@@ -6,32 +6,38 @@
  */
 
 import React, { memo } from 'react';
+import type { EuiCommentProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { UserActionCopyLink } from './copy_link';
+import type { Actions } from './property_actions';
 import { UserActionPropertyActions } from './property_actions';
 
 export interface UserActionContentToolbarProps {
-  commentMarkdown: string;
+  commentMarkdown?: string;
   id: string;
-  editLabel: string;
+  actions?: Actions;
+  editLabel?: string;
   deleteLabel?: string;
   deleteConfirmTitle?: string;
-  quoteLabel: string;
+  quoteLabel?: string;
   isLoading: boolean;
-  onEdit: (id: string) => void;
-  onQuote: (id: string) => void;
+  extraActions?: EuiCommentProps['actions'];
+  onEdit?: (id: string) => void;
+  onQuote?: (id: string) => void;
   onDelete?: (id: string) => void;
 }
 
 const UserActionContentToolbarComponent = ({
   commentMarkdown,
   id,
+  actions,
   editLabel,
   deleteLabel,
   deleteConfirmTitle,
   quoteLabel,
   isLoading,
+  extraActions,
   onEdit,
   onQuote,
   onDelete,
@@ -43,6 +49,7 @@ const UserActionContentToolbarComponent = ({
     <EuiFlexItem grow={false}>
       <UserActionPropertyActions
         id={id}
+        actions={actions}
         editLabel={editLabel}
         quoteLabel={quoteLabel}
         deleteLabel={deleteLabel}
@@ -54,6 +61,7 @@ const UserActionContentToolbarComponent = ({
         commentMarkdown={commentMarkdown}
       />
     </EuiFlexItem>
+    {extraActions != null ? <EuiFlexItem grow={false}>{extraActions}</EuiFlexItem> : null}
   </EuiFlexGroup>
 );
 UserActionContentToolbarComponent.displayName = 'UserActionContentToolbar';

@@ -89,7 +89,7 @@ describe('alert actions', () => {
   let searchStrategyClient: jest.Mocked<ISearchStart>;
   let clock: sinon.SinonFakeTimers;
   let mockKibanaServices: jest.Mock;
-  let mockGetExceptions: jest.Mock;
+  let mockGetExceptionFilter: jest.Mock;
   let fetchMock: jest.Mock;
   let toastMock: jest.Mock;
 
@@ -225,7 +225,7 @@ describe('alert actions', () => {
     jest.resetAllMocks();
     jest.restoreAllMocks();
     jest.clearAllMocks();
-    mockGetExceptions = jest.fn().mockResolvedValue([]);
+    mockGetExceptionFilter = jest.fn().mockResolvedValue(undefined);
 
     createTimeline = jest.fn() as jest.Mocked<CreateTimeline>;
     updateTimelineIsLoading = jest.fn() as jest.Mocked<UpdateTimelineLoading>;
@@ -260,10 +260,10 @@ describe('alert actions', () => {
           ecsData: mockEcsDataWithAlert,
           updateTimelineIsLoading,
           searchStrategyClient,
-          getExceptions: mockGetExceptions,
+          getExceptionFilter: mockGetExceptionFilter,
         });
 
-        expect(mockGetExceptions).not.toHaveBeenCalled();
+        expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(updateTimelineIsLoading).toHaveBeenCalledTimes(1);
         expect(updateTimelineIsLoading).toHaveBeenCalledWith({
           id: TimelineId.active,
@@ -277,7 +277,7 @@ describe('alert actions', () => {
           ecsData: mockEcsDataWithAlert,
           updateTimelineIsLoading,
           searchStrategyClient,
-          getExceptions: mockGetExceptions,
+          getExceptionFilter: mockGetExceptionFilter,
         });
         const expected = {
           from: '2018-11-05T18:58:25.937Z',
@@ -391,12 +391,11 @@ describe('alert actions', () => {
             pinnedEventIds: {},
             pinnedEventsSaveObject: {},
             queryFields: [],
+            resolveTimelineConfig: undefined,
             savedObjectId: null,
-            selectAll: false,
             selectedEventIds: {},
             sessionViewConfig: null,
             show: true,
-            showCheckboxes: false,
             sort: [
               {
                 columnId: '@timestamp',
@@ -415,7 +414,7 @@ describe('alert actions', () => {
           ruleNote: '# this is some markdown documentation',
         };
 
-        expect(mockGetExceptions).not.toHaveBeenCalled();
+        expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledWith(expected);
       });
 
@@ -437,11 +436,11 @@ describe('alert actions', () => {
           ecsData: mockEcsDataWithAlert,
           updateTimelineIsLoading,
           searchStrategyClient,
-          getExceptions: mockGetExceptions,
+          getExceptionFilter: mockGetExceptionFilter,
         });
         const createTimelineArg = (createTimeline as jest.Mock).mock.calls[0][0];
 
-        expect(mockGetExceptions).not.toHaveBeenCalled();
+        expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimelineArg.timeline.kqlQuery.filterQuery.kuery.kind).toEqual('kuery');
       });
@@ -456,7 +455,7 @@ describe('alert actions', () => {
           ecsData: mockEcsDataWithAlert,
           updateTimelineIsLoading,
           searchStrategyClient,
-          getExceptions: mockGetExceptions,
+          getExceptionFilter: mockGetExceptionFilter,
         });
         const defaultTimelinePropsWithoutNote = { ...defaultTimelineProps };
 
@@ -470,7 +469,7 @@ describe('alert actions', () => {
           id: TimelineId.active,
           isLoading: false,
         });
-        expect(mockGetExceptions).not.toHaveBeenCalled();
+        expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith({
           ...defaultTimelinePropsWithoutNote,
@@ -503,11 +502,11 @@ describe('alert actions', () => {
           ecsData: ecsDataMock,
           updateTimelineIsLoading,
           searchStrategyClient,
-          getExceptions: mockGetExceptions,
+          getExceptionFilter: mockGetExceptionFilter,
         });
 
         expect(updateTimelineIsLoading).not.toHaveBeenCalled();
-        expect(mockGetExceptions).not.toHaveBeenCalled();
+        expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith(defaultTimelineProps);
       });
@@ -530,11 +529,11 @@ describe('alert actions', () => {
           ecsData: ecsDataMock,
           updateTimelineIsLoading,
           searchStrategyClient,
-          getExceptions: mockGetExceptions,
+          getExceptionFilter: mockGetExceptionFilter,
         });
 
         expect(updateTimelineIsLoading).not.toHaveBeenCalled();
-        expect(mockGetExceptions).not.toHaveBeenCalled();
+        expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith(defaultTimelineProps);
       });
@@ -561,11 +560,11 @@ describe('alert actions', () => {
           ecsData: ecsDataMock,
           updateTimelineIsLoading,
           searchStrategyClient,
-          getExceptions: mockGetExceptions,
+          getExceptionFilter: mockGetExceptionFilter,
         });
 
         expect(updateTimelineIsLoading).not.toHaveBeenCalled();
-        expect(mockGetExceptions).not.toHaveBeenCalled();
+        expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith({
           ...defaultTimelineProps,
@@ -604,11 +603,11 @@ describe('alert actions', () => {
           ecsData: ecsDataMock,
           updateTimelineIsLoading,
           searchStrategyClient,
-          getExceptions: mockGetExceptions,
+          getExceptionFilter: mockGetExceptionFilter,
         });
 
         expect(updateTimelineIsLoading).not.toHaveBeenCalled();
-        expect(mockGetExceptions).not.toHaveBeenCalled();
+        expect(mockGetExceptionFilter).not.toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith(defaultTimelineProps);
       });
@@ -627,20 +626,68 @@ describe('alert actions', () => {
             ],
           },
         });
-        mockGetExceptions.mockResolvedValue([getExceptionListItemSchemaMock()]);
+        mockGetExceptionFilter.mockResolvedValue({
+          meta: {
+            alias: 'Exceptions',
+            disabled: false,
+            negate: true,
+          },
+          query: {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    filter: [
+                      {
+                        nested: {
+                          path: 'some.parentField',
+                          query: {
+                            bool: {
+                              minimum_should_match: 1,
+                              should: [
+                                {
+                                  match_phrase: {
+                                    'some.parentField.nested.field': 'some value',
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          score_mode: 'none',
+                        },
+                      },
+                      {
+                        bool: {
+                          minimum_should_match: 1,
+                          should: [
+                            {
+                              match_phrase: {
+                                'some.not.nested.field': 'some value',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        });
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMockWithNoTemplateTimeline,
           updateTimelineIsLoading,
           searchStrategyClient,
-          getExceptions: mockGetExceptions,
+          getExceptionFilter: mockGetExceptionFilter,
         });
 
         const expectedFrom = '2021-01-10T21:11:45.839Z';
         const expectedTo = '2021-01-10T21:12:45.839Z';
 
         expect(updateTimelineIsLoading).not.toHaveBeenCalled();
-        expect(mockGetExceptions).toHaveBeenCalled();
+        expect(mockGetExceptionFilter).toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith({
           ...defaultTimelineProps,
@@ -756,13 +803,12 @@ describe('alert actions', () => {
             ],
           },
         });
-        mockGetExceptions.mockResolvedValue([getExceptionListItemSchemaMock()]);
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMockWithNoTemplateTimelineAndNoFilters,
           updateTimelineIsLoading,
           searchStrategyClient,
-          getExceptions: mockGetExceptions,
+          getExceptionFilter: mockGetExceptionFilter,
         });
 
         expect(createTimeline).not.toThrow();
@@ -781,19 +827,20 @@ describe('alert actions', () => {
             ],
           },
         });
+
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMockWithTemplateTimeline,
           updateTimelineIsLoading,
           searchStrategyClient,
-          getExceptions: mockGetExceptions,
+          getExceptionFilter: mockGetExceptionFilter,
         });
 
         const expectedFrom = '2021-01-10T21:11:45.839Z';
         const expectedTo = '2021-01-10T21:12:45.839Z';
 
         expect(updateTimelineIsLoading).toHaveBeenCalled();
-        expect(mockGetExceptions).toHaveBeenCalled();
+        expect(mockGetExceptionFilter).toHaveBeenCalled();
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith({
           ...defaultTimelineProps,
@@ -886,7 +933,7 @@ describe('alert actions', () => {
           ecsData: ecsDataMockWithNoTemplateTimeline,
           updateTimelineIsLoading,
           searchStrategyClient,
-          getExceptions: mockGetExceptions,
+          getExceptionFilter: mockGetExceptionFilter,
         });
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith({
@@ -977,7 +1024,7 @@ describe('alert actions', () => {
           ecsData: ecsDataMockWithNoTemplateTimeline,
           updateTimelineIsLoading,
           searchStrategyClient,
-          getExceptions: mockGetExceptions,
+          getExceptionFilter: mockGetExceptionFilter,
         });
         expect(createTimeline).toHaveBeenCalledTimes(1);
         expect(createTimeline).toHaveBeenCalledWith(timelineProps);

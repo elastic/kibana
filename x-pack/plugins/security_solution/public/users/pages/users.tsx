@@ -26,7 +26,7 @@ import { LastEventTime } from '../../common/components/last_event_time';
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useKibana } from '../../common/lib/kibana';
-import { convertToBuildEsQuery } from '../../common/lib/keury';
+import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import type { State } from '../../common/store';
 import { inputsSelectors } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
@@ -45,12 +45,11 @@ import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { UsersKpiComponent } from '../components/kpi_users';
 import type { UpdateDateRange } from '../../common/components/charts/common';
-import { LastEventIndexKey } from '../../../common/search_strategy';
+import { LastEventIndexKey, RiskScoreEntity } from '../../../common/search_strategy';
 import { generateSeverityFilter } from '../../hosts/store/helpers';
 import { UsersTableType } from '../store/model';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { userNameExistsFilter } from './details/helpers';
 
@@ -77,12 +76,12 @@ const UsersComponent = () => {
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
-  const getUsersRiskScoreFilterQuerySelector = useMemo(
-    () => usersSelectors.usersRiskScoreSeverityFilterSelector(),
+  const getUserRiskScoreFilterQuerySelector = useMemo(
+    () => usersSelectors.userRiskScoreSeverityFilterSelector(),
     []
   );
   const severitySelection = useDeepEqualSelector((state: State) =>
-    getUsersRiskScoreFilterQuerySelector(state)
+    getUserRiskScoreFilterQuerySelector(state)
   );
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
@@ -96,7 +95,7 @@ const UsersComponent = () => {
     }
 
     if (tabName === UsersTableType.risk) {
-      const severityFilter = generateSeverityFilter(severitySelection);
+      const severityFilter = generateSeverityFilter(severitySelection, RiskScoreEntity.user);
 
       return [...severityFilter, ...filters];
     }
@@ -169,10 +168,10 @@ const UsersComponent = () => {
   );
 
   const capabilities = useMlCapabilities();
-  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   const navTabs = useMemo(
-    () => navTabsUsers(hasMlUserPermissions(capabilities), riskyUsersFeatureEnabled),
-    [capabilities, riskyUsersFeatureEnabled]
+    () => navTabsUsers(hasMlUserPermissions(capabilities), isPlatinumOrTrialLicense),
+    [capabilities, isPlatinumOrTrialLicense]
   );
 
   return (

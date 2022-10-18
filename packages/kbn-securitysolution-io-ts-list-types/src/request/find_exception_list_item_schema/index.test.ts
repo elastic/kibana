@@ -55,6 +55,7 @@ describe('find_list_item_schema', () => {
       namespace_type: ['single'],
       page: undefined,
       per_page: undefined,
+      search: undefined,
       sort_field: undefined,
       sort_order: undefined,
     };
@@ -73,7 +74,7 @@ describe('find_list_item_schema', () => {
     expect(message.schema).toEqual(expected);
   });
 
-  test('it should validate with pre_page missing', () => {
+  test('it should validate with per_page missing', () => {
     const payload = getFindExceptionListItemSchemaMock();
     delete payload.per_page;
     const decoded = findExceptionListItemSchema.decode(payload);
@@ -120,6 +121,18 @@ describe('find_list_item_schema', () => {
     expect(getPaths(left(message.errors))).toEqual([]);
     const expected = getFindExceptionListItemSchemaDecodedMock();
     delete expected.sort_order;
+    expect(message.schema).toEqual(expected);
+  });
+
+  test('it should validate with search missing', () => {
+    const payload = getFindExceptionListItemSchemaMock();
+    delete payload.search;
+    const decoded = findExceptionListItemSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    const expected = getFindExceptionListItemSchemaDecodedMock();
+    delete expected.search;
     expect(message.schema).toEqual(expected);
   });
 

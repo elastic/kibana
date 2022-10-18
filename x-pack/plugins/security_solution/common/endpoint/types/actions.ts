@@ -12,6 +12,10 @@ import type {
   ResponseActionBodySchema,
   KillOrSuspendProcessRequestSchema,
 } from '../schema/actions';
+import type {
+  ResponseActionStatus,
+  ResponseActionsApiCommandNames,
+} from '../service/response_actions/constants';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
@@ -46,16 +50,6 @@ export interface KillProcessActionOutputContent {
   entity_id?: string;
 }
 
-export const RESPONSE_ACTION_COMMANDS = [
-  'isolate',
-  'unisolate',
-  'kill-process',
-  'suspend-process',
-  'running-processes',
-] as const;
-
-export type ResponseActions = typeof RESPONSE_ACTION_COMMANDS[number];
-
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
   RESPONSE: 'response' as const,
@@ -71,9 +65,12 @@ interface EcsError {
   type?: string;
 }
 
-interface EndpointActionFields<TOutputContent extends object = object> {
+interface EndpointActionFields<
+  TParameters extends EndpointActionDataParameterTypes = never,
+  TOutputContent extends object = object
+> {
   action_id: string;
-  data: EndpointActionData<undefined, TOutputContent>;
+  data: EndpointActionData<TParameters, TOutputContent>;
 }
 
 interface ActionRequestFields {
@@ -107,12 +104,15 @@ export interface LogsEndpointAction {
  * An Action response written by the endpoint to the Endpoint `.logs-endpoint.action.responses` datastream
  * @since v7.16
  */
-export interface LogsEndpointActionResponse<TOutputContent extends object = object> {
+export interface LogsEndpointActionResponse<
+  TParameters extends EndpointActionDataParameterTypes = never,
+  TOutputContent extends object = object
+> {
   '@timestamp': string;
   agent: {
     id: string | string[];
   };
-  EndpointActions: EndpointActionFields<TOutputContent> & ActionResponseFields;
+  EndpointActions: EndpointActionFields<TParameters, TOutputContent> & ActionResponseFields;
   error?: EcsError;
 }
 
@@ -130,15 +130,20 @@ export type ResponseActionParametersWithPidOrEntityId =
   | ResponseActionParametersWithPid
   | ResponseActionParametersWithEntityId;
 
+export interface ResponseActionGetFileParameters {
+  file: string;
+}
+
 export type EndpointActionDataParameterTypes =
   | undefined
-  | ResponseActionParametersWithPidOrEntityId;
+  | ResponseActionParametersWithPidOrEntityId
+  | ResponseActionGetFileParameters;
 
 export interface EndpointActionData<
   T extends EndpointActionDataParameterTypes = never,
   TOutputContent extends object = object
 > {
-  command: ResponseActions;
+  command: ResponseActionsApiCommandNames;
   comment?: string;
   parameters?: T;
   output?: ActionResponseOutput<TOutputContent>;
@@ -280,7 +285,7 @@ export interface ActionDetails<TOutputContent extends object = object> {
    * The Endpoint type of action (ex. `isolate`, `release`) that is being requested to be
    * performed on the endpoint
    */
-  command: ResponseActions;
+  command: ResponseActionsApiCommandNames;
   /**
    * Will be set to true only if action is not yet completed and elapsed time has exceeded
    * the request's expiration date
@@ -311,6 +316,8 @@ export interface ActionDetails<TOutputContent extends object = object> {
       completedAt: string | undefined;
     }
   >;
+  /**  action status */
+  status: ResponseActionStatus;
   /** user that created the action */
   createdBy: string;
   /** comment submitted with action */
@@ -336,5 +343,6 @@ export interface ActionListApiResponse {
    * multiple agents
    */
   data: Array<Omit<ActionDetails, 'outputs'>>;
+  statuses: ResponseActionStatus[] | undefined;
   total: number;
 }

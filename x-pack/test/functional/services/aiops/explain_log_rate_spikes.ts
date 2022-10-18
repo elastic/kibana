@@ -99,6 +99,26 @@ export function ExplainLogRateSpikesProvider({ getService }: FtrProviderContext)
       });
     },
 
+    async assertSpikeAnalysisGroupSwitchExists(checked: boolean) {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail(
+          `aiopsExplainLogRateSpikesGroupSwitch${checked ? ' checked' : ''}`
+        );
+      });
+    },
+
+    async clickSpikeAnalysisGroupSwitch(checked: boolean) {
+      await testSubjects.clickWhenNotDisabledWithoutRetry(
+        `aiopsExplainLogRateSpikesGroupSwitch${checked ? ' checked' : ''}`
+      );
+
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail(
+          `aiopsExplainLogRateSpikesGroupSwitch${!checked ? ' checked' : ''}`
+        );
+      });
+    },
+
     async assertRerunAnalysisButtonExists(shouldRerun: boolean) {
       await testSubjects.existOrFail(
         `aiopsRerunAnalysisButton${shouldRerun ? ' shouldRerun' : ''}`

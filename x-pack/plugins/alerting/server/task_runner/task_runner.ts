@@ -82,6 +82,11 @@ export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
   },
 });
 
+interface StackTraceLog {
+  message: ElasticsearchError;
+  stackTrace?: string;
+}
+
 export class TaskRunner<
   Params extends RuleTypeParams,
   ExtractedParams extends RuleTypeParams,
@@ -114,6 +119,7 @@ export class TaskRunner<
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
+  private stackTraceLog: StackTraceLog | null;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -130,7 +136,8 @@ export class TaskRunner<
     inMemoryMetrics: InMemoryMetrics
   ) {
     this.context = context;
-    this.logger = context.logger;
+    const loggerId = ruleType.id.startsWith('.') ? ruleType.id.substring(1) : ruleType.id;
+    this.logger = context.logger.get(loggerId);
     this.usageCounter = context.usageCounter;
     this.ruleType = ruleType;
     this.ruleConsumer = null;
@@ -144,6 +151,7 @@ export class TaskRunner<
     this.alerts = {};
     this.timer = new TaskRunnerTimer({ logger: this.logger });
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
+    this.stackTraceLog = null;
   }
 
   private getExecutionHandler(
@@ -385,6 +393,7 @@ export class TaskRunner<
                 throttle,
                 notifyWhen,
               },
+              logger: this.logger,
             })
           );
 
@@ -401,10 +410,10 @@ export class TaskRunner<
               `rule execution failure: ${ruleLabel}`,
               err.message
             );
-            this.logger.error(err, {
-              tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
-              error: { stack_trace: err.stack },
-            });
+            this.stackTraceLog = {
+              message: err,
+              stackTrace: err.stack,
+            };
             throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
           }
         }
@@ -413,7 +422,6 @@ export class TaskRunner<
         checkHasReachedAlertLimit();
 
         this.alertingEventLogger.setExecutionSucceeded(`rule executed: ${ruleLabel}`);
-
         ruleRunMetricsStore.setSearchMetrics([
           wrappedScopedClusterClient.getMetrics(),
           wrappedSearchSourceClient.getMetrics(),
@@ -735,15 +743,20 @@ export class TaskRunner<
         (ruleRunStateWithMetrics: RuleTaskStateAndMetrics) =>
           transformRunStateToTaskState(ruleRunStateWithMetrics),
         (err: ElasticsearchError) => {
-          const message = `Executing Rule ${spaceId}:${
-            this.ruleType.id
-          }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
           if (isAlertSavedObjectNotFoundError(err, ruleId)) {
+            const message = `Executing Rule ${spaceId}:${
+              this.ruleType.id
+            }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
             this.logger.debug(message);
           } else {
+            const error = this.stackTraceLog ? this.stackTraceLog.message : err;
+            const stack = this.stackTraceLog ? this.stackTraceLog.stackTrace : err.stack;
+            const message = `Executing Rule ${spaceId}:${
+              this.ruleType.id
+            }:${ruleId} has resulted in Error: ${getEsErrorMessage(error)} - ${stack ?? ''}`;
             this.logger.error(message, {
               tags: [this.ruleType.id, ruleId, 'rule-run-failed'],
-              error: { stack_trace: err.stack },
+              error: { stack_trace: stack },
             });
           }
           return originalState;

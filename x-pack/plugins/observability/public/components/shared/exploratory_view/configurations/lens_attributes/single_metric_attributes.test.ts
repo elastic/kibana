@@ -74,7 +74,7 @@ describe('SingleMetricAttributes', () => {
       ],
       state: {
         datasourceStates: {
-          indexpattern: {
+          formBased: {
             layers: {
               layer0: {
                 columnOrder: ['layer-0-column-1'],
@@ -107,7 +107,7 @@ describe('SingleMetricAttributes', () => {
         },
       },
       title: 'Prefilled from exploratory view app',
-      visualizationType: 'lnsMetric',
+      visualizationType: 'lnsLegacyMetric',
     });
   });
 
@@ -136,7 +136,7 @@ describe('SingleMetricAttributes', () => {
       ],
       state: {
         datasourceStates: {
-          indexpattern: {
+          formBased: {
             layers: {
               layer0: {
                 columnOrder: ['layer-0-column-1'],
@@ -173,7 +173,7 @@ describe('SingleMetricAttributes', () => {
         },
       },
       title: 'Prefilled from exploratory view app',
-      visualizationType: 'lnsMetric',
+      visualizationType: 'lnsLegacyMetric',
     });
   });
 

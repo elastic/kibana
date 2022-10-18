@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/shared-ux-page-kibana-template-types",
+  "owner": "@elastic/shared-ux",
+  "runtimeDeps": [],
+  "typeDeps": []
+}

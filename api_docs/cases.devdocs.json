@@ -18,13 +18,7 @@
             "text": "CasesUiPlugin"
           },
           " implements ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<void, ",
           {
             "pluginId": "cases",
@@ -41,6 +35,7 @@
         ],
         "path": "x-pack/plugins/cases/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "cases",
@@ -54,6 +49,7 @@
             ],
             "path": "x-pack/plugins/cases/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "cases",
@@ -63,17 +59,12 @@
                 "label": "initializerContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<object>"
                 ],
                 "path": "x-pack/plugins/cases/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -88,13 +79,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>, plugins: ",
               "CasesPluginSetup",
               ") => ",
@@ -108,6 +93,7 @@
             ],
             "path": "x-pack/plugins/cases/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "cases",
@@ -117,17 +103,12 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<object, unknown>"
                 ],
                 "path": "x-pack/plugins/cases/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -142,6 +123,7 @@
                 ],
                 "path": "x-pack/plugins/cases/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -156,13 +138,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", plugins: ",
               "CasesPluginStart",
               ") => ",
@@ -176,6 +152,7 @@
             ],
             "path": "x-pack/plugins/cases/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "cases",
@@ -185,16 +162,11 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "x-pack/plugins/cases/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -209,6 +181,7 @@
                 ],
                 "path": "x-pack/plugins/cases/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -226,6 +199,7 @@
             ],
             "path": "x-pack/plugins/cases/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -248,6 +222,7 @@
         ],
         "path": "x-pack/plugins/cases/public/common/navigation/paths.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "cases",
@@ -261,6 +236,7 @@
             ],
             "path": "x-pack/plugins/cases/public/common/navigation/paths.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -279,6 +255,7 @@
         ],
         "path": "x-pack/plugins/cases/public/common/navigation/paths.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "cases",
@@ -292,6 +269,7 @@
             ],
             "path": "x-pack/plugins/cases/public/common/navigation/paths.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -322,6 +300,7 @@
         ],
         "path": "x-pack/plugins/cases/public/common/navigation/deep_links.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "cases",
@@ -332,6 +311,7 @@
             "description": [],
             "path": "x-pack/plugins/cases/public/common/navigation/deep_links.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "cases",
@@ -344,7 +324,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/plugins/cases/public/common/navigation/deep_links.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "cases",
@@ -365,7 +346,8 @@
                   ", Partial<T>>> | undefined"
                 ],
                 "path": "x-pack/plugins/cases/public/common/navigation/deep_links.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -385,6 +367,7 @@
         ],
         "path": "x-pack/plugins/cases/public/common/navigation/paths.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "cases",
@@ -398,6 +381,7 @@
             ],
             "path": "x-pack/plugins/cases/public/common/navigation/paths.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -416,6 +400,7 @@
         ],
         "path": "x-pack/plugins/cases/public/common/navigation/paths.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "cases",
@@ -429,6 +414,7 @@
             ],
             "path": "x-pack/plugins/cases/public/common/navigation/paths.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -446,6 +432,7 @@
         "description": [],
         "path": "x-pack/plugins/cases/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "cases",
@@ -458,7 +445,8 @@
               "AttachmentFramework"
             ],
             "path": "x-pack/plugins/cases/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -485,6 +473,7 @@
         ],
         "path": "x-pack/plugins/cases/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -500,6 +489,7 @@
         ],
         "path": "x-pack/plugins/cases/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -514,6 +504,7 @@
         ],
         "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -550,6 +541,7 @@
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_all_cases_selector_modal.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -592,6 +584,7 @@
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_cases.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -644,6 +637,7 @@
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_create_case_flyout.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -670,6 +664,7 @@
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_recent_cases.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -684,6 +679,7 @@
         ],
         "path": "x-pack/plugins/cases/public/common/navigation/deep_links.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -710,7 +706,25 @@
             "section": "def-common.CommentType",
             "text": "CommentType"
           },
-          ".alert; alertId: string | string[]; index: string | string[]; rule: { id: string | null; name: string | null; }; owner: string; } | { type: ",
+          ".alert; alertId: string | string[]; index: string | string[]; rule: { id: string | null; name: string | null; }; owner: string; } | { externalReferenceId: string; externalReferenceStorage: { type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ExternalReferenceStorageType",
+            "text": "ExternalReferenceStorageType"
+          },
+          ".elasticSearchDoc; }; externalReferenceAttachmentTypeId: string; externalReferenceMetadata: { [x: string]: ",
+          "JsonValue",
+          "; } | null; type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.CommentType",
+            "text": "CommentType"
+          },
+          ".externalReference; owner: string; } | { type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -724,6 +738,7 @@
         ],
         "path": "x-pack/plugins/cases/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -740,6 +755,7 @@
         ],
         "path": "x-pack/plugins/cases/public/common/navigation/deep_links.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -752,6 +768,7 @@
       "description": [],
       "path": "x-pack/plugins/cases/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "cases",
@@ -762,13 +779,7 @@
           "description": [],
           "signature": [
             "{ getRelatedCases: (alertId: string, query: { owner?: string | string[] | undefined; }) => Promise<{ id: string; title: string; }[]>; cases: { find: (query: { tags?: string | string[] | undefined; status?: ",
-            {
-              "pluginId": "cases",
-              "scope": "common",
-              "docId": "kibCasesPluginApi",
-              "section": "def-common.CaseStatuses",
-              "text": "CaseStatuses"
-            },
+            "CaseStatuses",
             " | undefined; severity?: ",
             "CaseSeverity",
             " | undefined; assignees?: string | string[] | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; fields?: string | string[] | undefined; from?: string | undefined; page?: number | undefined; perPage?: number | undefined; search?: string | undefined; searchFields?: string | string[] | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; to?: string | undefined; owner?: string | string[] | undefined; }, signal?: AbortSignal | undefined) => Promise<",
@@ -776,7 +787,8 @@
             ">; getCasesStatus: (query: { from?: string | undefined; to?: string | undefined; owner?: string | string[] | undefined; }, signal?: AbortSignal | undefined) => Promise<{ countOpenCases: number; countInProgressCases: number; countClosedCases: number; }>; getCasesMetrics: (query: { features: string[]; } & { from?: string | undefined; to?: string | undefined; owner?: string | string[] | undefined; }, signal?: AbortSignal | undefined) => Promise<{ mttr?: number | null | undefined; }>; }; }"
           ],
           "path": "x-pack/plugins/cases/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "cases",
@@ -855,7 +867,8 @@
             ", string | React.JSXElementConstructor<any>>; }"
           ],
           "path": "x-pack/plugins/cases/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "cases",
@@ -884,7 +897,8 @@
             " | undefined; }) => void; close: () => void; }; }"
           ],
           "path": "x-pack/plugins/cases/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "cases",
@@ -923,7 +937,8 @@
             "; }"
           ],
           "path": "x-pack/plugins/cases/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -943,6 +958,7 @@
         ],
         "path": "x-pack/plugins/cases/server/client/client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "cases",
@@ -956,6 +972,7 @@
             ],
             "path": "x-pack/plugins/cases/server/client/client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "cases",
@@ -969,6 +986,7 @@
                 ],
                 "path": "x-pack/plugins/cases/server/client/client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -987,7 +1005,8 @@
               "CasesSubClient"
             ],
             "path": "x-pack/plugins/cases/server/client/client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cases",
@@ -1002,7 +1021,8 @@
               "AttachmentsSubClient"
             ],
             "path": "x-pack/plugins/cases/server/client/client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cases",
@@ -1017,7 +1037,8 @@
               "UserActionsSubClient"
             ],
             "path": "x-pack/plugins/cases/server/client/client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cases",
@@ -1032,7 +1053,8 @@
               "ConfigureSubClient"
             ],
             "path": "x-pack/plugins/cases/server/client/client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cases",
@@ -1047,7 +1069,8 @@
               "MetricsSubClient"
             ],
             "path": "x-pack/plugins/cases/server/client/client.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1064,6 +1087,7 @@
         "description": [],
         "path": "x-pack/plugins/cases/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "cases",
@@ -1076,7 +1100,8 @@
               "AttachmentFramework"
             ],
             "path": "x-pack/plugins/cases/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1092,6 +1117,7 @@
         ],
         "path": "x-pack/plugins/cases/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "cases",
@@ -1117,6 +1143,7 @@
             ],
             "path": "x-pack/plugins/cases/server/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "cases",
@@ -1133,6 +1160,7 @@
                 ],
                 "path": "x-pack/plugins/cases/server/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1165,6 +1193,7 @@
         ],
         "path": "x-pack/plugins/cases/common/utils/capabilities.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -1183,6 +1212,7 @@
         ],
         "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [
           "All connectors endpoint"
@@ -1201,6 +1231,7 @@
         ],
         "path": "x-pack/plugins/cases/common/api/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "cases",
@@ -1214,6 +1245,7 @@
             ],
             "path": "x-pack/plugins/cases/common/api/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1234,6 +1266,7 @@
         ],
         "path": "x-pack/plugins/cases/common/utils/connectors_api.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [
           "Create connector endpoint"
@@ -1254,6 +1287,7 @@
         ],
         "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "cases",
@@ -1267,6 +1301,7 @@
             ],
             "path": "x-pack/plugins/cases/common/api/runtime_types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1284,6 +1319,7 @@
         "description": [],
         "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "cases",
@@ -1293,7 +1329,8 @@
             "label": "all",
             "description": [],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cases",
@@ -1303,7 +1340,8 @@
             "label": "create",
             "description": [],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cases",
@@ -1313,7 +1351,8 @@
             "label": "read",
             "description": [],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cases",
@@ -1323,7 +1362,8 @@
             "label": "update",
             "description": [],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cases",
@@ -1333,7 +1373,8 @@
             "label": "delete",
             "description": [],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cases",
@@ -1343,7 +1384,8 @@
             "label": "push",
             "description": [],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1357,6 +1399,7 @@
         "description": [],
         "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "cases",
@@ -1366,7 +1409,8 @@
             "label": "_id",
             "description": [],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cases",
@@ -1379,7 +1423,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cases",
@@ -1393,7 +1438,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "cases",
@@ -1408,7 +1454,8 @@
               "; } | undefined"
             ],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1422,8 +1469,12 @@
         "tags": [],
         "label": "CaseStatuses",
         "description": [],
-        "path": "x-pack/plugins/cases/common/api/cases/status.ts",
+        "signature": [
+          "CaseStatuses"
+        ],
+        "path": "node_modules/@types/kbn__cases-components/index.d.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1435,6 +1486,19 @@
         "description": [],
         "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.ExternalReferenceStorageType",
+        "type": "Enum",
+        "tags": [],
+        "label": "ExternalReferenceStorageType",
+        "description": [],
+        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1448,13 +1512,7 @@
         "description": [],
         "signature": [
           "Omit<{ description: string; status: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.CaseStatuses",
-            "text": "CaseStatuses"
-          },
+          "CaseStatuses",
           "; tags: string[]; title: string; connector: { id: string; type: ",
           "ConnectorTypes",
           ".casesWebhook; fields: null; name: string; } | { id: string; type: ",
@@ -1471,7 +1529,7 @@
           "ConnectorTypes",
           ".swimlane; fields: { caseId: string | null; } | null; name: string; }; settings: { syncAlerts: boolean; }; owner: string; severity: ",
           "CaseSeverity",
-          "; assignees: { uid: string; }[]; duration: number | null; closedAt: string | null; closedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; } | null; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; }; externalService: { connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; }; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; } | null; id: string; totalComment: number; totalAlerts: number; version: string; comments?: ((({ comment: string; type: ",
+          "; assignees: { uid: string; }[]; duration: number | null; closedAt: string | null; closedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; createdAt: string; createdBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; externalService: { connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; }; } | null; updatedAt: string | null; updatedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; profileUid?: string | undefined; } | null; id: string; totalComment: number; totalAlerts: number; version: string; comments?: ((({ comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -1479,7 +1537,7 @@
             "section": "def-common.CommentType",
             "text": "CommentType"
           },
-          ".user; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }) | ({ type: ",
+          ".user; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; pushed_at: string | null; pushed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -1487,7 +1545,7 @@
             "section": "def-common.CommentType",
             "text": "CommentType"
           },
-          ".alert; alertId: string | string[]; index: string | string[]; rule: { id: string | null; name: string | null; }; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }) | ({ type: ",
+          ".alert; alertId: string | string[]; index: string | string[]; rule: { id: string | null; name: string | null; }; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; pushed_at: string | null; pushed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -1495,8 +1553,14 @@
             "section": "def-common.CommentType",
             "text": "CommentType"
           },
-          ".actions; comment: string; actions: { targets: { hostname: string; endpointId: string; }[]; type: string; }; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }) | (({ externalReferenceId: string; externalReferenceStorage: { type: ",
-          "ExternalReferenceStorageType",
+          ".actions; comment: string; actions: { targets: { hostname: string; endpointId: string; }[]; type: string; }; owner: string; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; pushed_at: string | null; pushed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; }) | (({ externalReferenceId: string; externalReferenceStorage: { type: ",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ExternalReferenceStorageType",
+            "text": "ExternalReferenceStorageType"
+          },
           ".elasticSearchDoc; }; externalReferenceAttachmentTypeId: string; externalReferenceMetadata: { [x: string]: ",
           "JsonValue",
           "; } | null; type: ",
@@ -1508,7 +1572,13 @@
             "text": "CommentType"
           },
           ".externalReference; owner: string; } | { externalReferenceId: string; externalReferenceStorage: { type: ",
-          "ExternalReferenceStorageType",
+          {
+            "pluginId": "cases",
+            "scope": "common",
+            "docId": "kibCasesPluginApi",
+            "section": "def-common.ExternalReferenceStorageType",
+            "text": "ExternalReferenceStorageType"
+          },
           ".savedObject; soType: string; }; externalReferenceAttachmentTypeId: string; externalReferenceMetadata: { [x: string]: ",
           "JsonValue",
           "; } | null; type: ",
@@ -1519,7 +1589,7 @@
             "section": "def-common.CommentType",
             "text": "CommentType"
           },
-          ".externalReference; owner: string; }) & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; }) | ({ type: ",
+          ".externalReference; owner: string; }) & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; pushed_at: string | null; pushed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; }) | ({ type: ",
           {
             "pluginId": "cases",
             "scope": "common",
@@ -1529,12 +1599,13 @@
           },
           ".persistableState; owner: string; persistableStateAttachmentTypeId: string; persistableStateAttachmentState: { [x: string]: ",
           "JsonValue",
-          "; }; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; }; owner: string; pushed_at: string | null; pushed_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; updated_at: string | null; updated_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } | null; })) & { id: string; version: string; })[] | undefined; }, \"comments\"> & { comments: ",
+          "; }; } & { created_at: string; created_by: { email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }; owner: string; pushed_at: string | null; pushed_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; updated_at: string | null; updated_by: ({ email: string | null | undefined; full_name: string | null | undefined; username: string | null | undefined; } & { profile_uid?: string | undefined; }) | null; })) & { id: string; version: string; })[] | undefined; }, \"comments\"> & { comments: ",
           "Comment",
           "[]; }"
         ],
         "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1551,6 +1622,7 @@
         ],
         "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1567,6 +1639,7 @@
         ],
         "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1583,6 +1656,7 @@
         ],
         "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1599,6 +1673,7 @@
         ],
         "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1613,6 +1688,37 @@
         ],
         "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.GENERAL_CASES_OWNER",
+        "type": "string",
+        "tags": [],
+        "label": "GENERAL_CASES_OWNER",
+        "description": [],
+        "signature": [
+          "\"cases\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.OBSERVABILITY_OWNER",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_OWNER",
+        "description": [],
+        "signature": [
+          "\"observability\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1627,6 +1733,7 @@
         ],
         "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1641,6 +1748,7 @@
         ],
         "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1657,6 +1765,7 @@
         ],
         "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1671,6 +1780,7 @@
         ],
         "path": "x-pack/plugins/cases/common/ui/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1685,6 +1795,7 @@
         ],
         "path": "x-pack/plugins/cases/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

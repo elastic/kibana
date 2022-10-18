@@ -104,6 +104,55 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async selectOptionFromComboBox(testTargetId: string, name: string) {
+      const target = await testSubjects.find(testTargetId, 1000);
+      await comboBox.openOptionsList(target);
+      await comboBox.setElement(target, name);
+    },
+
+    async configureQueryAnnotation(opts: {
+      queryString: string;
+      timeField: string;
+      textDecoration?: { type: 'none' | 'name' | 'field'; textField?: string };
+      extraFields?: string[];
+    }) {
+      // type * in the query editor
+      const queryInput = await testSubjects.find('lnsXY-annotation-query-based-query-input');
+      await queryInput.type(opts.queryString);
+      await testSubjects.click('indexPattern-filters-existingFilterTrigger');
+      await this.selectOptionFromComboBox(
+        'lnsXY-annotation-query-based-field-picker',
+        opts.timeField
+      );
+      if (opts.textDecoration) {
+        await testSubjects.click(`lnsXY_textVisibility_${opts.textDecoration.type}`);
+        if (opts.textDecoration.textField) {
+          await this.selectOptionFromComboBox(
+            'lnsXY-annotation-query-based-text-decoration-field-picker',
+            opts.textDecoration.textField
+          );
+        }
+      }
+      if (opts.extraFields) {
+        for (const field of opts.extraFields) {
+          await this.addFieldToTooltip(field);
+        }
+      }
+    },
+
+    async addFieldToTooltip(fieldName: string) {
+      const lastIndex = (
+        await find.allByCssSelector('[data-test-subj^="lnsXY-annotation-tooltip-field-picker"]')
+      ).length;
+      await retry.try(async () => {
+        await testSubjects.click('lnsXY-annotation-tooltip-add_field');
+        await this.selectOptionFromComboBox(
+          `lnsXY-annotation-tooltip-field-picker--${lastIndex}`,
+          fieldName
+        );
+      });
+    },
+
     /**
      * Changes the specified dimension to the specified operation and (optinally) field.
      *
@@ -150,9 +199,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         });
       }
       if (opts.field) {
-        const target = await testSubjects.find('indexPattern-dimension-field');
-        await comboBox.openOptionsList(target);
-        await comboBox.setElement(target, opts.field);
+        await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
       }
 
       if (opts.formula) {
@@ -188,15 +235,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       isPreviousIncompatible?: boolean;
     }) {
       if (opts.operation) {
-        const target = await testSubjects.find('indexPattern-subFunction-selection-row');
-        await comboBox.openOptionsList(target);
-        await comboBox.setElement(target, opts.operation);
+        await this.selectOptionFromComboBox(
+          'indexPattern-subFunction-selection-row',
+          opts.operation
+        );
       }
 
       if (opts.field) {
-        const target = await testSubjects.find('indexPattern-reference-field-selection-row');
-        await comboBox.openOptionsList(target);
-        await comboBox.setElement(target, opts.field);
+        await this.selectOptionFromComboBox(
+          'indexPattern-reference-field-selection-row',
+          opts.field
+        );
       }
     },
 
@@ -241,17 +290,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(`lnsFieldListPanelField-${field}`);
     },
 
-    async editField() {
+    async editField(field: string) {
       await retry.try(async () => {
-        await testSubjects.click('lnsFieldListPanelEdit');
-        await testSubjects.missingOrFail('lnsFieldListPanelEdit');
+        await testSubjects.click(`fieldPopoverHeader_editField-${field}`);
+        await testSubjects.missingOrFail(`fieldPopoverHeader_editField-${field}`);
       });
     },
 
-    async removeField() {
+    async removeField(field: string) {
       await retry.try(async () => {
-        await testSubjects.click('lnsFieldListPanelRemove');
-        await testSubjects.missingOrFail('lnsFieldListPanelRemove');
+        await testSubjects.click(`fieldPopoverHeader_deleteField-${field}`);
+        await testSubjects.missingOrFail(`fieldPopoverHeader_deleteField-${field}`);
       });
     },
 
@@ -494,9 +543,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param dimension - the selector of the dimension panel to open
      * @param layerIndex - the index of the layer
      */
-    async openDimensionEditor(dimension: string, layerIndex = 0) {
+    async openDimensionEditor(dimension: string, layerIndex = 0, dimensionIndex = 0) {
       await retry.try(async () => {
-        await testSubjects.click(`lns-layerPanel-${layerIndex} > ${dimension}`);
+        const dimensionEditor = (
+          await testSubjects.findAll(`lns-layerPanel-${layerIndex} > ${dimension}`)
+        )[dimensionIndex];
+        await dimensionEditor.click();
       });
     },
 
@@ -507,8 +559,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     // closes the dimension editor flyout
     async closeDimensionEditor() {
       await retry.try(async () => {
-        await testSubjects.click('lns-indexPattern-dimensionContainerBack');
-        await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerBack');
+        await testSubjects.click('lns-indexPattern-dimensionContainerClose');
+        await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerClose');
       });
     },
 
@@ -588,10 +640,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       ).length;
       await retry.try(async () => {
         await testSubjects.click('indexPattern-terms-add-field');
-        // count the number of defined terms
-        const target = await testSubjects.find(`indexPattern-dimension-field-${lastIndex}`, 1000);
-        await comboBox.openOptionsList(target);
-        await comboBox.setElement(target, field);
+        await this.selectOptionFromComboBox(`indexPattern-dimension-field-${lastIndex}`, field);
       });
     },
 
@@ -608,7 +657,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
       // count the number of defined terms
       const target = await testSubjects.find(`indexPattern-dimension-field-${lastIndex}`);
-      // await comboBox.openOptionsList(target);
       for (const field of fields) {
         await comboBox.setCustom(`indexPattern-dimension-field-${lastIndex}`, field);
         await comboBox.openOptionsList(target);
@@ -661,9 +709,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.setValue('column-label-edit', label, { clearWithKeyboard: true });
     },
     async editDimensionFormat(format: string) {
-      const formatInput = await testSubjects.find('indexPattern-dimension-format');
-      await comboBox.openOptionsList(formatInput);
-      await comboBox.setElement(formatInput, format);
+      await this.selectOptionFromComboBox('indexPattern-dimension-format', format);
     },
     async editDimensionColor(color: string) {
       const colorPickerInput = await testSubjects.find('~indexPattern-dimension-colorPicker');
@@ -812,17 +858,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Returns the number of layers visible in the chart configuration
      */
     async getLayerCount() {
-      const elements = await testSubjects.findAll('lnsLayerRemove');
-      return elements.length;
+      return (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length;
     },
 
     /**
      * Adds a new layer to the chart, fails if the chart does not support new layers
      */
-    async createLayer(layerType: string = 'data') {
+    async createLayer(layerType: 'data' | 'referenceLine' | 'annotations' = 'data') {
       await testSubjects.click('lnsLayerAddButton');
-      const layerCount = (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`))
-        .length;
+      const layerCount = await this.getLayerCount();
 
       await retry.waitFor('check for layer type support', async () => {
         const fasterChecks = await Promise.all([
@@ -839,8 +883,15 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Changes the index pattern in the data panel
      */
-    async switchDataPanelIndexPattern(dataViewTitle: string) {
-      await PageObjects.unifiedSearch.switchDataView('lns-dataView-switch-link', dataViewTitle);
+    async switchDataPanelIndexPattern(
+      dataViewTitle: string,
+      transitionFromTextBasedLanguages?: boolean
+    ) {
+      await PageObjects.unifiedSearch.switchDataView(
+        'lns-dataView-switch-link',
+        dataViewTitle,
+        transitionFromTextBasedLanguages
+      );
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -1138,6 +1189,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         color: await (
           await this.getMetricElementIfExists('.echMetric', tile)
         )?.getComputedStyle('background-color'),
+        showingTrendline: Boolean(
+          await this.getMetricElementIfExists('.echSingleMetricSparkline', tile)
+        ),
       };
     },
 
@@ -1256,10 +1310,42 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await PageObjects.unifiedSearch.createNewDataView(name, true);
     },
 
-    /** resets visualization/layer or removes a layer */
-    async removeLayer() {
+    async switchToTextBasedLanguage(language: string) {
+      await testSubjects.click('lns-dataView-switch-link');
+      await PageObjects.unifiedSearch.selectTextBasedLanguage(language);
+    },
+
+    async configureTextBasedLanguagesDimension(opts: {
+      dimension: string;
+      field: string;
+      keepOpen?: boolean;
+      palette?: string;
+    }) {
       await retry.try(async () => {
-        await testSubjects.click('lnsLayerRemove');
+        if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
+          await testSubjects.click(opts.dimension);
+        }
+        await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose');
+      });
+
+      await this.selectOptionFromComboBox('text-based-dimension-field', opts.field);
+
+      if (opts.palette) {
+        await this.setPalette(opts.palette);
+      }
+
+      if (!opts.keepOpen) {
+        await this.closeDimensionEditor();
+      }
+    },
+
+    /** resets visualization/layer or removes a layer */
+    async removeLayer(index: number = 0) {
+      await retry.try(async () => {
+        if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
+          await testSubjects.click(`lnsLayerSplitButton--${index}`);
+        }
+        await testSubjects.click(`lnsLayerRemove--${index}`);
         if (await testSubjects.exists('lnsLayerRemoveModal')) {
           await testSubjects.exists('lnsLayerRemoveConfirmButton');
           await testSubjects.click('lnsLayerRemoveConfirmButton');
@@ -1461,6 +1547,66 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const applyButtonSelector = `lnsApplyChanges__${whichButton}`;
       await testSubjects.waitForEnabled(applyButtonSelector);
       await testSubjects.click(applyButtonSelector);
+    },
+
+    async assertNoInlineWarning() {
+      await testSubjects.missingOrFail('chart-inline-warning');
+    },
+
+    async assertNoEditorWarning() {
+      await testSubjects.missingOrFail('lens-editor-warning');
+    },
+
+    async assertInlineWarning(warningText: string) {
+      await testSubjects.click('chart-inline-warning-button');
+      await testSubjects.existOrFail('chart-inline-warning');
+      const warnings = await testSubjects.findAll('chart-inline-warning');
+      let found = false;
+      for (const warning of warnings) {
+        const text = await warning.getVisibleText();
+        log.info(text);
+        if (text === warningText) {
+          found = true;
+        }
+      }
+      await testSubjects.click('chart-inline-warning-button');
+      if (!found) {
+        throw new Error(`Warning with text "${warningText}" not found`);
+      }
+    },
+
+    async assertEditorWarning(warningText: string) {
+      await testSubjects.click('lens-editor-warning-button');
+      await testSubjects.existOrFail('lens-editor-warning');
+      const warnings = await testSubjects.findAll('lens-editor-warning');
+      let found = false;
+      for (const warning of warnings) {
+        const text = await warning.getVisibleText();
+        log.info(text);
+        if (text === warningText) {
+          found = true;
+        }
+      }
+      await testSubjects.click('lens-editor-warning-button');
+      if (!found) {
+        throw new Error(`Warning with text "${warningText}" not found`);
+      }
+    },
+
+    async getPaletteColorStops() {
+      const stops = await find.allByCssSelector(
+        `[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]`
+      );
+      const colorsElements = await testSubjects.findAll('euiColorPickerAnchor');
+      const colors = await Promise.all(
+        colorsElements.map((c) => c.getComputedStyle('background-color'))
+      );
+
+      return await Promise.all(
+        stops.map(async (stop, index) => {
+          return { stop: await stop.getAttribute('value'), color: colors[index] };
+        })
+      );
     },
   });
 }

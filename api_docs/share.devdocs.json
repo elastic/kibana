@@ -25,6 +25,7 @@
         ],
         "path": "src/plugins/share/public/lib/download_as.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "share",
@@ -40,6 +41,7 @@
             ],
             "path": "src/plugins/share/public/lib/download_as.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -62,6 +64,7 @@
             ],
             "path": "src/plugins/share/public/lib/download_as.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -92,6 +95,7 @@
         ],
         "path": "src/plugins/share/public/lib/download_as.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "share",
@@ -115,6 +119,7 @@
             ],
             "path": "src/plugins/share/public/lib/download_as.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -147,6 +152,7 @@
         ],
         "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "share",
@@ -167,6 +173,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -181,6 +188,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -196,6 +204,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -210,6 +219,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -233,6 +243,7 @@
         ],
         "path": "src/plugins/share/common/url_service/locators/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "share",
@@ -244,7 +255,8 @@
               "\nKibana application ID."
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -256,7 +268,8 @@
               "\nA relative URL path within a Kibana application."
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -271,7 +284,8 @@
               "S"
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -305,6 +319,7 @@
         ],
         "path": "src/plugins/share/common/url_service/locators/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "share",
@@ -316,7 +331,8 @@
               "\nUnique ID of the locator. Should be constant and unique across Kibana."
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -334,6 +350,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "share",
@@ -349,6 +366,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -386,6 +404,7 @@
         ],
         "path": "src/plugins/share/common/url_service/locators/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "share",
@@ -395,7 +414,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -413,6 +433,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "share",
@@ -428,6 +449,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -449,6 +471,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "share",
@@ -464,6 +487,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -481,6 +505,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -502,6 +527,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "share",
@@ -517,6 +543,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -534,6 +561,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -555,6 +583,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "share",
@@ -570,6 +599,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -587,6 +617,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -608,6 +639,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "share",
@@ -623,6 +655,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -640,6 +673,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -661,6 +695,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "share",
@@ -674,6 +709,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -689,6 +725,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -703,6 +740,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -724,6 +762,7 @@
         ],
         "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "share",
@@ -735,7 +774,8 @@
               "Locator ID."
             ],
             "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -747,7 +787,8 @@
               "Kibana version when locator params were generated."
             ],
             "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -762,7 +803,8 @@
               "P"
             ],
             "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -776,6 +818,7 @@
         "description": [],
         "path": "src/plugins/share/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "share",
@@ -785,7 +828,8 @@
             "label": "objectType",
             "description": [],
             "path": "src/plugins/share/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -798,7 +842,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/share/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -810,7 +855,8 @@
               "\nCurrent url for sharing. This can be set in cases where `window.location.href`\ndoes not contain a shareable URL (e.g. if using session storage to store the current\napp state is enabled). In these cases the property should contain the URL in a\nformat which makes it possible to use it without having access to any other state\nlike the current session.\n\nIf not set it will default to `window.location.href`"
             ],
             "path": "src/plugins/share/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -823,7 +869,8 @@
               "{ [key: string]: unknown; }"
             ],
             "path": "src/plugins/share/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -833,7 +880,8 @@
             "label": "isDirty",
             "description": [],
             "path": "src/plugins/share/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -847,6 +895,7 @@
             ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -864,6 +913,7 @@
             ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "share",
@@ -877,6 +927,7 @@
                 ],
                 "path": "src/plugins/share/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -906,6 +957,7 @@
         ],
         "path": "src/plugins/share/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "share",
@@ -915,7 +967,8 @@
             "label": "name",
             "description": [],
             "path": "src/plugins/share/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -928,7 +981,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/share/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -942,6 +996,7 @@
         "description": [],
         "path": "src/plugins/share/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "share",
@@ -960,7 +1015,8 @@
               }
             ],
             "path": "src/plugins/share/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -973,7 +1029,8 @@
               "EuiContextMenuPanelDescriptor"
             ],
             "path": "src/plugins/share/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -987,6 +1044,7 @@
         "description": [],
         "path": "src/plugins/share/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "share",
@@ -996,7 +1054,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/share/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -1026,6 +1085,7 @@
             ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "share",
@@ -1045,6 +1105,7 @@
                 ],
                 "path": "src/plugins/share/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1080,6 +1141,7 @@
         ],
         "path": "src/plugins/share/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "share",
@@ -1092,7 +1154,8 @@
               "HTMLElement"
             ],
             "path": "src/plugins/share/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -1102,7 +1165,8 @@
             "label": "allowEmbed",
             "description": [],
             "path": "src/plugins/share/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -1112,7 +1176,8 @@
             "label": "allowShortUrl",
             "description": [],
             "path": "src/plugins/share/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -1126,7 +1191,22 @@
               "[] | undefined"
             ],
             "path": "src/plugins/share/public/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.ShowShareMenuOptions.snapshotShareWarning",
+            "type": "string",
+            "tags": [],
+            "label": "snapshotShareWarning",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/share/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -1140,6 +1220,7 @@
             ],
             "path": "src/plugins/share/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1164,6 +1245,7 @@
         ],
         "path": "src/plugins/share/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1178,6 +1260,7 @@
         ],
         "path": "src/plugins/share/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1192,6 +1275,7 @@
         ],
         "path": "src/plugins/share/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1206,6 +1290,7 @@
         ],
         "path": "src/plugins/share/public/lib/download_as.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1250,6 +1335,7 @@
       ],
       "path": "src/plugins/share/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -1285,6 +1371,7 @@
       ],
       "path": "src/plugins/share/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -1307,6 +1394,7 @@
         ],
         "path": "src/plugins/share/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1321,6 +1409,7 @@
         ],
         "path": "src/plugins/share/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1334,6 +1423,7 @@
       "description": [],
       "path": "src/plugins/share/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "share",
@@ -1351,7 +1441,8 @@
             ">"
           ],
           "path": "src/plugins/share/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -1366,6 +1457,7 @@
       "description": [],
       "path": "src/plugins/share/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "share",
@@ -1383,7 +1475,8 @@
             ">"
           ],
           "path": "src/plugins/share/server/plugin.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -1417,6 +1510,7 @@
         ],
         "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "share",
@@ -1437,6 +1531,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -1451,6 +1546,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1466,6 +1562,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -1480,6 +1577,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1499,6 +1597,7 @@
         ],
         "path": "src/plugins/share/common/anonymous_access/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "share",
@@ -1522,6 +1621,7 @@
             ],
             "path": "src/plugins/share/common/anonymous_access/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1541,6 +1641,7 @@
             ],
             "path": "src/plugins/share/common/anonymous_access/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1558,6 +1659,7 @@
         ],
         "path": "src/plugins/share/common/anonymous_access/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "share",
@@ -1569,7 +1671,8 @@
               "\nWhether anonymous access is enabled or not."
             ],
             "path": "src/plugins/share/common/anonymous_access/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -1584,7 +1687,8 @@
               "Record<string, string> | null"
             ],
             "path": "src/plugins/share/common/anonymous_access/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1618,6 +1722,7 @@
         ],
         "path": "src/plugins/share/common/url_service/locators/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "share",
@@ -1629,7 +1734,8 @@
               "\nUnique ID of the locator. Should be constant and unique across Kibana."
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -1647,6 +1753,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "share",
@@ -1662,6 +1769,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1699,6 +1807,7 @@
         ],
         "path": "src/plugins/share/common/url_service/locators/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "share",
@@ -1708,7 +1817,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "share",
@@ -1726,6 +1836,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "share",
@@ -1741,6 +1852,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1762,6 +1874,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "share",
@@ -1777,6 +1890,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1794,6 +1908,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1815,6 +1930,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "share",
@@ -1830,6 +1946,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1847,6 +1964,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1868,6 +1986,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "share",
@@ -1883,6 +2002,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1900,6 +2020,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1921,6 +2042,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "share",
@@ -1936,6 +2058,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1953,6 +2076,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1974,6 +2098,7 @@
             ],
             "path": "src/plugins/share/common/url_service/locators/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "share",
@@ -1987,6 +2112,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2002,6 +2128,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -2016,6 +2143,7 @@
                 ],
                 "path": "src/plugins/share/common/url_service/locators/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],

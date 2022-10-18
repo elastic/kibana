@@ -38,6 +38,7 @@ import { EventsTable, TimelineBody, TimelineBodyGlobalStyle } from '../styles';
 import { ColumnHeaders } from './column_headers';
 import { Events } from './events';
 import { timelineBodySelector } from './selectors';
+import { useLicense } from '../../../../common/hooks/use_license';
 
 export interface Props {
   activePage: number;
@@ -80,7 +81,6 @@ export const StatefulBody = React.memo<Props>(
     const dispatch = useDispatch();
     const containerRef = useRef<HTMLDivElement | null>(null);
     const {
-      manageTimelineById: { queryFields, selectAll },
       timeline: {
         columns,
         eventIdToNoteIds,
@@ -89,8 +89,8 @@ export const StatefulBody = React.memo<Props>(
         loadingEventIds,
         pinnedEventIds,
         selectedEventIds,
-        showCheckboxes,
         show,
+        queryFields,
       } = timelineDefaults,
     } = useSelector((state: State) => timelineBodySelector(state, id));
 
@@ -98,7 +98,9 @@ export const StatefulBody = React.memo<Props>(
       () => getColumnHeaders(columns, browserFields),
       [browserFields, columns]
     );
-    const ACTION_BUTTON_COUNT = 6;
+
+    const isEnterprisePlus = useLicense().isEnterprise();
+    const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
 
     const onRowSelected: OnRowSelected = useCallback(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
@@ -136,10 +138,10 @@ export const StatefulBody = React.memo<Props>(
 
     // Sync to selectAll so parent components can select all events
     useEffect(() => {
-      if (selectAll && !isSelectAllChecked) {
+      if (!isSelectAllChecked) {
         onSelectAll({ isSelected: true });
       }
-    }, [isSelectAllChecked, onSelectAll, selectAll]);
+    }, [isSelectAllChecked, onSelectAll]);
 
     const enabledRowRenderers = useMemo(() => {
       if (
@@ -153,7 +155,10 @@ export const StatefulBody = React.memo<Props>(
       return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
     }, [excludedRowRendererIds, rowRenderers]);
 
-    const actionsColumnWidth = useMemo(() => getActionsColumnWidth(ACTION_BUTTON_COUNT), []);
+    const actionsColumnWidth = useMemo(
+      () => getActionsColumnWidth(ACTION_BUTTON_COUNT),
+      [ACTION_BUTTON_COUNT]
+    );
 
     const columnWidths = useMemo(
       () =>
@@ -230,7 +235,7 @@ export const StatefulBody = React.memo<Props>(
               onSelectAll={onSelectAll}
               show={show}
               showEventsSelect={false}
-              showSelectAllCheckbox={showCheckboxes}
+              showSelectAllCheckbox={false}
               sort={sort}
               tabType={tabType}
               timelineId={id}
@@ -255,7 +260,7 @@ export const StatefulBody = React.memo<Props>(
               rowRenderers={enabledRowRenderers}
               onRuleChange={onRuleChange}
               selectedEventIds={selectedEventIds}
-              showCheckboxes={showCheckboxes}
+              showCheckboxes={false}
               leadingControlColumns={leadingControlColumns}
               trailingControlColumns={trailingControlColumns}
               tabType={tabType}

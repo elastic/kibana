@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { FieldTypesContextValue } from '../../containers/field_types_provider';
+
 /**
  * Mock to map an indicator field to its type.
  */
-export const generateFieldTypeMap = (): { [id: string]: string } => ({
+export const generateFieldTypeMap = (): FieldTypesContextValue => ({
   '@timestamp': 'date',
   'threat.indicator.ip': 'ip',
   'threat.indicator.first_seen': 'date',

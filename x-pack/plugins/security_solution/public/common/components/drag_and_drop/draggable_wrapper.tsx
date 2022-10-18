@@ -18,6 +18,7 @@ import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { TableId } from '../../../../common/types';
 import { dragAndDropActions } from '../../store/drag_and_drop';
 import type { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
@@ -103,10 +104,13 @@ interface Props {
   render: RenderFunctionProp;
   isAggregatable?: boolean;
   fieldType?: string;
-  timelineId?: string;
+  scopeId?: string;
   truncate?: boolean;
   onFilterAdded?: () => void;
 }
+
+export const disableHoverActions = (timelineId: string | undefined): boolean =>
+  [TableId.rulePreview, ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID].includes(timelineId ?? '');
 
 /**
  * Wraps a draggable component to handle registration / unregistration of the
@@ -134,7 +138,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
   render,
   fieldType = '',
   isAggregatable = false,
-  timelineId,
+  scopeId,
   truncate,
 }) => {
   const [providerRegistered, setProviderRegistered] = useState(false);
@@ -159,7 +163,7 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
     render,
     fieldType,
     isAggregatable,
-    timelineId,
+    scopeId,
     truncate,
   });
 
@@ -320,7 +324,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   render,
   isAggregatable = false,
   fieldType = '',
-  timelineId,
+  scopeId,
   truncate,
 }) => {
   const {
@@ -338,7 +342,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     fieldType,
     onFilterAdded,
     render,
-    timelineId,
+    scopeId,
     truncate,
   });
   const renderContent = useCallback(
@@ -370,7 +374,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
       <WithHoverActions
         alwaysShow={showTopN || hoverActionsOwnFocus}
         closePopOverTrigger={closePopOverTrigger}
-        hoverContent={hoverContent}
+        hoverContent={disableHoverActions(scopeId) ? undefined : hoverContent}
         onCloseRequested={onCloseRequested}
         render={renderContent}
       />
@@ -384,7 +388,7 @@ const DraggableWrapperComponent: React.FC<Props> = ({
       fieldType={fieldType}
       isAggregatable={isAggregatable}
       render={render}
-      timelineId={timelineId}
+      scopeId={scopeId}
       truncate={truncate}
     />
   );

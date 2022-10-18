@@ -49,25 +49,25 @@ interface Props {
 
 const ProcessorEventLabelMap = {
   [ProcessorEvent.transaction]: i18n.translate(
-    'xpack.apm.settings.storageExplorer.serviceDetails.transactions',
+    'xpack.apm.storageExplorer.serviceDetails.transactions',
     {
       defaultMessage: 'Transactions',
     }
   ),
   [ProcessorEvent.span]: i18n.translate(
-    'xpack.apm.settings.storageExplorer.serviceDetails.spans',
+    'xpack.apm.storageExplorer.serviceDetails.spans',
     {
       defaultMessage: 'Spans',
     }
   ),
   [ProcessorEvent.metric]: i18n.translate(
-    'xpack.apm.settings.storageExplorer.serviceDetails.metrics',
+    'xpack.apm.storageExplorer.serviceDetails.metrics',
     {
       defaultMessage: 'Metrics',
     }
   ),
   [ProcessorEvent.error]: i18n.translate(
-    'xpack.apm.settings.storageExplorer.serviceDetails.errors',
+    'xpack.apm.storageExplorer.serviceDetails.errors',
     {
       defaultMessage: 'Errors',
     }
@@ -162,7 +162,7 @@ export function StorageDetailsPerService({
               <EuiTitle size="xs">
                 <h4>
                   {i18n.translate(
-                    'xpack.apm.settings.storageExplorer.serviceDetails.title',
+                    'xpack.apm.storageExplorer.serviceDetails.title',
                     {
                       defaultMessage: 'Service storage details',
                     }
@@ -173,7 +173,7 @@ export function StorageDetailsPerService({
             <EuiFlexItem grow={false}>
               <EuiLink href={serviceOverviewLink}>
                 {i18n.translate(
-                  'xpack.apm.settings.storageExplorer.serviceDetails.serviceOverviewLink',
+                  'xpack.apm.storageExplorer.serviceDetails.serviceOverviewLink',
                   {
                     defaultMessage: 'Go to service overview',
                   }
@@ -186,7 +186,10 @@ export function StorageDetailsPerService({
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
             <EuiFlexItem>
-              <EuiPanel hasShadow={false}>
+              <EuiPanel
+                hasShadow={false}
+                data-test-subj="serviceStorageDetailsChart"
+              >
                 <Chart>
                   <Settings
                     theme={[
@@ -224,7 +227,11 @@ export function StorageDetailsPerService({
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiPanel hasShadow={false} paddingSize="l">
+              <EuiPanel
+                hasShadow={false}
+                paddingSize="l"
+                data-test-subj="serviceStorageDetailsTable"
+              >
                 {processorEventStats.map(
                   ({ processorEventLabel, docs, size }) => (
                     <>

@@ -16,11 +16,32 @@ export type {
 } from '../common/types';
 export type { FieldStatsProps, FieldStatsServices } from './components/field_stats';
 export { FieldStats } from './components/field_stats';
+export {
+  FieldPopover,
+  type FieldPopoverProps,
+  FieldPopoverHeader,
+  type FieldPopoverHeaderProps,
+  FieldPopoverVisualize,
+  type FieldPopoverVisualizeProps,
+} from './components/field_popover';
+export {
+  FieldVisualizeButton,
+  type FieldVisualizeButtonProps,
+  getVisualizeInformation,
+  triggerVisualizeActions,
+  triggerVisualizeActionsTextBasedLanguages,
+  type VisualizeInformation,
+} from './components/field_visualize_button';
 export { loadFieldStats } from './services/field_stats';
+export { loadFieldExisting } from './services/field_existing';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
 export function plugin() {
   return new UnifiedFieldListPlugin();
 }
-export type { UnifiedFieldListPluginSetup, UnifiedFieldListPluginStart } from './types';
+export type {
+  UnifiedFieldListPluginSetup,
+  UnifiedFieldListPluginStart,
+  AddFieldFilterHandler,
+} from './types';

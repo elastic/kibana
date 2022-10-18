@@ -74,9 +74,11 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     } else {
       loadTestFile(require.resolve('./smokescreen'));
       loadTestFile(require.resolve('./ad_hoc_data_view'));
+      loadTestFile(require.resolve('./partition'));
       loadTestFile(require.resolve('./persistent_context'));
       loadTestFile(require.resolve('./table_dashboard'));
       loadTestFile(require.resolve('./table'));
+      loadTestFile(require.resolve('./text_based_languages'));
     }
   });
 };

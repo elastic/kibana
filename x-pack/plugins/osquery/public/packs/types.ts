@@ -10,7 +10,7 @@ import type { PackQueryFormData } from './queries/use_pack_query_form';
 export type PackSavedObject = SavedObject<{
   name: string;
   description: string | undefined;
-  queries: PackQueryFormData[];
+  queries: Record<string, Omit<PackQueryFormData, 'id'>>;
   version?: number;
   enabled: boolean | undefined;
   created_at: string;

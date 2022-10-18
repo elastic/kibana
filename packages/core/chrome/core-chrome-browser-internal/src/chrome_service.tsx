@@ -223,6 +223,7 @@ export class ChromeService {
           navControlsLeft$={navControls.getLeft$()}
           navControlsCenter$={navControls.getCenter$()}
           navControlsRight$={navControls.getRight$()}
+          navControlsExtension$={navControls.getExtension$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
         />

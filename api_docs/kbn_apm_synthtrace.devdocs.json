@@ -19,6 +19,7 @@
         "description": [],
         "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
@@ -32,6 +33,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
@@ -45,6 +47,7 @@
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -59,6 +62,7 @@
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -74,6 +78,7 @@
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -91,6 +96,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -106,6 +112,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
@@ -119,6 +126,7 @@
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -136,6 +144,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
@@ -149,6 +158,7 @@
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -166,6 +176,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
@@ -179,6 +190,7 @@
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -192,13 +204,30 @@
             "label": "refresh",
             "description": [],
             "signature": [
-              "() => Promise<",
+              "(dataStreams?: string[] | undefined) => Promise<",
               "ShardsOperationResponseBase",
               ">"
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
             "deprecated": false,
-            "children": [],
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.ApmSynthtraceEsClient.refresh.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "dataStreams",
+                "description": [],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -249,6 +278,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
@@ -277,6 +307,7 @@
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -300,6 +331,7 @@
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -323,6 +355,7 @@
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -350,6 +383,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
@@ -372,6 +406,7 @@
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -407,6 +442,7 @@
         ],
         "path": "packages/kbn-apm-synthtrace/src/lib/entity_iterable.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
@@ -420,6 +456,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/entity_iterable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
@@ -433,6 +470,7 @@
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/entity_iterable.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -450,21 +488,23 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/entity_iterable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.EntityArrayIterable.ratePerMinute",
+            "id": "def-server.EntityArrayIterable.estimatedRatePerMinute",
             "type": "Function",
             "tags": [],
-            "label": "ratePerMinute",
+            "label": "estimatedRatePerMinute",
             "description": [],
             "signature": [
               "() => number"
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/entity_iterable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -480,6 +520,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/entity_iterable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -495,6 +536,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/entity_iterable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -520,6 +562,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/entity_iterable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
@@ -540,6 +583,7 @@
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/entity_iterable.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -557,6 +601,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/entity_iterable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -579,6 +624,7 @@
         ],
         "path": "packages/kbn-apm-synthtrace/src/lib/utils/clean_write_targets.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
@@ -589,6 +635,7 @@
             "description": [],
             "path": "packages/kbn-apm-synthtrace/src/lib/utils/clean_write_targets.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
@@ -601,7 +648,8 @@
                   "string[]"
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/utils/clean_write_targets.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
@@ -614,7 +662,8 @@
                   "default"
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/utils/clean_write_targets.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
@@ -627,7 +676,8 @@
                   "{ perf: <T extends unknown>(name: string, cb: () => T) => T; debug: (...args: any[]) => void; info: (...args: any[]) => void; error: (...args: any[]) => void; }"
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/utils/clean_write_targets.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -655,6 +705,7 @@
         ],
         "path": "packages/kbn-apm-synthtrace/src/lib/utils/create_logger.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
@@ -674,6 +725,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/utils/create_logger.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -693,6 +745,7 @@
         ],
         "path": "packages/kbn-apm-synthtrace/src/lib/agent_config/observer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -710,6 +763,7 @@
         ],
         "path": "packages/kbn-apm-synthtrace/src/lib/timerange.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
@@ -723,6 +777,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/timerange.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -737,6 +792,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/timerange.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -754,6 +810,7 @@
         "description": [],
         "path": "packages/kbn-apm-synthtrace/src/lib/apm/apm_fields.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
@@ -763,7 +820,8 @@
             "label": "message",
             "description": [],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/apm_fields.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -787,6 +845,7 @@
         ],
         "path": "packages/kbn-apm-synthtrace/src/lib/entity_iterable.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
@@ -800,21 +859,23 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/entity_iterable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
-            "id": "def-server.EntityIterable.ratePerMinute",
+            "id": "def-server.EntityIterable.estimatedRatePerMinute",
             "type": "Function",
             "tags": [],
-            "label": "ratePerMinute",
+            "label": "estimatedRatePerMinute",
             "description": [],
             "signature": [
               "() => number"
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/entity_iterable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -838,6 +899,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/entity_iterable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -863,6 +925,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/entity_iterable.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
@@ -883,6 +946,7 @@
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/entity_iterable.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -900,6 +964,7 @@
         "description": [],
         "path": "packages/kbn-apm-synthtrace/src/lib/entity.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
@@ -912,7 +977,8 @@
               "number | undefined"
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/entity.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -928,6 +994,7 @@
         "description": [],
         "path": "packages/kbn-apm-synthtrace/src/lib/utils/create_logger.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -947,7 +1014,7 @@
             "section": "def-server.Fields",
             "text": "Fields"
           },
-          " & Partial<{ 'timestamp.us'?: number | undefined; 'agent.name': string; 'agent.version': string; 'container.id': string; 'ecs.version': string; 'event.outcome': string; 'event.ingested': number; 'error.id': string; 'error.exception': ",
+          " & Partial<{ 'timestamp.us'?: number | undefined; 'agent.name': string; 'agent.version': string; 'container.id': string; 'destination.address': string; 'destination.port': number; 'ecs.version': string; 'event.outcome': string; 'event.ingested': number; 'error.id': string; 'error.exception': ",
           {
             "pluginId": "@kbn/apm-synthtrace",
             "scope": "server",
@@ -955,12 +1022,13 @@
             "section": "def-server.ApmException",
             "text": "ApmException"
           },
-          "[]; 'error.grouping_name': string; 'error.grouping_key': string; 'host.name': string; 'host.hostname': string; 'kubernetes.pod.uid': string; 'kubernetes.pod.name': string; 'metricset.name': string; observer: ",
+          "[]; 'error.grouping_name': string; 'error.grouping_key': string; 'host.name': string; 'host.hostname': string; 'http.request.method': string; 'http.response.status_code': number; 'kubernetes.pod.uid': string; 'kubernetes.pod.name': string; 'metricset.name': string; observer: ",
           "Observer",
-          "; 'parent.id': string; 'processor.event': string; 'processor.name': string; 'trace.id': string; 'transaction.name': string; 'transaction.type': string; 'transaction.id': string; 'transaction.duration.us': number; 'transaction.duration.histogram': { values: number[]; counts: number[]; }; 'transaction.sampled': true; 'service.name': string; 'service.version': string; 'service.environment': string; 'service.node.name': string; 'service.runtime.name': string; 'service.runtime.version': string; 'service.framework.name': string; 'span.id': string; 'span.name': string; 'span.type': string; 'span.subtype': string; 'span.duration.us': number; 'span.destination.service.name': string; 'span.destination.service.resource': string; 'span.destination.service.type': string; 'span.destination.service.response_time.sum.us': number; 'span.destination.service.response_time.count': number; 'span.self_time.count': number; 'span.self_time.sum.us': number; 'span.links': { trace: { id: string; }; span: { id: string; }; }[]; 'cloud.provider': string; 'cloud.project.name': string; 'cloud.service.name': string; 'cloud.availability_zone': string; 'cloud.machine.type': string; 'cloud.region': string; 'host.os.platform': string; 'faas.id': string; 'faas.coldstart': boolean; 'faas.execution': string; 'faas.trigger.type': string; 'faas.trigger.request_id': string; }> & Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; }>"
+          "; 'parent.id': string; 'processor.event': string; 'processor.name': string; 'trace.id': string; 'transaction.name': string; 'transaction.type': string; 'transaction.id': string; 'transaction.duration.us': number; 'transaction.duration.histogram': { values: number[]; counts: number[]; }; 'transaction.sampled': true; 'service.name': string; 'service.version': string; 'service.environment': string; 'service.node.name': string; 'service.runtime.name': string; 'service.runtime.version': string; 'service.framework.name': string; 'service.target.name': string; 'service.target.type': string; 'span.action': string; 'span.id': string; 'span.name': string; 'span.type': string; 'span.subtype': string; 'span.duration.us': number; 'span.destination.service.resource': string; 'span.destination.service.response_time.sum.us': number; 'span.destination.service.response_time.count': number; 'span.self_time.count': number; 'span.self_time.sum.us': number; 'span.links': { trace: { id: string; }; span: { id: string; }; }[]; 'cloud.provider': string; 'cloud.project.name': string; 'cloud.service.name': string; 'cloud.availability_zone': string; 'cloud.machine.type': string; 'cloud.region': string; 'host.os.platform': string; 'faas.id': string; 'faas.name': string; 'faas.coldstart': boolean; 'faas.execution': string; 'faas.trigger.type': string; 'faas.trigger.request_id': string; }> & Partial<{ 'system.process.memory.size': number; 'system.memory.actual.free': number; 'system.memory.total': number; 'system.cpu.total.norm.pct': number; 'system.process.memory.rss.bytes': number; 'system.process.cpu.total.norm.pct': number; 'jvm.memory.heap.used': number; 'jvm.memory.non_heap.used': number; 'jvm.thread.count': number; 'faas.billed_duration': number; 'faas.timeout': number; 'faas.coldstart_duration': number; 'faas.duration': number; }>"
         ],
         "path": "packages/kbn-apm-synthtrace/src/lib/apm/apm_fields.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -974,6 +1042,7 @@
         "description": [],
         "path": "packages/kbn-apm-synthtrace/src/lib/apm/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
@@ -983,42 +1052,27 @@
             "label": "service",
             "description": [],
             "signature": [
-              "(name: string, environment: string, agentName: string) => ",
+              "({ name, environment, agentName, }: { name: string; environment: string; agentName: string; }) => ",
               "Service"
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
                 "id": "def-server.apm.service.$1",
-                "type": "string",
+                "type": "Object",
                 "tags": [],
-                "label": "name",
+                "label": "__0",
                 "description": [],
+                "signature": [
+                  "{ name: string; environment: string; agentName: string; }"
+                ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/service.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.apm.service.$2",
-                "type": "string",
-                "tags": [],
-                "label": "environment",
-                "description": [],
-                "path": "packages/kbn-apm-synthtrace/src/lib/apm/service.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.apm.service.$3",
-                "type": "string",
-                "tags": [],
-                "label": "agentName",
-                "description": [],
-                "path": "packages/kbn-apm-synthtrace/src/lib/apm/service.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1030,45 +1084,27 @@
             "label": "browser",
             "description": [],
             "signature": [
-              "(serviceName: string, production: string, userAgent: Partial<{ 'user_agent.original': string; 'user_agent.os.name': string; 'user_agent.name': string; 'user_agent.device.name': string; 'user_agent.version': number; }>) => ",
+              "({ serviceName, environment, userAgent, }: { serviceName: string; environment: string; userAgent: Partial<{ 'user_agent.original': string; 'user_agent.os.name': string; 'user_agent.name': string; 'user_agent.device.name': string; 'user_agent.version': number; }>; }) => ",
               "Browser"
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace",
                 "id": "def-server.apm.browser.$1",
-                "type": "string",
-                "tags": [],
-                "label": "serviceName",
-                "description": [],
-                "path": "packages/kbn-apm-synthtrace/src/lib/apm/browser.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.apm.browser.$2",
-                "type": "string",
-                "tags": [],
-                "label": "production",
-                "description": [],
-                "path": "packages/kbn-apm-synthtrace/src/lib/apm/browser.ts",
-                "deprecated": false
-              },
-              {
-                "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.apm.browser.$3",
                 "type": "Object",
                 "tags": [],
-                "label": "userAgent",
+                "label": "__0",
                 "description": [],
                 "signature": [
-                  "{ 'user_agent.original'?: string | undefined; 'user_agent.os.name'?: string | undefined; 'user_agent.name'?: string | undefined; 'user_agent.device.name'?: string | undefined; 'user_agent.version'?: number | undefined; }"
+                  "{ serviceName: string; environment: string; userAgent: Partial<{ 'user_agent.original': string; 'user_agent.os.name': string; 'user_agent.name': string; 'user_agent.device.name': string; 'user_agent.version': number; }>; }"
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/browser.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1088,7 +1124,7 @@
                 "section": "def-server.ApmFields",
                 "text": "ApmFields"
               },
-              "[]) => { 'metricset.name': string; 'transaction.duration.histogram': { values: number[]; counts: number[]; }; _doc_count: number; '@timestamp'?: number | undefined; 'timestamp.us'?: number | undefined; 'agent.name'?: string | undefined; 'agent.version'?: string | undefined; 'container.id'?: string | undefined; 'ecs.version'?: string | undefined; 'event.outcome'?: string | undefined; 'event.ingested'?: number | undefined; 'error.id'?: string | undefined; 'error.exception'?: ",
+              "[]) => { 'metricset.name': string; 'transaction.duration.histogram': { values: number[]; counts: number[]; }; _doc_count: number; '@timestamp'?: number | undefined; 'timestamp.us'?: number | undefined; 'agent.name'?: string | undefined; 'agent.version'?: string | undefined; 'container.id'?: string | undefined; 'destination.address'?: string | undefined; 'destination.port'?: number | undefined; 'ecs.version'?: string | undefined; 'event.outcome'?: string | undefined; 'event.ingested'?: number | undefined; 'error.id'?: string | undefined; 'error.exception'?: ",
               {
                 "pluginId": "@kbn/apm-synthtrace",
                 "scope": "server",
@@ -1096,12 +1132,13 @@
                 "section": "def-server.ApmException",
                 "text": "ApmException"
               },
-              "[] | undefined; 'error.grouping_name'?: string | undefined; 'error.grouping_key'?: string | undefined; 'host.name'?: string | undefined; 'host.hostname'?: string | undefined; 'kubernetes.pod.uid'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; observer?: ",
+              "[] | undefined; 'error.grouping_name'?: string | undefined; 'error.grouping_key'?: string | undefined; 'host.name'?: string | undefined; 'host.hostname'?: string | undefined; 'http.request.method'?: string | undefined; 'http.response.status_code'?: number | undefined; 'kubernetes.pod.uid'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; observer?: ",
               "Observer",
-              " | undefined; 'parent.id'?: string | undefined; 'processor.event'?: string | undefined; 'processor.name'?: string | undefined; 'trace.id'?: string | undefined; 'transaction.name'?: string | undefined; 'transaction.type'?: string | undefined; 'transaction.id'?: string | undefined; 'transaction.duration.us'?: number | undefined; 'transaction.sampled'?: true | undefined; 'service.name'?: string | undefined; 'service.version'?: string | undefined; 'service.environment'?: string | undefined; 'service.node.name'?: string | undefined; 'service.runtime.name'?: string | undefined; 'service.runtime.version'?: string | undefined; 'service.framework.name'?: string | undefined; 'span.id'?: string | undefined; 'span.name'?: string | undefined; 'span.type'?: string | undefined; 'span.subtype'?: string | undefined; 'span.duration.us'?: number | undefined; 'span.destination.service.name'?: string | undefined; 'span.destination.service.resource'?: string | undefined; 'span.destination.service.type'?: string | undefined; 'span.destination.service.response_time.sum.us'?: number | undefined; 'span.destination.service.response_time.count'?: number | undefined; 'span.self_time.count'?: number | undefined; 'span.self_time.sum.us'?: number | undefined; 'span.links'?: { trace: { id: string; }; span: { id: string; }; }[] | undefined; 'cloud.provider'?: string | undefined; 'cloud.project.name'?: string | undefined; 'cloud.service.name'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.machine.type'?: string | undefined; 'cloud.region'?: string | undefined; 'host.os.platform'?: string | undefined; 'faas.id'?: string | undefined; 'faas.coldstart'?: boolean | undefined; 'faas.execution'?: string | undefined; 'faas.trigger.type'?: string | undefined; 'faas.trigger.request_id'?: string | undefined; 'system.process.memory.size'?: number | undefined; 'system.memory.actual.free'?: number | undefined; 'system.memory.total'?: number | undefined; 'system.cpu.total.norm.pct'?: number | undefined; 'system.process.memory.rss.bytes'?: number | undefined; 'system.process.cpu.total.norm.pct'?: number | undefined; 'jvm.memory.heap.used'?: number | undefined; 'jvm.memory.non_heap.used'?: number | undefined; 'jvm.thread.count'?: number | undefined; }[]"
+              " | undefined; 'parent.id'?: string | undefined; 'processor.event'?: string | undefined; 'processor.name'?: string | undefined; 'trace.id'?: string | undefined; 'transaction.name'?: string | undefined; 'transaction.type'?: string | undefined; 'transaction.id'?: string | undefined; 'transaction.duration.us'?: number | undefined; 'transaction.sampled'?: true | undefined; 'service.name'?: string | undefined; 'service.version'?: string | undefined; 'service.environment'?: string | undefined; 'service.node.name'?: string | undefined; 'service.runtime.name'?: string | undefined; 'service.runtime.version'?: string | undefined; 'service.framework.name'?: string | undefined; 'service.target.name'?: string | undefined; 'service.target.type'?: string | undefined; 'span.action'?: string | undefined; 'span.id'?: string | undefined; 'span.name'?: string | undefined; 'span.type'?: string | undefined; 'span.subtype'?: string | undefined; 'span.duration.us'?: number | undefined; 'span.destination.service.resource'?: string | undefined; 'span.destination.service.response_time.sum.us'?: number | undefined; 'span.destination.service.response_time.count'?: number | undefined; 'span.self_time.count'?: number | undefined; 'span.self_time.sum.us'?: number | undefined; 'span.links'?: { trace: { id: string; }; span: { id: string; }; }[] | undefined; 'cloud.provider'?: string | undefined; 'cloud.project.name'?: string | undefined; 'cloud.service.name'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.machine.type'?: string | undefined; 'cloud.region'?: string | undefined; 'host.os.platform'?: string | undefined; 'faas.id'?: string | undefined; 'faas.name'?: string | undefined; 'faas.coldstart'?: boolean | undefined; 'faas.execution'?: string | undefined; 'faas.trigger.type'?: string | undefined; 'faas.trigger.request_id'?: string | undefined; 'system.process.memory.size'?: number | undefined; 'system.memory.actual.free'?: number | undefined; 'system.memory.total'?: number | undefined; 'system.cpu.total.norm.pct'?: number | undefined; 'system.process.memory.rss.bytes'?: number | undefined; 'system.process.cpu.total.norm.pct'?: number | undefined; 'jvm.memory.heap.used'?: number | undefined; 'jvm.memory.non_heap.used'?: number | undefined; 'jvm.thread.count'?: number | undefined; 'faas.billed_duration'?: number | undefined; 'faas.timeout'?: number | undefined; 'faas.coldstart_duration'?: number | undefined; 'faas.duration'?: number | undefined; }[]"
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1122,7 +1159,8 @@
                   "[]"
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/processors/get_transaction_metrics.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1142,7 +1180,7 @@
                 "section": "def-server.ApmFields",
                 "text": "ApmFields"
               },
-              "[]) => { \"metricset.name\": string; 'span.destination.service.response_time.sum.us': number; 'span.destination.service.response_time.count': number; '@timestamp'?: number | undefined; 'timestamp.us'?: number | undefined; 'agent.name'?: string | undefined; 'agent.version'?: string | undefined; 'container.id'?: string | undefined; 'ecs.version'?: string | undefined; 'event.outcome'?: string | undefined; 'event.ingested'?: number | undefined; 'error.id'?: string | undefined; 'error.exception'?: ",
+              "[]) => { \"metricset.name\": string; 'span.destination.service.response_time.sum.us': number; 'span.destination.service.response_time.count': number; '@timestamp'?: number | undefined; 'timestamp.us'?: number | undefined; 'agent.name'?: string | undefined; 'agent.version'?: string | undefined; 'container.id'?: string | undefined; 'destination.address'?: string | undefined; 'destination.port'?: number | undefined; 'ecs.version'?: string | undefined; 'event.outcome'?: string | undefined; 'event.ingested'?: number | undefined; 'error.id'?: string | undefined; 'error.exception'?: ",
               {
                 "pluginId": "@kbn/apm-synthtrace",
                 "scope": "server",
@@ -1150,12 +1188,13 @@
                 "section": "def-server.ApmException",
                 "text": "ApmException"
               },
-              "[] | undefined; 'error.grouping_name'?: string | undefined; 'error.grouping_key'?: string | undefined; 'host.name'?: string | undefined; 'host.hostname'?: string | undefined; 'kubernetes.pod.uid'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; observer?: ",
+              "[] | undefined; 'error.grouping_name'?: string | undefined; 'error.grouping_key'?: string | undefined; 'host.name'?: string | undefined; 'host.hostname'?: string | undefined; 'http.request.method'?: string | undefined; 'http.response.status_code'?: number | undefined; 'kubernetes.pod.uid'?: string | undefined; 'kubernetes.pod.name'?: string | undefined; observer?: ",
               "Observer",
-              " | undefined; 'parent.id'?: string | undefined; 'processor.event'?: string | undefined; 'processor.name'?: string | undefined; 'trace.id'?: string | undefined; 'transaction.name'?: string | undefined; 'transaction.type'?: string | undefined; 'transaction.id'?: string | undefined; 'transaction.duration.us'?: number | undefined; 'transaction.duration.histogram'?: { values: number[]; counts: number[]; } | undefined; 'transaction.sampled'?: true | undefined; 'service.name'?: string | undefined; 'service.version'?: string | undefined; 'service.environment'?: string | undefined; 'service.node.name'?: string | undefined; 'service.runtime.name'?: string | undefined; 'service.runtime.version'?: string | undefined; 'service.framework.name'?: string | undefined; 'span.id'?: string | undefined; 'span.name'?: string | undefined; 'span.type'?: string | undefined; 'span.subtype'?: string | undefined; 'span.duration.us'?: number | undefined; 'span.destination.service.name'?: string | undefined; 'span.destination.service.resource'?: string | undefined; 'span.destination.service.type'?: string | undefined; 'span.self_time.count'?: number | undefined; 'span.self_time.sum.us'?: number | undefined; 'span.links'?: { trace: { id: string; }; span: { id: string; }; }[] | undefined; 'cloud.provider'?: string | undefined; 'cloud.project.name'?: string | undefined; 'cloud.service.name'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.machine.type'?: string | undefined; 'cloud.region'?: string | undefined; 'host.os.platform'?: string | undefined; 'faas.id'?: string | undefined; 'faas.coldstart'?: boolean | undefined; 'faas.execution'?: string | undefined; 'faas.trigger.type'?: string | undefined; 'faas.trigger.request_id'?: string | undefined; 'system.process.memory.size'?: number | undefined; 'system.memory.actual.free'?: number | undefined; 'system.memory.total'?: number | undefined; 'system.cpu.total.norm.pct'?: number | undefined; 'system.process.memory.rss.bytes'?: number | undefined; 'system.process.cpu.total.norm.pct'?: number | undefined; 'jvm.memory.heap.used'?: number | undefined; 'jvm.memory.non_heap.used'?: number | undefined; 'jvm.thread.count'?: number | undefined; }[]"
+              " | undefined; 'parent.id'?: string | undefined; 'processor.event'?: string | undefined; 'processor.name'?: string | undefined; 'trace.id'?: string | undefined; 'transaction.name'?: string | undefined; 'transaction.type'?: string | undefined; 'transaction.id'?: string | undefined; 'transaction.duration.us'?: number | undefined; 'transaction.duration.histogram'?: { values: number[]; counts: number[]; } | undefined; 'transaction.sampled'?: true | undefined; 'service.name'?: string | undefined; 'service.version'?: string | undefined; 'service.environment'?: string | undefined; 'service.node.name'?: string | undefined; 'service.runtime.name'?: string | undefined; 'service.runtime.version'?: string | undefined; 'service.framework.name'?: string | undefined; 'service.target.name'?: string | undefined; 'service.target.type'?: string | undefined; 'span.action'?: string | undefined; 'span.id'?: string | undefined; 'span.name'?: string | undefined; 'span.type'?: string | undefined; 'span.subtype'?: string | undefined; 'span.duration.us'?: number | undefined; 'span.destination.service.resource'?: string | undefined; 'span.self_time.count'?: number | undefined; 'span.self_time.sum.us'?: number | undefined; 'span.links'?: { trace: { id: string; }; span: { id: string; }; }[] | undefined; 'cloud.provider'?: string | undefined; 'cloud.project.name'?: string | undefined; 'cloud.service.name'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.machine.type'?: string | undefined; 'cloud.region'?: string | undefined; 'host.os.platform'?: string | undefined; 'faas.id'?: string | undefined; 'faas.name'?: string | undefined; 'faas.coldstart'?: boolean | undefined; 'faas.execution'?: string | undefined; 'faas.trigger.type'?: string | undefined; 'faas.trigger.request_id'?: string | undefined; 'system.process.memory.size'?: number | undefined; 'system.memory.actual.free'?: number | undefined; 'system.memory.total'?: number | undefined; 'system.cpu.total.norm.pct'?: number | undefined; 'system.process.memory.rss.bytes'?: number | undefined; 'system.process.cpu.total.norm.pct'?: number | undefined; 'jvm.memory.heap.used'?: number | undefined; 'jvm.memory.non_heap.used'?: number | undefined; 'jvm.thread.count'?: number | undefined; 'faas.billed_duration'?: number | undefined; 'faas.timeout'?: number | undefined; 'faas.coldstart_duration'?: number | undefined; 'faas.duration'?: number | undefined; }[]"
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1176,7 +1215,8 @@
                   "[]"
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/processors/get_span_destination_metrics.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1192,6 +1232,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -1223,6 +1264,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1243,7 +1285,8 @@
                   "[]"
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/processors/get_breakdown_metrics.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1263,6 +1306,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1278,7 +1322,8 @@
                   "; forceLegacyIndices?: boolean | undefined; }"
                 ],
                 "path": "packages/kbn-apm-synthtrace/src/lib/apm/utils/get_apm_write_targets.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1300,7 +1345,8 @@
               }
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
@@ -1314,7 +1360,40 @@
               "ApmSynthtraceKibanaClient"
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/index.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.apm.serverlessFunction",
+            "type": "Function",
+            "tags": [],
+            "label": "serverlessFunction",
+            "description": [],
+            "signature": [
+              "({ functionName, serviceName, environment, agentName, }: { functionName: string; environment: string; agentName: string; serviceName?: string | undefined; }) => ",
+              "ServerlessFunction"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/apm/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace",
+                "id": "def-server.apm.serverlessFunction.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ functionName: string; environment: string; agentName: string; serviceName?: string | undefined; }"
+                ],
+                "path": "packages/kbn-apm-synthtrace/src/lib/apm/serverless_function.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -1328,6 +1407,7 @@
         "description": [],
         "path": "packages/kbn-apm-synthtrace/src/lib/stack_monitoring/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/apm-synthtrace",
@@ -1342,6 +1422,7 @@
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/stack_monitoring/index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1352,7 +1433,8 @@
                 "label": "name",
                 "description": [],
                 "path": "packages/kbn-apm-synthtrace/src/lib/stack_monitoring/cluster.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }

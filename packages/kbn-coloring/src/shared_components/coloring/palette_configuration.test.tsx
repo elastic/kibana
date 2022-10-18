@@ -39,7 +39,7 @@ jest.mock('./color_ranges/color_ranges_validation', () => {
 
   return {
     ...original,
-    isAllColorRangesValid: () => true,
+    allRangesValid: () => true,
   };
 });
 

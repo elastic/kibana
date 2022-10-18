@@ -24,23 +24,19 @@ import {
   BulkActionsProp,
   FieldBrowserOptions,
   TGridCellAction,
-  TimelineId,
-  TimelineTabs,
 } from '../../../../common/types/timeline';
 
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
-  DataProvider,
   RowRenderer,
   AlertStatus,
 } from '../../../../common/types/timeline';
 
-import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import { defaultHeaders } from '../body/column_headers/default_headers';
 import { getCombinedFilterQuery } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
+import { Ecs } from '../../../../common/ecs';
 import { useTimelineEvents, InspectResponse, Refetch } from '../../../container';
 import { StatefulBody } from '../body';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER } from '../styles';
@@ -82,7 +78,6 @@ export interface TGridIntegratedProps {
   bulkActions?: BulkActionsProp;
   columns: ColumnHeaderOptions[];
   data?: DataPublicPluginStart;
-  dataProviders: DataProvider[];
   dataViewId?: string | null;
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
@@ -92,17 +87,23 @@ export interface TGridIntegratedProps {
   fieldBrowserOptions?: FieldBrowserOptions;
   filters: Filter[];
   filterStatus?: AlertStatus;
+  getRowRenderer?: ({
+    data,
+    rowRenderers,
+  }: {
+    data: Ecs;
+    rowRenderers: RowRenderer[];
+  }) => RowRenderer | null;
   globalFullScreen: boolean;
   hasAlertsCrud: boolean;
   height?: number;
-  id: TimelineId;
+  id: string;
   indexNames: string[];
   indexPattern: DataViewBase;
   isLive: boolean;
   isLoadingIndexPattern: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
-  kqlMode: 'filter' | 'search';
   leadingControlColumns?: ControlColumnProps[];
   onRuleChange?: () => void;
   query: Query;
@@ -122,7 +123,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   bulkActions,
   columns,
   data,
-  dataProviders,
   dataViewId = null,
   defaultCellActions,
   deletedEventIds,
@@ -132,6 +132,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   fieldBrowserOptions,
   filters,
   filterStatus,
+  getRowRenderer,
   globalFullScreen,
   hasAlertsCrud,
   id,
@@ -140,7 +141,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   isLoadingIndexPattern,
   itemsPerPage,
   itemsPerPageOptions,
-  kqlMode,
   leadingControlColumns,
   onRuleChange,
   query,
@@ -154,33 +154,29 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   unit,
 }) => {
   const dispatch = useDispatch();
-  const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const { uiSettings } = useKibana<CoreStart>().services;
   const [isQueryLoading, setIsQueryLoading] = useState(true);
 
-  const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
-  const { queryFields } = useDeepEqualSelector((state) => getManageTimeline(state, id ?? ''));
+  const getManageDataTable = useMemo(() => tGridSelectors.getManageDataTableById(), []);
 
-  useEffect(() => {
-    dispatch(tGridActions.updateIsLoading({ id, isLoading: isQueryLoading }));
-  }, [dispatch, id, isQueryLoading]);
+  dispatch(tGridActions.updateIsLoading({ id, isLoading: isQueryLoading }));
+  getManageDataTable(state, id ?? '');
 
   const esQueryConfig = getEsQueryConfig(uiSettings);
-
   const filterQuery = useMemo(
     () =>
       getCombinedFilterQuery({
         config: esQueryConfig,
         browserFields,
-        dataProviders,
+        dataProviders: [],
         filters,
         from: start,
         indexPattern,
-        kqlMode,
+        kqlMode: 'filter',
         kqlQuery: query,
         to: end,
       }),
-    [esQueryConfig, dataProviders, indexPattern, browserFields, filters, start, end, query, kqlMode]
+    [esQueryConfig, indexPattern, browserFields, filters, start, end, query]
   );
 
   const canQueryTimeline = useMemo(
@@ -191,11 +187,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
       !isEmpty(start) &&
       !isEmpty(end),
     [isLoadingIndexPattern, filterQuery, start, end]
-  );
-
-  const fields = useMemo(
-    () => [...columnsHeader.map((c) => c.id), ...(queryFields ?? [])],
-    [columnsHeader, queryFields]
   );
 
   const sortField = useMemo(
@@ -254,7 +245,6 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   useEffect(() => {
     setQuery(inspect, loading, refetch);
   }, [inspect, loading, refetch, setQuery]);
-
   // Clear checkbox selection when new events are fetched
   useEffect(() => {
     dispatch(tGridActions.clearSelected({ id }));
@@ -295,6 +285,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                 filterQuery={filterQuery}
                 filters={filters}
                 filterStatus={filterStatus}
+                getRowRenderer={getRowRenderer}
                 hasAlertsCrud={hasAlertsCrud}
                 id={id}
                 indexNames={indexNames}
@@ -307,7 +298,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                 refetch={refetch}
                 renderCellValue={renderCellValue}
                 rowRenderers={rowRenderers}
-                tabType={TimelineTabs.query}
+                tabType={'query'}
                 totalItems={totalCountMinusDeleted}
                 trailingControlColumns={trailingControlColumns}
                 unit={unit}

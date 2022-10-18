@@ -15,16 +15,17 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { Direction, EntityType } from '../../../../common/search_strategy';
-import { TGridCellAction, TimelineTabs } from '../../../../common/types/timeline';
 
+import type { Ecs } from '../../../../common/ecs';
+import { Direction, EntityType } from '../../../../common/search_strategy';
+import { TGridCellAction } from '../../../../common/types/timeline';
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   DataProvider,
   RowRenderer,
-  SortColumnTimeline,
+  SortColumnTable,
   BulkActionsProp,
   AlertStatus,
 } from '../../../../common/types/timeline';
@@ -39,7 +40,7 @@ import { LastUpdatedAt } from '../..';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexItem, UpdatedFlexGroup } from '../styles';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { useFetchIndex } from '../../../container/source';
-import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
+import { TGridLoading, TGridEmpty, TableContext } from '../shared';
 
 const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
   overflow: hidden;
@@ -85,8 +86,14 @@ export interface TGridStandaloneProps {
   entityType?: EntityType;
   loadingText: React.ReactNode;
   filters: Filter[];
-  footerText: React.ReactNode;
   filterStatus?: AlertStatus;
+  getRowRenderer?: ({
+    data,
+    rowRenderers,
+  }: {
+    data: Ecs;
+    rowRenderers: RowRenderer[];
+  }) => RowRenderer | null;
   hasAlertsCrudPermissions: ({
     ruleConsumer,
     ruleProducer,
@@ -106,7 +113,7 @@ export interface TGridStandaloneProps {
   runtimeMappings: MappingRuntimeFields;
   setRefetch: (ref: () => void) => void;
   start: string;
-  sort: SortColumnTimeline[];
+  sort: SortColumnTable[];
   graphEventId?: string;
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
@@ -127,8 +134,8 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
   entityType = 'alerts',
   loadingText,
   filters,
-  footerText,
   filterStatus,
+  getRowRenderer,
   hasAlertsCrudPermissions,
   indexNames,
   itemsPerPage,
@@ -284,21 +291,18 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
       tGridActions.createTGrid({
         id: STANDALONE_ID,
         columns,
-        dateRange: {
-          start,
-          end,
-        },
         indexNames,
         itemsPerPage: itemsPerPage || itemsPerPageStore,
         itemsPerPageOptions,
         showCheckboxes,
+        defaultColumns: columns,
+        sort,
       })
     );
     dispatch(
       tGridActions.initializeTGridSettings({
         id: STANDALONE_ID,
         defaultColumns: columns,
-        footerText,
         sort,
         loadingText,
         unit,
@@ -308,7 +312,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const timelineContext = { timelineId: STANDALONE_ID };
+  const tableContext = { tableId: STANDALONE_ID };
 
   // Clear checkbox selection when new events are fetched
   useEffect(() => {
@@ -326,7 +330,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
       <AlertsTableWrapper>
         {showFullLoading && <TGridLoading />}
         {canQueryTimeline ? (
-          <TimelineContext.Provider value={timelineContext}>
+          <TableContext.Provider value={tableContext}>
             <EventsContainerLoading
               data-timeline-id={STANDALONE_ID}
               data-test-subj={`events-container-loading-${loading}`}
@@ -352,6 +356,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       defaultCellActions={defaultCellActions}
                       disabledCellActions={disabledCellActions}
                       filterQuery={filterQuery}
+                      getRowRenderer={getRowRenderer}
                       hasAlertsCrud={hasAlertsCrud}
                       hasAlertsCrudPermissions={hasAlertsCrudPermissions}
                       id={STANDALONE_ID}
@@ -365,7 +370,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                       rowRenderers={rowRenderers}
                       onRuleChange={onRuleChange}
                       pageSize={itemsPerPageStore}
-                      tabType={TimelineTabs.query}
+                      tabType={'query'}
                       totalItems={totalCountMinusDeleted}
                       totalSelectAllAlerts={totalSelectAllAlerts}
                       unit={unit}
@@ -378,7 +383,7 @@ const TGridStandaloneComponent: React.FC<TGridStandaloneProps> = ({
                 </FullWidthFlexGroup>
               )}
             </EventsContainerLoading>
-          </TimelineContext.Provider>
+          </TableContext.Provider>
         ) : null}
       </AlertsTableWrapper>
     </InspectButtonContainer>

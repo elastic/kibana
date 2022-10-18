@@ -13,6 +13,7 @@ import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
 
+import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exception_lists';
 import {
   checkPrivilegesFromEsClient,
   getExceptions,
@@ -300,6 +301,14 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               indicesToQuery: inputIndex,
             });
 
+            const { filter: exceptionFilter, unprocessedExceptions } = await buildExceptionFilter({
+              alias: null,
+              excludeExceptions: true,
+              chunkSize: 10,
+              lists: exceptionItems,
+              listClient,
+            });
+
             if (!skipExecution) {
               for (const tuple of tuples) {
                 const runResult = await type.executor({
@@ -309,7 +318,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   runOpts: {
                     completeRule,
                     inputIndex,
-                    exceptionItems,
+                    exceptionFilter,
+                    unprocessedExceptions,
                     runtimeMappings: {
                       ...runtimeMappings,
                       ...timestampRuntimeMappings,
@@ -333,6 +343,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 const warningMessages = result.warningMessages.concat(runResult.warningMessages);
                 result = {
                   bulkCreateTimes: result.bulkCreateTimes.concat(runResult.bulkCreateTimes),
+                  enrichmentTimes: result.enrichmentTimes.concat(runResult.enrichmentTimes),
                   createdSignals,
                   createdSignalsCount: createdSignals.length,
                   errors: result.errors.concat(runResult.errors),
@@ -348,6 +359,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             } else {
               result = {
                 bulkCreateTimes: [],
+                enrichmentTimes: [],
                 createdSignals: [],
                 createdSignalsCount: 0,
                 errors: [],
@@ -424,6 +436,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   metrics: {
                     searchDurations: result.searchAfterTimes,
                     indexingDurations: result.bulkCreateTimes,
+                    enrichmentDurations: result.enrichmentTimes,
                   },
                 });
               }
@@ -442,6 +455,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
+                  enrichmentDurations: result.enrichmentTimes,
                 },
               });
             }
@@ -454,6 +468,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               metrics: {
                 searchDurations: result.searchAfterTimes,
                 indexingDurations: result.bulkCreateTimes,
+                enrichmentDurations: result.enrichmentTimes,
               },
             });
 

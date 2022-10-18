@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
+import { EuiLink } from '@elastic/eui';
 import { StorageExplorer } from '../../app/storage_explorer';
 import { BetaBadge } from '../../shared/beta_badge';
 import { ApmMainTemplate } from '../templates/apm_main_template';
@@ -28,26 +29,42 @@ export const storageExplorer = {
         href="/storage-explorer"
       >
         <ApmMainTemplate
-          pageTitle={
-            <EuiFlexGroup
-              justifyContent="flexStart"
-              gutterSize="s"
-              alignItems="baseline"
-            >
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="l">
-                  <h2>
-                    {i18n.translate('xpack.apm.views.storageExplorer.title', {
-                      defaultMessage: 'Storage explorer',
-                    })}
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <BetaBadge />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
+          pageHeader={{
+            alignItems: 'center',
+            pageTitle: (
+              <EuiFlexGroup
+                justifyContent="flexStart"
+                gutterSize="s"
+                alignItems="baseline"
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="l">
+                    <h2>
+                      {i18n.translate('xpack.apm.views.storageExplorer.title', {
+                        defaultMessage: 'Storage explorer',
+                      })}
+                    </h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <BetaBadge />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+            rightSideItems: [
+              <EuiLink
+                href="https://ela.st/feedback-storage-explorer"
+                target="_blank"
+              >
+                {i18n.translate(
+                  'xpack.apm.views.storageExplorer.giveFeedback',
+                  {
+                    defaultMessage: 'Give feedback',
+                  }
+                )}
+              </EuiLink>,
+            ],
+          }}
         >
           <StorageExplorer />
         </ApmMainTemplate>

@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import styled from 'styled-components';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -32,9 +31,6 @@ import { getCommonTags } from '../utils';
 import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
 
-const FlexItem = styled(EuiFlexItem)`
-  height: ${(props) => props.theme.eui.euiSizeL};
-`;
 export interface Props {
   totalAgents: number;
   totalInactiveAgents: number;
@@ -228,42 +224,36 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           }}
           onClosePopover={() => {
             setIsTagAddVisible(false);
+            closeMenu();
           }}
         />
       )}
       <EuiFlexGroup gutterSize="m" alignItems="center">
-        {(selectionMode === 'manual' && selectedAgents.length) ||
-        (selectionMode === 'query' && totalAgents > 0) ? (
-          <>
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                id="agentBulkActionsMenu"
-                button={
-                  <EuiButton
-                    fill
-                    iconType="arrowDown"
-                    iconSide="right"
-                    onClick={onClickMenu}
-                    data-test-subj="agentBulkActionsButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.agentBulkActions.actions"
-                      defaultMessage="Actions"
-                    />
-                  </EuiButton>
-                }
-                isOpen={isMenuOpen}
-                closePopover={closeMenu}
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            id="agentBulkActionsMenu"
+            button={
+              <EuiButton
+                fill
+                iconType="arrowDown"
+                iconSide="right"
+                onClick={onClickMenu}
+                data-test-subj="agentBulkActionsButton"
               >
-                <EuiContextMenu initialPanelId={0} panels={panels} />
-              </EuiPopover>
-            </EuiFlexItem>
-          </>
-        ) : (
-          <FlexItem grow={false} />
-        )}
+                <FormattedMessage
+                  id="xpack.fleet.agentBulkActions.actions"
+                  defaultMessage="Actions"
+                />
+              </EuiButton>
+            }
+            isOpen={isMenuOpen}
+            closePopover={closeMenu}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenu initialPanelId={0} panels={panels} />
+          </EuiPopover>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );

@@ -9,7 +9,6 @@
 import React, { useRef, memo, useEffect, useState, useCallback } from 'react';
 import classNames from 'classnames';
 import { EsqlLang, monaco } from '@kbn/monaco';
-import { IDataPluginServices } from '@kbn/data-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -47,6 +46,7 @@ import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
 
 import './overwrite.scss';
+import { IUnifiedSearchPluginServices } from '../../types';
 
 export interface TextBasedLanguagesEditorProps {
   query: AggregateQuery;
@@ -55,6 +55,7 @@ export interface TextBasedLanguagesEditorProps {
   expandCodeEditor: (status: boolean) => void;
   isCodeEditorExpanded: boolean;
   errors?: Error[];
+  isDisabled?: boolean;
 }
 
 const MAX_COMPACT_VIEW_LENGTH = 250;
@@ -85,6 +86,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   expandCodeEditor,
   isCodeEditorExpanded,
   errors,
+  isDisabled,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
@@ -104,7 +106,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     Array<{ startLineNumber: number; message: string }>
   >([]);
   const [documentationSections, setDocumentationSections] = useState<DocumentationSections>();
-  const kibana = useKibana<IDataPluginServices>();
+  const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { uiSettings } = kibana.services;
 
   const styles = textBasedLanguagedEditorStyles(
@@ -341,6 +343,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       horizontal: 'hidden',
     },
     overviewRulerBorder: false,
+    readOnly: isDisabled,
   };
 
   if (isCompactFocused) {
@@ -490,7 +493,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   <div css={styles.editorContainer}>
                     {!isCompactFocused && (
                       <EuiBadge
-                        color="default"
+                        color={euiTheme.colors.lightShade}
                         css={styles.linesBadge}
                         data-test-subj="unifiedTextLangEditor-inline-lines-badge"
                       >
@@ -563,7 +566,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     data-test-subj="unifiedTextLangEditor-expand"
                     css={{
                       borderRadius: 0,
-                      backgroundColor: '#e9edf3',
+                      backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                       border: '1px solid rgb(17 43 134 / 10%) !important',
                     }}
                   />
@@ -599,7 +602,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         css={{
                           borderTopLeftRadius: 0,
                           borderBottomLeftRadius: 0,
-                          backgroundColor: '#e9edf3',
+                          backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                           border: '1px solid rgb(17 43 134 / 10%) !important',
                           borderLeft: 'transparent !important',
                         }}

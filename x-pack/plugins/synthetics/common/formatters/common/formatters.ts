@@ -28,6 +28,14 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.REVISION]: null,
   [ConfigKey.MONITOR_SOURCE_TYPE]: null,
   [ConfigKey.FORM_MONITOR_TYPE]: null,
+  [ConfigKey.JOURNEY_ID]: null,
+  [ConfigKey.PROJECT_ID]: null,
+  [ConfigKey.CUSTOM_HEARTBEAT_ID]: null,
+  [ConfigKey.ORIGINAL_SPACE]: null,
+  [ConfigKey.CONFIG_HASH]: null,
+
+  // Deprecated, slated to be removed in a later release
+  [ConfigKey.ID]: null,
 };
 
 export const arrayToJsonFormatter = (value: string[] = []) =>

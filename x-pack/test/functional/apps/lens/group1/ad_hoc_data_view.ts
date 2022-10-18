@@ -17,10 +17,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'unifiedSearch',
     'dashboard',
     'timeToVisualize',
+    'common',
+    'discover',
   ]);
   const elasticChart = getService('elasticChart');
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   const expectedData = [
     { x: '97.220.3.248', y: 19755 },
@@ -99,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should allow removing a field', async () => {
       await PageObjects.lens.clickField('runtimefield');
-      await PageObjects.lens.removeField();
+      await PageObjects.lens.removeField('runtimefield');
       await fieldEditor.confirmDelete();
       await PageObjects.lens.waitForFieldMissing('runtimefield');
     });
@@ -144,6 +148,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const metricData = await PageObjects.lens.getMetricVisualizationData();
       expect(metricData[0].value).to.eql('5.73K');
       expect(metricData[0].title).to.eql('Average of bytes');
+    });
+
+    it('should navigate to discover correctly', async () => {
+      await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
+
+      const [, discoverWindowHandle] = await browser.getAllWindowHandles();
+      await browser.switchToWindow(discoverWindowHandle);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const actualIndexPattern = await (
+        await testSubjects.find('discover-dataView-switch-link')
+      ).getVisibleText();
+      expect(actualIndexPattern).to.be('*stash*');
+
+      const actualDiscoverQueryHits = await testSubjects.getVisibleText(
+        'unifiedHistogramQueryHits'
+      );
+      expect(actualDiscoverQueryHits).to.be('14,005');
+
+      const prevDataViewId = await PageObjects.discover.getCurrentDataViewId();
+
+      await PageObjects.discover.addRuntimeField(
+        '_bytes-runtimefield',
+        `emit(doc["bytes"].value.toString())`
+      );
+      await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');
+      const newDataViewId = await PageObjects.discover.getCurrentDataViewId();
+      expect(newDataViewId).not.to.equal(prevDataViewId);
     });
   });
 }

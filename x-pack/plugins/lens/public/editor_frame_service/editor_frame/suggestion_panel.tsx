@@ -243,6 +243,7 @@ export function SuggestionPanel({
                   visualizationMap[visualizationId],
                   suggestionVisualizationState,
                   {
+                    ...frame,
                     dataViews: frame.dataViews,
                     datasourceLayers: getDatasourceLayers(
                       suggestionDatasourceId

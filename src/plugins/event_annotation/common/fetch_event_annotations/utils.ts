@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { TimeRange } from '@kbn/data-plugin/common';
+import { TimeBuckets, TimeRange, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { omit, pick } from 'lodash';
+import dateMath from '@kbn/datemath';
 import moment from 'moment';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import {
   ManualEventAnnotationOutput,
   ManualPointEventAnnotationOutput,
@@ -41,15 +43,70 @@ export const isManualAnnotation = (
 ): annotation is ManualPointEventAnnotationOutput | ManualRangeEventAnnotationOutput =>
   isRangeAnnotation(annotation) || isManualPointAnnotation(annotation);
 
+function toAbsoluteDate(date: string) {
+  const parsed = dateMath.parse(date);
+  return parsed ? parsed.toDate() : undefined;
+}
+
+export function toAbsoluteDates(range: TimeRange) {
+  const fromDate = dateMath.parse(range.from);
+  const toDate = dateMath.parse(range.to, { roundUp: true });
+
+  if (!fromDate || !toDate) {
+    return;
+  }
+
+  return {
+    from: fromDate.toDate(),
+    to: toDate.toDate(),
+  };
+}
+
+export const getCalculatedInterval = (
+  uiSettings: IUiSettingsClient,
+  usedInterval: string,
+  timeRange?: TimeRange
+) => {
+  const dates = timeRange && toAbsoluteDates(timeRange);
+  if (!dates) {
+    return;
+  }
+  const buckets = new TimeBuckets({
+    'histogram:maxBars': uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
+    'histogram:barTarget': uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
+    dateFormat: uiSettings.get('dateFormat'),
+    'dateFormat:scaled': uiSettings.get('dateFormat:scaled'),
+  });
+
+  buckets.setInterval(usedInterval);
+  buckets.setBounds({
+    min: moment(dates.from),
+    max: moment(dates.to),
+  });
+
+  return buckets.getInterval().expression;
+};
+
 export const isInRange = (annotation: ManualEventAnnotationOutput, timerange?: TimeRange) => {
   if (!timerange) {
     return false;
   }
+  const { from, to } = toAbsoluteDates(timerange) || {};
+  if (!from || !to) {
+    return false;
+  }
   if (isRangeAnnotation(annotation)) {
-    return !(annotation.time >= timerange.to || annotation.endTime < timerange.from);
+    const time = toAbsoluteDate(annotation.time);
+    const endTime = toAbsoluteDate(annotation.endTime);
+    if (time && endTime) {
+      return !(time >= to || endTime < from);
+    }
   }
   if (isManualPointAnnotation(annotation)) {
-    return annotation.time >= timerange.from && annotation.time <= timerange.to;
+    const time = toAbsoluteDate(annotation.time);
+    if (time) {
+      return time >= from && time <= to;
+    }
   }
   return true;
 };
@@ -99,6 +156,7 @@ export const postprocessAnnotations = (
         .map((col) => {
           return {
             ...col,
+            name: swappedFieldsColIdMap[col.id], // we need to overwrite the name because esaggs column name is per bucket and not per row (eg. "First 10 fields...")
             id: `field:${swappedFieldsColIdMap[col.id]}`,
           };
         });

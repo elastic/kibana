@@ -21,6 +21,14 @@ get:
                       - install_failed
                       - not_installed
                   savedObject:
+                    type: object
+                  latestVersion:
+                    type: string
+                  keepPoliciesUpToDate:
+                    type: boolean
+                  notice:
+                    type: string
+                  licensePath:
                     type: string
                 required:
                   - status
@@ -39,6 +47,11 @@ parameters:
     name: pkgVersion
     in: path
     required: true
+  - schema:
+      type: boolean
+    name: ignoreUnverified
+    description: 'Ignore if the package is fails signature verification'
+    in: query
 post:
   summary: Packages - Install
   tags: []

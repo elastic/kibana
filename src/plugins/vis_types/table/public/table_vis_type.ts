@@ -13,6 +13,7 @@ import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '@kbn/visualizations-plu
 import { TableVisParams, VIS_TYPE_TABLE } from '../common';
 import { TableOptions } from './components/table_vis_options_lazy';
 import { toExpressionAst } from './to_ast';
+import { convertToLens } from './convert_to_lens';
 
 export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
   name: VIS_TYPE_TABLE,
@@ -102,4 +103,10 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
   hasPartialRows: (vis) => vis.params.showPartialRows,
   hierarchicalData: (vis) => vis.params.showPartialRows || vis.params.showMetricsAtAllLevels,
   requiresSearch: true,
+  navigateToLens: async (vis, timefilter) => (vis ? convertToLens(vis, timefilter) : null),
+  getExpressionVariables: async (vis, timeFilter) => {
+    return {
+      canNavigateToLens: Boolean(vis?.params ? await convertToLens(vis, timeFilter) : null),
+    };
+  },
 };

@@ -67,6 +67,18 @@ describe('add analytics collection lib function', () => {
     expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();
   });
 
+  it('should reject if collection name is invalid', async () => {
+    mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
+    (fetchAnalyticsCollectionByName as jest.Mock).mockImplementation(() => false);
+
+    await expect(
+      addAnalyticsCollection(mockClient as unknown as IScopedClusterClient, {
+        name: 'index_name!',
+      })
+    ).rejects.toEqual(new Error(ErrorCode.ANALYTICS_COLLECTION_NAME_INVALID));
+    expect(mockClient.asCurrentUser.index).not.toHaveBeenCalled();
+  });
+
   it('should create index if no analytics collection index exists', async () => {
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
 

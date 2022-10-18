@@ -28,20 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const DASHBOARD_NAME = 'Test Range Slider Control';
 
-  const validateRange = async (
-    compare: 'value' | 'placeholder', // if 'value', compare actual selections; otherwise, compare the default range
-    controlId: string,
-    expectedLowerBound: string,
-    expectedUpperBound: string
-  ) => {
-    expect(await dashboardControls.rangeSliderGetLowerBoundAttribute(controlId, compare)).to.be(
-      expectedLowerBound
-    );
-    expect(await dashboardControls.rangeSliderGetUpperBoundAttribute(controlId, compare)).to.be(
-      expectedUpperBound
-    );
-  };
-
   describe('Range Slider Control', async () => {
     before(async () => {
       await security.testUser.setRoles([
@@ -103,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         expect(await dashboardControls.getControlsCount()).to.be(2);
         const secondId = (await dashboardControls.getAllControlIds())[1];
-        validateRange('placeholder', secondId, '100', '1200');
+        await dashboardControls.validateRange('placeholder', secondId, '100', '1200');
         // data views should be properly propagated from the control group to the dashboard
         expect(await filterBar.getIndexPatterns()).to.be('logstash-*,kibana_sample_data_flights');
         await dashboard.clearUnsavedChanges();
@@ -130,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.controlsEditorSetfield('dayOfWeek', RANGE_SLIDER_CONTROL);
         await dashboardControls.controlEditorSave();
         await dashboardControls.rangeSliderWaitForLoading();
-        validateRange('placeholder', firstId, '0', '6');
+        await dashboardControls.validateRange('placeholder', firstId, '0', '6');
 
         // when creating a new filter, the ability to select a data view should be removed, because the dashboard now only has one data view
         await retry.try(async () => {
@@ -165,7 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('applies filter from the first control on the second control', async () => {
         await dashboardControls.rangeSliderWaitForLoading();
         const secondId = (await dashboardControls.getAllControlIds())[1];
-        validateRange('placeholder', secondId, '100', '1000');
+        await dashboardControls.validateRange('placeholder', secondId, '100', '1000');
       });
 
       it('editing field clears selections', async () => {
@@ -175,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.controlEditorSave();
 
         await dashboardControls.rangeSliderWaitForLoading();
-        validateRange('value', secondId, '', '');
+        await dashboardControls.validateRange('value', secondId, '', '');
       });
 
       it('editing other control settings keeps selections', async () => {
@@ -190,13 +176,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.controlEditorSave();
 
         await dashboardControls.rangeSliderWaitForLoading();
-        validateRange('value', secondId, '50', '100');
+        await dashboardControls.validateRange('value', secondId, '50', '100');
       });
 
       it('can clear out selections by clicking the reset button', async () => {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.rangeSliderClearSelection(firstId);
-        validateRange('value', firstId, '', '');
+        await dashboardControls.validateRange('value', firstId, '', '');
       });
 
       it('deletes an existing control', async () => {

@@ -42,6 +42,7 @@
         ],
         "path": "packages/core/execution-context/core-execution-context-common/src/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

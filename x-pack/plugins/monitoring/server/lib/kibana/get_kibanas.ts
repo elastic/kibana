@@ -9,7 +9,7 @@ import moment from 'moment';
 import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
 import { Globals } from '../../static_globals';
 import { LegacyRequest } from '../../types';
-import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { getIndexPatterns, getKibanaDataset } from '../cluster/get_index_patterns';
 import { createQuery } from '../create_query';
 import { KibanaMetric } from '../metrics';
 import { buildKibanaInfo, KibanaInfo } from './build_kibana_info';
@@ -57,7 +57,7 @@ export async function getKibanas(req: LegacyRequest, { clusterUuid }: { clusterU
   const moduleType = 'kibana';
   const type = 'kibana_stats';
   const dataset = 'stats';
-  const indexPatterns = getNewIndexPatterns({
+  const indexPatterns = getIndexPatterns({
     config: Globals.app.config,
     ccs: req.payload.ccs,
     moduleType,
@@ -70,7 +70,7 @@ export async function getKibanas(req: LegacyRequest, { clusterUuid }: { clusterU
     body: {
       query: createQuery({
         type,
-        dsDataset: `${moduleType}.${dataset}`,
+        dsDataset: getKibanaDataset(dataset),
         metricset: dataset,
         start,
         end,

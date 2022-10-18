@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
+import { buildEsQuery } from '@kbn/es-query';
+import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
@@ -31,7 +34,6 @@ import { SecuritySolutionPageWrapper } from '../../../common/components/page_wra
 import { useNetworkDetails, ID } from '../../containers/details';
 import { useKibana } from '../../../common/lib/kibana';
 import { decodeIpv6 } from '../../../common/lib/helpers';
-import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { inputsSelectors } from '../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { setNetworkDetailsTablesActivePageToZero } from '../../store/actions';
@@ -44,9 +46,12 @@ import { LandingPageComponent } from '../../../common/components/landing_page';
 import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
 import { getNetworkDetailsPageFilter } from '../../../common/components/visualization_actions/utils';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
+import { AlertCountByRuleByStatus } from '../../../common/components/alert_count_by_status';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { navTabsNetworkDetails } from './nav_tabs';
 import { NetworkDetailsTabs } from './details_tabs';
+import { useInstalledSecurityJobsIds } from '../../../common/components/ml/hooks/use_installed_security_jobs';
 
 export { getTrailingBreadcrumbs } from './utils';
 
@@ -65,6 +70,10 @@ const NetworkDetailsComponent: React.FC = () => {
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
   );
+
+  const { signalIndexName } = useSignalIndex();
+  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
+  const canReadAlerts = hasKibanaREAD && hasIndexRead;
 
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
@@ -94,32 +103,46 @@ const NetworkDetailsComponent: React.FC = () => {
   const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
   const ip = decodeIpv6(detailName);
 
-  const queryFilters = useMemo(
-    () => [...getNetworkDetailsPageFilter(ip), ...filters],
-    [filters, ip]
-  );
+  const [rawFilteredQuery, kqlError] = useMemo(() => {
+    try {
+      return [
+        buildEsQuery(
+          indexPattern,
+          [query],
+          [...getNetworkDetailsPageFilter(ip), ...filters],
+          getEsQueryConfig(uiSettings)
+        ),
+      ];
+    } catch (e) {
+      return [undefined, e];
+    }
+  }, [filters, indexPattern, ip, query, uiSettings]);
 
-  const [filterQuery, kqlError] = convertToBuildEsQuery({
-    config: getEsQueryConfig(uiSettings),
-    indexPattern,
-    queries: [query],
-    filters: queryFilters,
+  const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
+  useInvalidFilterQuery({
+    id: ID,
+    filterQuery: stringifiedAdditionalFilters,
+    kqlError,
+    query,
+    startDate: from,
+    endDate: to,
   });
-
-  useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
   const [loading, { id, inspect, networkDetails, refetch }] = useNetworkDetails({
     skip: isInitializing,
-    filterQuery,
+    filterQuery: stringifiedAdditionalFilters,
     indexNames: selectedPatterns,
     ip,
   });
 
+  const { jobIds } = useInstalledSecurityJobsIds();
   const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
     criteriaFields: networkToCriteria(detailName, flowTarget),
     startDate: from,
     endDate: to,
     skip: isInitializing,
+    jobIds,
+    aggregationInterval: 'auto',
   });
 
   const headerDraggableArguments = useMemo(
@@ -129,8 +152,16 @@ const NetworkDetailsComponent: React.FC = () => {
 
   // When the filterQuery comes back as undefined, it means an error has been thrown and the request should be skipped
   const shouldSkip = useMemo(
-    () => isInitializing || filterQuery === undefined,
-    [isInitializing, filterQuery]
+    () => isInitializing || rawFilteredQuery === undefined,
+    [isInitializing, rawFilteredQuery]
+  );
+
+  const entityFilter = useMemo(
+    () => ({
+      field: `${flowTarget}.ip`,
+      value: detailName,
+    }),
+    [detailName, flowTarget]
   );
 
   return (
@@ -157,6 +188,7 @@ const NetworkDetailsComponent: React.FC = () => {
             >
               <FlowTargetSelectConnected flowTarget={flowTarget} />
             </HeaderPage>
+
             <NetworkDetailsManage
               id={id}
               inspect={inspect}
@@ -175,8 +207,32 @@ const NetworkDetailsComponent: React.FC = () => {
               narrowDateRange={narrowDateRange}
               indexPatterns={selectedPatterns}
             />
+
             <EuiHorizontalRule />
             <EuiSpacer />
+
+            {canReadAlerts && (
+              <>
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <AlertsByStatus
+                      signalIndexName={signalIndexName}
+                      entityFilter={entityFilter}
+                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <AlertCountByRuleByStatus
+                      entityFilter={entityFilter}
+                      signalIndexName={signalIndexName}
+                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer />
+              </>
+            )}
+
             <SecuritySolutionTabNavigation
               navTabs={navTabsNetworkDetails(ip, hasMlUserPermissions(capabilities), flowTarget)}
             />
@@ -185,7 +241,7 @@ const NetworkDetailsComponent: React.FC = () => {
               ip={ip}
               endDate={to}
               startDate={from}
-              filterQuery={filterQuery}
+              filterQuery={stringifiedAdditionalFilters}
               indexNames={selectedPatterns}
               skip={shouldSkip}
               setQuery={setQuery}

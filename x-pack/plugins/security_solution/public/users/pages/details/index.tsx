@@ -5,13 +5,25 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiWindowEvent,
+} from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import { TableId } from '../../../../common/types';
+import { dataTableSelectors } from '../../../common/store/data_table';
+import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { AlertCountByRuleByStatus } from '../../../common/components/alert_count_by_status';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -21,8 +33,8 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
-import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { inputsSelectors } from '../../../common/store';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { setUsersDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
@@ -34,8 +46,6 @@ import { type } from './utils';
 import { getUsersDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
-import { timelineSelectors } from '../../../timelines/store/timeline';
-import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -53,18 +63,19 @@ import { UsersType } from '../../store/model';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { LandingPageComponent } from '../../../common/components/landing_page';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+
 const QUERY_ID = 'UsersDetailsQueryId';
+const ES_USER_FIELD = 'user.name';
 
 const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   detailName,
   usersDetailsPagePath,
 }) => {
   const dispatch = useDispatch();
-  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
-    (state) => (getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults).graphEventId
+    (state) => (getTable(state, TableId.hostsPageEvents) ?? timelineDefaults).graphEventId
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -74,28 +85,43 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
+  const { signalIndexName } = useSignalIndex();
+  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
+  const canReadAlerts = hasKibanaREAD && hasIndexRead;
+
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
 
-  const kibana = useKibana();
+  const {
+    services: { uiSettings },
+  } = useKibana();
+
   const usersDetailsPageFilters: Filter[] = useMemo(
     () => getUsersDetailsPageFilters(detailName),
     [detailName]
   );
-  const getFilters = () => [...usersDetailsPageFilters, ...filters];
 
   const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
 
-  const [filterQuery, kqlError] = convertToBuildEsQuery({
-    config: getEsQueryConfig(kibana.services.uiSettings),
-    indexPattern,
-    queries: [query],
-    filters: getFilters(),
-  });
+  const [rawFilteredQuery, kqlError] = useMemo(() => {
+    try {
+      return [
+        buildEsQuery(
+          indexPattern,
+          [query],
+          [...usersDetailsPageFilters, ...filters],
+          getEsQueryConfig(uiSettings)
+        ),
+      ];
+    } catch (e) {
+      return [undefined, e];
+    }
+  }, [filters, indexPattern, query, uiSettings, usersDetailsPageFilters]);
 
+  const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
     id: QUERY_ID,
-    filterQuery,
+    filterQuery: stringifiedAdditionalFilters,
     kqlError,
     query,
     startDate: from,
@@ -133,6 +159,14 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [dispatch]
   );
 
+  const entityFilter = useMemo(
+    () => ({
+      field: ES_USER_FIELD,
+      value: detailName,
+    }),
+    [detailName]
+  );
+
   return (
     <>
       {indicesExist ? (
@@ -144,7 +178,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <HeaderPage
-              border
               subtitle={
                 <LastEventTime
                   indexKey={LastEventIndexKey.userDetails}
@@ -154,6 +187,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               }
               title={detailName}
             />
+
             <AnomalyTableProvider
               criteriaFields={getCriteriaFromUsersType(UsersType.details, detailName)}
               startDate={from}
@@ -176,23 +210,43 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                 />
               )}
             </AnomalyTableProvider>
-
+            <EuiHorizontalRule />
             <EuiSpacer />
+
+            {canReadAlerts && (
+              <>
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <AlertsByStatus
+                      signalIndexName={signalIndexName}
+                      entityFilter={entityFilter}
+                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <AlertCountByRuleByStatus
+                      entityFilter={entityFilter}
+                      signalIndexName={signalIndexName}
+                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer />
+              </>
+            )}
 
             <SecuritySolutionTabNavigation
               navTabs={navTabsUsersDetails(
                 detailName,
                 hasMlUserPermissions(capabilities),
-                riskyUsersFeatureEnabled
+                isPlatinumOrTrialLicense
               )}
             />
-
             <EuiSpacer />
-
             <UsersDetailsTabs
               deleteQuery={deleteQuery}
               detailName={detailName}
-              filterQuery={filterQuery}
+              filterQuery={stringifiedAdditionalFilters}
               from={from}
               indexNames={selectedPatterns}
               indexPattern={indexPattern}

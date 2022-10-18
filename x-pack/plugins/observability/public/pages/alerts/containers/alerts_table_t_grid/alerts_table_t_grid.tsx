@@ -153,7 +153,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
     timelines,
     application: { capabilities },
   } = useKibana<ObservabilityAppServices>().services;
-  const { observabilityRuleTypeRegistry } = usePluginContext();
+  const { observabilityRuleTypeRegistry, config } = usePluginContext();
 
   const [flyoutAlert, setFlyoutAlert] = useState<TopAlert | undefined>(undefined);
   const [tGridState, setTGridState] = useState<Partial<TGridModel> | null>(
@@ -210,17 +210,18 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
                 setEventsDeleted={setEventsDeleted}
                 setFlyoutAlert={setFlyoutAlert}
                 observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+                config={config}
               />
             </EuiFlexGroup>
           );
         },
       },
     ];
-  }, [setEventsDeleted, observabilityRuleTypeRegistry]);
+  }, [setEventsDeleted, observabilityRuleTypeRegistry, config]);
 
   const onStateChange = useCallback(
     (state: TGridState) => {
-      const pickedState = pick(state.timelineById['standalone-t-grid'], [
+      const pickedState = pick(state.tableById['standalone-t-grid'], [
         'columns',
         'sort',
         'selectedEventIds',
@@ -258,7 +259,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       itemsPerPage,
       itemsPerPageOptions: [10, 25, 50],
       loadingText: translations.alertsTable.loadingTextLabel,
-      footerText: translations.alertsTable.footerTextLabel,
       onStateChange,
       query: {
         query: kuery ?? '',

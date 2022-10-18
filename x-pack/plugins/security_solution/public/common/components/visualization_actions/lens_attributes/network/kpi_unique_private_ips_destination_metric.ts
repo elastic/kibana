@@ -11,7 +11,7 @@ export const kpiUniquePrivateIpsDestinationMetricLensAttributes: LensAttributes 
   description: '',
   state: {
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           'cea37c70-8f91-43bf-b9fe-72d8c049f6a3': {
             columnOrder: ['bd17c23e-4f83-4108-8005-2669170d064b'],
@@ -48,7 +48,7 @@ export const kpiUniquePrivateIpsDestinationMetricLensAttributes: LensAttributes 
     },
   },
   title: '[Network] Unique private IPs - destination metric',
-  visualizationType: 'lnsMetric',
+  visualizationType: 'lnsLegacyMetric',
   references: [
     {
       id: '{dataViewId}',

@@ -69,7 +69,7 @@ describe('home', () => {
 
     let home = mountWithIntl(<TriggersActionsUIHome {...props} />);
 
-    // Just rules/connectors
+    // Just rules/logs
     expect(home.find('.euiTab__content').length).toBe(2);
 
     (getIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((feature: string) => {

@@ -16,7 +16,6 @@ import {
   GROUP_BY_TOP_INPUT,
   ACKNOWLEDGED_ALERTS_FILTER_BTN,
   LOADING_ALERTS_PANEL,
-  MANAGE_ALERT_DETECTION_RULES_BTN,
   MARK_ALERT_ACKNOWLEDGED_BTN,
   OPEN_ALERT_BTN,
   OPENED_ALERTS_FILTER_BTN,
@@ -24,6 +23,8 @@ import {
   SELECT_TABLE,
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
+  CLOSE_FLYOUT,
+  OPEN_ANALYZER_BTN,
 } from '../screens/alerts';
 import { REFRESH_BUTTON } from '../screens/security_header';
 import {
@@ -82,6 +83,8 @@ export const expandFirstAlert = () => {
     .pipe(($el) => $el.trigger('click'));
 };
 
+export const closeAlertFlyout = () => cy.get(CLOSE_FLYOUT).click();
+
 export const viewThreatIntelTab = () => cy.get(THREAT_INTEL_TAB).click();
 
 export const setEnrichmentDates = (from?: string, to?: string) => {
@@ -101,10 +104,6 @@ export const goToClosedAlerts = () => {
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
   cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
-};
-
-export const goToManageAlertsDetectionRules = () => {
-  cy.get(MANAGE_ALERT_DETECTION_RULES_BTN).should('exist').click({ force: true });
 };
 
 export const goToOpenedAlerts = () => {
@@ -153,6 +152,10 @@ export const selectNumberOfAlerts = (numberOfAlerts: number) => {
 
 export const investigateFirstAlertInTimeline = () => {
   cy.get(SEND_ALERT_TO_TIMELINE_BTN).first().click({ force: true });
+};
+
+export const openAnalyzerForFirstAlertInTimeline = () => {
+  cy.get(OPEN_ANALYZER_BTN).first().click({ force: true });
 };
 
 export const addAlertPropertyToTimeline = (propertySelector: string, rowIndex: number) => {

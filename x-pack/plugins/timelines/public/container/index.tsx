@@ -16,12 +16,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  clearEventsLoading,
-  clearEventsDeleted,
-  setTimelineUpdatedAt,
-} from '../store/t_grid/actions';
+import { clearEventsLoading, clearEventsDeleted, setTableUpdatedAt } from '../store/t_grid/actions';
 import {
   Direction,
   TimelineFactoryQueryTypes,
@@ -41,16 +36,13 @@ import type {
 import type { ESQuery } from '../../common/typed_json';
 import type { KueryFilterQueryKind } from '../../common/types/timeline';
 import { useAppToasts } from '../hooks/use_app_toasts';
-import { TimelineId } from '../store/t_grid/types';
+import { TableId } from '../store/t_grid/types';
 import * as i18n from './translations';
-import { TimelinesStartPlugins } from '../types';
+import { getSearchTransactionName, useStartTransaction } from '../lib/apm/use_start_transaction';
 
 export type InspectResponse = Inspect & { response: string[] };
 
-export const detectionsTimelineIds = [
-  TimelineId.detectionsPage,
-  TimelineId.detectionsRulesDetailsPage,
-];
+export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
 
 export type Refetch = () => void;
 
@@ -118,14 +110,16 @@ export const initSortDefault = [
 ];
 
 const useApmTracking = (timelineId: string) => {
-  const { apm } = useKibana<TimelinesStartPlugins>().services;
+  const { startTransaction } = useStartTransaction();
 
   const startTracking = useCallback(() => {
     // Create the transaction, the managed flag is turned off to prevent it from being polluted by non-related automatic spans.
     // The managed flag can be turned on to investigate high latency requests in APM.
     // However, note that by enabling the managed flag, the transaction trace may be distorted by other requests information.
-    const transaction = apm?.startTransaction(`Timeline search ${timelineId}`, 'http-request', {
-      managed: false,
+    const transaction = startTransaction({
+      name: getSearchTransactionName(timelineId),
+      type: 'http-request',
+      options: { managed: false },
     });
     // Create a blocking span to control the transaction time and prevent it from closing automatically with partial batch responses.
     // The blocking span needs to be ended manually when the batched request finishes.
@@ -136,7 +130,7 @@ const useApmTracking = (timelineId: string) => {
         span?.end();
       },
     };
-  }, [apm, timelineId]);
+  }, [startTransaction, timelineId]);
 
   return { startTracking };
 };
@@ -197,7 +191,7 @@ export const useTimelineEvents = ({
 
   const setUpdated = useCallback(
     (updatedAt: number) => {
-      dispatch(setTimelineUpdatedAt({ id, updated: updatedAt }));
+      dispatch(setTableUpdatedAt({ id, updated: updatedAt }));
     },
     [dispatch, id]
   );

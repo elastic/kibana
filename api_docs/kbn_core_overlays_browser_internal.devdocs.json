@@ -40,6 +40,7 @@
         ],
         "path": "packages/core/overlays/core-overlays-browser-internal/src/banners/banners_service.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "initialIsOpen": false
       }

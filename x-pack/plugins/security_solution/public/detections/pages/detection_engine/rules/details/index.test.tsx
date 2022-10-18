@@ -28,6 +28,7 @@ import { useParams } from 'react-router-dom';
 import { mockHistory, Router } from '../../../../../common/mock/router';
 
 import { fillEmptySeverityMappings } from '../helpers';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -169,7 +170,13 @@ const mockRule = {
   exceptions_list: [],
 };
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const store = createStore(
+  state,
+  SUB_PLUGINS_REDUCER,
+  { dataTable: tGridReducer },
+  kibanaObservable,
+  storage
+);
 
 describe('RuleDetailsPageComponent', () => {
   beforeAll(() => {
@@ -292,6 +299,72 @@ describe('RuleDetailsPageComponent', () => {
         otherObjectId: 'aliased_rule_id',
         otherObjectPath: `rules/id/aliased_rule_id`,
       });
+    });
+  });
+
+  it('renders exceptions tab', async () => {
+    await setup();
+    (useRuleWithFallback as jest.Mock).mockReturnValue({
+      error: null,
+      loading: false,
+      isExistingRule: true,
+      refresh: jest.fn(),
+      rule: {
+        ...mockRule,
+        outcome: 'conflict',
+        alias_target_id: 'aliased_rule_id',
+        alias_purpose: 'savedObjectConversion',
+      },
+    });
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Router history={mockHistory}>
+          <RuleDetailsPage />
+        </Router>
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="navigation-rule_exceptions"]').exists()).toBeTruthy();
+      expect(
+        wrapper.find('[data-test-subj="navigation-endpoint_exceptions"]').exists()
+      ).toBeFalsy();
+    });
+  });
+
+  it('renders endpoint exeptions tab when rule includes endpoint list', async () => {
+    await setup();
+    (useRuleWithFallback as jest.Mock).mockReturnValue({
+      error: null,
+      loading: false,
+      isExistingRule: true,
+      refresh: jest.fn(),
+      rule: {
+        ...mockRule,
+        outcome: 'conflict',
+        alias_target_id: 'aliased_rule_id',
+        alias_purpose: 'savedObjectConversion',
+        exceptions_list: [
+          {
+            id: 'endpoint_list',
+            list_id: 'endpoint_list',
+            type: 'endpoint',
+            namespace_type: 'agnostic',
+          },
+        ],
+      },
+    });
+    const wrapper = mount(
+      <TestProviders store={store}>
+        <Router history={mockHistory}>
+          <RuleDetailsPage />
+        </Router>
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="navigation-rule_exceptions"]').exists()).toBeTruthy();
+      expect(
+        wrapper.find('[data-test-subj="navigation-endpoint_exceptions"]').exists()
+      ).toBeTruthy();
     });
   });
 });

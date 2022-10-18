@@ -8,7 +8,13 @@
 import React, { useEffect, useMemo } from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-import { EuiPageHeader, EuiSpacer, EuiPageContent, EuiLink, EuiCallOut } from '@elastic/eui';
+import {
+  EuiPageHeader,
+  EuiSpacer,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiLink,
+  EuiCallOut,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DocLinksStart } from '@kbn/core/public';

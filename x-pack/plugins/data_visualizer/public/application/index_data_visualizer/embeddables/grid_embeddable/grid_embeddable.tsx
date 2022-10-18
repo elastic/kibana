@@ -54,6 +54,7 @@ export interface DataVisualizerGridInput {
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   sessionId?: string;
   fieldsToFetch?: string[];
+  totalDocuments?: number;
 }
 export type DataVisualizerGridEmbeddableInput = EmbeddableInput & DataVisualizerGridInput;
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
@@ -100,6 +101,7 @@ export const EmbeddableWrapper = ({
               dataView={input.dataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
               onAddFilter={input.onAddFilter}
+              totalDocuments={input.totalDocuments}
             />
           );
         }

@@ -25,9 +25,13 @@ export enum RuleAuditAction {
   AGGREGATE = 'rule_aggregate',
   BULK_EDIT = 'rule_bulk_edit',
   GET_EXECUTION_LOG = 'rule_get_execution_log',
+  GET_GLOBAL_EXECUTION_LOG = 'rule_get_global_execution_log',
+  GET_GLOBAL_EXECUTION_KPI = 'rule_get_global_execution_kpi',
   GET_ACTION_ERROR_LOG = 'rule_get_action_error_log',
+  GET_RULE_EXECUTION_KPI = 'rule_get_execution_kpi',
   SNOOZE = 'rule_snooze',
   UNSNOOZE = 'rule_unsnooze',
+  RUN_SOON = 'rule_run_soon',
 }
 
 type VerbsTuple = [string, string, string];
@@ -53,6 +57,11 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
     'accessing execution log for',
     'accessed execution log for',
   ],
+  rule_get_global_execution_log: [
+    'access execution log',
+    'accessing execution log',
+    'accessed execution log',
+  ],
   rule_get_action_error_log: [
     'access action error log for',
     'accessing action error log for',
@@ -60,6 +69,17 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   ],
   rule_snooze: ['snooze', 'snoozing', 'snoozed'],
   rule_unsnooze: ['unsnooze', 'unsnoozing', 'unsnoozed'],
+  rule_run_soon: ['run', 'running', 'ran'],
+  rule_get_execution_kpi: [
+    'access execution KPI for',
+    'accessing execution KPI for',
+    'accessed execution KPI for',
+  ],
+  rule_get_global_execution_kpi: [
+    'access global execution KPI for',
+    'accessing global execution KPI for',
+    'accessed global execution KPI for',
+  ],
 };
 
 const eventTypes: Record<RuleAuditAction, EcsEventType> = {
@@ -79,9 +99,13 @@ const eventTypes: Record<RuleAuditAction, EcsEventType> = {
   rule_alert_unmute: 'change',
   rule_aggregate: 'access',
   rule_get_execution_log: 'access',
+  rule_get_global_execution_log: 'access',
   rule_get_action_error_log: 'access',
   rule_snooze: 'change',
   rule_unsnooze: 'change',
+  rule_run_soon: 'access',
+  rule_get_execution_kpi: 'access',
+  rule_get_global_execution_kpi: 'access',
 };
 
 export interface RuleAuditEventParams {

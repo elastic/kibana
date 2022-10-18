@@ -13,7 +13,7 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AlertParams } from '../route';
 import {
-  getSearchAggregatedTransactions,
+  getSearchTransactionsEvents,
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
@@ -34,7 +34,7 @@ export async function getTransactionErrorRateChartPreview({
   const { serviceName, environment, transactionType, interval, start, end } =
     alertParams;
 
-  const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+  const searchAggregatedTransactions = await getSearchTransactionsEvents({
     ...setup,
     kuery: '',
     start,
@@ -48,6 +48,7 @@ export async function getTransactionErrorRateChartPreview({
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {

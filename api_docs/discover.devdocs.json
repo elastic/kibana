@@ -23,6 +23,7 @@
         ],
         "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discover",
@@ -36,6 +37,7 @@
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -50,6 +52,7 @@
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/get_saved_searches.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -68,6 +71,7 @@
         ],
         "path": "src/plugins/saved_search/common/saved_searches_url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discover",
@@ -81,6 +85,7 @@
             ],
             "path": "src/plugins/saved_search/common/saved_searches_url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -99,6 +104,7 @@
         ],
         "path": "src/plugins/saved_search/common/saved_searches_url.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discover",
@@ -112,6 +118,7 @@
             ],
             "path": "src/plugins/saved_search/common/saved_searches_url.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -138,6 +145,7 @@
         ],
         "path": "src/plugins/saved_search/public/services/saved_searches/saved_searches_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discover",
@@ -157,6 +165,7 @@
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/saved_searches_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -177,6 +186,7 @@
         ],
         "path": "src/plugins/discover/public/utils/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -201,6 +211,7 @@
         ],
         "path": "src/plugins/saved_search/public/services/saved_searches/saved_searches_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discover",
@@ -220,6 +231,7 @@
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/saved_searches_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -248,6 +260,7 @@
         ],
         "path": "src/plugins/discover/public/locator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discover",
@@ -262,7 +275,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -277,7 +291,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -295,11 +310,8 @@
             ],
             "path": "src/plugins/discover/public/locator.ts",
             "deprecated": true,
+            "trackAdoption": false,
             "references": [
-              {
-                "plugin": "lens",
-                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
-              },
               {
                 "plugin": "observability",
                 "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/hooks/use_discover_link.tsx"
@@ -334,7 +346,7 @@
               },
               {
                 "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/public/live_queries/form/pack_queries_status_table.tsx"
+                "path": "x-pack/plugins/osquery/public/discover/view_results_in_discover.tsx"
               },
               {
                 "plugin": "osquery",
@@ -345,6 +357,27 @@
                 "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/synthetics/check_steps/stderr_logs.tsx"
               }
             ]
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverAppLocatorParams.dataViewSpec",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViewSpec",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/discover/public/locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -360,7 +393,8 @@
               " | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -385,7 +419,8 @@
               ") | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -401,7 +436,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -419,7 +455,8 @@
               " | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -434,7 +471,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -449,7 +487,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -464,7 +503,8 @@
               "string[] | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -479,7 +519,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -494,7 +535,8 @@
               "string[][] | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -509,7 +551,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -531,7 +574,8 @@
               " | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -546,7 +590,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -560,6 +605,7 @@
         "description": [],
         "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discover",
@@ -580,7 +626,8 @@
               "> | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -594,6 +641,7 @@
         "description": [],
         "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discover",
@@ -606,7 +654,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -648,6 +697,7 @@
         ],
         "path": "src/plugins/discover/public/embeddable/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discover",
@@ -668,6 +718,7 @@
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -683,6 +734,7 @@
         "description": [],
         "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discover",
@@ -917,7 +969,8 @@
               "; parseActiveIndexPatternFromQueryString: (queryString: string) => string[]; }"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -930,7 +983,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -943,7 +997,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -957,7 +1012,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -970,7 +1026,8 @@
               "string[] | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -983,7 +1040,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -996,7 +1054,8 @@
               "string[] | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -1017,7 +1076,8 @@
               "> | undefined; } | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -1030,7 +1090,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -1040,10 +1101,11 @@
             "label": "sharingSavedObjectProps",
             "description": [],
             "signature": [
-              "{ outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
+              "{ outcome?: \"conflict\" | \"exactMatch\" | \"aliasMatch\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -1063,7 +1125,8 @@
               " | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -1076,7 +1139,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -1089,7 +1153,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -1102,7 +1167,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -1115,7 +1181,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -1135,7 +1202,8 @@
               " | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -1155,7 +1223,8 @@
               " | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -1168,7 +1237,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1199,6 +1269,7 @@
         ],
         "path": "src/plugins/discover/public/embeddable/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "discover",
@@ -1211,7 +1282,22 @@
               "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.SearchInput.timeslice",
+            "type": "Object",
+            "tags": [],
+            "label": "timeslice",
+            "description": [],
+            "signature": [
+              "[number, number] | undefined"
+            ],
+            "path": "src/plugins/discover/public/embeddable/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -1225,7 +1311,8 @@
               " | undefined"
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -1239,7 +1326,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -1252,7 +1340,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -1265,7 +1354,8 @@
               "string[] | undefined"
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -1279,7 +1369,8 @@
               "[] | undefined"
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -1292,7 +1383,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "discover",
@@ -1305,7 +1397,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/discover/public/embeddable/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1321,6 +1414,7 @@
         "description": [],
         "path": "src/plugins/saved_search/public/services/saved_searches/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1337,6 +1431,7 @@
         ],
         "path": "src/plugins/discover/public/locator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1366,6 +1461,7 @@
         ],
         "path": "src/plugins/discover/public/locator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1380,6 +1476,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1393,6 +1490,7 @@
       "description": [],
       "path": "src/plugins/discover/public/plugin.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "discover",
@@ -1409,7 +1507,8 @@
             "): void; }"
           ],
           "path": "src/plugins/discover/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         },
         {
           "parentPluginId": "discover",
@@ -1431,7 +1530,8 @@
             " | undefined"
           ],
           "path": "src/plugins/discover/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -1446,6 +1546,7 @@
       "description": [],
       "path": "src/plugins/discover/public/plugin.tsx",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "discover",
@@ -1467,7 +1568,8 @@
             " | undefined"
           ],
           "path": "src/plugins/discover/public/plugin.tsx",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -1500,6 +1602,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1514,6 +1617,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1528,6 +1632,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1542,6 +1647,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1556,6 +1662,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1570,6 +1677,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1584,6 +1692,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1598,6 +1707,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1612,6 +1722,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1626,6 +1737,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1640,6 +1752,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1654,6 +1767,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1668,6 +1782,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1682,6 +1797,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1696,6 +1812,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1710,6 +1827,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1724,6 +1842,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1738,6 +1857,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1752,6 +1872,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1766,6 +1887,22 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
+        "id": "def-common.SHOW_LEGACY_FIELD_TOP_VALUES",
+        "type": "string",
+        "tags": [],
+        "label": "SHOW_LEGACY_FIELD_TOP_VALUES",
+        "description": [],
+        "signature": [
+          "\"discover:showLegacyFieldTopValues\""
+        ],
+        "path": "src/plugins/discover/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1780,6 +1917,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1794,6 +1932,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1808,6 +1947,7 @@
         ],
         "path": "src/plugins/discover/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

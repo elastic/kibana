@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiCommentProps } from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
 
-import { CommentUserAction, Actions, CommentType } from '../../../../common/api';
-import { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from '../types';
+import type { CommentUserAction } from '../../../../common/api';
+import { Actions, CommentType } from '../../../../common/api';
+import type { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from '../types';
 import { createCommonUpdateUserActionBuilder } from '../common';
-import { Comment } from '../../../containers/types';
+import type { Comment } from '../../../containers/types';
 import * as i18n from '../translations';
 import { createUserAttachmentUserActionBuilder } from './user';
 import { createAlertAttachmentUserActionBuilder } from './alert';
@@ -23,13 +24,15 @@ const getDeleteLabelTitle = () => `${i18n.REMOVED_FIELD} ${i18n.COMMENT.toLowerC
 
 const getDeleteCommentUserAction = ({
   userAction,
+  userProfiles,
   handleOutlineComment,
 }: {
   userAction: UserActionResponse<CommentUserAction>;
-} & Pick<UserActionBuilderArgs, 'handleOutlineComment'>): EuiCommentProps[] => {
+} & Pick<UserActionBuilderArgs, 'handleOutlineComment' | 'userProfiles'>): EuiCommentProps[] => {
   const label = getDeleteLabelTitle();
   const commonBuilder = createCommonUpdateUserActionBuilder({
     userAction,
+    userProfiles,
     handleOutlineComment,
     label,
     icon: 'cross',
@@ -40,6 +43,7 @@ const getDeleteCommentUserAction = ({
 
 const getCreateCommentUserAction = ({
   userAction,
+  userProfiles,
   caseData,
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
@@ -63,11 +67,12 @@ const getCreateCommentUserAction = ({
   comment: Comment;
 } & Omit<
   UserActionBuilderArgs,
-  'caseServices' | 'comments' | 'index' | 'handleOutlineComment'
+  'caseServices' | 'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
 >): EuiCommentProps[] => {
   switch (comment.type) {
     case CommentType.user:
       const userBuilder = createUserAttachmentUserActionBuilder({
+        userProfiles,
         comment,
         outlined: comment.id === selectedOutlineCommentId,
         isEdit: manageMarkdownEditIds.includes(comment.id),
@@ -83,6 +88,7 @@ const getCreateCommentUserAction = ({
 
     case CommentType.alert:
       const alertBuilder = createAlertAttachmentUserActionBuilder({
+        userProfiles,
         alertData,
         comment,
         userAction,
@@ -96,6 +102,7 @@ const getCreateCommentUserAction = ({
 
     case CommentType.actions:
       const actionBuilder = createActionAttachmentUserActionBuilder({
+        userProfiles,
         userAction,
         comment,
         actionsNavigation,
@@ -106,9 +113,12 @@ const getCreateCommentUserAction = ({
     case CommentType.externalReference:
       const externalReferenceBuilder = createExternalReferenceAttachmentUserActionBuilder({
         userAction,
+        userProfiles,
         comment,
         externalReferenceAttachmentTypeRegistry,
         caseData,
+        isLoading: loadingCommentIds.includes(comment.id),
+        handleDeleteComment,
       });
 
       return externalReferenceBuilder.build();
@@ -116,9 +126,12 @@ const getCreateCommentUserAction = ({
     case CommentType.persistableState:
       const persistableBuilder = createPersistableStateAttachmentUserActionBuilder({
         userAction,
+        userProfiles,
         comment,
         persistableStateAttachmentTypeRegistry,
         caseData,
+        isLoading: loadingCommentIds.includes(comment.id),
+        handleDeleteComment,
       });
 
       return persistableBuilder.build();
@@ -129,6 +142,7 @@ const getCreateCommentUserAction = ({
 
 export const createCommentUserActionBuilder: UserActionBuilder = ({
   caseData,
+  userProfiles,
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
   userAction,
@@ -152,7 +166,11 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
     const commentUserAction = userAction as UserActionResponse<CommentUserAction>;
 
     if (commentUserAction.action === Actions.delete) {
-      return getDeleteCommentUserAction({ userAction: commentUserAction, handleOutlineComment });
+      return getDeleteCommentUserAction({
+        userAction: commentUserAction,
+        handleOutlineComment,
+        userProfiles,
+      });
     }
 
     const comment = caseData.comments.find((c) => c.id === commentUserAction.commentId);
@@ -164,6 +182,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
     if (commentUserAction.action === Actions.create) {
       const commentAction = getCreateCommentUserAction({
         caseData,
+        userProfiles,
         userAction: commentUserAction,
         externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
@@ -190,6 +209,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
     const label = getUpdateLabelTitle();
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
+      userProfiles,
       handleOutlineComment,
       label,
       icon: 'dot',

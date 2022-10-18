@@ -5,124 +5,57 @@
  * 2.0.
  */
 
-import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
 import * as api from '../api';
-import { TestProviders } from '../common/mock';
-import { useGetCasesMetrics, UseGetCasesMetrics } from './use_get_cases_metrics';
+import type { AppMockRenderer } from '../common/mock';
+import { createAppMockRenderer } from '../common/mock';
+import { useGetCasesMetrics } from './use_get_cases_metrics';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { useToasts } from '../common/lib/kibana';
 
 jest.mock('../api');
 jest.mock('../common/lib/kibana');
 
-describe('useGetReporters', () => {
+describe('useGetCasesMetrics', () => {
+  const abortCtrl = new AbortController();
+  const addSuccess = jest.fn();
+  const addError = jest.fn();
+
+  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+
+  let appMockRender: AppMockRenderer;
+
   beforeEach(() => {
+    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
-  it('init', async () => {
-    const { result } = renderHook<string, UseGetCasesMetrics>(() => useGetCasesMetrics(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-    });
-
-    await act(async () => {
-      expect(result.current).toEqual({
-        mttr: 0,
-        isLoading: true,
-        isError: false,
-        fetchCasesMetrics: result.current.fetchCasesMetrics,
-      });
-    });
-  });
-
-  it('calls getCasesMetrics api', async () => {
+  it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'getCasesMetrics');
-    await act(async () => {
-      const { waitForNextUpdate } = renderHook<string, UseGetCasesMetrics>(
-        () => useGetCasesMetrics(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
+    const { waitForNextUpdate } = renderHook(() => useGetCasesMetrics(), {
+      wrapper: appMockRender.AppWrapper,
+    });
 
-      await waitForNextUpdate();
-      expect(spy).toBeCalledWith({
-        http: expect.anything(),
-        signal: expect.anything(),
-        query: {
-          features: ['mttr'],
-          owner: [SECURITY_SOLUTION_OWNER],
-        },
-      });
+    await waitForNextUpdate();
+
+    expect(spy).toHaveBeenCalledWith({
+      http: expect.anything(),
+      signal: abortCtrl.signal,
+      query: { owner: [SECURITY_SOLUTION_OWNER], features: ['mttr'] },
     });
   });
 
-  it('fetch cases metrics', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesMetrics>(
-        () => useGetCasesMetrics(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
+  it('shows a toast error when the api return an error', async () => {
+    jest
+      .spyOn(api, 'getCasesMetrics')
+      .mockRejectedValue(new Error('useGetCasesMetrics: Test error'));
 
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        mttr: 12,
-        isLoading: false,
-        isError: false,
-        fetchCasesMetrics: result.current.fetchCasesMetrics,
-      });
-    });
-  });
-
-  it('fetches metrics when fetchCasesMetrics is invoked', async () => {
-    const spy = jest.spyOn(api, 'getCasesMetrics');
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesMetrics>(
-        () => useGetCasesMetrics(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-
-      await waitForNextUpdate();
-      expect(spy).toBeCalledWith({
-        http: expect.anything(),
-        signal: expect.anything(),
-        query: {
-          features: ['mttr'],
-          owner: [SECURITY_SOLUTION_OWNER],
-        },
-      });
-      result.current.fetchCasesMetrics();
-      await waitForNextUpdate();
-      expect(spy).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  it('unhappy path', async () => {
-    const spy = jest.spyOn(api, 'getCasesMetrics');
-    spy.mockImplementation(() => {
-      throw new Error('Oh on. this is impossible');
+    const { waitForNextUpdate } = renderHook(() => useGetCasesMetrics(), {
+      wrapper: appMockRender.AppWrapper,
     });
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesMetrics>(
-        () => useGetCasesMetrics(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
+    await waitForNextUpdate();
 
-      expect(result.current).toEqual({
-        mttr: 0,
-        isLoading: false,
-        isError: true,
-        fetchCasesMetrics: result.current.fetchCasesMetrics,
-      });
-    });
+    expect(addError).toHaveBeenCalled();
   });
 });

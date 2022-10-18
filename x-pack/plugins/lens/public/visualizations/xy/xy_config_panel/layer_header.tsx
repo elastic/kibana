@@ -10,10 +10,14 @@ import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiPopover, EuiSelectable, EuiText, EuiPopoverTitle } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
-import type { VisualizationLayerWidgetProps, VisualizationType } from '../../../types';
-import { State, visualizationTypes, SeriesType } from '../types';
+import type {
+  VisualizationLayerHeaderContentProps,
+  VisualizationLayerWidgetProps,
+  VisualizationType,
+} from '../../../types';
+import { State, visualizationTypes, SeriesType, XYAnnotationLayerConfig } from '../types';
 import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
-import { StaticHeader } from '../../../shared_components';
+import { ChangeIndexPattern, StaticHeader } from '../../../shared_components';
 import { updateLayer } from '.';
 import { isAnnotationsLayer, isDataLayer, isReferenceLayer } from '../visualization_helpers';
 
@@ -24,10 +28,19 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   }
   if (isReferenceLayer(layer)) {
     return <ReferenceLayerHeader />;
-  } else if (isAnnotationsLayer(layer)) {
+  }
+  if (isAnnotationsLayer(layer)) {
     return <AnnotationsLayerHeader />;
   }
   return <DataLayerHeader {...props} />;
+}
+
+export function LayerHeaderContent(props: VisualizationLayerHeaderContentProps<State>) {
+  const layer = props.state.layers.find((l) => l.layerId === props.layerId);
+  if (layer && isAnnotationsLayer(layer)) {
+    return <AnnotationLayerHeaderContent {...props} />;
+  }
+  return null;
 }
 
 function ReferenceLayerHeader() {
@@ -48,6 +61,37 @@ function AnnotationsLayerHeader() {
       label={i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
         defaultMessage: 'Annotations',
       })}
+    />
+  );
+}
+
+function AnnotationLayerHeaderContent({
+  frame,
+  state,
+  layerId,
+  onChangeIndexPattern,
+}: VisualizationLayerHeaderContentProps<State>) {
+  const notFoundTitleLabel = i18n.translate('xpack.lens.layerPanel.missingDataView', {
+    defaultMessage: 'Data view not found',
+  });
+  const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
+  const layer = state.layers[layerIndex] as XYAnnotationLayerConfig;
+  const currentIndexPattern = frame.dataViews.indexPatterns[layer.indexPatternId];
+
+  return (
+    <ChangeIndexPattern
+      data-test-subj="indexPattern-switcher"
+      trigger={{
+        label: currentIndexPattern?.name || notFoundTitleLabel,
+        title: currentIndexPattern?.title || notFoundTitleLabel,
+        'data-test-subj': 'lns_layerIndexPatternLabel',
+        size: 's',
+        fontWeight: 'normal',
+      }}
+      indexPatternId={layer.indexPatternId}
+      indexPatternRefs={frame.dataViews.indexPatternRefs}
+      isMissingCurrent={!currentIndexPattern}
+      onChangeIndexPattern={onChangeIndexPattern}
     />
   );
 }

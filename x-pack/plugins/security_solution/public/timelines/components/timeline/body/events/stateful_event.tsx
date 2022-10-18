@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
@@ -160,7 +161,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   );
 
   const hasRowRenderers: boolean = useMemo(
-    () => getRowRenderer(event.ecs, rowRenderers) != null,
+    () => getRowRenderer({ data: event.ecs, rowRenderers }) != null,
     [event.ecs, rowRenderers]
   );
 
@@ -200,7 +201,7 @@ const StatefulEventComponent: React.FC<Props> = ({
       timelineActions.toggleDetailPanel({
         ...updatedExpandedDetail,
         tabType,
-        timelineId,
+        id: timelineId,
       })
     );
 
@@ -280,6 +281,7 @@ const StatefulEventComponent: React.FC<Props> = ({
           <EventsTrSupplement
             className="siemEventsTable__trSupplement--notes"
             data-test-subj="event-notes-flex-item"
+            $display="block"
           >
             <NoteCards
               ariaRowindex={ariaRowindex}
@@ -291,16 +293,20 @@ const StatefulEventComponent: React.FC<Props> = ({
             />
           </EventsTrSupplement>
 
-          <EventsTrSupplement>
-            <StatefulRowRenderer
-              ariaRowindex={ariaRowindex}
-              containerRef={containerRef}
-              event={event}
-              lastFocusedAriaColindex={lastFocusedAriaColindex}
-              rowRenderers={rowRenderers}
-              timelineId={timelineId}
-            />
-          </EventsTrSupplement>
+          <EuiFlexGroup gutterSize="none" justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EventsTrSupplement>
+                <StatefulRowRenderer
+                  ariaRowindex={ariaRowindex}
+                  containerRef={containerRef}
+                  event={event}
+                  lastFocusedAriaColindex={lastFocusedAriaColindex}
+                  rowRenderers={rowRenderers}
+                  timelineId={timelineId}
+                />
+              </EventsTrSupplement>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EventsTrSupplementContainerWrapper>
       </EventsTrGroup>
     </StatefulEventContext.Provider>

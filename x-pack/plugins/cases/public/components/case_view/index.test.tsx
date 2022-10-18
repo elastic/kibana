@@ -15,22 +15,24 @@
 import React from 'react';
 
 import '../../common/mock/match_media';
-import { CaseViewProps } from './types';
+import type { CaseViewProps } from './types';
 import { connectorsMock } from '../../containers/mock';
-import { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { useUpdateCase } from '../../containers/use_update_case';
-import { UseGetCase, useGetCase } from '../../containers/use_get_case';
+import type { UseGetCase } from '../../containers/use_get_case';
+import { useGetCase } from '../../containers/use_get_case';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
-import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import CaseView from '.';
 import { waitFor } from '@testing-library/dom';
 import { useGetTags } from '../../containers/use_get_tags';
-import { CASE_VIEW_CACHE_KEY } from '../../containers/constants';
+import { casesQueriesKeys } from '../../containers/constants';
 import {
   alertsHit,
   caseViewProps,
@@ -173,7 +175,8 @@ describe('CaseView', () => {
     const queryClientSpy = jest.spyOn(appMockRenderer.queryClient, 'invalidateQueries');
     const result = appMockRenderer.render(<CaseView {...caseViewProps} />);
     userEvent.click(result.getByTestId('case-refresh'));
-    expect(queryClientSpy).toHaveBeenCalledWith(['case']);
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
   });
 
   describe('when a `refreshRef` prop is provided', () => {
@@ -205,7 +208,8 @@ describe('CaseView', () => {
     it('should refresh actions and comments', async () => {
       refreshRef!.current!.refreshCase();
       await waitFor(() => {
-        expect(queryClientSpy).toHaveBeenCalledWith([CASE_VIEW_CACHE_KEY]);
+        expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
+        expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
       });
     });
   });

@@ -39,6 +39,8 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               schema.object({
                 query: schema.string(),
                 interval: schema.maybe(schema.number()),
+                snapshot: schema.maybe(schema.boolean()),
+                removed: schema.maybe(schema.boolean()),
                 platform: schema.maybe(schema.string()),
                 version: schema.maybe(schema.string()),
                 ecs_mapping: schema.maybe(
@@ -142,7 +144,10 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                   }
 
                   set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
-                    queries: convertSOQueriesToPack(queries, { removeMultiLines: true }),
+                    queries: convertSOQueriesToPack(queries, {
+                      removeMultiLines: true,
+                      removeResultType: true,
+                    }),
                   });
 
                   return draft;

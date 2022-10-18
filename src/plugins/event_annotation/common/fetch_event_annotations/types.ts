@@ -17,7 +17,9 @@ import { ExpressionFunctionDefinition, Datatable } from '@kbn/expressions-plugin
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { EventAnnotationGroupOutput } from '../event_annotation_group';
 
-export type FetchEventAnnotationsOutput = Observable<Datatable | null>;
+export type FetchEventAnnotationsOutput = Observable<
+  Datatable | { rows: never[]; columns: never[]; type: string }
+>;
 
 export interface FetchEventAnnotationsArgs {
   groups: EventAnnotationGroupOutput[];

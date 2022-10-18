@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import styled, { ThemeContext } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { EntityType, RowRenderer } from '@kbn/timelines-plugin/common';
 import type {
   BrowserFields,
   Direction,
@@ -65,7 +66,6 @@ import type {
 import { TimelineTabs, TimelineId } from '../../../../common/types/timeline';
 import { APP_UI_ID } from '../../../../common/constants';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
-import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { InspectButton, InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
@@ -79,10 +79,12 @@ import { useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import type { FieldEditorActions } from '../../../timelines/components/fields_browser';
 import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
+import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import {
   useSessionViewNavigation,
   useSessionView,
 } from '../../../timelines/components/timeline/session_tab_content/use_session_view';
+import type { SubsetTGridModel } from '../../store/data_table/model';
 import type { ViewSelection } from '../event_rendered_view/selector';
 import { SummaryViewSelector } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
@@ -267,10 +269,10 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
 
 export interface Props {
   defaultCellActions?: TGridCellAction[];
-  defaultModel: SubsetTimelineModel;
+  defaultModel: SubsetTGridModel;
   end: string;
   entityType: EntityType;
-  id: TimelineId;
+  tableId: TableId;
   leadingControlColumns: ControlColumnProps[];
   scopeId: SourcererScopeName;
   start: string;
@@ -305,7 +307,7 @@ const StatefulEventsViewerComponent: React.FC<StatefulEventsViewerProps> = ({
   defaultModel,
   end,
   entityType,
-  id,
+  tableId,
   leadingControlColumns,
   pageFilters,
   currentFilter,
@@ -331,20 +333,17 @@ const StatefulEventsViewerComponent: React.FC<StatefulEventsViewerProps> = ({
     input,
     query,
     globalQueries,
-    timelineQuery,
-    timeline: {
+    dataTable: {
       columns,
-      dataProviders,
       defaultColumns,
       deletedEventIds,
       graphEventId, // If truthy, the graph viewer (Resolver) is showing
       itemsPerPage,
       itemsPerPageOptions,
-      kqlMode,
       sessionViewConfig,
       sort,
     } = defaultModel,
-  } = useSelector((state: State) => eventsViewerSelector(state, id));
+  } = useSelector((state: State) => eventsViewerSelector(state, tableId));
 
   const { timelines: timelinesUi, data, uiSettings } = useKibana().services;
   const {
@@ -365,12 +364,11 @@ const StatefulEventsViewerComponent: React.FC<StatefulEventsViewerProps> = ({
 
   useEffect(() => {
     dispatch(
-      timelineActions.createTimeline({
+      dataTableActions.createTGrid({
         columns,
         dataViewId: selectedDataViewId,
         defaultColumns,
-        excludedRowRendererIds,
-        id,
+        id: tableId,
         indexNames: selectedPatterns,
         itemsPerPage,
         showCheckboxes,
@@ -390,26 +388,33 @@ const StatefulEventsViewerComponent: React.FC<StatefulEventsViewerProps> = ({
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
   const { Navigation } = useSessionViewNavigation({
-    timelineId: id,
+    scopeId: tableId,
   });
 
   const { DetailsPanel, SessionView } = useSessionView({
     entityType,
-    timelineId: id,
+    scopeId: tableId,
   });
 
   const graphOverlay = useMemo(() => {
     const shouldShowOverlay =
       (graphEventId != null && graphEventId.length > 0) || sessionViewConfig != null;
     return shouldShowOverlay ? (
-      <GraphOverlay timelineId={id} SessionView={SessionView} Navigation={Navigation} />
+      <GraphOverlay scopeId={tableId} SessionView={SessionView} Navigation={Navigation} />
     ) : null;
-  }, [graphEventId, id, sessionViewConfig, SessionView, Navigation]);
+  }, [graphEventId, tableId, sessionViewConfig, SessionView, Navigation]);
   const setQuery = useCallback(
     (inspect, loading, refetch) => {
       dispatch(inputsActions.setQuery({ id, inputId: 'global', inspect, loading, refetch }));
+        inputsActions.setQuery({
+          id: tableId,
+          inputId: InputsModelId.global,
+          inspect,
+          loading,
+          refetch,
+        })
     },
-    [dispatch, id]
+    [dispatch, tableId]
   );
 
   const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
@@ -420,21 +425,19 @@ const StatefulEventsViewerComponent: React.FC<StatefulEventsViewerProps> = ({
   const bulkActions = useMemo(
     () => ({
       onAlertStatusActionSuccess: () => {
-        if (id === TimelineId.active) {
-          refetchQuery([timelineQuery]);
-        } else {
-          refetchQuery(globalQueries);
-        }
+        refetchQuery(globalQueries);
       },
       customBulkActions: addToCaseBulkActions,
     }),
-    [addToCaseBulkActions, globalQueries, id, timelineQuery]
+    [addToCaseBulkActions, globalQueries]
   );
 
   const fieldBrowserOptions = useFieldBrowserOptions({
     sourcererScope: scopeId,
-    timelineId: id,
     editorActionsRef,
+    upsertColumn: (column, index) =>
+      dispatch(dataTableActions.upsertColumn({ column, id: tableId, index })),
+    removeColumn: (columnId) => dispatch(dataTableActions.removeColumn({ columnId, id: tableId })),
   });
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
@@ -695,7 +698,6 @@ const StatefulEventsViewerComponent: React.FC<StatefulEventsViewerProps> = ({
     setEventsDeleted,
     itemsPerPage,
   ]);
-
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
@@ -738,6 +740,7 @@ const StatefulEventsViewerComponent: React.FC<StatefulEventsViewerProps> = ({
                   fieldBrowserOptions,
                   filters: globalFilters,
                   filterStatus: currentFilter,
+            getRowRenderer,
                   globalFullScreen,
                   hasAlertsCrud,
                   id,

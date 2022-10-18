@@ -20,28 +20,34 @@ import {
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
 
-export const createActionRequestsEsSearchResultsMock =
-  (): estypes.SearchResponse<LogsEndpointAction> => {
-    const endpointActionGenerator = new EndpointActionGenerator('seed');
+export const createActionRequestsEsSearchResultsMock = (
+  agentIds?: string[],
+  isMultipleActions: boolean = false
+): estypes.SearchResponse<LogsEndpointAction> => {
+  const endpointActionGenerator = new EndpointActionGenerator('seed');
 
-    return endpointActionGenerator.toEsSearchResponse<LogsEndpointAction>([
-      endpointActionGenerator.generateActionEsHit({
-        EndpointActions: { action_id: '123' },
-        agent: { id: 'agent-a' },
-        '@timestamp': '2022-04-27T16:08:47.449Z',
-      }),
-    ]);
-  };
+  return isMultipleActions
+    ? endpointActionGenerator.toEsSearchResponse<LogsEndpointAction>(
+        Array.from({ length: 23 }).map(() => endpointActionGenerator.generateActionEsHit())
+      )
+    : endpointActionGenerator.toEsSearchResponse<LogsEndpointAction>([
+        endpointActionGenerator.generateActionEsHit({
+          EndpointActions: { action_id: '123' },
+          agent: { id: agentIds ? agentIds : 'agent-a' },
+          '@timestamp': '2022-04-27T16:08:47.449Z',
+        }),
+      ]);
+};
 
-export const createActionResponsesEsSearchResultsMock = (): estypes.SearchResponse<
-  LogsEndpointActionResponse | EndpointActionResponse
-> => {
+export const createActionResponsesEsSearchResultsMock = (
+  agentIds?: string[]
+): estypes.SearchResponse<LogsEndpointActionResponse | EndpointActionResponse> => {
   const endpointActionGenerator = new EndpointActionGenerator('seed');
   const fleetActionGenerator = new FleetActionGenerator('seed');
 
-  return endpointActionGenerator.toEsSearchResponse<
-    LogsEndpointActionResponse | EndpointActionResponse
-  >([
+  let hitSource: Array<
+    estypes.SearchHit<EndpointActionResponse> | estypes.SearchHit<LogsEndpointActionResponse>
+  > = [
     fleetActionGenerator.generateResponseEsHit({
       action_id: '123',
       agent_id: 'agent-a',
@@ -53,7 +59,31 @@ export const createActionResponsesEsSearchResultsMock = (): estypes.SearchRespon
       EndpointActions: { action_id: '123' },
       '@timestamp': '2022-04-30T16:08:47.449Z',
     }),
-  ]);
+  ];
+
+  if (agentIds?.length) {
+    const fleetResponses = agentIds.map((id) => {
+      return fleetActionGenerator.generateResponseEsHit({
+        action_id: '123',
+        agent_id: id,
+        error: '',
+        '@timestamp': '2022-04-30T16:08:47.449Z',
+      });
+    });
+
+    hitSource = [
+      ...fleetResponses,
+      endpointActionGenerator.generateResponseEsHit({
+        agent: { id: agentIds ? agentIds : 'agent-a' },
+        EndpointActions: { action_id: '123' },
+        '@timestamp': '2022-04-30T16:08:47.449Z',
+      }),
+    ];
+  }
+
+  return endpointActionGenerator.toEsSearchResponse<
+    LogsEndpointActionResponse | EndpointActionResponse
+  >(hitSource);
 };
 
 /**

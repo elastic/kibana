@@ -12,9 +12,10 @@ import { PointStyleProps } from '../types';
 export type QueryPointEventAnnotationArgs = {
   id: string;
   filter: KibanaQueryOutput;
-  timeField: string;
+  timeField?: string;
   extraFields?: string[];
   textField?: string;
+  ignoreGlobalFilters?: boolean;
 } & PointStyleProps;
 
 export type QueryPointEventAnnotationOutput = QueryPointEventAnnotationArgs & {

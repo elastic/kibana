@@ -26,6 +26,7 @@
         ],
         "path": "x-pack/plugins/telemetry_collection_xpack/server/telemetry_collection/get_license.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

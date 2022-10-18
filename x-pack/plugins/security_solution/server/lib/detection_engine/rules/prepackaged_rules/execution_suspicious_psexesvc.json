@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "Suspicious Process Execution via Renamed PsExec Executable",
   "note": "",
-  "query": "process where event.type in (\"start\", \"process_started\", \"info\") and\n  process.pe.original_file_name : \"psexesvc.exe\" and not process.name : \"PSEXESVC.exe\"\n",
+  "query": "process where event.type == \"start\" and\n  process.pe.original_file_name : \"psexesvc.exe\" and not process.name : \"PSEXESVC.exe\"\n",
   "required_fields": [
     {
       "ecs": true,
@@ -68,5 +68,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 7
+  "version": 101
 }

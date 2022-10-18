@@ -31,6 +31,7 @@
         ],
         "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -43,7 +44,8 @@
               "\"ML_APP_LOCATOR\""
             ],
             "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -61,6 +63,7 @@
             ],
             "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "ml",
@@ -74,6 +77,7 @@
                 ],
                 "path": "x-pack/plugins/ml/public/locator/ml_locator.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -98,6 +102,7 @@
         ],
         "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -113,6 +118,7 @@
             ],
             "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -133,6 +139,7 @@
         ],
         "path": "x-pack/plugins/ml/public/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -152,6 +159,7 @@
         ],
         "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -167,6 +175,7 @@
             ],
             "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -187,6 +196,7 @@
         ],
         "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -202,6 +212,7 @@
             ],
             "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -229,6 +240,7 @@
         ],
         "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -244,6 +256,7 @@
             ],
             "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -262,6 +275,7 @@
         ],
         "path": "x-pack/plugins/ml/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -275,6 +289,7 @@
             ],
             "path": "x-pack/plugins/ml/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -299,6 +314,7 @@
         ],
         "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -314,6 +330,7 @@
             ],
             "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -328,6 +345,7 @@
             ],
             "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -342,6 +360,7 @@
             ],
             "path": "x-pack/plugins/ml/public/locator/use_ml_href.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -361,6 +380,7 @@
         ],
         "path": "x-pack/plugins/ml/common/types/anomalies.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -372,7 +392,8 @@
               "\nThe start time of the interval for which the anomaly data in the table is being aggregated.\nAnomalies in the table are commonly aggregated by day, hour, or at the bucket span of the job."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -387,7 +408,8 @@
               "AnomalyRecordDoc"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -399,7 +421,8 @@
               "\nUnique identifier for the table row."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -411,7 +434,8 @@
               "\nIdentifier for the anomaly detection job."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -423,7 +447,8 @@
               "\nA unique identifier for the detector.\nThis identifier is based on the order of the detectors in the analysis configuration, starting at zero."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -435,7 +460,8 @@
               "\nSeverity of the anomaly displaying the anomaly record_score, a normalized score between 0-100,\nwhich is based on the probability of the anomalousness of this record."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -450,7 +476,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -465,7 +492,8 @@
               "any"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -480,7 +508,8 @@
               "{ [key: string]: any; }[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -495,7 +524,8 @@
               "number[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -510,7 +540,8 @@
               "any"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -525,7 +556,8 @@
               "number[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -540,7 +572,8 @@
               "any"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -555,7 +588,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -571,7 +605,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -586,7 +621,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -601,7 +637,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -615,6 +652,7 @@
         "description": [],
         "path": "x-pack/plugins/ml/common/types/modules.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -628,7 +666,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/ml/common/types/modules.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -642,7 +681,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/ml/common/types/modules.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -661,7 +701,8 @@
               "[]; }"
             ],
             "path": "x-pack/plugins/ml/common/types/modules.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -677,6 +718,7 @@
         ],
         "path": "x-pack/plugins/ml/common/types/anomalies.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -688,7 +730,8 @@
               "\nThe field name of the influencer."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -703,7 +746,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -717,6 +761,7 @@
         "description": [],
         "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -726,7 +771,8 @@
             "label": "jobsExist",
             "description": [],
             "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -740,7 +786,8 @@
               "[]"
             ],
             "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -754,6 +801,7 @@
         "description": [],
         "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -763,7 +811,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -773,7 +822,8 @@
             "label": "earliestTimestampMs",
             "description": [],
             "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -783,7 +833,8 @@
             "label": "latestTimestampMs",
             "description": [],
             "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -796,7 +847,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/data_recognizer.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -810,6 +862,7 @@
         "description": [],
         "path": "x-pack/plugins/ml/common/types/capabilities.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -822,7 +875,8 @@
               "{ canAccessML: boolean; canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; canGetTrainedModels: boolean; canTestTrainedModels: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; canViewMlNodes: boolean; canCreateTrainedModels: boolean; canDeleteTrainedModels: boolean; canStartStopTrainedModels: boolean; }"
             ],
             "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -832,7 +886,8 @@
             "label": "upgradeInProgress",
             "description": [],
             "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -842,7 +897,8 @@
             "label": "isPlatinumOrTrialLicense",
             "description": [],
             "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -852,7 +908,8 @@
             "label": "mlFeatureEnabledInSpace",
             "description": [],
             "path": "x-pack/plugins/ml/common/types/capabilities.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -868,6 +925,7 @@
         ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -879,7 +937,8 @@
               "\nThe identifier for the anomaly detection job."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -891,7 +950,8 @@
               "\nA description of the job."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -906,7 +966,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -921,7 +982,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -936,7 +998,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -953,7 +1016,8 @@
               "JobActionState"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -968,7 +1032,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -980,7 +1045,8 @@
               "\nFlag indicating whether a datafeed exists for the job."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -992,7 +1058,8 @@
               "\nThe identifier for the datafeed."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1004,7 +1071,8 @@
               "\nThe status of the datafeed."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1019,7 +1087,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1034,7 +1103,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1049,7 +1119,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1065,7 +1136,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1080,7 +1152,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1097,7 +1170,8 @@
               "> | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1109,7 +1183,8 @@
               "\nFlag indicating whether results of the job can be viewed in the Single Metric Viewer."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1124,7 +1199,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1140,7 +1216,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1155,7 +1232,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1170,7 +1248,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1182,7 +1261,8 @@
               "\nIndicates whether the job is currently awaiting assignment to a node before opening."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1198,7 +1278,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1213,7 +1294,8 @@
               "{ [x: string]: string; }"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1225,7 +1307,8 @@
               "\nThe size of the interval that the analysis is aggregated into, typically between 5m and 1h."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1240,7 +1323,8 @@
               "any"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1266,6 +1350,7 @@
         ],
         "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -1281,6 +1366,7 @@
             ],
             "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -1296,7 +1382,8 @@
                   ") => void; }"
                 ],
                 "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -1311,7 +1398,8 @@
               "string[] | undefined"
             ],
             "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1329,6 +1417,7 @@
         ],
         "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1345,6 +1434,7 @@
         ],
         "path": "x-pack/plugins/ml/public/embeddables/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1367,6 +1457,7 @@
         ],
         "path": "x-pack/plugins/ml/public/embeddables/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1381,6 +1472,7 @@
         ],
         "path": "x-pack/plugins/ml/public/ui_actions/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1396,6 +1488,7 @@
         ],
         "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1411,6 +1504,7 @@
         ],
         "path": "x-pack/plugins/ml/public/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1434,6 +1528,7 @@
         ],
         "path": "x-pack/plugins/ml/common/types/locator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1450,6 +1545,7 @@
         ],
         "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1465,7 +1561,8 @@
               ") => void; }"
             ],
             "path": "x-pack/plugins/ml/public/application/components/data_grid/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1488,6 +1585,7 @@
         ],
         "path": "x-pack/plugins/ml/common/types/es_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1498,10 +1596,11 @@
         "label": "ML_PAGES",
         "description": [],
         "signature": [
-          "{ readonly ANOMALY_DETECTION_JOBS_MANAGE: \"jobs\"; readonly ANOMALY_EXPLORER: \"explorer\"; readonly SINGLE_METRIC_VIEWER: \"timeseriesexplorer\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE: \"data_frame_analytics\"; readonly DATA_FRAME_ANALYTICS_SOURCE_SELECTION: \"data_frame_analytics/source_selection\"; readonly DATA_FRAME_ANALYTICS_CREATE_JOB: \"data_frame_analytics/new_job\"; readonly TRAINED_MODELS_MANAGE: \"trained_models\"; readonly TRAINED_MODELS_NODES: \"trained_models/nodes\"; readonly DATA_FRAME_ANALYTICS_EXPLORATION: \"data_frame_analytics/exploration\"; readonly DATA_FRAME_ANALYTICS_MAP: \"data_frame_analytics/map\"; readonly DATA_VISUALIZER: \"datavisualizer\"; readonly DATA_VISUALIZER_INDEX_SELECT: \"datavisualizer_index_select\"; readonly DATA_VISUALIZER_FILE: \"filedatavisualizer\"; readonly DATA_VISUALIZER_INDEX_VIEWER: \"jobs/new_job/datavisualizer\"; readonly ANOMALY_DETECTION_CREATE_JOB: \"jobs/new_job\"; readonly ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER: \"jobs/new_job/recognize\"; readonly ANOMALY_DETECTION_CREATE_JOB_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: \"jobs/new_job/step/job_type\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: \"jobs/new_job/step/index_or_search\"; readonly ANOMALY_DETECTION_CREATE_JOB_FROM_LENS: \"jobs/new_job/from_lens\"; readonly SETTINGS: \"settings\"; readonly CALENDARS_MANAGE: \"settings/calendars_list\"; readonly CALENDARS_NEW: \"settings/calendars_list/new_calendar\"; readonly CALENDARS_EDIT: \"settings/calendars_list/edit_calendar\"; readonly FILTER_LISTS_MANAGE: \"settings/filter_lists\"; readonly FILTER_LISTS_NEW: \"settings/filter_lists/new_filter_list\"; readonly FILTER_LISTS_EDIT: \"settings/filter_lists/edit_filter_list\"; readonly ACCESS_DENIED: \"access-denied\"; readonly OVERVIEW: \"overview\"; readonly AIOPS: \"aiops\"; readonly AIOPS_EXPLAIN_LOG_RATE_SPIKES: \"aiops/explain_log_rate_spikes\"; readonly AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT: \"aiops/explain_log_rate_spikes_index_select\"; }"
+          "{ readonly ANOMALY_DETECTION_JOBS_MANAGE: \"jobs\"; readonly ANOMALY_EXPLORER: \"explorer\"; readonly SINGLE_METRIC_VIEWER: \"timeseriesexplorer\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE: \"data_frame_analytics\"; readonly DATA_FRAME_ANALYTICS_SOURCE_SELECTION: \"data_frame_analytics/source_selection\"; readonly DATA_FRAME_ANALYTICS_CREATE_JOB: \"data_frame_analytics/new_job\"; readonly TRAINED_MODELS_MANAGE: \"trained_models\"; readonly TRAINED_MODELS_NODES: \"trained_models/nodes\"; readonly DATA_FRAME_ANALYTICS_EXPLORATION: \"data_frame_analytics/exploration\"; readonly DATA_FRAME_ANALYTICS_MAP: \"data_frame_analytics/map\"; readonly DATA_VISUALIZER: \"datavisualizer\"; readonly DATA_VISUALIZER_INDEX_SELECT: \"datavisualizer_index_select\"; readonly DATA_VISUALIZER_FILE: \"filedatavisualizer\"; readonly DATA_VISUALIZER_INDEX_VIEWER: \"jobs/new_job/datavisualizer\"; readonly ANOMALY_DETECTION_CREATE_JOB: \"jobs/new_job\"; readonly ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER: \"jobs/new_job/recognize\"; readonly ANOMALY_DETECTION_CREATE_JOB_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: \"jobs/new_job/step/job_type\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: \"jobs/new_job/step/index_or_search\"; readonly ANOMALY_DETECTION_CREATE_JOB_FROM_LENS: \"jobs/new_job/from_lens\"; readonly SETTINGS: \"settings\"; readonly CALENDARS_MANAGE: \"settings/calendars_list\"; readonly CALENDARS_NEW: \"settings/calendars_list/new_calendar\"; readonly CALENDARS_EDIT: \"settings/calendars_list/edit_calendar\"; readonly FILTER_LISTS_MANAGE: \"settings/filter_lists\"; readonly FILTER_LISTS_NEW: \"settings/filter_lists/new_filter_list\"; readonly FILTER_LISTS_EDIT: \"settings/filter_lists/edit_filter_list\"; readonly ACCESS_DENIED: \"access-denied\"; readonly OVERVIEW: \"overview\"; readonly NOTIFICATIONS: \"notifications\"; readonly AIOPS: \"aiops\"; readonly AIOPS_EXPLAIN_LOG_RATE_SPIKES: \"aiops/explain_log_rate_spikes\"; readonly AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT: \"aiops/explain_log_rate_spikes_index_select\"; readonly AIOPS_LOG_CATEGORIZATION: \"aiops/log_categorization\"; readonly AIOPS_LOG_CATEGORIZATION_INDEX_SELECT: \"aiops/log_categorization_index_select\"; }"
         ],
         "path": "x-pack/plugins/ml/common/constants/locator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1519,6 +1618,7 @@
       ],
       "path": "x-pack/plugins/ml/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -1544,6 +1644,7 @@
         ],
         "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -1557,6 +1658,7 @@
             ],
             "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "ml",
@@ -1570,6 +1672,7 @@
                 ],
                 "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1597,6 +1700,7 @@
         ],
         "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -1610,6 +1714,7 @@
             ],
             "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "ml",
@@ -1623,6 +1728,7 @@
                 ],
                 "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1650,6 +1756,7 @@
         ],
         "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -1663,6 +1770,7 @@
             ],
             "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "ml",
@@ -1676,6 +1784,7 @@
                 ],
                 "path": "x-pack/plugins/ml/server/lib/capabilities/errors.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -1698,6 +1807,7 @@
         ],
         "path": "x-pack/plugins/ml/common/types/anomalies.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -1709,7 +1819,8 @@
               "\nThe start time of the interval for which the anomaly data in the table is being aggregated.\nAnomalies in the table are commonly aggregated by day, hour, or at the bucket span of the job."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1724,7 +1835,8 @@
               "AnomalyRecordDoc"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1736,7 +1848,8 @@
               "\nUnique identifier for the table row."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1748,7 +1861,8 @@
               "\nIdentifier for the anomaly detection job."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1760,7 +1874,8 @@
               "\nA unique identifier for the detector.\nThis identifier is based on the order of the detectors in the analysis configuration, starting at zero."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1772,7 +1887,8 @@
               "\nSeverity of the anomaly displaying the anomaly record_score, a normalized score between 0-100,\nwhich is based on the probability of the anomalousness of this record."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1787,7 +1903,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1802,7 +1919,8 @@
               "any"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1817,7 +1935,8 @@
               "{ [key: string]: any; }[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1832,7 +1951,8 @@
               "number[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1847,7 +1967,8 @@
               "any"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1862,7 +1983,8 @@
               "number[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1877,7 +1999,8 @@
               "any"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1892,7 +2015,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1908,7 +2032,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1923,7 +2048,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1938,7 +2064,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1954,6 +2081,7 @@
         ],
         "path": "x-pack/plugins/ml/common/types/anomalies.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -1968,7 +2096,8 @@
               "[key: string]:  any"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1980,7 +2109,8 @@
               "\nThe identifier for the anomaly detection job."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -1992,7 +2122,8 @@
               "\nThe type of the result document, which is 'record' for record level results."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2004,7 +2135,8 @@
               "\nThe probability of the individual anomaly occurring, in the range 0 to 1.\nThis value can be held to a high precision of over 300 decimal places,\nso the record_score is provided as a human-readable and friendly interpretation of this."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2016,7 +2148,8 @@
               "\nA normalized score between 0-100, which is based on the probability of the anomalousness of this record.\nUnlike initial_record_score, this value will be updated by a re-normalization process as new data is analyzed."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2028,7 +2161,8 @@
               "\nA normalized score between 0-100, which is based on the probability of the anomalousness of this record.\nThis is the initial value that was calculated at the time the bucket was processed."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2040,7 +2174,8 @@
               "\nThe length of the bucket in seconds. This value matches the bucket_span that is specified in the job."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2052,7 +2187,8 @@
               "\nA unique identifier for the detector. This identifier is based on the order of the detectors\nin the analysis configuration, starting at zero."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2064,7 +2200,8 @@
               "\nIf true, this is an interim result. In other words, the results are calculated based on partial input data."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2076,7 +2213,8 @@
               "\nThe start time of the bucket for which these results were calculated."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2091,7 +2229,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2106,7 +2245,8 @@
               "string | number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2118,7 +2258,8 @@
               "\nThe function in which the anomaly occurs, as specified in the detector configuration. For example, max."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2130,7 +2271,8 @@
               "\nThe description of the function in which the anomaly occurs, as specified in the detector configuration."
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2145,7 +2287,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2160,7 +2303,8 @@
               "number[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2175,7 +2319,8 @@
               "number[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2191,7 +2336,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2206,7 +2352,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2221,7 +2368,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2236,7 +2384,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2251,7 +2400,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2266,7 +2416,8 @@
               "{ function: string; function_description: string; probability: number; actual: number[]; typical: number[]; field_name?: string | undefined; over_field_name?: string | undefined; over_field_value?: string | undefined; by_field_name?: string | undefined; by_field_value?: string | undefined; partition_field_name?: string | undefined; partition_field_value?: string | number | undefined; }[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2281,7 +2432,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2297,6 +2449,7 @@
         ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -2308,7 +2461,8 @@
               "\nThe identifier for the anomaly detection job."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2320,7 +2474,8 @@
               "\nA description of the job."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2335,7 +2490,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2350,7 +2506,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2365,7 +2522,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2382,7 +2540,8 @@
               "JobActionState"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2397,7 +2556,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2409,7 +2569,8 @@
               "\nFlag indicating whether a datafeed exists for the job."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2421,7 +2582,8 @@
               "\nThe identifier for the datafeed."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2433,7 +2595,8 @@
               "\nThe status of the datafeed."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2448,7 +2611,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2463,7 +2627,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2478,7 +2643,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2494,7 +2660,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2509,7 +2676,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2526,7 +2694,8 @@
               "> | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2538,7 +2707,8 @@
               "\nFlag indicating whether results of the job can be viewed in the Single Metric Viewer."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2553,7 +2723,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2569,7 +2740,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2584,7 +2756,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2599,7 +2772,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2611,7 +2785,8 @@
               "\nIndicates whether the job is currently awaiting assignment to a node before opening."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2627,7 +2802,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2642,7 +2818,8 @@
               "{ [x: string]: string; }"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2654,7 +2831,8 @@
               "\nThe size of the interval that the analysis is aggregated into, typically between 5m and 1h."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -2669,7 +2847,8 @@
               "any"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2677,6 +2856,46 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.AlertingService",
+        "type": "Type",
+        "tags": [],
+        "label": "AlertingService",
+        "description": [],
+        "signature": [
+          "{ preview: (args_0: Readonly<{} & { timeRange: string; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; sampleSize: number; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>) => Promise<{ context: ",
+          "AnomalyDetectionAlertContext",
+          "; name: string; isHealthy: boolean; } | undefined>; }"
+        ],
+        "path": "x-pack/plugins/ml/server/shared.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.AnomalyDetectors",
+        "type": "Type",
+        "tags": [],
+        "label": "AnomalyDetectors",
+        "description": [],
+        "signature": [
+          "{ jobs(jobId?: string | undefined): Promise<{ count: number; jobs: ",
+          "MlJob",
+          "[]; }>; jobStats(jobId?: string | undefined): Promise<{ count: number; jobs: ",
+          "MlJobStats",
+          "[]; }>; datafeeds(datafeedId?: string | undefined): Promise<{ count: number; datafeeds: ",
+          "MlDatafeed",
+          "[]; }>; datafeedStats(datafeedId?: string | undefined): Promise<{ count: number; datafeeds: ",
+          "MlDatafeedStats",
+          "[]; }>; }"
+        ],
+        "path": "x-pack/plugins/ml/server/shared.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "ml",
         "id": "def-server.AnomalyResultType",
@@ -2691,6 +2910,7 @@
         ],
         "path": "x-pack/plugins/ml/common/types/anomalies.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2705,6 +2925,7 @@
         ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2719,6 +2940,97 @@
         ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.JobService",
+        "type": "Type",
+        "tags": [],
+        "label": "JobService",
+        "description": [],
+        "signature": [
+          "{ jobsSummary: (jobIds?: string[]) => Promise<",
+          {
+            "pluginId": "ml",
+            "scope": "common",
+            "docId": "kibMlPluginApi",
+            "section": "def-common.MlSummaryJob",
+            "text": "MlSummaryJob"
+          },
+          "[]>; }"
+        ],
+        "path": "x-pack/plugins/ml/server/shared.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.MlSystem",
+        "type": "Type",
+        "tags": [],
+        "label": "MlSystem",
+        "description": [],
+        "signature": [
+          "{ mlCapabilities(): Promise<",
+          "MlCapabilitiesResponse",
+          ">; mlInfo(): Promise<",
+          "MlInfoResponse",
+          ">; mlAnomalySearch<T>(searchParams: any, jobIds: string[]): Promise<",
+          "SearchResponse",
+          "<T, Record<string, ",
+          "AggregationsAggregate",
+          ">>>; }"
+        ],
+        "path": "x-pack/plugins/ml/server/shared.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.Modules",
+        "type": "Type",
+        "tags": [],
+        "label": "Modules",
+        "description": [],
+        "signature": [
+          "{ recognize: (indexPattern: string) => Promise<",
+          "RecognizeResult",
+          "[]>; getModule: (id: string, prefix?: string) => Promise<",
+          "Module",
+          ">; listModules: () => Promise<",
+          "Module",
+          "[]>; setup(payload: ",
+          "ModuleSetupPayload",
+          "): Promise<",
+          "DataRecognizerConfigResponse",
+          ">; }"
+        ],
+        "path": "x-pack/plugins/ml/server/shared.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.ResultsService",
+        "type": "Type",
+        "tags": [],
+        "label": "ResultsService",
+        "description": [],
+        "signature": [
+          "{ getAnomaliesTableData: (jobIds: string[], criteriaFields: ",
+          "CriteriaField",
+          "[], influencers: Influencer[], aggregationInterval: string, threshold: number, earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords?: number, maxExamples?: number, influencersFilterQuery?: any, functionDescription?: string | undefined) => Promise<{ anomalies: ",
+          "AnomaliesTableRecord",
+          "[]; interval: string; examplesByJobId?: { [key: string]: any; } | undefined; }>; }"
+        ],
+        "path": "x-pack/plugins/ml/server/shared.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -2735,6 +3047,30 @@
         ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-server.TrainedModels",
+        "type": "Type",
+        "tags": [],
+        "label": "TrainedModels",
+        "description": [],
+        "signature": [
+          "{ getTrainedModels(params: ",
+          "MlGetTrainedModelsRequest",
+          "): Promise<",
+          "MlGetTrainedModelsResponse",
+          ">; getTrainedModelsStats(params: ",
+          "MlGetTrainedModelsStatsRequest",
+          "): Promise<",
+          "MlGetTrainedModelsStatsResponse",
+          ">; }"
+        ],
+        "path": "x-pack/plugins/ml/server/shared.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -2762,10 +3098,12 @@
         "KibanaRequest",
         "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; sampleSize: number; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>) => Promise<{ context: ",
         "AnomalyDetectionAlertContext",
-        "; name: string; isHealthy: boolean; } | undefined>; }; }"
+        "; name: string; isHealthy: boolean; } | undefined>; }; } & ",
+        "TrainedModelsProvider"
       ],
       "path": "x-pack/plugins/ml/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "setup",
       "initialIsOpen": true
     },
@@ -2781,6 +3119,7 @@
       ],
       "path": "x-pack/plugins/ml/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -2802,6 +3141,7 @@
         ],
         "path": "x-pack/plugins/ml/common/util/validators.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -2815,6 +3155,7 @@
             ],
             "path": "x-pack/plugins/ml/common/util/validators.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2835,6 +3176,7 @@
         ],
         "path": "x-pack/plugins/ml/common/util/errors/process_errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -2848,6 +3190,7 @@
             ],
             "path": "x-pack/plugins/ml/common/util/errors/process_errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -2867,6 +3210,7 @@
         ],
         "path": "x-pack/plugins/ml/common/types/capabilities.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -2885,6 +3229,7 @@
         ],
         "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -2900,6 +3245,7 @@
             ],
             "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2927,6 +3273,7 @@
         ],
         "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -2942,6 +3289,7 @@
             ],
             "path": "x-pack/plugins/ml/common/util/anomaly_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2960,6 +3308,7 @@
         ],
         "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -2973,6 +3322,7 @@
             ],
             "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2991,6 +3341,7 @@
         ],
         "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -3004,6 +3355,7 @@
             ],
             "path": "x-pack/plugins/ml/common/util/runtime_field_utils.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3024,6 +3376,7 @@
         ],
         "path": "x-pack/plugins/ml/common/util/validators.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -3037,6 +3390,7 @@
             ],
             "path": "x-pack/plugins/ml/common/util/validators.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -3056,6 +3410,7 @@
         ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -3067,7 +3422,8 @@
               "\nThe identifier for the anomaly detection job."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3079,7 +3435,8 @@
               "\nA description of the job."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3094,7 +3451,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3109,7 +3467,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3124,7 +3483,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3141,7 +3501,8 @@
               "JobActionState"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3156,7 +3517,8 @@
               "string[]"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3168,7 +3530,8 @@
               "\nFlag indicating whether a datafeed exists for the job."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3180,7 +3543,8 @@
               "\nThe identifier for the datafeed."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3192,7 +3556,8 @@
               "\nThe status of the datafeed."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3207,7 +3572,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3222,7 +3588,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3237,7 +3604,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3253,7 +3621,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3268,7 +3637,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3285,7 +3655,8 @@
               "> | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3297,7 +3668,8 @@
               "\nFlag indicating whether results of the job can be viewed in the Single Metric Viewer."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3312,7 +3684,8 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3328,7 +3701,8 @@
               " | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3343,7 +3717,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3358,7 +3733,8 @@
               "number | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3370,7 +3746,8 @@
               "\nIndicates whether the job is currently awaiting assignment to a node before opening."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3386,7 +3763,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3401,7 +3779,8 @@
               "{ [x: string]: string; }"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3413,7 +3792,8 @@
               "\nThe size of the interval that the analysis is aggregated into, typically between 5m and 1h."
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3428,7 +3808,8 @@
               "any"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3446,6 +3827,7 @@
         ],
         "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3459,6 +3841,7 @@
         ],
         "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3472,6 +3855,7 @@
         ],
         "path": "x-pack/plugins/ml/common/constants/states.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3485,6 +3869,7 @@
         ],
         "path": "x-pack/plugins/ml/common/constants/states.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -3505,6 +3890,7 @@
         ],
         "path": "x-pack/plugins/ml/common/types/field_histograms.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3523,6 +3909,7 @@
         ],
         "path": "x-pack/plugins/ml/common/types/fields.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3545,6 +3932,7 @@
         ],
         "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3561,6 +3949,7 @@
         ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -3581,6 +3970,7 @@
         ],
         "path": "x-pack/plugins/ml/common/types/es_client.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3594,6 +3984,7 @@
         ],
         "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "ml",
@@ -3605,7 +3996,8 @@
               "/**\n   * Color used in the UI to indicate a critical anomaly, with a score greater than or equal to 75.\n   */"
             ],
             "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3617,7 +4009,8 @@
               "/**\n   * Color used in the UI to indicate a major anomaly, with a score greater than or equal to 50 and less than 75 .\n   */"
             ],
             "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3629,7 +4022,8 @@
               "/**\n   * Color used in the UI to indicate a minor anomaly, with a score greater than or equal to 25 and less than 50.\n   */"
             ],
             "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3641,7 +4035,8 @@
               "/**\n   * Color used in the UI to indicate a warning anomaly, with a score greater than or equal to 3 and less than 25.\n   * Note in some parts of the UI, warning severity is used when the score is greater than or equal to 0.\n   */"
             ],
             "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3653,7 +4048,8 @@
               "/**\n   * Color used in some parts of the UI to indicate a low severity anomaly, with a score greater than or equal to 0 and less than 3.\n   */"
             ],
             "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "ml",
@@ -3665,7 +4061,8 @@
               "/**\n   * Color used in the UI to indicate an anomaly for which the score is unknown.\n   */"
             ],
             "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

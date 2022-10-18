@@ -67,24 +67,23 @@ export const createEqlAlertType = (
           tuple,
           inputIndex,
           runtimeMappings,
-          exceptionItems,
           ruleExecutionLogger,
           bulkCreate,
           wrapHits,
           wrapSequences,
           primaryTimestamp,
           secondaryTimestamp,
+          exceptionFilter,
+          unprocessedExceptions,
         },
         services,
         state,
       } = execOptions;
-
       const result = await eqlExecutor({
         completeRule,
         tuple,
         inputIndex,
         runtimeMappings,
-        exceptionItems,
         ruleExecutionLogger,
         services,
         version,
@@ -93,6 +92,8 @@ export const createEqlAlertType = (
         wrapSequences,
         primaryTimestamp,
         secondaryTimestamp,
+        exceptionFilter,
+        unprocessedExceptions,
       });
       return { ...result, state };
     },

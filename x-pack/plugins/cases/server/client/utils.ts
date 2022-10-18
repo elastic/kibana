@@ -12,25 +12,28 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { nodeBuilder, fromKueryExpression, KueryNode, escapeKuery } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
 } from '../../common/utils/attachments';
-import { CASE_SAVED_OBJECT } from '../../common/constants';
+import { CASE_SAVED_OBJECT, NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+import type {
+  CaseStatuses,
+  CommentRequest,
+  CaseSeverity,
+  CommentRequestExternalReferenceType,
+} from '../../common/api';
 import {
   OWNER_FIELD,
   AlertCommentRequestRt,
   ActionsCommentRequestRt,
-  CaseStatuses,
-  CommentRequest,
   ContextTypeUserRt,
   excess,
   throwErrors,
-  CaseSeverity,
   ExternalReferenceStorageType,
   ExternalReferenceSORt,
-  CommentRequestExternalReferenceType,
   ExternalReferenceNoSORt,
   PersistableStateAttachmentRt,
 } from '../../common/api';
@@ -42,8 +45,8 @@ import {
   isCommentRequestTypeActions,
   assertUnreachable,
 } from '../common/utils';
-import { SavedObjectFindOptionsKueryNode } from '../common/types';
-import { ConstructQueryParams } from './types';
+import type { SavedObjectFindOptionsKueryNode } from '../common/types';
+import type { CasesFindQueryParams } from './types';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {
@@ -319,6 +322,43 @@ export const buildRangeFilter = ({
   }
 };
 
+export const buildAssigneesFilter = ({
+  assignees,
+}: {
+  assignees: CasesFindQueryParams['assignees'];
+}): KueryNode | undefined => {
+  if (assignees === undefined) {
+    return;
+  }
+
+  const assigneesAsArray = Array.isArray(assignees) ? assignees : [assignees];
+
+  if (assigneesAsArray.length === 0) {
+    return;
+  }
+
+  const assigneesWithoutNone = assigneesAsArray.filter(
+    (assignee) => assignee !== NO_ASSIGNEES_FILTERING_KEYWORD
+  );
+  const hasNoneAssignee = assigneesAsArray.some(
+    (assignee) => assignee === NO_ASSIGNEES_FILTERING_KEYWORD
+  );
+
+  const assigneesFilter = assigneesWithoutNone.map((filter) =>
+    nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, escapeKuery(filter))
+  );
+
+  if (!hasNoneAssignee) {
+    return nodeBuilder.or(assigneesFilter);
+  }
+
+  const filterCasesWithoutAssigneesKueryNode = fromKueryExpression(
+    `not ${CASE_SAVED_OBJECT}.attributes.assignees.uid: *`
+  );
+
+  return nodeBuilder.or([...assigneesFilter, filterCasesWithoutAssigneesKueryNode]);
+};
+
 export const constructQueryOptions = ({
   tags,
   reporters,
@@ -330,24 +370,16 @@ export const constructQueryOptions = ({
   from,
   to,
   assignees,
-}: ConstructQueryParams): SavedObjectFindOptionsKueryNode => {
+}: CasesFindQueryParams): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
-  const reportersFilter = buildFilter({
-    filters: reporters,
-    field: 'created_by.username',
-    operator: 'or',
-  });
+  const reportersFilter = createReportersFilter(reporters);
   const sortField = sortToSnake(sortByField);
   const ownerFilter = buildFilter({ filters: owner, field: OWNER_FIELD, operator: 'or' });
 
   const statusFilter = status != null ? addStatusFilter({ status }) : undefined;
   const severityFilter = severity != null ? addSeverityFilter({ severity }) : undefined;
   const rangeFilter = buildRangeFilter({ from, to });
-  const assigneesFilter = buildFilter({
-    filters: assignees,
-    field: 'assignees.uid',
-    operator: 'or',
-  });
+  const assigneesFilter = buildAssigneesFilter({ assignees });
 
   const filters = combineFilters([
     statusFilter,
@@ -363,6 +395,30 @@ export const constructQueryOptions = ({
     filter: combineFilterWithAuthorizationFilter(filters, authorizationFilter),
     sortField,
   };
+};
+
+const createReportersFilter = (reporters?: string | string[]): KueryNode | undefined => {
+  const reportersFilter = buildFilter({
+    filters: reporters,
+    field: 'created_by.username',
+    operator: 'or',
+  });
+
+  const reportersProfileUidFilter = buildFilter({
+    filters: reporters,
+    field: 'created_by.profile_uid',
+    operator: 'or',
+  });
+
+  const filters = [reportersFilter, reportersProfileUidFilter].filter(
+    (filter): filter is KueryNode => filter != null
+  );
+
+  if (filters.length <= 0) {
+    return;
+  }
+
+  return nodeBuilder.or(filters);
 };
 
 interface CompareArrays<T> {

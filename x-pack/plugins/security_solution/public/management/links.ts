@@ -7,7 +7,12 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
+
+import {
+  calculateEndpointAuthz,
+  getEndpointAuthzInitialState,
+  calculatePermissionsFromCapabilities,
+} from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
   ENDPOINTS_PATH,
@@ -16,6 +21,7 @@ import {
   HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGE_PATH,
   POLICIES_PATH,
+  RESPONSE_ACTIONS_HISTORY_PATH,
   RULES_CREATE_PATH,
   RULES_PATH,
   SecurityPageName,
@@ -31,6 +37,7 @@ import {
   HOST_ISOLATION_EXCEPTIONS,
   MANAGE,
   POLICIES,
+  RESPONSE_ACTIONS_HISTORY,
   RULES,
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
@@ -41,6 +48,7 @@ import {
   manageCategories as cloudSecurityPostureCategories,
   manageLinks as cloudSecurityPostureLinks,
 } from '../cloud_security_posture/links';
+import { IconActionHistory } from './icons/action_history';
 import { IconBlocklist } from './icons/blocklist';
 import { IconEndpoints } from './icons/endpoints';
 import { IconEndpointPolicies } from './icons/endpoint_policies';
@@ -50,6 +58,7 @@ import { IconHostIsolation } from './icons/host_isolation';
 import { IconSiemRules } from './icons/siem_rules';
 import { IconTrustedApplications } from './icons/trusted_applications';
 import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
+import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 
 const categories = [
   {
@@ -69,6 +78,7 @@ const categories = [
       SecurityPageName.eventFilters,
       SecurityPageName.hostIsolationExceptions,
       SecurityPageName.blocklist,
+      SecurityPageName.responseActionsHistory,
     ],
   },
   ...cloudSecurityPostureCategories,
@@ -133,7 +143,7 @@ export const links: LinkItem = {
     {
       id: SecurityPageName.endpoints,
       description: i18n.translate('xpack.securitySolution.appLinks.endpointsDescription', {
-        defaultMessage: 'Hosts running endpoint security.',
+        defaultMessage: 'Hosts running Elastic Defend.',
       }),
       landingIcon: IconEndpoints,
       title: ENDPOINTS,
@@ -202,38 +212,83 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
     },
+    {
+      id: SecurityPageName.responseActionsHistory,
+      title: RESPONSE_ACTIONS_HISTORY,
+      description: i18n.translate('xpack.securitySolution.appLinks.actionHistoryDescription', {
+        defaultMessage: 'View the history of response actions performed on hosts.',
+      }),
+      landingIcon: IconActionHistory,
+      path: RESPONSE_ACTIONS_HISTORY_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+    },
     cloudSecurityPostureLinks,
   ],
 };
 
-const getFilteredLinks = (linkIds: SecurityPageName[]) => ({
+const excludeLinks = (linkIds: SecurityPageName[]) => ({
   ...links,
   links: links.links?.filter((link) => !linkIds.includes(link.id)),
 });
+
+const getHostIsolationExceptionTotal = async (http: CoreStart['http']) => {
+  const hostIsolationExceptionsApiClientInstance =
+    HostIsolationExceptionsApiClient.getInstance(http);
+  const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
+  return summaryResponse.total;
+};
 
 export const getManagementFilteredLinks = async (
   core: CoreStart,
   plugins: StartPlugins
 ): Promise<LinkItem> => {
+  const fleetAuthz = plugins.fleet?.authz;
+  const isEndpointRbacEnabled = ExperimentalFeaturesService.get().endpointRbacEnabled;
+  const endpointPermissions = calculatePermissionsFromCapabilities(core.application.capabilities);
+
   try {
     const currentUserResponse = await plugins.security.authc.getCurrentUser();
-    const privileges = calculateEndpointAuthz(
-      licenseService,
-      plugins.fleet?.authz,
-      currentUserResponse.roles
-    );
-    const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
-      core.http
-    );
+    const { canAccessEndpointManagement, canIsolateHost, canReadActionsLogManagement } = fleetAuthz
+      ? calculateEndpointAuthz(
+          licenseService,
+          fleetAuthz,
+          currentUserResponse.roles,
+          isEndpointRbacEnabled,
+          endpointPermissions
+        )
+      : getEndpointAuthzInitialState();
 
-    if (!privileges.canIsolateHost) {
-      const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
-      if (!summaryResponse.total) {
-        return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+    if (!canAccessEndpointManagement) {
+      return excludeLinks([
+        SecurityPageName.hostIsolationExceptions,
+        SecurityPageName.responseActionsHistory,
+      ]);
+    }
+
+    if (!canReadActionsLogManagement) {
+      // <= enterprise license
+      const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
+      if (!canIsolateHost && !hostExceptionCount) {
+        return excludeLinks([
+          SecurityPageName.hostIsolationExceptions,
+          SecurityPageName.responseActionsHistory,
+        ]);
       }
+      return excludeLinks([SecurityPageName.responseActionsHistory]);
+    } else if (!canIsolateHost) {
+      const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
+      if (!hostExceptionCount) {
+        // <= platinum so exclude also links that require enterprise
+        return excludeLinks([
+          SecurityPageName.hostIsolationExceptions,
+          SecurityPageName.responseActionsHistory,
+        ]);
+      }
+      return excludeLinks([SecurityPageName.responseActionsHistory]);
     }
   } catch {
-    return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+    return excludeLinks([SecurityPageName.hostIsolationExceptions]);
   }
 
   return links;

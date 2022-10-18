@@ -32,6 +32,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -41,7 +42,8 @@
             "label": "kibanaVersion",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -57,6 +59,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -76,6 +79,7 @@
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -95,6 +99,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -105,6 +110,7 @@
                 "description": [],
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -117,7 +123,8 @@
                       "boolean | undefined"
                     ],
                     "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -136,6 +143,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -155,6 +163,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -171,6 +180,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -190,6 +200,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -204,6 +215,7 @@
                 ],
                 "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -231,6 +243,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -246,6 +259,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -263,6 +277,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -290,6 +305,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/build_active_mappings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -307,6 +323,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/build_active_mappings.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -339,6 +356,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/bulk_overwrite_transformed_documents.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -352,6 +370,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/bulk_overwrite_transformed_documents.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -378,6 +397,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/calculate_exclude_filters.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -391,6 +411,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/calculate_exclude_filters.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -417,6 +438,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/check_for_unknown_docs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -430,6 +452,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/check_for_unknown_docs.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -464,6 +487,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/clone_index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -477,6 +501,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/clone_index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -501,6 +526,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/close_pit.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -514,6 +540,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/close_pit.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -544,6 +571,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/create_index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -557,6 +585,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/create_index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -585,6 +614,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/fetch_indices.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -598,6 +628,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/fetch_indices.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -626,6 +657,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/initialize_action.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -639,6 +671,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/initialize_action.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -659,6 +692,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -673,6 +707,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -693,6 +728,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -707,6 +743,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -727,6 +764,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -741,6 +779,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -761,6 +800,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -775,6 +815,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/es_errors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -798,6 +839,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -812,6 +854,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -838,6 +881,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/open_pit.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -851,6 +895,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/open_pit.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -885,6 +930,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/pickup_updated_mappings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -898,6 +944,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/pickup_updated_mappings.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -912,6 +959,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/pickup_updated_mappings.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -938,6 +986,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/read_with_pit.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -951,6 +1000,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/read_with_pit.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -977,6 +1027,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/refresh_index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -990,6 +1041,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/refresh_index.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1018,6 +1070,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/reindex.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -1031,6 +1084,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/reindex.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1057,6 +1111,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/remove_write_block.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -1070,6 +1125,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/remove_write_block.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1100,6 +1156,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/search_for_outdated_documents.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -1113,6 +1170,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/search_for_outdated_documents.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -1127,6 +1185,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/search_for_outdated_documents.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1155,6 +1214,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/set_write_block.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -1168,6 +1228,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/set_write_block.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1206,6 +1267,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/transform_docs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -1219,6 +1281,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/transform_docs.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1251,6 +1314,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_aliases.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -1264,6 +1328,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_aliases.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1292,6 +1357,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_and_pickup_mappings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -1305,6 +1371,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_and_pickup_mappings.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1331,6 +1398,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_index_status.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -1345,6 +1413,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_index_status.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1371,6 +1440,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_index_status.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -1385,6 +1455,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_index_status.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1415,6 +1486,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_index_status.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -1428,6 +1500,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_index_status.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1454,6 +1527,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_pickup_updated_mappings_task.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1467,7 +1541,8 @@
               "A"
             ],
             "path": "node_modules/fp-ts/lib/function.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1498,6 +1573,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_reindex_task.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -1511,7 +1587,8 @@
               "A"
             ],
             "path": "node_modules/fp-ts/lib/function.d.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1540,6 +1617,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_task.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -1553,6 +1631,7 @@
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/wait_for_task.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -1570,6 +1649,7 @@
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migrate_raw_docs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -1579,7 +1659,8 @@
             "label": "type",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migrate_raw_docs.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -1592,7 +1673,8 @@
               "string[]"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migrate_raw_docs.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -1606,7 +1688,8 @@
               "[]"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migrate_raw_docs.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -1620,7 +1703,8 @@
               "[]"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migrate_raw_docs.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1634,6 +1718,7 @@
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migrate_raw_docs.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -1647,7 +1732,8 @@
               "[]"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/migrate_raw_docs.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1661,6 +1747,7 @@
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -1670,7 +1757,7 @@
             "label": "client",
             "description": [],
             "signature": [
-              "{ get: { <TDocument = unknown>(this: That, params: ",
+              "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
               "GetRequest",
               " | ",
               "GetRequest",
@@ -1788,7 +1875,7 @@
               "default",
               "; security: ",
               "default",
-              "; name: string | symbol; index: { <TDocument = unknown>(this: That, params: ",
+              "; index: { <TDocument = unknown>(this: That, params: ",
               "IndexRequest",
               "<TDocument> | ",
               "IndexRequest",
@@ -1840,7 +1927,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "UpdateResponse",
-              "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocumentR>>; }; asyncSearch: ",
+              "default",
+              "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -1849,8 +1938,6 @@
               ") => ",
               "default",
               "; Internal: ",
-              "default",
-              "; asyncSearch: ",
               "default",
               "; autoscaling: ",
               "default",
@@ -2861,7 +2948,8 @@
               "; }"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -2874,7 +2962,8 @@
               "ISavedObjectTypeRegistry"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -2889,7 +2978,8 @@
               "; readonly scrollDuration: string; readonly retryAttempts: number; }"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -2899,7 +2989,8 @@
             "label": "kibanaIndex",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -2909,7 +3000,8 @@
             "label": "kibanaVersion",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -2922,7 +3014,8 @@
               "Logger"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -2935,7 +3028,8 @@
               "DocLinksServiceSetup"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2949,6 +3043,7 @@
         "description": [],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/pickup_updated_mappings.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -2958,7 +3053,8 @@
             "label": "taskId",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/pickup_updated_mappings.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2980,6 +3076,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/unused_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -2995,6 +3092,7 @@
         ],
         "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/run_resilient_migrator.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -3004,7 +3102,8 @@
             "label": "maxRetries",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/run_resilient_migrator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
@@ -3014,7 +3113,8 @@
             "label": "requestTimeout",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/run_resilient_migrator.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

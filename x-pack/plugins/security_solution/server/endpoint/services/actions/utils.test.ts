@@ -14,6 +14,7 @@ import {
   formatEndpointActionResults,
   getUniqueLogData,
   getActionCompletionInfo,
+  getActionStatus,
   isLogsEndpointAction,
   isLogsEndpointActionResponse,
   mapToNormalizedActionRequest,
@@ -440,7 +441,18 @@ describe('When using Actions service utilities', () => {
           completedAt: COMPLETED_AT,
           wasSuccessful: true,
           errors: undefined,
-          outputs: {},
+          outputs: {
+            '456': {
+              content: {
+                file: {
+                  name: 'bad_file.txt',
+                  path: '/some/path/bad_file.txt',
+                  size: 221,
+                },
+              },
+              type: 'json',
+            },
+          },
           agentState: {
             '123': {
               completedAt: '2022-01-05T19:27:23.816Z',
@@ -808,6 +820,48 @@ describe('When using Actions service utilities', () => {
           (e) => 'EndpointActions' in e.item.data
         )[0]
       ).toBeTruthy();
+    });
+  });
+
+  describe('#getActionStatus', () => {
+    it('should show isExpired as TRUE and status as `failed` correctly', () => {
+      expect(
+        getActionStatus({
+          expirationDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(),
+          isCompleted: false,
+          wasSuccessful: false,
+        })
+      ).toEqual({ isExpired: true, status: 'failed' });
+    });
+
+    it('should show isExpired as FALSE and status as `pending` correctly', () => {
+      expect(
+        getActionStatus({
+          expirationDate: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(),
+          isCompleted: false,
+          wasSuccessful: false,
+        })
+      ).toEqual({ isExpired: false, status: 'pending' });
+    });
+
+    it('should show isExpired as FALSE and status as `successful` correctly', () => {
+      expect(
+        getActionStatus({
+          expirationDate: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(),
+          isCompleted: true,
+          wasSuccessful: true,
+        })
+      ).toEqual({ isExpired: false, status: 'successful' });
+    });
+
+    it('should show isExpired as FALSE and status as `failed` correctly', () => {
+      expect(
+        getActionStatus({
+          expirationDate: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(),
+          isCompleted: true,
+          wasSuccessful: false,
+        })
+      ).toEqual({ isExpired: false, status: 'failed' });
     });
   });
 });
