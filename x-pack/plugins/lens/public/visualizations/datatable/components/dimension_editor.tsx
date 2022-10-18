@@ -98,7 +98,7 @@ export function TableDimensionEditor(
       {props.groupId === 'rows' && (
         <CollapseSetting
           value={column.collapseFn || ''}
-          onChange={(collapseFn: string) => {
+          onChange={(collapseFn) => {
             setState({
               ...state,
               columns: updateColumnWith(state, accessor, { collapseFn }),
