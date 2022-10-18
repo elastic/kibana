@@ -9,9 +9,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { UseCase, UseCaseCard } from './use_case_card';
 import { GuideState } from '../../types';
 import { GuideCardFooter } from './guide_card_footer';
+import { UseCase, UseCaseCard } from './use_case_card';
 
 type GuideCardConstants = {
   [key in UseCase]: {

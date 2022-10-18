@@ -48,7 +48,8 @@ const constants: UseCaseConstants = {
 };
 
 export type UseCase = 'search' | 'observability' | 'security';
-export interface UseCaseProps {
+
+export interface UseCaseCardProps {
   useCase: GuideId;
   title: string;
   description: string;
@@ -64,7 +65,7 @@ export const UseCaseCard = ({
   footer,
   isDarkTheme,
   addBasePath,
-}: UseCaseProps) => {
+}: UseCaseCardProps) => {
   const getImageUrl = (imageName: UseCase) => {
     const imagePath = `/plugins/home/assets/solution_logos/${imageName}${
       isDarkTheme ? '_dark' : ''
