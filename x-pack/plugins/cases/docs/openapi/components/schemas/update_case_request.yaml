@@ -2,10 +2,276 @@ title: Update case request
 description: >-
   The update case API request body varies depending on the type of connector.
 oneOf:
-  - $ref: 'update_case_connector_none.yaml'
-  - $ref: 'update_case_connector_cases_webhook.yaml'
-  - $ref: 'update_case_connector_jira.yaml'
-  - $ref: 'update_case_connector_resilient.yaml'
-  - $ref: 'update_case_connector_servicenow.yaml'
-  - $ref: 'update_case_connector_servicenow_sir.yaml'
-  - $ref: 'update_case_connector_swimlane.yaml'
+  - type: object
+    title: Update case request with no connector
+    required:
+     - cases
+    properties:
+      cases:
+        type: array
+        description: An array containing one or more case objects.
+        items:
+          type: object
+          required:
+            - id
+            - version
+          properties: 
+            connector:
+              $ref: 'connector_properties_none.yaml'
+            description:
+              description: An updated description for the case.
+              type: string
+            id:
+              description: The identifier for the case.
+              type: string
+            settings:
+              $ref: 'settings.yaml'
+            severity:
+              $ref: 'severity_property.yaml' 
+            status:
+              $ref: 'status.yaml'
+            tags:
+              description: The words and phrases that help categorize cases.
+              type: array
+              items:
+                type: string
+            title:
+              description: A title for the case.
+              type: string
+            version:
+              description: The current version of the case. To determine this value, use the get case or find cases APIs.
+              type: string
+  - type: object
+    title: Update case request with a Cases Webhook connector
+    required:
+      - cases
+    properties:
+      cases:
+        type: array
+        description: An array containing one or more case objects.
+        items:
+          type: object
+          required:
+            - id
+            - version
+          properties: 
+            connector:
+              $ref: 'connector_properties_cases_webhook.yaml'
+            description:
+              description: An updated description for the case.
+              type: string
+            id:
+              description: The identifier for the case.
+              type: string
+            settings:
+              $ref: 'settings.yaml'
+            severity:
+              $ref: 'severity_property.yaml' 
+            status:
+              $ref: 'status.yaml'
+            tags:
+              description: The words and phrases that help categorize cases.
+              type: array
+              items:
+                type: string
+            title:
+              description: A title for the case.
+              type: string
+            version:
+              description: The current version of the case. To determine this value, use the get case or find cases APIs.
+              type: string
+  - type: object
+    title: Update case request with a Jira connector
+    required:
+      - cases
+    properties:
+      cases:
+        type: array
+        description: An array containing one or more case objects.
+        items:
+          type: object
+          required:
+            - id
+            - version
+          properties: 
+            connector:
+              $ref: 'connector_properties_jira.yaml'
+            description:
+              description: An updated description for the case.
+              type: string
+            id:
+              description: The identifier for the case.
+              type: string
+            settings:
+              $ref: 'settings.yaml'
+            severity:
+              $ref: 'severity_property.yaml' 
+            status:
+              $ref: 'status.yaml'
+            tags:
+              description: The words and phrases that help categorize cases.
+              type: array
+              items:
+                type: string
+            title:
+              description: A title for the case.
+              type: string
+            version:
+              description: The current version of the case. To determine this value, use the get case or find cases APIs.
+              type: string
+  - type: object
+    title: Update case request with an IBM Resilient connector
+    required:
+     - cases
+    properties:
+      cases:
+        type: array
+        description: An array containing one or more case objects.
+        items:
+          type: object
+          required:
+            - id
+            - version
+          properties: 
+            connector:
+              $ref: 'connector_properties_resilient.yaml'
+            description:
+              description: An updated description for the case.
+              type: string
+            id:
+              description: The identifier for the case.
+              type: string
+            settings:
+              $ref: 'settings.yaml'
+            severity:
+              $ref: 'severity_property.yaml' 
+            status:
+              $ref: 'status.yaml'
+            tags:
+              description: The words and phrases that help categorize cases.
+              type: array
+              items:
+                type: string
+            title:
+              description: A title for the case.
+              type: string
+            version:
+              description: The current version of the case. To determine this value, use the get case or find cases APIs.
+              type: string
+  - type: object
+    title: Update case request with a ServiceNow ITSM connector
+    required:
+     - cases
+    properties:
+      cases:
+        type: array
+        description: An array containing one or more case objects.
+        items:
+          type: object
+          required:
+            - id
+            - version
+          properties: 
+            connector:
+              $ref: 'connector_properties_servicenow.yaml'
+            description:
+              description: An updated description for the case.
+              type: string
+            id:
+              description: The identifier for the case.
+              type: string
+            settings:
+              $ref: 'settings.yaml'
+            severity:
+              $ref: 'severity_property.yaml' 
+            status:
+              $ref: 'status.yaml'
+            tags:
+              description: The words and phrases that help categorize cases.
+              type: array
+              items:
+                type: string
+            title:
+              description: A title for the case.
+              type: string
+            version:
+              description: The current version of the case. To determine this value, use the get case or find cases APIs.
+              type: string
+  - type: object
+    title: Update case request with ServiceNow SecOps connector
+    required:
+     - cases
+    properties:
+      cases:
+        type: array
+        description: An array containing one or more case objects.
+        items:
+          type: object
+          required:
+            - id
+            - version
+          properties: 
+            connector:
+              $ref: 'connector_properties_servicenow_sir.yaml'
+            description:
+              description: An updated description for the case.
+              type: string
+            id:
+              description: The identifier for the case.
+              type: string
+            settings:
+              $ref: 'settings.yaml'
+            severity:
+              $ref: 'severity_property.yaml' 
+            status:
+              $ref: 'status.yaml'
+            tags:
+              description: The words and phrases that help categorize cases.
+              type: array
+              items:
+                type: string
+            title:
+              description: A title for the case.
+              type: string
+            version:
+              description: The current version of the case. To determine this value, use the get case or find cases APIs.
+              type: string
+  - type: object
+    title: Update case request with a Swimlane connector
+    required:
+     - cases
+    properties:
+      cases:
+        type: array
+        description: An array containing one or more case objects.
+        items:
+          type: object
+          required:
+            - id
+            - version
+          properties: 
+            connector:
+              $ref: 'connector_properties_swimlane.yaml'
+            description:
+              description: An updated description for the case.
+              type: string
+            id:
+              description: The identifier for the case.
+              type: string
+            settings:
+              $ref: 'settings.yaml'
+            severity:
+              $ref: 'severity_property.yaml' 
+            status:
+              $ref: 'status.yaml'
+            tags:
+              description: The words and phrases that help categorize cases.
+              type: array
+              items:
+                type: string
+            title:
+              description: A title for the case.
+              type: string
+            version:
+              description: The current version of the case. To determine this value, use the get case or find cases APIs.
+              type: string

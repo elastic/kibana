@@ -665,6 +665,20 @@ Any modifications made to this file will be overwritten.
   <ol>
     <li><a href="#Case_response_properties_for_comments_inner"><code>Case_response_properties_for_comments_inner</code> - </a></li>
     <li><a href="#Case_response_properties_for_connectors"><code>Case_response_properties_for_connectors</code> - Case response properties for connectors</a></li>
+    <li><a href="#Update_case_request_with_ServiceNow_SecOps_connector"><code>Update_case_request_with_ServiceNow_SecOps_connector</code> - Update case request with ServiceNow SecOps connector</a></li>
+    <li><a href="#Update_case_request_with_ServiceNow_SecOps_connector_cases"><code>Update_case_request_with_ServiceNow_SecOps_connector_cases</code> - </a></li>
+    <li><a href="#Update_case_request_with_a_Cases_Webhook_connector"><code>Update_case_request_with_a_Cases_Webhook_connector</code> - Update case request with a Cases Webhook connector</a></li>
+    <li><a href="#Update_case_request_with_a_Cases_Webhook_connector_cases"><code>Update_case_request_with_a_Cases_Webhook_connector_cases</code> - </a></li>
+    <li><a href="#Update_case_request_with_a_Jira_connector"><code>Update_case_request_with_a_Jira_connector</code> - Update case request with a Jira connector</a></li>
+    <li><a href="#Update_case_request_with_a_Jira_connector_cases"><code>Update_case_request_with_a_Jira_connector_cases</code> - </a></li>
+    <li><a href="#Update_case_request_with_a_ServiceNow_ITSM_connector"><code>Update_case_request_with_a_ServiceNow_ITSM_connector</code> - Update case request with a ServiceNow ITSM connector</a></li>
+    <li><a href="#Update_case_request_with_a_ServiceNow_ITSM_connector_cases"><code>Update_case_request_with_a_ServiceNow_ITSM_connector_cases</code> - </a></li>
+    <li><a href="#Update_case_request_with_a_Swimlane_connector"><code>Update_case_request_with_a_Swimlane_connector</code> - Update case request with a Swimlane connector</a></li>
+    <li><a href="#Update_case_request_with_a_Swimlane_connector_cases"><code>Update_case_request_with_a_Swimlane_connector_cases</code> - </a></li>
+    <li><a href="#Update_case_request_with_an_IBM_Resilient_connector"><code>Update_case_request_with_an_IBM_Resilient_connector</code> - Update case request with an IBM Resilient connector</a></li>
+    <li><a href="#Update_case_request_with_an_IBM_Resilient_connector_cases"><code>Update_case_request_with_an_IBM_Resilient_connector_cases</code> - </a></li>
+    <li><a href="#Update_case_request_with_no_connector"><code>Update_case_request_with_no_connector</code> - Update case request with no connector</a></li>
+    <li><a href="#Update_case_request_with_no_connector_cases"><code>Update_case_request_with_no_connector_cases</code> - </a></li>
     <li><a href="#add_alert_comment_request_properties"><code>add_alert_comment_request_properties</code> - Add case comment request properties for alerts</a></li>
     <li><a href="#add_case_comment_request"><code>add_case_comment_request</code> - Add case comment request</a></li>
     <li><a href="#add_user_comment_request_properties"><code>add_user_comment_request_properties</code> - Add case comment request properties for user comments</a></li>
@@ -701,20 +715,6 @@ Any modifications made to this file will be overwritten.
     <li><a href="#status"><code>status</code> - </a></li>
     <li><a href="#update_alert_comment_request_properties"><code>update_alert_comment_request_properties</code> - Update case comment request properties for alerts</a></li>
     <li><a href="#update_case_comment_request"><code>update_case_comment_request</code> - Update case comment request</a></li>
-    <li><a href="#update_case_connector_cases_webhook"><code>update_case_connector_cases_webhook</code> - Update case request with a Cases Webhook connector</a></li>
-    <li><a href="#update_case_connector_cases_webhook_cases_inner"><code>update_case_connector_cases_webhook_cases_inner</code> - </a></li>
-    <li><a href="#update_case_connector_jira"><code>update_case_connector_jira</code> - Update case request with a Jira connector</a></li>
-    <li><a href="#update_case_connector_jira_cases_inner"><code>update_case_connector_jira_cases_inner</code> - </a></li>
-    <li><a href="#update_case_connector_none"><code>update_case_connector_none</code> - Update case request with no connector</a></li>
-    <li><a href="#update_case_connector_none_cases_inner"><code>update_case_connector_none_cases_inner</code> - </a></li>
-    <li><a href="#update_case_connector_resilient"><code>update_case_connector_resilient</code> - Update case request with an IBM Resilient connector</a></li>
-    <li><a href="#update_case_connector_resilient_cases_inner"><code>update_case_connector_resilient_cases_inner</code> - </a></li>
-    <li><a href="#update_case_connector_servicenow"><code>update_case_connector_servicenow</code> - Update case request with a ServiceNow ITSM connector</a></li>
-    <li><a href="#update_case_connector_servicenow_cases_inner"><code>update_case_connector_servicenow_cases_inner</code> - </a></li>
-    <li><a href="#update_case_connector_servicenow_sir"><code>update_case_connector_servicenow_sir</code> - Update case request with ServiceNow SecOps connector</a></li>
-    <li><a href="#update_case_connector_servicenow_sir_cases_inner"><code>update_case_connector_servicenow_sir_cases_inner</code> - </a></li>
-    <li><a href="#update_case_connector_swimlane"><code>update_case_connector_swimlane</code> - Update case request with a Swimlane connector</a></li>
-    <li><a href="#update_case_connector_swimlane_cases_inner"><code>update_case_connector_swimlane_cases_inner</code> - </a></li>
     <li><a href="#update_case_request"><code>update_case_request</code> - Update case request</a></li>
     <li><a href="#update_user_comment_request_properties"><code>update_user_comment_request_properties</code> - Update case comment request properties for user comments</a></li>
     <li><a href="#user_comment_response_properties"><code>user_comment_response_properties</code> - Case response properties for user comments</a></li>
@@ -752,6 +752,160 @@ Any modifications made to this file will be overwritten.
 <div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">.swimlane</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Update_case_request_with_ServiceNow_SecOps_connector"><code>Update_case_request_with_ServiceNow_SecOps_connector</code> - Update case request with ServiceNow SecOps connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">cases </div><div class="param-desc"><span class="param-type"><a href="#Update_case_request_with_ServiceNow_SecOps_connector_cases">array[Update_case_request_with_ServiceNow_SecOps_connector_cases]</a></span> An array containing one or more case objects. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Update_case_request_with_ServiceNow_SecOps_connector_cases"><code>Update_case_request_with_ServiceNow_SecOps_connector_cases</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_properties_servicenow_sir">connector_properties_servicenow_sir</a></span>  </div>
+<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An updated description for the case. </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the case. </div>
+<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. </div>
+<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
+<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current version of the case. To determine this value, use the get case or find cases APIs. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Update_case_request_with_a_Cases_Webhook_connector"><code>Update_case_request_with_a_Cases_Webhook_connector</code> - Update case request with a Cases Webhook connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">cases </div><div class="param-desc"><span class="param-type"><a href="#Update_case_request_with_a_Cases_Webhook_connector_cases">array[Update_case_request_with_a_Cases_Webhook_connector_cases]</a></span> An array containing one or more case objects. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Update_case_request_with_a_Cases_Webhook_connector_cases"><code>Update_case_request_with_a_Cases_Webhook_connector_cases</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_properties_cases_webhook">connector_properties_cases_webhook</a></span>  </div>
+<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An updated description for the case. </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the case. </div>
+<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. </div>
+<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
+<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current version of the case. To determine this value, use the get case or find cases APIs. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Update_case_request_with_a_Jira_connector"><code>Update_case_request_with_a_Jira_connector</code> - Update case request with a Jira connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">cases </div><div class="param-desc"><span class="param-type"><a href="#Update_case_request_with_a_Jira_connector_cases">array[Update_case_request_with_a_Jira_connector_cases]</a></span> An array containing one or more case objects. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Update_case_request_with_a_Jira_connector_cases"><code>Update_case_request_with_a_Jira_connector_cases</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_properties_jira">connector_properties_jira</a></span>  </div>
+<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An updated description for the case. </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the case. </div>
+<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. </div>
+<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
+<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current version of the case. To determine this value, use the get case or find cases APIs. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Update_case_request_with_a_ServiceNow_ITSM_connector"><code>Update_case_request_with_a_ServiceNow_ITSM_connector</code> - Update case request with a ServiceNow ITSM connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">cases </div><div class="param-desc"><span class="param-type"><a href="#Update_case_request_with_a_ServiceNow_ITSM_connector_cases">array[Update_case_request_with_a_ServiceNow_ITSM_connector_cases]</a></span> An array containing one or more case objects. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Update_case_request_with_a_ServiceNow_ITSM_connector_cases"><code>Update_case_request_with_a_ServiceNow_ITSM_connector_cases</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_properties_servicenow">connector_properties_servicenow</a></span>  </div>
+<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An updated description for the case. </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the case. </div>
+<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. </div>
+<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
+<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current version of the case. To determine this value, use the get case or find cases APIs. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Update_case_request_with_a_Swimlane_connector"><code>Update_case_request_with_a_Swimlane_connector</code> - Update case request with a Swimlane connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">cases </div><div class="param-desc"><span class="param-type"><a href="#Update_case_request_with_a_Swimlane_connector_cases">array[Update_case_request_with_a_Swimlane_connector_cases]</a></span> An array containing one or more case objects. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Update_case_request_with_a_Swimlane_connector_cases"><code>Update_case_request_with_a_Swimlane_connector_cases</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_properties_swimlane">connector_properties_swimlane</a></span>  </div>
+<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An updated description for the case. </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the case. </div>
+<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. </div>
+<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
+<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current version of the case. To determine this value, use the get case or find cases APIs. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Update_case_request_with_an_IBM_Resilient_connector"><code>Update_case_request_with_an_IBM_Resilient_connector</code> - Update case request with an IBM Resilient connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">cases </div><div class="param-desc"><span class="param-type"><a href="#Update_case_request_with_an_IBM_Resilient_connector_cases">array[Update_case_request_with_an_IBM_Resilient_connector_cases]</a></span> An array containing one or more case objects. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Update_case_request_with_an_IBM_Resilient_connector_cases"><code>Update_case_request_with_an_IBM_Resilient_connector_cases</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_properties_resilient">connector_properties_resilient</a></span>  </div>
+<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An updated description for the case. </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the case. </div>
+<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. </div>
+<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
+<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current version of the case. To determine this value, use the get case or find cases APIs. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Update_case_request_with_no_connector"><code>Update_case_request_with_no_connector</code> - Update case request with no connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">cases </div><div class="param-desc"><span class="param-type"><a href="#Update_case_request_with_no_connector_cases">array[Update_case_request_with_no_connector_cases]</a></span> An array containing one or more case objects. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Update_case_request_with_no_connector_cases"><code>Update_case_request_with_no_connector_cases</code> - </a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_properties_none">connector_properties_none</a></span>  </div>
+<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An updated description for the case. </div>
+<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the case. </div>
+<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
+<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. </div>
+<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
+<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current version of the case. To determine this value, use the get case or find cases APIs. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1155,164 +1309,10 @@ Any modifications made to this file will be overwritten.
     </div>  <!-- field-items -->
   </div>
   <div class="model">
-    <h3><a name="update_case_connector_cases_webhook"><code>update_case_connector_cases_webhook</code> - Update case request with a Cases Webhook connector</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">cases </div><div class="param-desc"><span class="param-type"><a href="#update_case_connector_cases_webhook_cases_inner">array[update_case_connector_cases_webhook_cases_inner]</a></span> An array containing one or more case objects. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_case_connector_cases_webhook_cases_inner"><code>update_case_connector_cases_webhook_cases_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_properties_cases_webhook">connector_properties_cases_webhook</a></span>  </div>
-<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An updated description for the case. </div>
-<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the case. </div>
-<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
-<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
-<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
-<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. </div>
-<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
-<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current version of the case. To determine this value, use the get case or find cases APIs. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_case_connector_jira"><code>update_case_connector_jira</code> - Update case request with a Jira connector</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">cases </div><div class="param-desc"><span class="param-type"><a href="#update_case_connector_jira_cases_inner">array[update_case_connector_jira_cases_inner]</a></span> An array containing one or more case objects. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_case_connector_jira_cases_inner"><code>update_case_connector_jira_cases_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_properties_jira">connector_properties_jira</a></span>  </div>
-<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An updated description for the case. </div>
-<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the case. </div>
-<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
-<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
-<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
-<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. </div>
-<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
-<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current version of the case. To determine this value, use the get case or find cases APIs. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_case_connector_none"><code>update_case_connector_none</code> - Update case request with no connector</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">cases </div><div class="param-desc"><span class="param-type"><a href="#update_case_connector_none_cases_inner">array[update_case_connector_none_cases_inner]</a></span> An array containing one or more case objects. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_case_connector_none_cases_inner"><code>update_case_connector_none_cases_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_properties_none">connector_properties_none</a></span>  </div>
-<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An updated description for the case. </div>
-<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the case. </div>
-<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
-<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
-<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
-<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. </div>
-<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
-<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current version of the case. To determine this value, use the get case or find cases APIs. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_case_connector_resilient"><code>update_case_connector_resilient</code> - Update case request with an IBM Resilient connector</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">cases </div><div class="param-desc"><span class="param-type"><a href="#update_case_connector_resilient_cases_inner">array[update_case_connector_resilient_cases_inner]</a></span> An array containing one or more case objects. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_case_connector_resilient_cases_inner"><code>update_case_connector_resilient_cases_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_properties_resilient">connector_properties_resilient</a></span>  </div>
-<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An updated description for the case. </div>
-<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the case. </div>
-<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
-<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
-<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
-<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. </div>
-<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
-<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current version of the case. To determine this value, use the get case or find cases APIs. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_case_connector_servicenow"><code>update_case_connector_servicenow</code> - Update case request with a ServiceNow ITSM connector</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">cases </div><div class="param-desc"><span class="param-type"><a href="#update_case_connector_servicenow_cases_inner">array[update_case_connector_servicenow_cases_inner]</a></span> An array containing one or more case objects. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_case_connector_servicenow_cases_inner"><code>update_case_connector_servicenow_cases_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_properties_servicenow">connector_properties_servicenow</a></span>  </div>
-<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An updated description for the case. </div>
-<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the case. </div>
-<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
-<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
-<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
-<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. </div>
-<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
-<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current version of the case. To determine this value, use the get case or find cases APIs. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_case_connector_servicenow_sir"><code>update_case_connector_servicenow_sir</code> - Update case request with ServiceNow SecOps connector</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">cases </div><div class="param-desc"><span class="param-type"><a href="#update_case_connector_servicenow_sir_cases_inner">array[update_case_connector_servicenow_sir_cases_inner]</a></span> An array containing one or more case objects. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_case_connector_servicenow_sir_cases_inner"><code>update_case_connector_servicenow_sir_cases_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_properties_servicenow_sir">connector_properties_servicenow_sir</a></span>  </div>
-<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An updated description for the case. </div>
-<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the case. </div>
-<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
-<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
-<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
-<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. </div>
-<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
-<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current version of the case. To determine this value, use the get case or find cases APIs. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_case_connector_swimlane"><code>update_case_connector_swimlane</code> - Update case request with a Swimlane connector</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">cases </div><div class="param-desc"><span class="param-type"><a href="#update_case_connector_swimlane_cases_inner">array[update_case_connector_swimlane_cases_inner]</a></span> An array containing one or more case objects. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="update_case_connector_swimlane_cases_inner"><code>update_case_connector_swimlane_cases_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">connector (optional)</div><div class="param-desc"><span class="param-type"><a href="#connector_properties_swimlane">connector_properties_swimlane</a></span>  </div>
-<div class="param">description (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> An updated description for the case. </div>
-<div class="param">id </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The identifier for the case. </div>
-<div class="param">settings (optional)</div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
-<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
-<div class="param">status (optional)</div><div class="param-desc"><span class="param-type"><a href="#status">status</a></span>  </div>
-<div class="param">tags (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. </div>
-<div class="param">title (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
-<div class="param">version </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The current version of the case. To determine this value, use the get case or find cases APIs. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
     <h3><a name="update_case_request"><code>update_case_request</code> - Update case request</a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>The update case API request body varies depending on the type of connector.</div>
     <div class="field-items">
-      <div class="param">cases </div><div class="param-desc"><span class="param-type"><a href="#update_case_connector_swimlane_cases_inner">array[update_case_connector_swimlane_cases_inner]</a></span> An array containing one or more case objects. </div>
+      <div class="param">cases </div><div class="param-desc"><span class="param-type"><a href="#Update_case_request_with_a_Swimlane_connector_cases">array[Update_case_request_with_a_Swimlane_connector_cases]</a></span> An array containing one or more case objects. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
