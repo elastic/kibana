@@ -41,7 +41,7 @@ const constants: LinkCardConstants = {
   },
 };
 
-export const LinkCard = ({
+export const ObservabilityLinkCard = ({
   navigateToApp,
   isDarkTheme,
   addBasePath,

@@ -25,7 +25,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { GuideState, GuideId, UseCase } from '@kbn/guided-onboarding';
-import { GuideCard, LinkCard } from '@kbn/guided-onboarding';
+import { GuideCard, ObservabilityLinkCard } from '@kbn/guided-onboarding';
 
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
@@ -125,7 +125,7 @@ export const GettingStarted = () => {
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <LinkCard
+              <ObservabilityLinkCard
                 navigateToApp={application.navigateToApp}
                 isDarkTheme={isDarkTheme}
                 addBasePath={http.basePath.prepend}

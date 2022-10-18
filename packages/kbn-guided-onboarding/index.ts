@@ -7,5 +7,5 @@
  */
 
 export type { GuideState, GuideId } from './src/types';
-export { GuideCard, LinkCard } from './src/components/landing_page';
+export { GuideCard, ObservabilityLinkCard } from './src/components/landing_page';
 export type { UseCase } from './src/components/landing_page';

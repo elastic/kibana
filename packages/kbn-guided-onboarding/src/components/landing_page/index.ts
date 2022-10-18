@@ -7,5 +7,5 @@
  */
 
 export { GuideCard } from './guide_card';
-export { LinkCard } from './link_card';
-export { UseCase } from './use_case_card';
+export { ObservabilityLinkCard } from './observability_link_card';
+export type { UseCase } from './use_case_card';

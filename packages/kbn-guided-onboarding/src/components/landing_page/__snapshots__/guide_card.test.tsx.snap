@@ -5,21 +5,11 @@ exports[`guide card snapshots should render use case card component for observab
   addBasePath={[MockFunction]}
   description="Get end-to-end observability into your environments by consolidating your logs, metrics, and traces."
   footer={
-    <EuiFlexGroup
-      justifyContent="center"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButton
-          data-test-subj="onboarding--guideCard--view--observability"
-          fill={true}
-          onClick={[Function]}
-        >
-          View guide
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <GuideCardFooter
+      activateGuide={[MockFunction]}
+      guides={Array []}
+      useCase="observability"
+    />
   }
   isDarkTheme={false}
   title="Monitor my environments"
@@ -32,21 +22,11 @@ exports[`guide card snapshots should render use case card component for search 1
   addBasePath={[MockFunction]}
   description="Create a finely-tuned search experience for your websites, applications, workplace content, and more."
   footer={
-    <EuiFlexGroup
-      justifyContent="center"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButton
-          data-test-subj="onboarding--guideCard--view--search"
-          fill={true}
-          onClick={[Function]}
-        >
-          View guide
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <GuideCardFooter
+      activateGuide={[MockFunction]}
+      guides={Array []}
+      useCase="search"
+    />
   }
   isDarkTheme={false}
   title="Search my data"
@@ -59,21 +39,11 @@ exports[`guide card snapshots should render use case card component for security
   addBasePath={[MockFunction]}
   description="Protect your environment against threats by unifying SIEM, endpoint security, and cloud security in one place."
   footer={
-    <EuiFlexGroup
-      justifyContent="center"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiButton
-          data-test-subj="onboarding--guideCard--view--security"
-          fill={true}
-          onClick={[Function]}
-        >
-          View guide
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <GuideCardFooter
+      activateGuide={[MockFunction]}
+      guides={Array []}
+      useCase="security"
+    />
   }
   isDarkTheme={false}
   title="Protect my environment"
