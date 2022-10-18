@@ -111,6 +111,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
             : c
         ),
         excludedRowRendererIds: showExternalAlerts ? Object.values(RowRendererId) : undefined,
+        title: i18n.EVENTS_GRAPH_TITLE,
       })
     );
   }, [dispatch, showExternalAlerts, tGridEnabled, timelineId]);
