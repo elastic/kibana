@@ -7,3 +7,4 @@
  */
 
 export { setupServer } from './src/setup_server';
+export { createExportableType } from './src/create_exportable_type';

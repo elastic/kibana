@@ -9,7 +9,6 @@
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import { createHttpServer, createCoreContext } from '@kbn/core-http-server-mocks';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
@@ -60,19 +59,5 @@ export const setupServer = async (coreId: symbol = defaultCoreId) => {
     server,
     httpSetup,
     handlerContext,
-  };
-};
-
-export const createExportableType = (name: string): SavedObjectsType => {
-  return {
-    name,
-    hidden: false,
-    namespaceType: 'single',
-    mappings: {
-      properties: {},
-    },
-    management: {
-      importableAndExportable: true,
-    },
   };
 };
