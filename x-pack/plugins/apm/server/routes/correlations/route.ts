@@ -99,6 +99,7 @@ const fieldValueStatsTransactionsRoute = createApmServerRoute({
         serviceName: t.string,
         transactionName: t.string,
         transactionType: t.string,
+        samplerShardSize: t.string,
       }),
       environmentRt,
       kueryRt,
@@ -134,9 +135,14 @@ const fieldValueStatsTransactionsRoute = createApmServerRoute({
         kuery,
         fieldName,
         fieldValue,
+        samplerShardSize: samplerShardSizeStr,
       },
     } = resources.params;
 
+    const samplerShardSize = samplerShardSizeStr
+      ? parseInt(samplerShardSizeStr, 10)
+      : undefined;
+    console.log('typeof samplerShardSize', typeof samplerShardSize);
     return fetchFieldValueFieldStats({
       setup,
       eventType: ProcessorEvent.transaction,
@@ -157,6 +163,7 @@ const fieldValueStatsTransactionsRoute = createApmServerRoute({
         fieldName,
         fieldValue,
       },
+      samplerShardSize,
     });
   },
 });

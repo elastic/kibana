@@ -18,11 +18,10 @@ import {
 } from '@kbn/unified-field-list-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldTopValuesBucket } from '@kbn/unified-field-list-plugin/public';
 
 import type { FieldTopValuesBucketParams } from '@kbn/unified-field-list-plugin/public';
-import { css } from '@emotion/react';
 import {
   EuiHorizontalRule,
   EuiText,
@@ -33,13 +32,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import numeral from '@elastic/numeral';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { isUndefinedOrNull } from '../../../../../common/utils/is_defined_or_null';
-import { asPercent } from '../../../../../common/utils/formatters';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetchParams } from '../use_fetch_params';
@@ -48,6 +47,12 @@ import { useApmDataView } from '../../../../hooks/use_apm_data_view';
 import { useTheme } from '../../../../hooks/use_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
+const HIGHLIGHTED_BUCKET_PROPS = {
+  color: 'accent',
+  textProps: {
+    color: 'accent',
+  },
+};
 export function kqlQuery(kql: string): estypes.QueryDslQueryContainer[] {
   return !!kql ? [toElasticsearchQuery(fromKueryExpression(kql))] : [];
 }
@@ -71,10 +76,14 @@ export type OnAddFilter = ({
 
 const defaultFilters: Filter[] = [];
 
-type FieldStatsPopoverContentProps = FieldStatsProps & {
+type FieldStatsPopoverContentProps = Omit<
+  FieldStatsProps,
+  'dataViewOrDataViewId'
+> & {
   fieldName: string;
   fieldValue: string | number;
   dslQuery: object;
+  dataView: DataView;
 };
 
 export function FieldStatsPopoverContent({
@@ -82,7 +91,7 @@ export function FieldStatsPopoverContent({
   fieldValue,
   services,
   field,
-  dataViewOrDataViewId,
+  dataView,
   dslQuery,
   filters,
   fromDate,
@@ -121,6 +130,8 @@ export function FieldStatsPopoverContent({
                 ...params,
                 fieldName,
                 fieldValue,
+                // Using sampler shard size to match with unified field list's default
+                samplerShardSize: '5000',
               },
             },
           }
@@ -130,13 +141,14 @@ export function FieldStatsPopoverContent({
     [params, fieldName, fieldValue, needToFetchIndividualStat]
   );
   const progressBarMax = fieldValueStats?.topValuesSampleSize;
+  const formatter = dataView.getFormatterForField(field);
 
   return (
     <>
       <FieldStats
         services={services}
         field={field}
-        dataViewOrDataViewId={dataViewOrDataViewId}
+        dataViewOrDataViewId={dataView}
         dslQuery={dslQuery}
         filters={filters}
         fromDate={fromDate}
@@ -158,24 +170,27 @@ export function FieldStatsPopoverContent({
           {status === FETCH_STATUS.SUCCESS &&
           Array.isArray(fieldValueStats?.topValues) ? (
             fieldValueStats?.topValues.map((value) => {
+              if (progressBarMax === undefined) return null;
+
+              const formatted = formatter.convert(fieldValue);
+              const decimal = value.doc_count / progressBarMax;
               const valueText =
                 progressBarMax !== undefined
-                  ? asPercent(value.doc_count, progressBarMax)
+                  ? numeral(decimal).format('0.0%')
                   : '';
 
-              if (progressBarMax === undefined || valueText === '') return null;
               return (
                 <FieldTopValuesBucket
                   field={field}
                   fieldValue={fieldValue}
                   formattedPercentage={valueText}
-                  formattedFieldValue={fieldValue.toString()}
-                  progressValue={value.doc_count / progressBarMax}
+                  formattedFieldValue={formatted}
+                  progressValue={decimal}
                   count={value.doc_count}
                   onAddFilter={onAddFilter}
                   overrideFieldTopValueBar={overrideFieldTopValueBar}
-                  color={'accent'}
                   {...{ 'data-test-subj': 'apmNotInTopTenFieldTopValueBucket' }}
+                  {...HIGHLIGHTED_BUCKET_PROPS}
                 />
               );
             })
@@ -272,14 +287,7 @@ export function FieldStatsPopover({
         return { color: 'primary' };
       }
       return fieldValue === fieldTopValuesBucketParams.fieldValue
-        ? {
-            color: 'accent',
-            textProps: {
-              css: css`
-                font-weight: bold;
-              `,
-            },
-          }
+        ? HIGHLIGHTED_BUCKET_PROPS
         : {};
     },
     [fieldValue]
@@ -328,7 +336,7 @@ export function FieldStatsPopover({
             fieldValue={fieldValue}
             services={fieldStatsServices as FieldStatsServices}
             field={field}
-            dataViewOrDataViewId={dataView}
+            dataView={dataView}
             dslQuery={fieldStatsQuery}
             filters={defaultFilters}
             fromDate={start}
