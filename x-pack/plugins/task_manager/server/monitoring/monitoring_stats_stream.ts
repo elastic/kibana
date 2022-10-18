@@ -30,6 +30,12 @@ import {
   TaskRunStat,
   SummarizedTaskRunStat,
 } from './task_run_statistics';
+import {
+  BackgroundTaskUtilizationStat,
+  summarizeUtilizationStat,
+  createBackgroundTaskUtilizationAggregator,
+} from './background_task_utilization_statistics';
+
 import { ConfigStat, createConfigurationAggregator } from './configuration_statistics';
 import { TaskManagerConfig } from '../config';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
@@ -46,6 +52,7 @@ export interface MonitoringStats {
     workload?: MonitoredStat<WorkloadStat>;
     runtime?: MonitoredStat<TaskRunStat>;
     ephemeral?: MonitoredStat<EphemeralTaskStat>;
+    utilization?: MonitoredStat<BackgroundTaskUtilizationStat>;
   };
 }
 
@@ -96,7 +103,11 @@ export function createAggregators(
   ];
   if (taskPollingLifecycle) {
     aggregators.push(
-      createTaskRunAggregator(taskPollingLifecycle, config.monitored_stats_running_average_window)
+      createTaskRunAggregator(taskPollingLifecycle, config.monitored_stats_running_average_window),
+      createBackgroundTaskUtilizationAggregator(
+        taskPollingLifecycle,
+        config.monitored_stats_running_average_window
+      )
     );
   }
   if (ephemeralTaskLifecycle && ephemeralTaskLifecycle.enabled) {
@@ -145,7 +156,7 @@ export function summarizeMonitoringStats(
   {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     last_update,
-    stats: { runtime, workload, configuration, ephemeral },
+    stats: { runtime, workload, configuration, ephemeral, utilization },
   }: MonitoringStats,
   config: TaskManagerConfig
 ): RawMonitoringStats {
@@ -179,6 +190,14 @@ export function summarizeMonitoringStats(
           ephemeral: {
             timestamp: ephemeral.timestamp,
             ...summarizeEphemeralStat(ephemeral.value),
+          },
+        }
+      : {}),
+    ...(utilization
+      ? {
+          utilization: {
+            timestamp: utilization.timestamp,
+            ...summarizeUtilizationStat(utilization.value),
           },
         }
       : {}),
