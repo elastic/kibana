@@ -69,9 +69,13 @@ import type {
 import { RenderingService } from '@kbn/core-rendering-server-internal';
 
 import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
+import {
+  InternalCorePreboot,
+  InternalCoreSetup,
+  InternalCoreStart,
+} from '@kbn/core-lifecycle-server-internal';
 import { CoreApp } from './core_app';
 import { PluginsService, config as pluginsConfig } from './plugins';
-import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { DiscoveredPlugins } from './plugins';
 
 const coreId = Symbol('core');

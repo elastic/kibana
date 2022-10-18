@@ -18,13 +18,17 @@ import type { PluginName } from '@kbn/core-base-common';
 import type { InternalEnvironmentServicePreboot } from '@kbn/core-environment-server-internal';
 import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
 import type { InternalPluginInfo, UiPlugins } from '@kbn/core-plugins-base-server-internal';
+import {
+  InternalCorePreboot,
+  InternalCoreSetup,
+  InternalCoreStart,
+} from '@kbn/core-lifecycle-server-internal';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
 import { DiscoveredPlugin, PluginConfigDescriptor, PluginDependencies, PluginType } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';
-import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from '../internal_types';
 
 /** @internal */
 export type DiscoveredPlugins = {

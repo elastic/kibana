@@ -16,7 +16,7 @@ import { getEnvOptions } from '@kbn/config-mocks';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
-import { InternalCoreStart } from '../../../internal_types';
+import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '../../../root';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
