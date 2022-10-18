@@ -1,0 +1,13 @@
+---
+id: kibDevDocsOpsEslintPluginTelemetry
+slug: /kibana-dev-docs/ops/kbn-eslint-plugin-telemetry
+title: '@kbn/eslint-plugin-telemetry'
+description: Custom ESLint rules to support telemetry in the Kibana repository
+tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'telemetry']
+---
+
+`@kbn/eslint-plugin-telemetry` is an ESLint plugin providing custom rules for validating JSXCode in the Kibana repo to make sure it can be instrumented for the purposes of telemetry.
+
+## `@kbn/telemetry/instrumentable_elements_should_be_instrumented`
+
+This rule warns engineers to add `data-test-id` to instrumentable components. It currently suggests the most widely used EUI components (`EuiButton`, `EuiFieldText`, etc), but can be expanded with often-used specific components used in the Kibana repo.
