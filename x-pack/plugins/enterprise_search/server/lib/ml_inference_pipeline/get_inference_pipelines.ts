@@ -12,6 +12,12 @@ import { IngestPipeline, IngestProcessorContainer } from '@elastic/elasticsearch
 
 import { getMlModelConfigsForModelIds } from '../indices/fetch_ml_inference_pipeline_processors';
 
+/**
+ * Gets all ML inference pipelines. Redacts trained model IDs in those pipelines which reference
+ * a model inaccessible in the current Kibana space.
+ * @param esClient the Elasticsearch Client to use to fetch the errors.
+ * @param trainedModelsProvider ML trained models provider.
+ */
 export const getMlInferencePipelines = async (
   esClient: ElasticsearchClient,
   trainedModelsProvider: MlTrainedModels | undefined,
@@ -49,18 +55,34 @@ export const getMlInferencePipelines = async (
   return Promise.resolve(inferencePipelinesResult);
 };
 
+/**
+ * Convenience function that finds the inference processor in a given ingest pipeline.
+ * @param pipeline the pipeline.
+ */
 function getInferenceProcessor(pipeline: IngestPipeline): IngestProcessorContainer | undefined {
   const processors = pipeline.processors || [];
 
   return processors.find((processor) => processor.hasOwnProperty('inference'));
 }
 
-function isModelIdRedacted(pipeline: IngestPipeline, redactedModelIds: string[]) {
+/**
+ * Convenience function for evaluating whether the trained model the supplied pipeline references
+ * is redacted.
+ * @param pipeline the pipeline.
+ * @param redactedModelIds Array of known redacted model IDs.
+ */
+ function isModelIdRedacted(pipeline: IngestPipeline, redactedModelIds: string[]) {
   const inferenceProcessor = getInferenceProcessor(pipeline);
 
-  return inferenceProcessor?.inference && redactedModelIds.includes(inferenceProcessor.inference?.model_id);
+  return inferenceProcessor?.inference && redactedModelIds.includes(inferenceProcessor.inference.model_id);
 }
 
+/**
+ * Convenience function that redacts the trained model ID in a given ingest pipeline by setting it
+ * to `model_id: ''`.
+ * @param pipeline the pipeline to process.
+ * @returns a copy of the input pipeline with the model ID redacted.
+ */
 function redactModelId(pipeline: IngestPipeline): IngestPipeline {
   const modifiedPipeline = { ...pipeline };
 
