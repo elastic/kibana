@@ -268,34 +268,6 @@ components:
           example: .none
           enum:
             - .none
-    owners:
-      type: string
-      description: |
-        The application that owns the cases: Stack Management, Observability, or Elastic Security.
-      enum:
-        - cases
-        - observability
-        - securitySolution
-      example: cases
-    settings:
-      type: object
-      description: An object that contains the case settings.
-      required:
-        - syncAlerts
-      properties:
-        syncAlerts:
-          description: Turns alert syncing on or off.
-          type: boolean
-          example: true
-    severity_property:
-      type: string
-      description: The severity of the case.
-      enum:
-        - critical
-        - high
-        - low
-        - medium
-      default: low
     connector_properties_cases_webhook:
       title: Create or upate case request properties for Cases Webhook connector
       required:
@@ -548,214 +520,72 @@ components:
           example: .swimlane
           enum:
             - .swimlane
+    owners:
+      type: string
+      description: |
+        The application that owns the cases: Stack Management, Observability, or Elastic Security.
+      enum:
+        - cases
+        - observability
+        - securitySolution
+      example: cases
+    settings:
+      type: object
+      description: An object that contains the case settings.
+      required:
+        - syncAlerts
+      properties:
+        syncAlerts:
+          description: Turns alert syncing on or off.
+          type: boolean
+          example: true
+    severity_property:
+      type: string
+      description: The severity of the case.
+      enum:
+        - critical
+        - high
+        - low
+        - medium
+      default: low
     create_case_request:
       title: Create case request
       description: The create case API request body varies depending on the type of connector.
-      oneOf:
-        - type: object
-          title: Create case request with no connector
-          description: Defines properties for cases when the connector type is `.none`.
-          required:
-            - connector
-            - description
-            - owner
-            - settings
-            - tags
-            - title
-          properties:
-            connector:
-              $ref: '#/components/schemas/connector_properties_none'
-            description:
-              description: The description for the case.
-              type: string
-            owner:
-              $ref: '#/components/schemas/owners'
-            settings:
-              $ref: '#/components/schemas/settings'
-            severity:
-              $ref: '#/components/schemas/severity_property'
-            tags:
-              description: The words and phrases that help categorize cases. It can be an empty array.
-              type: array
-              items:
-                type: string
-            title:
-              description: A title for the case.
-              type: string
-        - type: object
-          title: Create case request with a Cases Webhook connector
-          required:
-            - connector
-            - description
-            - owner
-            - settings
-            - tags
-            - title
-          properties:
-            connector:
-              $ref: '#/components/schemas/connector_properties_cases_webhook'
-            description:
-              description: The description for the case.
-              type: string
-            owner:
-              $ref: '#/components/schemas/owners'
-            settings:
-              $ref: '#/components/schemas/settings'
-            severity:
-              $ref: '#/components/schemas/severity_property'
-            tags:
-              description: The words and phrases that help categorize cases. It can be an empty array.
-              type: array
-              items:
-                type: string
-            title:
-              description: A title for the case.
-              type: string
-        - type: object
-          title: Create case request with a Jira connector
-          required:
-            - connector
-            - description
-            - owner
-            - settings
-            - tags
-            - title
-          properties:
-            connector:
-              $ref: '#/components/schemas/connector_properties_jira'
-            description:
-              description: The description for the case.
-              type: string
-            owner:
-              $ref: '#/components/schemas/owners'
-            settings:
-              $ref: '#/components/schemas/settings'
-            severity:
-              $ref: '#/components/schemas/severity_property'
-            tags:
-              description: The words and phrases that help categorize cases. It can be an empty array.
-              type: array
-              items:
-                type: string
-            title:
-              description: A title for the case.
-              type: string
-        - type: object
-          title: Create case request with a IBM Resilient connector
-          required:
-            - connector
-            - description
-            - owner
-            - settings
-            - tags
-            - title
-          properties:
-            connector:
-              $ref: '#/components/schemas/connector_properties_resilient'
-            description:
-              description: The description for the case.
-              type: string
-            owner:
-              $ref: '#/components/schemas/owners'
-            settings:
-              $ref: '#/components/schemas/settings'
-            severity:
-              $ref: '#/components/schemas/severity_property'
-            tags:
-              description: The words and phrases that help categorize cases. It can be an empty array.
-              type: array
-              items:
-                type: string
-            title:
-              description: A title for the case.
-              type: string
-        - type: object
-          title: Create case request with a ServiceNow ITSM connector
-          required:
-            - connector
-            - description
-            - owner
-            - settings
-            - tags
-            - title
-          properties:
-            connector:
-              $ref: '#/components/schemas/connector_properties_servicenow'
-            description:
-              description: The description for the case.
-              type: string
-            owner:
-              $ref: '#/components/schemas/owners'
-            settings:
-              $ref: '#/components/schemas/settings'
-            severity:
-              $ref: '#/components/schemas/severity_property'
-            tags:
-              description: The words and phrases that help categorize cases. It can be an empty array.
-              type: array
-              items:
-                type: string
-            title:
-              description: A title for the case.
-              type: string
-        - type: object
-          title: Create case request with a ServiceNow SecOps connector
-          required:
-            - connector
-            - description
-            - owner
-            - settings
-            - tags
-            - title
-          properties:
-            connector:
-              $ref: '#/components/schemas/connector_properties_servicenow_sir'
-            description:
-              description: The description for the case.
-              type: string
-            owner:
-              $ref: '#/components/schemas/owners'
-            settings:
-              $ref: '#/components/schemas/settings'
-            severity:
-              $ref: '#/components/schemas/severity_property'
-            tags:
-              description: The words and phrases that help categorize cases. It can be an empty array.
-              type: array
-              items:
-                type: string
-            title:
-              description: A title for the case.
-              type: string
-        - type: object
-          title: Create case request with a Swimlane connector
-          required:
-            - connector
-            - description
-            - owner
-            - settings
-            - tags
-            - title
-          properties:
-            connector:
-              $ref: '#/components/schemas/connector_properties_swimlane'
-            description:
-              description: The description for the case.
-              type: string
-            owner:
-              $ref: '#/components/schemas/owners'
-            settings:
-              $ref: '#/components/schemas/settings'
-            severity:
-              $ref: '#/components/schemas/severity_property'
-            tags:
-              description: The words and phrases that help categorize cases. It can be an empty array.
-              type: array
-              items:
-                type: string
-            title:
-              description: A title for the case.
-              type: string
+      type: object
+      required:
+        - connector
+        - description
+        - owner
+        - settings
+        - tags
+        - title
+      properties:
+        connector:
+          oneOf:
+            - $ref: '#/components/schemas/connector_properties_none'
+            - $ref: '#/components/schemas/connector_properties_cases_webhook'
+            - $ref: '#/components/schemas/connector_properties_jira'
+            - $ref: '#/components/schemas/connector_properties_resilient'
+            - $ref: '#/components/schemas/connector_properties_servicenow'
+            - $ref: '#/components/schemas/connector_properties_servicenow_sir'
+            - $ref: '#/components/schemas/connector_properties_swimlane'
+        description:
+          description: The description for the case.
+          type: string
+        owner:
+          $ref: '#/components/schemas/owners'
+        settings:
+          $ref: '#/components/schemas/settings'
+        severity:
+          $ref: '#/components/schemas/severity_property'
+        tags:
+          description: The words and phrases that help categorize cases. It can be an empty array.
+          type: array
+          items:
+            type: string
+        title:
+          description: A title for the case.
+          type: string
     case_response_closed_by_properties:
       title: Case response properties for closed_by
       type: object
