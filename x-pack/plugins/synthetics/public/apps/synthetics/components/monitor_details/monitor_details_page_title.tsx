@@ -6,9 +6,19 @@
  */
 
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { MonitorSelector } from './monitor_selector/monitor_selector';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 
 export const MonitorDetailsPageTitle = () => {
   const { monitor } = useSelectedMonitor();
-  return <>{monitor ? monitor.name : null}</>;
+
+  return (
+    <EuiFlexGroup gutterSize="m">
+      <EuiFlexItem grow={false}> {monitor?.name}</EuiFlexItem>
+      <EuiFlexItem>
+        <MonitorSelector />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };

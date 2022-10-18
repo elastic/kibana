@@ -23,10 +23,10 @@ export const testMobileKPIAttr = {
   visualizationType: 'lnsXY',
   state: {
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           layer0: {
-            columnOrder: ['x-axis-column-layer0', 'y-axis-column-layer0'],
+            columnOrder: ['x-axis-column-layer0', 'y-axis-column-layer0-0'],
             columns: {
               'x-axis-column-layer0': {
                 sourceField: '@timestamp',
@@ -37,10 +37,11 @@ export const testMobileKPIAttr = {
                 params: { interval: 'auto' },
                 scale: 'interval',
               },
-              'y-axis-column-layer0': {
+              'y-axis-column-layer0-0': {
                 isBucketed: false,
                 label: 'Median of System memory usage',
                 operationType: 'median',
+                params: {},
                 scale: 'ratio',
                 sourceField: 'system.memory.usage',
                 dataType: 'number',
@@ -67,12 +68,12 @@ export const testMobileKPIAttr = {
       preferredSeriesType: 'line',
       layers: [
         {
-          accessors: ['y-axis-column-layer0'],
+          accessors: ['y-axis-column-layer0-0'],
           layerId: 'layer0',
           layerType: 'data',
           palette: undefined,
           seriesType: 'line',
-          yConfig: [{ forAccessor: 'y-axis-column-layer0', color: 'green', axisMode: 'left' }],
+          yConfig: [{ forAccessor: 'y-axis-column-layer0-0', color: 'green', axisMode: 'left' }],
           xAccessor: 'x-axis-column-layer0',
         },
       ],

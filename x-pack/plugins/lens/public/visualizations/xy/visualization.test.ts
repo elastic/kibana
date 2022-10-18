@@ -28,7 +28,7 @@ import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsState } from '../../state_management';
-import { createMockedIndexPattern } from '../../indexpattern_datasource/mocks';
+import { createMockedIndexPattern } from '../../datasources/form_based/mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
@@ -292,6 +292,7 @@ describe('xy_visualization', () => {
               label: 'date_histogram',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -1685,6 +1686,7 @@ describe('xy_visualization', () => {
               label: 'date_histogram',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -1715,6 +1717,7 @@ describe('xy_visualization', () => {
               label: 'date_histogram',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -1759,6 +1762,7 @@ describe('xy_visualization', () => {
               label: 'histogram',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -1791,6 +1795,7 @@ describe('xy_visualization', () => {
               label: 'top values',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -1821,6 +1826,7 @@ describe('xy_visualization', () => {
               label: 'top values',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -1930,6 +1936,7 @@ describe('xy_visualization', () => {
               label: 'date_histogram',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;

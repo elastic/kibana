@@ -91,7 +91,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('change the status of cases to in-progress correctly', async () => {
           await cases.casesTable.selectAndChangeStatusOfAllCases(CaseStatuses['in-progress']);
           await cases.casesTable.waitForTableToFinishLoading();
-          await testSubjects.missingOrFail('status-badge-open');
+          await testSubjects.missingOrFail('case-status-badge-open');
         });
       });
 
@@ -217,13 +217,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.refreshTable();
         await cases.casesTable.validateCasesTableHasNthRows(1);
         const row = await cases.casesTable.getCaseFromTable(0);
-        const tags = await row.findByCssSelector('[data-test-subj="case-table-column-tags-one"]');
+        const tags = await row.findByTestSubject('case-table-column-tags-one');
         expect(await tags.getVisibleText()).to.be('one');
       });
 
       it('filters cases by status', async () => {
         await cases.casesTable.changeStatus(CaseStatuses['in-progress'], 0);
-        await testSubjects.existOrFail(`status-badge-${CaseStatuses['in-progress']}`);
+        await testSubjects.existOrFail(`case-status-badge-${CaseStatuses['in-progress']}`);
         await cases.casesTable.filterByStatus(CaseStatuses['in-progress']);
         await cases.casesTable.validateCasesTableHasNthRows(1);
       });
@@ -239,6 +239,33 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await cases.casesTable.filterByAssignee('2');
           await cases.casesTable.validateCasesTableHasNthRows(1);
           await testSubjects.exists('case-user-profile-avatar-cases_all_user2');
+        });
+
+        it('filters cases without assignees', async () => {
+          await cases.casesTable.openAssigneesPopover();
+          await cases.common.selectFirstRowInAssigneesPopover();
+          await cases.casesTable.validateCasesTableHasNthRows(2);
+
+          const firstCaseTitle = await (
+            await cases.casesTable.getCaseFromTable(0)
+          ).findByTestSubject('case-details-link');
+
+          const secondCaseTitle = await (
+            await cases.casesTable.getCaseFromTable(1)
+          ).findByTestSubject('case-details-link');
+
+          expect(await firstCaseTitle.getVisibleText()).be('test2');
+          expect(await secondCaseTitle.getVisibleText()).be('matchme');
+        });
+
+        it('filters cases with and without assignees', async () => {
+          await cases.casesTable.openAssigneesPopover();
+          await cases.common.selectRowsInAssigneesPopover([0, 2]);
+          await cases.casesTable.validateCasesTableHasNthRows(3);
+
+          expect(await cases.casesTable.getCaseTitle(0)).be('test4');
+          expect(await cases.casesTable.getCaseTitle(1)).be('test2');
+          expect(await cases.casesTable.getCaseTitle(2)).be('matchme');
         });
       });
     });
@@ -326,17 +353,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         it('to in progress', async () => {
           await cases.casesTable.changeStatus(CaseStatuses['in-progress'], 0);
-          await testSubjects.existOrFail(`status-badge-${CaseStatuses['in-progress']}`);
+          await testSubjects.existOrFail(`case-status-badge-${CaseStatuses['in-progress']}`);
         });
 
         it('to closed', async () => {
           await cases.casesTable.changeStatus(CaseStatuses.closed, 0);
-          await testSubjects.existOrFail(`status-badge-${CaseStatuses.closed}`);
+          await testSubjects.existOrFail(`case-status-badge-${CaseStatuses.closed}`);
         });
 
         it('to open', async () => {
           await cases.casesTable.changeStatus(CaseStatuses.open, 0);
-          await testSubjects.existOrFail(`status-badge-${CaseStatuses.open}`);
+          await testSubjects.existOrFail(`case-status-badge-${CaseStatuses.open}`);
         });
       });
 
