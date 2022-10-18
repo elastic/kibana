@@ -202,6 +202,7 @@ describe('Storage Explorer', () => {
       cy.contains('Service storage details');
       cy.getByTestSubj('storageExplorerTimeseriesChart');
       cy.getByTestSubj('serviceStorageDetailsTable');
+      cy.getByTestSubj('storageExplorerIndicesStatsTable');
     });
   });
 });
