@@ -12,7 +12,7 @@ import { EuiCodeBlock } from '@elastic/eui';
 import { IngestPipelineParams } from '../../../../../../../common/types/connectors';
 import { useCloudDetails } from '../../../../../shared/cloud_details/cloud_details';
 
-import { decodeCloudId } from '../../../../utils/decode_cloud_id';
+import { decodeCloudId } from '../../../../../shared/decode_cloud_id/decode_cloud_id';
 
 interface CurlRequestParams {
   apiKey?: string;
