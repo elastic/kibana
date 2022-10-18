@@ -24,7 +24,6 @@ export type TopNavMenuProps<QT extends Query | AggregateQuery = Query> =
       config?: TopNavMenuData[];
       badges?: Array<EuiBadgeProps & { badgeText: string }>;
       showSearchBar?: boolean;
-      showQueryBar?: boolean;
       showQueryInput?: boolean;
       showDatePicker?: boolean;
       showFilterBar?: boolean;
@@ -142,7 +141,6 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
 
 TopNavMenu.defaultProps = {
   showSearchBar: false,
-  showQueryBar: true,
   showQueryInput: true,
   showDatePicker: true,
   showFilterBar: true,

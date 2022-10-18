@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.switchToWindow(discoverWindowHandle);
 
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('discoverChart');
+      await testSubjects.existOrFail('unifiedHistogramChart');
       // check the table columns
       const columns = await PageObjects.discover.getColumnHeaders();
       expect(columns).to.eql(['extension.raw', '@timestamp', 'bytes']);
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('discoverChart');
+      await testSubjects.existOrFail('unifiedHistogramChart');
       expect(await queryBar.getQueryString()).be.eql('');
       await browser.closeCurrentWindow();
       await browser.switchToWindow(lensWindowHandler);
@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('discoverChart');
+      await testSubjects.existOrFail('unifiedHistogramChart');
       // check the query
       expect(await queryBar.getQueryString()).be.eql(
         '( ( extension.raw: "png" ) OR ( extension.raw: "css" ) OR ( extension.raw: "jpg" ) )'
@@ -139,7 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('discoverChart');
+      await testSubjects.existOrFail('unifiedHistogramChart');
       // check the columns
       const columns = await PageObjects.discover.getColumnHeaders();
       expect(columns).to.eql(['extension.raw', '@timestamp', 'memory']);
@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('discoverChart');
+      await testSubjects.existOrFail('unifiedHistogramChart');
 
       // check the query
       expect(await queryBar.getQueryString()).be.eql(
