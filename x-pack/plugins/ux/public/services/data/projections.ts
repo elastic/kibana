@@ -9,7 +9,6 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   AGENT_NAME,
   PROCESSOR_EVENT,
-  SERVICE_LANGUAGE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
