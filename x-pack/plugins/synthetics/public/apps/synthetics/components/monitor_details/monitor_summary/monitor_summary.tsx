@@ -53,7 +53,7 @@ export const MonitorSummary = () => {
             </EuiTitle>
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem>
-                <AvailabilityPanel />
+                <AvailabilityPanel from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <AvailabilitySparklines />
