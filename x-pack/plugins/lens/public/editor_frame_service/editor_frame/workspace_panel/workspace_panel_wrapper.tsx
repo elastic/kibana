@@ -112,14 +112,9 @@ export function WorkspacePanelWrapper({
     warningMessages.push(...requestWarnings);
   }
   return (
-    <EuiPageTemplate direction="column" grow={false} offset={0} minHeight={0}>
+    <EuiPageTemplate direction="column" offset={0} minHeight={0} restrictWidth={false}>
       {!(isFullscreen && (autoApplyEnabled || warningMessages?.length)) && (
-        <EuiPageTemplate.Section
-          grow={false}
-          paddingSize="none"
-          color="transparent"
-          restrictWidth={false}
-        >
+        <EuiPageTemplate.Section paddingSize="none" color="transparent">
           <EuiFlexGroup
             alignItems="flexEnd"
             gutterSize="s"
@@ -201,7 +196,7 @@ export function WorkspacePanelWrapper({
         className={classNames('lnsWorkspacePanelWrapper', {
           'lnsWorkspacePanelWrapper--fullscreen': isFullscreen,
         })}
-        restrictWidth={false}
+        color="transparent"
       >
         <WorkspaceTitle />
         {children}
