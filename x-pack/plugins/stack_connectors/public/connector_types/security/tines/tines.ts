@@ -12,6 +12,7 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { TinesActionParams, TinesConfig, TinesSecrets } from './types';
+import { TINES_CONNECTOR_ID } from '../../../../common/connector_types/security/tines/constants';
 
 export function getConnectorType(): ConnectorTypeModel<
   TinesConfig,
@@ -19,7 +20,7 @@ export function getConnectorType(): ConnectorTypeModel<
   TinesActionParams
 > {
   return {
-    id: '.tines',
+    id: TINES_CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.tinesAction.selectMessageText',
