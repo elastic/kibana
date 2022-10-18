@@ -16,7 +16,7 @@ describe('TextWithEdit', () => {
     );
     expect(wrapper).toMatchSnapshot();
     expect(wrapper.getByTestId('TextWithEditTestText')).toHaveTextContent('Test');
-    expect(wrapper.queryByTestId('TextWithEditTestEditTitleIcon')).not.toBeInTheDocument();
+    expect(wrapper.queryByTestId('TextWithEditTestEditIcon')).not.toBeInTheDocument();
   });
   it('should render the edit icon  when isReadonly is false', () => {
     const wrapper = render(
@@ -24,7 +24,7 @@ describe('TextWithEdit', () => {
     );
     expect(wrapper).toMatchSnapshot();
     expect(wrapper.getByTestId('TextWithEditTestText')).toHaveTextContent('Test');
-    expect(wrapper.getByTestId('TextWithEditTestEditTitleIcon')).toBeInTheDocument();
+    expect(wrapper.getByTestId('TextWithEditTestEditIcon')).toBeInTheDocument();
   });
   it('should not call onEdit', () => {
     const onEdit = '';
@@ -36,7 +36,7 @@ describe('TextWithEdit', () => {
         onEdit={onEdit as any}
       />
     );
-    const editIcon = wrapper.getByTestId('TextWithEditTestEditTitleIcon');
+    const editIcon = wrapper.getByTestId('TextWithEditTestEditIcon');
     expect(wrapper.getByTestId('TextWithEditTestText')).toHaveTextContent('Test');
     expect(editIcon).toBeInTheDocument();
     fireEvent.click(editIcon);
@@ -53,8 +53,8 @@ describe('TextWithEdit', () => {
       />
     );
     expect(wrapper.getByTestId('TextWithEditTestText')).toHaveTextContent('Test');
-    expect(wrapper.queryByTestId('TextWithEditTestEditTitleIcon')).toBeInTheDocument();
-    fireEvent.click(wrapper.getByTestId('TextWithEditTestEditTitleIcon'));
+    expect(wrapper.queryByTestId('TextWithEditTestEditIcon')).toBeInTheDocument();
+    fireEvent.click(wrapper.getByTestId('TextWithEditTestEditIcon'));
     expect(onEdit).toBeCalled();
   });
 });
