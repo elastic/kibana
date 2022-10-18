@@ -126,6 +126,21 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
               <EuiFlexItem grow={false}>
                 <EuiToolTip
                   position="top"
+                  content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+                >
+                  <EuiButtonIcon
+                    size="s"
+                    color="danger"
+                    iconType="eraser"
+                    data-test-subj="optionsList-control-clear-all-selections"
+                    aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+                    onClick={() => dispatch(clearSelections({}))}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  position="top"
                   content={
                     showOnlySelected
                       ? OptionsListStrings.popover.getAllOptionsButtonTitle()
@@ -256,39 +271,14 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
           background-color: ${useEuiBackgroundColor('subdued')};
         `}
       >
-        <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonGroup
-              legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
-              options={aggregationToggleButtons}
-              idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
-              onChange={(optionId) =>
-                dispatch(setExclude(optionId === 'optionsList__excludeResults'))
-              }
-              buttonSize="compressed"
-              data-test-subj="optionsList__includeExcludeButtonGroup"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                >
-                  <EuiButtonIcon
-                    size="s"
-                    color="danger"
-                    iconType="eraser"
-                    data-test-subj="optionsList-control-clear-all-selections"
-                    aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                    onClick={() => dispatch(clearSelections({}))}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiButtonGroup
+          legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
+          options={aggregationToggleButtons}
+          idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
+          onChange={(optionId) => dispatch(setExclude(optionId === 'optionsList__excludeResults'))}
+          buttonSize="compressed"
+          data-test-subj="optionsList__includeExcludeButtonGroup"
+        />
       </EuiPopoverFooter>
     </>
   );
