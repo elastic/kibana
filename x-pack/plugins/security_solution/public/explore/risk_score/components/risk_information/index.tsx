@@ -27,7 +27,7 @@ import React from 'react';
 import { getRiskEntityTranslation } from '../translations';
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../../helper_hooks';
-import { RiskScore } from '../../../../common/components/severity/common';
+import { RiskScore } from '../severity/common';
 import { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreDocLink } from '../risk_score_onboarding/risk_score_doc_link';
 

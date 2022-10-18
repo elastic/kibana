@@ -10,7 +10,7 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { EntityAnalyticsRiskScores } from '.';
 import { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
-import type { SeverityCount } from '../../../../common/components/severity/types';
+import type { SeverityCount } from '../../../../explore/risk_score/components/severity/types';
 import { useRiskScore, useRiskScoreKpi } from '../../../../explore/risk_score/containers';
 
 const mockSeverityCount: SeverityCount = {

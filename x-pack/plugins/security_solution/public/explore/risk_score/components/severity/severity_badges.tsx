@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiNotificationBadge, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import type { RiskSeverity } from '../../../../common/search_strategy';
+import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScore, RISK_SEVERITY_COLOUR } from './common';
 import type { SeverityCount } from './types';
 

@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { EuiColorPaletteDisplay } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import type { RiskSeverity } from '../../../../common/search_strategy';
+import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RISK_SEVERITY_COLOUR } from './common';
 import type { SeverityCount } from './types';
 

@@ -18,7 +18,7 @@ import {
 import * as i18n from './translations';
 import { isIndexNotFoundError } from '../../../../common/utils/exceptions';
 import type { ESTermQuery } from '../../../../../common/typed_json';
-import type { SeverityCount } from '../../../../common/components/severity/types';
+import type { SeverityCount } from '../../components/severity/types';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';

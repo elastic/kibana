@@ -10,7 +10,7 @@ import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
-import { RiskScore } from '../../severity/common';
+import { RiskScore } from '../../../../explore/risk_score/components/severity/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import type { HostRisk, UserRisk } from '../../../../explore/risk_score/containers';

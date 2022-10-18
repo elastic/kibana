@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { EnableRiskScore } from '../../../../explore/risk_score/components/enable_risk_score';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../../../explore/users/store/model';
-import { SeverityFilterGroup } from '../../../../common/components/severity/severity_filter_group';
+import { SeverityFilterGroup } from '../../../../explore/risk_score/components/severity/severity_filter_group';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
 import { HostsTableType, HostsType } from '../../../../explore/hosts/store/model';

@@ -19,7 +19,7 @@ import { Provider } from '../../../../timelines/components/timeline/data_provide
 import type { UserRiskScoreColumns } from '.';
 
 import * as i18n from './translations';
-import { RiskScore } from '../../../../common/components/severity/common';
+import { RiskScore } from '../../../risk_score/components/severity/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreFields } from '../../../../../common/search_strategy';
 import { UserDetailsLink } from '../../../../common/components/links';

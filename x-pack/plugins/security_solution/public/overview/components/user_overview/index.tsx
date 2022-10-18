@@ -34,7 +34,7 @@ import * as i18n from './translations';
 
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { useRiskScore } from '../../../explore/risk_score/containers';
-import { RiskScore } from '../../../common/components/severity/common';
+import { RiskScore } from '../../../explore/risk_score/components/severity/common';
 import type { UserItem } from '../../../../common/search_strategy/security_solution/users/common';
 import { RiskScoreHeaderTitle } from '../../../explore/risk_score/components/risk_score_onboarding/risk_score_header_title';
 

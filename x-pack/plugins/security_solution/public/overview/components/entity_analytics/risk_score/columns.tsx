@@ -12,7 +12,7 @@ import { UsersTableType } from '../../../../explore/users/store/model';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink, UserDetailsLink } from '../../../../common/components/links';
 import { HostsTableType } from '../../../../explore/hosts/store/model';
-import { RiskScore } from '../../../../common/components/severity/common';
+import { RiskScore } from '../../../../explore/risk_score/components/severity/common';
 import type { HostRiskScore, RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreEntity, RiskScoreFields } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
