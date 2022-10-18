@@ -62,7 +62,7 @@ export const MonitorSummary = () => {
                 <DurationPanel from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>
-                <DurationSparklines />
+                <DurationSparklines from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <MonitorErrorsCount />
