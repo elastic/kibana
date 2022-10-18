@@ -169,6 +169,8 @@
       "@kbn/ui-actions-plugin/*": ["src/plugins/ui_actions/*"],
       "@kbn/unified-field-list-plugin": ["src/plugins/unified_field_list"],
       "@kbn/unified-field-list-plugin/*": ["src/plugins/unified_field_list/*"],
+      "@kbn/unified-histogram-plugin": ["src/plugins/unified_histogram"],
+      "@kbn/unified-histogram-plugin/*": ["src/plugins/unified_histogram/*"],
       "@kbn/unified-search-plugin": ["src/plugins/unified_search"],
       "@kbn/unified-search-plugin/*": ["src/plugins/unified_search/*"],
       "@kbn/url-forwarding-plugin": ["src/plugins/url_forwarding"],
