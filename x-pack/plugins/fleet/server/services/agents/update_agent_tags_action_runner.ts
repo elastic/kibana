@@ -7,13 +7,19 @@
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import uuid from 'uuid';
-import { difference, uniq } from 'lodash';
+import { uniq } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Agent } from '../../types';
 
+import { AGENTS_INDEX } from '../../constants';
+
+import { appContextService } from '..';
+
+import { agentPolicyService } from '../agent_policy';
+
 import { ActionRunner } from './action_runner';
 
-import { bulkUpdateAgents } from './crud';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 import { filterHostedPolicies } from './filter_hosted_agents';
 import {
@@ -21,6 +27,7 @@ import {
   bulkCreateAgentActionResults,
   createAgentAction,
 } from './actions';
+import { getElasticsearchQuery } from './crud';
 
 export class UpdateAgentTagsActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -45,6 +52,25 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
   protected getActionType() {
     return 'UPDATE_TAGS';
   }
+
+  async processAgentsInBatches(): Promise<{ actionId: string }> {
+    const { updated, took } = await updateTagsBatch(
+      this.soClient,
+      this.esClient,
+      [],
+      {},
+      {
+        tagsToAdd: this.actionParams?.tagsToAdd,
+        tagsToRemove: this.actionParams?.tagsToRemove,
+        actionId: this.actionParams.actionId,
+        total: this.actionParams.total,
+        kuery: this.actionParams.kuery,
+      }
+    );
+
+    appContextService.getLogger().info(`processed ${updated} agents, took ${took}ms`);
+    return { actionId: this.actionParams.actionId! };
+  }
 }
 
 export async function updateTagsBatch(
@@ -57,8 +83,9 @@ export async function updateTagsBatch(
     tagsToRemove: string[];
     actionId?: string;
     total?: number;
+    kuery?: string;
   }
-): Promise<{ actionId: string }> {
+): Promise<{ actionId: string; updated?: number; took?: number }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const filteredAgents = await filterHostedPolicies(
@@ -68,33 +95,60 @@ export async function updateTagsBatch(
     `Cannot modify tags on a hosted agent`
   );
 
-  const getNewTags = (agent: Agent): string[] => {
-    const existingTags = agent.tags ?? [];
+  let query: estypes.QueryDslQueryContainer | undefined;
+  if (options.kuery) {
+    const hostedPolicies = await agentPolicyService.list(soClient, { kuery: 'is_managed:true' });
+    const hostedIds = hostedPolicies.items.map((item) => item.id);
 
-    if (options.tagsToAdd.length === 1 && options.tagsToRemove.length === 1) {
-      const removableTagIndex = existingTags.indexOf(options.tagsToRemove[0]);
-      if (removableTagIndex > -1) {
-        const newTags = uniq([
-          ...existingTags.slice(0, removableTagIndex),
-          options.tagsToAdd[0],
-          ...existingTags.slice(removableTagIndex + 1),
-        ]);
-        return newTags;
-      }
-    }
-    return uniq(difference(existingTags, options.tagsToRemove).concat(options.tagsToAdd));
-  };
-
-  await bulkUpdateAgents(
-    esClient,
-    filteredAgents.map((agent) => ({
-      agentId: agent.id,
-      data: {
-        tags: getNewTags(agent),
+    query = getElasticsearchQuery(options.kuery, false, false, hostedIds);
+  } else {
+    const agentIds = filteredAgents.map((agent) => agent.id);
+    query = {
+      terms: {
+        _id: agentIds,
       },
-    })),
-    errors
-  );
+    };
+  }
+
+  const res = await esClient.updateByQuery({
+    query,
+    index: AGENTS_INDEX,
+    refresh: true,
+    wait_for_completion: true,
+    script: {
+      source: `   
+      ctx._source.tags = ctx._source.tags == null ? [] : ctx._source.tags;
+      if (params.tagsToAdd.length == 1 && params.tagsToRemove.length == 1) { 
+        ctx._source.tags.replaceAll(tag -> params.tagsToRemove[0] == tag ? params.tagsToAdd[0] : tag);
+      } else {
+        ctx._source.tags.removeAll(params.tagsToRemove); 
+        ctx._source.tags.addAll(params.tagsToAdd);
+      } 
+
+      LinkedHashSet uniqueSet = new LinkedHashSet();
+      uniqueSet.addAll(ctx._source.tags);
+
+      ctx._source.tags = uniqueSet.toArray();
+
+      ctx._source.updated_at = params.updatedAt;
+      `,
+      lang: 'painless',
+      params: {
+        tagsToAdd: uniq(options.tagsToAdd),
+        tagsToRemove: uniq(options.tagsToRemove),
+        updatedAt: new Date().toISOString(),
+      },
+    },
+    conflicts: 'proceed',
+  });
+
+  appContextService.getLogger().debug(JSON.stringify(res));
+
+  if (res.failures && res.failures.length > 0) {
+    appContextService
+      .getLogger()
+      .warn('Failures while updating agent tags: ' + JSON.stringify(res.failures));
+  }
 
   const actionId = options.actionId ?? uuid();
   const total = options.total ?? givenAgents.length;
@@ -122,5 +176,5 @@ export async function updateTagsBatch(
     'cannot modified tags on hosted agents'
   );
 
-  return { actionId };
+  return { actionId, updated: res.updated, took: res.took };
 }

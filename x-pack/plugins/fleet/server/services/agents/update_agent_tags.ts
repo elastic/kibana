@@ -13,7 +13,7 @@ import { AgentReassignmentError } from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
-import { getAgentDocuments, getAgentsByKuery, openPointInTime } from './crud';
+import { getAgentDocuments, getAgentsByKuery } from './crud';
 import type { GetAgentsOptions } from '.';
 import { searchHitToAgent } from './helpers';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
@@ -61,10 +61,11 @@ export async function updateAgentTags(
           ...options,
           batchSize,
           total: res.total,
+          kuery: options.kuery,
           tagsToAdd,
           tagsToRemove,
         },
-        { pitId: await openPointInTime(esClient) }
+        { pitId: '' }
       ).runActionAsyncWithRetry();
     }
   }
