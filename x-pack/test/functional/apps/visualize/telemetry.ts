@@ -51,7 +51,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await PageObjects.common.sleep(44440004);
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/dashboard/with_by_value_visualizations'
       );
