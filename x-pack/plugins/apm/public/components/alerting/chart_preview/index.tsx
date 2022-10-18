@@ -46,10 +46,6 @@ export function ChartPreview({
   const xMax = Math.max(...timestamps);
   const xFormatter = niceTimeFormatter([xMin, xMax]);
 
-  // Make the maximum Y value either the actual max or 20% more than the threshold
-  const values = series.flatMap(({ data }) => data.map(({ y }) => y ?? 0));
-  const yMax = Math.max(threshold * 1.2, ...values);
-
   const style = {
     fill: theme.eui.euiColorVis2,
     line: {
@@ -114,10 +110,10 @@ export function ChartPreview({
           position={Position.Left}
           tickFormat={yTickFormat}
           ticks={5}
-          domain={{ max: yMax, min: NaN }}
         />
         {series.map(({ name, data }, index) => (
           <BarSeries
+            key={index}
             timeZone={timeZone}
             data={data}
             id={`chart_preview_bar_series_${name || index}`}
