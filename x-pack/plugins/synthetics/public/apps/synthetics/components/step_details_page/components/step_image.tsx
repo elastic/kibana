@@ -7,19 +7,20 @@
 
 import React, { useState } from 'react';
 import { EuiButtonGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { LastSuccessfulScreenshot } from './last_successful_screenshot';
 import { JourneyStep } from '../../../../../../common/runtime_types';
 import { JourneyScreenshot } from '../../monitor_details/monitor_summary/last_ten_test_runs';
 
 export const StepImage = ({ ping }: { ping: JourneyStep }) => {
-  const toggleButtonsDisabled = [
+  const toggleButtons = [
     {
       id: `received`,
-      label: 'Received',
+      label: RECEIVED_LABEL,
     },
     {
       id: `expected`,
-      label: 'Expected',
+      label: EXPECTED_LABEL,
     },
   ];
 
@@ -32,7 +33,7 @@ export const StepImage = ({ ping }: { ping: JourneyStep }) => {
   return (
     <>
       <EuiTitle size="xs">
-        <h3>Screenshot</h3>
+        <h3>{SCREENSHOT_LABEL}</h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       <div className="eui-textCenter">
@@ -43,16 +44,29 @@ export const StepImage = ({ ping }: { ping: JourneyStep }) => {
         )}
 
         <EuiSpacer size="l" />
-
-        <EuiButtonGroup
-          legend="This is a disabled group"
-          options={toggleButtonsDisabled}
-          idSelected={idSelected}
-          onChange={(id) => onChangeDisabled(id)}
-          buttonSize="s"
-          isFullWidth
-        />
+        {ping.monitor.status === 'down' && (
+          <EuiButtonGroup
+            legend=""
+            options={toggleButtons}
+            idSelected={idSelected}
+            onChange={(id) => onChangeDisabled(id)}
+            buttonSize="s"
+            isFullWidth
+          />
+        )}
       </div>
     </>
   );
 };
+
+const SCREENSHOT_LABEL = i18n.translate('xpack.synthetics.stepDetails.screenshot', {
+  defaultMessage: 'Screenshot',
+});
+
+const EXPECTED_LABEL = i18n.translate('xpack.synthetics.stepDetails.expected', {
+  defaultMessage: 'Expected',
+});
+
+const RECEIVED_LABEL = i18n.translate('xpack.synthetics.stepDetails.received', {
+  defaultMessage: 'Received',
+});

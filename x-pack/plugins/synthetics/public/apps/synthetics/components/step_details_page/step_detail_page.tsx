@@ -8,10 +8,17 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { StepImage } from './components/step_image';
 import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
 import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
+import { useStepDetailsBreadcrumbs } from './hooks/use_step_details_breadcrumbs';
 
 export const StepDetailPage = () => {
   const { checkGroupId } = useParams<{ checkGroupId: string; stepIndex: string }>();
@@ -19,7 +26,17 @@ export const StepDetailPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'stepDetail' });
   useTrackPageview({ app: 'synthetics', path: 'stepDetail', delay: 15000 });
 
-  const { data } = useJourneySteps(checkGroupId);
+  const { data, loading } = useJourneySteps(checkGroupId);
+
+  useStepDetailsBreadcrumbs([{ text: data?.details?.journey.monitor.name ?? '' }]);
+
+  if (loading) {
+    return (
+      <div className="eui-textCenter">
+        <EuiLoadingSpinner size="xxl" />
+      </div>
+    );
+  }
 
   return (
     <>
