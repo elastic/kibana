@@ -8,22 +8,23 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+interface UiCounterEvent {
+  eventName: string;
+  total: number;
+}
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
 
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const usageCollection = getService('usageCollection');
+  const queryBar = getService('queryBar');
   const retry = getService('retry');
 
   describe('smoke telemetry tests', function () {
-    let items: Array<{
-      key: string;
-      appName: string;
-      eventName: string;
-      type: string;
-      total: number;
-    }> = [];
+    let initialEvents: UiCounterEvent[] = [];
+    let afterRefreshEvents: UiCounterEvent[] = [];
 
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -35,16 +36,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.loadSavedDashboard('visualizations');
-        await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
         await PageObjects.dashboard.waitForRenderComplete();
 
-        items = await usageCollection.getUICounterEvents();
+        initialEvents = await usageCollection.getUICounterEvents();
 
-        expect(items.length).to.be.greaterThan(0);
+        await queryBar.clickQuerySubmitButton();
+        await PageObjects.dashboard.waitForRenderComplete();
+
+        afterRefreshEvents = await usageCollection.getUICounterEvents();
+
+        expect(initialEvents.length).to.be.greaterThan(0);
+        expect(afterRefreshEvents.length).to.be.greaterThan(0);
       });
     });
 
     after(async () => {
+      await PageObjects.common.sleep(44440004);
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/dashboard/with_by_value_visualizations'
       );
@@ -52,10 +59,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     const checkTelemetry = (eventName: string) => {
-      const event = items.find((e) => e.eventName === eventName);
+      const initialEvent = initialEvents.find((e) => e.eventName === eventName);
+      const afterRefreshEvent = afterRefreshEvents.find((e) => e.eventName === eventName);
 
-      expect(event).to.be.ok();
-      expect(event!.total).to.be(1);
+      expect(initialEvent).to.be.ok();
+      expect(afterRefreshEvent).to.be.ok();
+      expect(afterRefreshEvent!.total).to.be(initialEvent!.total + 1);
     };
 
     ['legacy_metric', 'donut', 'timelion', 'area_stacked', 'table', 'heatmap'].forEach((vis) => {
