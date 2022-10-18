@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { of, merge } from 'rxjs';
 import { buildEsQuery, DataViewBase, Query, AggregateQuery, isOfQueryType } from '@kbn/es-query';
@@ -24,6 +24,7 @@ interface ILogFilterState {
     originalQuery: Query;
   } | null;
   queryStringQuery: Query | AggregateQuery;
+  validationError: Error | null;
 }
 
 const DEFAULT_QUERY = {
@@ -32,9 +33,12 @@ const DEFAULT_QUERY = {
 };
 
 // Error toasts
-const errorToastTitle = i18n.translate('xpack.infra.logsPage.toolbar.logFilterErrorToastTitle', {
-  defaultMessage: 'Log filter error',
-});
+export const errorToastTitle = i18n.translate(
+  'xpack.infra.logsPage.toolbar.logFilterErrorToastTitle',
+  {
+    defaultMessage: 'Log filter error',
+  }
+);
 
 const unsupportedLanguageError = i18n.translate(
   'xpack.infra.logsPage.toolbar.logFilterUnsupportedLanguageError',
@@ -103,15 +107,22 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase
       return {
         filterQuery: getLogFilterQuery(query as Query),
         queryStringQuery: query,
+        validationError: null,
       };
     } catch (error) {
-      handleValidationError(error);
       return {
-        filterQuery: getLogFilterQuery(DEFAULT_QUERY),
+        filterQuery: null,
         queryStringQuery: query,
+        validationError: error,
       };
     }
   });
+
+  useEffect(() => {
+    if (logFilterState.validationError) {
+      handleValidationError(logFilterState.validationError);
+    }
+  }, [handleValidationError, logFilterState.validationError]);
 
   const applyLogFilterQuery = useCallback(
     (validFilterQuery: Query) => {
@@ -128,31 +139,38 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase
 
   useSubscription(
     useMemo(() => {
-      return merge(of(undefined), queryString.getUpdates$());
+      return merge(of(undefined), queryString.getUpdates$()); // NOTE: getUpdates$ uses skip(1) so we do this to ensure an initial emit of a value.
     }, [queryString]),
     useMemo(() => {
       return {
         next: () => {
+          const query = queryString.getQuery();
           try {
-            const query = queryString.getQuery();
+            validateQuery(query);
             setLogFilterState((previousLogFilterState) => ({
               ...previousLogFilterState,
               queryStringQuery: query,
+              validationError: null,
             }));
-            validateQuery(query);
             applyLogFilterQuery(query as Query);
           } catch (error) {
-            handleValidationError(error);
+            setLogFilterState((previousLogFilterState) => ({
+              ...previousLogFilterState,
+              queryStringQuery: query,
+              validationError: error,
+              filterQuery: null,
+            }));
           }
         },
       };
-    }, [applyLogFilterQuery, handleValidationError, queryString, validateQuery])
+    }, [applyLogFilterQuery, queryString, validateQuery])
   );
 
   return {
     queryStringQuery: logFilterState.queryStringQuery, // NOTE: Query String Manager query.
     filterQuery: logFilterState.filterQuery, // NOTE: Valid and syntactically correct query applied to requests etc.
     applyLogFilterQuery,
+    validationError: logFilterState.validationError,
   };
 };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
@@ -18,7 +18,10 @@ import { LogMinimap } from '../../../components/logging/log_minimap';
 import { ScrollableLogTextStreamView } from '../../../components/logging/log_text_stream';
 import { LogEntryStreamItem } from '../../../components/logging/log_text_stream/item';
 import { PageContent } from '../../../components/page';
-import { useLogFilterStateContext } from '../../../containers/logs/log_filter';
+import {
+  useLogFilterStateContext,
+  errorToastTitle as logFilterErrorToastTitle,
+} from '../../../containers/logs/log_filter';
 import {
   useLogEntryFlyoutContext,
   WithFlyoutOptionsUrlState,
@@ -71,7 +74,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     updateDateRange,
     lastCompleteDateRangeExpressionUpdate,
   } = useLogPositionStateContext();
-  const { filterQuery, applyLogFilterQuery } = useLogFilterStateContext();
+  const { filterQuery, validationError: queryValidationError } = useLogFilterStateContext();
 
   const {
     isReloading,
@@ -110,10 +113,11 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     const hasQueryChanged = filterQuery !== prevFilterQuery;
 
     if (
-      isFirstLoad ||
-      completeDateRangeExpressionHasChanged ||
-      isCenterPointOutsideLoadedRange ||
-      hasQueryChanged
+      (isFirstLoad ||
+        completeDateRangeExpressionHasChanged ||
+        isCenterPointOutsideLoadedRange ||
+        hasQueryChanged) &&
+      !queryValidationError
     ) {
       if (isStreaming) {
         fetchNewestEntries();
@@ -136,6 +140,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     prevFilterQuery,
     lastCompleteDateRangeExpressionUpdate,
     prevLastCompleteDateRangeExpressionUpdate,
+    queryValidationError,
   ]);
 
   const { logSummaryHighlights, currentHighlightKey, logEntryHighlightsById } =
@@ -209,21 +214,16 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     [jumpToTargetPosition, queryString, setSurroundingLogsId, stopLiveStreaming]
   );
 
-  return (
-    <>
-      <WithLogTextviewUrlState />
-      <WithFlyoutOptionsUrlState />
-      <LogsToolbar />
-      <EuiSpacer size="m" />
-      <PageViewLogInContext />
-      {isFlyoutOpen ? (
-        <LogEntryFlyout
-          logEntryId={flyoutLogEntryId}
-          onCloseFlyout={closeLogEntryFlyout}
-          onSetFieldFilter={setFilter}
-          sourceId={logViewId}
-        />
-      ) : null}
+  const pageContent = useMemo(() => {
+    if (queryValidationError) {
+      return (
+        <EuiCallOut title={logFilterErrorToastTitle} color="danger" iconType="alert">
+          <p>{queryValidationError.toString()}</p>
+        </EuiCallOut>
+      );
+    }
+
+    return (
       <PageContent key={`${logViewId}-${logView?.version}`}>
         <ScrollableLogTextStreamView
           columnConfigurations={(resolvedLogView && resolvedLogView.columns) || []}
@@ -276,6 +276,54 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
           }}
         </AutoSizer>
       </PageContent>
+    );
+  }, [
+    currentHighlightKey,
+    endDateExpression,
+    fetchEntries,
+    handleDateRangeExtension,
+    handlePagination,
+    hasMoreAfterEnd,
+    hasMoreBeforeStart,
+    isLoadingMore,
+    isReloading,
+    isStreaming,
+    items,
+    jumpToTargetPosition,
+    lastLoadedTime,
+    logSummaryHighlights,
+    logView?.version,
+    logViewId,
+    openLogEntryFlyout,
+    queryValidationError,
+    resolvedLogView,
+    setContextEntry,
+    startDateExpression,
+    startLiveStreaming,
+    surroundingLogsId,
+    targetPosition,
+    textScale,
+    textWrap,
+    visibleMidpointTime,
+    visibleTimeInterval,
+  ]);
+
+  return (
+    <>
+      <WithLogTextviewUrlState />
+      <WithFlyoutOptionsUrlState />
+      <LogsToolbar />
+      <EuiSpacer size="m" />
+      <PageViewLogInContext />
+      {isFlyoutOpen ? (
+        <LogEntryFlyout
+          logEntryId={flyoutLogEntryId}
+          onCloseFlyout={closeLogEntryFlyout}
+          onSetFieldFilter={setFilter}
+          sourceId={logViewId}
+        />
+      ) : null}
+      {pageContent}
     </>
   );
 };
