@@ -7,19 +7,28 @@
 
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { get } from 'lodash/fp';
 import { UsersTableType } from '../../../../users/store/model';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink, UserDetailsLink } from '../../../../common/components/links';
 import { HostsTableType } from '../../../../hosts/store/model';
 import { RiskScore } from '../../../../common/components/severity/common';
-import type { HostRiskScore, RiskSeverity } from '../../../../../common/search_strategy';
+import type {
+  HostRiskScore,
+  RiskSeverity,
+  UserRiskScore,
+} from '../../../../../common/search_strategy';
 import { RiskScoreEntity, RiskScoreFields } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
+import { FormattedCount } from '../../../../common/components/formatted_number';
 
-type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore>>;
+type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore & UserRiskScore>>;
 
-export const getRiskScoreColumns = (riskEntity: RiskScoreEntity): HostRiskScoreColumns => [
+export const getRiskScoreColumns = (
+  riskEntity: RiskScoreEntity,
+  openEntityInTimeline: (hostName: string) => void
+): HostRiskScoreColumns => [
   {
     field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
     name: i18n.ENTITY_NAME(riskEntity),
@@ -74,5 +83,21 @@ export const getRiskScoreColumns = (riskEntity: RiskScoreEntity): HostRiskScoreC
       }
       return getEmptyTagValue();
     },
+  },
+  {
+    field: RiskScoreFields.alertsCount,
+    width: '15%',
+    name: i18n.ALERTS,
+    truncateText: false,
+    mobileOptions: { show: true },
+    render: (alertCount: number, risk) => (
+      <EuiLink
+        data-test-subj="risk-score-alerts"
+        disabled={alertCount === 0}
+        onClick={() => openEntityInTimeline(get('host.name', risk) ?? get('user.name', risk))}
+      >
+        <FormattedCount count={alertCount} />
+      </EuiLink>
+    ),
   },
 ];
