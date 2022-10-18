@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { ESIndexSelect } from './es_index_select';
-export { ESIndexSelect as ESIndexSelectComponent } from './es_index_select.component';
+export { ESDataViewSelect } from './es_data_view_select';
+export { ESDataViewSelect as ESDataViewSelectComponent } from './es_data_view_select.component';
