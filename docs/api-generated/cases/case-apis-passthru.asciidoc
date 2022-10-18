@@ -665,6 +665,13 @@ Any modifications made to this file will be overwritten.
   <ol>
     <li><a href="#Case_response_properties_for_comments_inner"><code>Case_response_properties_for_comments_inner</code> - </a></li>
     <li><a href="#Case_response_properties_for_connectors"><code>Case_response_properties_for_connectors</code> - Case response properties for connectors</a></li>
+    <li><a href="#Create_case_request_with_a_Cases_Webhook_connector"><code>Create_case_request_with_a_Cases_Webhook_connector</code> - Create case request with a Cases Webhook connector</a></li>
+    <li><a href="#Create_case_request_with_a_IBM_Resilient_connector"><code>Create_case_request_with_a_IBM_Resilient_connector</code> - Create case request with a IBM Resilient connector</a></li>
+    <li><a href="#Create_case_request_with_a_Jira_connector"><code>Create_case_request_with_a_Jira_connector</code> - Create case request with a Jira connector</a></li>
+    <li><a href="#Create_case_request_with_a_ServiceNow_ITSM_connector"><code>Create_case_request_with_a_ServiceNow_ITSM_connector</code> - Create case request with a ServiceNow ITSM connector</a></li>
+    <li><a href="#Create_case_request_with_a_ServiceNow_SecOps_connector"><code>Create_case_request_with_a_ServiceNow_SecOps_connector</code> - Create case request with a ServiceNow SecOps connector</a></li>
+    <li><a href="#Create_case_request_with_a_Swimlane_connector"><code>Create_case_request_with_a_Swimlane_connector</code> - Create case request with a Swimlane connector</a></li>
+    <li><a href="#Create_case_request_with_no_connector"><code>Create_case_request_with_no_connector</code> - Create case request with no connector</a></li>
     <li><a href="#add_alert_comment_request_properties"><code>add_alert_comment_request_properties</code> - Add case comment request properties for alerts</a></li>
     <li><a href="#add_case_comment_request"><code>add_case_comment_request</code> - Add case comment request</a></li>
     <li><a href="#add_user_comment_request_properties"><code>add_user_comment_request_properties</code> - Add case comment request properties for user comments</a></li>
@@ -691,13 +698,6 @@ Any modifications made to this file will be overwritten.
     <li><a href="#connector_properties_servicenow_sir_fields"><code>connector_properties_servicenow_sir_fields</code> - </a></li>
     <li><a href="#connector_properties_swimlane"><code>connector_properties_swimlane</code> - Create case request properties for a Swimlane connector</a></li>
     <li><a href="#connector_properties_swimlane_fields"><code>connector_properties_swimlane_fields</code> - </a></li>
-    <li><a href="#create_case_connector_cases_webhook"><code>create_case_connector_cases_webhook</code> - Create case request with a Cases Webhook connector</a></li>
-    <li><a href="#create_case_connector_jira"><code>create_case_connector_jira</code> - Create case request with a Jira connector</a></li>
-    <li><a href="#create_case_connector_none"><code>create_case_connector_none</code> - Create case request with no connector</a></li>
-    <li><a href="#create_case_connector_resilient"><code>create_case_connector_resilient</code> - Create case request with a IBM Resilient connector</a></li>
-    <li><a href="#create_case_connector_servicenow"><code>create_case_connector_servicenow</code> - Create case request with a ServiceNow ITSM connector</a></li>
-    <li><a href="#create_case_connector_servicenow_sir"><code>create_case_connector_servicenow_sir</code> - Create case request with a ServiceNow SecOps connector</a></li>
-    <li><a href="#create_case_connector_swimlane"><code>create_case_connector_swimlane</code> - Create case request with a Swimlane connector</a></li>
     <li><a href="#create_case_request"><code>create_case_request</code> - Create case request</a></li>
     <li><a href="#external_service"><code>external_service</code> - </a></li>
     <li><a href="#owners"><code>owners</code> - </a></li>
@@ -758,6 +758,97 @@ Any modifications made to this file will be overwritten.
 <div class="param">type </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The type of connector. </div>
         <div class="param-enum-header">Enum:</div>
         <div class="param-enum">.swimlane</div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Create_case_request_with_a_Cases_Webhook_connector"><code>Create_case_request_with_a_Cases_Webhook_connector</code> - Create case request with a Cases Webhook connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_cases_webhook">connector_properties_cases_webhook</a></span>  </div>
+<div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The description for the case. </div>
+<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">settings </div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. It can be an empty array. </div>
+<div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Create_case_request_with_a_IBM_Resilient_connector"><code>Create_case_request_with_a_IBM_Resilient_connector</code> - Create case request with a IBM Resilient connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_resilient">connector_properties_resilient</a></span>  </div>
+<div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The description for the case. </div>
+<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">settings </div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. It can be an empty array. </div>
+<div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Create_case_request_with_a_Jira_connector"><code>Create_case_request_with_a_Jira_connector</code> - Create case request with a Jira connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_jira">connector_properties_jira</a></span>  </div>
+<div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The description for the case. </div>
+<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">settings </div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. It can be an empty array. </div>
+<div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Create_case_request_with_a_ServiceNow_ITSM_connector"><code>Create_case_request_with_a_ServiceNow_ITSM_connector</code> - Create case request with a ServiceNow ITSM connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_servicenow">connector_properties_servicenow</a></span>  </div>
+<div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The description for the case. </div>
+<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">settings </div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. It can be an empty array. </div>
+<div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Create_case_request_with_a_ServiceNow_SecOps_connector"><code>Create_case_request_with_a_ServiceNow_SecOps_connector</code> - Create case request with a ServiceNow SecOps connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_servicenow_sir">connector_properties_servicenow_sir</a></span>  </div>
+<div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The description for the case. </div>
+<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">settings </div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. It can be an empty array. </div>
+<div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Create_case_request_with_a_Swimlane_connector"><code>Create_case_request_with_a_Swimlane_connector</code> - Create case request with a Swimlane connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'></div>
+    <div class="field-items">
+      <div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_swimlane">connector_properties_swimlane</a></span>  </div>
+<div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The description for the case. </div>
+<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">settings </div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. It can be an empty array. </div>
+<div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
+    </div>  <!-- field-items -->
+  </div>
+  <div class="model">
+    <h3><a name="Create_case_request_with_no_connector"><code>Create_case_request_with_no_connector</code> - Create case request with no connector</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class='model-description'>Defines properties for cases when the connector type is <code>.none</code>.</div>
+    <div class="field-items">
+      <div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_none">connector_properties_none</a></span>  </div>
+<div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The description for the case. </div>
+<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
+<div class="param">settings </div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
+<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
+<div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. It can be an empty array. </div>
+<div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1056,97 +1147,6 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'>An object containing the connector fields. If you want to omit any individual field, specify null as its value.</div>
     <div class="field-items">
       <div class="param">caseId </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The case identifier for Swimlane connectors. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="create_case_connector_cases_webhook"><code>create_case_connector_cases_webhook</code> - Create case request with a Cases Webhook connector</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_cases_webhook">connector_properties_cases_webhook</a></span>  </div>
-<div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The description for the case. </div>
-<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">settings </div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
-<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
-<div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. It can be an empty array. </div>
-<div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="create_case_connector_jira"><code>create_case_connector_jira</code> - Create case request with a Jira connector</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_jira">connector_properties_jira</a></span>  </div>
-<div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The description for the case. </div>
-<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">settings </div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
-<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
-<div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. It can be an empty array. </div>
-<div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="create_case_connector_none"><code>create_case_connector_none</code> - Create case request with no connector</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'>Defines properties for cases when the connector type is <code>.none</code>.</div>
-    <div class="field-items">
-      <div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_none">connector_properties_none</a></span>  </div>
-<div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The description for the case. </div>
-<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">settings </div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
-<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
-<div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. It can be an empty array. </div>
-<div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="create_case_connector_resilient"><code>create_case_connector_resilient</code> - Create case request with a IBM Resilient connector</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_resilient">connector_properties_resilient</a></span>  </div>
-<div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The description for the case. </div>
-<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">settings </div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
-<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
-<div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. It can be an empty array. </div>
-<div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="create_case_connector_servicenow"><code>create_case_connector_servicenow</code> - Create case request with a ServiceNow ITSM connector</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_servicenow">connector_properties_servicenow</a></span>  </div>
-<div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The description for the case. </div>
-<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">settings </div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
-<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
-<div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. It can be an empty array. </div>
-<div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="create_case_connector_servicenow_sir"><code>create_case_connector_servicenow_sir</code> - Create case request with a ServiceNow SecOps connector</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_servicenow_sir">connector_properties_servicenow_sir</a></span>  </div>
-<div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The description for the case. </div>
-<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">settings </div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
-<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
-<div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. It can be an empty array. </div>
-<div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
-    </div>  <!-- field-items -->
-  </div>
-  <div class="model">
-    <h3><a name="create_case_connector_swimlane"><code>create_case_connector_swimlane</code> - Create case request with a Swimlane connector</a> <a class="up" href="#__Models">Up</a></h3>
-    <div class='model-description'></div>
-    <div class="field-items">
-      <div class="param">connector </div><div class="param-desc"><span class="param-type"><a href="#connector_properties_swimlane">connector_properties_swimlane</a></span>  </div>
-<div class="param">description </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The description for the case. </div>
-<div class="param">owner </div><div class="param-desc"><span class="param-type"><a href="#owners">owners</a></span>  </div>
-<div class="param">settings </div><div class="param-desc"><span class="param-type"><a href="#settings">settings</a></span>  </div>
-<div class="param">severity (optional)</div><div class="param-desc"><span class="param-type"><a href="#severity_property">severity_property</a></span>  </div>
-<div class="param">tags </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The words and phrases that help categorize cases. It can be an empty array. </div>
-<div class="param">title </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A title for the case. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">

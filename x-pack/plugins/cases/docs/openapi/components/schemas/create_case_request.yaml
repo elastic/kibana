@@ -2,10 +2,207 @@ title: Create case request
 description: >-
   The create case API request body varies depending on the type of connector.
 oneOf:
-  - $ref: 'create_case_connector_none.yaml'
-  - $ref: 'create_case_connector_cases_webhook.yaml'
-  - $ref: 'create_case_connector_jira.yaml'
-  - $ref: 'create_case_connector_resilient.yaml'
-  - $ref: 'create_case_connector_servicenow.yaml'
-  - $ref: 'create_case_connector_servicenow_sir.yaml'
-  - $ref: 'create_case_connector_swimlane.yaml'
+  - type: object
+    title: Create case request with no connector
+    description: Defines properties for cases when the connector type is `.none`.
+    required:
+      - connector
+      - description
+      - owner
+      - settings
+      - tags
+      - title
+    properties:
+      connector:
+        $ref: 'connector_properties_none.yaml'
+      description:
+        description: The description for the case.
+        type: string
+      owner:
+        $ref: 'owners.yaml'
+      settings:
+        $ref: 'settings.yaml'
+      severity:
+        $ref: 'severity_property.yaml'
+      tags:
+        description: The words and phrases that help categorize cases. It can be an empty array.
+        type: array
+        items:
+          type: string
+      title:
+        description: A title for the case.
+        type: string
+  - type: object
+    title: Create case request with a Cases Webhook connector
+    required:
+      - connector
+      - description
+      - owner
+      - settings
+      - tags
+      - title
+    properties:
+      connector:
+        $ref: 'connector_properties_cases_webhook.yaml'
+      description:
+        description: The description for the case.
+        type: string
+      owner:
+        $ref: 'owners.yaml'
+      settings:
+        $ref: 'settings.yaml'
+      severity:
+        $ref: 'severity_property.yaml'
+      tags:
+        description: The words and phrases that help categorize cases. It can be an empty array.
+        type: array
+        items:
+          type: string
+      title:
+        description: A title for the case.
+        type: string
+  - type: object
+    title: Create case request with a Jira connector
+    required:
+      - connector
+      - description
+      - owner
+      - settings
+      - tags
+      - title
+    properties:
+      connector:
+        $ref: 'connector_properties_jira.yaml'
+      description:
+        description: The description for the case.
+        type: string
+      owner:
+        $ref: 'owners.yaml'
+      settings:
+        $ref: 'settings.yaml'
+      severity:
+        $ref: 'severity_property.yaml'
+      tags:
+        description: The words and phrases that help categorize cases. It can be an empty array.
+        type: array
+        items:
+          type: string
+      title:
+        description: A title for the case.
+        type: string
+  - type: object
+    title: Create case request with a IBM Resilient connector
+    required:
+      - connector
+      - description
+      - owner
+      - settings
+      - tags
+      - title
+    properties:
+      connector:
+        $ref: 'connector_properties_resilient.yaml'
+      description:
+        description: The description for the case.
+        type: string
+      owner:
+        $ref: 'owners.yaml'
+      settings:
+       $ref: 'settings.yaml'
+      severity:
+        $ref: 'severity_property.yaml'
+      tags:
+        description: The words and phrases that help categorize cases. It can be an empty array.
+        type: array
+        items:
+          type: string
+      title:
+        description: A title for the case.
+        type: string
+  - type: object
+    title: Create case request with a ServiceNow ITSM connector
+    required:
+      - connector
+      - description
+      - owner
+      - settings
+      - tags
+      - title
+    properties:
+      connector:
+        $ref: 'connector_properties_servicenow.yaml'
+      description:
+        description: The description for the case.
+        type: string
+      owner:
+        $ref: 'owners.yaml'
+      settings:
+        $ref: 'settings.yaml'
+      severity:
+        $ref: 'severity_property.yaml'
+      tags:
+        description: The words and phrases that help categorize cases. It can be an empty array.
+        type: array
+        items:
+          type: string
+      title:
+        description: A title for the case.
+        type: string
+  - type: object
+    title: Create case request with a ServiceNow SecOps connector
+    required:
+      - connector
+      - description
+      - owner
+      - settings
+      - tags
+      - title
+    properties:
+      connector:
+        $ref: 'connector_properties_servicenow_sir.yaml'
+      description:
+        description: The description for the case.
+        type: string
+      owner:
+        $ref: 'owners.yaml'
+      settings:
+        $ref: 'settings.yaml'
+      severity:
+        $ref: 'severity_property.yaml'
+      tags:
+        description: The words and phrases that help categorize cases. It can be an empty array.
+        type: array
+        items:
+          type: string
+      title:
+        description: A title for the case.
+        type: string
+  - type: object
+    title: Create case request with a Swimlane connector
+    required:
+      - connector
+      - description
+      - owner
+      - settings
+      - tags
+      - title
+    properties:
+      connector:
+        $ref: 'connector_properties_swimlane.yaml'
+      description:
+        description: The description for the case.
+        type: string
+      owner:
+        $ref: 'owners.yaml'
+      settings:
+        $ref: 'settings.yaml'
+      severity:
+        $ref: 'severity_property.yaml'
+      tags:
+        description: The words and phrases that help categorize cases. It can be an empty array.
+        type: array
+        items:
+          type: string
+      title:
+        description: A title for the case.
+        type: string
