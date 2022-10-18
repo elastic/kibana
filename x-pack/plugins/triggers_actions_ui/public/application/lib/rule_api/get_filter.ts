@@ -40,5 +40,5 @@ function getOutcomeFilter(outcomeFilter: string[]) {
     success:
       'kibana.alerting.outcome:success OR (event.outcome: success AND NOT kibana.alerting.outcome:*)',
   };
-  return `${outcomeFilter.map((f) => filterMapping[f]).join(' OR ')}`;
+  return `(${outcomeFilter.map((f) => filterMapping[f]).join(' OR ')})`;
 }
