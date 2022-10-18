@@ -9,10 +9,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constant
 import { getPatchRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_management/mocks';
 
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import {
-  mlServicesMock,
-  mlAuthzMock as mockMlAuthzFactory,
-} from '../../../../../machine_learning/mocks';
+import { mlServicesMock } from '../../../../../machine_learning/mocks';
 
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import {
@@ -30,7 +27,7 @@ import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migrati
 
 import { patchRuleRoute } from './route';
 
-jest.mock('../../../../../machine_learning/authz', () => mockMlAuthzFactory.create());
+jest.mock('../../../../../machine_learning/authz');
 
 jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
   const actual = jest.requireActual('../../../logic/rule_actions/legacy_action_migration');

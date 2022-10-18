@@ -6,10 +6,7 @@
  */
 
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';
-import {
-  mlServicesMock,
-  mlAuthzMock as mockMlAuthzFactory,
-} from '../../../../../machine_learning/mocks';
+import { mlServicesMock } from '../../../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import {
   getEmptyFindResult,
@@ -27,7 +24,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 // eslint-disable-next-line no-restricted-imports
 import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 
-jest.mock('../../../../../machine_learning/authz', () => mockMlAuthzFactory.create());
+jest.mock('../../../../../machine_learning/authz');
 
 jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
   const actual = jest.requireActual('../../../logic/rule_actions/legacy_action_migration');

@@ -6,10 +6,7 @@
  */
 
 import { DETECTION_ENGINE_RULES_BULK_CREATE } from '../../../../../../../common/constants';
-import {
-  mlServicesMock,
-  mlAuthzMock as mockMlAuthzFactory,
-} from '../../../../../machine_learning/mocks';
+import { mlServicesMock } from '../../../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import {
   getReadBulkRequest,
@@ -27,7 +24,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-jest.mock('../../../../../machine_learning/authz', () => mockMlAuthzFactory.create());
+jest.mock('../../../../../machine_learning/authz');
 
 describe('Bulk create rules route', () => {
   let server: ReturnType<typeof serverMock.create>;

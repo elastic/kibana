@@ -14,10 +14,7 @@ import {
 } from '../../../../../../../common/detection_engine/rule_management/mocks';
 
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import {
-  mlServicesMock,
-  mlAuthzMock as mockMlAuthzFactory,
-} from '../../../../../machine_learning/mocks';
+import { mlServicesMock } from '../../../../../machine_learning/mocks';
 
 import type { requestMock } from '../../../../routes/__mocks__';
 import { createMockConfig, requestContextMock, serverMock } from '../../../../routes/__mocks__';
@@ -35,7 +32,7 @@ import * as createRulesAndExceptionsStreamFromNdJson from '../../../logic/import
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { importRulesRoute } from './route';
 
-jest.mock('../../../../../machine_learning/authz', () => mockMlAuthzFactory.create());
+jest.mock('../../../../../machine_learning/authz');
 
 describe('Import rules route', () => {
   let config: ReturnType<typeof createMockConfig>;

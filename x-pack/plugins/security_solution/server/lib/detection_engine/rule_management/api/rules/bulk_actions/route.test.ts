@@ -9,10 +9,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   BulkActionsDryRunErrCode,
 } from '../../../../../../../common/constants';
-import {
-  mlServicesMock,
-  mlAuthzMock as mockMlAuthzFactory,
-} from '../../../../../machine_learning/mocks';
+import { mlServicesMock } from '../../../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import {
   getEmptyFindResult,
@@ -34,7 +31,7 @@ import { readRules } from '../../../logic/crud/read_rules';
 import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 
-jest.mock('../../../../../machine_learning/authz', () => mockMlAuthzFactory.create());
+jest.mock('../../../../../machine_learning/authz');
 jest.mock('../../../logic/crud/read_rules', () => ({ readRules: jest.fn() }));
 
 jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {

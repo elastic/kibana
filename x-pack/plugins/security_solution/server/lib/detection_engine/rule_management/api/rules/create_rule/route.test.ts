@@ -14,10 +14,7 @@ import {
   createMlRuleRequest,
   getBasicEmptySearchResponse,
 } from '../../../../routes/__mocks__/request_responses';
-import {
-  mlServicesMock,
-  mlAuthzMock as mockMlAuthzFactory,
-} from '../../../../../machine_learning/mocks';
+import { mlServicesMock } from '../../../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { createRuleRoute } from './route';
@@ -25,7 +22,7 @@ import { getCreateRulesSchemaMock } from '../../../../../../../common/detection_
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 
-jest.mock('../../../../../machine_learning/authz', () => mockMlAuthzFactory.create());
+jest.mock('../../../../../machine_learning/authz');
 
 describe('Create rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
