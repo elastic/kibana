@@ -7221,6 +7221,17 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.XYChartProps.syncCursor",
+            "type": "boolean",
+            "tags": [],
+            "label": "syncCursor",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.XYChartProps.syncColors",
             "type": "boolean",
             "tags": [],

@@ -3703,7 +3703,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { samples: { traceId: string; transactionId: string; }[]; }, ",
+          ", { traceSamples: { traceId: string; transactionId: string; }[]; }, ",
           "APMRouteCreateOptions",
           ">; \"GET /internal/apm/transactions/{transactionId}\": ",
           "ServerRoute",
