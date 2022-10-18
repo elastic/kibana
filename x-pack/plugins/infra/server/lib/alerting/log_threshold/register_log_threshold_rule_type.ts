@@ -134,5 +134,6 @@ export async function registerLogThresholdRuleType(
       ],
     },
     producer: 'logs',
+    ruleDataSearcher: libs.logsRules.ruleDataSearchWrapper(),
   });
 }

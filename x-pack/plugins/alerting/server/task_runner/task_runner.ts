@@ -305,6 +305,10 @@ export class TaskRunner<
       searchSourceClient,
     });
 
+    if (this.ruleType.ruleDataSearcher) {
+      this.ruleType.ruleDataSearcher({}, spaceId);
+    }
+
     const { updatedRuleTypeState, hasReachedAlertLimit, originalAlerts } =
       await this.timer.runWithTimer(TaskRunnerTimerSpan.RuleTypeRun, async () => {
         for (const id in alertRawInstances) {

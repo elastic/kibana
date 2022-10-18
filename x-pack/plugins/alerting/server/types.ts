@@ -18,8 +18,8 @@ import {
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -126,6 +126,11 @@ export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
 
+export type RuleDataSearcher = <TSearchRequest extends ESSearchRequest>(
+  request: TSearchRequest,
+  spaceId: string
+) => Promise<ESSearchResponse<Partial<unknown>, TSearchRequest>>;
+
 export interface RuleType<
   Params extends RuleTypeParams = never,
   ExtractedParams extends RuleTypeParams = never,
@@ -170,7 +175,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
-  ruleDataClient?: IRuleDataClient;
+  ruleDataSearcher?: RuleDataSearcher;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
