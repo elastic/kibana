@@ -7637,6 +7637,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__guided-onboarding@link:bazel-bin/packages/kbn-guided-onboarding/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__handlebars@link:bazel-bin/packages/kbn-handlebars/npm_module_types":
   version "0.0.0"
   uid ""

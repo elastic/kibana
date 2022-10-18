@@ -2,6 +2,7 @@
 
 exports[`guide card snapshots should render use case card component for observability 1`] = `
 <UseCaseCard
+  addBasePath={[MockFunction]}
   description="Get end-to-end observability into your environments by consolidating your logs, metrics, and traces."
   footer={
     <EuiFlexGroup
@@ -20,59 +21,15 @@ exports[`guide card snapshots should render use case card component for observab
       </EuiFlexItem>
     </EuiFlexGroup>
   }
-  http={
-    Object {
-      "addLoadingCountSource": [MockFunction],
-      "anonymousPaths": Object {
-        "isAnonymous": [MockFunction],
-        "register": [MockFunction],
-      },
-      "basePath": BasePath {
-        "basePath": "",
-        "get": [Function],
-        "prepend": [Function],
-        "publicBaseUrl": undefined,
-        "remove": [Function],
-        "serverBasePath": "",
-      },
-      "delete": [MockFunction],
-      "externalUrl": Object {
-        "isInternalUrl": [MockFunction],
-        "validateUrl": [MockFunction],
-      },
-      "fetch": [MockFunction],
-      "get": [MockFunction],
-      "getLoadingCount$": [MockFunction],
-      "head": [MockFunction],
-      "intercept": [MockFunction],
-      "options": [MockFunction],
-      "patch": [MockFunction],
-      "post": [MockFunction],
-      "put": [MockFunction],
-    }
-  }
+  isDarkTheme={false}
   title="Monitor my environments"
-  uiSettings={
-    Object {
-      "get": [MockFunction],
-      "get$": [MockFunction],
-      "getAll": [MockFunction],
-      "getUpdate$": [MockFunction],
-      "getUpdateErrors$": [MockFunction],
-      "isCustom": [MockFunction],
-      "isDeclared": [MockFunction],
-      "isDefault": [MockFunction],
-      "isOverridden": [MockFunction],
-      "remove": [MockFunction],
-      "set": [MockFunction],
-    }
-  }
   useCase="observability"
 />
 `;
 
 exports[`guide card snapshots should render use case card component for search 1`] = `
 <UseCaseCard
+  addBasePath={[MockFunction]}
   description="Create a finely-tuned search experience for your websites, applications, workplace content, and more."
   footer={
     <EuiFlexGroup
@@ -91,59 +48,15 @@ exports[`guide card snapshots should render use case card component for search 1
       </EuiFlexItem>
     </EuiFlexGroup>
   }
-  http={
-    Object {
-      "addLoadingCountSource": [MockFunction],
-      "anonymousPaths": Object {
-        "isAnonymous": [MockFunction],
-        "register": [MockFunction],
-      },
-      "basePath": BasePath {
-        "basePath": "",
-        "get": [Function],
-        "prepend": [Function],
-        "publicBaseUrl": undefined,
-        "remove": [Function],
-        "serverBasePath": "",
-      },
-      "delete": [MockFunction],
-      "externalUrl": Object {
-        "isInternalUrl": [MockFunction],
-        "validateUrl": [MockFunction],
-      },
-      "fetch": [MockFunction],
-      "get": [MockFunction],
-      "getLoadingCount$": [MockFunction],
-      "head": [MockFunction],
-      "intercept": [MockFunction],
-      "options": [MockFunction],
-      "patch": [MockFunction],
-      "post": [MockFunction],
-      "put": [MockFunction],
-    }
-  }
+  isDarkTheme={false}
   title="Search my data"
-  uiSettings={
-    Object {
-      "get": [MockFunction],
-      "get$": [MockFunction],
-      "getAll": [MockFunction],
-      "getUpdate$": [MockFunction],
-      "getUpdateErrors$": [MockFunction],
-      "isCustom": [MockFunction],
-      "isDeclared": [MockFunction],
-      "isDefault": [MockFunction],
-      "isOverridden": [MockFunction],
-      "remove": [MockFunction],
-      "set": [MockFunction],
-    }
-  }
   useCase="search"
 />
 `;
 
 exports[`guide card snapshots should render use case card component for security 1`] = `
 <UseCaseCard
+  addBasePath={[MockFunction]}
   description="Protect your environment against threats by unifying SIEM, endpoint security, and cloud security in one place."
   footer={
     <EuiFlexGroup
@@ -162,53 +75,8 @@ exports[`guide card snapshots should render use case card component for security
       </EuiFlexItem>
     </EuiFlexGroup>
   }
-  http={
-    Object {
-      "addLoadingCountSource": [MockFunction],
-      "anonymousPaths": Object {
-        "isAnonymous": [MockFunction],
-        "register": [MockFunction],
-      },
-      "basePath": BasePath {
-        "basePath": "",
-        "get": [Function],
-        "prepend": [Function],
-        "publicBaseUrl": undefined,
-        "remove": [Function],
-        "serverBasePath": "",
-      },
-      "delete": [MockFunction],
-      "externalUrl": Object {
-        "isInternalUrl": [MockFunction],
-        "validateUrl": [MockFunction],
-      },
-      "fetch": [MockFunction],
-      "get": [MockFunction],
-      "getLoadingCount$": [MockFunction],
-      "head": [MockFunction],
-      "intercept": [MockFunction],
-      "options": [MockFunction],
-      "patch": [MockFunction],
-      "post": [MockFunction],
-      "put": [MockFunction],
-    }
-  }
+  isDarkTheme={false}
   title="Protect my environment"
-  uiSettings={
-    Object {
-      "get": [MockFunction],
-      "get$": [MockFunction],
-      "getAll": [MockFunction],
-      "getUpdate$": [MockFunction],
-      "getUpdateErrors$": [MockFunction],
-      "isCustom": [MockFunction],
-      "isDeclared": [MockFunction],
-      "isDefault": [MockFunction],
-      "isOverridden": [MockFunction],
-      "remove": [MockFunction],
-      "set": [MockFunction],
-    }
-  }
   useCase="security"
 />
 `;

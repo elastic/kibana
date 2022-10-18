@@ -86,6 +86,8 @@ export const GettingStarted = () => {
   const paddingCss = css`
     padding: calc(${euiTheme.size.base}*3) calc(${euiTheme.size.base}*4);
   `;
+
+  const isDarkTheme = uiSettings.get<boolean>('theme:darkMode');
   const activateGuide = async (useCase: UseCase, guideState?: GuideState) => {
     await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
     // TODO error handling
@@ -109,8 +111,8 @@ export const GettingStarted = () => {
                 useCase="search"
                 guides={guidesState}
                 activateGuide={activateGuide}
-                http={http}
-                uiSettings={uiSettings}
+                isDarkTheme={isDarkTheme}
+                addBasePath={http.basePath.prepend}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -118,20 +120,24 @@ export const GettingStarted = () => {
                 useCase="observability"
                 guides={guidesState}
                 activateGuide={activateGuide}
-                http={http}
-                uiSettings={uiSettings}
+                isDarkTheme={isDarkTheme}
+                addBasePath={http.basePath.prepend}
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <LinkCard application={application} http={http} uiSettings={uiSettings} />
+              <LinkCard
+                navigateToApp={application.navigateToApp}
+                isDarkTheme={isDarkTheme}
+                addBasePath={http.basePath.prepend}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <GuideCard
                 useCase="security"
                 guides={guidesState}
                 activateGuide={activateGuide}
-                http={http}
-                uiSettings={uiSettings}
+                isDarkTheme={isDarkTheme}
+                addBasePath={http.basePath.prepend}
               />
             </EuiFlexItem>
           </EuiFlexGrid>

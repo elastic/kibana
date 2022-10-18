@@ -9,9 +9,6 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-
 import { UseCaseCard, UseCaseProps } from './use_case_card';
 
 describe('use case card', () => {
@@ -20,8 +17,8 @@ describe('use case card', () => {
     title: 'testTitle',
     description: 'testDescription',
     footer: <span>testFooter</span>,
-    http: httpServiceMock.createStartContract(),
-    uiSettings: uiSettingsServiceMock.createStartContract(),
+    isDarkTheme: false,
+    addBasePath: jest.fn(),
   };
   test('should render use case card component for search', async () => {
     const component = await shallow(<UseCaseCard {...defaultProps} useCase="search" />);

@@ -10,8 +10,6 @@ import React, { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
 
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { UseCase, UseCaseCard } from './use_case_card';
 import { GuideId, GuideState } from '../../types';
 
@@ -182,10 +180,16 @@ export interface GuideCardProps {
   useCase: UseCase;
   guides: GuideState[];
   activateGuide: (useCase: UseCase, guide?: GuideState) => Promise<void>;
-  http: HttpStart;
-  uiSettings: IUiSettingsClient;
+  isDarkTheme: boolean;
+  addBasePath: (url: string) => string;
 }
-export const GuideCard = ({ useCase, guides, activateGuide, http, uiSettings }: GuideCardProps) => {
+export const GuideCard = ({
+  useCase,
+  guides,
+  activateGuide,
+  isDarkTheme,
+  addBasePath,
+}: GuideCardProps) => {
   const footer = getCardFooter(guides, useCase, activateGuide);
   return (
     <UseCaseCard
@@ -193,8 +197,8 @@ export const GuideCard = ({ useCase, guides, activateGuide, http, uiSettings }: 
       title={constants[useCase].i18nTexts.title}
       description={constants[useCase].i18nTexts.description}
       footer={footer}
-      http={http}
-      uiSettings={uiSettings}
+      isDarkTheme={isDarkTheme}
+      addBasePath={addBasePath}
     />
   );
 };

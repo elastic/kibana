@@ -8,8 +8,6 @@
 
 import React, { ReactNode } from 'react';
 import { EuiCard, EuiText, EuiImage } from '@elastic/eui';
-import type { HttpStart } from '@kbn/core-http-browser';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { i18n } from '@kbn/i18n';
 import { GuideId } from '../../types';
 
@@ -55,8 +53,8 @@ export interface UseCaseProps {
   title: string;
   description: string;
   footer: ReactNode;
-  http: HttpStart;
-  uiSettings: IUiSettingsClient;
+  isDarkTheme: boolean;
+  addBasePath: (url: string) => string;
 }
 
 export const UseCaseCard = ({
@@ -64,17 +62,15 @@ export const UseCaseCard = ({
   title,
   description,
   footer,
-  http,
-  uiSettings,
+  isDarkTheme,
+  addBasePath,
 }: UseCaseProps) => {
-  const isDarkTheme = uiSettings.get('theme:darkMode');
-
   const getImageUrl = (imageName: UseCase) => {
     const imagePath = `/plugins/home/assets/solution_logos/${imageName}${
       isDarkTheme ? '_dark' : ''
     }.png`;
 
-    return http.basePath.prepend(imagePath);
+    return addBasePath(imagePath);
   };
 
   const titleElement = (

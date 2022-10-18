@@ -8,8 +8,6 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 import { GuideCard, GuideCardProps } from './guide_card';
 
@@ -17,8 +15,8 @@ const defaultProps: GuideCardProps = {
   useCase: 'search',
   guides: [],
   activateGuide: jest.fn(),
-  http: httpServiceMock.createStartContract(),
-  uiSettings: uiSettingsServiceMock.createStartContract(),
+  isDarkTheme: false,
+  addBasePath: jest.fn(),
 };
 
 describe('guide card', () => {
