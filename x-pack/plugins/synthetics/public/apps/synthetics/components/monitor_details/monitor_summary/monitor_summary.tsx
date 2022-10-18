@@ -31,6 +31,10 @@ import { MonitorErrorsCount } from './monitor_errors_count';
 export const MonitorSummary = () => {
   const { euiTheme } = useEuiTheme();
 
+  // TODO this range needs to be adjusted dynamically https://github.com/elastic/kibana/issues/143472
+  const from = 'now-30d/d';
+  const to = 'now';
+
   return (
     <>
       <EuiFlexGroup>
