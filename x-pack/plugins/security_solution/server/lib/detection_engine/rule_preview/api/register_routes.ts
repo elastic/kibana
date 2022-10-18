@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor } from '@kbn/core/server';
+import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
 import type { ConfigType } from '../../../../config';
@@ -23,7 +23,8 @@ export const registerRulePreviewRoutes = (
   ruleOptions: CreateRuleOptions,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  logger: Logger
 ) => {
   previewRulesRoute(
     router,
@@ -33,6 +34,7 @@ export const registerRulePreviewRoutes = (
     ruleOptions,
     securityRuleTypeOptions,
     previewRuleDataClient,
-    getStartServices
+    getStartServices,
+    logger
   );
 };
