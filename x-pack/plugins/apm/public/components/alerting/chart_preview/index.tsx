@@ -28,29 +28,27 @@ import { getTimeZone } from '../../shared/charts/helper/timezone';
 
 interface ChartPreviewProps {
   yTickFormat?: TickFormatter;
-  data?: Coordinate[];
   threshold: number;
   uiSettings?: IUiSettingsClient;
-  multiData?: Array<{ name: string; data: Coordinate[] }>;
+  series: Array<{ name?: string; data: Coordinate[] }>;
 }
 
 export function ChartPreview({
-  data = [],
   yTickFormat,
   threshold,
   uiSettings,
-  multiData,
+  series,
 }: ChartPreviewProps) {
   const theme = useTheme();
   const thresholdOpacity = 0.3;
-  const timestamps = data.map((d) => d.x);
+  const timestamps = series.flatMap(({ data }) => data.map(({ x }) => x));
   const xMin = Math.min(...timestamps);
   const xMax = Math.max(...timestamps);
   const xFormatter = niceTimeFormatter([xMin, xMax]);
 
   // Make the maximum Y value either the actual max or 20% more than the threshold
-  const values = data.map((d) => d.y ?? 0);
-  const yMax = Math.max(...values, threshold * 1.2);
+  const values = series.flatMap(({ data }) => data.map(({ y }) => y ?? 0));
+  const yMax = Math.max(threshold * 1.2, ...values);
 
   const style = {
     fill: theme.eui.euiColorVis2,
@@ -74,21 +72,21 @@ export function ChartPreview({
   ];
 
   const timeZone = getTimeZone(uiSettings);
-  const hasMultiData = !!multiData;
-  const dataSetsCount = hasMultiData ? multiData?.length : 1;
-  const legendSize = Math.ceil(dataSetsCount / 2) * 30;
+  const legendSize = Math.ceil(series.length / 2) * 30;
   const chartSize = 150;
 
   return (
     <>
       <EuiSpacer size="m" />
       <Chart
-        size={{ height: hasMultiData ? chartSize + legendSize : chartSize }}
+        size={{
+          height: series.length > 1 ? chartSize + legendSize : chartSize,
+        }}
         data-test-subj="ChartPreview"
       >
         <Settings
           tooltip="none"
-          showLegend={hasMultiData}
+          showLegend={series.length > 1}
           legendPosition={'bottom'}
           legendSize={legendSize}
         />
@@ -118,31 +116,18 @@ export function ChartPreview({
           ticks={5}
           domain={{ max: yMax, min: NaN }}
         />
-        {multiData ? (
-          multiData.map((dataSet) => (
-            <BarSeries
-              timeZone={timeZone}
-              data={dataSet.data}
-              id={`chart_preview_bar_series_${dataSet.name}`}
-              name={dataSet.name}
-              xAccessor="x"
-              xScaleType={ScaleType.Time}
-              yAccessors={['y']}
-              yScaleType={ScaleType.Linear}
-            />
-          ))
-        ) : (
+        {series.map(({ name, data }, index) => (
           <BarSeries
             timeZone={timeZone}
-            color={theme.eui.euiColorVis1}
             data={data}
-            id="chart_preview_bar_series"
+            id={`chart_preview_bar_series_${name || index}`}
+            name={name}
             xAccessor="x"
             xScaleType={ScaleType.Time}
             yAccessors={['y']}
             yScaleType={ScaleType.Linear}
           />
-        )}
+        ))}
       </Chart>
     </>
   );
