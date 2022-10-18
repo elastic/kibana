@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiMarkdownEditor, EuiMarkdownEditorProps, EuiMarkdownFormat } from '@elastic/eui';
+import { EuiLink, EuiMarkdownEditor, EuiMarkdownEditorProps, EuiMarkdownFormat, getDefaultEuiMarkdownProcessingPlugins } from '@elastic/eui';
 import React, { useState } from 'react';
 
 export type MarkdownProps = Partial<
@@ -24,6 +24,7 @@ export type MarkdownProps = Partial<
   height?: number | 'full';
   placeholder?: string | undefined;
   children?: string;
+  openLinksInNewTab?: boolean;
 };
 
 export const Markdown = ({
@@ -31,11 +32,18 @@ export const Markdown = ({
   readOnly,
   markdownContent,
   children,
+  openLinksInNewTab,
   defaultValue = '',
   placeholder = '',
   height = 'full',
 }: MarkdownProps) => {
   const [value, setValue] = useState(defaultValue);
+
+  // openLinksInNewTab functionality from https://codesandbox.io/s/relaxed-yalow-hy69r4?file=/demo.js:482-645
+  const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
+  processingPlugins[1][1].components.a = (props) => (
+    <EuiLink {...props} target="_blank" />
+  );
 
   // Render EuiMarkdownFormat when readOnly set to true
   if (readOnly) {
@@ -57,6 +65,7 @@ export const Markdown = ({
       value={value}
       onChange={setValue}
       height={height}
+      processingPluginList={openLinksInNewTab ? processingPlugins : undefined}
     />
   );
 };
