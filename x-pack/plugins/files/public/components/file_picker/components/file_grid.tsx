@@ -24,14 +24,15 @@ export const FileGrid: FunctionComponent = () => {
   }
   return (
     <div
+      data-test-subj="fileGrid"
       css={css`
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(calc(${euiTheme.size.xxxxl} * 3), 1fr));
         gap: ${euiTheme.size.m};
       `}
     >
-      {files.map((file) => (
-        <FileCard file={file} />
+      {files.map((file, idx) => (
+        <FileCard key={idx} file={file} />
       ))}
     </div>
   );

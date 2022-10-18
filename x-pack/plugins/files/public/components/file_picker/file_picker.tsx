@@ -74,7 +74,12 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
   );
 
   return (
-    <EuiModal className="filesFilePicker filesFilePicker--fixed" maxWidth="75vw" onClose={onClose}>
+    <EuiModal
+      data-test-subj="filePickerModal"
+      className="filesFilePicker filesFilePicker--fixed"
+      maxWidth="75vw"
+      onClose={onClose}
+    >
       <EuiModalHeader>
         <Title />
         <SearchField />
@@ -88,7 +93,7 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
                 place-items: center;
               `}
             >
-              <EuiLoadingSpinner size="xl" />
+              <EuiLoadingSpinner data-test-subj="loadingSpinner" size="xl" />
             </div>
           </EuiModalBody>
           {renderFooter()}

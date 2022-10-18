@@ -21,6 +21,7 @@ export const ErrorContent: FunctionComponent<Props> = ({ error }) => {
   const isLoading = useBehaviorSubject(state.isLoading$);
   return (
     <EuiEmptyPrompt
+      data-test-subj="errorPrompt"
       iconType="alert"
       iconColor="danger"
       titleSize="xs"

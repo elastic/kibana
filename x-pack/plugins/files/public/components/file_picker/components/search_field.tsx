@@ -18,6 +18,7 @@ export const SearchField: FunctionComponent = () => {
   const hasFiles = useBehaviorSubject(state.hasFiles$);
   return (
     <EuiFieldSearch
+      data-test-subj="searchField"
       disabled={!query && !hasFiles}
       value={query ?? ''}
       placeholder={i18nTexts.searchFieldPlaceholder}

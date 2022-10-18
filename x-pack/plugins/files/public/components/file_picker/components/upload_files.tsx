@@ -20,6 +20,7 @@ export const UploadFilesPrompt: FunctionComponent<Props> = ({ kind }) => {
   const { state } = useFilePickerContext();
   return (
     <EuiEmptyPrompt
+      data-test-subj="emptyPrompt"
       title={<h3>{i18nTexts.emptyStatePrompt}</h3>}
       body={
         <EuiText color="subdued" size="s">

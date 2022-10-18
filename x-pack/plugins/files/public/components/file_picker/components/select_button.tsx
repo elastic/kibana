@@ -20,7 +20,11 @@ export const SelectButton: FunctionComponent<Props> = ({ onClick }) => {
   const { state } = useFilePickerContext();
   const selectedFiles = useBehaviorSubject(state.selectedFileIds$);
   return (
-    <EuiButton disabled={!state.hasFilesSelected()} onClick={() => onClick(selectedFiles)}>
+    <EuiButton
+      data-test-subj="selectButton"
+      disabled={!state.hasFilesSelected()}
+      onClick={() => onClick(selectedFiles)}
+    >
       {selectedFiles.length > 1
         ? i18nTexts.selectFilesLabel(selectedFiles.length)
         : i18nTexts.selectFileLabel}
