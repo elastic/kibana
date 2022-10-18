@@ -371,14 +371,15 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
           content={i18n.translate(
             'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.recordScoreTooltip',
             {
-              defaultMessage: 'Record score normalized blah blah blah',
+              defaultMessage:
+                'The initial record score has been reduced based on the analysis of subsequent data.',
             }
           )}
         >
           <span>
             <FormattedMessage
               id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.recordScore"
-              defaultMessage="Record score normalized"
+              defaultMessage="Record score reduction"
             />
             <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
           </span>
