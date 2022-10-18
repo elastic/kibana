@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Logger } from '@kbn/core/server';
+import { CoreSetup } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
@@ -23,7 +23,6 @@ import { executor } from './executor';
 import { isEsQueryRule } from './util';
 
 export function getRuleType(
-  logger: Logger,
   core: CoreSetup
 ): RuleType<
   EsQueryRuleParams,
@@ -184,7 +183,7 @@ export function getRuleType(
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: async (options: ExecutorOptions<EsQueryRuleParams>) => {
-      return await executor(logger, core, options);
+      return await executor(core, options);
     },
     producer: STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,

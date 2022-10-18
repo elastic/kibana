@@ -376,7 +376,7 @@ export const DiscoverGrid = ({
               },
               fieldName,
               onSave: async () => {
-                onFieldEdited();
+                await onFieldEdited();
               },
             });
           }

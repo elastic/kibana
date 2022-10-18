@@ -35,7 +35,8 @@
       },
       "unsupportedKey": {
         "nestedUnsupportedKey": "unsupportedValue"
-      }
+      },
+      "hash": "ekrjelkjrelkjre"
     },
     {
       "locations": ["localhost"],
@@ -69,7 +70,8 @@
             "saved"
           ]
         }
-      }
+      },
+      "hash": "ekrjelkjrelkjre"
     }
   ]
 }

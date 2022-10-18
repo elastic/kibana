@@ -7,12 +7,9 @@
 
 import * as t from 'io-ts';
 import {
-  apmTransactionDurationIndicatorSchema,
-  apmTransactionErrorRateIndicatorSchema,
   budgetingMethodSchema,
   dateType,
   indicatorSchema,
-  indicatorTypesSchema,
   objectiveSchema,
   rollingTimeWindowSchema,
 } from '../schema';
@@ -35,19 +32,6 @@ const storedSLOSchema = sloSchema;
 export { sloSchema, storedSLOSchema };
 
 type SLO = t.TypeOf<typeof sloSchema>;
-
-type APMTransactionErrorRateIndicator = t.TypeOf<typeof apmTransactionErrorRateIndicatorSchema>;
-type APMTransactionDurationIndicator = t.TypeOf<typeof apmTransactionDurationIndicatorSchema>;
-type Indicator = t.TypeOf<typeof indicatorSchema>;
-type IndicatorTypes = t.TypeOf<typeof indicatorTypesSchema>;
-
 type StoredSLO = t.TypeOf<typeof storedSLOSchema>;
 
-export type {
-  SLO,
-  Indicator,
-  IndicatorTypes,
-  APMTransactionErrorRateIndicator,
-  APMTransactionDurationIndicator,
-  StoredSLO,
-};
+export type { SLO, StoredSLO };

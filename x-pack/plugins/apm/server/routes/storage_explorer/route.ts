@@ -11,7 +11,7 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import {
   indexLifecyclePhaseRt,
@@ -85,7 +85,7 @@ const storageExplorerRoute = createApmServerRoute({
       getRandomSampler({ security, request, probability }),
     ]);
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       kuery,
@@ -242,7 +242,7 @@ const storageChartRoute = createApmServerRoute({
       getRandomSampler({ security, request, probability }),
     ]);
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       kuery,
@@ -333,7 +333,7 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
       getRandomSampler({ security, request, probability }),
     ]);
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       kuery,
