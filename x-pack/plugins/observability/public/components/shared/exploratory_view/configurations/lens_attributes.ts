@@ -257,23 +257,6 @@ export class LensAttributes {
     };
   }
 
-  getCardinalityColumn({
-    sourceField,
-    label,
-    seriesConfig,
-  }: {
-    sourceField: string;
-    label?: string;
-    seriesConfig: SeriesConfig;
-  }) {
-    return this.getNumberOperationColumn({
-      sourceField,
-      operationType: 'unique_count',
-      label,
-      seriesConfig,
-    });
-  }
-
   getFiltersColumn({
     label,
     paramFilters,
@@ -389,15 +372,24 @@ export class LensAttributes {
     | CardinalityIndexPatternColumn {
     return {
       ...buildNumberColumn(sourceField),
-      label: i18n.translate('xpack.observability.expView.columns.operation.label', {
-        defaultMessage: '{operationType} of {sourceField}',
-        values: {
-          sourceField: label || seriesConfig.labels[sourceField],
-          operationType: capitalize(operationType),
-        },
-      }),
+      label:
+        operationType === 'unique_count'
+          ? label || seriesConfig.labels[sourceField]
+          : i18n.translate('xpack.observability.expView.columns.operation.label', {
+              defaultMessage: '{operationType} of {sourceField}',
+              values: {
+                sourceField: label || seriesConfig.labels[sourceField],
+                operationType: capitalize(operationType),
+              },
+            }),
       filter: columnFilter,
       operationType,
+      params:
+        operationType === 'unique_count'
+          ? {
+              emptyAsNull: true,
+            }
+          : {},
     };
   }
 
@@ -588,11 +580,13 @@ export class LensAttributes {
         seriesConfig: layerConfig.seriesConfig,
       });
     }
-    if (operationType === 'unique_count') {
-      return this.getCardinalityColumn({
+    if (operationType === 'unique_count' || fieldType === 'string') {
+      return this.getNumberOperationColumn({
         sourceField: fieldName,
+        operationType: 'unique_count',
         label: columnLabel || label,
         seriesConfig: layerConfig.seriesConfig,
+        columnFilter: columnFilters?.[0],
       });
     }
 
