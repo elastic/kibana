@@ -728,6 +728,7 @@ describe('IndexPattern Data Source', () => {
           dataType: 'number',
           isBucketed: false,
           hasTimeShift: false,
+          hasReducedTimeRange: false,
         });
       });
 

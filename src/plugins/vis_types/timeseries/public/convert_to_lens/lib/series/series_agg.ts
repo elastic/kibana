@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { CollapseFunction } from '@kbn/visualizations-plugin/common';
 import type { Metric } from '../../../../common/types';
 
-const functionMap: Partial<Record<string, string>> = {
+const functionMap: Partial<Record<string, CollapseFunction>> = {
   mean: 'avg',
   min: 'min',
   max: 'max',

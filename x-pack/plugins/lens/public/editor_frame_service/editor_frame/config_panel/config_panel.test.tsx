@@ -374,6 +374,16 @@ describe('ConfigPanel', () => {
           columnId: 'myColumn',
           groupId: 'testGroup',
           staticValue: 100,
+          visualizationGroups: [
+            expect.objectContaining({
+              accessors: [],
+              dataTestSubj: 'mockVisA',
+              groupId: 'a',
+              groupLabel: 'a',
+              layerId: 'layer1',
+              supportsMoreColumns: true,
+            }),
+          ],
         }
       );
     });
@@ -410,6 +420,16 @@ describe('ConfigPanel', () => {
           groupId: 'a',
           columnId: 'newId',
           staticValue: 100,
+          visualizationGroups: [
+            expect.objectContaining({
+              accessors: [],
+              dataTestSubj: 'mockVisA',
+              groupId: 'a',
+              groupLabel: 'a',
+              layerId: 'layer1',
+              supportsMoreColumns: true,
+            }),
+          ],
         }
       );
     });

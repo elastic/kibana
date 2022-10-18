@@ -6,19 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { Column, PagingState, TableVisConfiguration } from '@kbn/visualizations-plugin/common';
+import {
+  CollapseFunction,
+  Column,
+  PagingState,
+  TableVisConfiguration,
+} from '@kbn/visualizations-plugin/common';
 import { TableVisParams } from '../../../common';
 
 const getColumns = (
   params: TableVisParams,
   metrics: string[],
   columns: Column[],
-  bucketCollapseFn?: Record<string, string[]>
+  bucketCollapseFn?: Record<CollapseFunction, string[]>
 ) => {
   const { showTotal, totalFunc } = params;
   return columns.map(({ columnId }) => {
     const collapseFn = bucketCollapseFn
-      ? Object.keys(bucketCollapseFn).find((key) => bucketCollapseFn[key].includes(columnId))
+      ? (Object.keys(bucketCollapseFn).find((key) =>
+          bucketCollapseFn[key as CollapseFunction].includes(columnId)
+        ) as CollapseFunction)
       : undefined;
     return {
       columnId,
@@ -61,7 +68,7 @@ export const getConfiguration = (
       customBuckets: Record<string, string>;
     };
     columnsWithoutReferenced: Column[];
-    bucketCollapseFn?: Record<string, string[]>;
+    bucketCollapseFn?: Record<CollapseFunction, string[]>;
   }
 ): TableVisConfiguration => {
   return {

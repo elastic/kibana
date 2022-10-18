@@ -209,6 +209,12 @@ export function getTextBasedDatasource({
         initialContext: context,
       };
     },
+
+    syncColumns({ state }) {
+      // TODO implement this for real
+      return state;
+    },
+
     onRefreshIndexPattern() {},
 
     getUsedDataViews: (state) => {
@@ -581,6 +587,7 @@ export function getTextBasedDatasource({
               label: columnLabelMap[columnId] ?? column?.fieldName,
               isBucketed: Boolean(column?.meta?.type !== 'number'),
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -606,6 +613,7 @@ export function getTextBasedDatasource({
             },
           };
         },
+        hasDefaultTimeField: () => false,
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {

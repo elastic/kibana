@@ -8,6 +8,7 @@
 import { EuiFormRow, EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { CollapseFunction } from '../../common/expressions';
 
 const options = [
   { text: i18n.translate('xpack.lens.collapse.none', { defaultMessage: 'None' }), value: '' },
@@ -22,7 +23,7 @@ export function CollapseSetting({
   onChange,
 }: {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: CollapseFunction) => void;
 }) {
   return (
     <EuiFormRow
@@ -52,7 +53,7 @@ export function CollapseSetting({
         options={options}
         value={value}
         onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-          onChange(e.target.value);
+          onChange(e.target.value as CollapseFunction);
         }}
       />
     </EuiFormRow>

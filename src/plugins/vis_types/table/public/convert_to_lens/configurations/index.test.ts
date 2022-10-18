@@ -8,6 +8,7 @@
 
 import { AggTypes } from '../../../common';
 import { getConfiguration } from '.';
+import { CollapseFunction } from '@kbn/visualizations-plugin/common';
 
 const params = {
   perPage: 20,
@@ -48,7 +49,7 @@ describe('getConfiguration', () => {
             },
           },
         ],
-        bucketCollapseFn: { sum: ['bucket-1'] },
+        bucketCollapseFn: { sum: ['bucket-1'] } as Record<CollapseFunction, string[]>,
       })
     ).toEqual({
       columns: [

@@ -8,7 +8,13 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/public';
-import { AggBasedColumn, SchemaConfig, SupportedAggregation } from '../../common';
+import {
+  AggBasedColumn,
+  CollapseFunction,
+  isCollapseFunction,
+  SchemaConfig,
+  SupportedAggregation,
+} from '../../common';
 import { convertBucketToColumns } from '../../common/convert_to_lens/lib/buckets';
 import { isSiblingPipeline } from '../../common/convert_to_lens/lib/utils';
 import { BucketColumn } from '../../common/convert_to_lens/lib';
@@ -30,7 +36,7 @@ export const getBucketCollapseFn = (
   customBucketsMap: Record<string, string>,
   metricColumns: AggBasedColumn[]
 ) => {
-  const collapseFnMap: Record<string, string[]> = {
+  const collapseFnMap: Record<CollapseFunction, string[]> = {
     min: [],
     max: [],
     sum: [],
@@ -45,8 +51,11 @@ export const getBucketCollapseFn = (
       const collapseFn = metrics
         .find((m) => m.aggId === metricColumn.meta.aggId)
         ?.aggType.split('_')[0];
-      if (collapseFn) {
-        collapseFnMap[collapseFn].push(bucket.columnId);
+
+      if (isCollapseFunction(collapseFn)) {
+        if (collapseFn) {
+          collapseFnMap[collapseFn].push(bucket.columnId);
+        }
       }
     });
   });
