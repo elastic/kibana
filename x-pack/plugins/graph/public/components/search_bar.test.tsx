@@ -58,7 +58,7 @@ function getServiceMocks() {
       query: {
         savedQueries: {},
       },
-      indexPatternsService: {
+      indexPatterns: {
         find: jest.fn(),
       },
     },
