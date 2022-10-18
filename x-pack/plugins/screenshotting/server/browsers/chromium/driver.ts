@@ -355,6 +355,7 @@ export class HeadlessChromiumDriver {
       return;
     }
 
+    // FIXME: retrieve the client in open() and  pass in the client?
     const client = this.page._client();
 
     // We have to reach into the Chrome Devtools Protocol to apply headers as using
