@@ -10,8 +10,8 @@ import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 
-import type { FormHook } from '../../common/shared_imports';
-import { useForm, Form } from '../../common/shared_imports';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { Assignees } from './assignees';
 import type { FormProps } from './schema';
