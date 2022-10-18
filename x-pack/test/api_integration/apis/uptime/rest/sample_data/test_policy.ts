@@ -310,11 +310,11 @@ export const getTestProjectSyntheticsPolicy = (
     id: string;
     projectId?: string;
   } = {
-      name: 'check if title is present-Test private location 0',
-      inputs: {},
-      configId: '',
-      id: '',
-    }
+    name: 'check if title is present-Test private location 0',
+    inputs: {},
+    configId: '',
+    id: '',
+  }
 ): PackagePolicy => ({
   id: `4b6abc6c-118b-4d93-a489-1135500d09f1-${projectId}-default-d70a46e0-22ea-11ed-8c6b-09a2d21dfbc3`,
   version: 'WzEzMDksMV0=',
