@@ -26,7 +26,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApi(serviceName: string, serverlessFunctionName?: string) {
     return await apmApiClient.readUser({
-      endpoint: `GET /internal/apm/services/{serviceName}/metrics/serverless`,
+      endpoint: 'GET /internal/apm/services/{serviceName}/metrics/serverless/charts',
       params: {
         path: { serviceName },
         query: {
@@ -44,7 +44,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Serverless metrics charts when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
-      let serverlessMetrics: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless'>;
+      let serverlessMetrics: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/charts'>;
       before(async () => {
         const response = await callApi('lambda-python');
         serverlessMetrics = response.body;
@@ -77,7 +77,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     after(() => synthtraceEsClient.clean());
 
     describe('Python service', () => {
-      let serverlessMetrics: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless'>;
+      let serverlessMetrics: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/charts'>;
       before(async () => {
         const response = await callApi('lambda-python');
         serverlessMetrics = response.body;
@@ -199,7 +199,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     describe('detailed metrics', () => {
-      let serverlessMetrics: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless'>;
+      let serverlessMetrics: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/charts'>;
       before(async () => {
         const response = await callApi('lambda-python', pythonServerlessFunctionNames[0]);
         serverlessMetrics = response.body;

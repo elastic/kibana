@@ -30,7 +30,7 @@ export function ServerlessMetricsCharts({ serverlessFunctionName }: Props) {
         return undefined;
       }
       return callApmApi(
-        'GET /internal/apm/services/{serviceName}/metrics/serverless',
+        'GET /internal/apm/services/{serviceName}/metrics/serverless/charts',
         {
           params: {
             path: {

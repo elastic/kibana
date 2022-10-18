@@ -15,8 +15,9 @@ import { getServerlessFunctionsOverview } from './get_serverless_functions_overv
 import { getServerlessSummary } from './get_serverless_summary';
 import { getActiveInstancesTimeseries } from './get_active_instances_timeseries';
 
-const serverlessMetricsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/serverless',
+const serverlessMetricsChartsRoute = createApmServerRoute({
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/metrics/serverless/charts',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -175,7 +176,7 @@ const serverlessMetricsSummaryRoute = createApmServerRoute({
 });
 
 export const metricsServerlessRouteRepository = {
-  ...serverlessMetricsRoute,
+  ...serverlessMetricsChartsRoute,
   ...serverlessMetricsSummaryRoute,
   ...serverlessMetricsFunctionsOverviewRoute,
   ...serverlessMetricsActiveInstancesRoute,
