@@ -73,7 +73,7 @@ interface EcsError {
 }
 
 interface EndpointActionFields<
-  TParameters extends EndpointActionDataParameterTypes = never,
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   TOutputContent extends object = object
 > {
   action_id: string;
@@ -148,7 +148,7 @@ export type EndpointActionDataParameterTypes =
   | ResponseActionGetFileParameters;
 
 export interface EndpointActionData<
-  TParameters extends EndpointActionDataParameterTypes = never,
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   TOutputContent extends object = object
 > {
   command: ResponseActionsApiCommandNames;
@@ -278,7 +278,7 @@ export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema
 
 export interface ActionDetails<
   TOutputContent extends object = object,
-  TParameters extends EndpointActionDataParameterTypes = never
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 > {
   /** The action id */
   id: string;
@@ -339,7 +339,7 @@ export interface ActionDetails<
 
 export interface ActionDetailsApiResponse<
   TOutputType extends object = object,
-  TParameters extends EndpointActionDataParameterTypes = never
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 > {
   data: ActionDetails<TOutputType, TParameters>;
 }
