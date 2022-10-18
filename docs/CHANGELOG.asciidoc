@@ -428,7 +428,7 @@ To review the breaking changes in previous versions, refer to the following:
 [[enhancement-v8.4.2]]
 === Enhancements
 Security::
-Logs a hash of the Saved Objects encryption key (`xpack.encryptedSavedObjects.encryptionKey`) when {kib} starts to make it easier to spot mismatched encryption keys {kibana-pull}139874[#139874]
+Logs a hash of the saved objects encryption key (`xpack.encryptedSavedObjects.encryptionKey`) when {kib} starts to assist in identifying mismatched encryption keys {kibana-pull}139874[#139874]
 
 [float]
 [[fixes-v8.4.2]]
