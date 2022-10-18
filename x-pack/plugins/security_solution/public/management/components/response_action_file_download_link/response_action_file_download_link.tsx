@@ -9,6 +9,7 @@ import type { CSSProperties } from 'react';
 import React, { memo } from 'react';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import { getHostActionFileDownloadUrl } from '../../services/response_actions/get_host_action_file_download_url';
 import type { ActionDetails } from '../../../../common/endpoint/types/actions';
@@ -23,6 +24,7 @@ const STYLE_INHERIT_FONT_FAMILY = Object.freeze<CSSProperties>({
 
 export interface ResponseActionFileDownloadLinkProps {
   action: MaybeImmutable<ActionDetails>;
+  'data-test-subj'?: string;
 }
 
 /**
@@ -31,13 +33,15 @@ export interface ResponseActionFileDownloadLinkProps {
  * NOTE: Currently displays only the link for the first host in the Action
  */
 export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLinkProps>(
-  ({ action }) => {
+  ({ action, 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+
     return (
       <>
         <EuiButtonEmpty
           href={getHostActionFileDownloadUrl(action)}
           iconType="download"
-          data-test-subj="fileDownloadLink"
+          data-test-subj={getTestId('downloadButton')}
           flush="left"
           style={STYLE_INHERIT_FONT_FAMILY}
           download
@@ -49,7 +53,11 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
             />
           </EuiText>
         </EuiButtonEmpty>
-        <EuiText size="s" className="eui-displayInline">
+        <EuiText
+          size="s"
+          className="eui-displayInline"
+          data-test-subj={getTestId('passcodeMessage')}
+        >
           <FormattedMessage
             id="xpack.securitySolution.responseActionFileDownloadLink.passcodeInfo"
             defaultMessage="(ZIP file passcode: {passcode})"

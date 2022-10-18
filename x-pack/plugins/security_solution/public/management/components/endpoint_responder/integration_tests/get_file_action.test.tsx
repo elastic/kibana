@@ -124,4 +124,17 @@ describe('When using get-file aciton from response actions console', () => {
       'Argument can only be used once: --comment'
     );
   });
+
+  it('should display download link once action completes', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
+    });
+
+    expect(renderResult.getByTestId('getFileSuccess').textContent).toEqual(
+      'File retrieved from the host.Click here to download(ZIP file passcode: elastic)'
+    );
+  });
 });
