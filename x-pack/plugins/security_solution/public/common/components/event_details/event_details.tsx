@@ -179,6 +179,11 @@ const EventDetailsComponent: React.FC<Props> = ({
     [detailsEcsData]
   );
 
+  const showThreatSummary = useMemo(
+    () => enrichmentCount > 0 || (isLicenseValid && (hostRisk || userRisk)),
+    [enrichmentCount, hostRisk, isLicenseValid, userRisk]
+  );
+
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
       isAlert
@@ -237,20 +242,19 @@ const EventDetailsComponent: React.FC<Props> = ({
                   isReadOnly={isReadOnly}
                 />
 
-                {enrichmentCount > 0 ||
-                  (isLicenseValid && (hostRisk || userRisk) && (
-                    <ThreatSummaryView
-                      isDraggable={isDraggable}
-                      hostRisk={hostRisk}
-                      userRisk={userRisk}
-                      browserFields={browserFields}
-                      data={data}
-                      eventId={id}
-                      timelineId={timelineId}
-                      enrichments={allEnrichments}
-                      isReadOnly={isReadOnly}
-                    />
-                  ))}
+                {showThreatSummary && (
+                  <ThreatSummaryView
+                    isDraggable={isDraggable}
+                    hostRisk={hostRisk}
+                    userRisk={userRisk}
+                    browserFields={browserFields}
+                    data={data}
+                    eventId={id}
+                    timelineId={timelineId}
+                    enrichments={allEnrichments}
+                    isReadOnly={isReadOnly}
+                  />
+                )}
 
                 {isEnrichmentsLoading && (
                   <>
@@ -268,7 +272,6 @@ const EventDetailsComponent: React.FC<Props> = ({
       browserFields,
       data,
       detailsEcsData,
-      enrichmentCount,
       goToTableTab,
       handleOnEventClosed,
       hostRisk,
@@ -277,7 +280,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       isAlert,
       isDraggable,
       isEnrichmentsLoading,
-      isLicenseValid,
+      showThreatSummary,
       isReadOnly,
       renderer,
       timelineId,
