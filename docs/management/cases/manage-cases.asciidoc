@@ -58,7 +58,7 @@ it by clicking the *Open Visualization* option in the comment menu.
 === Manage cases
 
 In *Management > {stack-manage-app} > Cases*, you can search cases and filter
-them by tags, reporter.
+them by severity, status, tags, and assignees.
 
 To view a case, click on its name. You can then:
 
