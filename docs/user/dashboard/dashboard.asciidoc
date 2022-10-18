@@ -12,16 +12,14 @@ The best way to understand your data is to visualize it. With dashboards, you ca
 image:images/dashboard_ecommerceRevenueDashboard_7.15.0.png[Example dashboard]
 
 [discrete]
-[[dashboard-best-practices]]
-== Dashboard best practices
+[[dashboard-identify-your-audience]]
+== Identify your audience
 
-Before you create dashboards, review the best practices to help your users complete their tasks quickly and efficiently.
+To help you choose the visualizations to display on the dashboard, identify your users and the goals they need to accomplish while using the dashboard. 
 
 [discrete]
-[[dashboard-identify-your-audience]]
-=== Identify your audience and goal
-
-Identify the primary dashboard users and their goals for using the dashboard. 
+[[dashboard-choose-the-best-visualization-to-display-your-data]]
+== Choose the best visualizations for your data
 
 [discrete]
 [[dashboard-define-the-organization-and-hierarchy]]
@@ -46,36 +44,6 @@ Group visualizations that contain related data together and in rows. For example
 Horizontal proportions best show trends and small variations. 
 
 When you display visualizations in narrow or short proportions, it is difficult to understand the data that is displayed. 
-
-[discrete]
-[[dashboard-choose-the-best-visualization-to-display-your-data]]
-=== Choose the best visualization to display your data
-
-[cols="2"]
-|===
-
-| <<aggregation-reference,Editors>>
-| Use one of the editors to create visualizations of your data. Each editor varies in capabilities for all levels of analysts.
-
-| <<maps,Maps>>
-| Create beautiful displays of your geographical data.
-
-| <<xpack-ml-anomalies,Anomaly swim lane>>
-| Display the results from machine learning anomaly detection jobs.
-
-| <<xpack-ml-anomalies,Anomaly chart>>
-| Display an anomaly chart from the *Anomaly Explorer*.
-
-| <<logs-app,Log stream>>
-| Display a table of live streaming logs.
-
-| <<add-controls,Tools>>
-| Add interactive filters with *Controls* panels.
-
-| <<add-text,Text>>
-| Add context to your panels with *Text*.
-
-|===
 
 [discrete]
 [[dashboard-consider-the-right-colors]]
