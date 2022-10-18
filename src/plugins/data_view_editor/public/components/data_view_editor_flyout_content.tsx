@@ -17,10 +17,10 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import memoizeOne from 'memoize-one';
-import { BehaviorSubject } from 'rxjs';
+import { isEqual } from 'lodash';
+import { BehaviorSubject, first, firstValueFrom, Subject, distinctUntilChanged } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
-import { INDEX_PATTERN_TYPE, MatchedItem } from '@kbn/data-views-plugin/public';
+import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 
 import {
   DataView,
@@ -32,7 +32,6 @@ import {
   UseField,
 } from '../shared_imports';
 
-import { ensureMinimumTime, getMatchedIndices } from '../lib';
 import { FlyoutPanels } from './flyout_panels';
 
 import { removeSpaces } from '../lib';
@@ -41,7 +40,6 @@ import {
   DataViewEditorContext,
   RollupIndicesCapsResponse,
   IndexPatternConfig,
-  MatchedIndicesSet,
   FormInternal,
 } from '../types';
 
@@ -58,7 +56,6 @@ import {
 } from '.';
 import { editDataViewModal } from './confirm_modals/edit_data_view_changed_modal';
 import { DataViewEditorServiceContext } from './data_view_flyout_content_container';
-import { DataViewEditorService } from '../data_view_editor_service';
 
 export interface Props {
   /**
@@ -140,7 +137,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         id: formData.id,
         name: formData.name,
       };
-      const rollupIndex = rollupIndex$.current.getValue();
+      const rollupIndex = dataViewEditorService.rollupIndex$.getValue();
 
       if (type === INDEX_PATTERN_TYPE.ROLLUP && rollupIndex) {
         indexPatternStub.type = INDEX_PATTERN_TYPE.ROLLUP;
@@ -166,6 +163,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
     },
   });
 
+  const onChange = useCallback(() => {
+    newItem$.current.next(undefined);
+  }, []);
+
   // `useFormData` initially returns `undefined`,
   // we override `undefined` with real default values from `schema`
   // to get a stable reference to avoid hooks re-run and reduce number of excessive requests
@@ -175,9 +176,17 @@ const IndexPatternEditorFlyoutContentComponent = ({
       allowHidden = schema.allowHidden.defaultValue,
       type = schema.type.defaultValue,
     },
-  ] = useFormData<FormInternal>({ form });
+  ] = useFormData<FormInternal>({
+    form,
+    onChange,
+    /*
+    onChange: () => {
+      // newItem$.current.next(undefined);
+    },
+    */
+  });
 
-  const currentLoadingMatchedIndicesRef = useRef(0);
+  // const currentLoadingMatchedIndicesRef = useRef(0);
 
   const isLoadingSources = useObservable(dataViewEditorService.isLoadingSources$, true);
 
@@ -186,13 +195,50 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const isLoadingDataViewNames$ = useRef(new BehaviorSubject<boolean>(true));
   const existingDataViewNames$ = useRef(new BehaviorSubject<string[]>([]));
   const isLoadingDataViewNames = useObservable(isLoadingDataViewNames$.current, true);
+  const newItem$ = useRef(new Subject());
+
+  // I'm pretty sure this is here for debugging purposes
+  useEffect(() => {
+    const a = dataViewEditorService.matchedIndices$
+      .pipe(distinctUntilChanged(isEqual))
+      .subscribe((item) => {
+        newItem$.current.next(item);
+        newItem$.current.next(undefined);
+      });
+
+    const b = newItem$.current.subscribe((item) => console.log('newItem$', item));
+
+    return () => {
+      a.unsubscribe();
+      b.unsubscribe();
+    };
+  }, [dataViewEditorService.matchedIndices$]);
+
+  // newItem$.subscribe(dataViewEditorService.matchedIndices$);
+
+  const indicesProvider = useCallback(async () => {
+    console.log('indicesProvider is firing!');
+    const rollupIndex = undefined;
+    /* await firstValueFrom(
+      dataViewEditorService.rollupIndex$.pipe(first((data) => data !== null))
+    );
+    */
+
+    const matchedIndicesResult = await firstValueFrom(
+      dataViewEditorService.matchedIndices$.pipe(first((data) => data !== undefined))
+    );
+
+    // Wait until we have fetched the indices.
+    // The result will then be sent to the field validator(s) (when calling await provider(););
+    return { matchedIndicesResult, rollupIndex };
+  }, [dataViewEditorService.matchedIndices$ /* , dataViewEditorService.rollupIndex$, title */]);
 
   const rollupIndicesCapabilities = useObservable(
     dataViewEditorService.rollupIndicesCapabilities$,
     {}
   );
 
-  const rollupIndex$ = useRef(new BehaviorSubject<string | undefined>(undefined));
+  // const rollupIndex$ = useRef(new BehaviorSubject<string | undefined>(undefined));
 
   // initial loading of indicies and data view names
   useEffect(() => {
@@ -203,12 +249,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
         removeSpaces(timeFieldQuery),
         type,
         requireTimestampField,
-        rollupIndex$.current.getValue()
+        dataViewEditorService.rollupIndex$.getValue()
       );
     });
 
-    dataViewEditorService.loadIndices(title, allowHidden).then((matchedIndices) => {
-      if (isCancelled) return;
+    dataViewEditorService.loadIndices(title, allowHidden, type).then((matchedIndices) => {
       dataViewEditorService.matchedIndices$.next(matchedIndices);
     });
 
@@ -226,58 +271,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
   }, [editData, type, title, allowHidden, requireTimestampField, dataViewEditorService]);
 
   const getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
-
-  // used in title field validation
-  const reloadMatchedIndices = useCallback(
-    async (newTitle: string) => {
-      let newRollupIndexName: string | undefined;
-
-      const fetchIndices = async (query: string = '') => {
-        const currentLoadingMatchedIndicesIdx = ++currentLoadingMatchedIndicesRef.current;
-
-        loadingMatchedIndices$.current.next(true);
-
-        const allSrcs = await dataViewEditorService.getIndicesCached({
-          pattern: '*',
-          showAllIndices: allowHidden,
-        });
-
-        const { matchedIndicesResult, exactMatched } = !isLoadingSources
-          ? await loadMatchedIndices(query, allowHidden, allSrcs, dataViewEditorService)
-          : {
-              matchedIndicesResult: matchedIndiciesDefault,
-              exactMatched: [],
-            };
-
-        if (currentLoadingMatchedIndicesIdx === currentLoadingMatchedIndicesRef.current) {
-          // we are still interested in this result
-          if (type === INDEX_PATTERN_TYPE.ROLLUP) {
-            const isRollupIndex = await dataViewEditorService.getIsRollupIndex();
-            const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
-            newRollupIndexName = rollupIndices.length === 1 ? rollupIndices[0].name : undefined;
-            rollupIndex$.current.next(newRollupIndexName);
-          } else {
-            rollupIndex$.current.next(undefined);
-          }
-
-          dataViewEditorService.matchedIndices$.next(matchedIndicesResult);
-          loadingMatchedIndices$.current.next(false);
-        }
-
-        return { matchedIndicesResult, newRollupIndexName };
-      };
-
-      return fetchIndices(newTitle);
-    },
-    [
-      allowHidden,
-      type,
-      dataViewEditorService,
-      rollupIndex$,
-      isLoadingSources,
-      loadingMatchedIndices$,
-    ]
-  );
 
   const onTypeChange = useCallback(
     (newType) => {
@@ -353,9 +346,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
             <EuiFlexItem>
               <TitleField
                 isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
-                refreshMatchedIndices={reloadMatchedIndices}
+                // refreshMatchedIndices={reloadMatchedIndices}
                 matchedIndices$={dataViewEditorService.matchedIndices$}
                 rollupIndicesCapabilities={rollupIndicesCapabilities}
+                indicesProvider={indicesProvider}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -415,6 +409,8 @@ export const IndexPatternEditorFlyoutContent = React.memo(IndexPatternEditorFlyo
 // that are challenging to synchronize without a larger refactor
 // Use memoizeOne as a caching layer to avoid excessive network requests on each key type
 // TODO: refactor to remove `memoize` when https://github.com/elastic/kibana/pull/109238 is done
+
+/*
 const loadMatchedIndices = memoizeOne(
   async (
     query: string,
@@ -466,3 +462,4 @@ const loadMatchedIndices = memoizeOne(
   // compare only query and allowHidden
   (newArgs, oldArgs) => newArgs[0] === oldArgs[0] && newArgs[1] === oldArgs[1]
 );
+*/

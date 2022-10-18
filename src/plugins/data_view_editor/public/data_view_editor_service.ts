@@ -31,6 +31,8 @@ export class DataViewEditorService {
   loadingTimestampFields$ = new BehaviorSubject<boolean>(false);
   timestampFieldOptions$ = new Subject<TimestampOption[]>();
 
+  rollupIndex$ = new BehaviorSubject<string | undefined>(undefined);
+
   matchedIndices$ = new BehaviorSubject<MatchedIndicesSet>({
     allIndices: [],
     exactMatchedIndices: [],
@@ -41,7 +43,9 @@ export class DataViewEditorService {
   private rollupCapsResponse: Promise<RollupIndicesCapsResponse>;
 
   private currentLoadingTimestampFields = 0;
+  private currentLoadingMatchedIndices = 0;
 
+  // todo call only once per display of modal
   private getRollupIndexCaps = async () => {
     let response: RollupIndicesCapsResponse = {};
     try {
@@ -60,31 +64,41 @@ export class DataViewEditorService {
     return (indexName: string) => this.getRollupIndices(response).includes(indexName);
   };
 
+  // todo hopefully don't use return value
   loadMatchedIndices = async (
     query: string,
     allowHidden: boolean,
-    allSources: MatchedItem[]
+    allSources: MatchedItem[],
+    type: INDEX_PATTERN_TYPE
   ): Promise<{
     matchedIndicesResult: MatchedIndicesSet;
     exactMatched: MatchedItem[];
     partialMatched: MatchedItem[];
   }> => {
+    const currentLoadingMatchedIndicesIdx = ++this.currentLoadingMatchedIndices;
+    const isRollupIndex = await this.getIsRollupIndex();
     const indexRequests = [];
+    let newRollupIndexName: string | undefined;
+    console.log('loadMatchedIndices', query, allowHidden, allSources, type);
 
     if (query?.endsWith('*')) {
       const exactMatchedQuery = this.getIndicesCached({
+        // might need to add isRollupIndex
         pattern: query,
         showAllIndices: allowHidden,
       });
+
       indexRequests.push(exactMatchedQuery);
       // provide default value when not making a request for the partialMatchQuery
       indexRequests.push(Promise.resolve([]));
     } else {
       const exactMatchQuery = this.getIndicesCached({
+        // might need to add isRollupIndex
         pattern: query,
         showAllIndices: allowHidden,
       });
       const partialMatchQuery = this.getIndicesCached({
+        // might need to add isRollupIndex
         pattern: `${query}*`,
         showAllIndices: allowHidden,
       });
@@ -104,28 +118,44 @@ export class DataViewEditorService {
       allowHidden
     );
 
-    this.matchedIndices$.next(matchedIndicesResult);
-    return { matchedIndicesResult, exactMatched, partialMatched };
+    if (currentLoadingMatchedIndicesIdx === this.currentLoadingMatchedIndices) {
+      // we are still interested in this result
+      if (type === INDEX_PATTERN_TYPE.ROLLUP) {
+        const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
+        newRollupIndexName = rollupIndices.length === 1 ? rollupIndices[0].name : undefined;
+        this.rollupIndex$.next(newRollupIndexName);
+      } else {
+        this.rollupIndex$.next(undefined);
+      }
+
+      // todo
+      // loadingMatchedIndices$.current.next(false);
+
+      this.matchedIndices$.next(matchedIndicesResult);
+      return { matchedIndicesResult, exactMatched, partialMatched };
+    }
+    // return undefined;
   };
 
-  loadIndices = async (title: string, allowHidden: boolean) => {
-    const allSrcs = await this.getIndicesCached({
+  loadIndices = async (title: string, allowHidden: boolean, type: INDEX_PATTERN_TYPE) => {
+    const isRollupIndex = await this.getIsRollupIndex();
+    const allSrcs = await this.dataViews.getIndices({
+      isRollupIndex,
       pattern: '*',
       showAllIndices: allowHidden,
     });
-
-    const matchedSet = await this.loadMatchedIndices(title, allowHidden, allSrcs);
-
-    this.isLoadingSources$.next(false);
-    const matchedIndices = getMatchedIndices(
+    // todo look at this
+    const { matchedIndicesResult } = await this.loadMatchedIndices(
+      title,
+      allowHidden,
       allSrcs,
-      matchedSet.partialMatched,
-      matchedSet.exactMatched,
-      allowHidden
+      type
     );
 
-    this.matchedIndices$.next(matchedIndices);
-    return matchedIndices;
+    this.isLoadingSources$.next(false);
+
+    this.matchedIndices$.next(matchedIndicesResult);
+    return matchedIndicesResult;
   };
 
   loadDataViewNames = async (dataViewName?: string) => {
