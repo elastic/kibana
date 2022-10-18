@@ -53,7 +53,7 @@ type FailedError = Array<{ id?: string; reason: string; details: string; payload
 export const INSUFFICIENT_FLEET_PERMISSIONS =
   'Insufficient permissions. In order to configure private locations, you must have Fleet and Integrations write permissions. To resolve, please generate a new API key with a user who has Fleet and Integrations write permissions.';
 
-export class ProjectMonitorFormatter {
+export class ProjectMonitorFormatterLegacy {
   private projectId: string;
   private spaceId: string;
   private keepStale: boolean;
@@ -158,9 +158,8 @@ export class ProjectMonitorFormatter {
     if (normalizedUpdateMonitors.length > 0) {
       let updateMessage = '';
       if (updatedCount > 0) {
-        updateMessage = `${updatedCount} monitor${
-          updatedCount > 1 ? 's' : ''
-        } updated successfully.`;
+        updateMessage = `${updatedCount} monitor${updatedCount > 1 ? 's' : ''
+          } updated successfully.`;
       }
 
       const noChanges = normalizedUpdateMonitors.length - updatedCount;
@@ -306,9 +305,8 @@ export class ProjectMonitorFormatter {
         if (newMonitors && newMonitors.length === monitors.length) {
           this.createdMonitors.push(...monitors.map((monitor) => monitor[ConfigKey.JOURNEY_ID]!));
           this.handleStreamingMessage({
-            message: `${monitors.length} monitor${
-              monitors.length > 1 ? 's' : ''
-            } created successfully.`,
+            message: `${monitors.length} monitor${monitors.length > 1 ? 's' : ''
+              } created successfully.`,
           });
         } else {
           this.failedMonitors.push({

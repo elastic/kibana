@@ -11,7 +11,7 @@ import { ProjectMonitor } from '../../../common/runtime_types';
 import { SyntheticsStreamingRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
-import { ProjectMonitorFormatter } from '../../synthetics_service/project_monitor/project_monitor_formatter';
+import { ProjectMonitorFormatterLegacy } from '../../synthetics_service/project_monitor/project_monitor_formatter_legacy';
 
 const MAX_PAYLOAD_SIZE = 1048576 * 20; // 20MiB
 
@@ -50,7 +50,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsStreamingRouteFactory =
       );
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
-      const pushMonitorFormatter = new ProjectMonitorFormatter({
+      const pushMonitorFormatter = new ProjectMonitorFormatterLegacy({
         projectId,
         spaceId,
         keepStale,

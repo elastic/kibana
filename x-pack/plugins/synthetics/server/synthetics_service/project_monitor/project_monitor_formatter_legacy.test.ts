@@ -8,8 +8,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   INSUFFICIENT_FLEET_PERMISSIONS,
-  ProjectMonitorFormatter,
-} from './project_monitor_formatter';
+  ProjectMonitorFormatterLegacy,
+} from './project_monitor_formatter_legacy';
 import { DataStream, LocationStatus } from '../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { times } from 'lodash';
@@ -88,7 +88,7 @@ const privateLocations = times(1).map((n) => {
   };
 });
 
-describe('ProjectMonitorFormatter', () => {
+describe('ProjectMonitorFormatterLegacy', () => {
   const mockEsClient = {
     search: jest.fn(),
   };
@@ -145,7 +145,7 @@ describe('ProjectMonitorFormatter', () => {
 
     testSubject.next = jest.fn();
 
-    const pushMonitorFormatter = new ProjectMonitorFormatter({
+    const pushMonitorFormatter = new ProjectMonitorFormatterLegacy({
       projectId: 'test-project',
       spaceId: 'default-space',
       keepStale: false,
@@ -214,7 +214,7 @@ describe('ProjectMonitorFormatter', () => {
       },
     } as any;
 
-    const pushMonitorFormatter = new ProjectMonitorFormatter({
+    const pushMonitorFormatter = new ProjectMonitorFormatterLegacy({
       projectId: 'test-project',
       spaceId: 'default-space',
       keepStale: false,
@@ -274,7 +274,7 @@ describe('ProjectMonitorFormatter', () => {
       },
     } as any;
 
-    const pushMonitorFormatter = new ProjectMonitorFormatter({
+    const pushMonitorFormatter = new ProjectMonitorFormatterLegacy({
       projectId: 'test-project',
       spaceId: 'default-space',
       keepStale: false,
@@ -329,7 +329,7 @@ describe('ProjectMonitorFormatter', () => {
 
     soClient.bulkCreate = jest.fn().mockResolvedValue({ saved_objects: [] });
 
-    const pushMonitorFormatter = new ProjectMonitorFormatter({
+    const pushMonitorFormatter = new ProjectMonitorFormatterLegacy({
       projectId: 'test-project',
       spaceId: 'default-space',
       keepStale: false,
@@ -385,7 +385,7 @@ describe('ProjectMonitorFormatter', () => {
 
     soClient.bulkCreate = jest.fn().mockResolvedValue({ saved_objects: soResult });
 
-    const pushMonitorFormatter = new ProjectMonitorFormatter({
+    const pushMonitorFormatter = new ProjectMonitorFormatterLegacy({
       projectId: 'test-project',
       spaceId: 'default-space',
       keepStale: false,
@@ -447,7 +447,7 @@ describe('ProjectMonitorFormatter', () => {
       .spyOn(telemetryHooks, 'sendTelemetryEvents')
       .mockImplementation(jest.fn());
 
-    const pushMonitorFormatter = new ProjectMonitorFormatter({
+    const pushMonitorFormatter = new ProjectMonitorFormatterLegacy({
       projectId: 'test-project',
       spaceId: 'default-space',
       keepStale: false,
