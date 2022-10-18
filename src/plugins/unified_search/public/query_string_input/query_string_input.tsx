@@ -40,7 +40,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { matchPairs } from './match_pairs';
 import { toUser } from './to_user';
 import { fromUser } from './from_user';
-import { fetchIndexPatterns } from './fetch_index_patterns';
+import { type DataViewByIdOrTitle, fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '../typeahead';
@@ -61,11 +61,6 @@ export interface QueryStringInputDependencies {
   http: CoreStart['http'];
   docLinks: DocLinksStart;
   uiSettings: CoreStart['uiSettings'];
-}
-
-interface DataViewByIdOrTitle {
-  type: 'title' | 'id';
-  value: string;
 }
 
 export interface QueryStringInputProps {
