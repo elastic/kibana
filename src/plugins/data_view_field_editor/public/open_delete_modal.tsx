@@ -35,7 +35,7 @@ export interface OpenFieldDeleteModalOptions {
    * Callback fired when fields are deleted
    * @param fieldNames - the names of the deleted fields
    */
-  onDelete?: (fieldNames: string[]) => void;
+  onDelete?: (fieldNames: string[], dataView?: DataView) => void;
   /**
    * Names of the fields to be deleted
    */
@@ -103,7 +103,7 @@ export const getFieldDeleteModalOpener =
         });
 
         if (onDelete) {
-          onDelete(fieldsToDelete);
+          onDelete(fieldsToDelete, dataView);
         }
       };
 

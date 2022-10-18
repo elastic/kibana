@@ -27,7 +27,7 @@ export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'navigateTo'> & {
   stateContainer: DiscoverStateContainer;
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
-  onFieldEdited: () => void;
+  onFieldEdited: (dataView?: DataView) => void;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
   adHocDataViewList: DataView[];
@@ -61,7 +61,7 @@ export const DiscoverTopNav = ({
     [dataView]
   );
   const services = useDiscoverServices();
-  const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, dataViews } = services;
+  const { dataViewEditor, navigation, dataViewFieldEditor, uiSettings, dataViews } = services;
 
   const canEditDataView =
     Boolean(dataViewEditor?.userPermissions.editDataView()) || !dataView.isPersisted();
@@ -87,21 +87,21 @@ export const DiscoverTopNav = ({
     () =>
       canEditDataView
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
-            if (dataView?.id) {
-              const dataViewInstance = await data.dataViews.get(dataView.id);
+            const dataViewInstance = stateContainer.internalStateContainer.getState().dataView;
+            if (dataViewInstance?.id) {
               closeFieldEditor.current = dataViewFieldEditor.openEditor({
                 ctx: {
                   dataView: dataViewInstance,
                 },
                 fieldName,
-                onSave: async () => {
-                  onFieldEdited();
+                onSave: async (field, nextDataView) => {
+                  onFieldEdited(nextDataView);
                 },
               });
             }
           }
         : undefined,
-    [canEditDataView, dataView?.id, data.dataViews, dataViewFieldEditor, onFieldEdited]
+    [canEditDataView, stateContainer, dataViewFieldEditor, onFieldEdited]
   );
 
   const addField = useMemo(

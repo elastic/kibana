@@ -86,7 +86,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * callback to execute on edit runtime field
    */
-  onFieldEdited: () => void;
+  onFieldEdited: (dataView?: DataView) => void;
   /**
    * callback to execute on create dataview
    */

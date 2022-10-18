@@ -89,7 +89,7 @@ export const FieldEditorFlyoutContentContainer = ({
   const { fields } = dataView;
 
   const namesNotAllowed = useMemo(() => {
-    const fieldNames = dataView.fields.map((fld) => fld.name);
+    const fieldNames = fields.map((fld) => fld.name);
     const runtimeCompositeNames = Object.entries(dataView.getAllRuntimeFields())
       .filter(([, _runtimeField]) => _runtimeField.type === 'composite')
       .map(([_runtimeFieldName]) => _runtimeFieldName);
@@ -97,7 +97,7 @@ export const FieldEditorFlyoutContentContainer = ({
       fields: fieldNames,
       runtimeComposites: runtimeCompositeNames,
     };
-  }, [dataView]);
+  }, [dataView, fields]);
 
   const existingConcreteFields = useMemo(() => {
     const existing: Array<{ name: string; type: string }> = [];

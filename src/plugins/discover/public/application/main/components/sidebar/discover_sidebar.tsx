@@ -29,6 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import { triggerVisualizeActionsTextBasedLanguages } from '@kbn/unified-field-list-plugin/public';
+import { addLog } from '../../../../utils/addLog';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { DiscoverStateContainer } from '../../services/discover_state';
@@ -282,13 +283,14 @@ export function DiscoverSidebarComponent({
     () =>
       editField && selectedDataView
         ? async (fieldName: string) => {
+            addLog('[sidebar] delete field of data view', selectedDataView);
             const ref = dataViewFieldEditor.openDeleteModal({
               ctx: {
                 dataView: selectedDataView,
               },
               fieldName,
-              onDelete: async () => {
-                onFieldEdited();
+              onDelete: async (fieldNames, dataView) => {
+                onFieldEdited(dataView);
               },
             });
             if (setFieldEditorRef) {

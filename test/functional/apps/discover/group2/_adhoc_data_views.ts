@@ -155,12 +155,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // save first search
       await PageObjects.discover.saveSearch('logst*-ss-_bytes-runtimefield');
+      await PageObjects.common.sleep(5000);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // remove field and create with the same name, but different value
       await PageObjects.discover.clickFieldListItemRemove('_bytes-runtimefield');
+      await PageObjects.common.sleep(5000);
       await PageObjects.discover.removeField('_bytes-runtimefield');
+      await PageObjects.common.sleep(10000);
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.common.sleep(5000);
 
       await addRuntimeField('_bytes-runtimefield', `emit((doc["bytes"].value * 2).toString())`);
       await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');

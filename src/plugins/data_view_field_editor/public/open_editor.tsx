@@ -39,7 +39,7 @@ export interface OpenFieldEditorOptions {
    * action to take after field is saved
    * @param field - the fields that were saved
    */
-  onSave?: (field: DataViewField[]) => void;
+  onSave?: (field: DataViewField[], dataView?: DataView) => void;
   /**
    * field to edit, for existing field
    */
@@ -105,7 +105,7 @@ export const getFieldEditorOpener =
         closeEditor();
 
         if (onSave) {
-          onSave(updatedField);
+          onSave(updatedField, dataView);
         }
       };
 
