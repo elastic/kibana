@@ -36,6 +36,7 @@ describe('Background Search Session management status labels', () => {
       initialState: {},
       restoreState: {},
       version: '8.0.0',
+      idMapping: {},
     };
   });
 

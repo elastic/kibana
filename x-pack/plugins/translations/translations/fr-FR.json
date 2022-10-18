@@ -1097,8 +1097,6 @@
     "data.search.searchSource.indexPatternIdDescription": "L'ID dans l'index {kibanaIndexPattern}.",
     "data.search.searchSource.queryTimeValue": "{queryTime} ms",
     "data.search.searchSource.requestTimeValue": "{requestTime} ms",
-    "data.search.statusError": "Recherche terminée avec un statut {errorCode}",
-    "data.search.statusThrow": "Le statut de la recherche a généré un statut d'erreur {message} ({errorCode})",
     "data.search.timeBuckets.dayLabel": "{amount, plural, one {un jour} other {# jours}}",
     "data.search.timeBuckets.hourLabel": "{amount, plural, one {une heure} other {# heures}}",
     "data.search.timeBuckets.millisecondLabel": "{amount, plural, one {une milliseconde} other {# millisecondes}}",

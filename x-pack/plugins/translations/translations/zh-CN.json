@@ -1097,8 +1097,6 @@
     "data.search.searchSource.indexPatternIdDescription": "{kibanaIndexPattern} 索引中的 ID。",
     "data.search.searchSource.queryTimeValue": "{queryTime}ms",
     "data.search.searchSource.requestTimeValue": "{requestTime}ms",
-    "data.search.statusError": "搜索完成，状态为 {errorCode}",
-    "data.search.statusThrow": "搜索状态引发错误 {message} ({errorCode}) 状态",
     "data.search.timeBuckets.dayLabel": "{amount, plural, other {# 天}}",
     "data.search.timeBuckets.hourLabel": "{amount, plural, other {# 小时}}",
     "data.search.timeBuckets.millisecondLabel": "{amount, plural,other {# 毫秒}}",

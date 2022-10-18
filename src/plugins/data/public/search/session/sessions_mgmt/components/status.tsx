@@ -118,7 +118,10 @@ const getStatusAttributes = ({
         label: <TableText>{getStatusText(session.status)}</TableText>,
         toolTipContent: i18n.translate('data.mgmt.searchSessions.status.message.error', {
           defaultMessage: 'Error: {error}',
-          values: { error: (session as any).error || 'unknown' },
+          values: {
+            error:
+              session.errors && session.errors?.length > 0 ? session.errors.join('\n') : 'unknown',
+          },
         }),
       };
 
