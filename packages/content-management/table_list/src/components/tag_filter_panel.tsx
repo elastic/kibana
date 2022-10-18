@@ -142,7 +142,7 @@ export const TagFilterPanel: FC<Props> = ({
         return {
           name,
           label: name,
-          value: id,
+          value: id ?? '',
           tag,
           checked,
           view: (
@@ -159,7 +159,7 @@ export const TagFilterPanel: FC<Props> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiBadge color={checked !== undefined ? 'accent' : undefined}>
-                  {tagsToTableItemMap[id]?.length ?? 0}
+                  {tagsToTableItemMap[id ?? '']?.length ?? 0}
                 </EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
