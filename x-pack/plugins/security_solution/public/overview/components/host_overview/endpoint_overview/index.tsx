@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiHealth } from '@elastic/eui';
+import { EuiFlexGrid, EuiHealth, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
@@ -92,7 +92,6 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
                     pendingRunningProcesses: data.pendingActions?.['running-processes'] ?? 0,
                   }}
                 />
-                { data.fleetAgentId && <ResponderContextMenuItem endpointId={data.fleetAgentId} /> }
               </>
             ) : (
               getEmptyTagValue()
@@ -112,6 +111,13 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
           key={index}
         />
       ))}
+      { data && data.fleetAgentId &&
+       <EuiFlexGroup justifyContent='center' gutterSize='xs'>
+          <EuiFlexItem grow={false}>
+            <ResponderContextMenuItem endpointId={data.fleetAgentId} /> 
+          </EuiFlexItem>
+       </EuiFlexGroup>
+      }
     </>
   );
 });

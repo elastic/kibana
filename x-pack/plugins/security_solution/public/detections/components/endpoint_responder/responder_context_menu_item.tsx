@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenuItem, EuiButton } from '@elastic/eui';
+import { EuiContextMenuItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -90,7 +90,7 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
     }, [endpointHostInfo, onClick, showEndpointResponseActionsConsole]);
 
     return (
-      <EuiButton
+      <EuiButtonEmpty
         key="endpointResponseActions-action-item"
         data-test-subj="endpointResponseActions-action-item"
         disabled={isDisabled}
@@ -101,7 +101,7 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
           id="xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.buttonLabel"
           defaultMessage="Respond"
         />
-      </EuiButton>
+      </EuiButtonEmpty>
     );
 
     // return (
