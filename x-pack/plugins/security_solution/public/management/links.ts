@@ -246,10 +246,11 @@ export const getManagementFilteredLinks = async (
   const fleetAuthz = plugins.fleet?.authz;
   const isEndpointRbacEnabled = ExperimentalFeaturesService.get().endpointRbacEnabled;
   const endpointPermissions = calculatePermissionsFromCapabilities(core.application.capabilities);
+  const linksToExclude: SecurityPageName[] = [];
 
   try {
     const currentUserResponse = await plugins.security.authc.getCurrentUser();
-    const { canAccessEndpointManagement, canReadActionsLogManagement, canIsolateHost } = fleetAuthz
+    const { canReadActionsLogManagement, canIsolateHost, canUnIsolateHost } = fleetAuthz
       ? calculateEndpointAuthz(
           licenseService,
           fleetAuthz,
@@ -259,39 +260,23 @@ export const getManagementFilteredLinks = async (
         )
       : getEndpointAuthzInitialState();
 
-    // exclude links based on canAccessEndpointManagement
-    if (!canAccessEndpointManagement) {
-      return excludeLinks([
-        SecurityPageName.hostIsolationExceptions,
-        SecurityPageName.responseActionsHistory,
-      ]);
+    if (!canReadActionsLogManagement) {
+      linksToExclude.push(SecurityPageName.responseActionsHistory);
     }
 
-    // exclude links based on privileges and HIE entries
-    if (!canReadActionsLogManagement) {
-      // <= enterprise license
+    if (!canIsolateHost && canUnIsolateHost) {
       const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
-      if (!canIsolateHost && !hostExceptionCount) {
-        return excludeLinks([
-          SecurityPageName.hostIsolationExceptions,
-          SecurityPageName.responseActionsHistory,
-        ]);
+      const shouldSeeHIEToBeAbleToDeleteEntries = hostExceptionCount !== 0;
+
+      if (!shouldSeeHIEToBeAbleToDeleteEntries) {
+        linksToExclude.push(SecurityPageName.hostIsolationExceptions);
       }
-      return excludeLinks([SecurityPageName.responseActionsHistory]);
     } else if (!canIsolateHost) {
-      const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
-      if (!hostExceptionCount) {
-        // <= platinum so exclude also links that require enterprise
-        return excludeLinks([
-          SecurityPageName.hostIsolationExceptions,
-          SecurityPageName.responseActionsHistory,
-        ]);
-      }
-      return excludeLinks([SecurityPageName.responseActionsHistory]);
+      linksToExclude.push(SecurityPageName.hostIsolationExceptions);
     }
   } catch {
     return excludeLinks([SecurityPageName.hostIsolationExceptions]);
   }
 
-  return links;
+  return excludeLinks(linksToExclude);
 };

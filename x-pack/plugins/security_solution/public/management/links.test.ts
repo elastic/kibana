@@ -58,8 +58,8 @@ describe('links', () => {
 
   it('should return all links without filtering when having isolate permission', async () => {
     (calculateEndpointAuthz as jest.Mock).mockReturnValue({
-      canAccessEndpointManagement: true,
       canIsolateHost: true,
+      canUnIsolateHost: true,
       canReadActionsLogManagement: true,
     });
 
@@ -70,100 +70,75 @@ describe('links', () => {
     expect(filteredLinks).toEqual(links);
   });
 
-  it('should return all but HIE and response actions history links when neither management access', async () => {
-    (calculateEndpointAuthz as jest.Mock).mockReturnValue({
-      canAccessEndpointManagement: false,
-      canIsolateHost: true,
-      canReadActionsLogManagement: true,
-    });
+  describe('Action Logs', () => {
+    it('should return all but response actions link when no actions log access', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue({
+        canIsolateHost: true,
+        canUnIsolateHost: true,
+        canReadActionsLogManagement: false,
+      });
+      fakeHttpServices.get.mockResolvedValue({ total: 0 });
 
-    const filteredLinks = await getManagementFilteredLinks(
-      coreMockStarted,
-      getPlugins(['superuser'])
-    );
-    expect(filteredLinks).toEqual({
-      ...links,
-      links: links.links?.filter(
-        (link) =>
-          link.id !== SecurityPageName.hostIsolationExceptions &&
-          link.id !== SecurityPageName.responseActionsHistory
-      ),
-    });
-  });
-
-  it('should return all but response actions link when no actions log access', async () => {
-    (calculateEndpointAuthz as jest.Mock).mockReturnValue({
-      canAccessEndpointManagement: true,
-      canIsolateHost: true,
-      canReadActionsLogManagement: false,
-    });
-    fakeHttpServices.get.mockResolvedValue({ total: 0 });
-
-    const filteredLinks = await getManagementFilteredLinks(
-      coreMockStarted,
-      getPlugins(['superuser'])
-    );
-    expect(filteredLinks).toEqual({
-      ...links,
-      links: links.links?.filter((link) => link.id !== SecurityPageName.responseActionsHistory),
+      const filteredLinks = await getManagementFilteredLinks(
+        coreMockStarted,
+        getPlugins(['superuser'])
+      );
+      expect(filteredLinks).toEqual({
+        ...links,
+        links: links.links?.filter((link) => link.id !== SecurityPageName.responseActionsHistory),
+      });
     });
   });
 
-  it('should return all but response action link when NOg isolation permission but HAS at least one host isolation exceptions entry', async () => {
-    (calculateEndpointAuthz as jest.Mock).mockReturnValue({
-      canAccessEndpointManagement: true,
-      canIsolateHost: false,
-      canReadActionsLogManagement: true,
-    });
-    fakeHttpServices.get.mockResolvedValue({ total: 1 });
+  describe('Host Isolation Exception', () => {
+    it('should return all but HIE when NO isolation permission due to privilege', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue({
+        canIsolateHost: false,
+        canUnIsolateHost: false,
+        canReadActionsLogManagement: true,
+      });
 
-    const filteredLinks = await getManagementFilteredLinks(
-      coreMockStarted,
-      getPlugins(['superuser'])
-    );
-    expect(filteredLinks).toEqual({
-      ...links,
-      links: links.links?.filter((link) => link.id !== SecurityPageName.responseActionsHistory),
+      const filteredLinks = await getManagementFilteredLinks(
+        coreMockStarted,
+        getPlugins(['superuser'])
+      );
+      expect(filteredLinks).toEqual({
+        ...links,
+        links: links.links?.filter((link) => link.id !== SecurityPageName.hostIsolationExceptions),
+      });
     });
-  });
 
-  it('should return all but response actions history when NO access privilege to either response actions history or HIE but HAS one HIE entry', async () => {
-    (calculateEndpointAuthz as jest.Mock).mockReturnValue({
-      canAccessEndpointManagement: true,
-      canIsolateHost: false,
-      canReadActionsLogManagement: false,
+    it('should return all but HIE when NO isolation permission due to license and NO host isolation exceptions entry', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue({
+        canIsolateHost: false,
+        canUnIsolateHost: true,
+        canReadActionsLogManagement: true,
+      });
+      fakeHttpServices.get.mockResolvedValue({ total: 0 });
+
+      const filteredLinks = await getManagementFilteredLinks(
+        coreMockStarted,
+        getPlugins(['superuser'])
+      );
+      expect(filteredLinks).toEqual({
+        ...links,
+        links: links.links?.filter((link) => link.id !== SecurityPageName.hostIsolationExceptions),
+      });
     });
-    fakeHttpServices.get.mockResolvedValue({ total: 1 });
 
-    const filteredLinks = await getManagementFilteredLinks(
-      coreMockStarted,
-      getPlugins(['superuser'])
-    );
-    expect(filteredLinks).toEqual({
-      ...links,
-      links: links.links?.filter((link) => link.id !== SecurityPageName.responseActionsHistory),
-    });
-  });
+    it('should return all when NO isolation permission due to license but HAS at least one host isolation exceptions entry', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue({
+        canIsolateHost: false,
+        canUnIsolateHost: true,
+        canReadActionsLogManagement: true,
+      });
+      fakeHttpServices.get.mockResolvedValue({ total: 1 });
 
-  it('should return all but HIE and response actions history links NO isolation permission and NO host isolation exceptions entry', async () => {
-    (calculateEndpointAuthz as jest.Mock).mockReturnValue({
-      canAccessEndpointManagement: false,
-      canIsolateHost: false,
-      canReadActionsLogManagement: false,
-    });
-    fakeHttpServices.get.mockResolvedValue({ total: 0 });
-
-    const filteredLinks = await getManagementFilteredLinks(
-      coreMockStarted,
-      getPlugins(['superuser'])
-    );
-    expect(filteredLinks).toEqual({
-      ...links,
-      links: links.links?.filter(
-        (link) =>
-          link.id !== SecurityPageName.hostIsolationExceptions &&
-          link.id !== SecurityPageName.responseActionsHistory
-      ),
+      const filteredLinks = await getManagementFilteredLinks(
+        coreMockStarted,
+        getPlugins(['superuser'])
+      );
+      expect(filteredLinks).toEqual(links);
     });
   });
 });
