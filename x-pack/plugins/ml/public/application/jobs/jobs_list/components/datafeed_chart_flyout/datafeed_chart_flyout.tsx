@@ -510,7 +510,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           key={'source-results'}
                           color={euiTheme.euiColorPrimary}
                           id={i18n.translate('xpack.ml.jobsList.datafeedChart.sourceSeriesId', {
-                            defaultMessage: 'Source indices',
+                            defaultMessage: 'Source indices document count',
                           })}
                           xScaleType={ScaleType.Time}
                           yScaleType={ScaleType.Linear}
@@ -523,7 +523,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           key={'job-results'}
                           color={euiTheme.euiColorAccentText}
                           id={i18n.translate('xpack.ml.jobsList.datafeedChart.bucketSeriesId', {
-                            defaultMessage: 'Job results',
+                            defaultMessage: 'Datafeed document count',
                           })}
                           xScaleType={ScaleType.Time}
                           yScaleType={ScaleType.Linear}
