@@ -13,17 +13,18 @@ import { useLogFilterStateContext } from './log_filter_state';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export const WithLogFilterUrlState: React.FC = () => {
-  const { filterQuery } = useLogFilterStateContext();
   const {
     data: {
       query: { queryString },
     },
   } = useKibanaContextForPlugin().services;
 
+  const { queryStringQuery } = useLogFilterStateContext();
+
   return (
     <UrlStateContainer
-      populateWithInitialState={true} // NOTE: Since the filterQuery is ultimately determined by the QueryString manager populate with the initial state
-      urlState={filterQuery?.originalQuery}
+      populateWithInitialState={true}
+      urlState={queryStringQuery}
       urlStateKey="logFilter"
       mapToUrlState={mapToFilterQuery}
       onChange={(urlState) => {
