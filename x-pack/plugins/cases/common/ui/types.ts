@@ -104,7 +104,7 @@ export interface FilterOptions {
   severity: CaseSeverityWithAll;
   status: CaseStatusWithAllStatus;
   tags: string[];
-  assignees: string[];
+  assignees: Array<string | null> | null;
   reporters: User[];
   owner: string[];
 }
@@ -127,7 +127,7 @@ export type ElasticUser = SnakeToCamelCase<User>;
 
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
-  filterOptions?: FilterOptions & { owner: string[] };
+  filterOptions?: FilterOptions;
 }
 
 export interface ApiProps {

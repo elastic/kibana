@@ -10,7 +10,6 @@ import { isEqual } from 'lodash/fp';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
 
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { CaseStatusWithAllStatus, CaseSeverityWithAll } from '../../../common/ui/types';
 import { StatusAll } from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/api';
@@ -24,6 +23,7 @@ import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { AssigneesFilterPopover } from './assignees_filter';
 import type { CurrentUserProfile } from '../types';
 import { useCasesFeatures } from '../../common/use_cases_features';
+import type { AssigneesFilteringSelection } from '../user_profiles/types';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -68,15 +68,17 @@ const CasesTableFiltersComponent = ({
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
   const [selectedOwner, setSelectedOwner] = useState([]);
-  const [selectedAssignees, setSelectedAssignees] = useState<UserProfileWithAvatar[]>([]);
+  const [selectedAssignees, setSelectedAssignees] = useState<AssigneesFilteringSelection[]>([]);
   const { data: tags = [] } = useGetTags();
   const { caseAssignmentAuthorized } = useCasesFeatures();
 
   const handleSelectedAssignees = useCallback(
-    (newAssignees: UserProfileWithAvatar[]) => {
+    (newAssignees: AssigneesFilteringSelection[]) => {
       if (!isEqual(newAssignees, selectedAssignees)) {
         setSelectedAssignees(newAssignees);
-        onFilterChanged({ assignees: newAssignees.map((assignee) => assignee.uid) });
+        onFilterChanged({
+          assignees: newAssignees.map((assignee) => assignee?.uid ?? null),
+        });
       }
     },
     [selectedAssignees, onFilterChanged]
