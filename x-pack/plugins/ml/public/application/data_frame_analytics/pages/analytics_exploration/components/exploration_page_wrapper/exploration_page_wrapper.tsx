@@ -32,6 +32,7 @@ import { LoadingPanel } from '../loading_panel';
 import { FeatureImportanceSummaryPanelProps } from '../total_feature_importance_summary/feature_importance_summary';
 import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
 import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
+import { IndexPatternPrompt } from '../index_pattern_prompt';
 
 function getFilters(resultsField: string) {
   return {
@@ -114,6 +115,9 @@ export const ExplorationPageWrapper: FC<Props> = ({
   };
 
   const resultsField = jobConfig?.dest.results_field ?? '';
+  const destIndex =
+    (Array.isArray(jobConfig?.dest.index) ? jobConfig?.dest.index[0] : jobConfig?.dest.index) ?? '';
+
   const scatterplotFieldOptions = useScatterplotFieldOptions(
     indexPattern,
     jobConfig?.analyzed_fields?.includes,
@@ -131,7 +135,12 @@ export const ExplorationPageWrapper: FC<Props> = ({
           color="danger"
           iconType="cross"
         >
-          <p>{indexPatternErrorMessage}</p>
+          <p>
+            {indexPatternErrorMessage}
+            {needsDestIndexPattern ? (
+              <IndexPatternPrompt destIndex={destIndex} color="text" />
+            ) : null}
+          </p>
         </EuiCallOut>
       </EuiPanel>
     );

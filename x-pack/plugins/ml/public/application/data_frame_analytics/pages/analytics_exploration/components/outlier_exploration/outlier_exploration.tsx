@@ -33,6 +33,7 @@ import { getFeatureCount } from './common';
 import { useOutlierData } from './use_outlier_data';
 import { useExplorationUrlState } from '../../hooks/use_exploration_url_state';
 import { ExplorationQueryBarProps } from '../exploration_query_bar/exploration_query_bar';
+import { IndexPatternPrompt } from '../index_pattern_prompt';
 
 export type TableItem = Record<string, any>;
 
@@ -90,6 +91,8 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     jobConfig?.analyzed_fields?.excludes,
     resultsField
   );
+  const destIndex =
+    (Array.isArray(jobConfig?.dest.index) ? jobConfig?.dest.index[0] : jobConfig?.dest.index) ?? '';
 
   if (indexPatternErrorMessage !== undefined) {
     return (
@@ -101,7 +104,12 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
           color="danger"
           iconType="cross"
         >
-          <p>{indexPatternErrorMessage}</p>
+          <p>
+            {indexPatternErrorMessage}
+            {needsDestIndexPattern ? (
+              <IndexPatternPrompt destIndex={destIndex} color="text" />
+            ) : null}
+          </p>
         </EuiCallOut>
       </EuiPanel>
     );
