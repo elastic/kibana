@@ -144,6 +144,7 @@ const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldPr
       fullWidth
     >
       <EuiSuperSelect
+        data-test-subj={'resultsTypeField'}
         options={FIELD_OPTIONS}
         fullWidth
         valueOfSelected={selectedOption}
