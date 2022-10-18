@@ -50,15 +50,15 @@ export const HostsContent: React.FunctionComponent = () => {
     [],
     'host',
     sourceId,
-    1665748800000, // currentTime.  need to add support for TimeRange?
+    1666081614879, // currentTime.  need to add support for TimeRange?
     '',
     '',
     true,
     {
-      from: 1665748800000, // dynamic time range needs to be supported
+      from: 1666081614879, // dynamic time range needs to be supported
       interval: '1m',
       lookbackSize: 5,
-      to: 1665752400000,
+      to: 1666082814879,
     }
   );
 
@@ -86,7 +86,6 @@ export const HostsContent: React.FunctionComponent = () => {
         ) : (
           <>
             <SearchBar
-              showQueryBar={true}
               showFilterBar={false}
               showDatePicker={true}
               showAutoRefreshOnly={false}
