@@ -22,6 +22,7 @@ export const getMockServices = (overrides?: Partial<Services>) => {
     TagList,
     getTagList: () => [],
     itemHasTags: () => true,
+    getTagManagementUrl: () => '',
     ...overrides,
   };
 

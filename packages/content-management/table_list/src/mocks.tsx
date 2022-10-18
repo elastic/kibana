@@ -87,6 +87,7 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
     TagList,
     getTagList: () => [],
     itemHasTags: () => true,
+    getTagManagementUrl: () => '',
     ...params,
   };
 

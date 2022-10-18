@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { FC, useState, useEffect, useCallback } from 'react';
 import {
   Query,
   EuiPopover,
