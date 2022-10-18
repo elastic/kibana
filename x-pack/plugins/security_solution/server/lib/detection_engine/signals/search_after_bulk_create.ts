@@ -81,6 +81,7 @@ export const searchAfterAndBulkCreate = async ({
             trackTotalHits,
             sortOrder,
           });
+
           mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
           toReturn = mergeReturns([
             toReturn,

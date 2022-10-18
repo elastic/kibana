@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
   EuiSuperUpdateButton,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import moment from 'moment';
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
@@ -37,6 +38,8 @@ import type {
 } from '../../../pages/detection_engine/rules/types';
 import { usePreviewInvocationCount } from './use_preview_invocation_count';
 import { ProfileTree } from './profile/profile_tree';
+import { ModalInspectQuery, BUTTON_CLASS } from '../../../../common/components/inspect/modal';
+import { INSPECT } from '../../../../common/components/inspect/translations';
 
 export const REASONABLE_INVOCATION_COUNT = 200;
 
@@ -100,6 +103,15 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   const [timeframeEnd, setTimeframeEnd] = useState(moment());
 
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
+  const [inspectModal, setInspectModal] = useState<{
+    indexPatterns: string[];
+    request: string;
+    response: string;
+  } | null>(null);
+
+  const handleCloseModal = useCallback(() => {
+    setInspectModal(null);
+  }, []);
 
   useEffect(() => {
     const { start, end } = refreshedTimeframe(startDate, endDate);
@@ -136,6 +148,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     hasNoiseWarning,
     isAborted,
     profileResponse,
+    isProfileLoading,
   } = usePreviewRoute({
     defineRuleData: previewData.defineRuleData,
     aboutRuleData: previewData.aboutRuleData,
@@ -146,7 +159,21 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   });
 
   const { startTransaction } = useStartTransaction();
+  const handleInspectSourceIndexButtonClick = useCallback(() => {
+    setInspectModal(() => ({
+      indexPatterns: profileResponse?.profileResponse[0].index ?? null,
+      request: JSON.stringify(profileResponse?.profileResponse[0].request, null, 2) ?? null,
+      response: JSON.stringify(profileResponse?.profileResponse[0].response, null, 2) ?? null,
+    }));
+  }, [profileResponse?.profileResponse]);
 
+  const handleInspectThreatIndexButtonClick = useCallback(() => {
+    setInspectModal(() => ({
+      indexPatterns: profileResponse?.profileResponse[1].index ?? null,
+      request: JSON.stringify(profileResponse?.profileResponse[1].request, null, 2) ?? null,
+      response: JSON.stringify(profileResponse?.profileResponse[1].response, null, 2) ?? null,
+    }));
+  }, [profileResponse?.profileResponse]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   useEffect(() => {
     if (!isRefreshing) {
@@ -212,7 +239,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       timeframeStart,
     ]
   );
-  // console.log(profileResponse);
+  console.log('-------profileResponse-------', profileResponse[0]);
   return (
     <>
       <EuiSpacer size="s" />
@@ -262,21 +289,50 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       {profileResponse && profileResponse.profileResponse && (
         <>
           <EuiTitle size="xs">
-            <h4>Source indices profile</h4>
+            <h4>
+              <>Source indices profile</>
+              <EuiButtonIcon
+                className={BUTTON_CLASS}
+                aria-label={INSPECT}
+                data-test-subj="inspect-icon-button"
+                iconSize="m"
+                iconType="inspect"
+                isDisabled={isProfileLoading}
+                title={INSPECT}
+                onClick={handleInspectSourceIndexButtonClick}
+              />
+            </h4>
           </EuiTitle>
-          <ProfileTree
-            target={'searches'}
-            data={profileResponse?.profileResponse[0].profile.shards}
-          />
+          <ProfileTree data={profileResponse?.profileResponse[0].response.profile.shards} />
           <EuiSpacer size="l" />
           <EuiTitle size="xs">
-            <h4>Indicator indices profile</h4>
+            <h4>
+              <>Indicator indices profile</>
+              <EuiButtonIcon
+                className={BUTTON_CLASS}
+                aria-label={INSPECT}
+                data-test-subj="inspect-icon-button"
+                iconSize="m"
+                iconType="inspect"
+                isDisabled={isProfileLoading}
+                title={INSPECT}
+                onClick={handleInspectThreatIndexButtonClick}
+              />
+            </h4>
           </EuiTitle>
-          <ProfileTree
-            target={'searches'}
-            data={profileResponse?.profileResponse[1].profile.shards}
-          />
+          <ProfileTree data={profileResponse?.profileResponse[1].response.profile.shards} />
           <EuiSpacer size="l" />
+          {inspectModal && profileResponse !== null && (
+            <ModalInspectQuery
+              closeModal={handleCloseModal}
+              data-test-subj="inspect-modal"
+              inputId={'default'}
+              indexPatterns={inspectModal.indexPatterns}
+              request={inspectModal.request}
+              response={inspectModal.response}
+              title={'Inspect'}
+            />
+          )}
         </>
       )}
 

@@ -47,6 +47,8 @@ export const createThreatSignal = async ({
     entryKey: 'value',
   });
 
+  console.log('======threatFilter======', threatFilter);
+
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty threat list and we do not want to return everything as being
     // a hit so opt to return the existing result.
@@ -65,7 +67,7 @@ export const createThreatSignal = async ({
       index: inputIndex,
       exceptionFilter,
     });
-
+    console.log('--------esFilter', esFilter);
     ruleExecutionLogger.debug(
       `${threatFilter.query?.bool.should.length} indicator items are being checked for existence of matches`
     );

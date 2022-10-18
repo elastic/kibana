@@ -91,6 +91,7 @@ export const singleSearchAfter = async <
       });
 
       const profile = nextSearchAfterResult?.profile ?? null;
+      console.log('-------nextSearchAfterResult--', nextSearchAfterResult);
 
       return {
         searchResult: nextSearchAfterResult,

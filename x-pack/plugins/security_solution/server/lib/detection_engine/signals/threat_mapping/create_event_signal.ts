@@ -57,6 +57,8 @@ export const createEventSignal = async ({
     entryKey: 'field',
   });
 
+  console.log('+++++threatFilter++++', JSON.stringify(threatFilter));
+
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty event list and we do not want to return everything as being
     // a hit so opt to return the existing result.
@@ -82,7 +84,7 @@ export const createEventSignal = async ({
       listClient,
       exceptionFilter,
     });
-
+    console.log('-------createEventSignal1', threatListHits);
     const signalMatches = getSignalMatchesFromThreatList(threatListHits);
 
     const ids = signalMatches.map((item) => item.signalId);
@@ -96,6 +98,7 @@ export const createEventSignal = async ({
         },
       },
     };
+    console.log('-------createEventSignal2', ids);
 
     const esFilter = await getFilter({
       type,
@@ -119,6 +122,7 @@ export const createEventSignal = async ({
         threatIndicatorPath,
         signalMatches
       );
+    console.log('-------createEventSignal3');
 
     const result = await searchAfterAndBulkCreate({
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
@@ -140,6 +144,7 @@ export const createEventSignal = async ({
       primaryTimestamp,
       secondaryTimestamp,
     });
+    console.log('-------createEventSignal4', result);
 
     ruleExecutionLogger.debug(
       `${

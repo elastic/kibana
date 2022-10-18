@@ -21,6 +21,7 @@ import type {
 export const INDICATOR_PER_PAGE = 1000;
 
 export const getThreatList = async ({
+  aggs,
   esClient,
   index,
   language,
@@ -47,7 +48,7 @@ export const getThreatList = async ({
     index,
     exceptionFilter,
   });
-  // console.log('-----threatQueryFilters------', JSON.stringify(queryFilter));
+  console.log('-----aggs------', JSON.stringify(aggs));
   ruleExecutionLogger.debug(
     `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
   );
@@ -58,6 +59,7 @@ export const getThreatList = async ({
   >({
     body: {
       ...threatListConfig,
+      aggregations: aggs,
       query: queryFilter,
       search_after: searchAfter,
       runtime_mappings: runtimeMappings,
@@ -122,7 +124,7 @@ export const getAllThreatListHits = async (
   let threatList = await getThreatList({ ...params, searchAfter: undefined });
 
   allThreatListHits = allThreatListHits.concat(threatList.hits.hits);
-
+  console.log('#######getAllThreatListHits', threatList.hits.hits[threatList.hits.hits.length - 1]);
   while (threatList.hits.hits.length !== 0) {
     threatList = await getThreatList({
       ...params,

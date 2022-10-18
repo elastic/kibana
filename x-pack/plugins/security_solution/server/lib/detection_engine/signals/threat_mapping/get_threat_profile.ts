@@ -10,11 +10,12 @@ import type {
   EventCountOptions,
   ThreatListCountOptions,
 } from './types';
-import { getMappingFilters } from './get_mapping_filters';
+import { getMappingAggs, getMappingFilters } from './get_mapping_filters';
 import { getQueryFilter } from '../get_query_filter';
 import { buildEventsSearchQuery } from '../build_events_query';
 
 const getEventProfile = async ({
+  aggs,
   esClient,
   query,
   language,
@@ -44,14 +45,15 @@ const getEventProfile = async ({
     runtimeMappings: undefined,
   }).body.query;
   const response = await esClient.search({
-    body: { query: eventSearchQueryBodyQuery, profile: true },
+    body: { aggs, query: eventSearchQueryBodyQuery, profile: true },
     ignore_unavailable: true,
     index,
   });
-  return response;
+  return { response, request: { body: { query: eventSearchQueryBodyQuery } }, index };
 };
 
 const getThreatListProfile = async ({
+  aggs,
   esClient,
   query,
   language,
@@ -68,13 +70,14 @@ const getThreatListProfile = async ({
   });
   const response = await esClient.search({
     body: {
+      aggs,
       query: queryFilter,
       profile: true,
     },
     ignore_unavailable: true,
     index,
   });
-  return response;
+  return { response, request: { body: queryFilter }, index };
 };
 
 export const getThreatMatchProfile = async ({
@@ -94,6 +97,7 @@ export const getThreatMatchProfile = async ({
   exceptionFilter,
 }: CreateThreatProfileOptions) => {
   const { eventMappingFilter, indicatorMappingFilter } = getMappingFilters(threatMapping);
+  const { eventMappingsAggs, indicatorMappingAggs } = getMappingAggs(threatMapping);
   const allEventFilters = [...filters, eventMappingFilter];
   const allThreatFilters = [...threatFilters, indicatorMappingFilter];
 

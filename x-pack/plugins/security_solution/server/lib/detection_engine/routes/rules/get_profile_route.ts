@@ -425,7 +425,6 @@ export const getProfileRoute = async (
           default:
             assertUnreachable(previewRuleParams);
         }
-        console.log('-----------profileResponse--------', JSON.stringify(profileResponse));
         // Refreshes alias to ensure index is able to be read before returning
         await coreContext.elasticsearch.client.asInternalUser.indices.refresh(
           {

@@ -108,6 +108,7 @@ export const formatIndexPatternRequested = (indices: string[] = []) => {
 export const ModalInspectQuery = ({
   additionalRequests,
   additionalResponses,
+  indexPatterns,
   closeModal,
   inputId,
   request,
@@ -145,7 +146,7 @@ export const ModalInspectQuery = ({
       ),
       description: (
         <span data-test-subj="index-pattern-description">
-          <p>{formatIndexPatternRequested(inspectRequests[0]?.index ?? [])}</p>
+          <p>{formatIndexPatternRequested(indexPatterns ?? inspectRequests[0]?.index ?? [])}</p>
 
           {!isSourcererPattern && (
             <p>

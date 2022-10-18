@@ -25,7 +25,7 @@ export const getSignalMatchesFromThreatList = (
 
   threatList.forEach((threatHit) =>
     extractNamedQueries(threatHit).forEach((item) => {
-      const signalId = item.id;
+      const signalId = threatHit._id;
       if (!signalId) {
         return;
       }

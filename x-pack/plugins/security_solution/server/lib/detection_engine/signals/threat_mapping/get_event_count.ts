@@ -14,6 +14,7 @@ import { buildEventsSearchQuery } from '../build_events_query';
 export const MAX_PER_PAGE = 3000;
 
 export const getEventList = async ({
+  aggs,
   services,
   ruleExecutionLogger,
   query,
@@ -44,8 +45,10 @@ export const getEventList = async ({
     index,
     exceptionFilter,
   });
+  console.log('-----aggs!!------', JSON.stringify(aggs));
 
   const { searchResult } = await singleSearchAfter({
+    aggregations: aggs,
     searchAfterSortIds: searchAfter,
     index,
     from: tuple.from.toISOString(),

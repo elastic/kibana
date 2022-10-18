@@ -60,10 +60,9 @@ export const getIndicesColor = ({
     threatIndices: 1,
   };
   const sortedIndices: Index[] = initDataFor()(
-    profile.profileResponse[responseMapping[indicesType]].profile.shards
+    profile.profileResponse[responseMapping[indicesType]].response.profile.shards
   );
 
-  console.log('sortedIndices-----', sortedIndices);
   return indices.map((i) => {
     const temp = sortedIndices.find((index) => index.name.match(i));
     if (temp) {

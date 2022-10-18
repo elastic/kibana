@@ -12,6 +12,32 @@ interface MustExist {
   bool: { must: Array<{ exists: { field: string } }> };
 }
 
+export const getMappingAggs = (threatMapping: ThreatMapping) => {
+  const eventMappingsAggs = {
+    // [entry.field]: {
+    //   terms: {
+    //     field: entry.field,
+    //   },
+    // },
+  };
+  const indicatorMappingAggs = {};
+
+  return threatMapping.reduce(
+    (acc, threatMap) => {
+      threatMap.entries.forEach((entry) => {
+        acc.eventMappingsAggs[entry.field] = { terms: { field: entry.field } };
+        acc.indicatorMappingAggs[entry.value] = { terms: { field: entry.value } };
+      });
+
+      return acc;
+    },
+    {
+      eventMappingsAggs,
+      indicatorMappingAggs,
+    }
+  );
+};
+
 export const getMappingFilters = (threatMapping: ThreatMapping) => {
   const eventMappingFilter: Filter = {
     meta: {},

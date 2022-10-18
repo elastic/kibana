@@ -20,7 +20,7 @@ import type { SearchAfterAndBulkCreateReturnType } from '../types';
 import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
 import { buildThreatEnrichment } from './build_threat_enrichment';
 import { getEventCount, getEventList } from './get_event_count';
-import { getMappingFilters } from './get_mapping_filters';
+import { getMappingAggs, getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../common/cti/constants';
 
 export const createThreatSignals = async ({
@@ -76,6 +76,8 @@ export const createThreatSignals = async ({
   };
 
   const { eventMappingFilter, indicatorMappingFilter } = getMappingFilters(threatMapping);
+  const { eventMappingsAggs, indicatorMappingAggs } = getMappingAggs(threatMapping);
+  console.log('==================', eventMappingsAggs, indicatorMappingAggs);
   const allEventFilters = [...filters, eventMappingFilter];
   const allThreatFilters = [...threatFilters, indicatorMappingFilter];
 
@@ -148,17 +150,23 @@ export const createThreatSignals = async ({
     totalDocumentCount: number;
   }) => {
     let list = await getDocumentList({ searchAfter: undefined });
-    let documentCount = totalDocumentCount;
+    const aggsResult = Object.entries(list.aggregations ?? {}).reduce((acc, [field, res]) => {
+      console.log('--------buckets-------', res.buckets);
 
-    while (list.hits.hits.length !== 0) {
+      return acc.concat(res.buckets);
+    }, []);
+    let documentCount = aggsResult.length;
+
+    while (documentCount !== 0) {
       verifyExecutionCanProceed();
-      const chunks = chunk(itemsPerSearch, list.hits.hits);
+      const chunks = chunk(itemsPerSearch, aggsResult);
       ruleExecutionLogger.debug(`${chunks.length} concurrent indicator searches are starting.`);
       const concurrentSearchesPerformed =
         chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(createSignal);
       const searchesPerformed = await Promise.all(concurrentSearchesPerformed);
       results = combineConcurrentResults(results, searchesPerformed);
-      documentCount -= list.hits.hits.length;
+      documentCount -= itemsPerSearch;
+      console.log('======searchesPerformed=====', concurrentSearchesPerformed);
       ruleExecutionLogger.debug(
         `Concurrent indicator match searches completed with ${results.createdSignalsCount} signals found`,
         `search times of ${results.searchAfterTimes}ms,`,
@@ -172,10 +180,13 @@ export const createThreatSignals = async ({
         break;
       }
       ruleExecutionLogger.debug(`Documents items left to check are ${documentCount}`);
+      console.log('--------list---------', list.hits.hits[list.hits.hits.length - 1].sort);
 
       list = await getDocumentList({
         searchAfter: list.hits.hits[list.hits.hits.length - 1].sort,
       });
+
+      console.log('+++++list++++', list);
     }
   };
 
@@ -184,6 +195,7 @@ export const createThreatSignals = async ({
       totalDocumentCount: eventCount,
       getDocumentList: async ({ searchAfter }) =>
         getEventList({
+          aggs: eventMappingsAggs,
           services,
           ruleExecutionLogger,
           filters: allEventFilters,
@@ -274,6 +286,7 @@ export const createThreatSignals = async ({
         getThreatList({
           esClient: services.scopedClusterClient.asCurrentUser,
           threatFilters: allThreatFilters,
+          aggs: indicatorMappingAggs,
           query: threatQuery,
           language: threatLanguage,
           index: threatIndex,

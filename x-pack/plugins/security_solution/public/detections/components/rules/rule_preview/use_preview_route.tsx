@@ -117,5 +117,6 @@ export const usePreviewRoute = ({
     logs,
     isAborted,
     profileResponse,
+    isProfileLoading,
   };
 };

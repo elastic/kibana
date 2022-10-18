@@ -31,9 +31,14 @@ export const buildThreatMappingFilter = ({
   if (computedChunkSize > 1024) {
     throw new TypeError('chunk sizes cannot exceed 1024 in size');
   }
+  console.log('++++++++++++', threatList);
   const query = buildEntriesMappingFilter({
     threatMapping,
-    threatList,
+    threatList: threatList.map((t) => ({
+      _id: 'id',
+      _index: 'index',
+      fields: { 'host.name': [{ value: t.key, field: 'agent.name' }] },
+    })),
     chunkSize: computedChunkSize,
     entryKey,
   });
@@ -60,8 +65,16 @@ export const filterThreatMapping = ({
     .map((threatMap) => {
       const atLeastOneItemMissingInThreatList = threatMap.entries.some((entry) => {
         const itemValue = get(entry[entryKey], threatListItem.fields);
+        console.log(
+          '-----threatListItem------',
+          threatListItem,
+          entry[entryKey],
+          threatListItem.fields,
+          itemValue
+        );
         return itemValue == null || itemValue.length !== 1;
       });
+      console.log('----atLeastOneItemMissingInThreatList---', atLeastOneItemMissingInThreatList);
       if (atLeastOneItemMissingInThreatList) {
         return { ...threatMap, entries: [] };
       } else {
@@ -77,6 +90,7 @@ export const createInnerAndClauses = ({
 }: CreateInnerAndClausesOptions): BooleanFilter[] => {
   return threatMappingEntries.reduce<BooleanFilter[]>((accum, threatMappingEntry) => {
     const value = get(threatMappingEntry[entryKey], threatListItem.fields);
+    console.log('------value----', value);
     if (value != null && value.length === 1) {
       // These values could be potentially 10k+ large so mutating the array intentionally
       accum.push({
@@ -85,7 +99,7 @@ export const createInnerAndClauses = ({
             {
               match: {
                 [threatMappingEntry[entryKey === 'field' ? 'value' : 'field']]: {
-                  query: value[0],
+                  query: value[0].value ?? value[0],
                   _name: encodeThreatMatchNamedQuery({
                     id: threatListItem._id,
                     index: threatListItem._index,
@@ -138,11 +152,13 @@ export const buildEntriesMappingFilter = ({
       threatListItem: threatListSearchItem,
       entryKey,
     });
+    console.log('-----filteredEntries-----', filteredEntries);
     const queryWithAndOrClause = createAndOrClauses({
       threatMapping: filteredEntries,
       threatListItem: threatListSearchItem,
       entryKey,
     });
+    console.log('-----queryWithAndOrClause----', queryWithAndOrClause);
     if (queryWithAndOrClause.bool.should.length !== 0) {
       // These values can be 10k+ large, so using a push here for performance
       accum.push(queryWithAndOrClause);

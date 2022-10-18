@@ -120,3 +120,73 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
 
 InspectButtonComponent.displayName = 'InspectButtonComponent';
 export const InspectButton = React.memo(InspectButtonComponent);
+
+interface InspectButtonWrapperProps {
+  additionalRequests: string[] | null;
+  additionalResponses: string[] | null;
+  handleClick: () => void;
+  handleCloseModal: () => void;
+  isButtonDisabled: boolean;
+  isShowingModal: boolean;
+  loading: boolean;
+  request: string | null;
+  response: string | null;
+}
+const InspectButtonWrapperComponent: React.FC<InspectButtonWrapperProps> = ({
+  additionalRequests,
+  additionalResponses,
+  handleClick,
+  handleCloseModal,
+  isButtonDisabled,
+  isShowingModal,
+  loading,
+  request,
+  response,
+}) => {
+  return (
+    <>
+      {inputId === InputsModelId.timeline && !compact && showInspectButton && (
+        <EuiButtonEmpty
+          className={BUTTON_CLASS}
+          aria-label={i18n.INSPECT}
+          data-test-subj="inspect-empty-button"
+          color="text"
+          iconSide="left"
+          iconType="inspect"
+          isDisabled={isButtonDisabled}
+          isLoading={loading}
+          onClick={handleClick}
+        >
+          {i18n.INSPECT}
+        </EuiButtonEmpty>
+      )}
+      {(inputId === InputsModelId.global || compact) && showInspectButton && (
+        <EuiButtonIcon
+          className={BUTTON_CLASS}
+          aria-label={i18n.INSPECT}
+          data-test-subj="inspect-icon-button"
+          iconSize="m"
+          iconType="inspect"
+          isDisabled={isButtonDisabled}
+          title={i18n.INSPECT}
+          onClick={handleClick}
+        />
+      )}
+      {isShowingModal && request !== null && response !== null && (
+        <ModalInspectQuery
+          additionalRequests={additionalRequests}
+          additionalResponses={additionalResponses}
+          closeModal={handleCloseModal}
+          data-test-subj="inspect-modal"
+          inputId={inputId}
+          request={request}
+          response={response}
+          title={title}
+        />
+      )}
+    </>
+  );
+};
+
+InspectButtonWrapperComponent.displayName = 'InspectButtonWrapperComponent';
+export const InspectButtonWrapper = React.memo(InspectButtonWrapperComponent);
