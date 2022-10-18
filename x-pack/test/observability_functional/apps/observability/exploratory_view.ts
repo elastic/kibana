@@ -35,16 +35,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload(
-        Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', '8.0.0')
-      );
-
-      await esArchiver.unload(
-        Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', 'rum_8.0.0')
-      );
-      await esArchiver.unload(
-        Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', 'rum_test_data')
-      );
+      // await esArchiver.unload(
+      //   Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', '8.0.0')
+      // );
+      //
+      // await esArchiver.unload(
+      //   Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', 'rum_8.0.0')
+      // );
+      // await esArchiver.unload(
+      //   Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', 'rum_test_data')
+      // );
     });
 
     it('should go to ux app', async function () {
@@ -85,8 +85,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await find.existsByCssSelector('[title="Chrome Mobile iOS"]')).to.eql(true);
-      expect(await find.existsByCssSelector('[title="Mobile Safari"]')).to.eql(true);
+      expect(
+        await find.existsByCssSelector(
+          '[aria-label="Chrome Mobile iOS; Activate to hide series in graph"]'
+        )
+      ).to.eql(true);
+      expect(
+        await find.existsByCssSelector(
+          '[aria-label="Mobile Safari; Activate to hide series in graph"]'
+        )
+      ).to.eql(true);
     });
   });
 }
