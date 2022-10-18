@@ -277,7 +277,6 @@ Dashboard::
 Fixes pinned filters that backed up in Session Storage {kibana-pull}142262[#142262]
 
 Discover::
-* Fixes an issue where histogram does not fill its container when time interval is not auto {kibana-pull}143004[#143004]
 * Adds support for line breaks in Document explorer {kibana-pull}139449[#139449]
 * Cancelled request errors for embeddables are now hidden {kibana-pull}137690[#137690]
 * Fixes legacy sort saved search stored in Dashboard saved objects {kibana-pull}137488[#137488]
