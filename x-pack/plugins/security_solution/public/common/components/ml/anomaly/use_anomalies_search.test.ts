@@ -244,7 +244,6 @@ describe('useNotableAnomaliesSearch', () => {
         expect.arrayContaining([
           {
             count: 99,
-            // jobId: mostRecentJobId,
             name: jobId,
             job: mostRecentJob,
             entity: AnomalyEntity.Host,

@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-// import { act } from '@testing-library/react';
 import { useEnableDataFeed } from './use_enable_data_feed';
 import {
   createSecuritySolutionStorageMock,
