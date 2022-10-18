@@ -18,6 +18,7 @@ import { fireEvent, render } from '@testing-library/react';
 import { ruleReferences } from '../mocks/rule_references.mock';
 import { Pagination } from '@elastic/eui';
 import { mockGetFormattedComments } from '../mocks/comments.mock';
+import { securityLinkAnchorComponent } from '../mocks/security_link_component.mock';
 
 const onCreateExceptionListItem = jest.fn();
 const onDeleteException = jest.fn();
@@ -133,17 +134,6 @@ describe('ExceptionsViewerItems', () => {
 
   describe('securityLinkAnchorComponent, formattedDateComponent, exceptionsUtilityComponent and getFormattedComments', () => {
     it('it should render sent securityLinkAnchorComponent', () => {
-      const securityLinkAnchorComponent = ({
-        referenceName,
-        referenceId,
-      }: {
-        referenceName: string;
-        referenceId: string;
-      }) => (
-        <div data-test-subj="securityLinkAnchorComponent">
-          <a href={referenceId}>{referenceName}</a>
-        </div>
-      );
       const wrapper = render(
         <ExceptionItems
           viewerStatus={'' as ViewerStatus}

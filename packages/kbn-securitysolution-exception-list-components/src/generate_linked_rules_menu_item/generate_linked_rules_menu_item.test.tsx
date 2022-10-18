@@ -6,24 +6,18 @@
  * Side Public License, v 1.
  */
 import { render } from '@testing-library/react';
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { ElementType } from 'react';
 import { generateLinedRulesMenuItems } from '.';
 import { rules } from '../mocks/rule_references.mock';
+import {
+  getSecurityLinkAction,
+  securityLinkAnchorComponent,
+} from '../mocks/security_link_component.mock';
 
 const dataTestSubj = 'generateLinedRulesMenuItemsTest';
 const linkedRules = rules;
-const securityLinkAnchorComponent = ({
-  referenceName,
-  referenceId,
-}: {
-  referenceName: string;
-  referenceId: string;
-}) => (
-  <div data-test-subj="securityLinkAnchorComponent">
-    <a href={referenceId}>{referenceName}</a>
-  </div>
-);
+
 describe('generateLinedRulesMenuItems', () => {
   it('should not render if the linkedRules length is falsy', () => {
     const result = generateLinedRulesMenuItems({
@@ -57,19 +51,7 @@ describe('generateLinedRulesMenuItems', () => {
     });
   });
   it('should render the second linked rule and apply the css when the length is > 1', () => {
-    const result: ReactElement[] = generateLinedRulesMenuItems({
-      dataTestSubj,
-      linkedRules: [
-        ...rules,
-        {
-          exception_lists: [],
-          id: '2a2b3c',
-          name: 'Simple Rule Query 2',
-          rule_id: 'rule-2',
-        },
-      ],
-      securityLinkAnchorComponent,
-    }) as ReactElement[];
+    const result: ReactElement[] = getSecurityLinkAction(dataTestSubj);
 
     const wrapper = render(result[1]);
     expect(wrapper).toMatchSnapshot();

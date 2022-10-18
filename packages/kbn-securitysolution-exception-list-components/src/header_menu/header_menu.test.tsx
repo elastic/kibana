@@ -9,6 +9,7 @@ import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { HeaderMenu } from '.';
 import { actions } from '../mocks/header.mock';
+import { getSecurityLinkAction } from '../mocks/security_link_component.mock';
 
 describe('HeaderMenu', () => {
   it('should render button icon with default settings', () => {
@@ -91,7 +92,7 @@ describe('HeaderMenu', () => {
   });
 
   it('should render custom Actions', () => {
-    const customActions = [<p key={1}>test</p>];
+    const customActions = getSecurityLinkAction('headerMenuTest');
     const wrapper = render(
       <HeaderMenu disableActions={false} emptyButton actions={customActions} useCustomActions />
     );
