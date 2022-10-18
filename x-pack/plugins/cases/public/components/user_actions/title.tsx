@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TitleUserAction } from '../../../common/api';
-import { UserActionBuilder, UserActionResponse } from './types';
+import type { TitleUserAction } from '../../../common/api';
+import type { UserActionBuilder, UserActionResponse } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
 
