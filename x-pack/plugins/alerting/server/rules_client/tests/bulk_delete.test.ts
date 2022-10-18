@@ -211,7 +211,7 @@ describe('bulkDelete', () => {
     });
   });
 
-  test('should try to delete rules, one successful and one with 409 error, , which will not be deleted with retry', async () => {
+  test('should try to delete rules, one successful and one with 409 error, which will not be deleted with retry', async () => {
     unsecuredSavedObjectsClient.bulkDelete
       .mockResolvedValueOnce({
         statuses: [

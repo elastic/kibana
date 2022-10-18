@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// number of times to retry when conflicts occur
 export const RETRY_IF_CONFLICTS_ATTEMPTES = 2;
 
 // milliseconds to wait before retrying when conflicts occur

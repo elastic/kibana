@@ -13,8 +13,7 @@ import { convertRuleIdsToKueryNode } from '../../lib';
 import { BulkDeleteError } from '../rules_client';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTES } from './wait_before_next_retry';
 
-// max number of failed SO ids in one retry filter
-const MaxIdsNumberInRetryFilter = 1000;
+const MAX_RULES_IDS_IN_RETRY = 1000;
 
 export type BulkDeleteOperation = (filter: KueryNode | null) => Promise<{
   apiKeysToInvalidate: string[];
@@ -37,7 +36,6 @@ interface ReturnRetry {
  * @param filter - KueryNode filter
  * @param retries - number of retries left
  * @param accApiKeysToInvalidate - accumulated apiKeys that need to be invalidated
- * @param accResults - accumulated updated savedObjects
  * @param accErrors - accumulated conflict errors
  * @param accTaskIdsToDelete - accumulated task ids
  * @returns Promise<ReturnRetry>
@@ -94,15 +92,14 @@ export const retryIfBulkDeleteConflicts = async (
       `Bulk delele rules conflicts, retrying ..., ${ruleIdsWithConflictError.length} saved objects conflicted`
     );
 
-    // delay before retry
     await waitBeforeNextRetry(retries);
 
     // here, we construct filter query with ids. But, due to a fact that number of conflicted saved objects can exceed few thousands we can encounter following error:
     // "all shards failed: search_phase_execution_exception: [query_shard_exception] Reason: failed to create query: maxClauseCount is set to 2621"
-    // That's why we chunk processing ids into pieces by size equals to MaxIdsNumberInRetryFilter
+    // That's why we chunk processing ids into pieces by size equals to MAX_RULES_IDS_IN_RETRY
     return (
       await pMap(
-        chunk(ruleIdsWithConflictError, MaxIdsNumberInRetryFilter),
+        chunk(ruleIdsWithConflictError, MAX_RULES_IDS_IN_RETRY),
         async (queryIds) =>
           retryIfBulkDeleteConflicts(
             logger,
