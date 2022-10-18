@@ -397,7 +397,7 @@ export class LensAttributes {
     return {
       ...buildNumberColumn(sourceField),
       label:
-        (operationType === 'unique_count' || shortLabel)
+        operationType === 'unique_count' || shortLabel
           ? label || seriesConfig.labels[sourceField]
           : i18n.translate('xpack.observability.expView.columns.operation.label', {
               defaultMessage: '{operationType} of {sourceField}',
