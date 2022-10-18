@@ -18,7 +18,7 @@ import {
   getUsersPageAuthenticationColumns,
   rowItems,
 } from './helpers';
-import { useAuthentications } from '../../../common/containers/authentications';
+import { useAuthentications } from '../../containers/authentications';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';

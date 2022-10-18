@@ -17,14 +17,14 @@ import { UsersQueries } from '../../../../common/search_strategy/security_soluti
 import type { PageInfoPaginated, SortField } from '../../../../common/search_strategy';
 import type { ESTermQuery } from '../../../../common/typed_json';
 
-import type { inputsModel } from '../../store';
-import { createFilter } from '../helpers';
-import { generateTablePaginationOptions } from '../../../explore/components/paginated_table/helpers';
+import type { inputsModel } from '../../../common/store';
+import { createFilter } from '../../../common/containers/helpers';
+import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
 
 import type { InspectResponse } from '../../../types';
 
 import * as i18n from './translations';
-import { useSearchStrategy } from '../use_search_strategy';
+import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 
 export interface AuthenticationArgs {
   authentications: AuthenticationsEdges[];

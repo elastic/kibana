@@ -17,7 +17,7 @@ import {
   getHostsPageAuthenticationColumns,
   rowItems,
 } from './helpers';
-import { useAuthentications } from '../../../common/containers/authentications';
+import { useAuthentications } from '../../containers/authentications';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import type { HostsComponentsQueryProps } from '../../hosts/pages/navigation/types';
 import { hostsActions, hostsModel, hostsSelectors } from '../../hosts/store';
