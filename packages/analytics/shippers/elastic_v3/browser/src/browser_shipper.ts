@@ -93,10 +93,12 @@ export class ElasticV3BrowserShipper implements IShipper {
 
     if (performanceEvents.length > 0) {
       const eventNames = performanceEvents.map((e) => e.properties.eventName);
-      // @ts-ignore
-      console.error(`[${ElasticV3BrowserShipper.shipperName}]: adding events to queue ${
-        events.length
-      } performance events - ${eventNames.join(',')}`);
+      // eslint-disable-next-line no-console
+      console.error(
+        `[${ElasticV3BrowserShipper.shipperName}]: adding events to queue ${
+          events.length
+        } performance events - ${eventNames.join(',')}`
+      );
     }
 
 
@@ -110,7 +112,7 @@ export class ElasticV3BrowserShipper implements IShipper {
    * Triggers a flush of the internal queue to attempt to send any events held in the queue.
    */
   public shutdown() {
-    // @ts-ignore
+    // eslint-disable-next-line no-console
     console.error('shutdown');
     this.internalQueue$.complete(); // NOTE: When completing the observable, the buffer logic does not wait and releases any buffered events.
   }
@@ -146,10 +148,12 @@ export class ElasticV3BrowserShipper implements IShipper {
 
     if (performanceEvents.length > 0) {
       const eventNames = performanceEvents.map((e) => e.properties.eventName);
-      // @ts-ignore
-      console.error(`[${ElasticV3BrowserShipper.shipperName}]: sending ${
-        events.length
-      } performance events - ${eventNames.join(',')}`);
+      // eslint-disable-next-line no-console
+      console.error(
+        `[${ElasticV3BrowserShipper.shipperName}]: sending ${
+          events.length
+        } performance events - ${eventNames.join(',')}`
+      );
       this.initContext.logger.debug(
         `[${ElasticV3BrowserShipper.shipperName}]: sending ${
           events.length
@@ -166,20 +170,20 @@ export class ElasticV3BrowserShipper implements IShipper {
       keepalive: true,
     });
 
+    const responseText = await response.text();
+
     if (performanceEvents.length > 0) {
-      // @ts-ignore
+      // eslint-disable-next-line no-console
       console.error(
-        `[${ElasticV3BrowserShipper.shipperName}]: ${response.status} - ${await response.text()}`);
+        `[${ElasticV3BrowserShipper.shipperName}]: ${response.status} - ${await responseText}`
+      );
       this.initContext.logger.debug(
-        `[${ElasticV3BrowserShipper.shipperName}]: ${response.status} - ${await response.text()}`
+        `[${ElasticV3BrowserShipper.shipperName}]: ${response.status} - ${await responseText}`
       );
     }
 
     if (!response.ok) {
-      throw new ErrorWithCode(
-        `${response.status} - ${await response.text()}`,
-        `${response.status}`
-      );
+      throw new ErrorWithCode(`${response.status} - ${await responseText}`, `${response.status}`);
     }
 
     return `${response.status}`;

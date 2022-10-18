@@ -9,7 +9,7 @@
 import type { LogRecord } from '@kbn/logging';
 import { createLogger } from './logger';
 
-describe('createLogger', () => {
+describe.skip('createLogger', () => {
   // Calling `.mockImplementation` on all of them to avoid jest logging the console usage
   const logErrorSpy = jest.spyOn(console, 'error').mockImplementation();
   const logWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
