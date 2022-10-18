@@ -6,6 +6,12 @@
 
 Creates a case.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification]. For a preview, check out <<case-apis>>.
+====
+
 === {api-request-title}
 
 `POST <kibana host>:<port>/api/cases`
@@ -45,10 +51,10 @@ specify `null` as its value.
 For {ibm-r} connectors, specify:
 
 `issueTypes`:::
-(Required, array of numbers) The type of the incident.
+(Required, array of strings) The type of the incident.
 
 `severityCode`:::
-(Required, number) The severity code of the incident.
+(Required, string) The severity code of the incident.
 
 For {jira} connectors, specify:
 

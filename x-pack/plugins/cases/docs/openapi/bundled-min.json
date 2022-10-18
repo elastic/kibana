@@ -25,6 +25,157 @@
     }
   ],
   "paths": {
+    "/s/{spaceId}/api/cases": {
+      "post": {
+        "summary": "Creates a case.",
+        "operationId": "createCase",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana  feature privileges, depending on the owner of the case you're creating.\n",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/create_case_request"
+              },
+              "examples": {
+                "createCaseRequest": {
+                  "$ref": "#/components/examples/create_case_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/case_response_properties"
+                },
+                "examples": {
+                  "createCaseResponse": {
+                    "$ref": "#/components/examples/create_case_response"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Deletes one or more cases.",
+        "operationId": "deleteCase",
+        "description": "You must have `read` or `all` privileges and the `delete` sub-feature privilege for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "name": "ids",
+            "description": "The cases that you want to removed. All non-ASCII characters must be URL encoded.",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "d4e7abb0-b462-11ec-9a8d-698504725a43"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Indicates a successful call."
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "patch": {
+        "summary": "Updates one or more cases.",
+        "operationId": "updateCase",
+        "description": "You must have `all` privileges for the **Cases** feature in the  **Management**, **Observability**, or **Security** section of the Kibana  feature privileges, depending on the owner of the case you're updating.\n",
+        "tags": [
+          "cases"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/update_case_request"
+              },
+              "examples": {
+                "updateCaseRequest": {
+                  "$ref": "#/components/examples/update_case_request"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Indicates a successful call.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/case_response_properties"
+                  }
+                },
+                "examples": {
+                  "updateCaseResponse": {
+                    "$ref": "#/components/examples/update_case_response"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://localhost:5601"
+          }
+        ]
+      },
+      "servers": [
+        {
+          "url": "https://localhost:5601"
+        }
+      ]
+    },
     "/s/{spaceId}/api/cases/{caseId}/comments": {
       "post": {
         "summary": "Adds a comment or alert to a case.",
@@ -221,15 +372,13 @@
       }
     },
     "parameters": {
-      "case_id": {
-        "in": "path",
-        "name": "caseId",
-        "description": "The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded.",
-        "required": true,
+      "kbn_xsrf": {
         "schema": {
-          "type": "string",
-          "example": "9c235210-6834-11ea-a78c-6ffb38a34414"
-        }
+          "type": "string"
+        },
+        "in": "header",
+        "name": "kbn-xsrf",
+        "required": true
       },
       "space_id": {
         "in": "path",
@@ -241,16 +390,483 @@
           "example": "default"
         }
       },
-      "kbn_xsrf": {
+      "case_id": {
+        "in": "path",
+        "name": "caseId",
+        "description": "The identifier for the case. To retrieve case IDs, use the find cases API. All non-ASCII characters must be URL encoded.",
+        "required": true,
         "schema": {
-          "type": "string"
-        },
-        "in": "header",
-        "name": "kbn-xsrf",
-        "required": true
+          "type": "string",
+          "example": "9c235210-6834-11ea-a78c-6ffb38a34414"
+        }
       }
     },
     "schemas": {
+      "connector_properties_none": {
+        "title": "Create or update case request properties for no connector",
+        "required": [
+          "fields",
+          "id",
+          "name",
+          "type"
+        ],
+        "description": "Defines properties for connectors when type is `.none`.",
+        "type": "object",
+        "properties": {
+          "fields": {
+            "description": "An object containing the connector fields. To create a case without a connector, specify null. To update a case to remove the connector, specify null.",
+            "nullable": true,
+            "type": "string",
+            "example": null
+          },
+          "id": {
+            "description": "The identifier for the connector. To create a case without a connector, use `none`. To update a case to remove the connector, specify `none`.",
+            "type": "string",
+            "example": "none"
+          },
+          "name": {
+            "description": "The name of the connector. To create a case without a connector, use `none`. To update a case to remove the connector, specify `none`.",
+            "type": "string",
+            "example": "none"
+          },
+          "type": {
+            "description": "The type of connector. To create a case without a connector, use `.none`. To update a case to remove the connector, specify `.none`.",
+            "type": "string",
+            "example": ".none",
+            "enum": [
+              ".none"
+            ]
+          }
+        }
+      },
+      "connector_properties_cases_webhook": {
+        "title": "Create or upate case request properties for Cases Webhook connector",
+        "required": [
+          "fields",
+          "id",
+          "name",
+          "type"
+        ],
+        "description": "Defines properties for connectors when type is `.cases-webhook`.",
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "string",
+            "nullable": true,
+            "example": null
+          },
+          "id": {
+            "description": "The identifier for the connector. To retrieve connector IDs, use the find connectors API.",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the connector.",
+            "type": "string"
+          },
+          "type": {
+            "description": "The type of connector.",
+            "type": "string",
+            "example": ".cases-webhook",
+            "enum": [
+              ".cases-webhook"
+            ]
+          }
+        }
+      },
+      "connector_properties_jira": {
+        "title": "Create or update case request properties for a Jira connector",
+        "required": [
+          "fields",
+          "id",
+          "name",
+          "type"
+        ],
+        "description": "Defines properties for connectors when type is `.jira`.",
+        "type": "object",
+        "properties": {
+          "fields": {
+            "description": "An object containing the connector fields. If you want to omit any individual field, specify null as its value.",
+            "type": "object",
+            "required": [
+              "issueType",
+              "parent",
+              "priority"
+            ],
+            "properties": {
+              "issueType": {
+                "description": "The type of issue.",
+                "type": "string",
+                "nullable": true
+              },
+              "parent": {
+                "description": "The key of the parent issue, when the issue type is sub-task.",
+                "type": "string",
+                "nullable": true
+              },
+              "priority": {
+                "description": "The priority of the issue.",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          "id": {
+            "description": "The identifier for the connector. To retrieve connector IDs, use the find connectors API.",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the connector.",
+            "type": "string"
+          },
+          "type": {
+            "description": "The type of connector.",
+            "type": "string",
+            "example": ".jira",
+            "enum": [
+              ".jira"
+            ]
+          }
+        }
+      },
+      "connector_properties_resilient": {
+        "title": "Create case request properties for a IBM Resilient connector",
+        "required": [
+          "fields",
+          "id",
+          "name",
+          "type"
+        ],
+        "description": "Defines properties for connectors when type is `.resilient`.",
+        "type": "object",
+        "properties": {
+          "fields": {
+            "description": "An object containing the connector fields. If you want to omit any individual field, specify null as its value.",
+            "type": "object",
+            "nullable": true,
+            "required": [
+              "issueTypes",
+              "severityCode"
+            ],
+            "properties": {
+              "issueTypes": {
+                "description": "The type of incident.",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "severityCode": {
+                "description": "The severity code of the incident.",
+                "type": "string"
+              }
+            }
+          },
+          "id": {
+            "description": "The identifier for the connector.",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the connector.",
+            "type": "string"
+          },
+          "type": {
+            "description": "The type of connector.",
+            "type": "string",
+            "example": ".resilient",
+            "enum": [
+              ".resilient"
+            ]
+          }
+        }
+      },
+      "connector_properties_servicenow": {
+        "title": "Create case request properties for a ServiceNow ITSM connector",
+        "required": [
+          "fields",
+          "id",
+          "name",
+          "type"
+        ],
+        "description": "Defines properties for connectors when type is `.servicenow`.",
+        "type": "object",
+        "properties": {
+          "fields": {
+            "description": "An object containing the connector fields. If you want to omit any individual field, specify null as its value.",
+            "type": "object",
+            "required": [
+              "category",
+              "impact",
+              "severity",
+              "subcategory",
+              "urgency"
+            ],
+            "properties": {
+              "category": {
+                "description": "The category of the incident.",
+                "type": "string",
+                "nullable": true
+              },
+              "impact": {
+                "description": "The effect an incident had on business.",
+                "type": "string",
+                "nullable": true
+              },
+              "severity": {
+                "description": "The severity of the incident.",
+                "type": "string",
+                "nullable": true
+              },
+              "subcategory": {
+                "description": "The subcategory of the incident.",
+                "type": "string",
+                "nullable": true
+              },
+              "urgency": {
+                "description": "The extent to which the incident resolution can be delayed.",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          "id": {
+            "description": "The identifier for the connector. To retrieve connector IDs, use the find connectors API.",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the connector.",
+            "type": "string"
+          },
+          "type": {
+            "description": "The type of connector.",
+            "type": "string",
+            "example": ".servicenow",
+            "enum": [
+              ".servicenow"
+            ]
+          }
+        }
+      },
+      "connector_properties_servicenow_sir": {
+        "title": "Create case request properties for a ServiceNow SecOps connector",
+        "required": [
+          "fields",
+          "id",
+          "name",
+          "type"
+        ],
+        "description": "Defines properties for connectors when type is `.servicenow-sir`.",
+        "type": "object",
+        "properties": {
+          "fields": {
+            "description": "An object containing the connector fields. If you want to omit any individual field, specify null as its value.",
+            "type": "object",
+            "required": [
+              "category",
+              "destIp",
+              "malwareHash",
+              "malwareUrl",
+              "priority",
+              "sourceIp",
+              "subcategory"
+            ],
+            "properties": {
+              "category": {
+                "description": "The category of the incident.",
+                "type": "string",
+                "nullable": true
+              },
+              "destIp": {
+                "description": "Indicates whether cases will send a comma-separated list of destination IPs.",
+                "type": "boolean",
+                "nullable": true
+              },
+              "malwareHash": {
+                "description": "Indicates whether cases will send a comma-separated list of malware hashes.",
+                "type": "boolean",
+                "nullable": true
+              },
+              "malwareUrl": {
+                "description": "Indicates whether cases will send a comma-separated list of malware URLs.",
+                "type": "boolean",
+                "nullable": true
+              },
+              "priority": {
+                "description": "The priority of the issue.",
+                "type": "string",
+                "nullable": true
+              },
+              "sourceIp": {
+                "description": "Indicates whether cases will send a comma-separated list of source IPs.",
+                "type": "boolean",
+                "nullable": true
+              },
+              "subcategory": {
+                "description": "The subcategory of the incident.",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          "id": {
+            "description": "The identifier for the connector. To retrieve connector IDs, use the find connectors API.",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the connector.",
+            "type": "string"
+          },
+          "type": {
+            "description": "The type of connector.",
+            "type": "string",
+            "example": ".servicenow-sir",
+            "enum": [
+              ".servicenow-sir"
+            ]
+          }
+        }
+      },
+      "connector_properties_swimlane": {
+        "title": "Create case request properties for a Swimlane connector",
+        "required": [
+          "fields",
+          "id",
+          "name",
+          "type"
+        ],
+        "description": "Defines properties for connectors when type is `.swimlane`.",
+        "type": "object",
+        "properties": {
+          "fields": {
+            "description": "An object containing the connector fields. If you want to omit any individual field, specify null as its value.",
+            "type": "object",
+            "required": [
+              "caseId"
+            ],
+            "properties": {
+              "caseId": {
+                "description": "The case identifier for Swimlane connectors.",
+                "type": "string",
+                "nullable": true
+              }
+            }
+          },
+          "id": {
+            "description": "The identifier for the connector. To retrieve connector IDs, use the find connectors API.",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the connector.",
+            "type": "string"
+          },
+          "type": {
+            "description": "The type of connector.",
+            "type": "string",
+            "example": ".swimlane",
+            "enum": [
+              ".swimlane"
+            ]
+          }
+        }
+      },
+      "owners": {
+        "type": "string",
+        "description": "The application that owns the cases: Stack Management, Observability, or Elastic Security.\n",
+        "enum": [
+          "cases",
+          "observability",
+          "securitySolution"
+        ],
+        "example": "cases"
+      },
+      "settings": {
+        "type": "object",
+        "description": "An object that contains the case settings.",
+        "required": [
+          "syncAlerts"
+        ],
+        "properties": {
+          "syncAlerts": {
+            "description": "Turns alert syncing on or off.",
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "severity_property": {
+        "type": "string",
+        "description": "The severity of the case.",
+        "enum": [
+          "critical",
+          "high",
+          "low",
+          "medium"
+        ],
+        "default": "low"
+      },
+      "create_case_request": {
+        "title": "Create case request",
+        "description": "The create case API request body varies depending on the type of connector.",
+        "type": "object",
+        "required": [
+          "connector",
+          "description",
+          "owner",
+          "settings",
+          "tags",
+          "title"
+        ],
+        "properties": {
+          "connector": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/connector_properties_none"
+              },
+              {
+                "$ref": "#/components/schemas/connector_properties_cases_webhook"
+              },
+              {
+                "$ref": "#/components/schemas/connector_properties_jira"
+              },
+              {
+                "$ref": "#/components/schemas/connector_properties_resilient"
+              },
+              {
+                "$ref": "#/components/schemas/connector_properties_servicenow"
+              },
+              {
+                "$ref": "#/components/schemas/connector_properties_servicenow_sir"
+              },
+              {
+                "$ref": "#/components/schemas/connector_properties_swimlane"
+              }
+            ]
+          },
+          "description": {
+            "description": "The description for the case.",
+            "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/owners"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/settings"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/severity_property"
+          },
+          "tags": {
+            "description": "The words and phrases that help categorize cases. It can be an empty array.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "title": {
+            "description": "A title for the case.",
+            "type": "string"
+          }
+        }
+      },
       "case_response_closed_by_properties": {
         "title": "Case response properties for closed_by",
         "type": "object",
@@ -281,16 +897,6 @@
           "full_name",
           "username"
         ]
-      },
-      "owners": {
-        "type": "string",
-        "description": "The application that owns the cases: Stack Management, Observability, or Elastic Security.\n",
-        "enum": [
-          "cases",
-          "observability",
-          "securitySolution"
-        ],
-        "example": "cases"
       },
       "alert_comment_response_properties": {
         "title": "Add case comment response properties for alerts",
@@ -580,91 +1186,6 @@
           }
         }
       },
-      "case_response_connector_field_properties": {
-        "title": "Case response properties for connector fields",
-        "type": "object",
-        "description": "An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.",
-        "nullable": true,
-        "properties": {
-          "caseId": {
-            "description": "The case identifier for Swimlane connectors.",
-            "type": "string"
-          },
-          "category": {
-            "description": "The category of the incident for ServiceNow ITSM and ServiceNow SecOps connectors.",
-            "type": "string"
-          },
-          "destIp": {
-            "description": "A comma-separated list of destination IPs for ServiceNow SecOps connectors.",
-            "type": "string"
-          },
-          "impact": {
-            "description": "The effect an incident had on business for ServiceNow ITSM connectors.",
-            "type": "string"
-          },
-          "issueType": {
-            "description": "The type of issue for Jira connectors.",
-            "type": "string"
-          },
-          "issueTypes": {
-            "description": "The type of incident for IBM Resilient connectors.",
-            "type": "array",
-            "items": {
-              "type": "number"
-            }
-          },
-          "malwareHash": {
-            "description": "A comma-separated list of malware hashes for ServiceNow SecOps connectors.",
-            "type": "string"
-          },
-          "malwareUrl": {
-            "description": "A comma-separated list of malware URLs for ServiceNow SecOps connectors.",
-            "type": "string"
-          },
-          "parent": {
-            "description": "The key of the parent issue, when the issue type is sub-task for Jira connectors.",
-            "type": "string"
-          },
-          "priority": {
-            "description": "The priority of the issue for Jira and ServiceNow SecOps connectors.",
-            "type": "string"
-          },
-          "severity": {
-            "description": "The severity of the incident for ServiceNow ITSM connectors.",
-            "type": "string"
-          },
-          "severityCode": {
-            "description": "The severity code of the incident for IBM Resilient connectors.",
-            "type": "number"
-          },
-          "sourceIp": {
-            "description": "A comma-separated list of source IPs for ServiceNow SecOps connectors.",
-            "type": "string"
-          },
-          "subcategory": {
-            "description": "The subcategory of the incident for ServiceNow ITSM connectors.",
-            "type": "string"
-          },
-          "urgency": {
-            "description": "The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.",
-            "type": "string"
-          }
-        }
-      },
-      "connector_types": {
-        "type": "string",
-        "description": "The type of connector.",
-        "enum": [
-          ".cases-webhook",
-          ".jira",
-          ".none",
-          ".resilient",
-          ".servicenow",
-          ".servicenow-sir",
-          ".swimlane"
-        ],
-        "example": ".none"
-      },
       "external_service": {
         "type": "object",
         "nullable": true,
@@ -714,28 +1235,6 @@
             "nullable": true
           }
         }
-      },
-      "settings": {
-        "type": "object",
-        "description": "An object that contains the case settings.",
-        "properties": {
-          "syncAlerts": {
-            "description": "Turns alert syncing on or off.",
-            "type": "boolean",
-            "example": true
-          }
-        }
-      },
-      "severity_property": {
-        "type": "string",
-        "description": "The severity of the case.",
-        "enum": [
-          "critical",
-          "high",
-          "low",
-          "medium"
-        ],
-        "default": "low"
       },
       "status": {
         "type": "string",
@@ -801,25 +1300,32 @@
           },
           "connector": {
             "title": "Case response properties for connectors",
-            "type": "object",
-            "properties": {
-              "fields": {
-                "$ref": "#/components/schemas/case_response_connector_field_properties"
+            "discriminator": {
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/connector_properties_none"
               },
-              "id": {
-                "description": "The identifier for the connector. To create a case without a connector, use `none`.",
-                "type": "string",
-                "example": "none"
+              {
+                "$ref": "#/components/schemas/connector_properties_cases_webhook"
               },
-              "name": {
-                "description": "The name of the connector. To create a case without a connector, use `none`.",
-                "type": "string",
-                "example": "none"
+              {
+                "$ref": "#/components/schemas/connector_properties_jira"
               },
-              "type": {
-                "$ref": "#/components/schemas/connector_types"
+              {
+                "$ref": "#/components/schemas/connector_properties_resilient"
+              },
+              {
+                "$ref": "#/components/schemas/connector_properties_servicenow"
+              },
+              {
+                "$ref": "#/components/schemas/connector_properties_servicenow_sir"
+              },
+              {
+                "$ref": "#/components/schemas/connector_properties_swimlane"
               }
-            }
+            ]
           },
           "created_at": {
             "type": "string",
@@ -890,6 +1396,86 @@
           "version": {
             "type": "string",
             "example": "WzUzMiwxXQ=="
+          }
+        }
+      },
+      "update_case_request": {
+        "title": "Update case request",
+        "description": "The update case API request body varies depending on the type of connector.",
+        "type": "object",
+        "required": [
+          "cases"
+        ],
+        "properties": {
+          "cases": {
+            "type": "array",
+            "description": "An array containing one or more case objects.",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "version"
+              ],
+              "properties": {
+                "connector": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/connector_properties_none"
+                    },
+                    {
+                      "$ref": "#/components/schemas/connector_properties_cases_webhook"
+                    },
+                    {
+                      "$ref": "#/components/schemas/connector_properties_jira"
+                    },
+                    {
+                      "$ref": "#/components/schemas/connector_properties_resilient"
+                    },
+                    {
+                      "$ref": "#/components/schemas/connector_properties_servicenow"
+                    },
+                    {
+                      "$ref": "#/components/schemas/connector_properties_servicenow_sir"
+                    },
+                    {
+                      "$ref": "#/components/schemas/connector_properties_swimlane"
+                    }
+                  ]
+                },
+                "description": {
+                  "description": "An updated description for the case.",
+                  "type": "string"
+                },
+                "id": {
+                  "description": "The identifier for the case.",
+                  "type": "string"
+                },
+                "settings": {
+                  "$ref": "#/components/schemas/settings"
+                },
+                "severity": {
+                  "$ref": "#/components/schemas/severity_property"
+                },
+                "status": {
+                  "$ref": "#/components/schemas/status"
+                },
+                "tags": {
+                  "description": "The words and phrases that help categorize cases.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "title": {
+                  "description": "A title for the case.",
+                  "type": "string"
+                },
+                "version": {
+                  "description": "The current version of the case. To determine this value, use the get case or find cases APIs.",
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       },
@@ -1124,6 +1710,162 @@
       }
     },
     "examples": {
+      "create_case_request": {
+        "summary": "Create a security case that uses a Jira connector.",
+        "value": {
+          "description": "A case description.",
+          "title": "Case title 1",
+          "tags": [
+            "tag-1"
+          ],
+          "connector": {
+            "id": "131d4448-abe0-4789-939d-8ef60680b498",
+            "name": "My connector",
+            "type": ".jira",
+            "fields": {
+              "issueType": "10006",
+              "priority": "High",
+              "parent": null
+            }
+          },
+          "settings": {
+            "syncAlerts": true
+          },
+          "owner": "cases"
+        }
+      },
+      "create_case_response": {
+        "summary": "The create case API returns a JSON object that contains details about the case.",
+        "value": {
+          "comments": [],
+          "totalAlerts": 0,
+          "id": "66b9aa00-94fa-11ea-9f74-e7e108796192",
+          "version": "WzUzMiwxXQ==",
+          "totalComment": 1,
+          "title": "Case title 1",
+          "tags": [
+            "tag 1"
+          ],
+          "description": "A case description.",
+          "settings": {
+            "syncAlerts": false
+          },
+          "owner": "cases",
+          "duration": null,
+          "severity": "low",
+          "closed_at": null,
+          "closed_by": null,
+          "created_at": "2022-03-24T00:37:03.906Z",
+          "created_by": {
+            "username": "elastic",
+            "full_name": null,
+            "email": null
+          },
+          "status": "open",
+          "updated_at": null,
+          "updated_by": null,
+          "connector": {
+            "id": "131d4448-abe0-4789-939d-8ef60680b498",
+            "name": "My connector",
+            "type": ".jira",
+            "fields": {
+              "issueType": "10006",
+              "parent": null,
+              "priority": "High"
+            }
+          },
+          "external_service": null
+        }
+      },
+      "update_case_request": {
+        "summary": "Update the case description, tags, and connector.",
+        "value": {
+          "cases": [
+            {
+              "id": "a18b38a0-71b0-11ea-a0b2-c51ea50a58e2",
+              "version": "WzIzLDFd",
+              "connector": {
+                "id": "131d4448-abe0-4789-939d-8ef60680b498",
+                "name": "My connector",
+                "type": ".jira",
+                "fields": {
+                  "issueType": "10006",
+                  "priority": null,
+                  "parent": null
+                }
+              },
+              "description": "A case description.",
+              "tags": [
+                "tag-1"
+              ],
+              "settings": {
+                "syncAlerts": true
+              }
+            }
+          ]
+        }
+      },
+      "update_case_response": {
+        "summary": "This is an example response when the case description, tags, and connector were updated.",
+        "value": [
+          {
+            "id": "66b9aa00-94fa-11ea-9f74-e7e108796192",
+            "version": "WzU0OCwxXQ==",
+            "comments": [],
+            "totalComment": 0,
+            "totalAlerts": 0,
+            "title": "Case title 1",
+            "tags": [
+              "tag-1"
+            ],
+            "settings": {
+              "syncAlerts": true
+            },
+            "owner": "cases",
+            "description": "A case description.",
+            "duration": null,
+            "severity": "low",
+            "closed_at": null,
+            "closed_by": null,
+            "created_at": "2022-05-13T09:16:17.416Z",
+            "created_by": {
+              "email": null,
+              "full_name": null,
+              "username": "elastic"
+            },
+            "status": "open",
+            "updated_at": "2022-05-13T09:48:33.043Z",
+            "updated_by": {
+              "email": null,
+              "full_name": null,
+              "username": "elastic"
+            },
+            "connector": {
+              "id": "131d4448-abe0-4789-939d-8ef60680b498",
+              "name": "My connector",
+              "type": ".jira",
+              "fields": {
+                "issueType": "10006",
+                "parent": null,
+                "priority": null
+              }
+            },
+            "external_service": {
+              "external_title": "IS-4",
+              "pushed_by": {
+                "full_name": null,
+                "email": null,
+                "username": "elastic"
+              },
+              "external_url": "https://hms.atlassian.net/browse/IS-4",
+              "pushed_at": "2022-05-13T09:20:40.672Z",
+              "connector_id": "05da469f-1fde-4058-99a3-91e4807e2de8",
+              "external_id": "10003",
+              "connector_name": "Jira"
+            }
+          }
+        ]
+      },
       "add_comment_request": {
         "summary": "Adds a comment to a case.",
         "value": {
