@@ -20,56 +20,77 @@ interface Settings {
 }
 
 const RESPONSE_SIZE_LIMIT = 10 * 1024 * 1024;
+// Limit the response size to 10MB, because the response can be very large and sending it to the client
+// can cause the browser to hang.
 
-async function limitEntityResponseSize(esClient: IScopedClusterClient, entity: string) {
-  const stream = await esClient.asInternalUser.transport.request(
-    {
-      method: 'GET',
-      path: `/${entity}`,
-    },
-    { asStream: true }
-  );
-
-  // Limit the response size to 10MB, because the response can be very large and sending it to the client
-  // can cause the browser to hang.
-  const body = await streamToString(stream as unknown as IncomingMessage, RESPONSE_SIZE_LIMIT);
-  return JSON.parse(body);
+function streamToJSON(stream: IncomingMessage) {
+  return streamToString(stream, RESPONSE_SIZE_LIMIT).then((response) => JSON.parse(response));
 }
 
 async function getMappings(esClient: IScopedClusterClient, settings: Settings) {
   if (settings.fields) {
-    return limitEntityResponseSize(esClient, '_mapping');
+    const stream = await esClient.asInternalUser.indices.getMapping(undefined, {
+      asStream: true,
+    });
+    return streamToJSON(stream as unknown as IncomingMessage);
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
-  return Promise.resolve({});
+  return {};
 }
 
 async function getAliases(esClient: IScopedClusterClient, settings: Settings) {
   if (settings.indices) {
-    return limitEntityResponseSize(esClient, '_alias');
+    const stream = await esClient.asInternalUser.indices.getAlias(undefined, {
+      asStream: true,
+    });
+    return streamToJSON(stream as unknown as IncomingMessage);
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
-  return Promise.resolve({});
+  return {};
 }
 
 async function getDataStreams(esClient: IScopedClusterClient, settings: Settings) {
   if (settings.dataStreams) {
-    return limitEntityResponseSize(esClient, '_data_stream');
+    const stream = await esClient.asInternalUser.indices.getDataStream(undefined, {
+      asStream: true,
+    });
+    return streamToJSON(stream as unknown as IncomingMessage);
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
-  return Promise.resolve({});
+  return {};
 }
 
-async function getTemplates(esClient: IScopedClusterClient, settings: Settings) {
+async function getLegacyTemplates(esClient: IScopedClusterClient, settings: Settings) {
   if (settings.templates) {
-    return Promise.all([
-      limitEntityResponseSize(esClient, '_template'),
-      limitEntityResponseSize(esClient, '_component_template'),
-      limitEntityResponseSize(esClient, '_index_template'),
-    ]);
+    const stream = await esClient.asInternalUser.indices.getTemplate(undefined, {
+      asStream: true,
+    });
+    return streamToJSON(stream as unknown as IncomingMessage);
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
-  return Promise.resolve([]);
+  return {};
+}
+
+async function getComponentTemplates(esClient: IScopedClusterClient, settings: Settings) {
+  if (settings.templates) {
+    const stream = await esClient.asInternalUser.cluster.getComponentTemplate(undefined, {
+      asStream: true,
+    });
+    return streamToJSON(stream as unknown as IncomingMessage);
+  }
+  // If the user doesn't want autocomplete suggestions, then clear any that exist.
+  return {};
+}
+
+async function getIndexTemplates(esClient: IScopedClusterClient, settings: Settings) {
+  if (settings.templates) {
+    const stream = await esClient.asInternalUser.indices.getIndexTemplate(undefined, {
+      asStream: true,
+    });
+    return streamToJSON(stream as unknown as IncomingMessage);
+  }
+  // If the user doesn't want autocomplete suggestions, then clear any that exist.
+  return {};
 }
 
 export function registerGetRoute({ router, lib: { handleEsError } }: RouteDependencies) {
@@ -96,30 +117,26 @@ export function registerGetRoute({ router, lib: { handleEsError } }: RouteDepend
           getMappings(esClient, settings),
           getAliases(esClient, settings),
           getDataStreams(esClient, settings),
-          getTemplates(esClient, settings),
+          getLegacyTemplates(esClient, settings),
+          getIndexTemplates(esClient, settings),
+          getComponentTemplates(esClient, settings),
         ]);
-
-        const map = results.map((result, idx) => {
-          // If the request was successful, return the result
-          if (result.status === 'fulfilled') {
-            return result.value;
-          }
-
-          // getTemplates returns an array of results, so we need to handle it in case of failure
-          if (idx === results.length - 1) {
-            return [];
-          }
-
-          // If the request failed, return an empty object
-          return {};
-        });
 
         const [
           mappings,
           aliases,
           dataStreams,
-          [legacyTemplates = {}, indexTemplates = {}, componentTemplates = {}],
-        ] = map;
+          legacyTemplates,
+          indexTemplates,
+          componentTemplates,
+        ] = results.map((result) => {
+          // If the request was successful, return the result
+          if (result.status === 'fulfilled') {
+            return result.value;
+          }
+          // If the request failed, return an empty object
+          return {};
+        });
 
         return response.ok({
           body: {
