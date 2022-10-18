@@ -92,7 +92,7 @@ interface FixtureStartDeps {
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
-  private router: IRouter;
+  private router?: IRouter;
 
   public setup(core: CoreSetup<FixtureStartDeps>, { features, actions }: FixtureSetupDeps) {
     // this action is specifically NOT enabled in ../../config.ts
@@ -150,7 +150,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
   }
 
   public start(core: CoreStart, { actions }: FixtureStartDeps) {
-    initUnsecuredAction(this.router, actions);
+    initUnsecuredAction(this.router!, actions);
   }
   public stop() {}
 }
