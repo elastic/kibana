@@ -130,10 +130,7 @@ const getOtherAggTerms = (requestAgg: Record<string, any>, key: string, otherAgg
 };
 
 /**
- *
- * @param requestAgg
- * @param aggConfigs
- * @returns
+ * Helper function to handle sampling case and get the correct cursor agg from a request object
  */
 const getCorrectAggCursorFromRequest = (
   requestAgg: Record<string, any>,
@@ -142,6 +139,9 @@ const getCorrectAggCursorFromRequest = (
   return aggConfigs.isSamplingEnabled() ? requestAgg.sampling.aggs : requestAgg;
 };
 
+/**
+ * Helper function to handle sampling case and get the correct cursor agg from a response object
+ */
 const getCorrectAggregationsCursorFromResponse = (
   response: estypes.SearchResponse<any>,
   aggConfigs: IAggConfigs

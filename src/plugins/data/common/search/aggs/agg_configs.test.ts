@@ -16,6 +16,15 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { stubIndexPattern } from '../../stubs';
 import { IEsSearchResponse } from '..';
 
+// Mute moment.tz warnings about not finding a mock timezone
+jest.mock('../utils', () => {
+  const original = jest.requireActual('../utils');
+  return {
+    ...original,
+    getUserTimeZone: jest.fn(() => 'US/Pacific'),
+  };
+});
+
 describe('AggConfigs', () => {
   const indexPattern: DataView = stubIndexPattern;
   let typesRegistry: AggTypesRegistryStart;
@@ -563,6 +572,82 @@ describe('AggConfigs', () => {
         '1-bucket>_count'
       );
     });
+
+    it('prepends a sampling agg whenever sampling is enabled', () => {
+      const configStates = [
+        {
+          enabled: true,
+          id: '1',
+          type: 'avg_bucket',
+          schema: 'metric',
+          params: {
+            customBucket: {
+              id: '1-bucket',
+              type: 'date_histogram',
+              schema: 'bucketAgg',
+              params: {
+                field: '@timestamp',
+                interval: '10s',
+              },
+            },
+            customMetric: {
+              id: '1-metric',
+              type: 'count',
+              schema: 'metricAgg',
+              params: {},
+            },
+          },
+        },
+        {
+          enabled: true,
+          id: '2',
+          type: 'terms',
+          schema: 'bucket',
+          params: {
+            field: 'clientip',
+          },
+        },
+        {
+          enabled: true,
+          id: '3',
+          type: 'terms',
+          schema: 'bucket',
+          params: {
+            field: 'machine.os.raw',
+          },
+        },
+      ];
+
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry, hierarchical: true, probability: 0.5 },
+        jest.fn()
+      );
+      const topLevelDsl = ac.toDsl();
+
+      expect(Object.keys(topLevelDsl)).toContain('sampling');
+      expect(Object.keys(topLevelDsl.sampling)).toEqual(['random_sampler', 'aggs']);
+      expect(Object.keys(topLevelDsl.sampling.aggs)).toContain('2');
+      expect(Object.keys(topLevelDsl.sampling.aggs['2'].aggs)).toEqual(['1', '3', '1-bucket']);
+    });
+
+    it('should not prepend a sampling agg when no nested agg is avaialble', () => {
+      const ac = new AggConfigs(
+        indexPattern,
+        [
+          {
+            enabled: true,
+            type: 'count',
+            schema: 'metric',
+          },
+        ],
+        { typesRegistry, probability: 0.5 },
+        jest.fn()
+      );
+      const topLevelDsl = ac.toDsl();
+      expect(Object.keys(topLevelDsl)).not.toContain('sampling');
+    });
   });
 
   describe('#postFlightTransform', () => {
@@ -852,6 +937,76 @@ describe('AggConfigs', () => {
           aggs={aggMin field=\\"bytes\\" id=\\"4\\" enabled=true schema=\\"metric\\"}
           aggs={aggMax field=\\"bytes\\" id=\\"5\\" enabled=true schema=\\"metric\\"}"
       `);
+    });
+  });
+
+  describe('isSamplingEnabled', () => {
+    it('should return false if probability is 1', () => {
+      const ac = new AggConfigs(
+        indexPattern,
+        [{ enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } }],
+        { typesRegistry, probability: 1 },
+        jest.fn()
+      );
+
+      expect(ac.isSamplingEnabled()).toBeFalsy();
+    });
+
+    it('should return true if probability is less than 1', () => {
+      const ac = new AggConfigs(
+        indexPattern,
+        [{ enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } }],
+        { typesRegistry, probability: 0.1 },
+        jest.fn()
+      );
+
+      expect(ac.isSamplingEnabled()).toBeTruthy();
+    });
+
+    it('should return false when all aggs have hasNoDsl flag enabled', () => {
+      const ac = new AggConfigs(
+        indexPattern,
+        [
+          {
+            enabled: true,
+            type: 'count',
+            schema: 'metric',
+          },
+        ],
+        { typesRegistry, probability: 1 },
+        jest.fn()
+      );
+
+      expect(ac.isSamplingEnabled()).toBeFalsy();
+    });
+
+    it('should return false when no nested aggs are avaialble', () => {
+      const ac = new AggConfigs(
+        indexPattern,
+        [{ enabled: false, type: 'avg', schema: 'metric', params: { field: 'bytes' } }],
+        { typesRegistry, probability: 1 },
+        jest.fn()
+      );
+
+      expect(ac.isSamplingEnabled()).toBeFalsy();
+    });
+
+    it('should return true if at least one nested agg is available and probability < 1', () => {
+      const ac = new AggConfigs(
+        indexPattern,
+        [
+          {
+            enabled: true,
+            type: 'count',
+            schema: 'metric',
+          },
+          { enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+        ],
+        { typesRegistry, probability: 0.1 },
+        jest.fn()
+      );
+
+      expect(ac.isSamplingEnabled()).toBeTruthy();
     });
   });
 });
