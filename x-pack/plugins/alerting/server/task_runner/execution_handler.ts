@@ -139,6 +139,8 @@ export class ExecutionHandler<
           ? this.ruleType.recoveryActionGroup.id
           : alert.getScheduledActionOptions()?.actionGroup!;
 
+        const instanceState = recovered ? {} : alert.getScheduledActionOptions()?.state!;
+
         if (!recovered) {
           alert.updateLastScheduledActions(action.group as ActionGroupIds);
           alert.unscheduleActions();
@@ -204,7 +206,7 @@ export class ExecutionHandler<
               alertActionGroupName: this.ruleTypeActionGroups.get(actionGroup)!,
               context: alert.getContext(),
               actionId: action.id,
-              state: alert.getState(),
+              state: instanceState,
               kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
               alertParams: this.rule.params,
               actionParams: action.params,
