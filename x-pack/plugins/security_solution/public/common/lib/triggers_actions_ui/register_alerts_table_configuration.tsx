@@ -12,8 +12,8 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { APP_ID, CASES_FEATURE_ID } from '../../../../common/constants';
-import { getTimelinesInStorageByIds } from '../../../timelines/containers/local_storage';
-import { TimelineId } from '../../../../common/types';
+import { getDataTablesInStorageByIds } from '../../../timelines/containers/local_storage';
+import { TableId } from '../../../../common/types';
 import { getColumns } from '../../../detections/configurations/security_solution_detections';
 import { useRenderCellValue } from '../../../detections/configurations/security_solution_detections/render_cell_value';
 import { useToGetInternalFlyout } from '../../../timelines/components/side_panel/event_details/flyout';
@@ -25,8 +25,8 @@ const registerAlertsTableConfiguration = (
   if (registry.has(APP_ID)) {
     return;
   }
-  const timelineStorage = getTimelinesInStorageByIds(storage, [TimelineId.detectionsPage]);
-  const columnsFormStorage = timelineStorage?.[TimelineId.detectionsPage]?.columns ?? [];
+  const dataTableStorage = getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]);
+  const columnsFormStorage = dataTableStorage?.[TableId.alertsOnAlertsPage]?.columns ?? [];
   const alertColumns = columnsFormStorage.length ? columnsFormStorage : getColumns();
 
   registry.register({

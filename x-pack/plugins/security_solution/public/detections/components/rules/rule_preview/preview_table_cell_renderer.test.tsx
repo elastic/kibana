@@ -18,6 +18,7 @@ import { DroppableWrapper } from '../../../../common/components/drag_and_drop/dr
 import type { BrowserFields } from '@kbn/timelines-plugin/common/search_strategy';
 import type { Ecs } from '../../../../../common/ecs';
 import { columnRenderers } from '../../../../timelines/components/timeline/body/renderers';
+import { TimelineId } from '../../../../../common/types';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../timelines/components/timeline/body/renderers/get_column_renderer');
@@ -36,7 +37,7 @@ describe('PreviewTableCellRenderer', () => {
   const rowIndex = 3;
   const colIndex = 0;
   const setCellProps = jest.fn();
-  const timelineId = 'test';
+  const scopeId = TimelineId.test;
   const ecsData = {} as Ecs;
   const browserFields = {} as BrowserFields;
 
@@ -69,7 +70,7 @@ describe('PreviewTableCellRenderer', () => {
               rowIndex={rowIndex}
               colIndex={colIndex}
               setCellProps={setCellProps}
-              timelineId={timelineId}
+              scopeId={scopeId}
             />
           </DroppableWrapper>
         </DragDropContextWrapper>
@@ -104,7 +105,7 @@ describe('PreviewTableCellRenderer', () => {
               rowIndex={rowIndex}
               colIndex={colIndex}
               setCellProps={setCellProps}
-              timelineId={timelineId}
+              scopeId={scopeId}
               truncate={truncate}
             />
           </DroppableWrapper>
@@ -122,7 +123,7 @@ describe('PreviewTableCellRenderer', () => {
       isDraggable: true,
       linkValues,
       rowRenderers: undefined,
-      timelineId,
+      scopeId,
       truncate,
       values: ['2018-11-05T19:03:25.937Z'],
     });
@@ -152,7 +153,7 @@ describe('PreviewTableCellRenderer', () => {
               rowIndex={rowIndex}
               colIndex={colIndex}
               setCellProps={setCellProps}
-              timelineId={timelineId}
+              scopeId={scopeId}
             />
           </DroppableWrapper>
         </DragDropContextWrapper>

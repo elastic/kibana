@@ -16,7 +16,7 @@ const ZeekExampleComponent: React.FC = () => (
     {zeekRowRenderer.renderRow({
       data: demoTimelineData[13].ecs,
       isDraggable: false,
-      timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
+      scopeId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
     })}
   </>
 );

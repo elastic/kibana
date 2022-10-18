@@ -14,7 +14,7 @@ import { reasonColumnRenderer } from './reason_column_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
 
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
-import { RowRendererId, TimelineId } from '../../../../../../common/types';
+import { TableId, RowRendererId } from '../../../../../../common/types';
 
 import { render } from '@testing-library/react';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
@@ -66,7 +66,7 @@ const defaultProps = {
   columnName: REASON_FIELD_NAME,
   eventId: 'test-event-id',
   field,
-  timelineId: 'test-timeline-id',
+  scopeId: 'test-timeline-id',
   values: ['test-value'],
 };
 
@@ -142,7 +142,7 @@ describe('reasonColumnRenderer', () => {
         isDetails: true,
         ecsData: validEcs,
         rowRenderers,
-        timelineId: TimelineId.rulePreview,
+        scopeId: TableId.rulePreview,
       });
 
       const wrapper = render(<TestProviders>{renderedColumn}</TestProviders>);

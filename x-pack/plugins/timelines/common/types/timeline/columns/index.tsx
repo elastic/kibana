@@ -49,7 +49,7 @@ export type TGridCellAction = ({
   ecsData,
   header,
   pageSize,
-  timelineId,
+  scopeId,
   closeCellPopover,
 }: {
   browserFields: BrowserFields;
@@ -58,7 +58,7 @@ export type TGridCellAction = ({
   ecsData: Ecs[];
   header?: ColumnHeaderOptions;
   pageSize: number;
-  timelineId: string;
+  scopeId: string;
   closeCellPopover?: () => void;
 }) => (props: EuiDataGridColumnCellActionProps) => ReactNode;
 
@@ -107,4 +107,11 @@ export interface ColumnRenderer {
     values: string[] | null | undefined;
     linkValues?: string[] | null | undefined;
   }) => React.ReactNode;
+}
+
+export interface SessionViewConfig {
+  sessionEntityId: string;
+  jumpToEntityId?: string;
+  jumpToCursor?: string;
+  investigatedAlertId?: string;
 }

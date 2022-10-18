@@ -201,7 +201,7 @@ const StatefulEventComponent: React.FC<Props> = ({
       timelineActions.toggleDetailPanel({
         ...updatedExpandedDetail,
         tabType,
-        timelineId,
+        id: timelineId,
       })
     );
 

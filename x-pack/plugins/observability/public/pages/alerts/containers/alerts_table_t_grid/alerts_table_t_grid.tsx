@@ -221,7 +221,7 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
 
   const onStateChange = useCallback(
     (state: TGridState) => {
-      const pickedState = pick(state.timelineById['standalone-t-grid'], [
+      const pickedState = pick(state.tableById['standalone-t-grid'], [
         'columns',
         'sort',
         'selectedEventIds',
@@ -259,7 +259,6 @@ export function AlertsTableTGrid(props: AlertsTableTGridProps) {
       itemsPerPage,
       itemsPerPageOptions: [10, 25, 50],
       loadingText: translations.alertsTable.loadingTextLabel,
-      footerText: translations.alertsTable.footerTextLabel,
       onStateChange,
       query: {
         query: kuery ?? '',

@@ -24,7 +24,8 @@ import { createStore } from '../../store';
 
 import type { Props } from './top_n';
 import { StatefulTopN } from '.';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TableId, TimelineId } from '../../../../common/types/timeline';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -93,7 +94,7 @@ const state: State = {
     ...mockGlobalState.timeline,
     timelineById: {
       [TimelineId.active]: {
-        ...mockGlobalState.timeline.timelineById.test,
+        ...mockGlobalState.timeline.timelineById['timeline-test'],
         id: TimelineId.active,
         dataProviders: [
           {
@@ -149,13 +150,19 @@ const state: State = {
 };
 
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const store = createStore(
+  state,
+  SUB_PLUGINS_REDUCER,
+  { dataTable: tGridReducer },
+  kibanaObservable,
+  storage
+);
 
 let testProps = {
   browserFields: mockBrowserFields,
   field,
   indexPattern: mockIndexPattern,
-  timelineId: TimelineId.hostsPageEvents,
+  scopeId: TableId.hostsPageEvents,
   toggleTopN: jest.fn(),
   onFilterAdded: jest.fn(),
   value,
@@ -292,13 +299,14 @@ describe('StatefulTopN', () => {
     let wrapper: ReactWrapper;
 
     beforeEach(() => {
-      testProps = {
-        ...testProps,
-        timelineId: TimelineId.active,
-      };
       wrapper = mount(
         <TestProviders store={store}>
-          <StatefulTopN {...testProps} />
+          <StatefulTopN
+            {...{
+              ...testProps,
+              scopeId: TimelineId.active,
+            }}
+          />
         </TestProviders>
       );
     });
@@ -357,7 +365,7 @@ describe('StatefulTopN', () => {
     test(`defaults to the 'Alert events' option when rendering in a NON-active timeline context (e.g. the Alerts table on the Detections page) when 'documentType' from 'useTimelineTypeContext()' is 'alerts'`, async () => {
       testProps = {
         ...testProps,
-        timelineId: TimelineId.detectionsPage,
+        scopeId: TableId.alertsOnAlertsPage,
       };
       const wrapper = mount(
         <TestProviders store={store}>

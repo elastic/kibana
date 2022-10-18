@@ -19,14 +19,27 @@ import { createStore } from '../../store/store';
 
 import { ErrorToastDispatcher } from '.';
 import type { State } from '../../store/types';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 describe('Error Toast Dispatcher', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
   });
 
   describe('rendering', () => {

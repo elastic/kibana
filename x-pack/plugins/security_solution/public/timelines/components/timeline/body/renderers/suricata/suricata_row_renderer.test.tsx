@@ -16,6 +16,7 @@ import '../../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 import { suricataRowRenderer } from './suricata_row_renderer';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
+import { TimelineId } from '../../../../../../../common/types';
 
 jest.mock('../../../../../../common/lib/kibana');
 
@@ -43,7 +44,7 @@ describe('suricata_row_renderer', () => {
     const children = suricataRowRenderer.renderRow({
       data: nonSuricata,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
 
     const wrapper = shallow(<span>{children}</span>);
@@ -62,7 +63,7 @@ describe('suricata_row_renderer', () => {
     const children = suricataRowRenderer.renderRow({
       data: suricata,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = mount(
       <TestProviders>
@@ -84,7 +85,7 @@ describe('suricata_row_renderer', () => {
     const children = suricataRowRenderer.renderRow({
       data: suricata,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = mount(
       <TestProviders>

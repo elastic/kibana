@@ -9,11 +9,11 @@ import React from 'react';
 import { ALERT_START, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { TGridIntegratedProps } from '../components/t_grid/integrated';
 import { mockBrowserFields, mockRuntimeMappings } from './browser_fields';
-import { mockDataProviders } from './mock_data_providers';
 import { mockTimelineData } from './mock_timeline_data';
-import { ColumnHeaderOptions, TimelineId } from '../../common/types';
+import { ColumnHeaderOptions } from '../../common/types';
 import { mockIndexNames, mockIndexPattern } from './index_pattern';
 import { EventRenderedViewProps } from '../components/t_grid/event_rendered_view';
+import { TableId } from '../types';
 
 const columnHeaders: ColumnHeaderOptions[] = [
   {
@@ -91,7 +91,6 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   appId: '',
   browserFields: mockBrowserFields,
   columns: columnHeaders,
-  dataProviders: mockDataProviders,
   dataViewId: 'data-view-id',
   deletedEventIds: [],
   disabledCellActions: [],
@@ -102,14 +101,13 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
   globalFullScreen: false,
   graphEventId: undefined,
   hasAlertsCrud: true,
-  id: TimelineId.active,
+  id: '',
   indexNames: mockIndexNames,
   indexPattern: mockIndexPattern,
   isLive: false,
   isLoadingIndexPattern: false,
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50, 100],
-  kqlMode: 'filter',
   query: {
     query: '_id: "28bf94ad5d16b5fded1b258127aa88792f119d7e018c35869121613385619e1e"',
     language: 'kuery',
@@ -142,6 +140,6 @@ export const eventRenderedProps: EventRenderedViewProps = {
   pageSize: 10,
   pageSizeOptions: [10, 25, 50, 100],
   rowRenderers: [],
-  timelineId: TimelineId.detectionsPage,
+  timelineId: TableId.alertsOnAlertsPage,
   totalItemCount: 100,
 };

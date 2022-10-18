@@ -107,6 +107,7 @@ export const getAddToTimelineCellAction = ({
             ownFocus: false,
             showTooltip: false,
             onClick: handleAddToTimelineAction,
+            timelineType: 'default',
           };
         }, [Component, columnId, dataProvider, handleAddToTimelineAction]);
 

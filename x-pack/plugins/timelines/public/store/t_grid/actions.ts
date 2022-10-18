@@ -9,16 +9,15 @@ import actionCreatorFactory from 'typescript-fsa';
 import type { TimelineNonEcsData } from '../../../common/search_strategy';
 import type {
   ColumnHeaderOptions,
-  DataProvider,
-  SortColumnTimeline,
-  TimelineExpandedDetailType,
+  SortColumnTable,
+  DataExpandedDetailType,
+  SessionViewConfig,
 } from '../../../common/types/timeline';
-import { TimelineTabs } from '../../../common/types/timeline';
 import { InitialyzeTGridSettings, TGridPersistInput } from './types';
 
 const actionCreator = actionCreatorFactory('x-pack/timelines/t-grid');
 
-export const createTGrid = actionCreator<TGridPersistInput>('CREATE_TIMELINE');
+export const createTGrid = actionCreator<TGridPersistInput>('CREATE_TGRID');
 
 export const upsertColumn = actionCreator<{
   column: ColumnHeaderOptions;
@@ -43,12 +42,12 @@ export const updateColumnWidth = actionCreator<{
   width: number;
 }>('UPDATE_COLUMN_WIDTH');
 
-export type ToggleDetailPanel = TimelineExpandedDetailType & {
-  tabType?: TimelineTabs;
-  timelineId: string;
+export type TableToggleDetailPanel = DataExpandedDetailType & {
+  tabType?: string;
+  id: string;
 };
 
-export const toggleDetailPanel = actionCreator<ToggleDetailPanel>('TOGGLE_DETAIL_PANEL');
+export const toggleDetailPanel = actionCreator<TableToggleDetailPanel>('TOGGLE_DETAIL_PANEL');
 
 export const removeColumn = actionCreator<{
   id: string;
@@ -74,38 +73,38 @@ export const updateItemsPerPageOptions = actionCreator<{
   itemsPerPageOptions: number[];
 }>('UPDATE_ITEMS_PER_PAGE_OPTIONS');
 
-export const updateSort = actionCreator<{ id: string; sort: SortColumnTimeline[] }>('UPDATE_SORT');
+export const updateSort = actionCreator<{ id: string; sort: SortColumnTable[] }>('UPDATE_SORT');
 
 export const setSelected = actionCreator<{
   id: string;
   eventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   isSelected: boolean;
   isSelectAllChecked: boolean;
-}>('SET_TIMELINE_SELECTED');
+}>('SET_TGRID_SELECTED');
 
 export const clearSelected = actionCreator<{
   id: string;
-}>('CLEAR_TIMELINE_SELECTED');
+}>('CLEAR_TGRID_SELECTED');
 
 export const setEventsLoading = actionCreator<{
   id: string;
   eventIds: string[];
   isLoading: boolean;
-}>('SET_TIMELINE_EVENTS_LOADING');
+}>('SET_TGRID_EVENTS_LOADING');
 
 export const clearEventsLoading = actionCreator<{
   id: string;
-}>('CLEAR_TIMELINE_EVENTS_LOADING');
+}>('CLEAR_TGRID_EVENTS_LOADING');
 
 export const setEventsDeleted = actionCreator<{
   id: string;
   eventIds: string[];
   isDeleted: boolean;
-}>('SET_TIMELINE_EVENTS_DELETED');
+}>('SET_TGRID_EVENTS_DELETED');
 
 export const clearEventsDeleted = actionCreator<{
   id: string;
-}>('CLEAR_TIMELINE_EVENTS_DELETED');
+}>('CLEAR_TGRID_EVENTS_DELETED');
 
 export const initializeTGridSettings = actionCreator<InitialyzeTGridSettings>('INITIALIZE_TGRID');
 
@@ -113,10 +112,15 @@ export const setTGridSelectAll = actionCreator<{ id: string; selectAll: boolean 
   'SET_TGRID_SELECT_ALL'
 );
 
-export const setTimelineUpdatedAt = actionCreator<{ id: string; updated: number }>(
-  'SET_TIMELINE_UPDATED_AT'
+export const updateGraphEventId = actionCreator<{ id: string; graphEventId: string }>(
+  'UPDATE_TGRID_GRAPH_EVENT_ID'
 );
 
-export const addProviderToTimeline = actionCreator<{ id: string; dataProvider: DataProvider }>(
-  'ADD_PROVIDER_TO_TIMELINE'
+export const updateSessionViewConfig = actionCreator<{
+  id: string;
+  sessionViewConfig: SessionViewConfig | null;
+}>('UPDATE_TGRID_SESSION_VIEW_CONFIG');
+
+export const setTableUpdatedAt = actionCreator<{ id: string; updated: number }>(
+  'SET_TABLE_UPDATED_AT'
 );

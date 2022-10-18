@@ -45,7 +45,7 @@ export const WITH_FIELD_NAMES = [
 
 export const DEFAULT_GAP = 3; // px
 
-export const AlertFieldFlexGroup = styled(EuiFlexGroup)<{ $timelineId: string }>`
+export const AlertFieldFlexGroup = styled(EuiFlexGroup)<{ $scopeId: string }>`
   flex-grow: 0;
-  gap: ${({ $timelineId }) => ($timelineId === TimelineId.active ? 0 : DEFAULT_GAP)}px;
+  gap: ${({ $scopeId }) => ($scopeId === TimelineId.active ? 0 : DEFAULT_GAP)}px;
 `;

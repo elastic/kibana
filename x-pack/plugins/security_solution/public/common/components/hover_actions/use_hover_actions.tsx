@@ -7,7 +7,8 @@
 
 import React, { useCallback, useMemo, useState, useRef, useContext } from 'react';
 import type { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
-import { TimelineContext } from '@kbn/timelines-plugin/public';
+import { TableContext } from '@kbn/timelines-plugin/public';
+import { TimelineContext } from '../../../timelines/components/timeline';
 import { HoverActions } from '.';
 
 import type { DataProvider } from '../../../../common/types';
@@ -34,7 +35,7 @@ interface Props {
   isDraggable?: boolean;
   inline?: boolean;
   render: RenderFunctionProp;
-  timelineId?: string;
+  scopeId?: string;
   truncate?: boolean;
   onFilterAdded?: () => void;
 }
@@ -47,14 +48,19 @@ export const useHoverActions = ({
   isDraggable,
   onFilterAdded,
   render,
-  timelineId,
+  scopeId,
 }: Props) => {
+  const { timelineId: timelineIdFind } = useContext(TimelineContext);
+  const { tableId: tableIdFind } = useContext(TableContext);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const keyboardHandlerRef = useRef<HTMLDivElement | null>(null);
   const [closePopOverTrigger, setClosePopOverTrigger] = useState(false);
   const [showTopN, setShowTopN] = useState<boolean>(false);
   const [hoverActionsOwnFocus, setHoverActionsOwnFocus] = useState<boolean>(false);
-  const { timelineId: timelineIdFind } = useContext(TimelineContext);
+  const id = useMemo(
+    () => (!scopeId ? timelineIdFind ?? tableIdFind : scopeId),
+    [scopeId, tableIdFind, timelineIdFind]
+  );
 
   const handleClosePopOverTrigger = useCallback(() => {
     setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger);
@@ -114,7 +120,7 @@ export const useHoverActions = ({
         ownFocus={hoverActionsOwnFocus}
         showOwnFocus={false}
         showTopN={showTopN}
-        timelineId={timelineId ?? timelineIdFind}
+        scopeId={id}
         toggleTopN={toggleTopN}
         values={
           typeof dataProvider.queryMatch.value !== 'number'
@@ -124,19 +130,18 @@ export const useHoverActions = ({
       />
     );
   }, [
-    closeTopN,
-    dataProvider,
-    fieldType,
-    handleClosePopOverTrigger,
-    hideTopN,
     hoverActionsOwnFocus,
-    isAggregatable,
-    isDraggable,
-    onFilterAdded,
-    render,
     showTopN,
-    timelineId,
-    timelineIdFind,
+    dataProvider,
+    render,
+    closeTopN,
+    handleClosePopOverTrigger,
+    isDraggable,
+    isAggregatable,
+    fieldType,
+    hideTopN,
+    onFilterAdded,
+    id,
     toggleTopN,
   ]);
 

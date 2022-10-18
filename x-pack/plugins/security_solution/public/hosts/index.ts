@@ -6,18 +6,15 @@
  */
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { TimelineIdLiteral } from '../../common/types/timeline';
-import { TimelineId } from '../../common/types/timeline';
+import type { TableIdLiteral } from '../../common/types/timeline';
+import { TableId } from '../../common/types/timeline';
 import type { SecuritySubPluginWithStore } from '../app/types';
-import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
+import { getDataTablesInStorageByIds } from '../timelines/containers/local_storage';
 import { routes } from './routes';
 import type { HostsState } from './store';
 import { initialHostsState, hostsReducer } from './store';
 
-const HOST_TIMELINE_IDS: TimelineIdLiteral[] = [
-  TimelineId.hostsPageEvents,
-  TimelineId.hostsPageSessions,
-];
+const HOST_TABLE_IDS: TableIdLiteral[] = [TableId.hostsPageEvents, TableId.hostsPageSessions];
 
 export class Hosts {
   public setup() {}
@@ -25,8 +22,8 @@ export class Hosts {
   public start(storage: Storage): SecuritySubPluginWithStore<'hosts', HostsState> {
     return {
       routes,
-      storageTimelines: {
-        timelineById: getTimelinesInStorageByIds(storage, HOST_TIMELINE_IDS),
+      storageDataTables: {
+        tableById: getDataTablesInStorageByIds(storage, HOST_TABLE_IDS),
       },
       store: {
         initialState: { hosts: initialHostsState },

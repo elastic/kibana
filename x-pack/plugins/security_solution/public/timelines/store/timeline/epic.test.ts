@@ -149,7 +149,6 @@ describe('Epic Timeline', () => {
         },
         loadingEventIds: [],
         queryFields: [],
-        selectAll: false,
         title: 'saved',
         timelineType: TimelineType.default,
         templateTimelineId: null,
@@ -162,7 +161,6 @@ describe('Epic Timeline', () => {
         selectedEventIds: {},
         sessionViewConfig: null,
         show: true,
-        showCheckboxes: false,
         sort: [
           {
             columnId: '@timestamp',

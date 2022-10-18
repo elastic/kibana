@@ -72,7 +72,7 @@ describe('EventDetails', () => {
     onEventViewSelected: jest.fn(),
     onThreatViewSelected: jest.fn(),
     timelineTabType: TimelineTabs.query,
-    timelineId: 'test',
+    scopeId: 'table-test',
     eventView: EventsViewType.summaryView,
     hostRisk: { fields: [], loading: true },
     indexName: 'test',

@@ -25,7 +25,7 @@ export interface LegendItem {
   dataProviderId: string;
   render?: (fieldValuePair?: { field: string; value: string | number }) => React.ReactNode;
   field: string;
-  timelineId?: string;
+  scopeId?: string;
   value: string | number;
   count?: number;
 }
@@ -47,7 +47,7 @@ const DraggableLegendItemComponent: React.FC<{
   legendItem: LegendItem;
 }> = ({ legendItem }) => {
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const { color, count, dataProviderId, field, timelineId, value } = legendItem;
+  const { color, count, dataProviderId, field, scopeId, value } = legendItem;
 
   return (
     <EuiText size="xs">
@@ -72,7 +72,7 @@ const DraggableLegendItemComponent: React.FC<{
                 hideTopN={true}
                 id={dataProviderId}
                 isDraggable={false}
-                timelineId={timelineId}
+                scopeId={scopeId}
                 value={value}
               >
                 {legendItem.render == null ? (

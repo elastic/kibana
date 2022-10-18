@@ -25,16 +25,16 @@ export const combineRenderers = ({
     contextId,
     data,
     isDraggable,
-    timelineId,
+    scopeId,
   }: {
     contextId?: string;
     data: Ecs;
     isDraggable: boolean;
-    timelineId: string;
+    scopeId: string;
   }) => (
     <>
-      {a.isInstance(data) && a.renderRow({ contextId, data, isDraggable, timelineId })}
-      {b.isInstance(data) && b.renderRow({ contextId, data, isDraggable, timelineId })}
+      {a.isInstance(data) && a.renderRow({ contextId, data, isDraggable, scopeId })}
+      {b.isInstance(data) && b.renderRow({ contextId, data, isDraggable, scopeId })}
     </>
   ),
 });

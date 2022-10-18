@@ -19,7 +19,7 @@ import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { useLicense } from '../../hooks/use_license';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TableId } from '../../../../common/types/timeline';
 export const TEST_ID = 'security_solution:sessions_viewer:sessions_view';
 
 export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
@@ -59,7 +59,7 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
 };
 
 const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
-  timelineId,
+  tableId,
   endDate,
   entityType = 'sessions',
   pageFilters,
@@ -93,7 +93,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   );
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT =
-    isEnterprisePlus || timelineId === TimelineId.kubernetesPageSessions ? 5 : 4;
+    isEnterprisePlus || tableId === TableId.kubernetesPageSessions ? 5 : 4;
   const leadingControlColumns = useMemo(
     () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
     [ACTION_BUTTON_COUNT]
@@ -109,7 +109,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
         defaultModel={getSessionsDefaultModel(columns, defaultColumns)}
         end={endDate}
         entityType={entityType}
-        id={timelineId}
+        tableId={tableId}
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}

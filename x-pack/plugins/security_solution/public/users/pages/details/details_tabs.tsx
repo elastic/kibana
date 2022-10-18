@@ -16,7 +16,7 @@ import { AnomaliesUserTable } from '../../../common/components/ml/tables/anomali
 import type { UsersDetailsTabsProps } from './types';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { usersDetailsPagePath } from '../constants';
-import { TimelineId } from '../../../../common/types';
+import { TableId } from '../../../../common/types';
 import { EventsQueryTabBody } from '../../../common/components/events_tab';
 import { userNameExistsFilter } from './helpers';
 import { AuthenticationsQueryTabBody } from '../navigation';
@@ -63,7 +63,7 @@ export const UsersDetailsTabs = React.memo<UsersDetailsTabsProps>(
           <EventsQueryTabBody
             {...tabProps}
             pageFilters={pageFilters}
-            timelineId={TimelineId.usersPageEvents}
+            tableId={TableId.usersPageEvents}
             externalAlertPageFilters={externalAlertPageFilters}
           />
         </Route>

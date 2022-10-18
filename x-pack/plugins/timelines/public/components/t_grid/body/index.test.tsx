@@ -14,7 +14,6 @@ import { REMOVE_COLUMN } from './column_headers/translations';
 import { Direction } from '../../../../common/search_strategy';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { defaultHeaders, mockBrowserFields, mockTimelineData, TestProviders } from '../../../mock';
-import { TimelineTabs } from '../../../../common/types/timeline';
 import { TestCellRenderer } from '../../../mock/cell_renderer';
 import { mockGlobalState } from '../../../mock/global_state';
 import { EuiDataGridColumn } from '@elastic/eui';
@@ -54,8 +53,8 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 });
 
 jest.mock('../../../hooks/use_selector', () => ({
-  useShallowEqualSelector: () => mockGlobalState.timelineById.test,
-  useDeepEqualSelector: () => mockGlobalState.timelineById.test,
+  useShallowEqualSelector: () => mockGlobalState.tableById['table-test'],
+  useDeepEqualSelector: () => mockGlobalState.tableById['table-test'],
 }));
 
 jest.mock(
@@ -85,7 +84,6 @@ describe('Body', () => {
     data: mockTimelineData,
     defaultCellActions: [],
     disabledCellActions: ['signal.rule.risk_score', 'signal.reason'],
-    excludedRowRendererIds: [],
     id: 'timeline-test',
     isSelectAllChecked: false,
     isLoading: false,
@@ -99,7 +97,7 @@ describe('Body', () => {
     setSelected: jest.fn() as unknown as StatefulBodyProps['setSelected'],
     sort: mockSort,
     showCheckboxes: false,
-    tabType: TimelineTabs.query,
+    tabType: 'query',
     tableView: 'gridView',
     totalItems: 1,
     leadingControlColumns: [],

@@ -28,6 +28,7 @@ import { HeaderActions } from '../actions/header_actions';
 import type { UseFieldBrowserOptionsProps } from '../../../fields_browser';
 import { mockTriggersActionsUi } from '../../../../../common/mock/mock_triggers_actions_ui_plugin';
 import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
+import { TimelineId } from '@kbn/timelines-plugin/public/types';
 
 jest.mock('../../../../../common/lib/kibana', () => ({
   useKibana: () => ({
@@ -52,7 +53,7 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-const timelineId = 'test';
+const timelineId = TimelineId.test;
 
 describe('ColumnHeaders', () => {
   const mount = useMountAppended();

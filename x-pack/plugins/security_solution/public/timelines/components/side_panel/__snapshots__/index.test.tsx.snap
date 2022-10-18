@@ -7,7 +7,7 @@ exports[`Details Panel Component DetailsPanel: rendering it should not render th
           isFlyoutView={false}
           runtimeMappings={Object {}}
           tabType="query"
-          timelineId="test"
+          scopeId="timeline-test"
         />
        1`] = `
 <DetailsPanel
@@ -15,8 +15,8 @@ exports[`Details Panel Component DetailsPanel: rendering it should not render th
   handleOnPanelClosed={[MockFunction]}
   isFlyoutView={false}
   runtimeMappings={Object {}}
+  scopeId="timeline-test"
   tabType="query"
-  timelineId="test"
 />
 `;
 
@@ -26,8 +26,8 @@ exports[`Details Panel Component DetailsPanel: rendering it should not render th
   handleOnPanelClosed={[MockFunction]}
   isFlyoutView={false}
   runtimeMappings={Object {}}
+  scopeId="timeline-test"
   tabType="query"
-  timelineId="test"
 />
 `;
 

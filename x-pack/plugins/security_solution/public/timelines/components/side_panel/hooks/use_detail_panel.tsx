@@ -8,7 +8,8 @@
 import React, { useMemo, useCallback, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import type { EntityType } from '@kbn/timelines-plugin/common';
-import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { getScopedActions, isInTableScope, isTimelineScope } from '../../../../helpers';
+import { timelineSelectors } from '../../../store/timeline';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { activeTimeline } from '../../../containers/active_timeline_context';
@@ -17,15 +18,15 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DetailsPanel as DetailsPanelComponent } from '..';
+import { dataTableSelectors } from '../../../../common/store/data_table';
 
 export interface UseDetailPanelConfig {
   entityType?: EntityType;
   isFlyoutView?: boolean;
   sourcererScope: SourcererScopeName;
-  timelineId: TimelineId;
+  scopeId: string;
   tabType?: TimelineTabs;
 }
-
 export interface UseDetailPanelReturn {
   openDetailsPanel: (eventId?: string, onClose?: () => void) => void;
   handleOnDetailsPanelClosed: () => void;
@@ -37,15 +38,21 @@ export const useDetailPanel = ({
   entityType,
   isFlyoutView,
   sourcererScope,
-  timelineId,
+  scopeId,
   tabType,
 }: UseDetailPanelConfig): UseDetailPanelReturn => {
   const { browserFields, selectedPatterns, runtimeMappings } = useSourcererDataView(sourcererScope);
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const dispatch = useDispatch();
+  const getScope = useMemo(() => {
+    if (isTimelineScope(scopeId)) {
+      return timelineSelectors.getTimelineByIdSelector();
+    } else if (isInTableScope(scopeId)) {
+      return dataTableSelectors.getTableByIdSelector();
+    }
+  }, [scopeId]);
 
   const expandedDetail = useDeepEqualSelector(
-    (state) => (getTimeline(state, timelineId) ?? timelineDefaults)?.expandedDetail
+    (state) => ((getScope && getScope(state, scopeId)) ?? timelineDefaults)?.expandedDetail
   );
   const onPanelClose = useRef(() => {});
 
@@ -60,24 +67,26 @@ export const useDetailPanel = ({
     }
     return false;
   }, [expandedDetail, tabType]);
-
+  const scopedActions = getScopedActions(scopeId);
   const loadDetailsPanel = useCallback(
     (eventId?: string) => {
-      if (eventId) {
-        dispatch(
-          timelineActions.toggleDetailPanel({
-            panelView: 'eventDetail',
-            tabType,
-            timelineId,
-            params: {
-              eventId,
-              indexName: selectedPatterns.join(','),
-            },
-          })
-        );
+      if (eventId && scopedActions) {
+        if (isTimelineScope(scopeId)) {
+          dispatch(
+            scopedActions.toggleDetailPanel({
+              panelView: 'eventDetail',
+              tabType,
+              id: scopeId,
+              params: {
+                eventId,
+                indexName: selectedPatterns.join(','),
+              },
+            })
+          );
+        }
       }
     },
-    [dispatch, selectedPatterns, tabType, timelineId]
+    [scopedActions, scopeId, dispatch, tabType, selectedPatterns]
   );
 
   const openDetailsPanel = useCallback(
@@ -90,17 +99,19 @@ export const useDetailPanel = ({
 
   const handleOnDetailsPanelClosed = useCallback(() => {
     if (onPanelClose.current) onPanelClose.current();
-    dispatch(timelineActions.toggleDetailPanel({ tabType, timelineId }));
+    if (scopedActions) {
+      dispatch(scopedActions.toggleDetailPanel({ tabType, id: scopeId }));
+    }
 
     if (
       tabType &&
       expandedDetail[tabType]?.panelView &&
-      timelineId === TimelineId.active &&
+      scopeId === TimelineId.active &&
       shouldShowDetailsPanel
     ) {
       activeTimeline.toggleExpandedDetail({});
     }
-  }, [dispatch, timelineId, expandedDetail, tabType, shouldShowDetailsPanel]);
+  }, [scopedActions, tabType, expandedDetail, scopeId, shouldShowDetailsPanel, dispatch]);
 
   const DetailsPanel = useMemo(
     () =>
@@ -112,7 +123,7 @@ export const useDetailPanel = ({
           isFlyoutView={isFlyoutView}
           runtimeMappings={runtimeMappings}
           tabType={tabType}
-          timelineId={timelineId}
+          scopeId={scopeId}
         />
       ) : null,
     [
@@ -123,7 +134,7 @@ export const useDetailPanel = ({
       runtimeMappings,
       shouldShowDetailsPanel,
       tabType,
-      timelineId,
+      scopeId,
     ]
   );
 

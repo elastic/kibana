@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { getOr, omit, uniq, isEmpty, isEqualWith, cloneDeep } from 'lodash/fp';
+import { getOr, omit, uniq, isEmpty, isEqualWith, cloneDeep, union } from 'lodash/fp';
 
 import uuid from 'uuid';
 
 import type { Filter } from '@kbn/es-query';
 
+import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { Sort } from '../../components/timeline/body/sort';
 import type {
   DataProvider,
@@ -29,12 +30,15 @@ import type {
   RowRendererId,
   SerializedFilterQuery,
   TimelinePersistInput,
+  ToggleDetailPanel,
+  TimelineExpandedDetail,
+  SortColumnTimeline,
 } from '../../../../common/types/timeline';
 import { TimelineType, TimelineStatus, TimelineId } from '../../../../common/types/timeline';
 import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
-import { timelineDefaults } from './defaults';
+import { getTimelineManageDefaults, timelineDefaults } from './defaults';
 import type { KqlMode, TimelineModel } from './model';
-import type { TimelineById } from './types';
+import type { TimelineById, TimelineModelSettings } from './types';
 import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
@@ -47,28 +51,6 @@ import { activeTimeline } from '../../containers/active_timeline_context';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
 import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
-
-interface AddTimelineHistoryParams {
-  id: string;
-  historyId: string;
-  timelineById: TimelineById;
-}
-
-export const addTimelineHistory = ({
-  id,
-  historyId,
-  timelineById,
-}: AddTimelineHistoryParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      historyIds: uniq([...timeline.historyIds, historyId]),
-    },
-  };
-};
 
 interface AddTimelineNoteParams {
   id: string;
@@ -260,7 +242,7 @@ export const updateTimelineShowTimeline = ({
   };
 };
 
-export const updateGraphEventId = ({
+export const updateTimelineGraphEventId = ({
   id,
   graphEventId,
   timelineById,
@@ -283,7 +265,7 @@ export const updateGraphEventId = ({
   };
 };
 
-export const updateSessionViewConfig = ({
+export const updateTimelineSessionViewConfig = ({
   id,
   sessionViewConfig,
   timelineById,
@@ -678,28 +660,6 @@ export const updateTimelineIsFavorite = ({
   };
 };
 
-interface UpdateTimelineIsLiveParams {
-  id: string;
-  isLive: boolean;
-  timelineById: TimelineById;
-}
-
-export const updateTimelineIsLive = ({
-  id,
-  isLive,
-  timelineById,
-}: UpdateTimelineIsLiveParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      isLive,
-    },
-  };
-};
-
 interface UpdateTimelineProvidersParams {
   id: string;
   providers: DataProvider[];
@@ -998,31 +958,6 @@ export const updateTimelineProviderProperties = ({
   };
 };
 
-interface UpdateTimelineProviderKqlQueryParams {
-  id: string;
-  providerId: string;
-  kqlQuery: string;
-  timelineById: TimelineById;
-}
-
-export const updateTimelineProviderKqlQuery = ({
-  id,
-  providerId,
-  kqlQuery,
-  timelineById,
-}: UpdateTimelineProviderKqlQueryParams): TimelineById => {
-  const timeline = timelineById[id];
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      dataProviders: timeline.dataProviders.map((provider) =>
-        provider.id === providerId ? { ...provider, ...{ kqlQuery } } : provider
-      ),
-    },
-  };
-};
-
 interface UpdateTimelineProviderTypeParams {
   andProviderId?: string;
   id: string;
@@ -1126,27 +1061,6 @@ export const updateTimelineItemsPerPage = ({
     [id]: {
       ...timeline,
       itemsPerPage,
-    },
-  };
-};
-
-interface UpdateTimelinePageIndexParams {
-  id: string;
-  activePage: number;
-  timelineById: TimelineById;
-}
-
-export const updateTimelinePageIndex = ({
-  id,
-  activePage,
-  timelineById,
-}: UpdateTimelinePageIndexParams) => {
-  const timeline = timelineById[id];
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      activePage,
     },
   };
 };
@@ -1314,6 +1228,308 @@ export const updateExcludedRowRenderersIds = ({
     [id]: {
       ...timeline,
       excludedRowRendererIds,
+    },
+  };
+};
+
+export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): TimelineExpandedDetail => {
+  const { tabType, id, ...expandedDetails } = action;
+
+  const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail', 'userDetail']);
+  const expandedTabType = tabType ?? 'query';
+  const newExpandDetails = {
+    params: expandedDetails.params ? { ...expandedDetails.params } : {},
+    panelView: expandedDetails.panelView,
+  } as TimelineExpandedDetail;
+  return {
+    [expandedTabType]: panelViewOptions.has(expandedDetails.panelView ?? '')
+      ? newExpandDetails
+      : {},
+  };
+};
+
+interface SetLoadingTableEventsParams {
+  id: string;
+  eventIds: string[];
+  isLoading: boolean;
+  timelineById: TimelineById;
+}
+
+export const setLoadingTableEvents = ({
+  id,
+  eventIds,
+  isLoading,
+  timelineById,
+}: SetLoadingTableEventsParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  const loadingEventIds = isLoading
+    ? union(timeline.loadingEventIds, eventIds)
+    : timeline.loadingEventIds.filter((currentEventId) => !eventIds.includes(currentEventId));
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      loadingEventIds,
+    },
+  };
+};
+
+interface RemoveTableColumnParams {
+  id: string;
+  columnId: string;
+  timelineById: TimelineById;
+}
+
+export const removeTableColumn = ({
+  id,
+  columnId,
+  timelineById,
+}: RemoveTableColumnParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  const columns = timeline.columns.filter((c) => c.id !== columnId);
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      columns,
+    },
+  };
+};
+
+/**
+ * Adds or updates a column. When updating a column, it will be moved to the
+ * new index
+ */
+export const upsertTableColumn = ({
+  column,
+  id,
+  index,
+  timelineById,
+}: AddTimelineColumnParams): TimelineById => {
+  const timeline = timelineById[id];
+  const alreadyExistsAtIndex = timeline.columns.findIndex((c) => c.id === column.id);
+
+  if (alreadyExistsAtIndex !== -1) {
+    // remove the existing entry and add the new one at the specified index
+    const reordered = timeline.columns.filter((c) => c.id !== column.id);
+    reordered.splice(index, 0, column); // ⚠️ mutation
+
+    return {
+      ...timelineById,
+      [id]: {
+        ...timeline,
+        columns: reordered,
+      },
+    };
+  }
+  // add the new entry at the specified index
+  const columns = [...timeline.columns];
+  columns.splice(index, 0, column); // ⚠️ mutation
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      columns,
+    },
+  };
+};
+
+interface UpdateTableColumnsParams {
+  id: string;
+  columns: ColumnHeaderOptions[];
+  timelineById: TimelineById;
+}
+
+export const updateTableColumns = ({
+  id,
+  columns,
+  timelineById,
+}: UpdateTableColumnsParams): TimelineById => {
+  const timeline = timelineById[id];
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      columns,
+    },
+  };
+};
+
+interface UpdateTableSortParams {
+  id: string;
+  sort: SortColumnTimeline[];
+  timelineById: TimelineById;
+}
+
+export const updateTableSort = ({
+  id,
+  sort,
+  timelineById,
+}: UpdateTableSortParams): TimelineById => {
+  const timeline = timelineById[id];
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      sort,
+    },
+  };
+};
+
+interface SetSelectedTableEventsParams {
+  id: string;
+  eventIds: Record<string, TimelineNonEcsData[]>;
+  isSelectAllChecked: boolean;
+  isSelected: boolean;
+  timelineById: TimelineById;
+}
+
+export const setSelectedTableEvents = ({
+  id,
+  eventIds,
+  isSelectAllChecked = false,
+  isSelected,
+  timelineById,
+}: SetSelectedTableEventsParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  const selectedEventIds = isSelected
+    ? { ...timeline.selectedEventIds, ...eventIds }
+    : omit(Object.keys(eventIds), timeline.selectedEventIds);
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      selectedEventIds,
+      isSelectAllChecked,
+    },
+  };
+};
+
+interface SetDeletedTableEventsParams {
+  id: string;
+  eventIds: string[];
+  isDeleted: boolean;
+  timelineById: TimelineById;
+}
+
+export const setDeletedTableEvents = ({
+  id,
+  eventIds,
+  isDeleted,
+  timelineById,
+}: SetDeletedTableEventsParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  const deletedEventIds = isDeleted
+    ? union(timeline.deletedEventIds, eventIds)
+    : timeline.deletedEventIds.filter((currentEventId) => !eventIds.includes(currentEventId));
+
+  const selectedEventIds = Object.fromEntries(
+    Object.entries(timeline.selectedEventIds).filter(
+      ([selectedEventId]) => !deletedEventIds.includes(selectedEventId)
+    )
+  );
+
+  const isSelectAllChecked =
+    Object.keys(selectedEventIds).length > 0 ? timeline.isSelectAllChecked : false;
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      deletedEventIds,
+      selectedEventIds,
+      isSelectAllChecked,
+    },
+  };
+};
+
+interface InitializeTimelineParams {
+  id: string;
+  timelineById: TimelineById;
+  timelineSettingsProps: Partial<TimelineModelSettings>;
+}
+
+export const setInitializeTimelineSettings = ({
+  id,
+  timelineById,
+  timelineSettingsProps,
+}: InitializeTimelineParams): TimelineById => {
+  const timeline = timelineById[id];
+
+  return !timeline?.initialized
+    ? {
+        ...timelineById,
+        [id]: {
+          ...timelineDefaults,
+          ...getTimelineManageDefaults(id),
+          ...timeline,
+          ...timelineSettingsProps,
+          ...(!timeline ||
+          (isEmpty(timeline.columns) && !isEmpty(timelineSettingsProps.defaultColumns))
+            ? { columns: timelineSettingsProps.defaultColumns }
+            : {}),
+          sort: timelineSettingsProps.sort ?? timelineDefaults.sort,
+          loadingEventIds: timelineDefaults.loadingEventIds,
+          initialized: true,
+        },
+      }
+    : timelineById;
+};
+
+interface ApplyDeltaToTableColumnWidth {
+  id: string;
+  columnId: string;
+  delta: number;
+  timelineById: TimelineById;
+}
+
+export const applyDeltaToTableColumnWidth = ({
+  id,
+  columnId,
+  delta,
+  timelineById,
+}: ApplyDeltaToTableColumnWidth): TimelineById => {
+  const timeline = timelineById[id];
+
+  const columnIndex = timeline.columns.findIndex((c) => c.id === columnId);
+  if (columnIndex === -1) {
+    // the column was not found
+    return {
+      ...timelineById,
+      [id]: {
+        ...timeline,
+      },
+    };
+  }
+
+  const requestedWidth =
+    (timeline.columns[columnIndex].initialWidth ?? DEFAULT_COLUMN_MIN_WIDTH) + delta; // raw change in width
+  const initialWidth = Math.max(RESIZED_COLUMN_MIN_WITH, requestedWidth); // if the requested width is smaller than the min, use the min
+
+  const columnWithNewWidth = {
+    ...timeline.columns[columnIndex],
+    initialWidth,
+  };
+
+  const columns = [
+    ...timeline.columns.slice(0, columnIndex),
+    columnWithNewWidth,
+    ...timeline.columns.slice(columnIndex + 1),
+  ];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      columns,
     },
   };
 };

@@ -39,7 +39,7 @@ export type {
   TimelineType,
 } from './types';
 
-export { IS_OPERATOR, EXISTS_OPERATOR, DataProviderType, TimelineId } from './types';
+export { IS_OPERATOR, EXISTS_OPERATOR, DataProviderType } from './types';
 
 export type {
   BeatFields,

@@ -9,6 +9,8 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import type { DraggableChildrenFn } from 'react-beautiful-dnd';
 import { Droppable } from 'react-beautiful-dnd';
 
+import { useDispatch } from 'react-redux';
+import { removeColumn, upsertColumn } from '../../../../store/timeline/actions';
 import { DragEffects } from '../../../../../common/components/drag_and_drop/draggable_wrapper';
 import { DraggableFieldBadge } from '../../../../../common/components/draggables/field_badge';
 import type { BrowserFields } from '../../../../../common/containers/source';
@@ -22,7 +24,6 @@ import type {
   HeaderActionProps,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
-import { TimelineId } from '../../../../../../common/types/timeline';
 import type { OnSelectAll } from '../../events';
 import {
   EventsTh,
@@ -77,15 +78,14 @@ DraggableContainer.displayName = 'DraggableContainer';
 
 export const isFullScreen = ({
   globalFullScreen,
-  timelineId,
+  isActiveTimelines,
   timelineFullScreen,
 }: {
   globalFullScreen: boolean;
-  timelineId: string;
+  isActiveTimelines: boolean;
   timelineFullScreen: boolean;
 }) =>
-  (timelineId === TimelineId.active && timelineFullScreen) ||
-  (timelineId !== TimelineId.active && globalFullScreen);
+  (isActiveTimelines && timelineFullScreen) || (isActiveTimelines === false && globalFullScreen);
 
 /** Renders the timeline header columns */
 export const ColumnHeadersComponent = ({
@@ -104,6 +104,8 @@ export const ColumnHeadersComponent = ({
   leadingControlColumns,
   trailingControlColumns,
 }: ColumnHeadersComponentProps) => {
+  const dispatch = useDispatch();
+
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const fieldEditorActionsRef = useRef<FieldEditorActions>(null);
 
@@ -194,8 +196,9 @@ export const ColumnHeadersComponent = ({
 
   const fieldBrowserOptions = useFieldBrowserOptions({
     sourcererScope: SourcererScopeName.timeline,
-    timelineId: timelineId as TimelineId,
     editorActionsRef: fieldEditorActionsRef,
+    upsertColumn: (column, index) => dispatch(upsertColumn({ column, id: timelineId, index })),
+    removeColumn: (columnId) => dispatch(removeColumn({ columnId, id: timelineId })),
   });
 
   const LeadingHeaderActions = useMemo(() => {

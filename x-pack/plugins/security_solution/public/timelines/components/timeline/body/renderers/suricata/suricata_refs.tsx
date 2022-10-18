@@ -18,18 +18,21 @@ const LinkEuiFlexItem = styled(EuiFlexItem)`
 LinkEuiFlexItem.displayName = 'LinkEuiFlexItem';
 
 export const SuricataRefs = React.memo<{ signatureId: number }>(({ signatureId }) => {
-  const links = getLinksFromSignature(signatureId);
-  return (
-    <EuiFlexGroup gutterSize="none" justifyContent="center" wrap>
-      {links.map((link) => (
-        <LinkEuiFlexItem key={link} grow={false}>
-          <EuiLink href={link} color="subdued" target="_blank">
-            {link}
-          </EuiLink>
-        </LinkEuiFlexItem>
-      ))}
-    </EuiFlexGroup>
-  );
+  let comp = <></>;
+  getLinksFromSignature(signatureId).then((links) => {
+    comp = (
+      <EuiFlexGroup gutterSize="none" justifyContent="center" wrap>
+        {links.map((link) => (
+          <LinkEuiFlexItem key={link} grow={false}>
+            <EuiLink href={link} color="subdued" target="_blank">
+              {link}
+            </EuiLink>
+          </LinkEuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
+  });
+  return comp;
 });
 
 SuricataRefs.displayName = 'SuricataRefs';

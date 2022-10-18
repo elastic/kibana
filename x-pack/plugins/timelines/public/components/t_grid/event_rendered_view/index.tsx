@@ -209,7 +209,7 @@ const EventRenderedViewComponent = ({
                     {rowRenderer.renderRow({
                       data: ecsData,
                       isDraggable: false,
-                      timelineId,
+                      scopeId: timelineId,
                     })}
                   </div>
                 </EventRenderedFlexItem>

@@ -11,7 +11,7 @@ import { Switch } from 'react-router-dom';
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { DataViewBase, Filter } from '@kbn/es-query';
 import { Route } from '@kbn/kibana-react-plugin/public';
-import { TimelineId } from '@kbn/timelines-plugin/common';
+import { TableId } from '../../../../common/types';
 import { getNetworkDetailsPageFilter } from '../../../common/components/visualization_actions/utils';
 import { AnomaliesNetworkTable } from '../../../common/components/ml/tables/anomalies_network_table';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
@@ -117,7 +117,7 @@ export const NetworkDetailsTabs = React.memo<NetworkDetailTabsProps>(
         >
           <EventsQueryTabBody
             pageFilters={networkDetailsPageFilters}
-            timelineId={TimelineId.networkPageEvents}
+            tableId={TableId.networkPageEvents}
             {...commonProps}
           />
         </Route>

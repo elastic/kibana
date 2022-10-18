@@ -108,7 +108,7 @@ describe('take action dropdown', () => {
       onAddIsolationStatusClick: jest.fn(),
       refetch: jest.fn(),
       refetchFlyoutData: jest.fn(),
-      timelineId: TimelineId.active,
+      scopeId: TimelineId.active,
       onOsqueryClick: jest.fn(),
     };
 
