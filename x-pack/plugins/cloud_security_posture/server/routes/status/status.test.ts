@@ -184,7 +184,8 @@ describe('CspSetupStatus route', () => {
     ] as unknown as AgentPolicy[]);
 
     mockAgentClient.getAgentStatusForAgentPolicy.mockResolvedValue({
-      total: 1,
+      online: 1,
+      updating: 0,
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
@@ -269,7 +270,8 @@ describe('CspSetupStatus route', () => {
     ] as unknown as AgentPolicy[]);
 
     mockAgentClient.getAgentStatusForAgentPolicy.mockResolvedValue({
-      total: 0,
+      online: 0,
+      updating: 0,
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
@@ -323,7 +325,8 @@ describe('CspSetupStatus route', () => {
     ] as unknown as AgentPolicy[]);
 
     mockAgentClient.getAgentStatusForAgentPolicy.mockResolvedValue({
-      total: 1,
+      online: 1,
+      updating: 0,
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
@@ -379,7 +382,8 @@ describe('CspSetupStatus route', () => {
     ] as unknown as AgentPolicy[]);
 
     mockAgentClient.getAgentStatusForAgentPolicy.mockResolvedValue({
-      total: 1,
+      online: 1,
+      updating: 0,
     } as unknown as GetAgentStatusResponse['results']);
 
     // Act
