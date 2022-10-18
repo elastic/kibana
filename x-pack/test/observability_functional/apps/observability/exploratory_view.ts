@@ -35,16 +35,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      // await esArchiver.unload(
-      //   Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', '8.0.0')
-      // );
-      //
-      // await esArchiver.unload(
-      //   Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', 'rum_8.0.0')
-      // );
-      // await esArchiver.unload(
-      //   Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', 'rum_test_data')
-      // );
+      await esArchiver.unload(
+        Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', '8.0.0')
+      );
+
+      await esArchiver.unload(
+        Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', 'rum_8.0.0')
+      );
+      await esArchiver.unload(
+        Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', 'rum_test_data')
+      );
     });
 
     it('should go to ux app', async function () {
