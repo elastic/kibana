@@ -84,7 +84,7 @@ export function LatencyChart({ height, kuery }: Props) {
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>
-            <EuiFlexGroup alignItems="center" responsive={false}>
+            <EuiFlexGroup alignItems="center" wrap>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xs">
                   <h2>
