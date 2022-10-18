@@ -45,13 +45,13 @@ export function isCombinedFilter(filter: Filter): filter is CombinedFilter {
  * @public
  */
 
-export function buildCombinedFilter(filters: FilterItem[], dataViewId?: string, alias?: string): CombinedFilter {
-  const filter = buildEmptyFilter(false, dataViewId);
+export function buildCombinedFilter(filters: FilterItem[], alias?: string): CombinedFilter {
+  const filter = buildEmptyFilter(false);
   return {
     ...filter,
     meta: {
       ...filter.meta,
-      alias: alias,
+      alias,
       type: FILTERS.COMBINED,
       params: filters,
     },

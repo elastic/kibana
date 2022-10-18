@@ -138,11 +138,7 @@ export const addFilter = (
 
   if (parentConditionType !== conditionalType) {
     if (conditionalType === ConditionTypes.OR) {
-      targetArray.splice(
-        selector,
-        1,
-        buildCombinedFilter([targetArray[selector], filter], filter.meta.index)
-      );
+      targetArray.splice(selector, 1, buildCombinedFilter([targetArray[selector], filter]));
     }
     if (conditionalType === ConditionTypes.AND) {
       targetArray.splice(selector, 1, [targetArray[selector], filter]);

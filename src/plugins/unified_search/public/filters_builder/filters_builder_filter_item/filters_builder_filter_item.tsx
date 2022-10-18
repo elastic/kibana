@@ -91,7 +91,7 @@ export function FilterItem({
   let params: Filter['meta']['params'] | undefined;
 
   if (!conditionalOperationType) {
-    field = getFieldFromFilter(filter as FieldFilter, dataView);
+    field = getFieldFromFilter(filter as FieldFilter, dataView!);
     operator = getOperatorFromFilter(filter);
     params = getFilterParams(filter);
   }

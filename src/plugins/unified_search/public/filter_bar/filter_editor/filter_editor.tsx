@@ -24,7 +24,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import {
   Filter,
-  FieldFilter,
   buildFilter,
   buildCustomFilter,
   cleanFilter,
@@ -32,25 +31,14 @@ import {
   buildCombinedFilter,
   isCombinedFilter,
 } from '@kbn/es-query';
-import { get } from 'lodash';
 import React, { Component } from 'react';
 import { XJsonLang } from '@kbn/monaco';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { css, cx } from '@emotion/css';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
-import {
-  getFieldFromFilter,
-  getFilterableFields,
-  getOperatorFromFilter,
-  getOperatorOptions,
-} from './lib/filter_editor_utils';
-import { Operator } from './lib/filter_operators';
-import { PhraseValueInput } from './phrase_value_input';
-import { PhrasesValuesInput } from './phrases_values_input';
-import { RangeValueInput } from './range_value_input';
-import { getFieldValidityAndErrorMessage } from './lib/helpers';
+import { getFieldFromFilter, getOperatorFromFilter } from './lib/filter_editor_utils';
 import { FiltersBuilder } from '../../filters_builder';
 
 /** The default max-height of the Add/Edit Filter popover used to show "+n More" filters (e.g. `+5 More`) */
@@ -72,9 +60,6 @@ export interface FilterEditorProps {
 
 interface State {
   selectedIndexPattern?: DataView;
-  selectedField?: DataViewField;
-  selectedOperator?: Operator;
-  params: any;
   useCustomLabel: boolean;
   customLabel: string | null;
   queryDsl: string;
@@ -101,14 +86,11 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
     super(props);
     this.state = {
       selectedIndexPattern: this.getIndexPatternFromFilter(),
-      selectedField: this.getFieldFromFilter(),
-      selectedOperator: this.getSelectedOperator(),
-      params: getFilterParams(props.filter),
       useCustomLabel: props.filter.meta.alias !== null,
       customLabel: props.filter.meta.alias || '',
       queryDsl: JSON.stringify(cleanFilter(props.filter), null, 2),
       isCustomEditorOpen: this.isUnknownFilterType(),
-      filters: isCombinedFilter(props.filter) ? props.filter.meta.params[0] : [props.filter],
+      filters: isCombinedFilter(props.filter) ? props.filter.meta.params : [props.filter],
     };
   }
 
@@ -264,21 +246,6 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
     );
   }
 
-  private renderRegularEditor() {
-    return (
-      <div>
-        <EuiFlexGroup responsive={true} gutterSize="s">
-          <EuiFlexItem grow={2}>{this.renderFieldInput()}</EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ flexBasis: 160 }}>
-            {this.renderOperatorInput()}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <div data-test-subj="filterParams">{this.renderParamsEditor()}</div>
-      </div>
-    );
-  }
-
   private renderFilterBuilderEditor() {
     const { selectedIndexPattern, filters } = this.state;
 
@@ -290,75 +257,6 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
           onChange={(filters: Filter[]) => this.setState({ filters })}
         />
       </div>
-    );
-  }
-
-  private renderFieldInput() {
-    const { selectedIndexPattern, selectedField } = this.state;
-    const fields = selectedIndexPattern ? getFilterableFields(selectedIndexPattern) : [];
-
-    return (
-      <EuiFormRow
-        fullWidth
-        label={this.props.intl.formatMessage({
-          id: 'unifiedSearch.filter.filterEditor.fieldSelectLabel',
-          defaultMessage: 'Field',
-        })}
-      >
-        <FieldComboBox
-          fullWidth
-          id="fieldInput"
-          isDisabled={!selectedIndexPattern}
-          placeholder={this.props.intl.formatMessage({
-            id: 'unifiedSearch.filter.filterEditor.fieldSelectPlaceholder',
-            defaultMessage: 'Select a field first',
-          })}
-          options={fields}
-          selectedOptions={selectedField ? [selectedField] : []}
-          getLabel={(field) => field.customLabel || field.name}
-          onChange={this.onFieldChange}
-          singleSelection={{ asPlainText: true }}
-          isClearable={false}
-          data-test-subj="filterFieldSuggestionList"
-        />
-      </EuiFormRow>
-    );
-  }
-
-  private renderOperatorInput() {
-    const { selectedField, selectedOperator } = this.state;
-    const operators = selectedField ? getOperatorOptions(selectedField) : [];
-    return (
-      <EuiFormRow
-        fullWidth
-        label={this.props.intl.formatMessage({
-          id: 'unifiedSearch.filter.filterEditor.operatorSelectLabel',
-          defaultMessage: 'Operator',
-        })}
-      >
-        <OperatorComboBox
-          fullWidth
-          isDisabled={!selectedField}
-          placeholder={
-            selectedField
-              ? this.props.intl.formatMessage({
-                  id: 'unifiedSearch.filter.filterEditor.operatorSelectPlaceholderSelect',
-                  defaultMessage: 'Select',
-                })
-              : this.props.intl.formatMessage({
-                  id: 'unifiedSearch.filter.filterEditor.operatorSelectPlaceholderWaiting',
-                  defaultMessage: 'Waiting',
-                })
-          }
-          options={operators}
-          selectedOptions={selectedOperator ? [selectedOperator] : []}
-          getLabel={({ message }) => message}
-          onChange={this.onOperatorChange}
-          singleSelection={{ asPlainText: true }}
-          isClearable={false}
-          data-test-subj="filterOperatorList"
-        />
-      </EuiFormRow>
     );
   }
 
@@ -385,74 +283,6 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
     );
   }
 
-  private renderParamsEditor() {
-    const indexPattern = this.state.selectedIndexPattern;
-    if (!indexPattern || !this.state.selectedOperator || !this.state.selectedField) {
-      return '';
-    }
-
-    const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(
-      this.state.selectedField,
-      this.state.params
-    );
-
-    switch (this.state.selectedOperator.type) {
-      case 'exists':
-        return '';
-      case 'phrase':
-        return (
-          <EuiFormRow
-            fullWidth
-            label={this.props.intl.formatMessage({
-              id: 'unifiedSearch.filter.filterEditor.valueInputLabel',
-              defaultMessage: 'Value',
-            })}
-            isInvalid={isInvalid}
-            error={errorMessage}
-          >
-            <PhraseValueInput
-              indexPattern={indexPattern}
-              field={this.state.selectedField}
-              value={this.state.params}
-              onChange={this.onParamsChange}
-              data-test-subj="phraseValueInput"
-              timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
-              fullWidth
-            />
-          </EuiFormRow>
-        );
-      case 'phrases':
-        return (
-          <EuiFormRow
-            fullWidth
-            label={this.props.intl.formatMessage({
-              id: 'unifiedSearch.filter.filterEditor.valuesSelectLabel',
-              defaultMessage: 'Values',
-            })}
-          >
-            <PhrasesValuesInput
-              indexPattern={indexPattern}
-              field={this.state.selectedField}
-              values={this.state.params}
-              onChange={this.onParamsChange}
-              onParamsUpdate={this.onParamsUpdate}
-              timeRangeForSuggestionsOverride={this.props.timeRangeForSuggestionsOverride}
-              fullWidth
-            />
-          </EuiFormRow>
-        );
-      case 'range':
-        return (
-          <RangeValueInput
-            field={this.state.selectedField}
-            value={this.state.params}
-            onChange={this.onParamsChange}
-            fullWidth
-          />
-        );
-    }
-  }
-
   private toggleCustomEditor = () => {
     const isCustomEditorOpen = !this.state.isCustomEditorOpen;
     this.setState({ isCustomEditorOpen });
@@ -467,24 +297,8 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
     return getIndexPatternFromFilter(this.props.filter, this.props.indexPatterns);
   }
 
-  private getFieldFromFilter() {
-    const indexPattern = this.getIndexPatternFromFilter();
-    return indexPattern && getFieldFromFilter(this.props.filter as FieldFilter, indexPattern);
-  }
-
-  private getSelectedOperator() {
-    return getOperatorFromFilter(this.props.filter);
-  }
-
   private isFilterValid() {
-    const {
-      isCustomEditorOpen,
-      queryDsl,
-      selectedIndexPattern: indexPattern,
-      selectedField: field,
-      selectedOperator: operator,
-      params,
-    } = this.state;
+    const { isCustomEditorOpen, queryDsl, selectedIndexPattern: indexPattern } = this.state;
 
     if (isCustomEditorOpen) {
       try {
@@ -496,38 +310,15 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
     }
 
     return true;
-    // this.state.filters
-    //   .map((filter) =>
-    //     isFilterValid(
-    //       indexPattern,
-    //       getFieldFromFilter(isCombinedFilter(filter), indexPattern!),
-    //       getOperatorFromFilter(filter),
-    //       getFilterParams(filter)
-    //     )
-    //   )
-    //   .every((filterValid) => Boolean(filterValid));
   }
 
   private onIndexPatternChange = ([selectedIndexPattern]: DataView[]) => {
-    const selectedField = undefined;
-    const selectedOperator = undefined;
-    const params = undefined;
-    this.setState({ selectedIndexPattern, selectedField, selectedOperator, params });
-  };
-
-  private onFieldChange = ([selectedField]: DataViewField[]) => {
-    const selectedOperator = undefined;
-    const params = undefined;
-    this.setState({ selectedField, selectedOperator, params });
-  };
-
-  private onOperatorChange = ([selectedOperator]: Operator[]) => {
-    // Only reset params when the operator type changes
-    const params =
-      get(this.state.selectedOperator, 'type') === get(selectedOperator, 'type')
-        ? this.state.params
-        : undefined;
-    this.setState({ selectedOperator, params });
+    this.setState({
+      selectedIndexPattern,
+      filters: isCombinedFilter(this.props.filter)
+        ? this.props.filter.meta.params
+        : [this.props.filter],
+    });
   };
 
   private onCustomLabelSwitchChange = (event: EuiSwitchEvent) => {
@@ -541,14 +332,6 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
     this.setState({ customLabel });
   };
 
-  private onParamsChange = (params: any) => {
-    this.setState({ params });
-  };
-
-  private onParamsUpdate = (value: string) => {
-    this.setState((prevState) => ({ params: [value, ...(prevState.params || [])] }));
-  };
-
   private onQueryDslChange = (queryDsl: string) => {
     this.setState({ queryDsl });
   };
@@ -556,9 +339,6 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
   private onSubmit = () => {
     const {
       selectedIndexPattern: indexPattern,
-      selectedField: field,
-      selectedOperator: operator,
-      params,
       useCustomLabel,
       customLabel,
       isCustomEditorOpen,
@@ -580,10 +360,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
     } else if (indexPattern) {
       const builderFilter = (filter: Filter) => {
         if (isCombinedFilter(filter)) {
-          return buildCombinedFilter(
-            filter.meta.params.map((item: Filter) => builderFilter(item)),
-            indexPattern?.id
-          );
+          return buildCombinedFilter(filter.meta.params.map((item: Filter) => builderFilter(item)));
         } else {
           return buildFilter(
             indexPattern,
@@ -598,7 +375,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
         }
       };
       const filters = this.state.filters.map((filter: Filter) => builderFilter(filter));
-      const builedFilter = buildCombinedFilter(filters, indexPattern?.id, alias);
+      const builedFilter = buildCombinedFilter(filters, alias);
 
       this.props.onSubmit(filters.length === 1 ? filters[0] : builedFilter);
     }
@@ -606,14 +383,6 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
 }
 
 function IndexPatternComboBox(props: GenericComboBoxProps<DataView>) {
-  return GenericComboBox(props);
-}
-
-function FieldComboBox(props: GenericComboBoxProps<DataViewField>) {
-  return GenericComboBox(props);
-}
-
-function OperatorComboBox(props: GenericComboBoxProps<Operator>) {
   return GenericComboBox(props);
 }
 

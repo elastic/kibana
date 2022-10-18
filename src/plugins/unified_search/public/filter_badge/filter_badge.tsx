@@ -19,8 +19,6 @@ import { FilterLabelStatus } from '../filter_bar/filter_item/filter_item';
 export interface FilterBadgeProps {
   filter: Filter;
   dataViews: DataView[];
-  iconOnClick: () => void;
-  onClick: () => void;
   valueLabel?: string;
   hideAlias?: boolean;
   filterLabelStatus?: FilterLabelStatus;
@@ -31,8 +29,6 @@ const rootLevelConditionType = ConditionTypes.AND;
 function FilterBadge({
   filter,
   dataViews,
-  iconOnClick,
-  onClick,
   valueLabel,
   hideAlias,
   filterLabelStatus,
@@ -47,6 +43,13 @@ function FilterBadge({
     [euiTheme.size.xs, euiTheme.size.xxs]
   );
 
+  const marginLeftLabel = useMemo(
+    () => css`
+      margin-left: ${euiTheme.size.xs};
+    `,
+    [euiTheme.size.xs]
+  );
+
   if (!dataViews.length) {
     return null;
   }
@@ -56,6 +59,7 @@ function FilterBadge({
         defaultMessage: 'NOT ',
       })}`
     : '';
+
   const prefix =
     filter.meta.negate && !filter.meta.disabled ? (
       <EuiTextColor color="danger">{prefixText}</EuiTextColor>
@@ -73,17 +77,13 @@ function FilterBadge({
       color="hollow"
       iconType="cross"
       iconSide="right"
-      iconOnClick={iconOnClick}
-      onClickAriaLabel="Filter actions"
-      iconOnClickAriaLabel="Remove filter"
-      onClick={onClick}
       title=""
       {...rest}
     >
       {!hideAlias && filter.meta.alias !== null ? (
         <>
           <EuiIcon type="save" size="s" />
-          <span style={{ marginLeft: '5px' }}>
+          <span className={marginLeftLabel}>
             {prefix}
             {filter.meta.alias}
             {filterLabelStatus && <>: {getValue(valueLabel)}</>}

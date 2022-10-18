@@ -49,7 +49,7 @@ describe('#handleCombinedFilter', function () {
       buildRangeFilter(getField('bytes'), { gte: 10 }, indexPattern),
       buildExistsFilter(getField('machine.os'), indexPattern),
     ];
-    const filter = buildCombinedFilter(filters, indexPattern.id);
+    const filter = buildCombinedFilter(filters);
     const result = handleCombinedFilter(filter);
     expect(result.query).toMatchInlineSnapshot(`
       Object {
@@ -562,7 +562,7 @@ describe('#handleCombinedFilter', function () {
           "store": "appState",
         },
         "meta": Object {
-          "alias": null,
+          "alias": undefined,
           "disabled": false,
           "index": undefined,
           "negate": false,

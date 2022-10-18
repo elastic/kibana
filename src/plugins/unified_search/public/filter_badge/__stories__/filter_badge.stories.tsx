@@ -36,27 +36,29 @@ Default.decorators = [
   ),
 ];
 
-export const mockedDataView = {
-  id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
-  title: 'logstash-*',
-  fields: [
-    {
-      name: 'category.keyword',
-      type: 'string',
-      esTypes: ['integer'],
-      aggregatable: true,
-      filterable: true,
-      searchable: true,
-    },
-  ],
-  getFormatterForField: () => ({
-    convert: (name: string) => name,
-  }),
-} as unknown as DataView;
+export const mockedDataView = [
+  {
+    id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+    title: 'logstash-*',
+    fields: [
+      {
+        name: 'category.keyword',
+        type: 'string',
+        esTypes: ['integer'],
+        aggregatable: true,
+        filterable: true,
+        searchable: true,
+      },
+    ],
+    getFormatterForField: () => ({
+      convert: (name: string) => name,
+    }),
+  } as unknown as DataView,
+];
 
 Default.args = {
-  filters: getFilterMockOrConditional(),
-  dataViews: [mockedDataView],
+  filter: getFilterMockOrConditional(),
+  dataViews: mockedDataView,
 };
 
 const createMockWebStorage = () => ({
