@@ -102,7 +102,6 @@ export const mockState: SyntheticsAppState = {
   syntheticsEnablement: { loading: false, error: null, enablement: null },
   monitorDetails: getMonitorDetailsMockSlice(),
   browserJourney: getBrowserJourneyMockSlice(),
-  networkEvents: {},
 };
 
 function getBrowserJourneyMockSlice() {
