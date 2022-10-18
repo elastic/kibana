@@ -11,6 +11,7 @@ import type { GuideConfig } from '../../types';
 export const observabilityConfig: GuideConfig = {
   title: 'Observe my Kubernetes infrastructure',
   description: `We'll help you quickly gain visibility into your Kubernetes environment using Elastic's out-of-the-box integration. Gain deep insights from your logs, metrics, and traces, and proactively detect issues and take action to resolve issues.`,
+  guideName: 'Kubernetes',
   docs: {
     text: 'Kubernetes documentation',
     url: 'example.com', // TODO update link to correct docs page
