@@ -18,7 +18,7 @@ import {
   ValidationConfig,
   FieldConfig,
 } from '../../shared_imports';
-import { canAppendWildcard, removeSpaces } from '../../lib';
+import { canAppendWildcard } from '../../lib';
 import { schema } from '../form_schema';
 import { RollupIndicesCapsResponse, IndexPatternConfig, MatchedIndicesSet } from '../../types';
 import { matchedIndiciesDefault } from '../data_view_editor_flyout_content';
