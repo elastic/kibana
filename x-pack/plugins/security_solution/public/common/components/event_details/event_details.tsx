@@ -179,10 +179,11 @@ const EventDetailsComponent: React.FC<Props> = ({
     [detailsEcsData]
   );
 
-  const showThreatSummary = useMemo(
-    () => enrichmentCount > 0 || (isLicenseValid && (hostRisk || userRisk)),
-    [enrichmentCount, hostRisk, isLicenseValid, userRisk]
-  );
+  const showThreatSummary = useMemo(() => {
+    const hasEnrichments = enrichmentCount > 0;
+    const hasRiskInfoWithLicense = isLicenseValid && (hostRisk || userRisk);
+    return hasEnrichments || hasRiskInfoWithLicense;
+  }, [enrichmentCount, hostRisk, isLicenseValid, userRisk]);
 
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
