@@ -30,7 +30,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('rulesTab');
   }
 
-  describe('rules list', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/141093
+  describe.skip('rules list', function () {
     const assertRulesLength = async (length: number) => {
       return await retry.try(async () => {
         const rules = await pageObjects.triggersActionsUI.getAlertsList();
