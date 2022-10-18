@@ -17,7 +17,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
-  async function callApi(serviceName: string) {
+  async function callApi(serviceName: string, serverlessFunctionName?: string) {
     return await apmApiClient.readUser({
       endpoint: `GET /internal/apm/services/{serviceName}/metrics/serverless/summary`,
       params: {
@@ -27,6 +27,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: '',
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
+          ...(serverlessFunctionName ? { serverlessFunctionName } : {}),
         },
       },
     });
@@ -72,6 +73,27 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(serverlessSummary.serverlessFunctionsTotal).to.eql(
           pythonServerlessFunctionNames.length
         );
+      });
+      it('returns correct serverless duration avg', () => {
+        expect(serverlessSummary.serverlessDurationAvg).to.eql(faasDuration);
+      });
+      it('returns correct billed duration avg', () => {
+        expect(serverlessSummary.billedDurationAvg).to.eql(billedDurationMs);
+      });
+    });
+
+    describe('detailed metrics', () => {
+      let serverlessSummary: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/summary'>;
+      before(async () => {
+        const response = await callApi('lambda-python', pythonServerlessFunctionNames[0]);
+        serverlessSummary = response.body;
+      });
+
+      it('returns correct memory avg', () => {
+        expect(serverlessSummary.memoryUsageAvgRate).to.eql(expectedMemoryUsedRate);
+      });
+      it('returns correct serverless function total', () => {
+        expect(serverlessSummary.serverlessFunctionsTotal).to.eql(1);
       });
       it('returns correct serverless duration avg', () => {
         expect(serverlessSummary.serverlessDurationAvg).to.eql(faasDuration);

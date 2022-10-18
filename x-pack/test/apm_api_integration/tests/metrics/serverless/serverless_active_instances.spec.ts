@@ -18,7 +18,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
-  async function callApi(serviceName: string) {
+  async function callApi(serviceName: string, serverlessFunctionName?: string) {
     return await apmApiClient.readUser({
       endpoint: `GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances`,
       params: {
@@ -28,6 +28,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: '',
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
+          ...(serverlessFunctionName ? { serverlessFunctionName } : {}),
         },
       },
     });
@@ -62,6 +63,34 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(activeInstanceOverview?.avgMemoryUsed).to.eql(expectedMemoryUsed);
           expect(activeInstanceOverview?.memorySize).to.eql(memoryTotal);
         });
+      });
+      describe('timeseries', () => {
+        it('returns correct sum value', () => {
+          const sumValue = sumBy(
+            activeInstances?.timeseries?.filter((item) => item.y !== 0),
+            'y'
+          );
+          expect(sumValue).to.equal(numberOfTransactionsCreated);
+        });
+      });
+    });
+
+    describe('detailed metrics', () => {
+      let activeInstances: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances'>;
+      before(async () => {
+        const response = await callApi('lambda-python', pythonServerlessFunctionNames[0]);
+        activeInstances = response.body;
+      });
+
+      it('returns correct values for all serverless functions', () => {
+        const activeInstanceOverview = activeInstances.activeInstances.find(
+          (item) => item.serverlessFunctionName === pythonServerlessFunctionNames[0]
+        );
+
+        expect(activeInstanceOverview?.serverlessDurationAvg).to.eql(faasDuration);
+        expect(activeInstanceOverview?.billedDurationAvg).to.eql(billedDurationMs);
+        expect(activeInstanceOverview?.avgMemoryUsed).to.eql(expectedMemoryUsed);
+        expect(activeInstanceOverview?.memorySize).to.eql(memoryTotal);
       });
       describe('timeseries', () => {
         it('returns correct sum value', () => {

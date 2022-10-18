@@ -36,7 +36,7 @@ export interface ActiveInstanceOverview {
   timeseries: ActiveInstanceTimeseries;
   serverlessDurationAvg: number | null;
   billedDurationAvg: number | null;
-  avgMemoryUsed: number | null;
+  avgMemoryUsed?: number | null;
   memorySize: number | null;
 }
 

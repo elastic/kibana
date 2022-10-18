@@ -24,7 +24,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  async function callApi(serviceName: string) {
+  async function callApi(serviceName: string, serverlessFunctionName?: string) {
     return await apmApiClient.readUser({
       endpoint: `GET /internal/apm/services/{serviceName}/metrics/serverless`,
       params: {
@@ -34,10 +34,29 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: '',
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
+          ...(serverlessFunctionName ? { serverlessFunctionName } : {}),
         },
       },
     });
   }
+
+  registry.when(
+    'Serverless metrics charts when data is not loaded',
+    { config: 'basic', archives: [] },
+    () => {
+      let serverlessMetrics: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless'>;
+      before(async () => {
+        const response = await callApi('lambda-python');
+        serverlessMetrics = response.body;
+      });
+
+      it('returns empty', () => {
+        serverlessMetrics.charts.forEach((chart) => {
+          expect(chart.series).to.be.empty();
+        });
+      });
+    }
+  );
 
   registry.when('Serverless metrics charts', { config: 'basic', archives: [] }, () => {
     const {
@@ -67,10 +86,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns all metrics chart', () => {
         expect(serverlessMetrics.charts.length).to.be.greaterThan(0);
         expect(serverlessMetrics.charts.map(({ title }) => title).sort()).to.eql([
-          'Avg. Duration',
-          'Cold start',
           'Cold start duration',
+          'Cold starts',
           'Compute usage',
+          'Lambda Duration',
           'System memory usage',
         ]);
       });
@@ -135,6 +154,124 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(sumValue).to.equal(
             numberOfTransactionsCreated * pythonServerlessFunctionNames.length
           );
+        });
+      });
+
+      describe('memory usage', () => {
+        const expectedFreeMemory = 1 - memoryFree / memoryTotal;
+        [
+          { title: 'Max', expectedValue: expectedFreeMemory },
+          { title: 'Average', expectedValue: expectedFreeMemory },
+        ].map(({ title, expectedValue }) =>
+          it(`returns correct ${title} value`, () => {
+            const memoryUsageMetric = serverlessMetrics.charts.find((chart) => {
+              return chart.key === 'memory_usage_chart';
+            });
+            const series = memoryUsageMetric?.series.find((item) => item.title === title);
+            expect(series?.overallValue).to.eql(expectedValue);
+            const meanValue = meanBy(series?.data.filter(isNotNullOrZeroCoordinate), 'y');
+            expect(meanValue).to.eql(expectedValue);
+          })
+        );
+      });
+
+      describe('Compute usage', () => {
+        const GBSeconds = 1024 * 1024 * 1024 * 1000;
+        const expectedValue = (memoryTotal * billedDurationMs) / GBSeconds;
+        let computeUsageMetric: typeof serverlessMetrics.charts[0] | undefined;
+        before(() => {
+          computeUsageMetric = serverlessMetrics.charts.find((chart) => {
+            return chart.key === 'compute_usage';
+          });
+        });
+        it('returns correct overall value', () => {
+          expect(computeUsageMetric?.series[0].overallValue).to.equal(expectedValue);
+        });
+
+        it('returns correct mean value', () => {
+          const meanValue = meanBy(
+            computeUsageMetric?.series[0]?.data.filter((item) => item.y !== 0),
+            'y'
+          );
+          expect(meanValue).to.equal(expectedValue);
+        });
+      });
+    });
+
+    describe('detailed metrics', () => {
+      let serverlessMetrics: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless'>;
+      before(async () => {
+        const response = await callApi('lambda-python', pythonServerlessFunctionNames[0]);
+        serverlessMetrics = response.body;
+      });
+
+      it('returns all metrics chart', () => {
+        expect(serverlessMetrics.charts.length).to.be.greaterThan(0);
+        expect(serverlessMetrics.charts.map(({ title }) => title).sort()).to.eql([
+          'Cold start duration',
+          'Cold starts',
+          'Compute usage',
+          'Lambda Duration',
+          'System memory usage',
+        ]);
+      });
+
+      describe('Avg. Duration', () => {
+        const transactionDurationInMicroSeconds = transactionDuration * 1000;
+        [
+          { title: 'Billed Duration', expectedValue: billedDurationMs * 1000 },
+          { title: 'Transaction Duration', expectedValue: transactionDurationInMicroSeconds },
+        ].map(({ title, expectedValue }) =>
+          it(`returns correct ${title} value`, () => {
+            const avgDurationMetric = serverlessMetrics.charts.find((chart) => {
+              return chart.key === 'avg_duration';
+            });
+            const series = avgDurationMetric?.series.find((item) => item.title === title);
+            expect(series?.overallValue).to.eql(expectedValue);
+            const meanValue = meanBy(series?.data.filter(isNotNullOrZeroCoordinate), 'y');
+            expect(meanValue).to.eql(expectedValue);
+          })
+        );
+      });
+
+      let metricsChart: typeof serverlessMetrics.charts[0] | undefined;
+
+      describe('Cold start duration', () => {
+        before(() => {
+          metricsChart = serverlessMetrics.charts.find((chart) => {
+            return chart.key === 'cold_start_duration';
+          });
+        });
+        it('returns correct overall value', () => {
+          expect(metricsChart?.series[0].overallValue).to.equal(coldStartDurationPython * 1000);
+        });
+
+        it('returns correct mean value', () => {
+          const meanValue = meanBy(
+            metricsChart?.series[0]?.data.filter(isNotNullOrZeroCoordinate),
+            'y'
+          );
+          expect(meanValue).to.equal(coldStartDurationPython * 1000);
+        });
+      });
+
+      describe('Cold start count', () => {
+        before(() => {
+          metricsChart = serverlessMetrics.charts.find((chart) => {
+            return chart.key === 'cold_start_count';
+          });
+        });
+
+        it('returns correct overall value', () => {
+          expect(metricsChart?.series[0].overallValue).to.equal(numberOfTransactionsCreated);
+        });
+
+        it('returns correct sum value', () => {
+          const sumValue = sumBy(
+            metricsChart?.series[0]?.data.filter(isNotNullOrZeroCoordinate),
+            'y'
+          );
+          expect(sumValue).to.equal(numberOfTransactionsCreated);
         });
       });
 
