@@ -53,10 +53,10 @@ describe('gainsightShipper', () => {
         });
 
         gainsightShipper.extendContext({ userId, cluster_name: clusterName });
-        expect(gainsightApiMock).toHaveBeenCalledTimes(2);
+        expect(gainsightApiMock).toHaveBeenCalledTimes(3);
 
         gainsightShipper.extendContext({ userId, cluster_name: `${clusterName}-1` });
-        expect(gainsightApiMock).toHaveBeenCalledTimes(4); // called again because the user changed
+        expect(gainsightApiMock).toHaveBeenCalledTimes(5); // called again because the user changed
       });
     });
   });
