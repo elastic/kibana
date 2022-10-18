@@ -88,7 +88,7 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
           >
             {(formattedFieldValue?.length ?? 0) > 0 ? (
               <EuiToolTip content={formattedFieldValue} delay="long">
-                <EuiText size="xs" className="eui-textTruncate" color={color}>
+                <EuiText size="xs" className="eui-textTruncate" color="subdued">
                   {formattedFieldValue}
                 </EuiText>
               </EuiToolTip>

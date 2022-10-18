@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   FieldPopover,
@@ -50,10 +50,6 @@ export function FieldStatsPopover({
     query: { kuery: kueryStr },
   } = useApmParams('/services/{serviceName}');
 
-  const fieldStatsQuery = {
-    query: kueryStr,
-    language: 'kuery',
-  };
   const { start, end } = useFetchParams();
 
   const {
@@ -65,38 +61,64 @@ export function FieldStatsPopover({
     services: { fieldFormats, charts },
   } = useKibana<ApmPluginStartDeps>();
 
-  const fieldStatsServices: Partial<FieldStatsServices> = {
-    uiSettings,
-    dataViews: data.dataViews,
-    data,
-    fieldFormats,
-    charts,
-  };
-
   const [infoIsOpen, setInfoOpen] = useState(false);
   const field = dataView?.getFieldByName(fieldName);
 
   const closePopover = useCallback(() => setInfoOpen(false), []);
   const theme = useTheme();
 
-  if (!fieldFormats || !charts || !field || !dataView) return null;
+  const fieldStatsQuery = useMemo(
+    () => ({
+      query: kueryStr,
+      language: 'kuery',
+    }),
+    [kueryStr]
+  );
 
-  const addFilter = (
-    popoverField: DataViewField | '_exists_',
-    value: unknown,
-    type: '+' | '-'
-  ) => {
-    if (
-      popoverField !== '_exists_' &&
-      (typeof value === 'number' || typeof value === 'string')
-    ) {
-      onAddFilter({
-        fieldName: popoverField.name,
-        fieldValue: value,
-        include: type === '+',
-      });
-    }
-  };
+  const fieldStatsServices: Partial<FieldStatsServices> = useMemo(
+    () => ({
+      uiSettings,
+      dataViews: data.dataViews,
+      data,
+      fieldFormats,
+      charts,
+    }),
+    [uiSettings, data, fieldFormats, charts]
+  );
+
+  const addFilter = useCallback(
+    (
+      popoverField: DataViewField | '_exists_',
+      value: unknown,
+      type: '+' | '-'
+    ) => {
+      if (
+        popoverField !== '_exists_' &&
+        (typeof value === 'number' || typeof value === 'string')
+      ) {
+        onAddFilter({
+          fieldName: popoverField.name,
+          fieldValue: value,
+          include: type === '+',
+        });
+      }
+    },
+    [onAddFilter]
+  );
+
+  const overrideFieldTopValueBar = useCallback(
+    (fieldTopValuesBucketParams: FieldTopValuesBucketParams) => {
+      if (fieldTopValuesBucketParams.type === 'other') {
+        return { color: 'primary' };
+      }
+      return fieldValue === fieldTopValuesBucketParams.fieldValue
+        ? { color: 'accent' }
+        : {};
+    },
+    [fieldValue]
+  );
+
+  if (!fieldFormats || !charts || !field || !dataView) return null;
 
   const trigger = (
     <EuiToolTip
@@ -123,17 +145,6 @@ export function FieldStatsPopover({
       />
     </EuiToolTip>
   );
-
-  const overrideFieldTopValueBar = (
-    fieldTopValuesBucketParams: FieldTopValuesBucketParams
-  ) => {
-    if (fieldTopValuesBucketParams.type === 'other') {
-      return { color: 'primary' };
-    }
-    return fieldValue === fieldTopValuesBucketParams.fieldValue
-      ? { color: 'accent' }
-      : {};
-  };
 
   return (
     <FieldPopover
