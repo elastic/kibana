@@ -25,12 +25,13 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_OVERVIEW_PAGE_LOAD } from '../../lib/ui_metric';
 import { getBackupStep } from './backup_step';
+import { getUpgradeReadinessStep } from './upgrade_readiness_step';
 import { getFixIssuesStep } from './fix_issues_step';
 import { getUpgradeStep } from './upgrade_step';
 import { getMigrateSystemIndicesStep } from './migrate_system_indices';
 import { getLogsStep } from './logs_step';
 
-type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'logs';
+type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'logs' | 'upgrade_readiness';
 
 export const Overview = withRouter(({ history }: RouteComponentProps) => {
   const {
@@ -54,6 +55,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
     migrate_system_indices: false,
     fix_issues: false,
     logs: false,
+    upgrade_readiness: false,
   });
 
   const isStepComplete = (step: OverviewStep) => completedStepsMap[step];
@@ -75,6 +77,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
           description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
             defaultMessage: 'Get ready for the next version of Elastic!',
           })}
+          
           rightSideItems={[
             <EuiButtonEmpty
               href={docLinks.links.upgradeAssistant.overview}
@@ -89,24 +92,32 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
             </EuiButtonEmpty>,
           ]}
         >
+          <EuiText>
+            <FormattedMessage
+                id="xpack.upgradeAssistant.overview.checkUpcomingVersion"
+                defaultMessage={`If you are not on the latest version of the Elastic stack, use the Upgrade Assistant to prepare for the next upgrade.`}
+              />
+          </EuiText>
           <EuiText data-test-subj="whatsNewLink">
-            <EuiLink href={docLinks.links.elasticsearch.version8ReleaseHighlights} target="_blank">
+            <EuiLink href={docLinks.links.elasticsearch.latestReleaseHighlights} target="_blank">
               <FormattedMessage
                 id="xpack.upgradeAssistant.overview.whatsNewLink"
-                defaultMessage="What's new in 8.x?"
+                defaultMessage="Check the latest release highlights"
               />
             </EuiLink>
           </EuiText>
         </EuiPageHeader>
-
         <EuiSpacer size="l" />
-
         <EuiSteps
           steps={[
             getBackupStep({
               cloud,
               isComplete: isStepComplete('backup'),
               setIsComplete: setCompletedStep.bind(null, 'backup'),
+            }),
+            getUpgradeReadinessStep({
+              isComplete: isStepComplete('backup'),
+              setIsComplete: setCompletedStep.bind(null, 'upgrade_readiness'),
             }),
             getMigrateSystemIndicesStep({
               docLinks,

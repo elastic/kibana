@@ -37,8 +37,8 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
     elasticStackGetStarted: `${ELASTIC_WEBSITE_URL}guide/en/index.html`,
     upgrade: {
-      upgradingStackOnPrem: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/8.0/upgrading-elastic-stack-on-prem.html`,
-      upgradingStackOnCloud: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/8.0/upgrade-elastic-stack-for-elastic-cloud.html`,
+      upgradingStackOnPrem: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrading-elastic-stack-on-prem.html`,
+      upgradingStackOnCloud: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrade-elastic-stack-for-elastic-cloud.html`,
     },
     apm: {
       kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
@@ -334,7 +334,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       migrationApiDeprecation: `${ELASTICSEARCH_DOCS}migration-api-deprecation.html`,
       nodeRoles: `${ELASTICSEARCH_DOCS}modules-node.html#node-roles`,
       releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
-      version8ReleaseHighlights: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/8.0/elastic-stack-highlights.html`,
+      latestReleaseHighlights: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/elastic-stack-highlights.html`,
       remoteClusters: `${ELASTICSEARCH_DOCS}remote-clusters.html`,
       remoteClustersProxy: `${ELASTICSEARCH_DOCS}remote-clusters.html#proxy-mode`,
       remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}remote-clusters-settings.html#remote-cluster-proxy-settings`,
