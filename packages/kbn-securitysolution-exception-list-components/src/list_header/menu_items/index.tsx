@@ -52,7 +52,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
     >
       <EuiFlexItem css={headerMenuCss}>
         <HeaderMenu
-          data-test-subj={`${dataTestSubj || ''}LinkedRulesMenu`}
+          dataTestSubj={`${dataTestSubj || ''}LinkedRulesMenu`}
           emptyButton
           useCustomActions
           text={i18n.EXCEPTION_LIST_HEADER_LINKED_RULES(linkedRules.length)}
@@ -78,7 +78,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
 
       <EuiFlexItem>
         <HeaderMenu
-          data-test-subj={`${dataTestSubj || ''}MenuActions`}
+          dataTestSubj={`${dataTestSubj || ''}MenuActions`}
           actions={[
             {
               key: '1',

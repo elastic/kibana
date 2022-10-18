@@ -8,7 +8,7 @@
 
 import React from 'react';
 import type { FC } from 'react';
-import { EuiIcon, EuiPageHeader, EuiPageHeaderSection, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiIcon, EuiPageHeader, EuiText } from '@elastic/eui';
 import * as i18n from '../translations';
 import {
   textWithEditContainerCss,
@@ -25,7 +25,7 @@ import { useExceptionListHeader } from './use_list_header';
 interface ExceptionListHeaderComponentProps {
   name: string;
   description?: string;
-  listId?: string;
+  listId: string;
   isReadonly: boolean;
   linkedRules: Rule[];
   dataTestSubj?: string;
@@ -61,31 +61,31 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
       <EuiPageHeader
         bottomBorder
         paddingSize="none"
-        // pageTitle={
-        //   <TextWithEdit
-        //     dataTestSubj={`${dataTestSubj || ''}Title`}
-        //     text={listDetails.name || i18n.EXCEPTION_LIST_HEADER_NAME}
-        //     isReadonly={isReadonly}
-        //     onEdit={onEdit}
-        //   />
-        // }
+        pageTitle={
+          <TextWithEdit
+            dataTestSubj={`${dataTestSubj || ''}Title`}
+            text={listDetails.name || i18n.EXCEPTION_LIST_HEADER_NAME}
+            isReadonly={isReadonly}
+            onEdit={onEdit}
+          />
+        }
         responsive
         data-test-subj={`${dataTestSubj || ''}PageHeader`}
-        // description={
-        //   <div css={descriptionContainerCss}>
-        //     <TextWithEdit
-        //       dataTestSubj={`${dataTestSubj || ''}Description`}
-        //       textCss={textCss}
-        //       isReadonly={isReadonly}
-        //       text={listDetails.description || i18n.EXCEPTION_LIST_HEADER_DESCRIPTION}
-        //       onEdit={onEdit}
-        //     />
-        //     <div css={textWithEditContainerCss} data-test-subj={`${dataTestSubj || ''}ListID`}>
-        //       <EuiText css={textCss}>{i18n.EXCEPTION_LIST_HEADER_LIST_ID}:</EuiText>
-        //       <EuiText css={textCss}>{listId}</EuiText>
-        //     </div>
-        //   </div>
-        // }
+        description={
+          <div css={descriptionContainerCss}>
+            <TextWithEdit
+              dataTestSubj={`${dataTestSubj || ''}Description`}
+              textCss={textCss}
+              isReadonly={isReadonly}
+              text={listDetails.description || i18n.EXCEPTION_LIST_HEADER_DESCRIPTION}
+              onEdit={onEdit}
+            />
+            <div css={textWithEditContainerCss} data-test-subj={`${dataTestSubj || ''}ListID`}>
+              <EuiText css={textCss}>{i18n.EXCEPTION_LIST_HEADER_LIST_ID}:</EuiText>
+              <EuiText css={textCss}>{listId}</EuiText>
+            </div>
+          </div>
+        }
         rightSideItems={[
           <MenuItems
             dataTestSubj={`${dataTestSubj || ''}RightSideMenuItems`}
@@ -100,10 +100,10 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
         breadcrumbs={[
           {
             text: (
-              <span data-test-subj={`${dataTestSubj || ''}Breadcrumb`}>
+              <div data-test-subj={`${dataTestSubj || ''}Breadcrumb`}>
                 <EuiIcon size="s" type="arrowLeft" />
                 {i18n.EXCEPTION_LIST_HEADER_BREADCRUMB}
-              </span>
+              </div>
             ),
             color: 'primary',
             'aria-current': false,
@@ -111,33 +111,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
             onClick: (e) => e.preventDefault(),
           },
         ]}
-      >
-        <EuiPageHeaderSection>
-          <TextWithEdit
-            dataTestSubj={`${dataTestSubj || ''}Title`}
-            text={listDetails.name || i18n.EXCEPTION_LIST_HEADER_NAME}
-            isReadonly={isReadonly}
-            onEdit={onEdit}
-          />
-          <div css={descriptionContainerCss}>
-            <EuiTitle size="l">
-              <h1>
-                <TextWithEdit
-                  dataTestSubj={`${dataTestSubj || ''}Description`}
-                  textCss={textCss}
-                  isReadonly={isReadonly}
-                  text={listDetails.description || i18n.EXCEPTION_LIST_HEADER_DESCRIPTION}
-                  onEdit={onEdit}
-                />
-              </h1>
-            </EuiTitle>
-            <div css={textWithEditContainerCss} data-test-subj={`${dataTestSubj || ''}ListID`}>
-              <EuiText css={textCss}>{i18n.EXCEPTION_LIST_HEADER_LIST_ID}:</EuiText>
-              <EuiText css={textCss}>{listId}</EuiText>
-            </div>
-          </div>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
+      />
       {isModalVisible && (
         <EditModal listDetails={listDetails} onSave={onSave} onCancel={onCancel} />
       )}
