@@ -28,7 +28,7 @@ describe('registerTransactionDurationAlertType', () => {
           buckets: [
             {
               key: 'ENVIRONMENT_NOT_DEFINED',
-              latency: {
+              avgLatency: {
                 value: 5500000,
               },
             },
