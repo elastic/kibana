@@ -125,7 +125,6 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
         previousColumn?.timeScale,
         previousColumn?.reducedTimeRange
       ),
-      customLabel: Boolean(field.customLabel),
       dataType: 'number',
       operationType: 'count',
       isBucketed: false,
