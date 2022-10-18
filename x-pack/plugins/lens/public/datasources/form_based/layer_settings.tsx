@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiToolTip, EuiIcon, EuiRange } from '@elastic/eui';
+import { EuiFormRow, EuiToolTip, EuiRange, EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { DatasourceLayerSettingsProps } from '../../types';
@@ -24,21 +24,31 @@ export function LayerSettingsPanel({
     <EuiFormRow
       display="columnCompressed"
       fullWidth
+      helpText={i18n.translate('xpack.lens.xyChart.randomSampling.help', {
+        defaultMessage: 'Change the sampling probability to see how your chart is affected',
+      })}
       label={
-        <EuiToolTip
-          content={i18n.translate('xpack.lens.xyChart.randomSampling.help', {
-            defaultMessage: 'Change the sampling probability to see how your chart is affected',
-          })}
-          delay="long"
-          position="top"
-        >
-          <span>
-            {i18n.translate('xpack.lens.xyChart.randomSampling.label', {
-              defaultMessage: 'Random Sampling',
+        <span>
+          {i18n.translate('xpack.lens.xyChart.randomSampling.label', {
+            defaultMessage: 'Sampling',
+          })}{' '}
+          <EuiToolTip
+            content={i18n.translate('xpack.lens.randomSampling.experimentalLabel', {
+              defaultMessage: 'Technical preview',
             })}
-            <EuiIcon type="questionInCircle" color="subdued" size="s" className="eui-alignTop" />
-          </span>
-        </EuiToolTip>
+            delay="long"
+            position="top"
+          >
+            <EuiBetaBadge
+              label={i18n.translate('xpack.lens.randomSampling.experimentalLabel', {
+                defaultMessage: 'Technical preview',
+              })}
+              color="subdued"
+              iconType="beaker"
+              size="s"
+            />
+          </EuiToolTip>
+        </span>
       }
     >
       <EuiRange
