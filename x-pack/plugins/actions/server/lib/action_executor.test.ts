@@ -35,7 +35,9 @@ const executeParams = {
 };
 
 const spacesMock = spacesServiceMock.createStartContract();
-const loggerMock = loggingSystemMock.create().get();
+const loggerMock: ReturnType<typeof loggingSystemMock.createLogger> =
+  loggingSystemMock.createLogger();
+
 const getActionsClientWithRequest = jest.fn();
 actionExecutor.initialize({
   logger: loggerMock,
@@ -66,6 +68,7 @@ beforeEach(() => {
   jest.resetAllMocks();
   spacesMock.getSpaceId.mockReturnValue('some-namespace');
   getActionsClientWithRequest.mockResolvedValue(actionsClient);
+  loggerMock.get.mockImplementation(() => loggerMock);
 });
 
 test('successfully executes', async () => {
@@ -123,6 +126,7 @@ test('successfully executes', async () => {
       baz: true,
     },
     params: { foo: true },
+    logger: loggerMock,
   });
 
   expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
@@ -596,6 +600,7 @@ test('should not throws an error if actionType is preconfigured', async () => {
       baz: true,
     },
     params: { foo: true },
+    logger: loggerMock,
   });
 });
 
