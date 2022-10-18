@@ -64,12 +64,8 @@ export interface FieldStatsServices {
   charts: ChartsPluginSetup;
 }
 
-export interface FieldStatsProps {
+interface FieldStatsPropsBase {
   services: FieldStatsServices;
-  /** If query is provided, build dsl query with this **/
-  query?: Query | AggregateQuery;
-  /** If dslQuery is provided, use this query directly **/
-  dslQuery?: object;
   filters: Filter[];
   /** ISO formatted date string **/
   fromDate: string;
@@ -92,6 +88,20 @@ export interface FieldStatsProps {
   overrideFieldTopValueBar?: OverrideFieldTopValueBarCallback;
   onStateChange?: (s: FieldStatsState) => void;
 }
+
+interface FieldStatsWithKbnQuery extends FieldStatsPropsBase {
+  /** If Kibana-supported query is provided, it will be converted to dsl query **/
+  query: Query | AggregateQuery;
+  dslQuery?: never;
+}
+
+interface FieldStatsWithDslQuery extends FieldStatsPropsBase {
+  query?: never;
+  /** If dsl query is provided, use it directly in searches **/
+  dslQuery: object;
+}
+
+export type FieldStatsProps = FieldStatsWithKbnQuery | FieldStatsWithDslQuery;
 
 const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   services,

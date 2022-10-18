@@ -71,10 +71,11 @@ export type OnAddFilter = ({
 
 const defaultFilters: Filter[] = [];
 
-interface FieldStatsPopoverContentProps extends FieldStatsProps {
+type FieldStatsPopoverContentProps = FieldStatsProps & {
   fieldName: string;
   fieldValue: string | number;
-}
+  dslQuery: object;
+};
 
 export function FieldStatsPopoverContent({
   fieldName,
