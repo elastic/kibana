@@ -32,10 +32,11 @@ export const MarkdownStoryComponent = (params: MarkdownStorybookParams) => {
     <EuiFlexGroup>
       <EuiFlexItem>
         <Markdown
+        {...params}
           readOnly={true}
           markdownContent={'My content in **markdown** format set as the *markdownContent prop*'}
         />
-        <Markdown readOnly={true}>
+        <Markdown {...params} readOnly={true}>
           {'My content in **markdown** format passed as *children* [test link to open in new tab or not](https://www.elastic.co)'}
         </Markdown>
       </EuiFlexItem>
