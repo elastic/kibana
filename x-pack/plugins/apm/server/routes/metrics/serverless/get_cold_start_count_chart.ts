@@ -11,6 +11,7 @@ import { euiLightVars as theme } from '@kbn/ui-theme';
 import {
   FAAS_COLDSTART,
   FAAS_NAME,
+  METRICSET_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { fetchAndTransformMetrics } from '../fetch_and_transform_metrics';
@@ -62,6 +63,7 @@ export function getColdStartCountChart({
     additionalFilters: [
       ...termQuery(FAAS_COLDSTART, true),
       ...termQuery(FAAS_NAME, serverlessFunctionName),
+      ...termQuery(METRICSET_NAME, 'app'),
     ],
     operationName: 'get_cold_start_count',
   });

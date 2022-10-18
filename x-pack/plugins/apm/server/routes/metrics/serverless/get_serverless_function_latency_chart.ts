@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import { termQuery } from '@kbn/observability-plugin/server';
+import { isEmpty } from 'lodash';
 import {
   FAAS_BILLED_DURATION,
   FAAS_NAME,
@@ -53,7 +54,6 @@ async function getServerlessLantecySeries({
   serviceName,
   start,
   end,
-  searchAggregatedTransactions,
   serverlessFunctionName,
 }: {
   environment: string;
@@ -62,7 +62,6 @@ async function getServerlessLantecySeries({
   serviceName: string;
   start: number;
   end: number;
-  searchAggregatedTransactions: boolean;
   serverlessFunctionName?: string;
 }): Promise<GenericMetricsChart['series']> {
   const transactionLatency = await getLatencyTimeseries({
@@ -70,10 +69,11 @@ async function getServerlessLantecySeries({
     kuery,
     serviceName,
     setup,
-    searchAggregatedTransactions,
+    searchAggregatedTransactions: false,
     latencyAggregationType: LatencyAggregationType.avg,
     start,
     end,
+    serverlessFunctionName,
   });
 
   return [
@@ -98,7 +98,6 @@ export async function getServerlessFunctionLatencyChart({
   serviceName,
   start,
   end,
-  searchAggregatedTransactions,
   serverlessFunctionName,
 }: {
   environment: string;
@@ -107,7 +106,6 @@ export async function getServerlessFunctionLatencyChart({
   serviceName: string;
   start: number;
   end: number;
-  searchAggregatedTransactions: boolean;
   serverlessFunctionName?: string;
 }): Promise<GenericMetricsChart> {
   const options = {
@@ -134,28 +132,33 @@ export async function getServerlessFunctionLatencyChart({
     }),
     getServerlessLantecySeries({
       ...options,
-      searchAggregatedTransactions,
       serverlessFunctionName,
     }),
   ]);
 
-  const [series] = billedDurationMetrics.series;
-  const data = series.data.map(({ x, y }) => ({
-    x,
-    // Billed duration is stored in ms, convert it to microseconds so it uses the same unit as the other chart
-    y: isFiniteNumber(y) ? y * 1000 : y,
-  }));
+  const series = [];
+
+  const [billedDurationSeries] = billedDurationMetrics.series;
+  if (billedDurationSeries) {
+    const data = billedDurationSeries.data?.map(({ x, y }) => ({
+      x,
+      // Billed duration is stored in ms, convert it to microseconds so it uses the same unit as the other chart
+      y: isFiniteNumber(y) ? y * 1000 : y,
+    }));
+    series.push({
+      ...billedDurationSeries,
+      // Billed duration is stored in ms, convert it to microseconds
+      overallValue: billedDurationSeries.overallValue * 1000,
+      data: data || [],
+    });
+  }
+
+  if (!isEmpty(serverlessDurationSeries[0].data)) {
+    series.push(...serverlessDurationSeries);
+  }
 
   return {
     ...billedDurationMetrics,
-    series: [
-      {
-        ...series,
-        // Billed duration is stored in ms, convert it to microseconds
-        overallValue: series.overallValue * 1000,
-        data,
-      },
-      ...serverlessDurationSeries,
-    ],
+    series,
   };
 }

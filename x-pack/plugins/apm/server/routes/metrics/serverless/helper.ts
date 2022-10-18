@@ -14,7 +14,7 @@ export function calcMemoryUsedRate({
   memoryTotal?: number | null;
 }) {
   if (!isFiniteNumber(memoryFree) || !isFiniteNumber(memoryTotal)) {
-    return 0;
+    return undefined;
   }
 
   return (memoryTotal - memoryFree) / memoryTotal;
@@ -28,7 +28,7 @@ export function calcMemoryUsed({
   memoryTotal?: number | null;
 }) {
   if (!isFiniteNumber(memoryFree) || !isFiniteNumber(memoryTotal)) {
-    return 0;
+    return undefined;
   }
 
   return memoryTotal - memoryFree;

@@ -13,7 +13,6 @@ export const config = {
   billedDurationMs: 4000,
   faasTimeoutMs: 10000,
   coldStartDurationPython: 4000,
-  coldStartDurationNode: 0,
   faasDuration: 4000,
   transactionDuration: 1000,
   pythonServerlessFunctionNames: ['fn-lambda-python', 'fn-lambda-python-2'],
@@ -41,7 +40,6 @@ export async function generateData({
     billedDurationMs,
     faasTimeoutMs,
     coldStartDurationPython,
-    coldStartDurationNode,
     faasDuration,
     transactionDuration,
     pythonServerlessFunctionNames,
@@ -111,7 +109,6 @@ export async function generateData({
         .invocation()
         .billedDuration(billedDurationMs)
         .coldStart(false)
-        .coldStartDuration(coldStartDurationNode)
         .faasDuration(faasDuration)
         .faasTimeout(faasTimeoutMs)
         .memory(systemMemory)

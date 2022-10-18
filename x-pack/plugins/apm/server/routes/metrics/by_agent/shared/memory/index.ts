@@ -5,32 +5,45 @@
  * 2.0.
  */
 
-import type { ESFilter } from '@kbn/es-types';
-import { euiLightVars as theme } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { termQuery } from '@kbn/observability-plugin/server';
+import { withApmSpan } from '../../../../../utils/with_apm_span';
 import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
-import {
-  FAAS_NAME,
+  FAAS_ID,
   METRIC_CGROUP_MEMORY_LIMIT_BYTES,
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
-  SERVICE_NAME,
 } from '../../../../../../common/elasticsearch_fieldnames';
-import {
-  environmentQuery,
-  serviceNodeNameQuery,
-} from '../../../../../../common/utils/environment_query';
-import { getMetricsDateHistogramParams } from '../../../../../lib/helpers/metrics';
 import { Setup } from '../../../../../lib/helpers/setup_request';
-import { withApmSpan } from '../../../../../utils/with_apm_span';
-import type { FetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
-import { getVizColorForIndex } from '../../../../../../common/viz_colors';
+import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
+import { ChartBase } from '../../../types';
+
+const series = {
+  memoryUsedMax: {
+    title: i18n.translate('xpack.apm.chart.memorySeries.systemMaxLabel', {
+      defaultMessage: 'Max',
+    }),
+  },
+  memoryUsedAvg: {
+    title: i18n.translate('xpack.apm.chart.memorySeries.systemAverageLabel', {
+      defaultMessage: 'Average',
+    }),
+  },
+};
+
+const chartBase: ChartBase = {
+  title: i18n.translate(
+    'xpack.apm.serviceDetails.metrics.memoryUsageChartTitle',
+    {
+      defaultMessage: 'System memory usage',
+    }
+  ),
+  key: 'memory_usage_chart',
+  type: 'linemark',
+  yUnit: 'percent',
+  series,
+};
 
 export const percentSystemMemoryUsedScript = {
   lang: 'painless',
@@ -67,166 +80,27 @@ export const percentCgroupMemoryUsedScript = {
     `,
 } as const;
 
-async function fetchMemoryInfo({
-  environment,
-  kuery,
-  setup,
-  serviceName,
-  serviceNodeName,
-  start,
-  end,
-  additionalFilters,
-  script,
-}: {
-  environment: string;
-  kuery: string;
-  setup: Setup;
-  serviceName: string;
-  serviceNodeName?: string;
-  start: number;
-  end: number;
-  additionalFilters: ESFilter[];
-  script:
-    | typeof percentCgroupMemoryUsedScript
-    | typeof percentSystemMemoryUsedScript;
-}) {
-  const { apmEventClient, config } = setup;
-
-  const aggs = {
-    memoryUsedAvg: { avg: { script } },
-    memoryUsedMax: { max: { script } },
-  };
-
-  const params = {
-    apm: {
-      events: [ProcessorEvent.metric],
-    },
-    body: {
-      track_total_hits: 1,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...serviceNodeNameQuery(serviceNodeName),
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...additionalFilters,
-          ],
-        },
-      },
-      aggs: {
-        timeseriesData: {
-          date_histogram: getMetricsDateHistogramParams({
-            start,
-            end,
-            metricsInterval: config.metricsInterval,
-          }),
-          aggs,
-        },
-        ...aggs,
-      },
-    },
-  };
-
-  const response = await apmEventClient.search('fetch_memory_info', params);
-
-  return {
-    hasData: response.hits.total.value > 0,
-    memoryUsedAvg: response.aggregations?.memoryUsedAvg.value || 0,
-    memoryUsedMax: response.aggregations?.memoryUsedMax.value || 0,
-    timeseries: {
-      memoryUsedAvg:
-        response.aggregations?.timeseriesData.buckets.map((bucket) => {
-          const value = bucket.memoryUsedAvg.value;
-          const y = value === null || isNaN(value) ? null : value;
-          return { x: bucket.key, y };
-        }) || [],
-      memoryUsedMax:
-        response.aggregations?.timeseriesData.buckets.map((bucket) => {
-          const value = bucket.memoryUsedMax.value;
-          const y = value === null || isNaN(value) ? null : value;
-          return { x: bucket.key, y };
-        }) || [],
-    },
-  };
-}
-
-export async function getMemoryInfo({
-  environment,
-  kuery,
-  setup,
-  serviceName,
-  serviceNodeName,
-  start,
-  end,
-  serverlessFunctionName,
-}: {
-  environment: string;
-  kuery: string;
-  setup: Setup;
-  serviceName: string;
-  serviceNodeName?: string;
-  start: number;
-  end: number;
-  serverlessFunctionName?: string;
-}) {
-  return withApmSpan('get_memory_info', async () => {
-    const options = {
-      environment,
-      kuery,
-      setup,
-      serviceName,
-      serviceNodeName,
-      start,
-      end,
-    };
-    let memoryInfo = await fetchMemoryInfo({
-      ...options,
-      additionalFilters: [
-        { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
-        ...termQuery(FAAS_NAME, serverlessFunctionName),
-      ],
-      script: percentCgroupMemoryUsedScript,
-    });
-
-    if (!memoryInfo.hasData) {
-      memoryInfo = await fetchMemoryInfo({
-        ...options,
-        additionalFilters: [
-          { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
-          { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-          ...termQuery(FAAS_NAME, serverlessFunctionName),
-        ],
-        script: percentSystemMemoryUsedScript,
-      });
-    }
-    return memoryInfo;
-  });
-}
-
 export async function getMemoryChartData({
   environment,
   kuery,
   setup,
   serviceName,
   serviceNodeName,
+  faasId,
   start,
   end,
-  serverlessFunctionName,
 }: {
   environment: string;
   kuery: string;
   setup: Setup;
   serviceName: string;
   serviceNodeName?: string;
+  faasId?: string;
   start: number;
   end: number;
-  serverlessFunctionName?: string;
-}): Promise<FetchAndTransformMetrics> {
+}) {
   return withApmSpan('get_memory_metrics_charts', async () => {
-    const memoryInfo = await getMemoryInfo({
+    const cgroupResponse = await fetchAndTransformMetrics({
       environment,
       kuery,
       setup,
@@ -234,39 +108,41 @@ export async function getMemoryChartData({
       serviceNodeName,
       start,
       end,
-      serverlessFunctionName,
+      chartBase,
+      aggs: {
+        memoryUsedAvg: { avg: { script: percentCgroupMemoryUsedScript } },
+        memoryUsedMax: { max: { script: percentCgroupMemoryUsedScript } },
+      },
+      additionalFilters: [
+        { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
+        ...termQuery(FAAS_ID, faasId),
+      ],
+      operationName: 'get_cgroup_memory_metrics_charts',
     });
 
-    return {
-      key: 'memory_usage_chart',
-      title: i18n.translate(
-        'xpack.apm.serviceDetails.metrics.memoryUsageChartTitle',
-        { defaultMessage: 'System memory usage' }
-      ),
-      yUnit: 'percent',
-      series: [
-        {
-          key: 'memoryUsedMax',
-          title: i18n.translate('xpack.apm.chart.memorySeries.systemMaxLabel', {
-            defaultMessage: 'Max',
-          }),
-          type: 'linemark',
-          color: getVizColorForIndex(0, theme),
-          overallValue: memoryInfo.memoryUsedMax,
-          data: memoryInfo.timeseries.memoryUsedMax,
+    if (cgroupResponse.series.length === 0) {
+      return await fetchAndTransformMetrics({
+        environment,
+        kuery,
+        setup,
+        serviceName,
+        serviceNodeName,
+        start,
+        end,
+        chartBase,
+        aggs: {
+          memoryUsedAvg: { avg: { script: percentSystemMemoryUsedScript } },
+          memoryUsedMax: { max: { script: percentSystemMemoryUsedScript } },
         },
-        {
-          key: 'memoryUsedAvg',
-          title: i18n.translate(
-            'xpack.apm.chart.memorySeries.systemAverageLabel',
-            { defaultMessage: 'Average' }
-          ),
-          type: 'linemark',
-          color: getVizColorForIndex(1, theme),
-          overallValue: memoryInfo.memoryUsedAvg,
-          data: memoryInfo.timeseries.memoryUsedAvg,
-        },
-      ],
-    };
+        additionalFilters: [
+          { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
+          { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+          ...termQuery(FAAS_ID, faasId),
+        ],
+        operationName: 'get_system_memory_metrics_charts',
+      });
+    }
+
+    return cgroupResponse;
   });
 }

@@ -32,6 +32,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
+  registry.when(
+    'Serverless overview when data is not loaded',
+    { config: 'basic', archives: [] },
+    () => {
+      let serverlessSummary: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/summary'>;
+      before(async () => {
+        const response = await callApi('lambda-python');
+        serverlessSummary = response.body;
+      });
+
+      it('returns empty', () => {
+        expect(serverlessSummary).to.be.empty();
+      });
+    }
+  );
+
   registry.when('Serverless overview', { config: 'basic', archives: [] }, () => {
     const { billedDurationMs, pythonServerlessFunctionNames, faasDuration } = config;
     const { expectedMemoryUsedRate } = expectedValues;
