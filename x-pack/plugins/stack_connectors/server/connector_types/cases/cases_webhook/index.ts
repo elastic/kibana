@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { curry } from 'lodash';
-import { Logger } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -35,11 +33,7 @@ const supportedSubActions: string[] = ['pushToService'];
 export type ActionParamsType = CasesWebhookActionParamsType;
 export const ConnectorTypeId = '.cases-webhook';
 // connector type definition
-export function getConnectorType({
-  logger,
-}: {
-  logger: Logger;
-}): ConnectorType<
+export function getConnectorType(): ConnectorType<
   CasesWebhookPublicConfigurationType,
   CasesWebhookSecretConfigurationType,
   ExecutorParams,
@@ -63,23 +57,21 @@ export function getConnectorType({
       },
       connector: validate.connector,
     },
-    executor: curry(executor)({ logger }),
+    executor,
     supportedFeatureIds: [CasesConnectorFeatureId],
   };
 }
 
 // action executor
 export async function executor(
-  { logger }: { logger: Logger },
   execOptions: ConnectorTypeExecutorOptions<
     CasesWebhookPublicConfigurationType,
     CasesWebhookSecretConfigurationType,
     CasesWebhookActionParamsType
   >
 ): Promise<ConnectorTypeExecutorResult<CasesWebhookExecutorResultData>> {
-  const actionId = execOptions.actionId;
-  const configurationUtilities = execOptions.configurationUtilities;
-  const { subAction, subActionParams } = execOptions.params;
+  const { actionId, configurationUtilities, params, logger } = execOptions;
+  const { subAction, subActionParams } = params;
   let data: CasesWebhookExecutorResultData | undefined;
 
   const externalService = createExternalService(
