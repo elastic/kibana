@@ -34,7 +34,7 @@ const TimelineDetailsPanel = () => {
       entityType="events"
       isFlyoutView
       runtimeMappings={runtimeMappings}
-      timelineId={TimelineId.casePage}
+      scopeId={TimelineId.casePage}
     />
   );
 };
@@ -58,7 +58,7 @@ const CaseContainerComponent: React.FC = () => {
       dispatch(
         timelineActions.toggleDetailPanel({
           panelView: 'eventDetail',
-          timelineId: TimelineId.casePage,
+          id: TimelineId.casePage,
           params: {
             eventId: alertId,
             indexName: index,

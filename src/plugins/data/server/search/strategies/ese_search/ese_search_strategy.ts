@@ -78,11 +78,7 @@ export const enhancedEsSearchStrategyProvider = (
 
       const response = shimHitsTotal(body.response, options);
 
-      return toAsyncKibanaSearchResponse(
-        // @ts-expect-error @elastic/elasticsearch start_time_in_millis expected to be number
-        { ...body, response },
-        headers?.warning
-      );
+      return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning);
     };
 
     const cancel = async () => {

@@ -12,7 +12,7 @@ import { eventsViewerSelector } from '.';
 describe('selectors', () => {
   describe('eventsViewerSelector', () => {
     it('returns the expected results', () => {
-      const id = 'detections-page';
+      const id = 'alerts-page';
 
       expect(eventsViewerSelector(mockState, id)).toEqual({
         filters: mockState.inputs.global.filters,
@@ -20,7 +20,7 @@ describe('selectors', () => {
         query: mockState.inputs.global.query,
         globalQueries: mockState.inputs.global.queries,
         timelineQuery: mockState.inputs.timeline.queries[0],
-        timeline: mockState.timeline.timelineById[id],
+        dataTable: mockState.dataTable.tableById[id],
       });
     });
   });

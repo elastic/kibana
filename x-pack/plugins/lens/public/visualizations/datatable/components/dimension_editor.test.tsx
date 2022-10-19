@@ -74,6 +74,9 @@ describe('data table dimension editor', () => {
       setState,
       paletteService: chartPluginMock.createPaletteRegistry(),
       panelRef: React.createRef(),
+      addLayer: jest.fn(),
+      removeLayer: jest.fn(),
+      datasource: {} as DatasourcePublicAPI,
     };
   });
 

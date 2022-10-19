@@ -68,7 +68,7 @@ export const buildQuery = ({
               {
                 _key: 'asc' as const,
               },
-            ] as estypes.AggregationsTermsAggregationOrder,
+            ] as estypes.AggregationsAggregateOrder,
           },
           aggregations: {
             process: {
