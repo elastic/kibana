@@ -7,3 +7,4 @@
 
 export * from './compute_error_budget';
 export * from './compute_sli';
+export * from './date_range';

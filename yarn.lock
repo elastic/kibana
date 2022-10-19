@@ -1502,10 +1502,10 @@
   dependencies:
     "@elastic/ecs-helpers" "^1.1.0"
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@8.3.0-canary.1":
-  version "8.3.0-canary.1"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.3.0-canary.1.tgz#31dc18f724433c4135ed85fde5fd018393134552"
-  integrity sha512-CSNP4vTL/90VRD3MbvfBggy4VBxEgNmlHQf7mlWiPRTxo24t68PqNS+TnsfzO7fbY/nOALoX9hE8VlxRcMo0iA==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@8.4.0-canary.1":
+  version "8.4.0-canary.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.4.0-canary.1.tgz#af951826a67eb8a97562014e90447087c3bccee9"
+  integrity sha512-BWC3u2SfNBZBPUB/M7Qt6jl/8QcnG1+tzYto4pTZW/AaQn6raTyKtdta78Vi9Tj83MzA2skz7Y0FfCmPudwPsQ==
   dependencies:
     "@elastic/transport" "^8.2.0"
     tslib "^2.4.0"
@@ -2642,6 +2642,10 @@
   uid ""
 
 "@kbn/analytics-shippers-fullstory@link:bazel-bin/packages/analytics/shippers/fullstory":
+  version "0.0.0"
+  uid ""
+
+"@kbn/analytics-shippers-gainsight@link:bazel-bin/packages/analytics/shippers/gainsight":
   version "0.0.0"
   uid ""
 
@@ -6818,6 +6822,10 @@
   uid ""
 
 "@types/kbn__analytics-shippers-fullstory@link:bazel-bin/packages/analytics/shippers/fullstory/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__analytics-shippers-gainsight@link:bazel-bin/packages/analytics/shippers/gainsight/npm_module_types":
   version "0.0.0"
   uid ""
 
