@@ -270,7 +270,7 @@ PUT _ingest/pipeline/tri_met_tracks
 ----------------------------------
 
 [float]
-==== Step 2: Configure Elastic Agent
+==== Step 2: Configure {agent}
 
 . From the {kib} main menu, click *Fleet*, then the *Agent policies* tab.
 
