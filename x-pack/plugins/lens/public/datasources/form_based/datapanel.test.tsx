@@ -21,7 +21,7 @@ import { FieldItem } from './field_item';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
 import { FormBasedPrivateState } from './types';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiCallOut, EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
 import { documentField } from './document_field';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
@@ -256,10 +256,8 @@ async function mountAndWaitForLazyModules(component: React.ReactElement): Promis
     inst = await mountWithIntl(component);
     // wait for lazy modules
     await new Promise((resolve) => setTimeout(resolve, 0));
-    inst.update();
+    await inst.update();
   });
-
-  await inst!.update();
 
   return inst!;
 }
@@ -378,8 +376,8 @@ describe('FormBased Data Panel', () => {
     UseExistingFieldsApi.resetFieldsExistenceCache();
   });
 
-  it('should render a warning if there are no index patterns', () => {
-    const wrapper = shallowWithIntl(
+  it('should render a warning if there are no index patterns', async () => {
+    const wrapper = await mountAndWaitForLazyModules(
       <FormBasedDataPanel
         {...defaultProps}
         state={{
@@ -394,7 +392,7 @@ describe('FormBased Data Panel', () => {
         frame={createMockFramePublicAPI()}
       />
     );
-    expect(wrapper.find('[data-test-subj="indexPattern-no-indexpatterns"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="indexPattern-no-indexpatterns"]').exists()).toBeTruthy();
   });
 
   describe('loading existence data', () => {
@@ -668,15 +666,19 @@ describe('FormBased Data Panel', () => {
       expect(inst.find(EuiProgress).length).toEqual(1);
       expect(
         inst.find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]').first().text()
-      ).toBe('3 available fields. 0 empty fields. 0 meta fields.');
+      ).toBe('');
 
-      await act(() => {
+      await act(async () => {
         resolveFunction!({
           existingFieldNames: [indexPatterns.b.fields[0].name],
         });
+        await inst.update();
       });
 
-      await inst.update();
+      await act(async () => {
+        await inst.update();
+      });
+
       expect(inst.find(EuiProgress).length).toEqual(0);
       expect(
         inst.find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]').first().text()
@@ -889,13 +891,15 @@ describe('FormBased Data Panel', () => {
       ).toEqual(1);
       expect(wrapper.find(EuiCallOut).length).toEqual(0);
 
-      await act(() => {
+      await act(async () => {
         resolveFunction!({
           existingFieldNames: [],
         });
       });
 
-      await wrapper.update();
+      await act(async () => {
+        await wrapper.update();
+      });
 
       expect(
         wrapper.find('[data-test-subj="fieldListGroupedAvailableFields"]').find(EuiLoadingSpinner)

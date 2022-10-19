@@ -13,7 +13,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { FieldsAccordion, FieldsAccordionProps } from './fields_accordion';
 import { FieldListItem } from '../../types';
 
-describe('Fields Accordion', () => {
+describe('UnifiedFieldList <FieldsAccordion />', () => {
   let defaultProps: FieldsAccordionProps<FieldListItem>;
   const paginatedFields = dataView.fields;
 

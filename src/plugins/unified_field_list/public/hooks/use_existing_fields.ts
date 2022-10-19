@@ -243,7 +243,7 @@ export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
   useEffect(() => {
     const subscription = globalMap$.subscribe((data) => {
       // console.log('received', data);
-      if (mountedRef.current) {
+      if (mountedRef.current && Object.keys(data).length > 0) {
         setExistingFieldsByDataViewMap((savedData) => ({
           ...savedData,
           ...data,

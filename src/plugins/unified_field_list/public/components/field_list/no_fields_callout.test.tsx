@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { NoFieldsCallout } from './no_fields_callout';
 
-describe('NoFieldCallout', () => {
+describe('UnifiedFieldList <NoFieldCallout />', () => {
   it('renders correctly for index with no fields', () => {
     const component = shallow(<NoFieldsCallout existFieldsInIndex={false} />);
     expect(component).toMatchInlineSnapshot(`

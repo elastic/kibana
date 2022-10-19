@@ -110,57 +110,59 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
               id={screenReaderDescriptionForSearchInputId}
               data-test-subj="unifiedFieldList__fieldListGroupedDescription"
             >
-              {[
-                (!fieldGroups.SelectedFields?.hideIfEmpty ||
-                  fieldGroups.SelectedFields?.fields?.length > 0) &&
-                  i18n.translate(
-                    'unifiedFieldList.fieldListGrouped.fieldSearchForSelectedFieldsLiveRegion',
-                    {
-                      defaultMessage:
-                        '{selectedFields} selected {selectedFields, plural, one {field} other {fields}}.',
-                      values: {
-                        selectedFields: fieldGroups.SelectedFields?.fields?.length || 0,
-                      },
-                    }
-                  ),
-                fieldGroups.AvailableFields?.fields &&
-                  i18n.translate(
-                    'unifiedFieldList.fieldListGrouped.fieldSearchForAvailableFieldsLiveRegion',
-                    {
-                      defaultMessage:
-                        '{availableFields} available {availableFields, plural, one {field} other {fields}}.',
-                      values: {
-                        availableFields: fieldGroups.AvailableFields.fields.length,
-                      },
-                    }
-                  ),
-                (!fieldGroups.EmptyFields?.hideIfEmpty ||
-                  fieldGroups.EmptyFields?.fields?.length > 0) &&
-                  i18n.translate(
-                    'unifiedFieldList.fieldListGrouped.fieldSearchForEmptyFieldsLiveRegion',
-                    {
-                      defaultMessage:
-                        '{emptyFields} empty {emptyFields, plural, one {field} other {fields}}.',
-                      values: {
-                        emptyFields: fieldGroups.EmptyFields?.fields?.length || 0,
-                      },
-                    }
-                  ),
-                (!fieldGroups.MetaFields?.hideIfEmpty ||
-                  fieldGroups.MetaFields?.fields?.length > 0) &&
-                  i18n.translate(
-                    'unifiedFieldList.fieldListGrouped.fieldSearchForMetaFieldsLiveRegion',
-                    {
-                      defaultMessage:
-                        '{metaFields} meta {metaFields, plural, one {field} other {fields}}.',
-                      values: {
-                        metaFields: fieldGroups.MetaFields?.fields?.length || 0,
-                      },
-                    }
-                  ),
-              ]
-                .filter(Boolean)
-                .join(' ')}
+              {hasSyncedExistingFields
+                ? [
+                    (!fieldGroups.SelectedFields?.hideIfEmpty ||
+                      fieldGroups.SelectedFields?.fields?.length > 0) &&
+                      i18n.translate(
+                        'unifiedFieldList.fieldListGrouped.fieldSearchForSelectedFieldsLiveRegion',
+                        {
+                          defaultMessage:
+                            '{selectedFields} selected {selectedFields, plural, one {field} other {fields}}.',
+                          values: {
+                            selectedFields: fieldGroups.SelectedFields?.fields?.length || 0,
+                          },
+                        }
+                      ),
+                    fieldGroups.AvailableFields?.fields &&
+                      i18n.translate(
+                        'unifiedFieldList.fieldListGrouped.fieldSearchForAvailableFieldsLiveRegion',
+                        {
+                          defaultMessage:
+                            '{availableFields} available {availableFields, plural, one {field} other {fields}}.',
+                          values: {
+                            availableFields: fieldGroups.AvailableFields.fields.length,
+                          },
+                        }
+                      ),
+                    (!fieldGroups.EmptyFields?.hideIfEmpty ||
+                      fieldGroups.EmptyFields?.fields?.length > 0) &&
+                      i18n.translate(
+                        'unifiedFieldList.fieldListGrouped.fieldSearchForEmptyFieldsLiveRegion',
+                        {
+                          defaultMessage:
+                            '{emptyFields} empty {emptyFields, plural, one {field} other {fields}}.',
+                          values: {
+                            emptyFields: fieldGroups.EmptyFields?.fields?.length || 0,
+                          },
+                        }
+                      ),
+                    (!fieldGroups.MetaFields?.hideIfEmpty ||
+                      fieldGroups.MetaFields?.fields?.length > 0) &&
+                      i18n.translate(
+                        'unifiedFieldList.fieldListGrouped.fieldSearchForMetaFieldsLiveRegion',
+                        {
+                          defaultMessage:
+                            '{metaFields} meta {metaFields, plural, one {field} other {fields}}.',
+                          values: {
+                            metaFields: fieldGroups.MetaFields?.fields?.length || 0,
+                          },
+                        }
+                      ),
+                  ]
+                    .filter(Boolean)
+                    .join(' ')
+                : ''}
             </div>
           </EuiScreenReaderOnly>
         )}
