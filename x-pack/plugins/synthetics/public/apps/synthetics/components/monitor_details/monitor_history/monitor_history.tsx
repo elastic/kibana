@@ -4,21 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSuperDatePicker, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useGetUrlParams } from '../../../hooks';
+import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { MonitorDurationTrend } from '../monitor_summary/duration_trend';
 import { TestRunsTable } from '../monitor_summary/test_runs_table';
 
 export const MonitorHistory = () => {
+  const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
-        <EuiSuperDatePicker
-          width="full"
-          onTimeChange={(...args) => console.log(args)}
-          updateButtonProps={{ fill: false }}
-        />
+        <SyntheticsDatePicker fullWidth={true} />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="m">
@@ -34,7 +34,7 @@ export const MonitorHistory = () => {
               <EuiTitle size="xs">
                 <h3>{DURATION_TREND_LABEL}</h3>
               </EuiTitle>
-              <MonitorDurationTrend />
+              <MonitorDurationTrend from={dateRangeStart} to={dateRangeEnd} />
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
