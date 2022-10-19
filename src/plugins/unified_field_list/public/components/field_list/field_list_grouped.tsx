@@ -204,7 +204,10 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                     [key]: open,
                   });
                   setPageSize(
-                    Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength))
+                    Math.max(
+                      PAGINATION_SIZE,
+                      Math.min(Math.ceil(pageSize * 1.5), displayedFieldLength)
+                    )
                   );
                 }}
                 showExistenceFetchError={fieldsExistenceStatus === ExistenceFetchStatus.failed}
