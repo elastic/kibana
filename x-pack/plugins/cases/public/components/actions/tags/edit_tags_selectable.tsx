@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useReducer, useState } from 'react';
+import React, { useCallback, useMemo, useReducer, useState, useEffect } from 'react';
 import type { EuiSelectableOption, IconType } from '@elastic/eui';
 import {
   EuiSelectable,
@@ -22,6 +22,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { assertNever } from '@kbn/std';
+import { isEmpty } from 'lodash';
 import type { Case } from '../../../../common';
 import * as i18n from './translations';
 import type { TagsSelectionState } from './types';
@@ -157,6 +158,23 @@ const getSelectionIcon = (tagState: TagState) => {
     : ICONS.UNCHECKED;
 };
 
+const getSelectedAndUnselectedTags = (newOptions: EuiSelectableOption[], tags: State['tags']) => {
+  const selectedTags: string[] = [];
+  const unSelectedTags: string[] = [];
+
+  for (const option of newOptions) {
+    if (option.checked === 'on') {
+      selectedTags.push(option.label);
+    }
+
+    if (!option.checked && tags[option.label].dirty) {
+      unSelectedTags.push(option.label);
+    }
+  }
+
+  return { selectedTags, unSelectedTags };
+};
+
 const NoMatchesMessage: React.FC<{ searchValue: string; onNewItem: (newTag: string) => void }> =
   React.memo(({ searchValue, onNewItem }) => {
     const onNewTagClick = useCallback(() => {
@@ -198,18 +216,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
 
   const onChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
-      const selectedTags: string[] = [];
-      const unSelectedTags: string[] = [];
-
-      for (const option of newOptions) {
-        if (option.checked === 'on') {
-          selectedTags.push(option.label);
-        }
-
-        if (!option.checked && state.tags[option.label].dirty) {
-          unSelectedTags.push(option.label);
-        }
-      }
+      const { selectedTags, unSelectedTags } = getSelectedAndUnselectedTags(newOptions, state.tags);
 
       dispatch({ type: Actions.CHECK_TAG, payload: selectedTags });
       dispatch({ type: Actions.UNCHECK_TAG, payload: unSelectedTags });
@@ -218,10 +225,15 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
     [onChangeTags, state.tags]
   );
 
-  const onNewItem = useCallback((newTag: string) => {
-    dispatch({ type: Actions.CHECK_TAG, payload: [newTag] });
-    setSearchValue('');
-  }, []);
+  const onNewItem = useCallback(
+    (newTag: string) => {
+      const { selectedTags, unSelectedTags } = getSelectedAndUnselectedTags(options, state.tags);
+      dispatch({ type: Actions.CHECK_TAG, payload: [newTag] });
+      setSearchValue('');
+      onChangeTags({ selectedTags: [...selectedTags, newTag], unSelectedTags });
+    },
+    [onChangeTags, options, state.tags]
+  );
 
   const onSelectAll = useCallback(() => {
     dispatch({ type: Actions.CHECK_TAG, payload: Object.keys(state.tags) });
@@ -240,6 +252,25 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
     dispatch({ type: Actions.UNCHECK_TAG, payload: unSelectedTags });
     onChangeTags({ selectedTags: [], unSelectedTags });
   }, [state.tags, onChangeTags]);
+
+  /**
+   * TODO: Remove hack when PR https://github.com/elastic/eui/pull/6317
+   * is merged and the new fix is merged into Kibana.
+   *
+   * This is a hack to force a rerender when
+   * the user adds a new tag. There is a bug in
+   * the EuiSelectable where a race condition that's causing the search bar
+   * to not to match terms with the empty string to trigger the reload.
+   * This means that when a user press the button to add a tag the
+   * search bar clears but the options are not shown.
+   */
+  const [_, setRerender] = useState(0);
+
+  useEffect(() => {
+    if (isEmpty(searchValue)) {
+      setRerender((x) => x + 1);
+    }
+  }, [options, setRerender, searchValue]);
 
   return (
     <EuiSelectable
