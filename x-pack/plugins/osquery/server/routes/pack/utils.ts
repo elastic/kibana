@@ -37,12 +37,33 @@ export const convertPackQueriesToSO = (queries) =>
 
 export const convertSOQueriesToPack = (
   // @ts-expect-error update types
-  queries,
-  options?: {
-    removeMultiLines?: boolean;
-    removeResultType?: boolean;
-    returnAll?: boolean;
-  }
+  queries
+) =>
+  reduce(
+    queries,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    (acc, { id: queryId, ecs_mapping, query, platform, ...rest }, key) => {
+      const index = queryId ? queryId : key;
+      acc[index] = {
+        ...rest,
+        query,
+        ...(!isEmpty(ecs_mapping)
+          ? isArray(ecs_mapping)
+            ? { ecs_mapping: convertECSMappingToObject(ecs_mapping) }
+            : { ecs_mapping }
+          : {}),
+        ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
+      };
+
+      return acc;
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    {} as Record<string, any>
+  );
+
+export const convertSOQueriesToPackConfig = (
+  // @ts-expect-error update types
+  queries
 ) =>
   reduce(
     queries,
@@ -52,18 +73,14 @@ export const convertSOQueriesToPack = (
       const index = queryId ? queryId : key;
       acc[index] = {
         ...rest,
-        query: options?.removeMultiLines ? removeMultilines(query) : query,
+        query: removeMultilines(query),
         ...(!isEmpty(ecs_mapping)
           ? isArray(ecs_mapping)
             ? { ecs_mapping: convertECSMappingToObject(ecs_mapping) }
             : { ecs_mapping }
           : {}),
         ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
-        ...(options?.removeResultType
-          ? resultType
-          : options?.returnAll
-          ? { snapshot, removed }
-          : { ...(snapshot ? { snapshot } : {}), ...(removed ? { removed } : {}) }),
+        ...resultType,
       };
 
       return acc;

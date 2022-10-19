@@ -44,9 +44,7 @@ export const readPackRoute = (router: IRouter) => {
           data: {
             ...rest,
             ...attributes,
-            queries: convertSOQueriesToPack(attributes.queries, {
-              returnAll: true,
-            }),
+            queries: convertSOQueriesToPack(attributes.queries),
             policy_ids: policyIds,
             read_only: attributes.version !== undefined && osqueryPackAssetReference,
           },
