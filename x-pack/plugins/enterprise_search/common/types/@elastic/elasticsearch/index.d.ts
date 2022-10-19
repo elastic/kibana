@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as EsApiTypes from '@elastic/elasticsearch/lib/api/types';
+import '@elastic/elasticsearch/lib/api/types';
 
 // TODO: Remove once type fixed in elasticsearch-specification
 // (add github issue)
@@ -13,10 +13,8 @@ declare module '@elastic/elasticsearch/lib/api/types' {
   // This workaround adds copy_from and description to the original IngestSetProcess and makes value
   // optional. It should be value xor copy_from, but that requires using type unions. This
   // workaround requires interface merging (ie, not types), so we cannot get.
-  export interface IngestSetProcessor extends EsApiTypes.IngestSetProcessor {
+  export interface IngestSetProcessor {
     copy_from?: string;
     description?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    value?: any;
   }
 }

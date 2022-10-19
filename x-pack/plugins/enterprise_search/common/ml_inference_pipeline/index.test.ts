@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IngestSetProcessor, MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/types';
 import { BUILT_IN_MODEL_TAG } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-plugin/common/constants/trained_models';
 
@@ -67,12 +67,13 @@ describe('getSetProcessorForInferenceType lib function', () => {
   it('should return expected value for TEXT_CLASSIFICATION', () => {
     const inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION;
 
-    const expected = {
+    const expected: IngestSetProcessor = {
       copy_from: 'ml.inference.dest.predicted_value',
       description:
         "Copy the predicted_value to 'dest' if the prediction_probability is greater than 0.5",
       field: destinationField,
       if: 'ml.inference.dest.prediction_probability > 0.5',
+      value: undefined,
     };
 
     expect(getSetProcessorForInferenceType(destinationField, inferenceType)).toEqual(expected);
@@ -81,10 +82,11 @@ describe('getSetProcessorForInferenceType lib function', () => {
   it('should return expected value for TEXT_EMBEDDING', () => {
     const inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING;
 
-    const expected = {
+    const expected: IngestSetProcessor = {
       copy_from: 'ml.inference.dest.predicted_value',
       description: "Copy the predicted_value to 'dest'",
       field: destinationField,
+      value: undefined,
     };
 
     expect(getSetProcessorForInferenceType(destinationField, inferenceType)).toEqual(expected);
@@ -149,7 +151,7 @@ describe('generateMlInferencePipelineBody lib function', () => {
   };
 
   it('should return something expected', () => {
-    const actual = generateMlInferencePipelineBody({
+    const actual: MlInferencePipeline = generateMlInferencePipelineBody({
       description: 'my-description',
       destinationField: 'my-destination-field',
       model: mockModel,
@@ -165,7 +167,7 @@ describe('generateMlInferencePipelineBody lib function', () => {
       ...mockModel,
       ...{ inference_config: { text_classification: {} } },
     };
-    const actual = generateMlInferencePipelineBody({
+    const actual: MlInferencePipeline = generateMlInferencePipelineBody({
       description: 'my-description',
       destinationField: 'my-destination-field',
       model: mockTextClassificationModel,
