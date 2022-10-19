@@ -173,10 +173,8 @@ const accuracyModeEnabledWarning = (columnName: string, docLink: string) => (
 export function getShardFailuresWarningMessages(
   state: FormBasedPersistedState,
   warning: SearchResponseWarning,
-  getRequestMeta: () => {
-    request: SearchRequest;
-    response: estypes.SearchResponse;
-  },
+  request: SearchRequest,
+  response: estypes.SearchResponse,
   theme: ThemeServiceStart
 ): Array<string | React.ReactNode> {
   if (state) {
@@ -218,12 +216,10 @@ export function getShardFailuresWarningMessages(
                   theme={theme}
                   title={warning.message}
                   size="m"
-                  getRequestMeta={
-                    getRequestMeta as () => {
-                      request: ShardFailureRequest;
-                      response: estypes.SearchResponse;
-                    }
-                  }
+                  getRequestMeta={() => ({
+                    request: request as ShardFailureRequest,
+                    response,
+                  })}
                 />
               ) : null}
             </>,

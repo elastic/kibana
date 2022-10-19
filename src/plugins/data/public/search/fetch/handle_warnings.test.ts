@@ -164,19 +164,19 @@ describe('Filtering and showing warnings', () => {
 
     it('filters out all', () => {
       callback.mockImplementation(() => true);
-      expect(filterWarnings(warnings, callback, request, response)).toEqual([]);
+      expect(filterWarnings(warnings, callback, request, response, 'id')).toEqual([]);
     });
 
     it('filters out some', () => {
       callback.mockImplementation(
         (warning: SearchResponseWarning) => warning.reason?.type !== 'generic_shard_failure'
       );
-      expect(filterWarnings(warnings, callback, request, response)).toEqual([warnings[2]]);
+      expect(filterWarnings(warnings, callback, request, response, 'id')).toEqual([warnings[2]]);
     });
 
     it('filters out none', () => {
       callback.mockImplementation(() => false);
-      expect(filterWarnings(warnings, callback, request, response)).toEqual(warnings);
+      expect(filterWarnings(warnings, callback, request, response, 'id')).toEqual(warnings);
     });
   });
 });

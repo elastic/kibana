@@ -412,10 +412,8 @@ export interface Datasource<T = unknown, P = unknown> {
   getSearchWarningMessages?: (
     state: P,
     warning: SearchResponseWarning,
-    getRequestMeta: () => {
-      request: SearchRequest;
-      response: estypes.SearchResponse;
-    }
+    request: SearchRequest,
+    response: estypes.SearchResponse
   ) => Array<string | React.ReactNode> | undefined;
 
   /**

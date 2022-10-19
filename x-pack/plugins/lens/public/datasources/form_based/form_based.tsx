@@ -707,8 +707,8 @@ export function getFormBasedDatasource({
         ),
       ];
     },
-    getSearchWarningMessages: (state, warning, getRequestMeta) => {
-      return [...getShardFailuresWarningMessages(state, warning, getRequestMeta, core.theme)];
+    getSearchWarningMessages: (state, warning, request, response) => {
+      return [...getShardFailuresWarningMessages(state, warning, request, response, core.theme)];
     },
     getDeprecationMessages: () => {
       const deprecatedMessages: React.ReactNode[] = [];

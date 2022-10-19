@@ -161,8 +161,9 @@ export type SearchResponseWarning =
  */
 export type WarningHandlerCallback = (
   warnings: SearchResponseWarning,
-  getRequestMeta: () => {
+  meta: {
     request: SearchRequest;
     response: estypes.SearchResponse;
+    requestId: string | undefined;
   }
 ) => boolean | undefined;

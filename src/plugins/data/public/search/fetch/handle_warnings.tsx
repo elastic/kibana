@@ -57,19 +57,23 @@ export function handleWarnings({
   theme,
   callback,
   sessionId = '',
+  requestId,
 }: {
   request: SearchRequest;
   response: estypes.SearchResponse;
   theme: ThemeServiceStart;
   callback?: WarningHandlerCallback;
   sessionId?: string;
+  requestId?: string;
 }) {
   const warnings = extractWarnings(response);
   if (warnings.length === 0) {
     return;
   }
 
-  const internal = callback ? filterWarnings(warnings, callback, request, response) : warnings;
+  const internal = callback
+    ? filterWarnings(warnings, callback, request, response, requestId)
+    : warnings;
   if (internal.length === 0) {
     return;
   }
@@ -124,16 +128,18 @@ export function filterWarnings(
   warnings: SearchResponseWarning[],
   cb: WarningHandlerCallback,
   request: SearchRequest,
-  response: estypes.SearchResponse
+  response: estypes.SearchResponse,
+  requestId: string | undefined
 ) {
   const unfiltered: SearchResponseWarning[] = [];
 
   // use the consumer's callback as a filter to receive warnings to handle on our side
   warnings.forEach((warning) => {
-    const consumerHandled = cb?.(warning, () => ({
+    const consumerHandled = cb?.(warning, {
+      requestId,
       request,
       response,
-    }));
+    });
     if (!consumerHandled) {
       unfiltered.push(warning);
     }

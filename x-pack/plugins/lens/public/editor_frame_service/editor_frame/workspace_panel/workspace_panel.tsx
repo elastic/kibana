@@ -231,20 +231,26 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       if (renderDeps.current) {
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
 
-        const warnings: Array<string | React.ReactNode> = [];
+        const warningsMap: Map<string, Array<string | React.ReactNode>> = new Map();
         const datasource = Object.values(renderDeps.current.datasourceMap)[0];
         const datasourceState = Object.values(renderDeps.current.datasourceStates)[0].state;
 
         if (adapters?.requests) {
-          plugins.data.search.showWarnings(adapters.requests, (warning, getRequestMeta) => {
+          plugins.data.search.showWarnings(adapters.requests, (warning, meta) => {
+            const { request, response, requestId } = meta;
+
             const warningMessages = datasource.getSearchWarningMessages?.(
               datasourceState,
               warning,
-              getRequestMeta
+              request,
+              response
             );
 
             if (warningMessages?.length) {
-              warnings.push(warningMessages);
+              const key = (requestId ?? '') + warning.type + warning.reason?.type ?? '';
+              if (!warningsMap.has(key)) {
+                warningsMap.set(key, warningMessages);
+              }
               return true;
             }
             return false;
@@ -263,7 +269,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
                     {}
                   )
                 : undefined,
-            requestWarnings: warnings,
+            requestWarnings: [...warningsMap.values()].flat(),
           })
         );
       }
