@@ -5,98 +5,190 @@
  * 2.0.
  */
 
-import { getException } from '../../../objects/exception';
+import { ROLES } from '../../../../common/test';
+import { getExceptionList, expectedExportedExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 
-import { ALERTS_COUNT, EMPTY_ALERT_TABLE, NUMBER_OF_ALERTS } from '../../../screens/alerts';
+import { createCustomRule } from '../../../tasks/api_calls/rules';
+import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../../tasks/login';
 
+import { EXCEPTIONS_URL } from '../../../urls/navigation';
 import {
-  addExceptionFromFirstAlert,
-  goToClosedAlerts,
-  goToOpenedAlerts,
-} from '../../../tasks/alerts';
-import { createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
-import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
+  deleteExceptionListWithRuleReference,
+  deleteExceptionListWithoutRuleReference,
+  exportExceptionList,
+  searchForExceptionList,
+  waitForExceptionsTableToBeLoaded,
+  clearSearchSelection,
+} from '../../../tasks/exceptions_table';
 import {
-  esArchiverLoad,
-  esArchiverUnload,
-  esArchiverResetKibana,
-} from '../../../tasks/es_archiver';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
-import {
-  addsException,
-  goToAlertsTab,
-  goToExceptionsTab,
-  removeException,
-  waitForTheRuleToBeExecuted,
-} from '../../../tasks/rule_details';
+  EXCEPTIONS_TABLE_DELETE_BTN,
+  EXCEPTIONS_TABLE_LIST_NAME,
+  EXCEPTIONS_TABLE_SHOWING_LISTS,
+} from '../../../screens/exceptions';
+import { createExceptionList } from '../../../tasks/api_calls/exceptions';
+import { esArchiverResetKibana } from '../../../tasks/es_archiver';
+import { TOASTER } from '../../../screens/alerts_detection_rules';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+const getExceptionList1 = () => ({
+  ...getExceptionList(),
+  name: 'Test a new list 1',
+  list_id: 'exception_list_1',
+});
+const getExceptionList2 = () => ({
+  ...getExceptionList(),
+  name: 'Test list 2',
+  list_id: 'exception_list_2',
+});
 
-describe('Adds rule exception from alerts flow', () => {
-  const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
-
+describe('Exceptions Table', () => {
   before(() => {
     esArchiverResetKibana();
-    esArchiverLoad('exceptions');
     login();
-  });
 
-  beforeEach(() => {
-    deleteAlertsAndRules();
-    createCustomRuleEnabled(
-      {
+    // Create exception list associated with a rule
+    createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
+      createCustomRule({
         ...getNewRule(),
-        customQuery: 'agent.name:*',
-        dataSource: { index: ['exceptions*'], type: 'indexPatterns' },
-      },
-      'rule_testing',
-      '1s'
+        exceptionLists: [
+          {
+            id: response.body.id,
+            list_id: getExceptionList2().list_id,
+            type: getExceptionList2().type,
+            namespace_type: getExceptionList2().namespace_type,
+          },
+        ],
+      })
     );
-    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    goToRuleDetails();
-    waitForTheRuleToBeExecuted();
-    waitForAlertsToPopulate();
+
+    // Create exception list not used by any rules
+    createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
+      'exceptionListResponse'
+    );
+
+    visitWithoutDateRange(EXCEPTIONS_URL);
+
+    // Using cy.contains because we do not care about the exact text,
+    // just checking number of lists shown
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
   });
 
-  afterEach(() => {
-    esArchiverUnload('exceptions_2');
+  it('Exports exception list', function () {
+    cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
+
+    visitWithoutDateRange(EXCEPTIONS_URL);
+    waitForExceptionsTableToBeLoaded();
+    exportExceptionList();
+
+    cy.wait('@export').then(({ response }) => {
+      cy.wrap(response?.body).should(
+        'eql',
+        expectedExportedExceptionList(this.exceptionListResponse)
+      );
+
+      cy.get(TOASTER).should('have.text', 'Exception list export success');
+    });
   });
 
-  after(() => {
-    esArchiverUnload('exceptions');
+  it('Filters exception lists on search', () => {
+    visitWithoutDateRange(EXCEPTIONS_URL);
+    waitForExceptionsTableToBeLoaded();
+
+    // Using cy.contains because we do not care about the exact text,
+    // just checking number of lists shown
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
+
+    // Single word search
+    searchForExceptionList('Endpoint');
+
+    // Using cy.contains because we do not care about the exact text,
+    // just checking number of lists shown
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
+    cy.get(EXCEPTIONS_TABLE_LIST_NAME).should('have.text', 'Endpoint Security Exception List');
+
+    // Multi word search
+    clearSearchSelection();
+    searchForExceptionList('test');
+
+    // Using cy.contains because we do not care about the exact text,
+    // just checking number of lists shown
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
+    cy.get(EXCEPTIONS_TABLE_LIST_NAME).eq(1).should('have.text', 'Test list 2');
+    cy.get(EXCEPTIONS_TABLE_LIST_NAME).eq(0).should('have.text', 'Test a new list 1');
+
+    // Exact phrase search
+    clearSearchSelection();
+    searchForExceptionList(`"${getExceptionList1().name}"`);
+
+    // Using cy.contains because we do not care about the exact text,
+    // just checking number of lists shown
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
+    cy.get(EXCEPTIONS_TABLE_LIST_NAME).should('have.text', getExceptionList1().name);
+
+    // Field search
+    clearSearchSelection();
+    searchForExceptionList('list_id:endpoint_list');
+
+    // Using cy.contains because we do not care about the exact text,
+    // just checking number of lists shown
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
+    cy.get(EXCEPTIONS_TABLE_LIST_NAME).should('have.text', 'Endpoint Security Exception List');
+
+    clearSearchSelection();
+
+    // Using cy.contains because we do not care about the exact text,
+    // just checking number of lists shown
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
   });
 
-  it('Creates an exception from an alert and deletes it', () => {
-    cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS);
-    // Create an exception from the alerts actions menu that matches
-    // the existing alert
-    addExceptionFromFirstAlert();
-    addsException(getException());
+  it('Deletes exception list without rule reference', () => {
+    visitWithoutDateRange(EXCEPTIONS_URL);
+    waitForExceptionsTableToBeLoaded();
 
-    // Alerts table should now be empty from having added exception and closed
-    // matching alert
-    cy.get(EMPTY_ALERT_TABLE).should('exist');
+    // Using cy.contains because we do not care about the exact text,
+    // just checking number of lists shown
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '3');
 
-    // Closed alert should appear in table
-    goToClosedAlerts();
-    cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
+    deleteExceptionListWithoutRuleReference();
 
-    // Remove the exception and load an event that would have matched that exception
-    // to show that said exception now starts to show up again
-    goToExceptionsTab();
-    removeException();
-    esArchiverLoad('exceptions_2');
-    goToAlertsTab();
-    goToOpenedAlerts();
-    waitForTheRuleToBeExecuted();
-    waitForAlertsToPopulate();
+    // Using cy.contains because we do not care about the exact text,
+    // just checking number of lists shown
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
+  });
 
-    cy.get(ALERTS_COUNT).should('exist');
-    cy.get(NUMBER_OF_ALERTS).should('have.text', '2 alerts');
+  it('Deletes exception list with rule reference', () => {
+    waitForPageWithoutDateRange(EXCEPTIONS_URL);
+    waitForExceptionsTableToBeLoaded();
+
+    // Using cy.contains because we do not care about the exact text,
+    // just checking number of lists shown
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
+
+    deleteExceptionListWithRuleReference();
+
+    // Using cy.contains because we do not care about the exact text,
+    // just checking number of lists shown
+    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
+  });
+});
+
+describe('Exceptions Table - read only', () => {
+  before(() => {
+    // First we login as a privileged user to create exception list
+    esArchiverResetKibana();
+    login(ROLES.platform_engineer);
+    visitWithoutDateRange(EXCEPTIONS_URL, ROLES.platform_engineer);
+    createExceptionList(getExceptionList(), getExceptionList().list_id);
+
+    // Then we login as read-only user to test.
+    login(ROLES.reader);
+    visitWithoutDateRange(EXCEPTIONS_URL, ROLES.reader);
+    waitForExceptionsTableToBeLoaded();
+
+    cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS).should('have.text', `Showing 1 list`);
+  });
+
+  it('Delete icon is not shown', () => {
+    cy.get(EXCEPTIONS_TABLE_DELETE_BTN).should('not.exist');
   });
 });
