@@ -219,6 +219,7 @@ describe('Test of <Doc /> helper / hook', () => {
   test('useEsDocSearch loading', async () => {
     const dataView = {
       getComputedFields: () => [],
+      getIndexPattern: () => index,
     };
     const props = {
       id: '1',
@@ -239,6 +240,7 @@ describe('Test of <Doc /> helper / hook', () => {
   test('useEsDocSearch ignore partial results', async () => {
     const dataView = {
       getComputedFields: () => [],
+      getIndexPattern: () => index,
     };
 
     const record = { _id: '1', _index: 't', test: 1 };
