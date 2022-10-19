@@ -36,12 +36,12 @@ export const registerActionFileDownloadRoutes = (
     withEndpointAuthz(
       { all: ['canWriteFileOperations'] },
       logger,
-      actionFileDownloadRouteHandler(endpointContext)
+      getActionFileDownloadRouteHandler(endpointContext)
     )
   );
 };
 
-export const actionFileDownloadRouteHandler = (
+export const getActionFileDownloadRouteHandler = (
   endpointContext: EndpointAppContext
 ): RequestHandler<
   EndpointActionFileDownloadParams,
