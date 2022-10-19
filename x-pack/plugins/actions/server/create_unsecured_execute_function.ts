@@ -14,7 +14,6 @@ import {
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
-import { RelatedSavedObjects } from './lib/related_saved_objects';
 
 // This allowlist should only contain connector types that don't require API keys for
 // execution.
@@ -25,15 +24,14 @@ interface CreateBulkUnsecuredExecuteFunctionOptions {
   preconfiguredConnectors: PreconfiguredConnector[];
 }
 
-export interface ExecuteOptions extends Pick<ActionExecutorOptions, 'params' | 'source'> {
+export interface ExecuteOptions
+  extends Pick<ActionExecutorOptions, 'params' | 'source' | 'relatedSavedObjects'> {
   id: string;
-  relatedSavedObjects?: RelatedSavedObjects;
 }
 
-interface ActionTaskParams extends Pick<ActionExecutorOptions, 'params'> {
-  actionId: string;
+interface ActionTaskParams
+  extends Pick<ActionExecutorOptions, 'actionId' | 'params' | 'relatedSavedObjects'> {
   apiKey: string | null;
-  relatedSavedObjects?: RelatedSavedObjects;
 }
 
 export type BulkUnsecuredExecutionEnqueuer<T> = (
