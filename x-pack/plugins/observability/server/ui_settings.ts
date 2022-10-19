@@ -39,7 +39,7 @@ function feedbackLink({ href }: { href: string }) {
   )}</a>`;
 }
 
-type UiSettings = UiSettingsParams<boolean | number | string | object> & { showInLabs?: boolean };
+type UiSettings = UiSettingsParams<boolean | number | string> & { showInLabs?: boolean };
 
 /**
  * uiSettings definitions for Observability.
