@@ -42,6 +42,7 @@ import { traceRouteRepository } from '../traces/route';
 import { transactionRouteRepository } from '../transactions/route';
 import { storageExplorerRouteRepository } from '../storage_explorer/route';
 import { labsRouteRepository } from '../settings/labs/route';
+import { agentExplorerRouteRepository } from '../agent_explorer/route';
 
 function getTypedGlobalApmServerRouteRepository() {
   const repository = {
@@ -77,6 +78,7 @@ function getTypedGlobalApmServerRouteRepository() {
     ...debugTelemetryRoute,
     ...timeRangeMetadataRoute,
     ...labsRouteRepository,
+    ...agentExplorerRouteRepository,
   };
 
   return repository;
