@@ -7,40 +7,29 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DiscoverMainStateParams } from '../../../hooks/use_root_breadcrumb';
 
 export const DISCOVER_CONTEXT_APP_LOCATOR = 'DISCOVER_CONTEXT_APP_LOCATOR';
 
-export interface DiscoverContextAppLocatorParams extends SerializableRecord {
-  dataViewSpec: DataViewSpec;
-  rowId: string;
-
-  columns?: string[];
-  filters?: Filter[];
-
+export interface DiscoverContextAppLocatorParams
+  extends DiscoverMainStateParams,
+    SerializableRecord {
   /**
-   * Next params used to create discover main view breadcrumb link if any provided
+   * String id for saved dataViews and spec for adhoc data views
    */
-  timeRange?: TimeRange;
-  query?: Query | AggregateQuery;
-  savedSearchId?: string;
+  index: string | DataViewSpec;
+  rowId: string;
 }
 
 export type DiscoverContextAppLocator = LocatorPublic<DiscoverContextAppLocatorParams>;
 
 export interface DiscoverContextAppLocatorDependencies {
   useHash: boolean;
-}
-
-export interface ContextHistoryLocationState {
-  dataViewSpec: DataViewSpec;
-  timeRange?: TimeRange;
-  query?: Query | AggregateQuery;
-  savedSearchId?: string;
 }
 
 export class DiscoverContextAppLocatorDefinition
@@ -52,7 +41,7 @@ export class DiscoverContextAppLocatorDefinition
 
   public readonly getLocation = async (params: DiscoverContextAppLocatorParams) => {
     const useHash = this.deps.useHash;
-    const { dataViewSpec, rowId, columns, filters, timeRange, query, savedSearchId } = params;
+    const { index, rowId, columns, filters, timeRange, query, savedSearchId } = params;
 
     const appState: { filters?: Filter[]; columns?: string[] } = {};
     const queryState: GlobalQueryStateFromUrl = {};
@@ -63,14 +52,21 @@ export class DiscoverContextAppLocatorDefinition
 
     if (filters && filters.length) queryState.filters = filters?.filter((f) => isFilterPinned(f));
 
-    const state: ContextHistoryLocationState = {
-      dataViewSpec,
+    const state: DiscoverMainStateParams = {
+      index,
       timeRange,
       query,
       savedSearchId,
     };
 
-    let path = `#/context/${dataViewSpec.id}/${rowId}`;
+    let dataViewId;
+    if (typeof index === 'string') {
+      dataViewId = index;
+    } else {
+      dataViewId = index.id;
+    }
+
+    let path = `#/context/${dataViewId}/${rowId}`;
     path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
     path = setStateToKbnUrl('_a', appState, { useHash }, path);
 

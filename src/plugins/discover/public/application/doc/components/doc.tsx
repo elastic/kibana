@@ -18,12 +18,14 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { getRootBreadcrumbs } from '../../../utils/breadcrumbs';
-import { useRootBreadcrumb } from '../../../hooks/use_root_breadcrumb';
+import {
+  type DiscoverMainStateParams,
+  useRootBreadcrumb,
+} from '../../../hooks/use_root_breadcrumb';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { ElasticRequestState } from '../types';
 import { useEsDocSearch } from '../../../hooks/use_es_doc_search';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
-import { SingleDocHistoryLocationState } from '../locator';
 
 export interface DocProps {
   /**
@@ -45,7 +47,7 @@ export interface DocProps {
   /**
    * State to build discover main url
    */
-  locationState?: SingleDocHistoryLocationState;
+  locationState?: DiscoverMainStateParams;
 }
 
 export function Doc(props: DocProps) {

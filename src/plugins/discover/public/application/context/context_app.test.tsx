@@ -22,7 +22,7 @@ import { themeServiceMock } from '@kbn/core/public/mocks';
 import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { ContextHistoryLocationState } from './services/locator';
+import { DiscoverMainStateParams } from '../../hooks/use_root_breadcrumb';
 
 const mockFilterManager = createFilterManagerMock();
 const mockNavigationPlugin = {
@@ -72,7 +72,7 @@ describe('ContextApp test', () => {
   const defaultProps = {
     dataView: dataViewMock,
     anchorId: 'mocked_anchor_id',
-    locationState: {} as ContextHistoryLocationState,
+    locationState: {} as DiscoverMainStateParams,
   };
 
   const topNavProps = {

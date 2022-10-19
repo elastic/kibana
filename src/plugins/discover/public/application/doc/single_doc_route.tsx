@@ -15,9 +15,9 @@ import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { Doc } from './components/doc';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getScopedHistory } from '../../kibana_services';
-import { SingleDocHistoryLocationState } from './locator';
 import { DiscoverError } from '../../components/common/error_alert';
-import { useDataView } from './use_data_view';
+import { useDataView } from '../../hooks/use_data_view';
+import type { DiscoverMainStateParams } from '../../hooks/use_root_breadcrumb';
 
 export interface DocUrlParams {
   dataViewId: string;
@@ -27,16 +27,14 @@ export interface DocUrlParams {
 export const SingleDocRoute = () => {
   const { timefilter, core } = useDiscoverServices();
   const { search } = useLocation();
-  const scopedHistory = getScopedHistory();
   const { dataViewId, index } = useParams<DocUrlParams>();
 
   const query = useMemo(() => new URLSearchParams(search), [search]);
   const id = query.get('id');
 
-  const locationState = useRef(scopedHistory.location.state).current as
-    | SingleDocHistoryLocationState
+  const locationState = useRef(getScopedHistory().location.state).current as
+    | DiscoverMainStateParams
     | undefined;
-  const dataViewSpec = locationState?.dataViewSpec;
 
   useExecutionContext(core.executionContext, {
     type: 'application',
@@ -51,7 +49,7 @@ export const SingleDocRoute = () => {
 
   const { dataView, error } = useDataView({
     dataViewId: decodeURIComponent(dataViewId),
-    dataViewSpec,
+    locationState,
   });
 
   if (error) {

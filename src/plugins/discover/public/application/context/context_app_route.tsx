@@ -11,9 +11,9 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ContextApp } from './context_app';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
-import { useDataView } from './hooks/use_data_view';
 import { getScopedHistory } from '../../kibana_services';
-import { ContextHistoryLocationState } from './services/locator';
+import { useDataView } from '../../hooks/use_data_view';
+import type { DiscoverMainStateParams } from '../../hooks/use_root_breadcrumb';
 
 export interface ContextUrlParams {
   dataViewId: string;
@@ -22,14 +22,14 @@ export interface ContextUrlParams {
 
 export function ContextAppRoute() {
   const locationState = React.useRef(
-    getScopedHistory().location.state as ContextHistoryLocationState | undefined
+    getScopedHistory().location.state as DiscoverMainStateParams | undefined
   ).current;
 
   const { dataViewId: encodedDataViewId, id } = useParams<ContextUrlParams>();
   const dataViewId = decodeURIComponent(encodedDataViewId);
   const anchorId = decodeURIComponent(id);
 
-  const { dataView, error } = useDataView({ dataViewId, locationState, rowId: anchorId });
+  const { dataView, error } = useDataView({ dataViewId, locationState });
 
   if (error) {
     return (

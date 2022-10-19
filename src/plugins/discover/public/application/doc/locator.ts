@@ -9,35 +9,19 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { DiscoverMainStateParams } from '../../hooks/use_root_breadcrumb';
 
 export const DISCOVER_SINGLE_DOC_LOCATOR = 'DISCOVER_SINGLE_DOC_LOCATOR';
 
-export interface DiscoverSingleDocLocatorParams extends SerializableRecord {
-  dataViewSpec: DataViewSpec;
+export interface DiscoverSingleDocLocatorParams
+  extends DiscoverMainStateParams,
+    SerializableRecord {
+  index: string | DataViewSpec;
   rowId: string;
   rowIndex: string;
-
-  /**
-   * Next params used to create discover main view breadcrumb link if any provided
-   */
-  columns?: string[];
-  filters?: Filter[];
-  timeRange?: TimeRange;
-  query?: Query | AggregateQuery;
-  savedSearchId?: string;
 }
 
 export type DiscoverSingleDocLocator = LocatorPublic<DiscoverSingleDocLocatorParams>;
-
-export interface SingleDocHistoryLocationState {
-  dataViewSpec?: DataViewSpec;
-  columns?: string[];
-  filters?: Filter[];
-  timeRange?: TimeRange;
-  query?: Query | AggregateQuery;
-  savedSearchId?: string;
-}
 
 export class DiscoverSingleDocLocatorDefinition
   implements LocatorDefinition<DiscoverSingleDocLocatorParams>
@@ -47,11 +31,10 @@ export class DiscoverSingleDocLocatorDefinition
   constructor() {}
 
   public readonly getLocation = async (params: DiscoverSingleDocLocatorParams) => {
-    const { dataViewSpec, rowId, rowIndex, timeRange, query, savedSearchId, columns, filters } =
-      params;
+    const { index, rowId, rowIndex, timeRange, query, savedSearchId, columns, filters } = params;
 
-    const state: SingleDocHistoryLocationState = {
-      dataViewSpec,
+    const state: DiscoverMainStateParams = {
+      index,
       timeRange,
       query,
       savedSearchId,
@@ -59,7 +42,14 @@ export class DiscoverSingleDocLocatorDefinition
       filters,
     };
 
-    const path = `#/doc/${dataViewSpec.id}/${rowIndex}?id=${rowId}`;
+    let dataViewId;
+    if (typeof index === 'string') {
+      dataViewId = index;
+    } else {
+      dataViewId = index.id;
+    }
+
+    const path = `#/doc/${dataViewId}/${rowIndex}?id=${rowId}`;
 
     return {
       app: 'discover',

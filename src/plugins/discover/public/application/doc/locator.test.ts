@@ -16,7 +16,7 @@ const setup = () => {
 };
 
 const stateParams = {
-  dataViewSpec: { id: dataViewId },
+  index: { id: dataViewId },
   columns: ['mock-column'],
   filters: [
     {

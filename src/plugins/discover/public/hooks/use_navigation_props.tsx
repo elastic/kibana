@@ -78,32 +78,9 @@ export const useNavigationProps = ({
   const isEmbeddableView = !useHistory();
   const services = useDiscoverServices();
 
-  const onOpenSingleDoc = useCallback(
-    (event) => {
-      event.preventDefault();
-
-      services.singleDocLocator.navigate({
-        dataViewSpec: dataView.toSpec(false),
-        rowId,
-        rowIndex,
-        ...getStateParams({
-          isEmbeddableView,
-          columns,
-          filters,
-          filterManager: services.filterManager,
-          data: services.data,
-          savedSearchId,
-        }),
-      });
-    },
-    [columns, dataView, filters, isEmbeddableView, rowId, rowIndex, savedSearchId, services]
-  );
-
-  const onOpenSurrDocs = useCallback(() => {
-    event?.preventDefault?.();
-
-    services.contextLocator.navigate({
-      dataViewSpec: dataView.toSpec(false),
+  const buildCommonParams = useCallback(
+    () => ({
+      index: dataView.isPersisted() ? dataView.id! : dataView.toSpec(false),
       rowId,
       ...getStateParams({
         isEmbeddableView,
@@ -113,8 +90,25 @@ export const useNavigationProps = ({
         data: services.data,
         savedSearchId,
       }),
-    });
-  }, [columns, dataView, filters, isEmbeddableView, rowId, savedSearchId, services]);
+    }),
+    [columns, dataView, filters, isEmbeddableView, rowId, savedSearchId, services]
+  );
+
+  const onOpenSingleDoc = useCallback(
+    (event) => {
+      event.preventDefault();
+      services.singleDocLocator.navigate({ rowIndex, ...buildCommonParams() });
+    },
+    [buildCommonParams, rowIndex, services.singleDocLocator]
+  );
+
+  const onOpenSurrDocs = useCallback(
+    (event) => {
+      event?.preventDefault?.();
+      services.contextLocator.navigate(buildCommonParams());
+    },
+    [buildCommonParams, services.contextLocator]
+  );
 
   return { onOpenSingleDoc, onOpenSurrDocs };
 };

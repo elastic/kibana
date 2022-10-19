@@ -34,15 +34,14 @@ import { SurrDocType } from './services/context';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
-import { ContextHistoryLocationState } from './services/locator';
-import { useRootBreadcrumb } from '../../hooks/use_root_breadcrumb';
+import { type DiscoverMainStateParams, useRootBreadcrumb } from '../../hooks/use_root_breadcrumb';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
 export interface ContextAppProps {
   dataView: DataView;
   anchorId: string;
-  locationState?: ContextHistoryLocationState;
+  locationState?: DiscoverMainStateParams;
 }
 
 export const ContextApp = ({ dataView, anchorId, locationState }: ContextAppProps) => {

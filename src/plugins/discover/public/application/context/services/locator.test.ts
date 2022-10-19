@@ -43,7 +43,7 @@ describe('Discover context url generator', () => {
   test('can create basic link to context', async () => {
     const { locator } = await setup();
     const { app, path } = await locator.getLocation({
-      dataViewSpec: { id: dataViewId },
+      index: { id: dataViewId },
       rowId: 'mock-row-id',
     });
     const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
@@ -56,7 +56,7 @@ describe('Discover context url generator', () => {
   test('should fill history state for context view', async () => {
     const { locator } = await setup();
     const stateParams = {
-      dataViewSpec: { id: dataViewId },
+      index: { id: dataViewId },
       timeRange: { from: 'now-15m', to: 'now' },
       query: { query: 'foo', language: 'kuery' },
       savedSearchId,
@@ -80,7 +80,7 @@ describe('Discover context url generator', () => {
   test('when useHash set to false, sets data view ID in the generated URL', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({
-      dataViewSpec: { id: dataViewId },
+      index: { id: dataViewId },
       rowId: 'mock-row-id',
       ...appStateParams,
     });
@@ -94,7 +94,7 @@ describe('Discover context url generator', () => {
   test('when useHash set to true, does not set data view ID in the generated URL', async () => {
     const { locator } = await setup({ useHash: true });
     const { path } = await locator.getLocation({
-      dataViewSpec: { id: dataViewId },
+      index: { id: dataViewId },
       rowId: 'mock-row-id',
       ...appStateParams,
     });
