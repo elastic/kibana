@@ -77,7 +77,7 @@ type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
 
 export interface UseTimelineEventsProps {
   dataViewId: string | null;
-  endDate: string;
+  endDate?: string;
   eqlOptions?: EqlOptionsSelected;
   fields: string[];
   filterQuery?: ESQuery | string;
@@ -88,7 +88,7 @@ export interface UseTimelineEventsProps {
   runtimeMappings: MappingRuntimeFields;
   skip?: boolean;
   sort?: TimelineRequestSortField[];
-  startDate: string;
+  startDate?: string;
   timerangeKind?: 'absolute' | 'relative';
 }
 

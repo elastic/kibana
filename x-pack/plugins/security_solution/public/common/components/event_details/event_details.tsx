@@ -263,7 +263,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                   </>
                 )}
 
-                <InvestigationGuideView data={data} />
+                <InvestigationGuideView data={data} scopeId={scopeId} />
               </>
             ),
           }

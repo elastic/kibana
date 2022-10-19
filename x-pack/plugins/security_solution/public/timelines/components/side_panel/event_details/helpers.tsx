@@ -19,6 +19,7 @@ export interface GetBasicDataFromDetailsData {
   userName: string;
   ruleName: string;
   timestamp: string;
+  data: any;
 }
 
 export const useBasicDataFromDetailsData = (
@@ -62,8 +63,10 @@ export const useBasicDataFromDetailsData = (
       userName,
       ruleName,
       timestamp,
+      // lol don't do this probably
+      data,
     }),
-    [agentId, alertId, hostName, isAlert, ruleName, timestamp, userName]
+    [agentId, alertId, hostName, isAlert, ruleName, timestamp, userName, data]
   );
 };
 

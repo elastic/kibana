@@ -10,21 +10,22 @@ import { cloneDeep } from 'lodash/fp';
 import type { EuiLinkAnchorProps } from '@elastic/eui';
 import { EuiMarkdownFormat } from '@elastic/eui';
 
-import { parsingPlugins, processingPlugins } from './plugins';
+import { markdownPlugins } from './plugins';
 import { MarkdownLink } from './markdown_link';
 
 interface Props {
   children: string;
   disableLinks?: boolean;
+  scopeId: string;
 }
 
-const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks }) => {
+const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, scopeId }) => {
   const MarkdownLinkProcessingComponent: React.FC<EuiLinkAnchorProps> = useMemo(
     // eslint-disable-next-line react/display-name
     () => (props) => <MarkdownLink {...props} disableLinks={disableLinks} />,
     [disableLinks]
   );
-
+  const { processingPlugins, parsingPlugins } = markdownPlugins(scopeId);
   // Deep clone of the processing plugins to prevent affecting the markdown editor.
   const processingPluginList = cloneDeep(processingPlugins);
   // This line of code is TS-compatible and it will break if [1][1] change in the future.

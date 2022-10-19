@@ -37,9 +37,12 @@ export const InvestigateInTimelineButton: React.FunctionComponent<{
     getDataViewsSelector(state)
   );
 
+  const hasTemplateProviders =
+    dataProviders && dataProviders.find((provider) => provider.type === 'template');
+
   const clearTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
-    timelineType: TimelineType.default,
+    timelineType: hasTemplateProviders ? TimelineType.template : TimelineType.default,
   });
 
   const configureAndOpenTimeline = React.useCallback(() => {

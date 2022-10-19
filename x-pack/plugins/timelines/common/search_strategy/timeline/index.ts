@@ -32,7 +32,7 @@ export * from './events';
 export type TimelineFactoryQueryTypes = TimelineEventsQueries;
 
 export interface TimelineRequestBasicOptions extends IEsSearchRequest {
-  timerange: TimerangeInput;
+  timerange?: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
   factoryQueryType?: TimelineFactoryQueryTypes;
