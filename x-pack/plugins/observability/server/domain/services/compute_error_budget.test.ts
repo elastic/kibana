@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { createAPMTransactionErrorRateIndicator, createSLO } from '../../services/slo/fixtures/slo';
+import { createSLO } from '../../services/slo/fixtures/slo';
 import { computeErrorBudget } from './compute_error_budget';
 
 describe('computeErrorBudget', () => {
   it("returns default values when total events is '0'", () => {
-    const slo = createSLO(createAPMTransactionErrorRateIndicator());
+    const slo = createSLO();
     const errorBudget = computeErrorBudget(slo, { good: 100, total: 0 });
 
     expect(errorBudget).toEqual({
@@ -21,7 +21,7 @@ describe('computeErrorBudget', () => {
   });
 
   it("computes the error budget when 'good > total' events", () => {
-    const slo = createSLO(createAPMTransactionErrorRateIndicator());
+    const slo = createSLO();
     const errorBudget = computeErrorBudget(slo, { good: 9999, total: 9 });
 
     expect(errorBudget).toEqual({
@@ -32,7 +32,7 @@ describe('computeErrorBudget', () => {
   });
 
   it('computes the error budget with all good events', () => {
-    const slo = createSLO(createAPMTransactionErrorRateIndicator());
+    const slo = createSLO();
     const errorBudget = computeErrorBudget(slo, { good: 100, total: 100 });
 
     expect(errorBudget).toEqual({
@@ -43,7 +43,7 @@ describe('computeErrorBudget', () => {
   });
 
   it('computes the error budget when exactly consumed', () => {
-    const slo = createSLO(createAPMTransactionErrorRateIndicator());
+    const slo = createSLO();
     const errorBudget = computeErrorBudget(slo, { good: 999, total: 1000 });
 
     expect(errorBudget).toEqual({
@@ -54,7 +54,7 @@ describe('computeErrorBudget', () => {
   });
 
   it('computes the error budget with rounded values', () => {
-    const slo = createSLO(createAPMTransactionErrorRateIndicator());
+    const slo = createSLO();
     const errorBudget = computeErrorBudget(slo, { good: 333, total: 777 });
 
     expect(errorBudget).toEqual({
@@ -65,7 +65,7 @@ describe('computeErrorBudget', () => {
   });
 
   it('computes the error budget with no good events', () => {
-    const slo = createSLO(createAPMTransactionErrorRateIndicator());
+    const slo = createSLO();
     const errorBudget = computeErrorBudget(slo, { good: 0, total: 100 });
 
     expect(errorBudget).toEqual({
