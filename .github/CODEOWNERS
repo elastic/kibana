@@ -835,6 +835,7 @@ packages/core/status/core-status-server-mocks @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-deprecations-getters @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-http-setup-browser @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-so-type-serializer @elastic/kibana-core
+packages/core/test-helpers/core-test-helpers-test-utils @elastic/kibana-core
 packages/core/theme/core-theme-browser @elastic/kibana-core
 packages/core/theme/core-theme-browser-internal @elastic/kibana-core
 packages/core/theme/core-theme-browser-mocks @elastic/kibana-core
@@ -913,6 +914,7 @@ packages/kbn-io-ts-utils @elastic/apm-ui
 packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
+packages/kbn-language-documentation-popover @elastic/kibana-vis-editors
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
 packages/kbn-managed-vscode-config @elastic/kibana-operations
@@ -989,6 +991,9 @@ packages/shared-ux/card/no_data/types @elastic/shared-ux
 packages/shared-ux/link/redirect_app/impl @elastic/shared-ux
 packages/shared-ux/link/redirect_app/mocks @elastic/shared-ux
 packages/shared-ux/link/redirect_app/types @elastic/shared-ux
+packages/shared-ux/markdown/impl @elastic/shared-ux
+packages/shared-ux/markdown/mocks @elastic/shared-ux
+packages/shared-ux/markdown/types @elastic/shared-ux
 packages/shared-ux/page/analytics_no_data/impl @elastic/shared-ux
 packages/shared-ux/page/analytics_no_data/mocks @elastic/shared-ux
 packages/shared-ux/page/analytics_no_data/types @elastic/shared-ux
