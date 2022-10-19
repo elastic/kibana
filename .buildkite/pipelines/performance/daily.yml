@@ -16,33 +16,7 @@ steps:
   - label: '💪 Performance Tests with Playwright config'
     command: .buildkite/scripts/steps/functional/performance_playwright.sh
     agents:
-      queue: kb-static-ubuntu
+      queue: kb-static-scalability
     depends_on: build
     key: tests
     timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-        - exit_status: '*'
-          limit: 1
-
-  - label: '🚢 Performance Tests dataset extraction for scalability benchmarking'
-    command: .buildkite/scripts/steps/functional/scalability_dataset_extraction.sh
-    agents:
-      queue: n2-2
-    depends_on: tests
-
-  - label: '📈 Report performance metrics to ci-stats'
-    command: .buildkite/scripts/steps/functional/report_performance_metrics.sh
-    agents:
-      queue: n2-2
-    depends_on: tests
-
-  - wait: ~
-    continue_on_failure: true
-
-  - label: '🦸 Post-Build'
-    command: .buildkite/scripts/lifecycle/post_build.sh
-    agents:
-      queue: kibana-default

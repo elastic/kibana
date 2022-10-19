@@ -63,14 +63,19 @@ while read -r journey; do
   export esPid=$!
 
   # Pings the es server every second for up to 2 minutes until it is green
-  curl \
-    --fail \
-    --silent \
-    --retry 120 \
-    --retry-delay 1 \
-    --retry-connrefused \
-    -XGET "${TEST_ES_URL}/_cluster/health?wait_for_nodes=>=1&wait_for_status=yellow" \
-    > /dev/null
+  curl --retry 120 \
+  --retry-delay 1 \
+  --retry-connrefused \
+  -I -XGET "${TEST_ES_URL}/_cluster/health?wait_for_nodes=>=1&wait_for_status=yellow" \
+  > /dev/null
+  # curl \
+  #   --fail \
+  #   --silent \
+  #   --retry 120 \
+  #   --retry-delay 1 \
+  #   --retry-connrefused \
+  #   -XGET "${TEST_ES_URL}/_cluster/health?wait_for_nodes=>=1&wait_for_status=yellow" \
+  #   > /dev/null
 
   echo "✅ ES is ready and will run in the background"
 
