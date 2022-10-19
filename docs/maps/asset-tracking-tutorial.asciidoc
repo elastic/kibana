@@ -274,7 +274,7 @@ PUT _ingest/pipeline/tri_met_tracks
 
 . From the {kib} main menu, click *Fleet*, then the *Agent policies* tab.
 
-. Click the name of the agent policy where you want to add the *Custom API* integration to. The configuration changes you make only apply to the policy you select.
+. Click the name of the agent policy where you want to add the *Custom API* integration. The configuration changes you make only apply to the policy you select.
 
 . Click the name of the *Custom API* integration, or add the integration first if the agent policy does not yet have it.
 
