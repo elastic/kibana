@@ -104,7 +104,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
           indexNames: selectedPatternsSourcerer,
           expandedDetail: activeTimeline.getExpandedDetail(),
           show: false,
-          title: '',
         })
       );
     }

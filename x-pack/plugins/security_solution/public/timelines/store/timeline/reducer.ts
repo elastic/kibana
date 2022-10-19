@@ -132,7 +132,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         id,
         timelineById: state.timelineById,
         timelineType,
-        // ...state.timelineById,
         ...timelineProps,
       }),
     };

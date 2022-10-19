@@ -20,7 +20,7 @@ import { inputsActions, inputsSelectors } from '../../../../common/store/inputs'
 import { sourcererActions, sourcererSelectors } from '../../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { appActions } from '../../../../common/store/app';
-import * as i18n from './translations';
+
 interface Props {
   timelineId?: string;
   timelineType: TimelineTypeLiteral;
@@ -55,8 +55,6 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
           indexNames: selectedPatterns,
           show,
           timelineType,
-          title:
-            timelineType === TimelineType.default ? i18n.UNTITLED_TIMELINE : i18n.UNTITLED_TEMPLATE,
         })
       );
 
