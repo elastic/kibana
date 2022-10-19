@@ -93,6 +93,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
               direction="row"
               justifyContent="spaceBetween"
               alignItems="center"
+              responsive={false}
             >
               <EuiFlexItem>
                 <EuiFieldSearch
