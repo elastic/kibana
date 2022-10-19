@@ -10,15 +10,28 @@ import { configServiceMock, IConfigServiceMock } from '@kbn/config-mocks';
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import type { ServerStart } from '../server';
 import { serverMock } from '../server/server.mock';
+import { mockReadFileSync } from './kibana_service.test.mocks';
 import { KibanaService } from './kibana_service';
 
 describe('KibanaService', () => {
   let config: IConfigServiceMock;
   let logger: MockedLogger;
   let server: ServerStart;
+  const mockConfig = {
+    hosts: ['https://localhost:5605', 'https://localhost:5606'],
+    requestTimeout: '30s',
+    ssl: {
+      certificate: '/herp/derp',
+      certificateAuthorities: '/beep/boop',
+      verificationMode: 'certificate',
+    },
+  };
 
   beforeEach(() => {
+    mockReadFileSync.mockReset();
+    mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
     config = configServiceMock.create();
+    config.atPathSync.mockReturnValue(mockConfig);
     logger = loggerMock.create();
     server = serverMock.createStartContract();
   });

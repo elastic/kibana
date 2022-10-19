@@ -17,6 +17,10 @@ describe('kibana config', () => {
         "hosts": Array [
           "http://localhost:5601",
         ],
+        "requestTimeout": "PT30S",
+        "ssl": Object {
+          "verificationMode": "full",
+        },
       }
     `);
   });
@@ -25,7 +29,9 @@ describe('kibana config', () => {
     test('accepts valid hosts', () => {
       const configSchema = config.schema;
       const validHosts = ['http://some.host:1234', 'https://some.other.host'];
-      expect(configSchema.validate({ hosts: validHosts })).toEqual({ hosts: validHosts });
+      expect(configSchema.validate({ hosts: validHosts })).toEqual(
+        expect.objectContaining({ hosts: validHosts })
+      );
     });
 
     test('throws if invalid hosts', () => {
@@ -34,6 +40,31 @@ describe('kibana config', () => {
       expect(() => configSchema.validate({ hosts: invalidHosts })).toThrowError(
         '[hosts.1]: expected URI with scheme [http|https].'
       );
+    });
+  });
+
+  describe('ssl', () => {
+    test('accepts valid ssl config', () => {
+      const configSchema = config.schema;
+      const valid = {
+        certificate: '/herp/derp',
+        certificateAuthorities: ['/beep/boop'],
+        verificationMode: 'certificate',
+      };
+      expect(configSchema.validate({ ssl: valid })).toEqual(
+        expect.objectContaining({ ssl: valid })
+      );
+    });
+
+    test('throws if invalid ssl config', () => {
+      const configSchema = config.schema;
+      const invalid = { verificationMode: 'nope' };
+      expect(() => configSchema.validate({ ssl: invalid })).toThrowErrorMatchingInlineSnapshot(`
+        "[ssl.verificationMode]: types that failed validation:
+        - [ssl.verificationMode.0]: expected value to equal [none]
+        - [ssl.verificationMode.1]: expected value to equal [certificate]
+        - [ssl.verificationMode.2]: expected value to equal [full]"
+      `);
     });
   });
 });

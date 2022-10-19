@@ -14,6 +14,20 @@ import { getArgValues } from './read_argv';
 const CONFIG_CLI_FLAGS = ['-c', '--config'];
 const DEFAULT_CONFIG_PATH = fromRoot('config/gateway.yml');
 
+// These `cliArgs` are required by `Env` for use with Kibana,
+// however they have no effect on the health gateway.
+const KIBANA_CLI_ARGS = {
+  dev: false,
+  silent: false,
+  watch: false,
+  basePath: false,
+  disableOptimizer: true,
+  cache: false,
+  dist: false,
+  oss: false,
+  runExamples: false,
+};
+
 export function getConfigService({ logger }: { logger: LoggerFactory }) {
   const configPathOverride = getArgValues(process.argv, CONFIG_CLI_FLAGS);
   const configPath = configPathOverride.length ? configPathOverride : [DEFAULT_CONFIG_PATH];
@@ -23,19 +37,7 @@ export function getConfigService({ logger }: { logger: LoggerFactory }) {
 
   const env = Env.createDefault(REPO_ROOT, {
     configs: configPath,
-    // These `cliArgs` are required by `Env` for use with Kibana,
-    // however they have no effect on the health gateway.
-    cliArgs: {
-      dev: false,
-      silent: false,
-      watch: false,
-      basePath: false,
-      disableOptimizer: true,
-      cache: false,
-      dist: false,
-      oss: false,
-      runExamples: false,
-    },
+    cliArgs: KIBANA_CLI_ARGS,
   });
 
   return new KbnConfigService(rawConfigService, env, logger);

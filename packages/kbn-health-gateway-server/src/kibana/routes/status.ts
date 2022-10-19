@@ -22,22 +22,32 @@ interface StatusRouteDependencies {
   config: IConfigService;
 }
 
+type Fetch = (path: string) => Promise<Response>;
+
 export function createStatusRoute({ config, log }: StatusRouteDependencies) {
   const kibanaConfig = new KibanaConfig(config.atPathSync<KibanaConfigType>('kibana'));
+  const fetch = configureFetch(kibanaConfig);
 
   return {
     method: 'GET',
     path: GATEWAY_STATUS_ROUTE,
     handler: async (req: Request, h: ResponseToolkit) => {
-      const responses = await fetchKibanaStatuses(kibanaConfig, { log });
+      const responses = await fetchKibanaStatuses({ fetch, kibanaConfig, log });
       const { body, statusCode } = mergeStatusResponses(responses);
       return h.response(body).type('application/json').code(statusCode);
     },
   };
 }
 
-async function fetchKibanaStatuses(kibanaConfig: KibanaConfig, { log }: { log: Logger }) {
-  const fetch = configureFetch(kibanaConfig);
+async function fetchKibanaStatuses({
+  fetch,
+  kibanaConfig,
+  log,
+}: {
+  fetch: Fetch;
+  kibanaConfig: KibanaConfig;
+  log: Logger;
+}) {
   const requests = await Promise.allSettled(
     kibanaConfig.hosts.map(async (host) => {
       log.debug(`Fetching response from ${host}${KIBANA_STATUS_ROUTE}`);
