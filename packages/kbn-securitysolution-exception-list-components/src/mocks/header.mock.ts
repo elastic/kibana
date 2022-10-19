@@ -5,9 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export * from './conditions';
-export * from './header';
-export * from './meta';
-export * from './comments';
-export * from './exception_item_card';
+export const handleEdit = jest.fn();
+export const handleDelete = jest.fn();
+export const actions = [
+  {
+    key: 'edit',
+    icon: 'pencil',
+    label: 'Edit detection exception',
+    onClick: handleEdit,
+  },
+  {
+    key: 'delete',
+    icon: 'trash',
+    label: 'Delete detection exception',
+    onClick: handleDelete,
+  },
+];

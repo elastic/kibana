@@ -19,27 +19,30 @@ const accordionCss = css`
 
 export interface ExceptionItemCardCommentsProps {
   comments: EuiCommentProps[];
+  dataTestSubj?: string;
 }
 
-export const ExceptionItemCardComments = memo<ExceptionItemCardCommentsProps>(({ comments }) => {
-  return (
-    <EuiFlexItem>
-      <EuiAccordion
-        id="exceptionItemCardComments"
-        buttonContent={
-          <EuiText size="s" css={accordionCss}>
-            {i18n.exceptionItemCardCommentsAccordion(comments.length)}
-          </EuiText>
-        }
-        arrowDisplay="none"
-        data-test-subj="exceptionsViewerCommentAccordion"
-      >
-        <EuiPanel data-test-subj="accordionContent" hasBorder hasShadow paddingSize="m">
-          <EuiCommentList data-test-subj="accordionCommentList" comments={comments} />
-        </EuiPanel>
-      </EuiAccordion>
-    </EuiFlexItem>
-  );
-});
+export const ExceptionItemCardComments = memo<ExceptionItemCardCommentsProps>(
+  ({ comments, dataTestSubj }) => {
+    return (
+      <EuiFlexItem data-test-subj={dataTestSubj}>
+        <EuiAccordion
+          id="exceptionItemCardComments"
+          buttonContent={
+            <EuiText size="s" css={accordionCss} data-test-subj={`${dataTestSubj || ''}TextButton`}>
+              {i18n.exceptionItemCardCommentsAccordion(comments.length)}
+            </EuiText>
+          }
+          arrowDisplay="none"
+          data-test-subj="exceptionItemCardComments"
+        >
+          <EuiPanel data-test-subj="accordionContentPanel" hasBorder hasShadow paddingSize="m">
+            <EuiCommentList data-test-subj="accordionCommentList" comments={comments} />
+          </EuiPanel>
+        </EuiAccordion>
+      </EuiFlexItem>
+    );
+  }
+);
 
 ExceptionItemCardComments.displayName = 'ExceptionItemCardComments';

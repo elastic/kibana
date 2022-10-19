@@ -13,11 +13,10 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import * as i18n from '../../translations';
 
 interface MetaInfoDetailsProps {
-  fieldName: string;
   label: string;
   lastUpdate: JSX.Element | string;
   lastUpdateValue: string;
-  dataTestSubj: string;
+  dataTestSubj?: string;
 }
 
 const euiBadgeFontFamily = css`
@@ -26,13 +25,19 @@ const euiBadgeFontFamily = css`
 export const MetaInfoDetails = memo<MetaInfoDetailsProps>(
   ({ label, lastUpdate, lastUpdateValue, dataTestSubj }) => {
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
+      <EuiFlexGroup
+        data-test-subj={`${dataTestSubj || ''}metaInfoDetails`}
+        alignItems="center"
+        gutterSize="s"
+        wrap
+        responsive
+      >
         <EuiFlexItem grow={false}>
           <EuiText size="xs" css={euiBadgeFontFamily}>
             {label}
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}lastUpdate`}>
+        <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj || ''}lastUpdate`}>
           <EuiBadge color="default" css={euiBadgeFontFamily}>
             {lastUpdate}
           </EuiBadge>
@@ -42,8 +47,8 @@ export const MetaInfoDetails = memo<MetaInfoDetailsProps>(
             {i18n.EXCEPTION_ITEM_CARD_META_BY}
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}lastUpdateValue`}>
-          <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={false}>
+        <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj || ''}lastUpdateValue`}>
+          <EuiFlexGroup responsive gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow" css={euiBadgeFontFamily}>
                 {lastUpdateValue}

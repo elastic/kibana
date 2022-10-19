@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { ElementType } from 'react';
 import { css } from '@emotion/react';
 import type { FC } from 'react';
 import { EuiCommentProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -47,9 +47,12 @@ interface ExceptionItemsProps {
   listType: ExceptionListTypeEnum;
   ruleReferences: RuleReferences;
   pagination: PaginationType;
-  securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
-  formattedDateComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
-  exceptionsUtilityComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
+  editActionLabel?: string;
+  deleteActionLabel?: string;
+  dataTestSubj?: string;
+  securityLinkAnchorComponent: ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
+  formattedDateComponent: ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
+  exceptionsUtilityComponent: ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   getFormattedComments: (comments: CommentsArray) => EuiCommentProps[]; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   onCreateExceptionListItem?: () => void;
   onDeleteException: (arg: ExceptionListItemIdentifiers) => void;
@@ -68,6 +71,9 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
   emptyViewerBody,
   emptyViewerButtonText,
   pagination,
+  dataTestSubj,
+  editActionLabel,
+  deleteActionLabel,
   securityLinkAnchorComponent,
   exceptionsUtilityComponent,
   formattedDateComponent,
@@ -96,24 +102,31 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup
             css={exceptionItemCss}
-            data-test-subj="exceptionsContainer"
+            data-test-subj={`${dataTestSubj || ''}exceptionsContainer`}
             direction="column"
             gutterSize="m"
           >
             {exceptions.map((exception) => (
-              <EuiFlexItem data-test-subj="exceptionItemContainer" grow={false} key={exception.id}>
+              <EuiFlexItem
+                data-test-subj={`${dataTestSubj || ''}exceptionItemContainer`}
+                grow={false}
+                key={exception.id}
+              >
                 <ExceptionItemCard
+                  key={`${exception.id}exceptionItemCardKey`}
+                  dataTestSubj={`${dataTestSubj || ''}exceptionItemCard`}
                   disableActions={isReadOnly}
                   exceptionItem={exception}
                   listType={listType}
                   ruleReferences={
                     Object.keys(ruleReferences).length && ruleReferences[exception.list_id]
-                      ? ruleReferences[exception.list_id]
+                      ? ruleReferences[exception.list_id].referenced_rules
                       : []
                   }
+                  editActionLabel={editActionLabel}
+                  deleteActionLabel={deleteActionLabel}
                   onDeleteException={onDeleteException}
                   onEditException={onEditExceptionItem}
-                  dataTestSubj="exceptionItemsViewerItem"
                   securityLinkAnchorComponent={securityLinkAnchorComponent}
                   formattedDateComponent={formattedDateComponent}
                   getFormattedComments={getFormattedComments}
@@ -124,7 +137,7 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <Pagination
-        dataTestSubj="listWithSearch{Pagination"
+        dataTestSubj={`${dataTestSubj || ''}pagination`}
         pagination={pagination}
         onPaginationChange={onPaginationChange}
       />
