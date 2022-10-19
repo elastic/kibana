@@ -87,39 +87,36 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
       connectorTypeIds[id] = actionTypeId;
     });
 
-    const actions = await Promise.all(
-      actionsToExecute.map(async (actionToExecute) => {
-        // Get saved object references from action ID and relatedSavedObjects
-        const { references, relatedSavedObjectWithRefs } = extractSavedObjectReferences(
-          actionToExecute.id,
-          true,
-          actionToExecute.relatedSavedObjects
-        );
-        const executionSourceReference = executionSourceAsSavedObjectReferences(
-          actionToExecute.source
-        );
+    const actions = actionsToExecute.map((actionToExecute) => {
+      // Get saved object references from action ID and relatedSavedObjects
+      const { references, relatedSavedObjectWithRefs } = extractSavedObjectReferences(
+        actionToExecute.id,
+        true,
+        actionToExecute.relatedSavedObjects
+      );
+      const executionSourceReference = executionSourceAsSavedObjectReferences(
+        actionToExecute.source
+      );
 
-        const taskReferences = [];
-        if (executionSourceReference.references) {
-          taskReferences.push(...executionSourceReference.references);
-        }
-        if (references) {
-          taskReferences.push(...references);
-        }
+      const taskReferences = [];
+      if (executionSourceReference.references) {
+        taskReferences.push(...executionSourceReference.references);
+      }
+      if (references) {
+        taskReferences.push(...references);
+      }
 
-        return {
-          type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-          attributes: {
-            actionId: actionToExecute.id,
-            params: actionToExecute.params,
-            apiKey: null,
-            relatedSavedObjects: relatedSavedObjectWithRefs,
-          },
-          references: taskReferences,
-        };
-      })
-    );
-
+      return {
+        type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+        attributes: {
+          actionId: actionToExecute.id,
+          params: actionToExecute.params,
+          apiKey: null,
+          relatedSavedObjects: relatedSavedObjectWithRefs,
+        },
+        references: taskReferences,
+      };
+    });
     const actionTaskParamsRecords: SavedObjectsBulkResponse<ActionTaskParams> =
       await internalSavedObjectsRepository.bulkCreate(actions);
 

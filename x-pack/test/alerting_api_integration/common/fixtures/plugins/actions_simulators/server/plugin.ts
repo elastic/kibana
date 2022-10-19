@@ -7,10 +7,13 @@
 
 import http from 'http';
 import https from 'https';
-import { Plugin, CoreSetup, IRouter } from '@kbn/core/server';
+import { Plugin, CoreSetup, CoreStart, IRouter } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server/plugin';
+import {
+  PluginSetupContract as ActionsPluginSetupContract,
+  PluginStartContract as ActionsPluginStartContract,
+} from '@kbn/actions-plugin/server/plugin';
 import { ActionType } from '@kbn/actions-plugin/server';
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
 import { initPlugin as initSwimlane } from './swimlane_simulation';
@@ -22,6 +25,7 @@ import { initPlugin as initSlack } from './slack_simulation';
 import { initPlugin as initWebhook } from './webhook_simulation';
 import { initPlugin as initMSExchange } from './ms_exchage_server_simulation';
 import { initPlugin as initXmatters } from './xmatters_simulation';
+import { initPlugin as initUnsecuredAction } from './unsecured_actions_simulation';
 
 export const NAME = 'actions-FTS-external-service-simulators';
 
@@ -84,9 +88,12 @@ interface FixtureSetupDeps {
 
 interface FixtureStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  actions: ActionsPluginStartContract;
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
+  private router?: IRouter;
+
   public setup(core: CoreSetup<FixtureStartDeps>, { features, actions }: FixtureSetupDeps) {
     // this action is specifically NOT enabled in ../../config.ts
     const notEnabledActionType: ActionType = {
@@ -126,19 +133,24 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       },
     });
 
-    const router: IRouter = core.http.createRouter();
+    this.router = core.http.createRouter();
 
-    initXmatters(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.XMATTERS));
-    initPagerduty(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
-    initJira(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
-    initResilient(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT));
-    initMSExchange(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.MS_EXCHANGE));
+    initXmatters(this.router, getExternalServiceSimulatorPath(ExternalServiceSimulator.XMATTERS));
+    initPagerduty(this.router, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
+    initJira(this.router, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
+    initResilient(this.router, getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT));
+    initMSExchange(
+      this.router,
+      getExternalServiceSimulatorPath(ExternalServiceSimulator.MS_EXCHANGE)
+    );
     initServiceNowOAuth(
-      router,
+      this.router,
       getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
     );
   }
 
-  public start() {}
+  public start(core: CoreStart, { actions }: FixtureStartDeps) {
+    initUnsecuredAction(this.router!, actions);
+  }
   public stop() {}
 }

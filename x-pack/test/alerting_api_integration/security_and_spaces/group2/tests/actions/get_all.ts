@@ -127,6 +127,14 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   name: 'Test:_Preconfigured_Index_Record',
                   referenced_by_count: 0,
                 },
+                {
+                  id: 'my-test-email',
+                  is_preconfigured: true,
+                  is_deprecated: false,
+                  connector_type_id: '.email',
+                  name: 'TestEmail#xyz',
+                  referenced_by_count: 0,
+                },
               ]);
               break;
             default:
@@ -262,6 +270,14 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   name: 'Test:_Preconfigured_Index_Record',
                   referenced_by_count: 0,
                 },
+                {
+                  id: 'my-test-email',
+                  is_preconfigured: true,
+                  is_deprecated: false,
+                  connector_type_id: '.email',
+                  name: 'TestEmail#xyz',
+                  referenced_by_count: 0,
+                },
               ]);
               break;
             default:
@@ -359,6 +375,14 @@ export default function getAllActionTests({ getService }: FtrProviderContext) {
                   is_deprecated: false,
                   connector_type_id: 'test.index-record',
                   name: 'Test:_Preconfigured_Index_Record',
+                  referenced_by_count: 0,
+                },
+                {
+                  id: 'my-test-email',
+                  is_preconfigured: true,
+                  is_deprecated: false,
+                  connector_type_id: '.email',
+                  name: 'TestEmail#xyz',
                   referenced_by_count: 0,
                 },
               ]);

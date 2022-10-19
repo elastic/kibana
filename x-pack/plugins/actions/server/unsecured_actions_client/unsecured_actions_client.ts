@@ -13,7 +13,11 @@ import {
 
 // allowlist for features wanting access to the unsecured actions client
 // which allows actions to be enqueued for execution without a user request
-const ALLOWED_REQUESTER_IDS = ['notifications'];
+const ALLOWED_REQUESTER_IDS = [
+  'notifications',
+  // For functional testing
+  'functional_tester',
+];
 
 export interface UnsecuredActionsClientOpts {
   internalSavedObjectsRepository: ISavedObjectsRepository;

@@ -22,6 +22,7 @@ export const createLogEntryCategoryExamplesQuery = (
 ): estypes.SearchRequest => ({
   ...defaultRequestParameters,
   body: {
+    size: exampleCount,
     query: {
       bool: {
         filter: [
@@ -51,7 +52,6 @@ export const createLogEntryCategoryExamplesQuery = (
     fields: ['event.dataset', 'message', 'container.id', 'host.name', 'log.file.path'],
   },
   index: indices,
-  size: exampleCount,
 });
 
 export const logEntryCategoryExampleHitRT = rt.type({

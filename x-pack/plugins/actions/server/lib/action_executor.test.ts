@@ -35,7 +35,9 @@ const executeParams = {
 };
 
 const spacesMock = spacesServiceMock.createStartContract();
-const loggerMock = loggingSystemMock.create().get();
+const loggerMock: ReturnType<typeof loggingSystemMock.createLogger> =
+  loggingSystemMock.createLogger();
+
 const getActionsClientWithRequest = jest.fn();
 actionExecutor.initialize({
   logger: loggerMock,
@@ -66,6 +68,7 @@ beforeEach(() => {
   jest.resetAllMocks();
   spacesMock.getSpaceId.mockReturnValue('some-namespace');
   getActionsClientWithRequest.mockResolvedValue(actionsClient);
+  loggerMock.get.mockImplementation(() => loggerMock);
 });
 
 test('successfully executes', async () => {
@@ -123,6 +126,7 @@ test('successfully executes', async () => {
       baz: true,
     },
     params: { foo: true },
+    logger: loggerMock,
   });
 
   expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
@@ -223,6 +227,7 @@ test('successfully executes with preconfigured connector', async () => {
       apiKey: 'abc',
     },
     params: { foo: true },
+    logger: loggerMock,
   });
 
   expect(loggerMock.debug).toBeCalledWith('executing action test:preconfigured: Preconfigured');
@@ -596,6 +601,7 @@ test('should not throws an error if actionType is preconfigured', async () => {
       baz: true,
     },
     params: { foo: true },
+    logger: loggerMock,
   });
 });
 
@@ -673,6 +679,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
       apiKey: 'abc',
     },
     params: { foo: true },
+    logger: loggerMock,
   });
 
   expect(loggerMock.debug).toBeCalledWith('executing action test:preconfigured: Preconfigured');
