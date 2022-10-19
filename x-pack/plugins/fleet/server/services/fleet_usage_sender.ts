@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable max-classes-per-file */
 import type {
   ConcreteTaskInstance,
   TaskManagerStartContract,
   TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
-
-import { ElasticV3ServerShipper } from '@kbn/analytics-shippers-elastic-v3-server';
 
 import type { Usage } from '../collectors/register';
 
