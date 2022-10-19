@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import { IngestPipeline, IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
-
-import { IngestPipeline, IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 
 /**
  * Gets all ML inference pipelines. Redacts trained model IDs in those pipelines which reference
@@ -18,7 +17,7 @@ import { IngestPipeline, IngestProcessorContainer } from '@elastic/elasticsearch
  */
 export const getMlInferencePipelines = async (
   esClient: ElasticsearchClient,
-  trainedModelsProvider: MlTrainedModels | undefined,
+  trainedModelsProvider: MlTrainedModels | undefined
 ): Promise<Record<string, IngestPipeline>> => {
   if (!trainedModelsProvider) {
     return Promise.reject(new Error('Machine Learning is not enabled'));
@@ -32,8 +31,9 @@ export const getMlInferencePipelines = async (
     }),
     trainedModelsProvider.getTrainedModels({}),
   ]);
-  const accessibleModelIds = Object.values(trainedModels.trained_model_configs)
-    .map((modelConfig) => modelConfig.model_id);
+  const accessibleModelIds = Object.values(trainedModels.trained_model_configs).map(
+    (modelConfig) => modelConfig.model_id
+  );
 
   // Process pipelines: check if the model_id is one of the redacted ones, if so, redact it in the
   // result as well
@@ -41,8 +41,8 @@ export const getMlInferencePipelines = async (
   Object.entries(fetchedInferencePipelines).forEach(([name, inferencePipeline]) => {
     inferencePipelinesResult[name] = {
       ...inferencePipeline,
-      processors: inferencePipeline.processors?.map(
-        (processor) => redactModelIdIfInaccessible(processor, accessibleModelIds)
+      processors: inferencePipeline.processors?.map((processor) =>
+        redactModelIdIfInaccessible(processor, accessibleModelIds)
       ),
     };
   });
@@ -57,7 +57,10 @@ export const getMlInferencePipelines = async (
  * @param accessibleModelIds array of known accessible model IDs.
  * @returns the input processor if unchanged, or a copy of the processor with the model ID redacted.
  */
-function redactModelIdIfInaccessible(processor: IngestProcessorContainer, accessibleModelIds: string[]): IngestProcessorContainer {
+function redactModelIdIfInaccessible(
+  processor: IngestProcessorContainer,
+  accessibleModelIds: string[]
+): IngestProcessorContainer {
   if (!processor.inference || accessibleModelIds.includes(processor.inference.model_id)) {
     return processor;
   }
@@ -67,6 +70,6 @@ function redactModelIdIfInaccessible(processor: IngestProcessorContainer, access
     inference: {
       ...processor.inference,
       model_id: '',
-    }
-  }
+    },
+  };
 }
