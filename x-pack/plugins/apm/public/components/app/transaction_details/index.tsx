@@ -22,7 +22,7 @@ import {
   isMobileAgentName,
   isServerlessAgent,
 } from '../../../../common/agent_name';
-import { MobileAgentTransactionCharts } from '../../shared/charts/transaction_charts/mobile_agent_transaction_charts';
+import { MobileTransactionCharts } from '../../shared/charts/transaction_charts/mobile_transaction_charts';
 
 export function TransactionDetails() {
   const { path, query } = useApmParams(
@@ -74,7 +74,14 @@ export function TransactionDetails() {
       <EuiSpacer size="m" />
 
       <ChartPointerEventContextProvider>
-        {!isMobileAgent ? (
+        {isMobileAgent ? (
+          <MobileTransactionCharts
+            kuery={query.kuery}
+            environment={query.environment}
+            start={start}
+            end={end}
+          />
+        ) : (
           <TransactionCharts
             kuery={query.kuery}
             environment={query.environment}
@@ -84,13 +91,6 @@ export function TransactionDetails() {
             isServerlessContext={isServerless}
             comparisonEnabled={comparisonEnabled}
             offset={offset}
-          />
-        ) : (
-          <MobileAgentTransactionCharts
-            kuery={query.kuery}
-            environment={query.environment}
-            start={start}
-            end={end}
           />
         )}
       </ChartPointerEventContextProvider>

@@ -13,7 +13,7 @@ import { ServiceOverviewThroughputChart } from '../../../app/service_overview/se
 import { LatencyChart } from '../latency_chart';
 import { FailedTransactionRateChart } from '../failed_transaction_rate_chart';
 
-export function MobileAgentTransactionCharts({
+export function MobileTransactionCharts({
   kuery,
   environment,
   start,

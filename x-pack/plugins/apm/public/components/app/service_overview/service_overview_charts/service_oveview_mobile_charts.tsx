@@ -26,7 +26,7 @@ interface Props {
   isSingleColumn: boolean;
 }
 
-export function ServiceOverviewMobileAgentCharts({
+export function ServiceOverviewMobileCharts({
   latencyChartHeight,
   rowDirection,
   nonLatencyChartHeight,

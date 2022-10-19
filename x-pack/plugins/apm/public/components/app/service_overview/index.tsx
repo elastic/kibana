@@ -14,7 +14,9 @@ import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { ServiceOverviewCharts } from './service_overview_charts/service_overview_charts';
-import { ServiceOverviewMobileAgentCharts } from './service_overview_charts/service_oveview_mobile_agent_charts';
+import { ServiceOverviewMobileCharts } from './service_overview_charts/service_oveview_mobile_charts';
+
+type RowDirection = 'column' | 'row';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -40,9 +42,16 @@ export function ServiceOverview() {
   const nonLatencyChartHeight = isSingleColumn
     ? latencyChartHeight
     : chartHeight;
-  const rowDirection = isSingleColumn ? 'column' : 'row';
+  const rowDirection: RowDirection = isSingleColumn ? 'column' : 'row';
 
   const isMobileAgent = isMobileAgentName(agentName);
+
+  const serviceOverviewProps = {
+    latencyChartHeight,
+    rowDirection,
+    nonLatencyChartHeight,
+    isSingleColumn,
+  };
 
   return (
     <AnnotationsContextProvider
@@ -52,20 +61,10 @@ export function ServiceOverview() {
       end={end}
     >
       <ChartPointerEventContextProvider>
-        {!isMobileAgent ? (
-          <ServiceOverviewCharts
-            latencyChartHeight={latencyChartHeight}
-            rowDirection={rowDirection}
-            nonLatencyChartHeight={nonLatencyChartHeight}
-            isSingleColumn={isSingleColumn}
-          />
+        {isMobileAgent ? (
+          <ServiceOverviewMobileCharts {...serviceOverviewProps} />
         ) : (
-          <ServiceOverviewMobileAgentCharts
-            latencyChartHeight={latencyChartHeight}
-            rowDirection={rowDirection}
-            nonLatencyChartHeight={nonLatencyChartHeight}
-            isSingleColumn={isSingleColumn}
-          />
+          <ServiceOverviewCharts {...serviceOverviewProps} />
         )}
       </ChartPointerEventContextProvider>
     </AnnotationsContextProvider>

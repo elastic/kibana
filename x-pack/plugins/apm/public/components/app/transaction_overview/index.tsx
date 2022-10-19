@@ -19,7 +19,7 @@ import {
   isMobileAgentName,
   isServerlessAgent,
 } from '../../../../common/agent_name';
-import { MobileAgentTransactionCharts } from '../../shared/charts/transaction_charts/mobile_agent_transaction_charts';
+import { MobileTransactionCharts } from '../../shared/charts/transaction_charts/mobile_transaction_charts';
 
 export function TransactionOverview() {
   const {
@@ -72,7 +72,14 @@ export function TransactionOverview() {
           <EuiSpacer size="s" />
         </>
       )}
-      {!isMobileAgent ? (
+      {isMobileAgent ? (
+        <MobileTransactionCharts
+          kuery={kuery}
+          environment={environment}
+          start={start}
+          end={end}
+        />
+      ) : (
         <TransactionCharts
           kuery={kuery}
           environment={environment}
@@ -81,13 +88,6 @@ export function TransactionOverview() {
           isServerlessContext={isServerless}
           comparisonEnabled={comparisonEnabled}
           offset={offset}
-        />
-      ) : (
-        <MobileAgentTransactionCharts
-          kuery={kuery}
-          environment={environment}
-          start={start}
-          end={end}
         />
       )}
       <EuiSpacer size="s" />
