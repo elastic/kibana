@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { bootstrap } from './src';
+import { bootstrap } from '../src';
+
+(async () => {
+  await bootstrap();
+})();

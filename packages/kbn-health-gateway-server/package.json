@@ -6,6 +6,6 @@
   "author": "Kibana Core",
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "scripts": {
-    "start": "node ../../bazel-bin/packages/kbn-health-gateway-server/target_node/index.js"
+    "start": "node ../../bazel-bin/packages/kbn-health-gateway-server/target_node/scripts/init.js"
   }
 }

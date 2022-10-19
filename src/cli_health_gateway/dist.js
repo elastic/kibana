@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { bootstrap } from './src';
+require('../setup_node_env/dist');
+require('./cli_health_gateway');
