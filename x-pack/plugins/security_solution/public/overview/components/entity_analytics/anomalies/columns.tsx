@@ -21,9 +21,11 @@ import { hostsActions } from '../../../../hosts/store';
 import { HostsType } from '../../../../hosts/store/model';
 import { UsersType } from '../../../../users/store/model';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
-import { useEnableDataFeed } from '../../../../common/components/ml_popover/hooks/use_enable_data_feed';
-import type { Refetch } from '../../../../common/store/inputs/model';
-import { isJobFailed, isJobStarted } from '../../../../../common/machine_learning/helpers';
+import {
+  isJobFailed,
+  isJobStarted,
+  isJobLoading,
+} from '../../../../../common/machine_learning/helpers';
 
 type AnomaliesColumns = Array<EuiBasicTableColumn<AnomaliesCount>>;
 
@@ -31,7 +33,10 @@ const MediumShadeText = styled.span`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
 `;
 
-export const useAnomaliesColumns = (loading: boolean, refreshJobs: Refetch): AnomaliesColumns => {
+export const useAnomaliesColumns = (
+  loading: boolean,
+  onJobStateChange: (job: SecurityJob) => Promise<void>
+): AnomaliesColumns => {
   const columns: AnomaliesColumns = useMemo(
     () => [
       {
@@ -68,46 +73,40 @@ export const useAnomaliesColumns = (loading: boolean, refreshJobs: Refetch): Ano
         width: '15%',
         'data-test-subj': 'anomalies-table-column-count',
         render: (count, { entity, job }) => {
-          if (loading || !job) return '';
+          if (!job) return '';
 
           if (count > 0 || isJobStarted(job.jobState, job.datafeedState)) {
             return <AnomaliesTabLink count={count} jobId={job.id} entity={entity} />;
           } else if (isJobFailed(job.jobState, job.datafeedState)) {
             return i18n.JOB_STATUS_FAILED;
           } else if (job.isCompatible) {
-            return <EnableJob job={job} isJobLoading={loading} refreshJobs={refreshJobs} />;
+            return <EnableJob job={job} isLoading={loading} onJobStateChange={onJobStateChange} />;
           } else {
             return <EuiIcon aria-label="Warning" size="s" type="alert" color="warning" />;
           }
         },
       },
     ],
-    [loading, refreshJobs]
+    [loading, onJobStateChange]
   );
   return columns;
 };
 
 const EnableJob = ({
   job,
-  isJobLoading,
-  refreshJobs,
+  isLoading,
+  onJobStateChange,
 }: {
   job: SecurityJob;
-  isJobLoading: boolean;
-  refreshJobs: Refetch;
+  isLoading: boolean;
+  onJobStateChange: (job: SecurityJob) => Promise<void>;
 }) => {
-  const { isLoading, enableDatafeed } = useEnableDataFeed();
+  const handleChange = useCallback(() => onJobStateChange(job), [job, onJobStateChange]);
 
-  const handleJobStateChange = useCallback(async () => {
-    const result = await enableDatafeed(job, job.latestTimestampMs || 0, true);
-    refreshJobs();
-    return result;
-  }, [enableDatafeed, job, refreshJobs]);
-
-  return isLoading || isJobLoading ? (
+  return isLoading || isJobLoading(job.jobState, job.datafeedState) ? (
     <EuiLoadingSpinner size="m" data-test-subj="job-switch-loader" />
   ) : (
-    <LinkAnchor onClick={handleJobStateChange} data-test-subj="enable-job">
+    <LinkAnchor onClick={handleChange} data-test-subj="enable-job">
       {i18n.RUN_JOB}
     </LinkAnchor>
   );
