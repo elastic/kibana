@@ -681,13 +681,13 @@ describe('Enterprise Search Managed Indices', () => {
     it('fetches ML inference pipelines', async () => {
       const pipelinesResult = {
         pipeline1: {
-          processors: []
+          processors: [],
         },
         pipeline2: {
-          processors: []
+          processors: [],
         },
         pipeline3: {
-          processors: []
+          processors: [],
         },
       };
 
@@ -697,7 +697,7 @@ describe('Enterprise Search Managed Indices', () => {
 
       expect(getMlInferencePipelines).toHaveBeenCalledWith(
         mockClient.asCurrentUser,
-        mockTrainedModelsProvider,
+        mockTrainedModelsProvider
       );
 
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
