@@ -23,6 +23,7 @@ export function LayerSettingsPanel({
   return (
     <EuiFormRow
       display="columnCompressed"
+      data-test-subj="lns-indexPattern-random-sampling-row"
       fullWidth
       helpText={i18n.translate('xpack.lens.xyChart.randomSampling.help', {
         defaultMessage: 'Change the sampling probability to see how your chart is affected',
@@ -52,6 +53,7 @@ export function LayerSettingsPanel({
       }
     >
       <EuiRange
+        data-test-subj="lns-indexPattern-random-sampling"
         value={currentSamplingIndex}
         onChange={(e) => {
           setState({

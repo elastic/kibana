@@ -601,6 +601,7 @@ export function getFormBasedDatasource({
           execute: openLayerSettings,
           icon: 'gear',
           isCompatible: Boolean(state.layers[layerId]),
+          'data-test-subj': 'lnsLayerSettings',
         },
       ];
     },
