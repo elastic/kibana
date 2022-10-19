@@ -12,15 +12,40 @@ import { i18n } from '@kbn/i18n';
 import { GuideId, GuideState } from '../../types';
 import { UseCase } from './use_case_card';
 
-export const GuideCardFooter = ({
-  guides,
-  useCase,
-  activateGuide,
-}: {
+const viewGuideLabel = i18n.translate(
+  'guidedOnboardingPackage.gettingStarted.guideCard.startGuide.buttonLabel',
+  {
+    defaultMessage: 'View guide',
+  }
+);
+
+const continueGuideLabel = i18n.translate(
+  'guidedOnboardingPackage.gettingStarted.guideCard.continueGuide.buttonLabel',
+  {
+    defaultMessage: 'Continue',
+  }
+);
+
+const completedLabel = i18n.translate(
+  'guidedOnboardingPackage.gettingStarted.guideCard.progress.completedLabel',
+  {
+    defaultMessage: 'Completed',
+  }
+);
+
+const inProgressLabel = i18n.translate(
+  'guidedOnboardingPackage.gettingStarted.guideCard.progress.inProgressLabel',
+  {
+    defaultMessage: 'In progress',
+  }
+);
+
+export interface GuideCardFooterProps {
   guides: GuideState[];
   useCase: UseCase;
   activateGuide: (useCase: UseCase, guideState?: GuideState) => void;
-}) => {
+}
+export const GuideCardFooter = ({ guides, useCase, activateGuide }: GuideCardFooterProps) => {
   const guideState = guides.find((guide) => guide.guideId === (useCase as GuideId));
   const viewGuideButton = (
     <div className="eui-textCenter">
@@ -30,9 +55,7 @@ export const GuideCardFooter = ({
         fill
         onClick={() => activateGuide(useCase, guideState)}
       >
-        {i18n.translate('guidedOnboardingPackage.gettingStarted.guideCard.startGuide.buttonLabel', {
-          defaultMessage: 'View guide',
-        })}
+        {viewGuideLabel}
       </EuiButton>
     </div>
   );
@@ -58,29 +81,10 @@ export const GuideCardFooter = ({
           value={numberCompleteSteps}
           max={numberSteps}
           size="s"
-          label={i18n.translate(
-            'guidedOnboardingPackage.gettingStarted.guideCard.progress.completedLabel',
-            {
-              defaultMessage: 'Completed',
-            }
-          )}
+          label={completedLabel}
         />
         <EuiSpacer size="l" />
-        <div className="eui-textCenter">
-          <EuiButton
-            // Used for FS tracking
-            data-test-subj={`onboarding--guideCard--view--${useCase}`}
-            fill
-            onClick={() => activateGuide(useCase, guideState)}
-          >
-            {i18n.translate(
-              'guidedOnboardingPackage.gettingStarted.guideCard.startGuide.buttonLabel',
-              {
-                defaultMessage: 'View guide',
-              }
-            )}
-          </EuiButton>
-        </div>
+        {viewGuideButton}
       </>
     );
   }
@@ -92,12 +96,7 @@ export const GuideCardFooter = ({
         value={numberCompleteSteps}
         max={numberSteps}
         size="s"
-        label={i18n.translate(
-          'guidedOnboardingPackage.gettingStarted.guideCard.progress.inProgressLabel',
-          {
-            defaultMessage: 'In progress',
-          }
-        )}
+        label={inProgressLabel}
       />
       <EuiSpacer size="l" />
       <div className="eui-textCenter">
@@ -107,12 +106,7 @@ export const GuideCardFooter = ({
           fill
           onClick={() => activateGuide(useCase, guideState)}
         >
-          {i18n.translate(
-            'guidedOnboardingPackage.gettingStarted.guideCard.continueGuide.buttonLabel',
-            {
-              defaultMessage: 'Continue',
-            }
-          )}
+          {continueGuideLabel}
         </EuiButton>
       </div>
     </>

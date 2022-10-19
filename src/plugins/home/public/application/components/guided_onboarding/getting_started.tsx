@@ -72,6 +72,7 @@ export const GettingStarted = () => {
       setGuidesState(allGuides.state);
     }
   }, [guidedOnboardingService]);
+
   useEffect(() => {
     fetchGuidesState();
   }, [fetchGuidesState]);
