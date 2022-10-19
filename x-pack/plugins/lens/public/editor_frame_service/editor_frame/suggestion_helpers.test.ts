@@ -571,6 +571,7 @@ describe('suggestion helpers', () => {
             getFilters: jest.fn(),
             getMaxPossibleNumValues: jest.fn(),
             isTextBasedLanguage: jest.fn(() => false),
+            hasDefaultTimeField: jest.fn(() => true),
           },
         },
         { activeId: 'testVis', state: {} },
@@ -609,6 +610,7 @@ describe('suggestion helpers', () => {
           getFilters: jest.fn(),
           getMaxPossibleNumValues: jest.fn(),
           isTextBasedLanguage: jest.fn(() => false),
+          hasDefaultTimeField: jest.fn(() => true),
         },
       };
       defaultParams[3] = {
@@ -672,6 +674,7 @@ describe('suggestion helpers', () => {
           getFilters: jest.fn(),
           getMaxPossibleNumValues: jest.fn(),
           isTextBasedLanguage: jest.fn(() => false),
+          hasDefaultTimeField: jest.fn(() => true),
         },
       };
       mockVisualization1.getSuggestions.mockReturnValue([]);

@@ -273,6 +273,9 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -298,6 +301,9 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -344,6 +350,9 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -387,6 +396,9 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -430,6 +442,9 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
