@@ -31,34 +31,18 @@ export function ServiceOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const latencyChartHeight = 200;
-
   // The default EuiFlexGroup breaks at 768, but we want to break at 1200, so we
   // observe the window width and set the flex directions of rows accordingly
   const { isLarge } = useBreakpoints();
   const isSingleColumn = isLarge;
+
+  const latencyChartHeight = 200;
   const nonLatencyChartHeight = isSingleColumn
     ? latencyChartHeight
     : chartHeight;
   const rowDirection = isSingleColumn ? 'column' : 'row';
 
   const isMobileAgent = isMobileAgentName(agentName);
-
-  const serviceOverviewCharts = !isMobileAgent ? (
-    <ServiceOverviewCharts
-      latencyChartHeight={latencyChartHeight}
-      rowDirection={rowDirection}
-      nonLatencyChartHeight={nonLatencyChartHeight}
-      isSingleColumn={isSingleColumn}
-    />
-  ) : (
-    <ServiceOverviewMobileAgentCharts
-      latencyChartHeight={latencyChartHeight}
-      rowDirection={rowDirection}
-      nonLatencyChartHeight={nonLatencyChartHeight}
-      isSingleColumn={isSingleColumn}
-    />
-  );
 
   return (
     <AnnotationsContextProvider
@@ -68,7 +52,21 @@ export function ServiceOverview() {
       end={end}
     >
       <ChartPointerEventContextProvider>
-        {serviceOverviewCharts}
+        {!isMobileAgent ? (
+          <ServiceOverviewCharts
+            latencyChartHeight={latencyChartHeight}
+            rowDirection={rowDirection}
+            nonLatencyChartHeight={nonLatencyChartHeight}
+            isSingleColumn={isSingleColumn}
+          />
+        ) : (
+          <ServiceOverviewMobileAgentCharts
+            latencyChartHeight={latencyChartHeight}
+            rowDirection={rowDirection}
+            nonLatencyChartHeight={nonLatencyChartHeight}
+            isSingleColumn={isSingleColumn}
+          />
+        )}
       </ChartPointerEventContextProvider>
     </AnnotationsContextProvider>
   );
