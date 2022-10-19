@@ -20,11 +20,9 @@ import {
 import { EntityCell, EntityCellFilter } from '../entity_cell';
 import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 import {
-  getMultiBucketImpactLabel,
   showActualForFunction,
   showTypicalForFunction,
 } from '../../../../common/util/anomaly_utils';
-import { MULTI_BUCKET_IMPACT } from '../../../../common/constants/multi_bucket_impact';
 import { AnomaliesTableRecord, MLAnomalyDoc } from '../../../../common/types/anomalies';
 import { formatValue } from '../../formatters/format_value';
 import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
@@ -219,18 +217,6 @@ export const DetailsItems: FC<{
     }),
     description: anomaly.jobId,
   });
-
-  if (
-    source.multi_bucket_impact !== undefined &&
-    source.multi_bucket_impact >= MULTI_BUCKET_IMPACT.LOW
-  ) {
-    items.push({
-      title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.multiBucketImpactTitle', {
-        defaultMessage: 'Multi-bucket impact',
-      }),
-      description: getMultiBucketImpactLabel(source.multi_bucket_impact),
-    });
-  }
 
   items.push({
     title: (
@@ -607,9 +593,9 @@ function getAnomalyType(explanation: MLAnomalyDoc['anomaly_score_explanation']) 
 }
 
 function getImpactValue(score: number) {
-  if (score < 1) return 1;
-  if (score < 3) return 2;
-  if (score < 6) return 3;
+  if (score < 2) return 1;
+  if (score < 4) return 2;
+  if (score < 7) return 3;
   if (score < 12) return 4;
   return 5;
 }
@@ -620,21 +606,21 @@ const impactTooltips = {
       'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.anomalyCharacteristicsTooltip.low',
       {
         defaultMessage:
-          'The statistical properties of the detected anomalous interval have a low impact on the score.',
+          'Moderate impact from the statistical properties of the detected anomaly compared to the previous anomalies.',
       }
     ),
     medium: i18n.translate(
       'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.anomalyCharacteristicsTooltip.medium',
       {
         defaultMessage:
-          'The statistical properties of the detected anomalous interval have a medium impact on the score.',
+          'Medium impact from the statistical properties of the detected anomaly compared to the previous anomalies.',
       }
     ),
     high: i18n.translate(
       'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.anomalyCharacteristicsTooltip.high',
       {
         defaultMessage:
-          'The statistical properties of the detected anomalous interval have a high impact on the score.',
+          'High impact from the statistical properties of the detected anomaly compared to the previous anomalies.',
       }
     ),
   },
@@ -643,21 +629,21 @@ const impactTooltips = {
       'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip.low',
       {
         defaultMessage:
-          'The difference between actual and typical values in this bucket have a low impact on the score.',
+          'The difference between actual and typical values in this bucket have a moderate impact.',
       }
     ),
     medium: i18n.translate(
       'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip.medium',
       {
         defaultMessage:
-          'The difference between actual and typical values in this bucket have a medium impact on the score.',
+          'The difference between actual and typical values in this bucket have a significant impact.',
       }
     ),
     high: i18n.translate(
       'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip.high',
       {
         defaultMessage:
-          'The difference between actual and typical values in this bucket have a high impact on the score.',
+          'The difference between actual and typical values in this bucket have a high impact.',
       }
     ),
   },
@@ -666,21 +652,21 @@ const impactTooltips = {
       'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multiBucketTooltip.low',
       {
         defaultMessage:
-          'The difference between actual and typical values in the past 12 buckets have a low impact on the score.',
+          'The difference between actual and typical values in the past 12 buckets have a moderate impact.',
       }
     ),
     medium: i18n.translate(
       'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multiBucketTooltip.medium',
       {
         defaultMessage:
-          'The difference between actual and typical values in the past 12 buckets have a medium impact on the score.',
+          'The difference between actual and typical values in the past 12 buckets have a significant impact.',
       }
     ),
     high: i18n.translate(
       'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multiBucketTooltip.high',
       {
         defaultMessage:
-          'The difference between actual and typical values in the past 12 buckets have a high impact on the score.',
+          'The difference between actual and typical values in the past 12 buckets have a high impact.',
       }
     ),
   },
