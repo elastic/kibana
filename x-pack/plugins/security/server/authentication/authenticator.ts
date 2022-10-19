@@ -27,7 +27,6 @@ import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import {
   type Session,
-  SessionError,
   SessionExpiredError,
   SessionUnexpectedError,
   type SessionValue,
@@ -297,9 +296,7 @@ export class Authenticator {
     assertRequest(request);
     assertLoginAttempt(attempt);
 
-    const existingSessionValueRaw = await this.getSessionValue(request);
-    const existingSessionValue =
-      existingSessionValueRaw instanceof SessionError ? null : existingSessionValueRaw;
+    const { value: existingSessionValue } = await this.getSessionValue(request);
 
     // Login attempt can target specific provider by its name (e.g. chosen at the Login Selector UI)
     // or a group of providers with the specified type (e.g. in case of 3rd-party initiated login
@@ -366,10 +363,9 @@ export class Authenticator {
   async authenticate(request: KibanaRequest): Promise<AuthenticationResult> {
     assertRequest(request);
 
-    const existingSessionValueRaw = await this.getSessionValue(request);
-    const existingSessionValue =
-      existingSessionValueRaw instanceof SessionError ? null : existingSessionValueRaw;
-    if (this.shouldRedirectToLoginSelector(request, existingSessionValue)) {
+    const existingSession = await this.getSessionValue(request);
+
+    if (this.shouldRedirectToLoginSelector(request, existingSession.value)) {
       const providerNameSuggestedByHint = request.url.searchParams.get(
         AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER
       );
@@ -390,9 +386,9 @@ export class Authenticator {
               )}`
             : ''
         }${
-          existingSessionValueRaw instanceof SessionExpiredError
+          existingSession.error instanceof SessionExpiredError
             ? `&${LOGOUT_REASON_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-                existingSessionValueRaw.code
+                existingSession.error.code
               )}`
             : ''
         }`
@@ -402,37 +398,37 @@ export class Authenticator {
     const requestIsRedirectable = canRedirectRequest(request);
 
     const suggestedProviderName =
-      existingSessionValue?.provider.name ??
+      existingSession.value?.provider.name ??
       request.url.searchParams.get(AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER);
     for (const [providerName, provider] of this.providerIterator(suggestedProviderName)) {
       // Check if current session has been set by this provider.
       const ownsSession =
-        existingSessionValue?.provider.name === providerName &&
-        existingSessionValue?.provider.type === provider.type;
+        existingSession.value?.provider.name === providerName &&
+        existingSession.value?.provider.type === provider.type;
 
       const authenticationResult = await provider.authenticate(
         request,
-        ownsSession ? existingSessionValue!.state : null
+        ownsSession ? existingSession.value!.state : null
       );
 
       if (!authenticationResult.notHandled()) {
         const sessionUpdateResult = await this.updateSessionValue(request, {
           provider: { type: provider.type, name: providerName },
           authenticationResult,
-          existingSessionValue,
+          existingSessionValue: existingSession.value,
         });
 
         if (requestIsRedirectable) {
-          // TODO: Will existingSessionValueRaw no always be a string here?!?
+          // TODO: Will existingSession.error not always be null here?!?
           if (
             // TODO: Should this just be `instanceof SessionError`?
-            existingSessionValueRaw instanceof SessionExpiredError &&
+            existingSession.error instanceof SessionExpiredError &&
             authenticationResult.redirectURL?.startsWith(
               `${this.options.basePath.get(request)}/login`
             )
           ) {
             authenticationResult.redirectURL += `&${LOGOUT_REASON_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-              existingSessionValueRaw.code
+              existingSession.error.code
             )}`;
           }
           return enrichWithUserProfileId(
@@ -449,15 +445,15 @@ export class Authenticator {
     }
 
     if (
-      existingSessionValueRaw instanceof SessionExpiredError ||
-      existingSessionValueRaw instanceof SessionUnexpectedError
+      existingSession.error instanceof SessionExpiredError ||
+      existingSession.error instanceof SessionUnexpectedError
     ) {
       const options = requestIsRedirectable
         ? undefined
         : {
-            authResponseHeaders: { [SESSION_ERROR_REASON_HEADER]: existingSessionValueRaw.code },
+            authResponseHeaders: { [SESSION_ERROR_REASON_HEADER]: existingSession.error.code },
           };
-      return AuthenticationResult.failed(existingSessionValueRaw, options);
+      return AuthenticationResult.failed(existingSession.error, options);
     } else {
       return AuthenticationResult.notHandled();
     }
@@ -470,9 +466,7 @@ export class Authenticator {
   async reauthenticate(request: KibanaRequest) {
     assertRequest(request);
 
-    const existingSessionValueRaw = await this.getSessionValue(request);
-    const existingSessionValue =
-      existingSessionValueRaw instanceof SessionError ? null : existingSessionValueRaw;
+    const { value: existingSessionValue } = await this.getSessionValue(request);
     if (!existingSessionValue) {
       this.logger.warn('Session is no longer available and cannot be re-authenticated.');
       return AuthenticationResult.notHandled();
@@ -504,8 +498,7 @@ export class Authenticator {
   async logout(request: KibanaRequest) {
     assertRequest(request);
 
-    const sessionValueRaw = await this.getSessionValue(request);
-    const sessionValue = sessionValueRaw instanceof SessionError ? null : sessionValueRaw;
+    const { value: sessionValue } = await this.getSessionValue(request);
     const suggestedProviderName =
       sessionValue?.provider.name ??
       request.url.searchParams.get(LOGOUT_PROVIDER_QUERY_STRING_PARAMETER);
@@ -545,10 +538,9 @@ export class Authenticator {
   async acknowledgeAccessAgreement(request: KibanaRequest) {
     assertRequest(request);
 
-    const existingSessionValueRaw = await this.getSessionValue(request);
-    const existingSessionValue =
-      existingSessionValueRaw instanceof SessionError ? null : existingSessionValueRaw;
+    const { value: existingSessionValue } = await this.getSessionValue(request);
     const currentUser = this.options.getCurrentUser(request);
+
     if (!existingSessionValue || !currentUser) {
       throw new Error('Cannot acknowledge access agreement for unauthenticated user.');
     }
@@ -648,24 +640,24 @@ export class Authenticator {
    * @param request Request instance.
    */
   private async getSessionValue(request: KibanaRequest) {
-    const existingSessionValue = await this.session.get(request);
+    const existingSession = await this.session.get(request);
 
     // If we detect that for some reason we have a session stored for the provider that is not
     // available anymore (e.g. when user was logged in with one provider, but then configuration has
     // changed and that provider is no longer available), then we should clear session entirely.
     if (
-      !(existingSessionValue instanceof SessionError) &&
-      this.providers.get(existingSessionValue.provider.name)?.type !==
-        existingSessionValue.provider.type
+      existingSession.value &&
+      this.providers.get(existingSession.value.provider.name)?.type !==
+        existingSession.value.provider.type
     ) {
       this.logger.warn(
-        `Attempted to retrieve session for the "${existingSessionValue.provider.type}/${existingSessionValue.provider.name}" provider, but it is not configured.`
+        `Attempted to retrieve session for the "${existingSession.value.provider.type}/${existingSession.value.provider.name}" provider, but it is not configured.`
       );
-      await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
-      return new SessionUnexpectedError();
+      await this.invalidateSessionValue({ request, sessionValue: existingSession.value });
+      return { error: new SessionUnexpectedError(), value: null };
     }
 
-    return existingSessionValue;
+    return existingSession;
   }
 
   /**

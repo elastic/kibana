@@ -151,7 +151,7 @@ export class Session {
   async get(request: KibanaRequest) {
     const sessionCookieValue = await this.options.sessionCookie.get(request);
     if (!sessionCookieValue) {
-      return new SessionMissingError();
+      return { error: new SessionMissingError(), value: null };
     }
 
     const sessionLogger = this.getLoggerForSID(sessionCookieValue.sid);
@@ -163,7 +163,7 @@ export class Session {
     ) {
       sessionLogger.debug('Session has expired and will be invalidated.');
       await this.invalidate(request, { match: 'current' });
-      return new SessionExpiredError();
+      return { error: new SessionExpiredError(), value: null };
     }
 
     const sessionIndexValue = await this.options.sessionIndex.get(sessionCookieValue.sid);
@@ -172,7 +172,7 @@ export class Session {
         'Session value is not available in the index, session cookie will be invalidated.'
       );
       await this.options.sessionCookie.clear(request);
-      return new SessionUnexpectedError();
+      return { error: new SessionUnexpectedError(), value: null };
     }
 
     let decryptedContent: SessionValueContentToEncrypt;
@@ -185,13 +185,16 @@ export class Session {
         `Unable to decrypt session content, session will be invalidated: ${err.message}`
       );
       await this.invalidate(request, { match: 'current' });
-      return new SessionUnexpectedError();
+      return { error: new SessionUnexpectedError(), value: null };
     }
 
     return {
-      ...Session.sessionIndexValueToSessionValue(sessionIndexValue, decryptedContent),
-      // Unlike session index, session cookie contains the most up-to-date idle timeout expiration.
-      idleTimeoutExpiration: sessionCookieValue.idleTimeoutExpiration,
+      error: null,
+      value: {
+        ...Session.sessionIndexValueToSessionValue(sessionIndexValue, decryptedContent),
+        // Unlike session index, session cookie contains the most up-to-date idle timeout expiration.
+        idleTimeoutExpiration: sessionCookieValue.idleTimeoutExpiration,
+      },
     };
   }
 

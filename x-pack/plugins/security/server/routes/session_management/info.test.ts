@@ -128,7 +128,7 @@ describe('Info session routes', () => {
       ];
 
       for (const [sessionInfo, expected] of assertions) {
-        session.get.mockResolvedValue(sessionMock.createValue(sessionInfo));
+        session.get.mockResolvedValue({ error: null, value: sessionMock.createValue(sessionInfo) });
 
         const expectedBody = {
           canBeExtended: expected.canBeExtended,

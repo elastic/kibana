@@ -58,7 +58,7 @@ describe('Change password', () => {
 
     authc.getCurrentUser.mockReturnValue(mockAuthenticatedUser(mockAuthenticatedUser()));
     authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockAuthenticatedUser()));
-    session.get.mockResolvedValue(sessionMock.createValue());
+    session.get.mockResolvedValue({ error: null, value: sessionMock.createValue() });
 
     mockCoreContext = coreMock.createRequestHandlerContext();
     mockContext = coreMock.createCustomRequestHandlerContext({
@@ -190,9 +190,10 @@ describe('Change password', () => {
       });
       authc.getCurrentUser.mockReturnValue(mockUser);
       authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockUser));
-      session.get.mockResolvedValue(
-        sessionMock.createValue({ provider: { type: 'token', name: 'token1' } })
-      );
+      session.get.mockResolvedValue({
+        error: null,
+        value: sessionMock.createValue({ provider: { type: 'token', name: 'token1' } }),
+      });
 
       const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
@@ -211,7 +212,7 @@ describe('Change password', () => {
     });
 
     it('successfully changes own password but does not re-login if current session does not exist.', async () => {
-      session.get.mockResolvedValue(new SessionMissingError());
+      session.get.mockResolvedValue({ error: new SessionMissingError(), value: null });
       const response = await routeHandler(mockContext, mockRequest, kibanaResponseFactory);
 
       expect(response.status).toBe(204);
