@@ -30,7 +30,8 @@
     "triggersActionsUi",
     "inspector",
     "unifiedSearch",
-    "security"
+    "security",
+    "guidedOnboarding"
   ],
   "ui": true,
   "server": true,
