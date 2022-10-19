@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo } from 'react';
+import React, { FC, memo } from 'react';
 import { EuiExpression, EuiToken, EuiFlexGroup } from '@elastic/eui';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -18,18 +18,15 @@ import type { Entry } from '../types';
 import * as i18n from '../../translations';
 import { getValue, getValueExpression } from './entry_content.helper';
 
-export const EntryContent = memo(
-  ({
-    entry,
-    index,
-    isNestedEntry = false,
-    dataTestSubj,
-  }: {
-    entry: Entry;
-    index: number;
-    isNestedEntry?: boolean;
-    dataTestSubj?: string;
-  }) => {
+interface EntryContentProps {
+  entry: Entry;
+  index: number;
+  isNestedEntry?: boolean;
+  dataTestSubj?: string;
+}
+
+export const EntryContent: FC<EntryContentProps> = memo(
+  ({ entry, index, isNestedEntry = false, dataTestSubj }) => {
     const { field, type } = entry;
     const value = getValue(entry);
     const operator = 'operator' in entry ? entry.operator : '';
@@ -40,12 +37,14 @@ export const EntryContent = memo(
         <div css={expressionContainerCss}>
           {isNestedEntry ? (
             <EuiFlexGroup
+              responsive
               css={nestedGroupSpaceCss}
               direction="row"
               alignItems="center"
               gutterSize="m"
+              data-test-subj={`${dataTestSubj || ''}NestedEntry`}
             >
-              <EuiToken iconType="tokenNested" size="s" />
+              <EuiToken data-test-subj="nstedEntryIcon" iconType="tokenNested" size="s" />
 
               <div css={valueContainerCss}>
                 <EuiExpression description="" value={field} color="subdued" />
@@ -58,6 +57,7 @@ export const EntryContent = memo(
                 description={index === 0 ? '' : i18n.CONDITION_AND}
                 value={field}
                 color={index === 0 ? 'primary' : 'subdued'}
+                data-test-subj={`${dataTestSubj || ''}SingleEntry`}
               />
 
               {getValueExpression(type as ListOperatorTypeEnum, operator, value)}
