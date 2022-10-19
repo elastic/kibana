@@ -79,9 +79,13 @@ export const observabilityConfig: GuideConfig = {
       descriptionList: [
         i18n.translate('guidedOnboarding.observabilityGuide.tourObservabilityStep.description', {
           defaultMessage:
-            'Take a look at the capabilities of our Observability solution and be inspired to add more integrations.',
+            'Get familiar with the rest of Elastic Observability and explore even more integrations.',
         }),
       ],
+      location: {
+        appID: 'observability',
+        path: '/overview',
+      },
     },
   ],
 };

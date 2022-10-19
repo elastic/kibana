@@ -48,7 +48,7 @@ export const Main = (props: MainProps) => {
   const [guidesState, setGuidesState] = useState<GuideState[] | undefined>(undefined);
   const [activeGuide, setActiveGuide] = useState<GuideState | undefined>(undefined);
 
-  const [selectedGuide, setSelectedGuide] = useState<GuideId | undefined>(undefined);
+  const [selectedGuide, setSelectedGuide] = useState<GuideId | undefined>('observability');
   const [selectedStep, setSelectedStep] = useState<GuideStepIds | undefined>(undefined);
 
   useEffect(() => {
