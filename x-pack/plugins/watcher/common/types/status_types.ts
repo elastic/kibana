@@ -14,15 +14,15 @@ export interface ActionStatusModelEs {
   id: string;
   actionStatusJson: estypes.WatcherActionStatus;
   errors?: any; // TODO: Type this more strictly.
-  lastCheckedRawFormat?: string; // Date e.g. '2017-03-01T20:55:49.679Z'
+  lastCheckedRawFormat?: estypes.DateTime; // Date e.g. '2017-03-01T20:55:49.679Z'
 }
 
 export interface ServerActionStatusModel {
   id: string;
   actionStatusJson: estypes.WatcherActionStatus;
   errors: any; // TODO: Type this more strictly.
-  lastCheckedRawFormat?: string; // Date e.g. '2017-03-01T20:55:49.679Z'
-  lastExecutionRawFormat?: string; // Date e.g. '2017-03-01T20:55:49.679Z'
+  lastCheckedRawFormat?: estypes.DateTime; // Date e.g. '2017-03-01T20:55:49.679Z'
+  lastExecutionRawFormat?: estypes.DateTime; // Date e.g. '2017-03-01T20:55:49.679Z'
   isLastExecutionSuccessful?: boolean;
   lastExecutionReason?: string;
   lastAcknowledged: Moment | null;
@@ -48,8 +48,8 @@ interface SerializedWatchStatus extends estypes.WatcherActivationStatus {
   //  - actions: WatcherActions // Record<IndexName, WatcherActionStatus>
   //  - state: WatcherActivationState // { active, timestamp }
   //  - version: VersionNumber
-  last_checked?: string; // Timestamp TODO: Update ES JS client types with this.
-  last_met_condition?: string; // Timestamp TODO: Update ES JS client types with this.
+  last_checked?: estypes.DateTime;
+  last_met_condition?: estypes.DateTime;
 }
 
 export interface WatchStatusModelEs {
