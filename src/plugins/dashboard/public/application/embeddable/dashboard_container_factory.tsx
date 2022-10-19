@@ -70,6 +70,7 @@ export class DashboardContainerFactoryDefinition
       isFullScreenMode: false,
       useMargins: true,
       syncColors: true,
+      syncCursor: true,
       syncTooltips: true,
     };
   }
