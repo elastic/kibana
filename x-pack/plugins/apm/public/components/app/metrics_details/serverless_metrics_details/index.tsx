@@ -8,16 +8,34 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { ServerlessMetrics } from '../../metrics/serverless_metrics';
 import { getServerlessFunctionNameFromId } from '../../../../../common/serverless';
+import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 
 interface Props {
   serverlessId: string;
 }
 
 export function ServerlessMetricsDetails({ serverlessId }: Props) {
+  const apmRouter = useApmRouter();
+  const { path, query } = useApmParams('/services/{serviceName}/metrics/{id}');
+
   const serverlessFunctionName = useMemo(
     () => getServerlessFunctionNameFromId(serverlessId),
     [serverlessId]
   );
+
+  useBreadcrumb(
+    () => ({
+      title: serverlessFunctionName,
+      href: apmRouter.link('/services/{serviceName}/metrics/{id}', {
+        path,
+        query,
+      }),
+    }),
+    [apmRouter, path, query, serverlessFunctionName]
+  );
+
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
