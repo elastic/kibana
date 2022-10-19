@@ -9,8 +9,8 @@ import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/ser
 import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
 import { toDateRange } from '../../domain/services/date_range';
 import { InternalQueryError } from '../../errors';
-import { Duration, DurationUnit } from '../../types/schema';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
+import { Duration, DurationUnit } from '../../types/models';
 import { DefaultSLIClient } from './sli_client';
 
 describe('SLIClient', () => {

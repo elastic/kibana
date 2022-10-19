@@ -6,8 +6,8 @@
  */
 
 import uuid from 'uuid';
+import { Duration, DurationUnit } from '../../../types/models/duration';
 
-import { Duration, DurationUnit } from '../../../types/schema';
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
