@@ -84,6 +84,7 @@ describe('convertToLens', () => {
     const result = await convertToLens(model);
     expect(result).toBeNull();
     expect(mockIsValidMetrics).toBeCalledTimes(1);
+    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
   });
 
   test('should return null for empty time field', async () => {
@@ -91,6 +92,7 @@ describe('convertToLens', () => {
     const result = await convertToLens(model);
     expect(result).toBeNull();
     expect(mockGetDataSourceInfo).toBeCalledTimes(1);
+    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
   });
 
   test('should return null for invalid date histogram', async () => {
@@ -98,6 +100,7 @@ describe('convertToLens', () => {
     const result = await convertToLens(model);
     expect(result).toBeNull();
     expect(mockConvertToDateHistogramColumn).toBeCalledTimes(1);
+    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
   });
 
   test('should return null for invalid or unsupported metrics', async () => {
@@ -105,6 +108,7 @@ describe('convertToLens', () => {
     const result = await convertToLens(model);
     expect(result).toBeNull();
     expect(mockGetMetricsColumns).toBeCalledTimes(1);
+    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
   });
 
   test('should return null for invalid or unsupported buckets', async () => {
@@ -112,6 +116,7 @@ describe('convertToLens', () => {
     const result = await convertToLens(model);
     expect(result).toBeNull();
     expect(mockGetBucketsColumns).toBeCalledTimes(1);
+    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
   });
 
   test('should return null for static value with buckets', async () => {
@@ -125,6 +130,7 @@ describe('convertToLens', () => {
     expect(result).toBeNull();
     expect(mockGetMetricsColumns).toBeCalledTimes(1);
     expect(mockGetBucketsColumns).toBeCalledTimes(1);
+    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
   });
 
   test('should return state for valid model', async () => {
@@ -133,6 +139,16 @@ describe('convertToLens', () => {
     expect(result?.type).toBe('lnsXY');
     expect(mockGetBucketsColumns).toBeCalledTimes(model.series.length);
     expect(mockGetConfigurationForTimeseries).toBeCalledTimes(1);
+    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(0);
+  });
+
+  test('should drop adhoc dataviews if action is required', async () => {
+    const result = await convertToLens(model, undefined, true);
+    expect(result).toBeDefined();
+    expect(result?.type).toBe('lnsXY');
+    expect(mockGetBucketsColumns).toBeCalledTimes(model.series.length);
+    expect(mockGetConfigurationForTimeseries).toBeCalledTimes(1);
+    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
   });
 
   test('should skip hidden series', async () => {
@@ -149,5 +165,6 @@ describe('convertToLens', () => {
     expect(result).toBeDefined();
     expect(result?.type).toBe('lnsXY');
     expect(mockIsValidMetrics).toBeCalledTimes(0);
+    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(0);
   });
 });
