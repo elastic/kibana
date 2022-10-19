@@ -30,6 +30,7 @@ import { fetchMlInferencePipelineHistory } from '../../lib/indices/fetch_ml_infe
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { getMlInferenceErrors } from '../../lib/ml_inference_pipeline/get_inference_errors';
+import { getMlInferencePipelines } from '../../lib/ml_inference_pipeline/get_inference_pipelines';
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
 import { getPipeline } from '../../lib/pipelines/get_pipeline';
@@ -676,6 +677,29 @@ export function registerIndexRoutes({
 
       return response.ok({
         body: history,
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/pipelines/ml_inference',
+      validate: {},
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const {
+        elasticsearch: { client },
+        savedObjects: { client: savedObjectsClient },
+      } = await context.core;
+      const trainedModelsProvider = ml
+        ? await ml.trainedModelsProvider(request, savedObjectsClient)
+        : undefined;
+
+      const pipelines = await getMlInferencePipelines(client.asCurrentUser, trainedModelsProvider);
+
+      return response.ok({
+        body: pipelines,
         headers: { 'content-type': 'application/json' },
       });
     })
