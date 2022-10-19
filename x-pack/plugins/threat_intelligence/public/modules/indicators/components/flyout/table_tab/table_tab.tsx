@@ -6,7 +6,7 @@
  */
 
 import React, { VFC } from 'react';
-import { Indicator } from '../../../../../../common/types/indicator';
+import { Indicator } from '../../../types';
 import { IndicatorEmptyPrompt } from '../empty_prompt';
 import { IndicatorFieldsTable } from '../fields_table';
 

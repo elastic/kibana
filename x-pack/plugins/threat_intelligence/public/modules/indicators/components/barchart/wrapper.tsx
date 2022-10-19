@@ -18,7 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { TimeRange } from '@kbn/es-query';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { SecuritySolutionDataViewBase } from '../../../../types';
-import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import { RawIndicatorFieldId } from '../../types';
 import { IndicatorsFieldSelector } from './field_selector';
 import { IndicatorsBarChart } from './barchart';
 import { ChartSeries } from '../../services';

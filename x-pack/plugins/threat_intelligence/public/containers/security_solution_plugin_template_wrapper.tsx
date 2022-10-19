@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { FC } from 'react';
+import React from 'react';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-types';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '../hooks';
 
 /**
  * Uses securityLayout service to retrieve shared plugin wrapper component and renders plugin routes / children inside of it.

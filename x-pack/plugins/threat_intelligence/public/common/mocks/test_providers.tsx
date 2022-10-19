@@ -19,7 +19,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
-import { KibanaContext } from '../../hooks/use_kibana';
+import { KibanaContext } from '../../hooks';
 import { SecuritySolutionPluginContext } from '../../types';
 import { getSecuritySolutionContextMock } from './mock_security_context';
 import { mockUiSetting } from './mock_kibana_ui_settings_service';

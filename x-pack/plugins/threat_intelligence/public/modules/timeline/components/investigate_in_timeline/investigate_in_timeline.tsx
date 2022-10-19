@@ -10,7 +10,7 @@ import { EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useInvestigateInTimeline } from '../../hooks';
-import { Indicator } from '../../../../../common/types/indicator';
+import { Indicator } from '../../../indicators';
 
 const BUTTON_ICON_LABEL: string = i18n.translate(
   'xpack.threatIntelligence.timeline.investigateInTimelineButtonIcon',

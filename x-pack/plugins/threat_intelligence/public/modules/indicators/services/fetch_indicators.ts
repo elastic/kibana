@@ -8,7 +8,7 @@
 import { ISearchStart } from '@kbn/data-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { Indicator } from '../../../../common/types/indicator';
+import { Indicator } from '../types';
 import { getIndicatorQueryParams, search } from '../utils';
 
 export interface RawIndicatorsResponse {

@@ -6,9 +6,9 @@
  */
 
 import React, { VFC } from 'react';
-import { useFieldTypes } from '../../../../hooks/use_field_types';
-import { EMPTY_VALUE } from '../../../../../common/constants';
-import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
+import { useFieldTypes } from '../../../../hooks';
+import { EMPTY_VALUE } from '../../../../common/constants';
+import { Indicator, RawIndicatorFieldId } from '../../types';
 import { DateFormatter } from '../../../../components/date_formatter';
 import { unwrapValue } from '../../utils';
 

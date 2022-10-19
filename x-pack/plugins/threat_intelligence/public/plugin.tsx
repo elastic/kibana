@@ -10,7 +10,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import React, { Suspense, VFC } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from './hooks/use_kibana';
+import { KibanaContextProvider } from './hooks';
 import {
   SecuritySolutionPluginContext,
   Services,

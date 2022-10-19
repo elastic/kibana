@@ -10,7 +10,7 @@ import type { ISearchStart, QueryStart } from '@kbn/data-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { calculateBarchartColumnTimeInterval } from '../../../common/utils/dates';
-import { RawIndicatorFieldId } from '../../../../common/types/indicator';
+import { RawIndicatorFieldId } from '../types';
 import { getIndicatorQueryParams, search } from '../utils';
 
 const TIMESTAMP_FIELD = RawIndicatorFieldId.TimeStamp;

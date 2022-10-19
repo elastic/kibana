@@ -10,10 +10,10 @@ import { Filter } from '@kbn/es-query';
 import {
   fieldAndValueValid,
   getIndicatorFieldAndValue,
+  Indicator,
   useIndicatorsFiltersContext,
 } from '../../indicators';
 import { FilterIn, FilterOut, updateFiltersArray } from '../utils';
-import { Indicator } from '../../../../common/types/indicator';
 
 export interface UseFilterInParam {
   /**
