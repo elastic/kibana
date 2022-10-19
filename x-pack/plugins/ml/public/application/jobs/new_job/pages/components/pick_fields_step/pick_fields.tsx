@@ -33,8 +33,7 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
 
   useEffect(() => {
     setNextActive(selectionValid && jobValidator.isPickFieldsStepValid);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobValidatorUpdated, selectionValid]);
+  }, [jobValidator, jobValidatorUpdated, selectionValid]);
 
   return (
     <Fragment>
