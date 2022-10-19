@@ -130,6 +130,18 @@ export class ElasticV3ServerShipper implements IShipper {
    */
   public reportEvents(events: Event[]) {
     // If opted out OR offline for longer than 24 hours, skip processing any events.
+
+    const performanceEvents = this.getPerfEvents(events);
+
+    if (performanceEvents.length > 0) {
+      const eventNames = performanceEvents.map((e) => e.properties.eventName);
+      this.initContext.logger.info(
+        `[Server shipper]: asked to report ${
+          performanceEvents.length
+        } performance events - ${eventNames.join(',')}`
+      );
+    }
+
     if (
       this.isOptedIn$.value === false ||
       (this.firstTimeOffline && Date.now() - this.firstTimeOffline > 24 * HOUR)
@@ -149,6 +161,15 @@ export class ElasticV3ServerShipper implements IShipper {
       });
     }
 
+    if (performanceEvents.length > 0) {
+      const eventNames = performanceEvents.map((e) => e.properties.eventName);
+      this.initContext.logger.info(
+        `[Server shipper]: pushing ${
+          performanceEvents.length
+        } performance events into queue - ${eventNames.join(',')}`
+      );
+    }
+
     this.internalQueue.push(...events);
   }
 
@@ -157,6 +178,7 @@ export class ElasticV3ServerShipper implements IShipper {
    * Triggers a flush of the internal queue to attempt to send any events held in the queue.
    */
   public shutdown() {
+    this.initContext.logger.info('[Server shipper]: shutdown');
     this.shutdown$.next();
     this.shutdown$.complete();
     this.isOptedIn$.complete();
@@ -297,20 +319,37 @@ export class ElasticV3ServerShipper implements IShipper {
   }
 
   private async sendEvents(events: Event[]) {
-    this.initContext.logger.debug(`Reporting ${events.length} events...`);
+    this.initContext.logger.info(`Reporting ${events.length} events...`);
     try {
       const code = await this.makeRequest(events);
       this.reportTelemetryCounters(events, { code });
-      this.initContext.logger.debug(`Reported ${events.length} events...`);
+      this.initContext.logger.info(`Reported ${events.length} events...`);
     } catch (error) {
-      this.initContext.logger.debug(`Failed to report ${events.length} events...`);
-      this.initContext.logger.debug(error);
+      this.initContext.logger.info(`Failed to report ${events.length} events...`);
+      this.initContext.logger.info(error);
       this.reportTelemetryCounters(events, { code: error.code, error });
       this.firstTimeOffline = undefined;
     }
   }
 
+  private getPerfEvents(events: Event[]) {
+    return events.filter((e) => {
+      return e.event_type === 'performance_metric';
+    });
+  }
+
   private async makeRequest(events: Event[]): Promise<string> {
+    const performanceEvents = this.getPerfEvents(events);
+
+    if (performanceEvents.length > 0) {
+      const eventNames = performanceEvents.map((e) => e.properties.eventName);
+      this.initContext.logger.info(
+        `[Server shipper]: sending ${
+          performanceEvents.length
+        } performance events - ${eventNames.join(',')}`
+      );
+    }
+
     const response = await fetch(this.url, {
       method: 'POST',
       body: eventsToNDJSON(events),
@@ -318,8 +357,8 @@ export class ElasticV3ServerShipper implements IShipper {
       ...(this.options.debug && { query: { debug: true } }),
     });
 
-    if (this.options.debug) {
-      this.initContext.logger.debug(`${response.status} - ${await response.text()}`);
+    if (performanceEvents.length > 0) {
+      this.initContext.logger.info(`${response.status} - ${await response.text()}`);
     }
 
     if (!response.ok) {

@@ -87,6 +87,20 @@ export class ElasticV3BrowserShipper implements IShipper {
    * @param events batched events {@link Event}
    */
   public reportEvents(events: Event[]) {
+    const performanceEvents = events.filter((e) => {
+      return e.event_type === 'performance_metric';
+    });
+
+    if (performanceEvents.length > 0) {
+      const eventNames = performanceEvents.map((e) => e.properties.eventName);
+      // eslint-disable-next-line no-console
+      console.error(
+        `[${ElasticV3BrowserShipper.shipperName}]: adding events to queue ${
+          events.length
+        } performance events - ${eventNames.join(',')}`
+      );
+    }
+
     events.forEach((event) => {
       this.internalQueue$.next(event);
     });
@@ -97,6 +111,8 @@ export class ElasticV3BrowserShipper implements IShipper {
    * Triggers a flush of the internal queue to attempt to send any events held in the queue.
    */
   public shutdown() {
+    // eslint-disable-next-line no-console
+    console.error('shutdown');
     this.internalQueue$.complete(); // NOTE: When completing the observable, the buffer logic does not wait and releases any buffered events.
   }
 
@@ -125,6 +141,25 @@ export class ElasticV3BrowserShipper implements IShipper {
   }
 
   private async makeRequest(events: Event[]): Promise<string> {
+    const performanceEvents = events.filter((e) => {
+      return e.event_type === 'performance_metric';
+    });
+
+    if (performanceEvents.length > 0) {
+      const eventNames = performanceEvents.map((e) => e.properties.eventName);
+      // eslint-disable-next-line no-console
+      console.error(
+        `[${ElasticV3BrowserShipper.shipperName}]: sending ${
+          events.length
+        } performance events - ${eventNames.join(',')}`
+      );
+      this.initContext.logger.debug(
+        `[${ElasticV3BrowserShipper.shipperName}]: sending ${
+          events.length
+        } performance events - ${eventNames.join(',')}`
+      );
+    }
+
     const response = await fetch(this.url, {
       method: 'POST',
       body: eventsToNDJSON(events),
@@ -134,17 +169,20 @@ export class ElasticV3BrowserShipper implements IShipper {
       keepalive: true,
     });
 
-    if (this.options.debug) {
+    const responseText = await response.text();
+
+    if (performanceEvents.length > 0) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `[${ElasticV3BrowserShipper.shipperName}]: ${response.status} - ${await responseText}`
+      );
       this.initContext.logger.debug(
-        `[${ElasticV3BrowserShipper.shipperName}]: ${response.status} - ${await response.text()}`
+        `[${ElasticV3BrowserShipper.shipperName}]: ${response.status} - ${await responseText}`
       );
     }
 
     if (!response.ok) {
-      throw new ErrorWithCode(
-        `${response.status} - ${await response.text()}`,
-        `${response.status}`
-      );
+      throw new ErrorWithCode(`${response.status} - ${await responseText}`, `${response.status}`);
     }
 
     return `${response.status}`;
