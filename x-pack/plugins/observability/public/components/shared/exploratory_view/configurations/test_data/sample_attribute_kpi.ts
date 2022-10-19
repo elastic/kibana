@@ -28,7 +28,7 @@ export const sampleAttributeKpi = {
       formBased: {
         layers: {
           layer0: {
-            columnOrder: ['x-axis-column-layer0', 'y-axis-column-layer0'],
+            columnOrder: ['x-axis-column-layer0', 'y-axis-column-layer0-0'],
             columns: {
               'x-axis-column-layer0': {
                 dataType: 'date',
@@ -41,7 +41,7 @@ export const sampleAttributeKpi = {
                 scale: 'interval',
                 sourceField: '@timestamp',
               },
-              'y-axis-column-layer0': {
+              'y-axis-column-layer0-0': {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
@@ -79,7 +79,7 @@ export const sampleAttributeKpi = {
       },
       layers: [
         {
-          accessors: ['y-axis-column-layer0'],
+          accessors: ['y-axis-column-layer0-0'],
           layerId: 'layer0',
           layerType: 'data',
           palette: undefined,
@@ -88,7 +88,7 @@ export const sampleAttributeKpi = {
           yConfig: [
             {
               color: 'green',
-              forAccessor: 'y-axis-column-layer0',
+              forAccessor: 'y-axis-column-layer0-0',
               axisMode: 'left',
             },
           ],

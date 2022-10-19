@@ -35,7 +35,7 @@ export const sampleAttribute = {
           layer0: {
             columnOrder: [
               'x-axis-column-layer0',
-              'y-axis-column-layer0',
+              'y-axis-column-layer0-0',
               'y-axis-column-layer0X0',
               'y-axis-column-layer0X1',
               'y-axis-column-layer0X2',
@@ -61,7 +61,7 @@ export const sampleAttribute = {
                 scale: 'interval',
                 sourceField: 'transaction.duration.us',
               },
-              'y-axis-column-layer0': {
+              'y-axis-column-layer0-0': {
                 customLabel: true,
                 dataType: 'number',
                 filter: {
@@ -253,7 +253,7 @@ export const sampleAttribute = {
       },
       layers: [
         {
-          accessors: ['y-axis-column-layer0'],
+          accessors: ['y-axis-column-layer0-0'],
           layerId: 'layer0',
           layerType: 'data',
           palette: undefined,
@@ -262,7 +262,7 @@ export const sampleAttribute = {
           yConfig: [
             {
               color: 'green',
-              forAccessor: 'y-axis-column-layer0',
+              forAccessor: 'y-axis-column-layer0-0',
               axisMode: 'left',
             },
           ],

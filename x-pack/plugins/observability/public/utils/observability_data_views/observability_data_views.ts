@@ -12,6 +12,8 @@ import type {
   DataView,
   DataViewSpec,
 } from '@kbn/data-views-plugin/public';
+import { RuntimeField } from '@kbn/data-views-plugin/public';
+import { syntheticsRuntimeFields } from '../../components/shared/exploratory_view/configurations/synthetics/runtime_fields';
 import { getApmDataViewTitle } from '../../components/shared/exploratory_view/utils/utils';
 import { rumFieldFormats } from '../../components/shared/exploratory_view/configurations/rum/field_formats';
 import { syntheticsFieldFormats } from '../../components/shared/exploratory_view/configurations/synthetics/field_formats';
@@ -33,8 +35,17 @@ const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   mobile: apmFieldFormats,
 };
 
+const appRuntimeFields: Record<AppDataType, Array<{ name: string; field: RuntimeField }> | null> = {
+  infra_logs: null,
+  infra_metrics: null,
+  ux: null,
+  apm: null,
+  synthetics: syntheticsRuntimeFields,
+  mobile: null,
+};
+
 function getFieldFormatsForApp(app: AppDataType) {
-  return appFieldFormats[app];
+  return { runtimeFields: appRuntimeFields[app], formats: appFieldFormats[app] };
 }
 
 export const dataViewList: Record<AppDataType, string> = {
@@ -127,7 +138,7 @@ export class ObservabilityDataViews {
   }
   // we want to make sure field formats remain same
   async validateFieldFormats(app: AppDataType, dataView: DataView) {
-    const defaultFieldFormats = getFieldFormatsForApp(app);
+    const { formats: defaultFieldFormats, runtimeFields } = getFieldFormatsForApp(app);
     if (defaultFieldFormats && defaultFieldFormats.length > 0) {
       let isParamsDifferent = false;
       defaultFieldFormats.forEach(({ field, format }) => {
@@ -141,7 +152,12 @@ export class ObservabilityDataViews {
           }
         }
       });
-      if (isParamsDifferent) {
+      if (runtimeFields !== null) {
+        runtimeFields.forEach(({ name, field }) => {
+          dataView.addRuntimeField(name, field);
+        });
+      }
+      if (isParamsDifferent || runtimeFields !== null) {
         await this.dataViews?.updateSavedObject(dataView);
       }
     }

@@ -43,7 +43,7 @@ interface Props {
   eventId: string;
   handleOnEventClosed: () => void;
   indexName: string;
-  timelineId: string;
+  scopeId: string;
   isReadOnly?: boolean;
 }
 
@@ -55,7 +55,7 @@ export const Overview = React.memo<Props>(
     eventId,
     handleOnEventClosed,
     indexName,
-    timelineId,
+    scopeId,
     isReadOnly,
   }) => {
     const statusData = useMemo(() => {
@@ -65,12 +65,12 @@ export const Overview = React.memo<Props>(
         getEnrichedFieldInfo({
           eventId,
           contextId,
-          timelineId,
+          scopeId,
           browserFields,
           item,
         })
       );
-    }, [browserFields, contextId, data, eventId, timelineId]);
+    }, [browserFields, contextId, data, eventId, scopeId]);
 
     const severityData = useMemo(() => {
       const item = find({ field: 'kibana.alert.severity', category: 'kibana' }, data);
@@ -79,12 +79,12 @@ export const Overview = React.memo<Props>(
         getEnrichedFieldInfo({
           eventId,
           contextId,
-          timelineId,
+          scopeId,
           browserFields,
           item,
         })
       );
-    }, [browserFields, contextId, data, eventId, timelineId]);
+    }, [browserFields, contextId, data, eventId, scopeId]);
 
     const riskScoreData = useMemo(() => {
       const item = find({ field: 'kibana.alert.risk_score', category: 'kibana' }, data);
@@ -93,12 +93,12 @@ export const Overview = React.memo<Props>(
         getEnrichedFieldInfo({
           eventId,
           contextId,
-          timelineId,
+          scopeId,
           browserFields,
           item,
         })
       );
-    }, [browserFields, contextId, data, eventId, timelineId]);
+    }, [browserFields, contextId, data, eventId, scopeId]);
 
     const ruleNameData = useMemo(() => {
       const item = find({ field: SIGNAL_RULE_NAME_FIELD_NAME, category: 'kibana' }, data);
@@ -108,13 +108,13 @@ export const Overview = React.memo<Props>(
         getEnrichedFieldInfo({
           eventId,
           contextId,
-          timelineId,
+          scopeId,
           browserFields,
           item,
           linkValueField,
         })
       );
-    }, [browserFields, contextId, data, eventId, timelineId]);
+    }, [browserFields, contextId, data, eventId, scopeId]);
 
     const signalCard =
       hasData(statusData) && !isReadOnly ? (
@@ -129,7 +129,7 @@ export const Overview = React.memo<Props>(
               contextId={contextId}
               enrichedFieldInfo={statusData}
               indexName={indexName}
-              timelineId={timelineId}
+              scopeId={scopeId}
               handleOnEventClosed={handleOnEventClosed}
             />
           </OverviewCardWithActions>
