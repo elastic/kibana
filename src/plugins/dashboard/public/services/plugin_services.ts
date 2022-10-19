@@ -65,6 +65,10 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   documentationLinks: new PluginServiceProvider(documentationLinksServiceFactory),
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
+  fieldFormats: new PluginServiceProvider(({ startPlugins }) => {
+    const { fieldFormats } = startPlugins;
+    return fieldFormats;
+  }),
   http: new PluginServiceProvider(httpServiceFactory),
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),
   navigation: new PluginServiceProvider(navigationServiceFactory),

@@ -12,6 +12,7 @@ import IndexThresholdAlertTypeExpression, { DEFAULT_VALUES } from './expression'
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { IndexThresholdAlertParams } from './types';
 import { validateExpression } from './validation';
 import {
@@ -71,6 +72,7 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
 const dataMock = dataPluginMock.createStartContract();
 const dataViewMock = dataViewPluginMocks.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
+const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
 describe('IndexThresholdAlertTypeExpression', () => {
   function getAlertParams(overrides = {}) {
@@ -98,6 +100,7 @@ describe('IndexThresholdAlertTypeExpression', () => {
         errors={errors}
         data={dataMock}
         dataViews={dataViewMock}
+        fieldFormats={fieldFormatsMock}
         defaultActionGroupId=""
         actionGroups={[]}
         charts={chartsStartMock}

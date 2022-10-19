@@ -12,6 +12,7 @@ import React from 'react';
 import { Expression, AlertContextMeta } from './expression';
 import { act } from 'react-dom/test-utils';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 
 jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({
@@ -40,6 +41,7 @@ jest.mock('../../../containers/ml/infra_ml_capabilities', () => ({
 }));
 
 const dataViewMock = dataViewPluginMocks.createStartContract();
+const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
 describe('Expression', () => {
   async function setup(currentOptions: AlertContextMeta) {
@@ -59,6 +61,7 @@ describe('Expression', () => {
         setRuleProperty={() => {}}
         metadata={currentOptions}
         dataViews={dataViewMock}
+        fieldFormats={fieldFormatsMock}
       />
     );
 

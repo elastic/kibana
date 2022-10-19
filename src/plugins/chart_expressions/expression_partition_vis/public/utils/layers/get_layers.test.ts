@@ -7,8 +7,7 @@
  */
 import { ShapeTreeNode } from '@elastic/charts';
 import type { PaletteDefinition, SeriesLayer } from '@kbn/coloring';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getColor } from './get_color';
 import { createMockVisData, createMockBucketColumns, createMockPieParams } from '../../mocks';
 import { ChartTypes } from '../../../common/types';
@@ -17,19 +16,19 @@ const visData = createMockVisData();
 const buckets = createMockBucketColumns();
 const visParams = createMockPieParams();
 const colors = ['color1', 'color2', 'color3', 'color4'];
-const dataMock = dataPluginMock.createStartContract();
+
 interface RangeProps {
   gte: number;
   lt: number;
 }
 
-dataMock.fieldFormats = {
+const fieldFormats = {
   deserialize: jest.fn(() => ({
     convert: jest.fn((s: RangeProps) => {
       return `≥ ${s.gte} and < ${s.lt}`;
     }),
   })),
-} as unknown as DataPublicPluginStart['fieldFormats'];
+} as unknown as FieldFormatsStart;
 
 export const getPaletteRegistry = () => {
   const mockPalette1: jest.Mocked<PaletteDefinition> = {
@@ -82,7 +81,7 @@ describe('computeColor', () => {
       { getColor: () => undefined },
       false,
       false,
-      dataMock.fieldFormats
+      fieldFormats
     );
     expect(color).toEqual(colors[0]);
   });
@@ -111,7 +110,7 @@ describe('computeColor', () => {
       { getColor: () => undefined },
       false,
       false,
-      dataMock.fieldFormats
+      fieldFormats
     );
     expect(color).toEqual('color3');
   });
@@ -139,7 +138,7 @@ describe('computeColor', () => {
       { getColor: () => undefined },
       false,
       false,
-      dataMock.fieldFormats
+      fieldFormats
     );
     expect(color).toEqual('#000028');
   });
@@ -188,7 +187,7 @@ describe('computeColor', () => {
       { getColor: () => undefined },
       false,
       false,
-      dataMock.fieldFormats,
+      fieldFormats,
       {
         id: 'range',
         params: {
@@ -229,7 +228,7 @@ describe('computeColor', () => {
       undefined,
       true,
       false,
-      dataMock.fieldFormats
+      fieldFormats
     );
     expect(registry.get().getCategoricalColor).toHaveBeenCalledWith(
       [expect.objectContaining({ name: 'Second level 1' })],
@@ -268,7 +267,7 @@ describe('computeColor', () => {
       undefined,
       true,
       false,
-      dataMock.fieldFormats
+      fieldFormats
     );
     expect(registry.get().getCategoricalColor).toHaveBeenCalledWith(
       [expect.objectContaining({ name: 'First level' })],

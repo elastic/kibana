@@ -12,6 +12,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import {
@@ -103,6 +104,7 @@ const createDataPluginMock = () => {
 
 const dataMock = createDataPluginMock();
 const dataViewMock = dataViewPluginMocks.createStartContract();
+const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 const unifiedSearchMock = unifiedSearchPluginMock.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
 
@@ -156,6 +158,7 @@ describe('EsQueryAlertTypeExpression', () => {
         errors={errors}
         data={dataMock}
         dataViews={dataViewMock}
+        fieldFormats={fieldFormatsMock}
         defaultActionGroupId=""
         actionGroups={[]}
         charts={chartsStartMock}

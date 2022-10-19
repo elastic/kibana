@@ -9,9 +9,8 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ThresholdVisualization } from './visualization';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import {
   builtInAggregationTypes,
@@ -34,13 +33,12 @@ jest.mock('./index_threshold_api', () => ({
 
 const { getThresholdAlertVisualizationData } = jest.requireMock('./index_threshold_api');
 
-const dataMock = dataPluginMock.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
-dataMock.fieldFormats = {
+const fieldFormats = {
   getDefaultInstance: jest.fn(() => ({
     convert: jest.fn((s: unknown) => JSON.stringify(s)),
   })),
-} as unknown as DataPublicPluginStart['fieldFormats'];
+} as unknown as FieldFormatsStart;
 
 describe('ThresholdVisualization', () => {
   beforeAll(() => {
@@ -68,7 +66,7 @@ describe('ThresholdVisualization', () => {
         aggregationTypes={builtInAggregationTypes}
         comparators={builtInComparators}
         charts={chartsStartMock}
-        dataFieldsFormats={dataMock.fieldFormats}
+        dataFieldsFormats={fieldFormats}
       />
     );
 
@@ -90,7 +88,7 @@ describe('ThresholdVisualization', () => {
         aggregationTypes={builtInAggregationTypes}
         comparators={builtInComparators}
         charts={chartsStartMock}
-        dataFieldsFormats={dataMock.fieldFormats}
+        dataFieldsFormats={fieldFormats}
         refreshRateInMilliseconds={refreshRate}
       />
     );
@@ -119,7 +117,7 @@ describe('ThresholdVisualization', () => {
         aggregationTypes={builtInAggregationTypes}
         comparators={builtInComparators}
         charts={chartsStartMock}
-        dataFieldsFormats={dataMock.fieldFormats}
+        dataFieldsFormats={fieldFormats}
       />
     );
     expect(wrapper.find('[data-test-subj="firstLoad"]').exists()).toBeTruthy();

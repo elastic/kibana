@@ -12,6 +12,7 @@ import type { DocLinksStart } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IconType, EuiFlyoutSize, RecursivePartial } from '@elastic/eui';
 import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
@@ -317,6 +318,7 @@ export interface RuleTypeParamsExpressionProps<
     value: SanitizedRule<Params>[Prop] | null
   ) => void;
   errors: IErrorObject;
+  fieldFormats: FieldFormatsStart;
   defaultActionGroupId: string;
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
   metadata?: MetaData;

@@ -38,8 +38,8 @@ export class ExportCSVAction implements Action<ExportContext> {
 
   constructor() {
     ({
-      data: { fieldFormats: this.fieldFormats },
       settings: { uiSettings: this.uiSettings },
+      fieldFormats: this.fieldFormats,
     } = pluginServices.getServices());
   }
 

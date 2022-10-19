@@ -7,10 +7,10 @@
  */
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 export interface DashboardDataService {
-  dataViews: DataPublicPluginStart['dataViews'];
-  fieldFormats: DataPublicPluginStart['fieldFormats'];
+  dataViews: DataViewsPublicPluginStart;
   query: DataPublicPluginStart['query'];
   search: DataPublicPluginStart['search'];
 }

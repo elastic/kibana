@@ -14,6 +14,7 @@ import { Comparator } from '../../../../common/alerting/metrics';
 import { MetricsExplorerMetric } from '../../../../common/http_api/metrics_explorer';
 import { Expressions } from './expression';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 
 jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({
@@ -29,6 +30,7 @@ jest.mock('../../../hooks/use_kibana', () => ({
 }));
 
 const dataViewMock = dataViewPluginMocks.createStartContract();
+const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
 describe('Expression', () => {
   async function setup(currentOptions: {
@@ -55,6 +57,7 @@ describe('Expression', () => {
           currentOptions,
         }}
         dataViews={dataViewMock}
+        fieldFormats={fieldFormatsMock}
       />
     );
 

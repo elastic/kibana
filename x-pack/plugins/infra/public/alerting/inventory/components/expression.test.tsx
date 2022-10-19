@@ -14,6 +14,7 @@ import { Comparator, InventoryMetricConditions } from '../../../../common/alerti
 import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 import { AlertContextMeta, defaultExpression, ExpressionRow, Expressions } from './expression';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 
 jest.mock('../../../containers/metrics_source/use_source_via_http', () => ({
   useSourceViaHttp: () => ({
@@ -36,6 +37,7 @@ const exampleCustomMetric = {
 } as SnapshotCustomMetricInput;
 
 const dataViewMock = dataViewPluginMocks.createStartContract();
+const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
 describe('Expression', () => {
   async function setup(currentOptions: AlertContextMeta) {
@@ -55,6 +57,7 @@ describe('Expression', () => {
         setRuleProperty={() => {}}
         metadata={currentOptions}
         dataViews={dataViewMock}
+        fieldFormats={fieldFormatsMock}
       />
     );
 
@@ -121,6 +124,7 @@ describe('Expression', () => {
         setRuleProperty={() => {}}
         metadata={{}}
         dataViews={dataViewMock}
+        fieldFormats={fieldFormatsMock}
       />
     );
 

@@ -11,6 +11,7 @@ import {
   PluginServiceProvider,
   PluginServiceRegistry,
 } from '@kbn/presentation-util-plugin/public';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 
 import { DashboardServices } from './types';
 
@@ -51,6 +52,7 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   dataViewEditor: new PluginServiceProvider(dataViewEditorServiceFactory),
   documentationLinks: new PluginServiceProvider(documentationLinksServiceFactory),
   embeddable: new PluginServiceProvider(embeddableServiceFactory),
+  fieldFormats: new PluginServiceProvider(fieldFormatsServiceMock.createStartContract),
   http: new PluginServiceProvider(httpServiceFactory),
   initializerContext: new PluginServiceProvider(initializerContextServiceFactory),
   navigation: new PluginServiceProvider(navigationServiceFactory),

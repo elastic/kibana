@@ -9,6 +9,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { EsQueryAlertParams, SearchType } from '../types';
 import { SearchSourceExpression } from './search_source_expression';
@@ -178,6 +179,7 @@ const savedQueryMock = {
   },
 };
 
+const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 const dataMock = dataPluginMock.createStartContract();
 (dataMock.search.searchSource.create as jest.Mock).mockImplementation(() =>
   Promise.resolve(searchSourceMock)
@@ -215,6 +217,7 @@ const setup = (alertParams: EsQueryAlertParams<SearchType.searchSource>) => {
         defaultActionGroupId=""
         actionGroups={[]}
         charts={chartsStartMock}
+        fieldFormats={fieldFormatsMock}
       />
     </KibanaContextProvider>
   );
