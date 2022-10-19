@@ -60,6 +60,7 @@ function getServiceMocks() {
       },
       indexPatterns: {
         find: jest.fn(),
+        get: jest.fn(),
       },
     },
     unifiedSearch: {
