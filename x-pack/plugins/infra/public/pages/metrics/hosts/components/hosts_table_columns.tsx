@@ -10,20 +10,20 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { scaleUpPercentage } from '../../../../components/infrastructure_node_metrics_tables/shared/hooks';
-import type { SnapshotNodeMetric } from '../../../../../common/http_api/snapshot_api';
 import { NumberCell } from '../../../../components/infrastructure_node_metrics_tables/shared/components';
 
-interface HostNodeRow extends HostMetics {
+export interface HostNodeRow extends HostMetics {
   os?: string | null | undefined;
   servicesOnHost?: number | null | undefined;
+  name: string;
 }
 
 export interface HostMetics {
-  cpuCores: SnapshotNodeMetric;
-  rx: SnapshotNodeMetric;
-  tx: SnapshotNodeMetric;
-  memory: SnapshotNodeMetric;
-  memoryTotal: SnapshotNodeMetric;
+  cpuCores: number | null | undefined;
+  rx: number | null | undefined;
+  tx: number | null | undefined;
+  memory: number | null | undefined;
+  memoryTotal: number | null | undefined;
 }
 
 export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
@@ -31,7 +31,8 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     name: i18n.translate('xpack.infra.hostsTable.nameColumnHeader', {
       defaultMessage: 'Name',
     }),
-    field: 'label',
+    field: 'name',
+    sortable: true,
     truncateText: true,
     textOnly: true,
     render: (name: string) => <EuiText size="s">{name}</EuiText>,
@@ -41,6 +42,7 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
       defaultMessage: 'Operating System',
     }),
     field: 'os',
+    sortable: true,
     render: (os: string) => <EuiText size="s">{os ?? '-'}</EuiText>,
   },
   {
@@ -48,13 +50,15 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
       defaultMessage: '# of CPUs',
     }),
     field: 'cpuCores',
-    render: (cpuCores: { value: number }) => <NumberCell value={cpuCores.value} />,
+    sortable: true,
+    render: (cpuCores: number) => <NumberCell value={cpuCores} />,
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.diskLatencyColumnHeader', {
       defaultMessage: 'Disk Latency',
     }),
     field: 'diskLatency',
+    sortable: true,
     render: (ds: number) => <NumberCell value={ds} unit=" ms" />,
   },
   {
@@ -62,29 +66,31 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
       defaultMessage: 'TX (avg.)',
     }),
     field: 'tx',
-    render: (tx: { avg: number }) => <NumberCell value={tx.avg} />,
+    sortable: true,
+    render: (tx: number) => <NumberCell value={tx} />,
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.averageRxColumnHeader', {
       defaultMessage: 'RX (avg.)',
     }),
     field: 'rx',
-    render: (rx: { avg: number }) => <NumberCell value={rx.avg} />,
+    sortable: true,
+    render: (rx: number) => <NumberCell value={rx} />,
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.averageMemoryTotalColumnHeader', {
       defaultMessage: 'Memory total (avg.)',
     }),
     field: 'memoryTotal',
-    render: (memoryTotal: { avg: number }) => (
-      <NumberCell value={Math.floor(memoryTotal.avg)} unit=" MB" />
-    ),
+    sortable: true,
+    render: (memoryTotal: number) => <NumberCell value={Math.floor(memoryTotal)} unit=" MB" />,
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.servicesOnHostColumnHeader', {
       defaultMessage: 'Services on Host',
     }),
     field: 'servicesOnHost',
+    sortable: true,
     render: (servicesOnHost: number) => <NumberCell value={servicesOnHost} />,
   },
   {
@@ -92,8 +98,7 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
       defaultMessage: 'Memory usage (avg.)',
     }),
     field: 'memory',
-    render: (memory: { avg: number }) => (
-      <NumberCell value={scaleUpPercentage(memory.avg)} unit="%" />
-    ),
+    sortable: true,
+    render: (memory: number) => <NumberCell value={scaleUpPercentage(memory)} unit="%" />,
   },
 ];

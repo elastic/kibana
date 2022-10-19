@@ -6,31 +6,31 @@
  */
 
 import React from 'react';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiInMemoryTable } from '@elastic/eui';
 import type { SnapshotNode } from '../../../../../common/http_api';
 import { HostsTableColumns } from './hosts_table_columns';
 import { useHostTable } from '../hooks/use_host_table';
-// import { EuiInMemoryTable } from '@elastic/eui';
 
 interface Props {
   nodes: SnapshotNode[];
 }
 
-export interface SortState<T> {
-  field: keyof T;
-  direction: 'asc' | 'desc';
-}
-
 export const HostsTable: React.FunctionComponent<Props> = ({ nodes }) => {
-  const { sortedNodes, sortSettings, onTableSortChange } = useHostTable(nodes);
+  const items = useHostTable(nodes);
+
+  const sortSettings = {
+    sort: {
+      field: 'cpuCores',
+      direction: 'desc',
+    },
+  } as const;
 
   return (
-    <EuiBasicTable
-      tableCaption="Infrastructure metrics for hosts"
-      items={sortedNodes}
-      columns={HostsTableColumns}
+    <EuiInMemoryTable
+      pagination={true}
       sorting={sortSettings}
-      onChange={onTableSortChange}
+      items={items}
+      columns={HostsTableColumns}
     />
   );
 };
