@@ -75,6 +75,10 @@
   background: $euiColorEmptyShade;
 }
 
+.documentation__docsHeader {
+  margin: 0;
+}
+
 .documentation__docs--inline {
   display: flex;
   flex-direction: column;

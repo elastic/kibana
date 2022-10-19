@@ -32,14 +32,13 @@ function DocumentationPopover({ language, sections, buttonProps }: Documentation
       panelPaddingSize="none"
       isOpen={isHelpOpen}
       closePopover={() => setIsHelpOpen(false)}
-      ownFocus={false}
       button={
         <EuiToolTip
           position="top"
           content={i18n.translate('languageDocumentationPopover.tooltip', {
             defaultMessage: '{lang} reference',
             values: {
-              lang: String(language).toUpperCase(),
+              lang: language,
             },
           })}
         >

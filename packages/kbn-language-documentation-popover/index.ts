@@ -7,4 +7,5 @@
  */
 
 export { LanguageDocumentationPopover } from './src/components/documentation_popover';
+export { LanguageDocumentationPopoverContent } from './src/components/documentation_content';
 export type { LanguageDocumentationSections } from './src/components/documentation_content';
