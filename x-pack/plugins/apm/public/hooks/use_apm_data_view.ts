@@ -25,7 +25,21 @@ export function useApmDataView() {
   useEffect(() => {
     async function fetchDataView() {
       const title = await getApmDataViewTitle();
-      return services.dataViews.create({ title });
+      try {
+        const displayError = false;
+        return await services.dataViews.create(
+          { title },
+          undefined,
+          displayError
+        );
+      } catch (e) {
+        const noDataScreen = e.message.includes('No matching indices found');
+        if (noDataScreen) {
+          return;
+        }
+
+        throw e;
+      }
     }
 
     fetchDataView().then(setDataView);
