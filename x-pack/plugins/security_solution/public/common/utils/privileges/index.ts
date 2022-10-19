@@ -36,14 +36,17 @@ export const getToolTipContent = (
     | boolean
     | Readonly<{
         [x: string]: boolean;
-      }>
+      }>,
+  canUserCRUD: boolean | null
 ): string | undefined => {
   if (rule == null) {
     return undefined;
   } else if (isMlRule(rule.type) && !hasMlPermissions) {
     return detectionI18n.ML_RULES_DISABLED_MESSAGE;
   } else if (!canEditRuleWithActions(rule, hasReadActionsPrivileges)) {
-    return i18n.EDIT_RULE_SETTINGS_TOOLTIP;
+    return i18n.LACK_OF_KIBANA_PRIVILEGES;
+  } else if (canUserCRUD !== null && !canUserCRUD) {
+    return i18n.LACK_OF_RULE_EDITING_PRIVILEGES;
   } else {
     return undefined;
   }

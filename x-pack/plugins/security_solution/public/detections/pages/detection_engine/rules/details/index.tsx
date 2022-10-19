@@ -689,7 +689,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
                       position="top"
-                      content={getToolTipContent(rule, hasMlPermissions, hasActionsPrivileges)}
+                      content={getToolTipContent(
+                        rule,
+                        hasMlPermissions,
+                        hasActionsPrivileges,
+                        canUserCRUD
+                      )}
                     >
                       <EuiFlexGroup>
                         <RuleSwitch
@@ -721,7 +726,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           disabledReason={getToolTipContent(
                             rule,
                             hasMlPermissions,
-                            hasActionsPrivileges
+                            hasActionsPrivileges,
+                            canUserCRUD
                           )}
                         />
                       </EuiFlexItem>
