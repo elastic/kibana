@@ -95,13 +95,17 @@ export const fetchChangePointPValues = async (
   params: AiopsExplainLogRateSpikesSchema,
   fieldNames: string[],
   logger: Logger,
-  emitError: (m: string) => void
+  emitError: (m: string) => void,
+  abortSignal?: AbortSignal
 ): Promise<ChangePoint[]> => {
   const result: ChangePoint[] = [];
 
   for (const fieldName of fieldNames) {
     const request = getChangePointRequest(params, fieldName);
-    const resp = await esClient.search<unknown, { change_point_p_value: Aggs }>(request);
+    const resp = await esClient.search<unknown, { change_point_p_value: Aggs }>(request, {
+      signal: abortSignal,
+      maxRetries: 0,
+    });
 
     if (resp.aggregations === undefined) {
       logger.error(

@@ -47,14 +47,18 @@ export const getRandomDocsRequest = (
 
 export const fetchFieldCandidates = async (
   esClient: ElasticsearchClient,
-  params: AiopsExplainLogRateSpikesSchema
+  params: AiopsExplainLogRateSpikesSchema,
+  abortSignal?: AbortSignal
 ): Promise<string[]> => {
   const { index } = params;
   // Get all supported fields
-  const respMapping = await esClient.fieldCaps({
-    index,
-    fields: '*',
-  });
+  const respMapping = await esClient.fieldCaps(
+    {
+      index,
+      fields: '*',
+    },
+    { signal: abortSignal, maxRetries: 0 }
+  );
 
   const finalFieldCandidates: Set<string> = new Set([]);
   const acceptableFields: Set<string> = new Set();
@@ -69,7 +73,10 @@ export const fetchFieldCandidates = async (
     }
   });
 
-  const resp = await esClient.search(getRandomDocsRequest(params));
+  const resp = await esClient.search(getRandomDocsRequest(params), {
+    signal: abortSignal,
+    maxRetries: 0,
+  });
   const sampledDocs = resp.hits.hits.map((d) => d.fields ?? {});
 
   // Get all field names for each returned doc and flatten it
