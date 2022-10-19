@@ -19,24 +19,24 @@ import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
   getEnvironmentLabel,
-} from '../../../common/environment_filter_values';
-import { getAlertUrlErrorCount } from '../../../common/utils/formatters';
+} from '../../../../../common/environment_filter_values';
+import { getAlertUrlErrorCount } from '../../../../../common/utils/formatters';
 import {
-  AlertType,
+  ApmRuleType,
   APM_SERVER_FEATURE_ID,
-  ALERT_TYPES_CONFIG,
+  RULE_TYPES_CONFIG,
   formatErrorCountReason,
-} from '../../../common/alert_types';
+} from '../../../../../common/rules/apm_rule_types';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-} from '../../../common/elasticsearch_fieldnames';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
-import { apmActionVariables } from './action_variables';
-import { alertingEsClient } from './alerting_es_client';
-import { RegisterRuleDependencies } from './register_apm_alerts';
+} from '../../../../../common/elasticsearch_fieldnames';
+import { environmentQuery } from '../../../../../common/utils/environment_query';
+import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
+import { apmActionVariables } from '../../action_variables';
+import { alertingEsClient } from '../../alerting_es_client';
+import { RegisterRuleDependencies } from '../../register_apm_rule_types';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -46,9 +46,9 @@ const paramsSchema = schema.object({
   environment: schema.string(),
 });
 
-const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.ErrorCount];
+const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
 
-export function registerErrorCountAlertType({
+export function registerErrorCountRuleType({
   alerting,
   logger,
   ruleDataClient,
@@ -62,10 +62,10 @@ export function registerErrorCountAlertType({
 
   alerting.registerType(
     createLifecycleRuleType({
-      id: AlertType.ErrorCount,
-      name: alertTypeConfig.name,
-      actionGroups: alertTypeConfig.actionGroups,
-      defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
+      id: ApmRuleType.ErrorCount,
+      name: ruleTypeConfig.name,
+      actionGroups: ruleTypeConfig.actionGroups,
+      defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
       validate: {
         params: paramsSchema,
       },
@@ -165,7 +165,7 @@ export function registerErrorCountAlertType({
 
             services
               .alertWithLifecycle({
-                id: [AlertType.ErrorCount, serviceName, environment]
+                id: [ApmRuleType.ErrorCount, serviceName, environment]
                   .filter((name) => name)
                   .join('_'),
                 fields: {
@@ -177,7 +177,7 @@ export function registerErrorCountAlertType({
                   [ALERT_REASON]: alertReason,
                 },
               })
-              .scheduleActions(alertTypeConfig.defaultActionGroupId, {
+              .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
                 serviceName,
                 environment: getEnvironmentLabel(environment),
                 threshold: ruleParams.threshold,

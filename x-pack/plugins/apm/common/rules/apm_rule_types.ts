@@ -14,11 +14,11 @@ import type {
 } from '@kbn/observability-plugin/common';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common';
-import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from './ml_constants';
+import { ANOMALY_SEVERITY, ANOMALY_THRESHOLD } from '../ml_constants';
 
 export const APM_SERVER_FEATURE_ID = 'apm';
 
-export enum AlertType {
+export enum ApmRuleType {
   ErrorCount = 'apm.error_rate', // ErrorRate was renamed to ErrorCount but the key is kept as `error_rate` for backwards-compat.
   TransactionErrorRate = 'apm.transaction_error_rate',
   TransactionDuration = 'apm.transaction_duration',
@@ -163,8 +163,8 @@ export function formatAnomalyReason({
   );
 }
 
-export const ALERT_TYPES_CONFIG: Record<
-  AlertType,
+export const RULE_TYPES_CONFIG: Record<
+  ApmRuleType,
   {
     name: string;
     actionGroups: Array<ActionGroup<ThresholdMetActionGroupId>>;
@@ -174,7 +174,7 @@ export const ALERT_TYPES_CONFIG: Record<
     producer: string;
   }
 > = {
-  [AlertType.ErrorCount]: {
+  [ApmRuleType.ErrorCount]: {
     name: i18n.translate('xpack.apm.errorCountAlert.name', {
       defaultMessage: 'Error count threshold',
     }),
@@ -184,7 +184,7 @@ export const ALERT_TYPES_CONFIG: Record<
     producer: APM_SERVER_FEATURE_ID,
     isExportable: true,
   },
-  [AlertType.TransactionDuration]: {
+  [ApmRuleType.TransactionDuration]: {
     name: i18n.translate('xpack.apm.transactionDurationAlert.name', {
       defaultMessage: 'Latency threshold',
     }),
@@ -194,7 +194,7 @@ export const ALERT_TYPES_CONFIG: Record<
     producer: APM_SERVER_FEATURE_ID,
     isExportable: true,
   },
-  [AlertType.Anomaly]: {
+  [ApmRuleType.Anomaly]: {
     name: i18n.translate('xpack.apm.anomalyAlert.name', {
       defaultMessage: 'Anomaly',
     }),
@@ -204,7 +204,7 @@ export const ALERT_TYPES_CONFIG: Record<
     producer: APM_SERVER_FEATURE_ID,
     isExportable: true,
   },
-  [AlertType.TransactionErrorRate]: {
+  [ApmRuleType.TransactionErrorRate]: {
     name: i18n.translate('xpack.apm.transactionErrorRateAlert.name', {
       defaultMessage: 'Failed transaction rate threshold',
     }),

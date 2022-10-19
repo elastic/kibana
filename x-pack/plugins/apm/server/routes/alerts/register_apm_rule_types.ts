@@ -10,11 +10,11 @@ import { IBasePath, Logger } from '@kbn/core/server';
 import { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
 import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { registerTransactionDurationAlertType } from './register_transaction_duration_alert_type';
-import { registerAnomalyAlertType } from './register_anomaly_alert_type';
-import { registerErrorCountAlertType } from './register_error_count_alert_type';
+import { registerTransactionDurationRuleType } from './rule_types/transaction_duration/register_transaction_duration_rule_type';
+import { registerAnomalyRuleType } from './rule_types/anomaly/register_anomaly_rule_type';
+import { registerErrorCountRuleType } from './rule_types/error_count/register_error_count_rule_type';
 import { APMConfig } from '../..';
-import { registerTransactionErrorRateAlertType } from './register_transaction_error_rate_alert_type';
+import { registerTransactionErrorRateRuleType } from './rule_types/transaction_error_rate/register_transaction_error_rate_rule_type';
 
 export interface RegisterRuleDependencies {
   ruleDataClient: IRuleDataClient;
@@ -25,9 +25,9 @@ export interface RegisterRuleDependencies {
   basePath: IBasePath;
 }
 
-export function registerApmAlerts(dependencies: RegisterRuleDependencies) {
-  registerTransactionDurationAlertType(dependencies);
-  registerAnomalyAlertType(dependencies);
-  registerErrorCountAlertType(dependencies);
-  registerTransactionErrorRateAlertType(dependencies);
+export function registerApmRuleTypes(dependencies: RegisterRuleDependencies) {
+  registerTransactionDurationRuleType(dependencies);
+  registerAnomalyRuleType(dependencies);
+  registerErrorCountRuleType(dependencies);
+  registerTransactionErrorRateRuleType(dependencies);
 }

@@ -13,18 +13,18 @@ import {
   getAlertUrlErrorCount,
   getAlertUrlTransaction,
 } from '../../../common/utils/formatters';
-import { AlertType } from '../../../common/alert_types';
+import { ApmRuleType } from '../../../common/rules/apm_rule_types';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size
 const SERVICE_ENVIRONMENT = 'service.environment';
 const SERVICE_NAME = 'service.name';
 const TRANSACTION_TYPE = 'transaction.type';
 
-export function registerApmAlerts(
+export function registerApmRuleTypes(
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
 ) {
   observabilityRuleTypeRegistry.register({
-    id: AlertType.ErrorCount,
+    id: ApmRuleType.ErrorCount,
     description: i18n.translate('xpack.apm.alertTypes.errorCount.description', {
       defaultMessage:
         'Alert when the number of errors in a service exceeds a defined threshold.',
@@ -61,7 +61,7 @@ export function registerApmAlerts(
   });
 
   observabilityRuleTypeRegistry.register({
-    id: AlertType.TransactionDuration,
+    id: ApmRuleType.TransactionDuration,
     description: i18n.translate(
       'xpack.apm.alertTypes.transactionDuration.description',
       {
@@ -105,7 +105,7 @@ export function registerApmAlerts(
   });
 
   observabilityRuleTypeRegistry.register({
-    id: AlertType.TransactionErrorRate,
+    id: ApmRuleType.TransactionErrorRate,
     description: i18n.translate(
       'xpack.apm.alertTypes.transactionErrorRate.description',
       {
@@ -147,7 +147,7 @@ export function registerApmAlerts(
   });
 
   observabilityRuleTypeRegistry.register({
-    id: AlertType.Anomaly,
+    id: ApmRuleType.Anomaly,
     description: i18n.translate('xpack.apm.alertTypes.anomaly.description', {
       defaultMessage:
         'Alert when either the latency, throughput, or failed transaction rate of a service is anomalous.',

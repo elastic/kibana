@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { registerAnomalyAlertType } from './register_anomaly_alert_type';
-import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
+import { registerAnomalyRuleType } from './register_anomaly_rule_type';
+import { ANOMALY_SEVERITY } from '../../../../../common/ml_constants';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
-import * as GetServiceAnomalies from '../service_map/get_service_anomalies';
-import { createRuleTypeMocks } from './test_utils';
-import { ApmMlJob } from '../../../common/anomaly_detection/apm_ml_job';
+import * as GetServiceAnomalies from '../../../service_map/get_service_anomalies';
+import { createRuleTypeMocks } from '../../test_utils';
+import { ApmMlJob } from '../../../../../common/anomaly_detection/apm_ml_job';
 
 describe('Transaction duration anomaly alert', () => {
   afterEach(() => {
@@ -19,7 +19,7 @@ describe('Transaction duration anomaly alert', () => {
     it('ml is not defined', async () => {
       const { services, dependencies, executor } = createRuleTypeMocks();
 
-      registerAnomalyAlertType({
+      registerAnomalyRuleType({
         ...dependencies,
         ml: undefined,
       });
@@ -47,7 +47,7 @@ describe('Transaction duration anomaly alert', () => {
         anomalyDetectorsProvider: jest.fn(),
       } as unknown as MlPluginSetup;
 
-      registerAnomalyAlertType({
+      registerAnomalyRuleType({
         ...dependencies,
         ml,
       });
@@ -98,7 +98,7 @@ describe('Transaction duration anomaly alert', () => {
         anomalyDetectorsProvider: jest.fn(),
       } as unknown as MlPluginSetup;
 
-      registerAnomalyAlertType({
+      registerAnomalyRuleType({
         ...dependencies,
         ml,
       });
@@ -174,7 +174,7 @@ describe('Transaction duration anomaly alert', () => {
         anomalyDetectorsProvider: jest.fn(),
       } as unknown as MlPluginSetup;
 
-      registerAnomalyAlertType({
+      registerAnomalyRuleType({
         ...dependencies,
         ml,
       });

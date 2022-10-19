@@ -6,21 +6,24 @@
  */
 
 import { getInitialAlertValues } from './get_initial_alert_values';
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
+import {
+  ApmRuleType,
+  RULE_TYPES_CONFIG,
+} from '../../../common/rules/apm_rule_types';
 
-test('handles null alert type and undefined service name', () => {
+test('handles null rule type and undefined service name', () => {
   expect(getInitialAlertValues(null, undefined)).toEqual({ tags: ['apm'] });
 });
 
-test('handles valid alert type', () => {
-  const alertType = AlertType.ErrorCount;
-  expect(getInitialAlertValues(alertType, undefined)).toEqual({
-    name: ALERT_TYPES_CONFIG[alertType].name,
+test('handles valid rule type', () => {
+  const ruleType = ApmRuleType.ErrorCount;
+  expect(getInitialAlertValues(ruleType, undefined)).toEqual({
+    name: RULE_TYPES_CONFIG[ruleType].name,
     tags: ['apm'],
   });
 
-  expect(getInitialAlertValues(alertType, 'Service Name')).toEqual({
-    name: `${ALERT_TYPES_CONFIG[alertType].name} | Service Name`,
+  expect(getInitialAlertValues(ruleType, 'Service Name')).toEqual({
+    name: `${RULE_TYPES_CONFIG[ruleType].name} | Service Name`,
     tags: ['apm', `service.name:service name`],
   });
 });

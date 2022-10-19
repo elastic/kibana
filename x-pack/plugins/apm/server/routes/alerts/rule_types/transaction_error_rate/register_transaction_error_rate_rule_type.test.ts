@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { registerTransactionErrorRateAlertType } from './register_transaction_error_rate_alert_type';
-import { createRuleTypeMocks } from './test_utils';
+import { registerTransactionErrorRateRuleType } from './register_transaction_error_rate_rule_type';
+import { createRuleTypeMocks } from '../../test_utils';
 
 describe('Transaction error rate alert', () => {
   it("doesn't send an alert when rate is less than threshold", async () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
 
-    registerTransactionErrorRateAlertType({
+    registerTransactionErrorRateRuleType({
       ...dependencies,
     });
 
@@ -49,7 +49,7 @@ describe('Transaction error rate alert', () => {
     const { services, dependencies, executor, scheduleActions } =
       createRuleTypeMocks();
 
-    registerTransactionErrorRateAlertType({
+    registerTransactionErrorRateRuleType({
       ...dependencies,
     });
 

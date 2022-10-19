@@ -16,37 +16,37 @@ import { firstValueFrom } from 'rxjs';
 import { asDuration } from '@kbn/observability-plugin/common/utils/formatters';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { getAlertUrlTransaction } from '../../../common/utils/formatters';
-import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
+import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
+import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import {
-  AlertType,
+  ApmRuleType,
   AggregationType,
-  ALERT_TYPES_CONFIG,
+  RULE_TYPES_CONFIG,
   APM_SERVER_FEATURE_ID,
   formatTransactionDurationReason,
-} from '../../../common/alert_types';
+} from '../../../../../common/rules/apm_rule_types';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
   SERVICE_ENVIRONMENT,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/elasticsearch_fieldnames';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
   getEnvironmentLabel,
-} from '../../../common/environment_filter_values';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import { getDurationFormatter } from '../../../common/utils/formatters';
+} from '../../../../../common/environment_filter_values';
+import { environmentQuery } from '../../../../../common/utils/environment_query';
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import {
   getDocumentTypeFilterForTransactions,
   getDurationFieldForTransactions,
-} from '../../lib/helpers/transactions';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
-import { apmActionVariables } from './action_variables';
-import { alertingEsClient } from './alerting_es_client';
-import { RegisterRuleDependencies } from './register_apm_alerts';
-import { averageOrPercentileAgg } from './average_or_percentile_agg';
+} from '../../../../lib/helpers/transactions';
+import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
+import { apmActionVariables } from '../../action_variables';
+import { alertingEsClient } from '../../alerting_es_client';
+import { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import { averageOrPercentileAgg } from '../../average_or_percentile_agg';
 
 const paramsSchema = schema.object({
   serviceName: schema.string(),
@@ -62,7 +62,7 @@ const paramsSchema = schema.object({
   environment: schema.string(),
 });
 
-const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionDuration];
+const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
 export function registerTransactionDurationAlertType({
   alerting,
@@ -76,11 +76,11 @@ export function registerTransactionDurationAlertType({
     logger,
   });
 
-  const type = createLifecycleRuleType({
-    id: AlertType.TransactionDuration,
-    name: alertTypeConfig.name,
-    actionGroups: alertTypeConfig.actionGroups,
-    defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
+  const ruleType = createLifecycleRuleType({
+    id: ApmRuleType.TransactionDuration,
+    name: ruleTypeConfig.name,
+    actionGroups: ruleTypeConfig.actionGroups,
+    defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
     validate: {
       params: paramsSchema,
     },
@@ -223,7 +223,7 @@ export function registerTransactionDurationAlertType({
           : relativeViewInAppUrl;
         services
           .alertWithLifecycle({
-            id: `${AlertType.TransactionDuration}_${getEnvironmentLabel(
+            id: `${ApmRuleType.TransactionDuration}_${getEnvironmentLabel(
               environment
             )}`,
             fields: {
@@ -236,7 +236,7 @@ export function registerTransactionDurationAlertType({
               [ALERT_REASON]: reasonMessage,
             },
           })
-          .scheduleActions(alertTypeConfig.defaultActionGroupId, {
+          .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
             transactionType: ruleParams.transactionType,
             serviceName: ruleParams.serviceName,
             environment: getEnvironmentLabel(environment),
@@ -252,5 +252,5 @@ export function registerTransactionDurationAlertType({
     },
   });
 
-  alerting.registerType(type);
+  alerting.registerType(ruleType);
 }

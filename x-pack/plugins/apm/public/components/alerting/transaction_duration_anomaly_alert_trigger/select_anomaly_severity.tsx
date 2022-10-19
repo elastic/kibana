@@ -12,7 +12,7 @@ import { getSeverityColor } from '../../../../common/anomaly_detection';
 import {
   AnomalyAlertSeverityType,
   ANOMALY_ALERT_SEVERITY_TYPES,
-} from '../../../../common/alert_types';
+} from '../../../../common/rules/apm_rule_types';
 
 export function AnomalySeverity({ type }: { type: AnomalyAlertSeverityType }) {
   const selectedOption = ANOMALY_ALERT_SEVERITY_TYPES.find(

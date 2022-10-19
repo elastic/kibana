@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { registerErrorCountAlertType } from './register_error_count_alert_type';
-import { createRuleTypeMocks } from './test_utils';
+import { registerErrorCountRuleType } from './register_error_count_rule_type';
+import { createRuleTypeMocks } from '../../test_utils';
 
 describe('Error count alert', () => {
   it("doesn't send an alert when error count is less than threshold", async () => {
     const { services, dependencies, executor } = createRuleTypeMocks();
 
-    registerErrorCountAlertType(dependencies);
+    registerErrorCountRuleType(dependencies);
 
     const params = { threshold: 1 };
 
@@ -42,7 +42,7 @@ describe('Error count alert', () => {
     const { services, dependencies, executor, scheduleActions } =
       createRuleTypeMocks();
 
-    registerErrorCountAlertType(dependencies);
+    registerErrorCountRuleType(dependencies);
 
     const params = { threshold: 2, windowSize: 5, windowUnit: 'm' };
 

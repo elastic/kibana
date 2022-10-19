@@ -20,32 +20,32 @@ import { termQuery } from '@kbn/observability-plugin/server';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
-  AlertType,
-  ALERT_TYPES_CONFIG,
+  ApmRuleType,
+  RULE_TYPES_CONFIG,
   ANOMALY_ALERT_SEVERITY_TYPES,
   formatAnomalyReason,
-} from '../../../common/alert_types';
-import { getSeverity } from '../../../common/anomaly_detection';
+} from '../../../../../common/rules/apm_rule_types';
+import { getSeverity } from '../../../../../common/anomaly_detection';
 import {
   ApmMlDetectorType,
   getApmMlDetectorIndex,
-} from '../../../common/anomaly_detection/apm_ml_detectors';
+} from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../../../common/elasticsearch_fieldnames';
 import {
   getEnvironmentEsField,
   getEnvironmentLabel,
-} from '../../../common/environment_filter_values';
-import { ANOMALY_SEVERITY } from '../../../common/ml_constants';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { getAlertUrlTransaction } from '../../../common/utils/formatters';
-import { getMLJobs } from '../service_map/get_service_anomalies';
-import { apmActionVariables } from './action_variables';
-import { RegisterRuleDependencies } from './register_apm_alerts';
+} from '../../../../../common/environment_filter_values';
+import { ANOMALY_SEVERITY } from '../../../../../common/ml_constants';
+import { asMutableArray } from '../../../../../common/utils/as_mutable_array';
+import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
+import { getMLJobs } from '../../../service_map/get_service_anomalies';
+import { apmActionVariables } from '../../action_variables';
+import { RegisterRuleDependencies } from '../../register_apm_rule_types';
 
 const paramsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
@@ -61,9 +61,9 @@ const paramsSchema = schema.object({
   ]),
 });
 
-const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.Anomaly];
+const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 
-export function registerAnomalyAlertType({
+export function registerAnomalyRuleType({
   logger,
   ruleDataClient,
   alerting,
@@ -77,10 +77,10 @@ export function registerAnomalyAlertType({
 
   alerting.registerType(
     createLifecycleRuleType({
-      id: AlertType.Anomaly,
-      name: alertTypeConfig.name,
-      actionGroups: alertTypeConfig.actionGroups,
-      defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
+      id: ApmRuleType.Anomaly,
+      name: ruleTypeConfig.name,
+      actionGroups: ruleTypeConfig.actionGroups,
+      defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
       validate: {
         params: paramsSchema,
       },
@@ -252,7 +252,12 @@ export function registerAnomalyAlertType({
             : relativeViewInAppUrl;
           services
             .alertWithLifecycle({
-              id: [AlertType.Anomaly, serviceName, environment, transactionType]
+              id: [
+                ApmRuleType.Anomaly,
+                serviceName,
+                environment,
+                transactionType,
+              ]
                 .filter((name) => name)
                 .join('_'),
               fields: {
@@ -266,7 +271,7 @@ export function registerAnomalyAlertType({
                 [ALERT_REASON]: reasonMessage,
               },
             })
-            .scheduleActions(alertTypeConfig.defaultActionGroupId, {
+            .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
               serviceName,
               transactionType,
               environment: getEnvironmentLabel(environment),

@@ -20,30 +20,30 @@ import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
   getEnvironmentLabel,
-} from '../../../common/environment_filter_values';
-import { getAlertUrlTransaction } from '../../../common/utils/formatters';
+} from '../../../../../common/environment_filter_values';
+import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import {
-  AlertType,
-  ALERT_TYPES_CONFIG,
+  ApmRuleType,
+  RULE_TYPES_CONFIG,
   APM_SERVER_FEATURE_ID,
   formatTransactionErrorRateReason,
-} from '../../../common/alert_types';
+} from '../../../../../common/rules/apm_rule_types';
 import {
   EVENT_OUTCOME,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
-import { EventOutcome } from '../../../common/event_outcome';
-import { asDecimalOrInteger } from '../../../common/utils/formatters';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
-import { apmActionVariables } from './action_variables';
-import { alertingEsClient } from './alerting_es_client';
-import { RegisterRuleDependencies } from './register_apm_alerts';
-import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
-import { getDocumentTypeFilterForTransactions } from '../../lib/helpers/transactions';
+} from '../../../../../common/elasticsearch_fieldnames';
+import { EventOutcome } from '../../../../../common/event_outcome';
+import { asDecimalOrInteger } from '../../../../../common/utils/formatters';
+import { environmentQuery } from '../../../../../common/utils/environment_query';
+import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
+import { apmActionVariables } from '../../action_variables';
+import { alertingEsClient } from '../../alerting_es_client';
+import { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
+import { getDocumentTypeFilterForTransactions } from '../../../../lib/helpers/transactions';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -54,9 +54,9 @@ const paramsSchema = schema.object({
   environment: schema.string(),
 });
 
-const alertTypeConfig = ALERT_TYPES_CONFIG[AlertType.TransactionErrorRate];
+const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionErrorRate];
 
-export function registerTransactionErrorRateAlertType({
+export function registerTransactionErrorRateRuleType({
   alerting,
   ruleDataClient,
   logger,
@@ -70,10 +70,10 @@ export function registerTransactionErrorRateAlertType({
 
   alerting.registerType(
     createLifecycleRuleType({
-      id: AlertType.TransactionErrorRate,
-      name: alertTypeConfig.name,
-      actionGroups: alertTypeConfig.actionGroups,
-      defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
+      id: ApmRuleType.TransactionErrorRate,
+      name: ruleTypeConfig.name,
+      actionGroups: ruleTypeConfig.actionGroups,
+      defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
       validate: {
         params: paramsSchema,
       },
@@ -225,7 +225,7 @@ export function registerTransactionErrorRateAlertType({
           services
             .alertWithLifecycle({
               id: [
-                AlertType.TransactionErrorRate,
+                ApmRuleType.TransactionErrorRate,
                 serviceName,
                 transactionType,
                 environment,
@@ -242,7 +242,7 @@ export function registerTransactionErrorRateAlertType({
                 [ALERT_REASON]: reasonMessage,
               },
             })
-            .scheduleActions(alertTypeConfig.defaultActionGroupId, {
+            .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
               serviceName,
               transactionType,
               environment: getEnvironmentLabel(environment),

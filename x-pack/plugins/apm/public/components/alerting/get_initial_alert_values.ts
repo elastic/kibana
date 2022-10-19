@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { AlertType, ALERT_TYPES_CONFIG } from '../../../common/alert_types';
+import {
+  ApmRuleType,
+  RULE_TYPES_CONFIG,
+} from '../../../common/rules/apm_rule_types';
 
 export function getInitialAlertValues(
-  alertType: AlertType | null,
+  ruleType: ApmRuleType | null,
   serviceName: string | undefined
 ) {
-  const alertTypeName = alertType
-    ? ALERT_TYPES_CONFIG[alertType].name
-    : undefined;
-  const alertName = alertTypeName
+  const ruleTypeName = ruleType ? RULE_TYPES_CONFIG[ruleType].name : undefined;
+  const alertName = ruleTypeName
     ? serviceName
-      ? `${alertTypeName} | ${serviceName}`
-      : alertTypeName
+      ? `${ruleTypeName} | ${serviceName}`
+      : ruleTypeName
     : undefined;
   const tags = ['apm'];
   if (serviceName) {

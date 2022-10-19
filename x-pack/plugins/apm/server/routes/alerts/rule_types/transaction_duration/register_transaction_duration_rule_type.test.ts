@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { registerTransactionDurationAlertType } from './register_transaction_duration_alert_type';
-import { createRuleTypeMocks } from './test_utils';
+import { registerTransactionDurationRuleType } from './register_transaction_duration_rule_type';
+import { createRuleTypeMocks } from '../../test_utils';
 
-describe('registerTransactionDurationAlertType', () => {
+describe('registerTransactionDurationRuleType', () => {
   it('sends alert when value is greater than threashold', async () => {
     const { services, dependencies, executor, scheduleActions } =
       createRuleTypeMocks();
 
-    registerTransactionDurationAlertType(dependencies);
+    registerTransactionDurationRuleType(dependencies);
 
     services.scopedClusterClient.asCurrentUser.search.mockResponse({
       hits: {

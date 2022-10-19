@@ -8,9 +8,9 @@
 import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  AlertType,
+  ApmRuleType,
   APM_SERVER_FEATURE_ID,
-} from '../../../../common/alert_types';
+} from '../../../../common/rules/apm_rule_types';
 import { getInitialAlertValues } from '../get_initial_alert_values';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useServiceName } from '../../../hooks/use_service_name';
@@ -22,11 +22,11 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 interface Props {
   addFlyoutVisible: boolean;
   setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
-  alertType: AlertType | null;
+  ruleType: ApmRuleType | null;
 }
 
 export function AlertingFlyout(props: Props) {
-  const { addFlyoutVisible, setAddFlyoutVisibility, alertType } = props;
+  const { addFlyoutVisible, setAddFlyoutVisibility, ruleType } = props;
 
   const serviceName = useServiceName();
   const { query } = useApmParams('/*');
@@ -42,7 +42,7 @@ export function AlertingFlyout(props: Props) {
     'transactionType' in query ? query.transactionType : undefined;
 
   const { services } = useKibana<ApmPluginStartDeps>();
-  const initialValues = getInitialAlertValues(alertType, serviceName);
+  const initialValues = getInitialAlertValues(ruleType, serviceName);
 
   const onCloseAddFlyout = useCallback(
     () => setAddFlyoutVisibility(false),
@@ -51,24 +51,24 @@ export function AlertingFlyout(props: Props) {
 
   const addAlertFlyout = useMemo(
     () =>
-      alertType &&
+      ruleType &&
       services.triggersActionsUi.getAddAlertFlyout({
         consumer: APM_SERVER_FEATURE_ID,
         onClose: onCloseAddFlyout,
-        ruleTypeId: alertType,
+        ruleTypeId: ruleType,
         canChangeTrigger: false,
         initialValues,
         metadata: {
           environment,
           serviceName,
-          ...(alertType === AlertType.ErrorCount ? {} : { transactionType }),
+          ...(ruleType === ApmRuleType.ErrorCount ? {} : { transactionType }),
           start,
           end,
         } as AlertMetadata,
       }),
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [
-      alertType,
+      ruleType,
       environment,
       onCloseAddFlyout,
       services.triggersActionsUi,
