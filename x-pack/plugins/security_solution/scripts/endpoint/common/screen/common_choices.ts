@@ -5,5 +5,12 @@
  * 2.0.
  */
 
-require('../../../../../src/setup_node_env');
-require('./action_responder').cli();
+import type { Choice } from './types';
+
+/**
+ * The Quit choice definition
+ */
+export const QuitChoice: Choice = {
+  key: 'Q',
+  title: 'Quit',
+} as const;
