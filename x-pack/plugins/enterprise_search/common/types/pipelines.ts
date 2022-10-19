@@ -37,7 +37,19 @@ export interface MlInferenceHistoryResponse {
 }
 
 export interface MlInferenceError {
-  message: string;
   doc_count: number;
+  message: string;
   timestamp: string | undefined; // Date string
+}
+
+export interface CreateMlInferencePipelineResponse {
+  addedToParentPipeline?: boolean;
+  created?: boolean;
+  id: string;
+}
+
+export interface AttachMlInferencePipelineResponse {
+  addedToParentPipeline?: boolean;
+  created?: boolean;
+  id: string;
 }

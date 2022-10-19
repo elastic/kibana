@@ -11,21 +11,17 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { formatPipelineName } from '../../common/ml_inference_pipeline';
 import { ErrorCode } from '../../common/types/error_codes';
 
+import type {
+  AttachMlInferencePipelineResponse,
+  CreateMlInferencePipelineResponse,
+} from '../../common/types/pipelines';
+
 import { formatMlPipelineBody } from '../lib/pipelines/create_pipeline_definitions';
 
 import {
   getInferencePipelineNameFromIndexName,
   getPrefixedInferencePipelineProcessorName,
 } from './ml_inference_pipeline_utils';
-
-/**
- * Details of a created pipeline.
- */
-export interface CreatedPipeline {
-  id: string;
-  created?: boolean;
-  addedToParentPipeline?: boolean;
-}
 
 /**
  * Creates a Machine Learning Inference pipeline with the given settings, if it doesn't exist yet,
@@ -44,7 +40,7 @@ export const createAndReferenceMlInferencePipeline = async (
   sourceField: string,
   destinationField: string | null | undefined,
   esClient: ElasticsearchClient
-): Promise<CreatedPipeline> => {
+): Promise<CreateMlInferencePipelineResponse> => {
   const createPipelineResult = await createMlInferencePipeline(
     pipelineName,
     modelId,
@@ -79,7 +75,7 @@ export const createMlInferencePipeline = async (
   sourceField: string,
   destinationField: string | null | undefined,
   esClient: ElasticsearchClient
-): Promise<CreatedPipeline> => {
+): Promise<CreateMlInferencePipelineResponse> => {
   const inferencePipelineGeneratedName = getPrefixedInferencePipelineProcessorName(pipelineName);
 
   // Check that a pipeline with the same name doesn't already exist
@@ -110,8 +106,8 @@ export const createMlInferencePipeline = async (
   });
 
   return Promise.resolve({
-    id: inferencePipelineGeneratedName,
     created: true,
+    id: inferencePipelineGeneratedName,
   });
 };
 
@@ -126,7 +122,7 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   indexName: string,
   pipelineName: string,
   esClient: ElasticsearchClient
-): Promise<CreatedPipeline> => {
+): Promise<AttachMlInferencePipelineResponse> => {
   const parentPipelineId = getInferencePipelineNameFromIndexName(indexName);
 
   // Fetch the parent pipeline
@@ -143,8 +139,8 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   // Verify the parent pipeline exists with a processors array
   if (!parentPipeline?.processors) {
     return Promise.resolve({
-      id: pipelineName,
       addedToParentPipeline: false,
+      id: pipelineName,
     });
   }
 
@@ -155,8 +151,8 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   );
   if (existingSubPipeline) {
     return Promise.resolve({
-      id: pipelineName,
       addedToParentPipeline: false,
+      id: pipelineName,
     });
   }
 
@@ -173,7 +169,7 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   });
 
   return Promise.resolve({
-    id: pipelineName,
     addedToParentPipeline: true,
+    id: pipelineName,
   });
 };
