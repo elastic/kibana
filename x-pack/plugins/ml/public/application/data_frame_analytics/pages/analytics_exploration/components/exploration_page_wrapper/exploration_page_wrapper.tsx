@@ -19,7 +19,7 @@ import {
   getScatterplotMatrixLegendType,
   useResultsViewConfig,
   DataFrameAnalyticsConfig,
-  getDestinationIndex
+  getDestinationIndex,
 } from '../../../../common';
 import { ResultsSearchQuery, ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 

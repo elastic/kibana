@@ -29,9 +29,7 @@ import {
   isClassificationAnalysis,
   isRegressionAnalysis,
 } from '../../../../common/util/analytics_utils';
-import {
-  getDestinationIndex
-} from './get_destination_index';
+import { getDestinationIndex } from './get_destination_index';
 
 export const useResultsViewConfig = (jobId: string) => {
   const mlContext = useMlContext();

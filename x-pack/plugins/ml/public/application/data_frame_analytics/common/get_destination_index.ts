@@ -7,6 +7,5 @@
 
 import { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
 
-export const getDestinationIndex = (
-  jobConfig: DataFrameAnalyticsConfig | undefined,
-) => (Array.isArray(jobConfig?.dest.index) ? jobConfig?.dest.index[0] : jobConfig?.dest.index) ?? '';
+export const getDestinationIndex = (jobConfig: DataFrameAnalyticsConfig | undefined) =>
+  (Array.isArray(jobConfig?.dest.index) ? jobConfig?.dest.index[0] : jobConfig?.dest.index) ?? '';

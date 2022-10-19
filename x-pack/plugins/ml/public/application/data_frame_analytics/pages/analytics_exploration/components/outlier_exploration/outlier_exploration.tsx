@@ -19,7 +19,12 @@ import {
 import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
-import { defaultSearchQuery, isOutlierAnalysis, useResultsViewConfig, getDestinationIndex } from '../../../../common';
+import {
+  defaultSearchQuery,
+  isOutlierAnalysis,
+  useResultsViewConfig,
+  getDestinationIndex,
+} from '../../../../common';
 import { FEATURE_INFLUENCE } from '../../../../common/constants';
 
 import {
