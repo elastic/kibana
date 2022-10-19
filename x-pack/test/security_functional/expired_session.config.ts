@@ -17,6 +17,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../functional/config.base.js')
   );
 
+  const testEndpointsPlugin = resolve(__dirname, './fixtures/common/test_endpoints');
+
   return {
     testFiles: [resolve(__dirname, './tests/expired_session')],
     services,
@@ -27,6 +29,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
+        `--plugin-path=${testEndpointsPlugin}`,
         '--xpack.security.session.idleTimeout=10s',
         `--xpack.security.authc.providers=${JSON.stringify({
           basic: { basic1: { order: 0 } },
