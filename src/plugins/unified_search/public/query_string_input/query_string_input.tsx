@@ -31,7 +31,7 @@ import { compact, debounce, isEmpty, isEqual, isFunction } from 'lodash';
 import { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import { DataPublicPluginStart, getQueryLog } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
 import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '@kbn/data-plugin/common';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -61,6 +61,7 @@ export interface QueryStringInputDependencies {
   http: CoreStart['http'];
   docLinks: DocLinksStart;
   uiSettings: CoreStart['uiSettings'];
+  dataViews: DataViewsPublicPluginStart;
 }
 
 export interface QueryStringInputProps {
@@ -193,7 +194,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
     const currentAbortController = this.fetchIndexPatternsAbortController;
 
     const objectPatternsFromStrings = (await fetchIndexPatterns(
-      this.props.deps.data.indexPatterns,
+      this.props.deps.dataViews,
       stringPatterns
     )) as DataView[];
 
