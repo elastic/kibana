@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useKibana } from '.';
-
-const useKibanaBasePath = (): string => useKibana().services.http.basePath.get();
-
-export const useIntegrationsPageLink = () =>
-  `${useKibanaBasePath()}/app/integrations/browse/threat_intel`;
+export * from './use_documentation_link';
+export * from './use_field_types';
+export * from './use_inspector';
+export * from './use_integrations_page_link';
+export * from './use_kibana';
+export * from './use_security_context';
