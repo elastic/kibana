@@ -132,6 +132,7 @@ import { useSignalHelpers } from '../../../../../common/containers/sourcerer/use
 import { HeaderPage } from '../../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../../../detection_engine/rule_exceptions/components/all_exception_items_table';
 import type { NavTab } from '../../../../../common/components/navigation/types';
+import { EditRuleSettingButtonLink } from './components/edit_rule_settings_button_link';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -595,42 +596,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [navigateToApp, ruleId]
   );
 
-  const editRule = useMemo(() => {
-    const renderEditRuleSettingButtonLink = (disabled: boolean) => (
-      <LinkButton
-        data-test-subj={disabled ? undefined : 'editRuleSettingsLink'}
-        onClick={goToEditRule}
-        iconType="controlsHorizontal"
-        isDisabled={disabled}
-        href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
-      >
-        {ruleI18n.EDIT_RULE_SETTINGS}
-      </LinkButton>
-    );
-
-    if (!hasActionsPrivileges || (isMlRule(rule?.type) && !hasMlPermissions)) {
-      return (
-        <EuiToolTip
-          position="top"
-          content={getToolTipContent(rule, hasMlPermissions, hasActionsPrivileges)}
-        >
-          {renderEditRuleSettingButtonLink(true)}
-        </EuiToolTip>
-      );
-    }
-
-    return renderEditRuleSettingButtonLink(!isExistingRule || !userHasPermissions(canUserCRUD));
-  }, [
-    isExistingRule,
-    canUserCRUD,
-    formatUrl,
-    goToEditRule,
-    hasActionsPrivileges,
-    ruleId,
-    rule,
-    hasMlPermissions,
-  ]);
-
   const onShowBuildingBlockAlertsChangedCallback = useCallback(
     (newShowBuildingBlockAlerts: boolean) => {
       setShowBuildingBlockAlerts(newShowBuildingBlockAlerts);
@@ -748,7 +713,21 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                      <EuiFlexItem grow={false}>{editRule}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EditRuleSettingButtonLink
+                          ruleId={ruleId}
+                          disabled={
+                            !isExistingRule ||
+                            !userHasPermissions(canUserCRUD) ||
+                            (isMlRule(rule?.type) && !hasMlPermissions)
+                          }
+                          disabledReason={getToolTipContent(
+                            rule,
+                            hasMlPermissions,
+                            hasActionsPrivileges
+                          )}
+                        />
+                      </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <RuleActionsOverflow
                           rule={rule}
