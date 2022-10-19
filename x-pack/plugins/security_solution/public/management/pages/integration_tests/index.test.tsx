@@ -37,73 +37,73 @@ describe('when in the Administration tab', () => {
   });
 
   describe('when the user has no permissions', () => {
-    it('should display `page not found` if no `canAccessEndpointManagement`', async () => {
+    it('should display `no permission` if no `canAccessEndpointManagement`', async () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: { loading: false, canAccessEndpointManagement: false },
       });
 
-      expect(await render().findByTestId('notFoundPage')).toBeTruthy();
+      expect(await render().findByTestId('noIngestPermissions')).toBeTruthy();
     });
 
-    it('should display `page not found` if no `canReadPolicyManagement`', async () => {
+    it('should display `no permission` if no `canReadPolicyManagement`', async () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: { loading: false, canReadPolicyManagement: false },
       });
 
       mockedContext.history.push('/administration/policy');
-      expect(await render().findByTestId('notFoundPage')).toBeTruthy();
+      expect(await render().findByTestId('noIngestPermissions')).toBeTruthy();
     });
 
-    it('should display `page not found` if no `canReadTrustedApplications`', async () => {
+    it('should display `no permission` if no `canReadTrustedApplications`', async () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: { loading: false, canReadTrustedApplications: false },
       });
 
       mockedContext.history.push('/administration/trusted_apps');
-      expect(await render().findByTestId('notFoundPage')).toBeTruthy();
+      expect(await render().findByTestId('noIngestPermissions')).toBeTruthy();
     });
 
-    it('should display `page not found` if no `canReadEventFilters`', async () => {
+    it('should display `no permission` if no `canReadEventFilters`', async () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: { loading: false, canReadEventFilters: false },
       });
 
       mockedContext.history.push('/administration/event_filters');
-      expect(await render().findByTestId('notFoundPage')).toBeTruthy();
+      expect(await render().findByTestId('noIngestPermissions')).toBeTruthy();
     });
 
-    it('should display `page not found` if no `canReadHostIsolationExceptions`', async () => {
+    it('should display `no permission` if no `canReadHostIsolationExceptions`', async () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: { loading: false, canReadHostIsolationExceptions: false },
       });
 
       mockedContext.history.push('/administration/host_isolation_exceptions');
-      expect(await render().findByTestId('notFoundPage')).toBeTruthy();
+      expect(await render().findByTestId('noIngestPermissions')).toBeTruthy();
     });
 
-    it('should display `page not found` if no `canReadBlocklist`', async () => {
+    it('should display `no permission` if no `canReadBlocklist`', async () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: { loading: false, canReadBlocklist: false },
       });
 
       mockedContext.history.push('/administration/blocklist');
-      expect(await render().findByTestId('notFoundPage')).toBeTruthy();
+      expect(await render().findByTestId('noIngestPermissions')).toBeTruthy();
     });
 
-    it('should display `page not found` if no `canReadActionsLogManagement`', async () => {
+    it('should display `no permission` if no `canReadActionsLogManagement`', async () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: { loading: false, canReadActionsLogManagement: false },
       });
 
       mockedContext.history.push('/administration/response_actions_history');
-      expect(await render().findByTestId('notFoundPage')).toBeTruthy();
+      expect(await render().findByTestId('noIngestPermissions')).toBeTruthy();
     });
   });
 
   describe('when the user has permissions', () => {
     it('should display the Management view if user has privileges', async () => {
       useUserPrivilegesMock.mockReturnValue({
-        endpointPrivileges: { loading: false, canAccessEndpointManagement: true },
+        endpointPrivileges: { loading: false, canReadEndpointList: true },
       });
 
       expect(await render().findByTestId('endpointPage')).toBeTruthy();
