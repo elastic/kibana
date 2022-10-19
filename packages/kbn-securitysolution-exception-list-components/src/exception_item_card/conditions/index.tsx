@@ -10,8 +10,8 @@ import React, { memo } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
 import { borderCss } from './conditions.styles';
-import { EntryContent } from './entry_content/entry_content';
-import { OsCondition } from './os_conditions/os_conditions';
+import { EntryContent } from './entry_content';
+import { OsCondition } from './os_conditions';
 import type { CriteriaConditionsProps, Entry } from './types';
 
 export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
