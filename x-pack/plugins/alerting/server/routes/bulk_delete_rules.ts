@@ -24,7 +24,7 @@ export const bulkDeleteRulesRoute = ({
       validate: {
         body: schema.object({
           filter: schema.maybe(schema.string()),
-          ids: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          ids: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 })),
         }),
       },
     },
