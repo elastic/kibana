@@ -11,7 +11,10 @@ import {
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { AlertingConnectorFeatureId, SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
-import { TINES_CONNECTOR_ID } from '../../../../common/connector_types/security/tines/constants';
+import {
+  TINES_CONNECTOR_ID,
+  TINES_TITLE,
+} from '../../../../common/connector_types/security/tines/constants';
 import {
   TinesConfigSchema,
   TinesSecretsSchema,
@@ -22,7 +25,7 @@ import { renderParameterTemplates } from './render';
 
 export const getTinesConnectorType = (): SubActionConnectorType<TinesConfig, TinesSecrets> => ({
   id: TINES_CONNECTOR_ID,
-  name: 'Tines',
+  name: TINES_TITLE,
   Service: TinesConnector,
   schema: {
     config: TinesConfigSchema,

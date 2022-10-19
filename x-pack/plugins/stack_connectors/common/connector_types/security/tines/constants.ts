@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export const TINES_TITLE = 'Tines';
 export const TINES_CONNECTOR_ID = '.tines';
 export const enum SUB_ACTION {
   STORIES = 'stories',

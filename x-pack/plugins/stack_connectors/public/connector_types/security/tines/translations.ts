@@ -7,94 +7,180 @@
 
 import { i18n } from '@kbn/i18n';
 
+// config form
 export const URL_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.tinesAction.urlTextFieldLabel',
+  'xpack.stackConnectors.security.tines.config.urlTextFieldLabel',
   {
     defaultMessage: 'Tenant URL',
   }
 );
 
 export const EMAIL_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.tinesAction.emailTextFieldLabel',
+  'xpack.stackConnectors.security.tines.config.emailTextFieldLabel',
   {
     defaultMessage: 'Email',
   }
 );
 export const TOKEN_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.tinesAction.tokenTextFieldLabel',
+  'xpack.stackConnectors.security.tines.config.tokenTextFieldLabel',
   {
     defaultMessage: 'Auth token',
   }
 );
 
 export const URL_INVALID = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.tinesAction.error.invalidUrlTextField',
+  'xpack.stackConnectors.security.tines.config.error.invalidUrlTextField',
   {
     defaultMessage: 'Tenant URL is invalid.',
   }
 );
 
 export const EMAIL_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.sections.addAction.tinesAction.error.requiredEmailText',
+  'xpack.stackConnectors.security.tines.config.error.requiredEmailText',
   {
     defaultMessage: 'Email is required.',
   }
 );
 export const TOKEN_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.sections.addAction.tinesAction.error.requiredAuthTokenText',
+  'xpack.stackConnectors.security.tines.config.error.requiredAuthTokenText',
   {
     defaultMessage: 'Auth token is required.',
   }
 );
 
+// params form
+export const STORY_LABEL = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.storyFieldLabel',
+  {
+    defaultMessage: 'Tines Story',
+  }
+);
+export const STORY_PLACEHOLDER = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.storyPlaceholder',
+  {
+    defaultMessage: 'Select a story',
+  }
+);
+export const STORY_ARIA_LABEL = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.storyFieldAriaLabel',
+  {
+    defaultMessage: 'Select a Tines Story',
+  }
+);
+
+export const WEBHOOK_LABEL = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.webhookFieldLabel',
+  {
+    defaultMessage: 'Tines Webhook Action',
+  }
+);
+export const WEBHOOK_PLACEHOLDER = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.webhookPlaceholder',
+  {
+    defaultMessage: 'Select a webhook action',
+  }
+);
+export const WEBHOOK_DISABLED_PLACEHOLDER = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.webhookDisabledPlaceholder',
+  {
+    defaultMessage: 'Select a story first',
+  }
+);
+export const WEBHOOK_ARIA_LABEL = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.webhookFieldAriaLabel',
+  {
+    defaultMessage: 'Select a Tines Webhook action',
+  }
+);
+
+export const BODY_LABEL = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.bodyFieldLabel',
+  {
+    defaultMessage: 'Body',
+  }
+);
+export const BODY_ARIA_LABEL = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.bodyFieldAriaLabel',
+  {
+    defaultMessage: 'Request body payload',
+  }
+);
+
+export const STORIES_ERROR = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.componentError.storiesRequestFailed',
+  {
+    defaultMessage: 'Error retrieving stories from Tines',
+  }
+);
+export const WEBHOOKS_ERROR = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.componentError.webhooksRequestFailed',
+  {
+    defaultMessage: 'Error retrieving webhook actions from Tines',
+  }
+);
+
+export const STORY_NOT_FOUND_WARNING = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.componentWarning.storyNotFound',
+  {
+    defaultMessage: 'Can not find the saved story. Please select a valid story from the selector',
+  }
+);
+export const WEBHOOK_NOT_FOUND_WARNING = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.componentWarning.webhookNotFound',
+  {
+    defaultMessage:
+      'Can not find the saved webhook. Please select a valid webhook from the selector',
+  }
+);
+
 export const ACTION_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredActionText',
+  'xpack.stackConnectors.security.tines.params.error.requiredActionText',
   {
     defaultMessage: 'Action is required.',
   }
 );
 
 export const INVALID_ACTION = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.invalidActionText',
+  'xpack.stackConnectors.security.tines.params.error.invalidActionText',
   {
     defaultMessage: 'Invalid action name.',
   }
 );
 
 export const BODY_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredBodyText',
+  'xpack.stackConnectors.security.tines.params.error.requiredBodyText',
   {
     defaultMessage: 'Body is required.',
   }
 );
 
 export const BODY_INVALID = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.invalidBodyText',
+  'xpack.stackConnectors.security.tines.params.error.invalidBodyText',
   {
     defaultMessage: 'Body does not have a valid JSON format.',
   }
 );
 
 export const STORY_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredStoryText',
+  'xpack.stackConnectors.security.tines.params.error.requiredStoryText',
   {
     defaultMessage: 'Story is required.',
   }
 );
 export const WEBHOOK_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredWebhookText',
+  'xpack.stackConnectors.security.tines.params.error.requiredWebhookText',
   {
     defaultMessage: 'Webhook is required.',
   }
 );
 export const WEBHOOK_PATH_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredWebhookPathText',
+  'xpack.stackConnectors.security.tines.params.error.requiredWebhookPathText',
   {
     defaultMessage: 'Webhook action path missing.',
   }
 );
 export const WEBHOOK_SECRET_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredWebhookSecretText',
+  'xpack.stackConnectors.security.tines.params.error.requiredWebhookSecretText',
   {
     defaultMessage: 'Webhook action secret is missing.',
   }

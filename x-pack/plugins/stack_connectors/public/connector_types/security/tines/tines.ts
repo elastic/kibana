@@ -12,8 +12,9 @@ import type {
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  SUB_ACTION,
   TINES_CONNECTOR_ID,
+  TINES_TITLE,
+  SUB_ACTION,
 } from '../../../../common/connector_types/security/tines/constants';
 import type {
   TinesConfig,
@@ -28,17 +29,12 @@ export function getConnectorType(): ConnectorTypeModel<
 > {
   return {
     id: TINES_CONNECTOR_ID,
+    actionTypeTitle: TINES_TITLE,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.tinesAction.selectMessageText',
       {
         defaultMessage: 'Send events to a Story.',
-      }
-    ),
-    actionTypeTitle: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.tinesAction.actionTypeTitle',
-      {
-        defaultMessage: 'Tines',
       }
     ),
     validateParams: async (

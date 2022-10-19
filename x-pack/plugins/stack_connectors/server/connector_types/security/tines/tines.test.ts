@@ -6,38 +6,24 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import crypto from 'crypto';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
 import { TinesConnector } from './tines';
-import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
+import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { TINES_CONNECTOR_ID } from '../../../../common/connector_types/security/tines/constants';
 
 jest.mock('axios');
+(axios as jest.Mocked<typeof axios>).create.mockImplementation(
+  () => jest.fn() as unknown as AxiosInstance
+);
 
-jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
-  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
-  return {
-    ...originalUtils,
-    request: jest.fn(),
-  };
-});
-
-const axiosMock = axios as jest.Mocked<typeof axios>;
-const requestMock = utils.request as jest.Mock;
+jest.mock('@kbn/actions-plugin/server/lib/axios_utils');
+const mockRequest = request as jest.Mock;
 
 const url = 'https://example.com';
 const email = 'some.email@test.com';
 const token = '123';
-
-const ignoredRequestFields = {
-  axios: expect.anything(),
-  configurationUtilities: expect.anything(),
-  logger: expect.anything(),
-};
 
 const story = {
   id: 97469,
@@ -60,7 +46,13 @@ const webhookAgent = {
   },
 };
 
-const defaultGetStoriesExpect = {
+const ignoredRequestFields = {
+  axios: expect.anything(),
+  configurationUtilities: expect.anything(),
+  logger: expect.anything(),
+};
+const storiesGetRequestExpected = {
+  ...ignoredRequestFields,
   method: 'get',
   data: {},
   url: `${url}/api/v1/stories`,
@@ -72,7 +64,8 @@ const defaultGetStoriesExpect = {
   params: { per_page: 20 },
 };
 
-const defaultGetAgentsExpect = {
+const agentsGetRequestExpected = {
+  ...ignoredRequestFields,
   method: 'get',
   data: {},
   url: `${url}/api/v1/agents`,
@@ -84,80 +77,65 @@ const defaultGetAgentsExpect = {
   params: { story_id: story.id, per_page: 20 },
 };
 
-const axiosInstanceMock = jest.fn();
-axiosMock.create.mockImplementation(() => {
-  return axiosInstanceMock as unknown as AxiosInstance;
-});
-
-const connector = new TinesConnector({
-  configurationUtilities: actionsConfigMock.create(),
-  config: { url },
-  connector: { id: '1', type: TINES_CONNECTOR_ID },
-  secrets: { email, token },
-  logger: loggingSystemMock.createLogger(),
-  services: actionsMock.createServices(),
-});
-
 describe('TinesConnector', () => {
+  const connector = new TinesConnector({
+    configurationUtilities: actionsConfigMock.create(),
+    config: { url },
+    connector: { id: '1', type: TINES_CONNECTOR_ID },
+    secrets: { email, token },
+    logger: loggingSystemMock.createLogger(),
+    services: actionsMock.createServices(),
+  });
+
   beforeEach(() => {
-    // jest.resetAllMocks();
     jest.clearAllMocks();
-    // requestMock.mockReturnValue({ data: { took: 5, requestId: '123', result: 'ok' } });
   });
 
   describe('getStories', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
-      requestMock.mockReturnValue({ data: { stories: [story], meta: {} } });
+      mockRequest.mockReturnValue({ data: { stories: [story], meta: {} } });
     });
 
     it('should request Tines stories', async () => {
       await connector.getStories();
-      expect(requestMock).toBeCalledTimes(1);
-      const [[requestArgs]] = requestMock.mock.calls;
+      expect(mockRequest).toBeCalledTimes(1);
+      const [[requestArgs]] = mockRequest.mock.calls;
 
-      expect(requestArgs).toEqual({
-        ...ignoredRequestFields,
-        ...defaultGetStoriesExpect,
-      });
+      expect(requestArgs).toEqual(storiesGetRequestExpected);
     });
 
     it('should request the Tines stories with pagination', async () => {
       const secondPageUrl = `${url}/api/v1/stories?page=2&per_page=20`;
-      requestMock.mockReturnValueOnce({
+      mockRequest.mockReturnValueOnce({
         data: { stories: [story], meta: { next_page: secondPageUrl } },
       });
       await connector.getStories();
 
-      expect(requestMock).toBeCalledTimes(2);
+      expect(mockRequest).toBeCalledTimes(2);
 
-      const [[request1Args], [request2Args]] = requestMock.mock.calls;
+      const [[request1Args], [request2Args]] = mockRequest.mock.calls;
 
-      expect(request1Args).toEqual({
-        ...ignoredRequestFields,
-        ...defaultGetStoriesExpect,
-      });
+      expect(request1Args).toEqual(storiesGetRequestExpected);
 
       expect(request2Args).toEqual({
-        ...ignoredRequestFields,
-        ...defaultGetStoriesExpect,
+        ...storiesGetRequestExpected,
         url: secondPageUrl,
         params: {},
       });
     });
 
     it('should request the Tines stories with pagination hard limit', async () => {
-      requestMock.mockReturnValue({
+      mockRequest.mockReturnValue({
         data: { stories: [story], meta: { next_page: url } },
       });
       await connector.getStories();
-      expect(requestMock).toBeCalledTimes(100); // hard limit is 100 pages
+      expect(mockRequest).toBeCalledTimes(100); // hard limit is 100 pages
     });
 
     it('should accumulate the Tines stories paged in a cleaned objects array', async () => {
       const story1 = { id: '1', name: 'story1' };
       const story2 = { id: '2', name: 'story2' };
-      requestMock
+      mockRequest
         .mockReturnValueOnce({
           data: { stories: [{ ...story1, description: 'desc1' }], meta: { next_page: url } },
         })
@@ -172,70 +150,64 @@ describe('TinesConnector', () => {
 
   describe('getWebhooks', () => {
     beforeEach(() => {
-      jest.clearAllMocks();
-      requestMock.mockReturnValue({ data: { agents: [webhookAgent], meta: {} } });
+      mockRequest.mockReturnValue({ data: { agents: [webhookAgent], meta: {} } });
     });
 
     it('should request Tines webhook actions', async () => {
       await connector.getWebhooks({ storyId: story.id });
 
-      expect(requestMock).toBeCalledTimes(1);
-      const [[requestArgs]] = requestMock.mock.calls;
+      expect(mockRequest).toBeCalledTimes(1);
+      const [[requestArgs]] = mockRequest.mock.calls;
 
-      expect(requestArgs).toEqual({
-        ...ignoredRequestFields,
-        ...defaultGetAgentsExpect,
-      });
+      expect(requestArgs).toEqual(agentsGetRequestExpected);
     });
 
     it('should request the Tines webhook actions with pagination', async () => {
       const secondPageUrl = `${url}/api/v1/agents?page=2&per_page=20`;
-      requestMock.mockReturnValueOnce({
+      mockRequest.mockReturnValueOnce({
         data: { agents: [webhookAgent], meta: { next_page: secondPageUrl } },
       });
       await connector.getWebhooks({ storyId: story.id });
 
-      expect(requestMock).toBeCalledTimes(2);
+      expect(mockRequest).toBeCalledTimes(2);
 
-      const [[request1Args], [request2Args]] = requestMock.mock.calls;
+      const [[request1Args], [request2Args]] = mockRequest.mock.calls;
 
-      expect(request1Args).toEqual({
-        ...ignoredRequestFields,
-        ...defaultGetAgentsExpect,
-      });
+      expect(request1Args).toEqual(agentsGetRequestExpected);
 
       expect(request2Args).toEqual({
-        ...ignoredRequestFields,
-        ...defaultGetAgentsExpect,
+        ...agentsGetRequestExpected,
         url: secondPageUrl,
         params: {},
       });
     });
 
-    it('should request Tines webhook actions and omit other actions', async () => {
-      requestMock.mockReturnValue({ data: { agents: [otherAgent, webhookAgent], meta: {} } });
-      await connector.getWebhooks({ storyId: story.id });
-
-      expect(requestMock).toBeCalledTimes(1);
-      const [[requestArgs]] = requestMock.mock.calls;
-
-      expect(requestArgs).toEqual({
-        ...ignoredRequestFields,
-        ...defaultGetAgentsExpect,
-      });
-    });
-
     it('should request the Tines webhook actions with pagination hard limit', async () => {
-      requestMock.mockReturnValue({
+      mockRequest.mockReturnValue({
         data: { agents: [webhookAgent], meta: { next_page: url } },
       });
       await connector.getWebhooks({ storyId: story.id });
-      expect(requestMock).toBeCalledTimes(100); // hard limit is 100 pages
+      expect(mockRequest).toBeCalledTimes(100); // hard limit is 100 pages
+    });
+
+    it('should request Tines webhook actions and take only webhook actions', async () => {
+      mockRequest.mockReturnValue({ data: { agents: [otherAgent, webhookAgent], meta: {} } });
+      const webhooks = await connector.getWebhooks({ storyId: story.id });
+
+      expect(webhooks).toEqual([
+        {
+          id: webhookAgent.id,
+          name: webhookAgent.name,
+          path: webhookAgent.options.path,
+          secret: webhookAgent.options.secret,
+          storyId: webhookAgent.story_id,
+        },
+      ]);
     });
 
     it('should accumulate the Tines webhook actions paged in a filtered and cleaned objects array', async () => {
       const webhookAgent2 = { ...webhookAgent, id: 2, name: 'Elastic webhook 2' };
-      requestMock
+      mockRequest
         .mockReturnValueOnce({
           data: {
             agents: [{ ...webhookAgent, description: 'desc1' }, otherAgent],
@@ -273,10 +245,10 @@ describe('TinesConnector', () => {
   describe('runWebhook', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      requestMock.mockReturnValue({ data: { took: 5, requestId: '123', status: 'ok' } });
+      mockRequest.mockReturnValue({ data: { took: 5, requestId: '123', status: 'ok' } });
     });
 
-    it('should request Tines webhook actions', async () => {
+    it('should send data to Tines webhook', async () => {
       await connector.runWebhook({
         webhook: {
           id: webhookAgent.id,
@@ -288,8 +260,8 @@ describe('TinesConnector', () => {
         body: '[]',
       });
 
-      expect(requestMock).toBeCalledTimes(1);
-      const [[requestArgs]] = requestMock.mock.calls;
+      expect(mockRequest).toBeCalledTimes(1);
+      const [[requestArgs]] = mockRequest.mock.calls;
 
       expect(requestArgs).toEqual({
         ...ignoredRequestFields,

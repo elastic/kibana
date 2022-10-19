@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -30,6 +29,7 @@ import type {
   TinesStoriesActionParams,
 } from '../../../../common/connector_types/security/tines/types';
 import type { TinesExecuteActionParams, TinesExecuteSubActionParams } from './types';
+import * as i18n from './translations';
 
 type StoryOption = EuiComboBoxOptionOption<TinesStoryObject>;
 type WebhookOption = EuiComboBoxOptionOption<TinesWebhookObject>;
@@ -109,16 +109,10 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
 
   useEffect(() => {
     if (storiesError) {
-      toasts.danger({
-        title: 'Error retrieving stories from Tines', // trans
-        body: storiesError.message,
-      });
+      toasts.danger({ title: i18n.STORIES_ERROR, body: storiesError.message });
     }
     if (webhooksError) {
-      toasts.danger({
-        title: 'Error retrieving webhook actions from Tines', // trans
-        body: webhooksError.message,
-      });
+      toasts.danger({ title: i18n.WEBHOOKS_ERROR, body: webhooksError.message });
     }
   }, [toasts, storiesError, webhooksError]);
 
@@ -129,15 +123,13 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
       if (selectedStory) {
         setSelectedStoryOption(createOption(selectedStory));
       } else {
-        toasts.warning({
-          title: 'Can not find the saved story. Please select a valid story from the selector', // TODO trans
-        });
+        toasts.warning({ title: i18n.STORY_NOT_FOUND_WARNING });
         editSubActionParams({ webhook: undefined });
       }
     }
 
     if (selectedStoryOption !== undefined && selectedStoryOption?.value?.id !== webhook?.storyId) {
-      // Selected story changed, update storyId to save and reset selected webhook
+      // Selected story changed, update storyId param and reset selected webhook
       editSubActionParams({ webhook: { storyId: selectedStoryOption?.value?.id } });
       setSelectedWebhookOption(null);
     }
@@ -150,15 +142,13 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
       if (selectedWebhook) {
         setSelectedWebhookOption(createOption(selectedWebhook));
       } else {
-        toasts.warning({
-          title: 'Can not find the saved webhook. Please select a valid webhook from the selector', // TODO trans
-        });
+        toasts.warning({ title: i18n.WEBHOOK_NOT_FOUND_WARNING });
         editSubActionParams({ webhook: { storyId: webhook?.storyId } });
       }
     }
 
     if (selectedWebhookOption !== undefined && selectedWebhookOption?.value?.id !== webhook?.id) {
-      // Selected webhook changed, update webhook to save, preserve storyId if the selected webhook has been reset
+      // Selected webhook changed, update webhook param, preserve storyId if the selected webhook has been reset
       editSubActionParams({
         webhook: selectedWebhookOption
           ? selectedWebhookOption?.value
@@ -186,19 +176,10 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <EuiFormRow
-          fullWidth
-          error={errors.story}
-          label={i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.tinesAction.storyTextFieldLabel',
-            {
-              defaultMessage: 'Tines Story', // TODO trans
-            }
-          )}
-        >
+        <EuiFormRow fullWidth error={errors.story} label={i18n.STORY_LABEL}>
           <EuiComboBox
-            aria-label="Tines Story" // TODO trans
-            placeholder="Select a story" // TODO trans
+            aria-label={i18n.STORY_PLACEHOLDER}
+            placeholder={i18n.STORY_ARIA_LABEL}
             singleSelection={{ asPlainText: true }}
             options={storiesOptions}
             selectedOptions={selectedStoryOptions}
@@ -207,19 +188,12 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
             isLoading={isLoadingStories}
           />
         </EuiFormRow>
-        <EuiFormRow
-          fullWidth
-          error={errors.webhook}
-          label={i18n.translate(
-            'xpack.triggersActionsUI.components.builtinActionTypes.tinesAction.webhookTextFieldLabel',
-            {
-              defaultMessage: 'Tines Webhook action', // TODO trans
-            }
-          )}
-        >
+        <EuiFormRow fullWidth error={errors.webhook} label={i18n.WEBHOOK_LABEL}>
           <EuiComboBox
-            aria-label="Tines Webhook action" // TODO trans
-            placeholder={selectedStoryOption ? 'Select a webhook action' : 'Select the story first'} // TODO trans
+            aria-label={i18n.WEBHOOK_ARIA_LABEL}
+            placeholder={
+              selectedStoryOption ? i18n.WEBHOOK_PLACEHOLDER : i18n.WEBHOOK_DISABLED_PLACEHOLDER
+            }
             singleSelection={{ asPlainText: true }}
             options={webhooksOptions}
             selectedOptions={selectedWebhookOptions}
@@ -235,18 +209,8 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
             messageVariables={messageVariables}
             paramsProperty={'body'}
             inputTargetValue={body}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.tinesAction.bodyFieldLabel',
-              {
-                defaultMessage: 'Body', // TODO trans
-              }
-            )}
-            aria-label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.tinesAction.bodyCodeEditorAriaLabel',
-              {
-                defaultMessage: 'Code editor', // TODO trans
-              }
-            )}
+            label={i18n.BODY_LABEL}
+            aria-label={i18n.BODY_ARIA_LABEL}
             errors={errors.body as string[]}
             onDocumentsChange={(json: string) => {
               editSubActionParams({ body: json });

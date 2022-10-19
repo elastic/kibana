@@ -19,8 +19,15 @@ export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> 
   variables
 ) => {
   if (params?.subAction !== SUB_ACTION.RUN) return params;
+
   // Remove the "kibana" entry from all alerts to reduce weight, the same data can be found in other parts of the alert object.
   const alerts = (variables.context as Context).alerts.map(({ kibana, ...alert }) => alert);
-  const body = JSON.stringify(set('context.alerts', alerts, variables));
+
+  let body: string;
+  try {
+    body = JSON.stringify(set('context.alerts', alerts, variables));
+  } catch (err) {
+    body = `error generating body payload: ${err.message}`;
+  }
   return set('subActionParams.body', body, params);
 };
