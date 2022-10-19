@@ -212,6 +212,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               dataViewId,
               indexNames: selectedPatterns,
               show: false,
+              title: '',
             })
           );
         }

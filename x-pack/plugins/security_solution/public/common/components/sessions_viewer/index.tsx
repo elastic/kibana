@@ -108,7 +108,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
 
   useEffect(() => {
     dispatch(
-      dataTableActions.createTGrid({
+      dataTableActions.initializeTGridSettings({
         id: tableId,
         title: i18n.SESSIONS_TITLE,
       })

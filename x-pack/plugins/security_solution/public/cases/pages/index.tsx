@@ -77,19 +77,6 @@ const CaseContainerComponent: React.FC = () => {
       }),
     });
 
-  const onComponentInitialized = useCallback(() => {
-    dispatch(
-      timelineActions.createTimeline({
-        id: TimelineId.casePage,
-        columns: [],
-        dataViewId: null,
-        indexNames: [],
-        expandedDetail: {},
-        show: false,
-      })
-    );
-  }, [dispatch]);
-
   const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
 
   return (
@@ -103,7 +90,6 @@ const CaseContainerComponent: React.FC = () => {
             alerts: { isExperimental: true },
           },
           refreshRef,
-          onComponentInitialized,
           actionsNavigation: {
             href: endpointDetailsHref,
             onClick: (endpointId: string, e) => {

@@ -106,7 +106,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       sessionViewConfig,
       showCheckboxes,
       sort,
-      title,
     } = defaultModel,
   } = useSelector((state: State) => eventsViewerSelector(state, tableId));
 

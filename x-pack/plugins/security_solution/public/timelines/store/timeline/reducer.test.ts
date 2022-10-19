@@ -226,6 +226,7 @@ describe('Timeline', () => {
         indexNames: [],
         timelineById: timelineByIdMock,
         timelineType: TimelineType.default,
+        title: '',
       });
       expect(update).not.toBe(timelineByIdMock);
     });
@@ -238,6 +239,7 @@ describe('Timeline', () => {
         indexNames: [],
         timelineById: timelineByIdMock,
         timelineType: TimelineType.default,
+        title: '',
       });
       expect(update).toEqual({
         foo: basicTimeline,
@@ -256,6 +258,7 @@ describe('Timeline', () => {
         indexNames: [],
         timelineById: timelineByIdMock,
         timelineType: TimelineType.default,
+        title: '',
       });
       expect(update).toEqual({
         foo: basicTimeline,
