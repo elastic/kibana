@@ -40,8 +40,10 @@ default space is used.
 .Properties of `cases` objects
 [%collapsible%open]
 ====
+
 `assignees`::
 (Optional, array of objects) Array containing assignee objects.
++
 .Properties of assignee objects
 [%collapsible%open]
 =====
