@@ -26,7 +26,7 @@ import type { IndexPattern } from '../../../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
 import { tinymathFunctions, groupArgsByType, unquotedStringRegex, nonNullable } from '../util';
 import type { GenericOperationDefinition } from '../..';
-import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
+import { getFunctionSignatureLabel, getHelpTextContent } from './formula_documentation_sections';
 import { hasFunctionFieldArgument } from '../validation';
 import { timeShiftOptions, timeShiftOptionOrder } from '../../../../time_shift_utils';
 import {
