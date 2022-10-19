@@ -39,6 +39,7 @@ function getOutcomeFilter(outcomeFilter: string[]) {
     warning: 'kibana.alerting.outcome: warning',
     success:
       'kibana.alerting.outcome:success OR (event.outcome: success AND NOT kibana.alerting.outcome:*)',
+    unknown: 'event.outcome: unknown',
   };
   return `${outcomeFilter.map((f) => filterMapping[f]).join(' OR ')}`;
 }
