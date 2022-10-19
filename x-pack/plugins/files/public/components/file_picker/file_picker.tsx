@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import type { FunctionComponent } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import {
   EuiModal,
   EuiModalBody,
@@ -59,10 +60,7 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
   const isLoading = useBehaviorSubject(state.isLoading$);
   const error = useBehaviorSubject(state.loadingError$);
 
-  useEffect(() => {
-    const sub = state.files$.subscribe();
-    return () => sub.unsubscribe();
-  }, [state]);
+  useObservable(state.files$);
 
   const renderFooter = () => (
     <EuiModalFooter>
