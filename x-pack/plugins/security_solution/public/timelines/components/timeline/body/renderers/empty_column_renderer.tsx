@@ -30,14 +30,14 @@ export const emptyColumnRenderer: ColumnRenderer = {
     eventId,
     field,
     isDraggable = true,
-    timelineId,
+    scopeId,
     truncate,
   }: {
     columnName: string;
     eventId: string;
     field: ColumnHeaderOptions;
     isDraggable?: boolean;
-    timelineId: string;
+    scopeId: string;
     truncate?: boolean;
   }) =>
     isDraggable ? (
@@ -45,7 +45,7 @@ export const emptyColumnRenderer: ColumnRenderer = {
         dataProvider={{
           enabled: true,
           id: escapeDataProviderId(
-            `empty-column-renderer-draggable-wrapper-${timelineId}-${columnName}-${eventId}-${field.id}`
+            `empty-column-renderer-draggable-wrapper-${scopeId}-${columnName}-${eventId}-${field.id}`
           ),
           name: `${columnName}: ${parseQueryValue(null)}`,
           queryMatch: {
@@ -59,7 +59,7 @@ export const emptyColumnRenderer: ColumnRenderer = {
           and: [],
         }}
         isDraggable={isDraggable}
-        key={`empty-column-renderer-draggable-wrapper-${timelineId}-${columnName}-${eventId}-${field.id}`}
+        key={`empty-column-renderer-draggable-wrapper-${scopeId}-${columnName}-${eventId}-${field.id}`}
         render={(dataProvider, _, snapshot) =>
           snapshot.isDragging ? (
             <DragEffects>
@@ -70,6 +70,7 @@ export const emptyColumnRenderer: ColumnRenderer = {
           )
         }
         truncate={truncate}
+        scopeId={scopeId}
       />
     ) : (
       <span>{getEmptyValue()}</span>
