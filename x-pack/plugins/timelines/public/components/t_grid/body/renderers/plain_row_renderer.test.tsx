@@ -23,7 +23,7 @@ describe('plain_row_renderer', () => {
     const children = plainRowRenderer.renderRow({
       data: mockDatum,
       isDraggable: false,
-      timelineId: 'test',
+      scopeId: 'test',
     });
     const wrapper = shallow(<span>{children}</span>);
     expect(wrapper).toMatchSnapshot();
@@ -37,7 +37,7 @@ describe('plain_row_renderer', () => {
     const children = plainRowRenderer.renderRow({
       data: mockDatum,
       isDraggable: false,
-      timelineId: 'test',
+      scopeId: 'test',
     });
     const wrapper = mount(<span>{children}</span>);
     expect(wrapper.text()).toEqual('');
