@@ -419,7 +419,6 @@ export class Authenticator {
         });
 
         if (requestIsRedirectable) {
-          // TODO: Will existingSession.error not always be null here?!?
           if (
             // TODO: Should this just be `instanceof SessionError`?
             existingSession.error instanceof SessionExpiredError &&
