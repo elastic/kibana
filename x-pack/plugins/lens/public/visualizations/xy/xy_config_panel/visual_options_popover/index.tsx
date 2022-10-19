@@ -55,7 +55,7 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
   );
 
   const hasNonBarSeries = dataLayers.some(({ seriesType }) =>
-    ['area_stacked', 'area', 'line'].includes(seriesType)
+    ['area_stacked', 'area', 'line', 'area_percentage_stacked'].includes(seriesType)
   );
 
   const hasAreaSeries = dataLayers.some(({ seriesType }) =>
