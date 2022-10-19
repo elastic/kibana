@@ -7,8 +7,8 @@
 
 import React, { useContext, VFC } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { InvestigateInTimelineButtonIcon } from '../../../../timeline/components/investigate_in_timeline';
-import { Indicator } from '../../../../../../common/types/indicator';
+import { InvestigateInTimelineButtonIcon } from '../../../../timeline';
+import { Indicator } from '../../../types';
 import { OpenIndicatorFlyoutButton } from './open_flyout_button';
 import { IndicatorsTableContext } from '../contexts';
 
