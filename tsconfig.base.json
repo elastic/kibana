@@ -321,6 +321,8 @@
       "@kbn/cloud-experiments-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_experiments/*"],
       "@kbn/cloud-full-story-plugin": ["x-pack/plugins/cloud_integrations/cloud_full_story"],
       "@kbn/cloud-full-story-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_full_story/*"],
+      "@kbn/cloud-gainsight-plugin": ["x-pack/plugins/cloud_integrations/cloud_gain_sight"],
+      "@kbn/cloud-gainsight-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_gain_sight/*"],
       "@kbn/cloud-links-plugin": ["x-pack/plugins/cloud_integrations/cloud_links"],
       "@kbn/cloud-links-plugin/*": ["x-pack/plugins/cloud_integrations/cloud_links/*"],
       "@kbn/cloud-security-posture-plugin": ["x-pack/plugins/cloud_security_posture"],
