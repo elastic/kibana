@@ -74,14 +74,14 @@ export const fetchPipelineProcessorInferenceData = async (
 export const getMlModelConfigsForModelIds = async (
   client: ElasticsearchClient,
   trainedModelsProvider: MlTrainedModels,
-  trainedModelNames?: string[]
+  trainedModelNames: string[]
 ): Promise<Record<string, InferencePipelineData>> => {
-  const getTrainedModelsParams = trainedModelNames ? { model_id: trainedModelNames.join() } : {};
   const [trainedModels, trainedModelsStats, trainedModelsInCurrentSpace] = await Promise.all([
-    client.ml.getTrainedModels(getTrainedModelsParams),
-    client.ml.getTrainedModelsStats(getTrainedModelsParams),
+    client.ml.getTrainedModels({ model_id: trainedModelNames.join() }),
+    client.ml.getTrainedModelsStats({ model_id: trainedModelNames.join() }),
     trainedModelsProvider.getTrainedModels({}), // Get all models from current space; note we can't
-    // use exact model name matching, that returns an error for models that cannot be found
+    // use exact model name matching, that returns an
+    // error for models that cannot be found
   ]);
   const modelNamesInCurrentSpace = trainedModelsInCurrentSpace.trained_model_configs.map(
     (modelConfig) => modelConfig.model_id
@@ -91,8 +91,7 @@ export const getMlModelConfigsForModelIds = async (
   trainedModels.trained_model_configs.forEach((trainedModelData) => {
     const trainedModelName = trainedModelData.model_id;
 
-    // Add model to results if it's one of the names we're filtering on, or if we don't filter
-    if (!trainedModelNames || trainedModelNames.includes(trainedModelName)) {
+    if (trainedModelNames.includes(trainedModelName)) {
       modelConfigs[trainedModelName] = {
         modelId: modelNamesInCurrentSpace.includes(trainedModelName) ? trainedModelName : undefined,
         modelState: TrainedModelState.NotDeployed,
