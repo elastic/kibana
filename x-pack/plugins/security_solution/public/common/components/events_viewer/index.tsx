@@ -16,7 +16,6 @@ import { dataTableActions } from '../../store/data_table';
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import type { ControlColumnProps, RowRenderer } from '../../../../common/types/timeline';
 import { APP_UI_ID } from '../../../../common/constants';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { InspectButtonContainer } from '../inspect';
@@ -96,7 +95,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     filters,
     input,
     query,
-    globalQueries,
     dataTable: {
       columns,
       defaultColumns,
