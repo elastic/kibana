@@ -9,12 +9,14 @@ import { useCallback, useState } from 'react';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { TimelineId } from '../../../../../common/types/timeline';
+import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import type { inputsModel } from '../../../../common/store';
 
 interface UseExceptionFlyoutProps {
   refetch?: inputsModel.Refetch;
   timelineId: string;
   onRuleChange?: () => void;
+  isActiveTimelines: boolean;
 }
 interface UseExceptionFlyout {
   exceptionFlyoutType: ExceptionListTypeEnum | null;
@@ -32,6 +34,7 @@ export const useExceptionFlyout = ({
   refetch,
   timelineId,
   onRuleChange,
+  isActiveTimelines,
 }: UseExceptionFlyoutProps): UseExceptionFlyout => {
   const [openAddExceptionFlyout, setOpenAddExceptionFlyout] = useState<boolean>(false);
   const [exceptionFlyoutType, setExceptionFlyoutType] = useState<ExceptionListTypeEnum | null>(
@@ -49,7 +52,7 @@ export const useExceptionFlyout = ({
   }, []);
 
   const onAddExceptionConfirm = useCallback(
-    (didRuleChange: boolean, _: boolean, didBulkCloseAlert) => {
+    (didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert) => {
       if (refetch && (timelineId !== TimelineId.active || didBulkCloseAlert)) {
         refetch();
       }
@@ -58,7 +61,7 @@ export const useExceptionFlyout = ({
       }
       setOpenAddExceptionFlyout(false);
     },
-    [onRuleChange, refetch, timelineId]
+    [onRuleChange, refetch, timelineId, isActiveTimelines]
   );
 
   return {

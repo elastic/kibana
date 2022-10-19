@@ -95,7 +95,7 @@ interface GetAlertParams {
 interface SingleSearchAfterAndAudit {
   id?: string | null | undefined;
   query?: string | object | undefined;
-  aggs?: object | undefined;
+  aggs?: Record<string, any> | undefined;
   index?: string;
   _source?: string[] | undefined;
   track_total_hits?: boolean | undefined;
@@ -242,7 +242,7 @@ export class AlertsClient {
 
       const config = getEsQueryConfig();
 
-      let queryBody = {
+      let queryBody: estypes.SearchRequest['body'] = {
         fields: [ALERT_RULE_TYPE_ID, ALERT_RULE_CONSUMER, ALERT_WORKFLOW_STATUS, SPACE_IDS],
         query: await this.buildEsQueryWithAuthz(query, id, alertSpaceId, operation, config),
         aggs,
@@ -262,7 +262,6 @@ export class AlertsClient {
       if (lastSortIds.length > 0) {
         queryBody = {
           ...queryBody,
-          // @ts-expect-error
           search_after: lastSortIds,
         };
       }
@@ -270,7 +269,6 @@ export class AlertsClient {
       const result = await this.esClient.search<ParsedTechnicalFields>({
         index: index ?? '.alerts-*',
         ignore_unavailable: true,
-        // @ts-expect-error
         body: queryBody,
         seq_no_primary_term: true,
       });

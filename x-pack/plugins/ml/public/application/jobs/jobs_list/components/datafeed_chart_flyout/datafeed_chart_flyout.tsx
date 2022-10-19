@@ -212,6 +212,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
 
       setData({
         datafeedConfig: job.datafeed_config,
+        // @ts-expect-error bucket_span is of type estypes.Duration
         bucketSpan: job.analysis_config.bucket_span,
         isInitialized: true,
         modelSnapshotData: modelSnapshotResultsLine.map(setLineAnnotationHeader),
@@ -510,7 +511,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           key={'source-results'}
                           color={euiTheme.euiColorPrimary}
                           id={i18n.translate('xpack.ml.jobsList.datafeedChart.sourceSeriesId', {
-                            defaultMessage: 'Source indices',
+                            defaultMessage: 'Source indices document count',
                           })}
                           xScaleType={ScaleType.Time}
                           yScaleType={ScaleType.Linear}
@@ -523,7 +524,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           key={'job-results'}
                           color={euiTheme.euiColorAccentText}
                           id={i18n.translate('xpack.ml.jobsList.datafeedChart.bucketSeriesId', {
-                            defaultMessage: 'Job results',
+                            defaultMessage: 'Datafeed document count',
                           })}
                           xScaleType={ScaleType.Time}
                           yScaleType={ScaleType.Linear}

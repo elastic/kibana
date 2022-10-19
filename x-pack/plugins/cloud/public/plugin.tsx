@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-import { registerCloudDeploymentIdAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
+import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { ELASTIC_SUPPORT_LINK, CLOUD_SNAPSHOTS_PATH } from '../common/constants';
 import { getFullCloudUrl } from './utils';
@@ -20,11 +20,8 @@ export interface CloudConfigType {
   profile_url?: string;
   deployment_url?: string;
   organization_url?: string;
-  full_story: {
-    enabled: boolean;
-    org_id?: string;
-    eventTypesAllowlist?: string[];
-  };
+  trial_end_date?: string;
+  is_elastic_staff_owned?: boolean;
 }
 
 export interface CloudStart {
@@ -55,14 +52,50 @@ export interface CloudStart {
 }
 
 export interface CloudSetup {
+  /**
+   * Cloud ID. Undefined if not running on Cloud.
+   */
   cloudId?: string;
+  /**
+   * This value is the same as `baseUrl` on ESS but can be customized on ECE.
+   */
   cname?: string;
+  /**
+   * This is the URL of the Cloud interface.
+   */
   baseUrl?: string;
+  /**
+   * The full URL to the deployment management page on Elastic Cloud. Undefined if not running on Cloud.
+   */
   deploymentUrl?: string;
+  /**
+   * The full URL to the user profile page on Elastic Cloud. Undefined if not running on Cloud.
+   */
   profileUrl?: string;
+  /**
+   * The full URL to the organization management page on Elastic Cloud. Undefined if not running on Cloud.
+   */
   organizationUrl?: string;
+  /**
+   * This is the path to the Snapshots page for the deployment to which the Kibana instance belongs. The value is already prepended with `deploymentUrl`.
+   */
   snapshotsUrl?: string;
+  /**
+   * `true` when Kibana is running on Elastic Cloud.
+   */
   isCloudEnabled: boolean;
+  /**
+   * When the Cloud Trial ends/ended for the organization that owns this deployment. Only available when running on Elastic Cloud.
+   */
+  trialEndDate?: Date;
+  /**
+   * `true` if the Elastic Cloud organization that owns this deployment is owned by an Elastician. Only available when running on Elastic Cloud.
+   */
+  isElasticStaffOwned?: boolean;
+  /**
+   * Registers CloudServiceProviders so start's `CloudContextProvider` hooks them.
+   * @param contextProvider The React component from the Service Provider.
+   */
   registerCloudService: (contextProvider: FC) => void;
 }
 
@@ -84,15 +117,23 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public setup(core: CoreSetup): CloudSetup {
-    registerCloudDeploymentIdAnalyticsContext(core.analytics, this.config.id);
+    registerCloudDeploymentMetadataAnalyticsContext(core.analytics, this.config);
 
-    const { id, cname, base_url: baseUrl } = this.config;
+    const {
+      id,
+      cname,
+      base_url: baseUrl,
+      trial_end_date: trialEndDate,
+      is_elastic_staff_owned: isElasticStaffOwned,
+    } = this.config;
 
     return {
       cloudId: id,
       cname,
       baseUrl,
       ...this.getCloudUrls(),
+      trialEndDate: trialEndDate ? new Date(trialEndDate) : undefined,
+      isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
       registerCloudService: (contextProvider) => {
         this.contextProviders.push(contextProvider);

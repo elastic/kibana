@@ -634,7 +634,6 @@ export function jobsProvider(
         results[job.job_id] = { job: { success: false }, datafeed: { success: false } };
 
         try {
-          // @ts-expect-error type mismatch on MlPutJobRequest.body
           await mlClient.putJob({ job_id: job.job_id, body: job });
           results[job.job_id].job = { success: true };
         } catch (error) {
