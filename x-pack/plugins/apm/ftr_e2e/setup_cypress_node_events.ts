@@ -48,8 +48,6 @@ export function setupNodeEvents(
       return null;
     },
     'synthtrace:index': async (events: SerializedSignal[]) => {
-      // eslint-disable-next-line no-console
-      console.log(events);
       await synthtraceEsClient.index(
         new SignalArray(events.map((e) => new SignalTransferObject(e)))
       );

@@ -40,13 +40,13 @@ function getProducerInternalOnly() {
             .duration(100)
             .success()
         );
-    });
+    })
+    .toArray();
 
-  const apmFields = signals.toArray();
-  const transactionA = apmFields.find(
+  const transactionA = signals.find(
     (item) => item.fields['processor.event'] === 'transaction'
   );
-  const spanA = apmFields.find(
+  const spanA = signals.find(
     (item) => item.fields['processor.event'] === 'span'
   );
 
@@ -118,13 +118,13 @@ function getProducerExternalOnly() {
             .duration(100)
             .success()
         );
-    });
+    })
+    .toArray();
 
-  const apmFields = signals.toArray();
-  const transactionB = apmFields.find(
+  const transactionB = signals.find(
     (item) => item.fields['processor.event'] === 'transaction'
   );
-  const spanB = apmFields.find(
+  const spanB = signals.find(
     (item) =>
       item.fields['processor.event'] === 'span' &&
       item.fields['span.name'] === 'Span B'
@@ -193,10 +193,10 @@ function getProducerConsumer({
             .duration(100)
             .success()
         );
-    });
+    })
+    .toArray();
 
-  const apmFields = signals.toArray();
-  const transactionC = apmFields.find(
+  const transactionC = signals.find(
     (item) => item.fields['processor.event'] === 'transaction'
   );
   const transactionCSpanLink = transactionC
@@ -205,7 +205,7 @@ function getProducerConsumer({
         span: { id: transactionC.fields['transaction.id']! },
       }
     : undefined;
-  const spanC = apmFields.find(
+  const spanC = signals.find(
     (item) =>
       item.fields['processor.event'] === 'span' ||
       item.fields['span.name'] === 'Span C'
@@ -293,12 +293,12 @@ function getConsumerMultiple({
             .duration(100)
             .success()
         );
-    });
-  const apmFields = signals.toArray();
-  const transactionD = apmFields.find(
+    })
+    .toArray();
+  const transactionD = signals.find(
     (item) => item.fields['processor.event'] === 'transaction'
   );
-  const spanE = apmFields.find(
+  const spanE = signals.find(
     (item) => item.fields['processor.event'] === 'span'
   );
 
@@ -353,10 +353,10 @@ export function generateSpanLinksData() {
     producerConsumerTransactionCSpanLink: producerConsumer.transactionCSpanLink,
     producerExternalOnlySpanBSpanLink: producerExternalOnly.spanBSpanLink,
   });
-  const events = new SignalArray(producerInternalOnly.signals.toArray()).merge(
-    new SignalArray(producerExternalOnly.signals.toArray()),
-    new SignalArray(producerConsumer.signals.toArray()),
-    new SignalArray(producerMultiple.signals.toArray())
+  const events = new SignalArray(producerInternalOnly.signals).merge(
+    new SignalArray(producerExternalOnly.signals),
+    new SignalArray(producerConsumer.signals),
+    new SignalArray(producerMultiple.signals)
   );
   synthtrace.index(events);
 
