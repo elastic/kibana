@@ -14,7 +14,7 @@ export const START_JOB_FAILURE = i18n.translate(
 );
 
 export const STOP_JOB_FAILURE = i18n.translate(
-  'xpack.securitySolution.components.hooks.errors.stopJobFailureTitle',
+  'xpack.securitySolution.components.mlPopup.hooks.errors.stopJobFailureTitle',
   {
     defaultMessage: 'Stop job failure',
   }
