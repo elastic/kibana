@@ -22,7 +22,7 @@ import {
   SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
 import { getEmptySavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
-import { DataViewSpec, TimeRange } from '@kbn/data-plugin/common';
+import { DataView, DataViewSpec, TimeRange } from '@kbn/data-plugin/common';
 import React, { useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { buildStateSubscribe } from '../hooks/utiles/build_state_subscribe';
@@ -121,6 +121,7 @@ export interface DiscoverStateContainer {
     initSyncSubscribe: () => () => void;
     stopSyncSubscribe: () => void;
     newSavedSearch: () => void;
+    onFieldEdited: (nextDataView?: DataView) => void;
   };
 }
 
@@ -166,6 +167,7 @@ export function getDiscoverStateContainer({
   const setAppState = appStateContainer.update;
 
   const pauseAutoRefreshInterval = async () => {
+    addLog('🧭 [discoverState] pauseAutoRefreshInterval');
     const state = stateStorage.get<QueryState>(GLOBAL_STATE_URL_KEY);
     if (state?.refreshInterval && !state.refreshInterval.pause) {
       await stateStorage.set(
@@ -185,6 +187,11 @@ export function getDiscoverStateContainer({
 
   const internalStateContainer = getInternalStateContainer();
   let unsubscribeSync: (() => void) | undefined;
+  const fetchData = (reset?: boolean) => {
+    addLog('🧭 [discoverState] fetch data', { reset });
+    const msg = reset ? 'reset' : undefined;
+    dataStateContainer.refetch$.next(msg);
+  };
 
   return {
     appState: appStateContainer,
@@ -225,17 +232,14 @@ export function getDiscoverStateContainer({
       onSubmitQuery: (_, isUpdate?: boolean) => {
         if (isUpdate === false) {
           searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-          dataStateContainer.refetch$.next(undefined);
+          fetchData(undefined);
         }
       },
       /**
        * Function triggered when the user changes the query in the search bar
        */
       onUpdateQuery: (args) => {},
-      fetch: (reset?: boolean) => {
-        const msg = reset ? 'reset' : undefined;
-        dataStateContainer.refetch$.next(msg);
-      },
+      fetch: fetchData,
       changeDataView: async (id: string, replaceURL = false) => {
         setAppState({ index: id }, replaceURL);
         return;
@@ -334,7 +338,7 @@ export function getDiscoverStateContainer({
             false,
             true
           );
-          dataStateContainer.refetch$.next(undefined);
+          fetchData(undefined);
         });
         unsubscribeSync = () => {
           stopSync();
@@ -349,6 +353,15 @@ export function getDiscoverStateContainer({
           unsubscribeSync();
           unsubscribeSync = undefined;
         }
+      },
+      onFieldEdited: async (nextDataView?: DataView) => {
+        const dataView = internalStateContainer.getState().dataView;
+        const usedDataView = nextDataView || dataView;
+        if (usedDataView) {
+          savedSearchContainer.get().searchSource.setField('index', usedDataView);
+          internalStateContainer.transitions.setDataView(usedDataView);
+        }
+        fetchData(true);
       },
     },
   };

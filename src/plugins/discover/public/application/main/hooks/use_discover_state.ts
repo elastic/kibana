@@ -69,14 +69,9 @@ export function useDiscoverState({
    */
   useEffect(() => {
     if (dataView && stateContainer.dataState.initialFetchStatus === FetchStatus.LOADING) {
-      stateContainer.dataState.refetch$.next(undefined);
+      stateContainer.actions.fetch(undefined);
     }
-  }, [
-    dataView,
-    savedSearch.id,
-    stateContainer.dataState.initialFetchStatus,
-    stateContainer.dataState.refetch$,
-  ]);
+  }, [dataView, savedSearch.id, stateContainer]);
 
   /**
    * We need to make sure the auto refresh interval is disabled for

@@ -31,27 +31,28 @@ export function getFetch$({
 }) {
   const { timefilter } = data.query.timefilter;
   const fetch$ = merge(
-    refetch$,
-    timefilter.getFetch$(),
-    timefilter.getAutoRefreshFetch$().pipe(
-      tap((done) => {
-        setAutoRefreshDone(done);
-      }),
-      filter(() => {
-        const currentFetchStatus = main$.getValue().fetchStatus;
-        return (
-          /**
-           * filter to prevent auto-refresh triggered fetch when
-           * loading is still ongoing
-           */
-          currentFetchStatus !== FetchStatus.LOADING && currentFetchStatus !== FetchStatus.PARTIAL
-        );
-      })
-    ),
+    refetch$.pipe(tap(() => addLog('👁️ fetch$ triggered by refetch$'))),
+    timefilter.getFetch$().pipe(tap(() => addLog('👁️ fetch$ triggered by timefilter'))),
+    timefilter
+      .getAutoRefreshFetch$()
+      .pipe(tap(() => addLog('👁️ fetch$ triggered by timefilter autorefresh')))
+      .pipe(
+        tap((done) => {
+          setAutoRefreshDone(done);
+        }),
+        filter(() => {
+          const currentFetchStatus = main$.getValue().fetchStatus;
+          return (
+            /**
+             * filter to prevent auto-refresh triggered fetch when
+             * loading is still ongoing
+             */
+            currentFetchStatus !== FetchStatus.LOADING && currentFetchStatus !== FetchStatus.PARTIAL
+          );
+        })
+      ),
     searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((sessionId) => !!sessionId))
-  )
-    .pipe(tap(() => addLog('👁️ fetch$ triggered')))
-    .pipe(debounceTime(100));
+  ).pipe(debounceTime(100));
 
   return fetch$;
 }

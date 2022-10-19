@@ -10,6 +10,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { addLog } from '../../../utils/addLog';
 import { Chart } from '../components/chart/point_series';
 import { DataTableRecord } from '../../../types';
 import { AppState } from './discover_app_state_container';
@@ -166,6 +167,7 @@ export function getDataStateContainer({
 
   function subscribe() {
     const subscription = fetch$.subscribe(async (val) => {
+      addLog('👁️ fetch$.subscription fetching data');
       if (
         !validateTimeRange(data.query.timefilter.timefilter.getTime(), services.toastNotifications)
       ) {

@@ -205,7 +205,7 @@ export const getDiscoverAppStateContainer = (
     }
 
     const { start, stop } = initSyncState();
-    replaceUrlState({}).then(() => start());
+    start();
 
     return () => {
       stopSyncingQueryAppStateWithStateContainer();

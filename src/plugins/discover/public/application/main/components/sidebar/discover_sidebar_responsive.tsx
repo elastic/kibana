@@ -212,8 +212,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
                 dataView: selectedDataView,
               },
               fieldName,
-              onSave: async () => {
-                onFieldEdited();
+              onSave: async (field, nextDataView) => {
+                onFieldEdited(nextDataView);
               },
             });
             if (setFieldEditorRef) {
