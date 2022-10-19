@@ -23,8 +23,8 @@ import { FINDINGS_REFETCH_INTERVAL_MS } from '../constants';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
-  from: NonNullable<estypes.SearchRequest['from']>;
-  size: NonNullable<estypes.SearchRequest['size']>;
+  from: NonNullable<NonNullable<estypes.SearchRequest['body']>['from']>;
+  size: NonNullable<NonNullable<estypes.SearchRequest['body']>['size']>;
   sort: Sort<CspFinding>;
   enabled: boolean;
 }

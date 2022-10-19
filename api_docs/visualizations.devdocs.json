@@ -7520,6 +7520,39 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.isCollapseFunction",
+        "type": "Function",
+        "tags": [],
+        "label": "isCollapseFunction",
+        "description": [],
+        "signature": [
+          "(candidate: string | undefined) => candidate is \"min\" | \"max\" | \"sum\" | \"avg\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.isCollapseFunction.$1",
+            "type": "string",
+            "tags": [],
+            "label": "candidate",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.isFieldValid",
         "type": "Function",
         "tags": [],
@@ -8444,12 +8477,12 @@
           {
             "parentPluginId": "visualizations",
             "id": "def-common.ColumnState.collapseFn",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "collapseFn",
             "description": [],
             "signature": [
-              "string | undefined"
+              "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -9531,12 +9564,12 @@
           {
             "parentPluginId": "visualizations",
             "id": "def-common.MetricVisConfiguration.collapseFn",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "collapseFn",
             "description": [],
             "signature": [
-              "string | undefined"
+              "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -9580,6 +9613,20 @@
             "signature": [
               "LayoutDirection",
               " | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.MetricVisConfiguration.showBar",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showBar",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -9981,7 +10028,7 @@
             "label": "collapseFns",
             "description": [],
             "signature": [
-              "Record<string, string> | undefined"
+              "Record<string, \"min\" | \"max\" | \"sum\" | \"avg\"> | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -11791,6 +11838,20 @@
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.XYConfiguration.showCurrentTimeMarker",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showCurrentTimeMarker",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -11940,12 +12001,12 @@
           {
             "parentPluginId": "visualizations",
             "id": "def-common.XYDataLayerConfig.collapseFn",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "collapseFn",
             "description": [],
             "signature": [
-              "string | undefined"
+              "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -12142,7 +12203,7 @@
             "label": "lineStyle",
             "description": [],
             "signature": [
-              "\"solid\" | \"dashed\" | \"dotted\" | \"dot-dashed\" | undefined"
+              "\"solid\" | \"dashed\" | \"dotted\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -12575,6 +12636,21 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.CollapseFunction",
+        "type": "Type",
+        "tags": [],
+        "label": "CollapseFunction",
+        "description": [],
+        "signature": [
+          "\"min\" | \"max\" | \"sum\" | \"avg\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.Column",
         "type": "Type",
         "tags": [],
@@ -12670,6 +12746,14 @@
             "docId": "kibVisualizationsPluginApi",
             "section": "def-common.MetricVisConfiguration",
             "text": "MetricVisConfiguration"
+          },
+          " | ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.GaugeVisConfiguration",
+            "text": "GaugeVisConfiguration"
           }
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
@@ -14016,6 +14100,21 @@
         "description": [],
         "signature": [
           "{ readonly DEFAULT: \"default\"; readonly INSIDE: \"inside\"; readonly HIDE: \"hide\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.CollapseFunctions",
+        "type": "Object",
+        "tags": [],
+        "label": "CollapseFunctions",
+        "description": [],
+        "signature": [
+          "readonly [\"sum\", \"avg\", \"min\", \"max\"]"
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
         "deprecated": false,
