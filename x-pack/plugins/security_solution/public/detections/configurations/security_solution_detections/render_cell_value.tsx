@@ -7,9 +7,9 @@
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding/tour';
 import { isDetectionsAlertsTable } from '../../../common/components/top_n/helpers';
-import { useTourContext } from '../../../common/components/guided_onboarding';
-import { getTourAnchor } from '../../../common/components/guided_onboarding/tour_config';
+import { SecurityStepId } from '../../../common/components/guided_onboarding/tour_config';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { TimelineId } from '../../../../common/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
@@ -45,47 +45,43 @@ export const RenderCellValue: React.FC<
   scopeId,
   truncate,
 }) => {
-  const { activeStep, incrementStep, isTourShown } = useTourContext();
-  const anchorTarget = useMemo(() => {
-    if (
+  const isTourAnchor = useMemo(
+    () =>
       columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
       isDetectionsAlertsTable(scopeId) &&
-      rowIndex === 0
-    ) {
-      // This alleviates a race condition where the active step attempts to mount before the tour anchor is mounted
-      if (isTourShown && activeStep === 0) {
-        setTimeout(() => {
-          incrementStep(1);
-        }, 500);
-      }
-      return getTourAnchor(1);
-    }
-    return '';
-  }, [activeStep, columnId, incrementStep, isTourShown, rowIndex, scopeId]);
+      rowIndex === 0,
+    [columnId, rowIndex, scopeId]
+  );
 
   return (
-    <span tour-step={anchorTarget}>
-      <DefaultCellRenderer
-        browserFields={browserFields}
-        columnId={columnId}
-        data={data}
-        ecsData={ecsData}
-        eventId={eventId}
-        globalFilters={globalFilters}
-        header={header}
-        isDetails={isDetails}
-        isDraggable={isDraggable}
-        isExpandable={isExpandable}
-        isExpanded={isExpanded}
-        linkValues={linkValues}
-        rowIndex={rowIndex}
-        colIndex={colIndex}
-        rowRenderers={rowRenderers}
-        setCellProps={setCellProps}
-        scopeId={scopeId}
-        truncate={truncate}
-      />
-    </span>
+    <>
+      <GuidedOnboardingTourStep
+        isTourAnchor={isTourAnchor}
+        step={1}
+        stepId={SecurityStepId.alertsCases}
+      >
+        <DefaultCellRenderer
+          browserFields={browserFields}
+          columnId={columnId}
+          data={data}
+          ecsData={ecsData}
+          eventId={eventId}
+          globalFilters={globalFilters}
+          header={header}
+          isDetails={isDetails}
+          isDraggable={isDraggable}
+          isExpandable={isExpandable}
+          isExpanded={isExpanded}
+          linkValues={linkValues}
+          rowIndex={rowIndex}
+          colIndex={colIndex}
+          rowRenderers={rowRenderers}
+          setCellProps={setCellProps}
+          scopeId={scopeId}
+          truncate={truncate}
+        />
+      </GuidedOnboardingTourStep>
+    </>
   );
 };
 

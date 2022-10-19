@@ -12,9 +12,10 @@ import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
+import { GuidedOnboardingTourStep } from '../../../../../common/components/guided_onboarding/tour';
 import { isDetectionsAlertsTable } from '../../../../../common/components/top_n/helpers';
 import { useTourContext } from '../../../../../common/components/guided_onboarding';
-import { getTourAnchor } from '../../../../../common/components/guided_onboarding/tour_config';
+import { SecurityStepId } from '../../../../../common/components/guided_onboarding/tour_config';
 import { getScopedActions, isTimelineScope } from '../../../../../helpers';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { eventHasNotes, getEventType, getPinOnClick } from '../helpers';
@@ -204,17 +205,24 @@ const ActionsComponent: React.FC<ActionProps> = ({
     scopedActions,
   ]);
 
-  const { isTourShown } = useTourContext();
+  const { isTourShown, incrementStep } = useTourContext();
 
   const isTourAnchor = useMemo(
     () =>
-      isTourShown &&
+      isTourShown(SecurityStepId.alertsCases) &&
       eventType === 'signal' &&
       // TODO: Steph make sure this is right
       isDetectionsAlertsTable(timelineId) &&
       ariaRowindex === 1,
     [isTourShown, ariaRowindex, eventType, timelineId]
   );
+
+  const onExpandEvent = useCallback(() => {
+    if (isTourAnchor) {
+      incrementStep(SecurityStepId.alertsCases);
+    }
+    onEventDetailsPanelOpened();
+  }, [incrementStep, isTourAnchor, onEventDetailsPanelOpened]);
 
   return (
     <ActionsContainer>
@@ -235,19 +243,25 @@ const ActionsComponent: React.FC<ActionProps> = ({
           </EventsTdContent>
         </div>
       )}
-      <div key="expand-event" tour-step={isTourAnchor ? getTourAnchor(2) : ''}>
-        <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-          <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
-            <EuiButtonIcon
-              aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
-              data-test-subj="expand-event"
-              iconType="expand"
-              onClick={onEventDetailsPanelOpened}
-              size="s"
-            />
-          </EuiToolTip>
-        </EventsTdContent>
-      </div>
+      <GuidedOnboardingTourStep
+        isTourAnchor={isTourAnchor}
+        step={2}
+        stepId={SecurityStepId.alertsCases}
+      >
+        <div key="expand-event">
+          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+            <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
+              <EuiButtonIcon
+                aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
+                data-test-subj="expand-event"
+                iconType="expand"
+                onClick={onExpandEvent}
+                size="s"
+              />
+            </EuiToolTip>
+          </EventsTdContent>
+        </div>
+      </GuidedOnboardingTourStep>
       <>
         {timelineId !== TimelineId.active && (
           <InvestigateInTimelineAction

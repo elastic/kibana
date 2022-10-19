@@ -7,22 +7,23 @@
 
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
-  EuiHorizontalRule,
-  EuiTabbedContent,
-  EuiSpacer,
-  EuiLoadingContent,
-  EuiNotificationBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLoadingContent,
   EuiLoadingSpinner,
+  EuiNotificationBadge,
+  EuiSpacer,
+  EuiTabbedContent,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import { GuidedOnboardingTourStep } from '../guided_onboarding/tour';
 import { isDetectionsAlertsTable } from '../top_n/helpers';
 import { useTourContext } from '../guided_onboarding';
-import { getTourAnchor } from '../guided_onboarding/tour_config';
+import { getTourAnchor, SecurityStepId } from '../guided_onboarding/tour_config';
 import type { AlertRawEventData } from './osquery_tab';
 import { useOsqueryTab } from './osquery_tab';
 import { EventFieldsBrowser } from './event_fields_browser';
@@ -181,37 +182,39 @@ const EventDetailsComponent: React.FC<Props> = ({
         : null,
     [detailsEcsData]
   );
-  const { activeStep, incrementStep, isTourShown } = useTourContext();
+  const { isTourShown } = useTourContext();
 
-  const anchorTarget = useMemo(
-    () => (isDetectionsAlertsTable(scopeId) && isTourShown ? getTourAnchor(3) : ''),
+  const isTourAnchor = useMemo(
+    () => isDetectionsAlertsTable(scopeId) && isTourShown(SecurityStepId.alertsCases),
     [isTourShown, scopeId]
   );
-
-  useEffect(() => {
-    // This alleviates a race condition where the active step attempts to mount before the tour anchor is mounted
-    if (activeStep === 2 && isTourShown) {
-      incrementStep(3);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const showThreatSummary = useMemo(() => {
     const hasEnrichments = enrichmentCount > 0;
     const hasRiskInfoWithLicense = isLicenseValid && (hostRisk || userRisk);
     return hasEnrichments || hasRiskInfoWithLicense;
   }, [enrichmentCount, hostRisk, isLicenseValid, userRisk]);
-
+  const TourStep = () => (
+    <GuidedOnboardingTourStep
+      altAnchor
+      isTourAnchor={isTourAnchor}
+      step={3}
+      stepId={SecurityStepId.alertsCases}
+    >
+      <></>
+    </GuidedOnboardingTourStep>
+  );
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
       isAlert
         ? {
+            ...(isTourAnchor ? { 'tour-step': getTourAnchor(3, SecurityStepId.alertsCases) } : {}),
             id: EventsViewType.summaryView,
             name: i18n.OVERVIEW,
             'data-test-subj': 'overviewTab',
-            ...(anchorTarget.length > 0 ? { 'tour-step': anchorTarget } : {}),
             content: (
               <>
+                <TourStep />
                 <EuiSpacer size="m" />
                 <Overview
                   browserFields={browserFields}
@@ -288,7 +291,6 @@ const EventDetailsComponent: React.FC<Props> = ({
         : undefined,
     [
       allEnrichments,
-      anchorTarget,
       browserFields,
       data,
       detailsEcsData,

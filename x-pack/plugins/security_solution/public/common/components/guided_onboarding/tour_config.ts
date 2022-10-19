@@ -9,6 +9,13 @@ import type { EuiTourStepProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ElementTarget } from '@elastic/eui/src/services/findElement';
 
+export const enum SecurityStepId {
+  // TODO: @Yulia, can we make these either all snake case or all camelcase?
+  addData = 'add_data',
+  rules = 'rules',
+  alertsCases = 'alertsCases',
+}
+
 export type StepConfig = Pick<
   EuiTourStepProps,
   'step' | 'content' | 'anchorPosition' | 'title' | 'initialFocus' | 'anchor'
@@ -22,12 +29,19 @@ export type StepConfig = Pick<
   };
 };
 
-type TourConfig = StepConfig[];
+const defaultConfig = {
+  minWidth: 360,
+  maxWidth: 360,
+  offset: 10,
+  repositionOnScroll: true,
+};
 
-export const getTourAnchor = (step: number) => `tourStepAnchor-alerts-${step}`;
+export const getTourAnchor = (step: number, stepId: SecurityStepId) =>
+  `tourStepAnchor-${stepId}-${step}`;
 
-export const tourConfig: TourConfig = [
+const alertsCasesConfig: StepConfig[] = [
   {
+    ...defaultConfig,
     step: 1,
     title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.ruleNameStep.tourTitle', {
       defaultMessage: 'Test alert for practice',
@@ -39,11 +53,12 @@ export const tourConfig: TourConfig = [
           'To help you practice triaging alerts, we enabled a rule to create your first alert.',
       }
     ),
-    anchor: `[tour-step="${getTourAnchor(1)}"]`,
+    anchor: `[tour-step="${getTourAnchor(1, SecurityStepId.alertsCases)}"]`,
     anchorPosition: 'downCenter',
     dataTestSubj: 'tourStep-alerts-1',
   },
   {
+    ...defaultConfig,
     step: 2,
     title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.openFlyout.tourTitle', {
       defaultMessage: 'Review the alert details',
@@ -55,13 +70,14 @@ export const tourConfig: TourConfig = [
           "Some information is provided at-a-glance in the table, but for full details, you'll want to open the alert.",
       }
     ),
-    anchor: `[tour-step="${getTourAnchor(2)}"]`,
+    anchor: `[tour-step="${getTourAnchor(2, SecurityStepId.alertsCases)}"]`,
     anchorPosition: 'rightUp',
-    initialFocus: `[tour-step="${getTourAnchor(2)}"]`,
+    initialFocus: `[tour-step="${getTourAnchor(2, SecurityStepId.alertsCases)}"]`,
     dataTestSubj: 'tourStep-alerts-2',
     hideNextButton: true,
   },
   {
+    ...defaultConfig,
     step: 3,
     title: i18n.translate(
       'xpack.securitySolution.guided_onboarding.tour.flyoutOverview.tourTitle',
@@ -76,11 +92,12 @@ export const tourConfig: TourConfig = [
           'Learn more about alerts by checking out all the information available on each tab.',
       }
     ),
-    anchor: `[tour-step="${getTourAnchor(3)}"]`,
+    anchor: `[tour-step="${getTourAnchor(3, SecurityStepId.alertsCases)}"]`,
     anchorPosition: 'leftUp',
     dataTestSubj: 'tourStep-alerts-3',
   },
   {
+    ...defaultConfig,
     step: 4,
     title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.addToCase.tourTitle', {
       defaultMessage: 'Create a case',
@@ -88,12 +105,13 @@ export const tourConfig: TourConfig = [
     content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.addToCase.tourContent', {
       defaultMessage: 'From the Take action menu, add the alert to a new case.',
     }),
-    anchor: `[tour-step="${getTourAnchor(4)}"]`,
+    anchor: `[tour-step="${getTourAnchor(4, SecurityStepId.alertsCases)}"]`,
     anchorPosition: 'upRight',
     dataTestSubj: 'tourStep-alerts-4',
     hideNextButton: true,
   },
   {
+    ...defaultConfig,
     step: 5,
     title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.createCase.tourTitle', {
       defaultMessage: `Add details`,
@@ -110,3 +128,15 @@ export const tourConfig: TourConfig = [
     hideNextButton: true,
   },
 ];
+
+interface SecurityTourConfig {
+  [SecurityStepId.addData]: StepConfig[];
+  [SecurityStepId.rules]: StepConfig[];
+  [SecurityStepId.alertsCases]: StepConfig[];
+}
+
+export const securityTourConfig: SecurityTourConfig = {
+  [SecurityStepId.addData]: [],
+  [SecurityStepId.rules]: [],
+  [SecurityStepId.alertsCases]: alertsCasesConfig,
+};

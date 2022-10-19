@@ -22,8 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import { useKibana } from '../../lib/kibana';
-import type { StepConfig } from './tour_config';
-import { tourConfig } from './tour_config';
+import { securityTourConfig, SecurityStepId, getTourAnchor } from './tour_config';
 
 /**
  * OLM team - when you implement your steps, you may or may not want to use local storage. I did not need it for the 'alertsCases' step
@@ -48,120 +47,168 @@ import { tourConfig } from './tour_config';
  * };
  */
 
-const minWidth: EuiTourStepProps['minWidth'] = 360;
-const maxWidth: EuiTourStepProps['maxWidth'] = 360;
-const offset: EuiTourStepProps['offset'] = 10;
-const repositionOnScroll: EuiTourStepProps['repositionOnScroll'] = true;
+interface SecurityTourStep {
+  step: number;
+  stepId: SecurityStepId;
+}
+interface Delayed {
+  children: React.ReactNode;
+  waitBeforeShow?: number;
+}
+const Delayed = ({ children, waitBeforeShow = 500 }: Delayed) => {
+  const [isShown, setIsShown] = useState(false);
 
-const getSteps = ({
-  activeStep,
-  incrementStep,
-  resetTour,
-}: {
-  activeStep: number;
-  incrementStep: () => void;
-  resetTour: () => void;
-}) => {
-  const getFooterAction = (hideNextButton: boolean): EuiTourStepProps['footerAction'] =>
-    !hideNextButton ? (
-      <EuiButton
-        size="s"
-        onClick={() => incrementStep()}
-        color="success"
-        data-test-subj="onboarding--securityTourNextStepButton"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.guided_onboarding.nextStep.buttonLabel"
-          defaultMessage="Next"
-        />
-      </EuiButton>
-    ) : (
-      <>
-        {/* Passing empty element instead of undefined. If undefined "Skip tour" button is shown, we do not want that*/}
-      </>
-    );
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsShown(true);
+    }, waitBeforeShow);
+    return () => clearTimeout(timer);
+  }, [waitBeforeShow]);
 
-  return tourConfig.map((stepConfig: StepConfig) => {
-    const { content, imageConfig, dataTestSubj, hideNextButton = false, ...rest } = stepConfig;
-
-    /* important not to mount until the step is active,
-     * otherwise the tourConfig[0].anchor may not yet exist in the DOM to mount the step to
-     */
-    return stepConfig.step === activeStep ? (
-      <EuiTourStep
-        {...rest}
-        minWidth={minWidth}
-        maxWidth={maxWidth}
-        offset={offset}
-        repositionOnScroll={repositionOnScroll}
-        stepsTotal={tourConfig.length}
-        isStepOpen={stepConfig.step === activeStep}
-        onFinish={() => resetTour()}
-        // TODO: re-add panelProps
-        // EUI has a bug https://github.com/elastic/eui/issues/6297
-        // where any panelProps overwrite their panelProps,
-        // so we lose cool things like the EuiBeacon
-        // panelProps={{
-        //   'data-test-subj': dataTestSubj,
-        // }}
-        content={
-          <>
-            <EuiText size="xs">
-              <p>{content}</p>
-            </EuiText>
-            {imageConfig && (
-              <>
-                <EuiSpacer size="m" />
-                <EuiImage alt={imageConfig.altText} src={imageConfig.src} size="fullWidth" />
-              </>
-            )}
-          </>
-        }
-        footerAction={getFooterAction(hideNextButton)}
-      />
-    ) : null;
-  });
+  return isShown ? <>{children}</> : <></>;
 };
+
+export const SecurityTourStep = ({ step, stepId }: SecurityTourStep) => {
+  const { activeStep, incrementStep } = useTourContext();
+  const tourStep = useMemo(
+    () => securityTourConfig[stepId].find((config) => config.step === step),
+    [step, stepId]
+  );
+  if (step !== activeStep || tourStep == null) {
+    return null;
+  }
+  const { content, imageConfig, dataTestSubj, hideNextButton = false, ...rest } = tourStep;
+
+  const footerAction: EuiTourStepProps['footerAction'] = !hideNextButton ? (
+    <EuiButton
+      size="s"
+      onClick={() => incrementStep(stepId)}
+      color="success"
+      data-test-subj="onboarding--securityTourNextStepButton"
+    >
+      <FormattedMessage
+        id="xpack.securitySolution.guided_onboarding.nextStep.buttonLabel"
+        defaultMessage="Next"
+      />
+    </EuiButton>
+  ) : (
+    <>
+      {/* Passing empty element instead of undefined. If undefined "Skip tour" button is shown, we do not want that*/}
+    </>
+  );
+  return (
+    <EuiTourStep
+      {...rest}
+      content={
+        <>
+          <EuiText size="xs">
+            <p>{content}</p>
+          </EuiText>
+          {imageConfig && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiImage alt={imageConfig.altText} src={imageConfig.src} size="fullWidth" />
+            </>
+          )}
+        </>
+      }
+      footerAction={footerAction}
+      isStepOpen={step === activeStep}
+      // guided onboarding does not allow skipping tour through the steps
+      onFinish={() => null}
+      stepsTotal={securityTourConfig[stepId].length}
+      // TODO: re-add panelProps
+      // EUI has a bug https://github.com/elastic/eui/issues/6297
+      // where any panelProps overwrite their panelProps,
+      // so we lose cool things like the EuiBeacon
+      // panelProps={{
+      //   'data-test-subj': dataTestSubj,
+      // }}
+    />
+  );
+};
+
+interface GuidedOnboardingTourStep extends SecurityTourStep {
+  // if true, this component renders the tour step only (not the anchor)
+  altAnchor?: boolean;
+  children: React.ReactNode;
+  isTourAnchor: boolean;
+}
+
+// wraps tour anchor component
+// and gives the tour step itself a place to mount once it is active
+// mounts the tour step with a delay to ensure the anchor will render first
+export const GuidedOnboardingTourStep = ({
+  altAnchor = false,
+  children,
+  isTourAnchor,
+  step,
+  stepId,
+}: GuidedOnboardingTourStep) =>
+  isTourAnchor ? (
+    <span tour-step={altAnchor ? '' : getTourAnchor(step, stepId)}>
+      <Delayed>
+        <SecurityTourStep step={step} stepId={stepId} />
+      </Delayed>
+      {children}
+    </span>
+  ) : (
+    <>{children}</>
+  );
 
 export interface TourContextValue {
   activeStep: number;
-  isTourShown: boolean;
-  endTour: () => void;
-  // Calling this in components with tour anchor tags alleviates a race condition where the active step attempts to mount before the tour anchor is mounted
-  incrementStep: (step?: number) => void;
+  isTourShown: (stepId: SecurityStepId) => boolean;
+  endTourStep: (stepId: SecurityStepId) => void;
+  // Calling this in components with tour anchor tags alleviates a race condition
+  // where the active step attempts to mount before the tour anchor is mounted
+  incrementStep: (stepId: SecurityStepId, step?: number) => void;
 }
 
-const TourContext = createContext<TourContextValue>({
+const initialState: TourContextValue = {
   activeStep: 1,
-  isTourShown: false,
-  endTour: () => {},
+  isTourShown: () => false,
+  endTourStep: () => {},
   incrementStep: () => {},
-} as TourContextValue);
+};
+
+const TourContext = createContext<TourContextValue>(initialState);
 
 export const TourContextProvider = ({ children }: { children: ReactChild }) => {
   const { guidedOnboardingApi } = useKibana().services.guidedOnboarding;
-  const isPrimaryTourActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$('security', 'alertsCases') ?? of(false),
+  const isAddDataTourActive = useObservable(
+    guidedOnboardingApi?.isGuideStepActive$('security', SecurityStepId.addData) ?? of(false),
+    false
+  );
+  const isRulesTourActive = useObservable(
+    guidedOnboardingApi?.isGuideStepActive$('security', SecurityStepId.rules) ?? of(false),
+    false
+  );
+  const isAlertsCasesTourActive = useObservable(
+    guidedOnboardingApi?.isGuideStepActive$('security', SecurityStepId.alertsCases) ?? of(false),
     false
   );
 
-  const [isTourActive, _setIsTourActive] = useState<boolean>(isPrimaryTourActive);
+  const tourStatus = useMemo(
+    () => ({
+      [SecurityStepId.addData]: isAddDataTourActive,
+      [SecurityStepId.rules]: isRulesTourActive,
+      [SecurityStepId.alertsCases]: isAlertsCasesTourActive,
+    }),
+    [isAddDataTourActive, isRulesTourActive, isAlertsCasesTourActive]
+  );
 
-  useEffect(() => {
-    _setIsTourActive(isPrimaryTourActive);
-  }, [isPrimaryTourActive]);
+  const isSmallScreen = useIsWithinBreakpoints(['xs', 's']);
+  const isTourShown = useCallback(
+    (stepId: SecurityStepId) => tourStatus[stepId] && !isSmallScreen,
+    [isSmallScreen, tourStatus]
+  );
 
-  const setIsTourActive = useCallback((value: boolean) => {
-    _setIsTourActive(value);
-  }, []);
+  const [activeStep, _setActiveStep] = useState<number>(1);
 
-  // always start with step 0, at least for 'alertsCases'. We increment the step from where the tour anchor
-  // is in some places to ensure that the anchor exists before the step is active for mounting purposes
-  const [activeStep, _setActiveStep] = useState<number>(0);
-
-  const incrementStep = useCallback((step?: number) => {
+  const incrementStep = useCallback((stepId: SecurityStepId, step?: number) => {
     _setActiveStep((prevState) =>
-      step != null ? step : (prevState >= tourConfig.length ? 0 : prevState) + 1
+      step != null ? step : (prevState >= securityTourConfig[stepId].length ? 0 : prevState) + 1
     );
   }, []);
 
@@ -170,38 +217,25 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
   }, []);
 
   const resetTour = useCallback(() => {
-    setIsTourActive(false);
     resetStep();
-  }, [setIsTourActive, resetStep]);
+  }, [resetStep]);
 
-  const endTour = useCallback(async () => {
-    resetTour();
-    await guidedOnboardingApi?.completeGuideStep('security', 'alertsCases');
-  }, [resetTour, guidedOnboardingApi]);
+  const endTourStep = useCallback(
+    async (stepId: SecurityStepId) => {
+      resetTour();
+      await guidedOnboardingApi?.completeGuideStep('security', stepId);
+    },
+    [resetTour, guidedOnboardingApi]
+  );
 
-  const isSmallScreen = useIsWithinBreakpoints(['xs', 's']);
-  const showTour = isTourActive && !isSmallScreen;
-
-  const context: TourContextValue = {
-    isTourShown: showTour,
-    endTour,
+  const context = {
+    isTourShown,
+    endTourStep,
     incrementStep,
     activeStep,
   };
 
-  const steps = useMemo(
-    () => (showTour ? getSteps({ activeStep, incrementStep, resetTour }) : null),
-    [activeStep, incrementStep, resetTour, showTour]
-  );
-
-  return (
-    <TourContext.Provider value={context}>
-      <>
-        {children}
-        {steps}
-      </>
-    </TourContext.Provider>
-  );
+  return <TourContext.Provider value={context}>{children}</TourContext.Provider>;
 };
 
 export const useTourContext = (): TourContextValue => {
