@@ -7,7 +7,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { omit } from 'lodash';
+import { omit, isEqual } from 'lodash';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from '../options_list/types';
 import { RANGE_SLIDER_CONTROL } from '../range_slider/types';
 import { TIME_SLIDER_CONTROL } from '../time_slider/types';
@@ -32,12 +32,22 @@ export const ControlPanelDiffSystems: {
       if (!deepEqual(omit(initialInput, 'explicitInput'), omit(newInput, 'explicitInput')))
         return false;
 
-      const { exclude: excludeA, ...inputA }: Partial<OptionsListEmbeddableInput> =
-        initialInput.explicitInput;
-      const { exclude: excludeB, ...inputB }: Partial<OptionsListEmbeddableInput> =
-        newInput.explicitInput;
+      const {
+        exclude: excludeA,
+        selectedOptions: selectedA,
+        ...inputA
+      }: Partial<OptionsListEmbeddableInput> = initialInput.explicitInput;
+      const {
+        exclude: excludeB,
+        selectedOptions: selectedB,
+        ...inputB
+      }: Partial<OptionsListEmbeddableInput> = newInput.explicitInput;
 
-      return Boolean(excludeA) === Boolean(excludeB) && deepEqual(inputA, inputB);
+      return (
+        Boolean(excludeA) === Boolean(excludeB) &&
+        isEqual(selectedA ?? [], selectedB ?? []) &&
+        deepEqual(inputA, inputB)
+      );
     },
   },
   [RANGE_SLIDER_CONTROL]: genericControlPanelDiffSystem,
