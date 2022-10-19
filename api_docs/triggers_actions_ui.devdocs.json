@@ -3007,7 +3007,8 @@
             "label": "defaultActionParams",
             "description": [],
             "signature": [
-              "Partial<ActionParams> | undefined"
+              "RecursivePartial",
+              "<ActionParams> | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -3021,7 +3022,8 @@
             "label": "defaultRecoveredActionParams",
             "description": [],
             "signature": [
-              "Partial<ActionParams> | undefined"
+              "RecursivePartial",
+              "<ActionParams> | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,

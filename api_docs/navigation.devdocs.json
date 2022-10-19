@@ -664,7 +664,7 @@
           },
           "[] | undefined; badges?: (",
           "EuiBadgeProps",
-          " & { badgeText: string; })[] | undefined; showSearchBar?: boolean | undefined; showQueryBar?: boolean | undefined; showQueryInput?: boolean | undefined; showDatePicker?: boolean | undefined; showFilterBar?: boolean | undefined; unifiedSearch?: ",
+          " & { badgeText: string; })[] | undefined; showSearchBar?: boolean | undefined; showQueryInput?: boolean | undefined; showDatePicker?: boolean | undefined; showFilterBar?: boolean | undefined; unifiedSearch?: ",
           {
             "pluginId": "unifiedSearch",
             "scope": "public",
