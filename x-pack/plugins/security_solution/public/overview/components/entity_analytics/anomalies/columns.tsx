@@ -56,10 +56,10 @@ export const useAnomaliesColumns = (loading: boolean, refreshJobs: Refetch): Ano
           }
 
           if (job && isJobStarted(job.jobState, job.datafeedState)) {
-            return -1;
+            return 0;
           }
 
-          return -2;
+          return -1;
         },
         truncateText: true,
         align: 'right',
