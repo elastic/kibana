@@ -59,11 +59,15 @@ function getRunGroups(bk: BuildkiteClient, allTypes: RunGroup[], typeName: strin
   if (tooLongs.length > 0) {
     bk.setAnnotation(
       `test-group-too-long:${typeName}`,
-      'error',
+      'warning',
       [
         tooLongs.length === 1
-          ? `The following "${typeName}" config has a duration that exceeds the maximum amount of time desired for a single CI job. Please split it up.`
-          : `The following "${typeName}" configs have durations that exceed the maximum amount of time desired for a single CI job. Please split them up.`,
+          ? `The following "${typeName}" config has a duration that exceeds the maximum amount of time desired for a single CI job. ` +
+            `This is not an error, and if you don't own this config then you can ignore this warning. ` +
+            `If you own this config please split it up ASAP and ask Operations if you have questions about how to do that.`
+          : `The following "${typeName}" configs have durations that exceed the maximum amount of time desired for a single CI job. ` +
+            `This is not an error, and if you don't own any of these configs then you can ignore this warning.` +
+            `If you own any of these configs please split them up ASAP and ask Operations if you have questions about how to do that.`,
         '',
         ...tooLongs.map(({ config, durationMin }) => ` - ${config}: ${durationMin} minutes`),
       ].join('\n')
