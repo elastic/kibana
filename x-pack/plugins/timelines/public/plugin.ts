@@ -17,6 +17,7 @@ import { tGridReducer } from './store/t_grid/reducer';
 import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
 import { getHoverActions, HoverActionsConfig } from './components/hover_actions';
+import { timelineReducer } from './store/timeline/reducer';
 
 export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
   private _store: Store | undefined;
@@ -62,6 +63,9 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       },
       getTGridReducer: () => {
         return tGridReducer;
+      },
+      getTimelineReducer: () => {
+        return timelineReducer;
       },
       getLoadingPanel: (props: LoadingPanelProps) => {
         return getLoadingPanelLazy(props);
