@@ -7,15 +7,10 @@
 
 import * as t from 'io-ts';
 
-const rollingTimeWindowSchema = t.type({
-  duration: t.string,
-  is_rolling: t.literal<boolean>(true),
-});
-
 const budgetingMethodSchema = t.literal('occurrences');
 
 const objectiveSchema = t.type({
   target: t.number,
 });
 
-export { rollingTimeWindowSchema, budgetingMethodSchema, objectiveSchema };
+export { budgetingMethodSchema, objectiveSchema };

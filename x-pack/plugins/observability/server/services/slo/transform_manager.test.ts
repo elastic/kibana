@@ -21,7 +21,11 @@ import {
   TransformGenerator,
 } from './transform_generators';
 import { SLO, IndicatorTypes } from '../../types/models';
-import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
+import {
+  createAPMTransactionDurationIndicator,
+  createAPMTransactionErrorRateIndicator,
+  createSLO,
+} from './fixtures/slo';
 
 describe('TransformManager', () => {
   let esClientMock: ElasticsearchClientMock;
@@ -42,17 +46,7 @@ describe('TransformManager', () => {
         const service = new DefaultTransformManager(generators, esClientMock, loggerMock);
 
         await expect(
-          service.install(
-            createSLO({
-              type: 'slo.apm.transaction_error_rate',
-              params: {
-                environment: 'irrelevant',
-                service: 'irrelevant',
-                transaction_name: 'irrelevant',
-                transaction_type: 'irrelevant',
-              },
-            })
-          )
+          service.install(createSLO({ indicator: createAPMTransactionErrorRateIndicator() }))
         ).rejects.toThrowError('Unsupported SLO type: slo.apm.transaction_error_rate');
       });
 
@@ -65,16 +59,7 @@ describe('TransformManager', () => {
 
         await expect(
           transformManager.install(
-            createSLO({
-              type: 'slo.apm.transaction_duration',
-              params: {
-                environment: 'irrelevant',
-                service: 'irrelevant',
-                transaction_name: 'irrelevant',
-                transaction_type: 'irrelevant',
-                'threshold.us': 250000,
-              },
-            })
+            createSLO({ indicator: createAPMTransactionDurationIndicator() })
           )
         ).rejects.toThrowError('Some error');
       });
@@ -86,7 +71,7 @@ describe('TransformManager', () => {
         'slo.apm.transaction_error_rate': new ApmTransactionErrorRateTransformGenerator(),
       };
       const transformManager = new DefaultTransformManager(generators, esClientMock, loggerMock);
-      const slo = createSLO(createAPMTransactionErrorRateIndicator());
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
 
       const transformId = await transformManager.install(slo);
 

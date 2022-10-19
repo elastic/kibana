@@ -11,7 +11,7 @@ import {
   dateType,
   indicatorSchema,
   objectiveSchema,
-  rollingTimeWindowSchema,
+  timeWindowSchema,
 } from '../schema';
 
 const sloSchema = t.type({
@@ -19,7 +19,7 @@ const sloSchema = t.type({
   name: t.string,
   description: t.string,
   indicator: indicatorSchema,
-  time_window: rollingTimeWindowSchema,
+  time_window: timeWindowSchema,
   budgeting_method: budgetingMethodSchema,
   objective: objectiveSchema,
   revision: t.number,
@@ -27,11 +27,9 @@ const sloSchema = t.type({
   updated_at: dateType,
 });
 
-const storedSLOSchema = sloSchema;
-
-export { sloSchema, storedSLOSchema };
+export { sloSchema };
 
 type SLO = t.TypeOf<typeof sloSchema>;
-type StoredSLO = t.TypeOf<typeof storedSLOSchema>;
+type StoredSLO = t.OutputOf<typeof sloSchema>;
 
 export type { SLO, StoredSLO };

@@ -12,7 +12,7 @@ const generator = new ApmTransactionErrorRateTransformGenerator();
 
 describe('APM Transaction Error Rate Transform Generator', () => {
   it('returns the correct transform params with every specified indicator params', async () => {
-    const anSLO = createSLO(createAPMTransactionErrorRateIndicator());
+    const anSLO = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
     const transform = generator.getTransformParams(anSLO);
 
     expect(transform).toMatchSnapshot({
@@ -29,21 +29,23 @@ describe('APM Transaction Error Rate Transform Generator', () => {
   });
 
   it("uses default values when 'good_status_codes' is not specified", async () => {
-    const anSLO = createSLO(createAPMTransactionErrorRateIndicator({ good_status_codes: [] }));
+    const anSLO = createSLO({
+      indicator: createAPMTransactionErrorRateIndicator({ good_status_codes: [] }),
+    });
     const transform = generator.getTransformParams(anSLO);
 
     expect(transform.pivot?.aggregations).toMatchSnapshot();
   });
 
   it("does not include the query filter when params are '*'", async () => {
-    const anSLO = createSLO(
-      createAPMTransactionErrorRateIndicator({
+    const anSLO = createSLO({
+      indicator: createAPMTransactionErrorRateIndicator({
         environment: '*',
         service: '*',
         transaction_name: '*',
         transaction_type: '*',
-      })
-    );
+      }),
+    });
     const transform = generator.getTransformParams(anSLO);
 
     expect(transform.source.query).toMatchSnapshot();

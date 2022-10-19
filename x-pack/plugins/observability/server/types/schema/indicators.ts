@@ -42,6 +42,8 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
   ]),
 });
 
+const indicatorDataSchema = t.type({ good: t.number, total: t.number });
+
 const indicatorTypesSchema = t.union([
   apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorTypeSchema,
@@ -59,4 +61,5 @@ export {
   apmTransactionErrorRateIndicatorTypeSchema,
   indicatorSchema,
   indicatorTypesSchema,
+  indicatorDataSchema,
 };

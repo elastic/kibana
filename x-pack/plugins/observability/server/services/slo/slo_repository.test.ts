@@ -9,18 +9,18 @@ import { SavedObject } from '@kbn/core-saved-objects-common';
 import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { SLO, StoredSLO } from '../../types/models';
+import { SLO, sloSchema, StoredSLO } from '../../types/models';
 import { SO_SLO_TYPE } from '../../saved_objects';
 import { KibanaSavedObjectsSLORepository } from './slo_repository';
 import { createAPMTransactionDurationIndicator, createSLO } from './fixtures/slo';
 import { SLONotFound } from '../../errors';
 
-const SOME_SLO = createSLO(createAPMTransactionDurationIndicator());
+const SOME_SLO = createSLO({ indicator: createAPMTransactionDurationIndicator() });
 
 function aStoredSLO(slo: SLO): SavedObject<StoredSLO> {
   return {
     id: slo.id,
-    attributes: slo,
+    attributes: sloSchema.encode(slo),
     type: SO_SLO_TYPE,
     references: [],
   };
@@ -62,15 +62,10 @@ describe('KibanaSavedObjectsSLORepository', () => {
     const savedSLO = await repository.save(SOME_SLO);
 
     expect(savedSLO).toEqual(SOME_SLO);
-    expect(soClientMock.create).toHaveBeenCalledWith(
-      SO_SLO_TYPE,
-      expect.objectContaining({
-        ...SOME_SLO,
-        updated_at: expect.anything(),
-        created_at: expect.anything(),
-      }),
-      { id: SOME_SLO.id, overwrite: true }
-    );
+    expect(soClientMock.create).toHaveBeenCalledWith(SO_SLO_TYPE, sloSchema.encode(SOME_SLO), {
+      id: SOME_SLO.id,
+      overwrite: true,
+    });
   });
 
   it('finds an existing SLO', async () => {

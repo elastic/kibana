@@ -30,7 +30,7 @@ describe('UpdateSLO', () => {
 
   describe('without breaking changes', () => {
     it('updates the SLO saved object without revision bump', async () => {
-      const slo = createSLO(createAPMTransactionErrorRateIndicator());
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
       mockRepository.findById.mockResolvedValueOnce(slo);
 
       const newName = 'new slo name';
@@ -48,7 +48,9 @@ describe('UpdateSLO', () => {
 
   describe('with breaking changes', () => {
     it('removes the obsolete data from the SLO previous revision', async () => {
-      const slo = createSLO(createAPMTransactionErrorRateIndicator({ environment: 'development' }));
+      const slo = createSLO({
+        indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
+      });
       mockRepository.findById.mockResolvedValueOnce(slo);
 
       const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
