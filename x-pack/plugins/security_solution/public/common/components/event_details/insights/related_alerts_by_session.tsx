@@ -8,6 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
+import { isActiveTimeline } from '../../../../helpers';
 import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { useActionCellDataProvider } from '../table/use_action_cell_data_provider';
@@ -24,7 +25,7 @@ interface Props {
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem;
   eventId: string;
-  timelineId: string;
+  scopeId: string;
 }
 
 /**
@@ -35,12 +36,12 @@ interface Props {
  * the related alerts in a timeline investigation.
  */
 export const RelatedAlertsBySession = React.memo<Props>(
-  ({ browserFields, data, eventId, timelineId }) => {
+  ({ browserFields, data, eventId, scopeId }) => {
     const { field, values } = data;
     const { error, count, alertIds } = useAlertPrevalence({
       field,
       value: values,
-      timelineId: timelineId ?? '',
+      isActiveTimelines: isActiveTimeline(scopeId),
       signalIndexName: null,
       includeAlertIds: true,
       ignoreTimerange: true,
@@ -48,17 +49,17 @@ export const RelatedAlertsBySession = React.memo<Props>(
 
     const { fieldFromBrowserField } = getEnrichedFieldInfo({
       browserFields,
-      contextId: timelineId,
+      contextId: scopeId,
       eventId,
       field: { id: data.field },
-      timelineId,
+      scopeId,
       item: data,
     });
 
     const cellData = useActionCellDataProvider({
       field,
       values,
-      contextId: timelineId,
+      contextId: scopeId,
       eventId,
       fieldFromBrowserField,
       fieldFormat: fieldFromBrowserField?.format,

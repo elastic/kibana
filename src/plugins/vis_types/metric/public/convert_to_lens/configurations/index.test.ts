@@ -8,6 +8,7 @@
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { CollapseFunction } from '@kbn/visualizations-plugin/common';
 import { getConfiguration } from '.';
 import { VisParams } from '../../types';
 
@@ -50,7 +51,7 @@ describe('getConfiguration', () => {
         metrics: [metric],
         buckets: { all: [bucket], customBuckets: { metric: bucket } },
         columnsWithoutReferenced: [],
-        bucketCollapseFn: { [collapseFn]: [bucket] },
+        bucketCollapseFn: { [collapseFn]: [bucket] } as Record<CollapseFunction, string[]>,
       })
     ).toEqual({
       breakdownByAccessor: bucket,
