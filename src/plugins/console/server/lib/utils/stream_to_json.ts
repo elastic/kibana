@@ -8,7 +8,7 @@
 
 import type { IncomingMessage } from 'http';
 
-export function streamToString(stream: IncomingMessage, limit: number) {
+export function streamToJSON(stream: IncomingMessage, limit: number) {
   return new Promise<string>((resolve, reject) => {
     const chunks: Buffer[] = [];
     stream.on('data', (chunk) => {
@@ -18,7 +18,10 @@ export function streamToString(stream: IncomingMessage, limit: number) {
         reject(new Error('Response size limit exceeded'));
       }
     });
-    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    stream.on('end', () => {
+      const response = Buffer.concat(chunks).toString('utf8');
+      resolve(JSON.parse(response));
+    });
     stream.on('error', reject);
   });
 }

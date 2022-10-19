@@ -10,7 +10,7 @@ import { parse } from 'query-string';
 import type { IncomingMessage } from 'http';
 import type { RouteDependencies } from '../../..';
 import { API_BASE_PATH } from '../../../../../common/constants';
-import { streamToString } from '../../../../lib/utils';
+import { streamToJSON } from '../../../../lib/utils';
 
 interface Settings {
   indices: boolean;
@@ -23,16 +23,12 @@ const RESPONSE_SIZE_LIMIT = 10 * 1024 * 1024;
 // Limit the response size to 10MB, because the response can be very large and sending it to the client
 // can cause the browser to hang.
 
-function streamToJSON(stream: IncomingMessage) {
-  return streamToString(stream, RESPONSE_SIZE_LIMIT).then((response) => JSON.parse(response));
-}
-
 async function getMappings(esClient: IScopedClusterClient, settings: Settings) {
   if (settings.fields) {
     const stream = await esClient.asInternalUser.indices.getMapping(undefined, {
       asStream: true,
     });
-    return streamToJSON(stream as unknown as IncomingMessage);
+    return streamToJSON(stream as unknown as IncomingMessage, RESPONSE_SIZE_LIMIT);
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return {};
@@ -43,7 +39,7 @@ async function getAliases(esClient: IScopedClusterClient, settings: Settings) {
     const stream = await esClient.asInternalUser.indices.getAlias(undefined, {
       asStream: true,
     });
-    return streamToJSON(stream as unknown as IncomingMessage);
+    return streamToJSON(stream as unknown as IncomingMessage, RESPONSE_SIZE_LIMIT);
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return {};
@@ -54,7 +50,7 @@ async function getDataStreams(esClient: IScopedClusterClient, settings: Settings
     const stream = await esClient.asInternalUser.indices.getDataStream(undefined, {
       asStream: true,
     });
-    return streamToJSON(stream as unknown as IncomingMessage);
+    return streamToJSON(stream as unknown as IncomingMessage, RESPONSE_SIZE_LIMIT);
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return {};
@@ -65,7 +61,7 @@ async function getLegacyTemplates(esClient: IScopedClusterClient, settings: Sett
     const stream = await esClient.asInternalUser.indices.getTemplate(undefined, {
       asStream: true,
     });
-    return streamToJSON(stream as unknown as IncomingMessage);
+    return streamToJSON(stream as unknown as IncomingMessage, RESPONSE_SIZE_LIMIT);
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return {};
@@ -76,7 +72,7 @@ async function getComponentTemplates(esClient: IScopedClusterClient, settings: S
     const stream = await esClient.asInternalUser.cluster.getComponentTemplate(undefined, {
       asStream: true,
     });
-    return streamToJSON(stream as unknown as IncomingMessage);
+    return streamToJSON(stream as unknown as IncomingMessage, RESPONSE_SIZE_LIMIT);
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return {};
@@ -87,7 +83,7 @@ async function getIndexTemplates(esClient: IScopedClusterClient, settings: Setti
     const stream = await esClient.asInternalUser.indices.getIndexTemplate(undefined, {
       asStream: true,
     });
-    return streamToJSON(stream as unknown as IncomingMessage);
+    return streamToJSON(stream as unknown as IncomingMessage, RESPONSE_SIZE_LIMIT);
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return {};

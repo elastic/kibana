@@ -7,7 +7,7 @@
  */
 
 import { Readable } from 'stream';
-import { streamToString } from './stream_to_string';
+import { streamToJSON } from './stream_to_json';
 import type { IncomingMessage } from 'http';
 
 describe('streamToString', () => {
@@ -18,18 +18,18 @@ describe('streamToString', () => {
       },
     });
     await expect(
-      streamToString(stream as IncomingMessage, 500)
+      streamToJSON(stream as IncomingMessage, 500)
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Response size limit exceeded"`);
   });
 
-  it('should resolve with string', async () => {
+  it('should parse the response', async () => {
     const stream = new Readable({
       read() {
         this.push('{"test": "test"}');
         this.push(null);
       },
     });
-    const result = await streamToString(stream as IncomingMessage, 5000);
-    expect(result).toEqual('{"test": "test"}');
+    const result = await streamToJSON(stream as IncomingMessage, 5000);
+    expect(result).toEqual({ test: 'test' });
   });
 });
