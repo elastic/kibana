@@ -129,12 +129,12 @@ describe('HostName', () => {
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
+        id: context.timelineID,
         panelView: 'hostDetail',
         params: {
           hostName: props.value,
         },
         tabType: context.tabType,
-        timelineId: context.timelineID,
       });
     });
   });
@@ -169,7 +169,7 @@ describe('HostName', () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
-      timelineID: 'detection',
+      timelineID: TimelineId.test,
       tabType: TimelineTabs.query,
     };
     const wrapper = mount(
@@ -183,12 +183,12 @@ describe('HostName', () => {
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
+        id: context.timelineID,
         panelView: 'hostDetail',
         params: {
           hostName: props.value,
         },
         tabType: context.tabType,
-        timelineId: context.timelineID,
       });
       expect(toggleExpandedDetail).not.toHaveBeenCalled();
     });

@@ -145,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.controlEditorSave();
 
         const selectionString = await dashboardControls.optionsListGetSelectionsString(secondId);
-        expect(selectionString).to.be('Select...');
+        expect(selectionString).to.be('Any');
       });
 
       it('editing other control settings keeps selections', async () => {
