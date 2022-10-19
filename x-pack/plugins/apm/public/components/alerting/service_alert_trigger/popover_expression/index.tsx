@@ -28,7 +28,7 @@ export function PopoverExpression(props: Props) {
           description={title}
           value={value}
           isActive={popoverOpen}
-          onClick={() => setPopoverOpen(true)}
+          onClick={() => setPopoverOpen((state) => !state)}
         />
       }
       repositionOnScroll
