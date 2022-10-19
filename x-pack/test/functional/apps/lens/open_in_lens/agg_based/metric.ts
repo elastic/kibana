@@ -6,20 +6,21 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, lens, visChart, timePicker, visEditor } = getPageObjects([
-    'visualize',
-    'lens',
-    'visChart',
-    'timePicker',
+  const { visEditor, visualize, lens, timePicker, visChart } = getPageObjects([
     'visEditor',
+    'visualize',
+    'visChart',
+    'lens',
+    'timePicker',
   ]);
 
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
-  describe('Goal', function describeIndexTests() {
+  describe('Metric', function describeIndexTests() {
     const isNewChartsLibraryEnabled = true;
 
     before(async () => {
@@ -28,7 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await visualize.navigateToNewAggBasedVisualization();
-      await visualize.clickGoal();
+      await visualize.clickMetric();
       await visualize.clickNewSearch();
       await timePicker.setDefaultAbsoluteRange();
     });
@@ -46,9 +47,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'Count',
           subtitle: undefined,
           extraText: '',
-          value: '140.05%',
+          value: '14.01K',
           color: 'rgba(245, 247, 250, 1)',
-          showingBar: true,
+          showingBar: false,
           showingTrendline: false,
         },
       ]);
@@ -66,9 +67,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await lens.getLayerCount()).to.be(1);
 
       const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
-      expect(dimensions).to.have.length(2);
+      expect(dimensions).to.have.length(1);
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
-      expect(await dimensions[1].getVisibleText()).to.be('Static value: 1');
 
       expect((await lens.getMetricVisualizationData()).length).to.be.equal(1);
       expect(await lens.getMetricVisualizationData()).to.eql([
@@ -76,9 +76,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'Average machine.ram',
           subtitle: undefined,
           extraText: '',
-          value: '131.04M%',
+          value: '13.1B',
           color: 'rgba(245, 247, 250, 1)',
-          showingBar: true,
+          showingBar: false,
           showingTrendline: false,
         },
       ]);
@@ -95,10 +95,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await lens.getLayerCount()).to.be(1);
 
       const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
-      expect(dimensions).to.have.length(3);
+      expect(dimensions).to.have.length(2);
       expect(await dimensions[0].getVisibleText()).to.be('Overall Max of Count');
-      expect(await dimensions[1].getVisibleText()).to.be('Static value: 1');
-      expect(await dimensions[2].getVisibleText()).to.be('@timestamp');
+      expect(await dimensions[1].getVisibleText()).to.be('@timestamp');
 
       expect((await lens.getMetricVisualizationData()).length).to.be.equal(1);
       expect(await lens.getMetricVisualizationData()).to.eql([
@@ -106,12 +105,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'Overall Max of Count',
           subtitle: undefined,
           extraText: '',
-          value: '14.37%',
+          value: '1.44K',
           color: 'rgba(245, 247, 250, 1)',
-          showingBar: true,
+          showingBar: false,
           showingTrendline: false,
         },
       ]);
+    });
+
+    it('should not convert aggregation with not supported field type', async () => {
+      await visEditor.clickMetricEditor();
+      await visEditor.selectAggregation('Top metrics', 'metrics');
+      await visEditor.selectField('extension.raw', 'metrics');
+
+      await visEditor.clickGo();
+
+      const button = await testSubjects.exists('visualizeEditInLensButton');
+      expect(button).to.be(false);
     });
 
     it('should convert color ranges', async () => {
@@ -123,12 +133,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectField('machine.os.raw');
 
       await visEditor.clickOptionsTab();
-      await testSubjects.setValue('gaugeColorRange0__to', '10000');
-      await testSubjects.click('gaugeColorRange__addRangeButton');
+      await testSubjects.setValue('metricColorRange0__to', '10000');
+      await testSubjects.click('metricColorRange__addRangeButton');
 
-      await testSubjects.setValue('gaugeColorRange1__to', '20000');
+      await testSubjects.setValue('metricColorRange1__to', '20000');
       await visChart.waitForVisualizationRenderingStabilized();
 
+      const backgroundButton = await find.byCssSelector('[data-text="Background"]');
+      await backgroundButton.click();
       await visEditor.clickGo();
 
       await visualize.navigateToLensFromAnotherVisulization();
@@ -137,56 +149,55 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await lens.getLayerCount()).to.be(1);
 
       const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
-      expect(dimensions).to.have.length(3);
+      expect(dimensions).to.have.length(2);
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
-      expect(await dimensions[1].getVisibleText()).to.be('Static value: 1');
-      expect(await dimensions[2].getVisibleText()).to.be('machine.os.raw: Descending');
+      expect(await dimensions[1].getVisibleText()).to.be('machine.os.raw: Descending');
 
       expect((await lens.getMetricVisualizationData()).length).to.be.equal(6);
       expect(await lens.getMetricVisualizationData()).to.eql([
         {
-          title: 'ios',
-          subtitle: 'Average machine.ram',
-          extraText: '',
-          value: '65.05M%',
-          color: 'rgba(245, 247, 250, 1)',
-          showingBar: true,
-          showingTrendline: false,
-        },
-        {
           title: 'osx',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '66.14M%',
+          value: '13.23B',
           color: 'rgba(245, 247, 250, 1)',
-          showingBar: true,
+          showingBar: false,
           showingTrendline: false,
         },
         {
           title: 'win 7',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '65.93M%',
+          value: '13.19B',
           color: 'rgba(245, 247, 250, 1)',
-          showingBar: true,
-          showingTrendline: false,
-        },
-        {
-          title: 'win 8',
-          subtitle: 'Average machine.ram',
-          extraText: '',
-          value: '65.16M%',
-          color: 'rgba(245, 247, 250, 1)',
-          showingBar: true,
+          showingBar: false,
           showingTrendline: false,
         },
         {
           title: 'win xp',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '65.37M%',
+          value: '13.07B',
           color: 'rgba(245, 247, 250, 1)',
-          showingBar: true,
+          showingBar: false,
+          showingTrendline: false,
+        },
+        {
+          title: 'win 8',
+          subtitle: 'Average machine.ram',
+          extraText: '',
+          value: '13.03B',
+          color: 'rgba(245, 247, 250, 1)',
+          showingBar: false,
+          showingTrendline: false,
+        },
+        {
+          title: 'ios',
+          subtitle: 'Average machine.ram',
+          extraText: '',
+          value: '13.01B',
+          color: 'rgba(245, 247, 250, 1)',
+          showingBar: false,
           showingTrendline: false,
         },
         {
@@ -195,7 +206,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           extraText: undefined,
           value: undefined,
           color: 'rgba(0, 0, 0, 0)',
-          showingBar: true,
+          showingBar: false,
           showingTrendline: false,
         },
       ]);
@@ -207,8 +218,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       expect(colorStops).to.eql([
         { stop: '0', color: 'rgba(0, 104, 55, 1)' },
-        { stop: '50', color: 'rgba(165, 0, 38, 1)' },
-        { stop: '100', color: undefined },
+        { stop: '10000', color: 'rgba(165, 0, 38, 1)' },
+        { stop: '20000', color: undefined },
       ]);
     });
   });
