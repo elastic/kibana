@@ -34,6 +34,5 @@ export const TinesWebhooksActionResponseSchema = schema.arrayOf(TinesWebhookObje
 export const TinesRunActionParamsSchema = schema.object({
   webhook: TinesWebhookObjectSchema,
   body: schema.string(),
-  dedupKey: schema.maybe(schema.string()),
 });
 export const TinesRunActionResponseSchema = schema.object({}, { unknowns: 'ignore' });

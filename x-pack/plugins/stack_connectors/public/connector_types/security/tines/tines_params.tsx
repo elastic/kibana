@@ -13,12 +13,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIconTip,
 } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import {
   JsonEditorWithMessageVariables,
-  TextFieldWithMessageVariables,
   useSubAction,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
@@ -53,7 +51,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
 }) => {
   const { toasts } = useKibana().notifications;
   const { subAction, subActionParams } = actionParams;
-  const { body, dedupKey, webhook } = subActionParams ?? {};
+  const { body, webhook } = subActionParams ?? {};
 
   const isTesting = useMemo(() => !messageVariables?.length, [messageVariables]);
 
@@ -69,14 +67,6 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
       editAction('subActionParams', { ...subActionParams, ...params }, index);
     },
     [editAction, index, subActionParams]
-  );
-
-  // Needs same signature as editAction so it can be passed to TextFieldWithMessageVariables component
-  const editSubActionParam = useCallback(
-    (key: string, value: any) => {
-      editSubActionParams({ [key]: value } as TinesExecuteSubActionParams);
-    },
-    [editSubActionParams]
   );
 
   const [connectorId, setConnectorId] = useState<string | undefined>(actionConnector?.id);
@@ -238,39 +228,6 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
             isLoading={isLoadingWebhooks}
           />
         </EuiFormRow>
-        {!isTesting && (
-          <EuiFormRow
-            fullWidth
-            error={errors.dedupKey}
-            //   isInvalid={isDedupKeyInvalid}
-            label={
-              <>
-                {i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.tinesAction.dedupKeyTextFieldLabel',
-                  {
-                    defaultMessage: 'Group by (optional)', // TODO trans
-                  }
-                )}
-
-                <EuiIconTip
-                  aria-label={'Group by'} // TODO trans
-                  type="iInCircle"
-                  content={
-                    'Defining "Group by" keys will send multiple messages to Tines on each execution, grouping context.alerts by the defined fields (e.g. host.name)'
-                  } // TODO trans
-                />
-              </>
-            }
-          >
-            <TextFieldWithMessageVariables
-              index={index}
-              editAction={editSubActionParam}
-              // messageVariables={messageVariables}
-              paramsProperty={'dedupKey'}
-              inputTargetValue={dedupKey}
-            />
-          </EuiFormRow>
-        )}
       </EuiFlexItem>
       {isTesting && (
         <EuiFlexItem>
@@ -292,11 +249,11 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
             )}
             errors={errors.body as string[]}
             onDocumentsChange={(json: string) => {
-              editSubActionParam('body', json);
+              editSubActionParams({ body: json });
             }}
             onBlur={() => {
               if (!body) {
-                editSubActionParam('body', '');
+                editSubActionParams({ body: '' });
               }
             }}
           />

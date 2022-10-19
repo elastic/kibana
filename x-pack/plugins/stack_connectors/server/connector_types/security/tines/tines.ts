@@ -39,25 +39,25 @@ export const API_PATH = '/api/v1';
 export const WEBHOOK_PATH = '/webhook';
 export const WEBHOOK_AGENT_TYPE = 'Agents::WebhookAgent';
 
-const storiesAccumulator = (
+function storiesAccumulator(
   result: TinesStoriesActionResponse,
   { stories }: TinesStoriesApiResponse
-) => {
+) {
   stories.forEach(({ id, name }) => {
     result.push({ id, name });
   });
-};
+}
 
-const webhooksAccumulator = (
+function webhooksAccumulator(
   result: TinesWebhooksActionResponse,
   { agents }: TinesWebhooksApiResponse
-) => {
+) {
   agents.forEach(({ id, type, name, story_id: storyId, options: { path = '', secret = '' } }) => {
     if (type === WEBHOOK_AGENT_TYPE) {
       result.push({ id, name, path, secret, storyId });
     }
   });
-};
+}
 
 export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets> {
   private urls: {
