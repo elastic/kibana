@@ -94,6 +94,7 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         id: 'monitor_availability',
         columnType: FORMULA_COLUMN,
         formula: "1- (count(kql='summary.down > 0') / count())",
+        columnFilters: [{ language: 'kuery', query: 'summary.up: *' }],
       },
       {
         label: 'Monitor Errors',

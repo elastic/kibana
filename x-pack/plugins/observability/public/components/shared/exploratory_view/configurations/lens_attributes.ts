@@ -564,6 +564,7 @@ export class LensAttributes {
         label: columnLabel ?? label,
         dataView: layerConfig.indexPattern,
         lensFormulaHelper: this.lensFormulaHelper!,
+        columnFilter: columnFilters ? columnFilters?.[colIndex || 0].query : undefined,
       }).main;
     }
 
