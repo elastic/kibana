@@ -11,20 +11,18 @@
   display: flex;
   flex: 1 1 100%;
   position: relative;
+  max-width: 100%;
   // flex-direction determined by js
 }
 
 .vgaVis--autoresize {
-  @include euiScrollBar;
   max-width: 100%;
   max-height: 100%;
-  overflow: auto;
-  .vgaVis__view {
-    overflow: hidden;
-  }
 }
 
 .vgaVis__view {
+  @include euiScrollBar;
+  overflow: auto;
   z-index: 0;
   flex: 1 1 100%;
 

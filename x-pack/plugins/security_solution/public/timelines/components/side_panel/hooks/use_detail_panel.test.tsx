@@ -39,7 +39,7 @@ jest.mock('../../../../common/containers/sourcerer', () => {
 describe('useDetailPanel', () => {
   const defaultProps: UseDetailPanelConfig = {
     sourcererScope: SourcererScopeName.detections,
-    timelineId: TimelineId.test,
+    scopeId: TimelineId.test,
   };
   const mockGetExpandedDetail = jest.fn().mockImplementation(() => ({}));
   beforeEach(() => {
@@ -140,8 +140,8 @@ describe('useDetailPanel', () => {
         <Memo(DetailsPanel)
           browserFields={Object {}}
           handleOnPanelClosed={[Function]}
+          scopeId="timeline-test"
           tabType="session"
-          timelineId="test"
         />
       `);
     });

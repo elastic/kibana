@@ -168,7 +168,7 @@ export interface BarChartComponentProps {
   barChart: ChartSeriesData[] | null | undefined;
   configs?: ChartSeriesConfigs | undefined;
   stackByField?: string;
-  timelineId?: string;
+  scopeId?: string;
   visualizationActionsOptions?: VisualizationActionsProps;
 }
 
@@ -178,7 +178,7 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
   barChart,
   configs,
   stackByField,
-  timelineId,
+  scopeId,
   visualizationActionsOptions,
 }) => {
   const { ref: measureRef, width, height } = useThrottledResizeObserver();
@@ -190,12 +190,12 @@ export const BarChartComponent: React.FC<BarChartComponentProps> = ({
             dataProviderId: escapeDataProviderId(
               `draggable-legend-item-${uuid.v4()}-${stackByField}-${d.key}`
             ),
-            timelineId,
+            scopeId,
             field: stackByField,
             value: d.key,
           }))
         : NO_LEGEND_DATA,
-    [barChart, stackByField, timelineId]
+    [barChart, stackByField, scopeId]
   );
 
   const yAxisTitle = get('yAxisTitle', configs);
@@ -243,7 +243,7 @@ export const BarChart = React.memo(
   BarChartComponent,
   (prevProps, nextProps) =>
     prevProps.stackByField === nextProps.stackByField &&
-    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.scopeId === nextProps.scopeId &&
     deepEqual(prevProps.configs, nextProps.configs) &&
     deepEqual(prevProps.barChart, nextProps.barChart)
 );
