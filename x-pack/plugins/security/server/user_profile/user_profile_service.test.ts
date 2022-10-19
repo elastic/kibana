@@ -25,7 +25,7 @@ import { userProfileMock } from '../../common/model/user_profile.mock';
 import { authorizationMock } from '../authorization/index.mock';
 import { securityMock } from '../mocks';
 import { sessionMock } from '../session_management/session.mock';
-import { UserProfileService } from './user_profile_service';
+import { prefixCommaSeparatedValues, UserProfileService } from './user_profile_service';
 
 const logger = loggingSystemMock.createLogger();
 describe('UserProfileService', () => {
@@ -245,7 +245,7 @@ describe('UserProfileService', () => {
       } as unknown as SecurityGetUserProfileResponse);
 
       const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.getCurrent({ request: mockRequest, dataPath: '*' })).resolves
+      await expect(startContract.getCurrent({ request: mockRequest, dataPath: 'one,two' })).resolves
         .toMatchInlineSnapshot(`
               Object {
                 "data": Object {
@@ -277,7 +277,7 @@ describe('UserProfileService', () => {
         mockStartParams.clusterClient.asInternalUser.security.getUserProfile
       ).toHaveBeenCalledWith({
         uid: 'UID',
-        data: 'kibana.*',
+        data: 'kibana.one,kibana.two',
       });
     });
   });
@@ -556,8 +556,8 @@ describe('UserProfileService', () => {
       } as unknown as SecurityGetUserProfileResponse);
 
       const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.bulkGet({ uids: new Set(['UID-1']), dataPath: '*' })).resolves
-        .toMatchInlineSnapshot(`
+      await expect(startContract.bulkGet({ uids: new Set(['UID-1']), dataPath: 'one,two' }))
+        .resolves.toMatchInlineSnapshot(`
               Array [
                 Object {
                   "data": Object {
@@ -580,7 +580,7 @@ describe('UserProfileService', () => {
         mockStartParams.clusterClient.asInternalUser.security.getUserProfile
       ).toHaveBeenCalledWith({
         uid: 'UID-1',
-        data: 'kibana.*',
+        data: 'kibana.one,kibana.two',
       });
     });
 
@@ -683,7 +683,7 @@ describe('UserProfileService', () => {
       } as unknown as SecuritySuggestUserProfilesResponse);
 
       const startContract = userProfileService.start(mockStartParams);
-      await expect(startContract.suggest({ name: 'some', dataPath: '*' })).resolves
+      await expect(startContract.suggest({ name: 'some', dataPath: 'one,two' })).resolves
         .toMatchInlineSnapshot(`
               Array [
                 Object {
@@ -708,7 +708,44 @@ describe('UserProfileService', () => {
       ).toHaveBeenCalledWith({
         name: 'some',
         size: 10,
-        data: 'kibana.*',
+        data: 'kibana.one,kibana.two',
+      });
+      expect(mockAuthz.checkUserProfilesPrivileges).not.toHaveBeenCalled();
+    });
+
+    it('should request data if uid hints are specified', async () => {
+      mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles.mockResolvedValue({
+        profiles: [
+          userProfileMock.createWithSecurity({
+            uid: 'UID-1',
+          }),
+        ],
+      } as unknown as SecuritySuggestUserProfilesResponse);
+
+      const startContract = userProfileService.start(mockStartParams);
+      await expect(startContract.suggest({ hint: { uids: ['UID-1'] } })).resolves
+        .toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "data": Object {},
+                  "enabled": true,
+                  "uid": "UID-1",
+                  "user": Object {
+                    "email": "some@email",
+                    "full_name": undefined,
+                    "username": "some-username",
+                  },
+                },
+              ]
+            `);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.suggestUserProfiles
+      ).toHaveBeenCalledWith({
+        size: 10,
+        hint: { uids: ['UID-1'] },
       });
       expect(mockAuthz.checkUserProfilesPrivileges).not.toHaveBeenCalled();
     });
@@ -788,7 +825,7 @@ describe('UserProfileService', () => {
         startContract.suggest({
           name: 'some',
           size: 3,
-          dataPath: '*',
+          dataPath: 'one,two',
           requiredPrivileges: {
             spaceId: 'some-space',
             privileges: { kibana: ['privilege-1', 'privilege-2'] },
@@ -842,7 +879,7 @@ describe('UserProfileService', () => {
       ).toHaveBeenCalledWith({
         name: 'some',
         size: 10,
-        data: 'kibana.*',
+        data: 'kibana.one,kibana.two',
       });
 
       expect(mockAuthz.checkUserProfilesPrivileges).toHaveBeenCalledTimes(1);
@@ -891,7 +928,7 @@ describe('UserProfileService', () => {
         startContract.suggest({
           name: 'some',
           size: 11,
-          dataPath: '*',
+          dataPath: 'one,two',
           requiredPrivileges: {
             spaceId: 'some-space',
             privileges: { kibana: ['privilege-1', 'privilege-2'] },
@@ -933,7 +970,7 @@ describe('UserProfileService', () => {
       ).toHaveBeenCalledWith({
         name: 'some',
         size: 22,
-        data: 'kibana.*',
+        data: 'kibana.one,kibana.two',
       });
 
       expect(mockAuthz.checkUserProfilesPrivileges).toHaveBeenCalledTimes(3);
@@ -992,7 +1029,7 @@ describe('UserProfileService', () => {
         startContract.suggest({
           name: 'some',
           size: 2,
-          dataPath: '*',
+          dataPath: 'one,two',
           requiredPrivileges: {
             spaceId: 'some-space',
             privileges: { kibana: ['privilege-1', 'privilege-2'] },
@@ -1034,7 +1071,7 @@ describe('UserProfileService', () => {
       ).toHaveBeenCalledWith({
         name: 'some',
         size: 10,
-        data: 'kibana.*',
+        data: 'kibana.one,kibana.two',
       });
 
       expect(mockAuthz.checkUserProfilesPrivileges).toHaveBeenCalledTimes(1);
@@ -1047,5 +1084,21 @@ describe('UserProfileService', () => {
         kibana: ['privilege-1', 'privilege-2'],
       });
     });
+  });
+});
+
+describe('prefixCommaSeparatedValues', () => {
+  it('should prefix each value', () => {
+    expect(prefixCommaSeparatedValues('one,two,three', '_')).toBe('_.one,_.two,_.three');
+  });
+
+  it('should trim whitespace', () => {
+    expect(prefixCommaSeparatedValues('one , two,  three   ', '_')).toBe('_.one,_.two,_.three');
+  });
+
+  it('should ignore empty values', () => {
+    expect(prefixCommaSeparatedValues('', '_')).toBe('');
+    expect(prefixCommaSeparatedValues(' ', '_')).toBe('');
+    expect(prefixCommaSeparatedValues(' ,, ', '_')).toBe('');
   });
 });
