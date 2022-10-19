@@ -39,7 +39,7 @@ exports[`getting started should render getting started component 1`] = `
         textAlign="center"
       >
         <p>
-          Select a starting point for a quick tour of how Elastic can help you do even more with your data.
+          Select a guide to help you make the most of your data.
         </p>
       </EuiText>
       <EuiSpacer
@@ -97,7 +97,7 @@ exports[`getting started should render getting started component 1`] = `
           data-test-subj="onboarding--skipUseCaseTourLink"
           onClick={[Function]}
         >
-          No thanks, I’ll explore on my own.
+          I’d like to do something else (skip)
         </EuiLink>
       </div>
     </EuiPanel>

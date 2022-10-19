@@ -32,17 +32,16 @@ import { KEY_ENABLE_WELCOME } from '../home';
 
 const homeBreadcrumb = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
 const gettingStartedBreadcrumb = i18n.translate('home.breadcrumbs.gettingStartedTitle', {
-  defaultMessage: 'Getting Started',
+  defaultMessage: 'Guided setup',
 });
 const title = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelectionTitle', {
   defaultMessage: 'What would you like to do first?',
 });
 const subtitle = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelectionSubtitle', {
-  defaultMessage:
-    'Select a starting point for a quick tour of how Elastic can help you do even more with your data.',
+  defaultMessage: 'Select a guide to help you make the most of your data.',
 });
 const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.buttonLabel', {
-  defaultMessage: `No thanks, I’ll explore on my own.`,
+  defaultMessage: `I’d like to do something else (skip)`,
 });
 
 export const GettingStarted = () => {

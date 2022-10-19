@@ -3,7 +3,7 @@
 exports[`observability link card snapshots should render link card for observability 1`] = `
 <UseCaseCard
   addBasePath={[MockFunction]}
-  description="Bring together application, infrastructure, and user data into a unified solution for end-to-end observability and alerting."
+  description="Add application, infrastructure, and user data through our pre-built integrations."
   footer={
     <EuiFlexGroup
       justifyContent="center"

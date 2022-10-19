@@ -31,7 +31,7 @@ const constants: GuideCardConstants = {
         'guidedOnboardingPackage.gettingStarted.guideCard.search.cardDescription',
         {
           defaultMessage:
-            'Create a finely-tuned search experience for your websites, applications, workplace content, and more.',
+            'Create a search experience for your websites, applications, workplace content, or anything in between.',
         }
       ),
     },
@@ -41,14 +41,14 @@ const constants: GuideCardConstants = {
       title: i18n.translate(
         'guidedOnboardingPackage.gettingStarted.guideCard.observability.cardTitle',
         {
-          defaultMessage: 'Monitor my environments',
+          defaultMessage: 'Observe my Kubernetes infrastructure',
         }
       ),
       description: i18n.translate(
         'guidedOnboardingPackage.gettingStarted.guideCard.observability.cardDescription',
         {
           defaultMessage:
-            'Get end-to-end observability into your environments by consolidating your logs, metrics, and traces.',
+            'Monitor your Kubernetes infrastructure by consolidating your logs and metrics.',
         }
       ),
     },
@@ -62,7 +62,7 @@ const constants: GuideCardConstants = {
         'guidedOnboardingPackage.gettingStarted.guideCard.security.cardDescription',
         {
           defaultMessage:
-            'Protect your environment against threats by unifying SIEM, endpoint security, and cloud security in one place.',
+            'Defend your environment against threats by unifying SIEM, endpoint security, and cloud security.',
         }
       ),
     },
