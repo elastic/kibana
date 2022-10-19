@@ -219,8 +219,8 @@ export function bulkCreateTestSuiteFactory(context: FtrProviderContext) {
         });
 
         after(async () => {
+          await testDataLoader.deleteAllSavedObjectsFromKibanaIndex();
           await testDataLoader.deleteFtrSpaces();
-          await testDataLoader.deleteFtrSavedObjectsData();
         });
 
         const attrs = { attributes: { [NEW_ATTRIBUTE_KEY]: NEW_ATTRIBUTE_VAL } };

@@ -14,10 +14,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Indicator } from '../../../../../../common/types/indicator';
-import { FilterInButtonIcon } from '../../../../query_bar/components/filter_in';
-import { FilterOutButtonIcon } from '../../../../query_bar/components/filter_out';
-import { AddToTimelineContextMenu } from '../../../../timeline/components/add_to_timeline';
+import { Indicator } from '../../../types';
+import { FilterInButtonIcon, FilterOutButtonIcon } from '../../../../query_bar';
+import { AddToTimelineContextMenu } from '../../../../timeline';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../utils';
 import { CopyToClipboardContextMenu } from '../../copy_to_clipboard';
 

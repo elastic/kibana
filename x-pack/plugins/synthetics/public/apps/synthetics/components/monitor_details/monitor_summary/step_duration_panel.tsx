@@ -9,9 +9,9 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes } from '@kbn/observability-plugin/public';
-import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { ClientPluginsStart } from '../../../../../plugin';
 export const StepDurationPanel = () => {
@@ -19,14 +19,14 @@ export const StepDurationPanel = () => {
 
   const { ExploratoryViewEmbeddable } = observability;
 
-  const { monitorId } = useParams<{ monitorId: string }>();
-
   const { monitor } = useSelectedMonitor();
+
+  const monitorId = useMonitorQueryId();
 
   const isBrowser = monitor?.type === 'browser';
 
   return (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} hasBorder>
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
