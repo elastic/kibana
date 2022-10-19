@@ -59,25 +59,46 @@ describe('getMlInferencePipelines', () => {
       pipeline1: mockInferencePipeline('model1'),
       pipeline2: mockInferencePipeline('model2'),
       pipeline3: mockInferencePipeline('redactedModel3'),
+      pipeline4: { // Pipeline with multiple inference processors referencing an inaccessible model
+        processors: [
+          {
+            append: {}
+          },
+          {
+            inference: {
+              model_id: 'redactedModel3',
+            }
+          },
+          {
+            inference: {
+              model_id: 'model2',
+            }
+          },
+          {
+            inference: {
+              model_id: 'redactedModel4',
+            }
+          },
+          {
+            remove: {}
+          }
+        ]
+      }
     }
 
-    const mockModelConfigs = {
-      model1: {
-        modelId: 'model1',
-        trainedModelName: 'model1',
-      },
-      model2: {
-        modelId: 'model2',
-        trainedModelName: 'model2',
-      },
-      redactedModel3: {
-        // Redacted (undefined) model ID
-        trainedModelName: 'redactedModel3',
-      },
+    const mockTrainedModels = {
+      trained_model_configs: [
+        {
+          model_id: 'model1'
+        },
+        {
+          model_id: 'model2'
+        }
+      ],
     };
 
     mockClient.ingest.getPipeline.mockImplementation(() => Promise.resolve(mockPipelines));
-    (getMlModelConfigsForModelIds as jest.Mock).mockImplementation(() => Promise.resolve(mockModelConfigs));
+    mockTrainedModelsProvider.getTrainedModels.mockImplementation(() => Promise.resolve(mockTrainedModels));
 
     const actualPipelines = await getMlInferencePipelines(
       mockClient as unknown as ElasticsearchClient,
@@ -87,6 +108,10 @@ describe('getMlInferencePipelines', () => {
     expect((actualPipelines['pipeline1'].processors as IngestProcessorContainer[])[1].inference?.model_id).toBeDefined();
     expect((actualPipelines['pipeline2'].processors as IngestProcessorContainer[])[1].inference?.model_id).toBeDefined();
     expect((actualPipelines['pipeline3'].processors as IngestProcessorContainer[])[1].inference?.model_id).toEqual(''); // Redacted model ID
+    expect((actualPipelines['pipeline4'].processors as IngestProcessorContainer[])[1].inference?.model_id).toEqual('');
+    expect((actualPipelines['pipeline4'].processors as IngestProcessorContainer[])[2].inference?.model_id).toBeDefined();
+    expect((actualPipelines['pipeline4'].processors as IngestProcessorContainer[])[3].inference?.model_id).toEqual('');
     expect(mockClient.ingest.getPipeline).toHaveBeenCalledWith({ id: 'ml-inference-*'});
+    expect(mockTrainedModelsProvider.getTrainedModels).toHaveBeenCalledWith({});
   });
 });

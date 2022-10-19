@@ -10,8 +10,6 @@ import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { IngestPipeline, IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 
-import { getMlModelConfigsForModelIds } from '../indices/fetch_ml_inference_pipeline_processors';
-
 /**
  * Gets all ML inference pipelines. Redacts trained model IDs in those pipelines which reference
  * a model inaccessible in the current Kibana space.
@@ -31,15 +29,10 @@ export const getMlInferencePipelines = async (
     id: 'ml-inference-*',
   });
 
-  // Fetch all trained models from the current Kibana space, and identify those that have their
-  // model_id redacted
-  const trainedModels = await getMlModelConfigsForModelIds(
-    esClient,
-    trainedModelsProvider,
-  );
-  const redactedModelIds = Object.values(trainedModels)
-    .filter((modelConfig) => !modelConfig.modelId)
-    .map((modelConfig) => modelConfig.trainedModelName);
+  // Fetch all trained model IDs that are accessible in the current Kibana space
+  const trainedModels = await trainedModelsProvider.getTrainedModels({});
+  const accessibleModelIds = Object.values(trainedModels.trained_model_configs)
+    .map((modelConfig) => modelConfig.model_id);
 
   // Process pipelines: check if the model_id is one of the redacted ones, if so, redact it in the
   // result as well
@@ -47,49 +40,34 @@ export const getMlInferencePipelines = async (
   Object.keys(fetchedInferencePipelines).forEach((name) => {
     const inferencePipeline = fetchedInferencePipelines[name];
 
-    inferencePipelinesResult[name] = isModelIdRedacted(inferencePipeline, redactedModelIds)
-      ? redactModelId(inferencePipeline)
-      : inferencePipeline;
+    inferencePipelinesResult[name] = {
+      ...inferencePipeline,
+      processors: inferencePipeline.processors?.map(
+        (processor) => redactModelIdIfInaccessible(processor, accessibleModelIds)
+      ),
+    };
   });
 
   return Promise.resolve(inferencePipelinesResult);
 };
 
 /**
- * Convenience function that finds the inference processor in a given ingest pipeline.
- * @param pipeline the pipeline.
+ * Convenience function to redact the trained model ID in an ML inference processor if the model is
+ * not accessible in the current Kibana space. In this case `model_id` gets replaced with `''`.
+ * @param processor the processor to process.
+ * @param accessibleModelIds array of known accessible model IDs.
+ * @returns the input processor if unchanged, or a copy of the processor with the model ID redacted.
  */
-function getInferenceProcessor(pipeline: IngestPipeline): IngestProcessorContainer | undefined {
-  const processors = pipeline.processors || [];
-
-  return processors.find((processor) => processor.hasOwnProperty('inference'));
-}
-
-/**
- * Convenience function for evaluating whether the trained model the supplied pipeline references
- * is redacted.
- * @param pipeline the pipeline.
- * @param redactedModelIds Array of known redacted model IDs.
- */
- function isModelIdRedacted(pipeline: IngestPipeline, redactedModelIds: string[]) {
-  const inferenceProcessor = getInferenceProcessor(pipeline);
-
-  return inferenceProcessor?.inference && redactedModelIds.includes(inferenceProcessor.inference.model_id);
-}
-
-/**
- * Convenience function that redacts the trained model ID in a given ingest pipeline by setting it
- * to `model_id: ''`.
- * @param pipeline the pipeline to process.
- * @returns a copy of the input pipeline with the model ID redacted.
- */
-function redactModelId(pipeline: IngestPipeline): IngestPipeline {
-  const modifiedPipeline = { ...pipeline };
-
-  const inferenceProcessor = getInferenceProcessor(modifiedPipeline);
-  if (inferenceProcessor?.inference) {
-    inferenceProcessor.inference.model_id = '';
+function redactModelIdIfInaccessible(processor: IngestProcessorContainer, accessibleModelIds: string[]): IngestProcessorContainer {
+  if (!processor.inference || accessibleModelIds.includes(processor.inference.model_id)) {
+    return processor;
   }
 
-  return modifiedPipeline;
+  return {
+    ...processor,
+    inference: {
+      ...processor.inference,
+      model_id: '',
+    }
+  }
 }
