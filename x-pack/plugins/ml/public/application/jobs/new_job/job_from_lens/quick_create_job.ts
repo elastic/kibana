@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { mergeWith, uniqBy, isEqual } from 'lodash';
+import { firstValueFrom } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   Embeddable,
@@ -105,6 +106,37 @@ export class QuickJobCreator {
       datafeedStarted: { success: false },
     };
 
+    // calculate model memory limit
+    try {
+      if (
+        start !== undefined &&
+        end !== undefined &&
+        job.data_description.time_field !== undefined &&
+        datafeedConfig.indices.length > 0
+      ) {
+        const { modelMemoryLimit } = await firstValueFrom(
+          this.mlApiServices.calculateModelMemoryLimit$({
+            datafeedConfig: datafeed,
+            analysisConfig: job.analysis_config,
+            indexPattern: datafeedConfig.indices[0],
+            query: datafeedConfig.query,
+            timeFieldName: job.data_description.time_field,
+            earliestMs: start,
+            latestMs: end,
+          })
+        );
+        if (job.analysis_limits === undefined) {
+          job.analysis_limits = {};
+        }
+        job.analysis_limits.model_memory_limit = modelMemoryLimit;
+      }
+    } catch (error) {
+      // could not calculate mml, continue with job creation as default value will be used.
+      // eslint-disable-next-line no-console
+      console.error('could not calculate model memory limit', error);
+    }
+
+    // put job
     try {
       await this.mlApiServices.addJob({ jobId: job.job_id, job });
     } catch (error) {
@@ -113,6 +145,7 @@ export class QuickJobCreator {
     }
     result.jobCreated.success = true;
 
+    // put datafeed
     try {
       await this.mlApiServices.addDatafeed({ datafeedId, datafeedConfig: datafeed });
     } catch (error) {
@@ -122,6 +155,7 @@ export class QuickJobCreator {
     result.datafeedCreated.success = true;
 
     if (startJob) {
+      // open job, ignore error if already open
       try {
         await this.mlApiServices.openJob({ jobId });
       } catch (error) {
@@ -133,6 +167,7 @@ export class QuickJobCreator {
       }
       result.jobOpened.success = true;
 
+      // start datafeed
       try {
         await this.mlApiServices.startDatafeed({
           datafeedId,
