@@ -12,17 +12,23 @@ import {
 import { AgentExplorerFieldName, AgentExplorerListItem } from '@kbn/apm-plugin/common/agent_explorer';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
-import React, { useMemo } from 'react';
+import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import { unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
-import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { ServiceLink } from '../../../shared/service_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { AgentExplorerDocsLink } from '../../agent_explorer_docs_link';
+import { ItemsBadge } from '../../../shared/item_badge';
+import { RIGHT_ALIGNMENT } from '@elastic/eui';
+import { EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
+import { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiInMemoryTable } from '@elastic/eui';
+import { AgentInstances } from '../agent_instances';
 
 function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
@@ -30,9 +36,13 @@ function formatString(value?: string | null) {
 
 export function getAgentsColumns({
   query,
+  toggleRow,
+  itemMap,
 }: {
   query: TypeOf<ApmRoutes, '/agent-explorer'>['query'];
-}): Array<ITableColumn<AgentExplorerListItem>> {
+  toggleRow: (selectedServiceName: string) => void;
+  itemMap: Record<string, ReactNode>;
+}): Array<EuiBasicTableColumn<AgentExplorerListItem>> {
   return [
     {
       field: AgentExplorerFieldName.ServiceName,
@@ -67,7 +77,7 @@ export function getAgentsColumns({
       render: (_, { environments }) => (
         <EnvironmentBadge environments={environments ?? []} />
       ),
-    } as ITableColumn<AgentExplorerListItem>,
+    },
     {
       field: AgentExplorerFieldName.AgentName,
       name: i18n.translate(
@@ -77,12 +87,31 @@ export function getAgentsColumns({
       sortable: true,
     },
     {
+      field: AgentExplorerFieldName.Instances,
+      name: i18n.translate(
+        'xpack.apm.agentExplorerTable.instancesColumnLabel',
+        { defaultMessage: 'Instances' }
+      ),
+      sortable: true,
+    },
+    {
       field: AgentExplorerFieldName.AgentVersion,
       name: i18n.translate(
         'xpack.apm.agentExplorerTable.agentVersionColumnLabel',
         { defaultMessage: 'Agent Version' }
       ),
-      sortable: true,
+      render: (_, { agentVersions }) => (
+        <ItemsBadge
+          items={agentVersions ?? []}
+          multipleItemsMessage={i18n.translate(
+            'xpack.apm.agentExplorerTable.agentVersionColumnLabel.multipleVersions',
+            { 
+              values: { versionsCount: agentVersions.length },
+              defaultMessage: '{versionsCount, plural, one {1 version} other {# versions}}',
+            }
+          )}
+        />
+      ),
     },
     {
       field: AgentExplorerFieldName.LatestVersion,
@@ -111,6 +140,40 @@ export function getAgentsColumns({
         />
       ),
     },
+    {
+      align: RIGHT_ALIGNMENT,
+      width: '40px',
+      isExpander: true,
+      name: (
+        <EuiScreenReaderOnly>
+          <span>
+            {i18n.translate('xpack.apm.storageExplorer.table.expandRow', {
+              defaultMessage: 'Expand row',
+            })}
+          </span>
+        </EuiScreenReaderOnly>
+      ),
+      render: ({ serviceName }: { serviceName: string }) => {
+        return (
+          <EuiButtonIcon
+            data-test-subj={`storageDetailsButton_${serviceName}`}
+            onClick={() => toggleRow(serviceName)}
+            aria-label={
+              itemMap[serviceName]
+                ? i18n.translate('xpack.apm.storageExplorer.table.collapse', {
+                    defaultMessage: 'Collapse',
+                  })
+                : i18n.translate('xpack.apm.storageExplorer.table.expand', {
+                    defaultMessage: 'Expand',
+                  })
+            }
+            iconType={
+              itemMap[serviceName] ? 'arrowUp' : 'arrowDown'
+            }
+          />
+        );
+      },
+    },
   ];
 }
 
@@ -119,9 +182,9 @@ interface Props {
   noItemsMessage?: React.ReactNode;
   isLoading: boolean;
   isFailure?: boolean;
-  initialSortField: string | undefined;
+  initialSortField: string;
   initialPageSize: number;
-  initialSortDirection?: 'asc' | 'desc';
+  initialSortDirection: 'asc' | 'desc';
   sortFn: (
     sortItems: AgentExplorerListItem[],
     sortField: string | undefined,
@@ -139,6 +202,14 @@ export function AgentList({
   initialPageSize,
   sortFn,
 }: Props) {
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
+    Record<string, ReactNode>
+  >({});
+
+  useEffect(() => {
+    // Closes any open rows when fetching new items
+    setItemIdToExpandedRowMap({});
+  }, [items]);
 
   const {
     // removes pagination and sort instructions from the query so it won't be passed down to next route
@@ -151,30 +222,51 @@ export function AgentList({
     },
   } = useApmParams('/agent-explorer');
 
+  const toggleRow = (selectedServiceName: string) => {
+    const expandedRowMapValues = { ...itemIdToExpandedRowMap };
+    if (expandedRowMapValues[selectedServiceName]) {
+      delete expandedRowMapValues[selectedServiceName];
+    } else {
+      expandedRowMapValues[selectedServiceName] = (
+        <AgentInstances
+          serviceName={selectedServiceName}
+        />
+      );
+    }
+    setItemIdToExpandedRowMap(expandedRowMapValues);
+  };
+
   const agentColumns = useMemo(
     () =>
-      getAgentsColumns({ query }),
+      getAgentsColumns({ query, toggleRow, itemMap: itemIdToExpandedRowMap }),
     [ query ]
   );
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
       <EuiFlexItem>
-        <ManagedTable<AgentExplorerListItem>
-          isLoading={isLoading}
-          error={isFailure}
-          columns={agentColumns}
+        <EuiInMemoryTable
+          tableCaption={i18n.translate('xpack.apm.agentExplorer.table.caption', {
+            defaultMessage: 'Agent Explorer',
+          })}
           items={items}
-          noItemsMessage={noItemsMessage}
-          initialSortField={initialSortField}
-          initialSortDirection={initialSortDirection}
-          initialPageSize={initialPageSize}
-          sortFn={(itemsToSort, sortField, sortDirection) =>
-            sortFn(
-              itemsToSort,
-              sortField,
-              sortDirection
-            )
+          columns={agentColumns}
+          pagination={{initialPageSize}}
+          sorting={{ sort: {
+              field: field ?? initialSortField,
+              direction: direction ?? initialSortDirection
+            }
+          }}
+          itemId="serviceName"
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          loading={isLoading}
+          data-test-subj="agentExplorerTable"
+          message={
+            isLoading
+              ? i18n.translate('xpack.apm.agentExplorer.table.loading', {
+                  defaultMessage: 'Loading...',
+                })
+              : noItemsMessage
           }
         />
       </EuiFlexItem>

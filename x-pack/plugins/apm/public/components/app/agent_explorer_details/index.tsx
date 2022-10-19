@@ -6,6 +6,7 @@
  */
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { AgentExplorerFieldName } from '@kbn/apm-plugin/common/agent_explorer';
 import { i18n } from '@kbn/i18n';
 import { capitalize, uniqBy } from 'lodash';
 import React from 'react';
@@ -27,6 +28,8 @@ function useServicesMainStatisticsFetcher() {
 	const {
 		query: {
 			environment,
+			serviceName,
+			agentName,
 			kuery,
 			page = 0,
 			pageSize = INITIAL_PAGE_SIZE,
@@ -40,10 +43,12 @@ function useServicesMainStatisticsFetcher() {
 	return useProgressiveFetcher(
 		(callApmApi) => {
 			if (start && end) {
-				return callApmApi('GET /internal/apm/services', {
+				return callApmApi('GET /internal/apm/agent_explorer', {
 					params: {
 						query: {
 							environment,
+							serviceName,
+							agentName,
 							kuery,
 							start,
 							end,
@@ -59,6 +64,8 @@ function useServicesMainStatisticsFetcher() {
 		},
 		[
 			environment,
+			serviceName,
+			agentName,
 			kuery,
 			start,
 			end,
@@ -75,32 +82,33 @@ export function AgentExplorerDetails() {
 	const history = useHistory();
 
 	const {
-		query: { serviceName, agentLanguage, sortField, sortDirection },
+		query: { serviceName, agentName, sortField, sortDirection },
 	} = useApmParams('/agent-explorer');
 
-	const servicesReq = useServicesMainStatisticsFetcher();
-	const services = (servicesReq.data?.items ?? [])
-		.map((service) => ({
-			serviceName: service.serviceName,
-			environments: service.environments,
-			agentName: service.agentName,
-			agentVersion: '',
+	const agentsReq = useServicesMainStatisticsFetcher();
+	const agents = (agentsReq.data?.items ?? [])
+		.map((agent) => ({
+			serviceName: agent.serviceName,
+			environments: agent.environments,
+			agentName: agent.agents?.[0]?.name,
+			agentVersions: agent.agents?.[0]?.versions,
 			latestVersion: '',
+			instances: agent.instances,
 		}));
 
-	const isLoading = servicesReq.status === FETCH_STATUS.LOADING;
+	const isLoading = agentsReq.status === FETCH_STATUS.LOADING;
 
 	const serviceNameOptions = uniqBy(
-		services.map((service) => ({ label: service.serviceName, value: service.serviceName })),
+		agents.map((service) => ({ label: service.serviceName, value: service.serviceName })),
 		'value',
 	);
 
 	const agentLanguageOptions = uniqBy(
-		services.map((service) => ({ label: capitalize(service.agentName ?? ''), value: service.agentName ?? '' })),
+		agents.map((service) => ({ label: capitalize(service.agentName ?? ''), value: service.agentName ?? '' })),
 		'value',
 	).filter((option) => option.label !== '');
 
-	const isFailure = servicesReq.status === FETCH_STATUS.FAILURE;
+	const isFailure = agentsReq.status === FETCH_STATUS.FAILURE;
 	const noItemsMessage = (
     <EuiEmptyPrompt
       title={
@@ -155,7 +163,7 @@ export function AgentExplorerDetails() {
 							}
 						)}
 						options={agentLanguageOptions}
-						value={agentLanguage}
+						value={agentName}
 						placeholder={i18n.translate(
 							'xpack.apm.agentExplorer.agentLanguageSelect.placeholder',
 							{
@@ -165,7 +173,7 @@ export function AgentExplorerDetails() {
 						isLoading={isLoading}
 						onChange={(value) => {
 							urlHelpers.push(history, {
-								query: { agentLanguage: value ?? '' },
+								query: { agentName: value ?? '' },
 							});
 						}}
 						dataTestSubj='agentExplorerAgentLanguageSelect'
@@ -177,9 +185,9 @@ export function AgentExplorerDetails() {
 				<AgentList
 					isLoading={isLoading}
 					isFailure={isFailure}
-					items={services}
-					initialSortField={sortField}
-					initialSortDirection={sortDirection}
+					items={agents}
+					initialSortField={AgentExplorerFieldName.Instances}
+					initialSortDirection='desc'
 					sortFn={(itemsToSort, sortField, sortDirection) => {
 						return orderAgentItems({
 							items: itemsToSort,

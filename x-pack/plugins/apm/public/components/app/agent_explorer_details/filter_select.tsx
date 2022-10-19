@@ -48,7 +48,7 @@ export function FilterSelect({
   return (
     <EuiComboBox
       prepend={title}
-      isClearable={false}
+      isClearable={true}
       isLoading={isLoading}
       singleSelection={{ asPlainText: true }}
       options={options}

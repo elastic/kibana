@@ -8,7 +8,7 @@
 import { orderBy } from 'lodash';
 import { AgentExplorerFieldName, AgentExplorerListItem } from '../../../../../common/agent_explorer';
 
-type SortValueGetter = (item: AgentExplorerListItem) => string;
+type SortValueGetter = (item: AgentExplorerListItem) => string | number;
 
 const sorts: Record<Partial<AgentExplorerFieldName>, SortValueGetter> = {
   [AgentExplorerFieldName.ServiceName]: (item) =>
@@ -16,9 +16,11 @@ const sorts: Record<Partial<AgentExplorerFieldName>, SortValueGetter> = {
   [AgentExplorerFieldName.Environments]: (item) =>
     item.environments?.join(', ').toLowerCase() ?? '',
   [AgentExplorerFieldName.AgentName]: (item) => (item.agentName ?? '').toLowerCase(),
-  [AgentExplorerFieldName.AgentVersion]: (item) => (item.agentVersion ?? '').toLowerCase(),
+  [AgentExplorerFieldName.AgentVersion]: (item) => 
+    item.agentVersions?.join(', ').toLowerCase() ?? '',
   [AgentExplorerFieldName.LatestVersion]: (item) => item.latestVersion,
   [AgentExplorerFieldName.DocsLink]: (item) => '',
+  [AgentExplorerFieldName.Instances]: (item) => item.instances,
 };
 
 export function orderAgentItems({
