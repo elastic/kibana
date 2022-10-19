@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { buildCombinedFilter, Filter, FilterStateStore } from '@kbn/es-query';
 
 import { Subscription } from 'rxjs';
 import { FilterManager } from './filter_manager';
@@ -259,6 +259,38 @@ describe('filter_manager', () => {
       filterManager.setFilters([f1]);
       expect(filterManager.getGlobalFilters()).toHaveLength(0);
       expect(filterManager.getAppFilters()).toHaveLength(1);
+    });
+
+    test('should support combined filter with OR relationship between filters', async () => {
+      const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
+      const f2 = getFilter(FilterStateStore.APP_STATE, false, false, 'gender', 'female');
+      const combinedFilter = buildCombinedFilter([f1, f2]);
+
+      // Сreated an identical copy, since in the filter manager modifies the filter
+      const combinedFilterCopy = JSON.parse(JSON.stringify(combinedFilter));
+      // both filters are equal
+      expect(combinedFilter).toEqual(combinedFilterCopy);
+
+      filterManager.setFilters([combinedFilterCopy]);
+      const filters = filterManager.getFilters();
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(combinedFilter);
+    });
+
+    test('should support combined filter with AND relationship between filters', async () => {
+      const f1 = getFilter(FilterStateStore.APP_STATE, false, false, 'age', 34);
+      const f2 = getFilter(FilterStateStore.APP_STATE, false, false, 'gender', 'female');
+      const combinedFilter = buildCombinedFilter([[f1, f2]]);
+
+      // Сreated an identical copy, since in the filter manager modifies the filter
+      const combinedFilterCopy = JSON.parse(JSON.stringify(combinedFilter));
+      // both filters are equal
+      expect(combinedFilter).toEqual(combinedFilterCopy);
+
+      filterManager.setFilters([combinedFilterCopy]);
+      const filters = filterManager.getFilters();
+      expect(filters).toHaveLength(1);
+      expect(filters[0]).toEqual(combinedFilter);
     });
   });
 
