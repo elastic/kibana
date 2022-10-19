@@ -251,6 +251,55 @@ describe('HttpResources service', () => {
             });
           });
         });
+        describe('renderCss', () => {
+          it('formats successful response', async () => {
+            const cssBody = `body {border: 1px solid red;}`;
+            register(routeConfig, async (ctx, req, res) => {
+              return res.renderCss({ body: cssBody });
+            });
+            const [[, routeHandler]] = router.get.mock.calls;
+
+            const responseFactory = createHttpResourcesResponseFactory();
+            await routeHandler(context, kibanaRequest, responseFactory);
+            expect(responseFactory.ok).toHaveBeenCalledWith({
+              body: cssBody,
+              headers: {
+                'content-type': 'text/css',
+                'content-security-policy':
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+              },
+            });
+          });
+
+          it('can attach headers, except the CSP & "content-type" headers', async () => {
+            const cssBody = `body {border: 1px solid red;}`;
+            register(routeConfig, async (ctx, req, res) => {
+              return res.renderCss({
+                body: cssBody,
+                headers: {
+                  'content-type': 'text/css5',
+                  'content-security-policy': "script-src 'unsafe-eval'",
+                  'x-kibana': '42',
+                },
+              });
+            });
+
+            const [[, routeHandler]] = router.get.mock.calls;
+
+            const responseFactory = createHttpResourcesResponseFactory();
+            await routeHandler(context, kibanaRequest, responseFactory);
+
+            expect(responseFactory.ok).toHaveBeenCalledWith({
+              body: cssBody,
+              headers: {
+                'content-type': 'text/css',
+                'x-kibana': '42',
+                'content-security-policy':
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+              },
+            });
+          });
+        });
       });
     }
 

@@ -2645,6 +2645,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/analytics-shippers-gainsight@link:bazel-bin/packages/analytics/shippers/gainsight":
+  version "0.0.0"
+  uid ""
+
 "@kbn/analytics@link:bazel-bin/packages/kbn-analytics":
   version "0.0.0"
   uid ""
@@ -6818,6 +6822,10 @@
   uid ""
 
 "@types/kbn__analytics-shippers-fullstory@link:bazel-bin/packages/analytics/shippers/fullstory/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__analytics-shippers-gainsight@link:bazel-bin/packages/analytics/shippers/gainsight/npm_module_types":
   version "0.0.0"
   uid ""
 
