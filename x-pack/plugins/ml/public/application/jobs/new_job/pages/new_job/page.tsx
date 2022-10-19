@@ -12,6 +12,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useTimeBuckets } from '../../../../components/custom_hooks/use_time_buckets';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
 import { getJobCreatorTitle } from '../../common/job_creator/util/general';
@@ -31,7 +32,6 @@ import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';
 import { useMlContext } from '../../../../contexts/ml';
 import { getTimeFilterRange } from '../../../../components/full_time_range_selector';
-import { getTimeBucketsFromCache } from '../../../../util/time_buckets';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
 import { newJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
@@ -50,6 +50,9 @@ export interface PageProps {
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const mlContext = useMlContext();
+
+  const chartInterval = useTimeBuckets();
+
   const jobCreator = useMemo(
     () =>
       jobCreatorFactory(jobType)(
@@ -60,6 +63,8 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobType]
   );
+
+  const jobValidator = useMemo(() => new JobValidator(jobCreator), [jobCreator]);
 
   const { displayErrorToast } = useToastNotificationService();
 
@@ -182,23 +187,18 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     }
   }
 
-  const chartInterval = getTimeBucketsFromCache();
   chartInterval.setBarTarget(BAR_TARGET);
   chartInterval.setMaxBars(MAX_BARS);
   chartInterval.setInterval('auto');
 
   const chartLoader = useMemo(
     () => new ChartLoader(mlContext.currentDataView, jobCreator.query),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [mlContext.currentDataView, jobCreator.query]
   );
-
-  const jobValidator = useMemo(() => new JobValidator(jobCreator), [jobCreator]);
 
   const resultsLoader = useMemo(
     () => new ResultsLoader(jobCreator, chartInterval, chartLoader),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [jobCreator, chartInterval, chartLoader]
   );
 
   useEffect(() => {
