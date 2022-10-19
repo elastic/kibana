@@ -33,12 +33,10 @@ export const MlModelSelectOption: React.FC<MlModelSelectOptionProps> = ({ model 
               <EuiTextColor color="subdued">{model.model_id}</EuiTextColor>
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false} key={type}>
-            <EuiFlexGroup gutterSize="xs">
-              <EuiFlexItem>
-                <EuiBadge color="hollow">{type}</EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <span>
+              <EuiBadge color="hollow">{type}</EuiBadge>
+            </span>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
