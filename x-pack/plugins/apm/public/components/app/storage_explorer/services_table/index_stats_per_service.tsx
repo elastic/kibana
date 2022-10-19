@@ -16,7 +16,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ValuesType } from 'utility-types';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { asDynamicBytes } from '../../../../../common/utils/formatters';
+import {
+  asDynamicBytes,
+  asInteger,
+} from '../../../../../common/utils/formatters';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { SizeLabel } from './size_label';
@@ -64,6 +67,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
           defaultMessage: 'Docs count',
         }
       ),
+      render: (_, { numberOfDocs }) => asInteger(numberOfDocs),
       sortable: true,
     },
     {
