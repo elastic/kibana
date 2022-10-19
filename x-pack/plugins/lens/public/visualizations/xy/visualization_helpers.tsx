@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
 import { DatasourceLayers, OperationMetadata, VisualizationType } from '../../types';
 import {
   State,
@@ -21,7 +21,7 @@ import {
   SeriesType,
 } from './types';
 import { isHorizontalChart } from './state_helpers';
-import type { LayerType } from '../../../common';
+import { layerTypes } from '../..';
 
 export function getAxisName(
   axis: 'x' | 'y' | 'yLeft' | 'yRight',
@@ -121,7 +121,7 @@ export function checkScaleOperation(
 }
 
 export const isDataLayer = (layer: XYLayerConfig): layer is XYDataLayerConfig =>
-  layer.layerType === LayerTypes.DATA || !layer.layerType;
+  layer.layerType === layerTypes.DATA || !layer.layerType;
 
 export const getDataLayers = (layers: XYLayerConfig[]) =>
   (layers || []).filter((layer): layer is XYDataLayerConfig => isDataLayer(layer));
@@ -131,31 +131,31 @@ export const getFirstDataLayer = (layers: XYLayerConfig[]) =>
 
 export const isReferenceLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>
-): layer is XYReferenceLineLayerConfig => layer.layerType === LayerTypes.REFERENCELINE;
+): layer is XYReferenceLineLayerConfig => layer.layerType === layerTypes.REFERENCELINE;
 
 export const getReferenceLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYReferenceLineLayerConfig => isReferenceLayer(layer));
 
 export const isAnnotationsLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>
-): layer is XYAnnotationLayerConfig => layer.layerType === LayerTypes.ANNOTATIONS;
+): layer is XYAnnotationLayerConfig => layer.layerType === layerTypes.ANNOTATIONS;
 
 export const getAnnotationsLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYAnnotationLayerConfig => isAnnotationsLayer(layer));
 
 export interface LayerTypeToLayer {
-  [LayerTypes.DATA]: (layer: XYDataLayerConfig) => XYDataLayerConfig;
-  [LayerTypes.REFERENCELINE]: (layer: XYReferenceLineLayerConfig) => XYReferenceLineLayerConfig;
-  [LayerTypes.ANNOTATIONS]: (layer: XYAnnotationLayerConfig) => XYAnnotationLayerConfig;
+  [layerTypes.DATA]: (layer: XYDataLayerConfig) => XYDataLayerConfig;
+  [layerTypes.REFERENCELINE]: (layer: XYReferenceLineLayerConfig) => XYReferenceLineLayerConfig;
+  [layerTypes.ANNOTATIONS]: (layer: XYAnnotationLayerConfig) => XYAnnotationLayerConfig;
 }
 
 export const getLayerTypeOptions = (layer: XYLayerConfig, options: LayerTypeToLayer) => {
   if (isDataLayer(layer)) {
-    return options[LayerTypes.DATA](layer);
+    return options[layerTypes.DATA](layer);
   } else if (isReferenceLayer(layer)) {
-    return options[LayerTypes.REFERENCELINE](layer);
+    return options[layerTypes.REFERENCELINE](layer);
   }
-  return options[LayerTypes.ANNOTATIONS](layer);
+  return options[layerTypes.ANNOTATIONS](layer);
 };
 
 export function getVisualizationType(state: State): VisualizationType | 'mixed' {
@@ -211,7 +211,7 @@ export const defaultIcon = IconChartBarStacked;
 export const defaultSeriesType = 'bar_stacked';
 
 export const supportedDataLayer = {
-  type: LayerTypes.DATA,
+  type: layerTypes.DATA,
   label: i18n.translate('xpack.lens.xyChart.addDataLayerLabel', {
     defaultMessage: 'Visualization',
   }),
@@ -253,7 +253,7 @@ export function getMessageIdsForDimension(
 }
 
 const newLayerFn = {
-  [LayerTypes.DATA]: ({
+  [layerTypes.DATA]: ({
     layerId,
     seriesType,
   }: {
@@ -261,16 +261,16 @@ const newLayerFn = {
     seriesType: SeriesType;
   }): XYDataLayerConfig => ({
     layerId,
-    layerType: LayerTypes.DATA,
+    layerType: layerTypes.DATA,
     accessors: [],
     seriesType,
   }),
-  [LayerTypes.REFERENCELINE]: ({ layerId }: { layerId: string }): XYReferenceLineLayerConfig => ({
+  [layerTypes.REFERENCELINE]: ({ layerId }: { layerId: string }): XYReferenceLineLayerConfig => ({
     layerId,
-    layerType: LayerTypes.REFERENCELINE,
+    layerType: layerTypes.REFERENCELINE,
     accessors: [],
   }),
-  [LayerTypes.ANNOTATIONS]: ({
+  [layerTypes.ANNOTATIONS]: ({
     layerId,
     indexPatternId,
   }: {
@@ -278,7 +278,7 @@ const newLayerFn = {
     indexPatternId: string;
   }): XYAnnotationLayerConfig => ({
     layerId,
-    layerType: LayerTypes.ANNOTATIONS,
+    layerType: layerTypes.ANNOTATIONS,
     annotations: [],
     indexPatternId,
     ignoreGlobalFilters: true,
@@ -287,12 +287,12 @@ const newLayerFn = {
 
 export function newLayerState({
   layerId,
-  layerType = LayerTypes.DATA,
+  layerType = layerTypes.DATA,
   seriesType,
   indexPatternId,
 }: {
   layerId: string;
-  layerType?: LayerType;
+  layerType?: XYLayerType;
   seriesType: SeriesType;
   indexPatternId: string;
 }) {
@@ -300,7 +300,7 @@ export function newLayerState({
 }
 
 export function getLayersByType(state: State, byType?: string) {
-  return state.layers.filter(({ layerType = LayerTypes.DATA }) =>
+  return state.layers.filter(({ layerType = layerTypes.DATA }) =>
     byType ? layerType === byType : true
   );
 }

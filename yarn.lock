@@ -1502,10 +1502,10 @@
   dependencies:
     "@elastic/ecs-helpers" "^1.1.0"
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@8.3.0-canary.1":
-  version "8.3.0-canary.1"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.3.0-canary.1.tgz#31dc18f724433c4135ed85fde5fd018393134552"
-  integrity sha512-CSNP4vTL/90VRD3MbvfBggy4VBxEgNmlHQf7mlWiPRTxo24t68PqNS+TnsfzO7fbY/nOALoX9hE8VlxRcMo0iA==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@8.4.0-canary.1":
+  version "8.4.0-canary.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.4.0-canary.1.tgz#af951826a67eb8a97562014e90447087c3bccee9"
+  integrity sha512-BWC3u2SfNBZBPUB/M7Qt6jl/8QcnG1+tzYto4pTZW/AaQn6raTyKtdta78Vi9Tj83MzA2skz7Y0FfCmPudwPsQ==
   dependencies:
     "@elastic/transport" "^8.2.0"
     tslib "^2.4.0"
@@ -2645,6 +2645,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/analytics-shippers-gainsight@link:bazel-bin/packages/analytics/shippers/gainsight":
+  version "0.0.0"
+  uid ""
+
 "@kbn/analytics@link:bazel-bin/packages/kbn-analytics":
   version "0.0.0"
   uid ""
@@ -3317,6 +3321,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-test-helpers-test-utils@link:bazel-bin/packages/core/test-helpers/core-test-helpers-test-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal":
   version "0.0.0"
   uid ""
@@ -3537,6 +3545,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/language-documentation-popover@link:bazel-bin/packages/kbn-language-documentation-popover":
+  version "0.0.0"
+  uid ""
+
 "@kbn/logging-mocks@link:bazel-bin/packages/kbn-logging-mocks":
   version "0.0.0"
   uid ""
@@ -3738,6 +3750,18 @@
   uid ""
 
 "@kbn/shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-markdown-mocks@link:bazel-bin/packages/shared-ux/markdown/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-markdown-types@link:bazel-bin/packages/shared-ux/markdown/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-markdown@link:bazel-bin/packages/shared-ux/markdown/impl":
   version "0.0.0"
   uid ""
 
@@ -6801,6 +6825,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__analytics-shippers-gainsight@link:bazel-bin/packages/analytics/shippers/gainsight/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__analytics@link:bazel-bin/packages/kbn-analytics/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7485,6 +7513,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-test-helpers-test-utils@link:bazel-bin/packages/core/test-helpers/core-test-helpers-test-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7689,6 +7721,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__language-documentation-popover@link:bazel-bin/packages/kbn-language-documentation-popover/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__logging-mocks@link:bazel-bin/packages/kbn-logging-mocks/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7886,6 +7922,18 @@
   uid ""
 
 "@types/kbn__shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app/impl/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-markdown-mocks@link:bazel-bin/packages/shared-ux/markdown/mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-markdown-types@link:bazel-bin/packages/shared-ux/markdown/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-markdown@link:bazel-bin/packages/shared-ux/markdown/impl/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -13958,6 +14006,44 @@ elastic-apm-node@^3.38.0:
     pino "^6.11.2"
     relative-microtime "^2.0.0"
     require-in-the-middle "^5.0.3"
+    semver "^6.3.0"
+    set-cookie-serde "^1.0.0"
+    shallow-clone-shim "^2.0.0"
+    source-map "^0.8.0-beta.0"
+    sql-summary "^1.0.1"
+    traverse "^0.6.6"
+    unicode-byte-truncate "^1.0.0"
+
+elastic-apm-node@^3.39.0:
+  version "3.39.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.39.0.tgz#51ca1dfc11e6b48b53967518461a959ac1623da1"
+  integrity sha512-aNRLDMQreZ+u23HStmppdDNtfS7Z651MWf3wLjw72haCNpGczuXsb4EuBRfJOk0IXWXTYgX1cDy2hiy4PAxlSQ==
+  dependencies:
+    "@elastic/ecs-pino-format" "^1.2.0"
+    "@opentelemetry/api" "^1.1.0"
+    after-all-results "^2.0.0"
+    async-cache "^1.1.0"
+    async-value-promise "^1.1.1"
+    basic-auth "^2.0.1"
+    cookie "^0.5.0"
+    core-util-is "^1.0.2"
+    elastic-apm-http-client "11.0.1"
+    end-of-stream "^1.4.4"
+    error-callsites "^2.0.4"
+    error-stack-parser "^2.0.6"
+    escape-string-regexp "^4.0.0"
+    fast-safe-stringify "^2.0.7"
+    http-headers "^3.0.2"
+    is-native "^1.0.1"
+    lru-cache "^6.0.0"
+    measured-reporting "^1.51.1"
+    monitor-event-loop-delay "^1.0.0"
+    object-filter-sequence "^1.0.0"
+    object-identity-map "^1.0.2"
+    original-url "^1.2.3"
+    pino "^6.11.2"
+    relative-microtime "^2.0.0"
+    require-in-the-middle "^5.2.0"
     semver "^6.3.0"
     set-cookie-serde "^1.0.0"
     shallow-clone-shim "^2.0.0"
