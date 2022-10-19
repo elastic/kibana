@@ -120,6 +120,30 @@ describe('Background Search Session management status labels', () => {
       expect(label.text()).toBe('Expired');
     });
 
+    test('error', () => {
+      session.status = SearchSessionStatus.ERROR;
+
+      const statusIndicator = mount(
+        <LocaleWrapper>
+          <StatusIndicator
+            session={{ ...session, errors: ['an error'] }}
+            now={mockNowTime.toISOString()}
+            timezone={tz}
+          />
+        </LocaleWrapper>
+      );
+
+      const label = statusIndicator
+        .find(`[data-test-subj="sessionManagementStatusLabel"][data-test-status="error"]`)
+        .first();
+      expect(label.text()).toBe('Error');
+
+      const tooltip = statusIndicator.find('EuiToolTip');
+      expect((tooltip.first().props() as EuiToolTipProps).content).toMatchInlineSnapshot(
+        `"One or more searches failed to complete. Use the \\"Inspect\\" action to see the underlying errors."`
+      );
+    });
+
     test('error handling', () => {
       session.status = SearchSessionStatus.COMPLETE;
       (session as any).created = null;
