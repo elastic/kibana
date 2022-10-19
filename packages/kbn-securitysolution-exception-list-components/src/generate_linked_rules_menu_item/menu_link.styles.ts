@@ -5,14 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 
-import type { Comment, CommentsArray } from '@kbn/securitysolution-io-ts-list-types';
+export const containerCss = css`
+  border-bottom: 1px solid ${euiThemeVars.euiColorLightShade};
+`;
 
-export const getCommentsMock = (): Comment => ({
-  comment: 'some old comment',
-  created_at: '2020-04-20T15:25:31.830Z',
-  created_by: 'some user',
-  id: 'uuid_here',
-});
-
-export const getCommentsArrayMock = (): CommentsArray => [getCommentsMock(), getCommentsMock()];
+export const itemContentCss = css`
+  color: ${euiThemeVars.euiColorPrimary};
+  flex-basis: content;
+`;
