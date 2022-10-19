@@ -11,10 +11,11 @@ type TransactionDurationField = ReturnType<
   typeof getDurationFieldForTransactions
 >;
 
-interface AvgLatencyAgg {
+/* eslint @typescript-eslint/consistent-type-definitions: ["error", "type"] */
+type AvgLatencyAgg = {
   avgLatency: { avg: { field: TransactionDurationField } };
-}
-interface PctLatencyAgg {
+};
+type PctLatencyAgg = {
   pctLatency: {
     percentiles: {
       field: TransactionDurationField;
@@ -22,7 +23,7 @@ interface PctLatencyAgg {
       keyed: false;
     };
   };
-}
+};
 
 export function averageOrPercentileAgg({
   aggregationType,
