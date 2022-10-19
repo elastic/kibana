@@ -97,6 +97,7 @@ export class APMPlugin
         taskManager: plugins.taskManager,
         logger: this.logger,
         kibanaVersion: this.initContext.env.packageInfo.version,
+        isProd: this.initContext.env.mode.prod,
       });
     }
 

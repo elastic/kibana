@@ -60,7 +60,7 @@ function getTabs({
   selectedTab: Tab['key'];
   router: ApmRouter;
 }) {
-  const canAccessML = !!core.application.capabilities.ml?.canAccessML;
+  const canReadMlJobs = !!core.application.capabilities.ml?.canGetJobs;
 
   const tabs: Tab[] = [
     {
@@ -90,7 +90,7 @@ function getTabs({
         defaultMessage: 'Anomaly detection',
       }),
       href: router.link('/settings/anomaly-detection'),
-      hidden: !canAccessML,
+      hidden: !canReadMlJobs,
     },
     {
       key: 'custom-links',
