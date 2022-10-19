@@ -1725,7 +1725,8 @@ export class RulesClient {
     } catch (error) {
       this.auditLogger?.log(
         ruleAuditEvent({
-          action: RuleAuditAction.BULK_DELETE,
+          action: RuleAuditAction.DELETE,
+          outcome: 'unknown',
           error,
         })
       );
@@ -1797,7 +1798,8 @@ export class RulesClient {
         } catch (error) {
           this.auditLogger?.log(
             ruleAuditEvent({
-              action: RuleAuditAction.BULK_DELETE,
+              action: RuleAuditAction.DELETE,
+              outcome: 'unknown',
               error,
             })
           );
@@ -1872,7 +1874,7 @@ export class RulesClient {
         }
         this.auditLogger?.log(
           ruleAuditEvent({
-            action: RuleAuditAction.BULK_DELETE,
+            action: RuleAuditAction.DELETE,
             outcome: 'success',
             savedObject: { type: 'alert', id: status.id },
           })
@@ -1888,7 +1890,7 @@ export class RulesClient {
         });
         this.auditLogger?.log(
           ruleAuditEvent({
-            action: RuleAuditAction.BULK_DELETE,
+            action: RuleAuditAction.DELETE,
             outcome: 'failure',
             savedObject: { type: 'alert', id: status.id },
           })

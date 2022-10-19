@@ -409,12 +409,12 @@ describe('bulkDelete', () => {
 
       await rulesClient.bulkDeleteRules({ filter: '' });
 
-      expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_bulk_delete');
+      expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_delete');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('success');
       expect(auditLogger.log.mock.calls[0][0]?.kibana).toEqual({
         saved_object: { id: 'id1', type: 'alert' },
       });
-      expect(auditLogger.log.mock.calls[1][0]?.event?.action).toEqual('rule_bulk_delete');
+      expect(auditLogger.log.mock.calls[1][0]?.event?.action).toEqual('rule_delete');
       expect(auditLogger.log.mock.calls[1][0]?.event?.outcome).toEqual('success');
       expect(auditLogger.log.mock.calls[1][0]?.kibana).toEqual({
         saved_object: { id: 'id2', type: 'alert' },
@@ -441,12 +441,12 @@ describe('bulkDelete', () => {
 
       await rulesClient.bulkDeleteRules({ filter: '' });
 
-      expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_bulk_delete');
+      expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_delete');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('success');
       expect(auditLogger.log.mock.calls[0][0]?.kibana).toEqual({
         saved_object: { id: 'id1', type: 'alert' },
       });
-      expect(auditLogger.log.mock.calls[1][0]?.event?.action).toEqual('rule_bulk_delete');
+      expect(auditLogger.log.mock.calls[1][0]?.event?.action).toEqual('rule_delete');
       expect(auditLogger.log.mock.calls[1][0]?.event?.outcome).toEqual('failure');
       expect(auditLogger.log.mock.calls[1][0]?.kibana).toEqual({
         saved_object: { id: 'id2', type: 'alert' },
@@ -466,8 +466,8 @@ describe('bulkDelete', () => {
         'Unauthorized'
       );
 
-      expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_bulk_delete');
-      expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('failure');
+      expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_delete');
+      expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('unknown');
     });
 
     test('logs audit event when getting an authorization filter failed', async () => {
@@ -481,8 +481,8 @@ describe('bulkDelete', () => {
 
       await expect(rulesClient.bulkDeleteRules({ filter: '' })).rejects.toThrowError('Error');
 
-      expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_bulk_delete');
-      expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('failure');
+      expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_delete');
+      expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('unknown');
     });
   });
 });
