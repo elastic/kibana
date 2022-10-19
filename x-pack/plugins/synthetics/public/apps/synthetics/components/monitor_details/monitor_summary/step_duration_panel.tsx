@@ -26,7 +26,7 @@ export const StepDurationPanel = () => {
   const isBrowser = monitor?.type === 'browser';
 
   return (
-    <EuiPanel>
+    <EuiPanel hasShadow={false} hasBorder>
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">

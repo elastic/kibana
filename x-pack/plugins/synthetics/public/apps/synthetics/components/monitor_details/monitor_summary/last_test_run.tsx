@@ -52,7 +52,7 @@ export const LastTestRun = () => {
   const loading = stepsLoading || pingsLoading;
 
   return (
-    <EuiPanel css={{ minHeight: 356 }}>
+    <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 356 }}>
       <PanelHeader monitor={monitor} latestPing={latestPing} loading={loading} />
       {!loading && latestPing?.error ? (
         <EuiCallOut
