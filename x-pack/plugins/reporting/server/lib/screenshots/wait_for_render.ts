@@ -26,7 +26,7 @@ export const waitForRenderComplete = async (
   );
 
   return await browser
-    .evaluate(
+    .evaluate<[string, number]>(
       {
         fn: (selector, visLoadDelay) => {
           // wait for visualizations to finish loading

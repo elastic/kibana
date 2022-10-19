@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { map, truncate } from 'lodash';
 import open from 'opn';
-import puppeteer, { ElementHandle, EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
+import puppeteer, { ElementHandle, Page, EvaluateFunc } from 'puppeteer';
 import { parse as parseUrl } from 'url';
 import type { LocatorParams } from '../../../../common/types';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../../../../common/constants';
@@ -21,6 +21,16 @@ import { Layout, ViewZoomWidthHeight } from '../../../lib/layouts/layout';
 import { ElementPosition } from '../../../lib/screenshots';
 import { allowRequest, NetworkPolicy } from '../../network_policy';
 
+declare module 'puppeteer' {
+  interface Page {
+    _client(): CDPSession;
+  }
+
+  interface Target {
+    _targetId: string;
+  }
+}
+
 export interface ChromiumDriverOptions {
   inspect: boolean;
   networkPolicy: NetworkPolicy;
@@ -30,9 +40,9 @@ interface WaitForSelectorOpts {
   timeout: number;
 }
 
-interface EvaluateOpts {
-  fn: EvaluateFn;
-  args: SerializableOrJSHandle[];
+interface EvaluateOpts<A extends unknown[]> {
+  fn: EvaluateFunc<A>;
+  args: unknown[];
 }
 
 interface EvaluateMetaOpts {
@@ -57,7 +67,7 @@ interface InterceptedRequest {
 const WAIT_FOR_DELAY_MS: number = 100;
 
 export class HeadlessChromiumDriver {
-  private readonly page: puppeteer.Page;
+  private readonly page: Page;
   private readonly inspect: boolean;
   private readonly networkPolicy: NetworkPolicy;
 
@@ -65,11 +75,7 @@ export class HeadlessChromiumDriver {
   private interceptedCount = 0;
   private core: ReportingCore;
 
-  constructor(
-    core: ReportingCore,
-    page: puppeteer.Page,
-    { inspect, networkPolicy }: ChromiumDriverOptions
-  ) {
+  constructor(core: ReportingCore, page: Page, { inspect, networkPolicy }: ChromiumDriverOptions) {
     this.core = core;
     this.page = page;
     this.inspect = inspect;
@@ -119,7 +125,10 @@ export class HeadlessChromiumDriver {
     await this.page.evaluateOnNewDocument(this.core.getEnableScreenshotMode());
 
     if (layout) {
-      await this.page.evaluateOnNewDocument(this.core.getSetScreenshotLayout(), layout.id);
+      await this.page.evaluateOnNewDocument(
+        this.core.getSetScreenshotLayout() as (arg0: string) => void,
+        layout.id
+      );
     }
 
     if (locator) {
@@ -189,14 +198,13 @@ export class HeadlessChromiumDriver {
     return undefined;
   }
 
-  public async evaluate(
-    { fn, args = [] }: EvaluateOpts,
+  public async evaluate<A extends unknown[], T = void>(
+    { fn, args = [] }: EvaluateOpts<A>,
     meta: EvaluateMetaOpts,
     logger: LevelLogger
-  ) {
+  ): Promise<T> {
     logger.debug(`evaluate ${meta.context}`);
-    const result = await this.page.evaluate(fn, ...args);
-    return result;
+    return this.page.evaluate(fn as EvaluateFunc<unknown[]>, ...args) as Promise<T>;
   }
 
   public async waitForSelector(
@@ -217,36 +225,21 @@ export class HeadlessChromiumDriver {
     return resp;
   }
 
-  public async waitFor(
-    {
-      fn,
-      args,
-      toEqual,
-      timeout,
-    }: {
-      fn: EvaluateFn;
-      args: SerializableOrJSHandle[];
-      toEqual: number;
-      timeout: number;
-    },
-    context: EvaluateMetaOpts,
-    logger: LevelLogger
-  ): Promise<void> {
-    const startTime = Date.now();
-
-    while (true) {
-      const result = await this.evaluate({ fn, args }, context, logger);
-      if (result === toEqual) {
-        return;
-      }
-
-      if (Date.now() - startTime > timeout) {
-        throw new Error(
-          `Timed out waiting for the items selected to equal ${toEqual}. Found: ${result}. Context: ${context.context}`
-        );
-      }
-      await new Promise((r) => setTimeout(r, WAIT_FOR_DELAY_MS));
-    }
+  public async waitFor<T extends unknown[] = unknown[]>({
+    fn,
+    args,
+    timeout,
+  }: {
+    fn: EvaluateFunc<T>;
+    args: unknown[];
+    toEqual: number;
+    timeout: number;
+  }): Promise<void> {
+    await this.page.waitForFunction(
+      fn as EvaluateFunc<unknown[]>,
+      { timeout, polling: WAIT_FOR_DELAY_MS },
+      ...args
+    );
   }
 
   public async setViewport(
@@ -271,9 +264,8 @@ export class HeadlessChromiumDriver {
       return;
     }
 
-    // @ts-ignore
-    // FIXME: retrieve the client in open() and  pass in the client
-    const client = this.page._client;
+    // FIXME: retrieve the client in open() and  pass in the client?
+    const client = this.page._client();
 
     // We have to reach into the Chrome Devtools Protocol to apply headers as using
     // puppeteer's API will cause map tile requests to hang indefinitely:
@@ -374,12 +366,12 @@ export class HeadlessChromiumDriver {
     // In order to get the inspector running, we have to know the page's internal ID (again, private)
     // in order to construct the final debugging URL.
 
+    const client = this.page._client();
     const target = this.page.target();
-    const client = await target.createCDPSession();
+    const targetId = target._targetId;
 
     await client.send('Debugger.enable');
     await client.send('Debugger.pause');
-    const targetId = target._targetId;
     const wsEndpoint = this.page.browser().wsEndpoint();
     const { port } = parseUrl(wsEndpoint);
 

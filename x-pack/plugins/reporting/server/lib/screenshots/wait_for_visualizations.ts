@@ -9,11 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { LevelLogger, startTrace } from '../';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { LayoutInstance } from '../layouts';
-import { CONTEXT_WAITFORELEMENTSTOBEINDOM } from './constants';
 
-type SelectorArgs = Record<string, string>;
-
-const getCompletedItemsCount = ({ renderCompleteSelector }: SelectorArgs) => {
+const getCompletedItemsCount = (renderCompleteSelector: string) => {
   return document.querySelectorAll(renderCompleteSelector).length;
 };
 
@@ -32,19 +29,15 @@ export const waitForVisualizations = async (
   const endTrace = startTrace('wait_for_visualizations', 'wait');
   const { renderComplete: renderCompleteSelector } = layout.selectors;
 
-  logger.debug(
-    i18n.translate('xpack.reporting.screencapture.waitingForRenderedElements', {
-      defaultMessage: `waiting for {itemsCount} rendered elements to be in the DOM`,
-      values: { itemsCount: toEqual },
-    })
-  );
+  logger.debug(`Waiting for ${toEqual} rendered elements to be in the DOM`);
 
   try {
-    await browser.waitFor(
-      { fn: getCompletedItemsCount, args: [{ renderCompleteSelector }], toEqual, timeout },
-      { context: CONTEXT_WAITFORELEMENTSTOBEINDOM },
-      logger
-    );
+    await browser.waitFor<string[]>({
+      fn: getCompletedItemsCount,
+      args: [renderCompleteSelector],
+      toEqual,
+      timeout,
+    });
 
     logger.debug(`found ${toEqual} rendered elements in the DOM`);
   } catch (err) {

@@ -18,7 +18,7 @@ export const getRenderErrors = async (
 ): Promise<undefined | string[]> => {
   const endTrace = startTrace('get_render_errors', 'read');
   logger.debug('reading render errors');
-  const errorsFound: undefined | string[] = await browser.evaluate(
+  const errorsFound: undefined | string[] = await browser.evaluate<string[], string[] | undefined>(
     {
       fn: (errorSelector, errorAttribute) => {
         const visualizations: Element[] = Array.from(document.querySelectorAll(errorSelector));
