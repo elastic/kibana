@@ -6,7 +6,6 @@
  */
 
 import React, { FC, VFC } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { IndicatorsBarChartWrapper } from '../components/barchart';
 import { IndicatorsTable } from '../components/table';
 import { useIndicators } from '../hooks/use_indicators';
@@ -22,16 +21,12 @@ import { IndicatorsFilters } from '../containers/filters';
 import { useSecurityContext } from '../../../hooks/use_security_context';
 import { UpdateStatus } from '../../../components/update_status';
 
-const queryClient = new QueryClient();
-
 const IndicatorsPageProviders: FC = ({ children }) => (
-  <QueryClientProvider client={queryClient}>
-    <IndicatorsFilters>
-      <FieldTypesProvider>
-        <InspectorProvider>{children}</InspectorProvider>
-      </FieldTypesProvider>
-    </IndicatorsFilters>
-  </QueryClientProvider>
+  <IndicatorsFilters>
+    <FieldTypesProvider>
+      <InspectorProvider>{children}</InspectorProvider>
+    </FieldTypesProvider>
+  </IndicatorsFilters>
 );
 
 const IndicatorsPageContent: VFC = () => {

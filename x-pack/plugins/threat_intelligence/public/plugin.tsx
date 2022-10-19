@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { CoreStart, Plugin } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import React, { Suspense, VFC } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -21,7 +22,7 @@ import {
 import { SecuritySolutionContext } from './containers/security_solution_context';
 import { EnterpriseGuard } from './containers/enterprise_guard';
 import { SecuritySolutionPluginTemplateWrapper } from './containers/security_solution_plugin_template_wrapper';
-import { IntegrationsGuard, setHttpClient } from './containers/integrations_guard';
+import { IntegrationsGuard } from './containers/integrations_guard';
 
 interface AppProps {
   securitySolutionContext: SecuritySolutionPluginContext;
@@ -37,6 +38,8 @@ const IndicatorsPage: VFC = () => (
   </SecuritySolutionPluginTemplateWrapper>
 );
 
+const queryClient = new QueryClient();
+
 /**
  * This is used here:
  * x-pack/plugins/security_solution/public/threat_intelligence/pages/threat_intelligence.tsx
@@ -51,9 +54,11 @@ export const createApp =
           <SecuritySolutionContext.Provider value={securitySolutionContext}>
             <KibanaContextProvider services={services}>
               <EnterpriseGuard>
-                <IntegrationsGuard>
-                  <IndicatorsPage />
-                </IntegrationsGuard>
+                <QueryClientProvider client={queryClient}>
+                  <IntegrationsGuard>
+                    <IndicatorsPage />
+                  </IntegrationsGuard>
+                </QueryClientProvider>
               </EnterpriseGuard>
             </KibanaContextProvider>
           </SecuritySolutionContext.Provider>
@@ -62,8 +67,7 @@ export const createApp =
     );
 
 export class ThreatIntelligencePlugin implements Plugin<void, void> {
-  public async setup(core: CoreSetup): Promise<ThreatIntelligencePluginSetup> {
-    setHttpClient(core.http);
+  public async setup(): Promise<ThreatIntelligencePluginSetup> {
     return {};
   }
 

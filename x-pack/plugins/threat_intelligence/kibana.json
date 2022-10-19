@@ -18,5 +18,5 @@
     "triggersActionsUi",
     "inspector"
   ],
-  "requiredBundles": ["data", "esUiShared", "kibanaUtils", "kibanaReact"]
+  "requiredBundles": ["data", "kibanaUtils", "kibanaReact"]
 }

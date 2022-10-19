@@ -7,21 +7,14 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import {
-  installationStatuses,
-  IntegrationsGuard,
-  THREAT_INTELLIGENCE_CATEGORY,
-  THREAT_INTELLIGENCE_UTILITIES,
-} from '.';
+import { IntegrationsGuard } from '.';
 import { TestProvidersComponent } from '../../common/mocks/test_providers';
 import { useIntegrationsPageLink, useTIDocumentationLink } from '../../hooks';
 import { useIndicatorsTotalCount } from '../../modules/indicators';
-import { useRequest } from '@kbn/es-ui-shared-plugin/public';
 
 jest.mock('../../modules/indicators/hooks/use_total_count');
 jest.mock('../../hooks/use_integrations_page_link');
 jest.mock('../../hooks/use_documentation_link');
-jest.mock('@kbn/es-ui-shared-plugin/public');
 
 describe('IntegrationsGuard', () => {
   it('should render nothing at all when indicator count and integrations are being loaded', () => {
@@ -37,13 +30,7 @@ describe('IntegrationsGuard', () => {
     (useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
       ''
     );
-    (useRequest as jest.MockedFunction<typeof useRequest>).mockReturnValue({
-      isInitialRequest: true,
-      isLoading: true,
-      data: { items: [] },
-      error: null,
-      resendRequest: () => null,
-    });
+    // const mockIntegrations = { items: [] };
 
     const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
       wrapper: TestProvidersComponent,
@@ -65,13 +52,7 @@ describe('IntegrationsGuard', () => {
     (useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
       ''
     );
-    (useRequest as jest.MockedFunction<typeof useRequest>).mockReturnValue({
-      isInitialRequest: true,
-      isLoading: false,
-      data: { items: [] },
-      error: null,
-      resendRequest: () => null,
-    });
+    // const mockIntegrations = { items: [] };
 
     const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
       wrapper: TestProvidersComponent,
@@ -86,13 +67,7 @@ describe('IntegrationsGuard', () => {
       count: 7,
       isLoading: false,
     });
-    (useRequest as jest.MockedFunction<typeof useRequest>).mockReturnValue({
-      isInitialRequest: true,
-      isLoading: true,
-      data: { items: [] },
-      error: null,
-      resendRequest: () => null,
-    });
+    // const mockIntegrations = { items: [] };
 
     const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
       wrapper: TestProvidersComponent,
@@ -107,60 +82,15 @@ describe('IntegrationsGuard', () => {
       count: 0,
       isLoading: true,
     });
-    (useRequest as jest.MockedFunction<typeof useRequest>).mockReturnValue({
-      isInitialRequest: true,
-      isLoading: false,
-      data: {
-        items: [
-          {
-            categories: [THREAT_INTELLIGENCE_CATEGORY],
-            id: '123',
-            status: installationStatuses.Installed,
-          },
-        ],
-      },
-      error: null,
-      resendRequest: () => null,
-    });
-
-    const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
-      wrapper: TestProvidersComponent,
-    });
-    expect(asFragment()).toMatchSnapshot();
-  });
-
-  it('should render empty page when loading is done and we have some unwanted integrations', async () => {
-    (
-      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
-    ).mockReturnValue({
-      count: 0,
-      isLoading: true,
-    });
-    (useRequest as jest.MockedFunction<typeof useRequest>).mockReturnValue({
-      isInitialRequest: true,
-      isLoading: false,
-      data: {
-        items: [
-          {
-            categories: [THREAT_INTELLIGENCE_CATEGORY],
-            id: '123',
-            status: installationStatuses.Installing,
-          },
-          {
-            categories: ['123'],
-            id: '123',
-            status: installationStatuses.Installed,
-          },
-          {
-            categories: [THREAT_INTELLIGENCE_CATEGORY],
-            id: THREAT_INTELLIGENCE_UTILITIES,
-            status: installationStatuses.Installed,
-          },
-        ],
-      },
-      error: null,
-      resendRequest: () => null,
-    });
+    // const mockIntegrations = {
+    //   items: [
+    //     {
+    //       categories: [THREAT_INTELLIGENCE_CATEGORY],
+    //       id: '123',
+    //       status: INSTALLATION_STATUS.Installed,
+    //     },
+    //   ],
+    // };
 
     const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
       wrapper: TestProvidersComponent,
