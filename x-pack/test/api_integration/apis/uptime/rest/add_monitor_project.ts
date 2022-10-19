@@ -668,7 +668,7 @@ export default function ({ getService }: FtrProviderContext) {
           full_name: 'a kibana user',
         });
         await supertestWithoutAuth
-          .put(
+          .post(
             `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT.replace(
               '{projectName}',
               project
@@ -722,7 +722,7 @@ export default function ({ getService }: FtrProviderContext) {
           full_name: 'a kibana user',
         });
         await supertestWithoutAuth
-          .put(
+          .post(
             `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT.replace(
               '{projectName}',
               project
@@ -1015,8 +1015,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${
-              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             }-${testPolicyId}`
         );
         expect(packagePolicy.name).eql(
@@ -1077,8 +1076,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${
-              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             }-${testPolicyId}`
         );
 
@@ -1099,8 +1097,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${
-              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             }-${testPolicyId}`
         );
 
@@ -1139,8 +1136,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${
-              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             }-${testPolicyId}`
         );
 
@@ -1175,8 +1171,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${
-              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             }-${testPolicyId}`
         );
 
@@ -1342,7 +1337,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('only allows 250 requests at a time', async () => {
-      const project = 'test-brower-suite';
+      const project = `test-project-${uuid.v4()}`;
       const monitors = [];
       for (let i = 0; i < 251; i++) {
         monitors.push({
