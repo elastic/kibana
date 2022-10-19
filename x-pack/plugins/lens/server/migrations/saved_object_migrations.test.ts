@@ -26,7 +26,8 @@ import {
   XYVisStatePre850,
   VisState850,
 } from './types';
-import { layerTypes, LegacyMetricState } from '../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/common';
+import { LegacyMetricState } from '../../common';
 import { Filter } from '@kbn/es-query';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 
@@ -1064,7 +1065,7 @@ describe('Lens migrations', () => {
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       if ('layers' in state) {
         for (const layer of state.layers) {
-          expect(layer.layerType).toEqual(layerTypes.DATA);
+          expect(layer.layerType).toEqual(LayerTypes.DATA);
         }
       }
     });
@@ -1092,7 +1093,7 @@ describe('Lens migrations', () => {
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       if ('layers' in state) {
         for (const layer of state.layers) {
-          expect(layer.layerType).toEqual(layerTypes.DATA);
+          expect(layer.layerType).toEqual(LayerTypes.DATA);
         }
       }
     });
@@ -1109,7 +1110,7 @@ describe('Lens migrations', () => {
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       expect('layerType' in state).toEqual(true);
       if ('layerType' in state) {
-        expect(state.layerType).toEqual(layerTypes.DATA);
+        expect(state.layerType).toEqual(LayerTypes.DATA);
       }
     });
     it('should add layer info to a datatable visualization', () => {
@@ -1125,7 +1126,7 @@ describe('Lens migrations', () => {
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       expect('layerType' in state).toEqual(true);
       if ('layerType' in state) {
-        expect(state.layerType).toEqual(layerTypes.DATA);
+        expect(state.layerType).toEqual(LayerTypes.DATA);
       }
     });
     it('should add layer info to a heatmap visualization', () => {
@@ -1141,7 +1142,7 @@ describe('Lens migrations', () => {
       const state = (result.attributes as LensDocShape715<VisStatePost715>).state.visualization;
       expect('layerType' in state).toEqual(true);
       if ('layerType' in state) {
-        expect(state.layerType).toEqual(layerTypes.DATA);
+        expect(state.layerType).toEqual(LayerTypes.DATA);
       }
     });
   });
@@ -2360,6 +2361,102 @@ describe('Lens migrations', () => {
         context
       ) as ReturnType<SavedObjectMigrationFn<LensDocShape, LensDocShape>>;
       expect(result.attributes.visualizationType).toBe('lnsMetric');
+    });
+  });
+
+  describe('8.6.0 migrates indexpattern datasource', () => {
+    const context = { log: { warn: () => {} } } as unknown as SavedObjectMigrationContext;
+    const example = {
+      type: 'lens',
+      id: 'mock-saved-object-id',
+      attributes: {
+        state: {
+          datasourceMetaData: {
+            filterableIndexPatterns: [
+              {
+                id: 'logstash-*',
+                title: 'logstash-*',
+              },
+            ],
+          },
+          datasourceStates: {
+            indexpattern: {
+              currentIndexPatternId: 'logstash-*',
+              layers: {
+                'c61a8afb-a185-4fae-a064-fb3846f6c451': {
+                  columnOrder: ['2cd09808-3915-49f4-b3b0-82767eba23f7'],
+                  columns: {
+                    '2cd09808-3915-49f4-b3b0-82767eba23f7': {
+                      dataType: 'number',
+                      isBucketed: false,
+                      label: 'Maximum of bytes',
+                      operationType: 'max',
+                      scale: 'ratio',
+                      sourceField: 'bytes',
+                    },
+                    'd3e62a7a-c259-4fff-a2fc-eebf20b7008a': {
+                      dataType: 'number',
+                      isBucketed: false,
+                      label: 'Minimum of bytes',
+                      operationType: 'min',
+                      scale: 'ratio',
+                      sourceField: 'bytes',
+                    },
+                    'd6e40cea-6299-43b4-9c9d-b4ee305a2ce8': {
+                      dataType: 'date',
+                      isBucketed: true,
+                      label: 'Date Histogram of @timestamp',
+                      operationType: 'date_histogram',
+                      params: {
+                        interval: 'auto',
+                      },
+                      scale: 'interval',
+                      sourceField: '@timestamp',
+                    },
+                  },
+                  indexPatternId: 'logstash-*',
+                },
+              },
+            },
+          },
+          filters: [],
+          query: {
+            language: 'kuery',
+            query: '',
+          },
+          visualization: {
+            accessor: '2cd09808-3915-49f4-b3b0-82767eba23f7',
+            isHorizontal: false,
+            layerId: 'c61a8afb-a185-4fae-a064-fb3846f6c451',
+            layers: [
+              {
+                accessors: [
+                  'd3e62a7a-c259-4fff-a2fc-eebf20b7008a',
+                  '26ef70a9-c837-444c-886e-6bd905ee7335',
+                ],
+                layerId: 'c61a8afb-a185-4fae-a064-fb3846f6c451',
+                seriesType: 'area',
+                splitAccessor: '54cd64ed-2a44-4591-af84-b2624504569a',
+                xAccessor: 'd6e40cea-6299-43b4-9c9d-b4ee305a2ce8',
+              },
+            ],
+            legend: {
+              isVisible: true,
+              position: 'right',
+            },
+            preferredSeriesType: 'area',
+          },
+        },
+        title: 'Artistpreviouslyknownaslens',
+        visualizationType: 'lnsXY',
+      },
+    };
+
+    it('migrates the indexpattern datasource to formBased', () => {
+      const result = migrations['8.6.0'](example, context);
+      expect(result.attributes.state.datasourceStates.formBased).toBe(
+        example.attributes.state.datasourceStates.indexpattern
+      );
     });
   });
 });

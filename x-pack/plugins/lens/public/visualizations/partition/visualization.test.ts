@@ -13,13 +13,14 @@ import {
   NumberDisplay,
   LegendDisplay,
 } from '../../../common';
-import { layerTypes } from '../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { FramePublicAPI } from '../../types';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { cloneDeep } from 'lodash';
 import { PartitionChartsMeta } from './partition_charts_meta';
+import { CollapseFunction } from '../../../common/expressions';
 
 jest.mock('../../id_generator');
 
@@ -36,7 +37,7 @@ function getExampleState(): PieVisualizationState {
     layers: [
       {
         layerId: LAYER_ID,
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         primaryGroups: [],
         metric: undefined,
         numberDisplay: NumberDisplay.PERCENT,
@@ -76,7 +77,7 @@ describe('pie_visualization', () => {
 
       it("doesn't count collapsed dimensions", () => {
         state.layers[0].collapseFns = {
-          [colIds[0]]: 'some-fn',
+          [colIds[0]]: 'some-fn' as CollapseFunction,
         };
 
         expect(pieVisualization.getErrorMessages(state)).toHaveLength(0);
@@ -92,7 +93,7 @@ describe('pie_visualization', () => {
 
   describe('#getLayerType', () => {
     it('should return the type only if the layer is in the state', () => {
-      expect(pieVisualization.getLayerType(LAYER_ID, getExampleState())).toEqual(layerTypes.DATA);
+      expect(pieVisualization.getLayerType(LAYER_ID, getExampleState())).toEqual(LayerTypes.DATA);
       expect(pieVisualization.getLayerType('foo', getExampleState())).toBeUndefined();
     });
   });
@@ -104,7 +105,7 @@ describe('pie_visualization', () => {
           {
             primaryGroups: ['a'],
             layerId: LAYER_ID,
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             numberDisplay: NumberDisplay.PERCENT,
             categoryDisplay: CategoryDisplay.DEFAULT,
             legendDisplay: LegendDisplay.DEFAULT,

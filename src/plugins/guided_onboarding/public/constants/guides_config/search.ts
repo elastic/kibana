@@ -11,6 +11,7 @@ import type { GuideConfig } from '../../types';
 export const searchConfig: GuideConfig = {
   title: 'Search my data',
   description: `We'll help you build world-class search experiences with your data, using Elastic's out-of-the-box web crawler, connectors, and our robust APIs. Gain deep insights from the built-in search analytics and use that data to inform changes to relevance.`,
+  guideName: 'Enterprise Search',
   docs: {
     text: 'Enterprise Search 101 Documentation',
     url: 'example.com',
@@ -25,8 +26,8 @@ export const searchConfig: GuideConfig = {
         'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
       ],
       location: {
-        appID: 'guidedOnboardingExample',
-        path: 'stepOne',
+        appID: 'enterpriseSearch',
+        path: '',
       },
     },
     {
@@ -40,6 +41,12 @@ export const searchConfig: GuideConfig = {
       location: {
         appID: 'guidedOnboardingExample',
         path: 'stepTwo',
+      },
+      manualCompletion: {
+        title: 'Manual completion step title',
+        description:
+          'Mark the step complete by opening the panel and clicking the button "Mark done"',
+        readyToCompleteOnNavigation: true,
       },
     },
     {

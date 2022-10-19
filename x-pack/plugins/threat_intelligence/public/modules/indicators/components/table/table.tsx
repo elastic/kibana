@@ -19,7 +19,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDataGridColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import { CellActions, cellRendererFactory } from './components';
+import { CellActions, cellPopoverRendererFactory, cellRendererFactory } from './components';
 import { BrowserFields, SecuritySolutionDataViewBase } from '../../../../types';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { EmptyState } from '../../../../components/empty_state';
@@ -27,8 +27,8 @@ import { IndicatorsTableContext, IndicatorsTableContextValue } from './contexts'
 import { IndicatorsFlyout } from '../flyout';
 import { ColumnSettingsValue, useToolbarOptions } from './hooks';
 import { useFieldTypes } from '../../../../hooks/use_field_types';
-import { getFieldSchema } from '../../utils/get_field_schema';
-import { Pagination } from '../../services/fetch_indicators';
+import { getFieldSchema } from '../../utils';
+import { Pagination } from '../../services';
 
 export interface IndicatorsTableProps {
   indicators: Indicator[];
@@ -75,6 +75,11 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
   const renderCellValue = useMemo(
     () => cellRendererFactory(pagination.pageIndex * pagination.pageSize),
     [pagination.pageIndex, pagination.pageSize]
+  );
+
+  const renderCellPopoverValue = useMemo(
+    () => cellPopoverRendererFactory(indicators, pagination),
+    [indicators, pagination]
   );
 
   const indicatorTableContextValue = useMemo<IndicatorsTableContextValue>(
@@ -177,6 +182,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
           leadingControlColumns={leadingControlColumns}
           rowCount={indicatorCount}
           renderCellValue={renderCellValue}
+          renderCellPopover={renderCellPopoverValue}
           toolbarVisibility={toolbarOptions}
           pagination={{
             ...pagination,
@@ -197,6 +203,7 @@ export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
     isFetching,
     leadingControlColumns,
     renderCellValue,
+    renderCellPopoverValue,
     toolbarOptions,
     pagination,
     onChangeItemsPerPage,

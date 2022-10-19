@@ -8,17 +8,13 @@
 import React, { VFC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useFilterInOut } from '../../hooks/use_filter_in_out';
-import { FilterOut } from '../../utils/filter';
+import { useFilterInOut } from '../../hooks';
+import { FilterOut } from '../../utils';
 import { Indicator } from '../../../../../common/types/indicator';
 import { useStyles } from './styles';
 
 const ICON_TYPE = 'minusInCircle';
-const ICON_TITLE = i18n.translate('xpack.threatIntelligence.queryBar.filterOutButtonIcon', {
-  defaultMessage: 'Filter Out',
-});
-const CELL_ACTION_TITLE = i18n.translate('xpack.threatIntelligence.queryBar.filterOutCellAction', {
+const TITLE = i18n.translate('xpack.threatIntelligence.queryBar.filterOut', {
   defaultMessage: 'Filter Out',
 });
 
@@ -62,9 +58,9 @@ export const FilterOutButtonIcon: VFC<FilterOutProps> = ({
   }
 
   return (
-    <EuiToolTip content={ICON_TITLE}>
+    <EuiToolTip content={TITLE}>
       <EuiButtonIcon
-        aria-label={ICON_TITLE}
+        aria-label={TITLE}
         iconType={ICON_TYPE}
         iconSize="s"
         size="xs"
@@ -79,9 +75,42 @@ export const FilterOutButtonIcon: VFC<FilterOutProps> = ({
 /**
  * Retrieves the indicator's field and value, then creates a new {@link Filter} and adds it to the {@link FilterManager}.
  *
+ * This component renders an {@link EuiButtonEmpty}.
+ *
+ * @returns filter out button empty
+ */
+export const FilterOutButtonEmpty: VFC<FilterOutProps> = ({
+  data,
+  field,
+  'data-test-subj': dataTestSub,
+}) => {
+  const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterOut });
+  if (!filterFn) {
+    return <></>;
+  }
+
+  return (
+    <EuiToolTip content={TITLE}>
+      <EuiButtonEmpty
+        aria-label={TITLE}
+        iconType={ICON_TYPE}
+        iconSize="s"
+        color="primary"
+        onClick={filterFn}
+        data-test-subj={dataTestSub}
+      >
+        {TITLE}
+      </EuiButtonEmpty>
+    </EuiToolTip>
+  );
+};
+
+/**
+ * Retrieves the indicator's field and value, then creates a new {@link Filter} and adds it to the {@link FilterManager}.
+ *
  * This component is to be used in an EuiContextMenu.
  *
- * @returns filter in item for a context menu
+ * @returns filter in {@link EuiContextMenuItem} for a context menu
  */
 export const FilterOutContextMenu: VFC<FilterOutProps> = ({
   data,
@@ -101,10 +130,7 @@ export const FilterOutContextMenu: VFC<FilterOutProps> = ({
       onClick={filterFn}
       data-test-subj={dataTestSub}
     >
-      <FormattedMessage
-        id="xpack.threatIntelligence.queryBar.filterOutContextMenu"
-        defaultMessage="Filter Out"
-      />
+      {TITLE}
     </EuiContextMenuItem>
   );
 };
@@ -130,10 +156,11 @@ export const FilterOutCellAction: VFC<FilterOutCellActionProps> = ({
   }
 
   return (
-    <EuiToolTip content={CELL_ACTION_TITLE}>
+    <EuiToolTip content={TITLE}>
       <div data-test-subj={dataTestSub} css={styles.button}>
-        {/* @ts-ignore*/}
-        <Component aria-label={CELL_ACTION_TITLE} iconType={ICON_TYPE} onClick={filterFn} />
+        <Component aria-label={TITLE} iconType={ICON_TYPE} onClick={filterFn}>
+          {TITLE}
+        </Component>
       </div>
     </EuiToolTip>
   );

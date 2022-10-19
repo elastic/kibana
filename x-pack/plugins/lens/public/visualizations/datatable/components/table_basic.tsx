@@ -52,7 +52,8 @@ import {
   createGridSortingConfig,
   createTransposeColumnFilterHandler,
 } from './table_actions';
-import { getOriginalId, getFinalSummaryConfiguration } from '../../../../common/expressions';
+import { getFinalSummaryConfiguration } from '../../../../common/expressions/datatable/summary';
+import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -309,7 +310,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         alignments,
         headerRowHeight,
         headerRowLines,
-        dataGridRef.current?.closeCellPopover
+        dataGridRef.current?.closeCellPopover,
+        props.columnFilterable
       ),
     [
       bucketColumns,
@@ -325,6 +327,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       alignments,
       headerRowHeight,
       headerRowLines,
+      props.columnFilterable,
     ]
   );
 

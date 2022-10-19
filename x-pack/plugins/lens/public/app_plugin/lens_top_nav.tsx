@@ -288,7 +288,8 @@ export const LensTopNavMenu = ({
     ]
   );
 
-  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
+  const canEditDataView =
+    Boolean(dataViewEditor?.userPermissions.editDataView()) || !currentIndexPattern?.isPersisted();
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
 
@@ -643,7 +644,7 @@ export const LensTopNavMenu = ({
             setIsOnTextBasedMode(true);
             dispatch(
               switchAndCleanDatasource({
-                newDatasourceId: 'textBasedLanguages',
+                newDatasourceId: 'textBased',
                 visualizationId: visualization?.activeId,
                 currentIndexPatternId: currentIndexPattern?.id,
               })
@@ -756,39 +757,32 @@ export const LensTopNavMenu = ({
     [editField, canEditDataView]
   );
 
-  const createNewDataView = useMemo(
-    () =>
-      canEditDataView
-        ? () => {
-            closeDataViewEditor.current = dataViewEditor.openEditor({
-              onSave: async (dataView) => {
-                if (dataView.id) {
-                  if (isOnTextBasedMode) {
-                    dispatch(
-                      switchAndCleanDatasource({
-                        newDatasourceId: 'indexpattern',
-                        visualizationId: visualization?.activeId,
-                        currentIndexPatternId: dataView?.id,
-                      })
-                    );
-                  }
-                  dispatchChangeIndexPattern(dataView);
-                  setCurrentIndexPattern(dataView);
-                }
-              },
-              allowAdHocDataView: true,
-            });
+  const createNewDataView = useCallback(() => {
+    closeDataViewEditor.current = dataViewEditor.openEditor({
+      onSave: async (dataView) => {
+        if (dataView.id) {
+          if (isOnTextBasedMode) {
+            dispatch(
+              switchAndCleanDatasource({
+                newDatasourceId: 'formBased',
+                visualizationId: visualization?.activeId,
+                currentIndexPatternId: dataView?.id,
+              })
+            );
           }
-        : undefined,
-    [
-      canEditDataView,
-      dataViewEditor,
-      dispatch,
-      dispatchChangeIndexPattern,
-      isOnTextBasedMode,
-      visualization?.activeId,
-    ]
-  );
+          dispatchChangeIndexPattern(dataView);
+          setCurrentIndexPattern(dataView);
+        }
+      },
+      allowAdHocDataView: true,
+    });
+  }, [
+    dataViewEditor,
+    dispatch,
+    dispatchChangeIndexPattern,
+    isOnTextBasedMode,
+    visualization?.activeId,
+  ]);
 
   const onCreateDefaultAdHocDataView = useCallback(
     async (pattern: string) => {
@@ -801,7 +795,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'indexpattern',
+            newDatasourceId: 'formBased',
             visualizationId: visualization?.activeId,
             currentIndexPatternId: dataView?.id,
           })
@@ -844,7 +838,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'indexpattern',
+            newDatasourceId: 'formBased',
             visualizationId: visualization?.activeId,
             currentIndexPatternId: newIndexPatternId,
           })
@@ -933,7 +927,6 @@ export const LensTopNavMenu = ({
       }
       textBasedLanguageModeErrors={textBasedLanguageModeErrors}
       onTextBasedSavedAndExit={onTextBasedSavedAndExit}
-      showQueryBar={true}
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"
       screenTitle={'lens'}
