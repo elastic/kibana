@@ -17,7 +17,7 @@ import {
   useEuiBackgroundColor,
   useEuiPaddingSize,
 } from '@elastic/eui';
-import type { Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { css, cx } from '@emotion/css';
 import type { Path } from './filters_builder_types';
 import { ConditionTypes, getConditionalOperationType } from '../utils';
@@ -136,7 +136,7 @@ export const FilterGroup = ({
     <EuiPanel
       color={color}
       hasShadow={false}
-      paddingSize={renderedLevel > 0 ? 'none' : 'xs'}
+      paddingSize="none"
       hasBorder
       className={cx({
         'filter-builder__panel': true,

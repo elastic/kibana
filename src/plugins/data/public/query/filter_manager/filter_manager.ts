@@ -91,7 +91,7 @@ export class FilterManager implements PersistableStateService<Filter[]> {
     this.filters = newFilters;
     if (filtersUpdated) {
       this.updated$.next();
-      if (updatedOnlyDisabledFilters) {
+      if (!updatedOnlyDisabledFilters) {
         this.fetch$.next();
       }
     }
