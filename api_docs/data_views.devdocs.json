@@ -4146,7 +4146,7 @@
               "\nGet default index pattern"
             ],
             "signature": [
-              "() => Promise<",
+              "(displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4159,7 +4159,25 @@
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewsService.getDefault.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -4427,7 +4445,7 @@
               "\nRefresh field list for a given index pattern."
             ],
             "signature": [
-              "(indexPattern: ",
+              "(dataView: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4435,7 +4453,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ") => Promise<void>"
+              ", displayErrors?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -4446,7 +4464,7 @@
                 "id": "def-public.DataViewsService.refreshFields.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "indexPattern",
+                "label": "dataView",
                 "description": [],
                 "signature": [
                   {
@@ -4456,6 +4474,23 @@
                     "section": "def-common.DataView",
                     "text": "DataView"
                   }
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewsService.refreshFields.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -4629,7 +4664,7 @@
               "\nGet an index pattern by id, cache optimized."
             ],
             "signature": [
-              "(id: string) => Promise<",
+              "(id: string, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4657,6 +4692,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewsService.get.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -4679,7 +4731,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", skipFetchFields?: boolean) => Promise<",
+              ", skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4730,6 +4782,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewsService.create.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": [
@@ -4754,7 +4823,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", override?: boolean, skipFetchFields?: boolean) => Promise<",
+              ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4824,6 +4893,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewsService.createAndSave.$4",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -4846,7 +4932,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean) => Promise<",
+              ", override?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4899,6 +4985,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewsService.createSavedObject.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -4921,7 +5024,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error | ",
+              ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void | Error | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4978,6 +5081,23 @@
                 "tags": [],
                 "label": "ignoreErrors",
                 "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.DataViewsService.updateSavedObject.$4",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
                 "signature": [
                   "boolean"
                 ],
@@ -11089,7 +11209,7 @@
               "\nGet default index pattern"
             ],
             "signature": [
-              "() => Promise<",
+              "(displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -11102,7 +11222,25 @@
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.DataViewsService.getDefault.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -11370,7 +11508,7 @@
               "\nRefresh field list for a given index pattern."
             ],
             "signature": [
-              "(indexPattern: ",
+              "(dataView: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -11378,7 +11516,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ") => Promise<void>"
+              ", displayErrors?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -11389,7 +11527,7 @@
                 "id": "def-server.DataViewsService.refreshFields.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "indexPattern",
+                "label": "dataView",
                 "description": [],
                 "signature": [
                   {
@@ -11399,6 +11537,23 @@
                     "section": "def-common.DataView",
                     "text": "DataView"
                   }
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.DataViewsService.refreshFields.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -11572,7 +11727,7 @@
               "\nGet an index pattern by id, cache optimized."
             ],
             "signature": [
-              "(id: string) => Promise<",
+              "(id: string, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -11600,6 +11755,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.DataViewsService.get.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -11622,7 +11794,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", skipFetchFields?: boolean) => Promise<",
+              ", skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -11673,6 +11845,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.DataViewsService.create.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": [
@@ -11697,7 +11886,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", override?: boolean, skipFetchFields?: boolean) => Promise<",
+              ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -11767,6 +11956,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.DataViewsService.createAndSave.$4",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -11789,7 +11995,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean) => Promise<",
+              ", override?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -11842,6 +12048,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.DataViewsService.createSavedObject.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -11864,7 +12087,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error | ",
+              ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void | Error | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -11921,6 +12144,23 @@
                 "tags": [],
                 "label": "ignoreErrors",
                 "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.DataViewsService.updateSavedObject.$4",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
                 "signature": [
                   "boolean"
                 ],
@@ -18649,7 +18889,7 @@
               "\nGet default index pattern"
             ],
             "signature": [
-              "() => Promise<",
+              "(displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -18662,7 +18902,25 @@
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsService.getDefault.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -18930,7 +19188,7 @@
               "\nRefresh field list for a given index pattern."
             ],
             "signature": [
-              "(indexPattern: ",
+              "(dataView: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -18938,7 +19196,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ") => Promise<void>"
+              ", displayErrors?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -18949,7 +19207,7 @@
                 "id": "def-common.DataViewsService.refreshFields.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "indexPattern",
+                "label": "dataView",
                 "description": [],
                 "signature": [
                   {
@@ -18959,6 +19217,23 @@
                     "section": "def-common.DataView",
                     "text": "DataView"
                   }
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsService.refreshFields.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -19132,7 +19407,7 @@
               "\nGet an index pattern by id, cache optimized."
             ],
             "signature": [
-              "(id: string) => Promise<",
+              "(id: string, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -19160,6 +19435,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsService.get.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -19182,7 +19474,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", skipFetchFields?: boolean) => Promise<",
+              ", skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -19233,6 +19525,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsService.create.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": [
@@ -19257,7 +19566,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", override?: boolean, skipFetchFields?: boolean) => Promise<",
+              ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -19327,6 +19636,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsService.createAndSave.$4",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -19349,7 +19675,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean) => Promise<",
+              ", override?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -19402,6 +19728,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsService.createSavedObject.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -19424,7 +19767,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error | ",
+              ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void | Error | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -19481,6 +19824,23 @@
                 "tags": [],
                 "label": "ignoreErrors",
                 "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsService.updateSavedObject.$4",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
                 "signature": [
                   "boolean"
                 ],
@@ -20671,7 +21031,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", skipFetchFields?: boolean | undefined) => Promise<",
+              ", skipFetchFields?: boolean | undefined, displayErrors?: boolean | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -20724,6 +21084,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsServicePublicMethods.create.$3",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -20746,7 +21123,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", override?: boolean | undefined, skipFetchFields?: boolean | undefined) => Promise<",
+              ", override?: boolean | undefined, skipFetchFields?: boolean | undefined, displayErrors?: boolean | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -20816,6 +21193,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsServicePublicMethods.createAndSave.$4",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -20838,7 +21232,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean | undefined) => Promise<",
+              ", override?: boolean | undefined, displayErrors?: boolean | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -20881,6 +21275,23 @@
                 "label": "override",
                 "description": [
                   "- If true, save over existing data view"
+                ],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsServicePublicMethods.createSavedObject.$3",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
                 ],
                 "signature": [
                   "boolean | undefined"
@@ -21092,7 +21503,7 @@
               "\nGet data view by id."
             ],
             "signature": [
-              "(id: string) => Promise<",
+              "(id: string, displayErrors?: boolean | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -21122,6 +21533,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsServicePublicMethods.get.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -21182,7 +21610,7 @@
               "\nGet default data view as data view instance."
             ],
             "signature": [
-              "() => Promise<",
+              "(displayErrors?: boolean | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -21195,7 +21623,25 @@
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsServicePublicMethods.getDefault.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           },
           {
@@ -21560,7 +22006,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ") => Promise<void>"
+              ", displayErrors?: boolean | undefined) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -21586,6 +22032,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsServicePublicMethods.refreshFields.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -21595,6 +22056,7 @@
             "id": "def-common.DataViewsServicePublicMethods.savedObjectToSpec",
             "type": "Function",
             "tags": [
+              "params",
               "params"
             ],
             "label": "savedObjectToSpec",
@@ -21725,7 +22187,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", saveAttempts?: number | undefined, ignoreErrors?: boolean | undefined) => Promise<void | Error | ",
+              ", saveAttempts?: number | undefined, ignoreErrors?: boolean | undefined, displayErrors?: boolean | undefined) => Promise<void | Error | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -21786,6 +22248,23 @@
                 "tags": [],
                 "label": "ignoreErrors",
                 "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewsServicePublicMethods.updateSavedObject.$4",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
                 "signature": [
                   "boolean | undefined"
                 ],
@@ -23814,7 +24293,7 @@
           "\nData views service interface"
         ],
         "signature": [
-          "{ get: (id: string) => Promise<",
+          "{ get: (id: string, displayErrors?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23830,7 +24309,7 @@
             "section": "def-common.DataViewSpec",
             "text": "DataViewSpec"
           },
-          ", skipFetchFields?: boolean) => Promise<",
+          ", skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23864,7 +24343,7 @@
             "section": "def-common.DataViewSavedObjectAttrs",
             "text": "DataViewSavedObjectAttrs"
           },
-          ">[] | null | undefined>; getDefault: () => Promise<",
+          ">[] | null | undefined>; getDefault: (displayErrors?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23920,7 +24399,7 @@
             "section": "def-common.FieldSpec",
             "text": "FieldSpec"
           },
-          "[]>; refreshFields: (indexPattern: ",
+          "[]>; refreshFields: (dataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23928,7 +24407,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ") => Promise<void>; fieldArrayToMap: (fields: ",
+          ", displayErrors?: boolean) => Promise<void>; fieldArrayToMap: (fields: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23978,7 +24457,7 @@
             "section": "def-common.DataViewSpec",
             "text": "DataViewSpec"
           },
-          ", override?: boolean, skipFetchFields?: boolean) => Promise<",
+          ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23994,7 +24473,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ", override?: boolean) => Promise<",
+          ", override?: boolean, displayErrors?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -24010,7 +24489,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error | ",
+          ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void | Error | ",
           {
             "pluginId": "dataViews",
             "scope": "common",
