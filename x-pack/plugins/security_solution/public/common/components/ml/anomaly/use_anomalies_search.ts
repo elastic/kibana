@@ -110,7 +110,7 @@ export const useNotableAnomaliesSearch = ({
 
         if (isSubscribed) {
           setLoading(false);
-          const buckets = response.aggregations.number_of_anomalies.buckets;
+          const buckets = response.aggregations?.number_of_anomalies.buckets ?? [];
           setData(formatResultData(buckets, notableAnomaliesJobs));
         }
       } catch (error) {

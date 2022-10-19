@@ -129,6 +129,22 @@ describe('useNotableAnomaliesSearch', () => {
     });
   });
 
+  it('does not throw error when aggregations is undefined', async () => {
+    await act(async () => {
+      mockNotableAnomaliesSearch.mockResolvedValue({});
+      const { waitForNextUpdate } = renderHook(
+        () => useNotableAnomaliesSearch({ skip: false, from, to }),
+        {
+          wrapper: TestProviders,
+        }
+      );
+      await waitForNextUpdate();
+      await waitForNextUpdate();
+
+      expect(mockAddToastError).not.toBeCalled();
+    });
+  });
+
   it('returns uninstalled jobs', async () => {
     mockuseInstalledSecurityJobs.mockReturnValue({
       loading: false,
