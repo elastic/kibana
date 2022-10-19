@@ -15,3 +15,5 @@ export {
   FilePicker,
   Image,
 } from '@kbn/files-plugin/public';
+
+export type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
