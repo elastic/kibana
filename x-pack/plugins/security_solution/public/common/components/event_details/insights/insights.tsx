@@ -27,7 +27,7 @@ interface Props {
   browserFields: BrowserFields;
   eventId: string;
   data: TimelineEventsDetailsItem[];
-  timelineId: string;
+  scopeId: string;
   isReadOnly?: boolean;
 }
 
@@ -35,7 +35,7 @@ interface Props {
  * Displays several key insights for the associated alert.
  */
 export const Insights = React.memo<Props>(
-  ({ browserFields, eventId, data, isReadOnly, timelineId }) => {
+  ({ browserFields, eventId, data, isReadOnly, scopeId }) => {
     const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
       'insightsRelatedAlertsByProcessAncestry'
     );
@@ -113,7 +113,7 @@ export const Insights = React.memo<Props>(
                 browserFields={browserFields}
                 data={sourceEventField}
                 eventId={eventId}
-                timelineId={timelineId}
+                scopeId={scopeId}
               />
             </EuiFlexItem>
           )}
@@ -124,7 +124,7 @@ export const Insights = React.memo<Props>(
                 browserFields={browserFields}
                 data={processSessionField}
                 eventId={eventId}
-                timelineId={timelineId}
+                scopeId={scopeId}
               />
             </EuiFlexItem>
           )}
@@ -137,7 +137,7 @@ export const Insights = React.memo<Props>(
                   originalDocumentId={originalDocumentId}
                   index={originalDocumentIndex}
                   eventId={eventId}
-                  timelineId={timelineId}
+                  scopeId={scopeId}
                 />
               </EuiFlexItem>
             ) : (
