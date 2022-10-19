@@ -13,9 +13,6 @@ import {
 import type {
   OpsgenieActionConfig,
   OpsgenieActionSecrets,
-  OpsgenieCreateAlertSubActionParams,
-  OpsgenieCreateAlertParams,
-  OpsgenieCloseAlertSubActionParams,
   OpsgenieActionParams,
 } from '../../../../server/connector_types/stack';
 
@@ -24,15 +21,7 @@ export type OpsgenieActionConnector = UserConfiguredActionConnector<
   OpsgenieActionSecrets
 >;
 
-interface CreateAlertSubActionParamsValidation extends OpsgenieCreateAlertSubActionParams {
-  subActionParams: OpsgenieCreateAlertParams & {
-    advancedEditor: string[];
-  };
-}
-
-export type ValidationParams = RecursivePartial<
-  CreateAlertSubActionParamsValidation | OpsgenieCloseAlertSubActionParams
->;
+export type ValidationParams = RecursivePartial<OpsgenieActionParams>;
 
 type EditActionParameters = Parameters<ActionParamsProps<OpsgenieActionParams>['editAction']>;
 

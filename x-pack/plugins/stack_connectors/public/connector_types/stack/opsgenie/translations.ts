@@ -70,6 +70,13 @@ export const MESSAGE_IS_REQUIRED = i18n.translate(
   }
 );
 
+export const MESSAGE_FIELD_IS_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.messageFieldRequired',
+  {
+    defaultMessage: '"message" field must be populated with a value other than just whitespace',
+  }
+);
+
 export const ALIAS_FIELD_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.aliasLabel',
   {
@@ -91,30 +98,31 @@ export const ALIAS_IS_REQUIRED = i18n.translate(
   }
 );
 
-export const ADVANCED_JSON_LABEL = i18n.translate(
+export const USE_JSON_EDITOR_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.jsonEditorLabel',
   {
-    defaultMessage: 'Additional fields',
+    defaultMessage: 'Use JSON editor',
   }
 );
 
-export const ADVANCED_JSON_ARIA = i18n.translate(
+export const JSON_EDITOR_ARIA = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.jsonEditorAriaLabel',
   {
-    defaultMessage: 'Additional fields JSON editor',
+    defaultMessage: 'JSON editor',
   }
 );
 
-export const ADVANCED_EDITOR_FORBIDDEN_KEYS = (keys: string[]) =>
-  i18n.translate('xpack.stackConnectors.components.opsgenie.jsonEditorError', {
-    defaultMessage: 'Forbidden {numKeys, plural, =1 {key} other {keys}}: {forbiddenKeys}',
-    values: { numKeys: keys.length, forbiddenKeys: keys.join(', ') },
-  });
-
-export const ADVANCED_OPTIONS = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.advancedOptions',
+export const MORE_OPTIONS = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.moreOptions',
   {
-    defaultMessage: 'Advanced Options',
+    defaultMessage: 'More options',
+  }
+);
+
+export const HIDE_OPTIONS = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.hideOptions',
+  {
+    defaultMessage: 'Hide options',
   }
 );
 

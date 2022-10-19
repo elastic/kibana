@@ -4,10 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React, { useCallback, useState } from 'react';
 
-export enum OpsgenieSubActions {
-  CreateAlert = 'createAlert',
-  CloseAlert = 'closeAlert',
-}
+const MoreOptionsComponent: React.FC<{}> = ({}) => {};
 
-export const OpsgenieConnectorTypeId = '.opsgenie';
+MoreOptionsComponent.displayName = 'MoreOptions';

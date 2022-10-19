@@ -8,8 +8,8 @@
 import crypto from 'crypto';
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { AxiosError } from 'axios';
-import { OpsgenieSubActions } from '../../../../common';
-import { CloseAlertParamsSchema, CreateAlertParamsSchema, Response } from './schema';
+import { OpsgenieCreateAlertParamsSchema, OpsgenieSubActions } from '../../../../common';
+import { CloseAlertParamsSchema, Response } from './schema';
 import { CloseAlertParams, Config, CreateAlertParams, Secrets } from './types';
 import * as i18n from './translations';
 
@@ -27,7 +27,7 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
     this.registerSubAction({
       method: this.createAlert.name,
       name: OpsgenieSubActions.CreateAlert,
-      schema: CreateAlertParamsSchema,
+      schema: OpsgenieCreateAlertParamsSchema,
     });
 
     this.registerSubAction({

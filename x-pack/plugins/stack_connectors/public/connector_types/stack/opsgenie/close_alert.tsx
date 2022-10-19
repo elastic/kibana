@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   ActionParamsProps,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  EuiAccordion,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
   RecursivePartial,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type {
   OpsgenieActionParams,
@@ -49,7 +48,11 @@ const CloseAlertComponent: React.FC<CloseAlertProps> = ({
     errors['subActionParams.alias'].length > 0 &&
     subActionParams?.alias !== undefined;
 
-  const accordionId = useGeneratedHtmlId({ prefix: `closeAlertEditor-${index}` });
+  const [showingMoreOptions, setShowingMoreOptions] = useState<boolean>(false);
+  const toggleShowingMoreOptions = useCallback(
+    () => setShowingMoreOptions((previousState) => !previousState),
+    []
+  );
 
   return (
     <>
@@ -78,43 +81,52 @@ const CloseAlertComponent: React.FC<CloseAlertProps> = ({
         label={i18n.NOTE_FIELD_LABEL}
       />
 
-      <EuiSpacer size={'m'} />
-      <EuiAccordion
-        id={accordionId}
-        buttonContent={i18n.ADVANCED_OPTIONS}
-        paddingSize={'none'}
-        arrowDisplay={'right'}
+      {showingMoreOptions ? (
+        <>
+          <EuiSpacer size={'m'} />
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                data-test-subj="opsgenie-source-row"
+                fullWidth
+                label={i18n.SOURCE_FIELD_LABEL}
+              >
+                <TextFieldWithMessageVariables
+                  index={index}
+                  editAction={editOptionalSubAction}
+                  messageVariables={messageVariables}
+                  paramsProperty={'source'}
+                  inputTargetValue={subActionParams?.source}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormRow
+                data-test-subj="opsgenie-user-row"
+                fullWidth
+                label={i18n.USER_FIELD_LABEL}
+              >
+                <TextFieldWithMessageVariables
+                  index={index}
+                  editAction={editOptionalSubAction}
+                  messageVariables={messageVariables}
+                  paramsProperty={'user'}
+                  inputTargetValue={subActionParams?.user}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      ) : null}
+      <EuiButtonEmpty
+        color="primary"
+        iconSide="right"
+        iconType={showingMoreOptions ? 'arrowUp' : 'arrowDown'}
+        flush={'left'}
+        onClick={toggleShowingMoreOptions}
       >
-        <EuiSpacer size={'m'} />
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiFormRow
-              data-test-subj="opsgenie-source-row"
-              fullWidth
-              label={i18n.SOURCE_FIELD_LABEL}
-            >
-              <TextFieldWithMessageVariables
-                index={index}
-                editAction={editOptionalSubAction}
-                messageVariables={messageVariables}
-                paramsProperty={'source'}
-                inputTargetValue={subActionParams?.source}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow data-test-subj="opsgenie-user-row" fullWidth label={i18n.USER_FIELD_LABEL}>
-              <TextFieldWithMessageVariables
-                index={index}
-                editAction={editOptionalSubAction}
-                messageVariables={messageVariables}
-                paramsProperty={'user'}
-                inputTargetValue={subActionParams?.user}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiAccordion>
+        {showingMoreOptions ? i18n.HIDE_OPTIONS : i18n.MORE_OPTIONS}
+      </EuiButtonEmpty>
     </>
   );
 };

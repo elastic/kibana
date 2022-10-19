@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 
@@ -14,19 +14,15 @@ import { EditActionCallback } from './types';
 
 interface TagsProps {
   onChange: EditActionCallback;
+  values: string[];
 }
 
-const TagsComponent: React.FC<TagsProps> = ({ onChange }) => {
+const TagsComponent: React.FC<TagsProps> = ({ onChange, values }) => {
   const [selectedOptions, setSelected] = useState<EuiComboBoxOptionOption[]>([]);
 
   const onCreateOption = useCallback(
     (tagValue: string) => {
-      const newOption = {
-        label: tagValue,
-        key: tagValue,
-      };
-
-      const newTags = [...selectedOptions, newOption];
+      const newTags = [...selectedOptions, getTagAsOption(tagValue)];
       setSelected(newTags);
       onChange(
         'tags',
@@ -46,6 +42,10 @@ const TagsComponent: React.FC<TagsProps> = ({ onChange }) => {
     },
     [onChange]
   );
+
+  useEffect(() => {
+    setSelected(values.map((value) => getTagAsOption(value)));
+  }, [values]);
 
   return (
     <EuiFormRow
@@ -69,3 +69,5 @@ const TagsComponent: React.FC<TagsProps> = ({ onChange }) => {
 TagsComponent.displayName = 'Tags';
 
 export const Tags = React.memo(TagsComponent);
+
+const getTagAsOption = (value: string) => ({ label: value, key: value });

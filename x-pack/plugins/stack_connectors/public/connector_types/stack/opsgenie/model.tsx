@@ -48,7 +48,6 @@ export const getConnectorType = (): ConnectorTypeModel<
       const errors = {
         'subActionParams.message': new Array<string>(),
         'subActionParams.alias': new Array<string>(),
-        'subActionParams.advancedEditor': new Array<string>(),
       };
 
       const validationResult = {
@@ -58,12 +57,6 @@ export const getConnectorType = (): ConnectorTypeModel<
       if (actionParams.subAction === OpsgenieSubActions.CreateAlert) {
         if (!actionParams?.subActionParams?.message?.length) {
           errors['subActionParams.message'].push(translations.MESSAGE_IS_REQUIRED);
-        }
-
-        if (actionParams.subActionParams?.advancedEditor?.length) {
-          errors['subActionParams.advancedEditor'].push(
-            translations.ADVANCED_EDITOR_FORBIDDEN_KEYS(actionParams.subActionParams.advancedEditor)
-          );
         }
       }
 
