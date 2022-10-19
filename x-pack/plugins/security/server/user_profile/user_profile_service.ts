@@ -434,7 +434,6 @@ export class UserProfileService {
       const body = await clusterClient.asInternalUser.security.suggestUserProfiles({
         name,
         size: numberOfResultsToRequest,
-        // @ts-expect-error: This will complain until elasticsearch-js types have been updated to ES 8.5 API
         hint,
         // If fetching data turns out to be a performance bottleneck, we can try to fetch data
         // only for the profiles that pass privileges check as a separate bulkGet request.
