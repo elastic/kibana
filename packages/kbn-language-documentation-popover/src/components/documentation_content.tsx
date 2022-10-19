@@ -23,7 +23,7 @@ import {
 
 import './documentation.scss';
 
-export interface DocumentationSections {
+export interface LanguageDocumentationSections {
   groups: Array<{
     label: string;
     description?: string;
@@ -34,10 +34,10 @@ export interface DocumentationSections {
 
 interface DocumentationProps {
   language: string;
-  sections?: DocumentationSections;
+  sections?: LanguageDocumentationSections;
 }
 
-function Documentation({ language, sections }: DocumentationProps) {
+function DocumentationContent({ language, sections }: DocumentationProps) {
   const [selectedSection, setSelectedSection] = useState<string | undefined>();
   const scrollTargets = useRef<Record<string, HTMLElement>>({});
 
@@ -69,8 +69,12 @@ function Documentation({ language, sections }: DocumentationProps) {
 
   return (
     <>
-      <EuiPopoverTitle className="documentation__docsHeader" paddingSize="m">
-        {i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.header', {
+      <EuiPopoverTitle
+        className="documentation__docsHeader"
+        paddingSize="m"
+        data-test-subj="language-documentation-title"
+      >
+        {i18n.translate('languageDocumentationPopover.header', {
           defaultMessage: '{language} reference',
           values: { language: language.toUpperCase() },
         })}
@@ -94,19 +98,17 @@ function Documentation({ language, sections }: DocumentationProps) {
                 onChange={(e) => {
                   setSearchText(e.target.value);
                 }}
-                placeholder={i18n.translate(
-                  'unifiedSearch.query.textBasedLanguagesEditor.documentation.searchPlaceholder',
-                  {
-                    defaultMessage: 'Search',
-                  }
-                )}
+                data-test-subj="language-documentation-navigation-search"
+                placeholder={i18n.translate('languageDocumentationPopover.searchPlaceholder', {
+                  defaultMessage: 'Search',
+                })}
               />
             </EuiFlexItem>
             <EuiFlexItem className="documentation__docsNav">
               {filteredGroups?.map((helpGroup, index) => {
                 return (
                   <nav className="documentation__docsNavGroup" key={helpGroup.label}>
-                    <EuiTitle size="xxs">
+                    <EuiTitle size="xxs" data-test-subj="language-documentation-navigation-title">
                       <h6>
                         <EuiLink
                           className="documentation__docsNavGroupLink"
@@ -200,4 +202,4 @@ function Documentation({ language, sections }: DocumentationProps) {
   );
 }
 
-export const MemoizedDocumentation = React.memo(Documentation);
+export const LanguageDocumentationPopoverContent = React.memo(DocumentationContent);
