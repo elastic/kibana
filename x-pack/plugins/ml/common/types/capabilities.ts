@@ -16,11 +16,9 @@ import { ML_ALERT_TYPES } from '../constants/alerts';
 
 export const apmUserMlCapabilities = {
   canGetJobs: false,
-  canAccessML: false,
 };
 
 export const userMlCapabilities = {
-  canAccessML: false,
   // Anomaly Detection
   canGetJobs: false,
   canGetDatafeeds: false,
@@ -39,6 +37,8 @@ export const userMlCapabilities = {
   // Trained models
   canGetTrainedModels: false,
   canTestTrainedModels: false,
+  canGetFieldInfo: false,
+  canGetMlInfo: false,
 };
 
 export const adminMlCapabilities = {
@@ -83,9 +83,11 @@ export type AdminMlCapabilities = typeof adminMlCapabilities;
 export type MlCapabilities = UserMlCapabilities & AdminMlCapabilities;
 export type MlCapabilitiesKey = keyof MlCapabilities;
 
-export const basicLicenseMlCapabilities = ['canAccessML', 'canFindFileStructure'] as Array<
-  keyof MlCapabilities
->;
+export const basicLicenseMlCapabilities = [
+  'canFindFileStructure',
+  'canGetFieldInfo',
+  'canGetMlInfo',
+] as Array<keyof MlCapabilities>;
 
 export function getDefaultCapabilities(): MlCapabilities {
   return {

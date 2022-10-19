@@ -19,7 +19,7 @@ const DEFAULT_VALUES = {
   canUseMlInferencePipeline: true,
   capabilities: {
     ml: {
-      canAccessML: true,
+      canGetTrainedModels: true,
     },
   },
   hasIndexIngestionPipeline: true,
