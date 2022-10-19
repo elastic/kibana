@@ -21,6 +21,7 @@ const createAnalyticsServicePreboot = (): jest.Mocked<AnalyticsServicePreboot> =
   return {
     optIn: jest.fn(),
     reportEvent: jest.fn(),
+    isEventTypeRegistered: jest.fn(),
     registerEventType: jest.fn(),
     registerContextProvider: jest.fn(),
     removeContextProvider: jest.fn(),
@@ -33,6 +34,7 @@ const createAnalyticsServiceSetup = (): jest.Mocked<AnalyticsServiceSetup> => {
   return {
     optIn: jest.fn(),
     reportEvent: jest.fn(),
+    isEventTypeRegistered: jest.fn(),
     registerEventType: jest.fn(),
     registerContextProvider: jest.fn(),
     removeContextProvider: jest.fn(),

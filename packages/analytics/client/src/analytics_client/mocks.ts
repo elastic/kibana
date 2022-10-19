@@ -13,6 +13,7 @@ function createMockedAnalyticsClient(): jest.Mocked<IAnalyticsClient> {
   return {
     optIn: jest.fn(),
     reportEvent: jest.fn(),
+    isEventTypeRegistered: jest.fn(),
     registerEventType: jest.fn(),
     registerContextProvider: jest.fn(),
     removeContextProvider: jest.fn(),

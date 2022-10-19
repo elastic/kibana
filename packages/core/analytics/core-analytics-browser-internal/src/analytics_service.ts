@@ -54,6 +54,7 @@ export class AnalyticsService {
       optIn: this.analyticsClient.optIn,
       registerContextProvider: this.analyticsClient.registerContextProvider,
       removeContextProvider: this.analyticsClient.removeContextProvider,
+      isEventTypeRegistered: this.analyticsClient.isEventTypeRegistered,
       registerEventType: this.analyticsClient.registerEventType,
       registerShipper: this.analyticsClient.registerShipper,
       reportEvent: this.analyticsClient.reportEvent,
