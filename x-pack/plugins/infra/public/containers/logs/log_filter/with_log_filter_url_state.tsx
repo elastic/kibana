@@ -23,7 +23,6 @@ export const WithLogFilterUrlState: React.FC = () => {
 
   return (
     <UrlStateContainer
-      populateWithInitialState={true}
       urlState={queryStringQuery}
       urlStateKey="logFilter"
       mapToUrlState={mapToFilterQuery}
