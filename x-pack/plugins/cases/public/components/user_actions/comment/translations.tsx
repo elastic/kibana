@@ -22,13 +22,6 @@ export const DEFAULT_EVENT_ATTACHMENT_TITLE = i18n.translate(
   }
 );
 
-export const DELETE_ATTACHMENT = i18n.translate(
-  'xpack.cases.userActions.defaultEventAttachmentTitle',
-  {
-    defaultMessage: 'Delete attachment',
-  }
-);
-
 export const ONE_ALERT = i18n.translate('xpack.cases.caseView.alerts.oneAlert', {
   defaultMessage: 'one alert',
 });

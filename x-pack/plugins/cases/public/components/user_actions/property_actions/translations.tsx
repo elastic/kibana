@@ -8,15 +8,12 @@
 import { i18n } from '@kbn/i18n';
 export * from '../translations';
 
-export const DELETE_ATTACHMENT = i18n.translate(
-  'xpack.cases.userActions.defaultEventAttachmentTitle',
-  {
-    defaultMessage: 'Delete attachment',
-  }
-);
+export const DELETE_ATTACHMENT = i18n.translate('xpack.cases.userActions.deleteAttachment', {
+  defaultMessage: 'Delete attachment',
+});
 
 export const REMOVE_ALERTS = (totalAlerts: number): string =>
-  i18n.translate('xpack.cases.caseView.alerts.remove', {
+  i18n.translate('xpack.cases.caseView.alerts.removeAlerts', {
     values: { totalAlerts },
     defaultMessage: 'Remove {totalAlerts, plural, =1 {alert} other {alerts}}',
   });
