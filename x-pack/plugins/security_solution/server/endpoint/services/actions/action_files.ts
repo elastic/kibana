@@ -47,7 +47,8 @@ export const getFileDownloadStream = async (
     if (error instanceof errors.ResponseError) {
       const statusCode = error.statusCode;
 
-      // 404 will be returned if file id is not found -or- index does not exist yet
+      // 404 will be returned if file id is not found -or- index does not exist yet.
+      // Using the `NotFoundError` error class will result in teh API returning a 404
       if (statusCode === 404) {
         throw new NotFoundError(`File with id [${fileId}] not found`, error);
       }
