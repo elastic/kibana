@@ -77,7 +77,7 @@ export class FleetUsageSender {
    */
   private registerTelemetryEventType(core: CoreSetup): void {
     core.analytics.registerEventType({
-      eventType: 'Fleet Usage',
+      eventType: 'fleet_usage',
       schema: {
         agents_enabled: { type: 'boolean', _meta: { description: 'agents enabled' } },
         agents: {
