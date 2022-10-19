@@ -94,6 +94,7 @@ describe('convertToLens', () => {
     const result = await convertToLens(model);
     expect(result).toBeNull();
     expect(mockIsValidMetrics).toBeCalledTimes(1);
+    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
   });
 
   test('should return null for invalid or unsupported metrics', async () => {
@@ -101,6 +102,7 @@ describe('convertToLens', () => {
     const result = await convertToLens(model);
     expect(result).toBeNull();
     expect(mockGetMetricsColumns).toBeCalledTimes(1);
+    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
   });
 
   test('should return null for invalid or unsupported buckets', async () => {
@@ -108,6 +110,7 @@ describe('convertToLens', () => {
     const result = await convertToLens(model);
     expect(result).toBeNull();
     expect(mockGetBucketsColumns).toBeCalledTimes(1);
+    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
   });
 
   test('should return null if metric is staticValue', async () => {
@@ -122,6 +125,7 @@ describe('convertToLens', () => {
     });
     expect(result).toBeNull();
     expect(mockGetDataSourceInfo).toBeCalledTimes(0);
+    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
   });
 
   test('should return null if only series agg is specified', async () => {
@@ -137,6 +141,7 @@ describe('convertToLens', () => {
       ],
     });
     expect(result).toBeNull();
+    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
   });
 
   test('should return null configuration is not valid', async () => {
@@ -146,6 +151,7 @@ describe('convertToLens', () => {
 
     const result = await convertToLens(model);
     expect(result).toBeNull();
+    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
   });
 
   test('should return state', async () => {
@@ -169,5 +175,32 @@ describe('convertToLens', () => {
     );
     expect(result).toBeDefined();
     expect(result?.type).toBe('lnsMetric');
+    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(0);
+  });
+
+  test('should drop adhoc dataviews if action is required', async () => {
+    mockGetMetricsColumns.mockReturnValue([metricColumn]);
+    mockGetSeriesAgg.mockReturnValue({ metrics: [metric] });
+    mockGetConfigurationForGauge.mockReturnValue({});
+
+    const result = await convertToLens(
+      createPanel({
+        series: [
+          createSeries({
+            metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+            hidden: false,
+          }),
+          createSeries({
+            metrics: [{ id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' }],
+            hidden: false,
+          }),
+        ],
+      }),
+      undefined,
+      true
+    );
+    expect(result).toBeDefined();
+    expect(result?.type).toBe('lnsMetric');
+    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
   });
 });
