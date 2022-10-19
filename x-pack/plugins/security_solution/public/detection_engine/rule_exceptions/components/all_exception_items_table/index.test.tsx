@@ -43,7 +43,7 @@ const sampleExceptionItem = {
   ],
   id: '863f3cb0-1f1c-11ed-8a48-9982ed15e50b',
   item_id: '74eacd42-7617-4d32-9363-3c074a8892fe',
-  list_id: '9633e7f2-b92c-4a51-ad56-3e69e5e5f517',
+  list_id: 'list_id',
   name: 'Index - exception list item',
   namespace_type: 'single',
   os_types: [],
@@ -78,7 +78,47 @@ describe('ExceptionsViewer', () => {
       },
     });
 
-    (useFindExceptionListReferences as jest.Mock).mockReturnValue([false, null]);
+    (useFindExceptionListReferences as jest.Mock).mockReturnValue([
+      false,
+      false,
+      {
+        list_id: {
+          _version: 'WzEzNjMzLDFd',
+          created_at: '2022-09-26T19:41:43.338Z',
+          created_by: 'elastic',
+          description:
+            'Exception list containing exceptions for rule with id: 178c2e10-3dd3-11ed-81d7-37f31b5b97f6',
+          id: '3fa2c8a0-3dd3-11ed-81d7-37f31b5b97f6',
+          immutable: false,
+          list_id: 'list_id',
+          name: 'Exceptions for rule - My really good rule',
+          namespace_type: 'single',
+          os_types: [],
+          tags: ['default_rule_exception_list'],
+          tie_breaker_id: '83395c3e-76a0-466e-ba58-2f5a4b8b5444',
+          type: 'rule_default',
+          updated_at: '2022-09-26T19:41:43.342Z',
+          updated_by: 'elastic',
+          version: 1,
+          referenced_rules: [
+            {
+              name: 'My really good rule',
+              id: '178c2e10-3dd3-11ed-81d7-37f31b5b97f6',
+              rule_id: 'cc604877-838b-438d-866b-8bce5237aa07',
+              exception_lists: [
+                {
+                  id: '3fa2c8a0-3dd3-11ed-81d7-37f31b5b97f6',
+                  list_id: 'list_id',
+                  type: 'rule_default',
+                  namespace_type: 'single',
+                },
+              ],
+            },
+          ],
+        },
+      },
+      jest.fn(),
+    ]);
   });
 
   it('it renders loading screen when "currentState" is "loading"', () => {
@@ -108,7 +148,7 @@ describe('ExceptionsViewer', () => {
               },
             ],
           }}
-          listType={ExceptionListTypeEnum.DETECTION}
+          listTypes={[ExceptionListTypeEnum.DETECTION]}
           isViewReadOnly={false}
         />
       </TestProviders>
@@ -146,7 +186,7 @@ describe('ExceptionsViewer', () => {
               },
             ],
           }}
-          listType={ExceptionListTypeEnum.DETECTION}
+          listTypes={[ExceptionListTypeEnum.DETECTION]}
           isViewReadOnly={false}
         />
       </TestProviders>
@@ -157,7 +197,7 @@ describe('ExceptionsViewer', () => {
     ).toBeTruthy();
   });
 
-  it('it renders no endpoint items screen when "currentState" is "empty" and "listType" is "endpoint"', () => {
+  it('it renders no endpoint items screen when "currentState" is "empty" and "listTypes" includes only "endpoint"', () => {
     (useReducer as jest.Mock).mockReturnValue([
       {
         exceptions: [],
@@ -184,7 +224,7 @@ describe('ExceptionsViewer', () => {
               },
             ],
           }}
-          listType={ExceptionListTypeEnum.ENDPOINT}
+          listTypes={[ExceptionListTypeEnum.ENDPOINT]}
           isViewReadOnly={false}
         />
       </TestProviders>
@@ -197,11 +237,11 @@ describe('ExceptionsViewer', () => {
       i18n.EXCEPTION_EMPTY_PROMPT_ENDPOINT_BUTTON
     );
     expect(
-      wrapper.find('[data-test-subj="exceptionItemViewerEmptyPrompts-empty-endpoint"]').exists()
+      wrapper.find('[data-test-subj="exceptionItemViewerEmptyPrompts-empty"]').exists()
     ).toBeTruthy();
   });
 
-  it('it renders no exception items screen when "currentState" is "empty" and "listType" is "detection"', () => {
+  it('it renders no exception items screen when "currentState" is "empty" and "listTypes" includes "detection"', () => {
     (useReducer as jest.Mock).mockReturnValue([
       {
         exceptions: [],
@@ -228,7 +268,7 @@ describe('ExceptionsViewer', () => {
               },
             ],
           }}
-          listType={ExceptionListTypeEnum.DETECTION}
+          listTypes={[ExceptionListTypeEnum.DETECTION]}
           isViewReadOnly={false}
         />
       </TestProviders>
@@ -241,7 +281,7 @@ describe('ExceptionsViewer', () => {
       i18n.EXCEPTION_EMPTY_PROMPT_BUTTON
     );
     expect(
-      wrapper.find('[data-test-subj="exceptionItemViewerEmptyPrompts-empty-detection"]').exists()
+      wrapper.find('[data-test-subj="exceptionItemViewerEmptyPrompts-empty"]').exists()
     ).toBeTruthy();
   });
 
@@ -271,7 +311,7 @@ describe('ExceptionsViewer', () => {
             },
           ],
         }}
-        listType={ExceptionListTypeEnum.DETECTION}
+        listTypes={[ExceptionListTypeEnum.DETECTION]}
         isViewReadOnly={false}
       />
     );
@@ -305,7 +345,7 @@ describe('ExceptionsViewer', () => {
             },
           ],
         }}
-        listType={ExceptionListTypeEnum.DETECTION}
+        listTypes={[ExceptionListTypeEnum.DETECTION]}
         isViewReadOnly={false}
       />
     );
