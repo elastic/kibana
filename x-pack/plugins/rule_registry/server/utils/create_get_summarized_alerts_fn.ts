@@ -15,24 +15,17 @@ interface CreateGetSummarizedAlertsFnOpts {
   useNamespace: boolean;
 }
 
-export function createGetSummarizedAlertsFn(opts: CreateGetSummarizedAlertsFnOpts) {
-  const { ruleDataClient, useNamespace } = opts;
-  return {
-    getSummarizedAlerts: () => {
-      return async <TSearchRequest extends ESSearchRequest>(
-        start: Date,
-        end: Date,
-        spaceId: string
-      ) => {
-        const ruleDataClientReader = useNamespace
-          ? ruleDataClient.getReader({ namespace: spaceId })
-          : ruleDataClient.getReader();
-        // build query using start and end parameters
-        return (await ruleDataClientReader.search({} as SearchRequest)) as ESSearchResponse<
-          Partial<unknown>,
-          TSearchRequest
-        >;
-      };
-    },
+export const createGetSummarizedAlertsFn =
+  (opts: CreateGetSummarizedAlertsFnOpts) =>
+  () =>
+  async <TSearchRequest extends ESSearchRequest>(start: Date, end: Date, spaceId: string) => {
+    const { ruleDataClient, useNamespace } = opts;
+    const ruleDataClientReader = useNamespace
+      ? ruleDataClient.getReader({ namespace: spaceId })
+      : ruleDataClient.getReader();
+    // build query using start and end parameters
+    return (await ruleDataClientReader.search({} as SearchRequest)) as ESSearchResponse<
+      Partial<unknown>,
+      TSearchRequest
+    >;
   };
-}

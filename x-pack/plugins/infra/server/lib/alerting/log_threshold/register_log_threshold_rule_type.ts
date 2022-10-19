@@ -134,6 +134,6 @@ export async function registerLogThresholdRuleType(
       ],
     },
     producer: 'logs',
-    getSummarizedAlerts: libs.logsRules.createGetSummarizedAlerts.getSummarizedAlerts(),
+    getSummarizedAlerts: libs.logsRules.createGetSummarizedAlerts(),
   });
 }
