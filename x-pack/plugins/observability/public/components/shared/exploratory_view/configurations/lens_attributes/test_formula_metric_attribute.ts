@@ -5,21 +5,25 @@
  * 2.0.
  */
 
+import { mockDataView } from '../../rtl_helpers';
+
 export const sampleMetricFormulaAttribute = {
   description: 'undefined',
-  references: [
-    {
-      id: 'apm-*',
-      name: 'indexpattern-datasource-current-indexpattern',
-      type: 'index-pattern',
-    },
-    {
-      id: 'apm-*',
-      name: 'indexpattern-datasource-layer-layer0',
-      type: 'index-pattern',
-    },
-  ],
+  references: [],
   state: {
+    adHocDataViews: { [mockDataView.title]: mockDataView.toSpec(false) },
+    internalReferences: [
+      {
+        id: 'apm-*',
+        name: 'indexpattern-datasource-current-indexpattern',
+        type: 'index-pattern',
+      },
+      {
+        id: 'apm-*',
+        name: 'indexpattern-datasource-layer-layer0',
+        type: 'index-pattern',
+      },
+    ],
     datasourceStates: {
       formBased: {
         layers: {

@@ -201,7 +201,7 @@ export class ObservabilityDataViews {
         return dataView;
       } catch (e: unknown) {
         if (e instanceof SavedObjectNotFound) {
-          return await this.createDataView(app, appIndices);
+          return await this.createAndSavedDataView(app, appIndices);
         }
       }
     }

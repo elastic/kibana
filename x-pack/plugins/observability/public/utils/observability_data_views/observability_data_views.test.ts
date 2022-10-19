@@ -67,10 +67,11 @@ const fieldFormats = {
   },
 };
 
-describe('ObservabilityIndexPatterns', function () {
+describe('ObservabilityDataViews', function () {
   const { dataViews } = mockCore();
   dataViews!.get = jest.fn().mockReturnValue({ title: 'index-*' });
   dataViews!.createAndSave = jest.fn().mockReturnValue({ id: dataViewList.ux });
+  dataViews!.create = jest.fn().mockReturnValue({ id: dataViewList.ux });
   dataViews!.updateSavedObject = jest.fn();
 
   it('should return index pattern for app', async function () {
