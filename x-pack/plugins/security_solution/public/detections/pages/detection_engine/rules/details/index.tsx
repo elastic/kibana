@@ -78,8 +78,6 @@ import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../../app/types';
-import { LinkButton } from '../../../../../common/components/links';
-import { useFormatUrl } from '../../../../../common/components/link_to';
 import {
   APP_UI_ID,
   DEFAULT_INDEX_KEY,
@@ -300,7 +298,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
   const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
   const mlCapabilities = useMlCapabilities();
-  const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});

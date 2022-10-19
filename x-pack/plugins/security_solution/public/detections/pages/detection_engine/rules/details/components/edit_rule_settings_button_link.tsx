@@ -1,17 +1,24 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import React, { useCallback } from 'react';
+import { EuiToolTip } from '@elastic/eui';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { SecuritySolutionLinkButton } from '../../../../../../common/components/links';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { SecurityPageName } from '../../../../../../app/types';
 import { getEditRuleUrl } from '../../../../../../common/components/link_to/redirect_to_detection_engine';
 import * as ruleI18n from '../../translations';
-import { EuiToolTip } from '@elastic/eui';
 
-type EditRuleSettingButtonLinkProps = {
+interface EditRuleSettingButtonLinkProps {
   ruleId: string;
   disabled: boolean;
   disabledReason?: string;
-};
+}
 
 export function EditRuleSettingButtonLink({
   ruleId,
