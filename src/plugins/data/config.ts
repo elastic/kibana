@@ -48,7 +48,7 @@ export const searchSessionsConfigSchema = schema.object({
 
 export const searchConfigSchema = schema.object({
   asyncSearch: schema.object({
-    waitForCompletion: schema.duration({ defaultValue: '100ms' }),
+    waitForCompletion: schema.duration({ defaultValue: '1000ms' }),
     keepAlive: schema.duration({ defaultValue: '1m' }),
     batchedReduceSize: schema.number({ defaultValue: 64 }),
   }),
