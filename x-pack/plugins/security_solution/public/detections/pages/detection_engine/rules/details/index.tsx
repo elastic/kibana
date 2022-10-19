@@ -45,7 +45,6 @@ import type { UpdateDateRange } from '../../../../../common/components/charts/co
 import { FiltersGlobal } from '../../../../../common/components/filters_global';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import {
-  getEditRuleUrl,
   getRulesUrl,
   getDetectionEngineUrl,
   getRuleDetailsTabUrl,
