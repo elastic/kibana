@@ -10,7 +10,8 @@
       "hosts": [ "smtp.gmail.com:587" ],
       "schedule": 1,
       "tags": [ "service:smtp", "org:google" ],
-      "privateLocations": [ "BEEP" ]
+      "privateLocations": [ "BEEP" ],
+      "hash": "ekrjelkjrelkjre"
     },
     {
       "locations": [ "localhost" ],
@@ -20,7 +21,8 @@
       "hosts": "localhost:18278",
       "schedule": 1,
       "tags": "tag1,tag2",
-      "privateLocations": [ "BEEP" ]
+      "privateLocations": [ "BEEP" ],
+      "hash": "ekrjelkjrelkjre"
     },
     {
       "locations": [ "localhost" ],
@@ -34,7 +36,8 @@
       "privateLocations": [ "BEEP" ],
       "unsupportedKey": {
         "nestedUnsupportedKey": "unnsuportedValue"
-      }
+      },
+      "hash": "ekrjelkjrelkjre"
     }
   ]
 }
