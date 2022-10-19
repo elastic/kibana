@@ -42,6 +42,7 @@ export function getDistributionInPercentageColumn({
           decimals: 0,
         },
       },
+      filter: columnFilter ? { query: columnFilter, language: 'kql' } : undefined,
     },
     {
       columns: {},
