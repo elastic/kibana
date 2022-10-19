@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { reportPerformanceMetricEvent, toMs } from '@kbn/ebt-tools';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { IRouter, Logger } from '@kbn/core/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
@@ -32,7 +32,7 @@ export function createInstallRoute(
       },
     },
     async (context, req, res) => {
-      const routeStartTime = process.uptime();
+      const routeStartTime = performance.now();
       const { params, query } = req;
       const sampleDataset = sampleDatasets.find(({ id }) => id === params.id);
       if (!sampleDataset) {
@@ -56,7 +56,7 @@ export function createInstallRoute(
 
         reportPerformanceMetricEvent(analytics, {
           eventName: SAMPLE_DATA_INSTALLED_EVENT,
-          duration: toMs(process.uptime() - routeStartTime),
+          duration: performance.now() - routeStartTime,
           key1: params.id,
         });
         return res.ok({

@@ -9,5 +9,4 @@ export type { PerformanceMetricEvent as MetricEvent } from './schema';
 export {
   registerPerformanceMetricEventType as registerPerformanceMetricEventType,
   reportPerformanceMetricEvent,
-  toMs,
 } from './helpers';

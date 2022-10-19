@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
-import { reportPerformanceMetricEvent, toMs } from '@kbn/ebt-tools';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { SampleDataUsageTracker } from '../usage/usage';
@@ -30,7 +30,7 @@ export function createUninstallRoute(
       },
     },
     async (context, request, response) => {
-      const routeStartTime = process.uptime();
+      const routeStartTime = performance.now();
       const sampleDataset = sampleDatasets.find(({ id }) => id === request.params.id);
       if (!sampleDataset) {
         return response.notFound();
@@ -50,7 +50,7 @@ export function createUninstallRoute(
 
         reportPerformanceMetricEvent(analytics, {
           eventName: SAMPLE_DATA_UNINSTALLED_EVENT,
-          duration: toMs(process.uptime() - routeStartTime),
+          duration: performance.now() - routeStartTime,
           key1: sampleDataset.id,
         });
         return response.noContent();
