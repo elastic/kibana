@@ -36,6 +36,9 @@ import {
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { TimeRange } from '@kbn/data-plugin/common';
+import { DiscoverSearchSessionManager } from './discover_search_session';
+import { DataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
@@ -132,6 +135,10 @@ export interface GetStateReturn {
    */
   appStateContainer: ReduxLikeStateContainer<AppState>;
   /**
+   * Data state, everything needed to fetch data from Elasticsearch
+   */
+  dataState: DataStateContainer;
+  /**
    * Initialize state with filters and query,  start state syncing
    */
   initializeAndSync: (
@@ -175,6 +182,13 @@ export interface GetStateReturn {
    * Pause the auto refresh interval without pushing an entry to history
    */
   pauseAutoRefreshInterval: () => Promise<void>;
+  /**
+   * Callback function when query changes
+   */
+  onUpdateQuery: (
+    payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
+    isUpdate?: boolean
+  ) => void;
 }
 
 const APP_STATE_URL_KEY = '_a';
@@ -207,6 +221,13 @@ export function getState({ history, savedSearch, services }: GetStateParams): Ge
     services.uiSettings
   );
 
+  /**
+   * Search session logic
+   */
+  const searchSessionManager = new DiscoverSearchSessionManager({
+    history,
+    session: services.data.search.session,
+  });
   // todo filter source depending on fields fetching flag (if no columns remain and source fetching is enabled, use default columns)
   let previousAppState: AppState;
   const appStateContainer = createStateContainer<AppState>(initialAppState);
@@ -220,6 +241,12 @@ export function getState({ history, savedSearch, services }: GetStateParams): Ge
       }
     },
   };
+  const dataState = getDataStateContainer({
+    services,
+    searchSessionManager,
+    getAppState: () => appStateContainer.getState(),
+    getSavedSearch: () => savedSearch,
+  });
 
   // Calling syncState from within initializeAndSync causes state syncing issues.
   // syncState takes a snapshot of the initial state when it's called to compare
@@ -253,6 +280,7 @@ export function getState({ history, savedSearch, services }: GetStateParams): Ge
   return {
     kbnUrlStateStorage: stateStorage,
     appStateContainer: appStateContainerModified,
+    dataState,
     startSync: () => {
       const { start, stop } = syncAppState();
       start();
@@ -274,6 +302,15 @@ export function getState({ history, savedSearch, services }: GetStateParams): Ge
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
     pauseAutoRefreshInterval,
+    /**
+     * Function triggered when the user changes the query in the search bar
+     */
+    onUpdateQuery: (_payload, isUpdate?: boolean) => {
+      if (isUpdate === false) {
+        searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
+        dataState.refetch$.next(undefined);
+      }
+    },
     initializeAndSync: (
       dataView: DataView,
       filterManager: FilterManager,

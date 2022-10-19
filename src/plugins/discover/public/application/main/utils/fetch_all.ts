@@ -5,11 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
-import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 import { getRawRecordType } from './get_raw_record_type';
 import {
   sendCompleteMsg,
@@ -32,20 +32,17 @@ import {
   DataTotalHits$,
   RecordRawType,
   SavedSearchData,
-} from '../hooks/use_saved_search';
+} from '../services/discover_data_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { fetchSql } from './fetch_sql';
 
 export interface FetchDeps {
   abortController: AbortController;
-  appStateContainer: ReduxLikeStateContainer<AppState>;
   data: DataPublicPluginStart;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;
-  savedSearch: SavedSearch;
   searchSessionId: string;
   services: DiscoverServices;
-  useNewFieldsApi: boolean;
 }
 
 /**
@@ -58,11 +55,13 @@ export interface FetchDeps {
  */
 export function fetchAll(
   dataSubjects: SavedSearchData,
-  searchSource: ISearchSource,
+  savedSearch: SavedSearch,
   reset = false,
+  getAppState: () => AppState,
   fetchDeps: FetchDeps
 ): Promise<void> {
-  const { initialFetchStatus, appStateContainer, services, useNewFieldsApi, data } = fetchDeps;
+  const { initialFetchStatus, services, data } = fetchDeps;
+  const { searchSource } = savedSearch;
 
   /**
    * Method to create an error handler that will forward the received error
@@ -83,21 +82,21 @@ export function fetchAll(
   };
 
   try {
-    const dataView = searchSource.getField('index')!;
+    const dataView = savedSearch.searchSource.getField('index')!;
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);
     }
-    const { hideChart, sort, query } = appStateContainer.getState();
+    const { hideChart, sort, query } = getAppState();
     const recordRawType = getRawRecordType(query);
     const useSql = recordRawType === RecordRawType.PLAIN;
 
     if (recordRawType === RecordRawType.DOCUMENT) {
       // Update the base searchSource, base for all child fetches
-      updateSearchSource(searchSource, false, {
+      updateSearchSource(savedSearch.searchSource, false, {
         dataView,
         services,
         sort: sort as SortOrder[],
-        useNewFieldsApi,
+        useNewFieldsApi: services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
       });
     }
 
@@ -116,7 +115,9 @@ export function fetchAll(
         ? fetchSql(query, services.dataViews, data, services.expressions)
         : fetchDocuments(searchSource.createCopy(), fetchDeps);
     const charts =
-      isChartVisible && !useSql ? fetchChart(searchSource.createCopy(), fetchDeps) : undefined;
+      isChartVisible && !useSql
+        ? fetchChart(searchSource.createCopy(), getAppState, fetchDeps)
+        : undefined;
     const totalHits =
       !isChartVisible && !useSql ? fetchTotalHits(searchSource.createCopy(), fetchDeps) : undefined;
     /**

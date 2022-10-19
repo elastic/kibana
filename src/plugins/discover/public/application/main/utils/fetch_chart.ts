@@ -12,6 +12,7 @@ import { lastValueFrom } from 'rxjs';
 import { DataPublicPluginStart, isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getChartAggConfigs } from '@kbn/unified-histogram-plugin/public';
+import { AppState } from '../services/discover_state';
 import { FetchDeps } from './fetch_all';
 
 interface Result {
@@ -21,9 +22,10 @@ interface Result {
 
 export function fetchChart(
   searchSource: ISearchSource,
-  { abortController, appStateContainer, data, inspectorAdapters, searchSessionId }: FetchDeps
+  getAppState: () => AppState,
+  { abortController, data, inspectorAdapters, searchSessionId }: FetchDeps
 ): Promise<Result> {
-  const timeInterval = appStateContainer.getState().interval ?? 'auto';
+  const timeInterval = getAppState().interval ?? 'auto';
 
   updateSearchSource(searchSource, timeInterval, data);
 

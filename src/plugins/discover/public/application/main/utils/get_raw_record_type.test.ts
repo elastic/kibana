@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RecordRawType } from '../hooks/use_saved_search';
+import { RecordRawType } from '../services/discover_data_state_container';
 import { getRawRecordType } from './get_raw_record_type';
 
 describe('getRawRecordType', () => {

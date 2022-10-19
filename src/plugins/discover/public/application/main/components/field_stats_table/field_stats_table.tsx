@@ -23,7 +23,7 @@ import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { GetStateReturn } from '../../services/discover_state';
-import { AvailableFields$, DataRefetch$, DataTotalHits$ } from '../../hooks/use_saved_search';
+import { AvailableFields$, DataRefetch$, DataTotalHits$ } from '../../services/discover_data_state_container';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   dataView: DataView;

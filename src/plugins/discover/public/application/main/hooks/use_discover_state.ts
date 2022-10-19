@@ -17,15 +17,7 @@ import { getState } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
-import { useSavedSearch as useSavedSearchData } from './use_saved_search';
-import {
-  MODIFY_COLUMNS_ON_SWITCH,
-  SEARCH_FIELDS_FROM_SOURCE,
-  SEARCH_ON_PAGE_LOAD_SETTING,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '../../../../common';
-import { useSearchSession } from './use_search_session';
-import { FetchStatus } from '../../types';
+import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { getDataViewAppState } from '../utils/get_switch_data_view_app_state';
 import { DataTableRecord } from '../../../types';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
@@ -45,8 +37,6 @@ export function useDiscoverState({
   dataViewList: DataViewListItem[];
 }) {
   const { uiSettings, data, filterManager, dataViews, toastNotifications } = services;
-  const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
-  const { timefilter } = data.query.timefilter;
 
   const dataView = savedSearch.searchSource.getField('index')!;
 
@@ -70,22 +60,6 @@ export function useDiscoverState({
   const { appStateContainer, replaceUrlAppState } = stateContainer;
 
   const [state, setState] = useState(appStateContainer.getState());
-
-  /**
-   * Search session logic
-   */
-  const searchSessionManager = useSearchSession({ services, history, stateContainer, savedSearch });
-
-  const initialFetchStatus: FetchStatus = useMemo(() => {
-    // A saved search is created on every page load, so we check the ID to see if we're loading a
-    // previously saved search or if it is just transient
-    const shouldSearchOnPageLoad =
-      uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-      savedSearch.id !== undefined ||
-      timefilter.getRefreshInterval().pause === false ||
-      searchSessionManager.hasSearchSessionIdInURL();
-    return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
-  }, [uiSettings, savedSearch.id, searchSessionManager, timefilter]);
 
   /**
    * Function triggered when user changes data view in the sidebar
@@ -135,22 +109,10 @@ export function useDiscoverState({
   });
 
   /**
-   * Data fetching logic
-   */
-  const { data$, refetch$, reset, inspectorAdapters } = useSavedSearchData({
-    initialFetchStatus,
-    searchSessionManager,
-    savedSearch,
-    searchSource,
-    services,
-    stateContainer,
-    useNewFieldsApi,
-  });
-  /**
    * State changes (data view, columns), when a text base query result is returned
    */
   useTextBasedQueryLanguage({
-    documents$: data$.documents$,
+    documents$: stateContainer.dataState.data$.documents$,
     dataViews,
     stateContainer,
     dataViewList,
@@ -160,7 +122,7 @@ export function useDiscoverState({
   /**
    * Reset to display loading spinner when savedSearch is changing
    */
-  useEffect(() => reset(), [savedSearch.id, reset]);
+  useEffect(() => stateContainer.dataState.reset(), [savedSearch.id, stateContainer]);
 
   /**
    * Sync URL state with local app state on saved search load
@@ -211,11 +173,11 @@ export function useDiscoverState({
         }
 
         savedSearch.searchSource.setField('index', nextDataView);
-        reset();
+        stateContainer.dataState.reset();
       }
 
       if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
-        refetch$.next(undefined);
+        stateContainer.dataState.refetch$.next(undefined);
       }
       setState(nextState);
     });
@@ -224,9 +186,7 @@ export function useDiscoverState({
     services,
     appStateContainer,
     state,
-    refetch$,
-    data$,
-    reset,
+    stateContainer,
     savedSearch.searchSource,
     replaceUrlAppState,
   ]);
@@ -262,26 +222,13 @@ export function useDiscoverState({
   );
 
   /**
-   * Function triggered when the user changes the query in the search bar
-   */
-  const onUpdateQuery = useCallback(
-    (_payload, isUpdate?: boolean) => {
-      if (isUpdate === false) {
-        searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-        refetch$.next(undefined);
-      }
-    },
-    [refetch$, searchSessionManager]
-  );
-
-  /**
    * Trigger data fetching on dataView or savedSearch changes
    */
   useEffect(() => {
     if (dataView) {
-      refetch$.next(undefined);
+      stateContainer.dataState.refetch$.next(undefined);
     }
-  }, [initialFetchStatus, refetch$, dataView, savedSearch.id]);
+  }, [stateContainer, dataView, savedSearch.id]);
 
   /**
    * We need to make sure the auto refresh interval is disabled for
@@ -294,13 +241,13 @@ export function useDiscoverState({
   }, [dataView, stateContainer]);
 
   return {
-    data$,
+    data$: stateContainer.dataState.data$,
     dataView,
-    inspectorAdapters,
-    refetch$,
+    inspectorAdapters: stateContainer.dataState.inspectorAdapters,
+    refetch$: stateContainer.dataState.refetch$,
     resetSavedSearch,
     onChangeDataView,
-    onUpdateQuery,
+    onUpdateQuery: stateContainer.onUpdateQuery,
     searchSource,
     setState,
     state,

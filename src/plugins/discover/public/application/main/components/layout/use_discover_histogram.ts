@@ -18,7 +18,7 @@ import { getUiActions } from '../../../../kibana_services';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDataState } from '../../hooks/use_data_state';
-import type { SavedSearchData } from '../../hooks/use_saved_search';
+import type { SavedSearchData } from '../../services/discover_data_state_container';
 import type { AppState, GetStateReturn } from '../../services/discover_state';
 
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';

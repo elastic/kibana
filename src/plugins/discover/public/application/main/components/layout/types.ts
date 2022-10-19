@@ -11,9 +11,9 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataViewListItem, ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { DataRefetch$, SavedSearchData } from '../../services/discover_data_state_container';
 import { DataTableRecord } from '../../../../types';
 import { AppState, GetStateReturn } from '../../services/discover_state';
-import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
 
 export interface DiscoverLayoutProps {
   dataView: DataView;

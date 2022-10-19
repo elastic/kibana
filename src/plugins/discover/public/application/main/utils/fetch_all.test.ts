@@ -22,7 +22,7 @@ import {
   DataMainMsg,
   DataTotalHitsMsg,
   SavedSearchData,
-} from '../hooks/use_saved_search';
+} from '../services/discover_data_state_container';
 
 import { fetchDocuments } from './fetch_documents';
 import { fetchSql } from './fetch_sql';
@@ -79,11 +79,6 @@ describe('test fetchAll', () => {
       }),
     };
     deps = {
-      appStateContainer: {
-        getState: () => {
-          return { interval: 'auto' };
-        },
-      } as ReduxLikeStateContainer<AppState>,
       abortController: new AbortController(),
       data: discoverServiceMock.data,
       inspectorAdapters: { requests: new RequestAdapter() },
@@ -93,7 +88,7 @@ describe('test fetchAll', () => {
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
     };
-    searchSource = savedSearchMock.searchSource.createChild();
+    savedSearchMock.searchSource = savedSearchMock.searchSource.createChild();
 
     mockFetchDocuments.mockReset().mockResolvedValue([]);
     mockFetchSQL.mockReset().mockResolvedValue([]);
@@ -108,7 +103,7 @@ describe('test fetchAll', () => {
 
     subjects.main$.subscribe((value) => stateArr.push(value.fetchStatus));
 
-    await fetchAll(subjects, searchSource, false, deps);
+    await fetchAll(subjects, savedSearchMock, false, () => ({ interval: 'auto' }), deps);
 
     expect(stateArr).toEqual([
       FetchStatus.UNINITIALIZED,
@@ -125,7 +120,7 @@ describe('test fetchAll', () => {
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue(documents);
-    await fetchAll(subjects, searchSource, false, deps);
+    await fetchAll(subjects, { searchSource }, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
