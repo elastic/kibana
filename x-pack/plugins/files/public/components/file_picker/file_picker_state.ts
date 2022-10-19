@@ -35,6 +35,7 @@ export class FilePickerState {
   public readonly hasFiles$ = new BehaviorSubject<boolean>(false);
   public readonly hasQuery$ = new BehaviorSubject<boolean>(false);
   public readonly query$ = new BehaviorSubject<undefined | string>(undefined);
+  public readonly queryDebounced$ = this.query$.pipe(debounceTime(100));
   public readonly currentPage$ = new BehaviorSubject<number>(0);
   public readonly totalPages$ = new BehaviorSubject<undefined | number>(undefined);
 

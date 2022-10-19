@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import type { FunctionComponent } from 'react';
-import { debounceTime } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -18,7 +17,7 @@ interface Props {
 
 export const ClearFilterButton: FunctionComponent<Props> = ({ onClick }) => {
   const { state } = useFilePickerContext();
-  const query = useObservable(state.query$.pipe(debounceTime(100)));
+  const query = useObservable(state.queryDebounced$);
   if (!query) {
     return null;
   }
