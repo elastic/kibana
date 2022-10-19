@@ -82,6 +82,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./add_monitor_private_location'));
       loadTestFile(require.resolve('./edit_monitor'));
       loadTestFile(require.resolve('./delete_monitor'));
+      loadTestFile(require.resolve('./delete_monitor_project'));
       loadTestFile(require.resolve('./synthetics_enablement'));
     });
   });

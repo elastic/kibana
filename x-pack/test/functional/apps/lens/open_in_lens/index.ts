@@ -17,7 +17,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
   const config = getService('config');
   let remoteEsArchiver;
 
-  describe('lens app - group 3', () => {
+  describe('lens app - Open in Lens', () => {
     const esArchive = 'x-pack/test/functional/es_archives/logstash_functional';
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
@@ -69,25 +69,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
     });
 
-    loadTestFile(require.resolve('./colors'));
-    loadTestFile(require.resolve('./chart_data'));
-    loadTestFile(require.resolve('./time_shift'));
-    loadTestFile(require.resolve('./drag_and_drop'));
-    loadTestFile(require.resolve('./disable_auto_apply'));
-    loadTestFile(require.resolve('./geo_field'));
-    loadTestFile(require.resolve('./formula'));
-    loadTestFile(require.resolve('./heatmap'));
-    loadTestFile(require.resolve('./gauge'));
-    loadTestFile(require.resolve('./metric'));
-    loadTestFile(require.resolve('./legacy_metric'));
-    loadTestFile(require.resolve('./reference_lines'));
-    loadTestFile(require.resolve('./annotations'));
-    loadTestFile(require.resolve('./inspector'));
-    loadTestFile(require.resolve('./error_handling'));
-    loadTestFile(require.resolve('./lens_tagging'));
-    loadTestFile(require.resolve('./lens_reporting'));
-    // keep these two last in the group in this order because they are messing with the default saved objects
-    loadTestFile(require.resolve('./rollup'));
-    loadTestFile(require.resolve('./no_data'));
+    loadTestFile(require.resolve('./tsvb'));
+    loadTestFile(require.resolve('./agg_based'));
   });
 };
