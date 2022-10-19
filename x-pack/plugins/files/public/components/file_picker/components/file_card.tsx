@@ -62,7 +62,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
               // I'm not sure if this is becuause of the image being in a modal
               // The result is that the image does not always get loaded.
               // TODO: Investigate this behaviour further
-              loadImageEagerly
+              lazy={false}
             />
           ) : (
             <div

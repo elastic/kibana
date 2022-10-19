@@ -38,9 +38,9 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
    * This setting overrides this behavior and loads an image as soon as the
    * component mounts.
    *
-   * @default false
+   * @default true
    */
-  loadImageEagerly?: boolean;
+  lazy?: boolean;
 }
 
 /**
@@ -64,7 +64,7 @@ export const Image = React.forwardRef<HTMLImageElement, Props>(
       meta,
       wrapperProps,
       size = 'original',
-      loadImageEagerly = false,
+      lazy = true,
       ...rest
     },
     ref
@@ -73,7 +73,7 @@ export const Image = React.forwardRef<HTMLImageElement, Props>(
     const [blurDelayExpired, setBlurDelayExpired] = useState(false);
     const { isVisible, ref: observerRef } = useViewportObserver({ onFirstVisible });
 
-    const loadImage = loadImageEagerly ? true : isVisible;
+    const loadImage = lazy ? isVisible : true;
 
     useEffect(() => {
       let unmounted = false;
