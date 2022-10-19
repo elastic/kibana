@@ -24,8 +24,15 @@ describe('registerTransactionDurationAlertType', () => {
         },
       },
       aggregations: {
-        latency: {
-          value: 5500000,
+        environments: {
+          buckets: [
+            {
+              key: 'ENVIRONMENT_NOT_DEFINED',
+              avgLatency: {
+                value: 5500000,
+              },
+            },
+          ],
         },
       },
       took: 0,

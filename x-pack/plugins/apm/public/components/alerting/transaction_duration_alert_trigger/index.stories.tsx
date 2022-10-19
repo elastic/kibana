@@ -10,6 +10,7 @@ import React, { ComponentType, useState } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { RuleParams, TransactionDurationAlertTrigger } from '.';
+import { AggregationType } from '../../../../common/alert_types';
 
 const KibanaReactContext = createKibanaReactContext({
   notifications: { toasts: { add: () => {} } },
@@ -33,7 +34,7 @@ export default {
 
 export const Example: Story = () => {
   const [params, setParams] = useState<RuleParams>({
-    aggregationType: 'avg' as const,
+    aggregationType: AggregationType.Avg,
     environment: 'testEnvironment',
     serviceName: 'testServiceName',
     threshold: 1500,

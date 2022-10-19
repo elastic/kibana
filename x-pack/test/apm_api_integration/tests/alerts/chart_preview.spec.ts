@@ -110,7 +110,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(response.status).to.be(200);
       expect(
         response.body.latencyChartPreview.some(
-          (item: { x: number; y: number | null }) => item.x && item.y
+          (item: { name: string; data: Array<{ x: number; y: number | null }> }) =>
+            item.data.some((coordinate) => coordinate.x && coordinate.y)
         )
       ).to.equal(true);
     });

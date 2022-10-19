@@ -118,7 +118,7 @@ export function ErrorCountAlertTrigger(props: Props) {
 
   const chartPreview = (
     <ChartPreview
-      data={data?.errorCountChartPreview}
+      series={[{ data: data?.errorCountChartPreview ?? [] }]}
       threshold={params.threshold}
       yTickFormat={asInteger}
       uiSettings={services.uiSettings}
