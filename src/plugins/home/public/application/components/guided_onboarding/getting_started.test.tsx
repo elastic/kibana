@@ -31,7 +31,9 @@ jest.mock('../../kibana_services', () => {
           prepend: jest.fn(),
         },
       },
-      guidedOnboardingService: jest.fn(),
+      guidedOnboardingService: {
+        fetchAllGuidesState: jest.fn(),
+      },
     }),
   };
 });

@@ -54,22 +54,35 @@ exports[`getting started should render getting started component 1`] = `
       >
         <EuiFlexItem>
           <GuideCard
+            activateGuide={[Function]}
+            addBasePath={[MockFunction]}
             guides={Array []}
+            isDarkTheme={false}
             useCase="search"
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <GuideCard
+            activateGuide={[Function]}
+            addBasePath={[MockFunction]}
             guides={Array []}
+            isDarkTheme={false}
             useCase="observability"
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <LinkCard />
+          <ObservabilityLinkCard
+            addBasePath={[MockFunction]}
+            isDarkTheme={false}
+            navigateToApp={[MockFunction]}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <GuideCard
+            activateGuide={[Function]}
+            addBasePath={[MockFunction]}
             guides={Array []}
+            isDarkTheme={false}
             useCase="security"
           />
         </EuiFlexItem>
