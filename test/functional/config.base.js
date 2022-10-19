@@ -9,6 +9,7 @@
 import { pageObjects } from './page_objects';
 import { services } from './services';
 
+// test
 export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
 
