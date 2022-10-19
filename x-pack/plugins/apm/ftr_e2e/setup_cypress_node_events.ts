@@ -12,8 +12,8 @@ import {
   StreamProcessor,
   ApmFields,
   SynthtraceEsClient,
-  SerializedSignal,
-  SignalTransferObject,
+  SignalTransferData,
+  TransferredSignal,
 } from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
 import { some } from 'lodash';
@@ -47,9 +47,9 @@ export function setupNodeEvents(
       console.log(message);
       return null;
     },
-    'synthtrace:index': async (events: SerializedSignal[]) => {
+    'synthtrace:index': async (events: SignalTransferData[]) => {
       await synthtraceEsClient.index(
-        new SignalArray(events.map((e) => new SignalTransferObject(e)))
+        new SignalArray(events.map((e) => new TransferredSignal(e)))
       );
       return null;
     },

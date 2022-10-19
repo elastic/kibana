@@ -22,5 +22,5 @@ export type { SignalIterable } from './src/lib/streaming/signal_iterable';
 export { SignalArray } from './src/lib/streaming/signal_iterable';
 export { StreamProcessor } from './src/lib/streaming/stream_processor';
 export type { StreamProcessorOptions } from './src/lib/streaming/stream_processor';
-export { SignalTransferObject } from './src/lib/streaming/signal_transfer_object';
-export { SerializedSignal } from './src/lib/streaming/serialized_signal';
+export { TransferredSignal } from './src/lib/streaming/transport/transferred_signal';
+export { SignalTransferData } from './src/lib/streaming/transport/signal_transfer_data';

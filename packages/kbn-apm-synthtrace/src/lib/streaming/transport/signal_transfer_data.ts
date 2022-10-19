@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Signal } from '../../dsl/signal';
-import { Fields } from '../../dsl/fields';
+import { Signal } from '../../../dsl/signal';
+import { Fields } from '../../../dsl/fields';
 
-export class SerializedSignal {
+// Represents a materialized view of a signal that is rich enough to be serialized over the wire
+export class SignalTransferData {
   public readonly index?: Lowercase<string>;
   public readonly dataStream?: Lowercase<string>;
   public readonly document: Record<string, any>;

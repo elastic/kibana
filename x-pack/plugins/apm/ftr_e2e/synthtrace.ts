@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Fields, SignalIterable } from '@kbn/apm-synthtrace';
-import { SerializedSignal } from '@kbn/apm-synthtrace';
+import { SignalTransferData } from '@kbn/apm-synthtrace';
 
 export const synthtrace = {
   index: (signals: SignalIterable<Fields>) => {
@@ -15,7 +15,7 @@ export const synthtrace = {
       .toArray()
       .map(
         (s) =>
-          new SerializedSignal(
+          new SignalTransferData(
             s.enrichWithVersionInformation(kibanaVersion, kibanaMajor)
           )
       );

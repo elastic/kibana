@@ -6,17 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { Fields } from '../../dsl/fields';
-import { Signal } from '../../dsl/signal';
-import { dataStream, index, WriteTarget } from '../../dsl/write_target';
-import { SerializedSignal } from './serialized_signal';
+import { Fields } from '../../../dsl/fields';
+import { Signal } from '../../../dsl/signal';
+import { dataStream, index, WriteTarget } from '../../../dsl/write_target';
+import { SignalTransferData } from './signal_transfer_data';
 
-export class SignalTransferObject extends Signal<Fields> {
+// Represents a Signal<> implementation that can receive SignalTransferData
+// that was sent over the wire.
+export class TransferredSignal extends Signal<Fields> {
   public readonly index?: Lowercase<string>;
   public readonly dataStream?: Lowercase<string>;
   private readonly document: Record<string, any>;
 
-  constructor(signal: SerializedSignal) {
+  constructor(signal: SignalTransferData) {
     super(signal.fields);
     this.index = signal.index;
     this.dataStream = signal.dataStream;
