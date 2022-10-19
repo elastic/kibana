@@ -430,8 +430,8 @@ export const useNavigateToWizardWithClonedJob = () => {
               <>
                 <FormattedMessage
                   id="xpack.ml.dataframe.analyticsList.noSourceDataViewForClone"
-                  defaultMessage="Unable to clone the analytics job. No data view exists for index {dataView}."
-                  values={{ dataView: sourceIndex }}
+                  defaultMessage="Unable to clone the analytics job. No data view exists for index {sourceIndex}."
+                  values={{ sourceIndex }}
                 />
                 {canCreateDataView ? (
                   <EuiText size="xs" color="text">
@@ -446,8 +446,8 @@ export const useNavigateToWizardWithClonedJob = () => {
                           >
                             <FormattedMessage
                               id="xpack.ml.dataframe.analytics.cloneAction.dataViewPromptLinkText"
-                              defaultMessage="Create a data view for {dataView}"
-                              values={{ dataView: sourceIndex }}
+                              defaultMessage="Create a data view for {sourceIndex}"
+                              values={{ sourceIndex }}
                             />
                           </EuiLink>
                         ),

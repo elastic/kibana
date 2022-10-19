@@ -19217,7 +19217,6 @@
     "xpack.ml.dataframe.analyticsList.errorWithCheckingIfUserCanDeleteIndexNotificationErrorMessage": "检查用户是否能够删除 {destinationIndex} 时发生错误：{error}",
     "xpack.ml.dataframe.analyticsList.fetchSourceDataViewForCloneErrorMessage": "检查数据视图 {dataView} 是否存在时发生错误：{error}",
     "xpack.ml.dataframe.analyticsList.forceStopModalBody": "{analyticsId} 处于失败状态。您必须停止该作业并修复失败问题。",
-    "xpack.ml.dataframe.analyticsList.noSourceDataViewForClone": "无法克隆分析作业。对于索引 {dataView}，不存在数据视图。",
     "xpack.ml.dataframe.analyticsList.progressOfPhase": "阶段 {currentPhase} 的进度：{progress}%",
     "xpack.ml.dataframe.analyticsList.rowCollapse": "隐藏 {analyticsId} 的详情",
     "xpack.ml.dataframe.analyticsList.rowExpand": "显示 {analyticsId} 的详情",

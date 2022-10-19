@@ -34,7 +34,7 @@ export const IndexPatternPrompt: FC<Props> = ({ destIndex, color }) => {
       <EuiText size="xs" color={color ?? 'warning'}>
         <FormattedMessage
           id="xpack.ml.dataframe.analytics.dataViewPromptMessage"
-          defaultMessage="No data view exists for index{destIndex}. "
+          defaultMessage="No data view exists for index {destIndex}. "
           values={{
             destIndex: destIndex ?? '',
           }}
