@@ -10,11 +10,7 @@ import moment from 'moment';
 import { toMomentUnitOfTime } from '../../types/models';
 
 import type { TimeWindow } from '../../types/models/time_window';
-import {
-  calendarAlignedTimeWindowSchema,
-  DurationUnit,
-  rollingTimeWindowSchema,
-} from '../../types/schema';
+import { calendarAlignedTimeWindowSchema, rollingTimeWindowSchema } from '../../types/schema';
 
 export interface DateRange {
   from: Date;
