@@ -21,6 +21,7 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, rangeRt } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
@@ -115,21 +116,23 @@ const serviceMapRoute = createApmServerRoute({
       savedObjects: { client: savedObjectsClient },
       uiSettings: { client: uiSettingsClient },
     } = await context.core;
-    const [setup, serviceGroup, maxNumberOfServices] = await Promise.all([
-      setupRequest(resources),
-      serviceGroupId
-        ? getServiceGroup({
-            savedObjectsClient,
-            serviceGroupId,
-          })
-        : Promise.resolve(null),
-      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
-    ]);
+    const [setup, apmEventClient, serviceGroup, maxNumberOfServices] =
+      await Promise.all([
+        setupRequest(resources),
+        getApmEventClient(resources),
+        serviceGroupId
+          ? getServiceGroup({
+              savedObjectsClient,
+              serviceGroupId,
+            })
+          : Promise.resolve(null),
+        uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
+      ]);
 
     const serviceNames = compact([serviceName]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient: setup.apmEventClient,
+      apmEventClient,
       config: setup.config,
       start,
       end,
@@ -137,6 +140,7 @@ const serviceMapRoute = createApmServerRoute({
     });
     return getServiceMap({
       setup,
+      apmEventClient,
       serviceNames,
       environment,
       searchAggregatedTransactions,
@@ -177,6 +181,7 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
       throw Boom.forbidden(invalidLicenseMessage);
     }
     const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       path: { serviceName },
@@ -184,7 +189,7 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
     } = params;
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient: setup.apmEventClient,
+      apmEventClient,
       config: setup.config,
       start,
       end,
@@ -193,7 +198,7 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
 
     const commonProps = {
       environment,
-      setup,
+      apmEventClient,
       serviceName,
       searchAggregatedTransactions,
       start,
@@ -239,13 +244,19 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
     if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       query: { dependencyName, environment, start, end, offset },
     } = params;
 
-    const commonProps = { environment, setup, dependencyName, start, end };
+    const commonProps = {
+      environment,
+      apmEventClient,
+      dependencyName,
+      start,
+      end,
+    };
 
     const [currentPeriod, previousPeriod] = await Promise.all([
       getServiceMapDependencyNodeInfo(commonProps),

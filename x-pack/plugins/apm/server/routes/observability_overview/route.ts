@@ -15,6 +15,7 @@ import { rangeRt } from '../default_api_types';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const observabilityOverviewHasDataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/observability_overview/has_data',
@@ -25,8 +26,9 @@ const observabilityOverviewHasDataRoute = createApmServerRoute({
     hasData: boolean;
     indices: import('./../../../../observability/common/typings').ApmIndicesConfig;
   }> => {
-    const setup = await setupRequest(resources);
-    return await getHasData({ setup });
+    const { indices } = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
+    return await getHasData({ indices, apmEventClient });
   },
 });
 
@@ -47,12 +49,13 @@ const observabilityOverviewRoute = createApmServerRoute({
       | { value: undefined; timeseries: never[] }
       | { value: number; timeseries: Array<{ x: number; y: number | null }> };
   }> => {
-    const setup = await setupRequest(resources);
+    const { config } = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
     const { bucketSize, intervalString, start, end } = resources.params.query;
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient: setup.apmEventClient,
-      config: setup.config,
+      apmEventClient,
+      config,
       start,
       end,
       kuery: '',
@@ -71,13 +74,13 @@ const observabilityOverviewRoute = createApmServerRoute({
       }> => {
         const [serviceCount, transactionPerMinute] = await Promise.all([
           getServiceCount({
-            setup,
+            apmEventClient,
             searchAggregatedTransactions,
             start,
             end,
           }),
           getTransactionsPerMinute({
-            setup,
+            apmEventClient,
             bucketSize,
             searchAggregatedTransactions,
             start,
