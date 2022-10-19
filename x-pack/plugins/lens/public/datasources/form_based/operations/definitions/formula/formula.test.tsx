@@ -157,7 +157,7 @@ describe('formula', () => {
         formulaOperation.buildColumn({
           previousColumn: {
             ...layer.columns.col1,
-            dataType: 'date',
+            dataType: 'boolean',
             filter: { language: 'kuery', query: 'ABC: DEF' },
           },
           layer,

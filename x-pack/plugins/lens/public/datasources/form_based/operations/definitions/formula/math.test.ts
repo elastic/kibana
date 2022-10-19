@@ -244,6 +244,7 @@ describe('math operation', () => {
           arguments: {
             id: ['myColumnId'],
             name: ['Math'],
+            castColumns: [],
             expression: [
               `("columnX0" + (("columnX1" - "columnX2") / ("columnX3" - ("columnX4" * "columnX5"))))`,
             ],
