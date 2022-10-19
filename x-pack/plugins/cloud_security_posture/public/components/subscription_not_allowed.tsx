@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiPageSection, EuiLink } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageSection } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SubscriptionLink } from '@kbn/subscription-tracking';
+import type { SubscriptionContext } from '@kbn/subscription-tracking';
 import React from 'react';
-import { useKibana } from '../common/hooks/use_kibana';
+
+const subscriptionContext: SubscriptionContext = {
+  feature: 'cloud-security-posture',
+  source: 'security__cloud-security-posture',
+};
 
 export const SubscriptionNotAllowed = () => {
-  const { application } = useKibana().services;
   return (
     <EuiPageSection color="danger" alignment="center">
       <EuiEmptyPrompt
@@ -31,16 +36,12 @@ export const SubscriptionNotAllowed = () => {
               defaultMessage="To use these cloud security features, you must {link}."
               values={{
                 link: (
-                  <EuiLink
-                    href={application.getUrlForApp('management', {
-                      path: 'stack/license_management/home',
-                    })}
-                  >
+                  <SubscriptionLink subscriptionContext={subscriptionContext}>
                     <FormattedMessage
                       id="xpack.csp.subscriptionNotAllowed.promptLinkText"
                       defaultMessage="start a trial or upgrade your subscription"
                     />
-                  </EuiLink>
+                  </SubscriptionLink>
                 ),
               }}
             />

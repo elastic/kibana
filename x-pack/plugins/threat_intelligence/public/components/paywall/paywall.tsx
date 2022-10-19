@@ -6,24 +6,17 @@
  */
 
 import React, { VFC } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SubscriptionButtonEmpty } from '@kbn/subscription-tracking';
+import type { SubscriptionContext } from '@kbn/subscription-tracking';
 
-interface PaywallProps {
-  /**
-   * Can be obtained using `http.basePath.prepend('/app/management/stack/license_management')`
-   */
-  licenseManagementHref: string;
-}
+const subscriptionContext: SubscriptionContext = {
+  feature: 'threat-intelligence',
+  source: 'security__threat-intelligence',
+};
 
-export const Paywall: VFC<PaywallProps> = ({ licenseManagementHref }) => {
+export const Paywall: VFC = () => {
   return (
     <EuiEmptyPrompt
       icon={<EuiIcon type="logoSecurity" size="xl" />}
@@ -59,12 +52,12 @@ export const Paywall: VFC<PaywallProps> = ({ licenseManagementHref }) => {
           </EuiFlexItem>
           <EuiFlexItem>
             <div>
-              <EuiButtonEmpty href={licenseManagementHref}>
+              <SubscriptionButtonEmpty subscriptionContext={subscriptionContext} fill>
                 <FormattedMessage
                   id="xpack.threatIntelligence.paywall.trial"
                   defaultMessage="Start a free trial"
                 />
-              </EuiButtonEmpty>
+              </SubscriptionButtonEmpty>
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>

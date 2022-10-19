@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import {
   EuiCard,
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiButton,
   EuiTextColor,
   EuiImage,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { useNavigation } from '../../lib/kibana';
+import { SubscriptionButton } from '@kbn/subscription-tracking';
+import type { SubscriptionContext } from '@kbn/subscription-tracking';
 import * as i18n from './translations';
 import paywallPng from '../../images/entity_paywall.png';
 
@@ -41,15 +41,12 @@ const StyledEuiCard = styled(EuiCard)`
   }
 `;
 
+const subscriptionContext: SubscriptionContext = {
+  feature: 'entity-analytics',
+  source: 'security__entity-analytics',
+};
+
 export const Paywall = memo(({ heading }: { heading?: string }) => {
-  const { getAppUrl, navigateTo } = useNavigation();
-  const subscriptionUrl = getAppUrl({
-    appId: 'management',
-    path: 'stack/license_management',
-  });
-  const goToSubscription = useCallback(() => {
-    navigateTo({ url: subscriptionUrl });
-  }, [navigateTo, subscriptionUrl]);
   return (
     <PaywallDiv>
       <StyledEuiCard
@@ -74,9 +71,9 @@ export const Paywall = memo(({ heading }: { heading?: string }) => {
             </EuiFlexItem>
             <EuiFlexItem>
               <div>
-                <EuiButton onClick={goToSubscription} fill>
+                <SubscriptionButton subscriptionContext={subscriptionContext} fill>
                   {i18n.UPGRADE_BUTTON}
-                </EuiButton>
+                </SubscriptionButton>
               </div>
             </EuiFlexItem>
           </EuiText>

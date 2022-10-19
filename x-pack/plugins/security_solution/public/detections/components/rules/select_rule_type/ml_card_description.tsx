@@ -6,9 +6,10 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiLink } from '@elastic/eui';
+
 import styled from 'styled-components';
 import React from 'react';
+import { EuiLink } from '@elastic/eui';
 
 import { ML_TYPE_DESCRIPTION } from './translations';
 

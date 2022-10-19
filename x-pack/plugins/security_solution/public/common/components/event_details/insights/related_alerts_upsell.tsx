@@ -25,7 +25,7 @@ const StyledIcon = euiStyled(EuiIcon)`
 
 const subscriptionContext: SubscriptionContext = {
   feature: 'alert-details-insights',
-  source: 'security::alert-details-flyout',
+  source: 'security__alert-details-flyout',
 };
 
 export const RelatedAlertsUpsell = React.memo(() => {
