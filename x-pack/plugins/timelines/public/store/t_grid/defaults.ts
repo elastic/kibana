@@ -65,14 +65,9 @@ export const tGridDefaults: SubsetTGridModel = {
   columns: defaultHeaders,
   defaultColumns: defaultHeaders,
   dataViewId: null,
-  dateRange: { start: '', end: '' },
   deletedEventIds: [],
-  excludedRowRendererIds: [],
   expandedDetail: {},
   filters: [],
-  kqlQuery: {
-    filterQuery: null,
-  },
   indexNames: [],
   isLoading: false,
   isSelectAllChecked: false,
@@ -89,14 +84,14 @@ export const tGridDefaults: SubsetTGridModel = {
       sortDirection: Direction.desc,
     },
   ],
-  savedObjectId: null,
-  version: null,
+  graphEventId: '',
+  sessionViewConfig: null,
+  queryFields: [],
 };
 
 export const getTGridManageDefaults = (id: string) => ({
   defaultColumns: defaultHeaders,
   loadingText: i18n.LOADING_EVENTS,
-  footerText: i18n.TOTAL_COUNT_OF_EVENTS,
   documentType: '',
   selectAll: false,
   id,
@@ -104,4 +99,5 @@ export const getTGridManageDefaults = (id: string) => ({
   queryFields: [],
   title: '',
   unit: (n: number) => i18n.UNIT(n),
+  graphEventId: '',
 });
