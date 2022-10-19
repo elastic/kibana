@@ -9,6 +9,7 @@ import type { CSSProperties } from 'react';
 import React, { memo } from 'react';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import { getHostActionFileDownloadUrl } from '../../services/response_actions/get_host_action_file_download_url';
@@ -28,13 +29,19 @@ export interface ResponseActionFileDownloadLinkProps {
 }
 
 /**
- * Displays the download link for a file retrieved via a Response Action.
+ * Displays the download link for a file retrieved via a Response Action. The download link
+ * button will only be displayed if the user has authorization to use file operations.
  *
  * NOTE: Currently displays only the link for the first host in the Action
  */
 export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLinkProps>(
   ({ action, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const { canWriteFileOperations } = useUserPrivileges().endpointPrivileges;
+
+    if (!canWriteFileOperations) {
+      return null;
+    }
 
     return (
       <>

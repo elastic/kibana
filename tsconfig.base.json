@@ -51,6 +51,8 @@
       "@kbn/ui-actions-explorer-plugin/*": ["examples/ui_actions_explorer/*"],
       "@kbn/user-profile-examples-plugin": ["examples/user_profile_examples"],
       "@kbn/user-profile-examples-plugin/*": ["examples/user_profile_examples/*"],
+      "@kbn/dev-plugin": ["plugins/dev_plugin"],
+      "@kbn/dev-plugin/*": ["plugins/dev_plugin/*"],
       "@kbn/advanced-settings-plugin": ["src/plugins/advanced_settings"],
       "@kbn/advanced-settings-plugin/*": ["src/plugins/advanced_settings/*"],
       "@kbn/bfetch-plugin": ["src/plugins/bfetch"],
