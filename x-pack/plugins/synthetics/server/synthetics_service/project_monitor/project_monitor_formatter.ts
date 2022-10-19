@@ -140,7 +140,6 @@ export class ProjectMonitorFormatter {
     } = await this.server.fleet.authz.fromRequest(this.request);
 
     this.writeIntegrationPoliciesPermissions = writeIntegrationPolicies;
-    console.warn('writePermissions', writeIntegrationPolicies);
 
     if (!writeIntegrationPolicies) {
       throw new Error(INSUFFICIENT_FLEET_PERMISSIONS);
