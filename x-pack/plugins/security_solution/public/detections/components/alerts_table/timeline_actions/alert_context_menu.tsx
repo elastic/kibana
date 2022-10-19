@@ -160,7 +160,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   } = useExceptionFlyout({
     refetch: refetchAll,
     onRuleChange,
-    timelineId,
     isActiveTimelines: isActiveTimeline(scopeId ?? ''),
   });
 
