@@ -816,6 +816,20 @@
           "title"
         ],
         "properties": {
+          "assignees": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "uid": {
+                  "type": "string",
+                  "description": "A user identifier to assign to the case.",
+                  "example": "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+                }
+              }
+            }
+          },
           "connector": {
             "oneOf": [
               {
@@ -1272,6 +1286,19 @@
           "version"
         ],
         "properties": {
+          "assignees": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "uid": {
+                  "type": "string",
+                  "example": "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+                }
+              }
+            }
+          },
           "closed_at": {
             "type": "string",
             "format": "date-time",
@@ -1417,6 +1444,20 @@
                 "version"
               ],
               "properties": {
+                "assignees": {
+                  "type": "array",
+                  "nullable": true,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "uid": {
+                        "type": "string",
+                        "description": "A user identifier to assign to the case.",
+                        "example": "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+                      }
+                    }
+                  }
+                },
                 "connector": {
                   "oneOf": [
                     {
@@ -1746,6 +1787,7 @@
           "tags": [
             "tag 1"
           ],
+          "assignees": [],
           "description": "A case description.",
           "settings": {
             "syncAlerts": false
@@ -1840,6 +1882,7 @@
               "full_name": null,
               "username": "elastic"
             },
+            "assignees": [],
             "connector": {
               "id": "131d4448-abe0-4789-939d-8ef60680b498",
               "name": "My connector",

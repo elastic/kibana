@@ -22,7 +22,16 @@ required:
   - updated_at
   - updated_by
   - version
-properties: 
+properties:
+  assignees:
+    type: array
+    nullable: true
+    items:
+      type: object
+      properties:
+        uid:
+          type: string
+          example: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
   closed_at:
     type: string
     format: date-time

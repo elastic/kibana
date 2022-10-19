@@ -13,7 +13,17 @@ properties:
       required:
         - id
         - version
-      properties: 
+      properties:
+        assignees:
+          type: array
+          nullable: true
+          items:
+            type: object
+            properties:
+              uid:
+                type: string
+                description: A user identifier to assign to the case.
+                example: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
         connector:
           oneOf:
             - $ref: 'connector_properties_none.yaml'
