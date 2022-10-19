@@ -50,10 +50,9 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   onFilterField,
 }: GroupedFieldsParams<T>): GroupedFieldsResult<T> {
   const [dataView, setDataView] = useState<DataView | null>(null);
-  const fieldsExistenceInfoUnavailable: boolean =
-    dataViewId && fieldsExistenceReader
-      ? fieldsExistenceReader.isFieldsExistenceInfoUnavailable(dataViewId)
-      : false;
+  const fieldsExistenceInfoUnavailable: boolean = dataViewId
+    ? fieldsExistenceReader?.isFieldsExistenceInfoUnavailable(dataViewId) ?? false
+    : true;
   const hasFieldDataHandler =
     dataViewId && fieldsExistenceReader
       ? fieldsExistenceReader.hasFieldData
@@ -126,13 +125,14 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         fieldCount: groupedFields.availableFields.length,
         isInitiallyOpen: true,
         showInAccordion: true,
-        title: fieldsExistenceInfoUnavailable
-          ? i18n.translate('unifiedFieldList.useGroupedFields.allFieldsLabel', {
-              defaultMessage: 'All fields',
-            })
-          : i18n.translate('unifiedFieldList.useGroupedFields.availableFieldsLabel', {
-              defaultMessage: 'Available fields',
-            }),
+        title:
+          dataViewId && fieldsExistenceInfoUnavailable
+            ? i18n.translate('unifiedFieldList.useGroupedFields.allFieldsLabel', {
+                defaultMessage: 'All fields',
+              })
+            : i18n.translate('unifiedFieldList.useGroupedFields.availableFieldsLabel', {
+                defaultMessage: 'Available fields',
+              }),
         helpText: i18n.translate('unifiedFieldList.useGroupedFields.allFieldsLabelHelp', {
           defaultMessage: 'Data view fields', // TODO: what text should be in here by default?
         }),
@@ -156,6 +156,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         isInitiallyOpen: false,
         showInAccordion: true,
         hideDetails: false,
+        hideIfEmpty: !dataViewId,
         title: i18n.translate('unifiedFieldList.useGroupedFields.emptyFieldsLabel', {
           defaultMessage: 'Empty fields',
         }),
@@ -177,6 +178,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         isInitiallyOpen: false,
         showInAccordion: true,
         hideDetails: false,
+        hideIfEmpty: !dataViewId,
         title: i18n.translate('unifiedFieldList.useGroupedFields.metaFieldsLabel', {
           defaultMessage: 'Meta fields',
         }),

@@ -7,15 +7,26 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import {
+  stubDataViewWithoutTimeField,
+  stubLogstashDataView as dataView,
+} from '@kbn/data-views-plugin/common/data_view.stub';
+import { createStubDataView, stubFieldSpecMap } from '@kbn/data-plugin/public/stubs';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { type GroupedFieldsParams, useGroupedFields } from './use_grouped_fields';
-import { ExistenceFetchStatus, FieldsGroupNames } from '../types';
+import { ExistenceFetchStatus, FieldListGroups, FieldsGroupNames } from '../types';
 
 describe('UnifiedFieldList useGroupedFields()', () => {
   let mockedServices: GroupedFieldsParams<DataViewField>['services'];
   const allFields = dataView.fields;
+  const anotherDataView = createStubDataView({
+    spec: {
+      id: 'another-data-view',
+      title: 'logstash-0',
+      fields: stubFieldSpecMap,
+    },
+  });
 
   beforeEach(() => {
     const dataViews = dataViewPluginMocks.createStartContract();
@@ -24,7 +35,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     };
 
     dataViews.get.mockImplementation(async (id: string) => {
-      return dataView;
+      return [dataView, stubDataViewWithoutTimeField].find((dw) => dw.id === id)!;
     });
   });
 
@@ -177,13 +188,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       Object.keys(fieldGroups!).map(
         (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
       )
-    ).toStrictEqual([
-      'SpecialFields-0',
-      'SelectedFields-0',
-      'AvailableFields-28',
-      'EmptyFields-0',
-      'MetaFields-0',
-    ]);
+    ).toStrictEqual(['SpecialFields-0', 'SelectedFields-0', 'AvailableFields-28', 'MetaFields-0']);
   });
 
   it('should work correctly when details are overwritten', async () => {
@@ -210,25 +215,28 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     expect(fieldGroups[FieldsGroupNames.AvailableFields]?.helpText).not.toBe('test');
   });
 
-  it('should work correctly when existence info is available', async () => {
-    const { result, waitForNextUpdate } = renderHook(() =>
-      useGroupedFields({
-        dataViewId: dataView.id!,
-        allFields,
-        services: mockedServices,
-        fieldsExistenceReader: {
-          hasFieldData: (dataViewId, fieldName) => {
-            return dataViewId === dataView.id! && ['bytes', 'extension'].includes(fieldName);
-          },
-          getFieldsExistenceStatus: () => ExistenceFetchStatus.succeeded,
-          isFieldsExistenceInfoUnavailable: () => false,
+  it('should work correctly when existence info is available only for one data view', async () => {
+    const knownDataViewId = dataView.id!;
+    let fieldGroups: FieldListGroups<DataViewField>;
+    const props: GroupedFieldsParams<DataViewField> = {
+      dataViewId: dataView.id!,
+      allFields,
+      services: mockedServices,
+      fieldsExistenceReader: {
+        hasFieldData: (dataViewId, fieldName) => {
+          return dataViewId === knownDataViewId && ['bytes', 'extension'].includes(fieldName);
         },
-      })
-    );
+        getFieldsExistenceStatus: (dataViewId) =>
+          dataViewId === knownDataViewId
+            ? ExistenceFetchStatus.succeeded
+            : ExistenceFetchStatus.unknown,
+        isFieldsExistenceInfoUnavailable: (dataViewId) => dataViewId !== knownDataViewId,
+      },
+    };
+    const hook1 = renderHook(() => useGroupedFields(props));
+    await hook1.waitForNextUpdate();
 
-    await waitForNextUpdate();
-
-    const fieldGroups = result.current.fieldGroups;
+    fieldGroups = hook1.result.current.fieldGroups;
 
     expect(
       Object.keys(fieldGroups!).map(
@@ -241,5 +249,22 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'EmptyFields-23',
       'MetaFields-3',
     ]);
+
+    const hook2 = renderHook(() =>
+      useGroupedFields({
+        ...props,
+        dataViewId: anotherDataView.id!,
+        allFields: anotherDataView.fields,
+      })
+    );
+    await hook2.waitForNextUpdate();
+
+    fieldGroups = hook2.result.current.fieldGroups;
+
+    expect(
+      Object.keys(fieldGroups!).map(
+        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+      )
+    ).toStrictEqual(['SpecialFields-0', 'SelectedFields-0', 'AvailableFields-8', 'MetaFields-0']);
   });
 });

@@ -209,15 +209,16 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
       hookParams: {
         dataViewId: null,
         allFields,
+        onSelectedFieldFilter: (field) => field.name === 'bytes',
       },
     });
 
     expect(
       wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
-    ).toBe('28 available fields. 0 empty fields. 0 meta fields.');
+    ).toBe('1 selected field. 28 available fields.');
     expect(
       wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('paginatedFields').length)
-    ).toStrictEqual([28, 0, 0]);
+    ).toStrictEqual([1, 28]);
   });
 
   it('renders correctly when Meta gets open', async () => {

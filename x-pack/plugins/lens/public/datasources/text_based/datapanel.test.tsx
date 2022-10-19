@@ -220,6 +220,9 @@ describe('TextBased Query Languages Data Panel', () => {
         .find(FieldButton)
         .map((fieldItem) => fieldItem.prop('fieldName'))
     ).toEqual(['bytes', 'memory', 'timestamp']);
+
+    expect(wrapper.find('[data-test-subj="fieldListGroupedEmptyFields"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="fieldListGroupedMetaFields"]').exists()).toBe(false);
   });
 
   it('should not display the selected fields accordion if there are no fields displayed', async () => {

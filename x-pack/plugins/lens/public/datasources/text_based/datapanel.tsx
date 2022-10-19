@@ -106,11 +106,6 @@ export function TextBasedDataPanel({
         }),
       };
     }
-    if (groupName === FieldsGroupNames.EmptyFields || groupName === FieldsGroupNames.MetaFields) {
-      return {
-        hideIfEmpty: true,
-      };
-    }
   }, []);
 
   const { fieldGroups } = useGroupedFields<DatatableColumn>({

@@ -112,8 +112,9 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
             >
               {hasSyncedExistingFields
                 ? [
-                    (!fieldGroups.SelectedFields?.hideIfEmpty ||
-                      fieldGroups.SelectedFields?.fields?.length > 0) &&
+                    fieldGroups.SelectedFields &&
+                      (!fieldGroups.SelectedFields?.hideIfEmpty ||
+                        fieldGroups.SelectedFields?.fields?.length > 0) &&
                       i18n.translate(
                         'unifiedFieldList.fieldListGrouped.fieldSearchForSelectedFieldsLiveRegion',
                         {
@@ -135,8 +136,9 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                           },
                         }
                       ),
-                    (!fieldGroups.EmptyFields?.hideIfEmpty ||
-                      fieldGroups.EmptyFields?.fields?.length > 0) &&
+                    fieldGroups.EmptyFields &&
+                      (!fieldGroups.EmptyFields?.hideIfEmpty ||
+                        fieldGroups.EmptyFields?.fields?.length > 0) &&
                       i18n.translate(
                         'unifiedFieldList.fieldListGrouped.fieldSearchForEmptyFieldsLiveRegion',
                         {
@@ -147,8 +149,9 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                           },
                         }
                       ),
-                    (!fieldGroups.MetaFields?.hideIfEmpty ||
-                      fieldGroups.MetaFields?.fields?.length > 0) &&
+                    fieldGroups.MetaFields &&
+                      (!fieldGroups.MetaFields?.hideIfEmpty ||
+                        fieldGroups.MetaFields?.fields?.length > 0) &&
                       i18n.translate(
                         'unifiedFieldList.fieldListGrouped.fieldSearchForMetaFieldsLiveRegion',
                         {
