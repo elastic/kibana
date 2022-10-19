@@ -25,13 +25,13 @@ const constants: LinkCardConstants = {
   observability: {
     i18nTexts: {
       title: i18n.translate(
-        'home.guidedOnboarding.gettingStarted.linkCard.observability.cardTitle',
+        'guidedOnboardingPackage.gettingStarted.linkCard.observability.cardTitle',
         {
           defaultMessage: 'Observe my data',
         }
       ),
       description: i18n.translate(
-        'home.guidedOnboarding.gettingStarted.linkCard.observability.cardDescription',
+        'guidedOnboardingPackage.gettingStarted.linkCard.observability.cardDescription',
         {
           defaultMessage:
             'Bring together application, infrastructure, and user data into a unified solution for end-to-end observability and alerting.',
@@ -64,7 +64,7 @@ export const ObservabilityLinkCard = ({
           fill
           onClick={navigateToIntegrations}
         >
-          {i18n.translate('home.guidedOnboarding.gettingStarted.linkCard.buttonLabel', {
+          {i18n.translate('guidedOnboardingPackage.gettingStarted.linkCard.buttonLabel', {
             defaultMessage: 'View integrations',
           })}
         </EuiButton>

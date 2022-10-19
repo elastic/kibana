@@ -19,29 +19,29 @@ type UseCaseConstants = {
 };
 const constants: UseCaseConstants = {
   search: {
-    logAltText: i18n.translate('home.guidedOnboarding.gettingStarted.search.iconName', {
+    logAltText: i18n.translate('guidedOnboardingPackage.gettingStarted.search.iconName', {
       defaultMessage: 'Enterprise Search logo',
     }),
-    betaBadgeLabel: i18n.translate('home.guidedOnboarding.gettingStarted.search.betaBadgeLabel', {
+    betaBadgeLabel: i18n.translate('guidedOnboardingPackage.gettingStarted.search.betaBadgeLabel', {
       defaultMessage: 'search',
     }),
   },
   observability: {
-    logAltText: i18n.translate('home.guidedOnboarding.gettingStarted.observability.iconName', {
+    logAltText: i18n.translate('guidedOnboardingPackage.gettingStarted.observability.iconName', {
       defaultMessage: 'Observability logo',
     }),
     betaBadgeLabel: i18n.translate(
-      'home.guidedOnboarding.gettingStarted.observability.betaBadgeLabel',
+      'guidedOnboardingPackage.gettingStarted.observability.betaBadgeLabel',
       {
         defaultMessage: 'observe',
       }
     ),
   },
   security: {
-    logAltText: i18n.translate('home.guidedOnboarding.gettingStarted.security.iconName', {
+    logAltText: i18n.translate('guidedOnboardingPackage.gettingStarted.security.iconName', {
       defaultMessage: 'Security logo',
     }),
-    betaBadgeLabel: i18n.translate('home.guidedOnboarding.gettingStarted.security.betaBadgeLabel', {
+    betaBadgeLabel: i18n.translate('guidedOnboardingPackage.gettingStarted.security.betaBadgeLabel', {
       defaultMessage: 'security',
     }),
   },

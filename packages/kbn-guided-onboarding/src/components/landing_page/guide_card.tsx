@@ -24,11 +24,11 @@ type GuideCardConstants = {
 const constants: GuideCardConstants = {
   search: {
     i18nTexts: {
-      title: i18n.translate('home.guidedOnboarding.gettingStarted.guideCard.search.cardTitle', {
+      title: i18n.translate('guidedOnboardingPackage.gettingStarted.guideCard.search.cardTitle', {
         defaultMessage: 'Search my data',
       }),
       description: i18n.translate(
-        'home.guidedOnboarding.gettingStarted.guideCard.search.cardDescription',
+        'guidedOnboardingPackage.gettingStarted.guideCard.search.cardDescription',
         {
           defaultMessage:
             'Create a finely-tuned search experience for your websites, applications, workplace content, and more.',
@@ -39,13 +39,13 @@ const constants: GuideCardConstants = {
   observability: {
     i18nTexts: {
       title: i18n.translate(
-        'home.guidedOnboarding.gettingStarted.guideCard.observability.cardTitle',
+        'guidedOnboardingPackage.gettingStarted.guideCard.observability.cardTitle',
         {
           defaultMessage: 'Monitor my environments',
         }
       ),
       description: i18n.translate(
-        'home.guidedOnboarding.gettingStarted.guideCard.observability.cardDescription',
+        'guidedOnboardingPackage.gettingStarted.guideCard.observability.cardDescription',
         {
           defaultMessage:
             'Get end-to-end observability into your environments by consolidating your logs, metrics, and traces.',
@@ -55,11 +55,11 @@ const constants: GuideCardConstants = {
   },
   security: {
     i18nTexts: {
-      title: i18n.translate('home.guidedOnboarding.gettingStarted.guideCard.security.cardTitle', {
+      title: i18n.translate('guidedOnboardingPackage.gettingStarted.guideCard.security.cardTitle', {
         defaultMessage: 'Protect my environment',
       }),
       description: i18n.translate(
-        'home.guidedOnboarding.gettingStarted.guideCard.security.cardDescription',
+        'guidedOnboardingPackage.gettingStarted.guideCard.security.cardDescription',
         {
           defaultMessage:
             'Protect your environment against threats by unifying SIEM, endpoint security, and cloud security in one place.',

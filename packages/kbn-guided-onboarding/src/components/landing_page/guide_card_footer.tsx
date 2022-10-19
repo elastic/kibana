@@ -30,7 +30,7 @@ export const GuideCardFooter = ({
         fill
         onClick={() => activateGuide(useCase, guideState)}
       >
-        {i18n.translate('home.guidedOnboarding.gettingStarted.guideCard.startGuide.buttonLabel', {
+        {i18n.translate('guidedOnboardingPackage.gettingStarted.guideCard.startGuide.buttonLabel', {
           defaultMessage: 'View guide',
         })}
       </EuiButton>
@@ -43,7 +43,7 @@ export const GuideCardFooter = ({
   const { status, steps } = guideState;
   const numberSteps = steps.length;
   const numberCompleteSteps = steps.filter((step) => step.status === 'complete').length;
-  const stepsLabel = i18n.translate('home.guidedOnboarding.gettingStarted.guideCard.stepsLabel', {
+  const stepsLabel = i18n.translate('guidedOnboardingPackage.gettingStarted.guideCard.stepsLabel', {
     defaultMessage: '{progress} steps',
     values: {
       progress: `${numberCompleteSteps}/${numberSteps}`,
@@ -59,7 +59,7 @@ export const GuideCardFooter = ({
           max={numberSteps}
           size="s"
           label={i18n.translate(
-            'home.guidedOnboarding.gettingStarted.guideCard.progress.completedLabel',
+            'guidedOnboardingPackage.gettingStarted.guideCard.progress.completedLabel',
             {
               defaultMessage: 'Completed',
             }
@@ -74,7 +74,7 @@ export const GuideCardFooter = ({
             onClick={() => activateGuide(useCase, guideState)}
           >
             {i18n.translate(
-              'home.guidedOnboarding.gettingStarted.guideCard.startGuide.buttonLabel',
+              'guidedOnboardingPackage.gettingStarted.guideCard.startGuide.buttonLabel',
               {
                 defaultMessage: 'View guide',
               }
@@ -93,7 +93,7 @@ export const GuideCardFooter = ({
         max={numberSteps}
         size="s"
         label={i18n.translate(
-          'home.guidedOnboarding.gettingStarted.guideCard.progress.inProgressLabel',
+          'guidedOnboardingPackage.gettingStarted.guideCard.progress.inProgressLabel',
           {
             defaultMessage: 'In progress',
           }
@@ -108,7 +108,7 @@ export const GuideCardFooter = ({
           onClick={() => activateGuide(useCase, guideState)}
         >
           {i18n.translate(
-            'home.guidedOnboarding.gettingStarted.guideCard.continueGuide.buttonLabel',
+            'guidedOnboardingPackage.gettingStarted.guideCard.continueGuide.buttonLabel',
             {
               defaultMessage: 'Continue',
             }
