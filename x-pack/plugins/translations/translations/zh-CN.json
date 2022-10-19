@@ -1051,7 +1051,6 @@
     "data.mgmt.searchSessions.status.expiresSoonInHours": "此会话将于 {numHours} 小时后过期",
     "data.mgmt.searchSessions.status.expiresSoonInHoursTooltip": "{numHours} 小时",
     "data.mgmt.searchSessions.status.message.createdOn": "于 {expireDate}过期",
-    "data.mgmt.searchSessions.status.message.error": "错误：{error}",
     "data.mgmt.searchSessions.status.message.expiredOn": "已于 {expireDate}过期",
     "data.painlessError.painlessScriptedFieldErrorMessage": "在索引模式 {indexPatternName} 上执行运行时字段或脚本字段时出错",
     "data.parseEsInterval.invalidEsCalendarIntervalErrorMessage": "无效的日历时间间隔：{interval}，值必须为 1",
