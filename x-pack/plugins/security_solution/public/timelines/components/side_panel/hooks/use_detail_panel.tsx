@@ -95,8 +95,8 @@ export const useDetailPanel = ({
         }
       }
     },
-    [scopedActions, scopeId, dispatch, tabType, selectedPatterns]);
-
+    [scopedActions, scopeId, dispatch, tabType]
+  );
 
   const openEventDetailsPanel = useCallback(
     (eventId?: string, onClose?: () => void) => {
