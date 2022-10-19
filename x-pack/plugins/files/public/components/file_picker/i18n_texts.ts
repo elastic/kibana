@@ -40,4 +40,7 @@ export const i18nTexts = {
   loadMoreButtonLabel: i18n.translate('xpack.files.filePicker.loadMoreButtonLabel', {
     defaultMessage: 'Load more',
   }),
+  clearFilterButton: i18n.translate('xpack.files.filePicker.clearFilterButtonLabel', {
+    defaultMessage: 'Clear filter',
+  }),
 };

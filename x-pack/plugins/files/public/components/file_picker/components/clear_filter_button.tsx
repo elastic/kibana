@@ -11,6 +11,8 @@ import { EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useFilePickerContext } from '../context';
 
+import { i18nTexts } from '../i18n_texts';
+
 interface Props {
   onClick: () => void;
 }
@@ -28,7 +30,7 @@ export const ClearFilterButton: FunctionComponent<Props> = ({ onClick }) => {
         place-items: center;
       `}
     >
-      <EuiLink onClick={onClick}>Clear filter</EuiLink>
+      <EuiLink onClick={onClick}>{i18nTexts.clearFilterButton}</EuiLink>
     </div>
   );
 };
