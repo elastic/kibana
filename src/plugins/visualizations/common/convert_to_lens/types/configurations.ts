@@ -314,16 +314,10 @@ export type HeatmapLayerState = HeatmapArguments & {
 
 export type Palette = PaletteOutput<CustomPaletteParams> & { accessor: string };
 
-export type HeatmapVisualizationState = HeatmapLayerState & {
+export type HeatmapConfiguration = HeatmapLayerState & {
   // need to store the current accessor to reset the color stops at accessor change
   palette?: Palette;
 };
-
-export interface HeatmapConfiguration {
-  shape: PartitionChartType;
-  layers: PartitionLayerState[];
-  palette?: PaletteOutput;
-}
 
 export type Configuration =
   | XYConfiguration
