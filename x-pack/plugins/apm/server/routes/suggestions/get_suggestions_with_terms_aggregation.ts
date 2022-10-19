@@ -23,7 +23,7 @@ export async function getSuggestionsWithTermsAggregation({
   fieldName: string;
   fieldValue: string;
   searchAggregatedTransactions: boolean;
-  serviceName: string;
+  serviceName?: string;
   setup: Setup;
   size: number;
   start: number;

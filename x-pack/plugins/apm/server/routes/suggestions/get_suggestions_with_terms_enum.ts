@@ -8,7 +8,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { Setup } from '../../lib/helpers/setup_request';
 
-export async function getSuggestions({
+export async function getSuggestionsWithTermsEnum({
   fieldName,
   fieldValue,
   searchAggregatedTransactions,
@@ -27,30 +27,33 @@ export async function getSuggestions({
 }) {
   const { apmEventClient } = setup;
 
-  const response = await apmEventClient.termsEnum('get_suggestions', {
-    apm: {
-      events: [
-        getProcessorEventForTransactions(searchAggregatedTransactions),
-        ProcessorEvent.error,
-        ProcessorEvent.metric,
-      ],
-    },
-    body: {
-      case_insensitive: true,
-      field: fieldName,
-      size,
-      string: fieldValue,
-      index_filter: {
-        range: {
-          ['@timestamp']: {
-            gte: start,
-            lte: end,
-            format: 'epoch_millis',
+  const response = await apmEventClient.termsEnum(
+    'get_suggestions_with_terms_enum',
+    {
+      apm: {
+        events: [
+          getProcessorEventForTransactions(searchAggregatedTransactions),
+          ProcessorEvent.error,
+          ProcessorEvent.metric,
+        ],
+      },
+      body: {
+        case_insensitive: true,
+        field: fieldName,
+        size,
+        string: fieldValue,
+        index_filter: {
+          range: {
+            ['@timestamp']: {
+              gte: start,
+              lte: end,
+              format: 'epoch_millis',
+            },
           },
         },
       },
-    },
-  });
+    }
+  );
 
   return { terms: response.terms };
 }
