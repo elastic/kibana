@@ -254,7 +254,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                       />
                     </SettingsTitleCell>
                     <td>
-                      <EuiTitle size="xs" data-test-subj="installedVersion">
+                      <EuiTitle size="xs" data-test-subj="epmSettings.installedVersionTitle">
                         <span>{installedVersion}</span>
                       </EuiTitle>
                     </td>
@@ -267,7 +267,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
                       />
                     </SettingsTitleCell>
                     <td>
-                      <EuiTitle size="xs" data-test-subj="latestVersion">
+                      <EuiTitle size="xs" data-test-subj="epmSettings.latestVersionTitle">
                         <span>{latestVersion}</span>
                       </EuiTitle>
                     </td>

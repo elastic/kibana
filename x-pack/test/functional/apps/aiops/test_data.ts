@@ -13,13 +13,20 @@ export const farequoteDataViewTestData: TestData = {
   sourceIndexOrSavedSearch: 'ft_farequote',
   brushTargetTimestamp: 1455033600000,
   expected: {
-    totalDocCountFormatted: '86,274',
+    totalDocCountFormatted: '86,375',
+    analysisGroupsTable: [
+      { docCount: '297', group: 'airline: AAL' },
+      {
+        docCount: '101',
+        group: 'airline: UALcustom_field.keyword: deviation',
+      },
+    ],
     analysisTable: [
       {
         fieldName: 'airline',
         fieldValue: 'AAL',
         logRate: 'Chart type:bar chart',
-        pValue: '4.63e-14',
+        pValue: '5.00e-11',
         impact: 'High',
       },
     ],

@@ -39,6 +39,7 @@ the data view is updated. The default is `false`.
 You can partially update the following fields:
 
 * `title`
+* `name`
 * `timeFieldName`
 * `fields`
 * `sourceFilters`
@@ -93,6 +94,7 @@ $ curl -X POST api/data_views/data-view/my-view
 {
   "data_view": {
     "title": "...",
+    "name": "...",
     "timeFieldName": "...",
     "sourceFilters": [],
     "fieldFormats": {},

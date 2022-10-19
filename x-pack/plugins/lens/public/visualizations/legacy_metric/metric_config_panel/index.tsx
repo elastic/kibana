@@ -8,12 +8,12 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, htmlIdGenerator } from '@elastic/eui';
 import type { VisualizationToolbarProps } from '../../../types';
-import type { MetricState } from '../../../../common/types';
+import type { LegacyMetricState } from '../../../../common/types';
 
 import { AppearanceOptionsPopover } from './appearance_options_popover';
 
 export const MetricToolbar = memo(function MetricToolbar(
-  props: VisualizationToolbarProps<MetricState>
+  props: VisualizationToolbarProps<LegacyMetricState>
 ) {
   const { state, setState, frame } = props;
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { InputsModelId } from '../store/inputs/constants';
 import {
   Direction,
   FlowTarget,
@@ -28,7 +29,13 @@ import {
   DEFAULT_SIGNALS_INDEX,
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
-import { TimelineType, TimelineStatus, TimelineTabs } from '../../../common/types/timeline';
+import {
+  TimelineType,
+  TimelineStatus,
+  TimelineTabs,
+  TableId,
+  TimelineId,
+} from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
@@ -74,11 +81,14 @@ export const mockGlobalState: State = {
         },
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
-        anomalies: null,
+        anomalies: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
         hostRisk: {
           activePage: 0,
           limit: 10,
-          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+          sort: { field: RiskScoreFields.hostRiskScore, direction: Direction.desc },
           severitySelection: [],
         },
         sessions: { activePage: 0, limit: 10 },
@@ -95,11 +105,14 @@ export const mockGlobalState: State = {
         },
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
-        anomalies: null,
+        anomalies: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
         hostRisk: {
           activePage: 0,
           limit: 10,
-          sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
+          sort: { field: RiskScoreFields.hostRiskScore, direction: Direction.desc },
           severitySelection: [],
         },
         sessions: { activePage: 0, limit: 10 },
@@ -149,6 +162,10 @@ export const mockGlobalState: State = {
           activePage: 0,
           limit: 10,
         },
+        [networkModel.NetworkTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
       },
     },
     details: {
@@ -189,6 +206,10 @@ export const mockGlobalState: State = {
           limit: 10,
           sort: { direction: Direction.desc },
         },
+        [networkModel.NetworkTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
       },
     },
   },
@@ -204,7 +225,10 @@ export const mockGlobalState: State = {
           activePage: 0,
           limit: 10,
         },
-        [usersModel.UsersTableType.anomalies]: null,
+        [usersModel.UsersTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
         [usersModel.UsersTableType.risk]: {
           activePage: 0,
           limit: 10,
@@ -219,7 +243,10 @@ export const mockGlobalState: State = {
     },
     details: {
       queries: {
-        [usersModel.UsersTableType.anomalies]: null,
+        [usersModel.UsersTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
         [usersModel.UsersTableType.events]: { activePage: 0, limit: 10 },
       },
     },
@@ -233,7 +260,7 @@ export const mockGlobalState: State = {
         from: '2020-07-07T08:20:18.966Z',
         to: '2020-07-08T08:20:18.966Z',
       },
-      linkTo: ['timeline'],
+      linkTo: [InputsModelId.timeline, InputsModelId.socTrends],
       queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
       query: {
@@ -250,7 +277,7 @@ export const mockGlobalState: State = {
         from: '2020-07-07T08:20:18.966Z',
         to: '2020-07-08T08:20:18.966Z',
       },
-      linkTo: ['global'],
+      linkTo: [InputsModelId.global, InputsModelId.socTrends],
       queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
       query: {
@@ -258,6 +285,17 @@ export const mockGlobalState: State = {
         language: 'kuery',
       },
       filters: [],
+    },
+    socTrends: {
+      timerange: {
+        kind: 'relative',
+        fromStr: DEFAULT_FROM,
+        toStr: DEFAULT_TO,
+        from: '2020-07-06T08:20:18.966Z',
+        to: '2020-07-07T08:20:18.966Z',
+      },
+      linkTo: [InputsModelId.global, InputsModelId.timeline],
+      policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
     },
   },
   dragAndDrop: { dataProviders: {} },
@@ -268,15 +306,14 @@ export const mockGlobalState: State = {
       newTimelineModel: null,
     },
     timelineById: {
-      test: {
+      [TimelineId.test]: {
         activeTab: TimelineTabs.query,
         prevActiveTab: TimelineTabs.notes,
         dataViewId: DEFAULT_DATA_VIEW_ID,
         deletedEventIds: [],
         documentType: '',
         queryFields: [],
-        selectAll: false,
-        id: 'test',
+        id: TimelineId.test,
         savedObjectId: null,
         columns: defaultHeaders,
         defaultColumns: defaultHeaders,
@@ -296,7 +333,6 @@ export const mockGlobalState: State = {
         historyIds: [],
         isFavorite: false,
         isLive: false,
-        isSelectAllChecked: false,
         isLoading: false,
         kqlMode: 'filter',
         kqlQuery: { filterQuery: null },
@@ -310,10 +346,8 @@ export const mockGlobalState: State = {
           start: '2020-07-07T08:20:18.966Z',
           end: '2020-07-08T08:20:18.966Z',
         },
-        selectedEventIds: {},
         sessionViewConfig: null,
         show: false,
-        showCheckboxes: false,
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
         itemsPerPageOptions: [5, 10, 20],
@@ -328,9 +362,47 @@ export const mockGlobalState: State = {
         isSaving: false,
         version: null,
         status: TimelineStatus.active,
+        isSelectAllChecked: false,
+        selectedEventIds: {},
       },
     },
     insertTimeline: null,
+  },
+  dataTable: {
+    tableById: {
+      [TableId.test]: {
+        columns: defaultHeaders,
+        defaultColumns: defaultHeaders,
+        dataViewId: 'security-solution-default',
+        deletedEventIds: [],
+        expandedDetail: {},
+        filters: [],
+        indexNames: ['.alerts-security.alerts-default'],
+        isSelectAllChecked: false,
+        itemsPerPage: 25,
+        itemsPerPageOptions: [10, 25, 50, 100],
+        loadingEventIds: [],
+        selectedEventIds: {},
+        showCheckboxes: false,
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: 'desc',
+          },
+        ],
+        graphEventId: '',
+        sessionViewConfig: null,
+        selectAll: false,
+        id: TableId.test,
+        title: '',
+        initialized: true,
+        updated: 1663882629000,
+        isLoading: false,
+        queryFields: [],
+      },
+    },
   },
   sourcerer: {
     ...mockSourcererState,

@@ -37,6 +37,7 @@
         ],
         "path": "packages/kbn-ebt-tools/src/performance_metric_events/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ebt-tools",
@@ -54,6 +55,7 @@
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -84,6 +86,7 @@
         ],
         "path": "packages/kbn-ebt-tools/src/performance_metric_events/helpers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ebt-tools",
@@ -101,6 +104,7 @@
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -123,6 +127,7 @@
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/helpers.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -142,6 +147,7 @@
         ],
         "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ebt-tools",
@@ -153,7 +159,8 @@
               "\nThe name of the event that is tracked in the metrics i.e. kibana_loaded, kibana_started"
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ebt-tools",
@@ -168,7 +175,8 @@
               "Record<string, unknown> | undefined"
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ebt-tools",
@@ -180,7 +188,8 @@
             "label": "duration",
             "description": [],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ebt-tools",
@@ -195,7 +204,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ebt-tools",
@@ -210,7 +220,8 @@
               "number | undefined"
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ebt-tools",
@@ -225,7 +236,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ebt-tools",
@@ -240,7 +252,8 @@
               "number | undefined"
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ebt-tools",
@@ -255,7 +268,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ebt-tools",
@@ -270,7 +284,8 @@
               "number | undefined"
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ebt-tools",
@@ -285,7 +300,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ebt-tools",
@@ -300,7 +316,8 @@
               "number | undefined"
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ebt-tools",
@@ -315,7 +332,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ebt-tools",
@@ -330,7 +348,8 @@
               "number | undefined"
             ],
             "path": "packages/kbn-ebt-tools/src/performance_metric_events/schema.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

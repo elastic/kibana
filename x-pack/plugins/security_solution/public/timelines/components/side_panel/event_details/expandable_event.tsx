@@ -18,18 +18,19 @@ import {
 import React from 'react';
 import styled from 'styled-components';
 
+import type { Ecs } from '../../../../../common/ecs';
 import type { TimelineTabs } from '../../../../../common/types/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
 import { EventDetails } from '../../../../common/components/event_details/event_details';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import type { HostRisk } from '../../../../risk_score/containers';
 
 export type HandleOnEventClosed = () => void;
 interface Props {
   browserFields: BrowserFields;
   detailsData: TimelineEventsDetailsItem[] | null;
+  detailsEcsData: Ecs | null;
   event: { eventId: string; indexName: string };
   isAlert: boolean;
   isDraggable?: boolean;
@@ -37,8 +38,7 @@ interface Props {
   messageHeight?: number;
   rawEventData: object | undefined;
   timelineTabType: TimelineTabs | 'flyout';
-  timelineId: string;
-  hostRisk: HostRisk | null;
+  scopeId: string;
   handleOnEventClosed: HandleOnEventClosed;
   isReadOnly?: boolean;
 }
@@ -101,13 +101,13 @@ export const ExpandableEvent = React.memo<Props>(
   ({
     browserFields,
     event,
-    timelineId,
+    scopeId,
     timelineTabType,
     isAlert,
     isDraggable,
     loading,
     detailsData,
-    hostRisk,
+    detailsEcsData,
     rawEventData,
     handleOnEventClosed,
     isReadOnly,
@@ -126,14 +126,14 @@ export const ExpandableEvent = React.memo<Props>(
           <EventDetails
             browserFields={browserFields}
             data={detailsData ?? []}
+            detailsEcsData={detailsEcsData}
             id={event.eventId}
             isAlert={isAlert}
             indexName={event.indexName}
             isDraggable={isDraggable}
             rawEventData={rawEventData}
-            timelineId={timelineId}
+            scopeId={scopeId}
             timelineTabType={timelineTabType}
-            hostRisk={hostRisk}
             handleOnEventClosed={handleOnEventClosed}
             isReadOnly={isReadOnly}
           />

@@ -6,7 +6,9 @@
  */
 
 import type { ReactNode, FunctionComponent } from 'react';
+import { useMemo } from 'react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
+
 import {
   EuiFlexGrid,
   EuiFlexGroup,
@@ -14,9 +16,13 @@ import {
   EuiLink,
   EuiSpacer,
   EuiTitle,
-  EuiSearchBar,
+  EuiFieldSearch,
   EuiText,
+  useEuiTheme,
+  EuiIcon,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,6 +32,10 @@ import { useLocalSearch, searchIdField } from '../../../hooks';
 
 import type { IntegrationCardItem } from '../../../../../../common/types/models';
 
+import type { ExtendedIntegrationCategory, CategoryFacet } from '../screens/home/category_facets';
+
+import { promoteFeaturedIntegrations } from './utils';
+
 import { PackageCard } from './package_card';
 
 export interface Props {
@@ -33,9 +43,10 @@ export interface Props {
   controls?: ReactNode | ReactNode[];
   title?: string;
   list: IntegrationCardItem[];
-  featuredList?: JSX.Element | null;
   initialSearch?: string;
+  selectedCategory: ExtendedIntegrationCategory;
   setSelectedCategory: (category: string) => void;
+  categories: CategoryFacet[];
   onSearchChange: (search: string) => void;
   showMissingIntegrationMessage?: boolean;
   callout?: JSX.Element | null;
@@ -49,9 +60,10 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   list,
   initialSearch,
   onSearchChange,
+  selectedCategory,
   setSelectedCategory,
+  categories,
   showMissingIntegrationMessage = false,
-  featuredList = null,
   callout,
   showCardLabels = true,
 }) => {
@@ -60,6 +72,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   const menuRef = useRef<HTMLDivElement>(null);
   const [isSticky, setIsSticky] = useState(false);
   const [windowScrollY] = useState(window.scrollY);
+  const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
     const menuRefCurrent = menuRef.current;
@@ -72,29 +85,22 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     return () => window.removeEventListener('scroll', onScroll);
   }, [windowScrollY, isSticky]);
 
-  const onQueryChange = ({
-    queryText: userInput,
-    error,
-  }: {
-    queryText: string;
-    error: { message: string } | null;
-  }) => {
-    if (!error) {
-      onSearchChange(userInput);
-      setSearchTerm(userInput);
-    }
+  const onQueryChange = (e: any) => {
+    const queryText = e.target.value;
+    setSearchTerm(queryText);
+    onSearchChange(queryText);
   };
 
   const resetQuery = () => {
     setSearchTerm('');
   };
 
-  const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
-  let gridContent: JSX.Element;
+  const selectedCategoryTitle = selectedCategory
+    ? categories.find((category) => category.id === selectedCategory)?.title
+    : undefined;
 
-  if (isLoading || !localSearchRef.current) {
-    gridContent = <Loading />;
-  } else {
+  const filteredPromotedList = useMemo(() => {
+    if (isLoading) return [];
     const filteredList = searchTerm
       ? list.filter((item) =>
           (localSearchRef.current!.search(searchTerm) as IntegrationCardItem[])
@@ -102,9 +108,19 @@ export const PackageListGrid: FunctionComponent<Props> = ({
             .includes(item[searchIdField])
         )
       : list;
+
+    return promoteFeaturedIntegrations(filteredList, selectedCategory);
+  }, [isLoading, list, localSearchRef, searchTerm, selectedCategory]);
+
+  const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
+  let gridContent: JSX.Element;
+
+  if (isLoading || !localSearchRef.current) {
+    gridContent = <Loading />;
+  } else {
     gridContent = (
       <GridColumn
-        list={filteredList}
+        list={filteredPromotedList}
         showMissingIntegrationMessage={showMissingIntegrationMessage}
         showCardLabels={showCardLabels}
       />
@@ -113,22 +129,67 @@ export const PackageListGrid: FunctionComponent<Props> = ({
 
   return (
     <>
-      {featuredList}
       <div ref={menuRef}>
-        <EuiFlexGroup alignItems="flexStart" gutterSize="xl">
+        <EuiFlexGroup
+          alignItems="flexStart"
+          gutterSize="xl"
+          data-test-subj="epmList.integrationCards"
+        >
           <EuiFlexItem grow={1} className={isSticky ? 'kbnStickyMenu' : ''}>
             {controlsContent}
           </EuiFlexItem>
           <EuiFlexItem grow={5}>
-            <EuiSearchBar
-              query={searchTerm || undefined}
-              box={{
-                placeholder: i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
-                  defaultMessage: 'Search for integrations',
-                }),
-                incremental: true,
-              }}
-              onChange={onQueryChange}
+            <EuiFieldSearch
+              data-test-subj="epmList.searchBar"
+              placeholder={i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
+                defaultMessage: 'Search for integrations',
+              })}
+              value={searchTerm}
+              onChange={(e) => onQueryChange(e)}
+              isClearable={true}
+              incremental={true}
+              fullWidth={true}
+              prepend={
+                selectedCategoryTitle ? (
+                  <EuiText
+                    data-test-subj="epmList.categoryBadge"
+                    size="xs"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      fontWeight: euiTheme.font.weight.bold,
+                      backgroundColor: euiTheme.colors.lightestShade,
+                    }}
+                  >
+                    <EuiScreenReaderOnly>
+                      <span>Searching category: </span>
+                    </EuiScreenReaderOnly>
+                    {selectedCategoryTitle}
+                    <button
+                      data-test-subj="epmList.categoryBadge.closeBtn"
+                      onClick={() => {
+                        setSelectedCategory('');
+                      }}
+                      aria-label="Remove filter"
+                      style={{
+                        padding: euiTheme.size.xs,
+                        paddingTop: '2px',
+                      }}
+                    >
+                      <EuiIcon
+                        type="cross"
+                        color="text"
+                        size="s"
+                        style={{
+                          width: 'auto',
+                          padding: 0,
+                          backgroundColor: euiTheme.colors.lightestShade,
+                        }}
+                      />
+                    </button>
+                  </EuiText>
+                ) : undefined
+              }
             />
             {callout ? (
               <>

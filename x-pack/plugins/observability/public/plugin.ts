@@ -37,6 +37,7 @@ import {
   RuleTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
 import { registerDataHandler } from './data_handler';
@@ -52,6 +53,24 @@ import { createExploratoryViewUrl } from './components/shared/exploratory_view/c
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
 
+export interface ConfigSchema {
+  unsafe: {
+    alertDetails: {
+      apm: {
+        enabled: boolean;
+      };
+      metrics: {
+        enabled: boolean;
+      };
+      logs: {
+        enabled: boolean;
+      };
+      uptime: {
+        enabled: boolean;
+      };
+    };
+  };
+}
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 
 export interface ObservabilityPublicPluginsSetup {
@@ -74,6 +93,7 @@ export interface ObservabilityPublicPluginsStart {
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   security: SecurityPluginStart;
+  guidedOnboarding: GuidedOnboardingPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -133,7 +153,7 @@ export class Plugin
     }),
   ];
 
-  constructor(private readonly initContext: PluginInitializerContext) {}
+  constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
@@ -141,6 +161,7 @@ export class Plugin
   ) {
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
+    const config = this.initContext.config.get();
 
     createCallObservabilityApi(coreSetup.http);
 
@@ -157,6 +178,7 @@ export class Plugin
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
       return renderApp({
         core: coreStart,
+        config,
         plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
         appMountParameters: params,
         observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
@@ -280,6 +302,7 @@ export class Plugin
       getUrlForApp: application.getUrlForApp,
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
+      guidedOnboardingApi: pluginsStart.guidedOnboarding.guidedOnboardingApi,
       getPageTemplateServices: () => ({ coreStart }),
     });
 
@@ -287,7 +310,10 @@ export class Plugin
       const { getO11yAlertsTableConfiguration } = await import(
         './config/register_alerts_table_configuration'
       );
-      return getO11yAlertsTableConfiguration(this.observabilityRuleTypeRegistry);
+      return getO11yAlertsTableConfiguration(
+        this.observabilityRuleTypeRegistry,
+        this.initContext.config.get()
+      );
     };
 
     const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;

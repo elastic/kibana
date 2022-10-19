@@ -15,6 +15,7 @@ export type ExecutionContextSearch = {
   filters?: Filter[];
   query?: Query | Query[];
   timeRange?: TimeRange;
+  disableShardWarnings?: boolean;
 };
 
 export type ExpressionValueSearchContext = ExpressionValueBoxed<

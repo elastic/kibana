@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 
 import { euiLightVars as euiVars } from '@kbn/ui-theme';
 
+import { getPreviousAgentStatusForOfflineAgents } from '../../../../../../common/services/agent_status';
+
 import type { Agent } from '../../../types';
 
 interface Props {
   agent: Agent;
+  showOfflinePreviousStatus?: boolean;
 }
 
 const Status = {
@@ -48,8 +51,8 @@ const Status = {
   ),
 };
 
-function getStatusComponent(agent: Agent): React.ReactElement {
-  switch (agent.status) {
+function getStatusComponent(status: Agent['status']): React.ReactElement {
+  switch (status) {
     case 'warning':
     case 'error':
     case 'degraded':
@@ -67,33 +70,60 @@ function getStatusComponent(agent: Agent): React.ReactElement {
   }
 }
 
-export const AgentHealth: React.FunctionComponent<Props> = ({ agent }) => {
-  const { last_checkin: lastCheckIn } = agent;
+export const AgentHealth: React.FunctionComponent<Props> = ({
+  agent,
+  showOfflinePreviousStatus,
+}) => {
+  const { last_checkin: lastCheckIn, last_checkin_message: lastCheckInMessage } = agent;
   const msLastCheckIn = new Date(lastCheckIn || 0).getTime();
+  const lastCheckInMessageText = lastCheckInMessage ? (
+    <FormattedMessage
+      id="xpack.fleet.agentHealth.checkinMessageText"
+      defaultMessage="Last checkin message: {lastCheckinMessage}"
+      values={{
+        lastCheckinMessage: lastCheckInMessage,
+      }}
+    />
+  ) : null;
+  const lastCheckinText = msLastCheckIn ? (
+    <>
+      <FormattedMessage
+        id="xpack.fleet.agentHealth.checkInTooltipText"
+        defaultMessage="Last checked in {lastCheckIn}"
+        values={{
+          lastCheckIn: <FormattedRelative value={msLastCheckIn} />,
+        }}
+      />
+    </>
+  ) : (
+    <FormattedMessage
+      id="xpack.fleet.agentHealth.noCheckInTooltipText"
+      defaultMessage="Never checked in"
+    />
+  );
+
+  const previousToOfflineStatus = useMemo(() => {
+    if (!showOfflinePreviousStatus || agent.status !== 'offline') {
+      return;
+    }
+
+    return getPreviousAgentStatusForOfflineAgents(agent);
+  }, [showOfflinePreviousStatus, agent]);
 
   return (
     <EuiToolTip
       position="top"
       content={
-        msLastCheckIn ? (
-          <>
-            <FormattedMessage
-              id="xpack.fleet.agentHealth.checkInTooltipText"
-              defaultMessage="Last checked in {lastCheckIn}"
-              values={{
-                lastCheckIn: <FormattedRelative value={msLastCheckIn} />,
-              }}
-            />
-          </>
-        ) : (
-          <FormattedMessage
-            id="xpack.fleet.agentHealth.noCheckInTooltipText"
-            defaultMessage="Never checked in"
-          />
-        )
+        <>
+          <p>{lastCheckinText}</p>
+          <p>{lastCheckInMessageText}</p>
+        </>
       }
     >
-      {getStatusComponent(agent)}
+      <>
+        {getStatusComponent(agent.status)}
+        {previousToOfflineStatus ? getStatusComponent(previousToOfflineStatus) : null}
+      </>
     </EuiToolTip>
   );
 };

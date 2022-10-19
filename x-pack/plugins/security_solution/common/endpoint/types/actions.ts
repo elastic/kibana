@@ -12,6 +12,10 @@ import type {
   ResponseActionBodySchema,
   KillOrSuspendProcessRequestSchema,
 } from '../schema/actions';
+import type {
+  ResponseActionStatus,
+  ResponseActionsApiCommandNames,
+} from '../service/response_actions/constants';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
@@ -46,15 +50,12 @@ export interface KillProcessActionOutputContent {
   entity_id?: string;
 }
 
-export const RESPONSE_ACTION_COMMANDS = [
-  'isolate',
-  'unisolate',
-  'kill-process',
-  'suspend-process',
-  'running-processes',
-] as const;
-
-export type ResponseActions = typeof RESPONSE_ACTION_COMMANDS[number];
+export interface ResponseActionGetFileOutputContent {
+  code: string;
+  path: string;
+  size: number;
+  zip_size: number;
+}
 
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
@@ -71,9 +72,12 @@ interface EcsError {
   type?: string;
 }
 
-interface EndpointActionFields<TOutputContent extends object = object> {
+interface EndpointActionFields<
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+  TOutputContent extends object = object
+> {
   action_id: string;
-  data: EndpointActionData<undefined, TOutputContent>;
+  data: EndpointActionData<TParameters, TOutputContent>;
 }
 
 interface ActionRequestFields {
@@ -112,7 +116,11 @@ export interface LogsEndpointActionResponse<TOutputContent extends object = obje
   agent: {
     id: string | string[];
   };
-  EndpointActions: EndpointActionFields<TOutputContent> & ActionResponseFields;
+  EndpointActions: ActionResponseFields & {
+    action_id: string;
+    // Endpoint Response documents do not have `parameters` in the `data`
+    data: Pick<EndpointActionData<never, TOutputContent>, 'comment' | 'command' | 'output'>;
+  };
   error?: EcsError;
 }
 
@@ -130,17 +138,22 @@ export type ResponseActionParametersWithPidOrEntityId =
   | ResponseActionParametersWithPid
   | ResponseActionParametersWithEntityId;
 
+export interface ResponseActionGetFileParameters {
+  path: string;
+}
+
 export type EndpointActionDataParameterTypes =
   | undefined
-  | ResponseActionParametersWithPidOrEntityId;
+  | ResponseActionParametersWithPidOrEntityId
+  | ResponseActionGetFileParameters;
 
 export interface EndpointActionData<
-  T extends EndpointActionDataParameterTypes = never,
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   TOutputContent extends object = object
 > {
-  command: ResponseActions;
+  command: ResponseActionsApiCommandNames;
   comment?: string;
-  parameters?: T;
+  parameters?: TParameters;
   output?: ActionResponseOutput<TOutputContent>;
 }
 
@@ -263,7 +276,10 @@ export interface PendingActionsResponse {
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
 
-export interface ActionDetails<TOutputContent extends object = object> {
+export interface ActionDetails<
+  TOutputContent extends object = object,
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+> {
   /** The action id */
   id: string;
   /**
@@ -272,10 +288,15 @@ export interface ActionDetails<TOutputContent extends object = object> {
    */
   agents: string[];
   /**
+   * A map of `Agent ID`'s to which the action was sent whose value contains more
+   * information about the host (currently the host name only).
+   */
+  hosts: Record<string, { name: string }>;
+  /**
    * The Endpoint type of action (ex. `isolate`, `release`) that is being requested to be
    * performed on the endpoint
    */
-  command: ResponseActions;
+  command: ResponseActionsApiCommandNames;
   /**
    * Will be set to true only if action is not yet completed and elapsed time has exceeded
    * the request's expiration date
@@ -293,16 +314,34 @@ export interface ActionDetails<TOutputContent extends object = object> {
   completedAt: string | undefined;
   /** The output data from an action stored in an object where the key is the agent id */
   outputs?: Record<string, ActionResponseOutput<TOutputContent>>;
+  /**
+   * A map by Agent ID holding information about the action for the specific agent.
+   * Helpful when action is sent to multiple agents
+   */
+  agentState: Record<
+    string,
+    {
+      isCompleted: boolean;
+      wasSuccessful: boolean;
+      errors: undefined | string[];
+      completedAt: string | undefined;
+    }
+  >;
+  /**  action status */
+  status: ResponseActionStatus;
   /** user that created the action */
   createdBy: string;
   /** comment submitted with action */
   comment?: string;
   /** parameters submitted with action */
-  parameters?: EndpointActionDataParameterTypes;
+  parameters?: TParameters;
 }
 
-export interface ActionDetailsApiResponse<TOutputType extends object = object> {
-  data: ActionDetails<TOutputType>;
+export interface ActionDetailsApiResponse<
+  TOutputType extends object = object,
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+> {
+  data: ActionDetails<TOutputType, TParameters>;
 }
 export interface ActionListApiResponse {
   page: number | undefined;
@@ -312,6 +351,12 @@ export interface ActionListApiResponse {
   endDate: string | undefined;
   userIds: string[] | undefined; // users that requested the actions
   commands: string[] | undefined; // type of actions
-  data: ActionDetails[];
+  /**
+   * The `outputs` is not currently part of the list response due to possibly large amounts of
+   * data, especially for cases (in the future) where we might support actions being sent to
+   * multiple agents
+   */
+  data: Array<Omit<ActionDetails, 'outputs'>>;
+  statuses: ResponseActionStatus[] | undefined;
   total: number;
 }

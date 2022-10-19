@@ -14,21 +14,23 @@ import { connect } from 'react-redux';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
+import { isActiveTimeline } from '../../../../helpers';
 import { useOsqueryContextActionItem } from '../../osquery/use_osquery_context_action_item';
 import { OsqueryFlyout } from '../../osquery/osquery_flyout';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
-import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
+import { buildGetAlertByIdQuery } from '../../../../detection_engine/rule_exceptions/utils/helpers';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
 import type { Ecs } from '../../../../../common/ecs';
-import type { AddExceptionFlyoutProps } from '../../../../common/components/exceptions/add_exception_flyout';
-import { AddExceptionFlyout } from '../../../../common/components/exceptions/add_exception_flyout';
+import type { AddExceptionFlyoutProps } from '../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
+import { AddExceptionFlyout } from '../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import * as i18n from '../translations';
 import type { inputsModel, State } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
-import { TimelineId } from '../../../../../common/types';
-import type { AlertData, EcsHit } from '../../../../common/components/exceptions/types';
+import { TableId } from '../../../../../common/types';
+import type { AlertData, EcsHit } from '../../../../detection_engine/rule_exceptions/utils/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../containers/detection_engine/alerts/constants';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
 import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/event_filters_flyout';
 import { useAlertsActions } from './use_alerts_actions';
@@ -49,7 +51,7 @@ interface AlertContextMenuProps {
   ecsRowData: Ecs;
   refetch: inputsModel.Refetch;
   onRuleChange?: () => void;
-  timelineId: string;
+  scopeId: string;
 }
 
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux> = ({
@@ -60,7 +62,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   ecsRowData,
   refetch,
   onRuleChange,
-  timelineId,
+  scopeId,
   globalQuery,
   timelineQuery,
 }) => {
@@ -71,14 +73,20 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const onMenuItemClick = useCallback(() => {
     setPopover(false);
   }, []);
+
+  const alertId = ecsRowData?.kibana?.alert ? ecsRowData?._id : null;
   const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
   const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
+  const isInDetections = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage].includes(
+    scopeId as TableId
+  );
 
   const { addToCaseActionItems } = useAddToCaseActions({
     ecsData: ecsRowData,
     onMenuItemClick,
-    timelineId,
+    isActiveTimelines: isActiveTimeline(scopeId ?? ''),
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
+    isInDetections,
   });
 
   const { loading: canAccessEndpointManagementLoading, canAccessEndpointManagement } =
@@ -94,9 +102,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const isAgentEndpoint = useMemo(() => ecsRowData.agent?.type?.includes('endpoint'), [ecsRowData]);
 
   const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
-  const timelineIdAllowsAddEndpointEventFilter = useMemo(
-    () => timelineId === TimelineId.hostsPageEvents || timelineId === TimelineId.usersPageEvents,
-    [timelineId]
+  const scopeIdAllowsAddEndpointEventFilter = useMemo(
+    () => scopeId === TableId.hostsPageEvents || scopeId === TableId.usersPageEvents,
+    [scopeId]
   );
 
   const onButtonClick = useCallback(() => {
@@ -127,7 +135,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   };
 
   const refetchAll = useCallback(() => {
-    if (timelineId === TimelineId.active) {
+    if (isActiveTimeline(scopeId ?? '')) {
       refetchQuery([timelineQuery]);
       if (routeProps.pageName === 'alerts') {
         refetchQuery(globalQuery);
@@ -135,7 +143,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     } else {
       refetchQuery(globalQuery);
     }
-  }, [timelineId, globalQuery, timelineQuery, routeProps]);
+  }, [scopeId, globalQuery, timelineQuery, routeProps]);
 
   const ruleIndex =
     ecsRowData['kibana.alert.rule.parameters']?.index ?? ecsRowData?.signal?.rule?.index;
@@ -149,7 +157,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   } = useExceptionFlyout({
     ruleIndex,
     refetch: refetchAll,
-    timelineId,
+    isActiveTimelines: isActiveTimeline(scopeId ?? ''),
   });
 
   const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
@@ -159,7 +167,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     alertStatus,
     eventId: ecsRowData?._id,
     indexName: ecsRowData?._index ?? '',
-    timelineId,
+    scopeId,
     refetch: refetchAll,
     closePopover,
   });
@@ -184,8 +192,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const { eventFilterActionItems } = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,
     disabled:
-      !isEndpointEvent || !canCreateEndpointEventFilters || !timelineIdAllowsAddEndpointEventFilter,
-    tooltipMessage: !timelineIdAllowsAddEndpointEventFilter
+      !isEndpointEvent || !canCreateEndpointEventFilters || !scopeIdAllowsAddEndpointEventFilter,
+    tooltipMessage: !scopeIdAllowsAddEndpointEventFilter
       ? i18n.ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP
       : undefined,
   });
@@ -263,7 +271,11 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
         <EventFiltersFlyout data={ecsRowData} onCancel={closeAddEventFilterModal} />
       )}
       {isOsqueryFlyoutOpen && agentId && ecsRowData != null && (
-        <OsqueryFlyout agentId={agentId} onClose={handleOnOsqueryClick} />
+        <OsqueryFlyout
+          agentId={agentId}
+          defaultValues={alertId ? { alertIds: [alertId] } : undefined}
+          onClose={handleOnOsqueryClick}
+        />
       )}
     </>
   );
@@ -272,10 +284,10 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
 const makeMapStateToProps = () => {
   const getGlobalQueries = inputsSelectors.globalQuery();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
-  const mapStateToProps = (state: State, { timelineId }: AlertContextMenuProps) => {
+  const mapStateToProps = (state: State, { scopeId }: AlertContextMenuProps) => {
     return {
       globalQuery: getGlobalQueries(state),
-      timelineQuery: getTimelineQuery(state, timelineId),
+      timelineQuery: getTimelineQuery(state, scopeId),
     };
   };
   return mapStateToProps;
@@ -315,6 +327,7 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
   const { loading: isLoadingAlertData, data } = useQueryAlerts<EcsHit, {}>({
     query: buildGetAlertByIdQuery(eventId),
     indexName: signalIndexName,
+    queryName: ALERTS_QUERY_NAMES.ADD_EXCEPTION_FLYOUT,
   });
 
   const enrichedAlert: AlertData | undefined = useMemo(() => {

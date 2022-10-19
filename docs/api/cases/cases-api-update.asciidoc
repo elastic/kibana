@@ -6,6 +6,12 @@
 
 Updates one or more cases.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification]. For a preview, check out <<case-apis>>.
+====
+
 === {api-request-title}
 
 `PATCH <kibana host>:<port>/api/cases`
@@ -51,10 +57,10 @@ connector, specify `null`. If you want to omit any individual field, specify
 For {ibm-r} connectors, specify:
 
 `issueTypes`:::
-(Required, array of numbers) The issue types of the issue.
+(Required, array of strings) The issue types of the issue.
 
 `severityCode`:::
-(Required, number) The severity code of the issue.
+(Required, string) The severity code of the issue.
 
 For {jira} connectors, specify:
 
@@ -112,6 +118,8 @@ For {swimlane} connectors, specify:
 
 `caseId`:::
 (Required, string) The identifier for the case.
+
+For {webhook-cm} connectors, specify `null`.
 =======
 
 `id`::
@@ -123,9 +131,9 @@ use `none`. To retrieve connector IDs, use <<cases-api-find-connectors>>).
 `none`.
 
 `type`::
-(Required, string) The type of the connector. Valid values are: `.jira`, `.none`,
-`.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`. To remove the
-connector, use `.none`.
+(Required, string) The type of the connector. Valid values are: `.cases-webhook`,
+`.jira`, `.none`, `.resilient`,`.servicenow`, `.servicenow-sir`, and `.swimlane`.
+To remove the connector, use `.none`.
 
 =====
 

@@ -6,20 +6,22 @@
  */
 
 import { EuiContextMenuItem } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { DraggableId } from 'react-beautiful-dnd';
 
 import { isEmpty } from 'lodash';
 
 import { FilterManager } from '@kbn/data-plugin/public';
+import { useDispatch } from 'react-redux';
+import { isActiveTimeline } from '../../../helpers';
+import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
 import { allowTopN } from '../drag_and_drop/helpers';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
 import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { timelineSelectors } from '../../../timelines/store/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
-
+import { addProvider } from '../../../timelines/store/timeline/actions';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
 export interface UseHoverActionItemsProps {
   dataProvider?: DataProvider | DataProvider[];
   dataType?: string;
@@ -41,7 +43,7 @@ export interface UseHoverActionItemsProps {
   ownFocus: boolean;
   showTopN: boolean;
   stKeyboardEvent: React.KeyboardEvent<Element> | undefined;
-  timelineId?: string | null;
+  scopeId?: string | null;
   toggleColumn?: (column: ColumnHeaderOptions) => void;
   toggleTopN: () => void;
   values?: string[] | string | null;
@@ -73,12 +75,13 @@ export const useHoverActionItems = ({
   ownFocus,
   showTopN,
   stKeyboardEvent,
-  timelineId,
+  scopeId,
   toggleColumn,
   toggleTopN,
   values,
 }: UseHoverActionItemsProps): UseHoverActionItems => {
   const kibana = useKibana();
+  const dispatch = useDispatch();
   const { timelines, uiSettings } = kibana.services;
   // Common actions used by the alert table and alert flyout
   const {
@@ -93,17 +96,41 @@ export const useHoverActionItems = ({
     () => kibana.services.data.query.filterManager,
     [kibana.services.data.query.filterManager]
   );
-  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
-  const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
-    getManageTimeline(state, timelineId ?? '')
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+
+  const activeFilterManager = useDeepEqualSelector((state) =>
+    isActiveTimeline(scopeId ?? '') ? getTimeline(state, scopeId ?? '')?.filterManager : undefined
   );
   const filterManager = useMemo(
     () =>
-      timelineId === TimelineId.active
+      isActiveTimeline(scopeId ?? '')
         ? activeFilterManager ?? new FilterManager(uiSettings)
         : filterManagerBackup,
-    [uiSettings, timelineId, activeFilterManager, filterManagerBackup]
+    [scopeId, activeFilterManager, uiSettings, filterManagerBackup]
   );
+
+  /*
+   *   Add to Timeline button, adds data to dataprovider but does not persists the Timeline
+   *   to the server because of following reasons.
+   *
+   *   1. Add to Timeline button performs actions in `timelines` plugin
+   *   2. `timelines` plugin does not have information on how to create/update the timelines in the server
+   *       as it is owned by Security Solution
+   * */
+  const OnAddToTimeline = useCallback(() => {
+    if (!dataProvider || isEmpty(dataProvider)) return;
+    dispatch(
+      addProvider({
+        id: TimelineId.active,
+        providers: dataProvider instanceof Array ? dataProvider : [dataProvider],
+      })
+    );
+  }, [dataProvider, dispatch]);
+
+  const onAddToTimelineClicked = useCallback(() => {
+    if (handleHoverActionClicked) handleHoverActionClicked();
+    OnAddToTimeline();
+  }, [handleHoverActionClicked, OnAddToTimeline]);
 
   /*
    * In the case of `DisableOverflowButton`, we show filters only when topN is NOT opened. As after topN button is clicked, the chart panel replace current hover actions in the hover actions' popover, so we have to hide all the actions.
@@ -126,19 +153,19 @@ export const useHoverActionItems = ({
         ownFocus={ownFocus}
         showTopN={showTopN}
         showTooltip={enableOverflowButton ? false : true}
-        timelineId={timelineId}
+        scopeId={scopeId}
         value={values}
       />
     ),
     [
       enableOverflowButton,
-      field,
       isCaseView,
+      field,
+      toggleTopN,
       onFilterAdded,
       ownFocus,
       showTopN,
-      timelineId,
-      toggleTopN,
+      scopeId,
       values,
     ]
   );
@@ -200,7 +227,7 @@ export const useHoverActionItems = ({
               field,
               keyboardEvent: stKeyboardEvent,
               ownFocus,
-              onClick: handleHoverActionClicked,
+              onClick: onAddToTimelineClicked,
               showTooltip: enableOverflowButton ? false : true,
               value: values,
             })}
@@ -247,6 +274,7 @@ export const useHoverActionItems = ({
       getFilterForValueButton,
       getFilterOutValueButton,
       handleHoverActionClicked,
+      onAddToTimelineClicked,
       hideAddToTimeline,
       hideTopN,
       isObjectArray,

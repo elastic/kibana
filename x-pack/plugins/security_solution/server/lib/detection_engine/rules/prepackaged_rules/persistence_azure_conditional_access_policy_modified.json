@@ -20,11 +20,11 @@
     {
       "integration": "activitylogs",
       "package": "azure",
-      "version": "0.12.0"
+      "version": "^1.0.0"
     },
     {
       "package": "azure",
-      "version": "0.12.0"
+      "version": "^1.0.0"
     }
   ],
   "required_fields": [
@@ -75,5 +75,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 8
+  "version": 101
 }

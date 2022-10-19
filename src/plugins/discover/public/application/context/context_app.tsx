@@ -10,7 +10,12 @@ import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from '
 import './context_app.scss';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
+import {
+  EuiText,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPage,
+  EuiSpacer,
+} from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -52,7 +57,7 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
   /**
    * Context app state
    */
-  const { appState, globalState, setAppState } = useContextAppState({ services });
+  const { appState, globalState, setAppState } = useContextAppState({ services, dataView });
   const prevAppState = useRef<AppState>();
   const prevGlobalState = useRef<GlobalState>({ filters: [] });
 
@@ -140,7 +145,6 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
     return {
       appName: 'context',
       showSearchBar: true,
-      showQueryBar: true,
       showQueryInput: false,
       showFilterBar: true,
       showSaveQuery: false,

@@ -65,6 +65,7 @@ export const AnomalyResultsViewSelector: FC<Props> = ({ viewId, selectedJobs }) 
         'data-test-subj': 'mlAnomalyResultsViewSelectorExplorer',
       },
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isSingleMetricViewerDisabled, selectedJobs?.length]
   );
 

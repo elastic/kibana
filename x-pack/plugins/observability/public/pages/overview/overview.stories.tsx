@@ -25,6 +25,7 @@ import { newsFeedFetchData } from './mock/news_feed.mock';
 import { emptyResponse as emptyUptimeResponse, fetchUptimeData } from './mock/uptime.mock';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { ApmIndicesConfig } from '../../../common/typings';
+import { ConfigSchema } from '../../plugin';
 
 function unregisterAll() {
   unregisterDataHandler({ appName: 'apm' });
@@ -74,6 +75,17 @@ const withCore = makeDecorator({
       },
     } as unknown as Partial<CoreStart>);
 
+    const config = {
+      unsafe: {
+        alertDetails: {
+          apm: { enabled: false },
+          logs: { enabled: false },
+          metrics: { enabled: false },
+          uptime: { enabled: false },
+        },
+      },
+    } as ConfigSchema;
+
     return (
       <MemoryRouter>
         <KibanaReactContext.Provider>
@@ -82,6 +94,7 @@ const withCore = makeDecorator({
               appMountParameters: {
                 setHeaderActionMenu: () => {},
               } as unknown as AppMountParameters,
+              config,
               observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
               ObservabilityPageTemplate: KibanaPageTemplate,
             }}

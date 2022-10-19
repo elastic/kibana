@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { PaletteOutput } from '@kbn/coloring';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors';
-import {
+import type {
   Visualization,
   Datasource,
   TableSuggestion,
@@ -20,8 +21,8 @@ import {
   Suggestion,
   DatasourceLayers,
 } from '../../types';
-import { DragDropIdentifier } from '../../drag_drop';
-import { LayerType, layerTypes } from '../../../common';
+import type { DragDropIdentifier } from '../../drag_drop';
+import type { LayerType } from '../../../common';
 import { getLayerType } from './config_panel/add_layer';
 import {
   LensDispatch,
@@ -83,7 +84,7 @@ export function getSuggestions({
   }, {} as Record<string, LayerType>);
 
   const isLayerSupportedByVisualization = (layerId: string, supportedTypes: LayerType[]) =>
-    supportedTypes.includes(layerTypesMap[layerId] ?? layerTypes.DATA);
+    supportedTypes.includes(layerTypesMap[layerId] ?? LayerTypes.DATA);
 
   // Collect all table suggestions from available datasources
   const datasourceTableSuggestions = datasources.flatMap(([datasourceId, datasource]) => {
@@ -103,7 +104,7 @@ export function getSuggestions({
           // used for navigating from Discover to Lens
           dataSourceSuggestions = datasource.getDatasourceSuggestionsForVisualizeField(
             datasourceState,
-            visualizeTriggerFieldContext.indexPatternId,
+            visualizeTriggerFieldContext.dataViewSpec.id!,
             visualizeTriggerFieldContext.fieldName,
             dataViews.indexPatterns
           );
@@ -112,14 +113,14 @@ export function getSuggestions({
         dataSourceSuggestions = datasource.getDatasourceSuggestionsForField(
           datasourceState,
           field,
-          (layerId) => isLayerSupportedByVisualization(layerId, [layerTypes.DATA]), // a field dragged to workspace should added to data layer
+          (layerId) => isLayerSupportedByVisualization(layerId, [LayerTypes.DATA]), // a field dragged to workspace should added to data layer
           dataViews.indexPatterns
         );
       } else {
         dataSourceSuggestions = datasource.getDatasourceSuggestionsFromCurrentState(
           datasourceState,
           dataViews.indexPatterns,
-          (layerId) => isLayerSupportedByVisualization(layerId, [layerTypes.DATA]),
+          (layerId) => isLayerSupportedByVisualization(layerId, [LayerTypes.DATA]),
           activeData
         );
       }
@@ -199,10 +200,17 @@ export function getVisualizeFieldSuggestions({
     const allSuggestions = suggestions.filter(
       (s) => s.visualizationId === visualizeTriggerFieldContext.type
     );
-    return activeVisualization?.getVisualizationSuggestionFromContext?.({
+    const visualization = visualizationMap[visualizeTriggerFieldContext.type] || null;
+    return visualization?.getSuggestionFromConvertToLensContext?.({
       suggestions: allSuggestions,
       context: visualizeTriggerFieldContext,
     });
+  }
+  // suggestions for visualizing textbased languages
+  if (visualizeTriggerFieldContext && 'query' in visualizeTriggerFieldContext) {
+    if (visualizeTriggerFieldContext.query) {
+      return suggestions.find((s) => s.datasourceId === 'textBased');
+    }
   }
 
   if (suggestions.length) {

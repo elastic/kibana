@@ -48,10 +48,13 @@ export const Result: React.FC<ResultProps> = ({ metaData, fields }) => {
           <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
             <EuiFlexItem grow={false}>
               <ResultHeader
-                title={i18n.translate('xpack.enterpriseSearch.shared.result.title.id', {
-                  defaultMessage: 'Document id: {id}',
-                  values: { id: metaData.id },
-                })}
+                title={
+                  metaData.title ??
+                  i18n.translate('xpack.enterpriseSearch.shared.result.title.id', {
+                    defaultMessage: 'Document id: {id}',
+                    values: { id: metaData.id },
+                  })
+                }
                 metaData={metaData}
               />
             </EuiFlexItem>

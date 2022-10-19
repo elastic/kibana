@@ -41,7 +41,7 @@ import type {
   GetFullAgentManifestResponse,
   BulkGetAgentPoliciesResponse,
 } from '../../../common/types';
-import { defaultIngestErrorHandler, AgentPolicyNotFoundError } from '../../errors';
+import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 
 async function populateAssignedAgentsCount(
@@ -75,6 +75,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
       withPackagePolicies,
       ...restOfQuery,
     });
+
     const body: GetAgentPoliciesResponse = {
       items,
       total,
@@ -86,7 +87,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
 
     return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -121,7 +122,7 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -146,7 +147,7 @@ export const getOneAgentPolicyHandler: RequestHandler<
       });
     }
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -182,7 +183,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -215,7 +216,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -244,7 +245,7 @@ export const copyAgentPolicyHandler: RequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -266,7 +267,7 @@ export const deleteAgentPoliciesHandler: RequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -298,7 +299,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
         });
       }
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   } else {
     try {
@@ -321,7 +322,7 @@ export const getFullAgentPolicy: FleetRequestHandler<
         });
       }
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   }
 };
@@ -360,7 +361,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         });
       }
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   } else {
     try {
@@ -384,7 +385,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         });
       }
     } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   }
 };
@@ -411,7 +412,7 @@ export const getK8sManifest: FleetRequestHandler<
       });
     }
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -440,6 +441,6 @@ export const downloadK8sManifest: FleetRequestHandler<
       });
     }
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

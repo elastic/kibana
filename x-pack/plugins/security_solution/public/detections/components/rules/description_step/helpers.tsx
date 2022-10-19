@@ -10,8 +10,6 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiSpacer,
   EuiLink,
   EuiText,
   EuiIcon,
@@ -39,21 +37,15 @@ import type {
   RequiredFieldArray,
   Threshold,
 } from '../../../../../common/detection_engine/schemas/common';
-import {
-  subtechniquesOptions,
-  tacticsOptions,
-  techniquesOptions,
-} from '../../../mitre/mitre_tactics_techniques';
-
 import * as i18n from './translations';
 import type { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';
-import ListTreeIcon from './assets/list_tree_icon.svg';
 import type {
   AboutStepRiskScore,
   AboutStepSeverity,
 } from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
+import { ThreatEuiFlexGroup } from './threat_description';
 
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
@@ -78,16 +70,28 @@ export const buildQueryBarDescription = ({
   filterManager,
   query,
   savedId,
+  savedQueryName,
   indexPatterns,
   queryLabel,
 }: BuildQueryBarDescription): ListItems[] => {
   let items: ListItems[] = [];
+  const isLoadedFromSavedQuery = !isEmpty(savedId) && !isEmpty(savedQueryName);
+  if (isLoadedFromSavedQuery) {
+    items = [
+      ...items,
+      {
+        title: <>{i18n.SAVED_QUERY_NAME_LABEL} </>,
+        description: <>{savedQueryName} </>,
+      },
+    ];
+  }
+
   if (!isEmpty(filters)) {
     filterManager.setFilters(filters);
     items = [
       ...items,
       {
-        title: <>{i18n.FILTERS_LABEL} </>,
+        title: <>{isLoadedFromSavedQuery ? i18n.SAVED_QUERY_FILTERS_LABEL : i18n.FILTERS_LABEL} </>,
         description: (
           <EuiFlexGroup wrap responsive={false} gutterSize="xs">
             {filterManager.getFilters().map((filter, index) => (
@@ -114,20 +118,14 @@ export const buildQueryBarDescription = ({
     items = [
       ...items,
       {
-        title: <>{queryLabel ?? i18n.QUERY_LABEL}</>,
+        title: (
+          <>{isLoadedFromSavedQuery ? i18n.SAVED_QUERY_LABEL : queryLabel ?? i18n.QUERY_LABEL}</>
+        ),
         description: <Query>{query}</Query>,
       },
     ];
   }
-  if (!isEmpty(savedId)) {
-    items = [
-      ...items,
-      {
-        title: <>{i18n.SAVED_ID_LABEL} </>,
-        description: <>{savedId} </>,
-      },
-    ];
-  }
+
   return items;
 };
 
@@ -163,100 +161,12 @@ export const buildEqlOptionsDescription = (eqlOptions: EqlOptionsSelected): List
   return items;
 };
 
-const ThreatEuiFlexGroup = styled(EuiFlexGroup)`
-  .euiFlexItem {
-    margin-bottom: 0px;
-  }
-`;
-
-const SubtechniqueFlexItem = styled(EuiFlexItem)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeM};
-`;
-
-const TechniqueLinkItem = styled(EuiButtonEmpty)`
-  .euiIcon {
-    width: 8px;
-    height: 8px;
-  }
-  align-self: flex-start;
-`;
-
 export const buildThreatDescription = ({ label, threat }: BuildThreatDescription): ListItems[] => {
   if (threat.length > 0) {
     return [
       {
         title: label,
-        description: (
-          <ThreatEuiFlexGroup direction="column">
-            {threat.map((singleThreat, index) => {
-              const tactic = tacticsOptions.find((t) => t.id === singleThreat.tactic.id);
-              return (
-                <EuiFlexItem key={`${singleThreat.tactic.name}-${index}`}>
-                  <EuiLink
-                    data-test-subj="threatTacticLink"
-                    href={singleThreat.tactic.reference}
-                    target="_blank"
-                  >
-                    {tactic != null
-                      ? tactic.text
-                      : `${singleThreat.tactic.name} (${singleThreat.tactic.id})`}
-                  </EuiLink>
-                  <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-                    {singleThreat.technique &&
-                      singleThreat.technique.map((technique, techniqueIndex) => {
-                        const myTechnique = techniquesOptions.find((t) => t.id === technique.id);
-                        return (
-                          <EuiFlexItem key={myTechnique?.id ?? techniqueIndex}>
-                            <TechniqueLinkItem
-                              data-test-subj="threatTechniqueLink"
-                              href={technique.reference}
-                              target="_blank"
-                              iconType={ListTreeIcon}
-                              size="xs"
-                            >
-                              {myTechnique != null
-                                ? myTechnique.label
-                                : `${technique.name} (${technique.id})`}
-                            </TechniqueLinkItem>
-                            <EuiFlexGroup
-                              gutterSize="none"
-                              alignItems="flexStart"
-                              direction="column"
-                            >
-                              {technique.subtechnique != null &&
-                                technique.subtechnique.map((subtechnique, subtechniqueIndex) => {
-                                  const mySubtechnique = subtechniquesOptions.find(
-                                    (t) => t.id === subtechnique.id
-                                  );
-                                  return (
-                                    <SubtechniqueFlexItem
-                                      key={mySubtechnique?.id ?? subtechniqueIndex}
-                                    >
-                                      <TechniqueLinkItem
-                                        data-test-subj="threatSubtechniqueLink"
-                                        href={subtechnique.reference}
-                                        target="_blank"
-                                        iconType={ListTreeIcon}
-                                        size="xs"
-                                      >
-                                        {mySubtechnique != null
-                                          ? mySubtechnique.label
-                                          : `${subtechnique.name} (${subtechnique.id})`}
-                                      </TechniqueLinkItem>
-                                    </SubtechniqueFlexItem>
-                                  );
-                                })}
-                            </EuiFlexGroup>
-                          </EuiFlexItem>
-                        );
-                      })}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              );
-            })}
-            <EuiSpacer />
-          </ThreatEuiFlexGroup>
-        ),
+        description: <ThreatEuiFlexGroup label={label} threat={threat} />,
       },
     ];
   }

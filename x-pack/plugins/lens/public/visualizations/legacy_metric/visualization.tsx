@@ -15,17 +15,17 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { getSuggestions } from './metric_suggestions';
 import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
-import type { MetricState } from '../../../common/types';
-import { layerTypes } from '../../../common';
+import type { LegacyMetricState } from '../../../common/types';
 import { MetricDimensionEditor } from './dimension_editor';
 import { MetricToolbar } from './metric_config_panel';
 import { DEFAULT_TITLE_POSITION } from './metric_config_panel/title_position_option';
 import { DEFAULT_TITLE_SIZE } from './metric_config_panel/size_options';
 import { DEFAULT_TEXT_ALIGNMENT } from './metric_config_panel/align_options';
 
-interface MetricConfig extends Omit<MetricState, 'palette' | 'colorMode'> {
+interface MetricConfig extends Omit<LegacyMetricState, 'palette' | 'colorMode'> {
   title: string;
   description: string;
   metricTitle: string;
@@ -46,9 +46,9 @@ const getFontSizeAndUnit = (fontSize: string) => {
 
 const toExpression = (
   paletteService: PaletteRegistry,
-  state: MetricState,
+  state: LegacyMetricState,
   datasourceLayers: DatasourceLayers,
-  attributes?: Partial<Omit<MetricConfig, keyof MetricState>>,
+  attributes?: Partial<Omit<MetricConfig, keyof LegacyMetricState>>,
   datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}
 ): Ast | null => {
   if (!state.accessor) {
@@ -175,12 +175,12 @@ export const getLegacyMetricVisualization = ({
 }: {
   paletteService: PaletteRegistry;
   theme: ThemeServiceStart;
-}): Visualization<MetricState> => ({
-  id: 'lnsMetric',
+}): Visualization<LegacyMetricState> => ({
+  id: 'lnsLegacyMetric',
 
   visualizationTypes: [
     {
-      id: 'lnsMetric',
+      id: 'lnsLegacyMetric',
       icon: IconChartMetric,
       label: i18n.translate('xpack.lens.legacyMetric.label', {
         defaultMessage: 'Legacy Metric',
@@ -192,7 +192,7 @@ export const getLegacyMetricVisualization = ({
   ],
 
   getVisualizationTypeId() {
-    return 'lnsMetric';
+    return 'lnsLegacyMetric';
   },
 
   clearLayer(state) {
@@ -222,7 +222,7 @@ export const getLegacyMetricVisualization = ({
       state || {
         layerId: addNewLayer(),
         accessor: undefined,
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
       }
     );
   },
@@ -235,13 +235,14 @@ export const getLegacyMetricVisualization = ({
       groups: [
         {
           groupId: 'metric',
+          dataTestSubj: 'lnsLegacyMetric_metricDimensionPanel',
           paramEditorCustomProps: {
             headingLabel: i18n.translate('xpack.lens.metric.headingLabel', {
               defaultMessage: 'Value',
             }),
           },
-          groupLabel: i18n.translate('xpack.lens.legacyMetric.label', {
-            defaultMessage: 'Legacy Metric',
+          groupLabel: i18n.translate('xpack.lens.metric.label', {
+            defaultMessage: 'Metric',
           }),
           layerId: props.state.layerId,
           accessors: props.state.accessor
@@ -257,7 +258,7 @@ export const getLegacyMetricVisualization = ({
           filterOperations: (op: OperationMetadata) =>
             !op.isBucketed && legacyMetricSupportedTypes.has(op.dataType),
           enableDimensionEditor: true,
-          required: true,
+          requiredMinDimensionCount: 1,
         },
       ],
     };
@@ -266,7 +267,7 @@ export const getLegacyMetricVisualization = ({
   getSupportedLayers() {
     return [
       {
-        type: layerTypes.DATA,
+        type: LayerTypes.DATA,
         label: i18n.translate('xpack.lens.legacyMetric.addLayer', {
           defaultMessage: 'Visualization',
         }),

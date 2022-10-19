@@ -7,7 +7,7 @@
  */
 
 import { renderOptedInNoticeBanner } from './render_opted_in_notice_banner';
-import { overlayServiceMock, httpServiceMock } from '@kbn/core/public/mocks';
+import { overlayServiceMock, httpServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { mockTelemetryConstants } from '../../mocks';
 
 describe('renderOptedInNoticeBanner', () => {
@@ -15,6 +15,7 @@ describe('renderOptedInNoticeBanner', () => {
     const bannerID = 'brucer-wayne';
     const overlays = overlayServiceMock.createStartContract();
     const mockHttp = httpServiceMock.createStartContract();
+    const theme = themeServiceMock.createStartContract();
     const telemetryConstants = mockTelemetryConstants();
     overlays.banners.add.mockReturnValue(bannerID);
 
@@ -22,6 +23,7 @@ describe('renderOptedInNoticeBanner', () => {
       http: mockHttp,
       onSeen: jest.fn(),
       overlays,
+      theme,
       telemetryConstants,
     });
 

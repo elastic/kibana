@@ -85,6 +85,7 @@ export const checkAggregatableFieldsExistRequest = (
 
   return {
     index,
+    // @ts-expect-error `track_total_hits` not allowed at top level for `typesWithBodyKey`
     track_total_hits: false,
     size,
     body: searchBody,
@@ -208,6 +209,7 @@ export const checkNonAggregatableFieldExistsRequest = (
 
   return {
     index,
+    // @ts-expect-error `size` not allowed at top level for `typesWithBodyKey`
     size,
     body: searchBody,
     // Small es optimization

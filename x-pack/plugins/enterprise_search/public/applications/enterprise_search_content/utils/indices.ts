@@ -9,6 +9,7 @@ import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 import { SyncStatus, ConnectorStatus } from '../../../../common/types/connectors';
 import {
   ConnectorIndex,
@@ -28,7 +29,11 @@ import {
 export function isConnectorIndex(
   index: ElasticsearchIndexWithIngestion | undefined
 ): index is ConnectorIndex {
-  return !!(index as ConnectorIndex)?.connector;
+  const connectorIndex = index as ConnectorIndex;
+  return (
+    !!connectorIndex?.connector &&
+    connectorIndex.connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
+  );
 }
 
 export function isCrawlerIndex(
@@ -45,7 +50,11 @@ export function isApiIndex(index: ElasticsearchIndexWithIngestion | undefined): 
 }
 
 export function isConnectorViewIndex(index: ElasticsearchViewIndex): index is ConnectorViewIndex {
-  return !!(index as ConnectorViewIndex)?.connector;
+  const connectorViewIndex = index as ConnectorViewIndex;
+  return (
+    !!connectorViewIndex?.connector &&
+    connectorViewIndex.connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
+  );
 }
 
 export function isCrawlerViewIndex(index: ElasticsearchViewIndex): index is CrawlerViewIndex {

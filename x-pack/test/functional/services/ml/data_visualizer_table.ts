@@ -290,6 +290,25 @@ export function MachineLearningDataVisualizerTableProvider(
       await testSubjects.existOrFail('dataVisualizerFieldTypeSelect');
     }
 
+    public async assertSampleSizeInputExists() {
+      await testSubjects.existOrFail('dataVisualizerShardSizeSelect');
+    }
+
+    public async setSampleSizeInputValue(
+      sampleSize: number | 'all',
+      fieldName: string,
+      docCountFormatted: string
+    ) {
+      await this.assertSampleSizeInputExists();
+      await testSubjects.clickWhenNotDisabledWithoutRetry('dataVisualizerShardSizeSelect');
+      await testSubjects.existOrFail(`dataVisualizerShardSizeOption ${sampleSize}`);
+      await testSubjects.click(`dataVisualizerShardSizeOption ${sampleSize}`);
+
+      await retry.tryForTime(5000, async () => {
+        await this.assertFieldDocCount(fieldName, docCountFormatted);
+      });
+    }
+
     public async setFieldTypeFilter(fieldTypes: string[], expectedRowCount = 1) {
       await this.assertFieldTypeInputExists();
       await mlCommonUI.setMultiSelectFilter('dataVisualizerFieldTypeSelect', fieldTypes);
@@ -548,7 +567,7 @@ export function MachineLearningDataVisualizerTableProvider(
 
     public async assertLensActionShowChart(fieldName: string, visualizationContainer?: string) {
       await retry.tryForTime(30 * 1000, async () => {
-        await testSubjects.clickWhenNotDisabled(
+        await testSubjects.clickWhenNotDisabledWithoutRetry(
           this.rowSelector(fieldName, 'dataVisualizerActionViewInLensButton')
         );
         await testSubjects.existOrFail(visualizationContainer ?? 'lnsVisualizationContainer', {

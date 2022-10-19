@@ -92,14 +92,14 @@ export const FieldValueCell = ({
   data,
   ecsData,
   header,
-  timelineId,
+  scopeId,
   pageSize,
   closeCellPopover,
 }: {
   data: TimelineNonEcsData[][];
   ecsData: Ecs[];
   header?: ColumnHeaderOptions;
-  timelineId: string;
+  scopeId: string;
   pageSize: number;
   closeCellPopover?: () => void;
 }) => {
@@ -134,7 +134,7 @@ export const FieldValueCell = ({
       return showEmpty === false ? (
         <FormattedFieldValue
           Component={Component}
-          contextId={`expanded-value-${columnId}-row-${pageRowIndex}-${timelineId}`}
+          contextId={`expanded-value-${columnId}-row-${pageRowIndex}-${scopeId}`}
           eventId={eventId}
           fieldFormat={fieldFormat}
           isAggregatable={header.aggregatable ?? false}

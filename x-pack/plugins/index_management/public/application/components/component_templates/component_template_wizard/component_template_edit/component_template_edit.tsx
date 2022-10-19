@@ -9,7 +9,11 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { EuiPageContentBody, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import {
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageHeader,
+  EuiSpacer,
+} from '@elastic/eui';
 import { History } from 'history';
 
 import { useComponentTemplatesContext } from '../../component_templates_context';

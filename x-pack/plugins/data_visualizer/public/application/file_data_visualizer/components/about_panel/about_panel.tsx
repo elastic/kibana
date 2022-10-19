@@ -15,7 +15,7 @@ import {
   EuiSpacer,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiHorizontalRule,
   EuiFilePicker,
   EuiLoadingSpinner,

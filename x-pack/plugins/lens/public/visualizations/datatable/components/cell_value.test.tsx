@@ -17,6 +17,7 @@ import { ReactWrapper } from 'enzyme';
 import { DatatableArgs, ColumnConfigArg } from '../../../../common/expressions';
 import { DataContextType } from './types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { EuiLink } from '@elastic/eui';
 
 describe('datatable cell renderer', () => {
   const table: Datatable = {
@@ -144,6 +145,50 @@ describe('datatable cell renderer', () => {
       </DataContext.Provider>
     );
     expect(cell.find('.lnsTableCell--multiline').exists()).toBeTruthy();
+  });
+
+  it('renders as EuiLink if oneClickFilter is set', () => {
+    const MultiLineCellRenderer = createGridCell(
+      {
+        a: { convert: (x) => `formatted ${x}` } as FieldFormat,
+      },
+      {
+        columns: [
+          {
+            columnId: 'a',
+            type: 'lens_datatable_column',
+            oneClickFilter: true,
+          },
+        ],
+        sortingColumnId: '',
+        sortingDirection: 'none',
+      },
+      DataContext,
+      { get: jest.fn() } as unknown as IUiSettingsClient,
+      true
+    );
+    const cell = mountWithIntl(
+      <DataContext.Provider
+        value={{
+          table,
+          alignments: {
+            a: 'right',
+          },
+          handleFilterClick: () => {},
+        }}
+      >
+        <MultiLineCellRenderer
+          rowIndex={0}
+          colIndex={0}
+          columnId="a"
+          setCellProps={() => {}}
+          isExpandable={false}
+          isDetails={false}
+          isExpanded={false}
+        />
+      </DataContext.Provider>
+    );
+    expect(cell.find(EuiLink).text()).toEqual('formatted 123');
   });
 
   describe('dynamic coloring', () => {

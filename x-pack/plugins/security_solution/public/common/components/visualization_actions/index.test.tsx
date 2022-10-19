@@ -24,6 +24,8 @@ import { useKibana } from '../../lib/kibana/kibana_react';
 import { CASES_FEATURE_ID } from '../../../../common/constants';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { allCasesCapabilities, allCasesPermissions } from '../../../cases_test_utils';
+import { InputsModelId } from '../../store/inputs/constants';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return {
@@ -44,7 +46,7 @@ describe('VisualizationActions', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
   const newQuery: UpdateQueryParams = {
-    inputId: 'global',
+    inputId: InputsModelId.global,
     id: 'networkDnsHistogramQuery',
     inspect: {
       dsl: ['mockDsl'],
@@ -55,7 +57,13 @@ describe('VisualizationActions', () => {
     state: state.inputs,
   };
 
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  );
   const props = {
     lensAttributes: dnsTopDomainsLensAttributes,
     queryId: 'networkDnsHistogramQuery',
@@ -116,7 +124,13 @@ describe('VisualizationActions', () => {
     });
     const myState = cloneDeep(state);
     myState.inputs = upsertQuery(newQuery);
-    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createStore(
+      myState,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
   });
 
   test('Should render VisualizationActions button', () => {

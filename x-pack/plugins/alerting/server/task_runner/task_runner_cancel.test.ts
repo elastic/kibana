@@ -64,6 +64,7 @@ let fakeTimer: sinon.SinonFakeTimers;
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 const alertingEventLogger = alertingEventLoggerMock.create();
+const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();
 
 describe('Task Runner Cancel', () => {
   let mockedTaskInstance: ConcreteTaskInstance;
@@ -110,7 +111,7 @@ describe('Task Runner Cancel', () => {
     actionsPlugin: actionsMock.createStart(),
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     encryptedSavedObjectsClient,
-    logger: loggingSystemMock.create().get(),
+    logger,
     executionContext: executionContextServiceMock.createInternalStartContract(),
     spaceIdToNamespace: jest.fn().mockReturnValue(undefined),
     basePathService: httpServiceMock.createBasePath(),
@@ -170,6 +171,7 @@ describe('Task Runner Cancel', () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
     alertingEventLogger.getStartAndDuration.mockImplementation(() => ({ start: new Date() }));
     (AlertingEventLogger as jest.Mock).mockImplementation(() => alertingEventLogger);
+    logger.get.mockImplementation(() => logger);
   });
 
   test('updates rule saved object execution status and writes to event log entry when task is cancelled mid-execution', async () => {
@@ -186,7 +188,6 @@ describe('Task Runner Cancel', () => {
     await taskRunner.cancel();
     await promise;
 
-    const logger = taskRunnerFactoryInitializerParams.logger;
     expect(logger.debug).toHaveBeenNthCalledWith(
       3,
       `Aborting any in-progress ES searches for rule type test with id 1`
@@ -390,7 +391,6 @@ describe('Task Runner Cancel', () => {
   });
 
   function testLogger() {
-    const logger = taskRunnerFactoryInitializerParams.logger;
     expect(logger.debug).toHaveBeenCalledTimes(7);
     expect(logger.debug).nthCalledWith(1, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
     expect(logger.debug).nthCalledWith(
@@ -464,6 +464,15 @@ describe('Task Runner Cancel', () => {
       status: {
         lastExecutionDate: new Date('1970-01-01T00:00:00.000Z'),
         status,
+      },
+      timings: {
+        claim_to_start_duration_ms: 0,
+        prepare_rule_duration_ms: 0,
+        process_alerts_duration_ms: 0,
+        process_rule_duration_ms: 0,
+        rule_type_run_duration_ms: 0,
+        total_run_duration_ms: 0,
+        trigger_actions_duration_ms: 0,
       },
     });
 

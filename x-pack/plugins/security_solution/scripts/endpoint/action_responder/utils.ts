@@ -8,11 +8,14 @@
 import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import type { UploadedFile } from '../../../common/endpoint/types/file_storage';
 import { sendEndpointMetadataUpdate } from '../common/endpoint_metadata_services';
 import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINTS_ACTION_LIST_ROUTE,
+  FILE_STORAGE_DATA_INDEX,
+  FILE_STORAGE_METADATA_INDEX,
 } from '../../../common/endpoint/constants';
 import type {
   ActionDetails,
@@ -20,8 +23,9 @@ import type {
   EndpointActionData,
   EndpointActionResponse,
   LogsEndpointActionResponse,
-  ActionResponseOutput,
   GetProcessesActionOutputContent,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
 } from '../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../common/endpoint/schema/actions';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -95,7 +99,7 @@ export const sendEndpointActionResponse = async (
       data: {
         command: action.command as EndpointActionData['command'],
         comment: '',
-        ...getOutputDataIfNeeded(action.command as EndpointActionData['command']),
+        ...getOutputDataIfNeeded(action),
       },
       started_at: action.startedAt,
     },
@@ -144,20 +148,80 @@ export const sendEndpointActionResponse = async (
     }
   }
 
+  // For `get-file`, upload a file to ES
+  if (action.command === 'get-file' && !endpointResponse.error) {
+    // Index the file's metadata
+    const fileMeta = await esClient.index<UploadedFile>({
+      index: FILE_STORAGE_METADATA_INDEX,
+      id: `${action.id}.${action.hosts[0]}`,
+      body: {
+        file: {
+          created: new Date().toISOString(),
+          extension: 'zip',
+          path: '/some/path/bad_file.txt',
+          type: 'file',
+          size: 221,
+          name: 'bad_file.txt.zip',
+          mime_type: 'application/zip',
+          Status: 'READY',
+          ChunkSize: 4194304,
+        },
+      },
+      refresh: 'wait_for',
+    });
+
+    // Index the file content (just one chunk)
+    await esClient.index({
+      index: FILE_STORAGE_DATA_INDEX,
+      id: `${fileMeta._id}.0`,
+      body: {
+        bid: fileMeta._id,
+        last: true,
+        data: 'UEsDBBQACAAIAFVeRFUAAAAAAAAAABMAAAAMACAAYmFkX2ZpbGUudHh0VVQNAAdTVjxjU1Y8Y1NWPGN1eAsAAQT1AQAABBQAAAArycgsVgCiRIWkxBSFtMycVC4AUEsHCKkCwMsTAAAAEwAAAFBLAQIUAxQACAAIAFVeRFWpAsDLEwAAABMAAAAMACAAAAAAAAAAAACkgQAAAABiYWRfZmlsZS50eHRVVA0AB1NWPGNTVjxjU1Y8Y3V4CwABBPUBAAAEFAAAAFBLBQYAAAAAAQABAFoAAABtAAAAAAA=',
+      },
+      refresh: 'wait_for',
+    });
+  }
+
   return endpointResponse;
 };
 
-const getOutputDataIfNeeded = (
-  command: EndpointActionData['command']
-): { output?: ActionResponseOutput } => {
-  return command === 'running-processes'
-    ? ({
+type ResponseOutput<TOutputContent extends object = object> = Pick<
+  LogsEndpointActionResponse<TOutputContent>['EndpointActions']['data'],
+  'output'
+>;
+
+const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
+  switch (action.command) {
+    case 'running-processes':
+      return {
         output: {
           type: 'json',
           content: {
             entries: endpointActionGenerator.randomResponseActionProcesses(100),
           },
         },
-      } as { output: ActionResponseOutput<GetProcessesActionOutputContent> })
-    : {};
+      } as ResponseOutput<GetProcessesActionOutputContent>;
+
+    case 'get-file':
+      return {
+        output: {
+          type: 'json',
+          content: {
+            code: 'ra_get-file-success',
+            path: (
+              action as ActionDetails<
+                ResponseActionGetFileOutputContent,
+                ResponseActionGetFileParameters
+              >
+            ).parameters?.path,
+            size: 1234,
+            zip_size: 123,
+          },
+        },
+      } as ResponseOutput<ResponseActionGetFileOutputContent>;
+
+    default:
+      return { output: undefined };
+  }
 };

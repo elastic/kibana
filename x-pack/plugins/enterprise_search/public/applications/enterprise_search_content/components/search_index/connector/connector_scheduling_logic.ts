@@ -20,7 +20,7 @@ import {
 import {
   UpdateConnectorSchedulingApiLogic,
   UpdateConnectorSchedulingArgs,
-} from '../../../api/connector_package/update_connector_scheduling_api_logic';
+} from '../../../api/connector/update_connector_scheduling_api_logic';
 
 type ConnectorSchedulingActions = Pick<
   Actions<UpdateConnectorSchedulingArgs, ConnectorScheduling>,

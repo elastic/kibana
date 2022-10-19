@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useFetcher } from './use_fetcher';
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../context/apm_service/use_apm_service_context';
 import { useApmParams } from './use_apm_params';
 import { useTimeRange } from './use_time_range';
 
-export interface TraceSample {
-  traceId: string;
-  transactionId: string;
-}
-
 const INITIAL_DATA = {
-  traceSamples: [] as TraceSample[],
+  traceSamples: [],
 };
+
+export type TraceSamplesFetchResult = ReturnType<
+  typeof useTransactionTraceSamplesFetcher
+>;
 
 export function useTransactionTraceSamplesFetcher({
   transactionName,
@@ -46,9 +46,9 @@ export function useTransactionTraceSamplesFetcher({
     status,
     error,
   } = useFetcher(
-    async (callApmApi) => {
+    (callApmApi) => {
       if (serviceName && start && end && transactionType && transactionName) {
-        const response = await callApmApi(
+        return callApmApi(
           'GET /internal/apm/services/{serviceName}/transactions/traces/samples',
           {
             params: {
@@ -70,8 +70,6 @@ export function useTransactionTraceSamplesFetcher({
             },
           }
         );
-
-        return response;
       }
     },
     // the samples should not be refetched if the transactionId or traceId changes
@@ -89,9 +87,12 @@ export function useTransactionTraceSamplesFetcher({
     ]
   );
 
-  return {
-    traceSamplesData: data,
-    traceSamplesStatus: status,
-    traceSamplesError: error,
-  };
+  return useMemo(
+    () => ({
+      data,
+      status,
+      error,
+    }),
+    [data, status, error]
+  );
 }

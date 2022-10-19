@@ -216,14 +216,17 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
       mlResultsService
     );
     return loadExplorerDataProvider(mlResultsService, anomalyExplorerChartsService, timefilter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadExplorerData$ = useMemo(() => new Subject<LoadExplorerDataConfig>(), []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const explorerData$ = useMemo(() => loadExplorerData$.pipe(switchMap(loadExplorerData)), []);
   const explorerData = useObservable(explorerData$);
 
   const update = useCallback((c) => {
     loadExplorerData$.next(c);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return [explorerData, update];

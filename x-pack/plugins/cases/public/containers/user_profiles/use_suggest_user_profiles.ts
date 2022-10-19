@@ -6,48 +6,66 @@
  */
 
 import { useState } from 'react';
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import useDebounce from 'react-use/lib/useDebounce';
-import { UserProfile } from '@kbn/security-plugin/common';
-import { DEFAULT_USER_SIZE } from '../../../common/constants';
+import type { UserProfile } from '@kbn/security-plugin/common';
+import { noop } from 'lodash';
+import { DEFAULT_USER_SIZE, SEARCH_DEBOUNCE_MS } from '../../../common/constants';
 import * as i18n from '../translations';
 import { useKibana, useToasts } from '../../common/lib/kibana';
-import { ServerError } from '../../types';
-import { USER_PROFILES_CACHE_KEY, USER_PROFILES_SUGGEST_CACHE_KEY } from '../constants';
-import { suggestUserProfiles, SuggestUserProfilesArgs } from './api';
+import type { ServerError } from '../../types';
+import { casesQueriesKeys } from '../constants';
+import type { SuggestUserProfilesArgs } from './api';
+import { suggestUserProfiles } from './api';
 
-const DEBOUNCE_MS = 500;
+type Props = Omit<SuggestUserProfilesArgs, 'signal' | 'http'> & { onDebounce?: () => void };
+
+/**
+ * Time in ms until the data become stale.
+ * We set the stale time to one minute
+ * to prevent fetching the same queries
+ * while the user is typing.
+ */
+
+const STALE_TIME = 1000 * 60;
 
 export const useSuggestUserProfiles = ({
   name,
-  owner,
+  owners,
   size = DEFAULT_USER_SIZE,
-}: Omit<SuggestUserProfilesArgs, 'signal' | 'http'>) => {
+  onDebounce = noop,
+}: Props) => {
   const { http } = useKibana().services;
   const [debouncedName, setDebouncedName] = useState(name);
 
-  useDebounce(() => setDebouncedName(name), DEBOUNCE_MS, [name]);
+  useDebounce(
+    () => {
+      setDebouncedName(name);
+      onDebounce();
+    },
+    SEARCH_DEBOUNCE_MS,
+    [name]
+  );
 
   const toasts = useToasts();
 
   return useQuery<UserProfile[], ServerError>(
-    [
-      USER_PROFILES_CACHE_KEY,
-      USER_PROFILES_SUGGEST_CACHE_KEY,
-      { name: debouncedName, owner, size },
-    ],
+    casesQueriesKeys.suggestUsers({ name: debouncedName, owners, size }),
     () => {
       const abortCtrlRef = new AbortController();
       return suggestUserProfiles({
         http,
         name: debouncedName,
-        owner,
+        owners,
         size,
         signal: abortCtrlRef.signal,
       });
     },
     {
       retry: false,
+      keepPreviousData: true,
+      staleTime: STALE_TIME,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts.addError(

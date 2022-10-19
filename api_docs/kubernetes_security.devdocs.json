@@ -13,6 +13,7 @@
         "description": [],
         "path": "x-pack/plugins/kubernetes_security/public/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "kubernetesSecurity",
@@ -28,6 +29,7 @@
             ],
             "path": "x-pack/plugins/kubernetes_security/public/types.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "kubernetesSecurity",
@@ -41,6 +43,7 @@
                 ],
                 "path": "x-pack/plugins/kubernetes_security/public/types.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],

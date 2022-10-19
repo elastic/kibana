@@ -8,7 +8,6 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-
 import type { RecursivePartial } from '@elastic/eui/src/components/common';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
@@ -43,6 +42,8 @@ import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { noCasesPermissions } from '../../../cases_test_utils';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
+import { mockApm } from '../apm/service.mock';
+import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -94,6 +95,7 @@ export const createStartServicesMock = (
 ): StartServices => {
   core.uiSettings.get.mockImplementation(createUseUiSettingMock());
   const { storage } = createSecuritySolutionStorageMock();
+  const apm = mockApm();
   const data = dataPluginMock.createStartContract();
   const security = securityMock.createSetup();
   const urlService = new MockUrlService();
@@ -103,9 +105,11 @@ export const createStartServicesMock = (
   const cases = mockCasesContract();
   cases.helpers.getUICapabilities.mockReturnValue(noCasesPermissions());
   const triggersActionsUi = triggersActionsUiMock.createStart();
+  const cloudExperiments = cloudExperimentsMock.createStartMock();
 
   return {
     ...core,
+    apm,
     cases,
     unifiedSearch,
     data: {
@@ -160,8 +164,15 @@ export const createStartServicesMock = (
     timelines: {
       getLastUpdated: jest.fn(),
       getFieldBrowser: jest.fn(),
+      getHoverActions: jest.fn().mockReturnValue({
+        getAddToTimelineButton: jest.fn(),
+      }),
+    },
+    osquery: {
+      OsqueryResults: jest.fn().mockReturnValue(null),
     },
     triggersActionsUi,
+    cloudExperiments,
   } as unknown as StartServices;
 };
 

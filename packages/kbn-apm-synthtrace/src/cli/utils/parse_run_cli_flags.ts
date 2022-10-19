@@ -66,6 +66,7 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'maxDocs',
       'maxDocsConfidence',
       'target',
+      'apm',
       'cloudId',
       'username',
       'password',

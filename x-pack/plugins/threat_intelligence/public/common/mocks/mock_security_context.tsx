@@ -13,6 +13,10 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
     () =>
     ({ children }) =>
       <div>{children}</div>,
+  getPageWrapper:
+    () =>
+    ({ children }) =>
+      <div>{children}</div>,
   licenseService: {
     isEnterprise() {
       return true;
@@ -22,5 +26,22 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
     browserFields: {},
     selectedPatterns: [],
     indexPattern: { fields: [], title: '' },
+    loading: false,
   },
+  getSecuritySolutionStore: {
+    // @ts-ignore
+    dispatch: () => jest.fn(),
+  },
+  getUseInvestigateInTimeline:
+    ({ dataProviders, from, to }) =>
+    () =>
+      new Promise((resolve) => window.alert('investigate in timeline')),
+
+  SiemSearchBar: () => <div data-test-subj="SiemSearchBar">mock siem search</div>,
+
+  useFilters: () => [],
+
+  useGlobalTime: () => ({ from: '', to: '' }),
+
+  useQuery: () => ({ language: 'kuery', query: '' }),
 });

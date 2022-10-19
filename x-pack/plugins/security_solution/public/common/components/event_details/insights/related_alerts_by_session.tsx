@@ -6,8 +6,9 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiBetaBadge, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
+import { isActiveTimeline } from '../../../../helpers';
 import type { BrowserFields } from '../../../containers/source';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { useActionCellDataProvider } from '../table/use_action_cell_data_provider';
@@ -19,13 +20,12 @@ import { SimpleAlertTable } from './simple_alert_table';
 import { getEnrichedFieldInfo } from '../helpers';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
 import { SESSION_LOADING, SESSION_EMPTY, SESSION_ERROR, SESSION_COUNT } from './translations';
-import { BETA } from '../../../translations';
 
 interface Props {
   browserFields: BrowserFields;
   data: TimelineEventsDetailsItem;
   eventId: string;
-  timelineId: string;
+  scopeId: string;
 }
 
 /**
@@ -36,29 +36,30 @@ interface Props {
  * the related alerts in a timeline investigation.
  */
 export const RelatedAlertsBySession = React.memo<Props>(
-  ({ browserFields, data, eventId, timelineId }) => {
+  ({ browserFields, data, eventId, scopeId }) => {
     const { field, values } = data;
     const { error, count, alertIds } = useAlertPrevalence({
       field,
       value: values,
-      timelineId: timelineId ?? '',
+      isActiveTimelines: isActiveTimeline(scopeId),
       signalIndexName: null,
       includeAlertIds: true,
+      ignoreTimerange: true,
     });
 
     const { fieldFromBrowserField } = getEnrichedFieldInfo({
       browserFields,
-      contextId: timelineId,
+      contextId: scopeId,
       eventId,
       field: { id: data.field },
-      timelineId,
+      scopeId,
       item: data,
     });
 
     const cellData = useActionCellDataProvider({
       field,
       values,
-      contextId: timelineId,
+      contextId: scopeId,
       eventId,
       fieldFromBrowserField,
       fieldFormat: fieldFromBrowserField?.format,
@@ -100,7 +101,6 @@ export const RelatedAlertsBySession = React.memo<Props>(
         state={state}
         text={getTextFromState(state, count)}
         renderContent={renderContent}
-        extraAction={<EuiBetaBadge size="s" label={BETA} color="subdued" />}
       />
     );
   }

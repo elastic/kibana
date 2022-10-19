@@ -208,4 +208,4 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
 
 AgentsTableComponent.displayName = 'AgentsTable';
 
-export const AgentsTable = React.memo(AgentsTableComponent);
+export const AgentsTable = React.memo(AgentsTableComponent, deepEqual);

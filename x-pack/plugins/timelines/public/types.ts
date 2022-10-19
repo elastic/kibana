@@ -12,6 +12,7 @@ import { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { ApmBase } from '@elastic/apm-rum';
 import type {
   LastUpdatedAtProps,
   LoadingPanelProps,
@@ -23,7 +24,6 @@ import type { TGridIntegratedProps } from './components/t_grid/integrated';
 import type { TGridStandaloneProps } from './components/t_grid/standalone';
 import type { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
 import { HoverActionsConfig } from './components/hover_actions';
-import { TimelineTabs } from '../common/types';
 export * from './store/t_grid';
 export interface TimelinesUIStart {
   getHoverActions: () => HoverActionsConfig;
@@ -32,6 +32,8 @@ export interface TimelinesUIStart {
   ) => ReactElement<GetTGridProps<T>>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getTGridReducer: () => any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getTimelineReducer: () => any;
   getLoadingPanel: (props: LoadingPanelProps) => ReactElement<LoadingPanelProps>;
   getLastUpdated: (props: LastUpdatedAtProps) => ReactElement<LastUpdatedAtProps>;
   getUseAddToTimeline: () => (props: UseAddToTimelineProps) => UseAddToTimeline;
@@ -46,6 +48,7 @@ export interface TimelinesStartPlugins {
   data: DataPublicPluginStart;
   cases: CasesUiStart;
   triggersActionsUi: TriggersActionsStart;
+  apm?: ApmBase;
 }
 
 export type TimelinesStartServices = CoreStart & TimelinesStartPlugins;
@@ -64,7 +67,7 @@ export type GetTGridProps<T extends TGridType> = T extends 'standalone'
 export type TGridProps = TGridStandaloneCompProps | TGridIntegratedCompProps;
 
 export interface StatefulEventContextType {
-  tabType: TimelineTabs | undefined;
+  tabType: string | undefined;
   timelineID: string;
   enableHostDetailsFlyout: boolean;
   enableIpDetailsFlyout: boolean;

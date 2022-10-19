@@ -26,6 +26,7 @@ import {
   GetServicesFunction,
   PreConfiguredAction,
   RawAction,
+  ValidatorServices,
 } from '../types';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
 import { ActionsClient } from '../actions_client';
@@ -120,7 +121,6 @@ export class ActionExecutor {
       },
       async (span) => {
         const {
-          logger,
           spaces,
           getServices,
           encryptedSavedObjectsClient,
@@ -143,6 +143,9 @@ export class ActionExecutor {
         );
 
         const { actionTypeId, name, config, secrets } = actionInfo;
+        const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
+        let { logger } = this.actionExecutorContext!;
+        logger = logger.get(loggerId);
 
         if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
           this.actionInfo = actionInfo;
@@ -206,13 +209,17 @@ export class ActionExecutor {
 
         let rawResult: ActionTypeExecutorRawResult<unknown>;
         try {
-          const { validatedParams, validatedConfig, validatedSecrets } = validateAction({
-            actionId,
-            actionType,
-            params,
-            config,
-            secrets,
-          });
+          const configurationUtilities = actionTypeRegistry.getUtils();
+          const { validatedParams, validatedConfig, validatedSecrets } = validateAction(
+            {
+              actionId,
+              actionType,
+              params,
+              config,
+              secrets,
+            },
+            { configurationUtilities }
+          );
 
           rawResult = await actionType.executor({
             actionId,
@@ -222,6 +229,8 @@ export class ActionExecutor {
             secrets: validatedSecrets,
             isEphemeral,
             taskInfo,
+            configurationUtilities,
+            logger,
           });
         } catch (err) {
           if (err.reason === ActionExecutionErrorReason.Validation) {
@@ -426,15 +435,18 @@ interface ValidateActionOpts {
   secrets: unknown;
 }
 
-function validateAction({ actionId, actionType, params, config, secrets }: ValidateActionOpts) {
+function validateAction(
+  { actionId, actionType, params, config, secrets }: ValidateActionOpts,
+  validatorServices: ValidatorServices
+) {
   let validatedParams: Record<string, unknown>;
   let validatedConfig: Record<string, unknown>;
   let validatedSecrets: Record<string, unknown>;
 
   try {
-    validatedParams = validateParams(actionType, params);
-    validatedConfig = validateConfig(actionType, config);
-    validatedSecrets = validateSecrets(actionType, secrets);
+    validatedParams = validateParams(actionType, params, validatorServices);
+    validatedConfig = validateConfig(actionType, config, validatorServices);
+    validatedSecrets = validateSecrets(actionType, secrets, validatorServices);
     if (actionType.validate?.connector) {
       validateConnector(actionType, {
         config,

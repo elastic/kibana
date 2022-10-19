@@ -61,16 +61,3 @@
     flex-direction: column;
   }
 }
-
-// Temporary fix for two tone icons to make them monochrome
-.dshSolutionToolbar__editorContextMenu--dark {
-  .euiIcon path {
-    fill: $euiColorGhost;
-  }
-}
-
-.dshSolutionToolbar__editorContextMenu--light {
-  .euiIcon path {
-    fill: $euiColorInk;
-  }
-}

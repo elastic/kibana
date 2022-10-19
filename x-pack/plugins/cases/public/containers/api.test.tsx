@@ -23,10 +23,9 @@ import {
   getCase,
   getCases,
   getCaseUserActions,
-  getReporters,
   getTags,
   patchCase,
-  patchCasesStatus,
+  updateCases,
   patchComment,
   postCase,
   createAttachments,
@@ -48,8 +47,6 @@ import {
   cases,
   caseUserActions,
   pushedCase,
-  reporters,
-  respReporters,
   tags,
   caseUserActionsSnake,
   casesStatusSnake,
@@ -189,47 +186,51 @@ describe('Cases API', () => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(allCasesSnake);
     });
-    test('should be called with correct check url, method, signal', async () => {
+
+    test('should be called with correct check url, method, signal with empty defaults', async () => {
       await getCases({
-        filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
+        filterOptions: DEFAULT_FILTER_OPTIONS,
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
+
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
         method: 'GET',
         query: {
           ...DEFAULT_QUERY_PARAMS,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-          reporters: [],
-          tags: [],
-          owner: [SECURITY_SOLUTION_OWNER],
         },
         signal: abortCtrl.signal,
       });
     });
 
-    test('should applies correct filters', async () => {
+    test('should applies correct all filters', async () => {
       await getCases({
         filterOptions: {
-          ...DEFAULT_FILTER_OPTIONS,
-          reporters: [...respReporters, { username: null, full_name: null, email: null }],
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          assignees: ['123'],
+          reporters: [{ username: 'username', full_name: null, email: null }],
           tags,
           status: CaseStatuses.open,
+          severity: CaseSeverity.HIGH,
           search: 'hello',
           owner: [SECURITY_SOLUTION_OWNER],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
+
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
         method: 'GET',
         query: {
           ...DEFAULT_QUERY_PARAMS,
-          reporters,
+          assignees: ['123'],
+          reporters: ['username'],
           tags: ['coke', 'pepsi'],
           search: 'hello',
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
           status: CaseStatuses.open,
+          severity: CaseSeverity.HIGH,
           owner: [SECURITY_SOLUTION_OWNER],
         },
         signal: abortCtrl.signal,
@@ -245,13 +246,12 @@ describe('Cases API', () => {
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
+
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
         method: 'GET',
         query: {
           ...DEFAULT_QUERY_PARAMS,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-          reporters: [],
-          tags: [],
           severity: CaseSeverity.HIGH,
         },
         signal: abortCtrl.signal,
@@ -267,13 +267,115 @@ describe('Cases API', () => {
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
+
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
         method: 'GET',
         query: {
           ...DEFAULT_QUERY_PARAMS,
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
-          reporters: [],
-          tags: [],
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('should apply the severity field correctly (with status value)', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          status: CaseStatuses.open,
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          status: CaseStatuses.open,
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('should not send the severity field with "all" status value', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          status: 'all',
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('should not send the assignees field if it an empty array', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          assignees: [],
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('should convert a single null value to none', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          assignees: null,
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          assignees: 'none',
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('should converts null value in the array to none', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          assignees: [null, '123'],
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
+          assignees: ['none', '123'],
         },
         signal: abortCtrl.signal,
       });
@@ -285,7 +387,8 @@ describe('Cases API', () => {
       await getCases({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
-          reporters: [...respReporters, { username: null, full_name: null, email: null }],
+          assignees: ['123'],
+          reporters: [{ username: undefined, full_name: undefined, email: undefined }],
           tags: weirdTags,
           status: CaseStatuses.open,
           search: 'hello',
@@ -294,11 +397,13 @@ describe('Cases API', () => {
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
+
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
         method: 'GET',
         query: {
           ...DEFAULT_QUERY_PARAMS,
-          reporters,
+          assignees: ['123'],
+          reporters: [],
           tags: ['(', '"double"'],
           search: 'hello',
           searchFields: DEFAULT_FILTER_OPTIONS.searchFields,
@@ -378,29 +483,6 @@ describe('Cases API', () => {
     });
   });
 
-  describe('getReporters', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(respReporters);
-    });
-
-    test('should be called with correct check url, method, signal', async () => {
-      await getReporters(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
-      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/reporters`, {
-        method: 'GET',
-        signal: abortCtrl.signal,
-        query: {
-          owner: [SECURITY_SOLUTION_OWNER],
-        },
-      });
-    });
-
-    test('should return correct response', async () => {
-      const resp = await getReporters(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
-      expect(resp).toEqual(respReporters);
-    });
-  });
-
   describe('getTags', () => {
     beforeEach(() => {
       fetchMock.mockClear();
@@ -468,7 +550,7 @@ describe('Cases API', () => {
     });
   });
 
-  describe('patchCasesStatus', () => {
+  describe('updateCases', () => {
     beforeEach(() => {
       fetchMock.mockClear();
       fetchMock.mockResolvedValue(casesSnake);
@@ -483,7 +565,7 @@ describe('Cases API', () => {
     ];
 
     test('should be called with correct check url, method, signal', async () => {
-      await patchCasesStatus(data, abortCtrl.signal);
+      await updateCases(data, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
         method: 'PATCH',
         body: JSON.stringify({ cases: data }),
@@ -492,7 +574,7 @@ describe('Cases API', () => {
     });
 
     test('should return correct response should not covert to camel case registered attachments', async () => {
-      const resp = await patchCasesStatus(data, abortCtrl.signal);
+      const resp = await updateCases(data, abortCtrl.signal);
       expect(resp).toEqual(cases);
     });
   });

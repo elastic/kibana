@@ -41,7 +41,7 @@ describe('query service persistable state tests', () => {
       const updatedQueryState = inject(queryState, [
         { type: DATA_VIEW_SAVED_OBJECT_TYPE, name: 'test123', id: '123' },
       ]);
-      expect(updatedQueryState.filters[0]).toHaveProperty('meta.index', undefined);
+      expect(updatedQueryState.filters[0]).toHaveProperty('meta.index', 'test');
     });
   });
 

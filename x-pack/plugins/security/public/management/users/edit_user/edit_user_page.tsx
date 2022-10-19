@@ -76,8 +76,9 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
 
   const isReservedUser = isUserReserved(user);
   const isDeprecatedUser = isUserDeprecated(user);
-  const displayName = getUserDisplayName(user);
 
+  // We render email below the title already and don't need to duplicate it in the title itself.
+  const title = getUserDisplayName({ full_name: user.full_name, username: user.username });
   return (
     <>
       <EuiPageHeader
@@ -85,11 +86,11 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
         pageTitle={
           <EuiFlexGroup alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiAvatar name={displayName!} size="xl" />
+              <EuiAvatar name={getUserDisplayName(user)} size="xl" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle>
-                <h1>{displayName}</h1>
+                <h1>{title}</h1>
               </EuiTitle>
               <EuiText>{user.email}</EuiText>
             </EuiFlexItem>

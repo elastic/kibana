@@ -75,6 +75,8 @@ const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
 const mockedDownloadSourceService = downloadSourceService as jest.Mocked<
   typeof downloadSourceService
 >;
+const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
+
 const mockedGetFullAgentPolicy = getFullAgentPolicy as jest.Mock<
   ReturnType<typeof getFullAgentPolicy>
 >;
@@ -144,6 +146,11 @@ describe('agent policy', () => {
 
     beforeEach(() => {
       soClient = getSavedObjectMock({ revision: 1, package_policies: ['package-1'] });
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        {
+          id: 'package-1',
+        },
+      ] as any);
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       (getAgentsByKuery as jest.Mock).mockResolvedValue({
@@ -153,10 +160,10 @@ describe('agent policy', () => {
         perPage: 10,
       });
 
-      (packagePolicyService.delete as jest.Mock).mockResolvedValue([
+      mockedPackagePolicyService.delete.mockResolvedValue([
         {
           id: 'package-1',
-        },
+        } as any,
       ]);
     });
 

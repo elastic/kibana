@@ -13,11 +13,12 @@ import {
   TestKibanaUtils,
   TestUtils,
 } from '../../../test_helpers/kbn_server';
-import { createOrUpgradeSavedConfig } from '../../ui_settings/create_or_upgrade_saved_config';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { createOrUpgradeSavedConfig } from '@kbn/core-ui-settings-server-internal';
 
 const logger = loggingSystemMock.create().get();
+
 describe('createOrUpgradeSavedConfig()', () => {
   let savedObjectsClient: SavedObjectsClientContract;
   let servers: TestUtils;
@@ -68,7 +69,7 @@ describe('createOrUpgradeSavedConfig()', () => {
   afterAll(async () => {
     await esServer.stop();
     await kbn.stop();
-  }, 30000);
+  });
 
   it('upgrades the previous version on each increment', async function () {
     // ------------------------------------
@@ -209,5 +210,5 @@ describe('createOrUpgradeSavedConfig()', () => {
       // Should have the transform(s) applied
       isDefaultIndexMigrated: true,
     });
-  }, 30000);
+  });
 });

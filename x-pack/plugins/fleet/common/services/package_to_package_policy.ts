@@ -18,14 +18,23 @@ import type {
 } from '../types';
 
 import { doesPackageHaveIntegrations } from '.';
+import {
+  getNormalizedDataStreams,
+  getNormalizedInputs,
+  isIntegrationPolicyTemplate,
+} from './policy_template';
+
+type PackagePolicyStream = RegistryStream & { release?: 'beta' | 'experimental' | 'ga' } & {
+  data_stream: { type: string; dataset: string };
+};
 
 export const getStreamsForInputType = (
   inputType: string,
   packageInfo: PackageInfo,
   dataStreamPaths: string[] = []
-): Array<RegistryStream & { data_stream: { type: string; dataset: string } }> => {
-  const streams: Array<RegistryStream & { data_stream: { type: string; dataset: string } }> = [];
-  const dataStreams = packageInfo.data_streams || [];
+): PackagePolicyStream[] => {
+  const streams: PackagePolicyStream[] = [];
+  const dataStreams = getNormalizedDataStreams(packageInfo);
   const dataStreamsToSearch = dataStreamPaths.length
     ? dataStreams.filter((dataStream) => dataStreamPaths.includes(dataStream.path))
     : dataStreams;
@@ -39,6 +48,7 @@ export const getStreamsForInputType = (
             type: dataStream.type,
             dataset: dataStream.dataset,
           },
+          release: dataStream.release,
         });
       }
     });
@@ -76,11 +86,12 @@ export const packageToPackagePolicyInputs = (
   } = {};
 
   packageInfo.policy_templates?.forEach((packagePolicyTemplate) => {
-    packagePolicyTemplate.inputs?.forEach((packageInput) => {
+    const normalizedInputs = getNormalizedInputs(packagePolicyTemplate);
+    normalizedInputs?.forEach((packageInput) => {
       const inputKey = `${packagePolicyTemplate.name}-${packageInput.type}`;
       const input = {
         ...packageInput,
-        ...(packagePolicyTemplate.data_streams
+        ...(isIntegrationPolicyTemplate(packagePolicyTemplate) && packagePolicyTemplate.data_streams
           ? { data_streams: packagePolicyTemplate.data_streams }
           : {}),
         policy_template: packagePolicyTemplate.name,
@@ -102,6 +113,7 @@ export const packageToPackagePolicyInputs = (
       const stream: NewPackagePolicyInputStream = {
         enabled: packageStream.enabled === false ? false : true,
         data_stream: packageStream.data_stream,
+        release: packageStream.release,
       };
       if (packageStream.vars && packageStream.vars.length) {
         stream.vars = packageStream.vars.reduce(varsReducer, {});
@@ -162,7 +174,6 @@ export const packageToPackagePolicyInputs = (
 export const packageToPackagePolicy = (
   packageInfo: PackageInfo,
   agentPolicyId: string,
-  outputId: string,
   namespace: string = '',
   packagePolicyName?: string,
   description?: string,
@@ -179,7 +190,6 @@ export const packageToPackagePolicy = (
     },
     enabled: true,
     policy_id: agentPolicyId,
-    output_id: outputId,
     inputs: packageToPackagePolicyInputs(packageInfo, integrationToEnable),
     vars: undefined,
   };

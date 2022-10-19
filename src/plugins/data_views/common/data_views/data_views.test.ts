@@ -21,7 +21,7 @@ import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
 
 const createFieldsFetcher = () =>
   ({
-    getFieldsForWildcard: jest.fn(async () => []),
+    getFieldsForWildcard: jest.fn(async () => ({ fields: [], indices: [] })),
   } as any as IDataViewsApiClient);
 
 const fieldFormats = fieldFormatsMock;
@@ -224,11 +224,11 @@ describe('IndexPatterns', () => {
 
     // This will conflict because samePattern did a save (from refreshFields)
     // but the resave should work fine
-    pattern.title = 'foo2';
+    pattern.setIndexPattern('foo2');
     await indexPatterns.updateSavedObject(pattern);
 
     // This should not be able to recover
-    samePattern.title = 'foo3';
+    samePattern.setIndexPattern('foo3');
 
     let result;
     try {
@@ -241,18 +241,18 @@ describe('IndexPatterns', () => {
   });
 
   test('create', async () => {
-    const title = 'kibana-*';
+    const indexPattern = 'kibana-*';
     indexPatterns.refreshFields = jest.fn();
 
-    const indexPattern = await indexPatterns.create({ title }, true);
-    expect(indexPattern).toBeInstanceOf(DataView);
-    expect(indexPattern.title).toBe(title);
+    const dataView = await indexPatterns.create({ title: indexPattern }, true);
+    expect(dataView).toBeInstanceOf(DataView);
+    expect(dataView.getIndexPattern()).toBe(indexPattern);
     expect(indexPatterns.refreshFields).not.toBeCalled();
 
-    await indexPatterns.create({ title });
+    await indexPatterns.create({ title: indexPattern });
     expect(indexPatterns.refreshFields).toBeCalled();
-    expect(indexPattern.id).toBeDefined();
-    expect(indexPattern.isPersisted()).toBe(false);
+    expect(dataView.id).toBeDefined();
+    expect(dataView.isPersisted()).toBe(false);
   });
 
   test('createSavedObject', async () => {
@@ -267,14 +267,14 @@ describe('IndexPatterns', () => {
       version,
       attributes: {
         ...savedObject.attributes,
-        title: dataView.title,
+        title: dataView.getIndexPattern(),
       },
     });
 
     const indexPattern = await indexPatterns.createSavedObject(dataView);
     expect(indexPattern).toBeInstanceOf(DataView);
     expect(indexPattern.id).toBe(dataView.id);
-    expect(indexPattern.title).toBe(title);
+    expect(indexPattern.getIndexPattern()).toBe(title);
     expect(indexPattern.isPersisted()).toBe(true);
   });
 
@@ -348,6 +348,26 @@ describe('IndexPatterns', () => {
 
     // successful subsequent request
     expect(async () => await indexPatterns.get(id)).toBeDefined();
+  });
+
+  test('can set and remove field format', async () => {
+    const id = 'id';
+    setDocsourcePayload(id, savedObject);
+    const dataView = await indexPatterns.get(id);
+    dataView.setFieldFormat('field', { id: 'formatId' });
+    await indexPatterns.updateSavedObject(dataView);
+    let lastCall = (savedObjectsClient.update as jest.Mock).mock.calls.pop() ?? [];
+    let [, , attrs] = lastCall;
+    expect(attrs).toHaveProperty('fieldFormatMap');
+    expect(attrs.fieldFormatMap).toMatchInlineSnapshot(`"{\\"field\\":{\\"id\\":\\"formatId\\"}}"`);
+    dataView.deleteFieldFormat('field');
+    await indexPatterns.updateSavedObject(dataView);
+    lastCall = (savedObjectsClient.update as jest.Mock).mock.calls.pop() ?? [];
+    [, , attrs] = lastCall;
+
+    // https://github.com/elastic/kibana/issues/134873: must keep an empty object and not delete it
+    expect(attrs).toHaveProperty('fieldFormatMap');
+    expect(attrs.fieldFormatMap).toMatchInlineSnapshot(`"{}"`);
   });
 
   describe('getDefaultDataView', () => {

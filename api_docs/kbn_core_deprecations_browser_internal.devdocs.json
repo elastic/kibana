@@ -41,6 +41,7 @@
         ],
         "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-browser-internal",
@@ -54,6 +55,7 @@
             ],
             "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -72,6 +74,7 @@
             ],
             "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-browser-internal",
@@ -82,6 +85,7 @@
                 "description": [],
                 "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-deprecations-browser-internal",
@@ -94,7 +98,8 @@
                       "HttpSetup"
                     ],
                     "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -113,6 +118,7 @@
             ],
             "path": "packages/core/deprecations/core-deprecations-browser-internal/src/deprecations_service.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }

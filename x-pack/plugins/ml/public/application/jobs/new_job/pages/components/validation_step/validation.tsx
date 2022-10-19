@@ -49,6 +49,7 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
     // force basic validation to run
     jobValidator.validate(() => {}, true);
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // keep a record of the advanced validation in the jobValidator

@@ -189,6 +189,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
       displayErrorToast(error, title);
     }
     setIsLoadingChartData(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [endDate, data.bucketSpan]);
 
   const getJobAndSnapshotData = useCallback(async () => {
@@ -211,6 +212,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
 
       setData({
         datafeedConfig: job.datafeed_config,
+        // @ts-expect-error bucket_span is of type estypes.Duration
         bucketSpan: job.analysis_config.bucket_span,
         isInitialized: true,
         modelSnapshotData: modelSnapshotResultsLine.map(setLineAnnotationHeader),
@@ -218,10 +220,12 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
     } catch (error) {
       displayErrorToast(error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId]);
 
   useEffect(function loadInitialData() {
     getJobAndSnapshotData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(
@@ -231,6 +235,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
         getChartData();
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [endDate, data.bucketSpan]
   );
 
@@ -506,7 +511,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           key={'source-results'}
                           color={euiTheme.euiColorPrimary}
                           id={i18n.translate('xpack.ml.jobsList.datafeedChart.sourceSeriesId', {
-                            defaultMessage: 'Source indices',
+                            defaultMessage: 'Source indices document count',
                           })}
                           xScaleType={ScaleType.Time}
                           yScaleType={ScaleType.Linear}
@@ -519,7 +524,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           key={'job-results'}
                           color={euiTheme.euiColorAccentText}
                           id={i18n.translate('xpack.ml.jobsList.datafeedChart.bucketSeriesId', {
-                            defaultMessage: 'Job results',
+                            defaultMessage: 'Datafeed document count',
                           })}
                           xScaleType={ScaleType.Time}
                           yScaleType={ScaleType.Linear}
@@ -644,6 +649,7 @@ export const JobListDatafeedChartFlyout: FC<JobListDatafeedChartFlyoutProps> = (
     return () => {
       unsetShowFunction();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (isVisible === true && job !== undefined) {

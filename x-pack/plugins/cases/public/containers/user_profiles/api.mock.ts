@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UserProfile } from '@kbn/security-plugin/common';
+import type { UserProfile } from '@kbn/security-plugin/common';
 
 export const userProfiles: UserProfile[] = [
   {
@@ -41,3 +41,5 @@ export const userProfiles: UserProfile[] = [
 ];
 
 export const userProfilesIds = userProfiles.map((profile) => profile.uid);
+
+export const userProfilesMap = new Map(userProfiles.map((profile) => [profile.uid, profile]));

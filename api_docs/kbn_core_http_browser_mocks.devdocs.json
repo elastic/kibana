@@ -33,6 +33,7 @@
         ],
         "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser-mocks",
@@ -46,6 +47,7 @@
             ],
             "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -60,6 +62,7 @@
             ],
             "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -74,6 +77,7 @@
             ],
             "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -88,6 +92,7 @@
             ],
             "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -102,6 +107,7 @@
             ],
             "path": "packages/core/http/core-http-browser-mocks/src/fetch_error.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -158,6 +164,7 @@
         ],
         "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -171,6 +178,7 @@
         "description": [],
         "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-browser-mocks",
@@ -188,6 +196,7 @@
             ],
             "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -201,7 +210,8 @@
                   "{ basePath?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -224,6 +234,7 @@
             ],
             "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -237,7 +248,8 @@
                   "{ basePath?: string | undefined; publicBaseUrl?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -260,6 +272,7 @@
             ],
             "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -273,7 +286,8 @@
                   "{ basePath?: string | undefined; publicBaseUrl?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -291,6 +305,7 @@
             ],
             "path": "packages/core/http/core-http-browser-mocks/src/http_service.mock.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -304,7 +319,8 @@
                   "{ publicBaseUrl?: string | undefined; serverBasePath?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-browser-mocks/src/base_path.mock.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }

@@ -16,8 +16,7 @@ export default function ({ getPageObjects, getService }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/136218
-  describe.skip('maps in embeddable library', () => {
+  describe('maps in embeddable library', () => {
     before(async () => {
       await security.testUser.setRoles(
         [

@@ -8,8 +8,6 @@
 import React, { useMemo } from 'react';
 import { Switch, Route } from 'react-router-dom';
 
-import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
-
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
 import { installationStatuses } from '../../../../../../../common/constants';
@@ -27,23 +25,21 @@ import { useGetPackages } from '../../../../hooks';
 
 import type { Section } from '../../..';
 
-import type { CategoryFacet } from './category_facets';
+import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
+
 import { InstalledPackages } from './installed_packages';
 import { AvailablePackages } from './available_packages';
 
 export interface CategoryParams {
-  category?: string;
+  category?: ExtendedIntegrationCategory;
 }
 
 export const getParams = (params: CategoryParams, search: string) => {
   const { category } = params;
-  const selectedCategory = category || '';
+  const selectedCategory: ExtendedIntegrationCategory = category || '';
   const queryParams = new URLSearchParams(search);
   const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
-  return { selectedCategory, searchParam } as {
-    selectedCategory: IntegrationCategory & '';
-    searchParam: string;
-  };
+  return { selectedCategory, searchParam };
 };
 
 export const categoryExists = (category: string, categories: CategoryFacet[]) => {
@@ -54,20 +50,25 @@ export const mapToCard = ({
   getAbsolutePath,
   getHref,
   item,
+  addBasePath,
   packageVerificationKeyId,
   selectedCategory,
 }: {
   getAbsolutePath: (p: string) => string;
   getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => string;
+  addBasePath: (url: string) => string;
   item: CustomIntegration | PackageListItem;
   packageVerificationKeyId?: string;
   selectedCategory?: string;
 }): IntegrationCardItem => {
-  let uiInternalPathUrl;
+  let uiInternalPathUrl: string;
 
   let isUnverified = false;
+
   if (item.type === 'ui_link') {
-    uiInternalPathUrl = item.uiExternalLink || getAbsolutePath(item.uiInternalPath);
+    uiInternalPathUrl = item.id.includes('language_client.')
+      ? addBasePath(item.uiInternalPath)
+      : item.uiExternalLink || getAbsolutePath(item.uiInternalPath);
   } else {
     let urlVersion = item.version;
     if ('savedObject' in item) {
@@ -98,7 +99,7 @@ export const mapToCard = ({
     url: uiInternalPathUrl,
     fromIntegrations: selectedCategory,
     integration: 'integration' in item ? item.integration || '' : '',
-    name: 'name' in item ? item.name || '' : '',
+    name: 'name' in item ? item.name : item.id,
     version: 'version' in item ? item.version || '' : '',
     release,
     categories: ((item.categories || []) as string[]).filter((c: string) => !!c),

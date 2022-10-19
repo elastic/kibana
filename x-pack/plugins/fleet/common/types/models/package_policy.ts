@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import type { RegistryRelease, ExperimentalDataStreamFeature } from './epm';
+
 export interface PackagePolicyPackage {
   name: string;
   title: string;
   version: string;
+  experimental_data_stream_features?: ExperimentalDataStreamFeature[];
 }
 
 export interface PackagePolicyConfigRecordEntry {
@@ -32,6 +35,7 @@ export interface NewPackagePolicyInputStream {
       };
     };
   };
+  release?: RegistryRelease;
   vars?: PackagePolicyConfigRecord;
   config?: PackagePolicyConfigRecord;
 }
@@ -65,7 +69,6 @@ export interface NewPackagePolicy {
   enabled: boolean;
   is_managed?: boolean;
   policy_id: string;
-  output_id: string;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
   vars?: PackagePolicyConfigRecord;

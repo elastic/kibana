@@ -22,6 +22,8 @@ import { upsertQuery } from '../../store/inputs/helpers';
 
 import { InspectButton } from '.';
 import { cloneDeep } from 'lodash/fp';
+import { InputsModelId } from '../../store/inputs/constants';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('./modal', () => ({
   ModalInspectQuery: jest.fn(() => <div data-test-subj="mocker-modal" />),
@@ -32,7 +34,7 @@ describe('Inspect Button', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
   const newQuery: UpdateQueryParams = {
-    inputId: 'global',
+    inputId: InputsModelId.global,
     id: 'myQuery',
     inspect: null,
     loading: false,
@@ -40,18 +42,30 @@ describe('Inspect Button', () => {
     state: state.inputs,
   };
 
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    { dataTable: tGridReducer },
+    kibanaObservable,
+    storage
+  );
 
   describe('Render', () => {
     beforeEach(() => {
       const myState = cloneDeep(state);
       myState.inputs = upsertQuery(newQuery);
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
     });
     test('Eui Empty Button', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <InspectButton queryId={newQuery.id} inputId="timeline" title="My title" />
+          <InspectButton queryId={newQuery.id} inputId={InputsModelId.timeline} title="My title" />
         </TestProviders>
       );
       expect(wrapper.find('button[data-test-subj="inspect-empty-button"]').first().exists()).toBe(
@@ -62,7 +76,12 @@ describe('Inspect Button', () => {
     test('it does NOT render the Eui Empty Button when timeline is timeline and compact is true', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <InspectButton compact={true} queryId={newQuery.id} inputId="timeline" title="My title" />
+          <InspectButton
+            compact={true}
+            queryId={newQuery.id}
+            inputId={InputsModelId.timeline}
+            title="My title"
+          />
         </TestProviders>
       );
       expect(wrapper.find('button[data-test-subj="inspect-empty-button"]').first().exists()).toBe(
@@ -75,7 +94,7 @@ describe('Inspect Button', () => {
         <TestProviders store={store}>
           <InspectButton
             queryId={newQuery.id}
-            inputId="timeline"
+            inputId={InputsModelId.timeline}
             showInspectButton={false}
             title="My title"
           />
@@ -100,7 +119,12 @@ describe('Inspect Button', () => {
     test('renders the Icon Button when inputId does NOT equal global, but compact is true', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <InspectButton compact={true} inputId="timeline" queryId={newQuery.id} title="My title" />
+          <InspectButton
+            compact={true}
+            inputId={InputsModelId.timeline}
+            queryId={newQuery.id}
+            title="My title"
+          />
         </TestProviders>
       );
       expect(wrapper.find('button[data-test-subj="inspect-icon-button"]').first().exists()).toBe(
@@ -142,7 +166,13 @@ describe('Inspect Button', () => {
       const myQuery = cloneDeep(newQuery);
       myQuery.inspect = null;
       myState.inputs = upsertQuery(myQuery);
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -159,7 +189,13 @@ describe('Inspect Button', () => {
         response: ['my response'],
       };
       myState.inputs = upsertQuery(myQuery);
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -176,7 +212,13 @@ describe('Inspect Button', () => {
         response: [],
       };
       myState.inputs = upsertQuery(myQuery);
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -195,7 +237,13 @@ describe('Inspect Button', () => {
         response: ['my response'],
       };
       myState.inputs = upsertQuery(myQuery);
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
     });
     test('Open Inspect Modal', () => {
       const wrapper = mount(
@@ -240,7 +288,13 @@ describe('Inspect Button', () => {
       };
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = true;
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -259,7 +313,13 @@ describe('Inspect Button', () => {
       };
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = false;
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -278,7 +338,13 @@ describe('Inspect Button', () => {
       };
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = true;
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />
@@ -297,7 +363,13 @@ describe('Inspect Button', () => {
       };
       myState.inputs = upsertQuery(myQuery);
       myState.inputs.global.queries[0].isInspected = true;
-      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      store = createStore(
+        myState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
       const wrapper = mount(
         <TestProviders store={store}>
           <InspectButton queryId={newQuery.id} title="My title" />

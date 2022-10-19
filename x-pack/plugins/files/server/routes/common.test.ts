@@ -9,40 +9,48 @@ import type { File } from '../file';
 import { getDownloadHeadersForFile } from './common';
 
 describe('getDownloadHeadersForFile', () => {
-  function t({ cd, ct }: { cd: string; ct: string }) {
+  function expectHeaders({
+    contentDisposition,
+    contentType,
+  }: {
+    contentDisposition: string;
+    contentType: string;
+  }) {
     return {
-      'content-type': ct,
-      'content-disposition': `attachment; filename="${cd}"`,
+      'content-type': contentType,
+      'content-disposition': `attachment; filename="${contentDisposition}"`,
+      'cache-control': 'max-age=31536000, immutable',
+      'x-content-type-options': 'nosniff',
     };
   }
 
   const file = { data: { name: 'test', mimeType: undefined } } as unknown as File;
   test('no mime type and name from file object', () => {
-    expect(getDownloadHeadersForFile(file, undefined)).toEqual(
-      t({ ct: 'application/octet-stream', cd: 'test' })
+    expect(getDownloadHeadersForFile({ file, fileName: undefined })).toEqual(
+      expectHeaders({ contentType: 'application/octet-stream', contentDisposition: 'test' })
     );
   });
 
   test('no mime type and name (without ext)', () => {
-    expect(getDownloadHeadersForFile(file, 'myfile')).toEqual(
-      t({ ct: 'application/octet-stream', cd: 'myfile' })
+    expect(getDownloadHeadersForFile({ file, fileName: 'myfile' })).toEqual(
+      expectHeaders({ contentType: 'application/octet-stream', contentDisposition: 'myfile' })
     );
   });
   test('no mime type and name (with ext)', () => {
-    expect(getDownloadHeadersForFile(file, 'myfile.png')).toEqual(
-      t({ ct: 'image/png', cd: 'myfile.png' })
+    expect(getDownloadHeadersForFile({ file, fileName: 'myfile.png' })).toEqual(
+      expectHeaders({ contentType: 'image/png', contentDisposition: 'myfile.png' })
     );
   });
   test('mime type and no name', () => {
     const fileWithMime = { data: { ...file.data, mimeType: 'application/pdf' } } as File;
-    expect(getDownloadHeadersForFile(fileWithMime, undefined)).toEqual(
-      t({ ct: 'application/pdf', cd: 'test' })
+    expect(getDownloadHeadersForFile({ file: fileWithMime, fileName: undefined })).toEqual(
+      expectHeaders({ contentType: 'application/pdf', contentDisposition: 'test' })
     );
   });
   test('mime type and name', () => {
     const fileWithMime = { data: { ...file.data, mimeType: 'application/pdf' } } as File;
-    expect(getDownloadHeadersForFile(fileWithMime, 'a cool file.pdf')).toEqual(
-      t({ ct: 'application/pdf', cd: 'a cool file.pdf' })
+    expect(getDownloadHeadersForFile({ file: fileWithMime, fileName: 'a cool file.pdf' })).toEqual(
+      expectHeaders({ contentType: 'application/pdf', contentDisposition: 'a cool file.pdf' })
     );
   });
 });

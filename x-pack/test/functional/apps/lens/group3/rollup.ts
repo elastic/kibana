@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should allow seamless transition to and from table view', async () => {
-      await PageObjects.lens.switchToVisualization('lnsMetric');
+      await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
       await PageObjects.lens.assertLegacyMetric('Sum of bytes', '16,788');
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       expect(await PageObjects.lens.getDatatableHeaderText()).to.eql('Sum of bytes');
@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchDataPanelIndexPattern('lens_regular_data');
-      await PageObjects.lens.switchToVisualization('lnsMetric');
+      await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
       await PageObjects.lens.configureDimension({
         dimension: 'lns-empty-dimension',
         operation: 'sum',

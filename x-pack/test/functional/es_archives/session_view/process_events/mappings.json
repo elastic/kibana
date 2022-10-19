@@ -16,6 +16,19 @@
         "process.entry_leader.entity_id": {
           "type": "keyword",
           "ignore_above": 256
+        },
+        "event.action": {
+          "type": "keyword",
+          "ignore_above": 256
+        },
+        "process.tty.char_device.major": {
+          "type": "long"
+        },
+        "process.tty.char_device.minor": {
+          "type": "long"
+        },
+        "host.id": {
+          "type": "keyword"
         }
       }
     }

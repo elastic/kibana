@@ -18,15 +18,8 @@ import {
   EuiFlexItem,
   EuiFocusTrap,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
-
-/**
- * The dimension container is set up to close when it detects a click outside it.
- * Use this CSS class to exclude particular elements from this behavior.
- */
-export const DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS =
-  'lensDontCloseDimensionContainerOnClick';
+import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 
 function fromExcludedClickTarget(event: Event) {
   for (
@@ -36,7 +29,8 @@ function fromExcludedClickTarget(event: Event) {
   ) {
     if (
       node.classList!.contains(DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS) ||
-      node.classList!.contains('euiBody-hasPortalContent')
+      node.classList!.contains('euiBody-hasPortalContent') ||
+      node.getAttribute('data-euiportal') === 'true'
     ) {
       return true;
     }
@@ -70,17 +64,20 @@ export function DimensionContainer({
   }, [handleClose]);
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('lnsBody--overflowHidden');
-    } else {
-      document.body.classList.remove('lnsBody--overflowHidden');
-    }
+    document.body.classList.toggle('lnsBody--overflowHidden', isOpen);
     return () => {
+      if (isOpen) {
+        setFocusTrapIsEnabled(false);
+      }
       document.body.classList.remove('lnsBody--overflowHidden');
     };
-  });
+  }, [isOpen]);
 
-  return isOpen ? (
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
     <div ref={panelRef}>
       <EuiFocusTrap
         disabled={!focusTrapIsEnabled}
@@ -158,5 +155,5 @@ export function DimensionContainer({
         </div>
       </EuiFocusTrap>
     </div>
-  ) : null;
+  );
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { useParams } from 'react-router-dom';
 
@@ -19,15 +19,17 @@ import { Status } from '../../../../../common/types/api';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
-import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
+import {
+  SEARCH_INDEX_PATH,
+  SEARCH_INDEX_SELECT_CONNECTOR_PATH,
+  SEARCH_INDEX_TAB_PATH,
+} from '../../routes';
 import { isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { baseBreadcrumbs } from '../search_indices';
 
 import { getHeaderActions } from './components/header_actions/header_actions';
-import { IndexCreatedCallout } from './components/index_created_callout/callout';
-import { IndexCreatedCalloutLogic } from './components/index_created_callout/callout_logic';
 import { ConnectorConfiguration } from './connector/connector_configuration';
 import { ConnectorSchedulingComponent } from './connector/connector_scheduling';
 import { AutomaticCrawlScheduler } from './crawler/automatic_crawl_scheduler/automatic_crawl_scheduler';
@@ -37,12 +39,14 @@ import { SearchIndexDocuments } from './documents';
 import { SearchIndexIndexMappings } from './index_mappings';
 import { IndexNameLogic } from './index_name_logic';
 import { SearchIndexOverview } from './overview';
+import { SearchIndexPipelines } from './pipelines/pipelines';
 
 export enum SearchIndexTabId {
   // all indices
   OVERVIEW = 'overview',
   DOCUMENTS = 'documents',
   INDEX_MAPPINGS = 'index_mappings',
+  PIPELINES = 'pipelines',
   // connector indices
   CONFIGURATION = 'configuration',
   SCHEDULING = 'scheduling',
@@ -52,12 +56,23 @@ export enum SearchIndexTabId {
 
 export const SearchIndex: React.FC = () => {
   const { data: indexData, status: indexApiStatus } = useValues(FetchIndexApiLogic);
-  const { isCalloutVisible } = useValues(IndexCreatedCalloutLogic);
   const { tabId = SearchIndexTabId.OVERVIEW } = useParams<{
     tabId?: string;
   }>();
 
   const { indexName } = useValues(IndexNameLogic);
+
+  useEffect(() => {
+    if (
+      isConnectorIndex(indexData) &&
+      indexData.connector.is_native &&
+      indexData.connector.service_type === null
+    ) {
+      KibanaLogic.values.navigateToUrl(
+        generateEncodedPath(SEARCH_INDEX_SELECT_CONNECTOR_PATH, { indexName })
+      );
+    }
+  }, [indexData]);
 
   const ALL_INDICES_TABS: EuiTabbedContentTab[] = [
     {
@@ -117,10 +132,19 @@ export const SearchIndex: React.FC = () => {
     },
   ];
 
+  const PIPELINES_TAB: EuiTabbedContentTab = {
+    content: <SearchIndexPipelines />,
+    id: SearchIndexTabId.PIPELINES,
+    name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.pipelinesTabLabel', {
+      defaultMessage: 'Pipelines',
+    }),
+  };
+
   const tabs: EuiTabbedContentTab[] = [
     ...ALL_INDICES_TABS,
     ...(isConnectorIndex(indexData) ? CONNECTOR_TABS : []),
     ...(isCrawlerIndex(indexData) ? CRAWLER_TABS : []),
+    PIPELINES_TAB,
   ];
 
   const selectedTab = tabs.find((tab) => tab.id === tabId);
@@ -150,7 +174,6 @@ export const SearchIndex: React.FC = () => {
       }}
     >
       <>
-        {isCalloutVisible && <IndexCreatedCallout indexName={indexName} />}
         {indexName === indexData?.name && (
           <EuiTabbedContent tabs={tabs} selectedTab={selectedTab} onTabClick={onTabClick} />
         )}

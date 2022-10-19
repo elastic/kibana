@@ -22,6 +22,7 @@ const ClassNameInput: FC<{
 
   useEffect(() => {
     inferrer.labelsText$.next(labelsText);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [labelsText]);
 
   const runningState = useObservable(inferrer.runningState$);

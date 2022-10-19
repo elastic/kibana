@@ -8,7 +8,7 @@
 
 import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
-import { DataViewBase } from '../..';
+import { DataViewBase } from '../../..';
 
 import * as range from './range';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';

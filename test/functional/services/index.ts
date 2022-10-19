@@ -13,9 +13,11 @@ import {
   BrowserProvider,
   FailureDebuggingProvider,
   FindProvider,
+  PngService,
   ScreenshotsService,
   SnapshotsService,
   TestSubjects,
+  RetryOnStaleProvider,
 } from './common';
 import { ComboBoxService } from './combo_box';
 import {
@@ -58,6 +60,7 @@ export const services = {
   find: FindProvider,
   testSubjects: TestSubjects,
   docTable: DocTableService,
+  png: PngService,
   screenshots: ScreenshotsService,
   snapshots: SnapshotsService,
   failureDebugging: FailureDebuggingProvider,
@@ -86,4 +89,5 @@ export const services = {
   managementMenu: ManagementMenuService,
   monacoEditor: MonacoEditorService,
   menuToggle: MenuToggleService,
+  retryOnStale: RetryOnStaleProvider,
 };

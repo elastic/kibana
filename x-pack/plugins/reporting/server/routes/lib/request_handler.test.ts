@@ -173,6 +173,26 @@ describe('Handle request to generate', () => {
     `);
   });
 
+  test('disallows invalid browser timezone', async () => {
+    (reportingCore.getLicenseInfo as jest.Mock) = jest.fn(() => ({
+      csv_searchsource: {
+        enableLinks: false,
+        message: `seeing this means the license isn't supported`,
+      },
+    }));
+
+    expect(
+      await requestHandler.handleGenerateRequest('csv_searchsource', {
+        ...mockJobParams,
+        browserTimezone: 'America/Amsterdam',
+      })
+    ).toMatchInlineSnapshot(`
+        Object {
+          "body": "seeing this means the license isn't supported",
+        }
+    `);
+  });
+
   test('generates the download path', async () => {
     const response = (await requestHandler.handleGenerateRequest(
       'csv_searchsource',

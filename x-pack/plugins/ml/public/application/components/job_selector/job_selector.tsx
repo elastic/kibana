@@ -28,8 +28,8 @@ import {
   JobSelectorFlyoutProps,
 } from './job_selector_flyout';
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
-import { useStorage } from '../../contexts/ml/use_storage';
-import { ApplyTimeRangeConfig, ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
+import { useStorage } from '../../contexts/storage';
+import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
 
 interface GroupObj {
   groupId: string;
@@ -89,7 +89,7 @@ export interface JobSelectionMaps {
 
 export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: JobSelectorProps) {
   const [globalState, setGlobalState] = useUrlState('_g');
-  const [applyTimeRangeConfig, setApplyTimeRangeConfig] = useStorage<ApplyTimeRangeConfig>(
+  const [applyTimeRangeConfig, setApplyTimeRangeConfig] = useStorage(
     ML_APPLY_TIME_RANGE_CONFIG,
     true
   );
@@ -110,6 +110,7 @@ export function JobSelector({ dateFormatTz, singleSelection, timeseriesOnly }: J
   // Ensure JobSelectionBar gets updated when selection via globalState changes.
   useEffect(() => {
     setSelectedIds(mergeSelection(selectedJobIds, selectedGroups, singleSelection));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify([selectedJobIds, selectedGroups])]);
 
   function closeFlyout() {

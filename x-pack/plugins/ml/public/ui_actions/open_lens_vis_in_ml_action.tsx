@@ -40,7 +40,7 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
       }
     },
     async isCompatible(context: { embeddable: Embeddable }) {
-      if (context.embeddable.type !== 'lens') {
+      if (context.embeddable.type !== 'lens' || !context.embeddable.getSavedVis()) {
         return false;
       }
 
@@ -57,8 +57,14 @@ export function createLensVisToADJobAction(getStartServices: MlCoreSetup['getSta
         return false;
       }
 
-      const { vis } = getJobsItemsFromEmbeddable(context.embeddable);
-      return isCompatibleVisualizationType(vis);
+      try {
+        const { vis } = getJobsItemsFromEmbeddable(context.embeddable);
+        return isCompatibleVisualizationType(vis);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error attempting to check for ML job compatibility', error);
+        return false;
+      }
     },
   });
 }

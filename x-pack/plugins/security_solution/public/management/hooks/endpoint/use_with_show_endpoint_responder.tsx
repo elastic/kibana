@@ -25,12 +25,12 @@ const RESPONDER_PAGE_TITLE = i18n.translate('xpack.securitySolution.responder_ov
 
 export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConsole => {
   const consoleManager = useConsoleManager();
-  const { canAccessResponseConsole } = useUserPrivileges().endpointPrivileges;
+  const endpointPrivileges = useUserPrivileges().endpointPrivileges;
 
   return useCallback(
     (endpointMetadata: HostMetadata) => {
       // If no authz, just exit and log something to the console
-      if (!canAccessResponseConsole) {
+      if (!endpointPrivileges.canAccessResponseConsole) {
         window.console.error(new Error('Access denied to endpoint response actions console'));
         return;
       }
@@ -48,7 +48,11 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
               endpoint: endpointMetadata,
             },
             consoleProps: {
-              commands: getEndpointResponseActionsConsoleCommands(endpointAgentId),
+              commands: getEndpointResponseActionsConsoleCommands({
+                endpointAgentId,
+                endpointCapabilities: endpointMetadata.Endpoint.capabilities ?? [],
+                endpointPrivileges,
+              }),
               'data-test-subj': 'endpointResponseActionsConsole',
               TitleComponent: () => <HeaderEndpointInfo endpointId={endpointAgentId} />,
             },
@@ -59,6 +63,6 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
           .show();
       }
     },
-    [canAccessResponseConsole, consoleManager]
+    [endpointPrivileges, consoleManager]
   );
 };

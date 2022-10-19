@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { act } from '@testing-library/react';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 
 import { TestProviders } from '../../common/mock';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
@@ -31,6 +33,7 @@ import { useGetConnectors } from '../../containers/configure/use_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/api');
+jest.mock('../../containers/user_profiles/api');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/configure/use_configure');
@@ -63,7 +66,7 @@ const fillForm = (wrapper: ReactWrapper) => {
 
   act(() => {
     (
-      wrapper.find(EuiComboBox).props() as unknown as {
+      wrapper.find(EuiComboBox).at(0).props() as unknown as {
         onChange: (a: EuiComboBoxOptionOption[]) => void;
       }
     ).onChange(sampleTags.map((tag) => ({ label: tag })));

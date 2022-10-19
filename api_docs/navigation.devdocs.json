@@ -18,13 +18,7 @@
             "text": "NavigationPublicPlugin"
           },
           " implements ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "navigation",
@@ -45,6 +39,7 @@
         ],
         "path": "src/plugins/navigation/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "navigation",
@@ -58,6 +53,7 @@
             ],
             "path": "src/plugins/navigation/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "navigation",
@@ -67,17 +63,12 @@
                 "label": "initializerContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<object>"
                 ],
                 "path": "src/plugins/navigation/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -92,13 +83,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>) => ",
               {
                 "pluginId": "navigation",
@@ -110,6 +95,7 @@
             ],
             "path": "src/plugins/navigation/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "navigation",
@@ -119,17 +105,12 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<object, unknown>"
                 ],
                 "path": "src/plugins/navigation/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -144,13 +125,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", { unifiedSearch }: ",
               "NavigationPluginStartDependencies",
               ") => ",
@@ -164,6 +139,7 @@
             ],
             "path": "src/plugins/navigation/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "navigation",
@@ -173,16 +149,11 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/plugins/navigation/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -197,6 +168,7 @@
                 ],
                 "path": "src/plugins/navigation/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -214,6 +186,7 @@
             ],
             "path": "src/plugins/navigation/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -242,6 +215,7 @@
         ],
         "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "navigation",
@@ -262,6 +236,7 @@
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -279,6 +254,7 @@
         "description": [],
         "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "navigation",
@@ -291,7 +267,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -301,7 +278,8 @@
             "label": "label",
             "description": [],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -315,6 +293,7 @@
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -328,7 +307,8 @@
                   "HTMLElement"
                 ],
                 "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -343,7 +323,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -356,7 +337,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -369,7 +351,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -382,7 +365,8 @@
               "boolean | (() => boolean) | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -395,7 +379,8 @@
               "string | (() => string | undefined) | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -558,7 +543,8 @@
               "<{ tooltipContent: React.ReactNode; title?: string | undefined; }, { title: string; tooltipContent?: React.ReactNode; }> & { title: string; tooltipContent?: React.ReactNode; } & { label: React.ReactNode; }) | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -571,7 +557,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -584,7 +571,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -597,7 +585,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -611,7 +600,8 @@
               " | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -624,7 +614,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "navigation",
@@ -637,7 +628,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_data.tsx",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -672,7 +664,7 @@
           },
           "[] | undefined; badges?: (",
           "EuiBadgeProps",
-          " & { badgeText: string; })[] | undefined; showSearchBar?: boolean | undefined; showQueryBar?: boolean | undefined; showQueryInput?: boolean | undefined; showDatePicker?: boolean | undefined; showFilterBar?: boolean | undefined; unifiedSearch?: ",
+          " & { badgeText: string; })[] | undefined; showSearchBar?: boolean | undefined; showQueryInput?: boolean | undefined; showDatePicker?: boolean | undefined; showFilterBar?: boolean | undefined; unifiedSearch?: ",
           {
             "pluginId": "unifiedSearch",
             "scope": "public",
@@ -686,6 +678,7 @@
         ],
         "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -699,6 +692,7 @@
       "description": [],
       "path": "src/plugins/navigation/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "navigation",
@@ -714,6 +708,7 @@
           ],
           "path": "src/plugins/navigation/public/types.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -727,7 +722,8 @@
                 "RegisteredTopNavMenuData"
               ],
               "path": "src/plugins/navigation/public/top_nav_menu/top_nav_menu_extensions_registry.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         }
@@ -744,6 +740,7 @@
       "description": [],
       "path": "src/plugins/navigation/public/types.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "navigation",
@@ -776,7 +773,8 @@
             ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>; }"
           ],
           "path": "src/plugins/navigation/public/types.ts",
-          "deprecated": false
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",

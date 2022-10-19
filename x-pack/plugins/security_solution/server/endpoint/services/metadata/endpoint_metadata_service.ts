@@ -14,10 +14,7 @@ import type {
 
 import type { SearchTotalHits, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
-import type {
-  AgentPolicyServiceInterface,
-  PackagePolicyServiceInterface,
-} from '@kbn/fleet-plugin/server';
+import type { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { getAgentStatus } from '@kbn/fleet-plugin/common/services/agent_status';
 import type {
@@ -64,14 +61,7 @@ type AgentPolicyWithPackagePolicies = Omit<AgentPolicy, 'package_policies'> & {
 const isAgentPolicyWithPackagePolicies = (
   agentPolicy: AgentPolicy | AgentPolicyWithPackagePolicies
 ): agentPolicy is AgentPolicyWithPackagePolicies => {
-  if (
-    agentPolicy.package_policies.length === 0 ||
-    typeof agentPolicy.package_policies[0] !== 'string'
-  ) {
-    return true;
-  }
-
-  return false;
+  return agentPolicy.package_policies ? true : false;
 };
 
 export class EndpointMetadataService {
@@ -84,7 +74,7 @@ export class EndpointMetadataService {
   constructor(
     private savedObjectsStart: SavedObjectsServiceStart,
     private readonly agentPolicyService: AgentPolicyServiceInterface,
-    private readonly packagePolicyService: PackagePolicyServiceInterface,
+    private readonly packagePolicyService: PackagePolicyClient,
     private readonly logger?: Logger
   ) {}
 
@@ -141,6 +131,7 @@ export class EndpointMetadataService {
   ): Promise<HostMetadata[]> {
     const query = getESQueryHostMetadataByFleetAgentIds(fleetAgentIds);
 
+    // @ts-expect-error `size` not defined as top level property when using `typesWithBodyKey`
     query.size = fleetAgentIds.length;
 
     const searchResult = await esClient

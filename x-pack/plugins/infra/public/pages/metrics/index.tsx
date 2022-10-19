@@ -15,7 +15,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal } from '@kbn/observability-plugin/public';
 import { useLinkProps } from '@kbn/observability-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
-import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import {
@@ -30,6 +29,7 @@ import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './inventory_view';
 import { MetricDetail } from './metric_detail';
 import { MetricsSettingsPage } from './settings';
+import { HostsPage } from './hosts';
 import { SourceLoadingPage } from '../../components/source_loading_page';
 import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options';
 import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';
@@ -72,12 +72,6 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
             <WaffleTimeProvider>
               <WaffleFiltersProvider>
                 <InfraMLCapabilitiesProvider>
-                  <DocumentTitle
-                    title={i18n.translate('xpack.infra.homePage.documentTitle', {
-                      defaultMessage: 'Metrics',
-                    })}
-                  />
-
                   <HelpCenterContent
                     feedbackLink="https://discuss.elastic.co/c/metrics"
                     appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
@@ -126,6 +120,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                       )}
                     />
                     <Route path="/detail/:type/:node" component={MetricDetail} />
+                    <Route path={'/hosts'} component={HostsPage} />
                     <Route path={'/settings'} component={MetricsSettingsPage} />
                   </Switch>
                 </InfraMLCapabilitiesProvider>

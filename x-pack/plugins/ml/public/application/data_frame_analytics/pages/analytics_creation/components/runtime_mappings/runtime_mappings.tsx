@@ -144,6 +144,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
         runtimeMappings: combinedRuntimeMappings,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

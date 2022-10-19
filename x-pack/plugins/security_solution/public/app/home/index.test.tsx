@@ -32,6 +32,8 @@ import { SecurityPageName } from '../types';
 import type { TimelineUrl } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { URL_PARAM_KEY } from '../../common/hooks/use_url_state';
+import { InputsModelId } from '../../common/store/inputs/constants';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../common/store/inputs/actions');
 
@@ -167,7 +169,7 @@ describe('HomePage', () => {
   it('calls useInitializeUrlParam for appQuery, filters and savedQuery', () => {
     render(
       <TestProviders>
-        <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+        <HomePage setHeaderActionMenu={jest.fn()}>
           <span />
         </HomePage>
       </TestProviders>
@@ -193,7 +195,7 @@ describe('HomePage', () => {
 
     render(
       <TestProviders>
-        <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+        <HomePage setHeaderActionMenu={jest.fn()}>
           <span />
         </HomePage>
       </TestProviders>
@@ -201,7 +203,7 @@ describe('HomePage', () => {
 
     expect(mockDispatch).toHaveBeenCalledWith(
       inputsActions.setFilterQuery({
-        id: 'global',
+        id: InputsModelId.global,
         query: state.query,
         language: state.language,
       })
@@ -234,7 +236,7 @@ describe('HomePage', () => {
 
     render(
       <TestProviders>
-        <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+        <HomePage setHeaderActionMenu={jest.fn()}>
           <span />
         </HomePage>
       </TestProviders>
@@ -242,17 +244,17 @@ describe('HomePage', () => {
 
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith(
-        inputsActions.setSavedQuery({ id: 'global', savedQuery: savedQueryData })
+        inputsActions.setSavedQuery({ id: InputsModelId.global, savedQuery: savedQueryData })
       );
 
       expect(mockDispatch).toHaveBeenCalledWith(
         inputsActions.setFilterQuery({
-          id: 'global',
+          id: InputsModelId.global,
           ...savedQueryData.attributes.query,
         })
       );
       expect(setSearchBarFilter).toHaveBeenCalledWith({
-        id: 'global',
+        id: InputsModelId.global,
         filters: savedQueryData.attributes.filters,
       });
     });
@@ -266,14 +268,14 @@ describe('HomePage', () => {
 
       render(
         <TestProviders>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
       );
 
       expect(setSearchBarFilter).toHaveBeenCalledWith({
-        id: 'global',
+        id: InputsModelId.global,
         filters: state,
       });
 
@@ -297,11 +299,17 @@ describe('HomePage', () => {
         },
       };
 
-      const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const mockStore = createStore(
+        mockstate,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
 
       render(
         <TestProviders store={mockStore}>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
@@ -318,7 +326,7 @@ describe('HomePage', () => {
 
       render(
         <TestProviders>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
@@ -348,11 +356,11 @@ describe('HomePage', () => {
       const state: UrlInputsModel = {
         global: {
           [URL_PARAM_KEY.timerange]: timerange,
-          linkTo: ['timeline'],
+          linkTo: [InputsModelId.timeline],
         },
         timeline: {
           [URL_PARAM_KEY.timerange]: timerange,
-          linkTo: ['global'],
+          linkTo: [InputsModelId.global],
         },
       };
 
@@ -360,7 +368,7 @@ describe('HomePage', () => {
 
       render(
         <TestProviders>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
@@ -370,14 +378,14 @@ describe('HomePage', () => {
         from: timerange.from,
         to: timerange.to,
         kind: timerange.kind,
-        id: 'global',
+        id: InputsModelId.global,
       });
 
       expect(setAbsoluteRangeDatePicker).toHaveBeenCalledWith({
         from: timerange.from,
         to: timerange.to,
         kind: timerange.kind,
-        id: 'timeline',
+        id: InputsModelId.timeline,
       });
     });
 
@@ -393,11 +401,11 @@ describe('HomePage', () => {
       const state: UrlInputsModel = {
         global: {
           [URL_PARAM_KEY.timerange]: timerange,
-          linkTo: ['timeline'],
+          linkTo: [InputsModelId.timeline],
         },
         timeline: {
           [URL_PARAM_KEY.timerange]: timerange,
-          linkTo: ['global'],
+          linkTo: [InputsModelId.global],
         },
       };
 
@@ -405,7 +413,7 @@ describe('HomePage', () => {
 
       render(
         <TestProviders>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
@@ -415,14 +423,14 @@ describe('HomePage', () => {
         ...timerange,
         to: DATE_TIME_NOW,
         from: DATE_TIME_NOW,
-        id: 'global',
+        id: InputsModelId.global,
       });
 
       expect(setRelativeRangeDatePicker).toHaveBeenCalledWith({
         ...timerange,
         to: DATE_TIME_NOW,
         from: DATE_TIME_NOW,
-        id: 'timeline',
+        id: InputsModelId.timeline,
       });
     });
 
@@ -451,11 +459,17 @@ describe('HomePage', () => {
       };
 
       const { storage } = createSecuritySolutionStorageMock();
-      const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const mockStore = createStore(
+        mockstate,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
 
       const TestComponent = () => (
         <TestProviders store={mockStore}>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
@@ -472,14 +486,14 @@ describe('HomePage', () => {
         ...timerange,
         to: DATE_TIME_NOW,
         from: DATE_TIME_NOW,
-        id: 'global',
+        id: InputsModelId.global,
       });
 
       expect(setRelativeRangeDatePicker).toHaveBeenCalledWith({
         ...timerange,
         to: DATE_TIME_NOW,
         from: DATE_TIME_NOW,
-        id: 'timeline',
+        id: InputsModelId.timeline,
       });
     });
 
@@ -508,11 +522,17 @@ describe('HomePage', () => {
       };
 
       const { storage } = createSecuritySolutionStorageMock();
-      const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const mockStore = createStore(
+        mockstate,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
 
       const TestComponent = () => (
         <TestProviders store={mockStore}>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
@@ -529,14 +549,14 @@ describe('HomePage', () => {
         ...timerange,
         to: DATE_TIME_NOW,
         from: DATE_TIME_NOW,
-        id: 'global',
+        id: InputsModelId.global,
       });
 
       expect(setRelativeRangeDatePicker).not.toHaveBeenCalledWith({
         ...timerange,
         to: DATE_TIME_NOW,
         from: DATE_TIME_NOW,
-        id: 'timeline',
+        id: InputsModelId.timeline,
       });
     });
   });
@@ -552,7 +572,7 @@ describe('HomePage', () => {
 
       render(
         <TestProviders>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
@@ -568,7 +588,13 @@ describe('HomePage', () => {
 
     it('it removes empty timeline state from URL', async () => {
       const { storage } = createSecuritySolutionStorageMock();
-      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const store = createStore(
+        mockGlobalState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
 
       mockUseInitializeUrlParam(URL_PARAM_KEY.timeline, {
         id: 'testSavedTimelineId',
@@ -577,7 +603,7 @@ describe('HomePage', () => {
 
       const TestComponent = () => (
         <TestProviders store={store}>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>
@@ -595,7 +621,13 @@ describe('HomePage', () => {
 
     it('it updates URL when timeline store changes', async () => {
       const { storage } = createSecuritySolutionStorageMock();
-      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const store = createStore(
+        mockGlobalState,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
       const savedObjectId = 'testTimelineId';
 
       mockUseInitializeUrlParam(URL_PARAM_KEY.timeline, {
@@ -605,7 +637,7 @@ describe('HomePage', () => {
 
       const TestComponent = () => (
         <TestProviders store={store}>
-          <HomePage onAppLeave={jest.fn()} setHeaderActionMenu={jest.fn()}>
+          <HomePage setHeaderActionMenu={jest.fn()}>
             <span />
           </HomePage>
         </TestProviders>

@@ -16,11 +16,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import {
-  clearEventsLoading,
-  clearEventsDeleted,
-  setTimelineUpdatedAt,
-} from '../store/t_grid/actions';
+import { clearEventsLoading, clearEventsDeleted, setTableUpdatedAt } from '../store/t_grid/actions';
 import {
   Direction,
   TimelineFactoryQueryTypes,
@@ -40,15 +36,13 @@ import type {
 import type { ESQuery } from '../../common/typed_json';
 import type { KueryFilterQueryKind } from '../../common/types/timeline';
 import { useAppToasts } from '../hooks/use_app_toasts';
-import { TimelineId } from '../store/t_grid/types';
+import { TableId } from '../store/t_grid/types';
 import * as i18n from './translations';
+import { getSearchTransactionName, useStartTransaction } from '../lib/apm/use_start_transaction';
 
 export type InspectResponse = Inspect & { response: string[] };
 
-export const detectionsTimelineIds = [
-  TimelineId.detectionsPage,
-  TimelineId.detectionsRulesDetailsPage,
-];
+export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
 
 export type Refetch = () => void;
 
@@ -115,6 +109,32 @@ export const initSortDefault = [
   },
 ];
 
+const useApmTracking = (timelineId: string) => {
+  const { startTransaction } = useStartTransaction();
+
+  const startTracking = useCallback(() => {
+    // Create the transaction, the managed flag is turned off to prevent it from being polluted by non-related automatic spans.
+    // The managed flag can be turned on to investigate high latency requests in APM.
+    // However, note that by enabling the managed flag, the transaction trace may be distorted by other requests information.
+    const transaction = startTransaction({
+      name: getSearchTransactionName(timelineId),
+      type: 'http-request',
+      options: { managed: false },
+    });
+    // Create a blocking span to control the transaction time and prevent it from closing automatically with partial batch responses.
+    // The blocking span needs to be ended manually when the batched request finishes.
+    const span = transaction?.startSpan('batched search', 'http-request', { blocking: true });
+    return {
+      endTracking: (result: 'success' | 'error' | 'aborted' | 'invalid') => {
+        transaction?.addLabels({ result });
+        span?.end();
+      },
+    };
+  }, [startTransaction, timelineId]);
+
+  return { startTracking };
+};
+
 const NO_CONSUMERS: AlertConsumers[] = [];
 export const useTimelineEvents = ({
   alertConsumers = NO_CONSUMERS,
@@ -136,6 +156,7 @@ export const useTimelineEvents = ({
   data,
 }: UseTimelineEventsProps): [boolean, TimelineArgs] => {
   const dispatch = useDispatch();
+  const { startTracking } = useApmTracking(id);
   const refetch = useRef<Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -170,7 +191,7 @@ export const useTimelineEvents = ({
 
   const setUpdated = useCallback(
     (updatedAt: number) => {
-      dispatch(setTimelineUpdatedAt({ id, updated: updatedAt }));
+      dispatch(setTableUpdatedAt({ id, updated: updatedAt }));
     },
     [dispatch, id]
   );
@@ -205,6 +226,9 @@ export const useTimelineEvents = ({
         abortCtrl.current = new AbortController();
         setLoading(true);
         if (data && data.search) {
+          const { endTracking } = startTracking();
+          const abortSignal = abortCtrl.current.signal;
+
           searchSubscription$.current = data.search
             .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(
               { ...request, entityType },
@@ -213,7 +237,7 @@ export const useTimelineEvents = ({
                   request.language === 'eql'
                     ? 'timelineEqlSearchStrategy'
                     : 'timelineSearchStrategy',
-                abortSignal: abortCtrl.current.signal,
+                abortSignal,
                 // we only need the id to throw better errors
                 indexPattern: { id: dataViewId } as unknown as DataView,
               }
@@ -221,6 +245,7 @@ export const useTimelineEvents = ({
             .subscribe({
               next: (response) => {
                 if (isCompleteResponse(response)) {
+                  endTracking('success');
                   setTimelineResponse((prevResponse) => {
                     const newTimelineResponse = {
                       ...prevResponse,
@@ -238,12 +263,14 @@ export const useTimelineEvents = ({
 
                   searchSubscription$.current.unsubscribe();
                 } else if (isErrorResponse(response)) {
+                  endTracking('invalid');
                   setLoading(false);
                   addWarning(i18n.ERROR_TIMELINE_EVENTS);
                   searchSubscription$.current.unsubscribe();
                 }
               },
               error: (msg) => {
+                endTracking(abortSignal.aborted ? 'aborted' : 'error');
                 setLoading(false);
                 data.search.showError(msg);
                 searchSubscription$.current.unsubscribe();
@@ -257,7 +284,7 @@ export const useTimelineEvents = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [skip, data, entityType, dataViewId, setUpdated, addWarning]
+    [skip, data, entityType, dataViewId, setUpdated, addWarning, startTracking]
   );
 
   useEffect(() => {

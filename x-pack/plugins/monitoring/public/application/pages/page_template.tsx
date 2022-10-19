@@ -7,9 +7,9 @@
 
 import {
   EuiPage,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageBody,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiTab,
   EuiTabs,
   EuiSpacer,
@@ -148,7 +148,11 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
               })}
             </EuiTabs>
           )}
-          <EuiPageContentBody>{renderContent()}</EuiPageContentBody>
+          <EuiPageContentBody>
+            <EuiPage paddingSize="m">
+              <EuiPageBody>{renderContent()}</EuiPageBody>
+            </EuiPage>
+          </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 import {
   useInitializeUrlParam,
   useGlobalQueryString,
@@ -26,6 +26,7 @@ import {
 import { createStore } from '../../store';
 import type { LinkInfo } from '../../links';
 import { SecurityPageName } from '../../../app/types';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 const mockDispatch = jest.fn();
 
@@ -65,6 +66,7 @@ describe('global query string', () => {
         globalUrlParam,
       },
       SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
       kibanaObservable,
       storage
     );
@@ -193,6 +195,7 @@ describe('global query string', () => {
           },
         },
         SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
         kibanaObservable,
         storage
       );
@@ -295,6 +298,34 @@ describe('global query string', () => {
       renderHook(() => useSyncGlobalQueryString(), { wrapper: makeWrapper(globalUrlParam) });
 
       expect(mockHistory.replace).not.toHaveBeenCalledWith();
+    });
+
+    it('deletes unregistered URL params', async () => {
+      const urlParamKey = 'testKey';
+      const value = '123';
+      window.location.search = `?${urlParamKey}=${value}`;
+      const globalUrlParam = {
+        [urlParamKey]: value,
+      };
+      const store = makeStore(globalUrlParam);
+
+      const { waitForNextUpdate } = renderHook(() => useSyncGlobalQueryString(), {
+        wrapper: ({ children }: { children: React.ReactElement }) => (
+          <TestProviders store={store}>{children}</TestProviders>
+        ),
+      });
+
+      mockHistory.replace.mockClear();
+
+      act(() => {
+        store.dispatch(globalUrlParamActions.deregisterUrlParam({ key: urlParamKey }));
+      });
+
+      waitForNextUpdate();
+
+      expect(mockHistory.replace).toHaveBeenCalledWith({
+        search: ``,
+      });
     });
   });
 });

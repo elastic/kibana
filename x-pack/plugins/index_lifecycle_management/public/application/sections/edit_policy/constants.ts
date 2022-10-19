@@ -6,10 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { PhaseWithDownsample } from '../../../../common/types';
 
 export const isUsingCustomRolloverPath = '_meta.hot.customRollover.enabled';
 
 export const isUsingDefaultRolloverPath = '_meta.hot.isUsingDefaultRollover';
+
+export const isUsingDownsamplePath = (phase: PhaseWithDownsample) =>
+  `_meta.${phase}.downsample.enabled`;
 
 /**
  * These strings describe the path to their respective values in the serialized
@@ -91,30 +95,6 @@ export const timeUnits = [
     value: 'm',
     text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.timeUnits.minutesLabel', {
       defaultMessage: 'minutes',
-    }),
-  },
-  {
-    value: 's',
-    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.timeUnits.secondsLabel', {
-      defaultMessage: 'seconds',
-    }),
-  },
-  {
-    value: 'ms',
-    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.timeUnits.millisecondsLabel', {
-      defaultMessage: 'milliseconds',
-    }),
-  },
-  {
-    value: 'micros',
-    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.timeUnits.microsecondsLabel', {
-      defaultMessage: 'microseconds',
-    }),
-  },
-  {
-    value: 'nanos',
-    text: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.timeUnits.nanosecondsLabel', {
-      defaultMessage: 'nanoseconds',
     }),
   },
 ];

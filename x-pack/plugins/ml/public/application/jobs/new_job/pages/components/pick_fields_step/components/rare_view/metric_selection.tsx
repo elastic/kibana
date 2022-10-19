@@ -40,6 +40,7 @@ export const RareDetectors: FC<Props> = ({ setIsValid, rareDetectorType, setRare
     }
     setIsValid(valid);
     setDetectorValid(valid);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   return (

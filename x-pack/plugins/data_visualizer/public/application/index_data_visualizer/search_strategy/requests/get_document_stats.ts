@@ -26,6 +26,53 @@ const MINIMUM_RANDOM_SAMPLER_SAMPLED_DOCS = 109;
 // The desired minimum threshold of randomly sampled documents for which the result is more meaningful
 const DESIRED_MINIMUM_RANDOM_SAMPLER_DOC_COUNT = 100000;
 
+const MINIMUM_RANDOM_SAMPLER_DOC_COUNT = 100000;
+export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyParams) => {
+  const {
+    index,
+    timeFieldName,
+    earliest: earliestMs,
+    latest: latestMs,
+    runtimeFieldMap,
+    searchQuery,
+    intervalMs,
+    fieldsToFetch,
+  } = params;
+
+  const size = 0;
+  const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, searchQuery);
+
+  // Don't use the sampler aggregation as this can lead to some potentially
+  // confusing date histogram results depending on the date range of data amongst shards.
+  const aggs = {
+    eventRate: {
+      date_histogram: {
+        field: timeFieldName,
+        fixed_interval: `${intervalMs}ms`,
+        min_doc_count: 1,
+      },
+    },
+  };
+
+  const searchBody = {
+    query: {
+      bool: {
+        filter: filterCriteria,
+      },
+    },
+    ...(!fieldsToFetch && timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0
+      ? { aggs }
+      : {}),
+    ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
+    track_total_hits: true,
+    size,
+  };
+  return {
+    index,
+    body: searchBody,
+  };
+};
+
 export const getDocumentCountStats = async (
   search: DataPublicPluginStart['search'],
   params: OverallStatsSearchStrategyParams,
@@ -100,25 +147,9 @@ export const getDocumentCountStats = async (
     .search(
       {
         params: getSearchParams(
-          hasTimeField
-            ? getEventRateAggsWithRandomSampling(initialDefaultProbability)
-            : // If there's no time field, we just make a value_count aggregation on any field
-              // just so we can calculate what's the optimal probability from the sampled doc count
-              {
-                sampler: {
-                  random_sampler: {
-                    probability: initialDefaultProbability,
-                  },
-                  aggs: {
-                    price_percentiles: {
-                      value_count: {
-                        field:
-                          first(params.aggregatableFields) ?? first(params.nonAggregatableFields),
-                      },
-                    },
-                  },
-                },
-              }
+          getAggsWithRandomSampling(initialDefaultProbability),
+          // Track total hits if time field is not defined
+          timeFieldName === undefined
         ),
       },
       searchOptions
@@ -132,6 +163,22 @@ export const getDocumentCountStats = async (
       )}`
     );
   }
+
+  // If time field is not defined, no need to show the document count chart
+  // Just need to return the tracked total hits
+  if (timeFieldName === undefined) {
+    const trackedTotalHits =
+      typeof firstResp.rawResponse.hits.total === 'number'
+        ? firstResp.rawResponse.hits.total
+        : firstResp.rawResponse.hits.total?.value;
+    return {
+      ...result,
+      randomlySampled: false,
+      took: firstResp.rawResponse.took,
+      totalCount: trackedTotalHits ?? 0,
+    };
+  }
+
 
   if (isDefined(probability)) {
     return {

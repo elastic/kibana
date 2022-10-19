@@ -53,6 +53,8 @@ export type TaskManagerStartContract = Pick<
   | 'ephemeralRunNow'
   | 'ensureScheduled'
   | 'bulkUpdateSchedules'
+  | 'bulkEnable'
+  | 'bulkDisable'
   | 'bulkSchedule'
 > &
   Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'remove'> & {
@@ -251,6 +253,8 @@ export class TaskManagerPlugin
       bulkSchedule: (...args) => taskScheduling.bulkSchedule(...args),
       ensureScheduled: (...args) => taskScheduling.ensureScheduled(...args),
       runSoon: (...args) => taskScheduling.runSoon(...args),
+      bulkEnable: (...args) => taskScheduling.bulkEnable(...args),
+      bulkDisable: (...args) => taskScheduling.bulkDisable(...args),
       bulkUpdateSchedules: (...args) => taskScheduling.bulkUpdateSchedules(...args),
       ephemeralRunNow: (task: EphemeralTask) => taskScheduling.ephemeralRunNow(task),
       supportsEphemeralTasks: () =>

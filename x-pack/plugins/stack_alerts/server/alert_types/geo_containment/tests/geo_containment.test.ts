@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import sampleAggsJsonResponse from './es_sample_response.json';
 import sampleShapesJsonResponse from './es_sample_response_shapes.json';
@@ -40,7 +40,10 @@ const alertFactory = (contextKeys: unknown[], testAlertActionArr: unknown[]) => 
     );
     return alertInstance;
   },
-  hasReachedAlertLimit: () => false,
+  alertLimit: {
+    getValue: () => 1000,
+    setLimitReached: () => {},
+  },
   done: () => ({ getRecoveredAlerts: () => [] }),
 });
 
@@ -502,7 +505,6 @@ describe('geo_containment', () => {
       },
     ];
     const testAlertActionArr: unknown[] = [];
-    const mockLogger = loggingSystemMock.createLogger();
     const previousStartedAt = new Date('2021-04-27T16:56:11.923Z');
     const startedAt = new Date('2021-04-29T16:56:11.923Z');
     const geoContainmentParams: GeoContainmentParams = {
@@ -557,7 +559,7 @@ describe('geo_containment', () => {
     });
 
     it('should query for shapes if state does not contain shapes', async () => {
-      const executor = await getGeoContainmentExecutor(mockLogger);
+      const executor = await getGeoContainmentExecutor();
       // @ts-ignore
       const executionResult = await executor({
         previousStartedAt,
@@ -577,7 +579,7 @@ describe('geo_containment', () => {
     });
 
     it('should not query for shapes if state contains shapes', async () => {
-      const executor = await getGeoContainmentExecutor(mockLogger);
+      const executor = await getGeoContainmentExecutor();
       // @ts-ignore
       const executionResult = await executor({
         previousStartedAt,
@@ -596,7 +598,7 @@ describe('geo_containment', () => {
     });
 
     it('should carry through shapes filters in state to next call unmodified', async () => {
-      const executor = await getGeoContainmentExecutor(mockLogger);
+      const executor = await getGeoContainmentExecutor();
       // @ts-ignore
       const executionResult = await executor({
         previousStartedAt,
@@ -632,7 +634,7 @@ describe('geo_containment', () => {
           },
         ],
       };
-      const executor = await getGeoContainmentExecutor(mockLogger);
+      const executor = await getGeoContainmentExecutor();
       // @ts-ignore
       const executionResult = await executor({
         previousStartedAt,

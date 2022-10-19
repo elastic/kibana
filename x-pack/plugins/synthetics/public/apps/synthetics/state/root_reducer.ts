@@ -7,24 +7,34 @@
 
 import { combineReducers } from '@reduxjs/toolkit';
 
-import { syntheticsMonitorReducer } from './monitor_summary/synthetics_montior_reducer';
-import { monitorStatusReducer } from './monitor_summary';
-import { uiReducer } from './ui';
-import { indexStatusReducer } from './index_status';
-import { syntheticsEnablementReducer } from './synthetics_enablement';
-import { monitorListReducer } from './monitor_list';
-import { serviceLocationsReducer } from './service_locations';
-import { monitorOverviewReducer } from './overview';
+import { monitorDetailsReducer, MonitorDetailsState } from './monitor_details';
+import { uiReducer, UiState } from './ui';
+import { indexStatusReducer, IndexStatusState } from './index_status';
+import { syntheticsEnablementReducer, SyntheticsEnablementState } from './synthetics_enablement';
+import { monitorListReducer, MonitorListState } from './monitor_list';
+import { serviceLocationsReducer, ServiceLocationsState } from './service_locations';
+import { monitorOverviewReducer, MonitorOverviewState } from './overview';
+import { BrowserJourneyState } from './browser_journey/models';
+import { browserJourneyReducer } from './browser_journey';
 
-export const rootReducer = combineReducers({
+export interface SyntheticsAppState {
+  ui: UiState;
+  indexStatus: IndexStatusState;
+  syntheticsEnablement: SyntheticsEnablementState;
+  monitorList: MonitorListState;
+  serviceLocations: ServiceLocationsState;
+  monitorDetails: MonitorDetailsState;
+  overview: MonitorOverviewState;
+  browserJourney: BrowserJourneyState;
+}
+
+export const rootReducer = combineReducers<SyntheticsAppState>({
   ui: uiReducer,
   indexStatus: indexStatusReducer,
   syntheticsEnablement: syntheticsEnablementReducer,
   monitorList: monitorListReducer,
   serviceLocations: serviceLocationsReducer,
-  monitorStatus: monitorStatusReducer,
-  syntheticsMonitor: syntheticsMonitorReducer,
+  monitorDetails: monitorDetailsReducer,
   overview: monitorOverviewReducer,
+  browserJourney: browserJourneyReducer,
 });
-
-export type SyntheticsAppState = ReturnType<typeof rootReducer>;

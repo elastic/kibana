@@ -152,6 +152,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
 
   useEffect(() => {
     loadModule();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**

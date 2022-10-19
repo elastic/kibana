@@ -18,6 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { noop } from 'lodash';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { UpdateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
@@ -52,16 +53,30 @@ import {
   MaxWidthEuiFlexItem,
 } from '../helpers';
 import * as ruleI18n from '../translations';
-import type { RuleStepsFormHooks, RuleStepsFormData, RuleStepsData } from '../types';
+import type {
+  ActionsStepRule,
+  AboutStepRule,
+  DefineStepRule,
+  ScheduleStepRule,
+  RuleStepsFormHooks,
+  RuleStepsFormData,
+  RuleStepsData,
+} from '../types';
 import { RuleStep } from '../types';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 import { ruleStepsOrder } from '../utils';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { APP_UI_ID } from '../../../../../../common/constants';
+import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
+import {
+  APP_UI_ID,
+  DEFAULT_INDEX_KEY,
+  DEFAULT_THREAT_INDEX_KEY,
+} from '../../../../../../common/constants';
 import { HeaderPage } from '../../../../../common/components/header_page';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
+import { PreviewFlyout } from '../preview';
+import { useGetSavedQuery } from '../use_get_saved_query';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -85,6 +100,11 @@ const EditRulePageComponent: FC = () => {
   const [ruleLoading, rule] = useRule(ruleId);
   const loading = ruleLoading || userInfoLoading || listsConfigLoading;
 
+  const { isSavedQueryLoading, savedQueryBar, savedQuery } = useGetSavedQuery(rule?.saved_id, {
+    ruleType: rule?.type,
+    onError: noop,
+  });
+
   const formHooks = useRef<RuleStepsFormHooks>({
     [RuleStep.defineRule]: formHookNoop,
     [RuleStep.aboutRule]: formHookNoop,
@@ -97,10 +117,10 @@ const EditRulePageComponent: FC = () => {
     [RuleStep.scheduleRule]: { isValid: false, data: undefined },
     [RuleStep.ruleActions]: { isValid: false, data: undefined },
   });
-  const defineStep = stepsData.current[RuleStep.defineRule];
-  const aboutStep = stepsData.current[RuleStep.aboutRule];
-  const scheduleStep = stepsData.current[RuleStep.scheduleRule];
-  const actionsStep = stepsData.current[RuleStep.ruleActions];
+  const [defineStep, setDefineStep] = useState(stepsData.current[RuleStep.defineRule]);
+  const [aboutStep, setAboutStep] = useState(stepsData.current[RuleStep.aboutRule]);
+  const [scheduleStep, setScheduleStep] = useState(stepsData.current[RuleStep.scheduleRule]);
+  const [actionsStep, setActionsStep] = useState(stepsData.current[RuleStep.ruleActions]);
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
   const invalidSteps = ruleStepsOrder.filter((step) => {
     const stepData = stepsData.current[step];
@@ -108,6 +128,8 @@ const EditRulePageComponent: FC = () => {
   });
   const [{ isLoading, isSaved }, setRule] = useUpdateRule();
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
+  const [isPreviewDisabled, setIsPreviewDisabled] = useState(false);
+  const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(false);
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -135,9 +157,60 @@ const EditRulePageComponent: FC = () => {
   );
   const setStepData = useCallback(
     <K extends keyof RuleStepsData>(step: K, data: RuleStepsData[K], isValid: boolean) => {
-      stepsData.current[step] = { ...stepsData.current[step], data, isValid };
+      switch (step) {
+        case RuleStep.aboutRule:
+          const aboutData = data as AboutStepRule;
+          setAboutStep({ ...stepsData.current[step], data: aboutData, isValid });
+          return;
+        case RuleStep.defineRule:
+          const defineData = data as DefineStepRule;
+          setDefineStep({ ...stepsData.current[step], data: defineData, isValid });
+          return;
+        case RuleStep.ruleActions:
+          const actionsData = data as ActionsStepRule;
+          setActionsStep({ ...stepsData.current[step], data: actionsData, isValid });
+          return;
+        case RuleStep.scheduleRule:
+          const scheduleData = data as ScheduleStepRule;
+          setScheduleStep({ ...stepsData.current[step], data: scheduleData, isValid });
+      }
     },
     []
+  );
+
+  const onDataChange = useCallback(async () => {
+    if (activeStep === RuleStep.defineRule) {
+      const defineStepData = await formHooks.current[RuleStep.defineRule]();
+      if (defineStepData?.isValid && defineStepData?.data) {
+        setDefineStep(defineStepData);
+      }
+    } else if (activeStep === RuleStep.aboutRule) {
+      const aboutStepData = await formHooks.current[RuleStep.aboutRule]();
+      if (aboutStepData?.isValid && aboutStepData?.data) {
+        setAboutStep(aboutStepData);
+      }
+    } else if (activeStep === RuleStep.scheduleRule) {
+      const scheduleStepData = await formHooks.current[RuleStep.scheduleRule]();
+      if (scheduleStepData?.isValid && scheduleStepData?.data) {
+        setScheduleStep(scheduleStepData);
+      }
+    }
+  }, [activeStep]);
+
+  const onPreviewClose = useCallback(() => setIsRulePreviewVisible(false), []);
+
+  const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
+
+  const defineStepDataWithSavedQuery = useMemo(
+    () =>
+      defineStep.data
+        ? {
+            ...defineStep.data,
+            queryBar: savedQueryBar ?? defineStep.data.queryBar,
+          }
+        : defineStep.data,
+    [defineStep.data, savedQueryBar]
   );
 
   const tabs = useMemo(
@@ -150,15 +223,20 @@ const EditRulePageComponent: FC = () => {
         content: (
           <>
             <EuiSpacer />
-            <StepPanel loading={loading} title={ruleI18n.DEFINITION}>
-              {defineStep.data != null && (
+            <StepPanel loading={loading || isSavedQueryLoading} title={ruleI18n.DEFINITION}>
+              {defineStepDataWithSavedQuery != null && !isSavedQueryLoading && (
                 <StepDefineRule
                   isReadOnlyView={false}
-                  isLoading={isLoading}
+                  isLoading={isLoading || isSavedQueryLoading}
                   isUpdateView
-                  defaultValues={defineStep.data}
+                  defaultValues={defineStepDataWithSavedQuery}
                   setForm={setFormHook}
                   kibanaDataViews={dataViewOptions}
+                  indicesConfig={indicesConfig}
+                  threatIndicesConfig={threatIndicesConfig}
+                  onRuleDataChange={onDataChange}
+                  onPreviewDisabledStateChange={setIsPreviewDisabled}
+                  defaultSavedQuery={savedQuery}
                 />
               )}
               <EuiSpacer />
@@ -183,6 +261,7 @@ const EditRulePageComponent: FC = () => {
                   defaultValues={aboutStep.data}
                   defineRuleData={defineStep.data}
                   setForm={setFormHook}
+                  onRuleDataChange={onDataChange}
                 />
               )}
               <EuiSpacer />
@@ -206,6 +285,7 @@ const EditRulePageComponent: FC = () => {
                   isUpdateView
                   defaultValues={scheduleStep.data}
                   setForm={setFormHook}
+                  onRuleDataChange={onDataChange}
                 />
               )}
               <EuiSpacer />
@@ -220,7 +300,7 @@ const EditRulePageComponent: FC = () => {
         content: (
           <>
             <EuiSpacer />
-            <StepPanel loading={loading} title={ruleI18n.ACTIONS}>
+            <StepPanel loading={loading}>
               {actionsStep.data != null && (
                 <StepRuleActions
                   isReadOnlyView={false}
@@ -229,6 +309,7 @@ const EditRulePageComponent: FC = () => {
                   defaultValues={actionsStep.data}
                   setForm={setFormHook}
                   actionMessageParams={actionMessageParams}
+                  ruleType={rule?.type}
                 />
               )}
               <EuiSpacer />
@@ -239,15 +320,22 @@ const EditRulePageComponent: FC = () => {
     ],
     [
       rule?.immutable,
+      rule?.type,
       loading,
       defineStep.data,
       isLoading,
+      isSavedQueryLoading,
+      defineStepDataWithSavedQuery,
       setFormHook,
+      dataViewOptions,
+      indicesConfig,
+      threatIndicesConfig,
+      onDataChange,
       aboutStep.data,
       scheduleStep.data,
       actionsStep.data,
       actionMessageParams,
-      dataViewOptions,
+      savedQuery,
     ]
   );
 
@@ -276,7 +364,7 @@ const EditRulePageComponent: FC = () => {
           about.data,
           schedule.data,
           actions.data,
-          rule
+          rule?.exceptions_list
         ),
         ...(ruleId ? { id: ruleId } : {}),
         ...(rule != null ? { max_signals: rule.max_signals } : {}),
@@ -388,7 +476,16 @@ const EditRulePageComponent: FC = () => {
               }}
               isLoading={isLoading}
               title={i18n.PAGE_TITLE}
-            />
+            >
+              {defineStep.data && aboutStep.data && scheduleStep.data && (
+                <EuiButton
+                  iconType="visBarVerticalStacked"
+                  onClick={() => setIsRulePreviewVisible((isVisible) => !isVisible)}
+                >
+                  {ruleI18n.RULE_PREVIEW_TITLE}
+                </EuiButton>
+              )}
+            </HeaderPage>
             {invalidSteps.length > 0 && (
               <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="alert">
                 <FormattedMessage
@@ -449,6 +546,16 @@ const EditRulePageComponent: FC = () => {
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
+            {isRulePreviewVisible && defineStep.data && aboutStep.data && scheduleStep.data && (
+              <PreviewFlyout
+                isDisabled={isPreviewDisabled}
+                defineStepData={defineStep.data}
+                aboutStepData={aboutStep.data}
+                scheduleStepData={scheduleStep.data}
+                exceptionsList={rule?.exceptions_list}
+                onClose={onPreviewClose}
+              />
+            )}
           </MaxWidthEuiFlexItem>
         </EuiFlexGroup>
       </SecuritySolutionPageWrapper>

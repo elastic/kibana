@@ -28,6 +28,9 @@ export async function buildUp(getService: FtrProviderContext['getService']) {
 }
 
 export async function tearDown(getService: FtrProviderContext['getService']) {
-  const esArchiver = getService('esArchiver');
-  await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+  const kibanaServer = getService('kibanaServer');
+  await kibanaServer.savedObjects.cleanStandardList();
+
+  const spacesService = getService('spaces');
+  for (const space of Object.values(Spaces)) await spacesService.delete(space.id);
 }

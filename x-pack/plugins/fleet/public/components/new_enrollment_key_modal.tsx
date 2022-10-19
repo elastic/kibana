@@ -131,7 +131,12 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
           })}
           {...form.policyIdInput.formRowProps}
         >
-          <EuiSelect required={true} {...form.policyIdInput.props} options={selectPolicyOptions} />
+          <EuiSelect
+            data-test-subj="createEnrollmentTokenSelectField"
+            required={true}
+            {...form.policyIdInput.props}
+            options={selectPolicyOptions}
+          />
         </EuiFormRow>
       </form>
     </EuiForm>

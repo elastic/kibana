@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
   AlertService,
   CaseConfigureService,
   CasesService,
@@ -33,7 +33,6 @@ export const createCaseServiceMock = (): CaseServiceMock => {
     getResolveCase: jest.fn(),
     getTags: jest.fn(),
     getReporters: jest.fn(),
-    getUser: jest.fn(),
     postNewCase: jest.fn(),
     patchCase: jest.fn(),
     patchCases: jest.fn(),

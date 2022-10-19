@@ -21,6 +21,7 @@ import { SecurityPageName } from '../../../../../common/constants';
 import { useCanSeeHostIsolationExceptionsMenu } from '../../../../management/pages/host_isolation_exceptions/view/hooks';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { useGlobalQueryString } from '../../../utils/global_query_string';
+import { useUserPrivileges } from '../../user_privileges';
 
 export const usePrimaryNavigationItems = ({
   navTabs,
@@ -71,7 +72,10 @@ export const usePrimaryNavigationItems = ({
 function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
   const hasCasesReadPermissions = useGetUserCasesPermissions().read;
   const canSeeHostIsolationExceptions = useCanSeeHostIsolationExceptionsMenu();
+  const canSeeResponseActionsHistory =
+    useUserPrivileges().endpointPrivileges.canReadActionsLogManagement;
   const isPolicyListEnabled = useIsExperimentalFeatureEnabled('policyListEnabled');
+
   const uiCapabilities = useKibana().services.application.capabilities;
   return useMemo(
     () =>
@@ -88,6 +92,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                 navTabs[SecurityPageName.overview],
                 navTabs[SecurityPageName.detectionAndResponse],
                 navTabs[SecurityPageName.cloudSecurityPostureDashboard],
+                navTabs[SecurityPageName.entityAnalytics],
                 ...(navTabs[SecurityPageName.kubernetes] != null
                   ? [navTabs[SecurityPageName.kubernetes]]
                   : []),
@@ -136,6 +141,9 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
                   ? [navTabs[SecurityPageName.hostIsolationExceptions]]
                   : []),
                 navTabs[SecurityPageName.blocklist],
+                ...(canSeeResponseActionsHistory
+                  ? [navTabs[SecurityPageName.responseActionsHistory]]
+                  : []),
                 navTabs[SecurityPageName.cloudSecurityPostureBenchmarks],
               ],
             },
@@ -153,6 +161,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
       navTabs,
       hasCasesReadPermissions,
       canSeeHostIsolationExceptions,
+      canSeeResponseActionsHistory,
       isPolicyListEnabled,
     ]
   );

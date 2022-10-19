@@ -22,8 +22,9 @@ import {
 import { act } from 'react-dom/test-utils';
 
 import { PalettePanelContainer } from '../../shared_components';
-import { layerTypes } from '../../../common';
-import type { MetricState } from '../../../common/types';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { LegacyMetricState } from '../../../common/types';
+import { DatasourcePublicAPI } from '../..';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -48,16 +49,16 @@ function paletteParamsContaining(paramsToCheck: PaletteOutput<CustomPaletteParam
 
 describe('metric dimension editor', () => {
   let frame: FramePublicAPI;
-  let state: MetricState;
-  let setState: (newState: MetricState) => void;
-  let props: VisualizationDimensionEditorProps<MetricState> & {
+  let state: LegacyMetricState;
+  let setState: (newState: LegacyMetricState) => void;
+  let props: VisualizationDimensionEditorProps<LegacyMetricState> & {
     paletteService: PaletteRegistry;
   };
 
-  function testState(): MetricState {
+  function testState(): LegacyMetricState {
     return {
       layerId: 'first',
-      layerType: layerTypes.DATA,
+      layerType: LayerTypes.DATA,
       accessor: 'foo',
     };
   }
@@ -93,6 +94,9 @@ describe('metric dimension editor', () => {
       setState,
       paletteService: chartPluginMock.createPaletteRegistry(),
       panelRef: React.createRef(),
+      addLayer: jest.fn(),
+      removeLayer: jest.fn(),
+      datasource: {} as DatasourcePublicAPI,
     };
     // add a div to the ref
     props.panelRef.current = document.createElement('div');

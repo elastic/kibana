@@ -13,17 +13,18 @@ import type { CoreStart } from '@kbn/core/public';
 import type { Pagination } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
+import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { FindingsEsPitContext } from '../es_pit/findings_es_pit_context';
 import { extractErrorMessage } from '../../../../common/utils/helpers';
-import type { CspFinding, Sort } from '../types';
+import type { Sort } from '../types';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import type { FindingsBaseEsQuery } from '../types';
 import { FINDINGS_REFETCH_INTERVAL_MS } from '../constants';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 
 interface UseFindingsOptions extends FindingsBaseEsQuery {
-  from: NonNullable<estypes.SearchRequest['from']>;
-  size: NonNullable<estypes.SearchRequest['size']>;
+  from: NonNullable<NonNullable<estypes.SearchRequest['body']>['from']>;
+  size: NonNullable<NonNullable<estypes.SearchRequest['body']>['size']>;
   sort: Sort<CspFinding>;
   enabled: boolean;
 }

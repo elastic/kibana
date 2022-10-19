@@ -73,6 +73,7 @@ export interface DataVisualizerGridInput {
    * since we might not have fetch all fields at once, but rather all that are available
    */
   fieldsToFetch?: string[];
+  totalDocuments?: number;
   /**
    * The preferred mode for sampling data for the field statistics
    * default as 'autoRandomSampler'
@@ -131,6 +132,7 @@ export const EmbeddableWrapper = ({
               dataView={input.dataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
               onAddFilter={input.onAddFilter}
+              totalDocuments={input.totalDocuments}
             />
           );
         }

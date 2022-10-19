@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ESFilter } from '@kbn/core/types/elasticsearch';
+import type { ESFilter } from '@kbn/es-types';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { Snapshot } from '../../../../common/runtime_types';
@@ -48,7 +48,7 @@ const statusCount = async (context: QueryContext): Promise<Snapshot> => {
     {
       body: statusCountBody(await context.dateAndCustomFilters(), context),
     },
-    'geSnapshotCount'
+    'getSnapshotCount'
   );
 
   return (

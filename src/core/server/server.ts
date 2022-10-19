@@ -49,26 +49,30 @@ import {
   savedObjectsConfig,
   savedObjectsMigrationConfig,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { CoreApp } from './core_app';
-import { I18nService } from './i18n';
-import { HttpResourcesService } from './http_resources';
-import { RenderingService } from './rendering';
-import { UiSettingsService } from './ui_settings';
-import { PluginsService, config as pluginsConfig } from './plugins';
-import { SavedObjectsService } from './saved_objects';
-// do not try to shorten the import to `./status`, it will break server test mocking
+import { SavedObjectsService } from '@kbn/core-saved-objects-server-internal';
+import { I18nService, config as i18nConfig } from '@kbn/core-i18n-server-internal';
+import {
+  DeprecationsService,
+  config as deprecationConfig,
+} from '@kbn/core-deprecations-server-internal';
+import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
+import { StatusService, statusConfig } from '@kbn/core-status-server-internal';
+import { UiSettingsService, uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
+import {
+  CoreRouteHandlerContext,
+  PrebootCoreRouteHandlerContext,
+} from '@kbn/core-http-request-handler-context-server-internal';
+import type {
+  RequestHandlerContext,
+  PrebootRequestHandlerContext,
+} from '@kbn/core-http-request-handler-context-server';
+import { RenderingService } from '@kbn/core-rendering-server-internal';
 
-import { StatusService } from './status/status_service';
-import { config as uiSettingsConfig } from './ui_settings';
-import { config as statusConfig } from './status';
-import { config as i18nConfig } from './i18n';
+import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
+import { CoreApp } from './core_app';
+import { PluginsService, config as pluginsConfig } from './plugins';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './internal_types';
-import { CoreUsageDataService } from './core_usage_data';
-import { DeprecationsService, config as deprecationConfig } from './deprecations';
-import { CoreRouteHandlerContext } from './core_route_handler_context';
-import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
 import { DiscoveredPlugins } from './plugins';
-import type { RequestHandlerContext, PrebootRequestHandlerContext } from '.';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -129,7 +133,7 @@ export class Server {
     public readonly env: Env,
     private readonly loggingSystem: ILoggingSystem
   ) {
-    const constructorStartUptime = process.uptime();
+    const constructorStartUptime = performance.now();
 
     this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('server');
@@ -163,12 +167,12 @@ export class Server {
       this.resolveSavedObjectsStartPromise = resolve;
     });
 
-    this.uptimePerStep.constructor = { start: constructorStartUptime, end: process.uptime() };
+    this.uptimePerStep.constructor = { start: constructorStartUptime, end: performance.now() };
   }
 
   public async preboot() {
     this.log.debug('prebooting server');
-    const prebootStartUptime = process.uptime();
+    const prebootStartUptime = performance.now();
     const prebootTransaction = apm.startTransaction('server-preboot', 'kibana-platform');
 
     const analyticsPreboot = this.analytics.preboot();
@@ -231,13 +235,13 @@ export class Server {
     this.coreApp.preboot(corePreboot, uiPlugins);
 
     prebootTransaction?.end();
-    this.uptimePerStep.preboot = { start: prebootStartUptime, end: process.uptime() };
+    this.uptimePerStep.preboot = { start: prebootStartUptime, end: performance.now() };
     return corePreboot;
   }
 
   public async setup() {
     this.log.debug('setting up server');
-    const setupStartUptime = process.uptime();
+    const setupStartUptime = performance.now();
     const setupTransaction = apm.startTransaction('server-setup', 'kibana-platform');
 
     const analyticsSetup = this.analytics.setup();
@@ -276,7 +280,10 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
-    const metricsSetup = await this.metrics.setup({ http: httpSetup });
+    const metricsSetup = await this.metrics.setup({
+      http: httpSetup,
+      elasticsearchService: elasticsearchServiceSetup,
+    });
 
     const coreUsageDataSetup = this.coreUsageData.setup({
       http: httpSetup,
@@ -350,13 +357,13 @@ export class Server {
     this.coreApp.setup(coreSetup, uiPlugins);
 
     setupTransaction?.end();
-    this.uptimePerStep.setup = { start: setupStartUptime, end: process.uptime() };
+    this.uptimePerStep.setup = { start: setupStartUptime, end: performance.now() };
     return coreSetup;
   }
 
   public async start() {
     this.log.debug('starting server');
-    const startStartUptime = process.uptime();
+    const startStartUptime = performance.now();
     const startTransaction = apm.startTransaction('server-start', 'kibana-platform');
 
     const analyticsStart = this.analytics.start();
@@ -405,7 +412,7 @@ export class Server {
 
     startTransaction?.end();
 
-    this.uptimePerStep.start = { start: startStartUptime, end: process.uptime() };
+    this.uptimePerStep.start = { start: startStartUptime, end: performance.now() };
     this.reportKibanaStartedEvents(analyticsStart);
 
     return this.coreStart;
@@ -572,21 +579,20 @@ export class Server {
 
     const ups = this.uptimePerStep;
 
-    const toMs = (sec: number) => Math.round(sec * 1000);
     // Report the metric-shaped KIBANA_STARTED_EVENT.
     reportPerformanceMetricEvent(analyticsStart, {
       eventName: KIBANA_STARTED_EVENT,
-      duration: toMs(ups.start!.end - ups.constructor!.start),
+      duration: ups.start!.end - ups.constructor!.start,
       key1: 'time_to_constructor',
-      value1: toMs(ups.constructor!.start),
+      value1: ups.constructor!.start,
       key2: 'constructor_time',
-      value2: toMs(ups.constructor!.end - ups.constructor!.start),
+      value2: ups.constructor!.end - ups.constructor!.start,
       key3: 'preboot_time',
-      value3: toMs(ups.preboot!.end - ups.preboot!.start),
+      value3: ups.preboot!.end - ups.preboot!.start,
       key4: 'setup_time',
-      value4: toMs(ups.setup!.end - ups.setup!.start),
+      value4: ups.setup!.end - ups.setup!.start,
       key5: 'start_time',
-      value5: toMs(ups.start!.end - ups.start!.start),
+      value5: ups.start!.end - ups.start!.start,
     });
   }
 }

@@ -6,7 +6,7 @@
  */
 
 export type { ApiKey, ApiKeyToInvalidate, ApiKeyRoleDescriptors } from './api_key';
-export type { User, EditUser } from './user';
+export type { User, EditUser, GetUserDisplayNameParams } from './user';
 export type {
   GetUserProfileResponse,
   UserProfile,

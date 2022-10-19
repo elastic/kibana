@@ -7,7 +7,7 @@
 import moment from 'moment';
 import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { StartServicesAccessor } from '@kbn/core/server';
+import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type {
   AlertInstanceContext,
@@ -64,7 +64,8 @@ export const previewRulesRoute = async (
   ruleOptions: CreateRuleOptions,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  logger: Logger
 ) => {
   router.post(
     {
@@ -88,6 +89,8 @@ export const previewRulesRoute = async (
         const searchSourceClient = await data.search.searchSource.asScoped(request);
         const savedObjectsClient = coreContext.savedObjects.client;
         const siemClient = (await context.securitySolution).getAppClient();
+        const { getQueryRuleAdditionalOptions: queryRuleAdditionalOptions } =
+          await context.securitySolution;
 
         const timeframeEnd = request.body.timeframeEnd;
         let invocationCount = request.body.invocationCount;
@@ -180,12 +183,14 @@ export const previewRulesRoute = async (
               | 'getState'
               | 'replaceState'
               | 'scheduleActions'
-              | 'scheduleActionsWithSubGroup'
               | 'setContext'
               | 'getContext'
               | 'hasContext'
             >;
-            hasReachedAlertLimit: () => boolean;
+            alertLimit: {
+              getValue: () => number;
+              setLimitReached: () => void;
+            };
             done: () => { getRecoveredAlerts: () => [] };
           }
         ) => {
@@ -247,6 +252,7 @@ export const previewRulesRoute = async (
               state: statePreview,
               tags: [],
               updatedBy: rule.updatedBy,
+              logger,
             })) as TState;
 
             const errors = loggedStatusChanges
@@ -278,7 +284,9 @@ export const previewRulesRoute = async (
 
         switch (previewRuleParams.type) {
           case 'query':
-            const queryAlertType = previewRuleTypeWrapper(createQueryAlertType(ruleOptions));
+            const queryAlertType = previewRuleTypeWrapper(
+              createQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+            );
             await runExecutors(
               queryAlertType.executor,
               queryAlertType.id,
@@ -287,14 +295,17 @@ export const previewRulesRoute = async (
               () => true,
               {
                 create: alertInstanceFactoryStub,
-                hasReachedAlertLimit: () => false,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
             );
             break;
           case 'saved_query':
             const savedQueryAlertType = previewRuleTypeWrapper(
-              createSavedQueryAlertType(ruleOptions)
+              createSavedQueryAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
             );
             await runExecutors(
               savedQueryAlertType.executor,
@@ -304,7 +315,10 @@ export const previewRulesRoute = async (
               () => true,
               {
                 create: alertInstanceFactoryStub,
-                hasReachedAlertLimit: () => false,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
             );
@@ -321,7 +335,10 @@ export const previewRulesRoute = async (
               () => true,
               {
                 create: alertInstanceFactoryStub,
-                hasReachedAlertLimit: () => false,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
             );
@@ -338,7 +355,10 @@ export const previewRulesRoute = async (
               () => true,
               {
                 create: alertInstanceFactoryStub,
-                hasReachedAlertLimit: () => false,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
             );
@@ -353,7 +373,10 @@ export const previewRulesRoute = async (
               () => true,
               {
                 create: alertInstanceFactoryStub,
-                hasReachedAlertLimit: () => false,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
             );
@@ -368,7 +391,10 @@ export const previewRulesRoute = async (
               () => true,
               {
                 create: alertInstanceFactoryStub,
-                hasReachedAlertLimit: () => false,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
             );
@@ -383,7 +409,10 @@ export const previewRulesRoute = async (
               () => true,
               {
                 create: alertInstanceFactoryStub,
-                hasReachedAlertLimit: () => false,
+                alertLimit: {
+                  getValue: () => 1000,
+                  setLimitReached: () => {},
+                },
                 done: () => ({ getRecoveredAlerts: () => [] }),
               }
             );

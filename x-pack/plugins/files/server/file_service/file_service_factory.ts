@@ -13,20 +13,16 @@ import {
 } from '@kbn/core/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
-import type { File, FileJSON, FileMetadata } from '../../common';
-import { fileObjectType, fileShareObjectType } from '../saved_objects';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { File, FileJSON, FileMetadata } from '../../common';
+import { fileObjectType, fileShareObjectType, hiddenTypes } from '../saved_objects';
 import { BlobStorageService } from '../blob_storage_service';
+import { FileClientImpl } from '../file_client/file_client';
 import { InternalFileShareService } from '../file_share_service';
-import {
-  CreateFileArgs,
-  FindFileArgs,
-  GetByIdArgs,
-  ListFilesArgs,
-  UpdateFileArgs,
-} from './file_action_types';
+import { CreateFileArgs, FindFileArgs, GetByIdArgs, UpdateFileArgs } from './file_action_types';
 import { InternalFileService } from './internal_file_service';
 import { FileServiceStart } from './file_service';
-import { FileKindsRegistry } from '../file_kinds_registry';
+import { FileKindsRegistry } from '../../common/file_kinds_registry';
 import { SavedObjectsFileMetadataClient } from '../file_client';
 
 /**
@@ -63,7 +59,6 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
   ) {}
 
   private createFileService(req?: KibanaRequest): FileServiceStart {
-    const hiddenTypes = [fileObjectType.name, fileShareObjectType.name];
     const soClient = req
       ? this.savedObjectsService.getScopedClient(req, {
           includedHiddenTypes: hiddenTypes,
@@ -104,10 +99,10 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
         return internalFileService.getById(args) as Promise<File<M>>;
       },
       async find<M>(args: FindFileArgs) {
-        return internalFileService.findFilesJSON(args) as Promise<Array<FileJSON<M>>>;
-      },
-      async list<M>(args: ListFilesArgs) {
-        return internalFileService.list(args) as Promise<Array<File<M>>>;
+        return internalFileService.findFilesJSON(args) as Promise<{
+          files: Array<FileJSON<M>>;
+          total: number;
+        }>;
       },
       async getUsageMetrics() {
         return internalFileService.getUsageMetrics();
@@ -133,8 +128,15 @@ export class FileServiceFactoryImpl implements FileServiceFactory {
   /**
    * This function can only called during Kibana's setup phase
    */
-  public static setup(savedObjectsSetup: SavedObjectsServiceSetup): void {
+  public static setup(
+    savedObjectsSetup: SavedObjectsServiceSetup,
+    usageCounter?: UsageCounter
+  ): void {
     savedObjectsSetup.registerType<FileMetadata<{}>>(fileObjectType);
     savedObjectsSetup.registerType(fileShareObjectType);
+    if (usageCounter) {
+      FileClientImpl.configureUsageCounter(usageCounter);
+      InternalFileShareService.configureUsageCounter(usageCounter);
+    }
   }
 }

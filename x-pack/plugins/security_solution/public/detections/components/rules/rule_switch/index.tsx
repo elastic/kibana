@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elasti
 import { noop } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { BulkAction } from '../../../../../common/detection_engine/schemas/common';
+import { BulkAction } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';

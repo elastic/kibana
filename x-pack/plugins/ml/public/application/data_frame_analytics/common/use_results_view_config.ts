@@ -148,6 +148,7 @@ export const useResultsViewConfig = (jobId: string) => {
         setIsLoadingJobConfig(false);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {

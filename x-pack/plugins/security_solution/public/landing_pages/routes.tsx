@@ -14,36 +14,43 @@ import { DASHBOARDS_PATH, MANAGE_PATH, EXPLORE_PATH } from '../../common/constan
 import { ExploreLandingPage } from './pages/explore';
 import { DashboardsLandingPage } from './pages/dashboards';
 import { ManageLandingPage } from './pages/manage';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 export const ThreatHuntingRoutes = () => (
-  <TrackApplicationView viewId={SecurityPageName.exploreLanding}>
-    <ExploreLandingPage />
-  </TrackApplicationView>
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.exploreLanding}>
+      <ExploreLandingPage />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
 );
 
 export const DashboardRoutes = () => (
-  <TrackApplicationView viewId={SecurityPageName.dashboardsLanding}>
-    <DashboardsLandingPage />
-  </TrackApplicationView>
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.dashboardsLanding}>
+      <DashboardsLandingPage />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
 );
 
 export const ManageRoutes = () => (
-  <TrackApplicationView viewId={SecurityPageName.administration}>
-    <ManageLandingPage />
-  </TrackApplicationView>
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.administration}>
+      <ManageLandingPage />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
 );
 
 export const routes: SecuritySubPluginRoutes = [
   {
     path: EXPLORE_PATH,
-    render: ThreatHuntingRoutes,
+    component: ThreatHuntingRoutes,
   },
   {
     path: DASHBOARDS_PATH,
-    render: DashboardRoutes,
+    component: DashboardRoutes,
   },
   {
     path: MANAGE_PATH,
-    render: ManageRoutes,
+    component: ManageRoutes,
   },
 ];

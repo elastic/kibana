@@ -26,11 +26,13 @@ export const BucketSpanEstimator: FC<Props> = ({ setEstimating }) => {
 
   useEffect(() => {
     setEstimating(status === ESTIMATE_STATUS.RUNNING);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
   useEffect(() => {
     setNoDetectors(jobCreator.detectors.length === 0);
     setIsUsingMlCategory(checkIsUsingMlCategory());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdate]);
 
   function checkIsUsingMlCategory() {

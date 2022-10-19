@@ -48,6 +48,7 @@ export interface QueryBarMenuProps {
   timeRangeForSuggestionsOverride?: boolean;
   indexPatterns?: Array<DataView | string>;
   buttonProps?: Partial<EuiButtonIconProps>;
+  isDisabled?: boolean;
 }
 
 export function QueryBarMenu({
@@ -75,6 +76,7 @@ export function QueryBarMenu({
   indexPatterns,
   timeRangeForSuggestionsOverride,
   buttonProps,
+  isDisabled,
 }: QueryBarMenuProps) {
   const [renderedComponent, setRenderedComponent] = useState('menu');
 
@@ -105,6 +107,7 @@ export function QueryBarMenu({
         size="m"
         display="empty"
         onClick={onButtonClick}
+        isDisabled={isDisabled}
         {...buttonProps}
         iconType="filter"
         aria-label={buttonLabel}

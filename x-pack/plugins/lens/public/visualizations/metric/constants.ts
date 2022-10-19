@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-export const LENS_METRIC_ID = 'lnsMetricNew'; // TODO - rename old one to "legacy"
+export const LENS_METRIC_ID = 'lnsMetric';
 
 export const GROUP_ID = {
   METRIC: 'metric',
   SECONDARY_METRIC: 'secondaryMetric',
   MAX: 'max',
   BREAKDOWN_BY: 'breakdownBy',
+  TREND_METRIC: 'trendMetric',
+  TREND_SECONDARY_METRIC: 'trendSecondaryMetric',
+  TREND_TIME: 'trendTime',
+  TREND_BREAKDOWN_BY: 'trendBreakdownBy',
 } as const;

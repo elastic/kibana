@@ -21,10 +21,10 @@ import {
   MAX_RULES_TO_UPDATE_IN_PARALLEL,
   RULES_TABLE_MAX_PAGE_SIZE,
 } from '../../../../../common/constants';
-import { BulkAction } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   performBulkActionSchema,
   performBulkActionQuerySchema,
+  BulkAction,
 } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import type { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';

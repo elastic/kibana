@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { SYNTHETICS_STEP_NAME } from '../constants/field_names/synthetics';
+import { i18n } from '@kbn/i18n';
+import {
+  SYNTHETICS_STEP_DURATION,
+  SYNTHETICS_STEP_NAME,
+} from '../constants/field_names/synthetics';
 import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, FORMULA_COLUMN } from '../constants';
 import { buildExistsFilter } from '../utils';
@@ -28,7 +32,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
       { field: 'url.full', filters: buildExistsFilter('summary.up', dataView) },
     ],
     reportType: 'single-metric',
-    baseFilters: [...buildExistsFilter('summary.up', dataView)],
+    baseFilters: [],
     metricOptions: [
       {
         id: 'monitor_availability',
@@ -64,6 +68,58 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
           },
           titlePosition: 'bottom',
         },
+        columnFilter: { language: 'kuery', query: 'summary.up: *' },
+      },
+      {
+        id: 'monitor_duration',
+        field: 'monitor.duration.us',
+        label: i18n.translate('xpack.observability.expView.avgDuration', {
+          defaultMessage: 'Avg. Duration',
+        }),
+        metricStateOptions: {
+          titlePosition: 'bottom',
+        },
+        columnFilter: { language: 'kuery', query: 'summary.up: *' },
+      },
+      {
+        id: 'step_duration',
+        field: SYNTHETICS_STEP_DURATION,
+        label: i18n.translate('xpack.observability.expView.stepDuration', {
+          defaultMessage: 'Total step duration',
+        }),
+        metricStateOptions: {
+          titlePosition: 'bottom',
+        },
+      },
+      {
+        id: 'monitor_errors',
+        field: 'state.id',
+        label: i18n.translate('xpack.observability.expView.errors', {
+          defaultMessage: 'Errors',
+        }),
+        metricStateOptions: {
+          titlePosition: 'bottom',
+          colorMode: 'Labels',
+          palette: {
+            name: 'custom',
+            type: 'palette',
+            params: {
+              steps: 3,
+              name: 'custom',
+              reverse: false,
+              rangeType: 'number',
+              rangeMin: 0,
+              progression: 'fixed',
+              stops: [{ color: '#E7664C', stop: 100 }],
+              colorStops: [{ color: '#E7664C', stop: 0 }],
+              continuity: 'above',
+              maxSteps: 5,
+            },
+          },
+        },
+        columnType: FORMULA_COLUMN,
+        formula: 'unique_count(state.id, kql=\'monitor.status: "down"\')',
+        format: 'number',
       },
     ],
     labels: FieldLabels,

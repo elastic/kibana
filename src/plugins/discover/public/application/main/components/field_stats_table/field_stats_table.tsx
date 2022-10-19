@@ -18,10 +18,12 @@ import {
   isErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { GetStateReturn } from '../../services/discover_state';
-import { AvailableFields$, DataRefetch$ } from '../../hooks/use_saved_search';
+import { AvailableFields$, DataRefetch$, DataTotalHits$ } from '../../hooks/use_saved_search';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   dataView: DataView;
@@ -50,6 +52,7 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
    * since we might not have fetch all fields at once, but rather all that are available
    */
   fieldsToFetch?: string[];
+  totalDocuments?: number;
   /**
    * The preferred mode for sampling data for the field statistics
    * default as 'autoRandomSampler'
@@ -106,6 +109,7 @@ export interface FieldStatisticsTableProps {
   savedSearchRefetch$?: DataRefetch$;
   availableFields$?: AvailableFields$;
   searchSessionId?: string;
+  savedSearchDataTotalHits$?: DataTotalHits$;
 }
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
@@ -121,6 +125,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     trackUiMetric,
     savedSearchRefetch$,
     searchSessionId,
+    savedSearchDataTotalHits$,
   } = props;
   const services = useDiscoverServices();
   const [embeddable, setEmbeddable] = useState<
@@ -174,6 +179,9 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         onAddFilter,
         sessionId: searchSessionId,
         fieldsToFetch: availableFields$?.getValue().fields,
+        totalDocuments: savedSearchDataTotalHits$
+          ? savedSearchDataTotalHits$.getValue()?.result
+          : undefined,
         samplingMode: 'autoRandomSampler',
       });
       embeddable.reload();
@@ -188,6 +196,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     onAddFilter,
     searchSessionId,
     availableFields$,
+    savedSearchDataTotalHits$,
   ]);
 
   useEffect(() => {
@@ -246,13 +255,22 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     };
   }, [embeddable, embeddableRoot, trackUiMetric]);
 
+  const statsTableCss = css`
+    overflow-y: auto;
+
+    .kbnDocTableWrapper {
+      overflow-x: hidden;
+    }
+  `;
+
   return (
-    <div
-      data-test-subj="dscFieldStatsEmbeddedContent"
-      ref={embeddableRoot}
-      style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden' }}
-      // Match the scroll bar of the Discover doc table
-      className="kbnDocTableWrapper"
-    />
+    <EuiFlexItem css={statsTableCss}>
+      <div
+        data-test-subj="dscFieldStatsEmbeddedContent"
+        ref={embeddableRoot}
+        // Match the scroll bar of the Discover doc table
+        className="kbnDocTableWrapper"
+      />
+    </EuiFlexItem>
   );
 };

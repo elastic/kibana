@@ -12,6 +12,7 @@ import {
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { nodeBuilder, escapeKuery } from '@kbn/es-query';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
   Pagination,
   FileShareJSON,
@@ -22,6 +23,7 @@ import type {
 import { FILE_SO_TYPE } from '../../common/constants';
 import type { File } from '../../common/types';
 import { fileShareObjectType } from '../saved_objects';
+import { getCounters, Counters } from '../usage';
 import { generateShareToken } from './generate_share_token';
 import { FileShareServiceStart } from './types';
 import {
@@ -126,35 +128,67 @@ function validateCreateArgs({ validUntil }: CreateShareArgs): void {
  * @internal
  */
 export class InternalFileShareService implements FileShareServiceStart {
+  private static usageCounter: undefined | UsageCounter;
+
+  public static configureUsageCounter(uc: UsageCounter) {
+    InternalFileShareService.usageCounter = uc;
+  }
+
   private readonly savedObjectsType = fileShareObjectType.name;
 
   constructor(
     private readonly savedObjects: SavedObjectsClientContract | ISavedObjectsRepository
   ) {}
 
-  public async share(args: CreateShareArgs): Promise<FileShareJSONWithToken> {
-    validateCreateArgs(args);
-    const { file, name, validUntil } = args;
-    const so = await this.savedObjects.create<FileShare>(
-      this.savedObjectsType,
-      {
-        created: new Date().toISOString(),
-        name,
-        valid_until: validUntil ? validUntil : Number(moment().add(30, 'days')),
-        token: generateShareToken(),
-      },
-      {
-        references: [{ name: file.data.name, id: file.data.id, type: FILE_SO_TYPE }],
-      }
-    );
+  private incrementUsageCounter(counter: Counters) {
+    InternalFileShareService.usageCounter?.incrementCounter({
+      counterName: getCounters('share_service')[counter],
+    });
+  }
 
-    return { ...toFileShareJSON(so), token: so.attributes.token };
+  public async share(args: CreateShareArgs): Promise<FileShareJSONWithToken> {
+    this.incrementUsageCounter('SHARE');
+    try {
+      validateCreateArgs(args);
+      const { file, name, validUntil } = args;
+      const so = await this.savedObjects.create<FileShare>(
+        this.savedObjectsType,
+        {
+          created: new Date().toISOString(),
+          name,
+          valid_until: validUntil ? validUntil : Number(moment().add(30, 'days')),
+          token: generateShareToken(),
+        },
+        {
+          references: [{ name: file.data.name, id: file.data.id, type: FILE_SO_TYPE }],
+        }
+      );
+
+      return { ...toFileShareJSON(so), token: so.attributes.token };
+    } catch (e) {
+      if (e instanceof ExpiryDateInThePastError) {
+        this.incrementUsageCounter('SHARE_ERROR_EXPIRATION_IN_PAST');
+      } else if (SavedObjectsErrorHelpers.isForbiddenError(e)) {
+        this.incrementUsageCounter('SHARE_ERROR_FORBIDDEN');
+      } else if (SavedObjectsErrorHelpers.isConflictError(e)) {
+        this.incrementUsageCounter('SHARE_ERROR_CONFLICT');
+      } else {
+        this.incrementUsageCounter('SHARE_ERROR');
+      }
+      throw e;
+    }
   }
 
   public async delete({ id }: DeleteArgs): Promise<void> {
+    this.incrementUsageCounter('UNSHARE');
     try {
       await this.savedObjects.delete(this.savedObjectsType, id);
     } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        this.incrementUsageCounter('UNSHARE_ERROR_NOT_FOUND');
+      } else {
+        this.incrementUsageCounter('UNSHARE_ERROR');
+      }
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw new FileShareNotFoundError(`File share with id "${id}" not found.`);
       }

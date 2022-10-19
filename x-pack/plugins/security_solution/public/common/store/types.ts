@@ -21,8 +21,9 @@ import type { NetworkPluginState } from '../../network/store';
 import type { ManagementPluginState } from '../../management';
 import type { UsersPluginState } from '../../users/store';
 import type { GlobalUrlParam } from './global_url_param';
+import type { DataTableState } from './data_table/types';
 
-export type StoreState = HostsPluginState &
+export type State = HostsPluginState &
   UsersPluginState &
   NetworkPluginState &
   UsersPluginState &
@@ -33,14 +34,7 @@ export type StoreState = HostsPluginState &
     inputs: InputsState;
     sourcerer: SourcererState;
     globalUrlParam: GlobalUrlParam;
-  };
-/**
- * The redux `State` type for the Security App.
- * We use `CombinedState` to wrap our shape because we create our reducer using `combineReducers`.
- * `combineReducers` returns a type wrapped in `CombinedState`.
- * `CombinedState` is required for redux to know what keys to make optional when preloaded state into a store.
- */
-export type State = CombinedState<StoreState>;
+  } & DataTableState;
 
 /**
  * like redux's `MiddlewareAPI` but `getState` returns an `Immutable` version of

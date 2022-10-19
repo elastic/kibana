@@ -18,8 +18,8 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { CustomizablePalette, PaletteRegistry, FIXED_PROGRESSION } from '@kbn/coloring';
-import { VisualizationDimensionEditorProps } from '../../../types';
-import { DatatableVisualizationState } from '../visualization';
+import type { VisualizationDimensionEditorProps } from '../../../types';
+import type { DatatableVisualizationState } from '../visualization';
 
 import {
   applyPaletteParams,
@@ -27,7 +27,8 @@ import {
   PalettePanelContainer,
   findMinMaxByColumnId,
 } from '../../../shared_components';
-import { isNumericFieldForDatatable, getOriginalId } from '../../../../common/expressions';
+import { isNumericFieldForDatatable } from '../../../../common/expressions/datatable/utils';
+import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 
 import './dimension_editor.scss';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
@@ -97,7 +98,7 @@ export function TableDimensionEditor(
       {props.groupId === 'rows' && (
         <CollapseSetting
           value={column.collapseFn || ''}
-          onChange={(collapseFn: string) => {
+          onChange={(collapseFn) => {
             setState({
               ...state,
               columns: updateColumnWith(state, accessor, { collapseFn }),
@@ -307,6 +308,42 @@ export function TableDimensionEditor(
                     return {
                       ...currentColumn,
                       hidden: !column.hidden,
+                    };
+                  } else {
+                    return currentColumn;
+                  }
+                }),
+              };
+              setState(newState);
+            }}
+          />
+        </EuiFormRow>
+      )}
+      {props.groupId === 'rows' && (
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.lens.table.columnFilterClickLabel', {
+            defaultMessage: 'Directly filter on click',
+          })}
+          display="columnCompressedSwitch"
+        >
+          <EuiSwitch
+            compressed
+            label={i18n.translate('xpack.lens.table.columnFilterClickLabel', {
+              defaultMessage: 'Directly filter on click',
+            })}
+            showLabel={false}
+            data-test-subj="lns-table-column-one-click-filter"
+            checked={Boolean(column?.oneClickFilter)}
+            disabled={column.hidden}
+            onChange={() => {
+              const newState = {
+                ...state,
+                columns: state.columns.map((currentColumn) => {
+                  if (currentColumn.columnId === accessor) {
+                    return {
+                      ...currentColumn,
+                      oneClickFilter: !column.oneClickFilter,
                     };
                   } else {
                     return currentColumn;

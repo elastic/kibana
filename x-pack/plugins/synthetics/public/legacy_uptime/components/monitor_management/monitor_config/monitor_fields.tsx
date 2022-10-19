@@ -14,7 +14,7 @@ import { CustomFields } from '../../fleet_package/custom_fields';
 import { validate } from '../validation';
 import { MonitorNameAndLocation } from './monitor_name_location';
 import { MonitorManagementAdvancedFields } from './monitor_advanced_fields';
-import { ProjectBrowserReadonlyFields } from './read_only_browser_fields';
+import { ProjectReadonlyView } from './project_readonly_view/project_readonly_view';
 
 const MIN_COLUMN_WRAP_WIDTH = '360px';
 
@@ -43,7 +43,7 @@ export const MonitorFields = ({ isFormSubmitted = false }: { isFormSubmitted?: b
   return (
     <EuiForm id="syntheticsServiceCreateMonitorForm" component="form">
       {sourceType === SourceType.PROJECT ? (
-        <ProjectBrowserReadonlyFields minColumnWidth={MIN_COLUMN_WRAP_WIDTH} />
+        <ProjectReadonlyView />
       ) : (
         <CustomFields
           minColumnWidth={MIN_COLUMN_WRAP_WIDTH}

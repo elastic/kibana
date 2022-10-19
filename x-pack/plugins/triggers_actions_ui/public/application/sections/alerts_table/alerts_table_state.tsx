@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useCallback, useRef, useMemo, useReducer } from 'react';
+import React, { useState, useCallback, useRef, useMemo, useReducer, useEffect } from 'react';
 import { isEmpty } from 'lodash';
 import {
   EuiDataGridColumn,
@@ -35,6 +35,7 @@ import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from '
 import { TypeRegistry } from '../../type_registry';
 import { bulkActionsReducer } from './bulk_actions/reducer';
 import { useGetUserCasesPermissions } from './hooks/use_get_user_cases_permissions';
+import { useColumns } from './hooks/use_columns';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -55,10 +56,11 @@ export interface AlertsTableStateProps {
   flyoutSize?: EuiFlyoutSize;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
+  refreshNow?: number;
   showExpandToDetails: boolean;
 }
 
-interface AlertsTableStorage {
+export interface AlertsTableStorage {
   columns: EuiDataGridColumn[];
   visibleColumns?: string[];
   sort: SortCombinations[];
@@ -92,6 +94,7 @@ const AlertsTableWithBulkActionsContextComponent: React.FunctionComponent<{
 );
 
 const AlertsTableWithBulkActionsContext = React.memo(AlertsTableWithBulkActionsContextComponent);
+const EMPTY_FIELDS = [{ field: '*', include_unmapped: true }];
 
 const AlertsTableState = ({
   alertsTableConfigurationRegistry,
@@ -101,9 +104,11 @@ const AlertsTableState = ({
   flyoutSize,
   query,
   pageSize,
+  refreshNow,
   showExpandToDetails,
 }: AlertsTableStateProps) => {
   const { cases } = useKibana<{ cases: CaseUi }>().services;
+
   const hasAlertsTableConfiguration =
     alertsTableConfigurationRegistry?.has(configurationId) ?? false;
   const alertsTableConfiguration = hasAlertsTableConfiguration
@@ -141,7 +146,23 @@ const AlertsTableState = ({
     ...DefaultPagination,
     pageSize: pageSize ?? DefaultPagination.pageSize,
   });
-  const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);
+
+  const {
+    columns,
+    onColumnsChange,
+    browserFields,
+    isBrowserFieldDataLoading,
+    onToggleColumn,
+    onResetColumns,
+    visibleColumns,
+    onChangeVisibleColumns,
+  } = useColumns({
+    featureIds,
+    storageAlertsTable,
+    storage,
+    id,
+    defaultColumns: (alertsTableConfiguration && alertsTableConfiguration.columns) ?? [],
+  });
 
   const [
     isLoading,
@@ -154,7 +175,7 @@ const AlertsTableState = ({
       updatedAt,
     },
   ] = useFetchAlerts({
-    fields: columns.map((col) => ({ field: col.id, include_unmapped: true })),
+    fields: EMPTY_FIELDS,
     featureIds,
     query,
     pagination,
@@ -192,18 +213,6 @@ const AlertsTableState = ({
     },
     [id]
   );
-  const onColumnsChange = useCallback(
-    (newColumns: EuiDataGridColumn[], visibleColumns: string[]) => {
-      setColumns(newColumns);
-      storageAlertsTable.current = {
-        ...storageAlertsTable.current,
-        columns: newColumns,
-        visibleColumns,
-      };
-      storage.current.set(id, storageAlertsTable.current);
-    },
-    [id, storage]
-  );
 
   const useFetchAlertsData = useCallback(() => {
     return {
@@ -213,7 +222,6 @@ const AlertsTableState = ({
       isInitializing,
       isLoading,
       getInspectQuery,
-      onColumnsChange,
       onPageChange,
       onSortChange,
       refresh,
@@ -226,7 +234,6 @@ const AlertsTableState = ({
     getInspectQuery,
     isInitializing,
     isLoading,
-    onColumnsChange,
     onPageChange,
     onSortChange,
     pagination.pageIndex,
@@ -250,9 +257,14 @@ const AlertsTableState = ({
       showExpandToDetails,
       trailingControlColumns: [],
       useFetchAlertsData,
-      visibleColumns: storageAlertsTable.current.visibleColumns ?? [],
+      visibleColumns,
       'data-test-subj': 'internalAlertsState',
       updatedAt,
+      browserFields,
+      onToggleColumn,
+      onResetColumns,
+      onColumnsChange,
+      onChangeVisibleColumns,
     }),
     [
       alertsTableConfiguration,
@@ -262,17 +274,30 @@ const AlertsTableState = ({
       id,
       showExpandToDetails,
       useFetchAlertsData,
+      visibleColumns,
       updatedAt,
+      browserFields,
+      onToggleColumn,
+      onResetColumns,
+      onColumnsChange,
+      onChangeVisibleColumns,
     ]
   );
 
   const CasesContext = cases?.ui.getCasesContext();
   const userCasesPermissions = useGetUserCasesPermissions(alertsTableConfiguration.casesFeatureId);
 
+  useEffect(() => {
+    if (!isLoading && refreshNow) {
+      refresh();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshNow]);
+
   return hasAlertsTableConfiguration ? (
     <>
       {!isLoading && alertsCount === 0 && <EmptyState />}
-      {isLoading && (
+      {(isLoading || isBrowserFieldDataLoading) && (
         <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
       )}
       {alertsCount !== 0 && CasesContext && cases && (

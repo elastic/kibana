@@ -9,9 +9,11 @@ import assert from 'assert';
 import { once } from 'lodash';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { Semaphore } from '@kbn/std';
 import { Readable, Transform } from 'stream';
 import { pipeline } from 'stream/promises';
 import { promisify } from 'util';
+import { lastValueFrom, defer } from 'rxjs';
 import type { BlobStorageClient } from '../../types';
 import type { ReadableContentStream } from './content_stream';
 import { getReadableContentStream, getWritableContentStream } from './content_stream';
@@ -27,16 +29,27 @@ export const BLOB_STORAGE_SYSTEM_INDEX_NAME = '.kibana_blob_storage';
 export const MAX_BLOB_STORE_SIZE_BYTES = 50 * 1024 * 1024 * 1024; // 50 GiB
 
 export class ElasticsearchBlobStorageClient implements BlobStorageClient {
+  private static defaultSemaphore: Semaphore;
+  /**
+   * Call this function once to globally set a concurrent upload limit for
+   * all {@link ElasticsearchBlobStorageClient} instances.
+   */
+  public static configureConcurrentUpload(capacity: number) {
+    this.defaultSemaphore = new Semaphore(capacity);
+  }
+
   constructor(
     private readonly esClient: ElasticsearchClient,
     private readonly index: string = BLOB_STORAGE_SYSTEM_INDEX_NAME,
     private readonly chunkSize: undefined | string,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    /**
+     * Override the default concurrent upload limit by passing in a different
+     * semaphore
+     */
+    private readonly uploadSemaphore = ElasticsearchBlobStorageClient.defaultSemaphore
   ) {
-    assert(
-      this.index.startsWith('.kibana'),
-      `Elasticsearch blob store index name must start with ".kibana", got ${this.index}.`
-    );
+    assert(this.uploadSemaphore, `No default semaphore provided and no semaphore was passed in.`);
   }
 
   /**
@@ -81,28 +94,32 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
   ): Promise<{ id: string; size: number }> {
     await this.createIndexIfNotExists();
 
-    try {
-      const dest = getWritableContentStream({
-        id,
-        client: this.esClient,
-        index: this.index,
-        logger: this.logger.get('content-stream-upload'),
-        parameters: {
-          maxChunkSize: this.chunkSize,
-        },
-      });
-      await pipeline.apply(null, [src, ...(transforms ?? []), dest] as unknown as Parameters<
-        typeof pipeline
-      >);
+    const processUpload = async () => {
+      try {
+        const dest = getWritableContentStream({
+          id,
+          client: this.esClient,
+          index: this.index,
+          logger: this.logger.get('content-stream-upload'),
+          parameters: {
+            maxChunkSize: this.chunkSize,
+          },
+        });
+        await pipeline.apply(null, [src, ...(transforms ?? []), dest] as unknown as Parameters<
+          typeof pipeline
+        >);
 
-      return {
-        id: dest.getContentReferenceId()!,
-        size: dest.getBytesWritten(),
-      };
-    } catch (e) {
-      this.logger.error(`Could not write chunks to Elasticsearch: ${e}`);
-      throw e;
-    }
+        return {
+          id: dest.getContentReferenceId()!,
+          size: dest.getBytesWritten(),
+        };
+      } catch (e) {
+        this.logger.error(`Could not write chunks to Elasticsearch for id ${id}: ${e}`);
+        throw e;
+      }
+    };
+
+    return lastValueFrom(defer(processUpload).pipe(this.uploadSemaphore.acquire()));
   }
 
   private getReadableContentStream(id: string, size?: number): ReadableContentStream {

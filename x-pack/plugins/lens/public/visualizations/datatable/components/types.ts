@@ -58,6 +58,7 @@ export type DatatableRenderProps = DatatableProps & {
    * ROW_CLICK_TRIGGER actions attached to it, otherwise false.
    */
   rowHasRowClickTriggerActions?: boolean[];
+  columnFilterable?: boolean[];
 };
 
 export interface DataContextType {
@@ -65,6 +66,13 @@ export interface DataContextType {
   rowHasRowClickTriggerActions?: boolean[];
   alignments?: Record<string, 'left' | 'right' | 'center'>;
   minMaxByColumnId?: Record<string, { min: number; max: number }>;
+  handleFilterClick?: (
+    field: string,
+    value: unknown,
+    colIndex: number,
+    rowIndex: number,
+    negate?: boolean
+  ) => void;
   getColorForValue?: (
     value: number | undefined,
     state: CustomPaletteState,

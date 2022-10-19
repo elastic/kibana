@@ -53,43 +53,6 @@ discover-app {
   height: auto;
 }
 
-.dscResultCount {
-  padding: $euiSizeS;
-  min-height: $euiSize * 3;
-
-  @include euiBreakpoint('xs', 's') {
-    .dscResultCount__toggle {
-      align-items: flex-end;
-    }
-
-    .dscResultCount__title,
-    .dscResultCount__actions {
-      margin-bottom: 0 !important;
-    }
-  }
-}
-
-.dscTimechart {
-  display: block;
-  position: relative;
-
-  // SASSTODO: the visualizing component should have an option or a modifier
-  .series > rect {
-    fill-opacity: .5;
-    stroke-width: 1;
-  }
-}
-
-.dscHistogram {
-  height: $euiSize * 7;
-  padding: 0 $euiSizeS $euiSizeS * 2 $euiSizeS;
-}
-
-.dscHistogramTimeRange {
-  padding: 0 $euiSizeS 0 $euiSizeS;
-  margin-top: - $euiSizeS;
-}
-
 .dscTable {
   // needs for scroll container of lagacy table
   min-height: 0;

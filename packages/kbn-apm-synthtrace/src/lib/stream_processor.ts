@@ -45,9 +45,11 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
   private readonly streamAggregators: Array<StreamAggregator<TFields>>;
 
   constructor(private readonly options: StreamProcessorOptions<TFields>) {
-    [this.intervalAmount, this.intervalUnit] = this.options.flushInterval
+    const { intervalAmount, intervalUnit } = this.options.flushInterval
       ? parseInterval(this.options.flushInterval)
       : parseInterval('1m');
+    this.intervalAmount = intervalAmount;
+    this.intervalUnit = intervalUnit;
     this.name = this.options?.name ?? 'StreamProcessor';
     this.version = this.options.version ?? '8.0.0';
     this.versionMajor = Number.parseInt(this.version.split('.')[0], 10);
@@ -56,8 +58,8 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
   }
   private readonly intervalAmount: number;
   private readonly intervalUnit: any;
-  private readonly name: string;
-  private readonly version: string;
+  public readonly name: string;
+  public readonly version: string;
   private readonly versionMajor: number;
 
   // TODO move away from chunking and feed this data one by one to processors
@@ -178,6 +180,7 @@ export class StreamProcessor<TFields extends Fields = ApmFields> {
   private static enrich(document: ApmFields, version: string, versionMajor: number): ApmFields {
     // see https://github.com/elastic/apm-server/issues/7088 can not be provided as flat key/values
     document.observer = {
+      type: 'synthtrace',
       version: version ?? '8.2.0',
       version_major: versionMajor,
     };

@@ -136,7 +136,7 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
   const columns = useMemo(() => {
     const expanderColumn: EuiTableComputedColumnType<DataVisualizerTableItem> = {
       name:
-        dimensions.breakPoint !== 'xs' && dimensions.breakPoint !== 's' ? (
+        dimensions.breakPoint !== 'small' ? (
           <EuiButtonIcon
             data-test-subj={`dataVisualizerToggleDetailsForAllRowsButton ${
               expandAll ? 'expanded' : 'collapsed'

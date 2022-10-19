@@ -27,6 +27,8 @@ import { HostsTabs } from './hosts_tabs';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { LandingPageComponent } from '../../common/components/landing_page';
+import { InputsModelId } from '../../common/store/inputs/constants';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -84,6 +86,16 @@ const mockHistory = {
   listen: jest.fn(),
 };
 const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
+const myState: State = mockGlobalState;
+const { storage } = createSecuritySolutionStorageMock();
+const myStore = createStore(
+  myState,
+  SUB_PLUGINS_REDUCER,
+  { dataTable: tGridReducer },
+  kibanaObservable,
+  storage
+);
+
 describe('Hosts - rendering', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -94,7 +106,7 @@ describe('Hosts - rendering', () => {
     });
 
     const wrapper = mount(
-      <TestProviders>
+      <TestProviders store={myStore}>
         <Router history={mockHistory}>
           <Hosts />
         </Router>
@@ -110,7 +122,7 @@ describe('Hosts - rendering', () => {
       indexPattern: {},
     });
     mount(
-      <TestProviders>
+      <TestProviders store={myStore}>
         <Router history={mockHistory}>
           <Hosts />
         </Router>
@@ -126,7 +138,7 @@ describe('Hosts - rendering', () => {
     });
 
     const wrapper = mount(
-      <TestProviders>
+      <TestProviders store={myStore}>
         <Router history={mockHistory}>
           <Hosts />
         </Router>
@@ -171,9 +183,6 @@ describe('Hosts - rendering', () => {
       indicesExist: true,
       indexPattern: { fields: [], title: 'title' },
     });
-    const myState: State = mockGlobalState;
-    const { storage } = createSecuritySolutionStorageMock();
-    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
     const wrapper = mount(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>
@@ -182,7 +191,9 @@ describe('Hosts - rendering', () => {
       </TestProviders>
     );
     wrapper.update();
-    myStore.dispatch(inputsActions.setSearchBarFilter({ id: 'global', filters: newFilters }));
+    myStore.dispatch(
+      inputsActions.setSearchBarFilter({ id: InputsModelId.global, filters: newFilters })
+    );
     wrapper.update();
     expect(wrapper.find(HostsTabs).props().filterQuery).toEqual(
       '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'

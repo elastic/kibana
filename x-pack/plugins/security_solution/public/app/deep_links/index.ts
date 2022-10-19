@@ -42,7 +42,8 @@ import {
   NETWORK,
   OVERVIEW,
   POLICIES,
-  RESPONSE_ACTIONS,
+  RESPONSE_ACTIONS_HISTORY,
+  ENTITY_ANALYTICS,
   RULES,
   TIMELINES,
   TRUSTED_APPLICATIONS,
@@ -64,7 +65,8 @@ import {
   NETWORK_PATH,
   OVERVIEW_PATH,
   POLICIES_PATH,
-  RESPONSE_ACTIONS_PATH,
+  RESPONSE_ACTIONS_HISTORY_PATH,
+  ENTITY_ANALYTICS_PATH,
   RULES_CREATE_PATH,
   RULES_PATH,
   SERVER_APP_ID,
@@ -165,6 +167,18 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
       {
         ...getSecuritySolutionLink<SecurityPageName>('dashboard'),
         features: [FEATURE.general],
+      },
+      {
+        id: SecurityPageName.entityAnalytics,
+        title: ENTITY_ANALYTICS,
+        path: ENTITY_ANALYTICS_PATH,
+        features: [FEATURE.general],
+        isPremium: true,
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.entityAnalytics', {
+            defaultMessage: 'Entity Analytics',
+          }),
+        ],
       },
     ],
   },
@@ -281,7 +295,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'Host risk',
             }),
             path: `${HOSTS_PATH}/hostRisk`,
-            experimentalKey: 'riskyHostsEnabled',
           },
           {
             id: SecurityPageName.sessions,
@@ -371,7 +384,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
               defaultMessage: 'User risk',
             }),
             path: `${USERS_PATH}/userRisk`,
-            experimentalKey: 'riskyUsersEnabled',
           },
           {
             id: SecurityPageName.usersEvents,
@@ -499,13 +511,13 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         path: BLOCKLIST_PATH,
       },
       {
-        ...getSecuritySolutionLink<SecurityPageName>('benchmarks'),
-        deepLinks: [getSecuritySolutionLink<SecurityPageName>('rules')],
+        id: SecurityPageName.responseActionsHistory,
+        title: RESPONSE_ACTIONS_HISTORY,
+        path: RESPONSE_ACTIONS_HISTORY_PATH,
       },
       {
-        id: SecurityPageName.responseActions,
-        title: RESPONSE_ACTIONS,
-        path: RESPONSE_ACTIONS_PATH,
+        ...getSecuritySolutionLink<SecurityPageName>('benchmarks'),
+        deepLinks: [getSecuritySolutionLink<SecurityPageName>('rules')],
       },
     ],
   },

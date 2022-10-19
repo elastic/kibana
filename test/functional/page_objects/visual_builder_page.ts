@@ -265,7 +265,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async applyChanges() {
-    await this.testSubjects.clickWhenNotDisabled('applyBtn');
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry('applyBtn');
   }
 
   /**
@@ -403,6 +403,27 @@ export class VisualBuilderPageObject extends FtrService {
     await this.retry.waitFor('new agg is added', async () => {
       const currentAggs = await this.testSubjects.findAll('aggSelector');
       return currentAggs.length > prevAggs.length;
+    });
+  }
+
+  public async createNewAggSeries(nth = 0) {
+    const prevAggs = await this.testSubjects.findAll('draggable');
+    const elements = await this.testSubjects.findAll('AddAddBtn');
+    await elements[nth].click();
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    await this.retry.waitFor('new agg series is added', async () => {
+      const currentAggs = await this.testSubjects.findAll('draggable');
+      return currentAggs.length > prevAggs.length;
+    });
+  }
+
+  public async createColorRule(nth = 0) {
+    const elements = await this.testSubjects.findAll('AddAddBtn');
+    await elements[nth].click();
+    await this.visChart.waitForVisualizationRenderingStabilized();
+    await this.retry.waitFor('new color rule is added', async () => {
+      const currentAddButtons = await this.testSubjects.findAll('AddAddBtn');
+      return currentAddButtons.length > elements.length;
     });
   }
 
@@ -619,6 +640,11 @@ export class VisualBuilderPageObject extends FtrService {
     await input.type(labelName);
   }
 
+  public async setStaticValue(value: number, nth: number = 0): Promise<void> {
+    const input = (await this.testSubjects.findAll('staticValue'))[nth];
+    await input.type(value.toString());
+  }
+
   /**
    * set field for type of aggregation
    *
@@ -682,16 +708,16 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async setColorRuleOperator(condition: string): Promise<void> {
     await this.retry.try(async () => {
-      await this.comboBox.clearInputField('colorRuleOperator');
-      await this.comboBox.set('colorRuleOperator', condition);
+      await this.comboBox.clearLastInputField('colorRuleOperator');
+      await this.comboBox.setForLastInput('colorRuleOperator', condition);
     });
   }
 
-  public async setColorRuleValue(value: number): Promise<void> {
+  public async setColorRuleValue(value: number, nth: number = 0): Promise<void> {
     await this.retry.try(async () => {
-      const colorRuleValueInput = await this.find.byCssSelector(
-        '[data-test-subj="colorRuleValue"]'
-      );
+      const colorRuleValueInput = (
+        await this.find.allByCssSelector('[data-test-subj="colorRuleValue"]')
+      )[nth];
       await colorRuleValueInput.type(value.toString());
     });
   }
