@@ -9,13 +9,16 @@ import { SerializedSignal } from '@kbn/apm-synthtrace';
 
 export const synthtrace = {
   index: (signals: SignalIterable<Fields>) => {
+    const kibanaVersion: string = Cypress.env('KIBANA_VERSION');
+    const kibanaMajor = parseInt(kibanaVersion.split('.')[0], 10);
     const transferableSignals = signals
       .toArray()
       .map(
-        (s) => new SerializedSignal(s.enrichWithVersionInformation('8.6.0', 8))
+        (s) =>
+          new SerializedSignal(
+            s.enrichWithVersionInformation(kibanaVersion, kibanaMajor)
+          )
       );
-    // eslint-disable-next-line no-console
-    console.log(transferableSignals);
     return cy.task('synthtrace:index', transferableSignals);
   },
   clean: () => cy.task('synthtrace:clean'),

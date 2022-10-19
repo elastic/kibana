@@ -66,6 +66,7 @@ export async function cypressTestRunner({ getService }: FtrProviderContext) {
     },
     env: {
       KIBANA_URL: kibanaUrl,
+      KIBANA_VERSION: kibanaVersion,
       ES_NODE: esNode,
       ES_REQUEST_TIMEOUT: esRequestTimeout,
       TEST_CLOUD: process.env.TEST_CLOUD,
