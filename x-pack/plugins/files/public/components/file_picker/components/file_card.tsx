@@ -91,18 +91,19 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
           </EuiText>
           <EuiText color="subdued" size="xs">
             {numeral(file.size).format('0[.]0 b')}
+            {file.extension && (
+              <>
+                &nbsp; &#183; &nbsp;
+                <span
+                  css={css`
+                    text-transform: uppercase;
+                  `}
+                >
+                  {file.extension}
+                </span>
+              </>
+            )}
           </EuiText>
-          {file.extension ? (
-            <EuiText
-              css={css`
-                text-transform: uppercase;
-              `}
-              color="subdued"
-              size="xs"
-            >
-              {file.extension}
-            </EuiText>
-          ) : null}
         </>
       }
       hasBorder
