@@ -45,8 +45,8 @@ export const convertToLens: ConvertHeatmapToLensVisualization = async (vis, time
 
   const { getColumnsFromVis } = await convertToLensModule;
   const layers = getColumnsFromVis(vis, timefilter, dataView, {
-    buckets: ['segment', 'group'],
-    splits: [],
+    buckets: ['segment'],
+    splits: ['group'],
     unsupported: ['split_row', 'split_column'],
   });
 
@@ -56,9 +56,7 @@ export const convertToLens: ConvertHeatmapToLensVisualization = async (vis, time
 
   const [layerConfig] = layers;
 
-  // doesn't support more than three split slice levels
-  // doesn't support pie without at least one split slice
-  if (layerConfig.buckets.all.length > 3 || !layerConfig.buckets.all.length) {
+  if (!layerConfig.buckets.all.length) {
     return null;
   }
 
@@ -75,7 +73,7 @@ export const convertToLens: ConvertHeatmapToLensVisualization = async (vis, time
         columnOrder: [],
       },
     ],
-    configuration: getConfiguration(),
+    configuration: getConfiguration(layerId, vis, layerConfig),
     indexPatternIds: [indexPatternId],
   };
 };

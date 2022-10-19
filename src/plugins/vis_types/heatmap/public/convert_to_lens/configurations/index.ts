@@ -6,6 +6,45 @@
  * Side Public License, v 1.
  */
 
-export const getConfiguration = () => {
-  return {} as any;
+import { Column, HeatmapConfiguration } from '@kbn/visualizations-plugin/common';
+import { Vis } from '@kbn/visualizations-plugin/public';
+import { HeatmapVisParams } from '../../types';
+
+export const getConfiguration = (
+  layerId: string,
+  vis: Vis<HeatmapVisParams>,
+  {
+    metrics,
+    buckets,
+    columns,
+  }: {
+    metrics: string[];
+    buckets: {
+      all: string[];
+      customBuckets: Record<string, string>;
+    };
+    columns: Column[];
+  }
+): HeatmapConfiguration => {
+  const [valueAccessor] = metrics;
+  const xColumn = columns.find(({ isBucketed, isSplit }) => isBucketed && !isSplit);
+  const yColumn = columns.find(({ isBucketed, isSplit }) => isBucketed && isSplit);
+  return {
+    layerId,
+    layerType: 'data',
+    shape: 'heatmap',
+    legend: {
+      type: 'heatmap_legend',
+      isVisible: true,
+      position: 'bottom',
+    },
+    gridConfig: {
+      type: 'heatmap_legend',
+      isVisible: true,
+      position: 'bottom',
+    },
+    valueAccessor,
+    xAccessor: xColumn?.columnId,
+    yAccessor: yColumn?.columnId,
+  };
 };

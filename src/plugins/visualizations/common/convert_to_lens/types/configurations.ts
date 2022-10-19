@@ -286,6 +286,7 @@ export interface HeatmapLegendConfig {
   maxLines?: number;
   shouldTruncate?: boolean;
   legendSize?: LegendSize;
+  type: 'heatmap_legend';
 }
 export interface HeatmapArguments {
   percentageMode?: boolean;
