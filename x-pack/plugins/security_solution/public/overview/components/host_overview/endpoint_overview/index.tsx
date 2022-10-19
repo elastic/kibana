@@ -19,6 +19,7 @@ import { HostPolicyResponseActionStatus } from '../../../../../common/search_str
 import { AgentStatus } from '../../../../common/components/endpoint/agent_status';
 import { EndpointHostIsolationStatus } from '../../../../common/components/endpoint/host_isolation';
 import { ResponderContextMenuItem } from '../../../../detections/components/endpoint_responder/responder_context_menu_item';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 interface Props {
   contextID?: string;
@@ -37,6 +38,7 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
     ),
     [contextID]
   );
+  const endpointPrivileges = useUserPrivileges().endpointPrivileges;
   const descriptionLists: Readonly<DescriptionList[][]> = useMemo(
     () => [
       [
@@ -111,7 +113,7 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
           key={index}
         />
       ))}
-      { data && data.fleetAgentId &&
+      { data && data.fleetAgentId && endpointPrivileges.canAccessResponseConsole &&
        <EuiFlexGroup justifyContent='center' gutterSize='xs'>
           <EuiFlexItem grow={false}>
             <ResponderContextMenuItem endpointId={data.fleetAgentId} /> 
