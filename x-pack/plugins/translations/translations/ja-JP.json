@@ -23569,7 +23569,6 @@
     "xpack.observability.formatters.secondsTimeUnitLabel": "s",
     "xpack.observability.formatters.secondsTimeUnitLabelExtended": "秒",
     "xpack.observability.home.addData": "統合の追加",
-    "xpack.observability.hoverActions.filterForValue": "値でフィルター",
     "xpack.observability.hoverActions.filterForValueButtonLabel": "フィルタリング",
     "xpack.observability.inspector.stats.dataViewDescription": "Elasticsearchインデックスに接続したデータビューです。",
     "xpack.observability.inspector.stats.dataViewLabel": "データビュー",

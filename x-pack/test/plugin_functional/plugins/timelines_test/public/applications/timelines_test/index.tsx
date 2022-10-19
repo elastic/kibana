@@ -87,11 +87,11 @@ const AppRoot = React.memo(
                   id: 'test',
                   hasAlertsCrud: false,
                   indexPattern: { fields: [], title: 'test' },
-                  isLive: true,
+                  isLive: false,
                   isLoadingIndexPattern: false,
                   itemsPerPage: 20,
                   setQuery: () => {},
-                  tGridEventRenderedViewEnabled: false,
+                  tGridEventRenderedViewEnabled: true,
                 })) ??
                 null}
             </EuiThemeProvider>

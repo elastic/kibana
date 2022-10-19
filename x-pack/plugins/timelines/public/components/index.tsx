@@ -12,6 +12,7 @@ import type { Store } from 'redux';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
+import { Provider } from 'react-redux';
 import { TGrid as TGridComponent } from './t_grid';
 import type { TGridProps } from '../types';
 import { DragDropContextWrapper } from './drag_and_drop';
@@ -33,11 +34,14 @@ export const TGrid = (props: TGridComponent) => {
     browserFields = (tGridProps as TGridIntegratedProps).browserFields;
   }
   return (
-    <I18nProvider>
-      <DragDropContextWrapper browserFields={browserFields} defaultsHeader={props.columns}>
-        <TGridComponent {...tGridProps} />
-      </DragDropContextWrapper>
-    </I18nProvider>
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    <Provider store={store!}>
+      <I18nProvider>
+        <DragDropContextWrapper browserFields={browserFields} defaultsHeader={props.columns}>
+          <TGridComponent {...tGridProps} />
+        </DragDropContextWrapper>
+      </I18nProvider>
+    </Provider>
   );
 };
 
