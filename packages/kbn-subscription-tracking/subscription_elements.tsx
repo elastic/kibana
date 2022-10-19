@@ -7,7 +7,14 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiLinkProps, EuiButton, EuiButtonProps } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiLinkProps,
+  EuiButton,
+  EuiButtonProps,
+  EuiButtonEmpty,
+  EuiButtonEmptyProps,
+} from '@elastic/eui';
 import { useGoToSubscription } from './use_go_to_subscription';
 import { useImpression } from './use_impression';
 import { SubscriptionContext } from './types';
@@ -47,5 +54,22 @@ export function SubscriptionButton({
     <EuiButton {...restProps} onClick={goToSubscription}>
       {children}
     </EuiButton>
+  );
+}
+
+export type SubscriptionButtonEmptyProps = EuiButtonEmptyProps & CommonProps;
+
+export function SubscriptionButtonEmpty({
+  subscriptionContext,
+  children,
+  ...restProps
+}: SubscriptionButtonEmptyProps) {
+  const goToSubscription = useGoToSubscription({ subscriptionContext });
+  useImpression(subscriptionContext);
+
+  return (
+    <EuiButtonEmpty {...restProps} onClick={goToSubscription}>
+      {children}
+    </EuiButtonEmpty>
   );
 }

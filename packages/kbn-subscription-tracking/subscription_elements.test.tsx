@@ -8,7 +8,11 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { SubscriptionLink, SubscriptionButton } from './subscription_elements';
+import {
+  SubscriptionLink,
+  SubscriptionButton,
+  SubscriptionButtonEmpty,
+} from './subscription_elements';
 import { SubscriptionTrackingProvider } from './services';
 import { EVENT_NAMES, Services, SubscriptionContext } from './types';
 import { coolDownTimeMs, resetCoolDown } from './use_impression';
@@ -48,7 +52,7 @@ describe('SubscriptionElements', () => {
     jest.useRealTimers();
   });
 
-  [SubscriptionButton, SubscriptionLink].forEach((SubscriptionElement) => {
+  [SubscriptionButton, SubscriptionLink, SubscriptionButtonEmpty].forEach((SubscriptionElement) => {
     describe(SubscriptionElement.name, () => {
       beforeEach(reset);
 
