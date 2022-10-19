@@ -27,7 +27,7 @@ image::maps/images/asset-tracking-tutorial/construction_zones.png[]
 
 [float]
 === Part 1: Ingest the Portland bus data
-To get to the fun of visualizing and alerting on Portland buses, you must first add the 'Custom API' integration to an Elastic Agent policy to get the TriMet Portland bus data into {es}.
+To get to the fun of visualizing and alerting on Portland buses, you must first add the *Custom API* integration to an Elastic Agent policy to get the TriMet Portland bus data into {es}.
 
 [float]
 ==== Step 1: Set up an Elasticsearch index
