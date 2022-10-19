@@ -9,7 +9,6 @@ import { useCallback, useState } from 'react';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import { TimelineId } from '../../../../../common/types/timeline';
-import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import type { inputsModel } from '../../../../common/store';
 
 interface UseExceptionFlyoutProps {
