@@ -98,7 +98,7 @@ export const DetailsSummaryTab = React.memo(
     const { DetailsPanel, openHostDetailsPanel, openUserDetailsPanel } = useDetailPanel({
       isFlyoutView: true,
       sourcererScope: SourcererScopeName.detections,
-      timelineId: TimelineId.detectionsAlertDetailsPage,
+      scopeId: TimelineId.detectionsAlertDetailsPage,
     });
 
     const renderHostActions = useCallback(

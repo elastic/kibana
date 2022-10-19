@@ -41,7 +41,7 @@ export const AlertRenderer = React.memo(({ dataAsNestedObject }: AlertRendererPr
             {renderer.renderRow({
               data: dataAsNestedObject,
               isDraggable: false,
-              timelineId: TimelineId.detectionsAlertDetailsPage,
+              scopeId: TimelineId.detectionsAlertDetailsPage,
             })}
           </RendererContainer>
         </div>
