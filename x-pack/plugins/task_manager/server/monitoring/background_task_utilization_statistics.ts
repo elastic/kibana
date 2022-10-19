@@ -142,7 +142,7 @@ export function createBackgroundTaskUtilizationAggregator(
         Pick<BackgroundTaskUtilizationStat, 'recurring'>
       ]) => {
         return {
-          key: 'runtime',
+          key: 'utilization',
           value: {
             ...adhoc,
             ...recurring,
