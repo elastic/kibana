@@ -6,6 +6,7 @@
   "requiredPlugins": [
     "charts",
     "data",
+    "dataViews",
     "embeddable",
     "inspector",
     "fieldFormats",
