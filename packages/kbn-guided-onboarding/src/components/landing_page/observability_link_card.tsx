@@ -34,7 +34,7 @@ const constants: LinkCardConstants = {
         'guidedOnboardingPackage.gettingStarted.linkCard.observability.cardDescription',
         {
           defaultMessage:
-            'Bring together application, infrastructure, and user data into a unified solution for end-to-end observability and alerting.',
+            'Add application, infrastructure, and user data through our pre-built integrations.',
         }
       ),
     },
