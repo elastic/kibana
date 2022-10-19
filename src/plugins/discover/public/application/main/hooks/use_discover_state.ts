@@ -51,15 +51,22 @@ export function useDiscoverState({
     () =>
       getState({
         history,
-        savedSearch,
+        savedSearch: { ...savedSearch, searchSource },
         services,
       }),
-    [history, savedSearch, services]
+    [history, savedSearch, searchSource, services]
   );
 
   const { appStateContainer, replaceUrlAppState } = stateContainer;
 
   const [state, setState] = useState(appStateContainer.getState());
+
+  useEffect(() => {
+    const unsubscribe = stateContainer.dataState.subscribe();
+    return () => {
+      unsubscribe();
+    };
+  }, [stateContainer]);
 
   /**
    * Function triggered when user changes data view in the sidebar
