@@ -400,17 +400,15 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
   }
 
   const impactDetails = [];
+
   if (explanation.anomaly_characteristics_impact !== undefined) {
     impactDetails.push({
       title: (
         <EuiToolTip
           position="left"
-          content={i18n.translate(
-            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.anomalyCharacteristicsTooltip',
-            {
-              defaultMessage:
-                'Impact of the statistical properties of the detected anomalous interval',
-            }
+          content={getImpactTooltip(
+            explanation.anomaly_characteristics_impact,
+            'anomaly_characteristics'
           )}
         >
           <span>
@@ -431,13 +429,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
       title: (
         <EuiToolTip
           position="left"
-          content={i18n.translate(
-            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip',
-            {
-              defaultMessage:
-                'The impact of the difference between actual and typical values in this bucket on the score.',
-            }
-          )}
+          content={getImpactTooltip(explanation.single_bucket_impact, 'single_bucket')}
         >
           <span>
             <FormattedMessage
@@ -456,13 +448,7 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
       title: (
         <EuiToolTip
           position="left"
-          content={i18n.translate(
-            'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multiBucketTooltip',
-            {
-              defaultMessage:
-                'The impact of the difference between actual and typical values in the past 12 buckets on the score.',
-            }
-          )}
+          content={getImpactTooltip(explanation.multi_bucket_impact, 'multi_bucket')}
         >
           <span>
             <FormattedMessage
@@ -626,6 +612,94 @@ function getImpactValue(score: number) {
   if (score < 6) return 3;
   if (score < 12) return 4;
   return 5;
+}
+
+const impactTooltips = {
+  anomaly_characteristics: {
+    low: i18n.translate(
+      'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.anomalyCharacteristicsTooltip.low',
+      {
+        defaultMessage:
+          'The statistical properties of the detected anomalous interval have a low impact on the score.',
+      }
+    ),
+    medium: i18n.translate(
+      'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.anomalyCharacteristicsTooltip.medium',
+      {
+        defaultMessage:
+          'The statistical properties of the detected anomalous interval have a medium impact on the score.',
+      }
+    ),
+    high: i18n.translate(
+      'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.anomalyCharacteristicsTooltip.high',
+      {
+        defaultMessage:
+          'The statistical properties of the detected anomalous interval have a high impact on the score.',
+      }
+    ),
+  },
+  single_bucket: {
+    low: i18n.translate(
+      'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip.low',
+      {
+        defaultMessage:
+          'The difference between actual and typical values in this bucket have a low impact on the score.',
+      }
+    ),
+    medium: i18n.translate(
+      'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip.medium',
+      {
+        defaultMessage:
+          'The difference between actual and typical values in this bucket have a medium impact on the score.',
+      }
+    ),
+    high: i18n.translate(
+      'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip.high',
+      {
+        defaultMessage:
+          'The difference between actual and typical values in this bucket have a high impact on the score.',
+      }
+    ),
+  },
+  multi_bucket: {
+    low: i18n.translate(
+      'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multiBucketTooltip.low',
+      {
+        defaultMessage:
+          'The difference between actual and typical values in the past 12 buckets have a low impact on the score.',
+      }
+    ),
+    medium: i18n.translate(
+      'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multiBucketTooltip.medium',
+      {
+        defaultMessage:
+          'The difference between actual and typical values in the past 12 buckets have a medium impact on the score.',
+      }
+    ),
+    high: i18n.translate(
+      'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multiBucketTooltip.high',
+      {
+        defaultMessage:
+          'The difference between actual and typical values in the past 12 buckets have a high impact on the score.',
+      }
+    ),
+  },
+};
+
+function getImpactTooltip(
+  score: number,
+  type: 'anomaly_characteristics' | 'single_bucket' | 'multi_bucket'
+) {
+  const value = getImpactValue(score);
+
+  if (value < 3) {
+    return impactTooltips[type].low;
+  }
+  if (value > 3) {
+    return impactTooltips[type].high;
+  }
+
+  return impactTooltips[type].medium;
 }
 
 const ImpactVisual: FC<{ score: number }> = ({ score }) => {
