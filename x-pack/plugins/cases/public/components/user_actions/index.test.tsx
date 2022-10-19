@@ -18,7 +18,6 @@ import {
   getUserAction,
   getHostIsolationUserAction,
   hostIsolationComment,
-  hostReleaseComment,
 } from '../../containers/mock';
 import { UserActions } from '.';
 import type { AppMockRenderer } from '../../common/mock';
@@ -423,46 +422,6 @@ describe(`UserActions`, () => {
       expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
       expect(screen.getByText('DR')).toBeInTheDocument();
       expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
-    });
-
-    it('shows a lock icon if the action is isolate', async () => {
-      const isolateAction = [getHostIsolationUserAction()];
-      const props = {
-        ...defaultProps,
-        caseUserActions: isolateAction,
-        data: { ...defaultProps.data, comments: [hostIsolationComment()] },
-      };
-
-      const wrapper = mount(
-        <TestProviders>
-          <UserActions {...props} />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        expect(
-          wrapper.find(`[data-test-subj="endpoint-action-icon"]`).first().prop('iconType')
-        ).toBe('lock');
-      });
-    });
-
-    it('shows a lockOpen icon if the action is unisolate/release', async () => {
-      const isolateAction = [getHostIsolationUserAction()];
-      const props = {
-        ...defaultProps,
-        caseUserActions: isolateAction,
-        data: { ...defaultProps.data, comments: [hostReleaseComment()] },
-      };
-
-      const wrapper = mount(
-        <TestProviders>
-          <UserActions {...props} />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        expect(
-          wrapper.find(`[data-test-subj="endpoint-action-icon"]`).first().prop('iconType')
-        ).toBe('lockOpen');
-      });
     });
   });
 });
