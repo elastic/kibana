@@ -15,12 +15,12 @@ import { AlertAttachmentContext } from '../common/contexts';
 export const getLazyOsqueryAction =
   (services: ServicesWrapperProps['services']) =>
   // eslint-disable-next-line react/display-name
-  (props: OsqueryActionProps & { ecsData: AlertEcsData }) => {
+  (props: OsqueryActionProps & { ecsData?: AlertEcsData }) => {
     const OsqueryAction = lazy(() => import('./osquery_action'));
 
     const { ecsData, ...restProps } = props;
     const renderAction = useMemo(() => {
-      if (ecsData?._id) {
+      if (ecsData && ecsData?._id) {
         return (
           <AlertAttachmentContext.Provider value={ecsData}>
             <OsqueryAction {...restProps} />

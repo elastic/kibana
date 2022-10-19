@@ -21,7 +21,7 @@ export interface OsqueryFlyoutProps {
   agentId?: string;
   defaultValues?: {};
   onClose: () => void;
-  ecsData: Ecs;
+  ecsData?: Ecs;
 }
 
 const OsqueryFlyoutComponent: React.FC<OsqueryFlyoutProps> = ({
