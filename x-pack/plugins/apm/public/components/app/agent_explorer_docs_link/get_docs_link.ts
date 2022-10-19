@@ -24,7 +24,7 @@ function getLinkDetails(agentName: AgentName): { user: 'elastic' | 'open-telemet
 		return {user: 'elastic', agent: `apm-agent-${agent}`};
 	}
 
-	return {user: 'open-telemetry', agent};
+	return {user: 'open-telemetry', agent: agent.replace('/', '-')};
 }
 
 export function getDocsLink(agentName: AgentName) {
