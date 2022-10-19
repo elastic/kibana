@@ -28,12 +28,20 @@ export const getDataSourceInfo = async (
     let indexPattern: DataView | null | undefined;
     // handle override index pattern
     if (isOverwritten) {
-      const fetchedIndexPattern = await fetchIndexPattern(overwrittenIndexPattern, dataViews);
-      indexPattern = fetchedIndexPattern.indexPattern;
-
-      if (indexPattern) {
+      if (isStringTypeIndexPattern(overwrittenIndexPattern)) {
+        indexPattern = await dataViews.create({
+          title: overwrittenIndexPattern,
+          timeFieldName: seriesTimeField,
+        });
         indexPatternId = indexPattern.id ?? '';
-        timeField = seriesTimeField ?? indexPattern.timeFieldName;
+        timeField = indexPattern.timeFieldName;
+      } else {
+        const fetchedIndexPattern = await fetchIndexPattern(overwrittenIndexPattern, dataViews);
+        indexPattern = fetchedIndexPattern.indexPattern;
+        if (indexPattern) {
+          indexPatternId = indexPattern.id ?? '';
+          timeField = seriesTimeField ?? indexPattern.timeFieldName;
+        }
       }
     }
 
