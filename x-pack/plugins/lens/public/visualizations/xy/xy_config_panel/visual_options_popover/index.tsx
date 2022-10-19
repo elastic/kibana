@@ -65,7 +65,7 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
   const isHistogramSeries = Boolean(hasHistogramSeries(dataLayers, datasourceLayers));
 
   const isValueLabelsEnabled = !hasNonBarSeries;
-  const isFittingEnabled = hasNonBarSeries;
+  const isFittingEnabled = hasNonBarSeries && !isAreaPercentage;
   const isCurveTypeEnabled = hasNonBarSeries || isAreaPercentage;
 
   const valueLabelsDisabledReason = getValueLabelDisableReason({
