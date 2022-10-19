@@ -66,7 +66,7 @@ export const convertToLens: ConvertHeatmapToLensVisualization = async (vis, time
 
   const indexPatternId = dataView.id!;
   return {
-    type: 'lnsPie',
+    type: 'lnsHeatmap',
     layers: [
       {
         indexPatternId,
