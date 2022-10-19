@@ -77,10 +77,10 @@ describe('Event Details Overview Cards', () => {
 
 const props = {
   handleOnEventClosed: jest.fn(),
-  contextId: 'detections-page',
+  contextId: 'alerts-page',
   eventId: 'testId',
   indexName: 'testIndex',
-  timelineId: 'page',
+  scopeId: 'page',
   data: [
     {
       category: 'kibana',

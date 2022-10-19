@@ -6,8 +6,8 @@
  */
 
 import { getLegacyMetricVisualization } from './visualization';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { LegacyMetricState } from '../../../common/types';
-import { layerTypes } from '../../../common';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { generateId } from '../../id_generator';
 import { DatasourcePublicAPI, FramePublicAPI } from '../../types';
@@ -21,7 +21,7 @@ function exampleState(): LegacyMetricState {
   return {
     accessor: 'a',
     layerId: 'l1',
-    layerType: layerTypes.DATA,
+    layerType: LayerTypes.DATA,
   };
 }
 
@@ -73,7 +73,7 @@ describe('metric_visualization', () => {
       expect(metricVisualization.clearLayer(exampleState(), 'l1', 'indexPattern1')).toEqual({
         accessor: undefined,
         layerId: 'l1',
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
       });
     });
   });
@@ -85,7 +85,7 @@ describe('metric_visualization', () => {
           state: {
             accessor: undefined,
             layerId: 'l1',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           },
           layerId: 'l1',
           frame: mockFrame(),
@@ -105,7 +105,7 @@ describe('metric_visualization', () => {
           state: {
             accessor: 'a',
             layerId: 'l1',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           },
           layerId: 'l1',
           frame: mockFrame(),
@@ -125,7 +125,7 @@ describe('metric_visualization', () => {
           state: {
             accessor: 'a',
             layerId: 'l1',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             palette: {
               type: 'palette',
               name: 'status',
@@ -151,7 +151,7 @@ describe('metric_visualization', () => {
           state: {
             accessor: 'a',
             layerId: 'l1',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           },
           layerId: 'l1',
           frame: mockFrame(),
@@ -175,7 +175,7 @@ describe('metric_visualization', () => {
           prevState: {
             accessor: undefined,
             layerId: 'l1',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           },
           layerId: 'l1',
           groupId: '',
@@ -185,7 +185,7 @@ describe('metric_visualization', () => {
       ).toEqual({
         accessor: 'newDimension',
         layerId: 'l1',
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
       });
     });
   });
@@ -197,7 +197,7 @@ describe('metric_visualization', () => {
           prevState: {
             accessor: 'a',
             layerId: 'l1',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           },
           layerId: 'l1',
           columnId: 'a',
@@ -206,7 +206,7 @@ describe('metric_visualization', () => {
       ).toEqual({
         accessor: undefined,
         layerId: 'l1',
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         colorMode: ColorMode.None,
         palette: undefined,
       });
@@ -218,7 +218,7 @@ describe('metric_visualization', () => {
           prevState: {
             accessor: 'a',
             layerId: 'l1',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             colorMode: ColorMode.Background,
             palette: {
               type: 'palette',
@@ -239,7 +239,7 @@ describe('metric_visualization', () => {
       ).toEqual({
         accessor: undefined,
         layerId: 'l1',
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         colorMode: ColorMode.None,
         palette: undefined,
       });
@@ -254,7 +254,7 @@ describe('metric_visualization', () => {
 
   describe('#getLayerType', () => {
     it('should return the type only if the layer is in the state', () => {
-      expect(metricVisualization.getLayerType('l1', exampleState())).toEqual(layerTypes.DATA);
+      expect(metricVisualization.getLayerType('l1', exampleState())).toEqual(LayerTypes.DATA);
       expect(metricVisualization.getLayerType('foo', exampleState())).toBeUndefined();
     });
   });
@@ -271,6 +271,7 @@ describe('metric_visualization', () => {
             label: 'shazm',
             isStaticValue: false,
             hasTimeShift: false,
+            hasReducedTimeRange: false,
           };
         },
       };
