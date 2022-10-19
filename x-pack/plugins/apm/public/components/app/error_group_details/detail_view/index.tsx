@@ -99,6 +99,7 @@ export function DetailView({ errorGroup, urlParams, kuery }: Props) {
   const traceExplorerLink = router.link('/traces/explorer', {
     query: {
       ...query,
+      showCriticalPath: false,
       query: `${ERROR_GROUP_ID}:${groupId}`,
       type: TraceSearchType.kql,
       traceId: '',

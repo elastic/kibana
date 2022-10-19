@@ -34,6 +34,8 @@ interface Props {
   serviceName?: string;
   waterfallItemId?: string;
   detailTab?: TransactionTab;
+  showCriticalPath: boolean;
+  onShowCriticalPathChange: (showCriticalPath: boolean) => void;
 }
 
 export function WaterfallWithSummary({
@@ -46,6 +48,8 @@ export function WaterfallWithSummary({
   serviceName,
   waterfallItemId,
   detailTab,
+  showCriticalPath,
+  onShowCriticalPathChange,
 }: Props) {
   const [sampleActivePage, setSampleActivePage] = useState(0);
 
@@ -139,6 +143,8 @@ export function WaterfallWithSummary({
             waterfallItemId={waterfallItemId}
             onTabClick={onTabClick}
             waterfall={waterfall}
+            showCriticalPath={showCriticalPath}
+            onShowCriticalPathChange={onShowCriticalPathChange}
           />
         </>
       )}

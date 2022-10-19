@@ -213,6 +213,7 @@ export const home = {
                   t.literal(TransactionTab.metadata),
                   t.literal(TransactionTab.logs),
                 ]),
+                showCriticalPath: toBooleanRt,
               }),
             }),
             defaults: {
@@ -223,6 +224,7 @@ export const home = {
                 traceId: '',
                 transactionId: '',
                 detailTab: TransactionTab.timeline,
+                showCriticalPath: '',
               },
             },
           },

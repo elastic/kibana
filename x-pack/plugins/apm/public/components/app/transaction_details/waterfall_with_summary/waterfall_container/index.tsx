@@ -7,24 +7,33 @@
 
 import React from 'react';
 import { keyBy } from 'lodash';
+import { EuiCheckbox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   IWaterfall,
   WaterfallLegendType,
 } from './waterfall/waterfall_helpers/waterfall_helpers';
 import { Waterfall } from './waterfall';
 import { WaterfallLegends } from './waterfall_legends';
+import { useCriticalPathEnabledSetting } from '../../../../../hooks/use_critical_path_enabled_setting';
 
 interface Props {
   waterfallItemId?: string;
   serviceName?: string;
   waterfall: IWaterfall;
+  showCriticalPath: boolean;
+  onShowCriticalPathChange: (showCriticalPath: boolean) => void;
 }
 
 export function WaterfallContainer({
   serviceName,
   waterfallItemId,
   waterfall,
+  showCriticalPath,
+  onShowCriticalPathChange,
 }: Props) {
+  const isCriticalPathEnabled = useCriticalPathEnabledSetting();
+
   if (!waterfall) {
     return null;
   }
@@ -74,9 +83,31 @@ export function WaterfallContainer({
   });
 
   return (
-    <div>
-      <WaterfallLegends legends={legendsWithFallbackLabel} type={colorBy} />
-      <Waterfall waterfallItemId={waterfallItemId} waterfall={waterfall} />
-    </div>
+    <EuiFlexGroup direction="column">
+      {isCriticalPathEnabled ? (
+        <EuiFlexItem>
+          <EuiCheckbox
+            id="showCriticalPath"
+            label={i18n.translate('xpack.apm.waterfall.showCriticalPath', {
+              defaultMessage: 'Show critical path',
+            })}
+            checked={showCriticalPath}
+            onChange={(event) => {
+              onShowCriticalPathChange(event.target.checked);
+            }}
+          />
+        </EuiFlexItem>
+      ) : null}
+      <EuiFlexItem>
+        <WaterfallLegends legends={legendsWithFallbackLabel} type={colorBy} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <Waterfall
+          showCriticalPath={showCriticalPath}
+          waterfallItemId={waterfallItemId}
+          waterfall={waterfall}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

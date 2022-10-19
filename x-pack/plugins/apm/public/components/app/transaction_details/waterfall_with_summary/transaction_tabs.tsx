@@ -21,6 +21,8 @@ interface Props {
   serviceName?: string;
   waterfallItemId?: string;
   onTabClick: (tab: TransactionTab) => void;
+  showCriticalPath: boolean;
+  onShowCriticalPathChange: (showCriticalPath: boolean) => void;
 }
 
 export function TransactionTabs({
@@ -30,6 +32,8 @@ export function TransactionTabs({
   waterfallItemId,
   serviceName,
   onTabClick,
+  showCriticalPath,
+  onShowCriticalPathChange,
 }: Props) {
   const tabs = [timelineTab, metadataTab, logsTab];
   const currentTab = tabs.find(({ key }) => key === detailTab) ?? timelineTab;
@@ -60,6 +64,8 @@ export function TransactionTabs({
         serviceName={serviceName}
         waterfall={waterfall}
         transaction={transaction}
+        showCriticalPath={showCriticalPath}
+        onShowCriticalPathChange={onShowCriticalPathChange}
       />
     </React.Fragment>
   );
@@ -99,16 +105,22 @@ function TimelineTabContent({
   waterfall,
   waterfallItemId,
   serviceName,
+  showCriticalPath,
+  onShowCriticalPathChange,
 }: {
   waterfallItemId?: string;
   serviceName?: string;
   waterfall: IWaterfall;
+  showCriticalPath: boolean;
+  onShowCriticalPathChange: (showCriticalPath: boolean) => void;
 }) {
   return (
     <WaterfallContainer
       waterfallItemId={waterfallItemId}
       serviceName={serviceName}
       waterfall={waterfall}
+      showCriticalPath={showCriticalPath}
+      onShowCriticalPathChange={onShowCriticalPathChange}
     />
   );
 }

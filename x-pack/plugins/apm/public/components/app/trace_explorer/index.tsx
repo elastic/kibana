@@ -37,6 +37,7 @@ export function TraceExplorer() {
       transactionId,
       waterfallItemId,
       detailTab,
+      showCriticalPath,
     },
   } = useApmParams('/traces/explorer');
 
@@ -150,6 +151,14 @@ export function TraceExplorer() {
           detailTab={detailTab}
           waterfallItemId={waterfallItemId}
           serviceName={waterfall.entryWaterfallTransaction?.doc.service.name}
+          showCriticalPath={showCriticalPath}
+          onShowCriticalPathChange={(nextShowCriticalPath) => {
+            push(history, {
+              query: {
+                showCriticalPath: nextShowCriticalPath ? 'true' : 'false',
+              },
+            });
+          }}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -22,3 +22,4 @@ export const apmLabsButton = 'observability:apmLabsButton';
 export const enableInfrastructureHostsView = 'observability:enableInfrastructureHostsView';
 export const enableAwsLambdaMetrics = 'observability:enableAwsLambdaMetrics';
 export const enableServiceMetrics = 'observability:apmEnableServiceMetrics';
+export const enableCriticalPath = 'observability:apmEnableCriticalPath';

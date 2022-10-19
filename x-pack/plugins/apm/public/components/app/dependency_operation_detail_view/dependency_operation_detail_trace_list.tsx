@@ -84,6 +84,7 @@ export function DependencyOperationDetailTraceList() {
             traceId,
             transactionId,
             transactionType,
+            showCriticalPath: false,
           },
         })
       : router.link('/link-to/trace/{traceId}', {

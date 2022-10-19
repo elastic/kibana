@@ -58,6 +58,7 @@ export function EdgeContents({ elementData }: ContentsProps) {
       traceId: '',
       transactionId: '',
       detailTab: TransactionTab.timeline,
+      showCriticalPath: false,
     },
   });
 
