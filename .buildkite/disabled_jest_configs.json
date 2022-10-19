@@ -1,3 +1,4 @@
 [
-  "x-pack/plugins/watcher/jest.config.js"
+  "x-pack/plugins/watcher/jest.config.js",
+  "x-pack/plugins/security_solution/public/timelines/jest.config.js"
 ]
