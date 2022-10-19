@@ -16,7 +16,7 @@ import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
-import { parseStreamApiResponse } from './add_monitor_project';
+import { parseStreamApiResponse } from './add_monitor_project_legacy';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('DeleteProjectMonitors', function () {
@@ -399,8 +399,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             savedObjectsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            '-' +
+            testPolicyId
         );
         expect(packagePolicy.policy_id).to.be(testPolicyId);
 
@@ -431,8 +431,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             savedObjectsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            '-' +
+            testPolicyId
         );
         expect(packagePolicy2).to.be(undefined);
       } finally {
