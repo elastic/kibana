@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationsTermsAggregationOrder } from '@elastic/elasticsearch/lib/api/types';
+import { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
 import {
   kqlQuery,
   rangeQuery,
@@ -59,7 +59,7 @@ export async function getErrorGroupMainStatistics({
 
   const maxTimestampAggKey = 'max_timestamp';
 
-  const order: AggregationsTermsAggregationOrder = sortByLatestOccurrence
+  const order: AggregationsAggregateOrder = sortByLatestOccurrence
     ? { [maxTimestampAggKey]: sortDirection }
     : { _count: sortDirection };
 
