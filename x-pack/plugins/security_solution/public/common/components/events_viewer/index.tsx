@@ -63,7 +63,7 @@ import type {
   RowRenderer,
   SortColumnTimeline,
 } from '../../../../common/types/timeline';
-import { TimelineTabs, TimelineId } from '../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../common/types/timeline';
 import { APP_UI_ID } from '../../../../common/constants';
 import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -406,13 +406,13 @@ const StatefulEventsViewerComponent: React.FC<StatefulEventsViewerProps> = ({
   const setQuery = useCallback(
     (inspect, loading, refetch) => {
       dispatch(inputsActions.setQuery({ id, inputId: 'global', inspect, loading, refetch }));
-        inputsActions.setQuery({
-          id: tableId,
-          inputId: InputsModelId.global,
-          inspect,
-          loading,
-          refetch,
-        })
+      inputsActions.setQuery({
+        id: tableId,
+        inputId: InputsModelId.global,
+        inspect,
+        loading,
+        refetch,
+      });
     },
     [dispatch, tableId]
   );
@@ -740,7 +740,7 @@ const StatefulEventsViewerComponent: React.FC<StatefulEventsViewerProps> = ({
                   fieldBrowserOptions,
                   filters: globalFilters,
                   filterStatus: currentFilter,
-            getRowRenderer,
+                  getRowRenderer,
                   globalFullScreen,
                   hasAlertsCrud,
                   id,

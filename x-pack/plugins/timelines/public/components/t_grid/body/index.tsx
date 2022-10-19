@@ -848,8 +848,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               ref={dataGridRef}
             />
           </EuiDataGridContainer>
-              getRowRenderer={getRowRenderer}
-              timelineId={id}
+          getRowRenderer={getRowRenderer}
+          timelineId={id}
         </StatefulEventContext.Provider>
       </>
     );

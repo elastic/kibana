@@ -10,7 +10,7 @@ import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
 } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
@@ -21,7 +21,7 @@ import styled from 'styled-components';
 
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
-import { Ecs } from '../../../../common/ecs';
+import type { Ecs } from '../../../../common/ecs';
 import type { TimelineItem } from '../../../../common/search_strategy';
 import type { RowRenderer } from '../../../../common/types';
 import { RuleName } from '../rule_name';
