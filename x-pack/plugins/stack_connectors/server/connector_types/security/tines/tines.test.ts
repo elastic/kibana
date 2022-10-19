@@ -6,12 +6,9 @@
  */
 
 import axios, { AxiosInstance } from 'axios';
-import crypto from 'crypto';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
 import { TinesConnector } from './tines';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { TINES_CONNECTOR_ID } from '../../../../common/connector_types/security/tines/constants';
