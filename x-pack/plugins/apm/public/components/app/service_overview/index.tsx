@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiFlexGroupProps } from '@elastic/eui';
 import { isMobileAgentName } from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -15,8 +16,6 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { ServiceOverviewCharts } from './service_overview_charts/service_overview_charts';
 import { ServiceOverviewMobileCharts } from './service_overview_charts/service_oveview_mobile_charts';
-
-type RowDirection = 'column' | 'row';
 
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
@@ -42,7 +41,9 @@ export function ServiceOverview() {
   const nonLatencyChartHeight = isSingleColumn
     ? latencyChartHeight
     : chartHeight;
-  const rowDirection: RowDirection = isSingleColumn ? 'column' : 'row';
+  const rowDirection: EuiFlexGroupProps['direction'] = isSingleColumn
+    ? 'column'
+    : 'row';
 
   const isMobileAgent = isMobileAgentName(agentName);
 
