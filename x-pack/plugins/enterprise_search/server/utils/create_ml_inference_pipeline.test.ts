@@ -37,6 +37,9 @@ describe('createMlInferencePipeline util function', () => {
     Promise.resolve({
       trained_model_configs: [
         {
+          inference_config: {
+            ner: {},
+          },
           input: {
             field_names: ['target-field'],
           },
