@@ -43,7 +43,7 @@ describe('filterByAgent', () => {
 
   describe('options per agent', () => {
     it('go', () => {
-      expect(getSettingKeysForAgent('go')).toEqual([
+      expect(getSettingKeysForAgent('go')).toEqual(expect.arrayContaining([
         'capture_body',
         'capture_headers',
         'log_level',
@@ -54,11 +54,11 @@ describe('filterByAgent', () => {
         'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
-      ]);
+      ]));
     });
 
     it('java', () => {
-      expect(getSettingKeysForAgent('java')).toEqual([
+      expect(getSettingKeysForAgent('java')).toEqual(expect.arrayContaining([
         'api_request_size',
         'api_request_time',
         'capture_body',
@@ -84,34 +84,34 @@ describe('filterByAgent', () => {
         'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
-      ]);
+      ]));
     });
 
     it('js-base', () => {
-      expect(getSettingKeysForAgent('js-base')).toEqual([
+      expect(getSettingKeysForAgent('js-base')).toEqual(expect.arrayContaining([
         'transaction_sample_rate',
-      ]);
+      ]));
     });
 
     it('rum-js', () => {
-      expect(getSettingKeysForAgent('rum-js')).toEqual([
+      expect(getSettingKeysForAgent('rum-js')).toEqual(expect.arrayContaining([
         'transaction_sample_rate',
-      ]);
+      ]));
     });
 
     it('nodejs', () => {
-      expect(getSettingKeysForAgent('nodejs')).toEqual([
+      expect(getSettingKeysForAgent('nodejs')).toEqual(expect.arrayContaining([
         'capture_body',
         'log_level',
         'sanitize_field_names',
         'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
-      ]);
+      ]));
     });
 
     it('python', () => {
-      expect(getSettingKeysForAgent('python')).toEqual([
+      expect(getSettingKeysForAgent('python')).toEqual(expect.arrayContaining([
         'api_request_size',
         'api_request_time',
         'capture_body',
@@ -123,11 +123,11 @@ describe('filterByAgent', () => {
         'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
-      ]);
+      ]));
     });
 
     it('dotnet', () => {
-      expect(getSettingKeysForAgent('dotnet')).toEqual([
+      expect(getSettingKeysForAgent('dotnet')).toEqual(expect.arrayContaining([
         'capture_body',
         'capture_headers',
         'log_level',
@@ -138,11 +138,11 @@ describe('filterByAgent', () => {
         'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
-      ]);
+      ]));
     });
 
     it('ruby', () => {
-      expect(getSettingKeysForAgent('ruby')).toEqual([
+      expect(getSettingKeysForAgent('ruby')).toEqual(expect.arrayContaining([
         'api_request_size',
         'api_request_time',
         'capture_body',
@@ -154,23 +154,23 @@ describe('filterByAgent', () => {
         'transaction_ignore_urls',
         'transaction_max_spans',
         'transaction_sample_rate',
-      ]);
+      ]));
     });
 
     it('php', () => {
-      expect(getSettingKeysForAgent('php')).toEqual([
+      expect(getSettingKeysForAgent('php')).toEqual(expect.arrayContaining([
         'log_level',
         'recording',
         'transaction_max_spans',
         'transaction_sample_rate',
-      ]);
+      ]));
     });
 
     it('"All" services (no agent name)', () => {
-      expect(getSettingKeysForAgent(undefined)).toEqual([
+      expect(getSettingKeysForAgent(undefined)).toEqual(expect.arrayContaining([
         'transaction_max_spans',
         'transaction_sample_rate',
-      ]);
+      ]));
     });
   });
 });
