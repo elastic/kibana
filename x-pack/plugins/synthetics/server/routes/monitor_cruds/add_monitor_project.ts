@@ -38,13 +38,12 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     savedObjectsClient,
     server,
     syntheticsMonitorClient,
-    subject,
   }): Promise<any> => {
+    const { projectName } = request.params;
+    const decodedProjectName = decodeURI(projectName);
     try {
       const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
       const spaceId = server.spaces.spacesService.getSpaceId(request);
-      const { projectName } = request.params;
-      const decodedProjectName = decodeURI(projectName);
       const { publicLocations, privateLocations } = await getAllLocations(
         server,
         syntheticsMonitorClient,
@@ -73,9 +72,8 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
         failedMonitors: pushMonitorFormatter.failedMonitors,
       };
     } catch (error) {
-      subject?.error(error);
-    } finally {
-      subject?.complete();
+      server.logger.error(`Error adding monitors to project ${decodedProjectName}`);
+      throw error;
     }
   },
 });
