@@ -12,11 +12,18 @@ import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
   httpServerMock,
+  httpServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
-import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  KibanaRequest,
+  RouteConfig,
+  SavedObjectsClientContract,
+  RequestHandler,
+  IRouter,
+} from '@kbn/core/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
@@ -204,6 +211,7 @@ export function createRouteHandlerContext(
 }
 
 export interface HttpApiTestSetupMock<P = any, Q = any, B = any> {
+  routerMock: ReturnType<typeof httpServiceMock.createRouter>;
   scopedEsClusterClientMock: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
   savedObjectClientMock: ReturnType<typeof savedObjectsClientMock.create>;
   endpointAppContextMock: EndpointAppContext;
@@ -211,6 +219,11 @@ export interface HttpApiTestSetupMock<P = any, Q = any, B = any> {
   httpHandlerContextMock: ReturnType<typeof requestContextMock.convertContext>;
   getEsClientMock: (type?: 'internalUser' | 'currentUser') => ElasticsearchClientMock;
   createRequestMock: (options?: RequestFixtureOptions<P, Q, B>) => KibanaRequest<P, Q, B>;
+  /** Retrieves the handler that was registered with the `router` for a given `method` and `path` */
+  getRegisteredRouteHandler: (
+    method: keyof Pick<IRouter, 'get' | 'put' | 'post' | 'patch' | 'delete'>,
+    path: string
+  ) => RequestHandler;
 }
 
 /**
@@ -221,6 +234,7 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
   Q,
   B
 > => {
+  const routerMock = httpServiceMock.createRouter();
   const endpointAppContextMock = createMockEndpointAppContext();
   const scopedEsClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
   const savedObjectClientMock = savedObjectsClientMock.create();
@@ -228,8 +242,25 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
     createRouteHandlerContext(scopedEsClusterClientMock, savedObjectClientMock)
   );
   const httpResponseMock = httpServerMock.createResponseFactory();
+  const getRegisteredRouteHandler: HttpApiTestSetupMock['getRegisteredRouteHandler'] = (
+    method,
+    path
+  ): RequestHandler => {
+    const methodCalls = routerMock[method].mock.calls as Array<
+      [route: RouteConfig<unknown, unknown, unknown, 'get'>, handler: RequestHandler]
+    >;
+    const handler = methodCalls.find(([routeConfig]) => routeConfig.path.startsWith(path));
+
+    if (!handler) {
+      throw new Error(`Handler for [${method}][${path}] not found`);
+    }
+
+    return handler[1];
+  };
 
   return {
+    routerMock,
+
     endpointAppContextMock,
     scopedEsClusterClientMock,
     savedObjectClientMock,
@@ -248,5 +279,7 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
         ? scopedEsClusterClientMock.asCurrentUser
         : scopedEsClusterClientMock.asInternalUser;
     },
+
+    getRegisteredRouteHandler,
   };
 };
