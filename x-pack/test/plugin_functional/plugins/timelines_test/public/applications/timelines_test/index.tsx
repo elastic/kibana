@@ -6,7 +6,7 @@
  */
 
 import { Router } from 'react-router-dom';
-import React, { useCallback, useRef } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -14,6 +14,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { EntityType } from '@kbn/timelines-plugin/common';
 
 type CoreStartTimelines = CoreStart & { data: DataPublicPluginStart };
 
@@ -49,14 +50,6 @@ const AppRoot = React.memo(
     parameters: AppMountParameters;
     timelinesPluginSetup: TimelinesUIStart | null;
   }) => {
-    const refetch = useRef();
-
-    const setRefetch = useCallback((_refetch) => {
-      refetch.current = _refetch;
-    }, []);
-
-    const hasAlertsCrudPermissions = useCallback(() => true, []);
-
     return (
       <I18nProvider>
         <Router history={parameters.history}>
@@ -64,17 +57,15 @@ const AppRoot = React.memo(
             <EuiThemeProvider>
               {(timelinesPluginSetup &&
                 timelinesPluginSetup.getTGrid &&
-                timelinesPluginSetup.getTGrid<'standalone'>({
-                  type: 'standalone',
+                timelinesPluginSetup.getTGrid<'embedded'>({
+                  type: 'embedded',
                   columns: [],
                   indexNames: [],
                   deletedEventIds: [],
                   disabledCellActions: [],
                   end: '',
                   filters: [],
-                  hasAlertsCrudPermissions,
                   itemsPerPageOptions: [1, 2, 3],
-                  loadingText: 'Loading events',
                   renderCellValue: () => <div data-test-subj="timeline-wrapper">test</div>,
                   sort: [],
                   leadingControlColumns: [],
@@ -83,12 +74,24 @@ const AppRoot = React.memo(
                     query: '',
                     language: 'kuery',
                   },
-                  setRefetch,
                   start: '',
                   rowRenderers: [],
                   runtimeMappings: {},
                   filterStatus: 'open',
                   unit: (n: number) => `${n}`,
+                  additionalFilters: [],
+                  appId: '',
+                  browserFields: {},
+                  entityType: EntityType.ALERTS,
+                  globalFullScreen: false,
+                  id: 'test',
+                  hasAlertsCrud: false,
+                  indexPattern: { fields: [], title: 'test' },
+                  isLive: true,
+                  isLoadingIndexPattern: false,
+                  itemsPerPage: 20,
+                  setQuery: () => {},
+                  tGridEventRenderedViewEnabled: false,
                 })) ??
                 null}
             </EuiThemeProvider>
