@@ -239,7 +239,6 @@ export const javaSettings: RawSettingDefinition[] = [
     includeAgents: ['java'],
   },
 
-
   {
     key: 'capture_jmx_metrics',
     type: 'text',
@@ -324,7 +323,7 @@ export const javaSettings: RawSettingDefinition[] = [
         defaultMessage:
           'When reporting exceptions,\n' +
           'un-nests the exceptions matching the wildcard pattern.\n' +
-          'This can come in handy for Spring\'s `org.springframework.web.util.NestedServletException`,\n' +
+          "This can come in handy for Spring's `org.springframework.web.util.NestedServletException`,\n" +
           'for example.',
       }
     ),

@@ -76,10 +76,14 @@ export const generalSettings: RawSettingDefinition[] = [
   {
     key: 'capture_body_content_types',
     type: 'text',
-    defaultValue: 'application/x-www-form-urlencoded*, text/*, application/json*, application/xml*',
-    label: i18n.translate('xpack.apm.agentConfig.captureBodyContentTypes.label', {
-      defaultMessage: 'Capture Body Content Types',
-    }),
+    defaultValue:
+      'application/x-www-form-urlencoded*, text/*, application/json*, application/xml*',
+    label: i18n.translate(
+      'xpack.apm.agentConfig.captureBodyContentTypes.label',
+      {
+        defaultMessage: 'Capture Body Content Types',
+      }
+    ),
     description: i18n.translate(
       'xpack.apm.agentConfig.captureBodyContentTypes.description',
       {
@@ -232,9 +236,12 @@ export const generalSettings: RawSettingDefinition[] = [
     key: 'span_compression_enabled',
     type: 'boolean',
     defaultValue: 'true',
-    label: i18n.translate('xpack.apm.agentConfig.spanCompressionEnabled.label', {
-      defaultMessage: 'Span compression enabled',
-    }),
+    label: i18n.translate(
+      'xpack.apm.agentConfig.spanCompressionEnabled.label',
+      {
+        defaultMessage: 'Span compression enabled',
+      }
+    ),
     description: i18n.translate(
       'xpack.apm.agentConfig.spanCompressionEnabled.description',
       {
@@ -251,9 +258,12 @@ export const generalSettings: RawSettingDefinition[] = [
     type: 'duration',
     defaultValue: '50ms',
     min: '0ms',
-    label: i18n.translate('xpack.apm.agentConfig.spanCompressionExactMatchMaxDuration.label', {
-      defaultMessage: 'Span compression exact match max duration',
-    }),
+    label: i18n.translate(
+      'xpack.apm.agentConfig.spanCompressionExactMatchMaxDuration.label',
+      {
+        defaultMessage: 'Span compression exact match max duration',
+      }
+    ),
     description: i18n.translate(
       'xpack.apm.agentConfig.spanCompressionExactMatchMaxDuration.description',
       {
@@ -268,9 +278,12 @@ export const generalSettings: RawSettingDefinition[] = [
     type: 'duration',
     defaultValue: '0ms',
     min: '0ms',
-    label: i18n.translate('xpack.apm.agentConfig.spanCompressionSameKindMaxDuration.label', {
-      defaultMessage: 'Span compression same kind max duration',
-    }),
+    label: i18n.translate(
+      'xpack.apm.agentConfig.spanCompressionSameKindMaxDuration.label',
+      {
+        defaultMessage: 'Span compression same kind max duration',
+      }
+    ),
     description: i18n.translate(
       'xpack.apm.agentConfig.spanCompressionSameKindMaxDuration.description',
       {
@@ -323,9 +336,12 @@ export const generalSettings: RawSettingDefinition[] = [
     validation: traceContinuationStrategyRt,
     type: 'select',
     defaultValue: 'continue',
-    label: i18n.translate('xpack.apm.agentConfig.traceContinuationStrategy.label', {
-      defaultMessage: 'Trace continuation strategy',
-    }),
+    label: i18n.translate(
+      'xpack.apm.agentConfig.traceContinuationStrategy.label',
+      {
+        defaultMessage: 'Trace continuation strategy',
+      }
+    ),
     description: i18n.translate(
       'xpack.apm.agentConfig.traceContinuationStrategy.description',
       {
@@ -336,9 +352,9 @@ export const generalSettings: RawSettingDefinition[] = [
           '* An Elastic-monitored service is publicly exposed, and does not want tracing data (trace-ids, sampling decisions) to possibly be spoofed by user requests.\n' +
           '\n' +
           'Valid values are:\n' +
-          '* \'continue\': The default behavior. An incoming `traceparent` value is used to continue the trace and determine the sampling decision.\n' +
-          '* \'restart\': Always ignores the `traceparent` header of incoming requests. A new trace-id will be generated and the sampling decision will be made based on transaction_sample_rate. A span link will be made to the incoming `traceparent`.\n' +
-          '* \'restart_external\': If an incoming request includes the `es` vendor flag in `tracestate`, then any `traceparent` will be considered internal and will be handled as described for \'continue\' above. Otherwise, any `traceparent` is considered external and will be handled as described for \'restart\' above.\n' +
+          "* 'continue': The default behavior. An incoming `traceparent` value is used to continue the trace and determine the sampling decision.\n" +
+          "* 'restart': Always ignores the `traceparent` header of incoming requests. A new trace-id will be generated and the sampling decision will be made based on transaction_sample_rate. A span link will be made to the incoming `traceparent`.\n" +
+          "* 'restart_external': If an incoming request includes the `es` vendor flag in `tracestate`, then any `traceparent` will be considered internal and will be handled as described for 'continue' above. Otherwise, any `traceparent` is considered external and will be handled as described for 'restart' above.\n" +
           '\n' +
           'Starting with Elastic Observability 8.2, span links are visible in trace views.\n' +
           '\n' +
@@ -411,9 +427,12 @@ export const generalSettings: RawSettingDefinition[] = [
     key: 'transaction_ignore_user_agents',
     type: 'text',
     defaultValue: '',
-    label: i18n.translate('xpack.apm.agentConfig.transactionIgnoreUserAgents.label', {
-      defaultMessage: 'Transaction ignore user agents',
-    }),
+    label: i18n.translate(
+      'xpack.apm.agentConfig.transactionIgnoreUserAgents.label',
+      {
+        defaultMessage: 'Transaction ignore user agents',
+      }
+    ),
     description: i18n.translate(
       'xpack.apm.agentConfig.transactionIgnoreUserAgents.description',
       {
@@ -432,9 +451,12 @@ export const generalSettings: RawSettingDefinition[] = [
     key: 'use_path_as_transaction_name',
     type: 'boolean',
     defaultValue: 'false',
-    label: i18n.translate('xpack.apm.agentConfig.usePathAsTransactionName.label', {
-      defaultMessage: 'Use path as transaction name',
-    }),
+    label: i18n.translate(
+      'xpack.apm.agentConfig.usePathAsTransactionName.label',
+      {
+        defaultMessage: 'Use path as transaction name',
+      }
+    ),
     description: i18n.translate(
       'xpack.apm.agentConfig.usePathAsTransactionName.description',
       {
@@ -491,5 +513,4 @@ export const generalSettings: RawSettingDefinition[] = [
     ),
     includeAgents: ['java', 'python', 'go', 'dotnet', 'nodejs', 'ruby'],
   },
-
 ];
