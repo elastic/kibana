@@ -14,7 +14,7 @@ describe('tracking', () => {
       expect(
         isValidContext({
           feature: 'test',
-          source: 'security::test',
+          source: 'security__test',
         })
       ).toBeTruthy();
     });
@@ -23,21 +23,21 @@ describe('tracking', () => {
       expect(
         isValidContext({
           feature: '',
-          source: 'security::',
+          source: 'security__',
         })
       ).toBeFalsy();
 
       expect(
         isValidContext({
           feature: 'test',
-          source: 'security::',
+          source: 'security__',
         })
       ).toBeFalsy();
 
       expect(
         isValidContext({
           feature: '',
-          source: 'security::test',
+          source: 'security__test',
         })
       ).toBeFalsy();
     });

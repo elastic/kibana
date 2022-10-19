@@ -8,7 +8,7 @@
 
 import { SubscriptionContext } from './types';
 
-const sourceStringRegEx = /[\w-_]+::[\w-_]+/;
+const sourceStringRegEx = /[\w-_]+__[\w-_]+/;
 export function isValidContext(context: SubscriptionContext): boolean {
   return context.feature.length > 0 && sourceStringRegEx.test(context.source);
 }

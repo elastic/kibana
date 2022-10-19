@@ -19,7 +19,7 @@ const testServices: Services = {
     registerEventType: jest.fn(),
   } as any,
 };
-const testContext: SubscriptionContext = { feature: 'test', source: 'security::test' };
+const testContext: SubscriptionContext = { feature: 'test', source: 'security__test' };
 
 const WithProviders: React.FC = ({ children }) => (
   <SubscriptionTrackingProvider
