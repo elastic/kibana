@@ -8,15 +8,16 @@
 import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
-import type { UploadedFile } from '../../../common/endpoint/types/file_storage';
-import { sendEndpointMetadataUpdate } from '../common/endpoint_metadata_services';
-import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
+import type { UploadedFile } from '../../../../common/endpoint/types/file_storage';
+import { checkInFleetAgent } from '../../common/fleet_services';
+import { sendEndpointMetadataUpdate } from '../../common/endpoint_metadata_services';
+import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
 import {
   ENDPOINT_ACTION_RESPONSES_INDEX,
   ENDPOINTS_ACTION_LIST_ROUTE,
   FILE_STORAGE_DATA_INDEX,
   FILE_STORAGE_METADATA_INDEX,
-} from '../../../common/endpoint/constants';
+} from '../../../../common/endpoint/constants';
 import type {
   ActionDetails,
   ActionListApiResponse,
@@ -26,9 +27,9 @@ import type {
   GetProcessesActionOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-} from '../../../common/endpoint/types';
-import type { EndpointActionListRequestQuery } from '../../../common/endpoint/schema/actions';
-import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
+} from '../../../../common/endpoint/types';
+import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
+import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
 
@@ -42,13 +43,33 @@ export const fetchEndpointActionList = async (
   kbn: KbnClient,
   options: EndpointActionListRequestQuery = {}
 ): Promise<ActionListApiResponse> => {
-  return (
-    await kbn.request<ActionListApiResponse>({
-      method: 'GET',
-      path: ENDPOINTS_ACTION_LIST_ROUTE,
-      query: options,
-    })
-  ).data;
+  try {
+    return (
+      await kbn.request<ActionListApiResponse>({
+        method: 'GET',
+        path: ENDPOINTS_ACTION_LIST_ROUTE,
+        query: options,
+      })
+    ).data;
+  } catch (error) {
+    // FIXME: remove once the Action List API is fixed (task #5221)
+    if (error?.response?.status === 404) {
+      return {
+        data: [],
+        total: 0,
+        page: 1,
+        pageSize: 10,
+        startDate: undefined,
+        elasticAgentIds: undefined,
+        endDate: undefined,
+        userIds: undefined,
+        commands: undefined,
+        statuses: undefined,
+      };
+    }
+
+    throw error;
+  }
 };
 
 export const sendFleetActionResponse = async (
@@ -125,26 +146,34 @@ export const sendEndpointActionResponse = async (
   // For isolate, If the response is not an error, then also send a metadata update
   if (action.command === 'isolate' && !endpointResponse.error) {
     for (const agentId of action.agents) {
-      await sendEndpointMetadataUpdate(esClient, agentId, {
-        Endpoint: {
-          state: {
-            isolation: true,
+      await Promise.all([
+        sendEndpointMetadataUpdate(esClient, agentId, {
+          Endpoint: {
+            state: {
+              isolation: true,
+            },
           },
-        },
-      });
+        }),
+
+        checkInFleetAgent(esClient, agentId),
+      ]);
     }
   }
 
   // For UnIsolate, if response is not an Error, then also send metadata update
   if (action.command === 'unisolate' && !endpointResponse.error) {
     for (const agentId of action.agents) {
-      await sendEndpointMetadataUpdate(esClient, agentId, {
-        Endpoint: {
-          state: {
-            isolation: false,
+      await Promise.all([
+        sendEndpointMetadataUpdate(esClient, agentId, {
+          Endpoint: {
+            state: {
+              isolation: false,
+            },
           },
-        },
-      });
+        }),
+
+        checkInFleetAgent(esClient, agentId),
+      ]);
     }
   }
 
