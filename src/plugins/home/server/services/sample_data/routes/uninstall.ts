@@ -8,11 +8,11 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { reportPerformanceMetricEvent, toMs } from '@kbn/ebt-tools';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { SampleDataUsageTracker } from '../usage/usage';
-import { getSampleDataInstaller } from './utils';
+import { getSampleDataInstaller, SAMPLE_DATA_UNINSTALLED_EVENT } from './utils';
 import { SampleDataInstallError } from '../errors';
 
 export function createUninstallRoute(
@@ -49,8 +49,8 @@ export function createUninstallRoute(
         usageTracker.addUninstall(request.params.id);
 
         reportPerformanceMetricEvent(analytics, {
-          eventName: 'sample_data_uninstall',
-          duration: Math.round((process.uptime() - routeStartTime) * 1000),
+          eventName: SAMPLE_DATA_UNINSTALLED_EVENT,
+          duration: toMs(process.uptime() - routeStartTime),
           key1: sampleDataset.id,
         });
         return response.noContent();

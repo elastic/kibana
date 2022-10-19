@@ -36,3 +36,10 @@ export function reportPerformanceMetricEvent(
 ) {
   analytics.reportEvent(PERFORMANCE_METRIC_EVENT_TYPE, eventData);
 }
+
+/**
+ * Converts the time returned from process.uptime() to milliseconds
+ * @param sec time in seconds
+ * @returns Time in milliseconds
+ */
+export const toMs = (sec: number) => Math.round(sec * 1000);
