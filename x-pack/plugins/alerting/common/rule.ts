@@ -32,6 +32,9 @@ export const RuleExecutionStatusValues = [
 ] as const;
 export type RuleExecutionStatuses = typeof RuleExecutionStatusValues[number];
 
+export const RuleLastRunOutcomeValues = ['succeeded', 'warning', 'failed'] as const;
+export type RuleLastRunOutcomes = typeof RuleLastRunOutcomeValues[number];
+
 export enum RuleExecutionStatusErrorReasons {
   Read = 'read',
   Decrypt = 'decrypt',
@@ -82,6 +85,18 @@ export interface RuleAggregations {
   ruleTags: string[];
 }
 
+export interface RuleLastRun {
+  outcome: RuleLastRunOutcomes;
+  warning?: RuleExecutionStatusErrorReasons | RuleExecutionStatusWarningReasons;
+  outcome_msg?: string;
+  alerts_count: {
+    active: number;
+    new: number;
+    recovered: number;
+    ignored: number;
+  };
+}
+
 export interface MappedParamsProperties {
   risk_score?: number;
   severity?: string;
@@ -116,6 +131,9 @@ export interface Rule<Params extends RuleTypeParams = never> {
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
   activeSnoozes?: string[];
   isSnoozedUntil?: Date | null;
+  last_run?: RuleLastRun | null;
+  next_run?: Date | null;
+  running: boolean;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'>;
@@ -173,17 +191,33 @@ export interface ActionVariable {
 export interface RuleMonitoringHistory extends SavedObjectAttributes {
   success: boolean;
   timestamp: number;
+  outcome: RuleLastRunOutcomes;
   duration?: number;
 }
 
-export interface RuleMonitoring extends SavedObjectAttributes {
-  execution: {
+export interface RuleMonitoringCalculatedMetrics extends SavedObjectAttributes {
+  p50?: number;
+  p95?: number;
+  p99?: number;
+  success_ratio: number;
+}
+
+export interface RuleMonitoringLastRun {
+  timestamp: Date;
+  metrics: {
+    duration?: number;
+    total_search_duration_ms?: number;
+    total_indexing_duration_ms?: number;
+    total_alerts_detected?: number;
+    total_alerts_created?: number;
+    gap_duration_s?: number;
+  };
+}
+
+export interface RuleMonitoring {
+  run: {
     history: RuleMonitoringHistory[];
-    calculated_metrics: {
-      p50?: number;
-      p95?: number;
-      p99?: number;
-      success_ratio: number;
-    };
+    calculated_metrics: RuleMonitoringCalculatedMetrics;
+    last_run: RuleMonitoringLastRun;
   };
 }

@@ -73,6 +73,7 @@ import {
   RuleSnooze,
   RuleSnoozeSchedule,
   RawAlertInstance as RawAlert,
+  RawRuleMonitoring,
 } from '../types';
 import {
   validateRuleTypeParams,
@@ -82,6 +83,10 @@ import {
   convertRuleIdsToKueryNode,
   getRuleSnoozeEndTime,
   convertEsSortToEventLogSort,
+  getDefaultRawRuleMonitoring,
+  updateMonitoring,
+  monitoringFromRaw,
+  getNextRunString,
 } from '../lib';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -111,7 +116,6 @@ import { getRuleExecutionStatusPending } from '../lib/rule_execution_status';
 import { Alert } from '../alert';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
-import { getDefaultRuleMonitoring } from '../task_runner/task_runner';
 import {
   getMappedParams,
   getModifiedField,
@@ -351,6 +355,9 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'executionStatus'
     | 'snoozeSchedule'
     | 'isSnoozedUntil'
+    | 'last_run'
+    | 'next_run'
+    | 'running'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     id?: string;
@@ -565,6 +572,7 @@ export class RulesClient {
     } = await this.extractReferences(ruleType, data.actions, validatedAlertTypeParams);
 
     const createTime = Date.now();
+    const lastRunTimestamp = new Date();
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
     const notifyWhen = getRuleNotifyWhenType(data.notifyWhen, data.throttle);
 
@@ -582,8 +590,9 @@ export class RulesClient {
       muteAll: false,
       mutedInstanceIds: [],
       notifyWhen,
-      executionStatus: getRuleExecutionStatusPending(new Date().toISOString()),
-      monitoring: getDefaultRuleMonitoring(),
+      running: false,
+      executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
+      monitoring: getDefaultRawRuleMonitoring(lastRunTimestamp.toISOString()),
     };
 
     const mappedParams = getMappedParams(updatedParams);
@@ -2298,17 +2307,29 @@ export class RulesClient {
 
     if (attributes.enabled === false) {
       const username = await this.getUserName();
+      const now = new Date();
+
+      const schedule = attributes.schedule as IntervalSchedule;
 
       const updateAttributes = this.updateMeta({
         ...attributes,
         ...(!existingApiKey && (await this.createNewAPIKeySet({ attributes, username }))),
+        ...(attributes.monitoring && {
+          monitoring: updateMonitoring<RawRuleMonitoring>({
+            monitoring: attributes.monitoring,
+            timestamp: now.toISOString(),
+            duration: 0,
+          }),
+        }),
+        running: false,
+        next_run: getNextRunString(schedule.interval),
         enabled: true,
         updatedBy: username,
-        updatedAt: new Date().toISOString(),
+        updatedAt: now.toISOString(),
         executionStatus: {
           status: 'pending',
           lastDuration: 0,
-          lastExecutionDate: new Date().toISOString(),
+          lastExecutionDate: now.toISOString(),
           error: null,
           warning: null,
         },
@@ -3134,6 +3155,8 @@ export class RulesClient {
       scheduledTaskId,
       params,
       executionStatus,
+      monitoring,
+      next_run: nextRun,
       schedule,
       actions,
       snoozeSchedule,
@@ -3185,6 +3208,8 @@ export class RulesClient {
       ...(executionStatus
         ? { executionStatus: ruleExecutionStatusFromRaw(this.logger, id, executionStatus) }
         : {}),
+      ...(monitoring ? { monitoring: monitoringFromRaw(this.logger, id, monitoring) } : {}),
+      ...(nextRun ? { next_run: new Date(nextRun) } : {}),
     };
 
     return includeLegacyId

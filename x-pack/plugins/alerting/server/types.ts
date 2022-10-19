@@ -31,7 +31,9 @@ import {
   RuleExecutionStatuses,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
+  RuleLastRunOutcomes,
   RuleNotifyWhenType,
+  RuleMonitoringHistory,
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
@@ -39,7 +41,6 @@ import {
   WithoutReservedActionGroups,
   ActionVariable,
   SanitizedRuleConfig,
-  RuleMonitoring,
   MappedParams,
   RuleSnooze,
 } from '../common';
@@ -205,6 +206,18 @@ export interface RawRuleExecutionStatus extends SavedObjectAttributes {
   };
 }
 
+export interface RawRuleLastRun extends SavedObjectAttributes {
+  outcome: RuleLastRunOutcomes;
+  warning: null | RuleExecutionStatusErrorReasons | RuleExecutionStatusWarningReasons;
+  outcome_msg: null | string;
+  alerts_count: {
+    active: number;
+    new: number;
+    recovered: number;
+    ignored: number;
+  };
+}
+
 export type PartialRule<Params extends RuleTypeParams = never> = Pick<Rule<Params>, 'id'> &
   Partial<Omit<Rule<Params>, 'id'>>;
 
@@ -247,9 +260,12 @@ export interface RawRule extends SavedObjectAttributes {
   mutedInstanceIds: string[];
   meta?: RuleMeta;
   executionStatus: RawRuleExecutionStatus;
-  monitoring?: RuleMonitoring;
+  monitoring?: RawRuleMonitoring;
   snoozeSchedule?: RuleSnooze; // Remove ? when this parameter is made available in the public API
   isSnoozedUntil?: string | null;
+  last_run?: RawRuleLastRun | null;
+  next_run?: string | null;
+  running: boolean;
 }
 
 export interface AlertingPlugin {
@@ -273,6 +289,29 @@ export interface AlertsConfigType {
 export interface InvalidatePendingApiKey {
   apiKeyId: string;
   createdAt: string;
+}
+
+export interface RawRuleMonitoring extends SavedObjectAttributes {
+  run: {
+    history: RuleMonitoringHistory[];
+    calculated_metrics: {
+      p50?: number;
+      p95?: number;
+      p99?: number;
+      success_ratio: number;
+    };
+    last_run: {
+      timestamp: string;
+      metrics: {
+        duration?: number;
+        total_search_duration_ms?: number;
+        total_indexing_duration_ms?: number;
+        total_alerts_detected?: number;
+        total_alerts_created?: number;
+        gap_duration_s?: number;
+      };
+    };
+  };
 }
 
 export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;

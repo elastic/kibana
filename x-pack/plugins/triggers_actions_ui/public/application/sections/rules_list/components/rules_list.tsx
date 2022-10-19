@@ -121,9 +121,9 @@ interface RuleTypeState {
 }
 
 export const percentileFields = {
-  [Percentiles.P50]: 'monitoring.execution.calculated_metrics.p50',
-  [Percentiles.P95]: 'monitoring.execution.calculated_metrics.p95',
-  [Percentiles.P99]: 'monitoring.execution.calculated_metrics.p99',
+  [Percentiles.P50]: 'monitoring.run.calculated_metrics.p50',
+  [Percentiles.P95]: 'monitoring.run.calculated_metrics.p95',
+  [Percentiles.P99]: 'monitoring.run.calculated_metrics.p99',
 };
 
 const initialPercentileOptions = Object.values(Percentiles).map((percentile) => ({

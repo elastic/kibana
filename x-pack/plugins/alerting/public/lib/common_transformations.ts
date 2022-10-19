@@ -5,7 +5,16 @@
  * 2.0.
  */
 import { AsApiContract } from '@kbn/actions-plugin/common';
-import { RuleExecutionStatus, Rule, RuleAction, RuleType } from '../../common';
+import {
+  RuleExecutionStatus,
+  RuleMonitoring,
+  RuleMonitoringHistory,
+  RuleMonitoringCalculatedMetrics,
+  RuleMonitoringLastRun,
+  Rule,
+  RuleAction,
+  RuleType,
+} from '../../common';
 
 function transformAction(input: AsApiContract<RuleAction>): RuleAction {
   const { connector_type_id: actionTypeId, ...rest } = input;
@@ -18,12 +27,34 @@ type ApiRuleExecutionStatus = Omit<AsApiContract<RuleExecutionStatus>, 'last_exe
   last_execution_date: string;
 };
 
+interface ApiRuleMonitoring {
+  run: {
+    history: RuleMonitoringHistory[];
+    calculated_metrics: RuleMonitoringCalculatedMetrics;
+    last_run: Omit<RuleMonitoringLastRun, 'timestamp'> & {
+      timestamp: string;
+    };
+  };
+}
+
 function transformExecutionStatus(input: ApiRuleExecutionStatus): RuleExecutionStatus {
   const { last_execution_date: lastExecutionDate, last_duration: lastDuration, ...rest } = input;
   return {
     lastExecutionDate: new Date(lastExecutionDate),
     lastDuration,
     ...rest,
+  };
+}
+
+function transformMonitoring(input: ApiRuleMonitoring): RuleMonitoring {
+  return {
+    run: {
+      ...input.run,
+      last_run: {
+        ...input.run.last_run,
+        timestamp: new Date(input.run.last_run.timestamp),
+      },
+    },
   };
 }
 
@@ -37,6 +68,7 @@ export type ApiRule = Omit<
   | 'updated_at'
   | 'alert_type_id'
   | 'muted_instance_ids'
+  | 'monitoring'
 > & {
   execution_status: ApiRuleExecutionStatus;
   actions: Array<AsApiContract<RuleAction>>;
@@ -44,6 +76,7 @@ export type ApiRule = Omit<
   updated_at: string;
   rule_type_id: string;
   muted_alert_ids: string[];
+  monitoring?: ApiRuleMonitoring;
 };
 
 export function transformRule(input: ApiRule): Rule {
@@ -61,6 +94,8 @@ export function transformRule(input: ApiRule): Rule {
     scheduled_task_id: scheduledTaskId,
     execution_status: executionStatusAPI,
     actions: actionsAPI,
+    next__run: nextRun,
+    monitoring: monitoring,
     ...rest
   } = input;
 
@@ -78,6 +113,8 @@ export function transformRule(input: ApiRule): Rule {
     executionStatus: transformExecutionStatus(executionStatusAPI),
     actions: actionsAPI ? actionsAPI.map((action) => transformAction(action)) : [],
     scheduledTaskId,
+    ...(nextRun ? { next_run: new Date(nextRun) } : {}),
+    ...(monitoring ? { monitoring: transformMonitoring(monitoring) } : {}),
     ...rest,
   };
 }

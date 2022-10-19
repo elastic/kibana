@@ -25,6 +25,19 @@ export {
   ruleExecutionStatusToRaw,
   ruleExecutionStatusFromRaw,
 } from './rule_execution_status';
+export {
+  lastRunFromState,
+  lastRunFromError,
+  lastRunToRaw,
+  getInitialAlertsCount,
+} from './last_run_status';
+export {
+  getDefaultRawRuleMonitoring,
+  updateMonitoring,
+  monitoringToRaw,
+  monitoringFromRaw,
+} from './monitoring';
+export { getNextRunDate, getNextRunString } from './next_run';
 export { processAlerts } from './process_alerts';
 export { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';
 export { isRuleSnoozed, getRuleSnoozeEndTime } from './is_rule_snoozed';

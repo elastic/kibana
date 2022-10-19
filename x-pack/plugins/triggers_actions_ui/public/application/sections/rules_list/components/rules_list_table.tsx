@@ -92,9 +92,9 @@ const percentileOrdinals = {
 };
 
 export const percentileFields = {
-  [Percentiles.P50]: 'monitoring.execution.calculated_metrics.p50',
-  [Percentiles.P95]: 'monitoring.execution.calculated_metrics.p95',
-  [Percentiles.P99]: 'monitoring.execution.calculated_metrics.p99',
+  [Percentiles.P50]: 'monitoring.run.calculated_metrics.p50',
+  [Percentiles.P95]: 'monitoring.run.calculated_metrics.p95',
+  [Percentiles.P99]: 'monitoring.run.calculated_metrics.p99',
 };
 
 const EMPTY_OBJECT = {};
@@ -684,7 +684,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
       },
       {
         id: 'ruleExecutionSuccessRatio',
-        field: 'monitoring.execution.calculated_metrics.success_ratio',
+        field: 'monitoring.run.calculated_metrics.success_ratio',
         width: '12%',
         selectorName: i18n.translate(
           'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.selector.successRatioTitle',
