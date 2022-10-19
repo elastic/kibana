@@ -74,34 +74,8 @@ interface ColumnCopy {
   shouldDeleteSource?: boolean;
 }
 
-export const deleteColumnInLayers = ({
-  layers,
-  source,
-}: {
-  layers: Record<string, FormBasedLayer>;
-  source: DataViewDragDropOperation;
-}) => ({
-  ...layers,
-  [source.layerId]: deleteColumn({
-    layer: layers[source.layerId],
-    columnId: source.columnId,
-    indexPattern: source.dataView,
-  }),
-});
-
-export function copyColumn({
-  layers,
-  source,
-  target,
-  shouldDeleteSource,
-}: ColumnCopy): Record<string, FormBasedLayer> {
-  const outputLayers = createCopiedColumn(layers, target, source);
-  return shouldDeleteSource
-    ? deleteColumnInLayers({
-        layers: outputLayers,
-        source,
-      })
-    : outputLayers;
+export function copyColumn({ layers, source, target }: ColumnCopy): Record<string, FormBasedLayer> {
+  return createCopiedColumn(layers, target, source);
 }
 
 function createCopiedColumn(
