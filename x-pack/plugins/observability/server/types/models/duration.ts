@@ -27,6 +27,12 @@ class Duration {
       throw new Error('invalid duration unit');
     }
   }
+
+  isShorterThan(other: Duration): boolean {
+    const otherDurationMoment = moment.duration(other.value, toMomentUnitOfTime(other.unit));
+    const currentDurationMoment = moment.duration(this.value, toMomentUnitOfTime(this.unit));
+    return currentDurationMoment.asSeconds() < otherDurationMoment.asSeconds();
+  }
 }
 
 const toMomentUnitOfTime = (unit: DurationUnit): moment.unitOfTime.Diff => {
