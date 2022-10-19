@@ -74,18 +74,19 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   const handleStepButtonClick = async (step: GuideStepStatus, stepConfig: StepConfig) => {
     if (guideState) {
       const { id, status } = step;
+
       if (status === 'ready_to_complete') {
         return await api.completeGuideStep(guideState?.guideId, id);
       }
 
-      if (status === 'active') {
-        await api.startGuideStep(guideState!.guideId, id);
-      }
       if (status === 'active' || status === 'in_progress') {
+        await api.startGuideStep(guideState!.guideId, id);
+
         if (stepConfig.location) {
           await application.navigateToApp(stepConfig.location.appID, {
             path: stepConfig.location.path,
           });
+
           if (stepConfig.manualCompletion?.readyToCompleteOnNavigation) {
             await api.completeGuideStep(guideState.guideId, id);
           }

@@ -109,7 +109,7 @@ export const GuideStep = ({
                   <EuiButton
                     onClick={() => handleButtonClick()}
                     fill
-                    data-test-subj="activeStepButtonLabel"
+                    data-test-subj="activeStepButton"
                   >
                     {getStepButtonLabel()}
                   </EuiButton>
