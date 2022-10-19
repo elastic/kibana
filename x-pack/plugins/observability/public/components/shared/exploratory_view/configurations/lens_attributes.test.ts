@@ -131,7 +131,7 @@ describe('Lens Attribute', () => {
         sourceField: '@timestamp',
       },
       ...PERCENTILE_RANKS.reduce((acc: Record<string, any>, rank, index) => {
-        acc[`y-axis-column-${index === 0 ? 'layer' + index : index}`] = {
+        acc[`y-axis-column-${index === 0 ? 'layer' + index + '-0' : index}`] = {
           customLabel: true,
           dataType: 'number',
           filter: {
@@ -153,24 +153,26 @@ describe('Lens Attribute', () => {
   });
 
   it('should return main y axis', function () {
-    expect(lnsAttr.getMainYAxis(layerConfig, 'layer0', '')).toEqual({
-      customLabel: true,
-      dataType: 'number',
-      isBucketed: false,
-      label: 'test-series',
-      operationType: 'formula',
-      params: {
-        format: {
-          id: 'percent',
-          params: {
-            decimals: 0,
+    expect(lnsAttr.getMainYAxis(layerConfig, 'layer0', '')).toEqual([
+      {
+        customLabel: true,
+        dataType: 'number',
+        isBucketed: false,
+        label: 'test-series',
+        operationType: 'formula',
+        params: {
+          format: {
+            id: 'percent',
+            params: {
+              decimals: 0,
+            },
           },
+          formula: 'count() / overall_sum(count())',
+          isFormulaBroken: false,
         },
-        formula: 'count() / overall_sum(count())',
-        isFormulaBroken: false,
+        references: ['y-axis-column-layer0X3'],
       },
-      references: ['y-axis-column-layer0X3'],
-    });
+    ]);
   });
 
   it('should return expected field type', function () {
@@ -363,13 +365,13 @@ describe('Lens Attribute', () => {
       gridlinesVisibilitySettings: { x: false, yLeft: true, yRight: true },
       layers: [
         {
-          accessors: ['y-axis-column-layer0'],
+          accessors: ['y-axis-column-layer0-0'],
           layerId: 'layer0',
           layerType: 'data',
           palette: undefined,
           seriesType: 'line',
           xAccessor: 'x-axis-column-layer0',
-          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0', axisMode: 'left' }],
+          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0-0', axisMode: 'left' }],
         },
         {
           accessors: [
@@ -474,14 +476,14 @@ describe('Lens Attribute', () => {
 
       expect(lnsAttr.visualization?.layers).toEqual([
         {
-          accessors: ['y-axis-column-layer0'],
+          accessors: ['y-axis-column-layer0-0'],
           layerId: 'layer0',
           layerType: 'data',
           palette: undefined,
           seriesType: 'line',
           splitAccessor: 'breakdown-column-layer0',
           xAccessor: 'x-axis-column-layer0',
-          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0', axisMode: 'left' }],
+          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0-0', axisMode: 'left' }],
         },
       ]);
 
@@ -489,7 +491,7 @@ describe('Lens Attribute', () => {
         columnOrder: [
           'breakdown-column-layer0',
           'x-axis-column-layer0',
-          'y-axis-column-layer0',
+          'y-axis-column-layer0-0',
           'y-axis-column-layer0X0',
           'y-axis-column-layer0X1',
           'y-axis-column-layer0X2',
@@ -540,7 +542,7 @@ describe('Lens Attribute', () => {
             scale: 'interval',
             sourceField: LCP_FIELD,
           },
-          'y-axis-column-layer0': {
+          'y-axis-column-layer0-0': {
             customLabel: true,
             dataType: 'number',
             filter: {

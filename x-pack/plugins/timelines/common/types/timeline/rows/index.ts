@@ -15,11 +15,11 @@ export interface RowRenderer {
     contextId,
     data,
     isDraggable,
-    timelineId,
+    scopeId,
   }: {
     contextId?: string;
     data: Ecs;
     isDraggable: boolean;
-    timelineId: string;
+    scopeId: string;
   }) => React.ReactNode;
 }
