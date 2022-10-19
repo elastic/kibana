@@ -131,14 +131,14 @@ interface MLInferenceProcessorsValues {
   mappingData: typeof MappingsApiLogic.values.data;
   mappingStatus: Status;
   mlInferencePipeline?: MlInferencePipeline;
-  mlModelsData: typeof MLModelsApiLogic.values.data;
+  mlModelsData: TrainedModelConfigResponse[];
   mlModelsStatus: Status;
   simulatePipelineData: typeof SimulateMlInterfacePipelineApiLogic.values.data;
   simulatePipelineErrors: string[];
   simulatePipelineResult: IngestSimulateResponse;
   simulatePipelineStatus: Status;
   sourceFields: string[] | undefined;
-  supportedMLModels: typeof MLModelsApiLogic.values.data;
+  supportedMLModels: TrainedModelConfigResponse[];
 }
 
 export const MLInferenceLogic = kea<

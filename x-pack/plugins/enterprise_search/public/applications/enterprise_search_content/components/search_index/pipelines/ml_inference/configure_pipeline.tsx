@@ -17,6 +17,8 @@ import {
   EuiFormRow,
   EuiLink,
   EuiSelect,
+  EuiSuperSelect,
+  EuiSuperSelectOption,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -29,6 +31,9 @@ import { docLinks } from '../../../../../shared/doc_links';
 import { IndexViewLogic } from '../../index_view_logic';
 
 import { MLInferenceLogic } from './ml_inference_logic';
+import { MlModelSelectOption } from './model_select_option';
+
+const MODEL_SELECT_PLACEHOLDER_VALUE = 'model_placeholder$$';
 
 const NoSourceFieldsError: React.FC = () => (
   <FormattedMessage
@@ -61,6 +66,22 @@ export const ConfigurePipeline: React.FC = () => {
   const models = supportedMLModels ?? [];
   const nameError = formErrors.pipelineName !== undefined && pipelineName.length > 0;
   const emptySourceFields = (sourceFields?.length ?? 0) === 0;
+
+  const modelOptions: Array<EuiSuperSelectOption<string>> = [
+    {
+      disabled: true,
+      inputDisplay: i18n.translate(
+        'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.model.placeholder',
+        { defaultMessage: 'Select a model' }
+      ),
+      value: MODEL_SELECT_PLACEHOLDER_VALUE,
+    },
+    ...models.map((model) => ({
+      dropdownDisplay: <MlModelSelectOption model={model} />,
+      inputDisplay: model.model_id,
+      value: model.model_id,
+    })),
+  ];
 
   return (
     <>
@@ -134,27 +155,19 @@ export const ConfigurePipeline: React.FC = () => {
           )}
           fullWidth
         >
-          <EuiSelect
+          <EuiSuperSelect
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectTrainedModel`}
             fullWidth
-            value={modelID}
-            options={[
-              {
-                disabled: true,
-                text: i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.model.placeholder',
-                  { defaultMessage: 'Select a model' }
-                ),
-                value: '',
-              },
-              ...models.map((m) => ({ text: m.model_id, value: m.model_id })),
-            ]}
-            onChange={(e) =>
+            hasDividers
+            itemLayoutAlign="top"
+            onChange={(value) =>
               setInferencePipelineConfiguration({
                 ...configuration,
-                modelID: e.target.value,
+                modelID: value,
               })
             }
+            options={modelOptions}
+            valueOfSelected={modelID === '' ? MODEL_SELECT_PLACEHOLDER_VALUE : modelID}
           />
         </EuiFormRow>
         <EuiSpacer />
