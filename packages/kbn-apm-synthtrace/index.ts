@@ -6,6 +6,24 @@
  * Side Public License, v 1.
  */
 
-export * from './common';
+export { timerange } from './src/dsl/timerange';
+export { apm } from './src/lib/apm';
+export { stackMonitoring } from './src/dsl/stack_monitoring';
+export { observer } from './src/dsl/apm/agent_config';
+export type { Fields } from './src/dsl/fields';
+export type { Signal } from './src/dsl/signal';
+
+export { createLogger, LogLevel } from './src/lib/utils/create_logger';
+
+export type { ApmFields, ApmException } from './src/lib/apm';
+export { apmDefaults } from './src/lib/apm';
+
+export type { SignalIterable } from './src/lib/streaming/signal_iterable';
+export { SignalArray } from './src/lib/streaming/signal_iterable';
+export { StreamProcessor } from './src/lib/streaming/stream_processor';
+export type { StreamProcessorOptions } from './src/lib/streaming/stream_processor';
+export { TransferredSignal } from './src/lib/streaming/transport/transferred_signal';
+export { SignalTransferData } from './src/lib/streaming/transport/signal_transfer_data';
+
 export { SynthtraceEsClient } from './src/lib/client/synthtrace_es_client';
 export { SynthtraceKibanaClient } from './src/lib/client/synthtrace_kibana_client';
