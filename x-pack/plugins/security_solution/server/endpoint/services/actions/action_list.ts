@@ -274,7 +274,7 @@ const getActionDetailsList = async ({
     // NOTE: `outputs` is not returned in this service because including it on a list of data
     // could result in a very large response unnecessarily. In the future, we might include
     // an option to optionally include it.
-    return {
+    const actionRecord: ActionListApiResponse['data'][number] = {
       id: action.id,
       agents: action.agents,
       hosts: action.agents.reduce<ActionDetails['hosts']>((acc, id) => {
@@ -294,6 +294,8 @@ const getActionDetailsList = async ({
       comment: action.comment,
       parameters: action.parameters,
     };
+
+    return actionRecord;
   });
 
   return { actionDetails, totalRecords };

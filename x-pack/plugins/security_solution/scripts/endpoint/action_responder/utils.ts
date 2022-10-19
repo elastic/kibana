@@ -23,8 +23,9 @@ import type {
   EndpointActionData,
   EndpointActionResponse,
   LogsEndpointActionResponse,
-  ActionResponseOutput,
   GetProcessesActionOutputContent,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
 } from '../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../common/endpoint/schema/actions';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -98,7 +99,7 @@ export const sendEndpointActionResponse = async (
       data: {
         command: action.command as EndpointActionData['command'],
         comment: '',
-        ...getOutputDataIfNeeded(action.command as EndpointActionData['command']),
+        ...getOutputDataIfNeeded(action),
       },
       started_at: action.startedAt,
     },
@@ -149,7 +150,7 @@ export const sendEndpointActionResponse = async (
 
   // For `get-file`, upload a file to ES
   if (action.command === 'get-file' && !endpointResponse.error) {
-    // Add the file's metadata
+    // Index the file's metadata
     const fileMeta = await esClient.index<UploadedFile>({
       index: FILE_STORAGE_METADATA_INDEX,
       id: `${action.id}.${action.hosts[0]}`,
@@ -169,6 +170,7 @@ export const sendEndpointActionResponse = async (
       refresh: 'wait_for',
     });
 
+    // Index the file content (just one chunk)
     await esClient.index({
       index: FILE_STORAGE_DATA_INDEX,
       id: `${fileMeta._id}.0`,
@@ -184,17 +186,42 @@ export const sendEndpointActionResponse = async (
   return endpointResponse;
 };
 
-const getOutputDataIfNeeded = (
-  command: EndpointActionData['command']
-): { output?: ActionResponseOutput } => {
-  return command === 'running-processes'
-    ? ({
+type ResponseOutput<TOutputContent extends object = object> = Pick<
+  LogsEndpointActionResponse<TOutputContent>['EndpointActions']['data'],
+  'output'
+>;
+
+const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
+  switch (action.command) {
+    case 'running-processes':
+      return {
         output: {
           type: 'json',
           content: {
             entries: endpointActionGenerator.randomResponseActionProcesses(100),
           },
         },
-      } as { output: ActionResponseOutput<GetProcessesActionOutputContent> })
-    : {};
+      } as ResponseOutput<GetProcessesActionOutputContent>;
+
+    case 'get-file':
+      return {
+        output: {
+          type: 'json',
+          content: {
+            code: 'ra_get-file-success',
+            path: (
+              action as ActionDetails<
+                ResponseActionGetFileOutputContent,
+                ResponseActionGetFileParameters
+              >
+            ).parameters?.path,
+            size: 1234,
+            zip_size: 123,
+          },
+        },
+      } as ResponseOutput<ResponseActionGetFileOutputContent>;
+
+    default:
+      return { output: undefined };
+  }
 };
