@@ -132,11 +132,6 @@ export class ProjectMonitorFormatter {
   };
 
   validatePermissions = async ({ monitor }: { monitor: ProjectMonitor }) => {
-    console.warn(
-      'this.writeIntegraitonPoliciesPermissions',
-      this.writeIntegrationPoliciesPermissions
-    );
-    console.warn('monitor.privateLocations', monitor.privateLocations);
     if (this.writeIntegrationPoliciesPermissions || (monitor.privateLocations ?? []).length === 0) {
       return;
     }
