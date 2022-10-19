@@ -84,7 +84,8 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
       throw invalidModelError();
     }
 
-    const { indexPatternId, indexPattern } = datasourceInfo;
+    const { indexPatternId, indexPattern, adHocDataViewIds } = datasourceInfo;
+    dataViewsToDrop = adHocDataViewIds;
 
     // handle multiple metrics
     const metricsColumns = getMetricsColumns(series, indexPattern!, model.series.length, {
