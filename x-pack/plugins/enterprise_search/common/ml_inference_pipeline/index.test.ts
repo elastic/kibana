@@ -16,6 +16,7 @@ import {
   generateMlInferencePipelineBody,
   getMlModelTypesForModelConfig,
   getSetProcessorForInferenceType,
+  SUPPORTED_PYTORCH_TASKS as LOCAL_SUPPORTED_PYTORCH_TASKS,
 } from '.';
 
 const mockModel: MlTrainedModelConfig = {
@@ -63,6 +64,10 @@ describe('getMlModelTypesForModelConfig lib function', () => {
 
 describe('getSetProcessorForInferenceType lib function', () => {
   const destinationField = 'dest';
+
+  it('local LOCAL_SUPPORTED_PYTORCH_TASKS matches ml plugin', () => {
+    expect(SUPPORTED_PYTORCH_TASKS).toEqual(LOCAL_SUPPORTED_PYTORCH_TASKS);
+  });
 
   it('should return expected value for TEXT_CLASSIFICATION', () => {
     const inferenceType = SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION;

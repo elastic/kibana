@@ -5,15 +5,24 @@
  * 2.0.
  */
 
-import { IngestSetProcessor } from '@elastic/elasticsearch/lib/api/types';
-import { MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-plugin/common/constants/trained_models';
+import { IngestSetProcessor, MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/types';
 
 import { MlInferencePipeline } from '../types/pipelines';
 
 // Getting an error importing this from @kbn/ml-plugin/common/constants/data_frame_analytics'
 // So defining it locally for now with a test to make sure it matches.
 export const BUILT_IN_MODEL_TAG = 'prepackaged';
+
+// Getting an error importing this from @kbn/ml-plugin/common/constants/trained_models'
+// So defining it locally for now with a test to make sure it matches.
+export const SUPPORTED_PYTORCH_TASKS = {
+  FILL_MASK: 'fill_mask',
+  NER: 'ner',
+  QUESTION_ANSWERING: 'question_answering',
+  TEXT_CLASSIFICATION: 'text_classification',
+  TEXT_EMBEDDING: 'text_embedding',
+  ZERO_SHOT_CLASSIFICATION: 'zero_shot_classification',
+} as const;
 
 export interface MlInferencePipelineParams {
   description?: string;
