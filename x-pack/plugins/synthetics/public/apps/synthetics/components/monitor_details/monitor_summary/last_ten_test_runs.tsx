@@ -119,7 +119,7 @@ export const LastTenTestRuns = () => {
   ];
 
   return (
-    <EuiPanel css={{ minHeight: 200 }}>
+    <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 200 }}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
