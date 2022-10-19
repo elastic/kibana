@@ -22,7 +22,7 @@ import { getDefaultControlColumn } from '../../../timelines/components/timeline/
 import { useLicense } from '../../hooks/use_license';
 import { TableId } from '../../../../common/types/timeline';
 export const TEST_ID = 'security_solution:sessions_viewer:sessions_view';
-import { timelineActions } from '../../../timelines/store/timeline';
+import { dataTableActions } from '../../store/data_table';
 
 export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
   query: {
@@ -108,12 +108,12 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
 
   useEffect(() => {
     dispatch(
-      timelineActions.initializeTGridSettings({
-        id: timelineId,
+      dataTableActions.createTGrid({
+        id: tableId,
         title: i18n.SESSIONS_TITLE,
       })
     );
-  }, [dispatch, timelineId]);
+  }, [dispatch, tableId]);
 
   return (
     <div data-test-subj={TEST_ID}>

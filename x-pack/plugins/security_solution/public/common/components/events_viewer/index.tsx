@@ -138,7 +138,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
         itemsPerPage,
         showCheckboxes,
         sort,
-        title,
       })
     );
 
