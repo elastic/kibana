@@ -17,6 +17,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { useSignalHelpers } from './use_signal_helpers';
 import type { State } from '../../store';
 import { createStore } from '../../store';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 describe('useSignalHelpers', () => {
   const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
@@ -53,7 +54,13 @@ describe('useSignalHelpers', () => {
       },
     };
     const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
         wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
@@ -83,7 +90,13 @@ describe('useSignalHelpers', () => {
       },
     };
     const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const store = createStore(
+      state,
+      SUB_PLUGINS_REDUCER,
+      { dataTable: tGridReducer },
+      kibanaObservable,
+      storage
+    );
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSignalHelpers(), {
         wrapper: ({ children }) => <TestProviders store={store}>{children}</TestProviders>,
