@@ -12,7 +12,6 @@ import * as i18n from '../components/t_grid/translations';
 import type { AlertStatus, BulkActionsProps } from '../../common/types/timeline';
 import { useUpdateAlertsStatus } from '../container/use_update_alerts';
 import { useAppToasts } from './use_app_toasts';
-import { STANDALONE_ID } from '../components/t_grid/standalone';
 import { useStartTransaction } from '../lib/apm/use_start_transaction';
 import { APM_USER_INTERACTIONS } from '../lib/apm/constants';
 
@@ -31,9 +30,8 @@ export const useBulkActionItems = ({
   onUpdateSuccess,
   onUpdateFailure,
   customBulkActions,
-  scopeId,
 }: BulkActionsProps) => {
-  const { updateAlertStatus } = useUpdateAlertsStatus(scopeId !== STANDALONE_ID);
+  const { updateAlertStatus } = useUpdateAlertsStatus(true);
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
 

@@ -6,12 +6,10 @@
  */
 import { ALERT_DURATION, ALERT_REASON, ALERT_STATUS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { EuiDataGridColumn } from '@elastic/eui';
-import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
 import { translations } from '../../../../config';
 
 export const addDisplayNames = (
-  column: Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
-    ColumnHeaderOptions
+  column: Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'>
 ) => {
   if (column.id === ALERT_REASON) {
     return { ...column, displayAsText: translations.alertsTable.reasonColumnDescription };

@@ -475,8 +475,6 @@
       "@kbn/global-search-test-plugin/*": ["x-pack/test/plugin_functional/plugins/global_search_test/*"],
       "@kbn/resolver-test-plugin": ["x-pack/test/plugin_functional/plugins/resolver_test"],
       "@kbn/resolver-test-plugin/*": ["x-pack/test/plugin_functional/plugins/resolver_test/*"],
-      "@kbn/timelines-test-plugin": ["x-pack/test/plugin_functional/plugins/timelines_test"],
-      "@kbn/timelines-test-plugin/*": ["x-pack/test/plugin_functional/plugins/timelines_test/*"],
       "@kbn/security-test-endpoints-plugin": ["x-pack/test/security_functional/fixtures/common/test_endpoints"],
       "@kbn/security-test-endpoints-plugin/*": ["x-pack/test/security_functional/fixtures/common/test_endpoints/*"],
       "@kbn/application-usage-test-plugin": ["x-pack/test/usage_collection/plugins/application_usage_test"],

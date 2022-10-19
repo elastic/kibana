@@ -24,8 +24,6 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
-import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
-
 export interface ObservabilityAppServices {
   application: ApplicationStart;
   cases: CasesUiStart;
@@ -42,7 +40,6 @@ export interface ObservabilityAppServices {
   stateTransfer: EmbeddableStateTransfer;
   storage: IStorageWrapper;
   theme: ThemeServiceStart;
-  timelines: TimelinesUIStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   uiSettings: IUiSettingsClient;
   isDev?: boolean;

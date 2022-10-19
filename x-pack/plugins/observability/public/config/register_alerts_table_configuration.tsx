@@ -12,9 +12,9 @@ import { casesFeatureId, observabilityFeatureId } from '../../common';
 import { useBulkAddToCaseActions } from '../hooks/use_alert_bulk_case_actions';
 import { TopAlert, useToGetInternalFlyout } from '../pages/alerts';
 import { getRenderCellValue } from '../pages/alerts/components/render_cell_value';
-import { addDisplayNames } from '../pages/alerts/containers/alerts_table_t_grid/add_display_names';
-import { columns as alertO11yColumns } from '../pages/alerts/containers/alerts_table_t_grid/alerts_table_t_grid';
-import { getRowActions } from '../pages/alerts/containers/alerts_table_t_grid/get_row_actions';
+import { addDisplayNames } from '../pages/alerts/containers/alerts_table/add_display_names';
+import { columns as alertO11yColumns } from '../pages/alerts/containers/alerts_table/default_columns';
+import { getRowActions } from '../pages/alerts/containers/alerts_table/get_row_actions';
 import type { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
 import type { ConfigSchema } from '../plugin';
 
