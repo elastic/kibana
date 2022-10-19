@@ -2732,7 +2732,6 @@
     "expressionXY.reusable.function.xyVis.errors.pointsRadiusForNonLineOrAreaChartError": "\"pointsRadius\" peut être appliqué uniquement aux graphiques linéaires ou aux graphiques en aires",
     "expressionXY.reusable.function.xyVis.errors.showPointsForNonLineOrAreaChartError": "\"showPoints\" peut être appliqué uniquement aux graphiques linéaires ou aux graphiques en aires",
     "expressionXY.reusable.function.xyVis.errors.timeMarkerForNotTimeChartsError": "Seuls les graphiques temporels peuvent avoir un repère de temps actuel",
-    "expressionXY.reusable.function.xyVis.errors.valueLabelsForNotBarsOrHistogramBarsChartsError": "L'argument \"valueLabels\" s'applique uniquement aux graphiques à barres qui ne sont pas des histogrammes.",
     "expressionXY.xAxisConfigFn.help": "Configurer la config de l'axe x du graphique xy",
     "expressionXY.xyChart.emptyXLabel": "(vide)",
     "expressionXY.xyChart.iconSelect.alertIconLabel": "Alerte",

@@ -58,17 +58,13 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
     ['area_stacked', 'area', 'line'].includes(seriesType)
   );
 
-  const hasBarNotStacked = dataLayers.some(({ seriesType }) =>
-    ['bar', 'bar_horizontal'].includes(seriesType)
-  );
-
   const hasAreaSeries = dataLayers.some(({ seriesType }) =>
     ['area_stacked', 'area', 'area_percentage_stacked'].includes(seriesType)
   );
 
   const isHistogramSeries = Boolean(hasHistogramSeries(dataLayers, datasourceLayers));
 
-  const isValueLabelsEnabled = !hasNonBarSeries && hasBarNotStacked && !isHistogramSeries;
+  const isValueLabelsEnabled = !hasNonBarSeries;
   const isFittingEnabled = hasNonBarSeries;
   const isCurveTypeEnabled = hasNonBarSeries || isAreaPercentage;
 
