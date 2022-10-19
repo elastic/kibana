@@ -47,7 +47,8 @@ default space is used.
 .Properties of assignee objects
 [%collapsible%open]
 =====
-`uid`:: A user identifier to assign to the case.
+`uid`::
+(Required, string) A user identifier to assign to the case.
 // TBD How are these values found?
 =====
 

@@ -821,6 +821,9 @@
             "nullable": true,
             "items": {
               "type": "object",
+              "required": [
+                "uid"
+              ],
               "properties": {
                 "uid": {
                   "type": "string",
@@ -1291,6 +1294,9 @@
             "nullable": true,
             "items": {
               "type": "object",
+              "required": [
+                "uid"
+              ],
               "properties": {
                 "uid": {
                   "type": "string",
@@ -1449,6 +1455,9 @@
                   "nullable": true,
                   "items": {
                     "type": "object",
+                    "required": [
+                      "uid"
+                    ],
                     "properties": {
                       "uid": {
                         "type": "string",

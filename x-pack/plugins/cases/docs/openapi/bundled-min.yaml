@@ -565,6 +565,8 @@ components:
           nullable: true
           items:
             type: object
+            required:
+              - uid
             properties:
               uid:
                 type: string
@@ -911,6 +913,8 @@ components:
           nullable: true
           items:
             type: object
+            required:
+              - uid
             properties:
               uid:
                 type: string
@@ -1016,6 +1020,8 @@ components:
                 nullable: true
                 items:
                   type: object
+                  required:
+                    - uid
                   properties:
                     uid:
                       type: string

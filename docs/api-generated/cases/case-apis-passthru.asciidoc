@@ -919,7 +919,7 @@ Any modifications made to this file will be overwritten.
     <h3><a name="case_response_properties_assignees_inner"><code>case_response_properties_assignees_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">uid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+      <div class="param">uid </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1092,7 +1092,7 @@ Any modifications made to this file will be overwritten.
     <h3><a name="create_case_request_assignees_inner"><code>create_case_request_assignees_inner</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'></div>
     <div class="field-items">
-      <div class="param">uid (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A user identifier to assign to the case. </div>
+      <div class="param">uid </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A user identifier to assign to the case. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
