@@ -51,6 +51,7 @@ export const searchConfigSchema = schema.object({
     waitForCompletion: schema.duration({ defaultValue: '100ms' }),
     keepAlive: schema.duration({ defaultValue: '1m' }),
     batchedReduceSize: schema.number({ defaultValue: 64 }),
+    pollInterval: schema.maybe(schema.number({ min: 1000 })),
   }),
   aggs: schema.object({
     shardDelay: schema.object({
