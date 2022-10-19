@@ -186,9 +186,8 @@ Refer to the corresponding {es} logs for potential write errors.
 | `failure` | User is not authorized to delete a connector.
 
 .2+| `rule_delete`
-| `unknown` | User is not authorized to delete a rule.
-| `success` | A rule is deleted successfully.
-| `failure` | A rule deletion failed.
+| `unknown` | User is deleting a rule.
+| `failure` | User is not authorized to delete a rule.
 
 .2+| `space_delete`
 | `unknown` | User is deleting a space.

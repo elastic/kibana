@@ -1726,7 +1726,6 @@ export class RulesClient {
       this.auditLogger?.log(
         ruleAuditEvent({
           action: RuleAuditAction.DELETE,
-          outcome: 'unknown',
           error,
         })
       );
@@ -1799,7 +1798,6 @@ export class RulesClient {
           this.auditLogger?.log(
             ruleAuditEvent({
               action: RuleAuditAction.DELETE,
-              outcome: 'unknown',
               error,
             })
           );
@@ -1859,6 +1857,14 @@ export class RulesClient {
           taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
         }
         rules.push(rule);
+
+        this.auditLogger?.log(
+          ruleAuditEvent({
+            action: RuleAuditAction.DELETE,
+            outcome: 'unknown',
+            savedObject: { type: 'alert', id: rule.id },
+          })
+        );
       }
     }
 
@@ -1872,13 +1878,6 @@ export class RulesClient {
         if (taskIdToRuleIdMapping[status.id]) {
           taskIdsToDelete.push(taskIdToRuleIdMapping[status.id]);
         }
-        this.auditLogger?.log(
-          ruleAuditEvent({
-            action: RuleAuditAction.DELETE,
-            outcome: 'success',
-            savedObject: { type: 'alert', id: status.id },
-          })
-        );
       } else {
         errors.push({
           message: status.error.message ?? 'n/a',
@@ -1888,13 +1887,6 @@ export class RulesClient {
             name: ruleNameToRuleIdMapping[status.id] ?? 'n/a',
           },
         });
-        this.auditLogger?.log(
-          ruleAuditEvent({
-            action: RuleAuditAction.DELETE,
-            outcome: 'failure',
-            savedObject: { type: 'alert', id: status.id },
-          })
-        );
       }
     });
     return { apiKeysToInvalidate, errors, taskIdsToDelete };
