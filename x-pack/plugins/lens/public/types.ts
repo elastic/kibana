@@ -232,6 +232,15 @@ export interface GetDropPropsArgs<T = unknown> {
   indexPatterns: IndexPatternMap;
 }
 
+interface DimensionLink {
+  from: { columnId: string; groupId: string; layerId: string };
+  to: {
+    columnId?: string;
+    groupId: string;
+    layerId: string;
+  };
+}
+
 /**
  * Interface for the datasource registry
  */
@@ -253,7 +262,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
   getUnifiedSearchErrors?: (state: T) => Error[];
 
-  insertLayer: (state: T, newLayerId: string) => T;
+  insertLayer: (state: T, newLayerId: string, linkToLayers?: string[]) => T;
   createEmptyLayer: (indexPatternId: string) => T;
   removeLayer: (state: T, layerId: string) => T;
   clearLayer: (state: T, layerId: string) => T;
@@ -277,10 +286,18 @@ export interface Datasource<T = unknown, P = unknown> {
     value: {
       columnId: string;
       groupId: string;
+      visualizationGroups: VisualizationDimensionGroupConfig[];
       staticValue?: unknown;
+      autoTimeField?: boolean;
     }
   ) => T;
 
+  syncColumns: (args: {
+    state: T;
+    links: Array<DimensionLink & { to: { columnId: string } }>;
+    getDimensionGroups: (layerId: string) => VisualizationDimensionGroupConfig[];
+    indexPatterns: IndexPatternMap;
+  }) => T;
   getSelectedFields?: (state: T) => string[];
 
   renderDataPanel: (
@@ -488,6 +505,7 @@ export interface DatasourcePublicAPI {
    *       or 6 if the "Other" bucket is enabled)
    */
   getMaxPossibleNumValues: (columnId: string) => number | null;
+  hasDefaultTimeField: () => boolean;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
@@ -617,7 +635,7 @@ export interface DatasourceDimensionDropProps<T> {
       forceRender?: boolean;
     }
   >;
-  dimensionGroups: VisualizationDimensionGroupConfig[];
+  targetLayerDimensionGroups: VisualizationDimensionGroupConfig[];
 }
 
 export type DatasourceDimensionDropHandlerProps<S> = DatasourceDimensionDropProps<S> & {
@@ -673,6 +691,7 @@ export interface OperationMetadata {
  */
 export interface OperationDescriptor extends Operation {
   hasTimeShift: boolean;
+  hasReducedTimeRange: boolean;
 }
 
 export interface VisualizationConfigProps<T = unknown> {
@@ -697,7 +716,10 @@ export interface VisualizationToolbarProps<T = unknown> {
 export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfigProps<T> & {
   groupId: string;
   accessor: string;
+  datasource: DatasourcePublicAPI | undefined;
   setState(newState: T | ((currState: T) => T)): void;
+  addLayer: (layerType: LayerType) => void;
+  removeLayer: (layerId: string) => void;
   panelRef: MutableRefObject<HTMLDivElement | null>;
 };
 
@@ -975,7 +997,9 @@ export interface Visualization<T = unknown, P = unknown> {
       columnId: string;
       groupId: string;
       staticValue?: unknown;
+      autoTimeField?: boolean;
     }>;
+    canAddViaMenu?: boolean;
   }>;
   /**
    * returns a list of custom actions supported by the visualization layer.
@@ -988,6 +1012,17 @@ export interface Visualization<T = unknown, P = unknown> {
   ) => LayerAction[];
   /** returns the type string of the given layer */
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
+
+  /**
+   * Get the layers this one should be linked to (currently that means just keeping the data view in sync)
+   */
+  getLayersToLinkTo?: (state: T, newLayerId: string) => string[];
+
+  /**
+   * Returns a set of dimensions that should be kept in sync
+   */
+  getLinkedDimensions?: (state: T) => DimensionLink[];
+
   /* returns the type of removal operation to perform for the specific layer in the current state */
   getRemoveOperation?: (state: T, layerId: string) => 'remove' | 'clear';
 
@@ -995,6 +1030,7 @@ export interface Visualization<T = unknown, P = unknown> {
    * For consistency across different visualizations, the dimension configuration UI is standardized
    */
   getConfiguration: (props: VisualizationConfigProps<T>) => {
+    hidden?: boolean;
     groups: VisualizationDimensionGroupConfig[];
   };
 
@@ -1146,6 +1182,7 @@ export interface Visualization<T = unknown, P = unknown> {
    */
   onIndexPatternChange?: (state: T, indexPatternId: string, layerId?: string) => T;
   onIndexPatternRename?: (state: T, oldIndexPatternId: string, newIndexPatternId: string) => T;
+  getLayersToRemoveOnIndexPatternChange?: (state: T) => string[];
   /**
    * Gets custom display options for showing the visualization.
    */

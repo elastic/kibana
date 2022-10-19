@@ -30,7 +30,7 @@ const props = {
   data: mockAlertDetailsData as TimelineEventsDetailsItem[],
   browserFields: mockBrowserFields,
   eventId: '5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31',
-  timelineId: 'detections-page',
+  scopeId: 'alerts-page',
   title: '',
   goToTable: jest.fn(),
 };
@@ -84,7 +84,7 @@ describe('AlertSummaryView', () => {
     await act(async () => {
       const { queryAllByTestId } = render(
         <TestProviders>
-          <AlertSummaryView {...props} timelineId={TimelineId.active} />
+          <AlertSummaryView {...props} scopeId={TimelineId.active} />
         </TestProviders>
       );
       expect(queryAllByTestId('hover-actions-filter-for').length).toEqual(0);
