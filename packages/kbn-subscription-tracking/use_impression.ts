@@ -6,25 +6,52 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { isValidContext } from './helpers';
 import { useServices } from './services';
 import { EVENT_NAMES, SubscriptionContext } from './types';
 
+/**
+ * Sends an impression event with the given context.
+ *
+ * Note: impression events are throttled and will not fire more
+ * often than once every 30 seconds.
+ */
 export const useImpression = (context: SubscriptionContext) => {
   const { analyticsClient } = useServices();
-  const hasSentImpression = useRef(false);
 
   useEffect(() => {
-    if (!hasSentImpression.current) {
-      if (isValidContext(context)) {
-        analyticsClient.reportEvent(EVENT_NAMES.IMPRESSION, context);
-      } else {
-        // eslint-disable-next-line no-console
-        console.error('The provided subscription context is invalid', context);
-      }
-
-      hasSentImpression.current = true;
+    if (!isValidContext(context)) {
+      // eslint-disable-next-line no-console
+      console.error('The provided subscription context is invalid', context);
+      return;
+    }
+    if (!isCoolingDown(context)) {
+      analyticsClient.reportEvent(EVENT_NAMES.IMPRESSION, context);
+      coolDown(context);
     }
   }, [analyticsClient, context]);
 };
+
+/**
+ * Impressions from the same context should not fire more than once every 30 seconds.
+ * This prevents logging too many impressions in case a page is reloaded often or
+ * if the user is navigating back and forth rapidly.
+ */
+export const coolDownTimeMs = 30 * 1000;
+let impressionCooldown = new WeakMap<SubscriptionContext, number>();
+
+function isCoolingDown(context: SubscriptionContext) {
+  const previousLog = impressionCooldown.get(context);
+
+  // we logged before and we are in the cooldown period
+  return previousLog && Date.now() - previousLog < coolDownTimeMs;
+}
+
+function coolDown(context: SubscriptionContext) {
+  impressionCooldown.set(context, Date.now());
+}
+
+export function resetCoolDown() {
+  impressionCooldown = new WeakMap<SubscriptionContext, number>();
+}

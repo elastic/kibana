@@ -11,6 +11,7 @@ import { render, screen } from '@testing-library/react';
 import { SubscriptionLink, SubscriptionButton } from './subscription_elements';
 import { SubscriptionTrackingProvider } from './services';
 import { EVENT_NAMES, Services, SubscriptionContext } from './types';
+import { coolDownTimeMs, resetCoolDown } from './use_impression';
 
 const testServices: Services = {
   navigateToApp: jest.fn(),
@@ -33,72 +34,71 @@ const WithProviders: React.FC = ({ children }) => (
 const renderWithProviders = (children: React.ReactElement) =>
   render(children, { wrapper: WithProviders });
 
+const reset = () => {
+  jest.resetAllMocks();
+  resetCoolDown();
+};
+
 describe('SubscriptionElements', () => {
-  describe('SubscriptionLink', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
-    it('renders the children correctly', () => {
-      renderWithProviders(
-        <SubscriptionLink subscriptionContext={testContext}>Hello</SubscriptionLink>
-      );
-      expect(screen.getByText('Hello')).toBeTruthy();
-    });
-
-    it('fires an impression event when rendered', () => {
-      renderWithProviders(<SubscriptionLink subscriptionContext={testContext} />);
-      expect(testServices.analyticsClient.reportEvent).toHaveBeenCalledWith(
-        EVENT_NAMES.IMPRESSION,
-        testContext
-      );
-    });
-
-    it('tracks a click when clicked and navigates to page', () => {
-      renderWithProviders(
-        <SubscriptionLink subscriptionContext={testContext}>hello</SubscriptionLink>
-      );
-
-      screen.getByText('hello').click();
-      expect(testServices.analyticsClient.reportEvent).toHaveBeenCalledWith(
-        EVENT_NAMES.CLICK,
-        testContext
-      );
-      expect(testServices.navigateToApp).toHaveBeenCalled();
-    });
+  beforeAll(() => {
+    jest.useFakeTimers('modern');
   });
 
-  describe('SubscriptionButton', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
+  afterAll(() => {
+    jest.useRealTimers();
+  });
 
-    it('renders the children correctly', () => {
-      renderWithProviders(
-        <SubscriptionButton subscriptionContext={testContext}>Hello</SubscriptionButton>
-      );
-      expect(screen.getByText('Hello')).toBeTruthy();
-    });
+  [SubscriptionButton, SubscriptionLink].forEach((SubscriptionElement) => {
+    describe(SubscriptionElement.name, () => {
+      beforeEach(reset);
 
-    it('fires an impression event when rendered', () => {
-      renderWithProviders(<SubscriptionButton subscriptionContext={testContext} />);
-      expect(testServices.analyticsClient.reportEvent).toHaveBeenCalledWith(
-        EVENT_NAMES.IMPRESSION,
-        testContext
-      );
-    });
+      it('renders the children correctly', () => {
+        renderWithProviders(
+          <SubscriptionElement subscriptionContext={testContext}>Hello</SubscriptionElement>
+        );
+        expect(screen.getByText('Hello')).toBeTruthy();
+      });
 
-    it('tracks a click when clicked and navigates to page', () => {
-      renderWithProviders(
-        <SubscriptionButton subscriptionContext={testContext}>hello</SubscriptionButton>
-      );
+      it('fires an impression event when rendered', () => {
+        renderWithProviders(<SubscriptionElement subscriptionContext={testContext} />);
+        expect(testServices.analyticsClient.reportEvent).toHaveBeenCalledWith(
+          EVENT_NAMES.IMPRESSION,
+          testContext
+        );
+      });
 
-      screen.getByText('hello').click();
-      expect(testServices.analyticsClient.reportEvent).toHaveBeenCalledWith(
-        EVENT_NAMES.CLICK,
-        testContext
-      );
-      expect(testServices.navigateToApp).toHaveBeenCalled();
+      it('fires an impression event when rendered (but only once)', () => {
+        const { unmount } = renderWithProviders(
+          <SubscriptionElement subscriptionContext={testContext} />
+        );
+        expect(testServices.analyticsClient.reportEvent).toHaveBeenCalledTimes(1);
+        unmount();
+
+        // does not create an impression again when remounted
+        const { unmount: unmountAgain } = renderWithProviders(
+          <SubscriptionElement subscriptionContext={testContext} />
+        );
+        unmountAgain();
+        expect(testServices.analyticsClient.reportEvent).toHaveBeenCalledTimes(1);
+
+        // only creates anew impression when the cooldown time has passed
+        jest.setSystemTime(Date.now() + coolDownTimeMs);
+        renderWithProviders(<SubscriptionElement subscriptionContext={testContext} />);
+        expect(testServices.analyticsClient.reportEvent).toHaveBeenCalledTimes(2);
+      });
+
+      it('tracks a click when clicked and navigates to page', () => {
+        renderWithProviders(
+          <SubscriptionElement subscriptionContext={testContext}>hello</SubscriptionElement>
+        );
+
+        screen.getByText('hello').click();
+        expect(testServices.analyticsClient.reportEvent).toHaveBeenCalledWith(
+          EVENT_NAMES.CLICK,
+          testContext
+        );
+        expect(testServices.navigateToApp).toHaveBeenCalled();
+      });
     });
   });
 });

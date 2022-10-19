@@ -14,6 +14,11 @@ interface Options {
   subscriptionContext: SubscriptionContext;
 }
 
+/**
+ * Provides a navigation function that navigates to the subscription
+ * management page. When the function executes, a click event with the
+ * given context is emitted.
+ */
 export const useGoToSubscription = ({ subscriptionContext }: Options) => {
   const { navigateToApp, analyticsClient } = useServices();
   const goToSubscription = useCallback(() => {
