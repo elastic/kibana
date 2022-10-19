@@ -17,7 +17,7 @@ import { LensAppServices } from '../../app_plugin/types';
 export const QueryInput = ({
   value,
   onChange,
-  indexPatternTitle,
+  indexPattern,
   isInvalid,
   onSubmit,
   disableAutoFocus,
@@ -26,7 +26,7 @@ export const QueryInput = ({
 }: {
   value: Query;
   onChange: (input: Query) => void;
-  indexPatternTitle: string;
+  indexPattern: string | { type: 'title' | 'id'; value: string };
   isInvalid: boolean;
   onSubmit: () => void;
   disableAutoFocus?: boolean;
@@ -46,7 +46,7 @@ export const QueryInput = ({
       disableAutoFocus={disableAutoFocus}
       isInvalid={isInvalid}
       bubbleSubmitEvent={false}
-      indexPatterns={[indexPatternTitle]}
+      indexPatterns={[indexPattern]}
       query={inputValue}
       onChange={(newQuery) => {
         if (!isEqual(newQuery, inputValue)) {
