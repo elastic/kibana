@@ -41,8 +41,8 @@ default space is used.
 [%collapsible%open]
 ====
 `assignees`::
-(Optional, array of objects) 
-.Properties of `assignees` objects
+(Optional, array of objects) Array containing assignee objects.
+.Properties of assignee objects
 [%collapsible%open]
 =====
 `uid`:: A user identifier to assign to the case.
