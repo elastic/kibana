@@ -217,7 +217,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.refreshTable();
         await cases.casesTable.validateCasesTableHasNthRows(1);
         const row = await cases.casesTable.getCaseFromTable(0);
-        const tags = await row.findByCssSelector('[data-test-subj="case-table-column-tags-one"]');
+        const tags = await row.findByTestSubject('case-table-column-tags-one');
         expect(await tags.getVisibleText()).to.be('one');
       });
 
@@ -239,6 +239,33 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await cases.casesTable.filterByAssignee('2');
           await cases.casesTable.validateCasesTableHasNthRows(1);
           await testSubjects.exists('case-user-profile-avatar-cases_all_user2');
+        });
+
+        it('filters cases without assignees', async () => {
+          await cases.casesTable.openAssigneesPopover();
+          await cases.common.selectFirstRowInAssigneesPopover();
+          await cases.casesTable.validateCasesTableHasNthRows(2);
+
+          const firstCaseTitle = await (
+            await cases.casesTable.getCaseFromTable(0)
+          ).findByTestSubject('case-details-link');
+
+          const secondCaseTitle = await (
+            await cases.casesTable.getCaseFromTable(1)
+          ).findByTestSubject('case-details-link');
+
+          expect(await firstCaseTitle.getVisibleText()).be('test2');
+          expect(await secondCaseTitle.getVisibleText()).be('matchme');
+        });
+
+        it('filters cases with and without assignees', async () => {
+          await cases.casesTable.openAssigneesPopover();
+          await cases.common.selectRowsInAssigneesPopover([0, 2]);
+          await cases.casesTable.validateCasesTableHasNthRows(3);
+
+          expect(await cases.casesTable.getCaseTitle(0)).be('test4');
+          expect(await cases.casesTable.getCaseTitle(1)).be('test2');
+          expect(await cases.casesTable.getCaseTitle(2)).be('matchme');
         });
       });
     });

@@ -331,7 +331,7 @@ export function DimensionEditor(
       )}
       <CollapseSetting
         value={currentLayer?.collapseFns?.[props.accessor] || ''}
-        onChange={(collapseFn: string) => {
+        onChange={(collapseFn) => {
           props.setState({
             ...props.state,
             layers: props.state.layers.map((layer) =>

@@ -7,30 +7,31 @@
 
 import { mapValues, trimEnd, cloneDeep, unset } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import {
+import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
   SavedObjectMigrationContext,
-  mergeSavedObjectMigrationMaps,
 } from '@kbn/core/server';
-import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import { CommentAttributes, CommentType } from '../../../common/api';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import type { CommentAttributes } from '../../../common/api';
+import { CommentType } from '../../../common/api';
+import type { LensMarkdownNode, MarkdownNode } from '../../../common/utils/markdown_plugins/utils';
 import {
   isLensMarkdownNode,
-  LensMarkdownNode,
-  MarkdownNode,
   parseCommentString,
   stringifyMarkdownComment,
 } from '../../../common/utils/markdown_plugins/utils';
-import { addOwnerToSO, SanitizedCaseOwner } from '.';
+import type { SanitizedCaseOwner } from '.';
+import { addOwnerToSO } from '.';
 import { logError } from './utils';
 import { GENERATED_ALERT, SUB_CASE_SAVED_OBJECT } from './constants';
-import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import { getAllPersistableAttachmentMigrations } from './get_all_persistable_attachment_migrations';
-import { PersistableStateAttachmentState } from '../../attachment_framework/types';
+import type { PersistableStateAttachmentState } from '../../attachment_framework/types';
 
 interface UnsanitizedComment {
   comment: string;

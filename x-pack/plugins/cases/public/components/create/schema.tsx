@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { FIELD_TYPES, VALIDATION_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { CasePostRequest, ConnectorTypeFields } from '../../../common/api';
 import { isInvalidTag } from '../../../common/utils/validators';
 import { MAX_TITLE_LENGTH } from '../../../common/constants';
-import type { FormSchema } from '../../common/shared_imports';
-import { FIELD_TYPES, fieldValidators, VALIDATION_TYPES } from '../../common/shared_imports';
 import * as i18n from './translations';
 
 import { OptionalFieldLabel } from './optional_field_label';

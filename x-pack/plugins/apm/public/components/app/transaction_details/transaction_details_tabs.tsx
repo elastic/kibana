@@ -11,9 +11,13 @@ import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { EuiPanel, EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
+import { XYBrushEvent } from '@elastic/charts';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { useTransactionTraceSamplesFetcher } from '../../../hooks/use_transaction_trace_samples_fetcher';
+import {
+  TraceSamplesFetchResult,
+  useTransactionTraceSamplesFetcher,
+} from '../../../hooks/use_transaction_trace_samples_fetcher';
 
 import { maybe } from '../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
@@ -23,6 +27,15 @@ import { latencyCorrelationsTab } from './latency_correlations_tab';
 import { traceSamplesTab } from './trace_samples_tab';
 import { useSampleChartSelection } from '../../../hooks/use_sample_chart_selection';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+
+export interface TabContentProps {
+  clearChartSelection: () => void;
+  onFilter: () => void;
+  sampleRangeFrom?: number;
+  sampleRangeTo?: number;
+  selectSampleFromChartSelection: (selection: XYBrushEvent) => void;
+  traceSamplesFetchResult: TraceSamplesFetchResult;
+}
 
 const tabs = [
   traceSamplesTab,
@@ -41,15 +54,14 @@ export function TransactionDetailsTabs() {
     tabs.find((tab) => tab.key === currentTab) ?? traceSamplesTab;
 
   const { environment, kuery, transactionName } = query;
-  const { traceSamplesData, traceSamplesStatus } =
-    useTransactionTraceSamplesFetcher({
-      transactionName,
-      kuery,
-      environment,
-    });
+
+  const traceSamplesFetchResult = useTransactionTraceSamplesFetcher({
+    transactionName,
+    kuery,
+    environment,
+  });
 
   const { sampleRangeFrom, sampleRangeTo, transactionId, traceId } = urlParams;
-  const { traceSamples } = traceSamplesData;
 
   const { clearChartSelection, selectSampleFromChartSelection } =
     useSampleChartSelection();
@@ -65,14 +77,19 @@ export function TransactionDetailsTabs() {
   }, [traceSamplesTabKey]);
 
   useEffect(() => {
-    const selectedSample = traceSamples.find(
+    const selectedSample = traceSamplesFetchResult.data?.traceSamples.find(
       (sample) =>
         sample.transactionId === transactionId && sample.traceId === traceId
     );
 
-    if (traceSamplesStatus === FETCH_STATUS.SUCCESS && !selectedSample) {
+    if (
+      traceSamplesFetchResult.status === FETCH_STATUS.SUCCESS &&
+      !selectedSample
+    ) {
       // selected sample was not found. select a new one:
-      const preferredSample = maybe(traceSamples[0]);
+      const preferredSample = maybe(
+        traceSamplesFetchResult.data?.traceSamples[0]
+      );
 
       history.replace({
         ...history.location,
@@ -85,7 +102,7 @@ export function TransactionDetailsTabs() {
         }),
       });
     }
-  }, [history, traceSamples, transactionId, traceId, traceSamplesStatus]);
+  }, [history, transactionId, traceId, traceSamplesFetchResult]);
 
   return (
     <>
@@ -112,8 +129,7 @@ export function TransactionDetailsTabs() {
             sampleRangeFrom,
             sampleRangeTo,
             selectSampleFromChartSelection,
-            traceSamples,
-            traceSamplesStatus,
+            traceSamplesFetchResult,
           }}
         />
       </EuiPanel>
