@@ -12,6 +12,7 @@ import React, { useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
+import { AggregationType } from '../../../../common/alert_types';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
@@ -32,7 +33,7 @@ import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
 
 export interface RuleParams {
-  aggregationType: 'avg' | '95th' | '99th';
+  aggregationType: AggregationType;
   environment: string;
   serviceName: string;
   threshold: number;
@@ -41,24 +42,18 @@ export interface RuleParams {
   windowUnit: string;
 }
 
-const TRANSACTION_ALERT_AGGREGATION_TYPES = {
-  avg: i18n.translate(
+const TRANSACTION_ALERT_AGGREGATION_TYPES: Record<AggregationType, string> = {
+  [AggregationType.Avg]: i18n.translate(
     'xpack.apm.transactionDurationAlert.aggregationType.avg',
-    {
-      defaultMessage: 'Average',
-    }
+    { defaultMessage: 'Average' }
   ),
-  '95th': i18n.translate(
+  [AggregationType.P95]: i18n.translate(
     'xpack.apm.transactionDurationAlert.aggregationType.95th',
-    {
-      defaultMessage: '95th percentile',
-    }
+    { defaultMessage: '95th percentile' }
   ),
-  '99th': i18n.translate(
+  [AggregationType.P99]: i18n.translate(
     'xpack.apm.transactionDurationAlert.aggregationType.99th',
-    {
-      defaultMessage: '99th percentile',
-    }
+    { defaultMessage: '99th percentile' }
   ),
 };
 
@@ -83,7 +78,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
       ...ruleParams,
     },
     {
-      aggregationType: 'avg',
+      aggregationType: AggregationType.Avg,
       threshold: 1500,
       windowSize: 5,
       windowUnit: 'm',
@@ -128,7 +123,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
 
   const latencyChartPreview = data?.latencyChartPreview ?? [];
 
-  const maxY = getMaxY([{ data: latencyChartPreview }]);
+  const maxY = getMaxY(latencyChartPreview);
   const formatter = getDurationFormatter(maxY);
   const yTickFormat = getResponseTimeTickFormatter(formatter);
 
@@ -137,7 +132,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
 
   const chartPreview = (
     <ChartPreview
-      data={latencyChartPreview}
+      series={latencyChartPreview}
       threshold={thresholdMs}
       yTickFormat={yTickFormat}
       uiSettings={services.uiSettings}

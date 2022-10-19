@@ -139,6 +139,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
       canNavigateToLens: Boolean(handlers.variables.canNavigateToLens),
       syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
       syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
+      syncCursor: handlers?.isSyncCursorEnabled?.() ?? true,
     },
   };
 };

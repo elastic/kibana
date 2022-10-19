@@ -25,6 +25,12 @@ export enum AlertType {
   Anomaly = 'apm.anomaly',
 }
 
+export enum AggregationType {
+  Avg = 'avg',
+  P95 = '95th',
+  P99 = '99th',
+}
+
 export const THRESHOLD_MET_GROUP_ID = 'threshold_met';
 export type ThresholdMetActionGroupId = typeof THRESHOLD_MET_GROUP_ID;
 const THRESHOLD_MET_GROUP: ActionGroup<ThresholdMetActionGroupId> = {
