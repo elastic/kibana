@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { UMServerLibs } from '../../legacy_uptime/lib/lib';
+import { i18n } from '@kbn/i18n';
 import { ProjectMonitor } from '../../../common/runtime_types';
 
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
@@ -15,9 +15,7 @@ import { ProjectMonitorFormatter } from '../../synthetics_service/project_monito
 
 const MAX_PAYLOAD_SIZE = 1048576 * 20; // 20MiB
 
-export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
-  libs: UMServerLibs
-) => ({
+export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: API_URLS.SYNTHETICS_MONITORS_PROJECT,
   validate: {
@@ -35,15 +33,25 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
   },
   handler: async ({
     request,
+    response,
     savedObjectsClient,
     server,
     syntheticsMonitorClient,
   }): Promise<any> => {
     const { projectName } = request.params;
     const decodedProjectName = decodeURI(projectName);
+    const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
+    const spaceId = server.spaces.spacesService.getSpaceId(request);
+
+    if (monitors.length > 250) {
+      return response.badRequest({
+        body: {
+          message: REQUEST_TOO_LARGE,
+        },
+      });
+    }
+
     try {
-      const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
-      const spaceId = server.spaces.spacesService.getSpaceId(request);
       const { publicLocations, privateLocations } = await getAllLocations(
         server,
         syntheticsMonitorClient,
@@ -76,4 +84,9 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       throw error;
     }
   },
+});
+
+export const REQUEST_TOO_LARGE = i18n.translate('xpack.synthetics.server.project.delete.toolarge', {
+  defaultMessage:
+    'Delete request payload is too large. Please send a max of 250 monitors to delete per request',
 });

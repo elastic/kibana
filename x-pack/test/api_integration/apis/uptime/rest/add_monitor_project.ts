@@ -10,6 +10,7 @@ import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/add_monitor_project';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
@@ -1332,6 +1333,37 @@ export default function ({ getService }: FtrProviderContext) {
             return deleteMonitor(monitor.id, project);
           }),
         ]);
+      }
+    });
+
+    it('only allows 250 requests at a time', async () => {
+      const project = 'test-brower-suite';
+      const monitors = [];
+      for (let i = 0; i < 251; i++) {
+        monitors.push({
+          ...projectMonitors.monitors[0],
+          id: `test-id-${i}`,
+          name: `test-name-${i}`,
+        });
+      }
+
+      try {
+        const {
+          body: { message },
+        } = await supertest
+          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send({
+            monitors,
+          })
+          .expect(400);
+
+        expect(message).to.eql(REQUEST_TOO_LARGE);
+      } finally {
+        await supertest
+          .put(API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY)
+          .set('kbn-xsrf', 'true')
+          .send({ ...projectMonitors, keep_stale: false, project });
       }
     });
   });
