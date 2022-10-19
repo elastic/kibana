@@ -3,7 +3,7 @@ load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
 PKG_DIRNAME = "mocks"
-PKG_REQUIRE_NAME = "@kbn/shared-ux-markdown-mocks"
+PKG_REQUIRE_NAME = "@kbn/shared-ux-code-editor-mocks"
 
 SOURCE_FILES = glob(
   [
@@ -50,7 +50,7 @@ RUNTIME_DEPS = [
   "@npm//react",
   "@npm//@storybook/addon-actions",
   "//packages/shared-ux/storybook/mock",
-  "//packages/shared-ux/markdown/impl",
+  "//packages/shared-ux/code_editor/impl",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -68,7 +68,7 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/node",
   "//packages/shared-ux/storybook/mock:npm_module_types",
-  "//packages/shared-ux/markdown/types:npm_module_types",
+  # "//packages/shared-ux/code_editor/types:npm_module_types",
 
 ]
 

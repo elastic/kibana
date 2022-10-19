@@ -3741,6 +3741,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-code-editor-mocks@link:bazel-bin/packages/shared-ux/code_editor/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-code-editor-types@link:bazel-bin/packages/shared-ux/code_editor/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-code-editor@link:bazel-bin/packages/shared-ux/code_editor/impl":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-link-redirect-app-mocks@link:bazel-bin/packages/shared-ux/link/redirect_app/mocks":
   version "0.0.0"
   uid ""
@@ -7910,6 +7922,18 @@
   uid ""
 
 "@types/kbn__shared-ux-card-no-data@link:bazel-bin/packages/shared-ux/card/no_data/impl/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-code-editor-mocks@link:bazel-bin/packages/shared-ux/code_editor/mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-code-editor-types@link:bazel-bin/packages/shared-ux/code_editor/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-code-editor@link:bazel-bin/packages/shared-ux/code_editor/impl/npm_module_types":
   version "0.0.0"
   uid ""
 
