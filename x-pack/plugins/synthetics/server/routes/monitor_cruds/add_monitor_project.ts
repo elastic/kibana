@@ -18,7 +18,7 @@ const MAX_PAYLOAD_SIZE = 1048576 * 20; // 20MiB
 export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
   libs: UMServerLibs
 ) => ({
-  method: 'PUT',
+  method: 'POST',
   path: API_URLS.SYNTHETICS_MONITORS_PROJECT,
   validate: {
     params: schema.object({
