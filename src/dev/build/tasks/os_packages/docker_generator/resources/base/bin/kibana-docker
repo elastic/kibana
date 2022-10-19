@@ -298,7 +298,10 @@ kibana_vars=(
     xpack.ingestManager.registryUrl
     xpack.observability.annotations.index
     xpack.observability.unsafe.slo.enabled
-    xpack.observability.unsafe.alertDetails.enabled
+    xpack.observability.unsafe.alertDetails.apm.enabled
+    xpack.observability.unsafe.alertDetails.metrics.enabled
+    xpack.observability.unsafe.alertDetails.logs.enabled
+    xpack.observability.unsafe.alertDetails.uptime.enabled
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
     xpack.reporting.capture.browser.chromium.inspect
