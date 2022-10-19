@@ -7,13 +7,13 @@
  */
 
 import { utc } from 'moment';
-import { search } from '@kbn/data-plugin/public';
+import { METRIC_TYPES, search } from '@kbn/data-plugin/public';
 import dateMath from '@kbn/datemath';
 import { TimeRange, UI_SETTINGS } from '@kbn/data-plugin/common';
 import { TimeScaleUnit } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getUISettings } from '../../../services';
 import type { Metric, Panel, Series } from '../../../../common/types';
-import { TIME_RANGE_DATA_MODES } from '../../../../common/enums';
+import { TIME_RANGE_DATA_MODES, TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { getFilterRatioFormula } from './filter_ratio_formula';
 import { getFormulaFromMetric, SUPPORTED_METRICS } from './supported_metrics';
 import { buildCounterRateFormula } from './counter_rate_formula';
@@ -133,10 +133,13 @@ export const getFormulaEquivalent = (
       }${addAdditionalArgs({ reducedTimeRange, timeShift })})`;
     }
     case 'positive_rate': {
-      return buildCounterRateFormula(aggFormula, currentMetric.field!, {
+      const counterRateFormula = buildCounterRateFormula(aggFormula, currentMetric.field!, {
         reducedTimeRange,
         timeShift,
       });
+      return currentMetric.unit
+        ? `normalize_by_unit(${counterRateFormula}, unit='${getTimeScale(currentMetric)}')`
+        : counterRateFormula;
     }
     case 'filter_ratio': {
       return getFilterRatioFormula(currentMetric, { reducedTimeRange, timeShift });
