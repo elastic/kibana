@@ -301,7 +301,7 @@ PUT _ingest/pipeline/tri_met_tracks
 
 . Leave everything else as defaults.
 
-. Click *Save integration*, this will deploy the configuration to any Agents with the policy assigned.
+. Click *Save integration* to deploy the configuration to any {agent} with the policy assigned.
 
 
 [float]
