@@ -49,7 +49,7 @@ export function CollapseSetting({
       <EuiSelect
         fullWidth
         compressed
-        data-test-subj="indexPattern-terms-orderBy"
+        data-test-subj="indexPattern-collapse-by"
         options={options}
         value={value}
         onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
