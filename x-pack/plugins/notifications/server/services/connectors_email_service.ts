@@ -6,9 +6,9 @@
  */
 
 import type { UnsecuredActionsClient } from '@kbn/actions-plugin/server/unsecured_actions_client/unsecured_actions_client';
-import type { IEmailService, PlainTextEmail } from './types';
+import type { EmailService, PlainTextEmail } from './types';
 
-export class EmailService implements IEmailService {
+export class ConnectorsEmailService implements EmailService {
   constructor(
     private requesterId: string,
     private connectorId: string,
@@ -18,13 +18,11 @@ export class EmailService implements IEmailService {
   async sendPlainTextEmail(params: PlainTextEmail): Promise<void> {
     const actions = params.to.map((to) => ({
       id: this.connectorId,
-      spaceId: 'default', // TODO should be space agnostic?
-      apiKey: null, // not needed for Email connector
-      executionId: '???',
       params: {
         ...params,
         to,
       },
+      relatedSavedObjects: params.context?.length ? params.context : undefined,
     }));
     return await this.actionsClient.bulkEnqueueExecution(this.requesterId, actions);
   }

@@ -5,87 +5,31 @@
  * 2.0.
  */
 
-import type {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '@kbn/core/server';
-import { Defer, defer } from '@kbn/kibana-utils-plugin/common';
-import type {
-  NotificationsPluginSetupDeps,
-  NotificationsPluginStartDeps,
-  NotificationsPluginSetup,
-  NotificationsPluginStart,
-} from './types';
-import { EmailService } from './services';
-import { NotificationsConfigType } from './config';
-import { PLUGIN_ID } from '../common';
+import type { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import type { NotificationsPluginStartDeps, NotificationsPluginStart } from './types';
+import { type EmailService, getEmailService } from './services';
+import type { NotificationsConfigType } from './config';
 
-export class NotificationsPlugin
-  implements Plugin<NotificationsPluginSetup, NotificationsPluginStart>
-{
+export class NotificationsPlugin implements Plugin<void, NotificationsPluginStart> {
   private readonly logger: Logger;
   private readonly initialConfig: NotificationsConfigType;
-  private emailService: Defer<EmailService>;
-  private emailConnector: string;
 
   constructor(initializerContext: PluginInitializerContext<NotificationsConfigType>) {
     this.logger = initializerContext.logger.get();
-    this.emailService = defer<EmailService>();
     this.initialConfig = initializerContext.config.get();
   }
 
-  public setup(core: CoreSetup, plugins: NotificationsPluginSetupDeps) {
-    if (!plugins.actions) {
-      this.emailService.reject(
-        `Error starting notification services: 'actions' plugin not available.`
-      );
-      return { email: this.emailService.promise };
-    }
-
-    const emailConnector = this.initialConfig.connectors?.default?.email;
-    if (!emailConnector) {
-      this.emailService.reject(
-        'Error starting notification services: Email connector not specified'
-      );
-      return { email: this.emailService.promise };
-    }
-
-    if (!plugins.actions.isPreconfiguredConnector(emailConnector)) {
-      this.emailService.reject(
-        `Error starting notification services: Unexisting email connector '${emailConnector}' specified`
-      );
-      return { email: this.emailService.promise };
-    }
-
-    plugins.actions.registerUnsecuredActionsClientAccess(PLUGIN_ID);
-
-    this.emailConnector = emailConnector;
-
-    return {
-      email: this.emailService.promise,
-    };
-  }
+  public setup() {}
 
   public start(core: CoreStart, plugins: NotificationsPluginStartDeps) {
-    if (this.emailConnector) {
-      plugins.actions.getUnsecuredActionsClient().then(
-        (actionsClient) => {
-          const email = new EmailService(PLUGIN_ID, this.emailConnector, actionsClient);
-          this.emailService.resolve(email);
-        },
-        (error) => {
-          this.logger.warn(`Error starting notification services: ${error}`);
-          this.emailService.reject(error);
-        }
-      );
+    let email: EmailService | undefined;
+    try {
+      email = getEmailService({ config: this.initialConfig, plugins });
+    } catch (err) {
+      this.logger.warn(`Error creating email service: ${err}`);
     }
 
-    return {
-      email: this.emailService.promise,
-    };
+    return { email };
   }
 
   public stop() {}

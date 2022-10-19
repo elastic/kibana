@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { IEmailService, PlainTextEmail } from './types';
-export { EmailService } from './email_service';
+export type { EmailService, PlainTextEmail } from './types';
+export { getEmailService, type EmailServiceStartDeps } from './connectors_email_service_factory';

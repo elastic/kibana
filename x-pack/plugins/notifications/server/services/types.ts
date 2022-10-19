@@ -5,12 +5,21 @@
  * 2.0.
  */
 
-export interface IEmailService {
+export interface EmailService {
   sendPlainTextEmail(payload: PlainTextEmail): Promise<void>;
 }
+
+interface RelatedSavedObject {
+  id: string;
+  type: string;
+  namespace: string;
+}
+
+export type SenderContext = RelatedSavedObject[];
 
 export interface PlainTextEmail {
   to: string[];
   subject: string;
   message: string;
+  context?: SenderContext;
 }

@@ -5,24 +5,10 @@
  * 2.0.
  */
 
-import type {
-  PluginSetupContract as ActionsPluginSetupContract,
-  PluginStartContract as ActionsPluginStartContract,
-} from '@kbn/actions-plugin/server';
-import type { IEmailService } from './services/email_service';
+import type { EmailService, EmailServiceStartDeps } from './services';
 
-export interface NotificationsPluginSetupDeps {
-  actions: ActionsPluginSetupContract;
-}
-
-export interface NotificationsPluginStartDeps {
-  actions: ActionsPluginStartContract;
-}
-
-export interface NotificationsPluginSetup {
-  email: Promise<IEmailService>;
-}
+export type NotificationsPluginStartDeps = EmailServiceStartDeps;
 
 export interface NotificationsPluginStart {
-  email: Promise<IEmailService>;
+  email?: EmailService;
 }

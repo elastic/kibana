@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { config, type NotificationsConfigType } from './config';
+export { type NotificationsConfigType, config } from './config';

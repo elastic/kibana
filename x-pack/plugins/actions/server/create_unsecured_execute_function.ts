@@ -25,9 +25,9 @@ interface CreateBulkUnsecuredExecuteFunctionOptions {
   preconfiguredConnectors: PreconfiguredConnector[];
 }
 
-export interface ExecuteOptions extends Pick<ActionExecutorOptions, 'params' | 'source'> {
+export interface ExecuteOptions
+  extends Pick<ActionExecutorOptions, 'params' | 'source' | 'relatedSavedObjects'> {
   id: string;
-  relatedSavedObjects?: RelatedSavedObjects;
 }
 
 interface ActionTaskParams extends Pick<ActionExecutorOptions, 'params'> {
