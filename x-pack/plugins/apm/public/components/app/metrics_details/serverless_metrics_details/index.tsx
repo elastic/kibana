@@ -4,15 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { ServerlessMetrics } from '../../metrics/serverless_metrics';
+import { getServerlessFunctionNameFromId } from '../../../../../common/serverless';
 
 interface Props {
-  serverlessFunctionName: string;
+  serverlessId: string;
 }
 
-export function ServerlessMetricsDetails({ serverlessFunctionName }: Props) {
+export function ServerlessMetricsDetails({ serverlessId }: Props) {
+  const serverlessFunctionName = useMemo(
+    () => getServerlessFunctionNameFromId(serverlessId),
+    [serverlessId]
+  );
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
@@ -21,7 +26,7 @@ export function ServerlessMetricsDetails({ serverlessFunctionName }: Props) {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
-        <ServerlessMetrics serverlessFunctionName={serverlessFunctionName} />
+        <ServerlessMetrics serverlessId={serverlessId} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

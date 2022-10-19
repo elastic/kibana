@@ -5,16 +5,22 @@
  * 2.0.
  */
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import {
   FAAS_BILLED_DURATION,
   FAAS_COLDSTART,
   FAAS_DURATION,
-  FAAS_NAME,
+  FAAS_ID,
+  METRICSET_NAME,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
+import { getServerlessFunctionNameFromId } from '../../../../common/serverless';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { calcMemoryUsed } from './helper';
@@ -46,6 +52,7 @@ export async function getServerlessFunctionsOverview({
       query: {
         bool: {
           filter: [
+            ...termQuery(METRICSET_NAME, 'app'),
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
@@ -55,7 +62,7 @@ export async function getServerlessFunctionsOverview({
       },
       aggs: {
         serverlessFunctions: {
-          terms: { field: FAAS_NAME },
+          terms: { field: FAAS_ID },
           aggs: {
             faasDurationAvg: { avg: { field: FAAS_DURATION } },
             faasBilledDurationAvg: { avg: { field: FAAS_BILLED_DURATION } },
@@ -76,8 +83,10 @@ export async function getServerlessFunctionsOverview({
 
   const serverlessFunctionsOverview =
     response.aggregations?.serverlessFunctions.buckets.map((bucket) => {
+      const serverlessId = bucket.key as string;
       return {
-        serverlessFunctionName: bucket.key as string,
+        serverlessId,
+        serverlessFunctionName: getServerlessFunctionNameFromId(serverlessId),
         serverlessDurationAvg: bucket.faasDurationAvg.value,
         billedDurationAvg: bucket.faasBilledDurationAvg.value,
         coldStartCount: bucket.coldStartCount.value,

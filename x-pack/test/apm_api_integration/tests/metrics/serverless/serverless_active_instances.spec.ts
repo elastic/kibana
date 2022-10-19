@@ -18,7 +18,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
-  async function callApi(serviceName: string, serverlessFunctionName?: string) {
+  async function callApi(serviceName: string, serverlessId?: string) {
     return await apmApiClient.readUser({
       endpoint: `GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances`,
       params: {
@@ -28,14 +28,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: '',
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
-          ...(serverlessFunctionName ? { serverlessFunctionName } : {}),
+          ...(serverlessId ? { serverlessId } : {}),
         },
       },
     });
   }
 
   registry.when('Serverless active instances', { config: 'basic', archives: [] }, () => {
-    const { memoryTotal, billedDurationMs, pythonServerlessFunctionNames, faasDuration } = config;
+    const {
+      memoryTotal,
+      billedDurationMs,
+      pythonServerlessFunctionNames,
+      faasDuration,
+      serverlessId,
+    } = config;
 
     const { expectedMemoryUsed, numberOfTransactionsCreated } = expectedValues;
 
@@ -58,6 +64,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             (item) => item.serverlessFunctionName === name
           );
 
+          expect(activeInstanceOverview?.serverlessId).to.eql(`${serverlessId}${name}`);
           expect(activeInstanceOverview?.serverlessDurationAvg).to.eql(faasDuration);
           expect(activeInstanceOverview?.billedDurationAvg).to.eql(billedDurationMs);
           expect(activeInstanceOverview?.avgMemoryUsed).to.eql(expectedMemoryUsed);
@@ -78,7 +85,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('detailed metrics', () => {
       let activeInstances: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances'>;
       before(async () => {
-        const response = await callApi('lambda-python', pythonServerlessFunctionNames[0]);
+        const response = await callApi(
+          'lambda-python',
+          `${serverlessId}${pythonServerlessFunctionNames[0]}`
+        );
         activeInstances = response.body;
       });
 
@@ -87,6 +97,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           (item) => item.serverlessFunctionName === pythonServerlessFunctionNames[0]
         );
 
+        expect(activeInstanceOverview?.serverlessId).to.eql(
+          `${serverlessId}${pythonServerlessFunctionNames[0]}`
+        );
         expect(activeInstanceOverview?.serverlessDurationAvg).to.eql(faasDuration);
         expect(activeInstanceOverview?.billedDurationAvg).to.eql(billedDurationMs);
         expect(activeInstanceOverview?.avgMemoryUsed).to.eql(expectedMemoryUsed);

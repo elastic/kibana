@@ -11,7 +11,8 @@ import { termQuery } from '@kbn/observability-plugin/server';
 import { isEmpty } from 'lodash';
 import {
   FAAS_BILLED_DURATION,
-  FAAS_NAME,
+  FAAS_ID,
+  METRICSET_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
@@ -54,7 +55,8 @@ async function getServerlessLantecySeries({
   serviceName,
   start,
   end,
-  serverlessFunctionName,
+  serverlessId,
+  searchAggregatedTransactions,
 }: {
   environment: string;
   kuery: string;
@@ -62,18 +64,19 @@ async function getServerlessLantecySeries({
   serviceName: string;
   start: number;
   end: number;
-  serverlessFunctionName?: string;
+  serverlessId?: string;
+  searchAggregatedTransactions: boolean;
 }): Promise<GenericMetricsChart['series']> {
   const transactionLatency = await getLatencyTimeseries({
     environment,
     kuery,
     serviceName,
     setup,
-    searchAggregatedTransactions: false,
+    searchAggregatedTransactions,
     latencyAggregationType: LatencyAggregationType.avg,
     start,
     end,
-    serverlessFunctionName,
+    serverlessId,
   });
 
   return [
@@ -98,7 +101,8 @@ export async function getServerlessFunctionLatencyChart({
   serviceName,
   start,
   end,
-  serverlessFunctionName,
+  serverlessId,
+  searchAggregatedTransactions,
 }: {
   environment: string;
   kuery: string;
@@ -106,7 +110,8 @@ export async function getServerlessFunctionLatencyChart({
   serviceName: string;
   start: number;
   end: number;
-  serverlessFunctionName?: string;
+  serverlessId?: string;
+  searchAggregatedTransactions: boolean;
 }): Promise<GenericMetricsChart> {
   const options = {
     environment,
@@ -126,13 +131,15 @@ export async function getServerlessFunctionLatencyChart({
       },
       additionalFilters: [
         { exists: { field: FAAS_BILLED_DURATION } },
-        ...termQuery(FAAS_NAME, serverlessFunctionName),
+        ...termQuery(FAAS_ID, serverlessId),
+        ...termQuery(METRICSET_NAME, 'app'),
       ],
       operationName: 'get_billed_duration',
     }),
     getServerlessLantecySeries({
       ...options,
-      serverlessFunctionName,
+      serverlessId,
+      searchAggregatedTransactions,
     }),
   ]);
 

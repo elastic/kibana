@@ -18,7 +18,7 @@ export function MetricsDetails() {
   const { runtimeName } = useApmServiceContext();
 
   if (isServerlessAgent(runtimeName)) {
-    return <ServerlessMetricsDetails serverlessFunctionName={id} />;
+    return <ServerlessMetricsDetails serverlessId={id} />;
   }
 
   return <ServiceNodeMetrics serviceNodeName={id} />;

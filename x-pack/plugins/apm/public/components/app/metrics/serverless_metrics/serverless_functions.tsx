@@ -75,6 +75,7 @@ export function ServerlessFunctions() {
         return (
           <ServerlessFunctionNameLink
             serverlessFunctionName={item.serverlessFunctionName}
+            serverlessId={item.serverlessId}
           />
         );
       },

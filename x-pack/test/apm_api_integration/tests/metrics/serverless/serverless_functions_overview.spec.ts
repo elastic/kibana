@@ -33,7 +33,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('Serverless functions overview', { config: 'basic', archives: [] }, () => {
-    const { memoryTotal, billedDurationMs, pythonServerlessFunctionNames, faasDuration } = config;
+    const {
+      memoryTotal,
+      billedDurationMs,
+      pythonServerlessFunctionNames,
+      faasDuration,
+      serverlessId,
+    } = config;
     const { expectedMemoryUsed, numberOfTransactionsCreated } = expectedValues;
 
     before(async () => {
@@ -61,6 +67,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             (item) => item.serverlessFunctionName === name
           );
 
+          expect(functionOverview?.serverlessId).to.eql(`${serverlessId}${name}`);
           expect(functionOverview?.serverlessDurationAvg).to.eql(faasDuration);
           expect(functionOverview?.billedDurationAvg).to.eql(billedDurationMs);
           expect(functionOverview?.coldStartCount).to.eql(numberOfTransactionsCreated);

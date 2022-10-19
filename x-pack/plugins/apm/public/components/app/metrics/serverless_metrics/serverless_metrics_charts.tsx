@@ -14,10 +14,10 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { MetricsChart } from '../../../shared/charts/metrics_chart';
 
 interface Props {
-  serverlessFunctionName?: string;
+  serverlessId?: string;
 }
 
-export function ServerlessMetricsCharts({ serverlessFunctionName }: Props) {
+export function ServerlessMetricsCharts({ serverlessId }: Props) {
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/metrics');
@@ -41,13 +41,13 @@ export function ServerlessMetricsCharts({ serverlessFunctionName }: Props) {
               environment,
               start,
               end,
-              serverlessFunctionName,
+              serverlessId,
             },
           },
         }
       );
     },
-    [kuery, environment, serviceName, start, end, serverlessFunctionName]
+    [kuery, environment, serviceName, start, end, serverlessId]
   );
 
   const { firstLineCharts, secondLineCharts } = useMemo(() => {

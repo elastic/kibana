@@ -13,7 +13,8 @@ import {
 import {
   FAAS_BILLED_DURATION,
   FAAS_DURATION,
-  FAAS_NAME,
+  FAAS_ID,
+  METRICSET_NAME,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
@@ -29,7 +30,7 @@ export async function getServerlessSummary({
   serviceName,
   setup,
   start,
-  serverlessFunctionName,
+  serverlessId,
 }: {
   environment: string;
   kuery: string;
@@ -37,7 +38,7 @@ export async function getServerlessSummary({
   serviceName: string;
   start: number;
   end: number;
-  serverlessFunctionName?: string;
+  serverlessId?: string;
 }) {
   const { apmEventClient } = setup;
 
@@ -51,16 +52,17 @@ export async function getServerlessSummary({
       query: {
         bool: {
           filter: [
+            ...termQuery(METRICSET_NAME, 'app'),
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
-            ...termQuery(FAAS_NAME, serverlessFunctionName),
+            ...termQuery(FAAS_ID, serverlessId),
           ],
         },
       },
       aggs: {
-        totalFunctions: { cardinality: { field: FAAS_NAME } },
+        totalFunctions: { cardinality: { field: FAAS_ID } },
         faasDurationAvg: { avg: { field: FAAS_DURATION } },
         faasBilledDurationAvg: { avg: { field: FAAS_BILLED_DURATION } },
         avgTotalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },

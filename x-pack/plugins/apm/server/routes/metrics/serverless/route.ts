@@ -26,7 +26,7 @@ const serverlessMetricsChartsRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       rangeRt,
-      t.partial({ serverlessFunctionName: t.string }),
+      t.partial({ serverlessId: t.string }),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -39,8 +39,7 @@ const serverlessMetricsChartsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
 
     const { serviceName } = params.path;
-    const { environment, kuery, start, end, serverlessFunctionName } =
-      params.query;
+    const { environment, kuery, start, end, serverlessId } = params.query;
 
     const charts = await getServerlessAgentMetricsCharts({
       environment,
@@ -49,7 +48,7 @@ const serverlessMetricsChartsRoute = createApmServerRoute({
       kuery,
       setup,
       serviceName,
-      serverlessFunctionName,
+      serverlessId,
     });
     return { charts };
   },
@@ -66,7 +65,7 @@ const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       rangeRt,
-      t.partial({ serverlessFunctionName: t.string }),
+      t.partial({ serverlessId: t.string }),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -82,8 +81,7 @@ const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
 
     const { serviceName } = params.path;
-    const { environment, kuery, start, end, serverlessFunctionName } =
-      params.query;
+    const { environment, kuery, start, end, serverlessId } = params.query;
 
     const options = {
       environment,
@@ -92,7 +90,7 @@ const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
       kuery,
       setup,
       serviceName,
-      serverlessFunctionName,
+      serverlessId,
     };
 
     const [activeInstances, timeseries] = await Promise.all([
@@ -149,7 +147,7 @@ const serverlessMetricsSummaryRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       rangeRt,
-      t.partial({ serverlessFunctionName: t.string }),
+      t.partial({ serverlessId: t.string }),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -160,8 +158,7 @@ const serverlessMetricsSummaryRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
 
     const { serviceName } = params.path;
-    const { environment, kuery, start, end, serverlessFunctionName } =
-      params.query;
+    const { environment, kuery, start, end, serverlessId } = params.query;
 
     return getServerlessSummary({
       environment,
@@ -170,7 +167,7 @@ const serverlessMetricsSummaryRoute = createApmServerRoute({
       kuery,
       setup,
       serviceName,
-      serverlessFunctionName,
+      serverlessId,
     });
   },
 });

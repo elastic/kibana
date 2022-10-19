@@ -27,7 +27,7 @@ import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 
 interface Props {
-  serverlessFunctionName?: string;
+  serverlessId?: string;
 }
 
 const CentralizedContainer = styled.div`
@@ -48,7 +48,7 @@ function VerticalRule() {
   );
 }
 
-export function ServerlessSummary({ serverlessFunctionName }: Props) {
+export function ServerlessSummary({ serverlessId }: Props) {
   const breakpoints = useBreakpoints();
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
@@ -73,13 +73,13 @@ export function ServerlessSummary({ serverlessFunctionName }: Props) {
               environment,
               start,
               end,
-              serverlessFunctionName,
+              serverlessId,
             },
           },
         }
       );
     },
-    [kuery, environment, serviceName, start, end, serverlessFunctionName]
+    [kuery, environment, serviceName, start, end, serverlessId]
   );
 
   const showVerticalRule = !breakpoints.isSmall;

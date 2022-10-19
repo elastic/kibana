@@ -12,7 +12,8 @@ import {
 } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
-  FAAS_NAME,
+  FAAS_ID,
+  METRICSET_NAME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
@@ -28,7 +29,7 @@ export async function getActiveInstancesTimeseries({
   serviceName,
   start,
   end,
-  serverlessFunctionName,
+  serverlessId,
 }: {
   environment: string;
   kuery: string;
@@ -36,7 +37,7 @@ export async function getActiveInstancesTimeseries({
   serviceName: string;
   start: number;
   end: number;
-  serverlessFunctionName?: string;
+  serverlessId?: string;
 }): Promise<Coordinate[]> {
   const { apmEventClient, config } = setup;
 
@@ -58,11 +59,12 @@ export async function getActiveInstancesTimeseries({
       query: {
         bool: {
           filter: [
+            ...termQuery(METRICSET_NAME, 'app'),
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
-            ...termQuery(FAAS_NAME, serverlessFunctionName),
+            ...termQuery(FAAS_ID, serverlessId),
           ],
         },
       },

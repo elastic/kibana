@@ -13,12 +13,14 @@ import {
 import {
   FAAS_BILLED_DURATION,
   FAAS_DURATION,
-  FAAS_NAME,
+  FAAS_ID,
+  METRICSET_NAME,
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
+import { getServerlessFunctionNameFromId } from '../../../../common/serverless';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { Coordinate } from '../../../../typings/timeseries';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
@@ -32,6 +34,7 @@ interface ActiveInstanceTimeseries {
 
 export interface ActiveInstanceOverview {
   activeInstanceName: string;
+  serverlessId: string;
   serverlessFunctionName: string;
   timeseries: ActiveInstanceTimeseries;
   serverlessDurationAvg: number | null;
@@ -47,7 +50,7 @@ export async function getServerlessActiveInstancesOverview({
   serviceName,
   setup,
   start,
-  serverlessFunctionName,
+  serverlessId,
 }: {
   environment: string;
   kuery: string;
@@ -55,7 +58,7 @@ export async function getServerlessActiveInstancesOverview({
   serviceName: string;
   start: number;
   end: number;
-  serverlessFunctionName?: string;
+  serverlessId?: string;
 }) {
   const { apmEventClient } = setup;
 
@@ -80,11 +83,12 @@ export async function getServerlessActiveInstancesOverview({
       query: {
         bool: {
           filter: [
+            ...termQuery(METRICSET_NAME, 'app'),
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
-            ...termQuery(FAAS_NAME, serverlessFunctionName),
+            ...termQuery(FAAS_ID, serverlessId),
           ],
         },
       },
@@ -93,7 +97,7 @@ export async function getServerlessActiveInstancesOverview({
           terms: { field: SERVICE_NODE_NAME },
           aggs: {
             serverlessFunctions: {
-              terms: { field: FAAS_NAME },
+              terms: { field: FAAS_ID },
               aggs: {
                 ...{
                   ...aggs,
@@ -136,7 +140,7 @@ export async function getServerlessActiveInstancesOverview({
       const serverlessFunctionsDetails =
         bucket.serverlessFunctions.buckets.reduce<ActiveInstanceOverview[]>(
           (acc, curr) => {
-            const functionName = curr.key as string;
+            const currentServerlessId = curr.key as string;
 
             const timeseries =
               curr.timeseries.buckets.reduce<ActiveInstanceTimeseries>(
@@ -167,7 +171,9 @@ export async function getServerlessActiveInstancesOverview({
               ...acc,
               {
                 activeInstanceName,
-                serverlessFunctionName: functionName,
+                serverlessId: currentServerlessId,
+                serverlessFunctionName:
+                  getServerlessFunctionNameFromId(currentServerlessId),
                 timeseries,
                 serverlessDurationAvg: curr.faasDurationAvg.value,
                 billedDurationAvg: curr.faasBilledDurationAvg.value,

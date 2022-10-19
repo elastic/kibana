@@ -24,7 +24,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  async function callApi(serviceName: string, serverlessFunctionName?: string) {
+  async function callApi(serviceName: string, serverlessId?: string) {
     return await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/metrics/serverless/charts',
       params: {
@@ -34,7 +34,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           kuery: '',
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
-          ...(serverlessFunctionName ? { serverlessFunctionName } : {}),
+          ...(serverlessId ? { serverlessId } : {}),
         },
       },
     });
@@ -66,6 +66,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       coldStartDurationPython,
       transactionDuration,
       pythonServerlessFunctionNames,
+      serverlessId,
     } = config;
 
     const { numberOfTransactionsCreated } = expectedValues;
@@ -201,7 +202,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('detailed metrics', () => {
       let serverlessMetrics: APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/charts'>;
       before(async () => {
-        const response = await callApi('lambda-python', pythonServerlessFunctionNames[0]);
+        const response = await callApi(
+          'lambda-python',
+          `${serverlessId}${pythonServerlessFunctionNames[0]}`
+        );
         serverlessMetrics = response.body;
       });
 

@@ -13,30 +13,26 @@ import { ServerlessMetricsCharts } from './serverless_metrics_charts';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 
 interface Props {
-  serverlessFunctionName?: string;
+  serverlessId?: string;
 }
 
-export function ServerlessMetrics({ serverlessFunctionName }: Props) {
+export function ServerlessMetrics({ serverlessId }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
-        <ServerlessSummary serverlessFunctionName={serverlessFunctionName} />
+        <ServerlessSummary serverlessId={serverlessId} />
       </EuiFlexItem>
-      {!serverlessFunctionName && (
+      {!serverlessId && (
         <EuiFlexItem>
           <ServerlessFunctions />
         </EuiFlexItem>
       )}
       <ChartPointerEventContextProvider>
         <EuiFlexItem>
-          <ServerlessMetricsCharts
-            serverlessFunctionName={serverlessFunctionName}
-          />
+          <ServerlessMetricsCharts serverlessId={serverlessId} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <ServerlessActiveInstances
-            serverlessFunctionName={serverlessFunctionName}
-          />
+          <ServerlessActiveInstances serverlessId={serverlessId} />
         </EuiFlexItem>
       </ChartPointerEventContextProvider>
     </EuiFlexGroup>

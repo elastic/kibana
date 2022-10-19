@@ -10,7 +10,8 @@ import { euiLightVars as theme } from '@kbn/ui-theme';
 import { termQuery } from '@kbn/observability-plugin/server';
 import {
   FAAS_COLDSTART_DURATION,
-  FAAS_NAME,
+  FAAS_ID,
+  METRICSET_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { fetchAndTransformMetrics } from '../fetch_and_transform_metrics';
@@ -49,7 +50,7 @@ export async function getColdStartDurationChart({
   serviceName,
   start,
   end,
-  serverlessFunctionName,
+  serverlessId,
 }: {
   environment: string;
   kuery: string;
@@ -57,7 +58,7 @@ export async function getColdStartDurationChart({
   serviceName: string;
   start: number;
   end: number;
-  serverlessFunctionName?: string;
+  serverlessId?: string;
 }) {
   const coldStartDurationMetric = await fetchAndTransformMetrics({
     environment,
@@ -70,7 +71,8 @@ export async function getColdStartDurationChart({
     aggs: { coldStart: { avg: { field: FAAS_COLDSTART_DURATION } } },
     additionalFilters: [
       { exists: { field: FAAS_COLDSTART_DURATION } },
-      ...termQuery(FAAS_NAME, serverlessFunctionName),
+      ...termQuery(FAAS_ID, serverlessId),
+      ...termQuery(METRICSET_NAME, 'app'),
     ],
     operationName: 'get_cold_start_duration',
   });

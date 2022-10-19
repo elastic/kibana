@@ -11,7 +11,7 @@ import {
   termQuery,
 } from '@kbn/observability-plugin/server';
 import {
-  FAAS_NAME,
+  FAAS_ID,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
@@ -48,7 +48,7 @@ function searchLatency({
   start,
   end,
   offset,
-  serverlessFunctionName,
+  serverlessId,
 }: {
   environment: string;
   kuery: string;
@@ -61,7 +61,7 @@ function searchLatency({
   start: number;
   end: number;
   offset?: string;
-  serverlessFunctionName?: string;
+  serverlessId?: string;
 }) {
   const { apmEventClient } = setup;
 
@@ -100,7 +100,7 @@ function searchLatency({
             ...kqlQuery(kuery),
             ...termQuery(TRANSACTION_NAME, transactionName),
             ...termQuery(TRANSACTION_TYPE, transactionType),
-            ...termQuery(FAAS_NAME, serverlessFunctionName),
+            ...termQuery(FAAS_ID, serverlessId),
           ],
         },
       },
@@ -137,7 +137,7 @@ export async function getLatencyTimeseries({
   start,
   end,
   offset,
-  serverlessFunctionName,
+  serverlessId,
 }: {
   environment: string;
   kuery: string;
@@ -150,7 +150,7 @@ export async function getLatencyTimeseries({
   start: number;
   end: number;
   offset?: string;
-  serverlessFunctionName?: string;
+  serverlessId?: string;
 }) {
   const response = await searchLatency({
     environment,
@@ -164,7 +164,7 @@ export async function getLatencyTimeseries({
     start,
     end,
     offset,
-    serverlessFunctionName,
+    serverlessId,
   });
 
   if (!response.aggregations) {

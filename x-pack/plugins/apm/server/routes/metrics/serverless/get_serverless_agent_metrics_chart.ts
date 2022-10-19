@@ -6,6 +6,7 @@
  */
 
 import { Setup } from '../../../lib/helpers/setup_request';
+import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getMemoryChartData } from '../by_agent/shared/memory';
 import { getColdStartCountChart } from './get_cold_start_count_chart';
@@ -20,7 +21,7 @@ export function getServerlessAgentMetricsCharts({
   serviceName,
   start,
   end,
-  serverlessFunctionName,
+  serverlessId,
 }: {
   environment: string;
   kuery: string;
@@ -28,9 +29,16 @@ export function getServerlessAgentMetricsCharts({
   serviceName: string;
   start: number;
   end: number;
-  serverlessFunctionName?: string;
+  serverlessId?: string;
 }) {
   return withApmSpan('get_serverless_agent_metric_charts', async () => {
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      ...setup,
+      kuery,
+      start,
+      end,
+    });
+
     const options = {
       environment,
       kuery,
@@ -38,10 +46,13 @@ export function getServerlessAgentMetricsCharts({
       serviceName,
       start,
       end,
-      serverlessFunctionName,
+      serverlessId,
     };
     return await Promise.all([
-      getServerlessFunctionLatencyChart(options),
+      getServerlessFunctionLatencyChart({
+        ...options,
+        searchAggregatedTransactions,
+      }),
       getMemoryChartData(options),
       getColdStartDurationChart(options),
       getColdStartCountChart(options),

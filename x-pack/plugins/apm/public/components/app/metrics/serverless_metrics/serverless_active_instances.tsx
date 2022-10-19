@@ -37,10 +37,10 @@ type ServerlessActiveInstances =
 const palette = euiPaletteColorBlind({ rotations: 2 });
 
 interface Props {
-  serverlessFunctionName?: string;
+  serverlessId?: string;
 }
 
-export function ServerlessActiveInstances({ serverlessFunctionName }: Props) {
+export function ServerlessActiveInstances({ serverlessId }: Props) {
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/metrics');
@@ -64,13 +64,13 @@ export function ServerlessActiveInstances({ serverlessFunctionName }: Props) {
               environment,
               start,
               end,
-              serverlessFunctionName,
+              serverlessId,
             },
           },
         }
       );
     },
-    [kuery, environment, serviceName, start, end, serverlessFunctionName]
+    [kuery, environment, serviceName, start, end, serverlessId]
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
@@ -90,6 +90,7 @@ export function ServerlessActiveInstances({ serverlessFunctionName }: Props) {
         return (
           <ServerlessFunctionNameLink
             serverlessFunctionName={item.serverlessFunctionName}
+            serverlessId={item.serverlessId}
           />
         );
       },

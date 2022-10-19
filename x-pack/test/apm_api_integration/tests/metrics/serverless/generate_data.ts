@@ -17,6 +17,7 @@ export const config = {
   transactionDuration: 1000,
   pythonServerlessFunctionNames: ['fn-lambda-python', 'fn-lambda-python-2'],
   pythonInstanceName: 'instance_A',
+  serverlessId: 'arn:aws:lambda:us-west-2:001:function:',
 };
 
 export const expectedValues = {

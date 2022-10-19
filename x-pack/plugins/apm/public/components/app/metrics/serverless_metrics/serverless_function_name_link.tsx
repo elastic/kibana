@@ -16,9 +16,13 @@ const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
 interface Props {
   serverlessFunctionName: string;
+  serverlessId: string;
 }
 
-export function ServerlessFunctionNameLink({ serverlessFunctionName }: Props) {
+export function ServerlessFunctionNameLink({
+  serverlessFunctionName,
+  serverlessId,
+}: Props) {
   const { serviceName } = useApmServiceContext();
   const { query } = useApmParams('/services/{serviceName}/metrics');
   const { link } = useApmRouter();
@@ -27,7 +31,7 @@ export function ServerlessFunctionNameLink({ serverlessFunctionName }: Props) {
       href={link('/services/{serviceName}/metrics/{id}', {
         path: {
           serviceName,
-          id: serverlessFunctionName,
+          id: serverlessId,
         },
         query,
       })}
