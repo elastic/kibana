@@ -14,7 +14,6 @@ import { css } from '@emotion/react';
 import { FileImageMetadata, FileJSON } from '../../../../common';
 import { Image } from '../../image';
 import { isImage } from '../../util';
-import { useFilesContext } from '../../context';
 import { useFilePickerContext } from '../context';
 
 import './file_card.scss';
@@ -24,8 +23,7 @@ interface Props {
 }
 
 export const FileCard: FunctionComponent<Props> = ({ file }) => {
-  const { client } = useFilesContext();
-  const { kind, state } = useFilePickerContext();
+  const { kind, state, client } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
   const displayImage = isImage({ type: file.mimeType });
 

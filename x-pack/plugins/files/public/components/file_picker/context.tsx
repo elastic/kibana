@@ -7,10 +7,10 @@
 
 import React, { createContext, useContext, useMemo, useEffect } from 'react';
 import type { FunctionComponent } from 'react';
-import { useFilesContext } from '../context';
+import { useFilesContext, FilesContextValue } from '../context';
 import { FilePickerState, createFilePickerState } from './file_picker_state';
 
-interface FilePickerContextValue {
+interface FilePickerContextValue extends FilesContextValue {
   state: FilePickerState;
   kind: string;
 }
@@ -28,13 +28,18 @@ export const FilePickerContext: FunctionComponent<FilePickerContextProps> = ({
   pageSize,
   children,
 }) => {
-  const { client } = useFilesContext();
+  const filesContext = useFilesContext();
+  const { client } = filesContext;
   const state = useMemo(
     () => createFilePickerState({ pageSize, client, kind }),
     [pageSize, client, kind]
   );
   useEffect(() => state.dispose, [state]);
-  return <FilePickerCtx.Provider value={{ state, kind }}>{children}</FilePickerCtx.Provider>;
+  return (
+    <FilePickerCtx.Provider value={{ state, kind, ...filesContext }}>
+      {children}
+    </FilePickerCtx.Provider>
+  );
 };
 
 export const useFilePickerContext = (): FilePickerContextValue => {
