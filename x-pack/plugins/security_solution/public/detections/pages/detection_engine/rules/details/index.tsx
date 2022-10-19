@@ -582,17 +582,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     setRule((currentRule) => (currentRule ? { ...currentRule, enabled } : currentRule));
   }, []);
 
-  const goToEditRule = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.rules,
-        path: getEditRuleUrl(ruleId ?? ''),
-      });
-    },
-    [navigateToApp, ruleId]
-  );
-
   const onShowBuildingBlockAlertsChangedCallback = useCallback(
     (newShowBuildingBlockAlerts: boolean) => {
       setShowBuildingBlockAlerts(newShowBuildingBlockAlerts);

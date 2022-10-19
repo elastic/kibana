@@ -68,7 +68,7 @@ const useEnabledColumn = ({ hasPermissions }: ColumnsProps): TableColumn => {
       render: (_, rule: Rule) => (
         <EuiToolTip
           position="top"
-          content={getToolTipContent(rule, hasMlPermissions, hasActionsPrivileges)}
+          content={getToolTipContent(rule, hasMlPermissions, hasActionsPrivileges, true)}
         >
           <RuleSwitch
             id={rule.id}

@@ -96,7 +96,7 @@ const RuleActionsOverflowComponent = ({
             >
               <EuiToolTip
                 position="left"
-                content={getToolTipContent(rule, true, canDuplicateRuleWithActions)}
+                content={getToolTipContent(rule, true, canDuplicateRuleWithActions, true)}
               >
                 <>{i18nActions.DUPLICATE_RULE}</>
               </EuiToolTip>
