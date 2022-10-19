@@ -8,7 +8,7 @@ In this tutorial, you’ll look at live urban transit data from the city of Port
 
 You’ll learn to:
 
-- Use the Elastic Agent to ingest the TriMet REST API into Elasticsearch.
+- Use {agent} to ingest the TriMet REST API into {es}.
 - Create a map with layers that visualize asset tracks and last-known locations.
 - Use symbols and colors to style data values and show which direction an asset is heading.
 - Set up tracking containment alerts to monitor moving vehicles.
