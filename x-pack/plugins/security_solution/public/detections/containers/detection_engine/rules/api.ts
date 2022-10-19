@@ -8,6 +8,10 @@
 import { camelCase } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
 
+import type {
+  CreateRuleExceptionListItemSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,
@@ -406,3 +410,30 @@ export const findRuleExceptionReferences = async ({
     }
   );
 };
+
+/**
+ * Add exception items to default rule exception list
+ *
+ * @param ruleId `id` of rule to add items to
+ * @param items CreateRuleExceptionListItemSchema[]
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const addRuleExceptions = async ({
+  ruleId,
+  items,
+  signal,
+}: {
+  ruleId: string;
+  items: CreateRuleExceptionListItemSchema[];
+  signal: AbortSignal | undefined;
+}): Promise<ExceptionListItemSchema[]> =>
+  KibanaServices.get().http.fetch<ExceptionListItemSchema[]>(
+    `${DETECTION_ENGINE_RULES_URL}/${ruleId}/exceptions`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ items }),
+      signal,
+    }
+  );

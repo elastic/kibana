@@ -16,11 +16,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
-import {
-  clearEventsLoading,
-  clearEventsDeleted,
-  setTimelineUpdatedAt,
-} from '../store/t_grid/actions';
+import { clearEventsLoading, clearEventsDeleted, setTableUpdatedAt } from '../store/t_grid/actions';
 import {
   Direction,
   TimelineFactoryQueryTypes,
@@ -40,16 +36,13 @@ import type {
 import type { ESQuery } from '../../common/typed_json';
 import type { KueryFilterQueryKind } from '../../common/types/timeline';
 import { useAppToasts } from '../hooks/use_app_toasts';
-import { TimelineId } from '../store/t_grid/types';
+import { TableId } from '../store/t_grid/types';
 import * as i18n from './translations';
 import { getSearchTransactionName, useStartTransaction } from '../lib/apm/use_start_transaction';
 
 export type InspectResponse = Inspect & { response: string[] };
 
-export const detectionsTimelineIds = [
-  TimelineId.detectionsPage,
-  TimelineId.detectionsRulesDetailsPage,
-];
+export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
 
 export type Refetch = () => void;
 
@@ -198,7 +191,7 @@ export const useTimelineEvents = ({
 
   const setUpdated = useCallback(
     (updatedAt: number) => {
-      dispatch(setTimelineUpdatedAt({ id, updated: updatedAt }));
+      dispatch(setTableUpdatedAt({ id, updated: updatedAt }));
     },
     [dispatch, id]
   );

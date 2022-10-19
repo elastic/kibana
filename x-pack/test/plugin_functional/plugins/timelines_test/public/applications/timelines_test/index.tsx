@@ -71,7 +71,6 @@ const AppRoot = React.memo(
                   deletedEventIds: [],
                   disabledCellActions: [],
                   end: '',
-                  footerText: 'Events',
                   filters: [],
                   hasAlertsCrudPermissions,
                   itemsPerPageOptions: [1, 2, 3],

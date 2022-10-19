@@ -12,7 +12,7 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { mockIndicatorsFiltersContext } from '../../../../../common/mocks/mock_indicators_filters_context';
 import { mockUiSettingsService } from '../../../../../common/mocks/mock_kibana_ui_settings_service';
 import { mockKibanaTimelinesService } from '../../../../../common/mocks/mock_kibana_timelines_service';
-import { generateMockIndicator, Indicator } from '../../../../../../common/types/indicator';
+import { generateMockIndicator, Indicator } from '../../../types';
 import { IndicatorsFlyoutTable } from '.';
 import { IndicatorsFiltersContext } from '../../../containers/filters';
 

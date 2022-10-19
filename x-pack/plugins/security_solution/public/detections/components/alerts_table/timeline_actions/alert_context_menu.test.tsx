@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import { AlertContextMenu } from './alert_context_menu';
-import { TimelineId } from '../../../../../common/types';
+import { TableId, TimelineId } from '../../../../../common/types';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
 import type { Ecs } from '../../../../../common/ecs';
@@ -44,7 +44,7 @@ const props = {
   disabled: false,
   ecsRowData,
   refetch: jest.fn(),
-  timelineId: 'detections-page',
+  timelineId: 'alerts-page',
 };
 
 jest.mock('../../../../common/lib/kibana', () => ({
@@ -85,8 +85,8 @@ const markAsClosedButton = '[data-test-subj="close-alert-status"]';
 const addEndpointEventFilterButton = '[data-test-subj="add-event-filter-menu-item"]';
 
 describe('InvestigateInResolverAction', () => {
-  test('it render AddToCase context menu item if timelineId === TimelineId.detectionsPage', () => {
-    const wrapper = mount(<AlertContextMenu {...props} timelineId={TimelineId.detectionsPage} />, {
+  test('it render AddToCase context menu item if timelineId === TableId.alertsOnAlertsPage', () => {
+    const wrapper = mount(<AlertContextMenu {...props} scopeId={TableId.alertsOnAlertsPage} />, {
       wrappingComponent: TestProviders,
     });
 
@@ -95,9 +95,9 @@ describe('InvestigateInResolverAction', () => {
     expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(true);
   });
 
-  test('it render AddToCase context menu item if timelineId === TimelineId.detectionsRulesDetailsPage', () => {
+  test('it render AddToCase context menu item if timelineId === TableId.alertsOnRuleDetailsPage', () => {
     const wrapper = mount(
-      <AlertContextMenu {...props} timelineId={TimelineId.detectionsRulesDetailsPage} />,
+      <AlertContextMenu {...props} scopeId={TableId.alertsOnRuleDetailsPage} />,
       {
         wrappingComponent: TestProviders,
       }
@@ -109,7 +109,7 @@ describe('InvestigateInResolverAction', () => {
   });
 
   test('it render AddToCase context menu item if timelineId === TimelineId.active', () => {
-    const wrapper = mount(<AlertContextMenu {...props} timelineId={TimelineId.active} />, {
+    const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
       wrappingComponent: TestProviders,
     });
 
@@ -119,7 +119,7 @@ describe('InvestigateInResolverAction', () => {
   });
 
   test('it does NOT render AddToCase context menu item when timelineId is not in the allowed list', () => {
-    const wrapper = mount(<AlertContextMenu {...props} timelineId="timeline-test" />, {
+    const wrapper = mount(<AlertContextMenu {...props} scopeId="timeline-test" />, {
       wrappingComponent: TestProviders,
     });
     wrapper.find(actionMenuButton).simulate('click');
@@ -128,7 +128,7 @@ describe('InvestigateInResolverAction', () => {
   });
 
   test('it renders the correct status action buttons', () => {
-    const wrapper = mount(<AlertContextMenu {...props} timelineId={TimelineId.active} />, {
+    const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
       wrappingComponent: TestProviders,
     });
 
@@ -155,7 +155,7 @@ describe('InvestigateInResolverAction', () => {
 
       test('it disables AddEndpointEventFilter when timeline id is not host events page', () => {
         const wrapper = mount(
-          <AlertContextMenu {...endpointEventProps} timelineId={TimelineId.active} />,
+          <AlertContextMenu {...endpointEventProps} scopeId={TimelineId.active} />,
           {
             wrappingComponent: TestProviders,
           }
@@ -168,7 +168,7 @@ describe('InvestigateInResolverAction', () => {
 
       test('it enables AddEndpointEventFilter when timeline id is host events page', () => {
         const wrapper = mount(
-          <AlertContextMenu {...endpointEventProps} timelineId={TimelineId.hostsPageEvents} />,
+          <AlertContextMenu {...endpointEventProps} scopeId={TableId.hostsPageEvents} />,
           {
             wrappingComponent: TestProviders,
           }
@@ -185,7 +185,7 @@ describe('InvestigateInResolverAction', () => {
           ecsRowData: { ...ecsRowData, agent: { type: ['other'] }, event: { kind: ['event'] } },
         };
         const wrapper = mount(
-          <AlertContextMenu {...customProps} timelineId={TimelineId.hostsPageEvents} />,
+          <AlertContextMenu {...customProps} scopeId={TableId.hostsPageEvents} />,
           {
             wrappingComponent: TestProviders,
           }
@@ -198,7 +198,7 @@ describe('InvestigateInResolverAction', () => {
 
       test('it enables AddEndpointEventFilter when timeline id is user events page', () => {
         const wrapper = mount(
-          <AlertContextMenu {...endpointEventProps} timelineId={TimelineId.usersPageEvents} />,
+          <AlertContextMenu {...endpointEventProps} scopeId={TableId.usersPageEvents} />,
           {
             wrappingComponent: TestProviders,
           }
@@ -215,7 +215,7 @@ describe('InvestigateInResolverAction', () => {
           ecsRowData: { ...ecsRowData, agent: { type: ['other'] }, event: { kind: ['event'] } },
         };
         const wrapper = mount(
-          <AlertContextMenu {...customProps} timelineId={TimelineId.usersPageEvents} />,
+          <AlertContextMenu {...customProps} scopeId={TableId.usersPageEvents} />,
           {
             wrappingComponent: TestProviders,
           }
@@ -236,7 +236,7 @@ describe('InvestigateInResolverAction', () => {
 
       test('it disables AddEndpointEventFilter when timeline id is host events page but cannot acces endpoint management', () => {
         const wrapper = mount(
-          <AlertContextMenu {...endpointEventProps} timelineId={TimelineId.hostsPageEvents} />,
+          <AlertContextMenu {...endpointEventProps} scopeId={TableId.hostsPageEvents} />,
           {
             wrappingComponent: TestProviders,
           }
@@ -249,7 +249,7 @@ describe('InvestigateInResolverAction', () => {
 
       test('it disables AddEndpointEventFilter when timeline id is user events page but cannot acces endpoint management', () => {
         const wrapper = mount(
-          <AlertContextMenu {...endpointEventProps} timelineId={TimelineId.usersPageEvents} />,
+          <AlertContextMenu {...endpointEventProps} scopeId={TableId.usersPageEvents} />,
           {
             wrappingComponent: TestProviders,
           }
