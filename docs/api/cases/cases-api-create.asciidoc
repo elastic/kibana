@@ -34,6 +34,15 @@ default space is used.
 [role="child_attributes"]
 === {api-request-body-title}
 
+`assignees`::
+(Optional, array of objects) 
+.Properties of `assignees` objects
+[%collapsible%open]
+=====
+`uid`:: A user identifier to assign to the case.
+// TBD How are these values found?
+=====
+
 `connector`::
 (Required, object) An object that contains the connector configuration.
 +
@@ -207,6 +216,7 @@ the case identifier, version, and creation time. For example:
   "totalAlerts": 0,
   "title": "Case title 1",
   "tags": [ "tag 1" ],
+  "assignees": [],
   "settings": {
     "syncAlerts": true
   },

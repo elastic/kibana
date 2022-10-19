@@ -40,6 +40,15 @@ default space is used.
 .Properties of `cases` objects
 [%collapsible%open]
 ====
+`assignees`::
+(Optional, array of objects) 
+.Properties of `assignees` objects
+[%collapsible%open]
+=====
+`uid`:: A user identifier to assign to the case.
+// TBD How are these values found?
+=====
+
 `connector`::
 (Optional, object) An object that contains the connector configuration.
 +
@@ -203,6 +212,7 @@ PATCH api/cases
       },
       "description": "A new description.",
       "tags": [ "tag-1", "tag-2" ],
+      "assignees": [],
       "settings": {
         "syncAlerts": true
       }
