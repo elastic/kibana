@@ -13,6 +13,7 @@ import { Filter } from '@kbn/es-query';
 import { OptionsListReduxState, OptionsListComponentState } from './types';
 import { OptionsListField } from '../../common/options_list/types';
 import { getIpRangeQuery } from '../../common/options_list/ip_search';
+import { IFrame } from '@storybook/components';
 
 export const getDefaultComponentState = (): OptionsListReduxState['componentState'] => ({
   searchString: { value: '', valid: true },
@@ -51,6 +52,29 @@ export const optionsListReducers = {
       state.componentState.searchString.valid = getIpRangeQuery(action.payload).validSearch;
     }
   },
+  selectExists: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
+    console.log(
+      'BEFORE:',
+      { ...state.componentState.validSelections },
+      { ...state.componentState.ignoredSelections }
+    );
+
+    state.explicitInput.existsSelected = action.payload;
+
+    if (action.payload) {
+      state.componentState.ignoredSelections = state.componentState.validSelections;
+      state.componentState.validSelections = [];
+    } else {
+      state.componentState.validSelections = state.componentState.ignoredSelections;
+      state.componentState.ignoredSelections = [];
+    }
+
+    console.log(
+      'AFTER',
+      { ...state.componentState.validSelections },
+      { ...state.componentState.ignoredSelections }
+    );
+  },
   selectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
     if (!state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
     state.explicitInput.selectedOptions?.push(action.payload);
@@ -62,7 +86,8 @@ export const optionsListReducers = {
     state.explicitInput.selectedOptions = [action.payload];
   },
   clearSelections: (state: WritableDraft<OptionsListReduxState>) => {
-    if (state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
+    if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
+    else if (state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
   },
   setExclude: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     state.explicitInput.exclude = action.payload;

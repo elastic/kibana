@@ -54,13 +54,21 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
-    actions: { selectOption, deselectOption, clearSelections, replaceSelection, setExclude },
+    actions: {
+      selectOption,
+      deselectOption,
+      clearSelections,
+      replaceSelection,
+      setExclude,
+      selectExists,
+    },
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
 
   const dispatch = useEmbeddableDispatch();
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const invalidSelections = select((state) => state.componentState.invalidSelections);
+  const ignoredSelections = select((state) => state.componentState.ignoredSelections);
   const totalCardinality = select((state) => state.componentState.totalCardinality);
   const availableOptions = select((state) => state.componentState.availableOptions);
   const searchString = select((state) => state.componentState.searchString);
@@ -68,6 +76,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
 
   const selectedOptions = select((state) => state.explicitInput.selectedOptions);
   const hideExclude = select((state) => state.explicitInput.hideExclude);
+  const existsSelected = select((state) => state.explicitInput.existsSelected);
   const singleSelect = select((state) => state.explicitInput.singleSelect);
   const title = select((state) => state.explicitInput.title);
   const exclude = select((state) => state.explicitInput.exclude);
@@ -83,6 +92,10 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
 
   const [showOnlySelected, setShowOnlySelected] = useState(false);
   const euiBackgroundColor = useEuiBackgroundColor('subdued');
+
+  const combinedIgnoredSelections = useMemo(() => {
+    return (invalidSelections ?? []).concat(ignoredSelections ?? []);
+  }, [ignoredSelections, invalidSelections]);
 
   return (
     <>
@@ -114,14 +127,14 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {invalidSelections && invalidSelections.length > 0 && (
+                {combinedIgnoredSelections.length > 0 && (
                   <EuiToolTip
                     content={OptionsListStrings.popover.getInvalidSelectionsTooltip(
-                      invalidSelections.length
+                      combinedIgnoredSelections.length
                     )}
                   >
                     <EuiBadge className="optionsList__ignoredBadge" color="warning">
-                      {invalidSelections.length}
+                      {combinedIgnoredSelections.length}
                     </EuiBadge>
                   </EuiToolTip>
                 )}
@@ -174,26 +187,39 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
       >
         {!showOnlySelected && (
           <>
-            {availableOptions?.map((availableOption, index) => (
-              <EuiFilterSelectItem
-                data-test-subj={`optionsList-control-selection-${availableOption}`}
-                checked={selectedOptionsSet?.has(availableOption) ? 'on' : undefined}
-                key={index}
-                onClick={() => {
-                  if (singleSelect) {
-                    dispatch(replaceSelection(availableOption));
-                    return;
-                  }
-                  if (selectedOptionsSet.has(availableOption)) {
-                    dispatch(deselectOption(availableOption));
-                    return;
-                  }
-                  dispatch(selectOption(availableOption));
-                }}
-              >
-                {`${availableOption}`}
-              </EuiFilterSelectItem>
-            ))}
+            <EuiFilterSelectItem
+              data-test-subj={`optionsList-control-selection-test`}
+              checked={existsSelected ? 'on' : undefined}
+              key={'exists-option'}
+              onClick={() => {
+                console.log(existsSelected);
+                dispatch(selectExists(!Boolean(existsSelected)));
+                console.log(existsSelected);
+              }}
+            >
+              <i>{`Exists (*)`}</i>
+            </EuiFilterSelectItem>
+            {!existsSelected &&
+              availableOptions?.map((availableOption, index) => (
+                <EuiFilterSelectItem
+                  data-test-subj={`optionsList-control-selection-${availableOption}`}
+                  checked={selectedOptionsSet?.has(availableOption) ? 'on' : undefined}
+                  key={index}
+                  onClick={() => {
+                    if (singleSelect) {
+                      dispatch(replaceSelection(availableOption));
+                      return;
+                    }
+                    if (selectedOptionsSet.has(availableOption)) {
+                      dispatch(deselectOption(availableOption));
+                      return;
+                    }
+                    dispatch(selectOption(availableOption));
+                  }}
+                >
+                  {`${availableOption}`}
+                </EuiFilterSelectItem>
+              ))}
 
             {!loading && (!availableOptions || availableOptions.length === 0) && (
               <div
@@ -208,18 +234,18 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
               </div>
             )}
 
-            {!isEmpty(invalidSelections) && (
+            {!isEmpty(combinedIgnoredSelections) && (
               <>
                 <EuiSpacer size="s" />
                 <EuiTitle size="xxs" className="optionsList-control-ignored-selection-title">
                   <label>
                     {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(
-                      invalidSelections?.length ?? 0
+                      combinedIgnoredSelections?.length ?? 0
                     )}
                   </label>
                 </EuiTitle>
                 <>
-                  {invalidSelections?.map((ignoredSelection, index) => (
+                  {combinedIgnoredSelections?.map((ignoredSelection, index) => (
                     <EuiFilterSelectItem
                       data-test-subj={`optionsList-control-ignored-selection-${ignoredSelection}`}
                       checked={'on'}

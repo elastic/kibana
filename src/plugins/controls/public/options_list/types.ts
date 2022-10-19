@@ -22,6 +22,7 @@ export interface OptionsListComponentState {
   availableOptions?: string[];
   invalidSelections?: string[];
   validSelections?: string[];
+  ignoredSelections?: string[];
   searchString: SearchString;
 }
 
