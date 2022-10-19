@@ -129,7 +129,11 @@ export function FilterQueryInput({
               data-test-subj="indexPattern-filter-by-input"
             >
               <QueryInput
-                indexPatternTitle={indexPattern.title}
+                indexPattern={
+                  indexPattern.id
+                    ? { type: 'id', value: indexPattern.id }
+                    : { type: 'title', value: indexPattern.title }
+                }
                 disableAutoFocus={true}
                 value={queryInput}
                 onChange={setQueryInput}

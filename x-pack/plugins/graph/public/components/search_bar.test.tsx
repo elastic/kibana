@@ -18,6 +18,7 @@ import {
 } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import { createStubDataView } from '@kbn/data-views-plugin/common/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider, InjectedIntl } from '@kbn/i18n-react';
@@ -90,7 +91,7 @@ describe('search_bar', () => {
     isLoading: false,
     indexPatternProvider: {
       get: jest.fn(() =>
-        Promise.resolve({ fields: [], getName: () => 'Test Name' } as unknown as DataView)
+        Promise.resolve(createStubDataView({ spec: { fields: {}, name: 'Test Name' } }))
       ),
     },
     confirmWipeWorkspace: (callback: () => void) => {

@@ -50,7 +50,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
 
       const objectPatternsFromStrings = (await fetchIndexPatterns(
         data.dataViews,
-        stringPatterns
+        stringPatterns.map((value) => ({ type: 'title', value }))
       )) as DataView[];
       setDataviews([...objectPatterns, ...objectPatternsFromStrings]);
       const [dataView] = [...objectPatterns, ...objectPatternsFromStrings];

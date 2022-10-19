@@ -361,7 +361,46 @@ describe('QueryStringInput', () => {
         disableAutoFocus: true,
       })
     );
-    expect(mockFetchIndexPatterns.mock.calls[0][1]).toStrictEqual(patternStrings);
+    expect(mockFetchIndexPatterns.mock.calls[0][1]).toEqual(
+      patternStrings.map((value) => ({ type: 'title', value }))
+    );
+  });
+
+  it('Should accept index pattern ids and fetch the full object', () => {
+    const idStrings = [{ type: 'id', value: '1' }];
+    mockFetchIndexPatterns.mockClear();
+    mount(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onSubmit: noop,
+        indexPatterns: idStrings,
+        disableAutoFocus: true,
+      })
+    );
+    expect(mockFetchIndexPatterns.mock.calls[0][1]).toEqual(idStrings);
+  });
+
+  it('Should accept a mix of full objects, title and ids and fetch only missing index pattern objects', () => {
+    const patternStrings = [
+      'logstash-*',
+      { type: 'id', value: '1' },
+      { type: 'title', value: 'my-fake-index-pattern' },
+      stubIndexPattern,
+    ];
+    mockFetchIndexPatterns.mockClear();
+    mount(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onSubmit: noop,
+        indexPatterns: patternStrings,
+        disableAutoFocus: true,
+      })
+    );
+    expect(mockFetchIndexPatterns.mock.calls[0][1]).toEqual([
+      { type: 'title', value: 'logstash-*' },
+      { type: 'id', value: '1' },
+      { type: 'title', value: 'my-fake-index-pattern' },
+    ]);
   });
 
   it('Should convert non-breaking spaces into regular spaces', () => {

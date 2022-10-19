@@ -60,7 +60,11 @@ export const FilterPopover = ({
       <QueryInput
         isInvalid={!isQueryValid(filter.input, indexPattern)}
         value={filter.input}
-        indexPatternTitle={indexPattern.title}
+        indexPattern={
+          indexPattern.id
+            ? { type: 'id', value: indexPattern.id }
+            : { type: 'title', value: indexPattern.title }
+        }
         disableAutoFocus
         onChange={setFilterQuery}
         onSubmit={() => {
