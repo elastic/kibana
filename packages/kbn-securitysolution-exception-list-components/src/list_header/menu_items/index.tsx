@@ -11,7 +11,7 @@ import { HeaderMenu } from '../../header_menu';
 import { headerMenuCss } from '../list_header.styles';
 import * as i18n from '../../translations';
 import { Rule } from '../../types';
-import { generateLinedRulesMenuItems } from '../../generate_linked_rules_menu_item';
+import { generateLinkedRulesMenuItems } from '../../generate_linked_rules_menu_item';
 interface MenuItemsProps {
   isReadonly: boolean;
   dataTestSubj?: string;
@@ -33,7 +33,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
 }) => {
   const referencedLinks = useMemo(
     () =>
-      generateLinedRulesMenuItems({
+      generateLinkedRulesMenuItems({
         leftIcon: 'check',
         dataTestSubj,
         linkedRules,

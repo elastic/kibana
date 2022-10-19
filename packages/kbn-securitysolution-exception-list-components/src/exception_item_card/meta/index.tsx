@@ -16,7 +16,7 @@ import * as i18n from '../translations';
 import type { Rule } from '../../types';
 import { MetaInfoDetails } from './details_info';
 import { HeaderMenu } from '../../header_menu';
-import { generateLinedRulesMenuItems } from '../../generate_linked_rules_menu_item';
+import { generateLinkedRulesMenuItems } from '../../generate_linked_rules_menu_item';
 
 const itemCss = css`
   border-right: 1px solid #d3dae6;
@@ -37,7 +37,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
 
     const referencedLinks = useMemo(
       () =>
-        generateLinedRulesMenuItems({
+        generateLinkedRulesMenuItems({
           dataTestSubj,
           linkedRules: rules,
           securityLinkAnchorComponent,

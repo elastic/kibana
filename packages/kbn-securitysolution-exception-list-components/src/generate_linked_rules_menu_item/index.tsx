@@ -17,7 +17,7 @@ interface MenuItemLinkedRulesProps {
   securityLinkAnchorComponent: ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
 }
 
-export const generateLinedRulesMenuItems = ({
+export const generateLinkedRulesMenuItems = ({
   dataTestSubj,
   linkedRules,
   securityLinkAnchorComponent,
