@@ -61,6 +61,7 @@ export class SettingsStorage<TSettingsDef extends object = object> {
 
   /** Save a new version of the settings to disk */
   public async save(newSettings: TSettingsDef): Promise<void> {
+    // FIXME: Enhance this method so that Partial `newSettings` can be provided and they are merged into the existing set.
     await this.ensureExists();
     await writeFile(this.settingsFileFullPath, JSON.stringify(newSettings, null, 2));
   }

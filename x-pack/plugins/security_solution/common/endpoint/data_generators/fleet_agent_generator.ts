@@ -242,7 +242,7 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
         // NOt able to find anything in fleet
         break;
 
-      // default is `online`, which is also teh default returned by `generateEsHit()`
+      // default is `online`, which is also the default returned by `generateEsHit()`
     }
 
     return esHit;

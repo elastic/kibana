@@ -49,7 +49,7 @@ export const checkInFleetAgent = async (
   // Ensure any `undefined` value is set to `null` for the update
   Object.entries(update).forEach(([key, value]) => {
     if (value === undefined) {
-      // @ts-expect-error
+      // @ts-expect-error TS7053 Element implicitly has an 'any' type
       update[key] = null;
     }
   });

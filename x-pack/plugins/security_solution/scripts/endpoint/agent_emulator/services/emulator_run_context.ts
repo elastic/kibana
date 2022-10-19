@@ -20,7 +20,7 @@ export interface EmulatorRunContextConstructorOptions {
   username: string;
   password: string;
   kibanaUrl: string;
-  elasticUrl: string;
+  elasticsearchUrl: string;
   actionResponseDelay: number;
   checkinInterval: number;
   asSuperuser?: boolean;
@@ -37,7 +37,7 @@ export class EmulatorRunContext {
   private readonly username: string;
   private readonly password: string;
   private readonly kibanaUrl: string;
-  private readonly elasticUrl: string;
+  private readonly elasticsearchUrl: string;
   private readonly actionResponseDelay: number;
   private readonly checkinInterval: number;
   private readonly asSuperuser: boolean = false;
@@ -48,7 +48,7 @@ export class EmulatorRunContext {
     this.username = options.username;
     this.password = options.password;
     this.kibanaUrl = options.kibanaUrl;
-    this.elasticUrl = options.elasticUrl;
+    this.elasticsearchUrl = options.elasticsearchUrl;
     this.actionResponseDelay = options.actionResponseDelay;
     this.checkinInterval = options.checkinInterval;
     this.asSuperuser = options.asSuperuser ?? false;
@@ -71,7 +71,7 @@ export class EmulatorRunContext {
 
     const { esClient, kbnClient, log } = await createRuntimeServices({
       kibanaUrl: this.kibanaUrl,
-      elasticsearchUrl: this.elasticUrl,
+      elasticsearchUrl: this.elasticsearchUrl,
       username: this.username,
       password: this.password,
       asSuperuser: this.asSuperuser,
