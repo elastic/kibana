@@ -3101,6 +3101,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-lifecycle-server-mocks@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-lifecycle-server@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server":
   version "0.0.0"
   uid ""
@@ -7313,6 +7317,10 @@
   uid ""
 
 "@types/kbn__core-lifecycle-server-internal@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-lifecycle-server-mocks@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
