@@ -66,7 +66,6 @@ export interface FieldStatsServices {
 
 interface FieldStatsPropsBase {
   services: FieldStatsServices;
-  filters: Filter[];
   /** ISO formatted date string **/
   fromDate: string;
   /** ISO formatted date string **/
@@ -89,14 +88,16 @@ interface FieldStatsPropsBase {
   onStateChange?: (s: FieldStatsState) => void;
 }
 
-interface FieldStatsWithKbnQuery extends FieldStatsPropsBase {
+export interface FieldStatsWithKbnQuery extends FieldStatsPropsBase {
   /** If Kibana-supported query is provided, it will be converted to dsl query **/
   query: Query | AggregateQuery;
+  filters: Filter[];
   dslQuery?: never;
 }
 
-interface FieldStatsWithDslQuery extends FieldStatsPropsBase {
+export interface FieldStatsWithDslQuery extends FieldStatsPropsBase {
   query?: never;
+  filters?: never;
   /** If dsl query is provided, use it directly in searches **/
   dslQuery: object;
 }

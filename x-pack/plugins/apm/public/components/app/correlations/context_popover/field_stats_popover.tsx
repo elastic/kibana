@@ -17,7 +17,6 @@ import {
   FieldStatsState,
 } from '@kbn/unified-field-list-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { Filter } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldTopValuesBucket } from '@kbn/unified-field-list-plugin/public';
 
@@ -73,8 +72,6 @@ export type OnAddFilter = ({
   fieldValue: string | number;
   include: boolean;
 }) => void;
-
-const defaultFilters: Filter[] = [];
 
 type FieldStatsPopoverContentProps = Omit<
   FieldStatsProps,
@@ -150,7 +147,6 @@ export function FieldStatsPopoverContent({
         field={field}
         dataViewOrDataViewId={dataView}
         dslQuery={dslQuery}
-        filters={filters}
         fromDate={fromDate}
         toDate={toDate}
         onAddFilter={onAddFilter}
@@ -338,7 +334,6 @@ export function FieldStatsPopover({
             field={field}
             dataView={dataView}
             dslQuery={fieldStatsQuery}
-            filters={defaultFilters}
             fromDate={start}
             toDate={end}
             onAddFilter={addFilter}

@@ -13,11 +13,11 @@ export type {
   NumberStatsResult,
   TopValuesResult,
 } from '../common/types';
-export {
-  FieldTopValuesBucket,
+export type {
   FieldTopValuesBucketProps,
   FieldTopValuesBucketParams,
 } from './components/field_stats';
+export { FieldTopValuesBucket } from './components/field_stats';
 export type {
   FieldStatsProps,
   FieldStatsServices,

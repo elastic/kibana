@@ -18,8 +18,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { loadFieldStats } from '../../services/field_stats';
-import FieldStats from './field_stats';
-import type { FieldStatsProps } from './field_stats';
+import FieldStats, { FieldStatsWithKbnQuery } from './field_stats';
 
 jest.mock('../../services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({}),
@@ -34,7 +33,7 @@ const mockedServices = {
 };
 
 describe('UnifiedFieldList <FieldStats />', () => {
-  let defaultProps: FieldStatsProps;
+  let defaultProps: FieldStatsWithKbnQuery;
   let dataView: DataView;
 
   beforeEach(() => {
@@ -174,6 +173,64 @@ describe('UnifiedFieldList <FieldStats />', () => {
           must_not: [],
         },
       },
+      fromDate: 'now-14d',
+      toDate: 'now-7d',
+      field: defaultProps.field,
+    });
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+
+    await act(async () => {
+      resolveFunction!({
+        totalDocuments: 4633,
+        sampledDocuments: 4633,
+        sampledValues: 4633,
+        histogram: {
+          buckets: [{ count: 705, key: 0 }],
+        },
+        topValues: {
+          buckets: [{ count: 147, key: 0 }],
+        },
+      });
+    });
+
+    await wrapper.update();
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+
+    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+  });
+
+  it('should request field stats with dsl query', async () => {
+    let resolveFunction: (arg: unknown) => void;
+
+    (loadFieldStats as jest.Mock).mockImplementation(() => {
+      return new Promise((resolve) => {
+        resolveFunction = resolve;
+      });
+    });
+
+    const wrapper = mountWithIntl(
+      <FieldStats
+        {...{
+          services: mockedServices,
+          dataViewOrDataViewId: dataView,
+          field: dataView.fields.find((f) => f.name === 'bytes')!,
+          'data-test-subj': 'testing',
+        }}
+        dslQuery={{ bool: { filter: { range: { field: 'duration', gte: 3000 } } } }}
+        fromDate="now-14d"
+        toDate="now-7d"
+      />
+    );
+
+    await wrapper.update();
+
+    expect(loadFieldStats).toHaveBeenCalledWith({
+      abortController: new AbortController(),
+      services: { data: mockedServices.data },
+      dataView,
+      dslQuery: { bool: { filter: { range: { field: 'duration', gte: 3000 } } } },
       fromDate: 'now-14d',
       toDate: 'now-7d',
       field: defaultProps.field,
@@ -631,5 +688,75 @@ describe('UnifiedFieldList <FieldStats />', () => {
     expect(wrapper.text()).toBe(
       'Toggle either theTop valuesDistribution1273.9%1326.1%Calculated from 23 sample records.'
     );
+  });
+
+  it('should override the top value bar props with overrideFieldTopValueBar', async () => {
+    let resolveFunction: (arg: unknown) => void;
+
+    (loadFieldStats as jest.Mock).mockImplementation(() => {
+      return new Promise((resolve) => {
+        resolveFunction = resolve;
+      });
+    });
+
+    const field = dataView.fields.find((f) => f.name === 'machine.ram')!;
+
+    const wrapper = mountWithIntl(
+      <FieldStats
+        {...defaultProps}
+        field={field}
+        query={{ language: 'kuery', query: '' }}
+        filters={[]}
+        fromDate="now-1h"
+        toDate="now"
+        color={'red'}
+        overrideFieldTopValueBar={(params) => ({ color: 'accent' })}
+      />
+    );
+
+    await wrapper.update();
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+
+    await act(async () => {
+      resolveFunction!({
+        totalDocuments: 100,
+        sampledDocuments: 23,
+        sampledValues: 23,
+        histogram: {
+          buckets: [
+            {
+              count: 17,
+              key: 12,
+            },
+            {
+              count: 6,
+              key: 13,
+            },
+          ],
+        },
+        topValues: {
+          buckets: [
+            {
+              count: 17,
+              key: 12,
+            },
+            {
+              count: 6,
+              key: 13,
+            },
+          ],
+        },
+      });
+    });
+
+    await wrapper.update();
+
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
+
+    expect(loadFieldStats).toHaveBeenCalledTimes(1);
+
+    expect(wrapper.find(EuiProgress)).toHaveLength(2);
+    expect(wrapper.find(EuiProgress).first().props()).toHaveProperty('color', 'accent');
   });
 });
