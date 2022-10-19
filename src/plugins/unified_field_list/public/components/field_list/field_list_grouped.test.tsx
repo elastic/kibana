@@ -20,7 +20,7 @@ import { FieldsAccordion } from './fields_accordion';
 import { NoFieldsCallout } from './no_fields_callout';
 import { useGroupedFields, type GroupedFieldsParams } from '../../hooks/use_grouped_fields';
 
-describe('UnifiedFieldList <FieldListGrouped />', () => {
+describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
   let defaultProps: FieldListGroupedProps<DataViewField>;
   let mockedServices: GroupedFieldsParams<DataViewField>['services'];
   const allFields = dataView.fields;
