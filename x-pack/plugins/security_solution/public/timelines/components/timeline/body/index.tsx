@@ -81,7 +81,6 @@ export const StatefulBody = React.memo<Props>(
     const dispatch = useDispatch();
     const containerRef = useRef<HTMLDivElement | null>(null);
     const {
-      manageTimelineById: { queryFields, selectAll },
       timeline: {
         columns,
         eventIdToNoteIds,
@@ -90,8 +89,8 @@ export const StatefulBody = React.memo<Props>(
         loadingEventIds,
         pinnedEventIds,
         selectedEventIds,
-        showCheckboxes,
         show,
+        queryFields,
       } = timelineDefaults,
     } = useSelector((state: State) => timelineBodySelector(state, id));
 
@@ -139,10 +138,10 @@ export const StatefulBody = React.memo<Props>(
 
     // Sync to selectAll so parent components can select all events
     useEffect(() => {
-      if (selectAll && !isSelectAllChecked) {
+      if (!isSelectAllChecked) {
         onSelectAll({ isSelected: true });
       }
-    }, [isSelectAllChecked, onSelectAll, selectAll]);
+    }, [isSelectAllChecked, onSelectAll]);
 
     const enabledRowRenderers = useMemo(() => {
       if (
@@ -236,7 +235,7 @@ export const StatefulBody = React.memo<Props>(
               onSelectAll={onSelectAll}
               show={show}
               showEventsSelect={false}
-              showSelectAllCheckbox={showCheckboxes}
+              showSelectAllCheckbox={false}
               sort={sort}
               tabType={tabType}
               timelineId={id}
@@ -261,7 +260,7 @@ export const StatefulBody = React.memo<Props>(
               rowRenderers={enabledRowRenderers}
               onRuleChange={onRuleChange}
               selectedEventIds={selectedEventIds}
-              showCheckboxes={showCheckboxes}
+              showCheckboxes={false}
               leadingControlColumns={leadingControlColumns}
               trailingControlColumns={trailingControlColumns}
               tabType={tabType}
