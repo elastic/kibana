@@ -431,7 +431,6 @@ export class Authenticator {
               `${this.options.basePath.get(request)}/login`
             )
           ) {
-            // FIXME: Clean session storage client side!!!
             authenticationResult.redirectURL += `&${LOGOUT_REASON_QUERY_STRING_PARAMETER}=${encodeURIComponent(
               existingSessionValueRaw.code
             )}`;
