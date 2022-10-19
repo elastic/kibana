@@ -4,100 +4,82 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { i18n } from '@kbn/i18n';
 import { useCallback, useEffect, useState } from 'react';
 
-import { sendPutSettings, useGetSettings } from '../../../hooks';
+import { intersection } from 'lodash';
 
-const URL_REGEX = /^(https):\/\/[^\s$.?#].[^\s]*$/gm;
+import { sendPostFleetServerHost, useGetFleetServerHosts } from '../../../hooks';
+import type { FleetServerHost } from '../../../types';
 
 export interface FleetServerHostForm {
-  saveFleetServerHost: () => Promise<void>;
-  fleetServerHost?: string;
+  saveFleetServerHost: (host: FleetServerHost) => Promise<void>;
+  fleetServerHost?: FleetServerHost;
   fleetServerHostSettings: string[];
   isFleetServerHostSubmitted: boolean;
-  setFleetServerHost: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setFleetServerHost: React.Dispatch<React.SetStateAction<FleetServerHost | undefined>>;
   error?: string;
-  validateFleetServerHost: () => boolean;
 }
 
 export const useFleetServerHost = (): FleetServerHostForm => {
-  const [fleetServerHost, setFleetServerHost] = useState<string>();
+  const [fleetServerHost, setFleetServerHost] = useState<FleetServerHost>();
   const [isFleetServerHostSubmitted, setIsFleetServerHostSubmitted] = useState<boolean>(false);
   const [error, setError] = useState<string>();
 
-  const { data: settings } = useGetSettings();
+  const { data } = useGetFleetServerHosts();
 
   useEffect(() => {
-    const settingsFleetServerHosts = settings?.item.fleet_server_hosts ?? [];
+    const fleetServerHosts = data?.items ?? [];
+    const defaultHost = fleetServerHosts.find((item) => item.is_default === true);
 
-    if (settingsFleetServerHosts.length) {
-      setFleetServerHost(settingsFleetServerHosts[0]);
+    // Get the default host, otherwise the first fleet server found
+    if (defaultHost) {
+      setFleetServerHost(defaultHost);
+    } else {
+      setFleetServerHost(fleetServerHosts[0]);
     }
-  }, [settings?.item.fleet_server_hosts]);
+  }, [data?.items, fleetServerHost]);
 
-  const validateFleetServerHost = useCallback(() => {
-    if (!fleetServerHost) {
-      setError(
-        i18n.translate('xpack.fleet.fleetServerHost.requiredError', {
-          defaultMessage: 'Fleet server host is required.',
-        })
-      );
+  const saveFleetServerHost = useCallback(
+    async (newFleetServerHost: FleetServerHost) => {
+      setIsFleetServerHostSubmitted(false);
+      setFleetServerHost(newFleetServerHost);
 
-      return false;
-    } else if (!fleetServerHost.startsWith('https')) {
-      setError(
-        i18n.translate('xpack.fleet.fleetServerHost.requiresHttpsError', {
-          defaultMessage: 'Fleet server host must begin with "https"',
-        })
-      );
+      // if (!isValid) {
+      //   console.log('not valid, return');
+      //   return;
+      // }
 
-      return false;
-    } else if (!fleetServerHost.match(URL_REGEX)) {
-      setError(
-        i18n.translate('xpack.fleet.fleetServerSetup.addFleetServerHostInvalidUrlError', {
-          defaultMessage: 'Invalid URL',
-        })
-      );
+      const fleetServerHostExists = data?.items.reduce((acc, curr) => {
+        const hostsIntersection = intersection(curr.host_urls, newFleetServerHost?.host_urls);
+        return hostsIntersection.length > 0 || acc;
+      }, false);
 
-      return false;
-    }
-
-    return true;
-  }, [fleetServerHost]);
-
-  const saveFleetServerHost = useCallback(async () => {
-    setIsFleetServerHostSubmitted(false);
-
-    if (!validateFleetServerHost()) {
-      return;
-    }
-
-    // If the Fleet Server host provided already exists in settings, don't submit it
-    if (settings?.item.fleet_server_hosts.includes(fleetServerHost!)) {
+      // If the Fleet Server host provided already exists in settings, don't submit it
+      if (fleetServerHostExists) {
+        setIsFleetServerHostSubmitted(true);
+        return;
+      }
+      if (newFleetServerHost) {
+        const res = await sendPostFleetServerHost({
+          name: newFleetServerHost?.name,
+          host_urls: newFleetServerHost?.host_urls,
+          is_default: newFleetServerHost?.is_default,
+        });
+        if (res.error) {
+          throw res.error;
+        }
+      }
       setIsFleetServerHostSubmitted(true);
-      return;
-    }
-
-    const res = await sendPutSettings({
-      fleet_server_hosts: [fleetServerHost!, ...(settings?.item.fleet_server_hosts || [])],
-    });
-
-    if (res.error) {
-      throw res.error;
-    }
-
-    setIsFleetServerHostSubmitted(true);
-  }, [fleetServerHost, settings?.item.fleet_server_hosts, validateFleetServerHost]);
+    },
+    [data?.items]
+  );
 
   return {
     saveFleetServerHost,
     fleetServerHost,
-    fleetServerHostSettings: settings?.item.fleet_server_hosts ?? [],
+    fleetServerHostSettings: data?.items[0]?.host_urls ?? [],
     isFleetServerHostSubmitted,
     setFleetServerHost,
     error,
-    validateFleetServerHost,
   };
 };

@@ -8,9 +8,22 @@
 import { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { sendCreateAgentPolicy, sendGetOneAgentPolicy, useStartServices } from '../../../hooks';
+import {
+  sendCreateAgentPolicy,
+  sendGetOneAgentPolicy,
+  useStartServices,
+  useComboInput,
+  useInput,
+} from '../../../hooks';
 
 import type { NewAgentPolicy } from '../../../types';
+
+import type { FleetServerHost } from '../../../types';
+
+import {
+  validateName,
+  validateFleetServerHosts,
+} from '../../../sections/settings/components/fleet_server_hosts_flyout/use_fleet_server_host_form';
 
 import { useSelectFleetServerPolicy } from './use_select_fleet_server_policy';
 import { useServiceToken } from './use_service_token';
@@ -32,12 +45,11 @@ export interface QuickStartCreateForm {
   status: QuickStartCreateFormStatus;
   error?: string;
   submit: () => void;
-  fleetServerHost?: string;
-  fleetServerHostSettings: string[];
+  fleetServerHost?: FleetServerHost;
   isFleetServerHostSubmitted: boolean;
-  onFleetServerHostChange: (value: string) => void;
   fleetServerPolicyId?: string;
   serviceToken?: string;
+  inputs: any;
 }
 
 /**
@@ -52,12 +64,10 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
 
   const {
     fleetServerHost,
-    fleetServerHostSettings,
     isFleetServerHostSubmitted,
-    setFleetServerHost,
-    validateFleetServerHost,
     saveFleetServerHost,
     error: fleetServerError,
+    setFleetServerHost,
   } = useFleetServerHost();
 
   // When a validation error is surfaced from the Fleet Server host form, we want to treat it
@@ -71,18 +81,34 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
   const { fleetServerPolicyId, setFleetServerPolicyId } = useSelectFleetServerPolicy();
   const { serviceToken, generateServiceToken } = useServiceToken();
 
-  const onFleetServerHostChange = useCallback(
-    (value: string) => {
-      setFleetServerHost(value);
-    },
-    [setFleetServerHost]
+  const isPreconfigured = fleetServerHost?.is_preconfigured ?? false;
+  const nameInput = useInput(fleetServerHost?.name ?? '', validateName, isPreconfigured);
+
+  const hostUrlsInput = useComboInput(
+    'hostUrls',
+    fleetServerHost?.host_urls || [],
+    validateFleetServerHosts,
+    isPreconfigured
+  );
+  const validate = useCallback(
+    () => hostUrlsInput.validate() && nameInput.validate(),
+    [hostUrlsInput, nameInput]
   );
 
   const submit = useCallback(async () => {
     try {
-      if (validateFleetServerHost()) {
+      if (validate()) {
         setStatus('loading');
-        await saveFleetServerHost();
+
+        const newFleetServerHost = {
+          name: nameInput.value,
+          host_urls: hostUrlsInput.value,
+          is_default: true,
+          id: 'fleet-server-host',
+          is_preconfigured: false,
+        };
+        setFleetServerHost(newFleetServerHost);
+        await saveFleetServerHost(newFleetServerHost);
         await generateServiceToken();
 
         const existingPolicy = await sendGetOneAgentPolicy(
@@ -99,11 +125,9 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
               withSysMonitoring: true,
             }
           );
-
           setFleetServerPolicyId(createPolicyResponse.data?.item.id);
         }
 
-        setFleetServerHost(fleetServerHost);
         setStatus('success');
       }
     } catch (err) {
@@ -117,13 +141,14 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
       setError(err.message);
     }
   }, [
-    validateFleetServerHost,
+    nameInput.value,
+    hostUrlsInput.value,
+    setFleetServerHost,
     saveFleetServerHost,
     generateServiceToken,
-    setFleetServerHost,
-    fleetServerHost,
     setFleetServerPolicyId,
     notifications.toasts,
+    validate,
   ]);
 
   return {
@@ -132,9 +157,11 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
     submit,
     fleetServerPolicyId,
     fleetServerHost,
-    fleetServerHostSettings,
     isFleetServerHostSubmitted,
-    onFleetServerHostChange,
     serviceToken,
+    inputs: {
+      hostUrlsInput,
+      nameInput,
+    },
   };
 };

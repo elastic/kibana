@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+// copy this one
 import React, { useCallback, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
@@ -38,7 +38,7 @@ const ConfirmDescription: React.FunctionComponent = ({}) => (
   />
 );
 
-function validateFleetServerHosts(value: string[]) {
+export function validateFleetServerHosts(value: string[]) {
   if (value.length === 0) {
     return [
       {
