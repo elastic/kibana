@@ -12,13 +12,11 @@ import {
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
-  EuiModalFooter,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiFlexGroup,
 } from '@elastic/eui';
 
-import { css } from '@emotion/react';
 import { useBehaviorSubject } from '../use_behavior_subject';
 import { useFilePickerContext, FilePickerContext } from './context';
 
@@ -27,8 +25,7 @@ import { ErrorContent } from './components/error_content';
 import { UploadFilesPrompt } from './components/upload_files';
 import { FileGrid } from './components/file_grid';
 import { SearchField } from './components/search_field';
-import { SelectButton } from './components/select_button';
-import { Pagination } from './components/pagination';
+import { ModalFooter } from './components/modal_footer';
 
 import './file_picker.scss';
 import { ClearFilterButton } from './components/clear_filter_button';
@@ -62,14 +59,7 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
 
   useObservable(state.files$);
 
-  const renderFooter = () => (
-    <EuiModalFooter>
-      <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
-        <Pagination />
-        <SelectButton onClick={onDone} />
-      </EuiFlexGroup>
-    </EuiModalFooter>
-  );
+  const renderFooter = () => <ModalFooter onDone={onDone} />;
 
   return (
     <EuiModal
@@ -85,14 +75,9 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
       {isLoading ? (
         <>
           <EuiModalBody>
-            <div
-              css={css`
-                display: grid;
-                place-items: center;
-              `}
-            >
+            <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="none">
               <EuiLoadingSpinner data-test-subj="loadingSpinner" size="xl" />
-            </div>
+            </EuiFlexGroup>
           </EuiModalBody>
           {renderFooter()}
         </>

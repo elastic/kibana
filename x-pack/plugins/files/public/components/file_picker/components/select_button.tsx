@@ -12,7 +12,7 @@ import { useBehaviorSubject } from '../../use_behavior_subject';
 import { useFilePickerContext } from '../context';
 import { i18nTexts } from '../i18n_texts';
 
-interface Props {
+export interface Props {
   onClick: (selectedFiles: string[]) => void;
 }
 
