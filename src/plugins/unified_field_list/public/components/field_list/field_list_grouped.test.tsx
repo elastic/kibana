@@ -24,6 +24,12 @@ describe('UnifiedFieldList <FieldListGrouped />', () => {
   let defaultProps: FieldListGroupedProps<DataViewField>;
   let mockedServices: GroupedFieldsParams<DataViewField>['services'];
   const allFields = dataView.fields;
+  // 5 times more fields. Added fields will be treated as empty as they are not a part of the data view.
+  const manyFields = [...new Array(5)].flatMap((_, index) =>
+    allFields.map((field) => {
+      return new DataViewField({ ...field.toSpec(), name: `${field.name}${index || ''}` });
+    })
+  );
 
   beforeEach(() => {
     const dataViews = dataViewPluginMocks.createStartContract();
@@ -255,12 +261,7 @@ describe('UnifiedFieldList <FieldListGrouped />', () => {
       },
       hookParams: {
         dataViewId: dataView.id!,
-        // 5 times more fields. Added fields will be treated as empty as they are not a part of the data view.
-        allFields: [...new Array(5)].flatMap((_, index) =>
-          allFields.map((field) => {
-            return new DataViewField({ ...field.toSpec(), name: `${field.name}${index || ''}` });
-          })
-        ),
+        allFields: manyFields,
       },
     });
 
@@ -296,5 +297,116 @@ describe('UnifiedFieldList <FieldListGrouped />', () => {
     expect(
       wrapper.find(FieldsAccordion).map((accordion) => accordion.prop('paginatedFields').length)
     ).toStrictEqual([25, 88, 0]);
+  });
+
+  it('renders correctly when filtered', async () => {
+    const hookParams = {
+      dataViewId: dataView.id!,
+      allFields: manyFields,
+    };
+    const wrapper = await mountGroupedList({
+      listProps: {
+        ...defaultProps,
+        fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+      },
+      hookParams,
+    });
+
+    expect(
+      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
+    ).toBe('25 available fields. 112 empty fields. 3 meta fields.');
+
+    await act(async () => {
+      await wrapper.setProps({
+        hookParams: {
+          ...hookParams,
+          onFilterField: (field: DataViewField) => field.name.startsWith('@'),
+        },
+      });
+      await wrapper.update();
+    });
+
+    expect(
+      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
+    ).toBe('2 available fields. 8 empty fields. 0 meta fields.');
+
+    await act(async () => {
+      await wrapper.setProps({
+        hookParams: {
+          ...hookParams,
+          onFilterField: (field: DataViewField) => field.name.startsWith('_'),
+        },
+      });
+      await wrapper.update();
+    });
+
+    expect(
+      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
+    ).toBe('0 available fields. 12 empty fields. 3 meta fields.');
+  });
+
+  it('renders correctly when non-supported fields are filtered out', async () => {
+    const hookParams = {
+      dataViewId: dataView.id!,
+      allFields: manyFields,
+    };
+    const wrapper = await mountGroupedList({
+      listProps: {
+        ...defaultProps,
+        fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+      },
+      hookParams,
+    });
+
+    expect(
+      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
+    ).toBe('25 available fields. 112 empty fields. 3 meta fields.');
+
+    await act(async () => {
+      await wrapper.setProps({
+        hookParams: {
+          ...hookParams,
+          onSupportedFieldFilter: (field: DataViewField) => field.aggregatable,
+        },
+      });
+      await wrapper.update();
+    });
+
+    expect(
+      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
+    ).toBe('23 available fields. 104 empty fields. 3 meta fields.');
+  });
+
+  it('renders correctly when selected fields are present', async () => {
+    const hookParams = {
+      dataViewId: dataView.id!,
+      allFields: manyFields,
+    };
+    const wrapper = await mountGroupedList({
+      listProps: {
+        ...defaultProps,
+        fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
+      },
+      hookParams,
+    });
+
+    expect(
+      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
+    ).toBe('25 available fields. 112 empty fields. 3 meta fields.');
+
+    await act(async () => {
+      await wrapper.setProps({
+        hookParams: {
+          ...hookParams,
+          onSelectedFieldFilter: (field: DataViewField) =>
+            ['@timestamp', 'bytes'].includes(field.name),
+        },
+      });
+      await wrapper.update();
+    });
+
+    expect(
+      wrapper.find(`#${defaultProps.screenReaderDescriptionForSearchInputId}`).first().text()
+    ).toBe('2 selected fields. 25 available fields. 112 empty fields. 3 meta fields.');
   });
 });
