@@ -254,6 +254,11 @@ Portions of this code are licensed under the following license:
 For license information please see https://edge.fullstory.com/s/fs.js.LICENSE.txt
 
 ---
+Portions of this code are licensed under the following license:
+Gainsight PX Agent Wrapper Agent Version: 0.46.0 Installed: 2022-08-25 08:07
+https://www.gainsight.com/policy/gainsight-px-license-agreement/
+
+---
 This code includes a copy of the `normalize-path`
 https://github.com/jonschlinkert/normalize-path/blob/52c3a95ebebc2d98c1ad7606cbafa7e658656899/index.js
 
