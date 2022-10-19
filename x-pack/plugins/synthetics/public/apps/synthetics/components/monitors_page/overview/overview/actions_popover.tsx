@@ -6,9 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiButtonIcon, EuiContextMenu, useEuiShadow } from '@elastic/eui';
+import { EuiPopover, EuiButtonIcon, EuiContextMenu, useEuiShadow, EuiPanel } from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
-import { useTheme } from '@kbn/observability-plugin/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
@@ -50,6 +49,29 @@ interface Props {
   monitor: MonitorOverviewItem;
   setIsPopoverOpen: React.Dispatch<React.SetStateAction<boolean>>;
   position: PopoverPosition;
+  iconHasPanel?: boolean;
+  iconSize?: 's' | 'xs';
+}
+
+const CustomShadowPanel = styled(EuiPanel)<{ shadow: string }>`
+  ${(props) => props.shadow}
+`;
+
+function IconPanel({ children, hasPanel }: { children: JSX.Element; hasPanel: boolean }) {
+  const shadow = useEuiShadow('s');
+  if (!hasPanel) return children;
+  return (
+    <CustomShadowPanel
+      color="plain"
+      element="button"
+      grow={false}
+      paddingSize="none"
+      hasShadow={false}
+      shadow={shadow}
+    >
+      {children}
+    </CustomShadowPanel>
+  );
 }
 
 export function ActionsPopover({
@@ -58,8 +80,9 @@ export function ActionsPopover({
   setIsPopoverOpen,
   monitor,
   position,
+  iconHasPanel = true,
+  iconSize = 's',
 }: Props) {
-  const theme = useTheme();
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
   const locationName = useLocationName({ locationId: monitor.location.id });
@@ -143,15 +166,16 @@ export function ActionsPopover({
     <Container boxShadow={euiShadow} position={position}>
       <EuiPopover
         button={
-          <EuiButtonIcon
-            aria-label={openActionsMenuAria}
-            iconType="boxesHorizontal"
-            color="primary"
-            size="s"
-            display="base"
-            style={{ backgroundColor: theme.eui.euiColorLightestShade }}
-            onClick={() => setIsPopoverOpen((b: boolean) => !b)}
-          />
+          <IconPanel hasPanel={iconHasPanel}>
+            <EuiButtonIcon
+              aria-label={openActionsMenuAria}
+              iconType="boxesHorizontal"
+              color="primary"
+              size={iconSize}
+              display="empty"
+              onClick={() => setIsPopoverOpen((b: boolean) => !b)}
+            />
+          </IconPanel>
         }
         color="lightestShade"
         isOpen={isPopoverOpen}

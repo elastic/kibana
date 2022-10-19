@@ -13,6 +13,7 @@ import {
   EuiContextMenu,
   EuiDescriptionList,
   EuiDescriptionListDescription,
+  EuiDescriptionListProps,
   EuiDescriptionListTitle,
   EuiErrorBoundary,
   EuiFlexGroup,
@@ -24,10 +25,11 @@ import {
   EuiHealth,
   EuiLink,
   EuiLoadingSpinner,
+  EuiPageSection,
+  EuiPanel,
   EuiPopover,
   EuiSpacer,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import { SavedObject } from '@kbn/core/public';
 import { FetcherResult } from '@kbn/observability-plugin/public/hooks/use_fetcher';
@@ -38,6 +40,7 @@ import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { capitalize } from 'lodash';
+import { useTheme } from '@kbn/observability-plugin/public';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import { useStatusByLocation } from '../../../../hooks/use_status_by_location';
 import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
@@ -81,63 +84,69 @@ function DetailFlyoutDurationChart({
   | 'previousDurationChartFrom'
   | 'previousDurationChartTo'
 >) {
-  const theme = useEuiTheme();
+  const theme = useTheme();
+
   const { observability } = useKibana<ClientPluginsStart>().services;
   const { ExploratoryViewEmbeddable } = observability;
   return (
-    <ExploratoryViewEmbeddable
-      customHeight="200px"
-      reportType="kpi-over-time"
-      axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
-      legendIsVisible={true}
-      legendPosition="bottom"
-      attributes={[
-        {
-          seriesType: 'area',
-          color: theme.euiTheme.colors.success,
-          time: {
-            from: currentDurationChartFrom ?? DEFAULT_DURATION_CHART_FROM,
-            to: currentDurationChartTo ?? DEFAULT_CURRENT_DURATION_CHART_TO,
-          },
-          reportDefinitions: {
-            'monitor.id': [id],
-            'observer.geo.name': [location],
-          },
-          filters: [
-            {
-              field: 'observer.geo.name',
-              values: [location],
+    <EuiPageSection bottomBorder="extended">
+      <EuiTitle size="xs">
+        <h3>{DURATION_HEADER_TEXT}</h3>
+      </EuiTitle>
+      <ExploratoryViewEmbeddable
+        customHeight="200px"
+        reportType="kpi-over-time"
+        axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
+        legendIsVisible={true}
+        legendPosition="bottom"
+        attributes={[
+          {
+            seriesType: 'area',
+            color: theme.eui.euiColorVis1,
+            time: {
+              from: currentDurationChartFrom ?? DEFAULT_DURATION_CHART_FROM,
+              to: currentDurationChartTo ?? DEFAULT_CURRENT_DURATION_CHART_TO,
             },
-          ],
-          dataType: 'synthetics',
-          selectedMetricField: 'monitor.duration.us',
-          name: 'All monitors response duration',
-          operationType: 'average',
-        },
-        {
-          seriesType: 'line',
-          color: '#ddaf84',
-          time: {
-            from: previousDurationChartFrom ?? DEFAULT_PREVIOUS_DURATION_CHART_FROM,
-            to: previousDurationChartTo ?? DEFAULT_PREVIOUS_DURATION_CHART_TO,
-          },
-          reportDefinitions: {
-            'monitor.id': [id],
-            'observer.geo.name': [location],
-          },
-          filters: [
-            {
-              field: 'observer.geo.name',
-              values: [location],
+            reportDefinitions: {
+              'monitor.id': [id],
+              'observer.geo.name': [location],
             },
-          ],
-          dataType: 'synthetics',
-          selectedMetricField: 'monitor.duration.us',
-          name: 'Previous period',
-          operationType: 'average',
-        },
-      ]}
-    />
+            filters: [
+              {
+                field: 'observer.geo.name',
+                values: [location],
+              },
+            ],
+            dataType: 'synthetics',
+            selectedMetricField: 'monitor.duration.us',
+            name: 'All monitors response duration',
+            operationType: 'average',
+          },
+          {
+            seriesType: 'line',
+            color: theme.eui.euiColorVis7,
+            time: {
+              from: previousDurationChartFrom ?? DEFAULT_PREVIOUS_DURATION_CHART_FROM,
+              to: previousDurationChartTo ?? DEFAULT_PREVIOUS_DURATION_CHART_TO,
+            },
+            reportDefinitions: {
+              'monitor.id': [id],
+              'observer.geo.name': [location],
+            },
+            filters: [
+              {
+                field: 'observer.geo.name',
+                values: [location],
+              },
+            ],
+            dataType: 'synthetics',
+            selectedMetricField: 'monitor.duration.us',
+            name: 'Previous period',
+            operationType: 'average',
+          },
+        ]}
+      />
+    </EuiPageSection>
   );
 }
 
@@ -159,16 +168,16 @@ function LocationSelect({
   const [isOpen, setIsOpen] = useState(false);
   const isDown = !!locations.find((l) => l.observer?.geo?.name === currentLocation)?.summary?.down;
   return (
-    <EuiFlexGroup gutterSize="xs">
-      <EuiFlexItem grow={2}>
-        <EuiDescriptionList compressed>
+    <EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <EuiDescriptionList align="left" compressed>
           <EuiDescriptionListTitle>{ENABLED_ITEM_TEXT}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
             <MonitorEnabled id={id} monitor={monitor} reloadPage={onEnabledChange} />
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
       </EuiFlexItem>
-      <EuiFlexItem grow={4}>
+      <EuiFlexItem grow={false}>
         <EuiDescriptionList compressed>
           <EuiDescriptionListTitle>{LOCATION_TITLE_TEXT}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
@@ -177,9 +186,11 @@ function LocationSelect({
               button={
                 <EuiButtonIcon
                   aria-label={LOCATION_SELECT_POPOVER_ICON_BUTTON_LABEL}
-                  onClick={() => setIsOpen(!isOpen)}
                   color="primary"
+                  display="empty"
                   iconType="arrowDown"
+                  onClick={() => setIsOpen(!isOpen)}
+                  size="xs"
                 />
               }
               isOpen={isOpen}
@@ -211,8 +222,8 @@ function LocationSelect({
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
       </EuiFlexItem>
-      <EuiFlexItem grow={2}>
-        <EuiDescriptionList compressed>
+      <EuiFlexItem grow={false}>
+        <EuiDescriptionList align="left" compressed>
           <EuiDescriptionListTitle>{STATUS_TITLE_TEXT}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
             <EuiBadge color={isDown ? 'danger' : 'success'}>
@@ -263,117 +274,135 @@ export function MonitorDetailFlyout(props: Props) {
   const locations = locationStatuses.locations?.filter((l: any) => !!l?.observer?.geo?.name) ?? [];
 
   return (
-    <EuiFlyout size="s" type="push" onClose={props.onClose}>
+    <EuiFlyout size="s" type="push" onClose={props.onClose} paddingSize="none">
       {status === FETCH_STATUS.FAILURE && <EuiErrorBoundary>{error?.message}</EuiErrorBoundary>}
       {status === FETCH_STATUS.LOADING && <EuiLoadingSpinner size="xl" />}
       {status === FETCH_STATUS.SUCCESS && monitorSavedObject && (
         <>
           <EuiFlyoutHeader hasBorder>
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xs">
-                  <h2>{monitorSavedObject?.attributes.name}</h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {monitor && (
-                  <ActionsPopover
-                    isPopoverOpen={isActionsPopoverOpen}
-                    isInspectView
-                    monitor={monitor}
-                    setIsPopoverOpen={setIsActionsPopoverOpen}
-                    position="default"
-                  />
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-            <LocationSelect
-              currentLocation={props.location}
-              locations={locations}
-              setCurrentLocation={setLocation}
-              id={id}
-              monitor={monitorSavedObject.attributes}
-              onEnabledChange={props.onEnabledChange}
-            />
+            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="s">
+                    <h2>{monitorSavedObject?.attributes.name}</h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {monitor && (
+                    <ActionsPopover
+                      isPopoverOpen={isActionsPopoverOpen}
+                      isInspectView
+                      monitor={monitor}
+                      setIsPopoverOpen={setIsActionsPopoverOpen}
+                      position="default"
+                      iconHasPanel={false}
+                      iconSize="xs"
+                    />
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+              <LocationSelect
+                currentLocation={props.location}
+                locations={locations}
+                setCurrentLocation={setLocation}
+                id={id}
+                monitor={monitorSavedObject.attributes}
+                onEnabledChange={props.onEnabledChange}
+              />
+            </EuiPanel>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <EuiTitle size="xs">
-              <h3>{DURATION_HEADER_TEXT}</h3>
-            </EuiTitle>
             <DetailFlyoutDurationChart {...props} location={props.location} />
-            <EuiSpacer />
-            <EuiTitle size="xs">
-              <h3>{MONITOR_DETAILS_HEADER_TEXT}</h3>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <EuiDescriptionList
-              type="column"
-              compressed
-              listItems={[
-                {
-                  title: LAST_RUN_HEADER_TEXT,
-                  description: <Time timestamp={monitorDetail.data?.timestamp} />,
-                },
-                {
-                  title: LAST_MODIFIED_HEADER_TEXT,
-                  description: <Time timestamp={monitorSavedObject.updated_at} />,
-                },
-                {
-                  title: MONITOR_ID_ITEM_TEXT,
-                  description: props.id,
-                },
-                {
-                  title: MONITOR_TYPE_HEADER_TEXT,
-                  description: capitalize(monitorSavedObject.type),
-                },
-                {
-                  title: FREQUENCY_HEADER_TEXT,
-                  description: freqeuncyStr(monitorSavedObject?.attributes.schedule),
-                },
-                {
-                  title: TAGS_HEADER_TEXT,
-                  description: (
-                    <>
-                      {monitorSavedObject?.attributes.tags?.map((tag) => (
-                        <EuiFlexItem key={`${tag}-tag`} grow={false}>
-                          <EuiBadge color="hollow">{tag}</EuiBadge>
-                        </EuiFlexItem>
-                      ))}
-                    </>
-                  ),
-                },
-                {
-                  title: URL_HEADER_TEXT,
-                  description: monitorDetail.data?.url?.full ? (
-                    <EuiLink external href={monitorDetail.data.url.full}>
-                      {monitorDetail.data.url.full}
-                    </EuiLink>
-                  ) : (
-                    ''
-                  ),
-                },
-              ]}
-            />
+            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
+              <EuiTitle size="xs">
+                <h3>{MONITOR_DETAILS_HEADER_TEXT}</h3>
+              </EuiTitle>
+              <EuiSpacer size="m" />
+              <EuiDescriptionList
+                align="left"
+                type="column"
+                compressed
+                listItems={
+                  [
+                    {
+                      title: URL_HEADER_TEXT,
+                      description: monitorDetail.data?.url?.full ? (
+                        <EuiLink external href={monitorDetail.data.url.full}>
+                          {monitorDetail.data.url.full}
+                        </EuiLink>
+                      ) : (
+                        ''
+                      ),
+                    },
+                    {
+                      title: LAST_RUN_HEADER_TEXT,
+                      description: <Time timestamp={monitorDetail.data?.timestamp} />,
+                    },
+                    {
+                      title: LAST_MODIFIED_HEADER_TEXT,
+                      description: <Time timestamp={monitorSavedObject.updated_at} />,
+                    },
+                    monitorSavedObject?.attributes.project_id
+                      ? {
+                          title: PROJECT_ID_HEADER_TEXT,
+                          description: monitorSavedObject?.attributes.project_id || '',
+                        }
+                      : undefined,
+                    {
+                      title: MONITOR_ID_ITEM_TEXT,
+                      description: props.id,
+                    },
+                    {
+                      title: MONITOR_TYPE_HEADER_TEXT,
+                      description: capitalize(monitorSavedObject.type),
+                    },
+                    {
+                      title: FREQUENCY_HEADER_TEXT,
+                      description: freqeuncyStr(monitorSavedObject?.attributes.schedule),
+                    },
+                    monitorSavedObject?.attributes.tags &&
+                    monitorSavedObject?.attributes.tags.length
+                      ? {
+                          title: TAGS_HEADER_TEXT,
+                          description: (
+                            <>
+                              {monitorSavedObject?.attributes.tags?.map((tag) => (
+                                <EuiFlexItem key={`${tag}-tag`} grow={false}>
+                                  <EuiBadge color="hollow">{tag}</EuiBadge>
+                                </EuiFlexItem>
+                              ))}
+                            </>
+                          ),
+                        }
+                      : undefined,
+                  ].filter(
+                    (descriptionListItem) => !!descriptionListItem
+                  ) as EuiDescriptionListProps['listItems']
+                }
+              />
+            </EuiPanel>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={props.onClose}>{CLOSE_FLYOUT_TEXT}</EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  // `detailLink` can be undefined
-                  isDisabled={!detailLink}
-                  fill
-                  href={detailLink}
-                  iconType="sortRight"
-                  iconSide="right"
-                >
-                  {GO_TO_MONITOR_LINK_TEXT}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l" color="transparent">
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty onClick={props.onClose}>{CLOSE_FLYOUT_TEXT}</EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    // `detailLink` can be undefined
+                    isDisabled={!detailLink}
+                    fill
+                    href={detailLink}
+                    iconType="sortRight"
+                    iconSide="right"
+                  >
+                    {GO_TO_MONITOR_LINK_TEXT}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
           </EuiFlyoutFooter>
         </>
       )}
@@ -487,6 +516,10 @@ const MONITOR_DETAILS_HEADER_TEXT = i18n.translate(
 
 const ENABLED_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.enabledItemText', {
   defaultMessage: 'Enabled',
+});
+
+const PROJECT_ID_HEADER_TEXT = i18n.translate('xpack.synthetics.monitorList.projectIdHeaderText', {
+  defaultMessage: 'Project ID',
 });
 
 const MONITOR_ID_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.monitorIdItemText', {
