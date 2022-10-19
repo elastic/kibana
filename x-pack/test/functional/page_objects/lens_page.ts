@@ -1189,6 +1189,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         color: await (
           await this.getMetricElementIfExists('.echMetric', tile)
         )?.getComputedStyle('background-color'),
+        showingTrendline: Boolean(
+          await this.getMetricElementIfExists('.echSingleMetricSparkline', tile)
+        ),
       };
     },
 
