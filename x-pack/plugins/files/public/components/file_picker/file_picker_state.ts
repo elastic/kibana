@@ -45,6 +45,7 @@ export class FilePickerState {
   private readonly fileSet = new Set<string>();
   private readonly retry$ = new BehaviorSubject<void>(undefined);
   private readonly subscriptions: Subscription[] = [];
+  private readonly internalIsLoading$ = new BehaviorSubject<boolean>(true);
 
   constructor(
     private readonly client: FilesClient,
@@ -54,10 +55,14 @@ export class FilePickerState {
     this.subscriptions = [
       this.query$
         .pipe(
+          tap(() => this.setIsLoading(true)),
           map((query) => Boolean(query)),
           distinctUntilChanged()
         )
         .subscribe(this.hasQuery$),
+      this.internalIsLoading$
+        .pipe(debounceTime(100), distinctUntilChanged())
+        .subscribe(this.isLoading$),
     ];
   }
 
@@ -88,6 +93,10 @@ export class FilePickerState {
     this.selectedFileIds$.next(this.getSelectedFileIds());
   }
 
+  private setIsLoading(value: boolean) {
+    this.internalIsLoading$.next(value);
+  }
+
   public selectFile = (fileId: string | string[]): void => {
     (Array.isArray(fileId) ? fileId : [fileId]).forEach((id) => this.fileSet.add(id));
     this.sendNextSelectedFiles();
@@ -99,7 +108,7 @@ export class FilePickerState {
     query: undefined | string
   ): Observable<{ files: FileJSON[]; total: number }> => {
     if (this.abort) this.abort();
-    this.isLoading$.next(true);
+    this.setIsLoading(true);
     this.loadingError$.next(undefined);
 
     const abortController = new AbortController();
@@ -122,7 +131,7 @@ export class FilePickerState {
       })
     ).pipe(
       tap(() => {
-        this.isLoading$.next(false);
+        this.setIsLoading(false);
         this.abort = undefined;
       }),
       shareReplay()
@@ -131,7 +140,7 @@ export class FilePickerState {
     request$.subscribe({
       error: (e: Error) => {
         if (e.name === 'AbortError') return;
-        this.isLoading$.next(false);
+        this.setIsLoading(false);
         this.loadingError$.next(e);
       },
     });

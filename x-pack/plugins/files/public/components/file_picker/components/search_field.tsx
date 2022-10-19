@@ -15,11 +15,13 @@ import { useBehaviorSubject } from '../../use_behavior_subject';
 export const SearchField: FunctionComponent = () => {
   const { state } = useFilePickerContext();
   const query = useBehaviorSubject(state.query$);
+  const isLoading = useBehaviorSubject(state.isLoading$);
   const hasFiles = useBehaviorSubject(state.hasFiles$);
   return (
     <EuiFieldSearch
       data-test-subj="searchField"
       disabled={!query && !hasFiles}
+      isLoading={isLoading}
       value={query ?? ''}
       placeholder={i18nTexts.searchFieldPlaceholder}
       onChange={(ev) => state.setQuery(ev.target.value)}
