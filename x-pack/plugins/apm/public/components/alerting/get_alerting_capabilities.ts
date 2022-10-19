@@ -17,17 +17,10 @@ export const getAlertingCapabilities = (
   const isAlertingPluginEnabled = !!plugins.alerting;
   const isAlertingAvailable =
     isAlertingPluginEnabled && (canReadAlerts || canSaveAlerts);
-  const isMlPluginEnabled = 'ml' in plugins;
-  const canReadAnomalies = !!(
-    isMlPluginEnabled &&
-    capabilities.ml.canAccessML &&
-    capabilities.ml.canGetJobs
-  );
 
   return {
     isAlertingAvailable,
     canReadAlerts,
     canSaveAlerts,
-    canReadAnomalies,
   };
 };
