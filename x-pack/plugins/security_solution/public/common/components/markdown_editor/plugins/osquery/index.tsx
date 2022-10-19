@@ -258,6 +258,7 @@ const RunOsqueryButtonRenderer = ({
     label?: string;
     query: string;
     ecs_mapping: { [key: string]: {} };
+    test: [];
   };
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
