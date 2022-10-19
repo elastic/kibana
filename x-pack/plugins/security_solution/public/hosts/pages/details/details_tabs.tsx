@@ -25,7 +25,7 @@ import {
   UncommonProcessQueryTabBody,
   SessionsTabBody,
 } from '../navigation';
-import { TimelineId } from '../../../../common/types';
+import { TableId } from '../../../../common/types';
 
 export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
   ({
@@ -65,9 +65,9 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
 
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.events})`}>
           <EventsQueryTabBody
-            {...tabProps}
-            timelineId={TimelineId.hostsPageEvents}
             additionalFilters={hostDetailsFilter}
+            tableId={TableId.hostsPageEvents}
+            {...tabProps}
           />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.risk})`}>

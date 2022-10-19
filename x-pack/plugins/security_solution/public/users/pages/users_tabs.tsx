@@ -18,8 +18,8 @@ import { AnomaliesUserTable } from '../../common/components/ml/tables/anomalies_
 
 import { UserRiskScoreQueryTabBody } from './navigation/user_risk_score_tab_body';
 import { EventsQueryTabBody } from '../../common/components/events_tab';
-import { TimelineId } from '../../../common/types';
 import { userNameExistsFilter } from './details/helpers';
+import { TableId } from '../../../common/types';
 
 export const UsersTabs = memo<UsersTabsProps>(
   ({ deleteQuery, filterQuery, from, indexNames, isInitializing, setQuery, to, type }) => {
@@ -50,9 +50,9 @@ export const UsersTabs = memo<UsersTabsProps>(
         </Route>
         <Route path={`${USERS_PATH}/:tabName(${UsersTableType.events})`}>
           <EventsQueryTabBody
-            {...tabProps}
-            timelineId={TimelineId.usersPageEvents}
             additionalFilters={userNameExistsFilter}
+            tableId={TableId.usersPageEvents}
+            {...tabProps}
           />
         </Route>
       </Switch>
