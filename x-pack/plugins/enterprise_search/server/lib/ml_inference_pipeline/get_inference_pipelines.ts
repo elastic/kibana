@@ -24,22 +24,21 @@ export const getMlInferencePipelines = async (
     return Promise.reject(new Error('Machine Learning is not enabled'));
   }
 
-  // Fetch all ML inference pipelines
-  const fetchedInferencePipelines = await esClient.ingest.getPipeline({
-    id: 'ml-inference-*',
-  });
-
-  // Fetch all trained model IDs that are accessible in the current Kibana space
-  const trainedModels = await trainedModelsProvider.getTrainedModels({});
+  // Fetch all ML inference pipelines and trained models that are accessible in the current
+  // Kibana space
+  const [fetchedInferencePipelines, trainedModels] = await Promise.all([
+    esClient.ingest.getPipeline({
+      id: 'ml-inference-*',
+    }),
+    trainedModelsProvider.getTrainedModels({}),
+  ]);
   const accessibleModelIds = Object.values(trainedModels.trained_model_configs)
     .map((modelConfig) => modelConfig.model_id);
 
   // Process pipelines: check if the model_id is one of the redacted ones, if so, redact it in the
   // result as well
   const inferencePipelinesResult: Record<string, IngestPipeline> = {};
-  Object.keys(fetchedInferencePipelines).forEach((name) => {
-    const inferencePipeline = fetchedInferencePipelines[name];
-
+  Object.entries(fetchedInferencePipelines).forEach(([name, inferencePipeline]) => {
     inferencePipelinesResult[name] = {
       ...inferencePipeline,
       processors: inferencePipeline.processors?.map(
