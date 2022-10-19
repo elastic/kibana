@@ -20,9 +20,12 @@ jest.mock('../../lib/indices/fetch_ml_inference_pipeline_history', () => ({
 jest.mock('../../lib/indices/fetch_ml_inference_pipeline_processors', () => ({
   fetchMlInferencePipelineProcessors: jest.fn(),
 }));
-jest.mock('../../utils/create_ml_inference_pipeline', () => ({
-  createAndReferenceMlInferencePipeline: jest.fn(),
-}));
+jest.mock(
+  '../../lib/indices/pipelines/ml_inference/pipeline_processors/create_ml_inference_pipeline',
+  () => ({
+    createAndReferenceMlInferencePipeline: jest.fn(),
+  })
+);
 jest.mock(
   '../../lib/indices/pipelines/ml_inference/pipeline_processors/attach_ml_pipeline',
   () => ({
@@ -44,8 +47,8 @@ import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchMlInferencePipelineHistory } from '../../lib/indices/fetch_ml_inference_pipeline_history';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
 import { attachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/attach_ml_pipeline';
+import { createAndReferenceMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/create_ml_inference_pipeline';
 import { getMlInferenceErrors } from '../../lib/ml_inference_pipeline/get_inference_errors';
-import { createAndReferenceMlInferencePipeline } from '../../utils/create_ml_inference_pipeline';
 import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
 import { registerIndexRoutes } from './indices';
