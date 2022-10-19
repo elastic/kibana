@@ -1317,8 +1317,7 @@ describe('Authenticator', () => {
       expectAuditEvents({ action: 'user_login', outcome: 'failure' });
     });
 
-    // TODO: Is it realistic that all providers choose not to handle it?
-    it('fails if session is unhandled by all providers and getting the current session results in an SessionExpiredError for redirectable requests.', async () => {
+    it('fails if getting the current session results in an SessionExpiredError for redirectable requests.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const failureReason = new SessionExpiredError();
 
@@ -1330,7 +1329,7 @@ describe('Authenticator', () => {
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
-    it('fails if session is unhandled by all providers and getting the current session results in an SessionExpiredError for non-redirectable requests.', async () => {
+    it('fails if getting the current session results in an SessionExpiredError for non-redirectable requests.', async () => {
       const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
       const failureReason = new SessionExpiredError();
 
@@ -1344,7 +1343,7 @@ describe('Authenticator', () => {
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
-    it('fails if session is unhandled by all providers and getting the current session results in an SessionUnexpectedError for redirectable requests.', async () => {
+    it('fails if getting the current session results in an SessionUnexpectedError for redirectable requests.', async () => {
       const request = httpServerMock.createKibanaRequest();
       const failureReason = new SessionUnexpectedError();
 
@@ -1356,7 +1355,7 @@ describe('Authenticator', () => {
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
-    it('fails if session is unhandled by all providers and getting the current session results in an SessionUnexpectedError for non-redirectable requests.', async () => {
+    it('fails if getting the current session results in an SessionUnexpectedError for non-redirectable requests.', async () => {
       const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
       const failureReason = new SessionUnexpectedError();
 
