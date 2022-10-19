@@ -9,7 +9,7 @@
 import React, { useCallback } from 'react';
 import type { FC } from 'react';
 
-import type { SearchFilterConfig } from '@elastic/eui';
+import type { IconType, SearchFilterConfig } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSearchBar } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { GetExceptionItemProps } from '../types';
@@ -55,6 +55,8 @@ interface SearchBarProps {
   isSearching?: boolean;
   dataTestSubj?: string;
   filters?: SearchFilterConfig[]; // TODO about filters
+  isButtonFilled?: boolean;
+  buttonIconType?: IconType;
   onSearch: (arg: GetExceptionItemProps) => void;
   onAddExceptionClick: (type: ExceptionListTypeEnum) => void;
 }
@@ -66,6 +68,8 @@ const SearchBarComponent: FC<SearchBarProps> = ({
   isSearching,
   dataTestSubj,
   filters = [],
+  isButtonFilled = true,
+  buttonIconType,
   onSearch,
   onAddExceptionClick,
 }) => {
@@ -101,7 +105,8 @@ const SearchBarComponent: FC<SearchBarProps> = ({
             data-test-subj={`${dataTestSubj || ''}Button`}
             onClick={handleAddException}
             isDisabled={isSearching}
-            fill
+            fill={isButtonFilled}
+            iconType={buttonIconType}
           >
             {addExceptionButtonText}
           </EuiButton>
