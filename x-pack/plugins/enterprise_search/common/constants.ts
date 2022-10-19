@@ -108,6 +108,8 @@ export const SEARCH_EXPERIENCES_PLUGIN = {
   }),
   URL: '/app/enterprise_search/search_experiences',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+  GITHUB_URL: 'https://github.com/elastic/search-ui/',
+  DOCUMENTATION_URL: 'https://docs.elastic.co/search-ui/',
 };
 
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';

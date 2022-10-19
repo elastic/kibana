@@ -11,18 +11,18 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { ElasticsearchGuide } from './components/elasticsearch_guide';
+import { SearchExperiencesGuide } from './components/search_experiences_guide';
 
-import { Elasticsearch } from '.';
+import { SearchExperiences } from '.';
 
-describe('Elasticsearch', () => {
-  it('renders the Elasticsearch setup guide', () => {
+describe('SearchExperiences', () => {
+  it('renders the Search Experiences guide', () => {
     setMockValues({
       errorConnectingMessage: '',
       config: { host: 'localhost' },
     });
-    const wrapper = shallow(<Elasticsearch />);
+    const wrapper = shallow(<SearchExperiences />);
 
-    expect(wrapper.find(ElasticsearchGuide)).toHaveLength(1);
+    expect(wrapper.find(SearchExperiencesGuide)).toHaveLength(1);
   });
 });
