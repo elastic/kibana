@@ -19,7 +19,7 @@ import {
 import { useScatterplotFieldOptions } from '../../../../../components/scatterplot_matrix';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
 
-import { defaultSearchQuery, isOutlierAnalysis, useResultsViewConfig } from '../../../../common';
+import { defaultSearchQuery, isOutlierAnalysis, useResultsViewConfig, getDestinationIndex } from '../../../../common';
 import { FEATURE_INFLUENCE } from '../../../../common/constants';
 
 import {
@@ -91,8 +91,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     jobConfig?.analyzed_fields?.excludes,
     resultsField
   );
-  const destIndex =
-    (Array.isArray(jobConfig?.dest.index) ? jobConfig?.dest.index[0] : jobConfig?.dest.index) ?? '';
+  const destIndex = getDestinationIndex(jobConfig);
 
   if (indexPatternErrorMessage !== undefined) {
     return (

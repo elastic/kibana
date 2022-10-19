@@ -19,6 +19,7 @@ import {
   getScatterplotMatrixLegendType,
   useResultsViewConfig,
   DataFrameAnalyticsConfig,
+  getDestinationIndex
 } from '../../../../common';
 import { ResultsSearchQuery, ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 
@@ -115,8 +116,7 @@ export const ExplorationPageWrapper: FC<Props> = ({
   };
 
   const resultsField = jobConfig?.dest.results_field ?? '';
-  const destIndex =
-    (Array.isArray(jobConfig?.dest.index) ? jobConfig?.dest.index[0] : jobConfig?.dest.index) ?? '';
+  const destIndex = getDestinationIndex(jobConfig);
 
   const scatterplotFieldOptions = useScatterplotFieldOptions(
     indexPattern,
