@@ -257,13 +257,10 @@ export const DatePickerWrapper: FC = () => {
   }
 
   return isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled ? (
-    <EuiFlexGroup
-      gutterSize="s"
-      alignItems="center"
-      className="mlNavigationMenu__datePickerWrapper"
-    >
-      <EuiFlexItem grow={false}>
+    <EuiFlexGroup gutterSize="s" alignItems="center" css={{ width: '100%', minWidth: 0 }}>
+      <EuiFlexItem grow={true} css={{ width: '100%' }}>
         <EuiSuperDatePicker
+          css={{ width: '100%', minWidth: 0 }}
           start={time.from}
           end={time.to}
           isPaused={refreshInterval.pause}

@@ -16,7 +16,7 @@ import { PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { checkBasicLicense } from '../../../license';
 import { cacheDataViewsContract } from '../../../util/index_utils';
-import { ExplainLogRateSpikesPage as Page } from '../../../aiops';
+import { ChangePointDetectionPage as Page } from '../../../aiops';
 
 export const changePointDetectionRouteFactory = (
   navigateToPath: NavigateToPath,
