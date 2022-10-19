@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export * from './compute_error_budget';
-export * from './compute_sli';
-export * from './date_range';
+import * as t from 'io-ts';
+import { timeWindowSchema } from '../schema/time_window';
+
+type TimeWindow = t.TypeOf<typeof timeWindowSchema>;
+
+export type { TimeWindow };
