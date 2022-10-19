@@ -153,8 +153,8 @@ export function ChangeDataView({
   }, [isTextBasedLangSelected, textBasedLanguage]);
 
   const isAdHocSelected = useMemo(() => {
-    return adHocDataViews?.some((dataView) => dataView.title === trigger.title);
-  }, [adHocDataViews, trigger.title]);
+    return adHocDataViews?.some((dataView) => dataView.id === currentDataViewId);
+  }, [adHocDataViews, currentDataViewId]);
 
   const createTrigger = function () {
     const { label, title, 'data-test-subj': dataTestSubj, fullWidth, ...rest } = trigger;
