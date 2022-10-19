@@ -12,7 +12,7 @@ import { Page } from 'playwright';
 import callsites from 'callsites';
 import { ToolingLog } from '@kbn/tooling-log';
 import { FtrConfigProvider } from '@kbn/test';
-import { FtrProviderContext } from '@kbn/ftr-common-functional-services';
+import { FtrProviderContext, KibanaServer } from '@kbn/ftr-common-functional-services';
 
 import { Auth } from '../services/auth';
 import { InputDelays } from '../services/input_delays';
@@ -27,6 +27,7 @@ export interface BaseStepCtx {
   log: ToolingLog;
   inputDelays: InputDelays;
   kbnUrl: KibanaUrl;
+  kibanaServer: KibanaServer;
 }
 
 export type AnyStep = Step<{}>;
