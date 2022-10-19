@@ -129,7 +129,7 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
 
   const chartPreview = (
     <ChartPreview
-      data={data?.errorRateChartPreview}
+      series={[{ data: data?.errorRateChartPreview ?? [] }]}
       yTickFormat={(d: number | null) => asPercent(d, 1)}
       threshold={thresholdAsPercent}
       uiSettings={services.uiSettings}
