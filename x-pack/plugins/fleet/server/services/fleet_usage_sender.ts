@@ -18,10 +18,6 @@ import type { Usage } from '../collectors/register';
 
 import { appContextService } from './app_context';
 
-export class FleetShipper extends ElasticV3ServerShipper {
-  public static shipperName = 'fleet_shipper';
-}
-
 export class FleetUsageSender {
   private taskManager?: TaskManagerStartContract;
   private taskId = 'Fleet-Usage-Sender-Task';
@@ -47,7 +43,7 @@ export class FleetUsageSender {
               try {
                 const usageData = await fetchUsage();
                 appContextService.getLogger().debug(JSON.stringify(usageData));
-                core.analytics.reportEvent('Fleet Usage', usageData);
+                core.analytics.reportEvent('fleet_usage', usageData);
               } catch (error) {
                 appContextService
                   .getLogger()
@@ -61,12 +57,6 @@ export class FleetUsageSender {
       },
     });
     this.registerTelemetryEventType(core);
-
-    core.analytics.registerShipper(FleetShipper, {
-      channelName: 'fleet-usages',
-      version: kibanaVersion,
-      sendTo: isProductionMode ? 'production' : 'staging',
-    });
   }
 
   public async start(taskManager: TaskManagerStartContract) {
