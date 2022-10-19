@@ -15,6 +15,8 @@ import type { Usage } from '../collectors/register';
 
 import { appContextService } from './app_context';
 
+const EVENT_TYPE = 'fleet_usage';
+
 export class FleetUsageSender {
   private taskManager?: TaskManagerStartContract;
   private taskId = 'Fleet-Usage-Sender-Task';
@@ -40,7 +42,7 @@ export class FleetUsageSender {
               try {
                 const usageData = await fetchUsage();
                 appContextService.getLogger().debug(JSON.stringify(usageData));
-                core.analytics.reportEvent('fleet_usage', usageData);
+                core.analytics.reportEvent(EVENT_TYPE, usageData);
               } catch (error) {
                 appContextService
                   .getLogger()
@@ -77,7 +79,7 @@ export class FleetUsageSender {
    */
   private registerTelemetryEventType(core: CoreSetup): void {
     core.analytics.registerEventType({
-      eventType: 'fleet_usage',
+      eventType: EVENT_TYPE,
       schema: {
         agents_enabled: { type: 'boolean', _meta: { description: 'agents enabled' } },
         agents: {
