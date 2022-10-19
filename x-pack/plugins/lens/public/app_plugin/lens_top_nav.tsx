@@ -644,7 +644,7 @@ export const LensTopNavMenu = ({
             setIsOnTextBasedMode(true);
             dispatch(
               switchAndCleanDatasource({
-                newDatasourceId: 'textBasedLanguages',
+                newDatasourceId: 'textBased',
                 visualizationId: visualization?.activeId,
                 currentIndexPatternId: currentIndexPattern?.id,
               })
@@ -764,7 +764,7 @@ export const LensTopNavMenu = ({
           if (isOnTextBasedMode) {
             dispatch(
               switchAndCleanDatasource({
-                newDatasourceId: 'indexpattern',
+                newDatasourceId: 'formBased',
                 visualizationId: visualization?.activeId,
                 currentIndexPatternId: dataView?.id,
               })
@@ -795,7 +795,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'indexpattern',
+            newDatasourceId: 'formBased',
             visualizationId: visualization?.activeId,
             currentIndexPatternId: dataView?.id,
           })
@@ -838,7 +838,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'indexpattern',
+            newDatasourceId: 'formBased',
             visualizationId: visualization?.activeId,
             currentIndexPatternId: newIndexPatternId,
           })
@@ -927,7 +927,6 @@ export const LensTopNavMenu = ({
       }
       textBasedLanguageModeErrors={textBasedLanguageModeErrors}
       onTextBasedSavedAndExit={onTextBasedSavedAndExit}
-      showQueryBar={true}
       showFilterBar={true}
       data-test-subj="lnsApp_topNav"
       screenTitle={'lens'}

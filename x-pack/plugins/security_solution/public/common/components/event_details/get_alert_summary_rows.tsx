@@ -237,14 +237,14 @@ function getEventCategoriesFromData(data: TimelineEventsDetailsItem[]): EventCat
 export const getSummaryRows = ({
   data,
   browserFields,
-  timelineId,
+  scopeId,
   eventId,
   isDraggable = false,
   isReadOnly = false,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
-  timelineId: string;
+  scopeId: string;
   eventId: string;
   isDraggable?: boolean;
   isReadOnly?: boolean;
@@ -288,8 +288,8 @@ export const getSummaryRows = ({
           ...getEnrichedFieldInfo({
             item,
             linkValueField: linkValueField || undefined,
-            contextId: timelineId,
-            timelineId,
+            contextId: scopeId,
+            scopeId,
             browserFields,
             eventId,
             field,

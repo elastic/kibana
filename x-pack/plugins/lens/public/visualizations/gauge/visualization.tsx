@@ -24,7 +24,8 @@ import {
 } from '@kbn/expression-gauge-plugin/public';
 import { IconChartHorizontalBullet, IconChartVerticalBullet } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { DatasourceLayers, OperationMetadata, Visualization } from '../../types';
+import type { FormBasedPersistedState } from '../../datasources/form_based/types';
+import type { DatasourceLayers, OperationMetadata, Suggestion, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
 import {
   GROUP_ID,
@@ -542,5 +543,29 @@ export const getGaugeVisualization = ({
     }
 
     return warnings;
+  },
+
+  getSuggestionFromConvertToLensContext({ suggestions, context }) {
+    const allSuggestions = suggestions as Array<
+      Suggestion<GaugeVisualizationState, FormBasedPersistedState>
+    >;
+    const suggestion: Suggestion<GaugeVisualizationState, FormBasedPersistedState> = {
+      ...allSuggestions[0],
+      datasourceState: {
+        ...allSuggestions[0].datasourceState,
+        layers: allSuggestions.reduce(
+          (acc, s) => ({
+            ...acc,
+            ...s.datasourceState?.layers,
+          }),
+          {}
+        ),
+      },
+      visualizationState: {
+        ...allSuggestions[0].visualizationState,
+        ...(context.configuration as GaugeVisualizationState),
+      },
+    };
+    return suggestion;
   },
 });

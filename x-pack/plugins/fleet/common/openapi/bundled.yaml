@@ -735,7 +735,7 @@ paths:
       parameters:
         - schema:
             type: array
-          name: agentsId
+          name: agentsIds
           in: query
           required: true
   /agents:
@@ -2292,7 +2292,7 @@ paths:
   /fleet_server_hosts:
     get:
       summary: Fleet Server Hosts - List
-      description: Return a list of Fleet server host
+      description: Return a list of Fleet server hosts
       tags: []
       responses:
         '200':
