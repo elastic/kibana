@@ -16,7 +16,7 @@ import {
 import { PANEL_TYPES, TSVB_METRIC_TYPES } from '../../../common/enums';
 import { Metric } from '../../../common/types';
 import { getDataViewsStart } from '../../services';
-import { getDataSourceInfo } from '../lib/datasource';
+import { dropGeneratedAdHocDataViews, getDataSourceInfo } from '../lib/datasource';
 import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import { getConfigurationForGauge as getConfiguration } from '../lib/configurations/metric';
 import {
@@ -45,95 +45,116 @@ const getMaxFormula = (metric: Metric, column?: Column) => {
   }))`;
 };
 
-export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeRange) => {
+const invalidModelError = () => new Error('Invalid model');
+
+export const convertToLens: ConvertTsvbToLensVisualization = async (
+  model,
+  timeRange,
+  clearAdHocDataViews
+) => {
+  let dataViewsToDrop: string[] = [];
   const dataViews = getDataViewsStart();
 
-  const series = model.series[0];
-  // not valid time shift
-  if (series.offset_time && parseTimeShift(series.offset_time) === 'invalid') {
+  try {
+    const series = model.series[0];
+    // not valid time shift
+    if (series.offset_time && parseTimeShift(series.offset_time) === 'invalid') {
+      throw invalidModelError();
+    }
+
+    if (!isValidMetrics(series.metrics, PANEL_TYPES.GAUGE, series.time_range_mode)) {
+      throw invalidModelError();
+    }
+
+    if (series.metrics[series.metrics.length - 1].type === TSVB_METRIC_TYPES.STATIC) {
+      throw invalidModelError();
+    }
+
+    const reducedTimeRange = getReducedTimeRange(model, series, timeRange);
+    const datasourceInfo = await getDataSourceInfo(
+      model.index_pattern,
+      model.time_field,
+      Boolean(series.override_index_pattern),
+      series.series_index_pattern,
+      series.series_time_field,
+      dataViews
+    );
+
+    if (!datasourceInfo) {
+      throw invalidModelError();
+    }
+
+    const { indexPatternId, indexPattern } = datasourceInfo;
+
+    // handle multiple metrics
+    const metricsColumns = getMetricsColumns(series, indexPattern!, model.series.length, {
+      reducedTimeRange,
+    });
+    if (metricsColumns === null) {
+      throw invalidModelError();
+    }
+
+    const bucketsColumns = getBucketsColumns(model, series, metricsColumns, indexPattern!, false);
+
+    if (bucketsColumns === null) {
+      throw invalidModelError();
+    }
+
+    const [bucket] = bucketsColumns;
+
+    const extendedLayer: ExtendedLayer = {
+      indexPatternId,
+      layerId: uuid(),
+      columns: [...metricsColumns, ...(bucket ? [bucket] : [])],
+      columnOrder: [],
+    };
+
+    const primarySeries = model.series[0];
+    const primaryMetricWithCollapseFn = getMetricWithCollapseFn(primarySeries);
+
+    if (!primaryMetricWithCollapseFn || !primaryMetricWithCollapseFn.metric) {
+      throw invalidModelError();
+    }
+
+    const primaryColumn = findMetricColumn(
+      primaryMetricWithCollapseFn.metric,
+      extendedLayer.columns
+    );
+    if (!primaryColumn) {
+      throw invalidModelError();
+    }
+
+    let gaugeMaxColumn: StaticValueColumn | FormulaColumn | null = createFormulaColumnWithoutMeta(
+      getMaxFormula(primaryMetricWithCollapseFn.metric, primaryColumn)
+    );
+    if (model.gauge_max !== undefined && model.gauge_max !== '') {
+      gaugeMaxColumn = createStaticValueColumn(model.gauge_max);
+    }
+
+    const layer = {
+      ...extendedLayer,
+      columns: [...extendedLayer.columns, gaugeMaxColumn],
+    };
+    const configuration = getConfiguration(model, layer, bucket, gaugeMaxColumn ?? undefined);
+    if (!configuration) {
+      throw invalidModelError();
+    }
+
+    const layers = Object.values(excludeMetaFromLayers({ 0: layer }));
+
+    if (clearAdHocDataViews) {
+      dropGeneratedAdHocDataViews(dataViewsToDrop, dataViews);
+      dataViewsToDrop = [];
+    }
+
+    return {
+      type: 'lnsMetric',
+      layers,
+      configuration,
+      indexPatternIds: getIndexPatternIds(layers),
+    };
+  } catch (e) {
+    dropGeneratedAdHocDataViews(dataViewsToDrop, dataViews);
     return null;
   }
-
-  if (!isValidMetrics(series.metrics, PANEL_TYPES.GAUGE, series.time_range_mode)) {
-    return null;
-  }
-
-  if (series.metrics[series.metrics.length - 1].type === TSVB_METRIC_TYPES.STATIC) {
-    return null;
-  }
-
-  const reducedTimeRange = getReducedTimeRange(model, series, timeRange);
-  const datasourceInfo = await getDataSourceInfo(
-    model.index_pattern,
-    model.time_field,
-    Boolean(series.override_index_pattern),
-    series.series_index_pattern,
-    series.series_time_field,
-    dataViews
-  );
-
-  if (!datasourceInfo) {
-    return null;
-  }
-
-  const { indexPatternId, indexPattern } = datasourceInfo;
-
-  // handle multiple metrics
-  const metricsColumns = getMetricsColumns(series, indexPattern!, model.series.length, {
-    reducedTimeRange,
-  });
-  if (metricsColumns === null) {
-    return null;
-  }
-
-  const bucketsColumns = getBucketsColumns(model, series, metricsColumns, indexPattern!, false);
-
-  if (bucketsColumns === null) {
-    return null;
-  }
-
-  const [bucket] = bucketsColumns;
-
-  const extendedLayer: ExtendedLayer = {
-    indexPatternId,
-    layerId: uuid(),
-    columns: [...metricsColumns, ...(bucket ? [bucket] : [])],
-    columnOrder: [],
-  };
-
-  const primarySeries = model.series[0];
-  const primaryMetricWithCollapseFn = getMetricWithCollapseFn(primarySeries);
-
-  if (!primaryMetricWithCollapseFn || !primaryMetricWithCollapseFn.metric) {
-    return null;
-  }
-
-  const primaryColumn = findMetricColumn(primaryMetricWithCollapseFn.metric, extendedLayer.columns);
-  if (!primaryColumn) {
-    return null;
-  }
-
-  let gaugeMaxColumn: StaticValueColumn | FormulaColumn | null = createFormulaColumnWithoutMeta(
-    getMaxFormula(primaryMetricWithCollapseFn.metric, primaryColumn)
-  );
-  if (model.gauge_max !== undefined && model.gauge_max !== '') {
-    gaugeMaxColumn = createStaticValueColumn(model.gauge_max);
-  }
-
-  const layer = {
-    ...extendedLayer,
-    columns: [...extendedLayer.columns, gaugeMaxColumn],
-  };
-  const configuration = getConfiguration(model, layer, bucket, gaugeMaxColumn ?? undefined);
-  if (!configuration) {
-    return null;
-  }
-
-  const layers = Object.values(excludeMetaFromLayers({ 0: layer }));
-  return {
-    type: 'lnsMetric',
-    layers,
-    configuration,
-    indexPatternIds: getIndexPatternIds(layers),
-  };
 };

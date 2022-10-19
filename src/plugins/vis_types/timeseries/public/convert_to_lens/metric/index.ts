@@ -11,7 +11,7 @@ import { DataView, parseTimeShift } from '@kbn/data-plugin/common';
 import { getIndexPatternIds } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
-import { getDataSourceInfo } from '../lib/datasource';
+import { dropGeneratedAdHocDataViews, getDataSourceInfo } from '../lib/datasource';
 import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import { getConfigurationForMetric as getConfiguration } from '../lib/configurations/metric';
 import { getReducedTimeRange, isValidMetrics } from '../lib/metrics';
@@ -22,109 +22,130 @@ import { excludeMetaFromLayers, getUniqueBuckets } from '../utils';
 const MAX_SERIES = 2;
 const MAX_BUCKETS = 2;
 
-export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeRange) => {
+const invalidModelError = () => new Error('Invalid model');
+
+export const convertToLens: ConvertTsvbToLensVisualization = async (
+  model,
+  timeRange,
+  clearAdHocDataViews
+) => {
+  let dataViewsToDrop: string[] = [];
   const dataViews = getDataViewsStart();
-  const seriesNum = model.series.filter((series) => !series.hidden).length;
 
-  const indexPatternIds = new Set();
-  const visibleSeries = model.series.filter(({ hidden }) => !hidden);
-  let currentIndexPattern: DataView | null = null;
-  for (const series of visibleSeries) {
-    const datasourceInfo = await getDataSourceInfo(
-      model.index_pattern,
-      model.time_field,
-      Boolean(series.override_index_pattern),
-      series.series_index_pattern,
-      series.series_time_field,
-      dataViews
-    );
+  try {
+    const seriesNum = model.series.filter((series) => !series.hidden).length;
 
-    if (!datasourceInfo) {
-      return null;
+    const indexPatternIds = new Set();
+    const visibleSeries = model.series.filter(({ hidden }) => !hidden);
+    let currentIndexPattern: DataView | null = null;
+    for (const series of visibleSeries) {
+      const datasourceInfo = await getDataSourceInfo(
+        model.index_pattern,
+        model.time_field,
+        Boolean(series.override_index_pattern),
+        series.series_index_pattern,
+        series.series_time_field,
+        dataViews
+      );
+
+      if (!datasourceInfo) {
+        throw invalidModelError();
+      }
+
+      const { indexPatternId, indexPattern, adHocDataViewIds } = datasourceInfo;
+      dataViewsToDrop = adHocDataViewIds;
+
+      indexPatternIds.add(indexPatternId);
+      currentIndexPattern = indexPattern;
     }
 
-    const { indexPatternId, indexPattern } = datasourceInfo;
-    indexPatternIds.add(indexPatternId);
-    currentIndexPattern = indexPattern;
-  }
+    if (indexPatternIds.size > 1) {
+      throw invalidModelError();
+    }
 
-  if (indexPatternIds.size > 1) {
+    const [indexPatternId] = indexPatternIds.values();
+
+    const buckets = [];
+    const metrics = [];
+
+    // handle multiple layers/series
+    for (const series of visibleSeries) {
+      // not valid time shift
+      if (series.offset_time && parseTimeShift(series.offset_time) === 'invalid') {
+        throw invalidModelError();
+      }
+
+      if (!isValidMetrics(series.metrics, PANEL_TYPES.METRIC, series.time_range_mode)) {
+        throw invalidModelError();
+      }
+
+      const reducedTimeRange = getReducedTimeRange(model, series, timeRange);
+
+      // handle multiple metrics
+      const metricsColumns = getMetricsColumns(series, currentIndexPattern!, seriesNum, {
+        reducedTimeRange,
+      });
+      if (metricsColumns === null) {
+        throw invalidModelError();
+      }
+
+      const bucketsColumns = getBucketsColumns(
+        model,
+        series,
+        metricsColumns,
+        currentIndexPattern!,
+        false
+      );
+
+      if (bucketsColumns === null) {
+        throw invalidModelError();
+      }
+
+      buckets.push(...bucketsColumns);
+      metrics.push(...metricsColumns);
+    }
+
+    let uniqueBuckets = buckets;
+    if (visibleSeries.length === MAX_SERIES && buckets.length) {
+      if (buckets.length !== MAX_BUCKETS) {
+        throw invalidModelError();
+      }
+
+      uniqueBuckets = getUniqueBuckets(buckets as ColumnsWithoutMeta[]);
+      if (uniqueBuckets.length !== 1) {
+        throw invalidModelError();
+      }
+    }
+
+    const [bucket] = uniqueBuckets;
+
+    const extendedLayer: ExtendedLayer = {
+      indexPatternId: indexPatternId as string,
+      layerId: uuid(),
+      columns: [...metrics, ...(bucket ? [bucket] : [])],
+      columnOrder: [],
+    };
+
+    const configuration = getConfiguration(model, extendedLayer, bucket);
+    if (!configuration) {
+      throw invalidModelError();
+    }
+
+    const layers = Object.values(excludeMetaFromLayers({ 0: extendedLayer }));
+
+    if (clearAdHocDataViews) {
+      dropGeneratedAdHocDataViews(dataViewsToDrop, dataViews);
+      dataViewsToDrop = [];
+    }
+
+    return {
+      type: 'lnsMetric',
+      layers,
+      configuration,
+      indexPatternIds: getIndexPatternIds(layers),
+    };
+  } catch (e) {
+    dropGeneratedAdHocDataViews(dataViewsToDrop, dataViews);
     return null;
   }
-
-  const [indexPatternId] = indexPatternIds.values();
-
-  const buckets = [];
-  const metrics = [];
-
-  // handle multiple layers/series
-  for (const series of visibleSeries) {
-    // not valid time shift
-    if (series.offset_time && parseTimeShift(series.offset_time) === 'invalid') {
-      return null;
-    }
-
-    if (!isValidMetrics(series.metrics, PANEL_TYPES.METRIC, series.time_range_mode)) {
-      return null;
-    }
-
-    const reducedTimeRange = getReducedTimeRange(model, series, timeRange);
-
-    // handle multiple metrics
-    const metricsColumns = getMetricsColumns(series, currentIndexPattern!, seriesNum, {
-      reducedTimeRange,
-    });
-    if (metricsColumns === null) {
-      return null;
-    }
-
-    const bucketsColumns = getBucketsColumns(
-      model,
-      series,
-      metricsColumns,
-      currentIndexPattern!,
-      false
-    );
-
-    if (bucketsColumns === null) {
-      return null;
-    }
-
-    buckets.push(...bucketsColumns);
-    metrics.push(...metricsColumns);
-  }
-
-  let uniqueBuckets = buckets;
-  if (visibleSeries.length === MAX_SERIES && buckets.length) {
-    if (buckets.length !== MAX_BUCKETS) {
-      return null;
-    }
-
-    uniqueBuckets = getUniqueBuckets(buckets as ColumnsWithoutMeta[]);
-    if (uniqueBuckets.length !== 1) {
-      return null;
-    }
-  }
-
-  const [bucket] = uniqueBuckets;
-
-  const extendedLayer: ExtendedLayer = {
-    indexPatternId: indexPatternId as string,
-    layerId: uuid(),
-    columns: [...metrics, ...(bucket ? [bucket] : [])],
-    columnOrder: [],
-  };
-
-  const configuration = getConfiguration(model, extendedLayer, bucket);
-  if (!configuration) {
-    return null;
-  }
-
-  const layers = Object.values(excludeMetaFromLayers({ 0: extendedLayer }));
-  return {
-    type: 'lnsMetric',
-    layers,
-    configuration,
-    indexPatternIds: getIndexPatternIds(layers),
-  };
 };

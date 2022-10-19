@@ -12,6 +12,13 @@ import {
 } from '../../../../common/index_patterns_utils';
 import type { IndexPatternValue } from '../../../../common/types';
 
+export const dropGeneratedAdHocDataViews = (
+  generatedAdHocDataViewIds: string[],
+  dataViews: DataViewsPublicPluginStart
+) => {
+  generatedAdHocDataViewIds.forEach((id) => dataViews.clearInstanceCache(id));
+};
+
 export const getDataSourceInfo = async (
   modelIndexPattern: IndexPatternValue,
   modelTimeField: string | undefined,
@@ -20,6 +27,7 @@ export const getDataSourceInfo = async (
   seriesTimeField: string | undefined,
   dataViews: DataViewsPublicPluginStart
 ) => {
+  const adHocDataViewIds = [];
   try {
     let indexPatternId =
       modelIndexPattern && !isStringTypeIndexPattern(modelIndexPattern) ? modelIndexPattern.id : '';
@@ -29,12 +37,17 @@ export const getDataSourceInfo = async (
     // handle override index pattern
     if (isOverwritten) {
       if (isStringTypeIndexPattern(overwrittenIndexPattern)) {
-        indexPattern = await dataViews.create({
-          title: overwrittenIndexPattern,
-          timeFieldName: seriesTimeField,
-        });
+        indexPattern = await dataViews.create(
+          {
+            title: overwrittenIndexPattern,
+            timeFieldName: seriesTimeField,
+          },
+          false,
+          false
+        );
         indexPatternId = indexPattern.id ?? '';
         timeField = indexPattern.timeFieldName;
+        adHocDataViewIds.push(indexPatternId);
       } else {
         const fetchedIndexPattern = await fetchIndexPattern(overwrittenIndexPattern, dataViews);
         indexPattern = fetchedIndexPattern.indexPattern;
@@ -47,11 +60,17 @@ export const getDataSourceInfo = async (
 
     if (!indexPatternId) {
       if (isStringTypeIndexPattern(modelIndexPattern)) {
-        indexPattern = await dataViews.create({
-          title: modelIndexPattern,
-          timeFieldName: timeField,
-        });
+        indexPattern = await dataViews.create(
+          {
+            title: modelIndexPattern,
+            timeFieldName: timeField,
+          },
+          false,
+          false
+        );
+
         indexPatternId = indexPattern.id ?? '';
+        adHocDataViewIds.push(indexPatternId);
       } else {
         indexPattern = await dataViews.getDefault();
         indexPatternId = indexPattern?.id ?? '';
@@ -68,8 +87,10 @@ export const getDataSourceInfo = async (
       indexPatternId,
       timeField,
       indexPattern,
+      adHocDataViewIds,
     };
   } catch (e) {
+    dropGeneratedAdHocDataViews(adHocDataViewIds, dataViews);
     return null;
   }
 };

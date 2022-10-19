@@ -171,7 +171,11 @@ export const metricsVisDefinition: VisTypeDefinition<
     return {
       canNavigateToLens: Boolean(
         vis?.params
-          ? await convertTSVBtoLensConfiguration(vis.params as Panel, timeFilter?.getAbsoluteTime())
+          ? await convertTSVBtoLensConfiguration(
+              vis.params as Panel,
+              timeFilter?.getAbsoluteTime(),
+              true
+            )
           : null
       ),
     };

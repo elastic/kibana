@@ -19,6 +19,7 @@ const mockGetDatasourceValue = jest
   .fn()
   .mockImplementation(() => Promise.resolve(stubLogstashDataView));
 const mockGetDataSourceInfo = jest.fn();
+const mockDropGeneratedAdHocDataViews = jest.fn();
 
 jest.mock('../../services', () => ({
   getDataViewsStart: jest.fn(() => mockGetDatasourceValue),
@@ -40,6 +41,7 @@ jest.mock('../lib/metrics', () => ({
 
 jest.mock('../lib/datasource', () => ({
   getDataSourceInfo: jest.fn(() => mockGetDataSourceInfo()),
+  dropGeneratedAdHocDataViews: jest.fn(() => mockDropGeneratedAdHocDataViews()),
 }));
 
 describe('convertToLens', () => {

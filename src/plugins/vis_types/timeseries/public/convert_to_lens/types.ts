@@ -16,7 +16,8 @@ import type { Panel } from '../../common/types';
 
 export type ConvertTsvbToLensVisualization = (
   model: Panel,
-  timeRange?: TimeRange
+  timeRange?: TimeRange,
+  clearAdHocDataViews?: boolean
 ) => Promise<NavigateToLensContext<XYConfiguration | MetricVisConfiguration> | null>;
 
 export interface Filter {
