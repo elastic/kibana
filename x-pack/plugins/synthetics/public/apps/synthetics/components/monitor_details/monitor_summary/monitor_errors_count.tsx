@@ -9,6 +9,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { ReportTypes } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
+import { KpiWrapper } from './kpi_wrapper';
 import { ClientPluginsStart } from '../../../../../plugin';
 
 interface MonitorErrorsCountProps {
@@ -24,18 +25,20 @@ export const MonitorErrorsCount = (props: MonitorErrorsCountProps) => {
   const { monitorId } = useParams<{ monitorId: string }>();
 
   return (
-    <ExploratoryViewEmbeddable
-      align="left"
-      reportType={ReportTypes.SINGLE_METRIC}
-      attributes={[
-        {
-          time: props,
-          reportDefinitions: { config_id: [monitorId] },
-          dataType: 'synthetics',
-          selectedMetricField: 'state.id',
-          name: 'synthetics-series-1',
-        },
-      ]}
-    />
+    <KpiWrapper>
+      <ExploratoryViewEmbeddable
+        align="left"
+        reportType={ReportTypes.SINGLE_METRIC}
+        attributes={[
+          {
+            time: props,
+            reportDefinitions: { config_id: [monitorId] },
+            dataType: 'synthetics',
+            selectedMetricField: 'state.id',
+            name: 'synthetics-series-1',
+          },
+        ]}
+      />
+    </KpiWrapper>
   );
 };

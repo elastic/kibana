@@ -7,7 +7,7 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
-import { Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
+import { CollapseFunction, Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
 import {
   convertToLensModule,
   getVisSchemas,
@@ -25,7 +25,7 @@ export interface Layer {
   columnOrder: never[];
   seriesIdsMap: Record<string, string>;
   isReferenceLineLayer: boolean;
-  collapseFn?: string;
+  collapseFn?: CollapseFunction;
 }
 
 const SIBBLING_PIPELINE_AGGS: string[] = [
@@ -175,9 +175,11 @@ export const convertToLens: ConvertXYToLensVisualization = async (vis, timefilte
       }
     });
     const collapseFn = l.bucketCollapseFn
-      ? Object.keys(l.bucketCollapseFn).find((key) =>
-          l.bucketCollapseFn[key].includes(l.buckets.customBuckets[l.metrics[0]])
-        )
+      ? (Object.keys(l.bucketCollapseFn).find((key) =>
+          l.bucketCollapseFn[key as CollapseFunction].includes(
+            l.buckets.customBuckets[l.metrics[0]]
+          )
+        ) as CollapseFunction)
       : undefined;
     return {
       indexPatternId,
