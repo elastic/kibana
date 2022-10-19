@@ -288,7 +288,7 @@ PUT _ingest/pipeline/tri_met_tracks
 
 . Set *Response Split* to *target: body.resultSet.vehicle*.
 
-. At the bottom of the configuration expand *Advanced options*.
+. At the bottom of the configuration, expand *Advanced options*.
 
 . Set *Processors* to:
 +
