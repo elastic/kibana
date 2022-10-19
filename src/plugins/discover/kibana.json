@@ -6,6 +6,7 @@
   "requiredPlugins": [
     "charts",
     "data",
+    "dataViews",
     "embeddable",
     "inspector",
     "fieldFormats",
@@ -30,7 +31,7 @@
     "triggersActionsUi",
     "savedObjectsTaggingOss"
   ],
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "dataViews", "unifiedSearch", "savedSearch"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch", "savedSearch"],
   "extraPublicDirs": ["common"],
   "owner": {
     "name": "Data Discovery",
