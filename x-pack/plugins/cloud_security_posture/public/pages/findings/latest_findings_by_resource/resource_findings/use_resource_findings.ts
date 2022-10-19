@@ -21,8 +21,8 @@ import type { FindingsBaseEsQuery, Sort } from '../../types';
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   resourceId: string;
-  from: NonNullable<estypes.SearchRequest['from']>;
-  size: NonNullable<estypes.SearchRequest['size']>;
+  from: NonNullable<NonNullable<estypes.SearchRequest['body']>['from']>;
+  size: NonNullable<NonNullable<estypes.SearchRequest['body']>['size']>;
   sort: Sort<CspFinding>;
   enabled: boolean;
 }
@@ -51,9 +51,9 @@ const getResourceFindingsQuery = ({
   pitId,
   sort,
 }: UseResourceFindingsOptions & { pitId: string }): estypes.SearchRequest => ({
-  from,
-  size,
   body: {
+    from,
+    size,
     query: {
       ...query,
       bool: {

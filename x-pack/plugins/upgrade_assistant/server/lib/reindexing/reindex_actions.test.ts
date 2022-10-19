@@ -257,7 +257,6 @@ describe('ReindexActions', () => {
     it('returns flat settings', async () => {
       clusterClient.asCurrentUser.indices.get.mockResponse({
         myIndex: {
-          // @ts-expect-error not full interface
           settings: { 'index.mySetting': '1' },
           mappings: {},
         },

@@ -97,7 +97,6 @@ export const createIndex = ({
             // Bump priority so that recovery happens before newer indices
             priority: 10,
             // Increase the fields limit beyond the default of 1000
-            // @ts-expect-error https://github.com/elastic/elasticsearch/issues/89381
             mapping: {
               total_fields: { limit: 1500 },
             },

@@ -4219,6 +4219,7 @@ describe('SavedObjectsRepository', () => {
 
         await findSuccess(relevantOpts, namespace);
         const esOptions = client.search.mock.calls[0][0];
+        // @ts-expect-error _source not a top property for typesWithBodyKey
         expect(esOptions?._source ?? []).toContain('index-pattern.title');
       });
 

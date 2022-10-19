@@ -802,7 +802,6 @@ export class DataRecognizer {
   }
 
   private async _saveJob(job: ModuleJob) {
-    // @ts-expect-error type mismatch on MlPutJobRequest.body
     return this._mlClient.putJob({ job_id: job.id, body: job.config });
   }
 

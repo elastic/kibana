@@ -107,7 +107,7 @@
     "@elastic/apm-rum-react": "^1.4.2",
     "@elastic/charts": "50.0.2",
     "@elastic/datemath": "5.0.3",
-    "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@8.3.0-canary.1",
+    "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@8.4.0-canary.1",
     "@elastic/ems-client": "8.3.3",
     "@elastic/eui": "64.0.5",
     "@elastic/filesaver": "1.1.2",

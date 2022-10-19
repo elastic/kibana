@@ -24,6 +24,7 @@ export const createLogEntryExamplesQuery = (
 ): estypes.SearchRequest => ({
   ...defaultRequestParameters,
   body: {
+    size: exampleCount,
     query: {
       bool: {
         filter: [
@@ -78,7 +79,6 @@ export const createLogEntryExamplesQuery = (
     fields: ['event.dataset', 'message'],
   },
   index: indices,
-  size: exampleCount,
 });
 
 export const logEntryExampleHitRT = rt.type({

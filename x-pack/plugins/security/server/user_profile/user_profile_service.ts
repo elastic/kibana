@@ -206,9 +206,7 @@ function parseUserProfileWithSecurity<D extends UserProfileData>(
     user: {
       ...userProfile.user,
       roles: rawUserProfile.user.roles,
-      // @ts-expect-error @elastic/elasticsearch SecurityUserProfileUser.realm_name: string
       realm_name: rawUserProfile.user.realm_name,
-      // @ts-expect-error @elastic/elasticsearch SecurityUserProfileUser.realm_domain?: string
       realm_domain: rawUserProfile.user.realm_domain,
     },
   };
