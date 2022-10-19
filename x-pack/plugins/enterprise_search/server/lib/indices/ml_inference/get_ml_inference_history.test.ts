@@ -11,9 +11,9 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { MlInferenceHistoryResponse } from '../../../common/types/pipelines';
+import { MlInferenceHistoryResponse } from '../../../../common/types/pipelines';
 
-import { fetchMlInferencePipelineHistory } from './fetch_ml_inference_pipeline_history';
+import { getMlInferenceHistory } from './get_ml_inference_history';
 
 const DEFAULT_RESPONSE: SearchResponse = {
   _shards: {
@@ -95,7 +95,7 @@ const expectedMockResults: MlInferenceHistoryResponse = {
   ],
 };
 
-describe('fetchMlInferencePipelineHistory', () => {
+describe('getMlInferenceHistory', () => {
   const mockClient = {
     search: jest.fn(),
   };
@@ -108,7 +108,7 @@ describe('fetchMlInferencePipelineHistory', () => {
   it('should query ingest pipelines from documents', async () => {
     mockClient.search.mockResolvedValue(emptyMockResponse);
 
-    await fetchMlInferencePipelineHistory(client, indexName);
+    await getMlInferenceHistory(client, indexName);
     expect(mockClient.search).toHaveBeenCalledWith({
       aggs: {
         inference_processors: {
@@ -125,25 +125,25 @@ describe('fetchMlInferencePipelineHistory', () => {
   it('should return empty history when no results found', async () => {
     mockClient.search.mockResolvedValue(emptyMockResponse);
 
-    const response = await fetchMlInferencePipelineHistory(client, indexName);
+    const response = await getMlInferenceHistory(client, indexName);
     expect(response).toEqual({ history: [] });
   });
   it('should return empty history when no aggregations returned', async () => {
     mockClient.search.mockResolvedValue(DEFAULT_RESPONSE);
 
-    const response = await fetchMlInferencePipelineHistory(client, indexName);
+    const response = await getMlInferenceHistory(client, indexName);
     expect(response).toEqual({ history: [] });
   });
   it('should return history with aggregated list', async () => {
     mockClient.search.mockResolvedValue(listMockResponse);
 
-    const response = await fetchMlInferencePipelineHistory(client, indexName);
+    const response = await getMlInferenceHistory(client, indexName);
     expect(response).toEqual(expectedMockResults);
   });
   it('should return history with aggregated object', async () => {
     mockClient.search.mockResolvedValue(objectMockResponse);
 
-    const response = await fetchMlInferencePipelineHistory(client, indexName);
+    const response = await getMlInferenceHistory(client, indexName);
     expect(response).toEqual(expectedMockResults);
   });
 });

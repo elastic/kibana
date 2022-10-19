@@ -26,11 +26,11 @@ import { deleteMlInferencePipeline } from '../../lib/indices/delete_ml_inference
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
-import { fetchMlInferencePipelineHistory } from '../../lib/indices/fetch_ml_inference_pipeline_history';
-import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
+import { getMlInferenceHistory } from '../../lib/indices/ml_inference/get_ml_inference_history';
+import { getMlInferencePipelineProcessors } from '../../lib/indices/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
-import { getMlInferenceErrors } from '../../lib/ml_inference_pipeline/get_inference_errors';
-import { getMlInferencePipelines } from '../../lib/ml_inference_pipeline/get_inference_pipelines';
+import { getMlInferenceErrors } from '../../lib/indices/ml_inference/get_ml_inference_errors';
+import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
 import { getPipeline } from '../../lib/pipelines/get_pipeline';
@@ -333,7 +333,7 @@ export function registerIndexRoutes({
         ? await ml.trainedModelsProvider(request, savedObjectsClient)
         : undefined;
 
-      const mlInferencePipelineProcessorConfigs = await fetchMlInferencePipelineProcessors(
+      const mlInferencePipelineProcessorConfigs = await getMlInferencePipelineProcessors(
         client.asCurrentUser,
         trainedModelsProvider,
         indexName
@@ -673,7 +673,7 @@ export function registerIndexRoutes({
       const indexName = decodeURIComponent(request.params.indexName);
       const { client } = (await context.core).elasticsearch;
 
-      const history = await fetchMlInferencePipelineHistory(client.asCurrentUser, indexName);
+      const history = await getMlInferenceHistory(client.asCurrentUser, indexName);
 
       return response.ok({
         body: history,

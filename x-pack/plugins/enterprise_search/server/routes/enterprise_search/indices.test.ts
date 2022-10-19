@@ -14,11 +14,11 @@ import { SharedServices } from '@kbn/ml-plugin/server/shared_services';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
-jest.mock('../../lib/indices/fetch_ml_inference_pipeline_history', () => ({
-  fetchMlInferencePipelineHistory: jest.fn(),
+jest.mock('../../lib/indices/ml_inference/get_ml_inference_history', () => ({
+  getMlInferenceHistory: jest.fn(),
 }));
-jest.mock('../../lib/indices/fetch_ml_inference_pipeline_processors', () => ({
-  fetchMlInferencePipelineProcessors: jest.fn(),
+jest.mock('../../lib/indices/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors', () => ({
+  getMlInferencePipelineProcessors: jest.fn(),
 }));
 jest.mock('../../utils/create_ml_inference_pipeline', () => ({
   createAndReferenceMlInferencePipeline: jest.fn(),
@@ -29,19 +29,19 @@ jest.mock('../../lib/indices/delete_ml_inference_pipeline', () => ({
 jest.mock('../../lib/indices/exists_index', () => ({
   indexOrAliasExists: jest.fn(),
 }));
-jest.mock('../../lib/ml_inference_pipeline/get_inference_errors', () => ({
+jest.mock('../../lib/indices/ml_inference/get_ml_inference_errors', () => ({
   getMlInferenceErrors: jest.fn(),
 }));
-jest.mock('../../lib/ml_inference_pipeline/get_inference_pipelines', () => ({
+jest.mock('../../lib/pipelines/ml_inference/get_ml_inference_pipelines', () => ({
   getMlInferencePipelines: jest.fn(),
 }));
 
 import { deleteMlInferencePipeline } from '../../lib/indices/delete_ml_inference_pipeline';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
-import { fetchMlInferencePipelineHistory } from '../../lib/indices/fetch_ml_inference_pipeline_history';
-import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
-import { getMlInferenceErrors } from '../../lib/ml_inference_pipeline/get_inference_errors';
-import { getMlInferencePipelines } from '../../lib/ml_inference_pipeline/get_inference_pipelines';
+import { getMlInferenceHistory } from '../../lib/indices/ml_inference/get_ml_inference_history';
+import { getMlInferencePipelineProcessors } from '../../lib/indices/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
+import { getMlInferenceErrors } from '../../lib/indices/ml_inference/get_ml_inference_errors';
+import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
 import { createAndReferenceMlInferencePipeline } from '../../utils/create_ml_inference_pipeline';
 import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
@@ -167,7 +167,7 @@ describe('Enterprise Search Managed Indices', () => {
         },
       };
 
-      (fetchMlInferencePipelineProcessors as jest.Mock).mockImplementationOnce(() => {
+      (getMlInferencePipelineProcessors as jest.Mock).mockImplementationOnce(() => {
         return Promise.resolve(mockData);
       });
 
@@ -175,7 +175,7 @@ describe('Enterprise Search Managed Indices', () => {
         params: { indexName: 'search-index-name' },
       });
 
-      expect(fetchMlInferencePipelineProcessors).toHaveBeenCalledWith(
+      expect(getMlInferencePipelineProcessors).toHaveBeenCalledWith(
         mockClient.asCurrentUser,
         mockTrainedModelsProvider,
         'search-index-name'
@@ -188,7 +188,7 @@ describe('Enterprise Search Managed Indices', () => {
     });
 
     it('returns a generic error if an error is thrown from the called service', async () => {
-      (fetchMlInferencePipelineProcessors as jest.Mock).mockImplementationOnce(() => {
+      (getMlInferencePipelineProcessors as jest.Mock).mockImplementationOnce(() => {
         return Promise.reject(new Error('something went wrong'));
       });
 
@@ -611,13 +611,13 @@ describe('Enterprise Search Managed Indices', () => {
         ],
       };
 
-      (fetchMlInferencePipelineHistory as jest.Mock).mockResolvedValueOnce(historyResult);
+      (getMlInferenceHistory as jest.Mock).mockResolvedValueOnce(historyResult);
 
       await mockRouter.callRoute({
         params: { indexName: 'unit-test-index' },
       });
 
-      expect(fetchMlInferencePipelineHistory).toHaveBeenCalledWith(
+      expect(getMlInferenceHistory).toHaveBeenCalledWith(
         mockClient.asCurrentUser,
         'unit-test-index'
       );
@@ -629,7 +629,7 @@ describe('Enterprise Search Managed Indices', () => {
     });
 
     it('fails if fetching history fails', async () => {
-      (fetchMlInferencePipelineHistory as jest.Mock).mockRejectedValueOnce(new Error('Oh No!!!'));
+      (getMlInferenceHistory as jest.Mock).mockRejectedValueOnce(new Error('Oh No!!!'));
 
       await mockRouter.callRoute({
         params: { indexName: 'unit-test-index' },

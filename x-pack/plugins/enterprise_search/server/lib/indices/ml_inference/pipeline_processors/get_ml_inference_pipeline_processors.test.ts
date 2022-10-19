@@ -8,16 +8,16 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import { InferencePipeline, TrainedModelState } from '../../../common/types/pipelines';
+import { InferencePipeline, TrainedModelState } from '../../../../../common/types/pipelines';
 
 import {
   fetchAndAddTrainedModelData,
   getMlModelConfigsForModelIds,
   fetchMlInferencePipelineProcessorNames,
-  fetchMlInferencePipelineProcessors,
+  getMlInferencePipelineProcessors,
   fetchPipelineProcessorInferenceData,
   InferencePipelineData,
-} from './fetch_ml_inference_pipeline_processors';
+} from './get_ml_inference_pipeline_processors';
 
 const mockGetPipeline = {
   'my-index@ml-inference': {
@@ -558,7 +558,7 @@ describe('fetchAndAddTrainedModelData lib function', () => {
   });
 });
 
-describe('fetchMlInferencePipelineProcessors lib function', () => {
+describe('getMlInferencePipelineProcessors lib function', () => {
   const mockClient = {
     ingest: {
       getPipeline: jest.fn(),
@@ -579,7 +579,7 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
   describe('when Machine Learning is disabled in the current space', () => {
     it('should throw an error', () => {
       expect(() =>
-        fetchMlInferencePipelineProcessors(
+        getMlInferencePipelineProcessors(
           mockClient as unknown as ElasticsearchClient,
           undefined,
           'some-index'
@@ -592,7 +592,7 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
     it('should return an empty array', async () => {
       mockClient.ingest.getPipeline.mockImplementation(() => Promise.reject({}));
 
-      const response = await fetchMlInferencePipelineProcessors(
+      const response = await getMlInferencePipelineProcessors(
         mockClient as unknown as ElasticsearchClient,
         mockTrainedModelsProvider as unknown as MlTrainedModels,
         'index-with-no-ml-inference-pipeline'
@@ -619,7 +619,7 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
         })
       );
 
-      const response = await fetchMlInferencePipelineProcessors(
+      const response = await getMlInferencePipelineProcessors(
         mockClient as unknown as ElasticsearchClient,
         mockTrainedModelsProvider as unknown as MlTrainedModels,
         'my-index'
@@ -656,7 +656,7 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
 
       const expected = [trainedModelDataObject['trained-model-id-1']] as InferencePipeline[];
 
-      const response = await fetchMlInferencePipelineProcessors(
+      const response = await getMlInferencePipelineProcessors(
         mockClient as unknown as ElasticsearchClient,
         mockTrainedModelsProvider as unknown as MlTrainedModels,
         'my-index'
@@ -700,7 +700,7 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
         trainedModelDataObject['ml-inference-pipeline-3'],
       ];
 
-      const response = await fetchMlInferencePipelineProcessors(
+      const response = await getMlInferencePipelineProcessors(
         mockClient as unknown as ElasticsearchClient,
         mockTrainedModelsProvider as unknown as MlTrainedModels,
         'my-index'

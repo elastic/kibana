@@ -9,11 +9,7 @@ import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import { getMlInferencePipelines } from './get_inference_pipelines';
-
-jest.mock('../indices/fetch_ml_inference_pipeline_processors', () => ({
-  getMlModelConfigsForModelIds: jest.fn(),
-}));
+import { getMlInferencePipelines } from './get_ml_inference_pipelines';
 
 describe('getMlInferencePipelines', () => {
   const mockClient = {

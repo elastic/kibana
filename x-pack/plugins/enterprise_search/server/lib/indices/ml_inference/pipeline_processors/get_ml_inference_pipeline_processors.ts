@@ -8,9 +8,9 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import { getMlModelTypesForModelConfig } from '../../../common/ml_inference_pipeline';
-import { InferencePipeline, TrainedModelState } from '../../../common/types/pipelines';
-import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
+import { getMlModelTypesForModelConfig } from '../../../../../common/ml_inference_pipeline';
+import { InferencePipeline, TrainedModelState } from '../../../../../common/types/pipelines';
+import { getInferencePipelineNameFromIndexName } from '../../../../utils/ml_inference_pipeline_utils';
 
 export type InferencePipelineData = InferencePipeline & {
   trainedModelName: string;
@@ -162,7 +162,7 @@ export const fetchAndAddTrainedModelData = async (
   });
 };
 
-export const fetchMlInferencePipelineProcessors = async (
+export const getMlInferencePipelineProcessors = async (
   client: ElasticsearchClient,
   trainedModelsProvider: MlTrainedModels | undefined,
   indexName: string

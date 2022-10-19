@@ -12,9 +12,9 @@ import {
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { MlInferenceHistoryResponse } from '../../../common/types/pipelines';
+import { MlInferenceHistoryResponse } from '../../../../common/types/pipelines';
 
-export const fetchMlInferencePipelineHistory = async (
+export const getMlInferenceHistory = async (
   client: ElasticsearchClient,
   index: string
 ): Promise<MlInferenceHistoryResponse> => {
