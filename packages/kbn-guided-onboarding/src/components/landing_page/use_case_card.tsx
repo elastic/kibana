@@ -41,9 +41,12 @@ const constants: UseCaseConstants = {
     logAltText: i18n.translate('guidedOnboardingPackage.gettingStarted.security.iconName', {
       defaultMessage: 'Security logo',
     }),
-    betaBadgeLabel: i18n.translate('guidedOnboardingPackage.gettingStarted.security.betaBadgeLabel', {
-      defaultMessage: 'security',
-    }),
+    betaBadgeLabel: i18n.translate(
+      'guidedOnboardingPackage.gettingStarted.security.betaBadgeLabel',
+      {
+        defaultMessage: 'security',
+      }
+    ),
   },
 };
 
