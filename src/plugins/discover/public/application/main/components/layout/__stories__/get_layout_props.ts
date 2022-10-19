@@ -88,7 +88,7 @@ const getCommonProps = (dataView: DataView) => {
   const searchSourceMock = {} as unknown as SearchSource;
 
   const dataViewList = [dataView].map((ip) => {
-    return { ...ip, ...{ attributes: { title: ip.title } } };
+    return { ...ip, ...{ attributes: { title: ip.getIndexPattern() } } };
   }) as unknown as Array<SavedObject<DataViewAttributes>>;
 
   const savedSearchMock = {} as unknown as SavedSearch;
