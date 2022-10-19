@@ -101,7 +101,7 @@ describe('OpsgenieParamFields', () => {
     expect(screen.getByDisplayValue('456')).toBeInTheDocument();
   });
 
-  it('does not render the sub action select for creating an alert', async () => {
+  it('does not render the sub action select for creating an alert when execution mode is undefined', async () => {
     render(<OpsgenieParamFields {...{ ...defaultCreateAlertProps, executionMode: undefined }} />);
 
     expect(screen.getByText('Message')).toBeInTheDocument();
@@ -112,7 +112,7 @@ describe('OpsgenieParamFields', () => {
     expect(screen.getByDisplayValue('hello')).toBeInTheDocument();
   });
 
-  it('does not render the sub action select for closing an alert', async () => {
+  it('does not render the sub action select for closing an alert when execution mode is undefined', async () => {
     render(<OpsgenieParamFields {...{ ...defaultCloseAlertProps, executionMode: undefined }} />);
 
     expect(screen.queryByText('Message')).not.toBeInTheDocument();

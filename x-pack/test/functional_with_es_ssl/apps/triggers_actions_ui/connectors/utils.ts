@@ -12,11 +12,9 @@ import { ObjectRemover } from '../../../lib/object_remover';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getTestActionData } from '../../../lib/get_test_data';
 
-export const createConnectorAndObjectRemover = async ({
-  getPageObject,
+export const createSlackConnectorAndObjectRemover = async ({
   getService,
 }: {
-  getPageObject: FtrProviderContext['getPageObject'];
   getService: FtrProviderContext['getService'];
 }) => {
   const supertest = getService('supertest');
@@ -25,8 +23,7 @@ export const createConnectorAndObjectRemover = async ({
   const testData = getTestActionData();
   const createdAction = await createSlackConnector({
     name: testData.name,
-    getPageObject,
-    getService,
+    supertest,
   });
   objectRemover.add(createdAction.id, 'action', 'actions');
 
@@ -35,26 +32,23 @@ export const createConnectorAndObjectRemover = async ({
 
 export const createSlackConnector = async ({
   name,
-  getPageObject,
-  getService,
+  supertest,
 }: {
   name: string;
-  getPageObject: FtrProviderContext['getPageObject'];
-  getService: FtrProviderContext['getService'];
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
 }) => {
   const connector = await createConnector({
     name,
     config: {},
     secrets: { webhookUrl: 'https://test.com' },
     connectorTypeId: '.slack',
-    getPageObject,
-    getService,
+    supertest,
   });
 
   return connector;
 };
 
-export const getConnector = async (
+export const getConnectorByName = async (
   name: string,
   supertest: SuperTest.SuperTest<SuperTest.Test>
 ) => {
@@ -71,20 +65,14 @@ export const createConnector = async ({
   config,
   secrets,
   connectorTypeId,
-  getPageObject,
-  getService,
+  supertest,
 }: {
   name: string;
   config: Record<string, unknown>;
   secrets: Record<string, unknown>;
   connectorTypeId: string;
-  getPageObject: FtrProviderContext['getPageObject'];
-  getService: FtrProviderContext['getService'];
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
 }) => {
-  const common = getPageObject('common');
-  const supertest = getService('supertest');
-  const testSubjects = getService('testSubjects');
-
   const { body: createdAction } = await supertest
     .post(`/api/actions/connector`)
     .set('kbn-xsrf', 'foo')
@@ -95,9 +83,6 @@ export const createConnector = async ({
       connector_type_id: connectorTypeId,
     })
     .expect(200);
-
-  await common.navigateToApp('triggersActions');
-  await testSubjects.click('connectorsTab');
 
   return createdAction;
 };

@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+<<<<<<< HEAD
+=======
+import expect from '@kbn/expect';
+>>>>>>> 048b11d2748b52314f19b99ab2fb3d1d081848ca
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { ActionsCommon } from './common';
 
@@ -19,16 +23,15 @@ export function ActionsOpsgenieServiceProvider(
   common: ActionsCommon
 ) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
 
   return {
     async createNewConnector(fields: ConnectorFormFields) {
       await common.openNewConnectorForm('opsgenie');
       await this.setConnectorFields(fields);
 
-      await find.clickByCssSelector(
-        '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
-      );
+      const flyOutSaveButton = await testSubjects.find('create-connector-flyout-save-btn');
+      expect(await flyOutSaveButton.isEnabled()).to.be(true);
+      await flyOutSaveButton.click();
     },
 
     async setConnectorFields({ name, apiUrl, apiKey }: ConnectorFormFields) {
@@ -40,9 +43,9 @@ export function ActionsOpsgenieServiceProvider(
     async updateConnectorFields(fields: ConnectorFormFields) {
       await this.setConnectorFields(fields);
 
-      await find.clickByCssSelector(
-        '[data-test-subj="edit-connector-flyout-save-btn"]:not(disabled)'
-      );
+      const editFlyOutSaveButton = await testSubjects.find('edit-connector-flyout-save-btn');
+      expect(await editFlyOutSaveButton.isEnabled()).to.be(true);
+      await editFlyOutSaveButton.click();
     },
   };
 }

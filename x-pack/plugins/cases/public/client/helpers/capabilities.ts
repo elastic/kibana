@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasesPermissions } from '../../../common';
+import type { CasesPermissions } from '../../../common';
 import {
   CREATE_CASES_CAPABILITY,
   DELETE_CASES_CAPABILITY,

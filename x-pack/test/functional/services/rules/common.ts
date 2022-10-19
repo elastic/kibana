@@ -16,6 +16,7 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
   const comboBox = getService('comboBox');
   const find = getService('find');
   const retry = getService('retry');
+  const browser = getService('browser');
 
   return {
     async clickCreateAlertButton() {
@@ -39,9 +40,12 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
     },
 
     async defineIndexThresholdAlert(alertName: string) {
+      await browser.refresh();
       await this.clickCreateAlertButton();
+      await testSubjects.scrollIntoView('ruleNameInput');
       await testSubjects.setValue('ruleNameInput', alertName);
       await testSubjects.click(`.index-threshold-SelectOption`);
+      await testSubjects.scrollIntoView('selectIndexExpression');
       await testSubjects.click('selectIndexExpression');
       const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
       await indexComboBox.click();

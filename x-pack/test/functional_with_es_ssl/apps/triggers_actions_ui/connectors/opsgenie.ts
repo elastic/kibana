@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
-import { createConnector, createConnectorAndObjectRemover, getConnector } from './utils';
+import { createConnector, createSlackConnectorAndObjectRemover, getConnectorByName } from './utils';
 
-export default ({ getPageObjects, getPageObject, getService }: FtrProviderContext) => {
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const find = getService('find');
@@ -19,11 +19,12 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
   const supertest = getService('supertest');
   const actions = getService('actions');
   const rules = getService('rules');
+  const browser = getService('browser');
   let objectRemover: ObjectRemover;
 
   describe('Opsgenie', () => {
     before(async () => {
-      objectRemover = await createConnectorAndObjectRemover({ getPageObject, getService });
+      objectRemover = await createSlackConnectorAndObjectRemover({ getService });
     });
 
     after(async () => {
@@ -31,8 +32,8 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     });
 
     describe('connector page', () => {
-      before(async () => {
-        await testSubjects.click('connectorsTab');
+      beforeEach(async () => {
+        await pageObjects.common.navigateToApp('triggersActionsConnectors');
       });
 
       it('should create the connector', async () => {
@@ -56,7 +57,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
             actionType: 'Opsgenie',
           },
         ]);
-        const connector = await getConnector(connectorName, supertest);
+        const connector = await getConnectorByName(connectorName, supertest);
         objectRemover.add(connector.id, 'action', 'actions');
       });
 
@@ -65,6 +66,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         const updatedConnectorName = `${connectorName}updated`;
         const createdAction = await createOpsgenieConnector(connectorName);
         objectRemover.add(createdAction.id, 'action', 'actions');
+        browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -97,6 +99,8 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         const connectorName = generateUniqueKey();
         const createdAction = await createOpsgenieConnector(connectorName);
         objectRemover.add(createdAction.id, 'action', 'actions');
+        browser.refresh();
+
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
         const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
@@ -123,6 +127,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         const connectorName = generateUniqueKey();
         const createdAction = await createOpsgenieConnector(connectorName);
         objectRemover.add(createdAction.id, 'action', 'actions');
+        browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -145,7 +150,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         const createdAction = await createOpsgenieConnector(connectorName);
         objectRemover.add(createdAction.id, 'action', 'actions');
 
-        await testSubjects.click('rulesTab');
+        await pageObjects.common.navigateToApp('triggersActions');
       });
 
       beforeEach(async () => {
@@ -186,16 +191,16 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       });
 
       it('should not preserve the message when switching to close alert and back to create alert', async () => {
-        await testSubjects.setValue('messageTextArea', 'a message');
+        await testSubjects.setValue('messageInput', 'a message');
         await testSubjects.selectValue('opsgenie-subActionSelect', 'closeAlert');
 
-        await testSubjects.missingOrFail('messageTextArea');
-        await retry.try(async () => {
+        await testSubjects.missingOrFail('messageInput');
+        await retry.waitFor('message input to be displayed', async () => {
           await testSubjects.selectValue('opsgenie-subActionSelect', 'createAlert');
-          await testSubjects.exists('messageTextArea');
+          return await testSubjects.exists('messageInput');
         });
 
-        expect(await testSubjects.getAttribute('messageTextArea', 'value')).to.be('');
+        expect(await testSubjects.getAttribute('messageInput', 'value')).to.be('');
       });
 
       it('should not preserve the alias when switching run when to recover', async () => {
@@ -203,7 +208,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         await testSubjects.click('addNewActionConnectorActionGroup-0');
         await testSubjects.click('addNewActionConnectorActionGroup-0-option-recovered');
 
-        await testSubjects.missingOrFail('messageTextArea');
+        await testSubjects.missingOrFail('messageInput');
 
         expect(await testSubjects.getAttribute('aliasInput', 'value')).to.be(defaultAlias);
       });
@@ -211,12 +216,12 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       it('should not preserve the alias when switching run when to threshold met', async () => {
         await testSubjects.click('addNewActionConnectorActionGroup-0');
         await testSubjects.click('addNewActionConnectorActionGroup-0-option-recovered');
-        await testSubjects.missingOrFail('messageTextArea');
+        await testSubjects.missingOrFail('messageInput');
 
         await testSubjects.setValue('aliasInput', 'an alias');
         await testSubjects.click('addNewActionConnectorActionGroup-0');
         await testSubjects.click('addNewActionConnectorActionGroup-0-option-threshold met');
-        await testSubjects.exists('messageTextArea');
+        await testSubjects.exists('messageInput');
 
         expect(await testSubjects.getAttribute('aliasInput', 'value')).to.be(defaultAlias);
       });
@@ -224,7 +229,9 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
     const setupRule = async () => {
       const alertName = generateUniqueKey();
-      await rules.common.defineIndexThresholdAlert(alertName);
+      await retry.try(async () => {
+        await rules.common.defineIndexThresholdAlert(alertName);
+      });
 
       await rules.common.setNotifyThrottleInput();
     };
@@ -240,8 +247,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         config: { apiUrl: 'https//test.com' },
         secrets: { apiKey: '1234' },
         connectorTypeId: '.opsgenie',
-        getPageObject,
-        getService,
+        supertest,
       });
     };
   });
