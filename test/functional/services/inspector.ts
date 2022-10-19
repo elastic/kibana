@@ -218,6 +218,27 @@ export class InspectorService extends FtrService {
   }
 
   /**
+   * Check how many tables are being shown in the inspector.
+   * @returns
+   */
+  public async getNumberOfTables(): Promise<number> {
+    const chooserDataTestId = 'inspectorTableChooser';
+    const menuDataTestId = 'inspectorTableChooserMenuPanel';
+
+    if (!(await this.testSubjects.exists(chooserDataTestId))) {
+      return 1;
+    }
+
+    return await this.retry.try(async () => {
+      await this.testSubjects.click(chooserDataTestId);
+      const menu = await this.testSubjects.find(menuDataTestId);
+      return (
+        await menu.findAllByCssSelector(`[data-test-subj="${menuDataTestId}"] .euiContextMenuItem`)
+      ).length;
+    });
+  }
+
+  /**
    * Returns the selected option value from combobox
    */
   public async getSelectedOption(): Promise<string> {

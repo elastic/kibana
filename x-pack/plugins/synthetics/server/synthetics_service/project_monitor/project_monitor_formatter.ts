@@ -5,12 +5,13 @@
  * 2.0.
  */
 import { KibanaRequest } from '@kbn/core/server';
+import pMap from 'p-map';
 import {
   SavedObjectsUpdateResponse,
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core/server';
-import pMap from 'p-map';
+import { i18n } from '@kbn/i18n';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { syncNewMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
 import { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
@@ -41,8 +42,13 @@ import { normalizeProjectMonitor } from './normalizers';
 
 type FailedError = Array<{ id?: string; reason: string; details: string; payload?: object }>;
 
-export const INSUFFICIENT_FLEET_PERMISSIONS =
-  'Insufficient permissions. In order to configure private locations, you must have Fleet and Integrations write permissions. To resolve, please generate a new API key with a user who has Fleet and Integrations write permissions.';
+export const INSUFFICIENT_FLEET_PERMISSIONS = i18n.translate(
+  'xpack.synthetics.service.projectMonitors.insufficientFleetPermissions',
+  {
+    defaultMessage:
+      'Insufficient permissions. In order to configure private locations, you must have Fleet and Integrations write permissions. To resolve, please generate a new API key with a user who has Fleet and Integrations write permissions.',
+  }
+);
 
 export class ProjectMonitorFormatter {
   private projectId: string;

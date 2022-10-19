@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, VFC } from 'react';
-import { Indicator, RawIndicatorFieldId } from '../../../../../../../common/types/indicator';
+import { Indicator, RawIndicatorFieldId } from '../../../../types';
 import { unwrapValue } from '../../../../utils';
 import { IndicatorFieldsTable } from '../../fields_table';
 

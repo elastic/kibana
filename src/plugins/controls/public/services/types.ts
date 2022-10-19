@@ -15,11 +15,13 @@ import { ControlsHTTPService } from './http/types';
 import { ControlsOptionsListService } from './options_list/types';
 import { ControlsSettingsService } from './settings/types';
 import { ControlsThemeService } from './theme/types';
+import { ControlsEmbeddableService } from './embeddable/types';
 
 export interface ControlsServices {
   // dependency services
   dataViews: ControlsDataViewsService;
   overlays: ControlsOverlaysService;
+  embeddable: ControlsEmbeddableService;
   data: ControlsDataService;
   unifiedSearch: ControlsUnifiedSearchService;
   http: ControlsHTTPService;

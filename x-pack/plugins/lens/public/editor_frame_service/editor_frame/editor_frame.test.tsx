@@ -306,7 +306,7 @@ describe('editor_frame', () => {
         setDatasourceState(updatedState);
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(3);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: updatedState,
@@ -377,6 +377,7 @@ describe('editor_frame', () => {
         getFilters: jest.fn(),
         getMaxPossibleNumValues: jest.fn(),
         isTextBasedLanguage: jest.fn(() => false),
+        hasDefaultTimeField: jest.fn(() => true),
       };
       mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
 
@@ -386,7 +387,7 @@ describe('editor_frame', () => {
         setDatasourceState({});
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(3);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           frame: expect.objectContaining({
@@ -711,7 +712,7 @@ describe('editor_frame', () => {
         instance.find('[data-test-subj="lnsSuggestion"]').at(2).simulate('click');
       });
 
-      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(1);
+      expect(mockVisualization.getConfiguration).toHaveBeenCalledTimes(2);
       expect(mockVisualization.getConfiguration).toHaveBeenLastCalledWith(
         expect.objectContaining({
           state: suggestionVisState,
