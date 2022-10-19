@@ -354,7 +354,7 @@ export function DiscoverSidebarComponent({
             trigger={{
               label: selectedDataView?.getName() || '',
               'data-test-subj': 'dataView-switch-link',
-              title: selectedDataView?.title || '',
+              title: selectedDataView?.getIndexPattern() || '',
               fullWidth: true,
             }}
           />
