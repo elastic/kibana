@@ -133,13 +133,8 @@ export class ExecutionHandler<
 
       this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
 
-      for (const { action, alert, alertId } of executables) {
+      for (const { action, alert, alertId, actionGroup, state } of executables) {
         const { actionTypeId } = action;
-        const actionGroup: ActionGroupIds | RecoveryActionGroupId = recovered
-          ? this.ruleType.recoveryActionGroup.id
-          : alert.getScheduledActionOptions()?.actionGroup!;
-
-        const instanceState = recovered ? {} : alert.getScheduledActionOptions()?.state!;
 
         if (!recovered) {
           alert.updateLastScheduledActions(action.group as ActionGroupIds);
@@ -206,7 +201,7 @@ export class ExecutionHandler<
               alertActionGroupName: this.ruleTypeActionGroups.get(actionGroup)!,
               context: alert.getContext(),
               actionId: action.id,
-              state: instanceState,
+              state,
               kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
               alertParams: this.rule.params,
               actionParams: action.params,
@@ -263,6 +258,8 @@ export class ExecutionHandler<
           const actionGroup = recovered
             ? this.ruleType.recoveryActionGroup.id
             : alert.getScheduledActionOptions()?.actionGroup!;
+          const state = recovered ? {} : alert.getScheduledActionOptions()?.state!;
+
           if (!this.ruleTypeActionGroups.has(actionGroup)) {
             this.logger.error(
               `Invalid action group "${actionGroup}" for rule "${this.ruleType.id}".`
@@ -274,6 +271,8 @@ export class ExecutionHandler<
               action,
               alert,
               alertId,
+              actionGroup,
+              state,
             });
           }
         }
