@@ -27,11 +27,11 @@
     "features",
     "inspector",
     "ruleRegistry",
-    "timelines",
     "triggersActionsUi",
     "inspector",
     "unifiedSearch",
-    "security"
+    "security",
+    "guidedOnboarding"
   ],
   "ui": true,
   "server": true,

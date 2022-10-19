@@ -32,12 +32,16 @@ jest.mock('../../lib/indices/exists_index', () => ({
 jest.mock('../../lib/ml_inference_pipeline/get_inference_errors', () => ({
   getMlInferenceErrors: jest.fn(),
 }));
+jest.mock('../../lib/ml_inference_pipeline/get_inference_pipelines', () => ({
+  getMlInferencePipelines: jest.fn(),
+}));
 
 import { deleteMlInferencePipeline } from '../../lib/indices/delete_ml_inference_pipeline';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchMlInferencePipelineHistory } from '../../lib/indices/fetch_ml_inference_pipeline_history';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
 import { getMlInferenceErrors } from '../../lib/ml_inference_pipeline/get_inference_errors';
+import { getMlInferencePipelines } from '../../lib/ml_inference_pipeline/get_inference_pipelines';
 import { createAndReferenceMlInferencePipeline } from '../../utils/create_ml_inference_pipeline';
 import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
@@ -639,6 +643,66 @@ describe('Enterprise Search Managed Indices', () => {
           message: 'Enterprise Search encountered an error. Check Kibana Server logs for details.',
         },
         statusCode: 502,
+      });
+    });
+  });
+
+  describe('GET /internal/enterprise_search/pipelines/ml_inference', () => {
+    let mockTrainedModelsProvider: MlTrainedModels;
+    let mockMl: SharedServices;
+
+    beforeEach(() => {
+      const context = {
+        core: Promise.resolve(mockCore),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
+      mockRouter = new MockRouter({
+        context,
+        method: 'get',
+        path: '/internal/enterprise_search/pipelines/ml_inference',
+      });
+
+      mockTrainedModelsProvider = {
+        getTrainedModels: jest.fn(),
+        getTrainedModelsStats: jest.fn(),
+      } as MlTrainedModels;
+
+      mockMl = {
+        trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
+      } as unknown as jest.Mocked<SharedServices>;
+
+      registerIndexRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+        ml: mockMl,
+      });
+    });
+
+    it('fetches ML inference pipelines', async () => {
+      const pipelinesResult = {
+        pipeline1: {
+          processors: [],
+        },
+        pipeline2: {
+          processors: [],
+        },
+        pipeline3: {
+          processors: [],
+        },
+      };
+
+      (getMlInferencePipelines as jest.Mock).mockResolvedValueOnce(pipelinesResult);
+
+      await mockRouter.callRoute({});
+
+      expect(getMlInferencePipelines).toHaveBeenCalledWith(
+        mockClient.asCurrentUser,
+        mockTrainedModelsProvider
+      );
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: pipelinesResult,
+        headers: { 'content-type': 'application/json' },
       });
     });
   });
