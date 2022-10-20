@@ -11,3 +11,58 @@ import type { TableState } from '@kbn/timelines-plugin/public/types';
 export interface DataTableState {
   dataTable: TableState;
 }
+
+export type { TGridModel };
+
+/** A map of id to data table  */
+export interface TableById {
+  [id: string]: TGridModel;
+}
+
+export const EMPTY_TABLE_BY_ID: TableById = {}; // stable reference
+
+export interface TGridEpicDependencies<State> {
+  // kibana$: Observable<CoreStart>;
+  storage: Storage;
+  tGridByIdSelector: () => (state: State, timelineId: string) => TGridModel;
+}
+
+/** The state of all data tables is stored here */
+export interface TableState {
+  tableById: TableById;
+}
+
+export enum TableId {
+  usersPageEvents = 'users-page-events',
+  hostsPageEvents = 'hosts-page-events',
+  networkPageEvents = 'network-page-events',
+  hostsPageSessions = 'hosts-page-sessions-v2',
+  alertsOnRuleDetailsPage = 'alerts-rules-details-page',
+  alertsOnAlertsPage = 'alerts-page',
+  casePage = 'timeline-case',
+  test = 'table-test', // Reserved for testing purposes
+  alternateTest = 'alternateTest',
+  kubernetesPageSessions = 'kubernetes-page-sessions',
+}
+
+export enum TimelineId {
+  active = 'timeline-1',
+  casePage = 'timeline-case',
+  test = 'timeline-test', // Reserved for testing purposes
+}
+
+export interface InitialyzeTGridSettings extends Partial<TGridModelSettings> {
+  id: string;
+}
+
+export interface TGridPersistInput extends Partial<Omit<TGridModel, keyof TGridModelSettings>> {
+  id: string;
+  columns: ColumnHeaderOptions[];
+  indexNames: string[];
+  showCheckboxes?: boolean;
+  defaultColumns: Array<
+    Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
+      ColumnHeaderOptions
+  >;
+  sort: SortColumnTable[];
+}

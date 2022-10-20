@@ -8,10 +8,9 @@
 import { Store, Unsubscribe } from 'redux';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
-import type { LastUpdatedAtProps, LoadingPanelProps } from './components';
-import { getLastUpdatedLazy, getLoadingPanelLazy, getTGridLazy } from './methods';
-import type { TimelinesUIStart, TimelinesStartPlugins, TGridIntegratedProps } from './types';
-import { tGridReducer } from './store/t_grid/reducer';
+import type { LoadingPanelProps } from './components';
+import { getLoadingPanelLazy } from './methods';
+import type { TimelinesUIStart, TimelinesStartPlugins } from './types';
 import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
 import { getHoverActions, HoverActionsConfig } from './components/hover_actions';
@@ -37,25 +36,11 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
           return this._hoverActions;
         }
       },
-      getTGrid: (props: TGridIntegratedProps) => {
-        return getTGridLazy(props, {
-          store: this._store,
-          storage: this._storage,
-          setStore: this.setStore.bind(this),
-          data,
-        });
-      },
-      getTGridReducer: () => {
-        return tGridReducer;
-      },
       getTimelineReducer: () => {
         return timelineReducer;
       },
       getLoadingPanel: (props: LoadingPanelProps) => {
         return getLoadingPanelLazy(props);
-      },
-      getLastUpdated: (props: LastUpdatedAtProps) => {
-        return getLastUpdatedLazy(props);
       },
       getUseAddToTimeline: () => {
         return useAddToTimeline;
@@ -66,7 +51,7 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       getUseDraggableKeyboardWrapper: () => {
         return useDraggableKeyboardWrapper;
       },
-      setTGridEmbeddedStore: (store: Store) => {
+      setTimelineEmbeddedStore: (store: Store) => {
         this.setStore(store);
       },
     };

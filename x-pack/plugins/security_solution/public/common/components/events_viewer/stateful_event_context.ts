@@ -6,6 +6,11 @@
  */
 
 import { createContext } from 'react';
-import { StatefulEventContextType } from '../types';
+export interface StatefulEventContextType {
+  tabType: string | undefined;
+  timelineID: string;
+  enableHostDetailsFlyout: boolean;
+  enableIpDetailsFlyout: boolean;
+}
 
 export const StatefulEventContext = createContext<StatefulEventContextType | null>(null);

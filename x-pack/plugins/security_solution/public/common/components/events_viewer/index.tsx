@@ -238,6 +238,106 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const tableContext = useMemo(() => ({ tableId: id }), [id]);
 
   const isLive = input.policy.kind === 'interval';
+  // -----------------------------------------------
+  const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
+  const { uiSettings } = useKibana<CoreStart>().services;
+
+  const getManageDataTable = useMemo(() => tGridSelectors.getManageDataTableById(), []);
+
+  const { queryFields } = useDeepEqualSelector((state) => getManageDataTable(state, id ?? ''));
+
+  const esQueryConfig = getEsQueryConfig(uiSettings);
+
+  const filterQuery = useMemo(
+    () =>
+      getCombinedFilterQuery({
+        config: esQueryConfig,
+        browserFields,
+        dataProviders: [],
+        filters,
+        from: start,
+        indexPattern,
+        kqlMode: 'filter',
+        kqlQuery: query,
+        to: end,
+      }),
+    [esQueryConfig, indexPattern, browserFields, filters, start, end, query]
+  );
+
+  const canQueryTimeline = useMemo(
+    () =>
+      filterQuery != null &&
+      isLoadingIndexPattern != null &&
+      !isLoadingIndexPattern &&
+      !isEmpty(start) &&
+      !isEmpty(end),
+    [isLoadingIndexPattern, filterQuery, start, end]
+  );
+
+  const fields = useMemo(
+    () => [...columnsHeader.map((c) => c.id), ...(queryFields ?? [])],
+    [columnsHeader, queryFields]
+  );
+
+  const sortField = useMemo(
+    () =>
+      sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
+        field: columnId,
+        type: columnType,
+        direction: sortDirection as Direction,
+        esTypes: esTypes ?? [],
+      })),
+    [sort]
+  );
+
+  const [loading, { events, loadPage, pageInfo, refetch, totalCount = 0, inspect }] =
+    useTimelineEvents({
+      // We rely on entityType to determine Events vs Alerts
+      alertConsumers: SECURITY_ALERTS_CONSUMERS,
+      data,
+      dataViewId,
+      endDate: end,
+      entityType,
+      fields,
+      filterQuery,
+      id,
+      indexNames,
+      limit: itemsPerPage,
+      runtimeMappings,
+      skip: !canQueryTimeline,
+      sort: sortField,
+      startDate: start,
+    });
+
+  useEffect(() => {
+    dispatch(tGridActions.updateIsLoading({ id, isLoading: loading }));
+  }, [dispatch, id, loading]);
+
+  const totalCountMinusDeleted = useMemo(
+    () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
+    [deletedEventIds.length, totalCount]
+  );
+
+  const hasAlerts = totalCountMinusDeleted > 0;
+
+  const nonDeletedEvents = useMemo(
+    () => events.filter((e) => !deletedEventIds.includes(e._id)),
+    [deletedEventIds, events]
+  );
+  useEffect(() => {
+    setQuery(inspect, loading, refetch);
+  }, [inspect, loading, refetch, setQuery]);
+
+  // Clear checkbox selection when new events are fetched
+  useEffect(() => {
+    dispatch(tGridActions.clearSelected({ id }));
+    dispatch(
+      tGridActions.setTGridSelectAll({
+        id,
+        selectAll: false,
+      })
+    );
+  }, [nonDeletedEvents, dispatch, id]);
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
@@ -278,39 +378,15 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
                 {graphOverlay}
 
-                {timelinesUi.getTGrid({
-                  browserFields,
-                  bulkActions,
-                  columns,
-                  dataViewId,
-                  defaultCellActions,
-                  deletedEventIds,
-                  disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-                  end,
-                  entityType,
-                  fieldBrowserOptions,
-                  filters: globalFilters,
-                  filterStatus: currentFilter,
-                  getRowRenderer,
-                  hasAlertsCrud,
-                  id: tableId,
-                  indexNames: selectedPatterns,
-                  indexPattern,
-                  isLive,
-                  isLoadingIndexPattern,
-                  itemsPerPage,
-                  itemsPerPageOptions,
-                  leadingControlColumns,
-                  onRuleChange,
-                  query,
-                  renderCellValue,
-                  rowRenderers,
-                  runtimeMappings,
-                  setQuery,
-                  sort,
-                  start,
-                  unit,
-                })}
+                {!hasAlerts && !loading && !graphOverlay && <TGridEmpty height="short" />}
+                {hasAlerts && (
+                  <FullWidthFlexGroupTable
+                    $visible={!graphEventId && graphOverlay == null}
+                    gutterSize="none"
+                  >
+                    <ScrollableFlexItem grow={1}> </ScrollableFlexItem>
+                  </FullWidthFlexGroupTable>
+                )}
               </StyledEuiPanel>
             </TableContext.Provider>
           </EventsContainerLoading>

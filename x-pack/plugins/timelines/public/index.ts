@@ -16,32 +16,6 @@
 
 import { TimelinesPlugin } from './plugin';
 
-export {
-  upsertColumn,
-  applyDeltaToColumnWidth,
-  updateColumnOrder,
-  updateColumnWidth,
-  toggleDetailPanel,
-  removeColumn,
-  updateIsLoading,
-  updateColumns,
-  updateItemsPerPage,
-  updateItemsPerPageOptions,
-  updateSort,
-  setSelected,
-  clearSelected,
-  setEventsLoading,
-  clearEventsLoading,
-  setEventsDeleted,
-  clearEventsDeleted,
-  initializeTGridSettings,
-  setTGridSelectAll,
-  updateGraphEventId,
-  updateSessionViewConfig,
-  createTGrid,
-} from './store/t_grid/actions';
-
-export { tGridReducer } from './store/t_grid/reducer';
 export type { TimelinesUIStart, TableState, TableById, SubsetTGridModel } from './types';
 export type { SortDirection, State as TGridState, TGridModel } from './types';
 export type { OnColumnFocused } from '../common/utils/accessibility';
@@ -88,9 +62,4 @@ export function plugin() {
   return new TimelinesPlugin();
 }
 
-export { StatefulEventContext } from './components/stateful_event_context';
-export { TableContext } from './components/t_grid/shared';
-
 export type { AddToTimelineButtonProps } from './components/hover_actions/actions/add_to_timeline';
-
-export { combineQueries } from './components/t_grid/helpers';

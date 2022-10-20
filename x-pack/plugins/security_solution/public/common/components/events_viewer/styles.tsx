@@ -11,6 +11,19 @@ import type { ViewSelection } from '../event_rendered_view/selector';
 export const SELECTOR_TIMELINE_GLOBAL_CONTAINER = 'securitySolutionTimeline__container';
 export const EVENTS_TABLE_CLASS_NAME = 'siemEventsTable';
 
+const FullWidthFlexGroupTable = styled(EuiFlexGroup)<{ $visible: boolean }>`
+  overflow: hidden;
+  margin: 0;
+  display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
+`;
+
+const ScrollableFlexItem = styled(EuiFlexItem)`
+  overflow: auto;
+`;
+
+const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
+
+
 export const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible?: boolean }>`
   overflow: hidden;
   margin: 0;
