@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-<<<<<<< HEAD
-=======
 import expect from '@kbn/expect';
->>>>>>> 048b11d2748b52314f19b99ab2fb3d1d081848ca
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { ActionsCommon } from './common';
 

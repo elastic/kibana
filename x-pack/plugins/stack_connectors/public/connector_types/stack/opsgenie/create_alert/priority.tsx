@@ -27,7 +27,7 @@ const PriorityComponent: React.FC<PriorityComponentProps> = ({ priority, onChang
   );
 
   return (
-    <EuiFormRow fullWidth label={i18n.PRIORITY_LABEL}>
+    <EuiFormRow fullWidth label={i18n.PRIORITY_LABEL} data-test-subj="opsgenie-priority-row">
       <EuiSelect
         fullWidth
         data-test-subj="opsgenie-prioritySelect"
@@ -48,21 +48,26 @@ const priorityOptions = [
   {
     value: i18n.PRIORITY_1,
     text: i18n.PRIORITY_1,
+    ['data-test-subj']: 'opsgenie-priority-p1',
   },
   {
     value: i18n.PRIORITY_2,
     text: i18n.PRIORITY_2,
+    ['data-test-subj']: 'opsgenie-priority-p2',
   },
   {
     value: i18n.PRIORITY_3,
     text: i18n.PRIORITY_3,
+    ['data-test-subj']: 'opsgenie-priority-p3',
   },
   {
     value: i18n.PRIORITY_4,
     text: i18n.PRIORITY_4,
+    ['data-test-subj']: 'opsgenie-priority-p4',
   },
   {
     value: i18n.PRIORITY_5,
     text: i18n.PRIORITY_5,
+    ['data-test-subj']: 'opsgenie-priority-p5',
   },
 ];

@@ -50,10 +50,10 @@ const JsonEditorComponent: React.FC<JsonEditorProps> = ({
         return;
       }
 
-      const sanitizedSubActionParams = getSanitizedSubActionParams(parsedJson, subActionParams);
+      const sanitizedSubActionParams = getSanitizedSubActionParams(parsedJson);
       editAction('subActionParams', sanitizedSubActionParams, index);
     },
-    [editAction, index, subActionParams, validateJsonWithSchema]
+    [editAction, index, validateJsonWithSchema]
   );
 
   useEffect(() => {
@@ -113,15 +113,11 @@ const getSchemaKeys = () => {
 };
 
 const getSanitizedSubActionParams = (
-  parsedJson: Record<string, unknown>,
-  subActionParams?: Partial<OpsgenieCreateAlertParams>
-) => {
+  parsedJson: Record<string, unknown>
+): Partial<OpsgenieCreateAlertParams> => {
   const validKeys = getSchemaKeys();
   const sanitizedEditorFields = pick(parsedJson, validKeys);
-  // TODO: do I need this?
-  const sanitizedSubActionParams = pick(subActionParams, validKeys);
   return {
-    ...sanitizedSubActionParams,
     ...sanitizedEditorFields,
   };
 };

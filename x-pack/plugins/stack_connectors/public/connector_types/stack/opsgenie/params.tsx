@@ -15,6 +15,19 @@ import * as i18n from './translations';
 import { CreateAlert } from './create_alert';
 import { CloseAlert } from './close_alert';
 
+const actionOptions = [
+  {
+    value: OpsgenieSubActions.CreateAlert,
+    text: i18n.CREATE_ALERT_ACTION,
+    'data-test-subj': 'opsgenie-subActionSelect-create-alert',
+  },
+  {
+    value: OpsgenieSubActions.CloseAlert,
+    text: i18n.CLOSE_ALERT_ACTION,
+    'data-test-subj': 'opsgenie-subActionSelect-close-alert',
+  },
+];
+
 const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = ({
   actionParams,
   editAction,
@@ -26,17 +39,6 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
   const { subAction, subActionParams } = actionParams;
 
   const currentSubAction = useRef<string>(subAction ?? OpsgenieSubActions.CreateAlert);
-
-  const actionOptions = [
-    {
-      value: OpsgenieSubActions.CreateAlert,
-      text: i18n.CREATE_ALERT_ACTION,
-    },
-    {
-      value: OpsgenieSubActions.CloseAlert,
-      text: i18n.CLOSE_ALERT_ACTION,
-    },
-  ];
 
   const onActionChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {

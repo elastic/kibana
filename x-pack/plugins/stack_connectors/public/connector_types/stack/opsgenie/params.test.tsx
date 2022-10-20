@@ -81,7 +81,7 @@ describe('OpsgenieParamFields', () => {
   it('renders the create alert component', async () => {
     render(<OpsgenieParamFields {...defaultCreateAlertProps} />);
 
-    expect(screen.getByText('Message')).toBeInTheDocument();
+    expect(screen.getByText('Message (required)')).toBeInTheDocument();
     expect(screen.getByText('Alias')).toBeInTheDocument();
     expect(screen.getByTestId('opsgenie-subActionSelect'));
 
@@ -93,7 +93,7 @@ describe('OpsgenieParamFields', () => {
     render(<OpsgenieParamFields {...defaultCloseAlertProps} />);
 
     expect(screen.queryByText('Message')).not.toBeInTheDocument();
-    expect(screen.getByText('Alias')).toBeInTheDocument();
+    expect(screen.getByText('Alias (required)')).toBeInTheDocument();
     expect(screen.getByTestId('opsgenie-subActionSelect'));
 
     expect(screen.queryByDisplayValue('hello')).not.toBeInTheDocument();
@@ -104,7 +104,7 @@ describe('OpsgenieParamFields', () => {
   it('does not render the sub action select for creating an alert when execution mode is undefined', async () => {
     render(<OpsgenieParamFields {...{ ...defaultCreateAlertProps, executionMode: undefined }} />);
 
-    expect(screen.getByText('Message')).toBeInTheDocument();
+    expect(screen.getByText('Message (required)')).toBeInTheDocument();
     expect(screen.getByText('Alias')).toBeInTheDocument();
     expect(screen.queryByTestId('opsgenie-subActionSelect')).not.toBeInTheDocument();
 
@@ -116,7 +116,7 @@ describe('OpsgenieParamFields', () => {
     render(<OpsgenieParamFields {...{ ...defaultCloseAlertProps, executionMode: undefined }} />);
 
     expect(screen.queryByText('Message')).not.toBeInTheDocument();
-    expect(screen.getByText('Alias')).toBeInTheDocument();
+    expect(screen.getByText('Alias (required)')).toBeInTheDocument();
     expect(screen.queryByTestId('opsgenie-subActionSelect')).not.toBeInTheDocument();
     expect(screen.getByDisplayValue('456')).toBeInTheDocument();
   });

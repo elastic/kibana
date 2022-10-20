@@ -23,8 +23,9 @@ const DisplayMoreOptionsComponent: React.FC<DisplayMoreOptionsProps> = ({
       color="primary"
       iconSide="right"
       iconType={showingMoreOptions ? 'arrowUp' : 'arrowDown'}
-      flush={'left'}
+      flush="left"
       onClick={toggleShowingMoreOptions}
+      data-test-subj="opsgenie-display-more-options"
     >
       {showingMoreOptions ? i18n.HIDE_OPTIONS : i18n.MORE_OPTIONS}
     </EuiButtonEmpty>

@@ -112,6 +112,7 @@ const CreateAlertComponent: React.FC<CreateAlertProps> = ({
         label={i18n.USE_JSON_EDITOR_LABEL}
         checked={showJsonEditor}
         onChange={toggleShowJsonEditor}
+        data-test-subj="opsgenie-show-json-editor-toggle"
       />
       <EuiSpacer size={'m'} />
       {showJsonEditor ? (

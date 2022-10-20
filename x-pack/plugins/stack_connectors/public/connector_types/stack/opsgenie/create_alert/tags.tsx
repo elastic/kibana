@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 
@@ -18,23 +18,21 @@ interface TagsProps {
 }
 
 const TagsComponent: React.FC<TagsProps> = ({ onChange, values }) => {
-  const [selectedOptions, setSelected] = useState<EuiComboBoxOptionOption[]>([]);
+  const tagOptions = useMemo(() => values.map((value) => getTagAsOption(value)), [values]);
 
   const onCreateOption = useCallback(
     (tagValue: string) => {
-      const newTags = [...selectedOptions, getTagAsOption(tagValue)];
-      setSelected(newTags);
+      const newTags = [...tagOptions, getTagAsOption(tagValue)];
       onChange(
         'tags',
         newTags.map((tag) => tag.label)
       );
     },
-    [onChange, selectedOptions]
+    [onChange, tagOptions]
   );
 
   const onTagsChange = useCallback(
     (newOptions: EuiComboBoxOptionOption[]) => {
-      setSelected(newOptions);
       onChange(
         'tags',
         newOptions.map((option) => option.label)
@@ -42,10 +40,6 @@ const TagsComponent: React.FC<TagsProps> = ({ onChange, values }) => {
     },
     [onChange]
   );
-
-  useEffect(() => {
-    setSelected(values.map((value) => getTagAsOption(value)));
-  }, [values]);
 
   return (
     <EuiFormRow
@@ -58,9 +52,10 @@ const TagsComponent: React.FC<TagsProps> = ({ onChange, values }) => {
         fullWidth
         isClearable
         noSuggestions
-        selectedOptions={selectedOptions}
+        selectedOptions={tagOptions}
         onCreateOption={onCreateOption}
         onChange={onTagsChange}
+        data-test-subj="opsgenie-tags"
       />
     </EuiFormRow>
   );
