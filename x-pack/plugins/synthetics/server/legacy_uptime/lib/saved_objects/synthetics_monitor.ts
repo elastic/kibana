@@ -54,6 +54,9 @@ export const syntheticsMonitor: SavedObjectsType = {
       origin: {
         type: 'keyword',
       },
+      hash: {
+        type: 'keyword',
+      },
       locations: {
         properties: {
           id: {
