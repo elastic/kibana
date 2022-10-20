@@ -27,7 +27,6 @@
     "features",
     "inspector",
     "ruleRegistry",
-    "timelines",
     "triggersActionsUi",
     "inspector",
     "unifiedSearch",
@@ -44,7 +43,8 @@
     "kibanaReact",
     "kibanaUtils",
     "lens",
-    "usageCollection"
+    "usageCollection",
+    "visualizations"
   ],
   "extraPublicDirs": [
     "common"
