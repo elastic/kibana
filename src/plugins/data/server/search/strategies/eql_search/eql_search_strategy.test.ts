@@ -157,6 +157,7 @@ describe('EQL search strategy', () => {
               options,
               params: {
                 ...params,
+                // @ts-expect-error not allowed at top level when using `typesWithBodyKey`
                 wait_for_completion_timeout: '5ms',
                 keep_on_completion: false,
               },
