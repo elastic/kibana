@@ -52,7 +52,8 @@ import {
   updateTableSessionViewConfig,
 } from './helpers';
 
-import { TableState, EMPTY_TABLE_BY_ID } from './types';
+import type { TableState } from './types';
+import { EMPTY_TABLE_BY_ID } from './types';
 
 export const initialTGridState: TableState = {
   tableById: EMPTY_TABLE_BY_ID,

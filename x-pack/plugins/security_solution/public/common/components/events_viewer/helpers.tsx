@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import type { Filter, EsQueryConfig, Query } from '@kbn/es-query';
-import { DataViewBase, FilterStateStore } from '@kbn/es-query';
+import type { Filter, EsQueryConfig, Query, DataViewBase } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { get, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { elementOrChildrenHasFocus } from '../../../common/utils/accessibility';
 import type { BrowserFields } from '../../../common/search_strategy/index_fields';
-import {
-  DataProvider,
-  DataProvidersAnd,
-  DataProviderType,
-  EXISTS_OPERATOR,
-} from '../../../common/types/timeline';
+import type { DataProvider, DataProvidersAnd } from '../../../common/types/timeline';
+import { DataProviderType, EXISTS_OPERATOR } from '../../../common/types/timeline';
 import { convertToBuildEsQuery, escapeQueryValue } from '../utils/keury';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
 import { TableId } from '../../types';
-import { ViewSelection } from './event_rendered_view/selector';
+import type { ViewSelection } from './event_rendered_view/selector';
 
 interface CombineQueries {
   config: EsQueryConfig;

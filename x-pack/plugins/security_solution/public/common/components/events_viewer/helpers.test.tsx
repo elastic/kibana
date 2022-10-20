@@ -6,7 +6,8 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-import { Filter, EsQueryConfig, FilterStateStore } from '@kbn/es-query';
+import type { Filter, EsQueryConfig } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 
 import { DataProviderType } from '../../../common/types/timeline';
 import {

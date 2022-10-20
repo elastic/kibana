@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SortColumnTable } from '../../../common/types';
+import type { SortColumnTable } from '../../types';
 import { tGridDefaults } from './defaults';
 import {
   setInitializeTgridSettings,
@@ -14,7 +14,8 @@ import {
 } from './helpers';
 import { mockGlobalState } from '../../mock/global_state';
 
-import { TableId, TGridModelSettings } from '.';
+import type { TGridModelSettings } from '.';
+import { TableId } from '.';
 
 const id = 'foo';
 const defaultTableById = {

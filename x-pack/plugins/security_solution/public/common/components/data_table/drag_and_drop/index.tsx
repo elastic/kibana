@@ -14,7 +14,8 @@ import {
 import { noop } from 'lodash/fp';
 import deepEqual from 'fast-deep-equal';
 import React, { useCallback } from 'react';
-import { DropResult, DragDropContext, BeforeCapture } from 'react-beautiful-dnd';
+import type { DropResult, BeforeCapture } from 'react-beautiful-dnd';
+import { DragDropContext } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 
 import type { BrowserFields } from '../../../common/search_strategy';

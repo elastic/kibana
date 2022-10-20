@@ -23,7 +23,6 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
 
 const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
-
 export const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible?: boolean }>`
   overflow: hidden;
   margin: 0;

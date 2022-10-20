@@ -8,12 +8,12 @@
 import { omit, union } from 'lodash/fp';
 
 import { isEmpty } from 'lodash';
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 import type { TableToggleDetailPanel } from './actions';
-import { TGridPersistInput, TableById } from './types';
+import type { TGridPersistInput, TableById } from './types';
 import type { TGridModelSettings } from './model';
 
-import {
+import type {
   ColumnHeaderOptions,
   SortColumnTable,
   DataExpandedDetail,

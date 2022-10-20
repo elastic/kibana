@@ -26,12 +26,10 @@ import { eventsViewerSelector } from './selectors';
 import type { SourcererScopeName } from '../../store/sourcerer/model';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
-import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
 import { useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 import type { FieldEditorActions } from '../../../timelines/components/fields_browser';
 import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
-import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import {
   useSessionViewNavigation,
   useSessionView,

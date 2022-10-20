@@ -12,7 +12,7 @@ import styled, { css } from 'styled-components';
 
 import { ModalInspectQuery } from './modal';
 import * as i18n from './translations';
-import { InspectQuery } from '../../store/t_grid/inputs';
+import type { InspectQuery } from '../../store/t_grid/inputs';
 
 export const BUTTON_CLASS = 'inspectButtonComponent';
 

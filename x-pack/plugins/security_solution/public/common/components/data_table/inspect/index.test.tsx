@@ -9,7 +9,8 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { cloneDeep } from 'lodash/fp';
 
-import { InspectButton, InspectButtonContainer, BUTTON_CLASS, InspectButtonProps } from '.';
+import type { InspectButtonProps } from '.';
+import { InspectButton, InspectButtonContainer, BUTTON_CLASS } from '.';
 
 describe('Inspect Button', () => {
   const newQuery: InspectButtonProps = {

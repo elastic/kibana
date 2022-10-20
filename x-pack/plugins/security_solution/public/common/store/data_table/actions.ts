@@ -13,7 +13,7 @@ import type {
   DataExpandedDetailType,
   SessionViewConfig,
 } from '../../../common/types/timeline';
-import { InitialyzeTGridSettings, TGridPersistInput } from './types';
+import type { InitialyzeTGridSettings, TGridPersistInput } from './types';
 
 const actionCreator = actionCreatorFactory('x-pack/timelines/t-grid');
 

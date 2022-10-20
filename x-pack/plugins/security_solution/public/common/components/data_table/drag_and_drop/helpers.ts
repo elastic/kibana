@@ -7,7 +7,7 @@
 
 import type { DropResult, FluidDragActions, Position } from 'react-beautiful-dnd';
 import { KEYBOARD_DRAG_OFFSET, getFieldIdFromDraggable } from '@kbn/securitysolution-t-grid';
-import { Dispatch } from 'redux';
+import type { Dispatch } from 'redux';
 import { isString, keyBy } from 'lodash/fp';
 
 import { stopPropagationAndPreventDefault } from '../../../common/utils/accessibility';
