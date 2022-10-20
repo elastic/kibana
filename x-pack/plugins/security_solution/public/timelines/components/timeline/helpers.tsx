@@ -9,15 +9,16 @@ import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 
 import {
-  handleSkipFocus,
   elementOrChildrenHasFocus,
   getFocusedAriaColindexCell,
   getTableSkipFocus,
+  handleSkipFocus,
   stopPropagationAndPreventDefault,
 } from '@kbn/timelines-plugin/public';
-import { assertUnreachable } from '@kbn/timelines-plugin/common/utility_types';
-import { escapeQueryValue } from '../../../common/lib/kuery';
 
+import { assertUnreachable } from '../../../../common/utility_types';
+import type { BrowserFields } from '../../../common/containers/source';
+import { escapeQueryValue } from '../../../common/lib/kuery';
 import type { DataProvider, DataProvidersAnd } from './data_providers/data_provider';
 import {
   DataProviderType,
@@ -25,8 +26,6 @@ import {
   IS_ONE_OF_OPERATOR,
   IS_OPERATOR,
 } from './data_providers/data_provider';
-import type { BrowserFields } from '../../../common/containers/source';
-
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
 
 const isNumber = (value: string | number): value is number => !isNaN(Number(value));
@@ -104,27 +103,14 @@ const buildQueryMatch = (
 
   switch (operator) {
     case IS_OPERATOR:
-      if (!isStringOrNumberArray(value)) {
-        return `${isExcluded}${
-          type !== DataProviderType.template
-            ? buildISQueryMatch({ browserFields, field, isFieldTypeNested, value })
-            : buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested })
-        }`;
-      } else {
-        // what to return if it's not a suitable format
-        return isExcluded + `${field} : ${value.length ? JSON.stringify(value[0]) : 'null'}`;
-      }
+      return handleISOperator({ browserFields, field, isExcluded, isFieldTypeNested, type, value });
 
     case EXISTS_OPERATOR:
-      return isExcluded + buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested });
+      return `${isExcluded}${buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested })}`;
 
     case IS_ONE_OF_OPERATOR:
-      if (isStringOrNumberArray(value)) {
-        return isExcluded + buildISONEOFQueryMatch({ field, value });
-      } else {
-        // what to return if it's not a suitable format
-        return isExcluded + `${field} : ${JSON.stringify(value)}`;
-      }
+      return handleISONEOFOperator({ field, isExcluded, value });
+
     default:
       assertUnreachable(operator);
   }
@@ -274,6 +260,43 @@ export const focusUtilityBarAction = (containerElement: HTMLElement | null) => {
  */
 export const resetKeyboardFocus = () => {
   document.querySelector<HTMLAnchorElement>('header.headerGlobalNav a.euiHeaderLogo')?.focus();
+};
+
+interface OperatorHandler {
+  field: string;
+  isExcluded: string;
+  value: string | number | Array<string | number>;
+}
+
+export const handleISOperator = ({
+  browserFields,
+  field,
+  isExcluded,
+  isFieldTypeNested,
+  type,
+  value,
+}: OperatorHandler & {
+  browserFields: BrowserFields;
+  isFieldTypeNested: boolean;
+  type?: DataProviderType;
+}) => {
+  if (!isStringOrNumberArray(value)) {
+    return `${isExcluded}${
+      type !== DataProviderType.template
+        ? buildISQueryMatch({ browserFields, field, isFieldTypeNested, value })
+        : buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested })
+    }`;
+  } else {
+    return `${isExcluded}${field} : ${JSON.stringify(value)}`;
+  }
+};
+
+export const handleISONEOFOperator = ({ field, isExcluded, value }: OperatorHandler) => {
+  if (isStringOrNumberArray(value)) {
+    return `${isExcluded}${buildISONEOFQueryMatch({ field, value })}`;
+  } else {
+    return `${isExcluded}${field} : ${JSON.stringify(value)}`;
+  }
 };
 
 export const buildISQueryMatch = ({

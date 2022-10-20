@@ -114,6 +114,9 @@ describe('helpers', () => {
             {
               label: 'nestedField.secondAttributes',
             },
+            {
+              label: 'nestedField.thirdAttributes',
+            },
           ],
         },
         { label: 'source', options: [{ label: 'source.ip' }, { label: 'source.port' }] },

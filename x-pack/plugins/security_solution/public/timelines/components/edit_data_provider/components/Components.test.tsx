@@ -12,11 +12,11 @@ import userEvent from '@testing-library/user-event';
 
 import { DataProviderType } from '../../timeline/data_providers/data_provider';
 import { ControlledComboboxInput, ControlledDefaultInput } from '.';
-import { getDefaultValue } from './ControlledDefaultInput';
 import {
   convertComboboxValuesToStringArray,
   convertValuesToComboboxValueArray,
-} from './ControlledComboboxInput';
+} from './controlled_combobox_input';
+import { getDefaultValue } from './controlled_default_input';
 
 const disabledButtonCallbackMock = jest.fn();
 const onChangeCallbackMock = jest.fn();

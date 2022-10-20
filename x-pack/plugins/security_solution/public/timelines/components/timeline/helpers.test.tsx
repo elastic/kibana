@@ -15,6 +15,7 @@ import {
   buildGlobalQuery,
   buildISONEOFQueryMatch,
   buildISQueryMatch,
+  handleISOperator,
   isStringOrNumberArray,
   showGlobalFilters,
 } from './helpers';
@@ -294,6 +295,23 @@ describe('isStringOrNumberArray', () => {
 
   test('it returns true when value is an array of all numbers', () => {
     expect(isStringOrNumberArray([123, 456, 789])).toBe(true);
+  });
+
+  describe.only('queryHandlerFunctions', () => {
+    describe('handleISOperator', () => {
+      it('returns the entire query unchanged, if value is an array', () => {
+        expect(
+          handleISOperator({
+            browserFields: {},
+            field: 'host.name',
+            isExcluded: '',
+            isFieldTypeNested: false,
+            type: undefined,
+            value: ['some', 'values'],
+          })
+        ).toBe('host.name : ["some","values"]');
+      });
+    });
   });
 
   describe('buildEXISTSQueryMatch', () => {
