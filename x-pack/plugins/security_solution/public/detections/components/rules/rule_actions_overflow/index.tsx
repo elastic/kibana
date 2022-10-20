@@ -23,7 +23,7 @@ import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useKibana } from '../../../../common/lib/kibana';
-import { explainLackOfPermission } from '../../../../common/utils/privileges';
+import { canEditRuleWithActions } from '../../../../common/utils/privileges';
 import type { Rule } from '../../../containers/detection_engine/rules';
 import {
   executeRulesBulkAction,
@@ -96,7 +96,11 @@ const RuleActionsOverflowComponent = ({
             >
               <EuiToolTip
                 position="left"
-                content={explainLackOfPermission(rule, true, canDuplicateRuleWithActions, true)}
+                content={
+                  !canEditRuleWithActions(rule, canDuplicateRuleWithActions)
+                    ? i18nActions.LACK_OF_KIBANA_PRIVILEGES
+                    : undefined
+                }
               >
                 <>{i18nActions.DUPLICATE_RULE}</>
               </EuiToolTip>
