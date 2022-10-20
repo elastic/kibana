@@ -190,6 +190,9 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
         initialFocus=".lnsFieldItem__fieldPanel"
         className="lnsFieldItem__popoverAnchor"
         data-test-subj="lnsFieldListPanelField"
+        panelProps={{
+          'data-test-subj': 'lnsFieldListPanelFieldContent',
+        }}
         container={document.querySelector<HTMLElement>('.application') || undefined}
         button={
           <DragDrop
@@ -336,7 +339,7 @@ function FieldItemPopoverContents(
             const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
             return (
               <>
-                <EuiText size="s">
+                <EuiText size="s" data-test-subj="lnsFieldListPanel-missingContent">
                   {isUsingSampling
                     ? i18n.translate('xpack.lens.indexPattern.fieldStatsSamplingNoData', {
                         defaultMessage:

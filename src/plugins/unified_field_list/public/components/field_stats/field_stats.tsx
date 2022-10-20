@@ -358,12 +358,14 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
               defaultMessage: 'Top values',
             }),
             id: 'topValues',
+            'data-test-subj': `${dataTestSubject}-topValues`,
           },
           {
             label: i18n.translate('unifiedFieldList.fieldStats.fieldDistributionLabel', {
               defaultMessage: 'Distribution',
             }),
             id: 'histogram',
+            'data-test-subj': `${dataTestSubject}-distribution`,
           },
         ]}
         onChange={(optionId: string) => {

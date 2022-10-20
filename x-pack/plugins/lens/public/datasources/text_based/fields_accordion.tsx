@@ -49,14 +49,18 @@ export const FieldsAccordion = memo(function InnerFieldsAccordion({
   const extraAction = useMemo(() => {
     if (hasLoaded) {
       return (
-        <EuiNotificationBadge size="m" color={isFiltered ? 'accent' : 'subdued'}>
+        <EuiNotificationBadge
+          size="m"
+          color={isFiltered ? 'accent' : 'subdued'}
+          data-test-subj={`${id}-count`}
+        >
           {fields.length}
         </EuiNotificationBadge>
       );
     }
 
     return <EuiLoadingSpinner size="m" />;
-  }, [fields.length, hasLoaded, isFiltered]);
+  }, [fields.length, hasLoaded, id, isFiltered]);
 
   return (
     <>
