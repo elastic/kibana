@@ -41,34 +41,7 @@ export const getConnectorType = (): ConnectorTypeModel<
     iconClass: lazy(() => import('./logo')),
     selectMessage: SELECT_MESSAGE,
     actionTypeTitle: TITLE,
-    validateParams: async (
-      actionParams: ValidationParams
-    ): Promise<GenericValidationResult<unknown>> => {
-      const translations = await import('./translations');
-      const errors = {
-        'subActionParams.message': new Array<string>(),
-        'subActionParams.alias': new Array<string>(),
-      };
-
-      const validationResult = {
-        errors,
-      };
-
-      if (actionParams.subAction === OpsgenieSubActions.CreateAlert) {
-        if (!actionParams?.subActionParams?.message?.length) {
-          errors['subActionParams.message'].push(translations.MESSAGE_IS_REQUIRED);
-        }
-      }
-
-      if (
-        actionParams.subAction === OpsgenieSubActions.CloseAlert &&
-        !actionParams?.subActionParams?.alias?.length
-      ) {
-        errors['subActionParams.alias'].push(translations.ALIAS_IS_REQUIRED);
-      }
-
-      return validationResult;
-    },
+    validateParams,
     actionConnectorFields: lazy(() => import('./connector')),
     actionParamsFields: lazy(() => import('./params')),
     defaultActionParams: {
@@ -84,4 +57,33 @@ export const getConnectorType = (): ConnectorTypeModel<
       },
     },
   };
+};
+
+const validateParams = async (
+  actionParams: ValidationParams
+): Promise<GenericValidationResult<unknown>> => {
+  const translations = await import('./translations');
+  const errors = {
+    'subActionParams.message': new Array<string>(),
+    'subActionParams.alias': new Array<string>(),
+  };
+
+  const validationResult = {
+    errors,
+  };
+
+  if (actionParams.subAction === OpsgenieSubActions.CreateAlert) {
+    if (!actionParams?.subActionParams?.message?.length) {
+      errors['subActionParams.message'].push(translations.MESSAGE_IS_REQUIRED);
+    }
+  }
+
+  if (
+    actionParams.subAction === OpsgenieSubActions.CloseAlert &&
+    !actionParams?.subActionParams?.alias?.length
+  ) {
+    errors['subActionParams.alias'].push(translations.ALIAS_IS_REQUIRED);
+  }
+
+  return validationResult;
 };

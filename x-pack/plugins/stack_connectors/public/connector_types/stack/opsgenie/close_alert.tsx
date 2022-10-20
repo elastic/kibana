@@ -11,20 +11,62 @@ import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-  RecursivePartial,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, RecursivePartial } from '@elastic/eui';
 import type {
   OpsgenieActionParams,
   OpsgenieCloseAlertParams,
 } from '../../../../server/connector_types/stack';
 import * as i18n from './translations';
 import { EditActionCallback } from './types';
+import { DisplayMoreOptions } from './display_more_options';
+
+type AdditionalOptionsProps = Pick<
+  CloseAlertProps,
+  'subActionParams' | 'editOptionalSubAction' | 'index' | 'messageVariables'
+>;
+
+const AdditionalOptions: React.FC<AdditionalOptionsProps> = ({
+  subActionParams,
+  editOptionalSubAction,
+  index,
+  messageVariables,
+}) => {
+  return (
+    <>
+      <EuiSpacer size={'m'} />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFormRow
+            data-test-subj="opsgenie-source-row"
+            fullWidth
+            label={i18n.SOURCE_FIELD_LABEL}
+          >
+            <TextFieldWithMessageVariables
+              index={index}
+              editAction={editOptionalSubAction}
+              messageVariables={messageVariables}
+              paramsProperty={'source'}
+              inputTargetValue={subActionParams?.source}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow data-test-subj="opsgenie-user-row" fullWidth label={i18n.USER_FIELD_LABEL}>
+            <TextFieldWithMessageVariables
+              index={index}
+              editAction={editOptionalSubAction}
+              messageVariables={messageVariables}
+              paramsProperty={'user'}
+              inputTargetValue={subActionParams?.user}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+};
+
+AdditionalOptions.displayName = 'AdditionalOptions';
 
 type CloseAlertProps = Omit<
   ActionParamsProps<OpsgenieActionParams>,
@@ -82,51 +124,17 @@ const CloseAlertComponent: React.FC<CloseAlertProps> = ({
       />
 
       {showingMoreOptions ? (
-        <>
-          <EuiSpacer size={'m'} />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFormRow
-                data-test-subj="opsgenie-source-row"
-                fullWidth
-                label={i18n.SOURCE_FIELD_LABEL}
-              >
-                <TextFieldWithMessageVariables
-                  index={index}
-                  editAction={editOptionalSubAction}
-                  messageVariables={messageVariables}
-                  paramsProperty={'source'}
-                  inputTargetValue={subActionParams?.source}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow
-                data-test-subj="opsgenie-user-row"
-                fullWidth
-                label={i18n.USER_FIELD_LABEL}
-              >
-                <TextFieldWithMessageVariables
-                  index={index}
-                  editAction={editOptionalSubAction}
-                  messageVariables={messageVariables}
-                  paramsProperty={'user'}
-                  inputTargetValue={subActionParams?.user}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
+        <AdditionalOptions
+          subActionParams={subActionParams}
+          index={index}
+          messageVariables={messageVariables}
+          editOptionalSubAction={editOptionalSubAction}
+        />
       ) : null}
-      <EuiButtonEmpty
-        color="primary"
-        iconSide="right"
-        iconType={showingMoreOptions ? 'arrowUp' : 'arrowDown'}
-        flush={'left'}
-        onClick={toggleShowingMoreOptions}
-      >
-        {showingMoreOptions ? i18n.HIDE_OPTIONS : i18n.MORE_OPTIONS}
-      </EuiButtonEmpty>
+      <DisplayMoreOptions
+        showingMoreOptions={showingMoreOptions}
+        toggleShowingMoreOptions={toggleShowingMoreOptions}
+      />
     </>
   );
 };

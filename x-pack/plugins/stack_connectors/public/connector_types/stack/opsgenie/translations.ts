@@ -156,3 +156,30 @@ export const TAGS_FIELD_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.tagsLabel',
   { defaultMessage: 'Opsgenie Tags' }
 );
+
+export const PRIORITY_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.priorityLabel',
+  {
+    defaultMessage: 'Priority',
+  }
+);
+
+export const PRIORITY_1 = i18n.translate('xpack.stackConnectors.components.opsgenie.priority1', {
+  defaultMessage: 'P1',
+});
+
+export const PRIORITY_2 = i18n.translate('xpack.stackConnectors.components.opsgenie.priority2', {
+  defaultMessage: 'P2',
+});
+
+export const PRIORITY_3 = i18n.translate('xpack.stackConnectors.components.opsgenie.priority3', {
+  defaultMessage: 'P3',
+});
+
+export const PRIORITY_4 = i18n.translate('xpack.stackConnectors.components.opsgenie.priority4', {
+  defaultMessage: 'P4',
+});
+
+export const PRIORITY_5 = i18n.translate('xpack.stackConnectors.components.opsgenie.priority5', {
+  defaultMessage: 'P5',
+});
