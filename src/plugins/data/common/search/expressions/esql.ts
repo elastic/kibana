@@ -18,8 +18,12 @@ import type {
 import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
+import { buildEsQuery } from '@kbn/es-query';
+import { getEsQueryConfig } from '../../es_query';
+import { getTime } from '../../query';
 import { ESQL_SEARCH_STRATEGY, IKibanaSearchRequest, ISearchGeneric, KibanaContext } from '..';
 import { IKibanaSearchResponse } from '../types';
+import { UiSettingsCommon } from '../..';
 
 type Input = KibanaContext | null;
 type Output = Observable<Datatable>;
@@ -27,6 +31,7 @@ type Output = Observable<Datatable>;
 interface Arguments {
   query: string;
   timezone?: string;
+  timeField?: string;
 }
 
 export type EsqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -42,6 +47,7 @@ interface EsqlFnArguments {
 
 interface EsqlStartDependencies {
   search: ISearchGeneric;
+  uiSettings: UiSettingsCommon;
 }
 
 function normalizeType(type: string): DatatableColumnType {
@@ -66,6 +72,7 @@ function sanitize(value: string) {
 interface ESQLSearchParams {
   time_zone?: string;
   query: string;
+  filter?: unknown;
 }
 
 interface ESQLSearchReponse {
@@ -101,8 +108,19 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             'The timezone to use for date operations. Valid ISO8601 formats and UTC offsets both work.',
         }),
       },
+      timeField: {
+        aliases: ['timeField'],
+        types: ['string'],
+        help: i18n.translate('data.search.essql.timeField.help', {
+          defaultMessage: 'The time field to use in the time range filter set in the context.',
+        }),
+      },
     },
-    fn(input, { query, timezone }, { abortSignal, inspectorAdapters, getKibanaRequest }) {
+    fn(
+      input,
+      { query, timezone, timeField },
+      { abortSignal, inspectorAdapters, getKibanaRequest }
+    ) {
       return defer(() =>
         getStartDependencies(() => {
           const request = getKibanaRequest?.();
@@ -116,11 +134,28 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           return request;
         })
       ).pipe(
-        switchMap(({ search }) => {
+        switchMap(({ search, uiSettings }) => {
           const params: ESQLSearchParams = {
             query,
             time_zone: timezone,
           };
+          if (input) {
+            const esQueryConfigs = getEsQueryConfig(
+              uiSettings as Parameters<typeof getEsQueryConfig>[0]
+            );
+            const timeFilter =
+              input.timeRange &&
+              getTime(undefined, input.timeRange, {
+                fieldName: timeField,
+              });
+
+            params.filter = buildEsQuery(
+              undefined,
+              input.query || [],
+              [...(input.filters ?? []), ...(timeFilter ? [timeFilter] : [])],
+              esQueryConfigs
+            );
+          }
 
           return search<
             IKibanaSearchRequest<ESQLSearchParams>,

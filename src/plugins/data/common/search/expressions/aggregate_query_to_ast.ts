@@ -24,6 +24,7 @@ export const aggregateQueryToAst = (
   if ('esql' in query) {
     return buildExpressionFunction<EsqlExpressionFunctionDefinition>('esql', {
       query: query.esql,
+      timeField,
     }).toAst();
   }
 };
