@@ -116,10 +116,15 @@ const getStatusAttributes = ({
         textColor: 'danger',
         icon: <EuiIcon color="danger" type="crossInACircleFilled" />,
         label: <TableText>{getStatusText(session.status)}</TableText>,
-        toolTipContent: i18n.translate('data.mgmt.searchSessions.status.message.error', {
-          defaultMessage: 'Error: {error}',
-          values: { error: (session as any).error || 'unknown' },
-        }),
+        toolTipContent:
+          session.errors && session.errors.length > 0
+            ? i18n.translate('data.mgmt.searchSessions.status.message.error', {
+                defaultMessage:
+                  'One or more searches failed to complete. Use the "Inspect" action to see the underlying errors.',
+              })
+            : i18n.translate('data.mgmt.searchSessions.status.message.unknownError', {
+                defaultMessage: 'Unknown error',
+              }),
       };
 
     case SearchSessionStatus.COMPLETE:
