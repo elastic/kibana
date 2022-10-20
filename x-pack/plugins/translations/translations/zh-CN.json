@@ -2729,7 +2729,6 @@
     "expressionXY.reusable.function.xyVis.errors.pointsRadiusForNonLineOrAreaChartError": "`pointsRadius` 仅适用于折线图或面积图",
     "expressionXY.reusable.function.xyVis.errors.showPointsForNonLineOrAreaChartError": "`showPoints` 仅适用于折线图或面积图",
     "expressionXY.reusable.function.xyVis.errors.timeMarkerForNotTimeChartsError": "仅时间图表可以具有当前时间标记",
-    "expressionXY.reusable.function.xyVis.errors.valueLabelsForNotBarsOrHistogramBarsChartsError": "`valueLabels` 参数仅适用于条形图，它们并非直方图。",
     "expressionXY.xAxisConfigFn.help": "配置 xy 图表的 x 轴配置",
     "expressionXY.xyChart.emptyXLabel": "（空）",
     "expressionXY.xyChart.iconSelect.alertIconLabel": "告警",
