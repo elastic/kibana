@@ -23588,7 +23588,6 @@
     "xpack.observability.formatters.secondsTimeUnitLabel": "s",
     "xpack.observability.formatters.secondsTimeUnitLabelExtended": "秒",
     "xpack.observability.home.addData": "添加集成",
-    "xpack.observability.hoverActions.filterForValue": "筛留值",
     "xpack.observability.hoverActions.filterForValueButtonLabel": "筛选范围",
     "xpack.observability.inspector.stats.dataViewDescription": "连接到 Elasticsearch 索引的数据视图。",
     "xpack.observability.inspector.stats.dataViewLabel": "数据视图",
