@@ -9,7 +9,7 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 
 import { EuiFieldText } from '@elastic/eui';
 
-import { DataProviderType } from '../../timeline/data_providers/data_provider';
+import type { DataProviderType } from '../../timeline/data_providers/data_provider';
 import { isStringOrNumberArray } from '../../timeline/helpers';
 import { isValueFieldInvalid, sanatizeValue } from '../helpers';
 import * as i18n from '../translations';

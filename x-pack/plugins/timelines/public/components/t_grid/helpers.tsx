@@ -116,19 +116,17 @@ const buildQueryMatch = (
             : buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested })
         }`;
       } else {
-        // what to return if it's not a suitable format
-        return isExcluded + `${field} : ${value.length ? JSON.stringify(value[0]) : 'null'}`;
+        return `${isExcluded}${field} : ${JSON.stringify(value[0])}`;
       }
 
     case EXISTS_OPERATOR:
-      return isExcluded + buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested });
+      return `${isExcluded}${buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested })}`;
 
     case IS_ONE_OF_OPERATOR:
       if (isStringOrNumberArray(value)) {
-        return isExcluded + buildISONEOFQueryMatch({ field, value });
+        return `${isExcluded}${buildISONEOFQueryMatch({ field, value })}`;
       } else {
-        // what to return if it's not a suitable format
-        return isExcluded + `${field} : ${JSON.stringify(value)}`;
+        return `${isExcluded}${field} : ${JSON.stringify(value)}`;
       }
     default:
       assertUnreachable(operator);

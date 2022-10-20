@@ -7,9 +7,10 @@
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 
-import { DataProviderType } from '../../timeline/data_providers/data_provider';
+import type { DataProviderType } from '../../timeline/data_providers/data_provider';
 import { isStringOrNumberArray } from '../../timeline/helpers';
 import { isValueFieldInvalid } from '../helpers';
 import * as i18n from '../translations';
