@@ -6,7 +6,7 @@
  */
 
 import type { Rule } from '../../../detections/containers/detection_engine/rules';
-import * as i18n from '../../../detections/pages/detection_engine/rules/translations';
+import * as i18nActions from '../../../detections/pages/detection_engine/rules/translations';
 import { isMlRule } from '../../../../common/machine_learning/helpers';
 import * as detectionI18n from '../../../detections/pages/detection_engine/translations';
 
@@ -48,9 +48,9 @@ export const explainLackOfPermission = (
   } else if (isMlRule(rule.type) && !hasMlPermissions) {
     return detectionI18n.ML_RULES_DISABLED_MESSAGE;
   } else if (!canEditRuleWithActions(rule, hasReadActionsPrivileges)) {
-    return i18n.LACK_OF_KIBANA_PRIVILEGES;
+    return i18nActions.LACK_OF_KIBANA_PRIVILEGES;
   } else if (!hasUserCRUDPermission(canUserCRUD)) {
-    return i18n.LACK_OF_RULE_EDITING_PRIVILEGES;
+    return i18nActions.LACK_OF_RULE_EDITING_PRIVILEGES;
   } else {
     return undefined;
   }
