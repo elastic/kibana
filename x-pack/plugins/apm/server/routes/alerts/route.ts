@@ -6,13 +6,13 @@
  */
 
 import * as t from 'io-ts';
-import { getTransactionDurationChartPreview } from './chart_preview/get_transaction_duration';
-import { getTransactionErrorCountChartPreview } from './chart_preview/get_transaction_error_count';
-import { getTransactionErrorRateChartPreview } from './chart_preview/get_transaction_error_rate';
+import { getTransactionDurationChartPreview } from './rule_types/transaction_duration/get_transaction_duration_chart_preview';
+import { getTransactionErrorCountChartPreview } from './rule_types/error_count/get_error_count_chart_preview';
+import { getTransactionErrorRateChartPreview } from './rule_types/transaction_error_rate/get_transaction_error_rate_chart_preview';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, rangeRt } from '../default_api_types';
-import { AggregationType } from '../../../common/alert_types';
+import { AggregationType } from '../../../common/rules/apm_rule_types';
 
 const alertParamsRt = t.intersection([
   t.partial({
@@ -34,7 +34,7 @@ const alertParamsRt = t.intersection([
 export type AlertParams = t.TypeOf<typeof alertParamsRt>;
 
 const transactionErrorRateChartPreview = createApmServerRoute({
-  endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_rate',
+  endpoint: 'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
   params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -54,7 +54,7 @@ const transactionErrorRateChartPreview = createApmServerRoute({
 });
 
 const transactionErrorCountChartPreview = createApmServerRoute({
-  endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_error_count',
+  endpoint: 'GET /internal/apm/rule_types/error_count/chart_preview',
   params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -75,7 +75,7 @@ const transactionErrorCountChartPreview = createApmServerRoute({
 });
 
 const transactionDurationChartPreview = createApmServerRoute({
-  endpoint: 'GET /internal/apm/alerts/chart_preview/transaction_duration',
+  endpoint: 'GET /internal/apm/rule_types/transaction_duration/chart_preview',
   params: t.type({ query: alertParamsRt }),
   options: { tags: ['access:apm'] },
   handler: async (

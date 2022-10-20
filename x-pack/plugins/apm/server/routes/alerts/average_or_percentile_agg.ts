@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AggregationType } from '../../../common/alert_types';
+import { AggregationType } from '../../../common/rules/apm_rule_types';
 import { getDurationFieldForTransactions } from '../../lib/helpers/transactions';
 
 type TransactionDurationField = ReturnType<
