@@ -54,7 +54,10 @@ const ExceptionItemCardComponent: FC<ExceptionItemProps> = ({
   onEditException,
 }) => {
   const { actions, formattedComments } = useExceptionItemCard({
+    listType,
+    editActionLabel,
     deleteActionLabel,
+    exceptionItem,
     getFormattedComments,
     onEditException,
     onDeleteException,
