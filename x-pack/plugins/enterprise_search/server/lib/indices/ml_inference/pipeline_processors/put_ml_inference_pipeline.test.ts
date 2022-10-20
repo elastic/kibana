@@ -8,13 +8,14 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import {
-  createMlInferencePipeline,
-  addSubPipelineToIndexSpecificMlPipeline,
-} from './put_ml_inference_pipeline';
-import {
   getInferencePipelineNameFromIndexName,
   getPrefixedInferencePipelineProcessorName,
 } from '../../../../utils/ml_inference_pipeline_utils';
+
+import {
+  createMlInferencePipeline,
+  addSubPipelineToIndexSpecificMlPipeline,
+} from './put_ml_inference_pipeline';
 
 const mockClient = {
   ingest: {
