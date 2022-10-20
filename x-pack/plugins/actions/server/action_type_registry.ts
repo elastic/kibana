@@ -25,6 +25,8 @@ import {
   ActionTypeParams,
 } from './types';
 
+export const MAX_ATTEMPTS: number = 3;
+
 export interface ActionTypeRegistryOpts {
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
@@ -151,7 +153,7 @@ export class ActionTypeRegistry {
     this.taskManager.registerTaskDefinitions({
       [`actions:${actionType.id}`]: {
         title: actionType.name,
-        maxAttempts: actionType.maxAttempts || 1,
+        maxAttempts: actionType.maxAttempts || MAX_ATTEMPTS,
         getRetry(attempts: number, error: unknown) {
           if (error instanceof ExecutorError) {
             return error.retry == null ? false : error.retry;
