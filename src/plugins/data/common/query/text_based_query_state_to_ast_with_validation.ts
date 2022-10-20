@@ -24,6 +24,9 @@ const getIndexPatternFromAggregateQuery = (query: AggregateQuery) => {
   if ('sql' in query) {
     return getIndexPatternFromSQLQuery(query.sql);
   }
+  if ('esql' in query) {
+    return getIndexPatternFromSQLQuery(query.esql);
+  }
 };
 
 /**
