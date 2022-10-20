@@ -8,15 +8,16 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 
-import { BodyComponent, StatefulBodyProps } from '.';
-import { Sort } from './sort';
+import type { StatefulBodyProps } from '.';
+import { BodyComponent } from '.';
+import type { Sort } from './sort';
 import { REMOVE_COLUMN } from './column_headers/translations';
 import { Direction } from '../../../../common/search_strategy';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { defaultHeaders, mockBrowserFields, mockTimelineData, TestProviders } from '../../../mock';
 import { TestCellRenderer } from '../../../mock/cell_renderer';
 import { mockGlobalState } from '../../../mock/global_state';
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 import { defaultColumnHeaderType } from '../../../store/t_grid/defaults';
 
 const mockSort: Sort[] = [

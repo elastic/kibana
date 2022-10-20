@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ColumnHeaderOptions } from '../../../../common/types';
+import type { ColumnHeaderOptions } from '../../../../common/types';
 import {
   hasCellActions,
   mapSortDirectionToDirection,

@@ -8,7 +8,7 @@
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { Ecs } from '../../../../common/ecs';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy';

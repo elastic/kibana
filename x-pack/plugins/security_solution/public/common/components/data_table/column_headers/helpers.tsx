@@ -6,7 +6,7 @@
  */
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import { EuiDataGridColumnActions } from '@elastic/eui';
+import type { EuiDataGridColumnActions } from '@elastic/eui';
 import { keyBy } from 'lodash/fp';
 import React from 'react';
 

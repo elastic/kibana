@@ -10,8 +10,8 @@ import { omit, set } from 'lodash/fp';
 import React from 'react';
 
 import { defaultHeaders } from './default_headers';
+import type { BUILT_IN_SCHEMA } from './helpers';
 import {
-  BUILT_IN_SCHEMA,
   getActionsColumnWidth,
   getColumnWidthFromType,
   getColumnHeaders,
@@ -24,7 +24,7 @@ import {
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
 } from '../constants';
 import { mockBrowserFields } from '../../../../mock/browser_fields';
-import { ColumnHeaderOptions } from '../../../../../common/types';
+import type { ColumnHeaderOptions } from '../../../../../common/types';
 
 window.matchMedia = jest.fn().mockImplementation((query) => {
   return {
