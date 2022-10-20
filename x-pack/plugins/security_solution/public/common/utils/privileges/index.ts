@@ -49,7 +49,7 @@ export const getToolTipContent = (
     return detectionI18n.ML_RULES_DISABLED_MESSAGE;
   } else if (!canEditRuleWithActions(rule, hasReadActionsPrivileges)) {
     return i18n.LACK_OF_KIBANA_PRIVILEGES;
-  } else if (canUserCRUD !== null && !canUserCRUD) {
+  } else if (!hasUserCRUDPermission(canUserCRUD)) {
     return i18n.LACK_OF_RULE_EDITING_PRIVILEGES;
   } else {
     return undefined;
