@@ -35,8 +35,8 @@ export const createGetSummarizedAlertsFn =
     if (!ruleId || !spaceId) {
       throw new Error(`Must specify both rule ID and space ID for summarized alert query.`);
     }
-    const queryByExecutionUuid: boolean = !!start && !!end;
-    const queryByTimeRange: boolean = !!executionUuid;
+    const queryByExecutionUuid: boolean = !!executionUuid;
+    const queryByTimeRange: boolean = !!start && !!end;
     // Either executionUuid or start/end dates must be specified, but not both
     if (
       (!queryByExecutionUuid && !queryByTimeRange) ||
@@ -179,22 +179,21 @@ const getAlertsByTimeRange = async <TSearchRequest extends ESSearchRequest>({
   // For non-lifecycle alerts (persistent), all alerts from an execution are
   // new, no alerts are ongoing or recovered
   return {
+    // new lifecycle alerts have start time same as timestamp
     new: isLifecycleAlert
-      ? alertHits.filter((hit) => {
-          const alertStart = new Date(hit._source[ALERT_START]!);
-          return alertStart >= start && alertStart <= end;
-        })
+      ? alertHits.filter((hit) => hit._source[ALERT_START] === hit._source[TIMESTAMP])
       : alertHits,
+    // ongoing lifecycle alerts have start time less than timestamp
     ongoing: isLifecycleAlert
       ? alertHits.filter((hit) => {
           const alertStart = new Date(hit._source[ALERT_START]!);
-          return alertStart < start && hit._source[ALERT_END] == null;
+          const alertTimestamp = new Date(hit._source[TIMESTAMP]!);
+          return alertStart < alertTimestamp && !hit._source[ALERT_END];
         })
       : [],
+    // recovered lifecycle alerts have end time same as timestamp
     recovered: isLifecycleAlert
-      ? alertHits.filter((hit) => {
-          return hit._source[ALERT_END] != null;
-        })
+      ? alertHits.filter((hit) => hit._source[ALERT_END] === hit._source[TIMESTAMP])
       : [],
   };
 };
