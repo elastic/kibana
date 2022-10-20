@@ -13,6 +13,7 @@ pageLoadAssetSize:
   cloudChat: 19894
   cloudExperiments: 59358
   cloudFullStory: 18493
+  cloudGainsight: 18710
   cloudLinks: 17629
   cloudSecurityPosture: 19109
   console: 46091
@@ -74,7 +75,7 @@ pageLoadAssetSize:
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
   kubernetesSecurity: 77234
-  lens: 36500
+  lens: 37000
   licenseManagement: 41817
   licensing: 29004
   lists: 22900
@@ -105,7 +106,7 @@ pageLoadAssetSize:
   screenshotting: 22870
   searchprofiler: 67080
   security: 65433
-  securitySolution: 273763
+  securitySolution: 66738
   sessionView: 77750
   share: 71239
   snapshotRestore: 79032

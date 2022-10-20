@@ -16,6 +16,7 @@
     { "path": "../share/tsconfig.json" },
     { "path": "../url_forwarding/tsconfig.json" },
     { "path": "../usage_collection/tsconfig.json" },
-    { "path": "../../../x-pack/plugins/cloud/tsconfig.json" }
+    { "path": "../guided_onboarding/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/cloud/tsconfig.json" },
   ]
 }
