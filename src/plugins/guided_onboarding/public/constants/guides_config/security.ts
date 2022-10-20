@@ -45,6 +45,10 @@ export const securityConfig: GuideConfig = {
         description:
           'Mark the step complete by opening the panel and clicking the button "Mark done"',
       },
+      location: {
+        appID: 'securitySolutionUI',
+        path: '/rules',
+      },
     },
     {
       id: 'alertsCases',
@@ -54,6 +58,10 @@ export const securityConfig: GuideConfig = {
         'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
         'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
       ],
+      location: {
+        appID: 'securitySolutionUI',
+        path: '/alerts',
+      },
     },
   ],
 };
