@@ -158,59 +158,50 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         .pipe(
           distinctUntilChanged(
             (a, b) =>
-              isEqual(a.selectedOptions, b.selectedOptions) &&
               a.exclude === b.exclude &&
-              a.existsSelected === b.existsSelected
+              a.existsSelected === b.existsSelected &&
+              isEqual(a.selectedOptions, b.selectedOptions)
           )
         )
-        .subscribe(async ({ selectedOptions: newSelectedOptions }) => {
-          const {
-            actions: {
-              clearValidAndInvalidSelections,
-              setValidAndInvalidSelections,
-              setIgnoredSelections,
-              publishFilters,
-            },
-            dispatch,
-          } = this.reduxEmbeddableTools;
-          // console.log('NEW SELECTIONS:', newSelectedOptions);
-          if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
-            batch(() => {
+        .subscribe(
+          async ({ selectedOptions: newSelectedOptions, existsSelected: newExistsSelected }) => {
+            const {
+              actions: {
+                clearValidAndInvalidSelections,
+                setValidAndInvalidSelections,
+                publishFilters,
+              },
+              dispatch,
+            } = this.reduxEmbeddableTools;
+            // console.log('NEW SELECTIONS:', newSelectedOptions);
+
+            if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
               dispatch(clearValidAndInvalidSelections({}));
-              dispatch(setIgnoredSelections([]));
-            });
-          } else {
-            const { invalidSelections, ignoredSelections } =
-              this.reduxEmbeddableTools.getState().componentState ?? {};
-            const newValidSelections: string[] = [];
-            const newInvalidSelections: string[] = [];
-            const newIgnoredSelections: string[] = [];
-            for (const selectedOption of newSelectedOptions) {
-              if (invalidSelections?.includes(selectedOption)) {
-                newInvalidSelections.push(selectedOption);
-                continue;
+            } else {
+              const { invalidSelections } =
+                this.reduxEmbeddableTools.getState().componentState ?? {};
+              const newValidSelections: string[] = [];
+              const newInvalidSelections: string[] = [];
+              for (const selectedOption of newSelectedOptions) {
+                if (invalidSelections?.includes(selectedOption)) {
+                  newInvalidSelections.push(selectedOption);
+                  continue;
+                }
+                newValidSelections.push(selectedOption);
               }
-              if (ignoredSelections?.includes(selectedOption)) {
-                newIgnoredSelections.push(selectedOption);
-                continue;
-              }
-              newValidSelections.push(selectedOption);
-            }
-            batch(() => {
+
               dispatch(
                 setValidAndInvalidSelections({
                   validSelections: newValidSelections,
                   invalidSelections: newInvalidSelections,
                 })
               );
-              dispatch(setIgnoredSelections(newIgnoredSelections));
-            });
+            }
+            const newFilters = await this.buildFilter();
+            // console.log('new filter 1:', newFilters);
+            dispatch(publishFilters(newFilters));
           }
-          const newFilters = await this.buildFilter();
-          // console.log('new filter 1:', newFilters);
-
-          dispatch(publishFilters(newFilters));
-        })
+        )
     );
   };
 
@@ -369,7 +360,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
       // publish filter
       const newFilters = await this.buildFilter();
-      // console.log('new filter 2:', newFilters);
       batch(() => {
         dispatch(setLoading(false));
         dispatch(publishFilters(newFilters));
@@ -389,8 +379,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private buildFilter = async () => {
     const { getState } = this.reduxEmbeddableTools;
     const { validSelections } = getState().componentState ?? {};
-    const { exclude } = this.getInput();
     const { existsSelected } = getState().explicitInput ?? {};
+    const { exclude } = this.getInput();
 
     if ((!validSelections || isEmpty(validSelections)) && !existsSelected) {
       return [];
@@ -408,10 +398,10 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         newFilter = buildPhrasesFilter(field, validSelections, dataView);
       }
     }
+    if (!newFilter) return [];
 
     newFilter.meta.key = field?.name;
     if (exclude) newFilter.meta.negate = true;
-    if (!newFilter) return [];
     return [newFilter];
   };
 

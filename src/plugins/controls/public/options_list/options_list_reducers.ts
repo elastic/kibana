@@ -53,22 +53,11 @@ export const optionsListReducers = {
   },
   selectExists: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
     state.explicitInput.existsSelected = action.payload;
-    if (state.explicitInput.existsSelected) {
-      state.componentState.ignoredSelections = state.componentState.validSelections;
-      state.componentState.validSelections = [];
-    } else {
-      state.componentState.validSelections = state.componentState.ignoredSelections;
-      state.componentState.ignoredSelections = [];
-    }
-  },
-  setIgnoredSelections: (
-    state: WritableDraft<OptionsListReduxState>,
-    action: PayloadAction<string[]>
-  ) => {
-    state.componentState.ignoredSelections = action.payload;
+    state.explicitInput.selectedOptions = [];
   },
   selectOption: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<string>) => {
     if (!state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
+    if (state.explicitInput.existsSelected) state.explicitInput.existsSelected = false;
     state.explicitInput.selectedOptions?.push(action.payload);
   },
   replaceSelection: (
