@@ -29,6 +29,10 @@ export const canEditRuleWithActions = (
   return true;
 };
 
+// typed as null not undefined as the initial state for this value is null.
+export const hasUserCRUDPermission = (canUserCRUD: boolean | null): boolean =>
+  canUserCRUD != null ? canUserCRUD : true;
+
 export const getToolTipContent = (
   rule: Rule | null | undefined,
   hasMlPermissions: boolean,

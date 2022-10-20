@@ -68,7 +68,7 @@ import {
 } from '../../../../components/alerts_table/default_config';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { StepPanel } from '../../../../components/rules/step_panel';
-import { getStepsData, redirectToDetections, userHasPermissions } from '../helpers';
+import { getStepsData, redirectToDetections } from '../helpers';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../../common/store/inputs/actions';
@@ -97,6 +97,7 @@ import {
   getToolTipContent,
   canEditRuleWithActions,
   isBoolean,
+  hasUserCRUDPermission,
 } from '../../../../../common/utils/privileges';
 
 import {
@@ -690,7 +691,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           isDisabled={
                             !isExistingRule ||
                             !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-                            !userHasPermissions(canUserCRUD) ||
+                            !hasUserCRUDPermission(canUserCRUD) ||
                             (!hasMlPermissions && !rule?.enabled)
                           }
                           enabled={isExistingRule && (rule?.enabled ?? false)}
@@ -708,7 +709,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           ruleId={ruleId}
                           disabled={
                             !isExistingRule ||
-                            !userHasPermissions(canUserCRUD) ||
+                            !hasUserCRUDPermission(canUserCRUD) ||
                             (isMlRule(rule?.type) && !hasMlPermissions)
                           }
                           disabledReason={getToolTipContent(
@@ -722,7 +723,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       <EuiFlexItem grow={false}>
                         <RuleActionsOverflow
                           rule={rule}
-                          userHasPermissions={isExistingRule && userHasPermissions(canUserCRUD)}
+                          userHasPermissions={isExistingRule && hasUserCRUDPermission(canUserCRUD)}
                           canDuplicateRuleWithActions={canEditRuleWithActions(
                             rule,
                             hasActionsPrivileges
