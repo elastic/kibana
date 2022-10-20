@@ -134,6 +134,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       usageCollector: this.usageCollector!,
       session: this.sessionService,
       theme,
+      searchConfig: this.initializerContext.config.get().search,
     });
 
     expressions.registerFunction(

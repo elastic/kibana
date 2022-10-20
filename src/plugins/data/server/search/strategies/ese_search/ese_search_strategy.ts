@@ -87,7 +87,10 @@ export const enhancedEsSearchStrategyProvider = (
       }
     };
 
-    return pollSearch(search, cancel, options).pipe(
+    return pollSearch(search, cancel, {
+      pollInterval: searchConfig.asyncSearch.pollInterval,
+      ...options,
+    }).pipe(
       tap((response) => (id = response.id)),
       tap(searchUsageObserver(logger, usage)),
       catchError((e) => {

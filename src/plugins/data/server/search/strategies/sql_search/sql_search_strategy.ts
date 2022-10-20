@@ -88,7 +88,10 @@ export const sqlSearchStrategyProvider = (
       }
     };
 
-    return pollSearch(search, cancel, options).pipe(
+    return pollSearch(search, cancel, {
+      pollInterval: searchConfig.asyncSearch.pollInterval,
+      ...options,
+    }).pipe(
       tap((response) => (id = response.id)),
       catchError((e) => {
         throw getKbnServerError(e);
