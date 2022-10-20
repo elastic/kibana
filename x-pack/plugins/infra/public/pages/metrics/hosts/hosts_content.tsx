@@ -16,7 +16,7 @@ import { useMetricsDataViewContext } from './hooks/use_data_view';
 import { HostsTable } from './components/hosts_table';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useSnapshot } from '../inventory_view/hooks/use_snaphot';
-import { SnapshotMetricType } from '../../../../common/inventory_models/types';
+import type { SnapshotMetricType } from '../../../../common/inventory_models/types';
 
 export const HostsContent: React.FunctionComponent = () => {
   const { source, sourceId } = useSourceContext();

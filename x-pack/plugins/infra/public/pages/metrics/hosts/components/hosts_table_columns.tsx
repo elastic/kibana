@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { scaleUpPercentage } from '../../../../components/infrastructure_node_metrics_tables/shared/hooks';
-import { SnapshotNodeMetric } from '../../../../../common/http_api/snapshot_api';
+import type { SnapshotNodeMetric } from '../../../../../common/http_api/snapshot_api';
 import { NumberCell } from '../../../../components/infrastructure_node_metrics_tables/shared/components';
 
 interface HostNodeRow extends HostMetics {
