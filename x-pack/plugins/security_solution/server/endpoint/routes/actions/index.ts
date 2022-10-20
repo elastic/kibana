@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { registerActionFileDownloadRoutes } from './file_download_handler';
 import { registerActionDetailsRoutes } from './details';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import type { EndpointAppContext } from '../../types';
@@ -23,5 +24,6 @@ export function registerActionRoutes(
   registerActionAuditLogRoutes(router, endpointContext);
   registerActionListRoutes(router, endpointContext);
   registerActionDetailsRoutes(router, endpointContext);
+  registerActionFileDownloadRoutes(router, endpointContext);
   registerResponseActionRoutes(router, endpointContext);
 }
