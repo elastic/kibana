@@ -26,11 +26,7 @@ const TinesActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         path="config.url"
         config={{
           label: i18n.URL_LABEL,
-          validations: [
-            {
-              validator: urlField(i18n.URL_INVALID),
-            },
-          ],
+          validations: [{ validator: urlField(i18n.URL_INVALID) }],
         }}
         component={Field}
         componentProps={{
@@ -49,11 +45,7 @@ const TinesActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         path="secrets.email"
         config={{
           label: i18n.EMAIL_LABEL,
-          validations: [
-            {
-              validator: emptyField(i18n.EMAIL_REQUIRED),
-            },
-          ],
+          validations: [{ validator: emptyField(i18n.EMAIL_REQUIRED) }],
         }}
         component={Field}
         componentProps={{
@@ -66,11 +58,7 @@ const TinesActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         path="secrets.token"
         config={{
           label: i18n.TOKEN_LABEL,
-          validations: [
-            {
-              validator: emptyField(i18n.TOKEN_REQUIRED),
-            },
-          ],
+          validations: [{ validator: emptyField(i18n.TOKEN_REQUIRED) }],
         }}
         component={Field}
         componentProps={{
