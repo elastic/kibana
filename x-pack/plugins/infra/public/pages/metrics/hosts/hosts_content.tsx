@@ -16,6 +16,7 @@ import { HostsTable } from './components/hosts_table';
 import { InfraClientStartDeps } from '../../../types';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useTimeRangeUrlState } from './hooks/use_time_range_url_state';
+import { useWaffleFiltersContext } from '../inventory_view/hooks/use_waffle_filters';
 
 export const HostsContent: React.FunctionComponent = () => {
   const {
@@ -24,12 +25,13 @@ export const HostsContent: React.FunctionComponent = () => {
   const { source } = useSourceContext();
   const { timeRange: selectedTimeRange, setTimeRange: setSelectedTimeRange } =
     useTimeRangeUrlState();
+  const { filterQuery, setWaffleFiltersState } = useWaffleFiltersContext();
 
   const [dateRange, setDateRange] = useState<TimeRange>({
     from: selectedTimeRange.startTime,
     to: selectedTimeRange.endTime,
   });
-  const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
+  const [query, setQuery] = useState<Query>({ query: filterQuery.expression, language: 'kuery' });
   const { metricsDataView, hasFailedCreatingDataView, hasFailedFetchingDataView } =
     useMetricsDataViewContext();
   // needed to refresh the lens table when filters havent changed
@@ -50,6 +52,9 @@ export const HostsContent: React.FunctionComponent = () => {
     (payload: { dateRange: TimeRange; query?: Query }) => {
       setDateRange(payload.dateRange);
       if (payload.query) {
+        if (payload.query.language === 'kuery' && typeof payload.query.query === 'string') {
+          setWaffleFiltersState({ kind: payload.query.language, expression: payload.query.query });
+        }
         setQuery(payload.query);
       }
       setIsLensLoading(true);
@@ -60,7 +65,13 @@ export const HostsContent: React.FunctionComponent = () => {
         isInvalid: false,
       });
     },
-    [setDateRange, setQuery, data.search.session, handleSelectedTimeRangeChange]
+    [
+      setDateRange,
+      setQuery,
+      data.search.session,
+      handleSelectedTimeRangeChange,
+      setWaffleFiltersState,
+    ]
   );
 
   const onLoading = useCallback(
