@@ -9,6 +9,8 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { CommentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { GuidedOnboardingTourStep } from '../../../../common/components/guided_onboarding/tour';
+import { SecurityStepId } from '../../../../common/components/guided_onboarding/tour_config';
 import { useTourContext } from '../../../../common/components/guided_onboarding';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
@@ -54,21 +56,18 @@ export const useAddToCaseActions = ({
       : [];
   }, [casesUi.helpers, ecsData, nonEcsData]);
 
-  const { activeStep, endTour, incrementStep, isTourShown } = useTourContext();
+  const { activeStep, endTourStep, incrementStep, isTourShown } = useTourContext();
 
-  const onCreateCaseSuccess = useCallback(async () => {
-    if (onSuccess) {
-      await onSuccess();
-      // onSuccess only passed on alert take action dropdown, which is a trigger for tour steps
-      if (isTourShown) {
-        endTour();
-      }
+  const afterCaseCreated = useCallback(async () => {
+    if (isTourShown(SecurityStepId.alertsCases)) {
+      endTourStep(SecurityStepId.alertsCases);
     }
-  }, [endTour, isTourShown, onSuccess]);
+  }, [endTourStep, isTourShown]);
 
   const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
     onClose: onMenuItemClick,
-    onSuccess: onCreateCaseSuccess,
+    onSuccess,
+    afterCaseCreated,
   });
 
   const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
@@ -78,12 +77,20 @@ export const useAddToCaseActions = ({
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
-    createCaseFlyout.open({ attachments: caseAttachments });
-    // This alleviates a race condition where the active step attempts to mount before the tour anchor is mounted
-    if (isTourShown && activeStep === 4) {
-      setTimeout(() => {
-        incrementStep(5);
-      }, 500);
+    createCaseFlyout.open({
+      attachments: caseAttachments,
+      ...(isTourShown(SecurityStepId.alertsCases) && activeStep === 4
+        ? {
+            optionalContent: (
+              <GuidedOnboardingTourStep isTourAnchor step={5} stepId={SecurityStepId.alertsCases}>
+                <p />
+              </GuidedOnboardingTourStep>
+            ),
+          }
+        : {}),
+    });
+    if (isTourShown(SecurityStepId.alertsCases) && activeStep === 4) {
+      incrementStep(SecurityStepId.alertsCases);
     }
   }, [onMenuItemClick, createCaseFlyout, caseAttachments, isTourShown, activeStep, incrementStep]);
 

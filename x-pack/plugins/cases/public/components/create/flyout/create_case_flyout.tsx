@@ -25,6 +25,7 @@ export interface CreateCaseFlyoutProps {
   onClose?: () => void;
   onSuccess?: (theCase: Case) => Promise<void>;
   attachments?: CaseAttachmentsWithoutOwner;
+  optionalContent?: React.ReactNode;
 }
 
 const StyledFlyout = styled(EuiFlyout)`
@@ -71,9 +72,10 @@ const FormWrapper = styled.div`
 `;
 
 export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
-  ({ afterCaseCreated, onClose, onSuccess, attachments }) => {
+  ({ afterCaseCreated, onClose, onSuccess, attachments, optionalContent }) => {
     const handleCancel = onClose || function () {};
     const handleOnSuccess = onSuccess || async function () {};
+    console.log('optional content??', optionalContent);
     return (
       <QueryClientProvider client={casesQueryClient}>
         <GlobalStyle />
@@ -87,6 +89,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
             <EuiTitle size="m">
               <h2>{i18n.CREATE_CASE_TITLE}</h2>
             </EuiTitle>
+            {optionalContent && optionalContent}
           </EuiFlyoutHeader>
           <StyledEuiFlyoutBody>
             <FormWrapper>

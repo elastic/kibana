@@ -31,14 +31,19 @@ interface SecurityTourStep {
 }
 
 export const SecurityTourStep = ({ step, stepId }: SecurityTourStep) => {
-  const { activeStep, incrementStep } = useTourContext();
+  const { activeStep, incrementStep, isTourShown } = useTourContext();
   const tourStep = useMemo(
     () => securityTourConfig[stepId].find((config) => config.step === step),
     [step, stepId]
   );
-  if (step !== activeStep || tourStep == null) {
+  // step === 5 && stepId === SecurityStepId.alertsCases is in Cases app and out of context.
+  // If we mount this step, we know we need to render it
+  // we are also managing the context on the siem end in the background
+  const overrideContext = step === 5 && stepId === SecurityStepId.alertsCases;
+  if (tourStep == null || ((step !== activeStep || !isTourShown(stepId)) && !overrideContext)) {
     return null;
   }
+
   const { content, imageConfig, dataTestSubj, hideNextButton = false, ...rest } = tourStep;
 
   const footerAction: EuiTourStepProps['footerAction'] = !hideNextButton ? (
@@ -75,7 +80,8 @@ export const SecurityTourStep = ({ step, stepId }: SecurityTourStep) => {
         </>
       }
       footerAction={footerAction}
-      isStepOpen={step === activeStep}
+      // we wouldn't even mount if it was not open
+      isStepOpen
       // guided onboarding does not allow skipping tour through the steps
       onFinish={() => null}
       stepsTotal={securityTourConfig[stepId].length}
@@ -128,7 +134,7 @@ export interface TourContextValue {
 }
 
 const initialState: TourContextValue = {
-  activeStep: 1,
+  activeStep: 0,
   isTourShown: () => false,
   endTourStep: () => {},
   incrementStep: () => {},
@@ -165,7 +171,6 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
     (stepId: SecurityStepId) => tourStatus[stepId] && !isSmallScreen,
     [isSmallScreen, tourStatus]
   );
-
   const [activeStep, _setActiveStep] = useState<number>(1);
 
   const incrementStep = useCallback((stepId: SecurityStepId, step?: number) => {
@@ -178,16 +183,18 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
     _setActiveStep(1);
   }, []);
 
-  const resetTour = useCallback(() => {
-    resetStep();
-  }, [resetStep]);
+  // const onSkipTour = useCallback((stepId: SecurityStepId) => {
+  //   // active state means the user is on this step but has not yet begun. so when the user hits skip,
+  //   // the tour will go back to this step until they "re-start it"
+  //   // guidedOnboardingApi.idkSetStepTo(stepId, 'active')
+  // }, []);
 
   const endTourStep = useCallback(
     async (stepId: SecurityStepId) => {
-      resetTour();
       await guidedOnboardingApi?.completeGuideStep('security', stepId);
+      resetStep();
     },
-    [resetTour, guidedOnboardingApi]
+    [resetStep, guidedOnboardingApi]
   );
 
   const context = {

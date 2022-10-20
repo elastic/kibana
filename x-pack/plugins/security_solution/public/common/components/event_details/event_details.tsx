@@ -194,15 +194,18 @@ const EventDetailsComponent: React.FC<Props> = ({
     const hasRiskInfoWithLicense = isLicenseValid && (hostRisk || userRisk);
     return hasEnrichments || hasRiskInfoWithLicense;
   }, [enrichmentCount, hostRisk, isLicenseValid, userRisk]);
-  const TourStep = () => (
-    <GuidedOnboardingTourStep
-      altAnchor
-      isTourAnchor={isTourAnchor}
-      step={3}
-      stepId={SecurityStepId.alertsCases}
-    >
-      <></>
-    </GuidedOnboardingTourStep>
+  const TourStep = useCallback(
+    () => (
+      <GuidedOnboardingTourStep
+        altAnchor
+        isTourAnchor={isTourAnchor}
+        step={3}
+        stepId={SecurityStepId.alertsCases}
+      >
+        <></>
+      </GuidedOnboardingTourStep>
+    ),
+    [isTourAnchor]
   );
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
@@ -290,23 +293,25 @@ const EventDetailsComponent: React.FC<Props> = ({
           }
         : undefined,
     [
-      allEnrichments,
+      isAlert,
+      isTourAnchor,
+      TourStep,
       browserFields,
+      scopeId,
       data,
-      detailsEcsData,
-      goToTableTab,
-      handleOnEventClosed,
-      hostRisk,
       id,
       indexName,
-      isAlert,
-      isDraggable,
-      scopeId,
-      isEnrichmentsLoading,
-      showThreatSummary,
+      handleOnEventClosed,
       isReadOnly,
       renderer,
+      detailsEcsData,
+      isDraggable,
+      goToTableTab,
+      showThreatSummary,
+      hostRisk,
       userRisk,
+      allEnrichments,
+      isEnrichmentsLoading,
     ]
   );
 
@@ -411,11 +416,19 @@ const EventDetailsComponent: React.FC<Props> = ({
     rawEventData: rawEventData as AlertRawEventData,
   });
 
-  const tabs = useMemo(() => {
-    return [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab].filter(
-      (tab: EventViewTab | undefined): tab is EventViewTab => !!tab
-    );
-  }, [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab]);
+  // intervention for not being able to put the actual tour step tag in ourselves
+  const possibleTourStepTag = useMemo(
+    () => (isTourAnchor ? { 'tour-step': getTourAnchor(3, SecurityStepId.alertsCases) } : {}),
+    [isTourAnchor]
+  );
+
+  const tabs = useMemo(
+    () =>
+      [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab]
+        .filter((tab: EventViewTab | undefined): tab is EventViewTab => !!tab)
+        .map((tab) => ({ ...tab, ...possibleTourStepTag })),
+    [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab, possibleTourStepTag]
+  );
 
   const selectedTab = useMemo(
     () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],

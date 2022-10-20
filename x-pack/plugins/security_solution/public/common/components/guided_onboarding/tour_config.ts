@@ -136,6 +136,9 @@ interface SecurityTourConfig {
 }
 
 export const securityTourConfig: SecurityTourConfig = {
+  /**
+   * OLM team implement your tour config here
+   */
   [SecurityStepId.addData]: [],
   [SecurityStepId.rules]: [],
   [SecurityStepId.alertsCases]: alertsCasesConfig,
