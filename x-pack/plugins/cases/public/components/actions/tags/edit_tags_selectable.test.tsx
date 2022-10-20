@@ -16,6 +16,11 @@ import { waitFor } from '@testing-library/react';
 
 describe('EditTagsSelectable', () => {
   let appMock: AppMockRenderer;
+
+  /**
+   * Case has the following tags: coke, pepsi
+   * All available tags are: one, two, coke, pepsi
+   */
   const props = {
     selectedCases: [basicCase],
     isLoading: false,
@@ -23,6 +28,11 @@ describe('EditTagsSelectable', () => {
     onChangeTags: jest.fn(),
   };
 
+  /**
+   * Case one has the following tags: coke, pepsi, one
+   * Case two has the following tags: one, three
+   * All available tags are: one, two, three, coke, pepsi
+   */
   const propsMultipleCases = {
     selectedCases: [
       { ...basicCase, tags: [...basicCase.tags, 'one'] },
@@ -49,6 +59,23 @@ describe('EditTagsSelectable', () => {
 
     for (const tag of props.tags) {
       expect(result.getByText(tag)).toBeInTheDocument();
+    }
+
+    await waitForComponentToUpdate();
+  });
+
+  it('renders the tags icons correctly', async () => {
+    const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
+
+    for (const [tag, icon] of [
+      ['one', 'check'],
+      ['two', 'empty'],
+      ['three', 'asterisk'],
+      ['coke', 'asterisk'],
+      ['pepsi', 'asterisk'],
+    ]) {
+      const iconDataTestSubj = `cases-actions-tags-edit-selectable-tag-${tag}-icon-${icon}`;
+      expect(result.getByTestId(iconDataTestSubj)).toBeInTheDocument();
     }
 
     await waitForComponentToUpdate();
@@ -86,6 +113,33 @@ describe('EditTagsSelectable', () => {
     await waitForComponentToUpdate();
   });
 
+  it('renders the icons correctly after selecting and deselecting tags', async () => {
+    const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
+
+    for (const tag of propsMultipleCases.tags) {
+      userEvent.click(result.getByText(tag));
+    }
+
+    for (const [tag, icon] of [
+      ['one', 'empty'],
+      ['two', 'check'],
+      ['three', 'check'],
+      ['coke', 'check'],
+      ['pepsi', 'check'],
+    ]) {
+      const iconDataTestSubj = `cases-actions-tags-edit-selectable-tag-${tag}-icon-${icon}`;
+      expect(result.getByTestId(iconDataTestSubj)).toBeInTheDocument();
+    }
+
+    expect(propsMultipleCases.onChangeTags).toBeCalledTimes(propsMultipleCases.tags.length);
+    expect(propsMultipleCases.onChangeTags).nthCalledWith(propsMultipleCases.tags.length, {
+      selectedTags: ['two', 'three', 'coke', 'pepsi'],
+      unSelectedTags: ['one'],
+    });
+
+    await waitForComponentToUpdate();
+  });
+
   it('adds a new tag correctly', async () => {
     const result = appMock.render(<EditTagsSelectable {...props} />);
 
@@ -111,5 +165,35 @@ describe('EditTagsSelectable', () => {
       selectedTags: ['coke', 'pepsi', 'not-exist'],
       unSelectedTags: [],
     });
+  });
+
+  it('selects all tags correctly', async () => {
+    const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
+
+    expect(result.getByText('Select all')).toBeInTheDocument();
+    userEvent.click(result.getByText('Select all'));
+
+    expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
+    expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
+      selectedTags: propsMultipleCases.tags,
+      unSelectedTags: [],
+    });
+
+    await waitForComponentToUpdate();
+  });
+
+  it('unselects all tags correctly', async () => {
+    const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
+
+    expect(result.getByText('Select all')).toBeInTheDocument();
+    userEvent.click(result.getByText('Select none'));
+
+    expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
+    expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
+      selectedTags: [],
+      unSelectedTags: ['one', 'three', 'coke', 'pepsi'],
+    });
+
+    await waitForComponentToUpdate();
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,6 +15,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLoadingSpinner,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -39,6 +40,8 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSa
     unSelectedTags: [],
   });
 
+  const onSave = useCallback(() => onSaveTags(tagsSelection), [onSaveTags, tagsSelection]);
+
   const headerSubtitle =
     selectedCases.length > 1 ? i18n.SELECTED_CASES(selectedCases.length) : selectedCases[0].title;
 
@@ -60,22 +63,30 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSa
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EditTagsSelectable
-          selectedCases={selectedCases}
-          isLoading={isLoading}
-          tags={tags ?? []}
-          onChangeTags={setTagsSelection}
-        />
+        {isLoading ? (
+          <EuiLoadingSpinner />
+        ) : (
+          <EditTagsSelectable
+            selectedCases={selectedCases}
+            isLoading={isLoading}
+            tags={tags ?? []}
+            onChangeTags={setTagsSelection}
+          />
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} flush="left">
+            <EuiButtonEmpty
+              onClick={onClose}
+              flush="left"
+              data-test-subj="cases-edit-tags-flyout-cancel"
+            >
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={() => onSaveTags(tagsSelection)} fill>
+            <EuiButton onClick={onSave} fill data-test-subj="cases-edit-tags-flyout-submit">
               {i18n.SAVE_SELECTION}
             </EuiButton>
           </EuiFlexItem>

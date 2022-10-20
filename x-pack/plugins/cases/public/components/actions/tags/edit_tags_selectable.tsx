@@ -190,6 +190,7 @@ const stateToOptions = (tagsState: State['tags']): TagSelectableOption[] => {
       key: tag,
       label: tag,
       ...(tagsState[tag].tagState === TagState.CHECKED ? { checked: 'on' } : {}),
+      'data-test-subj': `cases-actions-tags-edit-selectable-tag-${tag}`,
       data: { tagIcon: tagsState[tag].icon },
     };
   }) as TagSelectableOption[];
@@ -250,6 +251,12 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
   isLoading,
   onChangeTags,
 }) => {
+  /**
+   * If react query refetch on the background and fetches new tags the component will
+   * rerender but it will not change the state. getInitialTagsState will run only on
+   * mount. This is a desired behaviour because it prevents the list of tags for changing
+   * while the user interacts with the selectable.
+   */
   const [state, dispatch] = useReducer(tagsReducer, { tags, selectedCases }, getInitialTagsState);
   const [searchValue, setSearchValue] = useState<string>('');
 
@@ -258,7 +265,10 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
   const renderOption = useCallback((option: TagSelectableOption, search: string) => {
     return (
       <>
-        <EuiIcon type={option.tagIcon} />
+        <EuiIcon
+          type={option.tagIcon}
+          data-test-subj={`cases-actions-tags-edit-selectable-tag-${option.label}-icon-${option.tagIcon}`}
+        />
         <EuiHighlight search={search}>{option.label}</EuiHighlight>
       </>
     );
