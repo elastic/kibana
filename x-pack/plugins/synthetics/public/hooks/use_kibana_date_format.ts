@@ -15,7 +15,7 @@ export const DEFAULT_FORMAT = 'MMM D, YYYY @ HH:mm:ss';
 
 type AcceptedInputs = Moment | Date | number | string | undefined;
 
-export function toNumeric(timestamp: AcceptedInputs): number | undefined {
+function toNumeric(timestamp: AcceptedInputs): number | undefined {
   if (moment.isMoment(timestamp) || timestamp instanceof Date) return timestamp.valueOf();
   if (typeof timestamp === 'string') {
     return Number.isNaN(Number(timestamp)) ? new Date(timestamp).valueOf() : Number(timestamp);
@@ -23,7 +23,7 @@ export function toNumeric(timestamp: AcceptedInputs): number | undefined {
   return timestamp;
 }
 
-export function isExpectedFormat(maybeValue: unknown): maybeValue is [string, string] {
+function isExpectedFormat(maybeValue: unknown): maybeValue is [string, string] {
   return (
     Array.isArray(maybeValue) &&
     maybeValue.length === 2 &&
@@ -32,8 +32,8 @@ export function isExpectedFormat(maybeValue: unknown): maybeValue is [string, st
   );
 }
 
-export function getDateFormat(bounds: { [key: number]: string }, diff: number): string {
-  let format: string = DEFAULT_FORMAT;
+export function getDateFormat(bounds: { [key: number]: string }, diff: number): string | undefined {
+  let format: string | undefined;
   for (const bound of Object.entries(bounds)) {
     if (diff > Number(bound[0])) {
       format = bound[1];
@@ -51,6 +51,7 @@ export function useKibanaDateFormat(timestamp: AcceptedInputs): string {
   const dispatch = useDispatch();
   const { format, formatString } = useSelector(selectScaledDateFormat);
   const value = kibanaService.core.uiSettings.getAll()['dateFormat:scaled']?.value ?? '';
+  const defaultFormat = kibanaService.core.uiSettings.get('dateFormat', DEFAULT_FORMAT);
 
   useEffect(() => {
     if (typeof value === 'string' && value !== formatString) {
@@ -73,8 +74,8 @@ export function useKibanaDateFormat(timestamp: AcceptedInputs): string {
   }, [dispatch, formatString, value]);
 
   if (format === null || numericTimestamp === undefined) {
-    return DEFAULT_FORMAT;
+    return defaultFormat;
   }
 
-  return getDateFormat(format, now - numericTimestamp);
+  return getDateFormat(format, now - numericTimestamp) ?? defaultFormat;
 }

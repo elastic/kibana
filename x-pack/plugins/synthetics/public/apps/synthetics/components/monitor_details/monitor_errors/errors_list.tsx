@@ -90,7 +90,8 @@ export const ErrorsList = ({
                   {formatTestRunAt(
                     timestamp,
                     format
-                      ? getDateFormat(format, Date.now().valueOf() - Number(timestamp))
+                      ? getDateFormat(format, Date.now().valueOf() - Number(timestamp)) ??
+                          DEFAULT_FORMAT
                       : DEFAULT_FORMAT
                   )}
                 </EuiLink>
