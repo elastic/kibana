@@ -25,6 +25,7 @@ export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProp
   list,
 }) => {
   const {
+    allRules,
     listId,
     linkedRules,
     exportedList,
@@ -62,7 +63,7 @@ export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProp
           <ListWithSearch list={list} />
           {showManageRulesFlyout ? (
             <ManageRules
-              linkedRules={linkedRules}
+              linkedRules={allRules}
               onSave={onSaveManageRules}
               onCancel={onCancelManageRules}
               onRuleSelectionChange={onRuleSelectionChange}

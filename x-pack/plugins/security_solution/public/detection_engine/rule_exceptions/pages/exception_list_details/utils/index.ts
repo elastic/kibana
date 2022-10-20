@@ -11,7 +11,7 @@ import type { Rule } from '../../../../../detections/containers/detection_engine
 export const mapListRulesToUIRules = (listRules: Rule[]): UIRule[] | [] => {
   if (!listRules.length) return [];
   return listRules.map((listRule) => ({
-    name: listRules.name,
+    name: listRule.name,
     id: listRule.id,
     rule_id: listRule.rule_id,
     exception_list: listRule.exceptions_list,

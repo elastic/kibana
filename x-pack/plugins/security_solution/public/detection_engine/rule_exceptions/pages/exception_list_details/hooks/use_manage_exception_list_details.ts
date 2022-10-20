@@ -18,7 +18,7 @@ export const useManageExceptionListDetails = ({
 }: ExceptionListDetailsComponentProps) => {
   const [showManageRulesFlyout, setShowManageRulesFlyout] = useState(false);
   const [exportedList, setExportedList] = useState<Blob>();
-  const { name: listName, description: listDescription, list_id: listId } = list;
+  const { name: listName, description: listDescription, list_id: listId, rules: allRules } = list;
   const linkedRules = useMemo(() => mapListRulesToUIRules(list.rules), [list.rules]);
 
   const { toasts, viewerStatus, http, setIsReadOnly, handleErrorStatus } =
@@ -87,6 +87,7 @@ export const useManageExceptionListDetails = ({
   }, []);
   const onRuleSelectionChange = useCallback(() => {}, []);
   return {
+    allRules,
     linkedRules,
     exportedList,
     viewerStatus,

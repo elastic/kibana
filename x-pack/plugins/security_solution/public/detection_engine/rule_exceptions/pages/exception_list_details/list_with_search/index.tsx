@@ -9,10 +9,7 @@ import React from 'react';
 import type { FC } from 'react';
 import { EuiPanel } from '@elastic/eui';
 
-import type {
-  ExceptionListTypeEnum,
-  ExceptionListSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
   SearchBar,
@@ -26,9 +23,10 @@ import { getFormattedComments } from '../../../utils/helpers';
 import { ListDetailsLinkAnchor } from '../../../components/list_details_link_anchor';
 import { useManageListWithSearchComponent } from './use_manage_list_with_search';
 import { ExceptionsUtility } from '../../../components/exceptions_utility';
+import type { ExceptionListWithRules } from '../types';
 
 interface ListWithSearchComponentProps {
-  list: ExceptionListSchema;
+  list: ExceptionListWithRules;
 }
 
 const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list }) => {
