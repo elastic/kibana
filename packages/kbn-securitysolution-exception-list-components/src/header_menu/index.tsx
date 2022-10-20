@@ -28,10 +28,10 @@ interface Action {
 }
 interface HeaderMenuComponentProps {
   disableActions: boolean;
+  actions: Action[] | ReactElement[] | null;
   text?: string;
   iconType?: IconType;
   iconSide?: ButtonContentIconSide;
-  actions: Action[] | ReactElement[] | null;
   dataTestSubj?: string;
   emptyButton?: boolean;
   useCustomActions?: boolean;
@@ -57,7 +57,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
   const onClosePopover = () => setIsPopoverOpen(false);
 
   const itemActions = useMemo(() => {
-    if (useCustomActions) return actions;
+    if (useCustomActions || actions === null) return actions;
     return (actions as Action[]).map((action) => (
       <EuiContextMenuItem
         data-test-subj={`${dataTestSubj || ''}ActionItem${action.key}`}

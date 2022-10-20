@@ -25,10 +25,11 @@ import { useExceptionListHeader } from './use_list_header';
 interface ExceptionListHeaderComponentProps {
   name: string;
   description?: string;
-  listId?: string;
+  listId: string;
   isReadonly: boolean;
   linkedRules: Rule[];
   dataTestSubj?: string;
+  breadcrumbLink?: string;
   securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   onEditListDetails: (listDetails: ListDetails) => void;
   onExportList: () => void;
@@ -44,6 +45,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
   isReadonly,
   dataTestSubj,
   securityLinkAnchorComponent,
+  breadcrumbLink,
   onEditListDetails,
   onExportList,
   onDeleteList,
@@ -61,6 +63,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
         paddingSize="none"
         pageTitle={
           <TextWithEdit
+            dataTestSubj={`${dataTestSubj || ''}Title`}
             text={listDetails.name || i18n.EXCEPTION_LIST_HEADER_NAME}
             isReadonly={isReadonly}
             onEdit={onEdit}
@@ -71,12 +74,13 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
         description={
           <div css={descriptionContainerCss}>
             <TextWithEdit
+              dataTestSubj={`${dataTestSubj || ''}Description`}
               textCss={textCss}
               isReadonly={isReadonly}
               text={listDetails.description || i18n.EXCEPTION_LIST_HEADER_DESCRIPTION}
               onEdit={onEdit}
             />
-            <div css={textWithEditContainerCss}>
+            <div css={textWithEditContainerCss} data-test-subj={`${dataTestSubj || ''}ListID`}>
               <EuiText css={textCss}>{i18n.EXCEPTION_LIST_HEADER_LIST_ID}:</EuiText>
               <EuiText css={textCss}>{listId}</EuiText>
             </div>
@@ -84,7 +88,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
         }
         rightSideItems={[
           <MenuItems
-            dataTestSubj={dataTestSubj}
+            dataTestSubj={`${dataTestSubj || ''}RightSideMenuItems`}
             linkedRules={linkedRules}
             isReadonly={isReadonly}
             securityLinkAnchorComponent={securityLinkAnchorComponent}
@@ -96,15 +100,15 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
         breadcrumbs={[
           {
             text: (
-              <>
+              <div data-test-subj={`${dataTestSubj || ''}Breadcrumb`}>
                 <EuiIcon size="s" type="arrowLeft" />
                 {i18n.EXCEPTION_LIST_HEADER_BREADCRUMB}
-              </>
+              </div>
             ),
             color: 'primary',
             'aria-current': false,
-            href: '#',
-            onClick: (e) => e.preventDefault(), // TODO get all list link
+            href: breadcrumbLink,
+            onClick: (e) => e.preventDefault(),
           },
         ]}
       />

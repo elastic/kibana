@@ -75,6 +75,7 @@ describe('getLayerMetaInfo', () => {
         isStaticValue: false,
         sortingHint: undefined,
         hasTimeShift: true,
+        hasReducedTimeRange: true,
       })),
       getTableSpec: jest.fn(),
       getVisualDefaults: jest.fn(),
@@ -82,6 +83,7 @@ describe('getLayerMetaInfo', () => {
       getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(),
       isTextBasedLanguage: jest.fn(() => false),
+      hasDefaultTimeField: jest.fn(() => true),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     expect(
@@ -93,7 +95,7 @@ describe('getLayerMetaInfo', () => {
   it('should return error in case of getFilters returning errors', () => {
     const mockDatasource = createMockDatasource('testDatasource');
     const updatedPublicAPI: DatasourcePublicAPI = {
-      datasourceId: 'indexpattern',
+      datasourceId: 'formBased',
       getOperationForColumnId: jest.fn(),
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
       getVisualDefaults: jest.fn(),
@@ -101,6 +103,7 @@ describe('getLayerMetaInfo', () => {
       getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(() => ({ error: 'filters error' })),
       isTextBasedLanguage: jest.fn(() => false),
+      hasDefaultTimeField: jest.fn(() => true),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     expect(
@@ -128,6 +131,7 @@ describe('getLayerMetaInfo', () => {
       getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(() => ({ error: 'filters error' })),
       isTextBasedLanguage: jest.fn(() => false),
+      hasDefaultTimeField: jest.fn(() => true),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     // both capabilities should be enabled to enable discover
@@ -166,7 +170,7 @@ describe('getLayerMetaInfo', () => {
   it('should basically work collecting fields and filters in the visualization', () => {
     const mockDatasource = createMockDatasource('testDatasource');
     const updatedPublicAPI: DatasourcePublicAPI = {
-      datasourceId: 'indexpattern',
+      datasourceId: 'formBased',
       getOperationForColumnId: jest.fn(),
       getTableSpec: jest.fn(() => [{ columnId: 'col1', fields: ['bytes'] }]),
       getVisualDefaults: jest.fn(),
@@ -180,6 +184,7 @@ describe('getLayerMetaInfo', () => {
         },
         disabled: { kuery: [], lucene: [] },
       })),
+      hasDefaultTimeField: jest.fn(() => true),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     const { error, meta } = getLayerMetaInfo(

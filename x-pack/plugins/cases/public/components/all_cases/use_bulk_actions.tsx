@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { Case } from '../../containers/types';
+import type { Case } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
+import { useSeverityAction } from '../actions/severity/use_severity_action';
 import { useStatusAction } from '../actions/status/use_status_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import * as i18n from './translations';
@@ -44,6 +48,12 @@ export const useBulkActions = ({
     onActionSuccess,
   });
 
+  const severityAction = useSeverityAction({
+    isDisabled,
+    onAction,
+    onActionSuccess,
+  });
+
   const canDelete = deleteAction.canDelete;
   const canUpdate = statusAction.canUpdateStatus;
 
@@ -60,6 +70,14 @@ export const useBulkActions = ({
         disabled: isDisabled,
         'data-test-subj': 'case-bulk-action-status',
         key: 'case-bulk-action-status',
+      });
+
+      mainPanelItems.push({
+        name: i18n.SEVERITY,
+        panel: 2,
+        disabled: isDisabled,
+        'data-test-subj': 'case-bulk-action-severity',
+        key: 'case-bulk-action-severity',
       });
     }
 
@@ -86,10 +104,16 @@ export const useBulkActions = ({
         title: i18n.STATUS,
         items: statusAction.getActions(selectedCases),
       });
+
+      panelsToBuild.push({
+        id: 2,
+        title: i18n.SEVERITY,
+        items: severityAction.getActions(selectedCases),
+      });
     }
 
     return panelsToBuild;
-  }, [canDelete, canUpdate, deleteAction, isDisabled, selectedCases, statusAction]);
+  }, [canDelete, canUpdate, deleteAction, isDisabled, selectedCases, severityAction, statusAction]);
 
   return {
     modals: (

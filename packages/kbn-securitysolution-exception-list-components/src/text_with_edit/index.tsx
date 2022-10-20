@@ -16,7 +16,7 @@ interface TextWithEditProps {
   dataTestSubj?: string;
   text: string;
   textCss?: Interpolation<Theme>;
-  onEdit: () => void;
+  onEdit?: () => void;
 }
 
 const TextWithEditComponent: FC<TextWithEditProps> = ({
@@ -33,7 +33,7 @@ const TextWithEditComponent: FC<TextWithEditProps> = ({
       </span>
       {isReadonly ? null : (
         <EuiButtonIcon
-          data-test-subj={`${dataTestSubj || ''}EditTitleIcon`}
+          data-test-subj={`${dataTestSubj || ''}EditIcon`}
           aria-label="Edit Text List Header"
           iconType="pencil"
           onClick={() => (typeof onEdit === 'function' ? onEdit() : null)}

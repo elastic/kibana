@@ -129,6 +129,7 @@ enabled:
   - x-pack/test/banners_functional/config.ts
   - x-pack/test/cases_api_integration/security_and_spaces/config_basic.ts
   - x-pack/test/cases_api_integration/security_and_spaces/config_trial.ts
+  - x-pack/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
   - x-pack/test/cases_api_integration/spaces_only/config.ts
   - x-pack/test/detection_engine_api_integration/basic/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group1/config.ts
@@ -175,6 +176,7 @@ enabled:
   - x-pack/test/functional/apps/lens/group1/config.ts
   - x-pack/test/functional/apps/lens/group2/config.ts
   - x-pack/test/functional/apps/lens/group3/config.ts
+  - x-pack/test/functional/apps/lens/open_in_lens/config.ts
   - x-pack/test/functional/apps/license_management/config.ts
   - x-pack/test/functional/apps/logstash/config.ts
   - x-pack/test/functional/apps/management/config.ts

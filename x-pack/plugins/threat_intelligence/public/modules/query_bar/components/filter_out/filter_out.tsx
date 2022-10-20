@@ -8,9 +8,9 @@
 import React, { VFC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
-import { useFilterInOut } from '../../hooks/use_filter_in_out';
-import { FilterOut } from '../../utils/filter';
-import { Indicator } from '../../../../../common/types/indicator';
+import { useFilterInOut } from '../../hooks';
+import { FilterOut } from '../../utils';
+import { Indicator } from '../../../indicators';
 import { useStyles } from './styles';
 
 const ICON_TYPE = 'minusInCircle';

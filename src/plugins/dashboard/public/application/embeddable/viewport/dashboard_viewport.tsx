@@ -33,7 +33,6 @@ export interface DashboardViewportProps {
 
 interface State {
   isFullScreenMode: boolean;
-  controlGroupReady: boolean;
   useMargins: boolean;
   title: string;
   description?: string;
@@ -57,7 +56,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     this.controlsRoot = React.createRef();
 
     this.state = {
-      controlGroupReady: !this.props.controlGroup,
       isFullScreenMode,
       panelCount: Object.values(panels).length,
       useMargins,
@@ -84,9 +82,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     });
     if (this.props.controlGroup && this.controlsRoot.current) {
       this.props.controlGroup.render(this.controlsRoot.current);
-    }
-    if (this.props.controlGroup) {
-      this.props.controlGroup?.untilReady().then(() => this.setState({ controlGroupReady: true }));
     }
   }
 
@@ -164,9 +159,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
               <DashboardEmptyScreen isEditMode={isEditMode} />
             </div>
           )}
-          {this.state.controlGroupReady && (
-            <DashboardGrid container={container} onDataLoaded={this.props.onDataLoaded} />
-          )}
+          <DashboardGrid container={container} onDataLoaded={this.props.onDataLoaded} />
         </div>
       </>
     );

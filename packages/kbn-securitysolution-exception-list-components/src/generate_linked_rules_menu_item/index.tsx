@@ -8,7 +8,7 @@
 import React, { ElementType, ReactElement } from 'react';
 import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem, EuiIcon, IconType } from '@elastic/eui';
 import { Rule } from '../types';
-import { itemContentCss, containerCss } from './menu_item_linked_rules.styles';
+import { itemContentCss, containerCss } from './menu_link.styles';
 
 interface MenuItemLinkedRulesProps {
   leftIcon?: IconType;
@@ -17,7 +17,7 @@ interface MenuItemLinkedRulesProps {
   securityLinkAnchorComponent: ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
 }
 
-export const generateLinedRulesMenuItems = ({
+export const generateLinkedRulesMenuItems = ({
   dataTestSubj,
   linkedRules,
   securityLinkAnchorComponent,
@@ -35,7 +35,7 @@ export const generateLinedRulesMenuItems = ({
       >
         <EuiFlexGroup gutterSize="s" css={itemContentCss}>
           {leftIcon ? (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem data-test-subj={`${dataTestSubj || ''}LeftIcon`} grow={false}>
               <EuiIcon type={leftIcon} />
             </EuiFlexItem>
           ) : null}

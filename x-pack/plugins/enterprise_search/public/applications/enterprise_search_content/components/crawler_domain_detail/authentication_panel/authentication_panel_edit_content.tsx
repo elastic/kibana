@@ -40,6 +40,7 @@ export const AuthenticationPanelEditContent: React.FC = () => {
       <EuiFlexGroup direction="row">
         <EuiFlexItem>
           <EuiCheckableCard
+            data-telemetry-id="entSearchContent-crawler-domainDetail-authentication-basicAuthentication"
             id="basicAuthenticationCheckableCard"
             className="authenticationCheckable"
             label={
@@ -72,6 +73,7 @@ export const AuthenticationPanelEditContent: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiCheckableCard
+            data-telemetry-id="entSearchContent-crawler-domainDetail-authentication-authenticationHeader"
             id="authenticationHeaderCheckableCard"
             className="authenticationCheckable"
             label={

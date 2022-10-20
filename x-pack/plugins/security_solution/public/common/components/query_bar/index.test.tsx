@@ -202,7 +202,6 @@ describe('QueryBar ', () => {
       showAutoRefreshOnly: false,
       showDatePicker: false,
       showFilterBar: true,
-      showQueryBar: true,
       showQueryInput: true,
       showSaveQuery: true,
       showSubmitButton: false,

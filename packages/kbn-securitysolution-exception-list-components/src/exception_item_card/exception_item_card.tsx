@@ -22,7 +22,7 @@ import {
 } from '.';
 
 import type { ExceptionListItemIdentifiers, Rule } from '../types';
-import { useManageExceptionItemCard } from './use_manage_exception_item_card';
+import { useExceptionItemCard } from './use_exception_item_card';
 
 export interface ExceptionItemProps {
   dataTestSubj?: string;
@@ -53,17 +53,20 @@ const ExceptionItemCardComponent: FC<ExceptionItemProps> = ({
   onDeleteException,
   onEditException,
 }) => {
-  const { actions, formattedComments } = useManageExceptionItemCard({
-    listType,
-    editActionLabel,
+  const { actions, formattedComments } = useExceptionItemCard({
     deleteActionLabel,
-    exceptionItem,
     getFormattedComments,
     onEditException,
     onDeleteException,
   });
   return (
-    <EuiPanel paddingSize="l" data-test-subj={dataTestSubj} hasBorder hasShadow={false}>
+    <EuiPanel
+      key={`${exceptionItem.id}exceptionItemPanel`}
+      paddingSize="l"
+      data-test-subj={dataTestSubj || ''}
+      hasBorder
+      hasShadow={false}
+    >
       <EuiFlexGroup responsive gutterSize="m" direction="column">
         <EuiFlexItem data-test-subj="exceptionItemCardHeaderContainer">
           <ExceptionItemCardHeader

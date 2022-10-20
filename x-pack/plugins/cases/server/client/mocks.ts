@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
 
-import { CasesClient } from '.';
-import { AttachmentsSubClient } from './attachments/client';
-import { CasesSubClient } from './cases/client';
-import { ConfigureSubClient } from './configure/client';
-import { CasesClientFactory } from './factory';
-import { MetricsSubClient } from './metrics/client';
-import { UserActionsSubClient } from './user_actions/client';
+import type { CasesClient } from '.';
+import type { AttachmentsSubClient } from './attachments/client';
+import type { CasesSubClient } from './cases/client';
+import type { ConfigureSubClient } from './configure/client';
+import type { CasesClientFactory } from './factory';
+import type { MetricsSubClient } from './metrics/client';
+import type { UserActionsSubClient } from './user_actions/client';
 
 type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 

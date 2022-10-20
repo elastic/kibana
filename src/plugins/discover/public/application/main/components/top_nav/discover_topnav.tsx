@@ -34,7 +34,7 @@ export type DiscoverTopNavProps = Pick<
   onChangeDataView: (dataView: string) => void;
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
-  onFieldEdited: () => void;
+  onFieldEdited: () => Promise<void>;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
   adHocDataViewList: DataView[];
@@ -111,7 +111,7 @@ export const DiscoverTopNav = ({
                 },
                 fieldName,
                 onSave: async () => {
-                  onFieldEdited();
+                  await onFieldEdited();
                 },
               });
             }
@@ -204,7 +204,7 @@ export const DiscoverTopNav = ({
     trigger: {
       label: dataView?.getName() || '',
       'data-test-subj': 'discover-dataView-switch-link',
-      title: dataView?.title || '',
+      title: dataView?.getIndexPattern() || '',
     },
     currentDataViewId: dataView?.id,
     onAddField: addField,

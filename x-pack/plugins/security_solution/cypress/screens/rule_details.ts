@@ -28,8 +28,6 @@ export const SAVED_QUERY_DETAILS = /^Saved query$/;
 
 export const SAVED_QUERY_FILTERS_DETAILS = 'Saved query filters';
 
-export const FILTERS_DETAILS = 'Filters';
-
 export const DATA_VIEW_DETAILS = 'Data View';
 
 export const DEFINITION_DETAILS =
@@ -44,6 +42,8 @@ export const EXCEPTIONS_TAB = 'a[data-test-subj="navigation-rule_exceptions"]';
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
 export const INDEX_PATTERNS_DETAILS = 'Index patterns';
+
+export const ENDPOINT_EXCEPTIONS_TAB = 'a[data-test-subj="navigation-endpoint_exceptions"]';
 
 export const INDICATOR_INDEX_PATTERNS = 'Indicator index patterns';
 

@@ -40,21 +40,32 @@ const EditModalComponent: FC<EditModalProps> = ({ listDetails, onSave, onCancel 
     onSave(newListDetails);
   };
   return (
-    <EuiModal onClose={onSubmit} initialFocus="[name=popswitch]">
+    <EuiModal data-test-subj="EditModal" onClose={onSubmit} initialFocus="[name=popswitch]">
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle data-test-subj="editModalTitle">
           <h1>{i18n.EXCEPTION_LIST_HEADER_EDIT_MODAL_TITLE(listDetails.name)}</h1>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiForm id={modalFormId} component="form" onSubmit={onSubmit}>
+        <EuiForm
+          id={modalFormId}
+          data-test-subj="editModalForm"
+          component="form"
+          onSubmit={onSubmit}
+        >
           <EuiFormRow label={i18n.EXCEPTION_LIST_HEADER_NAME_TEXTBOX}>
-            <EuiFieldText name="name" value={newListDetails.name} onChange={onChange} />
+            <EuiFieldText
+              data-test-subj="editModalNameTextField"
+              name="name"
+              value={newListDetails.name}
+              onChange={onChange}
+            />
           </EuiFormRow>
 
           <EuiFormRow label={i18n.EXCEPTION_LIST_HEADER_DESCRIPTION_TEXTBOX}>
             <EuiFieldText
+              data-test-subj="editModalDescriptionTextField"
               name="description"
               value={newListDetails.description}
               onChange={onChange}
@@ -64,11 +75,17 @@ const EditModalComponent: FC<EditModalProps> = ({ listDetails, onSave, onCancel 
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel}>
+        <EuiButtonEmpty data-test-subj="editModalCancelBtn" onClick={onCancel}>
           {i18n.EXCEPTION_LIST_HEADER_EDIT_MODAL_CANCEL_BUTTON}
         </EuiButtonEmpty>
 
-        <EuiButton type="submit" form={modalFormId} onClick={onSubmit} fill>
+        <EuiButton
+          data-test-subj="editModalSaveBtn"
+          type="submit"
+          form={modalFormId}
+          onClick={onSubmit}
+          fill
+        >
           {i18n.EXCEPTION_LIST_HEADER_EDIT_MODAL_SAVE_BUTTON}
         </EuiButton>
       </EuiModalFooter>

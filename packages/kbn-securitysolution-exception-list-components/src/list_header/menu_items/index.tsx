@@ -11,7 +11,7 @@ import { HeaderMenu } from '../../header_menu';
 import { headerMenuCss } from '../list_header.styles';
 import * as i18n from '../../translations';
 import { Rule } from '../../types';
-import { generateLinedRulesMenuItems } from '../../generate_linked_rules_menu_item';
+import { generateLinkedRulesMenuItems } from '../../generate_linked_rules_menu_item';
 interface MenuItemsProps {
   isReadonly: boolean;
   dataTestSubj?: string;
@@ -33,7 +33,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
 }) => {
   const referencedLinks = useMemo(
     () =>
-      generateLinedRulesMenuItems({
+      generateLinkedRulesMenuItems({
         leftIcon: 'check',
         dataTestSubj,
         linkedRules,
@@ -47,12 +47,12 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
       alignItems="baseline"
       justifyContent="center"
       responsive
-      data-test-subj={`${dataTestSubj || ''}MenuItems`}
+      data-test-subj={`${dataTestSubj || ''}Container`}
       gutterSize="l"
     >
       <EuiFlexItem css={headerMenuCss}>
         <HeaderMenu
-          data-test-subj={`${dataTestSubj || ''}LinkedRulesMenu`}
+          dataTestSubj={`${dataTestSubj || ''}LinkedRulesMenu`}
           emptyButton
           useCustomActions
           text={i18n.EXCEPTION_LIST_HEADER_LINKED_RULES(linkedRules.length)}
@@ -78,6 +78,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
 
       <EuiFlexItem>
         <HeaderMenu
+          dataTestSubj={`${dataTestSubj || ''}MenuActions`}
           actions={[
             {
               key: '1',
