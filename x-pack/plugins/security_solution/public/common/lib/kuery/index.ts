@@ -6,7 +6,6 @@
  */
 
 export {
-  convertKueryToDslFilter,
   convertKueryToElasticSearchQuery,
   convertToBuildEsQuery,
   escapeKuery,

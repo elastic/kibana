@@ -14,13 +14,13 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import { Provider } from 'react-redux';
 import { TGrid as TGridComponent } from './t_grid';
-import type { TGridProps } from '../types';
+
 import { DragDropContextWrapper } from './drag_and_drop';
 import type { TGridIntegratedProps } from './t_grid/integrated';
 
 const EMPTY_BROWSER_FIELDS = {};
 
-type TGridComponent = TGridProps & {
+type TGridComponent = TGridIntegratedProps & {
   store?: Store;
   storage: Storage;
   data?: DataPublicPluginStart;

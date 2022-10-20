@@ -43,7 +43,7 @@ export {
 
 export { tGridReducer } from './store/t_grid/reducer';
 export type { TimelinesUIStart, TableState, TableById, SubsetTGridModel } from './types';
-export type { TGridType, SortDirection, State as TGridState, TGridModel } from './types';
+export type { SortDirection, State as TGridState, TGridModel } from './types';
 export type { OnColumnFocused } from '../common/utils/accessibility';
 
 export {
@@ -74,12 +74,8 @@ export {
   getTimelineIdFromColumnDroppableId,
 } from './components/drag_and_drop/helpers';
 
-export { getActionsColumnWidth } from './components/t_grid/body/column_headers/helpers';
-export { DEFAULT_ACTION_BUTTON_WIDTH } from './components/t_grid/body/constants';
-export { useBulkActionItems } from './hooks/use_bulk_action_items';
 export { getPageRowIndex } from '../common/utils/pagination';
 export {
-  convertKueryToDslFilter,
   convertKueryToElasticSearchQuery,
   convertToBuildEsQuery,
   escapeKuery,
