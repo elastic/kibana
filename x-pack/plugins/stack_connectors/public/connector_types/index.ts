@@ -16,6 +16,7 @@ import {
   getSlackConnectorType,
   getTeamsConnectorType,
   getWebhookConnectorType,
+  getOpsgenieConnectorType,
   getXmattersConnectorType,
 } from './stack';
 
@@ -58,6 +59,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getServiceNowSIRConnectorType());
   connectorTypeRegistry.register(getJiraConnectorType());
   connectorTypeRegistry.register(getResilientConnectorType());
+  connectorTypeRegistry.register(getOpsgenieConnectorType());
   connectorTypeRegistry.register(getTeamsConnectorType());
   connectorTypeRegistry.register(getTinesConnectorType());
 }

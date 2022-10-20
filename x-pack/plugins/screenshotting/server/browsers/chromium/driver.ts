@@ -12,7 +12,7 @@ import {
 } from '@kbn/screenshot-mode-plugin/server';
 import { truncate } from 'lodash';
 import open from 'opn';
-import puppeteer, { ElementHandle, EvaluateFn, Page, SerializableOrJSHandle } from 'puppeteer';
+import puppeteer, { ElementHandle, Page, EvaluateFunc } from 'puppeteer';
 import { Subject } from 'rxjs';
 import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '.';
@@ -22,6 +22,16 @@ import { getPrintLayoutSelectors } from '../../layouts/print_layout';
 import { allowRequest } from '../network_policy';
 import { stripUnsafeHeaders } from './strip_unsafe_headers';
 import { getFooterTemplate, getHeaderTemplate } from './templates';
+
+declare module 'puppeteer' {
+  interface Page {
+    _client(): CDPSession;
+  }
+
+  interface Target {
+    _targetId: string;
+  }
+}
 
 export type Context = Record<string, unknown>;
 
@@ -51,8 +61,8 @@ interface WaitForSelectorOpts {
 }
 
 interface EvaluateOpts {
-  fn: EvaluateFn;
-  args: SerializableOrJSHandle[];
+  fn: EvaluateFunc<any>;
+  args: unknown[];
 }
 
 interface EvaluateMetaOpts {
@@ -312,8 +322,8 @@ export class HeadlessChromiumDriver {
     args,
     timeout,
   }: {
-    fn: EvaluateFn;
-    args: SerializableOrJSHandle[];
+    fn: EvaluateFunc<any>;
+    args: unknown[];
     timeout: number;
   }): Promise<void> {
     await this.page.waitForFunction(fn, { timeout, polling: WAIT_FOR_DELAY_MS }, ...args);
@@ -345,8 +355,8 @@ export class HeadlessChromiumDriver {
       return;
     }
 
-    // FIXME: retrieve the client in open() and  pass in the client
-    const client = this.page.client();
+    // FIXME: retrieve the client in open() and  pass in the client?
+    const client = this.page._client();
 
     // We have to reach into the Chrome Devtools Protocol to apply headers as using
     // puppeteer's API will cause map tile requests to hang indefinitely:
@@ -437,12 +447,12 @@ export class HeadlessChromiumDriver {
     // In order to get the inspector running, we have to know the page's internal ID (again, private)
     // in order to construct the final debugging URL.
 
+    const client = this.page._client();
     const target = this.page.target();
-    const client = await target.createCDPSession();
+    const targetId = target._targetId;
 
     await client.send('Debugger.enable');
     await client.send('Debugger.pause');
-    const targetId = target._targetId;
     const wsEndpoint = this.page.browser().wsEndpoint();
     const { port } = parseUrl(wsEndpoint);
 

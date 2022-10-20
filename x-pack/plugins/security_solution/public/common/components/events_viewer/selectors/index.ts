@@ -7,6 +7,7 @@
 
 import { createSelector } from 'reselect';
 
+import { getTableByIdSelector } from '../../../store/data_table/selectors';
 import {
   getTimelineSelector,
   globalFiltersQuerySelector,
@@ -14,12 +15,11 @@ import {
   globalQuerySelector,
   timelineQueryByIdSelector,
 } from '../../../store/inputs/selectors';
-import { getTimelineByIdSelector } from '../../../../timelines/store/timeline/selectors';
 
 /**
  * This selector is invoked with two arguments:
  * @param state - the state of the store as defined by State in common/store/types.ts
- * @param id - a timeline id e.g. `detections-page`
+ * @param id - a timeline id e.g. `alerts-page`
  *
  * Example:
  *  `useSelector((state: State) => eventsViewerSelector(state, id))`
@@ -30,8 +30,8 @@ export const eventsViewerSelector = createSelector(
   globalQuerySelector(),
   globalQuery(),
   timelineQueryByIdSelector(),
-  getTimelineByIdSelector(),
-  (filters, input, query, globalQueries, timelineQuery, timeline) => ({
+  getTableByIdSelector(),
+  (filters, input, query, globalQueries, timelineQuery, dataTable) => ({
     /** an array representing filters added to the search bar */
     filters,
     /** an object containing the timerange set in the global date picker, and other page level state */
@@ -42,7 +42,7 @@ export const eventsViewerSelector = createSelector(
     globalQueries,
     /** an object with metadata and actions related to the table query */
     timelineQuery,
-    /** a specific timeline from the state's timelineById collection, or undefined */
-    timeline,
+    /** a specific data table from the state's tableById collection, or undefined */
+    dataTable,
   })
 );

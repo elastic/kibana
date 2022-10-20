@@ -125,3 +125,5 @@ export const EndpointActionGetFileSchema = {
     }),
   }),
 };
+
+export type ResponseActionGetFileRequestBody = TypeOf<typeof EndpointActionGetFileSchema.body>;
