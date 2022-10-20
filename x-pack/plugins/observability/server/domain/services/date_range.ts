@@ -7,13 +7,10 @@
 
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
+import { toMomentUnitOfTime } from '../../types/models';
 
 import type { TimeWindow } from '../../types/models/time_window';
-import {
-  calendarAlignedTimeWindowSchema,
-  DurationUnit,
-  rollingTimeWindowSchema,
-} from '../../types/schema';
+import { calendarAlignedTimeWindowSchema, rollingTimeWindowSchema } from '../../types/schema';
 
 export interface DateRange {
   from: Date;
@@ -48,21 +45,4 @@ export const toDateRange = (timeWindow: TimeWindow, currentDate: Date = new Date
   }
 
   assertNever(timeWindow);
-};
-
-const toMomentUnitOfTime = (unit: DurationUnit): moment.unitOfTime.Diff => {
-  switch (unit) {
-    case DurationUnit.d:
-      return 'days';
-    case DurationUnit.w:
-      return 'weeks';
-    case DurationUnit.M:
-      return 'months';
-    case DurationUnit.Q:
-      return 'quarters';
-    case DurationUnit.Y:
-      return 'years';
-    default:
-      assertNever(unit);
-  }
 };

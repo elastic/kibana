@@ -34,6 +34,7 @@ import { sortPings } from '../../../utils/monitor_test_result/sort_pings';
 import { selectPingsLoading, selectMonitorRecentPings, selectPingsError } from '../../../state';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
 
+import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { JourneyScreenshot } from '../../common/screenshot/journey_screenshot';
 
@@ -178,9 +179,10 @@ const TestDetailsLink = ({
   const { euiTheme } = useEuiTheme();
   const { basePath } = useSyntheticsSettingsContext();
 
+  const format = useKibanaDateFormat();
   const timestampText = (
     <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.medium }}>
-      {formatTestRunAt(timestamp)}
+      {formatTestRunAt(timestamp, format)}
     </EuiText>
   );
 
