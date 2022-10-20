@@ -83,6 +83,7 @@ export function QueryBarWrapper({
         docLinks,
         uiSettings,
         data,
+        dataViews,
         storage,
         usageCollection,
       }}

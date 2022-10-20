@@ -188,6 +188,7 @@ export const QueryBarTopRow = React.memo(
       notifications,
       docLinks,
       http,
+      dataViews,
     } = kibana.services;
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
@@ -550,6 +551,7 @@ export const QueryBarTopRow = React.memo(
                   docLinks,
                   http,
                   uiSettings,
+                  dataViews,
                 }}
               />
             </EuiFlexItem>
