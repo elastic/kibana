@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
+import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type {
   ColumnHeaderOptions,
   ControlColumnProps,

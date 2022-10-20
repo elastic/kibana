@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import {
-  EuiDataGrid,
+import type {
   EuiDataGridRefProps,
   EuiDataGridColumn,
   EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
-  EuiLoadingSpinner,
-  EuiProgress,
 } from '@elastic/eui';
+import { EuiDataGrid, EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
+import type { ComponentType } from 'react';
 import React, {
-  ComponentType,
   Suspense,
   useCallback,
   useEffect,
@@ -28,15 +26,16 @@ import React, {
   useContext,
   useRef,
 } from 'react';
-import { connect, ConnectedProps, useDispatch } from 'react-redux';
+import type { ConnectedProps } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 
 import styled, { ThemeContext } from 'styled-components';
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
+import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
+import type {
   TGridCellAction,
   BulkActionsProp,
   CellValueElementProps,
@@ -63,17 +62,18 @@ import {
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import type { OnRowSelected, OnSelectAll } from '../types';
 import type { Refetch } from '../../../store/t_grid/inputs';
-import { Ecs } from '../../../../common/ecs';
+import type { Ecs } from '../../../../common/ecs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
 import { StatefulEventContext } from '../../stateful_event_context';
-import { tGridActions, TGridModel, tGridSelectors, TableState } from '../../../store/t_grid';
+import type { TGridModel, TableState } from '../../../store/t_grid';
+import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
 import * as i18n from './translations';
 import { AlertCount } from '../styles';
 import { checkBoxControlColumn } from './control_columns';
 import { REMOVE_COLUMN } from './column_headers/translations';
-import { TimelinesStartPlugins } from '../../../types';
+import type { TimelinesStartPlugins } from '../../../types';
 
 interface OwnProps {
   activePage: number;
