@@ -273,4 +273,3 @@ export const getDefaultViewSelection = ({
     return isViewSelection(value) ? value : defaultViewSelection;
   }
 };
-

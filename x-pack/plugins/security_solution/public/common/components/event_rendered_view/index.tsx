@@ -4,19 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   CriteriaWithPagination,
   EuiBasicTableProps,
   EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import moment from 'moment';
-import { ComponentType, Suspense } from 'react';
+import type { ComponentType } from 'react';
+import { Suspense } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
