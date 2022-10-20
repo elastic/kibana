@@ -7,7 +7,7 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, first, firstValueFrom } from 'rxjs';
 
 import {
   DataViewsServicePublic,
@@ -23,6 +23,11 @@ import { GetFieldsOptions } from './shared_imports';
 export class DataViewEditorService {
   constructor(private http: HttpSetup, private dataViews: DataViewsServicePublic) {
     this.rollupCapsResponse = this.getRollupIndexCaps();
+    this.matchedIndices$.subscribe((matchedIndices) => {
+      console.log('*** matchedIndices copy', matchedIndices);
+      this.matchedIndicesForProvider$.next(matchedIndices);
+      this.matchedIndicesForProvider$.next(undefined);
+    });
   }
 
   rollupIndicesCapabilities$ = new BehaviorSubject<RollupIndicesCapsResponse>({});
@@ -39,6 +44,8 @@ export class DataViewEditorService {
     partialMatchedIndices: [],
     visibleIndices: [],
   });
+
+  matchedIndicesForProvider$ = new Subject<MatchedIndicesSet | undefined>();
 
   private rollupCapsResponse: Promise<RollupIndicesCapsResponse>;
 
@@ -130,7 +137,7 @@ export class DataViewEditorService {
 
       // todo
       // loadingMatchedIndices$.current.next(false);
-
+      console.log('*** matchedIndicesResult', matchedIndicesResult);
       this.matchedIndices$.next(matchedIndicesResult);
       return { matchedIndicesResult, exactMatched, partialMatched };
     }
@@ -241,5 +248,22 @@ export class DataViewEditorService {
         this.loadingTimestampFields$.next(false);
       }
     }
+  };
+
+  indicesProvider = async () => {
+    console.log('*** creating indices provider promise!');
+    const rollupIndex = undefined;
+    /* await firstValueFrom(
+      dataViewEditorService.rollupIndex$.pipe(first((data) => data !== null))
+    );
+    */
+
+    const matchedIndicesResult = await firstValueFrom(
+      this.matchedIndicesForProvider$.pipe(first((data) => data !== undefined))
+    );
+
+    // Wait until we have fetched the indices.
+    // The result will then be sent to the field validator(s) (when calling await provider(););
+    return { matchedIndicesResult, rollupIndex };
   };
 }

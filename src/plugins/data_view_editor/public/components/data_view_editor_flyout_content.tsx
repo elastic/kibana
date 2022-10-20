@@ -17,8 +17,8 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { isEqual } from 'lodash';
-import { BehaviorSubject, first, firstValueFrom, Subject, distinctUntilChanged } from 'rxjs';
+
+import { BehaviorSubject, Subject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 
@@ -198,6 +198,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const newItem$ = useRef(new Subject());
 
   // I'm pretty sure this is here for debugging purposes
+  /*
   useEffect(() => {
     const a = dataViewEditorService.matchedIndices$
       .pipe(distinctUntilChanged(isEqual))
@@ -213,25 +214,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       b.unsubscribe();
     };
   }, [dataViewEditorService.matchedIndices$]);
-
-  // newItem$.subscribe(dataViewEditorService.matchedIndices$);
-
-  const indicesProvider = useCallback(async () => {
-    console.log('indicesProvider is firing!');
-    const rollupIndex = undefined;
-    /* await firstValueFrom(
-      dataViewEditorService.rollupIndex$.pipe(first((data) => data !== null))
-    );
-    */
-
-    const matchedIndicesResult = await firstValueFrom(
-      dataViewEditorService.matchedIndices$.pipe(first((data) => data !== undefined))
-    );
-
-    // Wait until we have fetched the indices.
-    // The result will then be sent to the field validator(s) (when calling await provider(););
-    return { matchedIndicesResult, rollupIndex };
-  }, [dataViewEditorService.matchedIndices$ /* , dataViewEditorService.rollupIndex$, title */]);
+  */
 
   const rollupIndicesCapabilities = useObservable(
     dataViewEditorService.rollupIndicesCapabilities$,
@@ -349,7 +332,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                 // refreshMatchedIndices={reloadMatchedIndices}
                 matchedIndices$={dataViewEditorService.matchedIndices$}
                 rollupIndicesCapabilities={rollupIndicesCapabilities}
-                indicesProvider={indicesProvider}
+                indicesProvider={dataViewEditorService.indicesProvider}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

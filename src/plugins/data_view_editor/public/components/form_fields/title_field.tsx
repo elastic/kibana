@@ -7,6 +7,7 @@
  */
 
 import React, { ChangeEvent, useState, useMemo } from 'react';
+import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { Subject } from 'rxjs';
@@ -67,13 +68,13 @@ const createMatchesIndicesValidator = ({
 }: MatchesValidatorArgs): ValidationConfig<{}, string, string> => ({
   validator: async ({ value, customData: { provider } }) => {
     // const indices = await provider();
-    // console.log('*** createMatchesIndicesValidator', await provider());
+    console.log('*** validator awaiting results');
     const { matchedIndicesResult, rollupIndex } = (await provider()) as {
       matchedIndicesResult: MatchedIndicesSet;
       rollupIndex?: string;
     };
 
-    console.log('*** createMatchesIndicesValidator', matchedIndicesResult);
+    console.log('*** validator has results', matchedIndicesResult);
     // verifies that the title matches at least one index, alias, or data stream
     // const { newRollupIndexName } = await refreshMatchedIndices(removeSpaces(value));
     const rollupIndices = Object.keys(rollupIndicesCapabilities);
@@ -180,6 +181,10 @@ export const TitleField = ({
     >
       {(field) => {
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+        const setField = debounce((query: string) => {
+          console.log('*** field value update:', query);
+          field.setValue(query);
+        }, 300);
         return (
           <EuiFormRow
             label={field.label}
@@ -204,7 +209,7 @@ export const TitleField = ({
                     setAppendedWildcard(false);
                   }
                 }
-                field.setValue(query);
+                setField(query);
               }}
               isLoading={field.isValidating}
               fullWidth
