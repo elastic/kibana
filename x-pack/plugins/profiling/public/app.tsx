@@ -63,10 +63,7 @@ function App({
     <KibanaThemeProvider theme$={theme$}>
       <KibanaContextProvider services={{ ...coreStart, ...pluginsStart, storage }}>
         <i18nCore.Context>
-          <RedirectAppLinks
-            coreStart={coreStart}
-            currentAppId="profiling"
-          >
+          <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
             <RouterProvider router={profilingRouter as any} history={history}>
               <TimeRangeContextProvider>
                 <ProfilingDependenciesContextProvider value={profilingDependencies}>
