@@ -68,6 +68,51 @@ interface State {
   tagCounterMap: Map<string, number>;
 }
 
+/**
+ * The EuiSelectable has two states values for its items: checked="on" for checked items
+ * and check=undefined for unchecked items. Given that our use case needs
+ * to track tags that are part in some cases and not part in some others we need
+ * to keep our own state and sync it with the EuiSelectable. Our state is always
+ * the source of true.
+ *
+ * In our state, a tag can be in one of the following states: checked, partial, and unchecked.
+ * A checked tag is a tag that is either common in all cases or has been
+ * checked by the user. A partial tag is a tag that is available is some of the
+ * selected cases and not available in others. A user can not make a tag partial.
+ * A unchecked tag is a tag that is either unselected by the user or is not available
+ * in all selected cases.
+ *
+ * State transitions:
+ *
+ * partial --> checked
+ * checked --> unchecked
+ * unchecked --> checked
+ *
+ * A dirty tag is a tag that the user clicked. Because the EuiSelectable
+ * returns all items (tags) on each user interaction we need to distinguish tags
+ * that the user unselected from tags that are not common between all selected cases
+ * and the user did not interact with them. Marking tags as dirty help us to do that.
+ * A user to unselect a tag needs to fist checked a partial or an unselected tag and make it
+ * selected (and dirty). This guarantees that unchecked tags will always become dirty at some
+ * point in the past.
+ *
+ * On mount (initial state) the component gets all available tags.
+ * The tags that are common in all selected cases are marked as checked
+ * and dirty in our state and checked in EuiSelectable state.
+ * The ones that are not common in any of the selected tags are
+ * marked as unchecked and not dirty in our state and unchecked in EuiSelectable state.
+ * The tags that are common in some of the cases are marked as partial and not dirty
+ * in our state and unchecked in EuiSelectable state.
+ *
+ * When a user interacts with a tag the following happens:
+ * a) If the tag is unchecked the EuiSelectable marks it as checked and
+ * we change the state of the tag as checked and dirty.
+ * b) If the tag is partial the EuiSelectable marks it as checked and
+ * we change the state of the tag as checked and dirty.
+ * c) If the tag is checked the EuiSelectable marks it as unchecked and
+ * we change the state of the tag as unchecked and dirty.
+ */
+
 const tagsReducer: React.Reducer<State, Action> = (state: State, action): State => {
   switch (action.type) {
     case Actions.CHECK_TAG:
