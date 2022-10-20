@@ -10,7 +10,13 @@ import {
   formatTelemetryDeleteEvent,
   sendTelemetryEvents,
 } from '../../telemetry/monitor_upgrade_sender';
-import { ConfigKey, MonitorFields, SyntheticsMonitor } from '../../../../common/runtime_types';
+import {
+  ConfigKey,
+  MonitorFields,
+  SyntheticsMonitor,
+  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorWithId,
+} from '../../../../common/runtime_types';
 import { UptimeServerSetup } from '../../../legacy_uptime/lib/adapters';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
@@ -24,7 +30,7 @@ export const deleteMonitorBulk = async ({
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   server: UptimeServerSetup;
-  monitors: Array<SavedObject<SyntheticsMonitor>>;
+  monitors: Array<SavedObject<SyntheticsMonitor | EncryptedSyntheticsMonitor>>;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   request: KibanaRequest;
 }) => {
@@ -35,19 +41,18 @@ export const deleteMonitorBulk = async ({
     const deleteSyncPromise = syntheticsMonitorClient.deleteMonitors(
       monitors.map((normalizedMonitor) => ({
         ...normalizedMonitor.attributes,
-        id:
-          (normalizedMonitor.attributes as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] ||
-          normalizedMonitor.id,
-      })),
+        id: normalizedMonitor.attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] || normalizedMonitor.id,
+      })) as EncryptedSyntheticsMonitorWithId[],
       request,
       savedObjectsClient,
       spaceId
     );
-    const deletePromises = monitors.map((monitor) =>
-      savedObjectsClient.delete(syntheticsMonitorType, monitor.id)
+
+    const deletePromises = savedObjectsClient.bulkDelete(
+      monitors.map((monitor) => ({ type: syntheticsMonitorType, id: monitor.id }))
     );
 
-    const [errors] = await Promise.all([deleteSyncPromise, ...deletePromises]);
+    const [errors] = await Promise.all([deleteSyncPromise, deletePromises]);
 
     monitors.forEach((monitor) => {
       sendTelemetryEvents(

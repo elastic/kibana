@@ -73,6 +73,7 @@ export const getCustomColumn = () => {
       defaultMessage: 'Type',
     }),
     sortable: true,
+    width: '150px',
     render: (field: string, record: VisualizationListItem) =>
       !record.error ? (
         <span>

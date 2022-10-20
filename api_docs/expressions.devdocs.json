@@ -363,7 +363,7 @@
             "label": "invokeChain",
             "description": [],
             "signature": [
-              "<ChainOutput = unknown>(chainArr: ",
+              "<ChainOutput = unknown>([head, ...tail]: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -373,7 +373,15 @@
               },
               "[], input: unknown) => ",
               "Observable",
-              "<ChainOutput>"
+              "<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueError",
+                "text": "ExpressionValueError"
+              },
+              " | ChainOutput>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -384,7 +392,7 @@
                 "id": "def-public.Execution.invokeChain.$1",
                 "type": "Array",
                 "tags": [],
-                "label": "chainArr",
+                "label": "[head, ...tail]",
                 "description": [],
                 "signature": [
                   {
@@ -3708,7 +3716,7 @@
                 "id": "def-public.ExpressionRenderHandler.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      syncTooltips,\n      interactive,\n      hasCompatibleActions = async () => false,\n      executionContext,\n    }",
+                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      syncTooltips,\n      syncCursor,\n      interactive,\n      hasCompatibleActions = async () => false,\n      executionContext,\n    }",
                 "description": [],
                 "signature": [
                   "ExpressionRenderHandlerParams"
@@ -3867,13 +3875,7 @@
             "text": "ExpressionsPublicPlugin"
           },
           " implements ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "expressions",
@@ -3918,13 +3920,7 @@
                 "label": "initializerContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<object>"
                 ],
                 "path": "src/plugins/expressions/public/plugin.ts",
@@ -3944,13 +3940,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>) => ",
               {
                 "pluginId": "expressions",
@@ -3972,13 +3962,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<object, unknown>"
                 ],
                 "path": "src/plugins/expressions/public/plugin.ts",
@@ -3998,13 +3982,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ") => ",
               {
                 "pluginId": "expressions",
@@ -4026,13 +4004,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/plugins/expressions/public/plugin.ts",
                 "deprecated": false,
@@ -7048,6 +7020,24 @@
             "label": "isSyncColorsEnabled",
             "description": [
               "\nReturns the state (true|false) of the sync colors across panels switch."
+            ],
+            "signature": [
+              "(() => boolean) | undefined"
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExecutionContext.isSyncCursorEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSyncCursorEnabled",
+            "description": [
+              "\nReturns the state (true|false) of the sync cursor across panels switch."
             ],
             "signature": [
               "(() => boolean) | undefined"
@@ -10578,6 +10568,20 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.IExpressionLoaderParams.syncCursor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "syncCursor",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/public/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.IExpressionLoaderParams.syncTooltips",
             "type": "CompoundType",
             "tags": [],
@@ -10927,6 +10931,22 @@
             "type": "Function",
             "tags": [],
             "label": "isSyncColorsEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.IInterpreterRenderHandlers.isSyncCursorEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSyncCursorEnabled",
             "description": [],
             "signature": [
               "() => boolean"
@@ -11543,7 +11563,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"histogram\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -13405,7 +13425,7 @@
             "label": "invokeChain",
             "description": [],
             "signature": [
-              "<ChainOutput = unknown>(chainArr: ",
+              "<ChainOutput = unknown>([head, ...tail]: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -13415,7 +13435,15 @@
               },
               "[], input: unknown) => ",
               "Observable",
-              "<ChainOutput>"
+              "<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueError",
+                "text": "ExpressionValueError"
+              },
+              " | ChainOutput>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -13426,7 +13454,7 @@
                 "id": "def-server.Execution.invokeChain.$1",
                 "type": "Array",
                 "tags": [],
-                "label": "chainArr",
+                "label": "[head, ...tail]",
                 "description": [],
                 "signature": [
                   {
@@ -18031,6 +18059,24 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-server.ExecutionContext.isSyncCursorEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSyncCursorEnabled",
+            "description": [
+              "\nReturns the state (true|false) of the sync cursor across panels switch."
+            ],
+            "signature": [
+              "(() => boolean) | undefined"
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-server.ExecutionContext.isSyncTooltipsEnabled",
             "type": "Function",
             "tags": [],
@@ -20605,6 +20651,22 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-server.IInterpreterRenderHandlers.isSyncCursorEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSyncCursorEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-server.IInterpreterRenderHandlers.isSyncTooltipsEnabled",
             "type": "Function",
             "tags": [],
@@ -21073,7 +21135,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"histogram\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -22194,7 +22256,7 @@
             "label": "invokeChain",
             "description": [],
             "signature": [
-              "<ChainOutput = unknown>(chainArr: ",
+              "<ChainOutput = unknown>([head, ...tail]: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -22204,7 +22266,15 @@
               },
               "[], input: unknown) => ",
               "Observable",
-              "<ChainOutput>"
+              "<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueError",
+                "text": "ExpressionValueError"
+              },
+              " | ChainOutput>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -22215,7 +22285,7 @@
                 "id": "def-common.Execution.invokeChain.$1",
                 "type": "Array",
                 "tags": [],
-                "label": "chainArr",
+                "label": "[head, ...tail]",
                 "description": [],
                 "signature": [
                   {
@@ -29246,7 +29316,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"histogram\""
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -29660,6 +29730,24 @@
             "label": "isSyncColorsEnabled",
             "description": [
               "\nReturns the state (true|false) of the sync colors across panels switch."
+            ],
+            "signature": [
+              "(() => boolean) | undefined"
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExecutionContext.isSyncCursorEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSyncCursorEnabled",
+            "description": [
+              "\nReturns the state (true|false) of the sync cursor across panels switch."
             ],
             "signature": [
               "(() => boolean) | undefined"
@@ -31282,6 +31370,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "syncColors",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionExecutionParams.syncCursor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "syncCursor",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -34379,6 +34481,22 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-common.IInterpreterRenderHandlers.isSyncCursorEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSyncCursorEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.IInterpreterRenderHandlers.isSyncTooltipsEnabled",
             "type": "Function",
             "tags": [],
@@ -35262,7 +35380,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"histogram\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,

@@ -629,12 +629,6 @@ export const schema: FormSchema<DefineStepRule> = {
   },
   shouldLoadQueryDynamically: {
     type: FIELD_TYPES.CHECKBOX,
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldShouldLoadQueryDynamicallyLabel',
-      {
-        defaultMessage: 'Load the saved query dynamically on each rule execution',
-      }
-    ),
     defaultValue: false,
   },
 };

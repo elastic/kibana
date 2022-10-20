@@ -10,27 +10,6 @@ import type { RuleResponseAction } from '../../../../common/detection_engine/rul
 import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas';
 import type { SetupPlugins } from '../../../plugin_contract';
 
-interface OsqueryQuery {
-  id: string;
-  query: string;
-  ecs_mapping: Record<string, Record<'field', string>>;
-  version: string;
-  interval?: number;
-  platform: string;
-}
-
-interface OsqueryResponseAction {
-  actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY;
-  params: {
-    id: string;
-    queries: OsqueryQuery[];
-    savedQueryId: string;
-    query: string;
-    packId: string;
-    ecs_mapping?: Record<string, { field?: string; value?: string }>;
-  };
-}
-
 interface ScheduleNotificationActions {
   signals: unknown[];
   responseActions: RuleResponseAction[];
@@ -42,10 +21,6 @@ interface IAlert {
   };
 }
 
-const isOsqueryAction = (action: RuleResponseAction): action is OsqueryResponseAction => {
-  return action.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY;
-};
-
 export const scheduleNotificationResponseActions = (
   { signals, responseActions }: ScheduleNotificationActions,
   osqueryCreateAction?: SetupPlugins['osquery']['osqueryCreateAction']
@@ -55,14 +30,8 @@ export const scheduleNotificationResponseActions = (
   const alertIds = map(filteredAlerts, '_id');
 
   responseActions.forEach((responseAction) => {
-    if (isOsqueryAction(responseAction) && osqueryCreateAction) {
-      const {
-        savedQueryId,
-        packId,
-        queries,
-        ecs_mapping: ecsMapping,
-        ...rest
-      } = responseAction.params;
+    if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY && osqueryCreateAction) {
+      const { savedQueryId, packId, queries, ecsMapping, ...rest } = responseAction.params;
 
       return osqueryCreateAction({
         ...rest,

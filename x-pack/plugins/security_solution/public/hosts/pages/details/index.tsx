@@ -17,8 +17,10 @@ import React, { useEffect, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-
+import { tableDefaults } from '../../../common/store/data_table/defaults';
+import { dataTableSelectors } from '../../../common/store/data_table';
 import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -40,7 +42,6 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
-import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { inputsSelectors } from '../../../common/store';
 import { setHostDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
@@ -54,9 +55,7 @@ import { getHostDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { Display } from '../display';
-import { timelineSelectors } from '../../../timelines/store/timeline';
-import { TimelineId } from '../../../../common/types/timeline';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { TableId } from '../../../../common/types/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { ID, useHostDetails } from '../../containers/hosts/details';
 import { manageQuery } from '../../../common/components/page/manage_query';
@@ -71,9 +70,9 @@ const HostOverviewManage = manageQuery(HostOverview);
 
 const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
   const dispatch = useDispatch();
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
-    (state) => (getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults).graphEventId
+    (state) => (getTable(state, TableId.hostsPageEvents) ?? tableDefaults).graphEventId
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -88,12 +87,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   const { signalIndexName } = useSignalIndex();
 
   const capabilities = useMlCapabilities();
-  const kibana = useKibana();
+  const {
+    services: { uiSettings },
+  } = useKibana();
+
   const hostDetailsPageFilters: Filter[] = useMemo(
     () => getHostDetailsPageFilters(detailName),
     [detailName]
   );
-  const getFilters = () => [...hostDetailsPageFilters, ...filters];
 
   const isEnterprisePlus = useLicense().isEnterprise();
 
@@ -119,14 +120,31 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     indexNames: selectedPatterns,
     skip: selectedPatterns.length === 0,
   });
-  const [filterQuery, kqlError] = convertToBuildEsQuery({
-    config: getEsQueryConfig(kibana.services.uiSettings),
-    indexPattern,
-    queries: [query],
-    filters: getFilters(),
-  });
 
-  useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
+  const [rawFilteredQuery, kqlError] = useMemo(() => {
+    try {
+      return [
+        buildEsQuery(
+          indexPattern,
+          [query],
+          [...hostDetailsPageFilters, ...filters],
+          getEsQueryConfig(uiSettings)
+        ),
+      ];
+    } catch (e) {
+      return [undefined, e];
+    }
+  }, [filters, indexPattern, query, uiSettings, hostDetailsPageFilters]);
+
+  const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
+  useInvalidFilterQuery({
+    id: ID,
+    filterQuery: stringifiedAdditionalFilters,
+    kqlError,
+    query,
+    startDate: from,
+    endDate: to,
+  });
 
   useEffect(() => {
     dispatch(setHostDetailsTablesActivePageToZero());
@@ -206,12 +224,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                       <AlertsByStatus
                         signalIndexName={signalIndexName}
                         entityFilter={entityFilter}
+                        additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <AlertCountByRuleByStatus
                         entityFilter={entityFilter}
                         signalIndexName={signalIndexName}
+                        additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
@@ -241,7 +261,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               detailName={detailName}
               type={type}
               setQuery={setQuery}
-              filterQuery={filterQuery}
+              filterQuery={stringifiedAdditionalFilters}
               hostDetailsPagePath={hostDetailsPagePath}
               indexPattern={indexPattern}
             />

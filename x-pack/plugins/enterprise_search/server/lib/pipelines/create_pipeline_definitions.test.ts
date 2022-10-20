@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { merge } from 'lodash';
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
@@ -29,22 +30,74 @@ describe('createIndexPipelineDefinitions util function', () => {
     jest.clearAllMocks();
   });
 
-  it('should create the pipelines', () => {
+  it('should create the pipelines', async () => {
     mockClient.ingest.putPipeline.mockImplementation(() => Promise.resolve({ acknowledged: true }));
-    expect(
+    await expect(
       createIndexPipelineDefinitions(indexName, mockClient as unknown as ElasticsearchClient)
-    ).toEqual(expectedResult);
+    ).resolves.toEqual(expectedResult);
     expect(mockClient.ingest.putPipeline).toHaveBeenCalledTimes(3);
   });
 });
 
 describe('formatMlPipelineBody util function', () => {
+  const pipelineName = 'ml-inference-my-ml-proc';
   const modelId = 'my-model-id';
-  let modelInputField = 'my-model-input-field';
-  const modelType = 'my-model-type';
+  const modelInputField = 'my-model-input-field';
+  const modelType = 'pytorch';
+  const inferenceConfigKey = 'my-model-type';
+  const modelTypes = ['pytorch', 'my-model-type'];
   const modelVersion = 3;
   const sourceField = 'my-source-field';
   const destField = 'my-dest-field';
+
+  const expectedResult = {
+    description: '',
+    processors: [
+      {
+        remove: {
+          field: `ml.inference.${destField}`,
+          ignore_missing: true,
+        },
+      },
+      {
+        inference: {
+          field_map: {
+            [sourceField]: modelInputField,
+          },
+          model_id: modelId,
+          target_field: `ml.inference.${destField}`,
+          on_failure: [
+            {
+              append: {
+                field: '_source._ingest.inference_errors',
+                value: [
+                  {
+                    pipeline: pipelineName,
+                    message: `Processor 'inference' in pipeline '${pipelineName}' failed with message '{{ _ingest.on_failure_message }}'`,
+                    timestamp: '{{{ _ingest.timestamp }}}',
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      {
+        append: {
+          field: '_source._ingest.processors',
+          value: [
+            {
+              model_version: modelVersion,
+              pipeline: pipelineName,
+              processed_timestamp: '{{{ _ingest.timestamp }}}',
+              types: modelTypes,
+            },
+          ],
+        },
+      },
+    ],
+    version: 1,
+  };
 
   const mockClient = {
     ml: {
@@ -57,54 +110,23 @@ describe('formatMlPipelineBody util function', () => {
   });
 
   it('should return the pipeline body', async () => {
-    const expectedResult = {
-      description: '',
-      version: 1,
-      processors: [
-        {
-          remove: {
-            field: `ml.inference.${destField}`,
-            ignore_missing: true,
-          },
-        },
-        {
-          inference: {
-            model_id: modelId,
-            target_field: `ml.inference.${destField}`,
-            field_map: {
-              [sourceField]: modelInputField,
-            },
-          },
-        },
-        {
-          append: {
-            field: '_source._ingest.processors',
-            value: [
-              {
-                type: modelType,
-                model_id: modelId,
-                model_version: modelVersion,
-                processed_timestamp: '{{{ _ingest.timestamp }}}',
-              },
-            ],
-          },
-        },
-      ],
-    };
-
     const mockResponse = {
       count: 1,
       trained_model_configs: [
         {
-          model_id: modelId,
-          version: modelVersion,
-          model_type: modelType,
+          inference_config: {
+            [inferenceConfigKey]: {},
+          },
           input: { field_names: [modelInputField] },
+          model_id: modelId,
+          model_type: modelType,
+          version: modelVersion,
         },
       ],
     };
     mockClient.ml.getTrainedModels.mockImplementation(() => Promise.resolve(mockResponse));
     const actualResult = await formatMlPipelineBody(
+      pipelineName,
       modelId,
       sourceField,
       destField,
@@ -118,6 +140,7 @@ describe('formatMlPipelineBody util function', () => {
     const mockError = new Error('No known trained model with model_id [my-model-id]');
     mockClient.ml.getTrainedModels.mockImplementation(() => Promise.reject(mockError));
     const asyncCall = formatMlPipelineBody(
+      pipelineName,
       modelId,
       sourceField,
       destField,
@@ -128,60 +151,42 @@ describe('formatMlPipelineBody util function', () => {
   });
 
   it('should insert a placeholder if model has no input fields', async () => {
-    modelInputField = 'MODEL_INPUT_FIELD';
-    const expectedResult = {
-      description: '',
-      version: 1,
+    const expectedResultWithNoInputField = merge({}, expectedResult, {
       processors: [
-        {
-          remove: {
-            field: `ml.inference.${destField}`,
-            ignore_missing: true,
-          },
-        },
+        {}, // append - we'll leave it untouched
         {
           inference: {
-            model_id: modelId,
-            target_field: `ml.inference.${destField}`,
             field_map: {
-              [sourceField]: modelInputField,
+              [sourceField]: 'MODEL_INPUT_FIELD',
             },
           },
         },
-        {
-          append: {
-            field: '_source._ingest.processors',
-            value: [
-              {
-                type: modelType,
-                model_id: modelId,
-                model_version: modelVersion,
-                processed_timestamp: '{{{ _ingest.timestamp }}}',
-              },
-            ],
-          },
-        },
       ],
-    };
+    });
+
     const mockResponse = {
       count: 1,
       trained_model_configs: [
         {
-          model_id: modelId,
-          version: modelVersion,
-          model_type: modelType,
+          inference_config: {
+            [inferenceConfigKey]: {},
+          },
           input: { field_names: [] },
+          model_id: modelId,
+          model_type: modelType,
+          version: modelVersion,
         },
       ],
     };
     mockClient.ml.getTrainedModels.mockImplementation(() => Promise.resolve(mockResponse));
     const actualResult = await formatMlPipelineBody(
+      pipelineName,
       modelId,
       sourceField,
       destField,
       mockClient as unknown as ElasticsearchClient
     );
-    expect(actualResult).toEqual(expectedResult);
+    expect(actualResult).toEqual(expectedResultWithNoInputField);
     expect(mockClient.ml.getTrainedModels).toHaveBeenCalledTimes(1);
   });
 });

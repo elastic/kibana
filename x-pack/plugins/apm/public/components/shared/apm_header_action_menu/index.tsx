@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHeaderLink,
+  EuiHeaderLinks,
+} from '@elastic/eui';
 import { apmLabsButton } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -25,13 +30,10 @@ export function ApmHeaderActionMenu() {
   const { application, http } = core;
   const { basePath } = http;
   const { capabilities } = application;
-  const canAccessML = !!capabilities.ml?.canAccessML;
-  const {
-    isAlertingAvailable,
-    canReadAlerts,
-    canSaveAlerts,
-    canReadAnomalies,
-  } = getAlertingCapabilities(plugins, capabilities);
+  const canReadMlJobs = !!capabilities.ml?.canGetJobs;
+  const canCreateMlJobs = !!capabilities.ml?.canCreateJob;
+  const { isAlertingAvailable, canReadAlerts, canSaveAlerts } =
+    getAlertingCapabilities(plugins, capabilities);
   const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
 
   function apmHref(path: string) {
@@ -53,29 +55,23 @@ export function ApmHeaderActionMenu() {
       <EuiHeaderLink
         color="text"
         href={apmHref('/storage-explorer')}
-        iconType="beaker"
         data-test-subj="apmStorageExplorerHeaderLink"
       >
-        {i18n.translate('xpack.apm.storageExplorerLinkLabel', {
-          defaultMessage: 'Storage Explorer',
-        })}
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.apm.storageExplorerLinkLabel', {
+              defaultMessage: 'Storage Explorer',
+            })}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiHeaderLink>
-      <EuiHeaderLink
-        color="text"
-        href={apmHref('/settings')}
-        data-test-subj="apmSettingsHeaderLink"
-      >
-        {i18n.translate('xpack.apm.settingsLinkLabel', {
-          defaultMessage: 'Settings',
-        })}
-      </EuiHeaderLink>
-      {canAccessML && <AnomalyDetectionSetupLink />}
+      {canCreateMlJobs && <AnomalyDetectionSetupLink />}
       {isAlertingAvailable && (
         <AlertingPopoverAndFlyout
           basePath={basePath}
           canReadAlerts={canReadAlerts}
           canSaveAlerts={canSaveApmAlerts}
-          canReadAnomalies={canReadAnomalies}
+          canReadMlJobs={canReadMlJobs}
           includeTransactionDuration={serviceName !== undefined}
         />
       )}
@@ -87,6 +83,16 @@ export function ApmHeaderActionMenu() {
       >
         {i18n.translate('xpack.apm.addDataButtonLabel', {
           defaultMessage: 'Add data',
+        })}
+      </EuiHeaderLink>
+
+      <EuiHeaderLink
+        color="text"
+        href={apmHref('/settings')}
+        data-test-subj="apmSettingsHeaderLink"
+      >
+        {i18n.translate('xpack.apm.settingsLinkLabel', {
+          defaultMessage: 'Settings',
         })}
       </EuiHeaderLink>
       <InspectorHeaderLink />

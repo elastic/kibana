@@ -20,4 +20,5 @@ export interface NavigateToLensContext<T extends Configuration = Configuration> 
   layers: Layer[];
   type: string;
   configuration: T;
+  indexPatternIds: string[];
 }

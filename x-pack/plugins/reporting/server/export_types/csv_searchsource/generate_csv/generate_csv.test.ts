@@ -353,6 +353,73 @@ it('uses the scrollId to page all the data', async () => {
   });
 });
 
+it('keeps order of the columns during the scroll', async () => {
+  mockDataClient.search = jest.fn().mockImplementation(() =>
+    Rx.of({
+      rawResponse: {
+        _scroll_id: 'awesome-scroll-hero',
+        hits: {
+          hits: [
+            {
+              fields: {
+                a: ['a1'],
+                b: ['b1'],
+              },
+            },
+          ],
+          total: 3,
+        },
+      },
+    })
+  );
+
+  mockEsClient.asCurrentUser.scroll = jest
+    .fn()
+    .mockResolvedValueOnce({
+      hits: {
+        hits: [
+          {
+            fields: {
+              b: ['b2'],
+            },
+          },
+        ],
+      },
+    })
+    .mockResolvedValueOnce({
+      hits: {
+        hits: [
+          {
+            fields: {
+              a: ['a3'],
+              c: ['c3'],
+            },
+          },
+        ],
+      },
+    });
+
+  const generateCsv = new CsvGenerator(
+    createMockJob({ searchSource: {}, columns: [] }),
+    mockConfig,
+    {
+      es: mockEsClient,
+      data: mockDataClient,
+      uiSettings: uiSettingsClient,
+    },
+    {
+      searchSourceStart: mockSearchSourceService,
+      fieldFormatsRegistry: mockFieldFormatsRegistry,
+    },
+    new CancellationToken(),
+    mockLogger,
+    stream
+  );
+  await generateCsv.generateData();
+
+  expect(content).toMatchSnapshot();
+});
+
 describe('fields from job.searchSource.getFields() (7.12 generated)', () => {
   it('cells can be multi-value', async () => {
     mockDataClient.search = jest.fn().mockImplementation(() =>

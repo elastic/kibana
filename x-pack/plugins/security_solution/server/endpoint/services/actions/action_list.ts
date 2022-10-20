@@ -92,8 +92,8 @@ export const getActionListByStatus = async ({
     userIds,
     commands,
     statuses,
-    // for size 20 -> page 1: (0, 19), page 2: (20,39) ...etc
-    data: actionDetailsByStatus.slice((page - 1) * size, size * page - 1),
+    // for size 20 -> page 1: (0, 20), page 2: (20, 40) ...etc
+    data: actionDetailsByStatus.slice((page - 1) * size, size * page),
     total: actionDetailsByStatus.length,
   };
 };
@@ -251,7 +251,7 @@ const getActionDetailsList = async ({
   });
 
   // compute action details list for each action id
-  const actionDetails: ActionDetails[] = normalizedActionRequests.map((action) => {
+  const actionDetails: ActionListApiResponse['data'] = normalizedActionRequests.map((action) => {
     // pick only those responses that match the current action id
     const matchedResponses = categorizedResponses.filter((categorizedResponse) =>
       categorizedResponse.type === 'response'
@@ -274,7 +274,7 @@ const getActionDetailsList = async ({
     // NOTE: `outputs` is not returned in this service because including it on a list of data
     // could result in a very large response unnecessarily. In the future, we might include
     // an option to optionally include it.
-    return {
+    const actionRecord: ActionListApiResponse['data'][number] = {
       id: action.id,
       agents: action.agents,
       hosts: action.agents.reduce<ActionDetails['hosts']>((acc, id) => {
@@ -294,6 +294,8 @@ const getActionDetailsList = async ({
       comment: action.comment,
       parameters: action.parameters,
     };
+
+    return actionRecord;
   });
 
   return { actionDetails, totalRecords };

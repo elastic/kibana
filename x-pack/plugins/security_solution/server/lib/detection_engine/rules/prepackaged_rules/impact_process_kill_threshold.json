@@ -42,7 +42,8 @@
     "Host",
     "Linux",
     "Threat Detection",
-    "Impact"
+    "Impact",
+    "has_guide"
   ],
   "threat": [
     {
@@ -68,5 +69,5 @@
     "value": 10
   },
   "type": "threshold",
-  "version": 100
+  "version": 101
 }

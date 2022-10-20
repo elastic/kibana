@@ -32,8 +32,8 @@ import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/pu
 import type { EventAnnotationPluginSetup } from '@kbn/event-annotation-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { AppNavLinkStatus } from '@kbn/core/public';
 import {
@@ -41,18 +41,23 @@ import {
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
 } from '@kbn/ui-actions-plugin/public';
-import { VISUALIZE_EDITOR_TRIGGER } from '@kbn/visualizations-plugin/public';
+import {
+  VISUALIZE_EDITOR_TRIGGER,
+  AGG_BASED_VISUALIZATION_TRIGGER,
+} from '@kbn/visualizations-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
-  IndexPatternDatasource as IndexPatternDatasourceType,
-  IndexPatternDatasourceSetupPlugins,
+  FormBasedDatasource as FormBasedDatasourceType,
+  FormBasedDatasourceSetupPlugins,
   FormulaPublicApi,
-} from './indexpattern_datasource';
+} from './datasources/form_based';
+import type { TextBasedDatasource as TextBasedDatasourceType } from './datasources/text_based';
+
 import type {
   XyVisualization as XyVisualizationType,
   XyVisualizationPluginSetupPlugins,
@@ -85,6 +90,7 @@ import { getLensAliasConfig } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
+import { visualizeAggBasedVisAction } from './trigger_actions/visualize_agg_based_vis_actions';
 
 import type { LensEmbeddableInput } from './embeddable';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
@@ -225,7 +231,8 @@ export class LensPlugin {
   private editorFrameService: EditorFrameServiceType | undefined;
   private editorFrameSetup: EditorFrameSetup | undefined;
   private queuedVisualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
-  private indexpatternDatasource: IndexPatternDatasourceType | undefined;
+  private FormBasedDatasource: FormBasedDatasourceType | undefined;
+  private TextBasedDatasource: TextBasedDatasourceType | undefined;
   private xyVisualization: XyVisualizationType | undefined;
   private legacyMetricVisualization: LegacyMetricVisualizationType | undefined;
   private metricVisualization: MetricVisualizationType | undefined;
@@ -327,7 +334,8 @@ export class LensPlugin {
       async () => {
         const { getTimeZone } = await import('./utils');
         return getTimeZone(core.uiSettings);
-      }
+      },
+      () => startServices().plugins.data.nowProvider.get()
     );
 
     const getPresentationUtilContext = () =>
@@ -415,17 +423,19 @@ export class LensPlugin {
     const {
       DatatableVisualization,
       EditorFrameService,
-      IndexPatternDatasource,
+      FormBasedDatasource,
       XyVisualization,
       LegacyMetricVisualization,
       MetricVisualization,
       PieVisualization,
       HeatmapVisualization,
       GaugeVisualization,
+      TextBasedDatasource,
     } = await import('./async_services');
     this.datatableVisualization = new DatatableVisualization();
     this.editorFrameService = new EditorFrameService();
-    this.indexpatternDatasource = new IndexPatternDatasource();
+    this.FormBasedDatasource = new FormBasedDatasource();
+    this.TextBasedDatasource = new TextBasedDatasource();
     this.xyVisualization = new XyVisualization();
     this.legacyMetricVisualization = new LegacyMetricVisualization();
     this.metricVisualization = new MetricVisualization();
@@ -435,7 +445,7 @@ export class LensPlugin {
 
     const editorFrameSetupInterface = this.editorFrameService.setup();
 
-    const dependencies: IndexPatternDatasourceSetupPlugins &
+    const dependencies: FormBasedDatasourceSetupPlugins &
       XyVisualizationPluginSetupPlugins &
       DatatableVisualizationPluginSetupPlugins &
       LegacyMetricVisualizationPluginSetupPlugins &
@@ -448,7 +458,8 @@ export class LensPlugin {
       formatFactory,
       eventAnnotation,
     };
-    this.indexpatternDatasource.setup(core, dependencies);
+    this.FormBasedDatasource.setup(core, dependencies);
+    this.TextBasedDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);
     this.datatableVisualization.setup(core, dependencies);
     this.legacyMetricVisualization.setup(core, dependencies);
@@ -478,6 +489,11 @@ export class LensPlugin {
     startDependencies.uiActions.addTriggerAction(
       VISUALIZE_EDITOR_TRIGGER,
       visualizeTSVBAction(core.application)
+    );
+
+    startDependencies.uiActions.addTriggerAction(
+      AGG_BASED_VISUALIZATION_TRIGGER,
+      visualizeAggBasedVisAction(core.application)
     );
 
     startDependencies.uiActions.addTriggerAction(

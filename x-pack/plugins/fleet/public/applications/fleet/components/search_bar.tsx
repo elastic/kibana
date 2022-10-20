@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-
+import styled from 'styled-components';
 import { fromKueryExpression } from '@kbn/es-query';
 
 import type { FieldSpec } from '@kbn/data-plugin/common';
@@ -19,6 +19,12 @@ import { useStartServices } from '../hooks';
 import { INDEX_NAME, AGENTS_PREFIX } from '../constants';
 
 const HIDDEN_FIELDS = [`${AGENTS_PREFIX}.actions`, '_id', '_index'];
+
+const NoWrapQueryStringInput = styled(QueryStringInput)`
+  .kbnQueryBar__textarea {
+    white-space: nowrap;
+  }
+`;
 
 interface Props {
   value: string;
@@ -88,7 +94,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   }, [data.dataViews, fieldPrefix, indexPattern]);
 
   return (
-    <QueryStringInput
+    <NoWrapQueryStringInput
       iconType="search"
       disableLanguageSwitcher={true}
       indexPatterns={

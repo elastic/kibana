@@ -70,7 +70,7 @@ describe('convertToLens', () => {
     mockConvertToDateHistogramColumn.mockReturnValue({});
     mockGetMetricsColumns.mockReturnValue([{}]);
     mockGetBucketsColumns.mockReturnValue([{}]);
-    mockGetConfigurationForTimeseries.mockReturnValue({});
+    mockGetConfigurationForTimeseries.mockReturnValue({ layers: [] });
   });
 
   afterEach(() => {
@@ -109,6 +109,19 @@ describe('convertToLens', () => {
     mockGetBucketsColumns.mockReturnValue(null);
     const result = await convertToLens(model);
     expect(result).toBeNull();
+    expect(mockGetBucketsColumns).toBeCalledTimes(1);
+  });
+
+  test('should return null for static value with buckets', async () => {
+    mockGetBucketsColumns.mockReturnValue([{}]);
+    mockGetMetricsColumns.mockReturnValue([
+      {
+        operationType: 'static_value',
+      },
+    ]);
+    const result = await convertToLens(model);
+    expect(result).toBeNull();
+    expect(mockGetMetricsColumns).toBeCalledTimes(1);
     expect(mockGetBucketsColumns).toBeCalledTimes(1);
   });
 

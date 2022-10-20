@@ -163,6 +163,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
         </EuiFlexItem>
         <EuiFlexItem>
           <QueryStringInput
+            timeRangeForSuggestionsOverride={false} // to don't filter suggestions by the global time range
             disableAutoFocus
             bubbleSubmitEvent
             indexPatterns={currentIndexPattern ? [currentIndexPattern] : []}

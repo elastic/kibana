@@ -116,7 +116,7 @@ for journey in scalability_traces/server/*; do
     export SCALABILITY_JOURNEY_PATH="$KIBANA_DIR/$journey"
     echo "--- Run scalability file: $SCALABILITY_JOURNEY_PATH"
     node scripts/functional_tests \
-      --config x-pack/test/performance/scalability/config.ts \
+      --config x-pack/test/scalability/config.ts \
       --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
       --logToFile \
       --debug

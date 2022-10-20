@@ -24,6 +24,7 @@ import { isEqual, isEmpty, omit } from 'lodash';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 
+import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -74,7 +75,6 @@ import { useFetchIndex } from '../../../../common/containers/source';
 import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../schedule_item_form';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
-import { StepDefineRuleNewFeaturesTour } from './new_features_tour';
 import { defaultCustomQuery } from '../../../pages/detection_engine/rules/utils';
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
 
@@ -89,6 +89,7 @@ interface StepDefineRuleProps extends RuleStepProps {
   defaultValues: DefineStepRule;
   onRuleDataChange?: (data: DefineStepRule) => void;
   onPreviewDisabledStateChange?: (isDisabled: boolean) => void;
+  defaultSavedQuery?: SavedQuery;
 }
 
 export const MyLabelButton = styled(EuiButtonEmpty)`
@@ -125,6 +126,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   threatIndicesConfig,
   onRuleDataChange,
   onPreviewDisabledStateChange,
+  defaultSavedQuery,
 }) => {
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -504,7 +506,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const DataSource = useMemo(() => {
     return (
-      <RuleTypeEuiFormRow id="dataSourceSelector" label={i18n.SOURCE} $isVisible={true} fullWidth>
+      <RuleTypeEuiFormRow label={i18n.SOURCE} $isVisible={true} fullWidth>
         <EuiFlexGroup
           direction="column"
           gutterSize="s"
@@ -616,6 +618,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             onValidityChange: setIsQueryBarValid,
             onCloseTimelineSearch: handleCloseTimelineSearch,
             onSavedQueryError: handleSavedQueryError,
+            defaultSavedQuery,
           } as QueryBarDefineRuleProps
         }
       />
@@ -630,6 +633,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       openTimelineSearch,
       formShouldLoadQueryDynamically,
       handleSavedQueryError,
+      defaultSavedQuery,
     ]
   );
   const onOptionsChange = useCallback((field: FieldsEqlOptions, value: string | undefined) => {
@@ -679,7 +683,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   ) : (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
-        <StepDefineRuleNewFeaturesTour />
         <Form form={form} data-test-subj="stepDefineRule">
           <StyledVisibleContainer isVisible={false}>
             <UseField
@@ -741,8 +744,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             <>
               <EuiSpacer size="s" />
               <RuleTypeEuiFormRow
-                label={i18n.SAVED_QUERY_CHECKBOX_LABEL}
-                $isVisible={Boolean(formQuery?.saved_id)}
+                label={i18n.SAVED_QUERY_FORM_ROW_LABEL}
+                $isVisible={Boolean(formQuery?.saved_id && formQuery?.title)}
                 fullWidth
               >
                 <CommonUseField
@@ -752,6 +755,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                     'data-test-subj': 'detectionEngineStepDefineRuleShouldLoadQueryDynamically',
                     euiFieldProps: {
                       disabled: isLoading,
+                      label: formQuery?.title
+                        ? i18n.getSavedQueryCheckboxLabel(formQuery.title)
+                        : undefined,
                     },
                   }}
                 />

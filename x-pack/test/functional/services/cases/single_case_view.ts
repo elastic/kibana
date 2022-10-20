@@ -20,7 +20,13 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
 
   return {
     async deleteCase() {
-      await common.clickAndValidate('property-actions-ellipses', 'property-actions-trash');
+      const caseActions = await testSubjects.findDescendant(
+        'property-actions-ellipses',
+        await testSubjects.find('case-view-actions')
+      );
+
+      await caseActions.click();
+      await testSubjects.existOrFail('property-actions-trash');
       await common.clickAndValidate('property-actions-trash', 'confirmModalConfirmButton');
       await testSubjects.click('confirmModalConfirmButton');
       await header.waitUntilLoadingHasFinished();
@@ -114,8 +120,12 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
     },
 
     async closeAssigneesPopover() {
-      await testSubjects.click('case-refresh');
-      await header.waitUntilLoadingHasFinished();
+      await retry.try(async () => {
+        // Click somewhere outside the popover
+        await testSubjects.click('header-page-title');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.missingOrFail('euiSelectableList');
+      });
     },
   };
 }

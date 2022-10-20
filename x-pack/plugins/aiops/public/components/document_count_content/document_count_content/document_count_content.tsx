@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, FC, useMemo } from 'react';
+import React, { useEffect, useState, FC } from 'react';
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { WindowParameters } from '@kbn/aiops-utils';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
 
 import { DocumentCountChart, DocumentCountChartPoint } from '../document_count_chart';
 import { TotalCountHeader } from '../total_count_header';
@@ -27,9 +26,9 @@ const clearSelectionLabel = i18n.translate(
 export interface DocumentCountContentProps {
   brushSelectionUpdateHandler: (d: WindowParameters) => void;
   clearSelectionHandler: () => void;
-  changePoint?: ChangePoint;
   documentCountStats?: DocumentCountStats;
   documentCountStatsSplit?: DocumentCountStats;
+  documentCountStatsSplitLabel?: string;
   totalCount: number;
   windowParameters?: WindowParameters;
 }
@@ -37,9 +36,9 @@ export interface DocumentCountContentProps {
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   brushSelectionUpdateHandler,
   clearSelectionHandler,
-  changePoint,
   documentCountStats,
   documentCountStatsSplit,
+  documentCountStatsSplitLabel = '',
   totalCount,
   windowParameters,
 }) => {
@@ -50,12 +49,11 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   }, [windowParameters]);
 
   const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
-  const timeRangeEarliest = Math.min(...bucketTimestamps);
-  const timeRangeLatest = Math.max(...bucketTimestamps);
-  const chartPointsSplitLabel = useMemo(
-    () => `${changePoint?.fieldName}:${changePoint?.fieldValue}`,
-    [changePoint]
+  const splitBucketTimestamps = Object.keys(documentCountStatsSplit?.buckets ?? {}).map(
+    (time) => +time
   );
+  const timeRangeEarliest = Math.min(...[...bucketTimestamps, ...splitBucketTimestamps]);
+  const timeRangeLatest = Math.max(...[...bucketTimestamps, ...splitBucketTimestamps]);
 
   if (
     documentCountStats === undefined ||
@@ -121,7 +119,7 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
           timeRangeEarliest={timeRangeEarliest}
           timeRangeLatest={timeRangeLatest}
           interval={documentCountStats.interval}
-          chartPointsSplitLabel={chartPointsSplitLabel}
+          chartPointsSplitLabel={documentCountStatsSplitLabel}
           isBrushCleared={isBrushCleared}
         />
       )}

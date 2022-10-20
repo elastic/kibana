@@ -115,7 +115,7 @@ describe('unenrollAgents (plural)', () => {
 
     // calls ES update with correct values
     const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
-    const calledWith = esClient.bulk.mock.calls[1][0];
+    const calledWith = esClient.bulk.mock.calls[0][0];
     const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
@@ -128,7 +128,7 @@ describe('unenrollAgents (plural)', () => {
     }
 
     // hosted policy is updated in action results with error
-    const calledWithActionResults = esClient.bulk.mock.calls[0][0] as estypes.BulkRequest;
+    const calledWithActionResults = esClient.bulk.mock.calls[1][0] as estypes.BulkRequest;
     // bulk write two line per create
     expect(calledWithActionResults.body?.length).toBe(2);
     const expectedObject = expect.objectContaining({
@@ -170,7 +170,7 @@ describe('unenrollAgents (plural)', () => {
     });
 
     expect(esClient.bulk.mock.calls.length).toEqual(3);
-    const bulkBody = (esClient.bulk.mock.calls[1][0] as estypes.BulkRequest)?.body?.[1] as any;
+    const bulkBody = (esClient.bulk.mock.calls[2][0] as estypes.BulkRequest)?.body?.[1] as any;
     expect(bulkBody.agent_id).toEqual(agentInRegularDoc._id);
     expect(bulkBody.action_id).toEqual('other-action');
   });
@@ -223,25 +223,11 @@ describe('unenrollAgents (plural)', () => {
       agentIds: idsToUnenroll,
       revoke: true,
     });
-
-    expect(unenrolledResponse.items).toMatchObject([
-      {
-        id: 'agent-in-regular-policy',
-        success: true,
-      },
-      {
-        id: 'agent-in-hosted-policy',
-        success: false,
-      },
-      {
-        id: 'agent-in-regular-policy2',
-        success: true,
-      },
-    ]);
+    expect(unenrolledResponse.actionId).toBeDefined();
 
     // calls ES update with correct values
     const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
-    const calledWith = esClient.bulk.mock.calls[2][0];
+    const calledWith = esClient.bulk.mock.calls[0][0];
     const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
@@ -253,13 +239,13 @@ describe('unenrollAgents (plural)', () => {
       expect(doc).toHaveProperty('unenrolled_at');
     }
 
-    const errorResults = esClient.bulk.mock.calls[1][0];
+    const errorResults = esClient.bulk.mock.calls[2][0];
     const errorIds = (errorResults as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.agent_id)
       .map((i: any) => i.agent_id);
     expect(errorIds).toEqual([agentInHostedDoc._id]);
 
-    const actionResults = esClient.bulk.mock.calls[0][0];
+    const actionResults = esClient.bulk.mock.calls[1][0];
     const resultIds = (actionResults as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.agent_id)
       .map((i: any) => i.agent_id);
@@ -301,23 +287,10 @@ describe('unenrollAgents (plural)', () => {
       force: true,
     });
 
-    expect(unenrolledResponse.items).toMatchObject([
-      {
-        id: 'agent-in-regular-policy',
-        success: true,
-      },
-      {
-        id: 'agent-in-hosted-policy',
-        success: true,
-      },
-      {
-        id: 'agent-in-regular-policy2',
-        success: true,
-      },
-    ]);
+    expect(unenrolledResponse.actionId).toBeDefined();
 
     // calls ES update with correct values
-    const calledWith = esClient.bulk.mock.calls[1][0];
+    const calledWith = esClient.bulk.mock.calls[0][0];
     const ids = (calledWith as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.update !== undefined)
       .map((i: any) => i.update._id);
@@ -329,7 +302,7 @@ describe('unenrollAgents (plural)', () => {
       expect(doc).toHaveProperty('unenrolled_at');
     }
 
-    const actionResults = esClient.bulk.mock.calls[0][0];
+    const actionResults = esClient.bulk.mock.calls[1][0];
     const resultIds = (actionResults as estypes.BulkRequest)?.body
       ?.filter((i: any) => i.agent_id)
       .map((i: any) => i.agent_id);
@@ -358,6 +331,22 @@ describe('invalidateAPIKeysForAgents', () => {
             id: 'defaultApiKeyHistory2',
           },
         ],
+        outputs: {
+          output1: {
+            api_key_id: 'outputApiKey1',
+            to_retire_api_key_ids: [{ id: 'outputApiKeyRetire1' }, { id: 'outputApiKeyRetire2' }],
+          },
+          output2: {
+            api_key_id: 'outputApiKey2',
+          },
+          output3: {
+            api_key_id: 'outputApiKey3',
+            to_retire_api_key_ids: [
+              // Somes Fleet Server agents don't have an id here (probably a bug)
+              { retired_at: 'foo' },
+            ],
+          },
+        },
       } as any,
     ]);
 
@@ -367,6 +356,11 @@ describe('invalidateAPIKeysForAgents', () => {
       'defaultApiKey1',
       'defaultApiKeyHistory1',
       'defaultApiKeyHistory2',
+      'outputApiKey1',
+      'outputApiKeyRetire1',
+      'outputApiKeyRetire2',
+      'outputApiKey2',
+      'outputApiKey3',
     ]);
   });
 });

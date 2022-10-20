@@ -6,7 +6,7 @@
  */
 import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Logger } from '@kbn/core/server';
+import { CoreSetup } from '@kbn/core/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import { addMessages, EsQueryRuleActionContext } from './action_context';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
@@ -18,16 +18,14 @@ import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
 import { Comparator } from '../../../common/comparator_types';
 import { isEsQueryRule } from './util';
 
-export async function executor(
-  logger: Logger,
-  core: CoreSetup,
-  options: ExecutorOptions<EsQueryRuleParams>
-) {
+export async function executor(core: CoreSetup, options: ExecutorOptions<EsQueryRuleParams>) {
   const esQueryRule = isEsQueryRule(options.params.searchType);
-  const { alertId: ruleId, name, services, params, state, spaceId } = options;
+  const { alertId: ruleId, name, services, params, state, spaceId, logger } = options;
   const { alertFactory, scopedClusterClient, searchSourceClient } = services;
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
+
+  const alertLimit = alertFactory.alertLimit.getValue();
 
   const compareFn = ComparatorFns.get(params.thresholdComparator);
   if (compareFn == null) {
@@ -91,6 +89,12 @@ export async function executor(
     if (firstValidTimefieldSort) {
       latestTimestamp = firstValidTimefieldSort;
     }
+
+    // we only create one alert if the condition is met, so we would only ever
+    // reach the alert limit if the limit is less than 1
+    alertFactory.alertLimit.setLimitReached(alertLimit < 1);
+  } else {
+    alertFactory.alertLimit.setLimitReached(false);
   }
 
   const { getRecoveredAlerts } = alertFactory.done();

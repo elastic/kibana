@@ -6,11 +6,10 @@
  */
 
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
 import { find } from 'lodash';
 import { useWatch } from 'react-hook-form';
-import type { ECSMapping } from '../../../common/schemas/common';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { PackQueriesStatusTable } from '../../live_queries/form/pack_queries_status_table';
 import { usePacks } from '../../packs/use_packs';
 import { PacksComboBoxField } from '../../live_queries/form/packs_combobox_field';
@@ -25,17 +24,13 @@ interface PackFieldWrapperProps {
     action_id?: string;
     agents?: string[];
   };
-  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
   submitButtonContent?: React.ReactNode;
-  addToCase?: ({ actionId }: { actionId?: string }) => ReactElement;
   showResultsHeader?: boolean;
 }
 
 export const PackFieldWrapper = ({
   liveQueryDetails,
-  addToTimeline,
   submitButtonContent,
-  addToCase,
   showResultsHeader,
 }: PackFieldWrapperProps) => {
   const { data: packsData } = usePacks({});
@@ -69,8 +64,6 @@ export const PackFieldWrapper = ({
               agentIds={agentIds}
               // @ts-expect-error update types
               data={liveQueryDetails?.queries ?? selectedPackData?.attributes?.queries}
-              addToTimeline={addToTimeline}
-              addToCase={addToCase}
               showResultsHeader={showResultsHeader}
             />
           </EuiFlexItem>

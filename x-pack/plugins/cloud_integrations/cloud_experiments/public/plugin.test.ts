@@ -5,16 +5,30 @@
  * 2.0.
  */
 
+import { duration } from 'moment';
 import { coreMock } from '@kbn/core/public/mocks';
-import { ldClientMock } from './plugin.test.mock';
-import { CloudExperimentsPlugin } from './plugin';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { CloudExperimentsPluginStart } from '../common';
 import { FEATURE_FLAG_NAMES } from '../common/constants';
+import { CloudExperimentsPlugin } from './plugin';
+import { LaunchDarklyClient } from './launch_darkly_client';
+import { MetadataService } from '../common/metadata_service';
+jest.mock('./launch_darkly_client');
+
+function getLaunchDarklyClientInstanceMock() {
+  const launchDarklyClientInstanceMock = (
+    LaunchDarklyClient as jest.MockedClass<typeof LaunchDarklyClient>
+  ).mock.instances[0] as jest.Mocked<LaunchDarklyClient>;
+
+  return launchDarklyClientInstanceMock;
+}
 
 describe('Cloud Experiments public plugin', () => {
   jest.spyOn(console, 'debug').mockImplementation(); // silence console.debug logs
 
-  beforeEach(() => {
-    jest.resetAllMocks();
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('constructor', () => {
@@ -28,6 +42,7 @@ describe('Cloud Experiments public plugin', () => {
       expect(plugin).toHaveProperty('stop');
       expect(plugin).toHaveProperty('flagOverrides', undefined);
       expect(plugin).toHaveProperty('launchDarklyClient', undefined);
+      expect(plugin).toHaveProperty('metadataService', expect.any(MetadataService));
     });
 
     test('fails if launch_darkly is not provided in the config and it is a non-dev environment', () => {
@@ -48,78 +63,83 @@ describe('Cloud Experiments public plugin', () => {
       const plugin = new CloudExperimentsPlugin(initializerContext);
       expect(plugin).toHaveProperty('flagOverrides', { my_flag: '1234' });
     });
+
+    test('it initializes the LaunchDarkly client', () => {
+      const initializerContext = coreMock.createPluginInitializerContext({
+        launch_darkly: { client_id: 'sdk-1234' },
+      });
+      const plugin = new CloudExperimentsPlugin(initializerContext);
+      expect(LaunchDarklyClient).toHaveBeenCalledTimes(1);
+      expect(plugin).toHaveProperty('launchDarklyClient', expect.any(LaunchDarklyClient));
+    });
   });
 
   describe('setup', () => {
     let plugin: CloudExperimentsPlugin;
+    let metadataServiceSetupSpy: jest.SpyInstance;
 
     beforeEach(() => {
       const initializerContext = coreMock.createPluginInitializerContext({
         launch_darkly: { client_id: '1234' },
         flag_overrides: { my_flag: '1234' },
+        metadata_refresh_interval: duration(1, 'h'),
       });
       plugin = new CloudExperimentsPlugin(initializerContext);
+      // eslint-disable-next-line dot-notation
+      metadataServiceSetupSpy = jest.spyOn(plugin['metadataService'], 'setup');
     });
 
-    test('returns the contract', () => {
-      const setupContract = plugin.setup(coreMock.createSetup());
-      expect(setupContract).toStrictEqual(
-        expect.objectContaining({
-          identifyUser: expect.any(Function),
+    afterEach(() => {
+      plugin.stop();
+    });
+
+    test('returns no contract', () => {
+      expect(
+        plugin.setup(coreMock.createSetup(), {
+          cloud: cloudMock.createSetup(),
         })
-      );
+      ).toBeUndefined();
     });
 
     describe('identifyUser', () => {
       test('it skips creating the client if no client id provided in the config', () => {
         const initializerContext = coreMock.createPluginInitializerContext({
           flag_overrides: { my_flag: '1234' },
+          metadata_refresh_interval: duration(1, 'h'),
         });
         const customPlugin = new CloudExperimentsPlugin(initializerContext);
-        const setupContract = customPlugin.setup(coreMock.createSetup());
+        customPlugin.setup(coreMock.createSetup(), {
+          cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
+        });
         expect(customPlugin).toHaveProperty('launchDarklyClient', undefined);
-        setupContract.identifyUser('user-id', {});
-        expect(customPlugin).toHaveProperty('launchDarklyClient', undefined);
       });
 
-      test('it initializes the LaunchDarkly client', () => {
-        const setupContract = plugin.setup(coreMock.createSetup());
-        expect(plugin).toHaveProperty('launchDarklyClient', undefined);
-        setupContract.identifyUser('user-id', {});
-        expect(plugin).toHaveProperty('launchDarklyClient', ldClientMock);
-        expect(ldClientMock.identify).not.toHaveBeenCalled();
+      test('it skips identifying the user if cloud is not enabled', () => {
+        plugin.setup(coreMock.createSetup(), {
+          cloud: { ...cloudMock.createSetup(), isCloudEnabled: false },
+        });
+
+        expect(metadataServiceSetupSpy).not.toHaveBeenCalled();
       });
 
-      test('it calls identify if the client already exists', () => {
-        const setupContract = plugin.setup(coreMock.createSetup());
-        expect(plugin).toHaveProperty('launchDarklyClient', undefined);
-        setupContract.identifyUser('user-id', {});
-        expect(plugin).toHaveProperty('launchDarklyClient', ldClientMock);
-        expect(ldClientMock.identify).not.toHaveBeenCalled();
-        ldClientMock.identify.mockResolvedValue({}); // ensure it's a promise
-        setupContract.identifyUser('user-id', {});
-        expect(ldClientMock.identify).toHaveBeenCalledTimes(1);
-      });
+      test('it initializes the LaunchDarkly client', async () => {
+        plugin.setup(coreMock.createSetup(), {
+          cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
+        });
 
-      test('it handles identify rejections', async () => {
-        const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
-        const setupContract = plugin.setup(coreMock.createSetup());
-        expect(plugin).toHaveProperty('launchDarklyClient', undefined);
-        setupContract.identifyUser('user-id', {});
-        expect(plugin).toHaveProperty('launchDarklyClient', ldClientMock);
-        expect(ldClientMock.identify).not.toHaveBeenCalled();
-        const error = new Error('Something went terribly wrong');
-        ldClientMock.identify.mockRejectedValue(error);
-        setupContract.identifyUser('user-id', {});
-        expect(ldClientMock.identify).toHaveBeenCalledTimes(1);
-        await new Promise((resolve) => process.nextTick(resolve));
-        expect(consoleWarnSpy).toHaveBeenCalledWith(error);
+        expect(metadataServiceSetupSpy).toHaveBeenCalledWith({
+          is_elastic_staff_owned: true,
+          kibanaVersion: 'version',
+          trial_end_date: '2020-10-01T14:13:12.000Z',
+          userId: '1c2412b751f056aef6e340efa5637d137442d489a4b1e3117071e7c87f8523f2',
+        });
       });
     });
   });
 
   describe('start', () => {
     let plugin: CloudExperimentsPlugin;
+    let launchDarklyInstanceMock: jest.Mocked<LaunchDarklyClient>;
 
     const firstKnownFlag = Object.keys(FEATURE_FLAG_NAMES)[0] as keyof typeof FEATURE_FLAG_NAMES;
 
@@ -129,11 +149,19 @@ describe('Cloud Experiments public plugin', () => {
         flag_overrides: { [firstKnownFlag]: '1234' },
       });
       plugin = new CloudExperimentsPlugin(initializerContext);
+      launchDarklyInstanceMock = getLaunchDarklyClientInstanceMock();
+    });
+
+    afterEach(() => {
+      plugin.stop();
     });
 
     test('returns the contract', () => {
-      plugin.setup(coreMock.createSetup());
-      const startContract = plugin.start(coreMock.createStart());
+      plugin.setup(coreMock.createSetup(), { cloud: cloudMock.createSetup() });
+      const startContract = plugin.start(coreMock.createStart(), {
+        cloud: cloudMock.createStart(),
+        dataViews: dataViewPluginMocks.createStartContract(),
+      });
       expect(startContract).toStrictEqual(
         expect.objectContaining({
           getVariation: expect.any(Function),
@@ -142,23 +170,46 @@ describe('Cloud Experiments public plugin', () => {
       );
     });
 
+    test('triggers a userMetadataUpdate for `has_data`', async () => {
+      plugin.setup(coreMock.createSetup(), {
+        cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
+      });
+
+      const dataViews = dataViewPluginMocks.createStartContract();
+      plugin.start(coreMock.createStart(), { cloud: cloudMock.createStart(), dataViews });
+
+      // After scheduler kicks in...
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      // Using a timeout of 0ms to let the `timer` kick in.
+      // For some reason, fakeSchedulers is not working on browser-side tests :shrug:
+      expect(launchDarklyInstanceMock.updateUserMetadata).toHaveBeenCalledWith(
+        expect.objectContaining({
+          has_data: true,
+        })
+      );
+    });
+
     describe('getVariation', () => {
-      describe('with the user identified', () => {
+      let startContract: CloudExperimentsPluginStart;
+      describe('with the client created', () => {
         beforeEach(() => {
-          const setupContract = plugin.setup(coreMock.createSetup());
-          setupContract.identifyUser('user-id', {});
+          plugin.setup(coreMock.createSetup(), {
+            cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
+          });
+          startContract = plugin.start(coreMock.createStart(), {
+            cloud: cloudMock.createStart(),
+            dataViews: dataViewPluginMocks.createStartContract(),
+          });
         });
 
         test('uses the flag overrides to respond early', async () => {
-          const startContract = plugin.start(coreMock.createStart());
           await expect(startContract.getVariation(firstKnownFlag, 123)).resolves.toStrictEqual(
             '1234'
           );
         });
 
         test('calls the client', async () => {
-          const startContract = plugin.start(coreMock.createStart());
-          ldClientMock.variation.mockReturnValue('12345');
+          launchDarklyInstanceMock.getVariation.mockResolvedValue('12345');
           await expect(
             startContract.getVariation(
               // @ts-expect-error We only allow existing flags in FEATURE_FLAG_NAMES
@@ -166,27 +217,37 @@ describe('Cloud Experiments public plugin', () => {
               123
             )
           ).resolves.toStrictEqual('12345');
-          expect(ldClientMock.variation).toHaveBeenCalledWith(
+          expect(launchDarklyInstanceMock.getVariation).toHaveBeenCalledWith(
             undefined, // it couldn't find it in FEATURE_FLAG_NAMES
             123
           );
         });
       });
 
-      describe('with the user not identified', () => {
+      describe('with the client not created', () => {
         beforeEach(() => {
-          plugin.setup(coreMock.createSetup());
+          const initializerContext = coreMock.createPluginInitializerContext({
+            flag_overrides: { [firstKnownFlag]: '1234' },
+            metadata_refresh_interval: duration(1, 'h'),
+          });
+          const customPlugin = new CloudExperimentsPlugin(initializerContext);
+          customPlugin.setup(coreMock.createSetup(), {
+            cloud: cloudMock.createSetup(),
+          });
+          expect(customPlugin).toHaveProperty('launchDarklyClient', undefined);
+          startContract = customPlugin.start(coreMock.createStart(), {
+            cloud: cloudMock.createStart(),
+            dataViews: dataViewPluginMocks.createStartContract(),
+          });
         });
 
         test('uses the flag overrides to respond early', async () => {
-          const startContract = plugin.start(coreMock.createStart());
           await expect(startContract.getVariation(firstKnownFlag, 123)).resolves.toStrictEqual(
             '1234'
           );
         });
 
         test('returns the default value without calling the client', async () => {
-          const startContract = plugin.start(coreMock.createStart());
           await expect(
             startContract.getVariation(
               // @ts-expect-error We only allow existing flags in FEATURE_FLAG_NAMES
@@ -194,27 +255,32 @@ describe('Cloud Experiments public plugin', () => {
               123
             )
           ).resolves.toStrictEqual(123);
-          expect(ldClientMock.variation).not.toHaveBeenCalled();
+          expect(launchDarklyInstanceMock.getVariation).not.toHaveBeenCalled();
         });
       });
     });
 
     describe('reportMetric', () => {
-      describe('with the user identified', () => {
+      let startContract: CloudExperimentsPluginStart;
+      describe('with the client created', () => {
         beforeEach(() => {
-          const setupContract = plugin.setup(coreMock.createSetup());
-          setupContract.identifyUser('user-id', {});
+          plugin.setup(coreMock.createSetup(), {
+            cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
+          });
+          startContract = plugin.start(coreMock.createStart(), {
+            cloud: cloudMock.createStart(),
+            dataViews: dataViewPluginMocks.createStartContract(),
+          });
         });
 
         test('calls the track API', () => {
-          const startContract = plugin.start(coreMock.createStart());
           startContract.reportMetric({
             // @ts-expect-error We only allow existing flags in METRIC_NAMES
             name: 'my-flag',
             meta: {},
             value: 1,
           });
-          expect(ldClientMock.track).toHaveBeenCalledWith(
+          expect(launchDarklyInstanceMock.reportMetric).toHaveBeenCalledWith(
             undefined, // it couldn't find it in METRIC_NAMES
             {},
             1
@@ -222,20 +288,31 @@ describe('Cloud Experiments public plugin', () => {
         });
       });
 
-      describe('with the user not identified', () => {
+      describe('with the client not created', () => {
         beforeEach(() => {
-          plugin.setup(coreMock.createSetup());
+          const initializerContext = coreMock.createPluginInitializerContext({
+            flag_overrides: { [firstKnownFlag]: '1234' },
+            metadata_refresh_interval: duration(1, 'h'),
+          });
+          const customPlugin = new CloudExperimentsPlugin(initializerContext);
+          customPlugin.setup(coreMock.createSetup(), {
+            cloud: cloudMock.createSetup(),
+          });
+          expect(customPlugin).toHaveProperty('launchDarklyClient', undefined);
+          startContract = customPlugin.start(coreMock.createStart(), {
+            cloud: cloudMock.createStart(),
+            dataViews: dataViewPluginMocks.createStartContract(),
+          });
         });
 
         test('calls the track API', () => {
-          const startContract = plugin.start(coreMock.createStart());
           startContract.reportMetric({
             // @ts-expect-error We only allow existing flags in METRIC_NAMES
             name: 'my-flag',
             meta: {},
             value: 1,
           });
-          expect(ldClientMock.track).not.toHaveBeenCalled();
+          expect(launchDarklyInstanceMock.reportMetric).not.toHaveBeenCalled();
         });
       });
     });
@@ -243,32 +320,28 @@ describe('Cloud Experiments public plugin', () => {
 
   describe('stop', () => {
     let plugin: CloudExperimentsPlugin;
+    let launchDarklyInstanceMock: jest.Mocked<LaunchDarklyClient>;
 
     beforeEach(() => {
       const initializerContext = coreMock.createPluginInitializerContext({
         launch_darkly: { client_id: '1234' },
         flag_overrides: { my_flag: '1234' },
+        metadata_refresh_interval: duration(1, 'h'),
       });
       plugin = new CloudExperimentsPlugin(initializerContext);
-      const setupContract = plugin.setup(coreMock.createSetup());
-      setupContract.identifyUser('user-id', {});
-      plugin.start(coreMock.createStart());
+      launchDarklyInstanceMock = getLaunchDarklyClientInstanceMock();
+      plugin.setup(coreMock.createSetup(), {
+        cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
+      });
+      plugin.start(coreMock.createStart(), {
+        cloud: cloudMock.createStart(),
+        dataViews: dataViewPluginMocks.createStartContract(),
+      });
     });
 
     test('flushes the events on stop', () => {
-      ldClientMock.flush.mockResolvedValue();
       expect(() => plugin.stop()).not.toThrow();
-      expect(ldClientMock.flush).toHaveBeenCalledTimes(1);
-    });
-
-    test('handles errors when flushing events', async () => {
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
-      const error = new Error('Something went terribly wrong');
-      ldClientMock.flush.mockRejectedValue(error);
-      expect(() => plugin.stop()).not.toThrow();
-      expect(ldClientMock.flush).toHaveBeenCalledTimes(1);
-      await new Promise((resolve) => process.nextTick(resolve));
-      expect(consoleWarnSpy).toHaveBeenCalledWith(error);
+      expect(launchDarklyInstanceMock.stop).toHaveBeenCalledTimes(1);
     });
   });
 });

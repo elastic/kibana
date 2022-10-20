@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, {
-  useReducer,
-  useCallback,
-  useEffect,
-  useRef,
-  useMemo,
-  ReactNode,
-  MouseEvent,
-} from 'react';
+import React, { useReducer, useCallback, useEffect, useRef, useMemo, ReactNode } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiBasicTableColumn,
@@ -25,20 +17,26 @@ import {
   Direction,
   EuiSpacer,
   EuiTableActionsColumnType,
-  EuiLink,
+  CriteriaWithPagination,
 } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
-import { Table, ConfirmDeleteModal, ListingLimitWarning } from './components';
+import {
+  Table,
+  ConfirmDeleteModal,
+  ListingLimitWarning,
+  ItemDetails,
+  UpdatedAtField,
+} from './components';
 import { useServices } from './services';
 import type { SavedObjectsReference, SavedObjectsFindOptionsReference } from './services';
 import type { Action } from './actions';
 import { getReducer } from './reducer';
+import type { SortColumnField } from './components';
 
 export interface Props<T extends UserContentCommonSchema = UserContentCommonSchema> {
   entityName: string;
@@ -81,10 +79,10 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   searchQuery: string;
   selectedIds: string[];
   totalItems: number;
-  tableColumns: Array<EuiBasicTableColumn<T>>;
+  hasUpdatedAtMetadata: boolean;
   pagination: Pagination;
-  tableSort?: {
-    field: keyof T;
+  tableSort: {
+    field: SortColumnField;
     direction: Direction;
   };
 }
@@ -137,27 +135,14 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   const {
     canEditAdvancedSettings,
     getListingLimitSettingsUrl,
-    getTagsColumnDefinition,
     searchQueryParser,
     notifyError,
     DateFormatterComp,
-    navigateToUrl,
-    currentAppId$,
   } = useServices();
 
   const reducer = useMemo(() => {
-    return getReducer<T>({ DateFormatterComp });
-  }, [DateFormatterComp]);
-
-  const redirectAppLinksCoreStart = useMemo(
-    () => ({
-      application: {
-        navigateToUrl,
-        currentAppId$,
-      },
-    }),
-    [navigateToUrl, currentAppId$]
-  );
+    return getReducer<T>();
+  }, []);
 
   const [state, dispatch] = useReducer<(state: State<T>, action: Action<T>) => State<T>>(reducer, {
     items: [],
@@ -166,59 +151,18 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     isFetchingItems: false,
     isDeletingItems: false,
     showDeleteModal: false,
+    hasUpdatedAtMetadata: false,
     selectedIds: [],
-    tableColumns: [
-      {
-        field: 'attributes.title',
-        name: i18n.translate('contentManagement.tableList.titleColumnName', {
-          defaultMessage: 'Title',
-        }),
-        sortable: true,
-        render: (field: keyof T, record: T) => {
-          // The validation is handled at the top of the component
-          const href = getDetailViewLink ? getDetailViewLink(record) : undefined;
-
-          if (!href && !onClickTitle) {
-            // This item is not clickable
-            return <span>{record.attributes.title}</span>;
-          }
-
-          return (
-            <RedirectAppLinks coreStart={redirectAppLinksCoreStart}>
-              {/* eslint-disable-next-line  @elastic/eui/href-or-on-click */}
-              <EuiLink
-                href={getDetailViewLink ? getDetailViewLink(record) : undefined}
-                onClick={
-                  onClickTitle
-                    ? (e: MouseEvent) => {
-                        e.preventDefault();
-                        onClickTitle(record);
-                      }
-                    : undefined
-                }
-                data-test-subj={`${id}ListingTitleLink-${record.attributes.title
-                  .split(' ')
-                  .join('-')}`}
-              >
-                {record.attributes.title}
-              </EuiLink>
-            </RedirectAppLinks>
-          );
-        },
-      },
-      {
-        field: 'attributes.description',
-        name: i18n.translate('contentManagement.tableList.descriptionColumnName', {
-          defaultMessage: 'Description',
-        }),
-      },
-    ],
     searchQuery: initialQuery,
     pagination: {
       pageIndex: 0,
       totalItemCount: 0,
       pageSize: initialPageSize,
       pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort(),
+    },
+    tableSort: {
+      field: 'attributes.title' as const,
+      direction: 'asc',
     },
   });
 
@@ -232,7 +176,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     isDeletingItems,
     selectedIds,
     totalItems,
-    tableColumns: stateTableColumns,
+    hasUpdatedAtMetadata,
     pagination,
     tableSort,
   } = state;
@@ -242,15 +186,43 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   const showLimitError = !showFetchError && totalItems > listingLimit;
 
   const tableColumns = useMemo(() => {
-    const columns = stateTableColumns.slice();
+    const columns: Array<EuiBasicTableColumn<T>> = [
+      {
+        field: 'attributes.title',
+        name: i18n.translate('contentManagement.tableList.mainColumnName', {
+          defaultMessage: 'Name, description, tags',
+        }),
+        sortable: true,
+        render: (field: keyof T, record: T) => {
+          return (
+            <ItemDetails<T>
+              id={id}
+              item={record}
+              getDetailViewLink={getDetailViewLink}
+              onClickTitle={onClickTitle}
+              searchTerm={searchQuery}
+            />
+          );
+        },
+      },
+    ];
 
     if (customTableColumn) {
       columns.push(customTableColumn);
     }
 
-    const tagsColumnDef = getTagsColumnDefinition ? getTagsColumnDefinition() : undefined;
-    if (tagsColumnDef) {
-      columns.push(tagsColumnDef);
+    if (hasUpdatedAtMetadata) {
+      columns.push({
+        field: 'updatedAt',
+        name: i18n.translate('contentManagement.tableList.lastUpdatedColumnTitle', {
+          defaultMessage: 'Last updated',
+        }),
+        render: (field: string, record: { updatedAt?: string }) => (
+          <UpdatedAtField dateTime={record.updatedAt} DateFormatterComp={DateFormatterComp} />
+        ),
+        sortable: true,
+        width: '150px',
+      });
     }
 
     // Add "Actions" column
@@ -288,7 +260,16 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     }
 
     return columns;
-  }, [stateTableColumns, customTableColumn, getTagsColumnDefinition, editItem]);
+  }, [
+    customTableColumn,
+    hasUpdatedAtMetadata,
+    editItem,
+    id,
+    getDetailViewLink,
+    onClickTitle,
+    searchQuery,
+    DateFormatterComp,
+  ]);
 
   const itemsById = useMemo(() => {
     return keyBy(items, 'id');
@@ -332,6 +313,17 @@ function TableListViewComp<T extends UserContentCommonSchema>({
       });
     }
   }, [searchQueryParser, searchQuery, findItems]);
+
+  const onSortChange = useCallback((field: SortColumnField, direction: Direction) => {
+    dispatch({
+      type: 'onTableSortChange',
+      data: { field, direction },
+    });
+  }, []);
+
+  const onTableChange = useCallback((criteria: CriteriaWithPagination<T>) => {
+    dispatch({ type: 'onTableChange', data: criteria });
+  }, []);
 
   const deleteSelectedItems = useCallback(async () => {
     if (isDeletingItems) {
@@ -493,6 +485,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           isFetchingItems={isFetchingItems}
           searchQuery={searchQuery}
           tableColumns={tableColumns}
+          hasUpdatedAtMetadata={hasUpdatedAtMetadata}
           tableSort={tableSort}
           pagination={pagination}
           selectedIds={selectedIds}
@@ -500,6 +493,8 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           entityNamePlural={entityNamePlural}
           deleteItems={deleteItems}
           tableCaption={tableListTitle}
+          onTableChange={onTableChange}
+          onSortChange={onSortChange}
         />
 
         {/* Delete modal */}

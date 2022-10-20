@@ -62,49 +62,8 @@ export const cleanKibana = () => {
   deleteTimelines();
 };
 
-export const cleanPackages = () => {
-  deletePolicies();
-  deletePackages();
-};
-
-export const deletePolicies = () => {
-  cy.request({
-    method: 'GET',
-    url: 'api/fleet/agent_policies',
-    headers: { 'kbn-xsrf': 'cypress-creds' },
-  }).then((response) => {
-    response.body.items.forEach((item: { id: string }) => {
-      cy.request({
-        method: 'POST',
-        url: `api/fleet/agent_policies/delete`,
-        headers: { 'kbn-xsrf': 'cypress-creds' },
-        body: {
-          agentPolicyId: item.id,
-        },
-      });
-    });
-  });
-};
-
-export const deletePackages = () => {
-  cy.request({
-    method: 'GET',
-    url: 'api/fleet/epm/packages',
-    headers: { 'kbn-xsrf': 'cypress-creds' },
-  }).then((response) => {
-    response.body.items.forEach((item: { status: string; name: string; version: string }) => {
-      if (item.status === 'installed') {
-        cy.request({
-          method: 'DELETE',
-          url: `api/fleet/epm/packages/${item.name}/${item.version}`,
-          headers: { 'kbn-xsrf': 'cypress-creds' },
-        });
-      }
-    });
-  });
-};
-
 export const deleteAlertsAndRules = () => {
+  cy.log('Delete all alerts and rules');
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
 
   cy.request({
@@ -116,6 +75,7 @@ export const deleteAlertsAndRules = () => {
     },
     failOnStatusCode: false,
     headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    timeout: 300000,
   });
 
   cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
@@ -179,7 +139,7 @@ export const deleteCases = () => {
   });
 };
 
-export const deleteSavedQueries = () => {
+export const deleteConnectors = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
   cy.request('POST', `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`, {
     query: {
@@ -187,7 +147,7 @@ export const deleteSavedQueries = () => {
         filter: [
           {
             match: {
-              type: 'query',
+              type: 'action',
             },
           },
         ],
@@ -210,6 +170,15 @@ export const postDataView = (dataSource: string) => {
       },
     },
     headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+  });
+};
+
+export const deleteDataView = (dataSource: string) => {
+  cy.request({
+    method: 'DELETE',
+    url: `api/data_views/data_view/${dataSource}`,
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
   });
 };
 

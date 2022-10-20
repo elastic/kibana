@@ -19,7 +19,7 @@ import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { Annotation } from '@kbn/observability-plugin/common/annotations';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { getServiceInventorySearchSource } from '../../lib/helpers/get_service_inventory_search_source';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceAnnotations } from './annotations';
@@ -55,7 +55,8 @@ import { ServiceHealthStatus } from '../../../common/service_health_status';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
-import { getInfraMetricIndices } from '../../lib/helpers/get_infra_metric_indices';
+import { createInfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
+
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
   params: t.type({
@@ -274,11 +275,12 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
     import('./get_service_metadata_details').ServiceMetadataDetails
   > => {
     const setup = await setupRequest(resources);
-    const { params, context, plugins } = resources;
+    const infraMetricsClient = createInfraMetricsClient(resources);
+    const { params } = resources;
     const { serviceName } = params.path;
     const { start, end } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       start,
@@ -295,19 +297,8 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
     });
 
     if (serviceMetadataDetails?.container?.ids) {
-      const {
-        savedObjects: { client: savedObjectsClient },
-        elasticsearch: { client: esClient },
-      } = await context.core;
-
-      const indexName = await getInfraMetricIndices({
-        infraPlugin: plugins.infra,
-        savedObjectsClient,
-      });
-
       const containerMetadata = await getServiceOverviewContainerMetadata({
-        esClient: esClient.asCurrentUser,
-        indexName,
+        infraMetricsClient,
         containerIds: serviceMetadataDetails.container.ids,
         start,
         end,
@@ -335,7 +326,7 @@ const serviceMetadataIconsRoute = createApmServerRoute({
     const { serviceName } = params.path;
     const { start, end } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       start,
@@ -400,7 +391,7 @@ const serviceTransactionTypesRoute = createApmServerRoute({
     return getServiceTransactionTypes({
       serviceName,
       setup,
-      searchAggregatedTransactions: await getSearchAggregatedTransactions({
+      searchAggregatedTransactions: await getSearchTransactionsEvents({
         apmEventClient: setup.apmEventClient,
         config: setup.config,
         start,
@@ -474,7 +465,7 @@ const serviceAnnotationsRoute = createApmServerRoute({
                 observability.setup.getScopedAnnotationsClient(context, request)
             )
           : undefined,
-        getSearchAggregatedTransactions({
+        getSearchTransactionsEvents({
           apmEventClient: setup.apmEventClient,
           config: setup.config,
           start,
@@ -607,7 +598,7 @@ const serviceThroughputRoute = createApmServerRoute({
       start,
       end,
     } = params.query;
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       ...setup,
       kuery,
       start,
@@ -702,7 +693,7 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
       end,
     } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       ...setup,
       kuery,
       start,
@@ -824,7 +815,7 @@ const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
       end,
     } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       ...setup,
       kuery,
       start,
@@ -911,7 +902,8 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
       | undefined;
   }> => {
     const setup = await setupRequest(resources);
-    const { params, context, plugins } = resources;
+    const infraMetricsClient = createInfraMetricsClient(resources);
+    const { params } = resources;
     const { serviceName, serviceNodeName } = params.path;
     const { start, end } = params.query;
 
@@ -925,19 +917,8 @@ export const serviceInstancesMetadataDetails = createApmServerRoute({
       });
 
     if (serviceInstanceMetadataDetails?.container?.id) {
-      const {
-        savedObjects: { client: savedObjectsClient },
-        elasticsearch: { client: esClient },
-      } = await context.core;
-
-      const indexName = await getInfraMetricIndices({
-        infraPlugin: plugins.infra,
-        savedObjectsClient,
-      });
-
       const containerMetadata = await getServiceInstanceContainerMetadata({
-        esClient: esClient.asCurrentUser,
-        indexName,
+        infraMetricsClient,
         containerId: serviceInstanceMetadataDetails.container.id,
         start,
         end,

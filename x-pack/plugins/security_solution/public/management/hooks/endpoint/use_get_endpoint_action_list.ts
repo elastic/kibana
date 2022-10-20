@@ -24,6 +24,14 @@ export const useGetEndpointActionList = (
 ): UseQueryResult<ActionListApiResponse, IHttpFetchError<ErrorType>> => {
   const http = useHttp();
 
+  // prepend and append * to userIds for fuzzy search
+  let userIds = query.userIds;
+  if (typeof query.userIds === 'string') {
+    userIds = `*${query.userIds}*`;
+  } else if (Array.isArray(query.userIds)) {
+    userIds = query.userIds.map((userId) => `*${userId}*`);
+  }
+
   return useQuery<ActionListApiResponse, IHttpFetchError<ErrorType>>({
     queryKey: ['get-action-list', query],
     ...options,
@@ -37,7 +45,7 @@ export const useGetEndpointActionList = (
           pageSize: query.pageSize,
           startDate: query.startDate,
           statuses: query.statuses,
-          userIds: query.userIds,
+          userIds,
         },
       });
     },

@@ -1,0 +1,32 @@
+---
+id: kibDevDocsOpsJourneys
+slug: /kibana-dev-docs/ops/journeys
+title: Journeys
+description: A new style of functional test, focused on performance testing for now
+tags: ['kibana', 'dev', 'contributor', 'operations', 'performance', 'functional', 'testing']
+---
+
+Journeys are a slightly newer take on Functional Tests, currently powered by [playwright](https://playwright.dev/docs).
+
+A Journey is a single pathway through Kibana and looks something like this:
+
+```ts
+import { Journey } from '@kbn/journeys';
+import { subj } from '@kbn/test-subj-selector';
+
+export const journey = new Journey({
+  esArchives: [ ... ],
+  kbnArchives: [ ... ],
+  scalabilitySetup: { ... },
+})
+  .step('Go to Discover Page', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get(`/app/discover`));
+    await page.waitForSelector(subj('discoverDocTable'));
+  })
+
+  .step('Expand the first document', async ({ page }) => {
+    const expandButtons = page.locator(subj('docTableExpandToggleColumn'));
+    await expandButtons.first().click();
+    await page.locator('text="Expanded document"');
+  });
+```

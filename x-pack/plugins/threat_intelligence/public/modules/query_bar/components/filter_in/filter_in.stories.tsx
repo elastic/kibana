@@ -7,23 +7,69 @@
 
 import React from 'react';
 import { Story } from '@storybook/react';
+import { EuiContextMenuPanel, EuiDataGrid, EuiDataGridColumn } from '@elastic/eui';
+import { EuiDataGridColumnVisibility } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
-import { IndicatorsFiltersContext } from '../../../indicators/context';
-import { FilterIn } from '.';
+import { generateMockIndicator, Indicator, IndicatorsFiltersContext } from '../../../indicators';
+import { FilterInButtonIcon, FilterInCellAction, FilterInContextMenu } from '.';
 
 export default {
-  component: FilterIn,
   title: 'FilterIn',
 };
 
-export const Default: Story<void> = () => {
+export const ButtonIcon: Story<void> = () => {
   const mockIndicator: Indicator = generateMockIndicator();
   const mockField: string = 'threat.feed.name';
 
   return (
     <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
-      <FilterIn data={mockIndicator} field={mockField} />
+      <FilterInButtonIcon data={mockIndicator} field={mockField} />
+    </IndicatorsFiltersContext.Provider>
+  );
+};
+
+export const ContextMenu: Story<void> = () => {
+  const mockIndicator: Indicator = generateMockIndicator();
+  const mockField: string = 'threat.feed.name';
+  const items = [<FilterInContextMenu data={mockIndicator} field={mockField} />];
+
+  return (
+    <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+      <EuiContextMenuPanel items={items} />
+    </IndicatorsFiltersContext.Provider>
+  );
+};
+
+export const DataGrid: Story<void> = () => {
+  const mockIndicator: Indicator = generateMockIndicator();
+  const mockField: string = 'threat.feed.name';
+  const columnId: string = '1';
+  const columns: EuiDataGridColumn[] = [
+    {
+      id: columnId,
+      cellActions: [
+        ({ Component }) => (
+          <FilterInCellAction data={mockIndicator} field={mockField} Component={Component} />
+        ),
+      ],
+    },
+  ];
+  const columnVisibility: EuiDataGridColumnVisibility = {
+    visibleColumns: [columnId],
+    setVisibleColumns: () => window.alert('setVisibleColumns'),
+  };
+  const rowCount: number = 1;
+  const renderCellValue = () => <></>;
+
+  return (
+    <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+      <EuiDataGrid
+        aria-labelledby="test"
+        columns={columns}
+        columnVisibility={columnVisibility}
+        rowCount={rowCount}
+        renderCellValue={renderCellValue}
+      />
     </IndicatorsFiltersContext.Provider>
   );
 };

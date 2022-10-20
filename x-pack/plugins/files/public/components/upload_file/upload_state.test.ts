@@ -11,6 +11,7 @@ import { TestScheduler } from 'rxjs/testing';
 import type { FileKind, FileJSON } from '../../../common';
 import { createMockFilesClient } from '../../mocks';
 import type { FilesClient } from '../../types';
+import { ImageMetadataFactory } from '../util/image_metadata';
 
 import { UploadState } from './upload_state';
 
@@ -21,6 +22,7 @@ describe('UploadState', () => {
   let filesClient: DeeplyMockedKeys<FilesClient>;
   let uploadState: UploadState;
   let testScheduler: TestScheduler;
+  const imageMetadataFactory = (() => of(undefined)) as unknown as ImageMetadataFactory;
 
   beforeEach(() => {
     filesClient = createMockFilesClient();
@@ -28,9 +30,41 @@ describe('UploadState', () => {
     filesClient.upload.mockReturnValue(of(undefined) as any);
     uploadState = new UploadState(
       { id: 'test', http: {}, maxSizeBytes: 1000 } as FileKind,
-      filesClient
+      filesClient,
+      {},
+      imageMetadataFactory
     );
     testScheduler = getTestScheduler();
+  });
+
+  it('calls file client with expected arguments', async () => {
+    testScheduler.run(({ expectObservable, cold, flush }) => {
+      const file1 = { name: 'test.png', size: 1, type: 'image/png' } as File;
+
+      uploadState.setFiles([file1]);
+
+      // Simulate upload being triggered async
+      const upload$ = cold('--a|').pipe(tap(uploadState.upload));
+
+      expectObservable(upload$).toBe('--a|');
+
+      flush();
+
+      expect(filesClient.create).toHaveBeenCalledTimes(1);
+      expect(filesClient.create).toHaveBeenNthCalledWith(1, {
+        kind: 'test',
+        meta: 'a',
+        mimeType: 'image/png',
+        name: 'test',
+      });
+      expect(filesClient.upload).toHaveBeenCalledTimes(1);
+      expect(filesClient.upload).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          selfDestructOnAbort: true,
+        })
+      );
+    });
   });
 
   it('uploads all provided files and reports errors', async () => {
@@ -83,7 +117,7 @@ describe('UploadState', () => {
       filesClient.delete.mockReturnValue(of(undefined) as any);
 
       const file1 = { name: 'test' } as File;
-      const file2 = { name: 'test 2.png' } as File;
+      const file2 = { name: 'test 2.png', type: 'image/png' } as File;
 
       uploadState.setFiles([file1, file2]);
 
@@ -132,7 +166,6 @@ describe('UploadState', () => {
         name: 'test 2',
       });
       expect(filesClient.upload).toHaveBeenCalledTimes(2);
-      expect(filesClient.delete).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -160,7 +193,8 @@ describe('UploadState', () => {
       uploadState = new UploadState(
         { id: 'test', http: {}, maxSizeBytes: 1000 } as FileKind,
         filesClient,
-        { allowRepeatedUploads: true }
+        { allowRepeatedUploads: true },
+        imageMetadataFactory
       );
       const file1 = { name: 'test' } as File;
       const file2 = { name: 'test 2.png' } as File;

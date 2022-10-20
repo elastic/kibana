@@ -62,13 +62,7 @@
         "description": [],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.CoreSetup",
-            "text": "CoreSetup"
-          },
+          "CoreSetup",
           "<object, unknown>) => () => ",
           {
             "pluginId": "expressions",
@@ -93,13 +87,7 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>"
             ],
             "path": "src/plugins/expression_reveal_image/public/expression_renderers/reveal_image_renderer.tsx",

@@ -8,19 +8,21 @@
 import { KueryNode } from '@kbn/core-saved-objects-api-server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
-import { flatMap, get } from 'lodash';
+import { flatMap, get, isEmpty } from 'lodash';
 import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { parseDuration } from '.';
-import { IExecutionLog, IExecutionLogResult } from '../../common';
+import { IExecutionLog, IExecutionLogResult, EMPTY_EXECUTION_KPI_RESULT } from '../../common';
 
 const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
+const DEFAULT_MAX_KPI_BUCKETS_LIMIT = 10000;
 
 const RULE_ID_FIELD = 'rule.id';
 const RULE_NAME_FIELD = 'rule.name';
 const PROVIDER_FIELD = 'event.provider';
 const START_FIELD = 'event.start';
 const ACTION_FIELD = 'event.action';
+const ALERTING_OUTCOME_FIELD = 'kibana.alerting.outcome';
 const OUTCOME_FIELD = 'event.outcome';
 const DURATION_FIELD = 'event.duration';
 const MESSAGE_FIELD = 'message';
@@ -51,6 +53,21 @@ interface IActionExecution
   buckets: Array<{ key: string; doc_count: number }>;
 }
 
+interface IExecutionUuidKpiAggBucket extends estypes.AggregationsStringTermsBucketKeys {
+  actionExecution: {
+    doc_count: number;
+    actionOutcomes: IActionExecution;
+  };
+  ruleExecution: {
+    doc_count: number;
+    numTriggeredActions: estypes.AggregationsSumAggregate;
+    numGeneratedActions: estypes.AggregationsSumAggregate;
+    numActiveAlerts: estypes.AggregationsSumAggregate;
+    numRecoveredAlerts: estypes.AggregationsSumAggregate;
+    numNewAlerts: estypes.AggregationsSumAggregate;
+    ruleExecutionOutcomes: IActionExecution;
+  };
+}
 interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketKeys {
   timeoutMessage: estypes.AggregationsMultiBucketBase;
   ruleExecution: {
@@ -76,12 +93,22 @@ export interface ExecutionUuidAggResult<TBucket = IExecutionUuidAggBucket>
   buckets: TBucket[];
 }
 
+export interface ExecutionUuidKPIAggResult<TBucket = IExecutionUuidKpiAggBucket>
+  extends estypes.AggregationsAggregateBase {
+  buckets: TBucket[];
+}
+
 interface ExcludeExecuteStartAggResult extends estypes.AggregationsAggregateBase {
   executionUuid: ExecutionUuidAggResult;
   executionUuidCardinality: {
     executionUuidCardinality: estypes.AggregationsCardinalityAggregate;
   };
 }
+
+interface ExcludeExecuteStartKpiAggResult extends estypes.AggregationsAggregateBase {
+  executionUuid: ExecutionUuidKPIAggResult;
+}
+
 export interface IExecutionLogAggOptions {
   filter?: string | KueryNode;
   page: number;
@@ -100,6 +127,129 @@ const ExecutionLogSortFields: Record<string, string> = {
   num_active_alerts: 'ruleExecution>numActiveAlerts',
   num_recovered_alerts: 'ruleExecution>numRecoveredAlerts',
   num_new_alerts: 'ruleExecution>numNewAlerts',
+};
+
+export const getExecutionKPIAggregation = (filter?: IExecutionLogAggOptions['filter']) => {
+  const dslFilterQuery: estypes.QueryDslBoolQuery['filter'] = buildDslFilterQuery(filter);
+
+  return {
+    excludeExecuteStart: {
+      filter: {
+        bool: {
+          must_not: [
+            {
+              term: {
+                'event.action': 'execute-start',
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        executionUuid: {
+          // Bucket by execution UUID
+          terms: {
+            field: EXECUTION_UUID_FIELD,
+            size: DEFAULT_MAX_KPI_BUCKETS_LIMIT,
+            order: formatSortForTermSort([{ timestamp: { order: 'desc' } }]),
+          },
+          aggs: {
+            executionUuidSorted: {
+              bucket_sort: {
+                from: 0,
+                size: DEFAULT_MAX_KPI_BUCKETS_LIMIT,
+                gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
+              },
+            },
+            actionExecution: {
+              filter: {
+                bool: {
+                  must: [getProviderAndActionFilter('actions', 'execute')],
+                },
+              },
+              aggs: {
+                actionOutcomes: {
+                  terms: {
+                    field: OUTCOME_FIELD,
+                    size: 2,
+                  },
+                },
+              },
+            },
+            ruleExecution: {
+              filter: {
+                bool: {
+                  ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
+                  must: [getProviderAndActionFilter('alerting', 'execute')],
+                },
+              },
+              aggs: {
+                executeStartTime: {
+                  min: {
+                    field: START_FIELD,
+                  },
+                },
+                numTriggeredActions: {
+                  sum: {
+                    field: 'kibana.alert.rule.execution.metrics.number_of_triggered_actions',
+                    missing: 0,
+                  },
+                },
+                numGeneratedActions: {
+                  sum: {
+                    field: 'kibana.alert.rule.execution.metrics.number_of_generated_actions',
+                    missing: 0,
+                  },
+                },
+                numActiveAlerts: {
+                  sum: {
+                    field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
+                    missing: 0,
+                  },
+                },
+                numRecoveredAlerts: {
+                  sum: {
+                    field: 'kibana.alert.rule.execution.metrics.alert_counts.recovered',
+                    missing: 0,
+                  },
+                },
+                numNewAlerts: {
+                  sum: {
+                    field: 'kibana.alert.rule.execution.metrics.alert_counts.new',
+                    missing: 0,
+                  },
+                },
+                ruleExecutionOutcomes: {
+                  multi_terms: {
+                    size: 3,
+                    terms: [
+                      {
+                        field: ALERTING_OUTCOME_FIELD,
+                        missing: '',
+                      },
+                      {
+                        field: OUTCOME_FIELD,
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+            minExecutionUuidBucket: {
+              bucket_selector: {
+                buckets_path: {
+                  count: 'ruleExecution._count',
+                },
+                script: {
+                  source: 'params.count > 0',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
 };
 
 export function getExecutionLogAggregation({
@@ -130,13 +280,7 @@ export function getExecutionLogAggregation({
     throw Boom.badRequest(`Invalid perPage field "${perPage}" - must be greater than 0`);
   }
 
-  let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
-  try {
-    const filterKueryNode = typeof filter === 'string' ? fromKueryExpression(filter) : filter;
-    dslFilterQuery = filter ? toElasticsearchQuery(filterKueryNode) : undefined;
-  } catch (err) {
-    throw Boom.badRequest(`Invalid kuery syntax for filter ${filter}`);
-  }
+  const dslFilterQuery: estypes.QueryDslBoolQuery['filter'] = buildDslFilterQuery(filter);
 
   return {
     excludeExecuteStart: {
@@ -267,6 +411,7 @@ export function getExecutionLogAggregation({
                         VERSION_FIELD,
                         RULE_ID_FIELD,
                         RULE_NAME_FIELD,
+                        ALERTING_OUTCOME_FIELD,
                       ],
                     },
                   },
@@ -293,6 +438,15 @@ export function getExecutionLogAggregation({
       },
     },
   };
+}
+
+function buildDslFilterQuery(filter: IExecutionLogAggOptions['filter']) {
+  try {
+    const filterKueryNode = typeof filter === 'string' ? fromKueryExpression(filter) : filter;
+    return filter ? toElasticsearchQuery(filterKueryNode) : undefined;
+  } catch (err) {
+    throw Boom.badRequest(`Invalid kuery syntax for filter ${filter}`);
+  }
 }
 
 function getProviderAndActionFilter(provider: string, action: string) {
@@ -329,16 +483,19 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const actionExecutionError =
     actionExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0;
 
-  const outcomeAndMessage = bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source;
-  const status = outcomeAndMessage ? outcomeAndMessage?.event?.outcome ?? '' : '';
+  const outcomeAndMessage = bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source ?? {};
+  let status = outcomeAndMessage.kibana?.alerting?.outcome ?? '';
+  if (isEmpty(status)) {
+    status = outcomeAndMessage.event?.outcome ?? '';
+  }
+  const outcomeMessage = outcomeAndMessage.message ?? '';
+  const outcomeErrorMessage = outcomeAndMessage.error?.message ?? '';
   const message =
-    status === 'failure'
-      ? `${outcomeAndMessage?.message ?? ''} - ${outcomeAndMessage?.error?.message ?? ''}`
-      : outcomeAndMessage?.message ?? '';
-  const version = outcomeAndMessage ? outcomeAndMessage?.kibana?.version ?? '' : '';
+    status === 'failure' ? `${outcomeMessage} - ${outcomeErrorMessage}` : outcomeMessage;
+  const version = outcomeAndMessage.kibana?.version ?? '';
 
-  const ruleId = outcomeAndMessage ? outcomeAndMessage?.rule?.id ?? '' : '';
-  const ruleName = outcomeAndMessage ? outcomeAndMessage?.rule?.name ?? '' : '';
+  const ruleId = outcomeAndMessage.rule?.id ?? '';
+  const ruleName = outcomeAndMessage.rule?.name ?? '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
@@ -360,6 +517,70 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
     rule_id: ruleId,
     rule_name: ruleName,
   };
+}
+
+function formatExecutionKPIAggBuckets(buckets: IExecutionUuidKpiAggBucket[]) {
+  const objToReturn = {
+    success: 0,
+    unknown: 0,
+    failure: 0,
+    warning: 0,
+    activeAlerts: 0,
+    newAlerts: 0,
+    recoveredAlerts: 0,
+    erroredActions: 0,
+    triggeredActions: 0,
+  };
+
+  buckets.forEach((bucket) => {
+    const ruleExecutionOutcomes = bucket?.ruleExecution?.ruleExecutionOutcomes?.buckets ?? [];
+    const actionExecutionOutcomes = bucket?.actionExecution?.actionOutcomes?.buckets ?? [];
+
+    const ruleExecutionCount = bucket?.ruleExecution?.doc_count ?? 0;
+    const outcomes = {
+      successRuleExecution: 0,
+      failureRuleExecution: 0,
+      warningRuleExecution: 0,
+    };
+    ruleExecutionOutcomes.reduce((acc, subBucket) => {
+      const key = subBucket.key[0] ? subBucket.key[0] : subBucket.key[1];
+      if (key === 'success') {
+        acc.successRuleExecution = subBucket.doc_count ?? 0;
+      } else if (key === 'failure') {
+        acc.failureRuleExecution = subBucket.doc_count ?? 0;
+      } else if (key === 'warning') {
+        acc.warningRuleExecution = subBucket.doc_count ?? 0;
+      }
+      return acc;
+    }, outcomes);
+
+    objToReturn.success += outcomes.successRuleExecution;
+    objToReturn.unknown +=
+      ruleExecutionCount -
+      (outcomes.successRuleExecution +
+        outcomes.failureRuleExecution +
+        outcomes.warningRuleExecution);
+    objToReturn.failure += outcomes.failureRuleExecution;
+    objToReturn.warning += outcomes.warningRuleExecution;
+    objToReturn.activeAlerts += bucket?.ruleExecution?.numActiveAlerts.value ?? 0;
+    objToReturn.newAlerts += bucket?.ruleExecution?.numNewAlerts.value ?? 0;
+    objToReturn.recoveredAlerts += bucket?.ruleExecution?.numRecoveredAlerts.value ?? 0;
+    objToReturn.erroredActions +=
+      actionExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0;
+    objToReturn.triggeredActions += bucket?.ruleExecution?.numTriggeredActions.value ?? 0;
+  });
+
+  return objToReturn;
+}
+
+export function formatExecutionKPIResult(results: AggregateEventsBySavedObjectResult) {
+  const { aggregations } = results;
+  if (!aggregations || !aggregations.excludeExecuteStart) {
+    return EMPTY_EXECUTION_KPI_RESULT;
+  }
+  const aggs = aggregations.excludeExecuteStart as ExcludeExecuteStartKpiAggResult;
+  const buckets = aggs.executionUuid.buckets;
+  return formatExecutionKPIAggBuckets(buckets);
 }
 
 export function formatExecutionLogResult(

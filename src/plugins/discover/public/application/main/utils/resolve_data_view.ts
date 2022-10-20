@@ -162,10 +162,11 @@ export function resolveDataView(
         text: i18n.translate('discover.showingSavedDataViewWarningDescription', {
           defaultMessage: 'Showing the saved data view: "{ownDataViewTitle}" ({ownDataViewId})',
           values: {
-            ownDataViewTitle: ownDataView.title,
+            ownDataViewTitle: ownDataView.getIndexPattern(),
             ownDataViewId: ownDataView.id,
           },
         }),
+        'data-test-subj': 'dscDataViewNotFoundShowSavedWarning',
       });
       return ownDataView;
     }
@@ -176,10 +177,11 @@ export function resolveDataView(
         defaultMessage:
           'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
         values: {
-          loadedDataViewTitle: loadedDataView.title,
+          loadedDataViewTitle: loadedDataView.getIndexPattern(),
           loadedDataViewId: loadedDataView.id,
         },
       }),
+      'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
     });
   }
 

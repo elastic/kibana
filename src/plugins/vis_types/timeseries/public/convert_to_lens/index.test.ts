@@ -40,7 +40,7 @@ describe('convertTSVBtoLensConfiguration', () => {
   test('should return null for a not supported chart', async () => {
     const metricModel = {
       ...model,
-      type: 'metric',
+      type: 'markdown',
     } as Panel;
     const triggerOptions = await convertTSVBtoLensConfiguration(metricModel);
     expect(triggerOptions).toBeNull();

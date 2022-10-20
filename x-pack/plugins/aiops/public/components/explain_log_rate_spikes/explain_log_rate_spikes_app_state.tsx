@@ -36,6 +36,8 @@ import {
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
 
+import { SpikeAnalysisTableRowStateProvider } from '../spike_analysis_table/spike_analysis_table_row_provider';
+
 import { ExplainLogRateSpikesPage } from './explain_log_rate_spikes_page';
 
 export interface ExplainLogRateSpikesAppStateProps {
@@ -164,7 +166,9 @@ export const ExplainLogRateSpikesAppState: FC<ExplainLogRateSpikesAppStateProps>
   return (
     <AiopsAppContext.Provider value={appDependencies}>
       <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
-        <ExplainLogRateSpikesPage dataView={dataView} savedSearch={savedSearch} />
+        <SpikeAnalysisTableRowStateProvider>
+          <ExplainLogRateSpikesPage dataView={dataView} savedSearch={savedSearch} />
+        </SpikeAnalysisTableRowStateProvider>
       </UrlStateContextProvider>
     </AiopsAppContext.Provider>
   );

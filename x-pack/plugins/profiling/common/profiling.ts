@@ -28,18 +28,20 @@ export enum FrameType {
   JavaScript,
 }
 
+const frameTypeDescriptions = {
+  [FrameType.Unsymbolized]: '<unsymbolized frame>',
+  [FrameType.Python]: 'Python',
+  [FrameType.PHP]: 'PHP',
+  [FrameType.Native]: 'Native',
+  [FrameType.Kernel]: 'Kernel',
+  [FrameType.JVM]: 'JVM/Hotspot',
+  [FrameType.Ruby]: 'Ruby',
+  [FrameType.Perl]: 'Perl',
+  [FrameType.JavaScript]: 'JavaScript',
+};
+
 export function describeFrameType(ft: FrameType): string {
-  return {
-    [FrameType.Unsymbolized]: '<unsymbolized frame>',
-    [FrameType.Python]: 'Python',
-    [FrameType.PHP]: 'PHP',
-    [FrameType.Native]: 'Native',
-    [FrameType.Kernel]: 'Kernel',
-    [FrameType.JVM]: 'JVM/Hotspot',
-    [FrameType.Ruby]: 'Ruby',
-    [FrameType.Perl]: 'Perl',
-    [FrameType.JavaScript]: 'JavaScript',
-  }[ft];
+  return frameTypeDescriptions[ft];
 }
 
 export interface StackTraceEvent {
@@ -54,6 +56,13 @@ export interface StackTrace {
   Types: number[];
 }
 
+export const emptyStackTrace: StackTrace = {
+  FrameIDs: [],
+  FileIDs: [],
+  AddressOrLines: [],
+  Types: [],
+};
+
 export interface StackFrame {
   FileName: string;
   FunctionName: string;
@@ -62,9 +71,21 @@ export interface StackFrame {
   SourceType: number;
 }
 
+export const emptyStackFrame: StackFrame = {
+  FileName: '',
+  FunctionName: '',
+  FunctionOffset: 0,
+  LineNumber: 0,
+  SourceType: 0,
+};
+
 export interface Executable {
   FileName: string;
 }
+
+export const emptyExecutable: Executable = {
+  FileName: '',
+};
 
 export interface StackFrameMetadata {
   // StackTrace.FrameID
@@ -74,7 +95,7 @@ export interface StackFrameMetadata {
   // StackTrace.Type
   FrameType: FrameType;
 
-  // StackFrame.LineNumber?
+  // StackTrace.AddressOrLine
   AddressOrLine: number;
   // StackFrame.FunctionName
   FunctionName: string;
@@ -86,6 +107,8 @@ export interface StackFrameMetadata {
   SourceFilename: string;
   // StackFrame.LineNumber
   SourceLine: number;
+  // auto-generated - see createStackFrameMetadata
+  FunctionSourceLine: number;
 
   // Executable.FileName
   ExeFileName: string;
@@ -123,7 +146,52 @@ export function createStackFrameMetadata(
   metadata.SourcePackageURL = options.SourcePackageURL ?? '';
   metadata.SourceType = options.SourceType ?? 0;
 
+  // Unknown/invalid offsets are currently set to 0.
+  //
+  // In this case we leave FunctionSourceLine=0 as a flag for the UI that the
+  // FunctionSourceLine should not be displayed.
+  //
+  // As FunctionOffset=0 could also be a legit value, this work-around needs
+  // a real fix. The idea for after GA is to change FunctionOffset=-1 to
+  // indicate unknown/invalid.
+  if (metadata.FunctionOffset > 0) {
+    metadata.FunctionSourceLine = metadata.SourceLine - metadata.FunctionOffset;
+  } else {
+    metadata.FunctionSourceLine = 0;
+  }
+
   return metadata;
+}
+
+function checkIfStringHasParentheses(s: string) {
+  return /\(|\)/.test(s);
+}
+
+function getFunctionName(metadata: StackFrameMetadata) {
+  return metadata.FunctionName !== '' && !checkIfStringHasParentheses(metadata.FunctionName)
+    ? `${metadata.FunctionName}()`
+    : metadata.FunctionName;
+}
+
+function getExeFileName(metadata: StackFrameMetadata) {
+  if (metadata?.ExeFileName === undefined) {
+    return '';
+  }
+  if (metadata.ExeFileName !== '') {
+    return metadata.ExeFileName;
+  }
+  return describeFrameType(metadata.FrameType);
+}
+
+export function getCalleeLabel(metadata: StackFrameMetadata) {
+  if (metadata.FunctionName !== '') {
+    const sourceFilename = metadata.SourceFilename;
+    const sourceURL = sourceFilename ? sourceFilename.split('/').pop() : '';
+    return `${getExeFileName(metadata)}: ${getFunctionName(metadata)} in ${sourceURL}#${
+      metadata.SourceLine
+    }`;
+  }
+  return getExeFileName(metadata);
 }
 
 export function getCalleeFunction(frame: StackFrameMetadata): string {
@@ -137,7 +205,7 @@ export function getCalleeFunction(frame: StackFrameMetadata): string {
 }
 
 export function getCalleeSource(frame: StackFrameMetadata): string {
-  if (frame.FunctionName === '' && frame.SourceLine === 0) {
+  if (frame.SourceFilename === '' && frame.SourceLine === 0) {
     if (frame.ExeFileName) {
       // If no source line or filename available, display the executable offset
       return frame.ExeFileName + '+0x' + frame.AddressOrLine.toString(16);
@@ -154,26 +222,23 @@ export function getCalleeSource(frame: StackFrameMetadata): string {
   return frame.SourceFilename + (frame.SourceLine !== 0 ? `#${frame.SourceLine}` : '');
 }
 
-// groupStackFrameMetadataByStackTrace collects all of the per-stack-frame
-// metadata for a given set of trace IDs and their respective stack frames.
-//
-// This is similar to GetTraceMetaData in pf-storage-backend/storagebackend/storagebackendv1/reads_webservice.go
 export function groupStackFrameMetadataByStackTrace(
   stackTraces: Map<StackTraceID, StackTrace>,
   stackFrames: Map<StackFrameID, StackFrame>,
   executables: Map<FileID, Executable>
-): Map<StackTraceID, StackFrameMetadata[]> {
-  const frameMetadataForTraces = new Map<StackTraceID, StackFrameMetadata[]>();
+): Record<string, StackFrameMetadata[]> {
+  const stackTraceMap: Record<string, StackFrameMetadata[]> = {};
   for (const [stackTraceID, trace] of stackTraces) {
-    const frameMetadata = new Array<StackFrameMetadata>();
-    for (let i = 0; i < trace.FrameIDs.length; i++) {
+    const numFramesPerTrace = trace.FrameIDs.length;
+    const frameMetadata = new Array<StackFrameMetadata>(numFramesPerTrace);
+    for (let i = 0; i < numFramesPerTrace; i++) {
       const frameID = trace.FrameIDs[i];
       const fileID = trace.FileIDs[i];
       const addressOrLine = trace.AddressOrLines[i];
-      const frame = stackFrames.get(frameID)!;
-      const executable = executables.get(fileID)!;
+      const frame = stackFrames.get(frameID) ?? emptyStackFrame;
+      const executable = executables.get(fileID) ?? emptyExecutable;
 
-      const metadata = createStackFrameMetadata({
+      frameMetadata[i] = createStackFrameMetadata({
         FrameID: frameID,
         FileID: fileID,
         AddressOrLine: addressOrLine,
@@ -184,10 +249,8 @@ export function groupStackFrameMetadataByStackTrace(
         SourceFilename: frame.FileName,
         ExeFileName: executable.FileName,
       });
-
-      frameMetadata.push(metadata);
     }
-    frameMetadataForTraces.set(stackTraceID, frameMetadata);
+    stackTraceMap[stackTraceID] = frameMetadata;
   }
-  return frameMetadataForTraces;
+  return stackTraceMap;
 }

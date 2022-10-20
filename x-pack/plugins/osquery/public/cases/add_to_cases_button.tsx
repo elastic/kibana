@@ -19,8 +19,8 @@ const ADD_TO_CASE = i18n.translate(
   }
 );
 
-interface IProps {
-  queryId: string;
+export interface AddToCaseButtonProps {
+  queryId?: string;
   agentIds?: string[];
   actionId: string;
   isIcon?: boolean;
@@ -28,7 +28,7 @@ interface IProps {
   iconProps?: Record<string, string>;
 }
 
-export const AddToCaseButton: React.FC<IProps> = ({
+export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
   actionId,
   agentIds = [],
   queryId = '',
@@ -67,6 +67,7 @@ export const AddToCaseButton: React.FC<IProps> = ({
           iconType={'casesApp'}
           onClick={handleClick}
           isDisabled={isDisabled || !hasCasesPermissions}
+          aria-label={ADD_TO_CASE}
           {...iconProps}
         />
       </EuiToolTip>
@@ -79,6 +80,7 @@ export const AddToCaseButton: React.FC<IProps> = ({
       iconType="casesApp"
       onClick={handleClick}
       isDisabled={isDisabled || !hasCasesPermissions}
+      aria-label={ADD_TO_CASE}
     >
       {ADD_TO_CASE}
     </EuiButtonEmpty>

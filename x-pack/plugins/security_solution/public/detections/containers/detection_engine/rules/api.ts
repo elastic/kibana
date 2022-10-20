@@ -8,6 +8,10 @@
 import { camelCase } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
 
+import type {
+  CreateRuleExceptionListItemSchema,
+  ExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,
@@ -386,16 +390,50 @@ export const fetchInstalledIntegrations = async ({
 export const findRuleExceptionReferences = async ({
   lists,
   signal,
-}: FindRulesReferencedByExceptionsProps): Promise<RulesReferencedByExceptionListsSchema> =>
-  KibanaServices.get().http.fetch<RulesReferencedByExceptionListsSchema>(
-    DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
-    {
-      method: 'GET',
-      query: {
+}: FindRulesReferencedByExceptionsProps): Promise<RulesReferencedByExceptionListsSchema> => {
+  const idsUndefined = lists.some(({ id }) => id === undefined);
+  const query = idsUndefined
+    ? {
+        namespace_types: lists.map(({ namespaceType }) => namespaceType).join(','),
+      }
+    : {
         ids: lists.map(({ id }) => id).join(','),
         list_ids: lists.map(({ listId }) => listId).join(','),
         namespace_types: lists.map(({ namespaceType }) => namespaceType).join(','),
-      },
+      };
+  return KibanaServices.get().http.fetch<RulesReferencedByExceptionListsSchema>(
+    DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL,
+    {
+      method: 'GET',
+      query,
+      signal,
+    }
+  );
+};
+
+/**
+ * Add exception items to default rule exception list
+ *
+ * @param ruleId `id` of rule to add items to
+ * @param items CreateRuleExceptionListItemSchema[]
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ */
+export const addRuleExceptions = async ({
+  ruleId,
+  items,
+  signal,
+}: {
+  ruleId: string;
+  items: CreateRuleExceptionListItemSchema[];
+  signal: AbortSignal | undefined;
+}): Promise<ExceptionListItemSchema[]> =>
+  KibanaServices.get().http.fetch<ExceptionListItemSchema[]>(
+    `${DETECTION_ENGINE_RULES_URL}/${ruleId}/exceptions`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ items }),
       signal,
     }
   );

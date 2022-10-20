@@ -23,7 +23,6 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import moment from 'moment';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import {
@@ -118,7 +117,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       this.initializerContext,
       getStartServices,
       this.sessionsClient,
-      nowProvider
+      nowProvider,
+      this.usageCollector
     );
     /**
      * A global object that intercepts all searches and provides convenience methods for cancelling
@@ -245,7 +245,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       onResponse: (request, response, options) => {
         if (!options.disableShardFailureWarning) {
           const { rawResponse } = response;
-          handleWarnings(request.body, rawResponse, theme);
+          handleWarnings({
+            request: request.body,
+            response: rawResponse,
+            theme,
+            sessionId: options.sessionId,
+          });
         }
         return response;
       },
@@ -261,9 +266,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
               application,
               basePath: http.basePath,
               storage: new Storage(window.localStorage),
-              disableSaveAfterSessionCompletesTimeout: moment
-                .duration(config.search.sessions.notTouchedTimeout)
-                .asMilliseconds(),
               usageCollector: this.usageCollector,
               tourDisabled: screenshotMode.isScreenshotMode(),
             })
@@ -279,7 +281,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       showError: (e) => {
         this.searchInterceptor.showError(e);
       },
-      showWarnings: (adapter, cb) => {
+      showWarnings: (adapter, callback) => {
         adapter?.getRequests().forEach((request) => {
           const rawResponse = (
             request.response?.json as { rawResponse: estypes.SearchResponse | undefined }
@@ -289,7 +291,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             return;
           }
 
-          handleWarnings(request.json as SearchRequest, rawResponse, theme, cb);
+          handleWarnings({
+            request: request.json as SearchRequest,
+            response: rawResponse,
+            theme,
+            callback,
+          });
         });
       },
       session: this.sessionService,

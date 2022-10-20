@@ -228,7 +228,7 @@ describe('getNormalizedDataStreams', () => {
     ).toEqual([
       {
         type: 'foo',
-        dataset: 'nginx.foo',
+        dataset: 'nginx.bar',
         title: expect.any(String),
         release: 'ga',
         package: 'nginx',

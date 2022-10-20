@@ -346,12 +346,11 @@ export class ResourceInstaller {
         template: {
           settings: {
             hidden: true,
-            // @ts-expect-error type only defines nested structure
             'index.lifecycle': {
               name: ilmPolicyName,
               rollover_alias: primaryNamespacedAlias,
             },
-            'index.mapping.total_fields.limit': 1700,
+            'index.mapping.total_fields.limit': 1900,
             auto_expand_replicas: '0-1',
           },
           mappings: {

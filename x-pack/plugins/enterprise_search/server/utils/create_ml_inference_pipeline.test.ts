@@ -16,6 +16,16 @@ import {
   getPrefixedInferencePipelineProcessorName,
 } from './ml_inference_pipeline_utils';
 
+const mockClient = {
+  ingest: {
+    getPipeline: jest.fn(),
+    putPipeline: jest.fn(),
+  },
+  ml: {
+    getTrainedModels: jest.fn(),
+  },
+};
+
 describe('createMlInferencePipeline util function', () => {
   const pipelineName = 'my-pipeline';
   const modelId = 'my-model-id';
@@ -23,20 +33,13 @@ describe('createMlInferencePipeline util function', () => {
   const destinationField = 'my-dest-field';
   const inferencePipelineGeneratedName = getPrefixedInferencePipelineProcessorName(pipelineName);
 
-  const mockClient = {
-    ingest: {
-      getPipeline: jest.fn(),
-      putPipeline: jest.fn(),
-    },
-    ml: {
-      getTrainedModels: jest.fn(),
-    },
-  };
-
   mockClient.ml.getTrainedModels.mockImplementation(() =>
     Promise.resolve({
       trained_model_configs: [
         {
+          inference_config: {
+            ner: {},
+          },
           input: {
             field_names: ['target-field'],
           },
@@ -86,6 +89,32 @@ describe('createMlInferencePipeline util function', () => {
     );
   });
 
+  it('should default the destination field to the pipeline name', async () => {
+    mockClient.ingest.getPipeline.mockImplementation(() => Promise.reject({ statusCode: 404 })); // Pipeline does not exist
+    mockClient.ingest.putPipeline.mockImplementation(() => Promise.resolve({ acknowledged: true }));
+
+    await createMlInferencePipeline(
+      pipelineName,
+      modelId,
+      sourceField,
+      undefined, // Omitted destination field
+      mockClient as unknown as ElasticsearchClient
+    );
+
+    // Verify the object passed to pipeline creation contains the default target field name
+    expect(mockClient.ingest.putPipeline).toHaveBeenCalledWith(
+      expect.objectContaining({
+        processors: expect.arrayContaining([
+          expect.objectContaining({
+            inference: expect.objectContaining({
+              target_field: `ml.inference.${pipelineName}`,
+            }),
+          }),
+        ]),
+      })
+    );
+  });
+
   it('should throw an error without creating the pipeline if it already exists', () => {
     mockClient.ingest.getPipeline.mockImplementation(() =>
       Promise.resolve({
@@ -110,13 +139,6 @@ describe('addSubPipelineToIndexSpecificMlPipeline util function', () => {
   const indexName = 'my-index';
   const parentPipelineId = getInferencePipelineNameFromIndexName(indexName);
   const pipelineName = 'ml-inference-my-pipeline';
-
-  const mockClient = {
-    ingest: {
-      getPipeline: jest.fn(),
-      putPipeline: jest.fn(),
-    },
-  };
 
   beforeEach(() => {
     jest.clearAllMocks();

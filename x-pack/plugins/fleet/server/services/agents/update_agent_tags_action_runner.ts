@@ -6,27 +6,35 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-
+import uuid from 'uuid';
 import { difference, uniq } from 'lodash';
 
-import type { Agent, BulkActionResult } from '../../types';
+import type { Agent } from '../../types';
 
 import { ActionRunner } from './action_runner';
 
-import { errorsToResults, bulkUpdateAgents } from './crud';
+import { bulkUpdateAgents } from './crud';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 import { filterHostedPolicies } from './filter_hosted_agents';
+import {
+  createErrorActionResults,
+  bulkCreateAgentActionResults,
+  createAgentAction,
+} from './actions';
 
 export class UpdateAgentTagsActionRunner extends ActionRunner {
-  protected async processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
+  protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
     return await updateTagsBatch(
       this.soClient,
       this.esClient,
       agents,
       {},
-      { tagsToAdd: this.actionParams?.tagsToAdd, tagsToRemove: this.actionParams?.tagsToRemove },
-      undefined,
-      true
+      {
+        tagsToAdd: this.actionParams?.tagsToAdd,
+        tagsToRemove: this.actionParams?.tagsToRemove,
+        actionId: this.actionParams.actionId,
+        total: this.actionParams.total,
+      }
     );
   }
 
@@ -47,10 +55,10 @@ export async function updateTagsBatch(
   options: {
     tagsToAdd: string[];
     tagsToRemove: string[];
-  },
-  agentIds?: string[],
-  skipSuccess?: boolean
-): Promise<{ items: BulkActionResult[] }> {
+    actionId?: string;
+    total?: number;
+  }
+): Promise<{ actionId: string }> {
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const filteredAgents = await filterHostedPolicies(
@@ -84,8 +92,35 @@ export async function updateTagsBatch(
       data: {
         tags: getNewTags(agent),
       },
+    })),
+    errors
+  );
+
+  const actionId = options.actionId ?? uuid();
+  const total = options.total ?? givenAgents.length;
+
+  // creating an action doc so that update tags  shows up in activity
+  await createAgentAction(esClient, {
+    id: actionId,
+    agents: [],
+    created_at: new Date().toISOString(),
+    type: 'UPDATE_TAGS',
+    total,
+  });
+  await bulkCreateAgentActionResults(
+    esClient,
+    filteredAgents.map((agent) => ({
+      agentId: agent.id,
+      actionId,
     }))
   );
 
-  return { items: errorsToResults(filteredAgents, errors, agentIds, skipSuccess) };
+  await createErrorActionResults(
+    esClient,
+    actionId,
+    errors,
+    'cannot modified tags on hosted agents'
+  );
+
+  return { actionId };
 }

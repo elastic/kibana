@@ -25,18 +25,19 @@ import { settingsServiceFactory } from './settings/settings.story';
 import { unifiedSearchServiceFactory } from './unified_search/unified_search.story';
 import { themeServiceFactory } from './theme/theme.story';
 import { registry as stubRegistry } from './plugin_services.story';
+import { embeddableServiceFactory } from './embeddable/embeddable.story';
 
 export const providers: PluginServiceProviders<ControlsServices> = {
-  http: new PluginServiceProvider(httpServiceFactory),
-  data: new PluginServiceProvider(dataServiceFactory),
-  overlays: new PluginServiceProvider(overlaysServiceFactory),
-  dataViews: new PluginServiceProvider(dataViewsServiceFactory),
-  settings: new PluginServiceProvider(settingsServiceFactory),
-  unifiedSearch: new PluginServiceProvider(unifiedSearchServiceFactory),
-  theme: new PluginServiceProvider(themeServiceFactory),
-
+  embeddable: new PluginServiceProvider(embeddableServiceFactory),
   controls: new PluginServiceProvider(controlsServiceFactory),
+  data: new PluginServiceProvider(dataServiceFactory),
+  dataViews: new PluginServiceProvider(dataViewsServiceFactory),
+  http: new PluginServiceProvider(httpServiceFactory),
   optionsList: new PluginServiceProvider(optionsListServiceFactory),
+  overlays: new PluginServiceProvider(overlaysServiceFactory),
+  settings: new PluginServiceProvider(settingsServiceFactory),
+  theme: new PluginServiceProvider(themeServiceFactory),
+  unifiedSearch: new PluginServiceProvider(unifiedSearchServiceFactory),
 };
 
 export const pluginServices = new PluginServices<ControlsServices>();

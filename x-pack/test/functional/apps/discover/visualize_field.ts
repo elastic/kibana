@@ -26,12 +26,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'spaceSelector',
     'header',
   ]);
+  const monacoEditor = getService('monacoEditor');
+
+  const defaultSettings = {
+    'discover:enableSql': true,
+  };
 
   async function setDiscoverTimeRange() {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
   describe('discover field visualize button', () => {
+    before(async () => {
+      await kibanaServer.uiSettings.replace(defaultSettings);
+    });
     beforeEach(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
@@ -87,12 +95,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.discover.createAdHocDataView('logst', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await testSubjects.click('discoverEditVisualization');
+      await testSubjects.click('unifiedHistogramEditVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await retry.try(async () => {
         const selectedPattern = await PageObjects.lens.getDataPanelIndexPattern();
         expect(selectedPattern).to.eql('logst*');
+      });
+    });
+
+    it('should visualize correctly text based language queries', async () => {
+      await PageObjects.discover.selectTextBaseLang('SQL');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await monacoEditor.setCodeEditorValue(
+        'SELECT extension, AVG("bytes") as average FROM "logstash-*" GROUP BY extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      await testSubjects.click('textBased-visualize');
+
+      await retry.try(async () => {
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger-textBased');
+        expect(dimensions).to.have.length(2);
+        expect(await dimensions[1].getVisibleText()).to.be('average');
       });
     });
   });

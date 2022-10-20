@@ -101,6 +101,7 @@ import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 import { EndpointFleetServicesFactory } from './endpoint/services/fleet';
 import { featureUsageService } from './endpoint/services/feature_usage';
 import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
+import { artifactService } from './lib/telemetry/artifact';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -306,7 +307,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       NEW_TERMS_RULE_TYPE_ID,
     ];
 
-    plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));
+    plugins.features.registerKibanaFeature(
+      getKibanaPrivilegesFeaturePrivileges(ruleTypes, experimentalFeatures)
+    );
     plugins.features.registerKibanaFeature(getCasesKibanaFeature());
 
     if (plugins.alerting != null) {
@@ -470,6 +473,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       exceptionListsClient: exceptionListClient,
       registerListsServerExtension: this.lists?.registerExtension,
       featureUsageService,
+      experimentalFeatures: config.experimentalFeatures,
     });
 
     this.telemetryReceiver.start(
@@ -480,6 +484,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.endpointAppContextService,
       exceptionListClient
     );
+
+    artifactService.start(this.telemetryReceiver);
 
     this.telemetryEventsSender.start(
       plugins.telemetry,

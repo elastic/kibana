@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { curry, find } from 'lodash';
+import { find } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
@@ -70,7 +70,7 @@ const ParamsSchema = schema.object({
 
 export const ConnectorTypeId = '.index';
 // connector type definition
-export function getConnectorType({ logger }: { logger: Logger }): ESIndexConnectorType {
+export function getConnectorType(): ESIndexConnectorType {
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'basic',
@@ -90,7 +90,7 @@ export function getConnectorType({ logger }: { logger: Logger }): ESIndexConnect
         schema: ParamsSchema,
       },
     },
-    executor: curry(executor)({ logger }),
+    executor,
     renderParameterTemplates,
   };
 }
@@ -98,14 +98,9 @@ export function getConnectorType({ logger }: { logger: Logger }): ESIndexConnect
 // action executor
 
 async function executor(
-  { logger }: { logger: Logger },
   execOptions: ESIndexConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const actionId = execOptions.actionId;
-  const config = execOptions.config;
-  const params = execOptions.params;
-  const services = execOptions.services;
-
+  const { actionId, config, params, services, logger } = execOptions;
   const index = params.indexOverride || config.index;
 
   const bulkBody = [];
@@ -148,7 +143,7 @@ async function executor(
 function renderParameterTemplates(
   params: ActionParamsType,
   variables: Record<string, unknown>,
-  actionId: string
+  actionId?: string
 ): ActionParamsType {
   const { documents, indexOverride } = renderMustacheObject<ActionParamsType>(params, variables);
 

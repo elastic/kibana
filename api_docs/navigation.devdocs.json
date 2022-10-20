@@ -18,13 +18,7 @@
             "text": "NavigationPublicPlugin"
           },
           " implements ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "navigation",
@@ -69,13 +63,7 @@
                 "label": "initializerContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<object>"
                 ],
                 "path": "src/plugins/navigation/public/plugin.ts",
@@ -95,13 +83,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>) => ",
               {
                 "pluginId": "navigation",
@@ -123,13 +105,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<object, unknown>"
                 ],
                 "path": "src/plugins/navigation/public/plugin.ts",
@@ -149,13 +125,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", { unifiedSearch }: ",
               "NavigationPluginStartDependencies",
               ") => ",
@@ -179,13 +149,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/plugins/navigation/public/plugin.ts",
                 "deprecated": false,
@@ -700,7 +664,7 @@
           },
           "[] | undefined; badges?: (",
           "EuiBadgeProps",
-          " & { badgeText: string; })[] | undefined; showSearchBar?: boolean | undefined; showQueryBar?: boolean | undefined; showQueryInput?: boolean | undefined; showDatePicker?: boolean | undefined; showFilterBar?: boolean | undefined; unifiedSearch?: ",
+          " & { badgeText: string; })[] | undefined; showSearchBar?: boolean | undefined; showQueryInput?: boolean | undefined; showDatePicker?: boolean | undefined; showFilterBar?: boolean | undefined; unifiedSearch?: ",
           {
             "pluginId": "unifiedSearch",
             "scope": "public",

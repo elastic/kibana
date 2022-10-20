@@ -31,6 +31,8 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { tableDefaults } from '../../../../../common/store/data_table/defaults';
+import { dataTableActions, dataTableSelectors } from '../../../../../common/store/data_table';
 import { SecuritySolutionTabNavigation } from '../../../../../common/components/navigation';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import {
@@ -38,7 +40,7 @@ import {
   useShallowEqualSelector,
 } from '../../../../../common/hooks/use_selector';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
-import { TimelineId } from '../../../../../../common/types/timeline';
+import { TableId } from '../../../../../../common/types/timeline';
 import type { UpdateDateRange } from '../../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../../common/components/filters_global';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
@@ -92,8 +94,6 @@ import {
   resetKeyboardFocus,
   showGlobalFilters,
 } from '../../../../../timelines/components/timeline/helpers';
-import { timelineActions, timelineSelectors } from '../../../../../timelines/store/timeline';
-import { timelineDefaults } from '../../../../../timelines/store/timeline/defaults';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import {
@@ -116,7 +116,7 @@ import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
 import { RuleDetailsContextProvider } from './rule_details_context';
-import { useGetSavedQuery } from '../../../../../common/hooks/use_get_saved_query';
+import { useGetSavedQuery } from '../use_get_saved_query';
 import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
@@ -184,17 +184,15 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
-    (state) =>
-      (getTimeline(state, TimelineId.detectionsRulesDetailsPage) ?? timelineDefaults).graphEventId
+    (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).graphEventId
   );
   const updatedAt = useShallowEqualSelector(
-    (state) =>
-      (getTimeline(state, TimelineId.detectionsRulesDetailsPage) ?? timelineDefaults).updated
+    (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).updated
   );
   const isAlertsLoading = useShallowEqualSelector(
-    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).isLoading
+    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -306,9 +304,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
 
-  // load saved query only if rule type === 'saved_query', as other rule types still can have saved_id property that is not used
-  const savedQueryId = rule?.type === 'saved_query' ? rule?.saved_id : undefined;
-  const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery(savedQueryId);
+  const { isSavedQueryLoading, savedQueryBar } = useGetSavedQuery(rule?.saved_id, {
+    ruleType: rule?.type,
+  });
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
@@ -489,10 +487,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   // Callback for when open/closed filter changes
   const onFilterGroupChangedCallback = useCallback(
     (newFilterGroup: Status) => {
-      const timelineId = TimelineId.detectionsRulesDetailsPage;
-      clearEventsLoading({ id: timelineId });
-      clearEventsDeleted({ id: timelineId });
-      clearSelected({ id: timelineId });
+      const tableId = TableId.alertsOnRuleDetailsPage;
+      clearEventsLoading({ id: tableId });
+      clearEventsDeleted({ id: tableId });
+      clearSelected({ id: tableId });
       setFilterGroup(newFilterGroup);
     },
     [clearEventsLoading, clearEventsDeleted, clearSelected, setFilterGroup]
@@ -614,6 +612,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     }
     return (
       <LinkButton
+        data-test-subj="editRuleSettingsLink"
         onClick={goToEditRule}
         iconType="controlsHorizontal"
         isDisabled={!isExistingRule || !userHasPermissions(canUserCRUD)}
@@ -846,7 +845,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     {ruleId != null && (
                       <AlertsTable
                         filterGroup={filterGroup}
-                        timelineId={TimelineId.detectionsRulesDetailsPage}
+                        tableId={TableId.alertsOnRuleDetailsPage}
                         defaultFilters={alertsTableDefaultFilters}
                         hasIndexWrite={hasIndexWrite ?? false}
                         hasIndexMaintenance={hasIndexMaintenance ?? false}
@@ -867,8 +866,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.exceptions})`}>
                   <ExceptionsViewer
                     rule={rule}
-                    listType={ExceptionListTypeEnum.DETECTION}
+                    listTypes={[
+                      ExceptionListTypeEnum.DETECTION,
+                      ExceptionListTypeEnum.RULE_DEFAULT,
+                    ]}
                     onRuleChange={refreshRule}
+                    isViewReadOnly={!isExistingRule}
                     data-test-subj="exceptionTab"
                   />
                 </Route>
@@ -877,8 +880,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 >
                   <ExceptionsViewer
                     rule={rule}
-                    listType={ExceptionListTypeEnum.ENDPOINT}
+                    listTypes={[ExceptionListTypeEnum.ENDPOINT]}
                     onRuleChange={refreshRule}
+                    isViewReadOnly={!isExistingRule}
                     data-test-subj="endpointExceptionsTab"
                   />
                 </Route>
@@ -899,11 +903,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 };
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  clearSelected: ({ id }: { id: string }) => dispatch(timelineActions.clearSelected({ id })),
+  clearSelected: ({ id }: { id: string }) => dispatch(dataTableActions.clearSelected({ id })),
   clearEventsLoading: ({ id }: { id: string }) =>
-    dispatch(timelineActions.clearEventsLoading({ id })),
+    dispatch(dataTableActions.clearEventsLoading({ id })),
   clearEventsDeleted: ({ id }: { id: string }) =>
-    dispatch(timelineActions.clearEventsDeleted({ id })),
+    dispatch(dataTableActions.clearEventsDeleted({ id })),
 });
 
 const connector = connect(null, mapDispatchToProps);

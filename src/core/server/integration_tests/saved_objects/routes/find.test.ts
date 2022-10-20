@@ -15,7 +15,7 @@ import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import { setupServer } from './test_utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import {
   registerFindRoute,
   type InternalSavedObjectsRequestHandlerContext,
@@ -123,6 +123,7 @@ describe('GET /api/saved_objects/_find', () => {
       type: ['foo', 'bar'],
       defaultSearchOperator: 'OR',
       hasReferenceOperator: 'OR',
+      hasNoReferenceOperator: 'OR',
     });
   });
 
@@ -209,6 +210,73 @@ describe('GET /api/saved_objects/_find', () => {
     expect(options).toEqual(
       expect.objectContaining({
         hasReferenceOperator: 'AND',
+      })
+    );
+  });
+
+  it('accepts the query parameter has_no_reference as an object', async () => {
+    const references = querystring.escape(
+      JSON.stringify({
+        id: '1',
+        type: 'reference',
+      })
+    );
+    await supertest(httpSetup.server.listener)
+      .get(`/api/saved_objects/_find?type=foo&has_no_reference=${references}`)
+      .expect(200);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+
+    const options = savedObjectsClient.find.mock.calls[0][0];
+    expect(options.hasNoReference).toEqual({
+      id: '1',
+      type: 'reference',
+    });
+  });
+
+  it('accepts the query parameter has_no_reference as an array', async () => {
+    const references = querystring.escape(
+      JSON.stringify([
+        {
+          id: '1',
+          type: 'reference',
+        },
+        {
+          id: '2',
+          type: 'reference',
+        },
+      ])
+    );
+    await supertest(httpSetup.server.listener)
+      .get(`/api/saved_objects/_find?type=foo&has_no_reference=${references}`)
+      .expect(200);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+
+    const options = savedObjectsClient.find.mock.calls[0][0];
+    expect(options.hasNoReference).toEqual([
+      {
+        id: '1',
+        type: 'reference',
+      },
+      {
+        id: '2',
+        type: 'reference',
+      },
+    ]);
+  });
+
+  it('accepts the query parameter has_no_reference_operator', async () => {
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=foo&has_no_reference_operator=AND')
+      .expect(200);
+
+    expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
+
+    const options = savedObjectsClient.find.mock.calls[0][0];
+    expect(options).toEqual(
+      expect.objectContaining({
+        hasNoReferenceOperator: 'AND',
       })
     );
   });

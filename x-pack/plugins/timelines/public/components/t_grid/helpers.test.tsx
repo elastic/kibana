@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash/fp';
 import { Filter, EsQueryConfig, FilterStateStore } from '@kbn/es-query';
 
-import { DataProviderType, TimelineId } from '../../../common/types/timeline';
+import { DataProviderType } from '../../../common/types/timeline';
 import {
   buildGlobalQuery,
   combineQueries,
@@ -16,9 +16,9 @@ import {
   isSelectableView,
   isViewSelection,
   resolverIsShowing,
-  showGlobalFilters,
 } from './helpers';
 import { mockBrowserFields, mockDataProviders, mockIndexPattern } from '../../mock';
+import { TableId } from '../../types';
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
 
@@ -526,6 +526,101 @@ describe('Combined Queries', () => {
     );
   });
 
+  test('Disabled Data Provider and kqlQuery', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 1));
+    dataProviders[0].enabled = false;
+    const { filterQuery } = combineQueries({
+      config,
+      dataProviders,
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: '_id:*', language: 'kuery' },
+      kqlMode: 'search',
+    })!;
+
+    const expectQueryString = JSON.stringify({
+      bool: {
+        must: [],
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  exists: {
+                    field: '_id',
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
+    });
+
+    expect(filterQuery).toStrictEqual(expectQueryString);
+  });
+
+  test('Both disabled & enabled data provider and kqlQuery', () => {
+    const dataProviders = cloneDeep(mockDataProviders.slice(0, 2));
+    dataProviders[0].enabled = false;
+    const { filterQuery } = combineQueries({
+      config,
+      dataProviders,
+      indexPattern: mockIndexPattern,
+      browserFields: mockBrowserFields,
+      filters: [],
+      kqlQuery: { query: '_id:*', language: 'kuery' },
+      kqlMode: 'search',
+    })!;
+
+    const expectQueryString = JSON.stringify({
+      bool: {
+        must: [],
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    should: [
+                      {
+                        match_phrase: {
+                          [dataProviders[1].queryMatch.field]: dataProviders[1].queryMatch.value,
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+                {
+                  bool: {
+                    should: [
+                      {
+                        exists: {
+                          field: '_id',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
+    });
+
+    expect(filterQuery).toStrictEqual(expectQueryString);
+  });
+
   describe('resolverIsShowing', () => {
     test('it returns true when graphEventId is NOT an empty string', () => {
       expect(resolverIsShowing('a valid id')).toBe(true);
@@ -537,32 +632,6 @@ describe('Combined Queries', () => {
 
     test('it returns false when graphEventId is an empty string', () => {
       expect(resolverIsShowing('')).toBe(false);
-    });
-  });
-
-  describe('showGlobalFilters', () => {
-    test('it returns false when `globalFullScreen` is true and `graphEventId` is NOT an empty string, because Resolver IS showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: true, graphEventId: 'a valid id' })).toBe(false);
-    });
-
-    test('it returns true when `globalFullScreen` is true and `graphEventId` is undefined, because Resolver is NOT showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: true, graphEventId: undefined })).toBe(true);
-    });
-
-    test('it returns true when `globalFullScreen` is true and `graphEventId` is an empty string, because Resolver is NOT showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: true, graphEventId: '' })).toBe(true);
-    });
-
-    test('it returns true when `globalFullScreen` is false and `graphEventId` is NOT an empty string, because Resolver IS showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: false, graphEventId: 'a valid id' })).toBe(true);
-    });
-
-    test('it returns true when `globalFullScreen` is false and `graphEventId` is undefined, because Resolver is NOT showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: false, graphEventId: undefined })).toBe(true);
-    });
-
-    test('it returns true when `globalFullScreen` is false and `graphEventId` is an empty string, because Resolver is NOT showing', () => {
-      expect(showGlobalFilters({ globalFullScreen: false, graphEventId: '' })).toBe(true);
     });
   });
 
@@ -579,15 +648,14 @@ describe('Combined Queries', () => {
       null,
     ];
 
-    const selectableViews: TimelineId[] = [
-      TimelineId.detectionsPage,
-      TimelineId.detectionsRulesDetailsPage,
+    const selectableViews: TableId[] = [
+      TableId.alertsOnAlertsPage,
+      TableId.alertsOnRuleDetailsPage,
     ];
 
     const exampleNonSelectableViews: string[] = [
-      TimelineId.casePage,
-      TimelineId.hostsPageEvents,
-      TimelineId.usersPageEvents,
+      TableId.hostsPageEvents,
+      TableId.usersPageEvents,
       'foozle',
       '',
     ];

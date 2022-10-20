@@ -20,7 +20,6 @@ export const allowedExperimentalValues = Object.freeze({
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
   policyResponseInFleetEnabled: true,
-  threatIntelligenceEnabled: false,
 
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
@@ -60,6 +59,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the detection response actions in rule + alerts
    */
   responseActionsEnabled: true,
+
+  /**
+   * Enables endpoint package level rbac
+   */
+  endpointRbacEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

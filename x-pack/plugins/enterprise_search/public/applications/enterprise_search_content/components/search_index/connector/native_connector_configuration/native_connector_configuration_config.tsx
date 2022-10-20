@@ -11,6 +11,8 @@ import { EuiSpacer, EuiLink, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic
 
 import { i18n } from '@kbn/i18n';
 
+import { docLinks } from '../../../../../shared/doc_links';
+
 import { ConnectorConfigurationConfig } from '../connector_configuration_config';
 import { NativeConnector } from '../types';
 
@@ -35,7 +37,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
       <EuiSpacer />
       <EuiFlexGroup direction="row">
         <EuiFlexItem grow={false}>
-          <EuiLink href={'' /* TODO docLinks url */} target="_blank">
+          <EuiLink href={docLinks.elasticsearchSecureCluster} target="_blank">
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.securityDocumentationLinkLabel',
               {
@@ -44,19 +46,21 @@ export const NativeConnectorConfigurationConfig: React.FC<
             )}
           </EuiLink>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink href={'' /* TODO documentation url */} target="_blank">
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.sourceSecurityDocumentationLinkLabel',
-              {
-                defaultMessage: '{name} authentication',
-                values: {
-                  name: nativeConnector.name,
-                },
-              }
-            )}
-          </EuiLink>
-        </EuiFlexItem>
+        {nativeConnector.externalAuthDocsUrl && (
+          <EuiFlexItem grow={false}>
+            <EuiLink href={nativeConnector.externalAuthDocsUrl} target="_blank">
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.sourceSecurityDocumentationLinkLabel',
+                {
+                  defaultMessage: '{name} authentication',
+                  values: {
+                    name: nativeConnector.name,
+                  },
+                }
+              )}
+            </EuiLink>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </ConnectorConfigurationConfig>
   );

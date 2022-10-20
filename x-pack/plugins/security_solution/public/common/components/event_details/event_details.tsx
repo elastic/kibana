@@ -20,6 +20,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import type { AlertRawEventData } from './osquery_tab';
 import { useOsqueryTab } from './osquery_tab';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
@@ -51,21 +52,6 @@ export const EVENT_DETAILS_CONTEXT_ID = 'event-details';
 
 type EventViewTab = EuiTabbedContentTab;
 
-export interface AlertRawEventData {
-  _id: string;
-  fields: {
-    ['agent.id']?: string[];
-    ['kibana.alert.rule.parameters']: Array<{
-      response_actions: Array<{
-        action_type_id: string;
-        params: Record<string, unknown>;
-      }>;
-    }>;
-    ['kibana.alert.rule.name']: string[];
-  };
-  [key: string]: unknown;
-}
-
 export type EventViewId =
   | EventsViewType.tableView
   | EventsViewType.jsonView
@@ -91,7 +77,7 @@ interface Props {
   isDraggable?: boolean;
   rawEventData: object | undefined;
   timelineTabType: TimelineTabs | 'flyout';
-  timelineId: string;
+  scopeId: string;
   handleOnEventClosed: () => void;
   isReadOnly?: boolean;
 }
@@ -130,6 +116,7 @@ const TabContentWrapper = styled.div`
 const RendererContainer = styled.div`
   overflow-x: auto;
   padding-right: ${(props) => props.theme.eui.euiSizeXS};
+
   & .${DETAILS_CLASS_NAME} .euiFlexGroup {
     justify-content: flex-start;
   }
@@ -144,7 +131,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   isAlert,
   isDraggable,
   rawEventData,
-  timelineId,
+  scopeId,
   timelineTabType,
   handleOnEventClosed,
   isReadOnly,
@@ -192,6 +179,12 @@ const EventDetailsComponent: React.FC<Props> = ({
     [detailsEcsData]
   );
 
+  const showThreatSummary = useMemo(() => {
+    const hasEnrichments = enrichmentCount > 0;
+    const hasRiskInfoWithLicense = isLicenseValid && (hostRisk || userRisk);
+    return hasEnrichments || hasRiskInfoWithLicense;
+  }, [enrichmentCount, hostRisk, isLicenseValid, userRisk]);
+
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
       isAlert
@@ -204,11 +197,11 @@ const EventDetailsComponent: React.FC<Props> = ({
                 <EuiSpacer size="m" />
                 <Overview
                   browserFields={browserFields}
-                  contextId={timelineId}
+                  contextId={scopeId}
                   data={data}
                   eventId={id}
                   indexName={indexName}
-                  timelineId={timelineId}
+                  scopeId={scopeId}
                   handleOnEventClosed={handleOnEventClosed}
                   isReadOnly={isReadOnly}
                 />
@@ -221,7 +214,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                         contextId: EVENT_DETAILS_CONTEXT_ID,
                         data: detailsEcsData,
                         isDraggable: isDraggable ?? false,
-                        timelineId,
+                        scopeId,
                       })}
                     </RendererContainer>
                   </div>
@@ -234,7 +227,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                     eventId: id,
                     browserFields,
                     isDraggable,
-                    timelineId,
+                    scopeId,
                     title: i18n.HIGHLIGHTED_FIELDS,
                     isReadOnly,
                   }}
@@ -246,24 +239,23 @@ const EventDetailsComponent: React.FC<Props> = ({
                   browserFields={browserFields}
                   eventId={id}
                   data={data}
-                  timelineId={timelineId}
+                  scopeId={scopeId}
                   isReadOnly={isReadOnly}
                 />
 
-                {enrichmentCount > 0 ||
-                  (isLicenseValid && (hostRisk || userRisk) && (
-                    <ThreatSummaryView
-                      isDraggable={isDraggable}
-                      hostRisk={hostRisk}
-                      userRisk={userRisk}
-                      browserFields={browserFields}
-                      data={data}
-                      eventId={id}
-                      timelineId={timelineId}
-                      enrichments={allEnrichments}
-                      isReadOnly={isReadOnly}
-                    />
-                  ))}
+                {showThreatSummary && (
+                  <ThreatSummaryView
+                    isDraggable={isDraggable}
+                    hostRisk={hostRisk}
+                    userRisk={userRisk}
+                    browserFields={browserFields}
+                    data={data}
+                    eventId={id}
+                    scopeId={scopeId}
+                    enrichments={allEnrichments}
+                    isReadOnly={isReadOnly}
+                  />
+                )}
 
                 {isEnrichmentsLoading && (
                   <>
@@ -281,7 +273,6 @@ const EventDetailsComponent: React.FC<Props> = ({
       browserFields,
       data,
       detailsEcsData,
-      enrichmentCount,
       goToTableTab,
       handleOnEventClosed,
       hostRisk,
@@ -289,11 +280,11 @@ const EventDetailsComponent: React.FC<Props> = ({
       indexName,
       isAlert,
       isDraggable,
+      scopeId,
       isEnrichmentsLoading,
-      isLicenseValid,
+      showThreatSummary,
       isReadOnly,
       renderer,
-      timelineId,
       userRisk,
     ]
   );
@@ -368,14 +359,14 @@ const EventDetailsComponent: React.FC<Props> = ({
             data={data}
             eventId={id}
             isDraggable={isDraggable}
-            timelineId={timelineId}
+            scopeId={scopeId}
             timelineTabType={timelineTabType}
             isReadOnly={isReadOnly}
           />
         </>
       ),
     }),
-    [browserFields, data, id, isDraggable, timelineId, timelineTabType, isReadOnly]
+    [browserFields, data, id, isDraggable, scopeId, timelineTabType, isReadOnly]
   );
 
   const jsonTab = useMemo(
@@ -397,7 +388,6 @@ const EventDetailsComponent: React.FC<Props> = ({
 
   const osqueryTab = useOsqueryTab({
     rawEventData: rawEventData as AlertRawEventData,
-    id,
   });
 
   const tabs = useMemo(() => {

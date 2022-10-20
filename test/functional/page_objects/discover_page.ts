@@ -29,7 +29,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
   public async getChartTimespan() {
-    return await this.testSubjects.getAttribute('discoverChart', 'data-time-range');
+    return await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-time-range');
   }
 
   public async getDocTable() {
@@ -207,40 +207,40 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async isChartVisible() {
-    return await this.testSubjects.exists('discoverChart');
+    return await this.testSubjects.exists('unifiedHistogramChart');
   }
 
   public async toggleChartVisibility() {
-    await this.testSubjects.moveMouseTo('discoverChartOptionsToggle');
-    await this.testSubjects.click('discoverChartOptionsToggle');
-    await this.testSubjects.exists('discoverChartToggle');
-    await this.testSubjects.click('discoverChartToggle');
+    await this.testSubjects.moveMouseTo('unifiedHistogramChartOptionsToggle');
+    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
+    await this.testSubjects.exists('unifiedHistogramChartToggle');
+    await this.testSubjects.click('unifiedHistogramChartToggle');
     await this.header.waitUntilLoadingHasFinished();
   }
 
   public async getChartInterval() {
-    await this.testSubjects.click('discoverChartOptionsToggle');
-    await this.testSubjects.click('discoverTimeIntervalPanel');
-    const selectedOption = await this.find.byCssSelector(`.discoverIntervalSelected`);
+    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
+    await this.testSubjects.click('unifiedHistogramTimeIntervalPanel');
+    const selectedOption = await this.find.byCssSelector(`.unifiedHistogramIntervalSelected`);
     return selectedOption.getVisibleText();
   }
 
   public async getChartIntervalWarningIcon() {
-    await this.testSubjects.click('discoverChartOptionsToggle');
+    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
     await this.header.waitUntilLoadingHasFinished();
     return await this.find.existsByCssSelector('.euiToolTipAnchor');
   }
 
   public async setChartInterval(interval: string) {
-    await this.testSubjects.click('discoverChartOptionsToggle');
-    await this.testSubjects.click('discoverTimeIntervalPanel');
-    await this.testSubjects.click(`discoverTimeInterval-${interval}`);
+    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
+    await this.testSubjects.click('unifiedHistogramTimeIntervalPanel');
+    await this.testSubjects.click(`unifiedHistogramTimeInterval-${interval}`);
     return await this.header.waitUntilLoadingHasFinished();
   }
 
   public async getHitCount() {
     await this.header.waitUntilLoadingHasFinished();
-    return await this.testSubjects.getVisibleText('discoverQueryHits');
+    return await this.testSubjects.getVisibleText('unifiedHistogramQueryHits');
   }
 
   public async getDocHeader() {
@@ -486,7 +486,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async clickFieldListItemVisualize(fieldName: string) {
     const field = await this.testSubjects.find(`field-${fieldName}-showDetails`);
-    const isActive = await field.elementHasClass('dscSidebarItem--active');
+    const isActive = await field.elementHasClass('kbnFieldButton-isActive');
 
     if (!isActive) {
       // expand the field to show the "Visualize" button
@@ -494,6 +494,7 @@ export class DiscoverPageObject extends FtrService {
     }
 
     await this.testSubjects.click(`fieldVisualize-${fieldName}`);
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async expectFieldListItemVisualize(field: string) {
@@ -572,7 +573,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async waitForChartLoadingComplete(renderCount: number) {
-    await this.elasticChart.waitForRenderingCount(renderCount, 'discoverChart');
+    await this.elasticChart.waitForRenderingCount(renderCount, 'unifiedHistogramChart');
   }
 
   public async waitForDocTableLoadingComplete() {
@@ -681,5 +682,37 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.existOrFail('discover-sidebar');
     const button = await this.testSubjects.find('discover-dataView-switch-link');
     return button.getAttribute('title');
+  }
+
+  public async getCurrentDataViewId() {
+    const currentUrl = await this.browser.getCurrentUrl();
+    const matches = currentUrl.matchAll(/index:[^,]*/g);
+    const indexes = [];
+    for (const matchEntry of matches) {
+      const [index] = matchEntry;
+      indexes.push(decodeURIComponent(index).replace('index:', '').replaceAll("'", ''));
+    }
+
+    const first = indexes[0];
+    if (first) {
+      const allEqual = indexes.every((val) => val === first);
+      if (allEqual) {
+        return first;
+      } else {
+        throw new Error(
+          'Discover URL state contains different index references. They should be all the same.'
+        );
+      }
+    }
+    throw new Error("Discover URL state doesn't contain an index reference.");
+  }
+
+  public async addRuntimeField(name: string, script: string) {
+    await this.clickAddField();
+    await this.fieldEditor.setName(name);
+    await this.fieldEditor.enableValue();
+    await this.fieldEditor.typeScript(script);
+    await this.fieldEditor.save();
+    await this.header.waitUntilLoadingHasFinished();
   }
 }

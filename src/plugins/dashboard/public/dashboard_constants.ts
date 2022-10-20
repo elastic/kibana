@@ -6,8 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { ViewMode } from '@kbn/embeddable-plugin/common';
+import type { DashboardState } from './types';
+
 export const DASHBOARD_STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
+
+export const DASHBOARD_GRID_COLUMN_COUNT = 48;
+export const DASHBOARD_GRID_HEIGHT = 20;
+export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
+export const DEFAULT_PANEL_HEIGHT = 15;
+export const DASHBOARD_CONTAINER_TYPE = 'dashboard';
 
 export const DashboardConstants = {
   LANDING_PAGE_PATH: '/list',
@@ -18,9 +27,36 @@ export const DashboardConstants = {
   ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
   DASHBOARDS_ID: 'dashboards',
   DASHBOARD_ID: 'dashboard',
+  DASHBOARD_SAVED_OBJECT_TYPE: 'dashboard',
   SEARCH_SESSION_ID: 'searchSessionId',
   CHANGE_CHECK_DEBOUNCE: 100,
   CHANGE_APPLY_DEBOUNCE: 50,
+};
+
+export const defaultDashboardState: DashboardState = {
+  viewMode: ViewMode.EDIT, // new dashboards start in  edit mode.
+  fullScreenMode: false,
+  timeRestore: false,
+  query: { query: '', language: 'kuery' },
+  description: '',
+  filters: [],
+  panels: {},
+  title: '',
+  tags: [],
+  options: {
+    useMargins: true,
+    syncColors: false,
+    syncCursor: true,
+    syncTooltips: false,
+    hidePanelTitles: false,
+  },
+};
+
+export const getFullPath = (aliasId?: string, id?: string) =>
+  `/app/dashboards#${createDashboardEditUrl(aliasId || id)}`;
+
+export const getFullEditPath = (id?: string, editMode?: boolean) => {
+  return `/app/dashboards#${createDashboardEditUrl(id, editMode)}`;
 };
 
 export function createDashboardEditUrl(id?: string, editMode?: boolean) {

@@ -23,7 +23,7 @@ export async function getSuggestionsWithTermsAggregation({
   fieldName: string;
   fieldValue: string;
   searchAggregatedTransactions: boolean;
-  serviceName: string;
+  serviceName?: string;
   setup: Setup;
   size: number;
   start: number;
@@ -42,6 +42,7 @@ export async function getSuggestionsWithTermsAggregation({
         ],
       },
       body: {
+        track_total_hits: false,
         timeout: '1500ms',
         size: 0,
         query: {

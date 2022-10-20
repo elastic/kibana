@@ -35,7 +35,8 @@ import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { TimelineHeader } from '../header';
-import { calculateTotalPages, combineQueries } from '../helpers';
+import { calculateTotalPages } from '../helpers';
+import { combineQueries } from '../../../../common/lib/kuery';
 import { TimelineRefetch } from '../refetch_timeline';
 import type {
   ControlColumnProps,
@@ -178,6 +179,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   itemsPerPageOptions,
   kqlMode,
   kqlQueryExpression,
+  kqlQueryLanguage,
   onEventClosed,
   renderCellValue,
   rowRenderers,
@@ -207,11 +209,12 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
 
-  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
-  const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
-    getManageTimeline(state, timelineId ?? '')
+  const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const currentTimeline = useDeepEqualSelector((state) =>
+    getManageTimeline(state, timelineId ?? TimelineId.active)
   );
 
+  const activeFilterManager = currentTimeline.filterManager;
   const filterManager = useMemo(
     () => activeFilterManager ?? new FilterManager(uiSettings),
     [activeFilterManager, uiSettings]
@@ -222,8 +225,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     query: string;
     language: KueryFilterQueryKind;
   } = useMemo(
-    () => ({ query: kqlQueryExpression.trim(), language: 'kuery' }),
-    [kqlQueryExpression]
+    () => ({ query: kqlQueryExpression.trim(), language: kqlQueryLanguage }),
+    [kqlQueryExpression, kqlQueryLanguage]
   );
 
   const combinedQueries = combineQueries({
@@ -278,12 +281,12 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   useEffect(() => {
     dispatch(
-      timelineActions.initializeTGridSettings({
+      timelineActions.initializeTimelineSettings({
         filterManager,
         id: timelineId,
       })
     );
-  }, [activeFilterManager, dispatch, filterManager, timelineId, uiSettings]);
+  }, [activeFilterManager, currentTimeline, dispatch, filterManager, timelineId, uiSettings]);
 
   const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
     useTimelineEvents({
@@ -303,7 +306,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     });
 
   const handleOnPanelClosed = useCallback(() => {
-    onEventClosed({ tabType: TimelineTabs.query, timelineId });
+    onEventClosed({ tabType: TimelineTabs.query, id: timelineId });
 
     if (
       expandedDetail[TimelineTabs.query]?.panelView &&
@@ -449,7 +452,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 handleOnPanelClosed={handleOnPanelClosed}
                 runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.query}
-                timelineId={timelineId}
+                scopeId={timelineId}
               />
             </ScrollableFlexItem>
           </>
@@ -492,6 +495,11 @@ const makeMapStateToProps = () => {
         ? ' '
         : kqlQueryTimeline?.expression ?? '';
 
+    const kqlQueryLanguage =
+      isEmpty(dataProviders) && timelineType === 'template'
+        ? 'kuery'
+        : kqlQueryTimeline?.kind ?? 'kuery';
+
     return {
       activeTab,
       columns,
@@ -505,6 +513,7 @@ const makeMapStateToProps = () => {
       itemsPerPageOptions,
       kqlMode,
       kqlQueryExpression,
+      kqlQueryLanguage,
       showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
       show,
       showExpandedDetails:

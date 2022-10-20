@@ -1081,13 +1081,7 @@
             "text": "AdvancedUiActionsPublicPlugin"
           },
           " implements ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "uiActionsEnhanced",
@@ -1151,13 +1145,7 @@
                 "label": "initializerContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<object>"
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
@@ -1177,13 +1165,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<",
               "StartDependencies",
               ", unknown>, { embeddable, uiActions, licensing }: SetupDependencies) => ",
@@ -1207,13 +1189,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<",
                   "StartDependencies",
                   ", unknown>"
@@ -1250,13 +1226,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", { uiActions, licensing }: ",
               "StartDependencies",
               ") => ",
@@ -1280,13 +1250,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
                 "deprecated": false,

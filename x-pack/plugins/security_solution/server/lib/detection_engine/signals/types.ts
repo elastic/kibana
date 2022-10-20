@@ -286,6 +286,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   success: boolean;
   warning: boolean;
   searchAfterTimes: string[];
+  enrichmentTimes: string[];
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;
