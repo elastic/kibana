@@ -12,9 +12,9 @@ import React from 'react';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { HttpSetup } from '@kbn/core/public';
+import type { GuideState } from '@kbn/guided-onboarding';
 
 import { guidesConfig } from '../constants/guides_config';
-import type { GuideState } from '../../common/types';
 import { apiService } from '../services/api';
 import { GuidePanel } from './guide_panel';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
@@ -192,8 +192,8 @@ describe('Guided setup', () => {
       expect(exists('guideProgress')).toBe(true);
     });
 
-    test('should show the "Continue using Elastic" button when all steps has been completed', async () => {
-      const { component, exists } = testBed;
+    test('should show the completed state when all steps has been completed', async () => {
+      const { component, exists, find } = testBed;
 
       const readyToCompleteGuideState: GuideState = {
         guideId: 'search',
@@ -217,6 +217,10 @@ describe('Guided setup', () => {
 
       await updateComponentWithState(component, readyToCompleteGuideState, true);
 
+      expect(find('guideTitle').text()).toContain('Well done');
+      expect(find('guideDescription').text()).toContain(
+        `You've completed the Elastic Enterprise Search guide`
+      );
       expect(exists('useElasticButton')).toBe(true);
     });
 

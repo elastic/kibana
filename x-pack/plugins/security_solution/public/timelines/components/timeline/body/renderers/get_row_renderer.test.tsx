@@ -20,6 +20,7 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 
 import { defaultRowRenderers } from '.';
 import { getRowRenderer } from './get_row_renderer';
+import { TimelineId } from '../../../../../../common/types';
 
 // EuiIcons coming from .testenv render the icon's aria-label as a span
 // extractEuiIcon removes the aria-label before checking for equality
@@ -60,7 +61,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       data: nonSuricata,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
 
     const wrapper = shallow(<span>{row}</span>);
@@ -72,7 +73,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       data: nonSuricata,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = mount(
       <TestProviders>
@@ -87,7 +88,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       data: suricata,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = mount(
       <TestProviders>
@@ -105,7 +106,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       data: suricata,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = mount(
       <TestProviders>
@@ -123,7 +124,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       data: zeek,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = mount(
       <TestProviders>
@@ -141,7 +142,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       data: system,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = mount(
       <TestProviders>
@@ -159,7 +160,7 @@ describe('get_column_renderer', () => {
     const row = rowRenderer?.renderRow({
       data: auditd,
       isDraggable: true,
-      timelineId: 'test',
+      scopeId: TimelineId.test,
     });
     const wrapper = mount(
       <TestProviders>
@@ -197,7 +198,9 @@ describe('getRowRenderer', () => {
 
         render(
           <TestProviders>
-            <>{renderer?.renderRow({ data: auditd, isDraggable: false, timelineId: 'test' })}</>
+            <>
+              {renderer?.renderRow({ data: auditd, isDraggable: false, scopeId: TimelineId.test })}
+            </>
           </TestProviders>
         );
       });
@@ -239,7 +242,7 @@ describe('getRowRenderer', () => {
 
         render(
           <TestProviders>
-            <>{renderer?.renderRow({ data, isDraggable: false, timelineId: 'test' })}</>
+            <>{renderer?.renderRow({ data, isDraggable: false, scopeId: TimelineId.test })}</>
           </TestProviders>
         );
       });
@@ -274,7 +277,7 @@ describe('getRowRenderer', () => {
 
         render(
           <TestProviders>
-            <>{renderer?.renderRow({ data, isDraggable: false, timelineId: 'test' })}</>
+            <>{renderer?.renderRow({ data, isDraggable: false, scopeId: TimelineId.test })}</>
           </TestProviders>
         );
       });
