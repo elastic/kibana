@@ -8,6 +8,7 @@ value:
   title: Case title 1
   tags:
     - tag 1
+  assignees: []
   description: A case description.
   settings:
     syncAlerts: false

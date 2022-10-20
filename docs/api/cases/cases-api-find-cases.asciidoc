@@ -141,6 +141,7 @@ The API returns a JSON object listing the retrieved cases. For example:
         "full_name": "Joe Smith",
         "username": "jsmith"
       },
+      "assignees": [],
       "connector": {
         "id": "none",
         "name": "none",
