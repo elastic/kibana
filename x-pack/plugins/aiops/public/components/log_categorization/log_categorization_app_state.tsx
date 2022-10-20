@@ -11,6 +11,7 @@ import { LogCategorizationPage } from './log_categorization_page';
 import { SavedSearchSavedObject } from '../../application/utils/search_utils';
 import type { AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { UrlStateProvider } from '../../hooks/use_url_state';
 
 export interface LogCategorizationAppStateProps {
   dataView: DataView;
@@ -25,7 +26,9 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
 }) => {
   return (
     <AiopsAppContext.Provider value={appDependencies}>
-      <LogCategorizationPage dataView={dataView} savedSearch={savedSearch} />
+      <UrlStateProvider>
+        <LogCategorizationPage dataView={dataView} savedSearch={savedSearch} />
+      </UrlStateProvider>
     </AiopsAppContext.Provider>
   );
 };

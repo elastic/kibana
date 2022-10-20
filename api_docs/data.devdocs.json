@@ -11490,10 +11490,6 @@
               "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
             },
             {
-              "plugin": "discover",
-              "path": "src/plugins/discover/public/plugin.tsx"
-            },
-            {
               "plugin": "maps",
               "path": "x-pack/plugins/maps/public/kibana_services.ts"
             },
@@ -12060,12 +12056,8 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
-              },
-              {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -12073,7 +12065,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -12082,10 +12074,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -12210,26 +12198,6 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/hooks/use_es_doc_search.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/utils/resolve_data_view.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/utils/resolve_data_view.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/top_nav/discover_topnav.tsx"
               },
               {
                 "plugin": "aiops",
@@ -12874,10 +12842,6 @@
               {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
               },
               {
                 "plugin": "dataViews",
@@ -16715,15 +16679,13 @@
                   "UpdateResponse",
                   "<TDocumentR>>; }; asyncSearch: ",
                   "default",
-                  "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; helpers: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
                   ") => ",
-                  "default",
-                  "; Internal: ",
                   "default",
                   "; autoscaling: ",
                   "default",
@@ -19578,12 +19540,8 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
-              },
-              {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -19591,7 +19549,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -19600,10 +19558,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -19728,26 +19682,6 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/hooks/use_es_doc_search.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/utils/resolve_data_view.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/utils/resolve_data_view.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/top_nav/discover_topnav.tsx"
               },
               {
                 "plugin": "aiops",
@@ -20392,10 +20326,6 @@
               {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
               },
               {
                 "plugin": "dataViews",

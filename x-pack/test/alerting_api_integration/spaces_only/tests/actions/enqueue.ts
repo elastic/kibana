@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esTestIndexTool.waitForDocs('action:test.index-record', reference, 1);
     });
 
-    it('should cleanup task after a failure', async () => {
+    it('should retry task after a failure', async () => {
       const testStart = new Date().toISOString();
       const { body: createdAction } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
@@ -85,6 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
       objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
 
       const reference = `actions-enqueue-2:${Spaces.space1.id}:${createdAction.id}`;
+      let runAt: number;
       await supertest
         .post(
           `${getUrlPrefix(Spaces.space1.id)}/api/alerts_fixture/${createdAction.id}/enqueue_action`
@@ -96,7 +97,10 @@ export default function ({ getService }: FtrProviderContext) {
             index: ES_TEST_INDEX_NAME,
           },
         })
-        .expect(204);
+        .expect(204)
+        .then(() => {
+          runAt = Date.now();
+        });
       await esTestIndexTool.waitForDocs('action:test.failing', reference, 1);
 
       await retry.try(async () => {
@@ -123,7 +127,9 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
         });
-        expect((searchResult.hits.total as estypes.SearchTotalHits).value).to.eql(0);
+        const hit = searchResult.hits.hits as Array<estypes.SearchHit<any>>;
+        expect(Date.parse(hit[0]._source.task.runAt)).to.greaterThan(runAt);
+        expect(Date.parse(hit[0]._source.task.attempts)).to.greaterThan(1);
       });
     });
 
