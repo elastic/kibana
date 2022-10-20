@@ -90,7 +90,7 @@ export const GettingStarted = () => {
   const isDarkTheme = uiSettings.get<boolean>('theme:darkMode');
   const activateGuide = async (useCase: UseCase, guideState?: GuideState) => {
     await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
-    // TODO error handling
+    // TODO error handling https://github.com/elastic/kibana/issues/139798
   };
   return (
     <KibanaPageTemplate panelled={false} grow>
@@ -106,40 +106,30 @@ export const GettingStarted = () => {
           <EuiSpacer size="s" />
           <EuiSpacer size="xxl" />
           <EuiFlexGrid columns={4} gutterSize="l">
-            <EuiFlexItem>
-              <GuideCard
-                useCase="search"
-                guides={guidesState}
-                activateGuide={activateGuide}
-                isDarkTheme={isDarkTheme}
-                addBasePath={http.basePath.prepend}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <GuideCard
-                useCase="observability"
-                guides={guidesState}
-                activateGuide={activateGuide}
-                isDarkTheme={isDarkTheme}
-                addBasePath={http.basePath.prepend}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <ObservabilityLinkCard
-                navigateToApp={application.navigateToApp}
-                isDarkTheme={isDarkTheme}
-                addBasePath={http.basePath.prepend}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <GuideCard
-                useCase="security"
-                guides={guidesState}
-                activateGuide={activateGuide}
-                isDarkTheme={isDarkTheme}
-                addBasePath={http.basePath.prepend}
-              />
-            </EuiFlexItem>
+            {['search', 'observability', 'observabilityLink', 'security'].map((useCase) => {
+              if (useCase === 'observabilityLink') {
+                return (
+                  <EuiFlexItem>
+                    <ObservabilityLinkCard
+                      navigateToApp={application.navigateToApp}
+                      isDarkTheme={isDarkTheme}
+                      addBasePath={http.basePath.prepend}
+                    />
+                  </EuiFlexItem>
+                );
+              }
+              return (
+                <EuiFlexItem>
+                  <GuideCard
+                    useCase={useCase as UseCase}
+                    guides={guidesState}
+                    activateGuide={activateGuide}
+                    isDarkTheme={isDarkTheme}
+                    addBasePath={http.basePath.prepend}
+                  />
+                </EuiFlexItem>
+              );
+            })}
           </EuiFlexGrid>
           <EuiSpacer />
           <EuiHorizontalRule />
