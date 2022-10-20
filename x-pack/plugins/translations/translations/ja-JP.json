@@ -2725,7 +2725,6 @@
     "expressionXY.reusable.function.xyVis.errors.pointsRadiusForNonLineOrAreaChartError": "pointsRadiusは折れ線グラフまたは面グラフでのみ適用できます。",
     "expressionXY.reusable.function.xyVis.errors.showPointsForNonLineOrAreaChartError": "showPointsは折れ線グラフまたは面グラフでのみ適用できます。",
     "expressionXY.reusable.function.xyVis.errors.timeMarkerForNotTimeChartsError": "現在時刻マーカーを設定できるのは、時系列グラフのみです",
-    "expressionXY.reusable.function.xyVis.errors.valueLabelsForNotBarsOrHistogramBarsChartsError": "valueLabels引数は棒グラフでのみ適用できます。これはヒストグラフではありません。",
     "expressionXY.xAxisConfigFn.help": "xyグラフのx軸設定を構成",
     "expressionXY.xyChart.emptyXLabel": "（空）",
     "expressionXY.xyChart.iconSelect.alertIconLabel": "アラート",
