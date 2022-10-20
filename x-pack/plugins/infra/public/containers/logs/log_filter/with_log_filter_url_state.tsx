@@ -34,6 +34,8 @@ export const WithLogFilterUrlState: React.FC = () => {
       onInitialize={(urlState) => {
         if (urlState) {
           queryString.setQuery(urlState);
+        } else {
+          queryString.setQuery(DEFAULT_QUERY);
         }
       }}
     />
