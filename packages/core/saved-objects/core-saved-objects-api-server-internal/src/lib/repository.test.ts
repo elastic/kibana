@@ -824,7 +824,7 @@ describe('SavedObjectsRepository', () => {
         const modifiedObj1 = { ...obj1, coreMigrationVersion: '8.0.0' };
 
         await bulkCreateSuccess(client, repository, [modifiedObj1, obj2]);
-        const docs = [modifiedObj1, obj2].map((x) => ({ ...x, ...mockTimestampFields }));
+        const docs = [modifiedObj1, obj2].map((x) => ({ ...x, ...mockTimestampFieldsWithCreated }));
 
         expectMigrationArgs(docs[0], true, 1);
         expectMigrationArgs(docs[1], true, 2);

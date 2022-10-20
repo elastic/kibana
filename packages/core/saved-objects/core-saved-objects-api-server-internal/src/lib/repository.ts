@@ -650,6 +650,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
           ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
           updated_at: time,
+          created_at: time,
           references: object.references || [],
           originId,
         }) as SavedObjectSanitizedDoc<T>;

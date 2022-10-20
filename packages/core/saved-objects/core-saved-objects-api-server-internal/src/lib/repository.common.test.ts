@@ -566,7 +566,7 @@ export const getMockBulkCreateResponse = (
           namespace,
           ...(originId && { originId }),
           references,
-          ...mockTimestampFields,
+          ...mockTimestampFieldsWithCreated,
           migrationVersion: migrationVersion || { [type]: '1.1.1' },
         },
         ...mockVersionProps,
@@ -597,7 +597,7 @@ export const expectCreateResult = (obj: {
   coreMigrationVersion: KIBANA_VERSION,
   version: mockVersion,
   namespaces: obj.namespaces ?? [obj.namespace ?? 'default'],
-  ...mockTimestampFields,
+  ...mockTimestampFieldsWithCreated,
 });
 
 export const getMockBulkUpdateResponse = (
