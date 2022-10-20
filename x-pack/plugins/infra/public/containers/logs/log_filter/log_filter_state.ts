@@ -27,7 +27,7 @@ interface ILogFilterState {
   validationError: Error | null;
 }
 
-const DEFAULT_QUERY = {
+export const DEFAULT_QUERY = {
   language: 'kuery',
   query: '',
 };
@@ -64,11 +64,6 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern?: DataViewBas
   const kibanaQuerySettings = useKibanaQuerySettings();
 
   const [logFilterState, setLogFilterState] = useState<ILogFilterState>(() => {
-    // NOTE: Set a default on the queryString manager so we don't pull in values from other solutions.
-    queryString.setQuery({
-      language: 'kuery',
-      query: '',
-    });
     return INITIAL_LOG_FILTER_STATE;
   });
 
