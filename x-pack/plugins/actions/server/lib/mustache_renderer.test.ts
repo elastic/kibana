@@ -340,4 +340,46 @@ describe('mustache_renderer', () => {
     const expected = '1 - {"c":2,"d":[3,4]} -- 5,{"f":6,"g":7}';
     expect(renderMustacheString('{{a}} - {{b}} -- {{e}}', deepVariables, 'none')).toEqual(expected);
   });
+
+  describe('converting dot variables', () => {
+    const dotVariables = {
+      context: [
+        {
+          'test.field': 1,
+        },
+        {
+          level1: {
+            'test.field': 2,
+          },
+        },
+        {
+          level1: {
+            level2: {
+              'test.field': 3,
+            },
+          },
+        },
+      ],
+    };
+    expect(
+      renderMustacheObject(
+        {
+          x: '{{context.0.test.field}} - {{context.1.level1.test.field}} - {{context.2.level1.level2.test.field}}',
+        },
+        dotVariables
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "x": "1 - 2 - 3",
+      }
+    `);
+
+    expect(
+      renderMustacheString(
+        '{{context.0.test.field}} - {{context.1.level1.test.field}} - {{context.2.level1.level2.test.field}}',
+        dotVariables,
+        'none'
+      )
+    ).toEqual('1 - 2 - 3');
+  });
 });

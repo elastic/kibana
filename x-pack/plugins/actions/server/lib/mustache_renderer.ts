@@ -58,7 +58,7 @@ export function renderMustacheObject<Params>(params: Params, variables: Variable
 function augmentObjectVariables(variables: Variables): Variables {
   // convert context variables with '.' in the name to objects
   if (variables.context) {
-    convertDotNotation(variables.context as Variables);
+    convertDotVariables(variables.context as Variables);
   }
 
   const result = JSON.parse(JSON.stringify(variables));
@@ -66,14 +66,14 @@ function augmentObjectVariables(variables: Variables): Variables {
   return result;
 }
 
-function convertDotNotation(variables: Variables) {
+function convertDotVariables(variables: Variables) {
   Object.keys(variables).forEach((key) => {
     if (key.includes('.')) {
       const { k, v } = buildObject(key, variables[key]);
       variables[k] = v;
     }
     if (typeof variables[key] === 'object' && variables[key] != null) {
-      convertDotNotation(variables[key] as Variables);
+      convertDotVariables(variables[key] as Variables);
     }
   });
 }
