@@ -18,6 +18,7 @@ import { HostIsolationExceptionsList } from './view/host_isolation_exceptions_li
  * Provides the routing container for the hosts related views
  */
 export const HostIsolationExceptionsContainer = memo(() => {
+  // TODO: Probably should not silently redirect here
   const canAccessHostIsolationExceptionsLink = useLinkExists(
     SecurityPageName.hostIsolationExceptions
   );

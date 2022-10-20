@@ -40,8 +40,12 @@ export const useEndpointActionItems = (
   const isResponseActionsConsoleEnabled = useIsExperimentalFeatureEnabled(
     'responseActionsConsoleEnabled'
   );
-  const { canAccessResponseConsole, canIsolateHost, canUnIsolateHost } =
-    useUserPrivileges().endpointPrivileges;
+  const {
+    canAccessResponseConsole,
+    canIsolateHost,
+    canUnIsolateHost,
+    canReadActionsLogManagement,
+  } = useUserPrivileges().endpointPrivileges;
 
   return useMemo<ContextMenuItemNavByRouterProps[]>(() => {
     if (endpointMetadata) {
@@ -137,7 +141,7 @@ export const useEndpointActionItems = (
               },
             ]
           : []),
-        ...(options?.isEndpointList
+        ...(options?.isEndpointList && canReadActionsLogManagement
           ? [
               {
                 'data-test-subj': 'actionsLink',
@@ -249,6 +253,7 @@ export const useEndpointActionItems = (
   }, [
     allCurrentUrlParams,
     canAccessResponseConsole,
+    canReadActionsLogManagement,
     endpointMetadata,
     fleetAgentPolicies,
     getAppUrl,

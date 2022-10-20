@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ComponentType } from 'react';
 import React, { memo } from 'react';
 import { Switch, Redirect } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
@@ -30,8 +31,8 @@ import { getEndpointListPath } from '../common/routing';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
 import { BlocklistContainer } from './blocklist';
-import { NoPermissions } from '../components/no_permissons';
 import { ResponseActionsContainer } from './response_actions';
+import { NoPermissions } from '../components/no_permissons';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
@@ -75,44 +76,74 @@ const ResponseActionsTelemetry = () => (
   </TrackApplicationView>
 );
 
+interface PrivilegedRouteProps {
+  path: string;
+  component: ComponentType<{}>;
+  privilege: boolean;
+}
+
+const PrivilegedRoute = ({ component, privilege, path }: PrivilegedRouteProps) => {
+  return <Route path={path} component={privilege ? component : NoPermissions} />;
+};
+
 export const ManagementContainer = memo(() => {
-  const { loading, canAccessEndpointManagement, canReadActionsLogManagement } =
-    useUserPrivileges().endpointPrivileges;
+  const {
+    loading,
+    canReadPolicyManagement,
+    canReadBlocklist,
+    canReadTrustedApplications,
+    canReadEventFilters,
+    canReadActionsLogManagement,
+    canReadEndpointList,
+  } = useUserPrivileges().endpointPrivileges;
 
   // Lets wait until we can verify permissions
   if (loading) {
     return <EuiLoadingSpinner />;
   }
 
-  if (!canAccessEndpointManagement) {
-    return (
-      <>
-        <Route path="*" component={NoPermissions} />
-        <SpyRoute pageName={SecurityPageName.administration} />
-      </>
-    );
-  }
-
   return (
     <Switch>
-      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointTelemetry} />
-      <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyTelemetry} />
-      <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} component={TrustedAppTelemetry} />
-      <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} component={EventFilterTelemetry} />
+      <PrivilegedRoute
+        path={MANAGEMENT_ROUTING_ENDPOINTS_PATH}
+        component={EndpointTelemetry}
+        privilege={canReadEndpointList}
+      />
+      <PrivilegedRoute
+        path={MANAGEMENT_ROUTING_POLICIES_PATH}
+        component={PolicyTelemetry}
+        privilege={canReadPolicyManagement}
+      />
+      <PrivilegedRoute
+        path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH}
+        component={TrustedAppTelemetry}
+        privilege={canReadTrustedApplications}
+      />
+      <PrivilegedRoute
+        path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH}
+        component={EventFilterTelemetry}
+        privilege={canReadEventFilters}
+      />
       <Route
         path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
         component={HostIsolationExceptionsTelemetry}
       />
-      <Route path={MANAGEMENT_ROUTING_BLOCKLIST_PATH} component={BlocklistContainer} />
-      {canReadActionsLogManagement && (
-        <Route
-          path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
-          component={ResponseActionsTelemetry}
-        />
+      <PrivilegedRoute
+        path={MANAGEMENT_ROUTING_BLOCKLIST_PATH}
+        component={BlocklistContainer}
+        privilege={canReadBlocklist}
+      />
+      <PrivilegedRoute
+        path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
+        component={ResponseActionsTelemetry}
+        privilege={canReadActionsLogManagement}
+      />
+
+      {canReadEndpointList && (
+        <Route path={MANAGEMENT_PATH} exact>
+          <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
+        </Route>
       )}
-      <Route path={MANAGEMENT_PATH} exact>
-        <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
-      </Route>
       <Route path="*" component={NotFoundPage} />
     </Switch>
   );
