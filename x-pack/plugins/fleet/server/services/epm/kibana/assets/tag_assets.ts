@@ -11,6 +11,7 @@ import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging
 import type { KibanaAssetType } from '../../../../../common';
 
 import type { ArchiveAsset } from './install';
+import { KibanaSavedObjectTypeMapping } from './install';
 
 const TAG_COLOR = '#FFFFFF';
 const MANAGED_TAG_NAME = 'Managed';
@@ -30,7 +31,7 @@ export async function tagKibanaAssets({
   pkgName: string;
 }) {
   const taggableAssets = Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
-    if (!taggableTypes.includes(assetType as KibanaAssetType)) {
+    if (!taggableTypes.includes(KibanaSavedObjectTypeMapping[assetType as KibanaAssetType])) {
       return [];
     }
 
