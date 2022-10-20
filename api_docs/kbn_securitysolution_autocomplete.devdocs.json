@@ -288,7 +288,7 @@
         "label": "FieldComponent",
         "description": [],
         "signature": [
-          "{ ({ fieldInputWidth, fieldTypeFilter, indexPattern, isClearable, isDisabled, isLoading, isRequired, onChange, placeholder, selectedField, }: React.PropsWithChildren<",
+          "{ ({ fieldInputWidth, fieldTypeFilter, indexPattern, isClearable, isDisabled, isLoading, isRequired, onChange, placeholder, selectedField, acceptsCustomOptions, }: React.PropsWithChildren<",
           "FieldProps",
           ">): JSX.Element; displayName: string | undefined; }"
         ],
@@ -301,7 +301,7 @@
             "id": "def-common.FieldComponent.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  fieldInputWidth,\n  fieldTypeFilter = [],\n  indexPattern,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  isRequired = false,\n  onChange,\n  placeholder,\n  selectedField,\n}",
+            "label": "{\n  fieldInputWidth,\n  fieldTypeFilter = [],\n  indexPattern,\n  isClearable = false,\n  isDisabled = false,\n  isLoading = false,\n  isRequired = false,\n  onChange,\n  placeholder,\n  selectedField,\n  acceptsCustomOptions = false,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -788,7 +788,7 @@
             "label": "smallLists",
             "description": [],
             "signature": [
-              "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
+              "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"byte\" | \"float\" | \"half_float\" | \"integer\" | \"double_range\" | \"float_range\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; version: number; }[]"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
             "deprecated": false,
@@ -802,7 +802,7 @@
             "label": "largeLists",
             "description": [],
             "signature": [
-              "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
+              "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"date\" | \"keyword\" | \"ip\" | \"text\" | \"geo_point\" | \"geo_shape\" | \"date_nanos\" | \"long\" | \"double\" | \"date_range\" | \"ip_range\" | \"shape\" | \"short\" | \"binary\" | \"byte\" | \"float\" | \"half_float\" | \"integer\" | \"double_range\" | \"float_range\" | \"integer_range\" | \"long_range\"; updated_at: string; updated_by: string; version: number; }[]"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/field_value_lists/index.tsx",
             "deprecated": false,

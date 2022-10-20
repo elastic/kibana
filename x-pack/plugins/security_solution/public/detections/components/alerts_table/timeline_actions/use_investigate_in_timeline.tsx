@@ -15,6 +15,7 @@ import type { ExceptionListId } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi } from '@kbn/securitysolution-list-hooks';
 
 import type { Filter } from '@kbn/es-query';
+import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import type { Ecs } from '../../../../../common/ecs';
@@ -91,9 +92,9 @@ export const useInvestigateInTimeline = ({
   );
 
   const filterManagerBackup = useMemo(() => query.filterManager, [query.filterManager]);
-  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
-  const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
-    getManageTimeline(state, TimelineId.active ?? '')
+  const getManageTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const { filterManager: activeFilterManager } = useDeepEqualSelector(
+    (state) => getManageTimeline(state, TimelineId.active ?? '') ?? timelineDefaults
   );
   const filterManager = useMemo(
     () => activeFilterManager ?? filterManagerBackup,

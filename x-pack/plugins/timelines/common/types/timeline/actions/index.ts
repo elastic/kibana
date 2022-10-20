@@ -16,7 +16,7 @@ import type {
   BrowserFieldItem,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 
-import { OnRowSelected, SortColumnTimeline, TimelineTabs } from '..';
+import { OnRowSelected, SortColumnTable } from '..';
 import { BrowserFields } from '../../../search_strategy/index_fields';
 import { ColumnHeaderOptions } from '../columns';
 import { TimelineItem, TimelineNonEcsData } from '../../../search_strategy';
@@ -53,7 +53,7 @@ export interface ActionProps {
   setEventsLoading: SetEventsLoading;
   showCheckboxes: boolean;
   showNotes?: boolean;
-  tabType?: TimelineTabs;
+  tabType?: string;
   timelineId: string;
   toggleShowNotes?: () => void;
   width?: number;
@@ -92,7 +92,6 @@ export interface BulkActionsProps {
   onUpdateSuccess?: OnUpdateAlertStatusSuccess;
   onUpdateFailure?: OnUpdateAlertStatusError;
   customBulkActions?: CustomBulkActionProp[];
-  timelineId?: string;
 }
 
 export interface HeaderActionProps {
@@ -105,8 +104,8 @@ export interface HeaderActionProps {
   onSelectAll: ({ isSelected }: { isSelected: boolean }) => void;
   showEventsSelect: boolean;
   showSelectAllCheckbox: boolean;
-  sort: SortColumnTimeline[];
-  tabType: TimelineTabs;
+  sort: SortColumnTable[];
+  tabType: string;
   timelineId: string;
 }
 

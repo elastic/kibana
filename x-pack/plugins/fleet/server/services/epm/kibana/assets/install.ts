@@ -51,7 +51,7 @@ export type ArchiveAsset = Pick<
 
 // KibanaSavedObjectTypes are used to ensure saved objects being created for a given
 // KibanaAssetType have the correct type
-const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectType> = {
+export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectType> = {
   [KibanaAssetType.dashboard]: KibanaSavedObjectType.dashboard,
   [KibanaAssetType.indexPattern]: KibanaSavedObjectType.indexPattern,
   [KibanaAssetType.map]: KibanaSavedObjectType.map,

@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('query return results with valid scripted field', async function () {
       if (false) {
-        /* the commented-out steps below were used to create the scripted fields in the logstash-* index pattern
+        /* the skipped steps below were used to create the scripted fields in the logstash-* index pattern
         which are now saved in the esArchive.
          */
 
@@ -118,6 +118,7 @@ export default function ({ getService, getPageObjects }) {
         });
       }
 
+      await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('logstash-*');
       await queryBar.setQuery('php* OR *jpg OR *css*');
       await testSubjects.click('querySubmitButton');
