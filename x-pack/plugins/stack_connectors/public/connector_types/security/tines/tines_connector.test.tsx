@@ -7,32 +7,32 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import WebhookActionConnectorFields from './tines_connector';
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../../lib/test_utils';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import {
+  TINES_CONNECTOR_ID,
+  TINES_TITLE,
+} from '../../../../common/connector_types/security/tines/constants';
+import TinesConnectorFields from './tines_connector';
 
-describe('WebhookActionConnectorFields renders', () => {
-  test('all connector fields is rendered', async () => {
-    const actionConnector = {
-      actionTypeId: '.tines',
-      name: 'tines',
-      config: {
-        method: 'PUT',
-        url: 'https://test.com',
-        headers: [{ key: 'content-type', value: 'text' }],
-        hasAuth: true,
-      },
-      secrets: {
-        user: 'user',
-        password: 'pass',
-      },
-      isDeprecated: false,
-    };
+const url = 'https://example.com';
+const email = 'some.email@test.com';
+const token = '123';
 
+const actionConnector = {
+  actionTypeId: TINES_CONNECTOR_ID,
+  name: TINES_TITLE,
+  config: { url },
+  secrets: { email, token },
+  isDeprecated: false,
+};
+
+describe('TinesConnectorFields renders', () => {
+  it('should render all fields', async () => {
     const wrapper = mountWithIntl(
       <ConnectorFormTestProvider connector={actionConnector}>
-        <WebhookActionConnectorFields
+        <TinesConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
@@ -42,46 +42,25 @@ describe('WebhookActionConnectorFields renders', () => {
 
     await waitForComponentToUpdate();
 
-    expect(wrapper.find('[data-test-subj="webhookViewHeadersSwitch"]').length > 0).toBeTruthy();
-    wrapper.find('[data-test-subj="webhookViewHeadersSwitch"]').first().simulate('click');
-    expect(wrapper.find('[data-test-subj="webhookMethodSelect"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="webhookUrlText"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="webhookUserInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="webhookPasswordInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="tinesUrlInput"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="tinesUrlInput"]').first().prop('value')).toBe(url);
+    expect(wrapper.find('[data-test-subj="tinesEmailInput"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="tinesEmailInput"]').first().prop('value')).toBe(email);
+    expect(wrapper.find('[data-test-subj="tinesTokenInput"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="tinesTokenInput"]').first().prop('value')).toBe(token);
   });
 
   describe('Validation', () => {
     const onSubmit = jest.fn();
-    const actionConnector = {
-      actionTypeId: '.tines',
-      name: 'tines',
-      config: {
-        method: 'PUT',
-        url: 'https://test.com',
-        headers: [{ key: 'content-type', value: 'text' }],
-        hasAuth: true,
-      },
-      secrets: {
-        user: 'user',
-        password: 'pass',
-      },
-      isDeprecated: false,
-    };
 
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
-    const tests: Array<[string, string]> = [
-      ['webhookUrlText', 'not-valid'],
-      ['webhookUserInput', ''],
-      ['webhookPasswordInput', ''],
-    ];
-
-    it('connector validation succeeds when connector config is valid', async () => {
+    it('should succeed validation when connector config is valid', async () => {
       const { getByTestId } = render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
-          <WebhookActionConnectorFields
+          <TinesConnectorFields
             readOnly={false}
             isEdit={false}
             registerPreSubmitValidator={() => {}}
@@ -94,40 +73,20 @@ describe('WebhookActionConnectorFields renders', () => {
       });
 
       expect(onSubmit).toBeCalledWith({
-        data: {
-          actionTypeId: '.tines',
-          name: 'tines',
-          config: {
-            method: 'PUT',
-            url: 'https://test.com',
-            headers: [{ key: 'content-type', value: 'text' }],
-            hasAuth: true,
-          },
-          secrets: {
-            user: 'user',
-            password: 'pass',
-          },
-          __internal__: {
-            hasHeaders: true,
-          },
-          isDeprecated: false,
-        },
+        data: actionConnector,
         isValid: true,
       });
     });
 
-    it('connector validation succeeds when auth=false', async () => {
+    it('should fail validation when connector secrets are empty', async () => {
       const connector = {
         ...actionConnector,
-        config: {
-          ...actionConnector.config,
-          hasAuth: false,
-        },
+        secrets: {},
       };
 
       const { getByTestId } = render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
-          <WebhookActionConnectorFields
+          <TinesConnectorFields
             readOnly={false}
             isEdit={false}
             registerPreSubmitValidator={() => {}}
@@ -140,37 +99,20 @@ describe('WebhookActionConnectorFields renders', () => {
       });
 
       expect(onSubmit).toBeCalledWith({
-        data: {
-          actionTypeId: '.tines',
-          name: 'tines',
-          config: {
-            method: 'PUT',
-            url: 'https://test.com',
-            headers: [{ key: 'content-type', value: 'text' }],
-            hasAuth: false,
-          },
-          __internal__: {
-            hasHeaders: true,
-          },
-          isDeprecated: false,
-        },
-        isValid: true,
+        data: {},
+        isValid: false,
       });
     });
 
-    it('connector validation succeeds without headers', async () => {
+    it('should fail validation when connector url is empty', async () => {
       const connector = {
         ...actionConnector,
-        config: {
-          method: 'PUT',
-          url: 'https://test.com',
-          hasAuth: true,
-        },
+        config: { url: '' },
       };
 
       const { getByTestId } = render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
-          <WebhookActionConnectorFields
+          <TinesConnectorFields
             readOnly={false}
             isEdit={false}
             registerPreSubmitValidator={() => {}}
@@ -183,39 +125,20 @@ describe('WebhookActionConnectorFields renders', () => {
       });
 
       expect(onSubmit).toBeCalledWith({
-        data: {
-          actionTypeId: '.tines',
-          name: 'tines',
-          config: {
-            method: 'PUT',
-            url: 'https://test.com',
-            hasAuth: true,
-          },
-          secrets: {
-            user: 'user',
-            password: 'pass',
-          },
-          __internal__: {
-            hasHeaders: false,
-          },
-          isDeprecated: false,
-        },
-        isValid: true,
+        data: {},
+        isValid: false,
       });
     });
 
-    it('validates correctly if the method is empty', async () => {
+    it('should fail validation when connector url is invalid', async () => {
       const connector = {
         ...actionConnector,
-        config: {
-          ...actionConnector.config,
-          method: '',
-        },
+        config: { url: 'not a url' },
       };
 
-      const res = render(
+      const { getByTestId } = render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
-          <WebhookActionConnectorFields
+          <TinesConnectorFields
             readOnly={false}
             isEdit={false}
             registerPreSubmitValidator={() => {}}
@@ -224,42 +147,13 @@ describe('WebhookActionConnectorFields renders', () => {
       );
 
       await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
+        userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
-    });
-
-    it.each(tests)('validates correctly %p', async (field, value) => {
-      const connector = {
-        ...actionConnector,
-        config: {
-          ...actionConnector.config,
-          headers: [],
-        },
-      };
-
-      const res = render(
-        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
-          <WebhookActionConnectorFields
-            readOnly={false}
-            isEdit={false}
-            registerPreSubmitValidator={() => {}}
-          />
-        </ConnectorFormTestProvider>
-      );
-
-      await act(async () => {
-        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
-          delay: 10,
-        });
+      expect(onSubmit).toBeCalledWith({
+        data: {},
+        isValid: false,
       });
-
-      await act(async () => {
-        userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
-
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });
   });
 });

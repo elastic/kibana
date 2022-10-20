@@ -5,50 +5,151 @@
  * 2.0.
  */
 
-import { TypeRegistry } from '../../../type_registry';
-import { registerBuiltInActionTypes } from '..';
-import { ActionTypeModel } from '../../../../types';
-import { registrationServicesMock } from '../../../../mocks';
+import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
+import { registerConnectorTypes } from '../..';
+import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { registrationServicesMock } from '../../../mocks';
+import { TinesExecuteActionParams } from './types';
+import {
+  SUB_ACTION,
+  TINES_CONNECTOR_ID,
+  TINES_TITLE,
+} from '../../../../common/connector_types/security/tines/constants';
 
-const ACTION_TYPE_ID = '.tines';
-let actionTypeModel: ActionTypeModel;
+let actionTypeModel: ConnectorTypeModel;
+
+const webhook = {
+  id: 1234,
+  name: 'some webhook action',
+  storyId: 5435,
+  path: 'somePath',
+  secret: 'someSecret',
+};
+const actionParams: TinesExecuteActionParams = {
+  subAction: SUB_ACTION.RUN,
+  subActionParams: { webhook },
+};
 
 beforeAll(() => {
-  const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerBuiltInActionTypes({ actionTypeRegistry, services: registrationServicesMock });
-  const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
+  const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
+  registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
+  const getResult = connectorTypeRegistry.get(TINES_CONNECTOR_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
   }
 });
 
 describe('actionTypeRegistry.get() works', () => {
-  test('action type static data is as expected', () => {
-    expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
-    expect(actionTypeModel.iconClass).toEqual('logoTines');
+  it('should get Tines action type static data', () => {
+    expect(actionTypeModel.id).toEqual(TINES_CONNECTOR_ID);
+    expect(actionTypeModel.actionTypeTitle).toEqual(TINES_TITLE);
   });
 });
 
 describe('tines action params validation', () => {
-  test('action params validation succeeds when action params is valid', async () => {
-    const actionParams = {
-      body: 'message {test}',
-    };
-
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { body: [] },
+  it('should fail when storyId is missing', async () => {
+    const validation = await actionTypeModel.validateParams({
+      ...actionParams,
+      subActionParams: { webhook: { ...webhook, storyId: undefined } },
+    });
+    expect(validation.errors).toEqual({
+      subAction: [],
+      subActionParams: ['Story is required.'],
     });
   });
 
-  test('params validation fails when body is not valid', async () => {
-    const actionParams = {
-      body: '',
-    };
+  it('should fail when webhook is missing', async () => {
+    const validation = await actionTypeModel.validateParams({
+      ...actionParams,
+      subActionParams: { webhook: { ...webhook, id: undefined } },
+    });
+    expect(validation.errors).toEqual({
+      subAction: [],
+      subActionParams: ['Webhook is required.'],
+    });
+  });
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: {
-        body: ['Body is required.'],
-      },
+  it('should fail when webhook path is missing', async () => {
+    const validation = await actionTypeModel.validateParams({
+      ...actionParams,
+      subActionParams: { webhook: { ...webhook, path: '' } },
+    });
+    expect(validation.errors).toEqual({
+      subAction: [],
+      subActionParams: ['Webhook action path is missing.'],
+    });
+  });
+
+  it('should fail when webhook secret is missing', async () => {
+    const validation = await actionTypeModel.validateParams({
+      ...actionParams,
+      subActionParams: { webhook: { ...webhook, secret: '' } },
+    });
+    expect(validation.errors).toEqual({
+      subAction: [],
+      subActionParams: ['Webhook action secret is missing.'],
+    });
+  });
+
+  it('should succeed when subAction is run and params are correct', async () => {
+    const validation = await actionTypeModel.validateParams(actionParams);
+    expect(validation.errors).toEqual({
+      subAction: [],
+      subActionParams: [],
+    });
+  });
+
+  it('should fail when subAction is missing', async () => {
+    const validation = await actionTypeModel.validateParams({
+      ...actionParams,
+      subAction: '',
+    });
+    expect(validation.errors).toEqual({
+      subAction: ['Action is required.'],
+      subActionParams: [],
+    });
+  });
+  it('should fail when subAction is wrong', async () => {
+    const validation = await actionTypeModel.validateParams({
+      ...actionParams,
+      subAction: 'stories',
+    });
+    expect(validation.errors).toEqual({
+      subAction: ['Invalid action name.'],
+      subActionParams: [],
+    });
+  });
+
+  it('should fail when subAction is test and body is missing', async () => {
+    const validation = await actionTypeModel.validateParams({
+      ...actionParams,
+      subAction: SUB_ACTION.TEST,
+    });
+    expect(validation.errors).toEqual({
+      subAction: [],
+      subActionParams: ['Body is required.'],
+    });
+  });
+
+  it('should fail when subAction is test and body is not JSON format', async () => {
+    const validation = await actionTypeModel.validateParams({
+      subAction: SUB_ACTION.TEST,
+      subActionParams: { webhook, body: 'not json' },
+    });
+    expect(validation.errors).toEqual({
+      subAction: [],
+      subActionParams: ['Body does not have a valid JSON format.'],
+    });
+  });
+
+  it('should succeed when subAction is test and params are correct', async () => {
+    const validation = await actionTypeModel.validateParams({
+      subAction: SUB_ACTION.TEST,
+      subActionParams: { webhook, body: '[]' },
+    });
+    expect(validation.errors).toEqual({
+      subAction: [],
+      subActionParams: [],
     });
   });
 });

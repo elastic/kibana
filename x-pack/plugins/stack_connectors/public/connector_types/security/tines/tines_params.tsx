@@ -186,6 +186,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
             onChange={onChangeStory}
             isDisabled={isLoadingStories}
             isLoading={isLoadingStories}
+            data-test-subj="tines-storySelector"
           />
         </EuiFormRow>
         <EuiFormRow fullWidth error={errors.webhook} label={i18n.WEBHOOK_LABEL}>
@@ -200,13 +201,13 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
             onChange={onChangeWebhook}
             isDisabled={!selectedStoryOption || isLoadingWebhooks}
             isLoading={isLoadingWebhooks}
+            data-test-subj="tines-webhookSelector"
           />
         </EuiFormRow>
       </EuiFlexItem>
       {isTesting && (
         <EuiFlexItem>
           <JsonEditorWithMessageVariables
-            messageVariables={messageVariables}
             paramsProperty={'body'}
             inputTargetValue={body}
             label={i18n.BODY_LABEL}
@@ -220,6 +221,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
                 editSubActionParams({ body: '' });
               }
             }}
+            data-test-subj="tines-bodyJsonEditor"
           />
         </EuiFlexItem>
       )}

@@ -176,7 +176,7 @@ export const WEBHOOK_REQUIRED = i18n.translate(
 export const WEBHOOK_PATH_REQUIRED = i18n.translate(
   'xpack.stackConnectors.security.tines.params.error.requiredWebhookPathText',
   {
-    defaultMessage: 'Webhook action path missing.',
+    defaultMessage: 'Webhook action path is missing.',
   }
 );
 export const WEBHOOK_SECRET_REQUIRED = i18n.translate(
