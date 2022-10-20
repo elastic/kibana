@@ -147,6 +147,7 @@ export const USER_AGENT_DEVICE = 'user_agent.device.name';
 export const USER_AGENT_OS = 'user_agent.os.name';
 
 export const FAAS_ID = 'faas.id';
+export const FAAS_NAME = 'faas.name';
 export const FAAS_COLDSTART = 'faas.coldstart';
 export const FAAS_TRIGGER_TYPE = 'faas.trigger.type';
 export const FAAS_DURATION = 'faas.duration';

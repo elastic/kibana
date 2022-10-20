@@ -10,15 +10,16 @@ import { termQuery } from '@kbn/observability-plugin/server';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import {
   FAAS_COLDSTART,
+  FAAS_ID,
   METRICSET_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../../lib/helpers/setup_request';
-import { fetchAndTransformMetrics } from '../../fetch_and_transform_metrics';
-import { ChartBase } from '../../types';
+} from '../../../../common/elasticsearch_fieldnames';
+import { Setup } from '../../../lib/helpers/setup_request';
+import { fetchAndTransformMetrics } from '../fetch_and_transform_metrics';
+import { ChartBase } from '../types';
 
 const chartBase: ChartBase = {
-  title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStart', {
-    defaultMessage: 'Cold start',
+  title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStart.title', {
+    defaultMessage: 'Cold starts',
   }),
   key: 'cold_start_count',
   type: 'bar',
@@ -33,13 +34,14 @@ const chartBase: ChartBase = {
   },
 };
 
-export function getColdStartCount({
+export function getColdStartCountChart({
   environment,
   kuery,
   setup,
   serviceName,
   start,
   end,
+  serverlessId,
 }: {
   environment: string;
   kuery: string;
@@ -47,6 +49,7 @@ export function getColdStartCount({
   serviceName: string;
   start: number;
   end: number;
+  serverlessId?: string;
 }) {
   return fetchAndTransformMetrics({
     environment,
@@ -59,7 +62,8 @@ export function getColdStartCount({
     aggs: { coldStart: { sum: { field: FAAS_COLDSTART } } },
     additionalFilters: [
       ...termQuery(FAAS_COLDSTART, true),
-      ...termQuery(METRICSET_NAME, 'transaction'),
+      ...termQuery(FAAS_ID, serverlessId),
+      ...termQuery(METRICSET_NAME, 'app'),
     ],
     operationName: 'get_cold_start_count',
   });

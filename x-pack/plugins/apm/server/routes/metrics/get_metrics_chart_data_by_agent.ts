@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import { isJavaAgentName } from '../../../common/agent_name';
 import { Setup } from '../../lib/helpers/setup_request';
-import { getJavaMetricsCharts } from './by_agent/java';
 import { getDefaultMetricsCharts } from './by_agent/default';
-import { isJavaAgentName, isServerlessAgent } from '../../../common/agent_name';
+import { getJavaMetricsCharts } from './by_agent/java';
 import { GenericMetricsChart } from './fetch_and_transform_metrics';
-import { getServerlessAgentMetricCharts } from './by_agent/serverless';
 
 export async function getMetricsChartDataByAgent({
   environment,
@@ -41,17 +40,11 @@ export async function getMetricsChartDataByAgent({
     start,
     end,
   };
-  const serverlessAgent = isServerlessAgent(serviceRuntimeName);
-
-  if (isJavaAgentName(agentName) && !serverlessAgent) {
+  if (isJavaAgentName(agentName)) {
     return getJavaMetricsCharts({
       ...options,
       serviceNodeName,
     });
-  }
-
-  if (serverlessAgent) {
-    return getServerlessAgentMetricCharts(options);
   }
 
   return getDefaultMetricsCharts(options);

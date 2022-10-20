@@ -12,6 +12,7 @@ import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { FetchAndTransformMetrics } from './fetch_and_transform_metrics';
 import { getMetricsChartDataByAgent } from './get_metrics_chart_data_by_agent';
 import { getServiceNodes } from './get_service_nodes';
+import { metricsServerlessRouteRepository } from './serverless/route';
 
 const metricsChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
@@ -108,4 +109,5 @@ const serviceMetricsJvm = createApmServerRoute({
 export const metricsRouteRepository = {
   ...metricsChartsRoute,
   ...serviceMetricsJvm,
+  ...metricsServerlessRouteRepository,
 };

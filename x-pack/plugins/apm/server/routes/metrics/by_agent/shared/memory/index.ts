@@ -86,7 +86,7 @@ export async function getMemoryChartData({
   setup,
   serviceName,
   serviceNodeName,
-  faasId,
+  serverlessId,
   start,
   end,
 }: {
@@ -95,7 +95,7 @@ export async function getMemoryChartData({
   setup: Setup;
   serviceName: string;
   serviceNodeName?: string;
-  faasId?: string;
+  serverlessId?: string;
   start: number;
   end: number;
 }) {
@@ -115,7 +115,7 @@ export async function getMemoryChartData({
       },
       additionalFilters: [
         { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
-        ...termQuery(FAAS_ID, faasId),
+        ...termQuery(FAAS_ID, serverlessId),
       ],
       operationName: 'get_cgroup_memory_metrics_charts',
     });
@@ -137,7 +137,7 @@ export async function getMemoryChartData({
         additionalFilters: [
           { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
           { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-          ...termQuery(FAAS_ID, faasId),
+          ...termQuery(FAAS_ID, serverlessId),
         ],
         operationName: 'get_system_memory_metrics_charts',
       });
