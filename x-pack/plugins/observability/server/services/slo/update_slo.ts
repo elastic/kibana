@@ -17,6 +17,7 @@ import {
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 import { SLO } from '../../types/models';
+import { validateSLO } from '../../domain/services';
 
 export class UpdateSLO {
   constructor(
@@ -45,6 +46,7 @@ export class UpdateSLO {
   private updateSLO(originalSlo: SLO, params: UpdateSLOParams) {
     let hasBreakingChange = false;
     const updatedSlo: SLO = Object.assign({}, originalSlo, params, { updated_at: new Date() });
+    validateSLO(updatedSlo);
 
     if (!deepEqual(originalSlo.indicator, updatedSlo.indicator)) {
       hasBreakingChange = true;

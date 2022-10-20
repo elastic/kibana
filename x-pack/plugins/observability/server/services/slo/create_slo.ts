@@ -12,6 +12,7 @@ import { ResourceInstaller } from './resource_installer';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 import { CreateSLOParams, CreateSLOResponse } from '../../types/rest_specs';
+import { validateSLO } from '../../domain/services';
 
 export class CreateSLO {
   constructor(
@@ -22,6 +23,7 @@ export class CreateSLO {
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
     const slo = this.toSLO(params);
+    validateSLO(slo);
 
     await this.resourceInstaller.ensureCommonResourcesInstalled();
     await this.repository.save(slo);

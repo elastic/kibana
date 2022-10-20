@@ -6,7 +6,7 @@
  */
 
 import { TimeWindow } from '../../types/models/time_window';
-import { Duration, DurationUnit } from '../../types/schema';
+import { Duration, DurationUnit } from '../../types/models';
 import { toDateRange } from './date_range';
 
 const THIRTY_DAYS = new Duration(30, DurationUnit.d);
