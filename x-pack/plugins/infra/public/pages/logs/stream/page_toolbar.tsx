@@ -8,7 +8,6 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { DataView } from '@kbn/data-views-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
@@ -62,7 +61,7 @@ export const LogsToolbar = () => {
               defaultMessage: 'Search for log entries… (e.g. host.name:host-1)',
             })}
             useDefaultBehaviors={true}
-            indexPatterns={[derivedDataView as DataView]}
+            indexPatterns={derivedDataView ? [derivedDataView] : undefined}
             showQueryInput={true}
             showQueryMenu={false}
             showFilterBar={false}
