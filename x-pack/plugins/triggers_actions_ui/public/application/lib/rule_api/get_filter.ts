@@ -23,7 +23,10 @@ export const getFilter = ({
   }
 
   if (outcomeFilter && outcomeFilter.length) {
-    filter.push(getOutcomeFilter(outcomeFilter));
+    const outcomeFilterKQL = getOutcomeFilter(outcomeFilter);
+    if (outcomeFilterKQL) {
+      filter.push(`(${outcomeFilterKQL})`);
+    }
   }
 
   if (runId) {
@@ -41,5 +44,5 @@ function getOutcomeFilter(outcomeFilter: string[]) {
       'kibana.alerting.outcome:success OR (event.outcome: success AND NOT kibana.alerting.outcome:*)',
     unknown: 'event.outcome: unknown',
   };
-  return `(${outcomeFilter.map((f) => filterMapping[f]).join(' OR ')})`;
+  return `${outcomeFilter.map((f) => filterMapping[f]).join(' OR ')}`;
 }
