@@ -108,7 +108,7 @@ export interface DiscoverStateContainer {
      */
     fetch: (reset?: boolean) => void;
     changeDataView: (id: string, replace?: boolean) => void;
-    loadSavedSearchList: () => Promise<void>;
+    loadDataViewList: () => Promise<void>;
     loadSavedSearch: (
       id: string,
       dataViewSpec: DataViewSpec | undefined,
@@ -244,7 +244,7 @@ export function getDiscoverStateContainer({
         setAppState({ index: id }, replaceURL);
         return;
       },
-      loadSavedSearchList: async () => {
+      loadDataViewList: async () => {
         const dataViewList = await services.dataViews.getIdsWithTitle();
         internalStateContainer.transitions.setDataViews(dataViewList);
       },

@@ -24,8 +24,6 @@ export const loadDataViewBySavedSearch = async (
     const { index } = appStateContainer.getState();
     const dataViewList = internalStateContainer.getState().dataViews;
     const ip = await loadDataView(dataViewList, services, index, dataViewSpec);
-    const ipList = ip.list;
-    internalStateContainer.transitions.setDataViews(ipList);
     const dataViewData = resolveDataView(
       ip,
       nextSavedSearch.searchSource,

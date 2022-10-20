@@ -46,7 +46,7 @@ export const useAdHocDataViews = ({
   const updateAdHocDataViewId = useCallback(
     async (dataViewToUpdate: DataView) => {
       const newDataView = await dataViews.create({ ...dataViewToUpdate.toSpec(), id: undefined });
-      const savedSearch = stateContainer.savedSearchState.savedSearch$.getValue();
+      const savedSearch = stateContainer.savedSearchState.get();
 
       dataViews.clearInstanceCache(dataViewToUpdate.id);
       setAdHocDataViewList((prev) =>
@@ -76,18 +76,19 @@ export const useAdHocDataViews = ({
     stateContainer
   );
   const persistDataView = useCallback(async () => {
-    const savedSearch = stateContainer.savedSearchState.savedSearch$.getValue();
+    const savedSearch = stateContainer.savedSearchState.get();
     const currentDataView = savedSearch.searchSource.getField('index')!;
     if (currentDataView && !currentDataView.isPersisted()) {
       const createdDataView = await openConfirmSavePrompt(currentDataView);
       if (createdDataView) {
         savedSearch.searchSource.setField('index', createdDataView);
-        await stateContainer.actions.changeDataView(createdDataView.id!, true);
 
         // update saved search with saved data view
         if (savedSearch.id) {
           await updateSavedSearch({ savedSearch, dataView: createdDataView });
         }
+        await stateContainer.actions.loadDataViewList();
+        await stateContainer.actions.changeDataView(createdDataView.id!, true);
         getUrlTracker().setTrackingEnabled(true);
         return createdDataView;
       }

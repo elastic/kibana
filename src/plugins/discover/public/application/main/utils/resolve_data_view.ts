@@ -13,10 +13,6 @@ import type { ToastsStart } from '@kbn/core/public';
 import { DiscoverServices } from '../../../build_services';
 interface DataViewData {
   /**
-   * List of existing data views
-   */
-  list: DataViewListItem[];
-  /**
    * Loaded data view (might be default data view if requested was not found)
    */
   loaded: DataView;
@@ -89,7 +85,6 @@ export async function loadDataView(
     if (!isPersisted) {
       const createdAdHocDataView = await services.dataViews.create(dataViewSpec);
       return {
-        list: dataViewList || [],
         loaded: createdAdHocDataView,
         stateVal: createdAdHocDataView.id,
         stateValFound: true,
@@ -104,7 +99,6 @@ export async function loadDataView(
     const fetchedDataView = fetchId ? await services.dataViews.get(fetchId) : undefined;
     if (fetchedDataView && !fetchedDataView.isPersisted()) {
       return {
-        list: dataViewList || [],
         loaded: fetchedDataView,
         stateVal: id,
         stateValFound: true,
@@ -119,7 +113,6 @@ export async function loadDataView(
   // fetch persisted data view
   const actualId = getDataViewId(fetchId, dataViewList, services.uiSettings.get('defaultIndex'));
   return {
-    list: dataViewList || [],
     loaded: await services.dataViews.get(actualId),
     stateVal: fetchId,
     stateValFound: !!fetchId && actualId === fetchId,
