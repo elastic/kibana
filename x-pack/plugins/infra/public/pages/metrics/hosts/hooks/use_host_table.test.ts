@@ -60,7 +60,10 @@ describe('useHostTable hook', () => {
             avg: 9.194304,
           },
         ],
-        path: [{ value: 'host-1', label: 'host-1', ip: '243.86.94.22', os: 'macOS' }],
+        path: [
+          { value: 'host-1', label: 'host-1' },
+          { value: 'host-1', label: 'host-1', ip: '243.86.94.22', os: 'macOS' },
+        ],
         name: 'host-1',
       },
     ];
