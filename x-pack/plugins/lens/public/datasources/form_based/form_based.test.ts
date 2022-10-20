@@ -1675,6 +1675,29 @@ describe('IndexPattern Data Source', () => {
         },
       });
     });
+
+    it('should remove linked layers', () => {
+      const state = {
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+          second: {
+            indexPatternId: '2',
+            columnOrder: [],
+            columns: {},
+            linkToLayers: ['first'],
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(FormBasedDatasource.removeLayer(state, 'first')).toEqual({
+        ...state,
+        layers: {},
+      });
+    });
   });
 
   describe('#createEmptyLayer', () => {
