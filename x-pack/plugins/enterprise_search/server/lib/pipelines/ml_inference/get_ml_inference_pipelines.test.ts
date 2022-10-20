@@ -11,10 +11,6 @@ import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { getMlInferencePipelines } from './get_ml_inference_pipelines';
 
-jest.mock('../../fetch_ml_inference_pipeline_processors', () => ({
-  getMlModelConfigsForModelIds: jest.fn(),
-}));
-
 describe('getMlInferencePipelines', () => {
   const mockClient = {
     ingest: {

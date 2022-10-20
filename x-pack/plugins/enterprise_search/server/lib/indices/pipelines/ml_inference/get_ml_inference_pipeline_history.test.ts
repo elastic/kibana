@@ -11,9 +11,9 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { MlInferenceHistoryResponse } from '../../../common/types/pipelines';
+import { MlInferenceHistoryResponse } from '../../../../../common/types/pipelines';
 
-import { fetchMlInferencePipelineHistory } from './fetch_ml_inference_pipeline_history';
+import { fetchMlInferencePipelineHistory } from './get_ml_inference_pipeline_history';
 
 const DEFAULT_RESPONSE: SearchResponse = {
   _shards: {
