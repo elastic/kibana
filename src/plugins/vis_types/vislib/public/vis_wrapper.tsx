@@ -7,19 +7,22 @@
  */
 
 import React, { useEffect, useMemo, useRef } from 'react';
-import { EuiResizeObserver } from '@elastic/eui';
+import { EuiResizeObserver, EuiResizeObserverProps } from '@elastic/eui';
 import { debounce } from 'lodash';
 
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
+import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { VislibRenderValue } from './vis_type_vislib_vis_fn';
 import { createVislibVisController, VislibVisController } from './vis_controller';
 import { VisTypeVislibCoreSetup } from './plugin';
 import { PieRenderValue } from './pie_fn';
 
 import './index.scss';
+import { getUsageCollectionStart } from './services';
 
 type VislibWrapperProps = (VislibRenderValue | PieRenderValue) & {
   core: VisTypeVislibCoreSetup;
@@ -27,18 +30,62 @@ type VislibWrapperProps = (VislibRenderValue | PieRenderValue) & {
   handlers: IInterpreterRenderHandlers;
 };
 
+/** @internal **/
+const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {
+  if (context) {
+    const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
+      if (item.type) {
+        return item;
+      } else if (item.child) {
+        return recursiveGet(item.child);
+      }
+    };
+    return recursiveGet(context)?.type;
+  }
+};
+
 const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWrapperProps) => {
   const chartDiv = useRef<HTMLDivElement>(null);
   const visController = useRef<VislibVisController | null>(null);
 
+  const renderComplete = useMemo(
+    () => () => {
+      const usageCollection = getUsageCollectionStart();
+      const containerType = extractContainerType(handlers.getExecutionContext());
+
+      if (usageCollection && containerType) {
+        usageCollection.reportUiCounter(
+          containerType,
+          METRIC_TYPE.COUNT,
+          `render_agg_based_${visConfig!.type}`
+        );
+      }
+      handlers.done();
+    },
+    [handlers, visConfig]
+  );
+
   const updateChart = useMemo(
     () =>
-      debounce(() => {
+      (skipRenderComplete = false) => {
         if (visController.current) {
-          visController.current.render(visData, visConfig, handlers);
+          visController.current.render(
+            visData,
+            visConfig,
+            handlers,
+            skipRenderComplete ? undefined : renderComplete
+          );
         }
+      },
+    [handlers, renderComplete, visConfig, visData]
+  );
+
+  const onResize: EuiResizeObserverProps['onResize'] = useMemo(
+    () =>
+      debounce(() => {
+        updateChart(true);
       }, 100),
-    [visConfig, visData, handlers]
+    [updateChart]
   );
 
   useEffect(() => {
@@ -67,7 +114,7 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
   }, [handlers.uiState, updateChart]);
 
   return (
-    <EuiResizeObserver onResize={updateChart}>
+    <EuiResizeObserver onResize={onResize}>
       {(resizeRef) => (
         <div className="vislib__wrapper" ref={resizeRef}>
           <div className="vislib__container" ref={chartDiv} />
