@@ -21,7 +21,7 @@ export const ChartComponent: FC = React.memo(() => {
 
   const attributes = useMemo<TypedLensByValueInput['attributes']>(() => {
     return {
-      title: 'test_01',
+      title: 'change_point_test',
       description: '',
       visualizationType: 'lnsXY',
       type: 'lens',
@@ -29,7 +29,12 @@ export const ChartComponent: FC = React.memo(() => {
         {
           type: 'index-pattern',
           id: dataView.id!,
-          name: 'indexpattern-datasource-layer-87968adb-d2da-47ed-a163-728b31bd75d6',
+          name: 'indexpattern-datasource-layer-2d61a885-abb0-4d4e-a5f9-c488caec3c22',
+        },
+        {
+          type: 'index-pattern',
+          id: 'a65621a2-d2b9-45fa-a816-c57622139e2a',
+          name: 'xy-visualization-layer-8d26ab67-b841-4877-9d02-55bf270f9caf',
         },
       ],
       state: {
@@ -63,13 +68,34 @@ export const ChartComponent: FC = React.memo(() => {
           preferredSeriesType: 'line',
           layers: [
             {
-              layerId: '87968adb-d2da-47ed-a163-728b31bd75d6',
-              accessors: ['44b2de1e-e8bc-4ef1-b05a-47222c618d71'],
+              layerId: '2d61a885-abb0-4d4e-a5f9-c488caec3c22',
+              accessors: ['e9f26d17-fb36-4982-8539-03f1849cbed0'],
               position: 'top',
               seriesType: 'line',
               showGridlines: false,
               layerType: 'data',
-              xAccessor: 'b233dc2b-67d0-4a47-b950-94c79c9fb0ae',
+              xAccessor: '877e6638-bfaa-43ec-afb9-2241dc8e1c86',
+            },
+            {
+              layerId: '8d26ab67-b841-4877-9d02-55bf270f9caf',
+              layerType: 'annotations',
+              annotations: [
+                {
+                  type: 'manual',
+                  label: 'Change point detected',
+                  icon: 'bell',
+                  key: {
+                    type: 'range',
+                    timestamp: '2021-08-16T00:00:00.000Z',
+                    endTimestamp: '2021-08-16T10:30:00.000Z',
+                  },
+                  id: 'a8fb297c-8d96-4011-93c0-45af110d5302',
+                  isHidden: false,
+                  color: '#F04E981A',
+                  outside: false,
+                },
+              ],
+              ignoreGlobalFilters: true,
             },
           ],
         },
@@ -81,9 +107,9 @@ export const ChartComponent: FC = React.memo(() => {
         datasourceStates: {
           formBased: {
             layers: {
-              '87968adb-d2da-47ed-a163-728b31bd75d6': {
+              '2d61a885-abb0-4d4e-a5f9-c488caec3c22': {
                 columns: {
-                  'b233dc2b-67d0-4a47-b950-94c79c9fb0ae': {
+                  '877e6638-bfaa-43ec-afb9-2241dc8e1c86': {
                     label: '@timestamp',
                     dataType: 'date',
                     operationType: 'date_histogram',
@@ -91,12 +117,12 @@ export const ChartComponent: FC = React.memo(() => {
                     isBucketed: true,
                     scale: 'interval',
                     params: {
-                      interval: '15m',
+                      interval: 'auto',
                       includeEmptyRows: true,
                       dropPartials: false,
                     },
                   },
-                  '44b2de1e-e8bc-4ef1-b05a-47222c618d71': {
+                  'e9f26d17-fb36-4982-8539-03f1849cbed0': {
                     label: 'Median of value',
                     dataType: 'number',
                     operationType: 'median',
@@ -109,8 +135,8 @@ export const ChartComponent: FC = React.memo(() => {
                   },
                 },
                 columnOrder: [
-                  'b233dc2b-67d0-4a47-b950-94c79c9fb0ae',
-                  '44b2de1e-e8bc-4ef1-b05a-47222c618d71',
+                  '877e6638-bfaa-43ec-afb9-2241dc8e1c86',
+                  'e9f26d17-fb36-4982-8539-03f1849cbed0',
                 ],
                 incompleteColumns: {},
               },
