@@ -9,10 +9,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const ControlGroupStrings = {
-  getEmbeddableTitle: () =>
-    i18n.translate('controls.controlGroup.title', {
-      defaultMessage: 'Control group',
-    }),
   getControlButtonTitle: () =>
     i18n.translate('controls.controlGroup.toolbarButtonTitle', {
       defaultMessage: 'Controls',
