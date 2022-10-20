@@ -500,6 +500,36 @@ export default ({ getService }: FtrProviderContext) => {
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
+
+        it('should return an error if we pass more than 1000 ids', async () => {
+          const ids = [...Array(1001)].map((_, i) => `rule${i}`);
+
+          const response = await supertestWithoutAuth
+            .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_delete`)
+            .set('kbn-xsrf', 'foo')
+            .send({ ids })
+            .auth(user.username, user.password);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'global_read at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.body).to.eql({
+                error: 'Bad Request',
+                message:
+                  '[request body.ids]: array size is [1001], but cannot be greater than [1000]',
+                statusCode: 400,
+              });
+              expect(response.statusCode).to.eql(400);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
       });
     }
   });
