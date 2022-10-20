@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Filter } from '@kbn/es-query';
 import type { hostsModel } from '../store';
 import type { GlobalTimeArgs } from '../../common/containers/use_global_time';
 import { HOSTS_PATH } from '../../../common/constants';
@@ -13,8 +12,7 @@ import { HOSTS_PATH } from '../../../common/constants';
 export const hostDetailsPagePath = `${HOSTS_PATH}/name/:detailName`;
 
 export type HostsTabsProps = GlobalTimeArgs & {
-  filterQuery: string;
-  pageFilters?: Filter[];
+  filterQuery?: string;
   indexNames: string[];
   type: hostsModel.HostsType;
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
@@ -25,18 +25,8 @@ import {
 import { TableId } from '../../../common/types';
 import { hostNameExistsFilter } from '../../common/components/visualization_actions/utils';
 
-export const HostsTabs = memo<HostsTabsProps>(
-  ({
-    deleteQuery,
-    filterQuery,
-    pageFilters = [],
-    from,
-    indexNames,
-    isInitializing,
-    setQuery,
-    to,
-    type,
-  }) => {
+export const HostsTabs = React.memo<HostsTabsProps>(
+  ({ deleteQuery, filterQuery, from, indexNames, isInitializing, setQuery, to, type }) => {
     const tabProps = {
       deleteQuery,
       endDate: to,
@@ -48,10 +38,6 @@ export const HostsTabs = memo<HostsTabsProps>(
       type,
     };
 
-    const externalAlertPageFilters = useMemo(
-      () => [...hostNameExistsFilter, ...pageFilters],
-      [pageFilters]
-    );
     return (
       <Switch>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.hosts})`}>
@@ -68,10 +54,9 @@ export const HostsTabs = memo<HostsTabsProps>(
         </Route>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.events})`}>
           <EventsQueryTabBody
-            {...tabProps}
-            pageFilters={pageFilters}
+            additionalFilters={hostNameExistsFilter}
             tableId={TableId.hostsPageEvents}
-            externalAlertPageFilters={externalAlertPageFilters}
+            {...tabProps}
           />
         </Route>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.sessions})`}>

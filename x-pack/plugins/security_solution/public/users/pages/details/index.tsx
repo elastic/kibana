@@ -83,7 +83,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   );
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
-  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { signalIndexName } = useSignalIndex();
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
@@ -109,14 +109,14 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
         buildEsQuery(
           indexPattern,
           [query],
-          [...usersDetailsPageFilters, ...filters],
+          [...usersDetailsPageFilters, ...globalFilters],
           getEsQueryConfig(uiSettings)
         ),
       ];
     } catch (e) {
       return [undefined, e];
     }
-  }, [filters, indexPattern, query, uiSettings, usersDetailsPageFilters]);
+  }, [globalFilters, indexPattern, query, uiSettings, usersDetailsPageFilters]);
 
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
@@ -251,7 +251,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               indexNames={selectedPatterns}
               indexPattern={indexPattern}
               isInitializing={isInitializing}
-              pageFilters={usersDetailsPageFilters}
+              userDetailFilter={usersDetailsPageFilters}
               setQuery={setQuery}
               to={to}
               type={type}
