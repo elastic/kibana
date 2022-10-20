@@ -35,7 +35,7 @@ export interface DiscoverLayoutProps {
   state: AppState;
   stateContainer: GetStateReturn;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
-  onAddAdHocDataView: (dataView: DataView) => void;
+  onAddAdHocDataViews: (dataViews: DataView[]) => void;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
   adHocDataViewList: DataView[];
 }

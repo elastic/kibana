@@ -13,15 +13,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { type DataView, type Query, type ISearchSource, getTime } from '@kbn/data-plugin/common';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import { SearchBar, SearchBarProps } from '@kbn/unified-search-plugin/public';
-import { mapAndFlattenFilters, SavedQuery, TimeHistory } from '@kbn/data-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { SearchBarProps } from '@kbn/unified-search-plugin/public';
+import { mapAndFlattenFilters, type SavedQuery } from '@kbn/data-plugin/public';
+import { STACK_ALERTS_FEATURE_ID } from '../../../../common';
 import { CommonAlertParams, EsQueryAlertParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { RuleCommonExpressions } from '../rule_common_expressions';
 import { totalHitsToNumber } from '../test_query_row';
 import { hasExpressionValidationErrors } from '../validation';
+import { useTriggerUiActionServices } from '../util';
 
 const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = [
   'pinFilter',
@@ -65,8 +66,10 @@ interface SearchSourceExpressionFormProps {
   searchSource: ISearchSource;
   ruleParams: EsQueryAlertParams<SearchType.searchSource>;
   errors: IErrorObject;
+  metadata?: Record<string, unknown>;
   initialSavedQuery?: SavedQuery;
   setParam: (paramField: string, paramValue: unknown) => void;
+  onChangeMetaData: (metadata: Record<string, unknown>) => void;
 }
 
 const isSearchSourceParam = (action: LocalStateAction): action is SearchSourceParamsAction => {
@@ -74,10 +77,10 @@ const isSearchSourceParam = (action: LocalStateAction): action is SearchSourcePa
 };
 
 export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProps) => {
+  const services = useTriggerUiActionServices();
+  const unifiedSearch = services.unifiedSearch;
   const { searchSource, errors, initialSavedQuery, setParam, ruleParams } = props;
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
-
-  const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
 
   useEffect(() => setSavedQuery(initialSavedQuery), [initialSavedQuery]);
 
@@ -222,7 +225,12 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
       <EuiSpacer size="s" />
 
-      <DataViewSelectPopover dataView={dataView} onSelectDataView={onSelectDataView} />
+      <DataViewSelectPopover
+        dataView={dataView}
+        metadata={props.metadata}
+        onSelectDataView={onSelectDataView}
+        onChangeMetaData={props.onChangeMetaData}
+      />
 
       {Boolean(dataView?.id) && (
         <>
@@ -236,7 +244,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
             </h5>
           </EuiTitle>
           <EuiSpacer size="xs" />
-          <SearchBar
+          <unifiedSearch.ui.SearchBar
+            appName={STACK_ALERTS_FEATURE_ID}
             onQuerySubmit={onQueryBarSubmit}
             onQueryChange={onChangeQuery}
             suggestionsSize="s"
@@ -257,7 +266,6 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
             showSubmitButton={false}
             dateRangeFrom={undefined}
             dateRangeTo={undefined}
-            timeHistory={timeHistory}
             hiddenFilterPanelOptions={HIDDEN_FILTER_PANEL_OPTIONS}
           />
         </>

@@ -11,25 +11,17 @@ import ReactDOM from 'react-dom';
 import { I18nStart } from '@kbn/core/public';
 import { EuiWrappingPopover, EuiContextMenu } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ISearchSource } from '@kbn/data-plugin/common';
+import type { DataView, ISearchSource } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { pick } from 'lodash';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 import { updateSearchSource } from '../../utils/update_search_source';
-import { DiscoverAlertContextProvider } from '../../utils/discover_alert_context';
-
-/**
- * Unified search services needed, since SearchBar component is used internally
- */
-export interface DiscoverAlertServices extends IUnifiedSearchPluginServices {
-  dataViewEditor: DataViewEditorStart;
-}
 
 const container = document.createElement('div');
 let isOpen = false;
+
+interface DiscoverAlertMetadata {
+  adHocDataViewList: DataView[];
+}
 
 const ALERT_TYPE_ID = '.es-query';
 
@@ -41,20 +33,17 @@ interface AlertsPopoverProps {
   adHocDataViews: DataView[];
   I18nContext: I18nStart['Context'];
   services: DiscoverServices;
-  discoverAlertServices: DiscoverAlertServices;
-  addAdHocDataView: (dataView: DataView) => void;
+  onAddAdHocDataViews: (dataViews: DataView[]) => void;
 }
 
 export function AlertsPopover({
   searchSource,
   anchorElement,
   savedQueryId,
-  I18nContext,
   adHocDataViews,
   services,
-  discoverAlertServices,
   onClose: originalOnClose,
-  addAdHocDataView,
+  onAddAdHocDataViews,
 }: AlertsPopoverProps) {
   const dataView = searchSource.getField('index')!;
   const { triggersActionsUi } = services;
@@ -83,31 +72,45 @@ export function AlertsPopover({
     };
   }, [savedQueryId, searchSource, services]);
 
-  const discoverAlertContext = useMemo(
+  const discoverMetadata: DiscoverAlertMetadata = useMemo(
     () => ({
-      isManagementPage: false,
-      initialAdHocDataViewList: adHocDataViews.map((currentDataView) => ({
-        id: currentDataView.id!,
-        title: currentDataView.title,
-        name: currentDataView.name,
-      })),
-      addAdHocDataView,
+      adHocDataViewList: adHocDataViews,
+      savedDataViewList: [], // might be filled while in flyout
     }),
-    [adHocDataViews, addAdHocDataView]
+    [adHocDataViews]
   );
 
   const SearchThresholdAlertFlyout = useMemo(() => {
     if (!alertFlyoutVisible) {
       return;
     }
+
+    const onFinishFlyoutInteraction = (metadata: DiscoverAlertMetadata) => {
+      onAddAdHocDataViews(metadata.adHocDataViewList);
+    };
+
     return triggersActionsUi?.getAddAlertFlyout({
+      metadata: discoverMetadata,
       consumer: 'discover',
-      onClose,
+      onClose: (_, metadata) => {
+        onFinishFlyoutInteraction(metadata as DiscoverAlertMetadata);
+        onClose();
+      },
+      onSave: async (metadata) => {
+        onFinishFlyoutInteraction(metadata as DiscoverAlertMetadata);
+      },
       canChangeTrigger: false,
       ruleTypeId: ALERT_TYPE_ID,
       initialValues: { params: getParams() },
     });
-  }, [alertFlyoutVisible, getParams, triggersActionsUi, onClose]);
+  }, [
+    alertFlyoutVisible,
+    triggersActionsUi,
+    discoverMetadata,
+    getParams,
+    onAddAdHocDataViews,
+    onClose,
+  ]);
 
   const hasTimeFieldName = dataView.timeFieldName;
   const panels = [
@@ -151,21 +154,17 @@ export function AlertsPopover({
   ];
 
   return (
-    <I18nContext>
-      <KibanaContextProvider services={discoverAlertServices}>
-        <DiscoverAlertContextProvider value={discoverAlertContext}>
-          {SearchThresholdAlertFlyout}
-          <EuiWrappingPopover
-            ownFocus
-            button={anchorElement}
-            closePopover={onClose}
-            isOpen={!alertFlyoutVisible}
-          >
-            <EuiContextMenu initialPanelId="mainPanel" panels={panels} />
-          </EuiWrappingPopover>
-        </DiscoverAlertContextProvider>
-      </KibanaContextProvider>
-    </I18nContext>
+    <>
+      {SearchThresholdAlertFlyout}
+      <EuiWrappingPopover
+        ownFocus
+        button={anchorElement}
+        closePopover={onClose}
+        isOpen={!alertFlyoutVisible}
+      >
+        <EuiContextMenu initialPanelId="mainPanel" panels={panels} />
+      </EuiWrappingPopover>
+    </>
   );
 }
 
@@ -182,7 +181,7 @@ export function openAlertsPopover({
   services,
   adHocDataViews,
   savedQueryId,
-  addAdHocDataView,
+  onAddAdHocDataViews,
 }: {
   I18nContext: I18nStart['Context'];
   anchorElement: HTMLElement;
@@ -190,25 +189,8 @@ export function openAlertsPopover({
   services: DiscoverServices;
   adHocDataViews: DataView[];
   savedQueryId?: string;
-  addAdHocDataView: (dataView: DataView) => void;
+  onAddAdHocDataViews: (dataViews: DataView[]) => void;
 }) {
-  const discoverAlertServices: DiscoverAlertServices = {
-    ...pick(services, [
-      'unifiedSearch',
-      'uiSettings',
-      'notifications',
-      'application',
-      'http',
-      'storage',
-      'docLinks',
-      'dataViews',
-      'data',
-      'dataViewEditor',
-    ]),
-    savedObjects: services.core.savedObjects,
-    appName: 'stackAlerts',
-  };
-
   if (isOpen) {
     closeAlertsPopover();
     return;
@@ -218,17 +200,20 @@ export function openAlertsPopover({
   document.body.appendChild(container);
 
   const element = (
-    <AlertsPopover
-      onClose={closeAlertsPopover}
-      anchorElement={anchorElement}
-      searchSource={searchSource}
-      savedQueryId={savedQueryId}
-      adHocDataViews={adHocDataViews}
-      I18nContext={I18nContext}
-      services={services}
-      discoverAlertServices={discoverAlertServices}
-      addAdHocDataView={addAdHocDataView}
-    />
+    <I18nContext>
+      <KibanaContextProvider services={services}>
+        <AlertsPopover
+          onClose={closeAlertsPopover}
+          anchorElement={anchorElement}
+          searchSource={searchSource}
+          savedQueryId={savedQueryId}
+          adHocDataViews={adHocDataViews}
+          I18nContext={I18nContext}
+          services={services}
+          onAddAdHocDataViews={onAddAdHocDataViews}
+        />
+      </KibanaContextProvider>
+    </I18nContext>
   );
   ReactDOM.render(element, container);
 }

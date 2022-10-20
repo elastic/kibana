@@ -11,7 +11,6 @@ import 'brace/theme/github';
 import { EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { useDiscoverAlertContext } from '@kbn/discover-plugin/public';
 import { EsQueryAlertParams, SearchType } from '../types';
 import { SearchSourceExpression, SearchSourceExpressionProps } from './search_source_expression';
 import { EsQueryExpression } from './es_query_expression';
@@ -38,7 +37,8 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
 > = (props) => {
   const { ruleParams, errors, setRuleProperty, setRuleParams } = props;
   const isSearchSource = isSearchSourceAlert(ruleParams);
-  const { isManagementPage } = useDiscoverAlertContext();
+  // metadata provided only when open alert from Discover page
+  const isManagementPage = !props.metadata;
 
   const formTypeSelected = useCallback(
     (searchType: SearchType | null) => {
@@ -91,7 +91,11 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
       )}
 
       {ruleParams.searchType && isSearchSource && (
-        <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
+        <SearchSourceExpressionMemoized
+          {...props}
+          ruleParams={ruleParams}
+          unifiedSearch={props.unifiedSearch}
+        />
       )}
 
       {ruleParams.searchType && !isSearchSource && (

@@ -124,7 +124,7 @@ export function useDiscoverState({
   /**
    * Adhoc data views functionality
    */
-  const { adHocDataViewList, persistDataView, updateAdHocDataViewId, onAddAdHocDataView } =
+  const { adHocDataViewList, persistDataView, updateAdHocDataViewId, onAddAdHocDataViews } =
     useAdHocDataViews({
       dataView,
       dataViews,
@@ -309,6 +309,6 @@ export function useDiscoverState({
     adHocDataViewList,
     persistDataView,
     updateAdHocDataViewId,
-    onAddAdHocDataView,
+    onAddAdHocDataViews,
   };
 }

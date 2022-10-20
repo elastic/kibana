@@ -38,12 +38,20 @@ export type StatefulSearchBarProps<QT extends Query | AggregateQuery = Query> =
     useDefaultBehaviors?: boolean;
     savedQueryId?: string;
     onSavedQueryIdChange?: (savedQueryId?: string) => void;
+    onFiltersUpdated?: (filters: Filter[]) => void;
   };
 
 // Respond to user changing the filters
-const defaultFiltersUpdated = (queryService: QueryStart) => {
+const defaultFiltersUpdated = (
+  queryService: QueryStart,
+  onFiltersUpdated?: (filters: Filter[]) => void
+) => {
   return (filters: Filter[]) => {
-    queryService.filterManager.setFilters(filters);
+    if (onFiltersUpdated) {
+      onFiltersUpdated(filters);
+    } else {
+      queryService.filterManager.setFilters(filters);
+    }
   };
 };
 
@@ -205,7 +213,7 @@ export function createSearchBar({
           isRefreshPaused={refreshInterval.pause}
           filters={filters}
           query={query}
-          onFiltersUpdated={defaultFiltersUpdated(data.query)}
+          onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
           savedQuery={savedQuery}
           onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}

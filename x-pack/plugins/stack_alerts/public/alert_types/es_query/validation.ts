@@ -106,9 +106,9 @@ export const validateExpression = (ruleParams: EsQueryAlertParams): ValidationRe
     ) {
       errors.index.push(
         i18n.translate(
-          'xpack.stackAlerts.esQuery.ui.validation.error.requiredTimeBasedDataViewText',
+          'xpack.stackAlerts.esQuery.ui.validation.error.requiredDataViewTimeFieldText',
           {
-            defaultMessage: 'Data view is not time based.',
+            defaultMessage: 'Data view should have a time field.',
           }
         )
       );

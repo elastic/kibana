@@ -37,8 +37,8 @@ export type DiscoverTopNavProps = Pick<
   onFieldEdited: () => Promise<void>;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
-  addAdHocDataView: (dataView: DataView) => void;
   adHocDataViewList: DataView[];
+  onAddAdHocDataViews: (DataViewEditorStart: DataView[]) => void;
 };
 
 export const DiscoverTopNav = ({
@@ -58,8 +58,8 @@ export const DiscoverTopNav = ({
   onFieldEdited,
   persistDataView,
   updateAdHocDataViewId,
-  addAdHocDataView,
   adHocDataViewList,
+  onAddAdHocDataViews,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
 
@@ -164,7 +164,7 @@ export const DiscoverTopNav = ({
         onOpenSavedSearch,
         isPlainRecord,
         adHocDataViews: adHocDataViewList,
-        addAdHocDataView,
+        onAddAdHocDataViews,
         persistDataView,
         updateAdHocDataViewId,
       }),
@@ -179,9 +179,9 @@ export const DiscoverTopNav = ({
       onOpenSavedSearch,
       isPlainRecord,
       adHocDataViewList,
-      addAdHocDataView,
       persistDataView,
       updateAdHocDataViewId,
+      onAddAdHocDataViews,
     ]
   );
 

@@ -99,6 +99,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   metadata?: MetaData;
   filteredRuleTypes?: string[];
   connectorFeatureId?: string;
+  onChangeMetaData: (metadata: MetaData) => void;
 }
 
 export const RuleForm = ({
@@ -115,6 +116,7 @@ export const RuleForm = ({
   metadata,
   filteredRuleTypes: ruleTypeToFilter,
   connectorFeatureId = AlertingConnectorFeatureId,
+  onChangeMetaData,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -522,6 +524,7 @@ export const RuleForm = ({
               data={data}
               dataViews={dataViews}
               unifiedSearch={unifiedSearch}
+              onChangeMetaData={onChangeMetaData}
             />
           </Suspense>
         </EuiErrorBoundary>

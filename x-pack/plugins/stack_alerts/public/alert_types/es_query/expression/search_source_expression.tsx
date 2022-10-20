@@ -12,9 +12,9 @@ import { ISearchSource } from '@kbn/data-plugin/common';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { SavedQuery } from '@kbn/data-plugin/public';
 import { EsQueryAlertParams, SearchType } from '../types';
-import { useDiscoverAlertServices } from '../util';
 import { SearchSourceExpressionForm } from './search_source_expression_form';
 import { DEFAULT_VALUES } from '../constants';
+import { useTriggerUiActionServices } from '../util';
 
 export type SearchSourceExpressionProps = RuleTypeParamsExpressionProps<
   EsQueryAlertParams<SearchType.searchSource>
@@ -25,6 +25,8 @@ export const SearchSourceExpression = ({
   errors,
   setRuleParams,
   setRuleProperty,
+  metadata,
+  onChangeMetaData,
 }: SearchSourceExpressionProps) => {
   const {
     thresholdComparator,
@@ -36,7 +38,7 @@ export const SearchSourceExpression = ({
     searchConfiguration,
     excludeHitsFromPreviousRun,
   } = ruleParams;
-  const { data } = useDiscoverAlertServices();
+  const { data } = useTriggerUiActionServices();
 
   const [searchSource, setSearchSource] = useState<ISearchSource>();
   const [savedQuery, setSavedQuery] = useState<SavedQuery>();
@@ -112,6 +114,8 @@ export const SearchSourceExpression = ({
       errors={errors}
       initialSavedQuery={savedQuery}
       setParam={setParam}
+      metadata={metadata}
+      onChangeMetaData={onChangeMetaData}
     />
   );
 };

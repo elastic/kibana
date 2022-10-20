@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DiscoverAlertServices } from '@kbn/discover-plugin/public';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { EsQueryAlertParams, SearchType } from './types';
 
 export const isSearchSourceAlert = (
@@ -15,4 +14,4 @@ export const isSearchSourceAlert = (
   return ruleParams.searchType === 'searchSource';
 };
 
-export const useDiscoverAlertServices = () => useKibana<DiscoverAlertServices>().services;
+export const useTriggerUiActionServices = () => useKibana().services;

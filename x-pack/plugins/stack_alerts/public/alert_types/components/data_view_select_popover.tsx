@@ -21,13 +21,19 @@ import {
   useEuiPaddingCSS,
 } from '@elastic/eui';
 import type { DataViewListItem, DataView } from '@kbn/data-views-plugin/public';
-import { useDiscoverAlertContext } from '@kbn/discover-plugin/public';
 import { DataViewSelector } from '@kbn/unified-search-plugin/public';
-import { useDiscoverAlertServices } from '../es_query/util';
+import { useTriggerUiActionServices } from '../es_query/util';
+
+interface DiscoverAlertMetadata {
+  adHocDataViewList: DataView[];
+  [key: string]: unknown;
+}
 
 export interface DataViewSelectPopoverProps {
   dataView: DataView;
+  metadata?: Record<string, unknown>;
   onSelectDataView: (selectedDataView: DataView) => void;
+  onChangeMetaData: (metadata: Record<string, unknown>) => void;
 }
 
 const toDataViewListItem = (dataView: DataView): DataViewListItem => {
@@ -39,25 +45,21 @@ const toDataViewListItem = (dataView: DataView): DataViewListItem => {
 };
 
 export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopoverProps> = ({
+  metadata = { adHocDataViewList: [], savedDataViewList: [] },
   dataView,
   onSelectDataView,
+  onChangeMetaData,
 }) => {
-  const { dataViews, dataViewEditor } = useDiscoverAlertServices();
-  const discoverContext = useDiscoverAlertContext();
-  const [adHocDataViews, setAdHocDataViews] = useState<DataViewListItem[]>(() => {
-    if (discoverContext.isManagementPage) {
-      return dataView.isPersisted() ? [] : [toDataViewListItem(dataView)];
-    }
-    return discoverContext.initialAdHocDataViewList;
-  });
+  const { dataViews, dataViewEditor } = useTriggerUiActionServices();
+  const context = metadata as DiscoverAlertMetadata;
   const [dataViewItems, setDataViewsItems] = useState<DataViewListItem[]>([]);
   const [dataViewPopoverOpen, setDataViewPopoverOpen] = useState(false);
 
   const closeDataViewEditor = useRef<() => void | undefined>();
 
   const allDataViewItems = useMemo(
-    () => [...dataViewItems, ...adHocDataViews],
-    [adHocDataViews, dataViewItems]
+    () => [...dataViewItems, ...context.adHocDataViewList.map(toDataViewListItem)],
+    [context.adHocDataViewList, dataViewItems]
   );
 
   const closeDataViewPopover = useCallback(() => setDataViewPopoverOpen(false), []);
@@ -80,13 +82,14 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
     );
   }, [dataViews]);
 
-  const onAdHocDataView = useCallback(
+  const onAddAdHocDataView = useCallback(
     (adHocDataView: DataView) => {
-      // sync discover state
-      discoverContext.addAdHocDataView?.(adHocDataView);
-      setAdHocDataViews((prev) => [...prev, toDataViewListItem(adHocDataView)]);
+      onChangeMetaData({
+        ...context,
+        adHocDataViewList: [...context.adHocDataViewList, toDataViewListItem(adHocDataView)],
+      });
     },
-    [discoverContext]
+    [context, onChangeMetaData]
   );
 
   const createDataView = useMemo(
@@ -97,7 +100,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
               onSave: async (createdDataView) => {
                 if (createdDataView.id) {
                   if (!createdDataView.isPersisted()) {
-                    onAdHocDataView(createdDataView);
+                    onAddAdHocDataView(createdDataView);
                   }
 
                   await loadPersistedDataViews();
@@ -108,7 +111,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
             });
           }
         : undefined,
-    [dataViewEditor, loadPersistedDataViews, onChangeDataView, onAdHocDataView]
+    [dataViewEditor, loadPersistedDataViews, onChangeDataView, onAddAdHocDataView]
   );
 
   useEffect(() => {
@@ -133,10 +136,10 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
         newDataView.timeFieldName = '@timestamp';
       }
 
-      onAdHocDataView(newDataView);
+      onAddAdHocDataView(newDataView);
       onChangeDataView(newDataView.id!);
     },
-    [dataViews, onAdHocDataView, onChangeDataView]
+    [dataViews, onAddAdHocDataView, onChangeDataView]
   );
 
   if (!allDataViewItems) {

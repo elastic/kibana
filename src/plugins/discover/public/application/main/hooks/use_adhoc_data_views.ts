@@ -106,14 +106,19 @@ export const useAdHocDataViews = ({
     return currentDataView;
   }, [stateContainer, openConfirmSavePrompt, savedSearch, updateSavedSearch]);
 
-  const onAddAdHocDataView = useCallback((newDataView: DataView) => {
-    setAdHocDataViewList((prev) => [...prev, newDataView]);
+  const onAddAdHocDataViews = useCallback((newDataViews: DataView[]) => {
+    setAdHocDataViewList((prev) => {
+      const newAdHocDataViews = newDataViews.filter(
+        (newDataView) => !prev.find((d) => d.id === newDataView.id)
+      );
+      return [...prev, ...newAdHocDataViews];
+    });
   }, []);
 
   return {
     adHocDataViewList,
     persistDataView,
     updateAdHocDataViewId,
-    onAddAdHocDataView,
+    onAddAdHocDataViews,
   };
 };
