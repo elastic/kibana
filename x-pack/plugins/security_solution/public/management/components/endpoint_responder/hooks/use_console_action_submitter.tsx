@@ -63,6 +63,11 @@ export interface UseConsoleActionSubmitterOptions<
   actionRequestBody: TReqBody | undefined;
 
   dataTestSubj?: string;
+
+  /**  */
+  pendingMessage?: string;
+
+  successMessage?: string;
 }
 
 /**
@@ -78,6 +83,8 @@ export interface UseConsoleActionSubmitterOptions<
  * @param store
  * @param ResultComponent
  * @param dataTestSubj
+ * @param pendingMessage
+ * @param successMessage
  */
 export const useConsoleActionSubmitter = <
   TReqBody extends BaseActionRequestBody = BaseActionRequestBody,
@@ -91,6 +98,8 @@ export const useConsoleActionSubmitter = <
   store,
   ResultComponent,
   dataTestSubj,
+  pendingMessage,
+  successMessage,
 }: UseConsoleActionSubmitterOptions<
   TReqBody,
   TActionOutputContent
@@ -237,7 +246,11 @@ export const useConsoleActionSubmitter = <
   // Calculate the action's UI result based on the different API responses
   const result = useMemo(() => {
     if (isPending) {
-      return <ResultComponent showAs="pending" data-test-subj={getTestId('pending')} />;
+      return (
+        <ResultComponent showAs="pending" data-test-subj={getTestId('pending')}>
+          {pendingMessage}
+        </ResultComponent>
+      );
     }
 
     const apiError = actionRequestError || actionDetailsError;
@@ -246,7 +259,7 @@ export const useConsoleActionSubmitter = <
       return (
         <ResultComponent showAs="failure" data-test-subj={getTestId('apiFailure')}>
           <FormattedMessage
-            id="xpack.securitySolution.endpointResponseActions.killProcess.performApiErrorMessage"
+            id="xpack.securitySolution.endpointResponseActions.actionSubmitter.apiErrorDetails"
             defaultMessage="The following error was encountered:"
           />
           <FormattedError error={apiError} data-test-subj={getTestId('apiErrorDetails')} />
@@ -271,6 +284,7 @@ export const useConsoleActionSubmitter = <
           ResultComponent={ResultComponent}
           action={actionDetails}
           data-test-subj={getTestId('success')}
+          title={successMessage}
         />
       );
     }
@@ -283,6 +297,8 @@ export const useConsoleActionSubmitter = <
     actionDetails,
     ResultComponent,
     getTestId,
+    pendingMessage,
+    successMessage,
   ]);
 
   return {
