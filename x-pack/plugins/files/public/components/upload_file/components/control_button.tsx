@@ -38,7 +38,7 @@ export const ControlButton: FunctionComponent<Props> = ({ onCancel, onUpload, im
 
   if (uploading) return <CancelButton onClick={onCancel} />;
   if (retry) return <RetryButton onClick={onUpload} />;
-  if (!done && !immediate) return <UploadButton onClick={onUpload} />;
+  if (!immediate) return <UploadButton onClick={onUpload} />;
 
   if (done) {
     return (
