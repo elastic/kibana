@@ -23,7 +23,12 @@ import {
   valueActionVariableDescription,
   viewInAppUrlActionVariableDescription,
 } from '../common/messages';
-import { oneOfLiterals, validateIsStringElasticsearchJSONFilter } from '../common/utils';
+import {
+  getAlertDetailsPageEnabledForApp,
+  isNotNull,
+  oneOfLiterals,
+  validateIsStringElasticsearchJSONFilter,
+} from '../common/utils';
 import {
   createMetricThresholdExecutor,
   FIRED_ACTIONS,
@@ -42,6 +47,8 @@ export async function registerMetricThresholdRuleType(
   alertingPlugin: PluginSetupContract,
   libs: InfraBackendLibs
 ) {
+  const config = libs.getAlertDetailsConfig();
+
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
     comparator: oneOfLiterals(Object.values(Comparator)),
@@ -94,15 +101,17 @@ export async function registerMetricThresholdRuleType(
     actionVariables: {
       context: [
         { name: 'group', description: groupActionVariableDescription },
+        getAlertDetailsPageEnabledForApp(config, 'metrics')
+          ? { name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription }
+          : null,
         { name: 'alertState', description: alertStateActionVariableDescription },
-        { name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription },
         { name: 'reason', description: reasonActionVariableDescription },
         { name: 'timestamp', description: timestampActionVariableDescription },
         { name: 'value', description: valueActionVariableDescription },
         { name: 'metric', description: metricActionVariableDescription },
         { name: 'threshold', description: thresholdActionVariableDescription },
         { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
-      ],
+      ].filter(isNotNull),
     },
     producer: 'infrastructure',
   });

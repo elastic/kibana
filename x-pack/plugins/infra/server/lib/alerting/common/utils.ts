@@ -9,6 +9,7 @@ import { isEmpty, isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
 import type { IBasePath } from '@kbn/core/server';
+import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
@@ -22,6 +23,8 @@ export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
     validate: (value) =>
       arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
   });
+
+export const isNotNull = <T>(argument: T | null): argument is T => argument !== null;
 
 export const validateIsStringElasticsearchJSONFilter = (value: string) => {
   if (value === '') {
@@ -109,3 +112,12 @@ export const getViewInAppUrlInventory = (
 };
 
 export const LINK_TO_ALERT_DETAIL = '/app/observability/alerts';
+
+export const getAlertDetailsPageEnabledForApp = (
+  config: ObservabilityConfig['unsafe']['alertDetails'] | null,
+  appName: keyof ObservabilityConfig['unsafe']['alertDetails']
+): boolean => {
+  if (!config) return false;
+
+  return config[appName].enabled;
+};
