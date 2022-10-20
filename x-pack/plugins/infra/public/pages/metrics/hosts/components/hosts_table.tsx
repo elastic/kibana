@@ -18,19 +18,7 @@ interface Props {
 export const HostsTable: React.FunctionComponent<Props> = ({ nodes }) => {
   const items = useHostTable(nodes);
 
-  const sortSettings = {
-    sort: {
-      field: 'cpuCores',
-      direction: 'desc',
-    },
-  } as const;
-
   return (
-    <EuiInMemoryTable
-      pagination={true}
-      sorting={sortSettings}
-      items={items}
-      columns={HostsTableColumns}
-    />
+    <EuiInMemoryTable pagination={true} sorting={true} items={items} columns={HostsTableColumns} />
   );
 };
