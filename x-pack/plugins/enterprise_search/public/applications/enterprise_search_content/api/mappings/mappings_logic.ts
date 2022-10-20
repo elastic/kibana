@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';

@@ -163,4 +163,60 @@ describe('MlInferenceLogic', () => {
       });
     });
   });
+
+  describe('listeners', () => {
+    describe('createPipeline', () => {
+      const mockModelConfiguration = {
+        ...DEFAULT_VALUES.addInferencePipelineModal,
+        configuration: {
+          destinationField: '',
+          modelID: 'mock-model-id',
+          pipelineName: 'mock-pipeline-name',
+          sourceField: 'mock_text_field',
+        },
+        indexName: 'my-index-123',
+      };
+      it('calls makeCreatePipelineRequest when no destinationField is passed', () => {
+        mount({
+          ...DEFAULT_VALUES,
+          addInferencePipelineModal: {
+            ...mockModelConfiguration,
+          },
+        });
+        jest.spyOn(MLInferenceLogic.actions, 'makeCreatePipelineRequest');
+        MLInferenceLogic.actions.createPipeline();
+
+        expect(MLInferenceLogic.actions.makeCreatePipelineRequest).toHaveBeenCalledWith({
+          destinationField: undefined,
+          indexName: mockModelConfiguration.indexName,
+          modelId: mockModelConfiguration.configuration.modelID,
+          pipelineName: mockModelConfiguration.configuration.pipelineName,
+          sourceField: mockModelConfiguration.configuration.sourceField,
+        });
+      });
+
+      it('calls makeCreatePipelineRequest with passed destinationField', () => {
+        mount({
+          ...DEFAULT_VALUES,
+          addInferencePipelineModal: {
+            ...mockModelConfiguration,
+            configuration: {
+              ...mockModelConfiguration.configuration,
+              destinationField: 'mockDestinationField',
+            },
+          },
+        });
+        jest.spyOn(MLInferenceLogic.actions, 'makeCreatePipelineRequest');
+        MLInferenceLogic.actions.createPipeline();
+
+        expect(MLInferenceLogic.actions.makeCreatePipelineRequest).toHaveBeenCalledWith({
+          destinationField: 'mockDestinationField',
+          indexName: mockModelConfiguration.indexName,
+          modelId: mockModelConfiguration.configuration.modelID,
+          pipelineName: mockModelConfiguration.configuration.pipelineName,
+          sourceField: mockModelConfiguration.configuration.sourceField,
+        });
+      });
+    });
+  });
 });
