@@ -1,6 +1,6 @@
 # @kbn/analytics-shippers-gainsight
 
-gainsight implementation as a shipper for the `@kbn/analytics-client`.
+Gainsight implementation as a shipper for the `@kbn/analytics-client`.
 
 ## How to use it
 
