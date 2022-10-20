@@ -406,6 +406,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       ),
       migrationVersion,
       coreMigrationVersion,
+      created_at: time,
       updated_at: time,
       ...(Array.isArray(references) && { references }),
     });

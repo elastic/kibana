@@ -821,8 +821,10 @@ describe('SavedObjectsRepository', () => {
       it(`migrates the docs and serializes the migrated docs`, async () => {
         migrator.migrateDocument.mockImplementation(mockMigrateDocument);
         const modifiedObj1 = { ...obj1, coreMigrationVersion: '8.0.0' };
+
         await bulkCreateSuccess(client, repository, [modifiedObj1, obj2]);
         const docs = [modifiedObj1, obj2].map((x) => ({ ...x, ...mockTimestampFields }));
+
         expectMigrationArgs(docs[0], true, 1);
         expectMigrationArgs(docs[1], true, 2);
 
@@ -1157,6 +1159,7 @@ describe('SavedObjectsRepository', () => {
         namespaces: doc._source!.namespaces ?? ['default'],
         ...(doc._source!.originId && { originId: doc._source!.originId }),
         ...(doc._source!.updated_at && { updated_at: doc._source!.updated_at }),
+        ...(doc._source!.created_at && { created_at: doc._source!.created_at }),
         version: encodeHitVersion(doc),
         attributes: doc._source![type],
         references: doc._source!.references || [],
@@ -2892,7 +2895,7 @@ describe('SavedObjectsRepository', () => {
           references,
           migrationVersion,
           coreMigrationVersion,
-          ...mockTimestampFields,
+          ...mockTimestampFieldsWithCreated,
         };
         expectMigrationArgs(doc);
 
@@ -2949,7 +2952,7 @@ describe('SavedObjectsRepository', () => {
         expect(result).toEqual({
           type: MULTI_NAMESPACE_TYPE,
           id,
-          ...mockTimestampFields,
+          ...mockTimestampFieldsWithCreated,
           version: mockVersion,
           attributes,
           references,
@@ -3543,6 +3546,7 @@ describe('SavedObjectsRepository', () => {
                 'migrationVersion',
                 'coreMigrationVersion',
                 'updated_at',
+                'created_at',
                 'originId',
                 'title',
               ],

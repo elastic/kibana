@@ -30,5 +30,6 @@
     { "path": "../timelines/tsconfig.json"},
     { "path": "../translations/tsconfig.json" },
     { "path":  "../../../src/plugins/unified_search/tsconfig.json"},
+    { "path":  "../../../src/plugins/guided_onboarding/tsconfig.json"},
   ]
 }

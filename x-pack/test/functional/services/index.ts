@@ -69,6 +69,8 @@ import {
 import { SearchSessionsService } from './search_sessions';
 import { ObservabilityProvider } from './observability';
 import { CasesServiceProvider } from './cases';
+import { ActionsServiceProvider } from './actions';
+import { RulesServiceProvider } from './rules';
 import { AiopsProvider } from './aiops';
 
 // define the name and providers for services that should be
@@ -129,6 +131,8 @@ export const services = {
   searchSessions: SearchSessionsService,
   observability: ObservabilityProvider,
   // compareImages: CompareImagesProvider,
+  actions: ActionsServiceProvider,
+  rules: RulesServiceProvider,
   cases: CasesServiceProvider,
   aiops: AiopsProvider,
 };

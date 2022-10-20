@@ -1836,7 +1836,7 @@
           "Types matching number values"
         ],
         "signature": [
-          "\"date\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
+          "\"date\" | \"long\" | \"double\" | \"short\" | \"byte\" | \"float\" | \"integer\""
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
@@ -1870,7 +1870,7 @@
           "\nPossible type values in the schema"
         ],
         "signature": [
-          "\"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
+          "\"boolean\" | \"date\" | \"keyword\" | \"text\" | \"long\" | \"double\" | \"short\" | \"byte\" | \"float\" | \"integer\""
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,

@@ -10,10 +10,10 @@ import { waitFor, render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 import { TEST_ID, SessionsView, defaultSessionsFilter } from '.';
 import type { EntityType } from '@kbn/timelines-plugin/common';
-import { TimelineId } from '@kbn/timelines-plugin/common';
 import type { SessionsComponentsProps } from './types';
 import type { TimelineModel } from '../../../timelines/store/timeline/model';
 import { useGetUserCasesPermissions } from '../../lib/kibana';
+import { TableId } from '../../../../common/types';
 import { licenseService } from '../../hooks/use_license';
 
 jest.mock('../../lib/kibana');
@@ -34,7 +34,7 @@ const filterQuery =
   '{"bool":{"must":[],"filter":[{"match_phrase":{"host.name":{"query":"ubuntu-impish"}}}],"should":[],"must_not":[]}}';
 
 const testProps: SessionsComponentsProps = {
-  timelineId: TimelineId.hostsPageSessions,
+  tableId: TableId.hostsPageSessions,
   entityType: 'sessions',
   pageFilters: [],
   startDate,
@@ -193,7 +193,7 @@ describe('SessionsView', () => {
   it('Action tab should have 5 columns when accessed via K8S dahsboard', async () => {
     render(
       <TestProviders>
-        <SessionsView {...testProps} timelineId={TimelineId.kubernetesPageSessions} />
+        <SessionsView {...testProps} tableId={TableId.kubernetesPageSessions} />
       </TestProviders>
     );
 
