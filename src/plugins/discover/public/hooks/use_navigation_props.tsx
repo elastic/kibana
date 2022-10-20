@@ -7,13 +7,7 @@
  */
 
 import { useCallback } from 'react';
-import {
-  type AggregateQuery,
-  disableFilter,
-  type Query,
-  type TimeRange,
-  type Filter,
-} from '@kbn/es-query';
+import type { AggregateQuery, Query, TimeRange, Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
@@ -50,13 +44,14 @@ const getStateParams = ({
   if (!isEmbeddableView) {
     // applied from discover main and context app
     appliedFilters = [...filterManager.getGlobalFilters(), ...filterManager.getAppFilters()];
+    // eslint-disable-next-line no-console
+    console.log('getting filters from filterManager', appliedFilters);
     query = data.query.queryString.getQuery();
     timeRange = data.query.timefilter.timefilter.getTime();
   } else if (isEmbeddableView && filters?.length) {
     // applied from saved search embeddable
     appliedFilters = filters;
   }
-  appliedFilters = appliedFilters.map(disableFilter);
 
   return {
     columns,

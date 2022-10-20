@@ -37,9 +37,9 @@ export class DiscoverSingleDocLocatorDefinition
       index,
       timeRange,
       query,
-      savedSearchId,
-      columns,
       filters,
+      columns,
+      savedSearchId,
     };
 
     let dataViewId;

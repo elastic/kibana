@@ -56,6 +56,8 @@ export class DiscoverContextAppLocatorDefinition
       index,
       timeRange,
       query,
+      filters,
+      columns,
       savedSearchId,
     };
 

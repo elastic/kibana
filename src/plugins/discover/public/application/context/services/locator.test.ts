@@ -72,7 +72,7 @@ describe('Discover context url generator', () => {
     expect(path).toMatchInlineSnapshot(
       `"#/context/c367b774-a4c2-11ea-bb37-0242ac130002/mock-row-id?_g=(filters:!())&_a=(columns:!(mock-column),filters:!((meta:(disabled:!f,index:c367b774-a4c2-11ea-bb37-0242ac130002,key:mock-key,negate:!f,params:(query:mock-value),type:phrase,value:mock-value),query:(match_phrase:(mock-key:mock-value)))))"`
     );
-    expect(state).toEqual(stateParams);
+    expect(state).toEqual({ ...appStateParams, ...stateParams });
     expect(_a).toEqual(appStateParams);
     expect(_g).toEqual({ filters: [] });
   });

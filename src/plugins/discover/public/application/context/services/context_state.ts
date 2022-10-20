@@ -9,7 +9,13 @@
 import { isEqual } from 'lodash';
 import { History } from 'history';
 import { NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
-import { Filter, compareFilters, COMPARE_ALL_OPTIONS, FilterStateStore } from '@kbn/es-query';
+import {
+  Filter,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  FilterStateStore,
+  disableFilter,
+} from '@kbn/es-query';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
@@ -201,7 +207,9 @@ export function getState({
     startSync: () => {
       // some filters may not be valid for this context, so update
       // the filter manager with a modified list of valid filters
-      data.query.filterManager.setFilters(getValidFilters(dataView, getAllFilters()));
+      data.query.filterManager.setFilters(
+        getValidFilters(dataView, getAllFilters().map(disableFilter))
+      );
 
       const stopSyncingAppFilters = connectToQueryState(data.query, appStateContainer, {
         filters: FilterStateStore.APP_STATE,

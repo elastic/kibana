@@ -72,14 +72,7 @@ export const ContextApp = ({ dataView, anchorId, locationState }: ContextAppProp
     setAppState: stateContainer.setAppState,
   });
 
-  const breadcrumb = useRootBreadcrumb({
-    dataViewId: dataView.id!,
-    filters: appState.filters,
-    columns,
-    timeRange: locationState?.timeRange,
-    query: locationState?.query,
-    savedSearchId: locationState?.savedSearchId,
-  });
+  const breadcrumb = useRootBreadcrumb({ dataViewId: dataView.id!, ...locationState });
 
   useEffect(() => {
     services.chrome.setBreadcrumbs([
