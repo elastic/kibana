@@ -23587,7 +23587,6 @@
     "xpack.observability.formatters.secondsTimeUnitLabel": "s",
     "xpack.observability.formatters.secondsTimeUnitLabelExtended": "secondes",
     "xpack.observability.home.addData": "Ajouter des intégrations",
-    "xpack.observability.hoverActions.filterForValue": "Filtrer sur la valeur",
     "xpack.observability.hoverActions.filterForValueButtonLabel": "Inclure",
     "xpack.observability.inspector.stats.dataViewDescription": "La vue de données qui se connecte aux index Elasticsearch.",
     "xpack.observability.inspector.stats.dataViewLabel": "Vue de données",

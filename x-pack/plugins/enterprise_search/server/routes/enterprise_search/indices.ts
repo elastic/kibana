@@ -22,7 +22,6 @@ import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
 import { createIndex } from '../../lib/indices/create_index';
-import { deleteMlInferencePipeline } from '../../lib/indices/delete_ml_inference_pipeline';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
@@ -34,6 +33,8 @@ import { getMlInferencePipelines } from '../../lib/ml_inference_pipeline/get_inf
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
 import { getPipeline } from '../../lib/pipelines/get_pipeline';
+import { deleteMlInferencePipeline } from '../../lib/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
+import { detachMlInferencePipeline } from '../../lib/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import {
@@ -702,6 +703,48 @@ export function registerIndexRoutes({
         body: pipelines,
         headers: { 'content-type': 'application/json' },
       });
+    })
+  );
+
+  router.delete(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/{pipelineName}/detach',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+          pipelineName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const pipelineName = decodeURIComponent(request.params.pipelineName);
+      const { client } = (await context.core).elasticsearch;
+
+      try {
+        const detachResult = await detachMlInferencePipeline(
+          indexName,
+          pipelineName,
+          client.asCurrentUser
+        );
+
+        return response.ok({
+          body: detachResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isResourceNotFoundException(error)) {
+          // return specific message if pipeline doesn't exist
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: error.meta?.body?.error?.reason,
+            response,
+            statusCode: 404,
+          });
+        }
+        // otherwise, let the default handler wrap it
+        throw error;
+      }
     })
   );
 }
