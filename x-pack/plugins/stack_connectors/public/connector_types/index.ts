@@ -12,20 +12,21 @@ import {
   getIndexConnectorType,
   getPagerDutyConnectorType,
   getServerLogConnectorType,
+  getServiceNowITOMConnectorType,
   getSlackConnectorType,
   getTeamsConnectorType,
   getWebhookConnectorType,
+  getOpsgenieConnectorType,
+  getXmattersConnectorType,
 } from './stack';
 
 import {
   getCasesWebhookConnectorType,
   getJiraConnectorType,
   getResilientConnectorType,
-  getServiceNowITOMConnectorType,
   getServiceNowITSMConnectorType,
   getServiceNowSIRConnectorType,
   getSwimlaneConnectorType,
-  getXmattersConnectorType,
 } from './cases';
 
 export interface RegistrationServices {
@@ -56,5 +57,6 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getServiceNowSIRConnectorType());
   connectorTypeRegistry.register(getJiraConnectorType());
   connectorTypeRegistry.register(getResilientConnectorType());
+  connectorTypeRegistry.register(getOpsgenieConnectorType());
   connectorTypeRegistry.register(getTeamsConnectorType());
 }

@@ -7,7 +7,9 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { isActiveTimeline } from '../../../helpers';
+import { TableId } from '../../../../common/types';
 import { useResponderActionItem } from '../endpoint_responder';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { TAKE_ACTION } from '../alerts_table/additional_filters_action/translations';
@@ -43,12 +45,12 @@ export interface TakeActionDropdownProps {
   isHostIsolationPanelOpen: boolean;
   loadingEventDetails: boolean;
   onAddEventFilterClick: () => void;
-  onAddExceptionTypeClick: (type: ExceptionListType) => void;
+  onAddExceptionTypeClick: (type?: ExceptionListTypeEnum) => void;
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
   refetch: (() => void) | undefined;
   refetchFlyoutData: () => Promise<void>;
-  timelineId: string;
   onOsqueryClick: (id: string) => void;
+  scopeId: string;
 }
 
 export const TakeActionDropdown = React.memo(
@@ -64,8 +66,8 @@ export const TakeActionDropdown = React.memo(
     onAddIsolationStatusClick,
     refetch,
     refetchFlyoutData,
-    timelineId,
     onOsqueryClick,
+    scopeId,
   }: TakeActionDropdownProps) => {
     const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
     const { loading: canAccessEndpointManagementLoading, canAccessEndpointManagement } =
@@ -142,7 +144,7 @@ export const TakeActionDropdown = React.memo(
     );
 
     const handleOnAddExceptionTypeClick = useCallback(
-      (type: ExceptionListType) => {
+      (type?: ExceptionListTypeEnum) => {
         onAddExceptionTypeClick(type);
         setIsPopoverOpen(false);
       },
@@ -174,7 +176,7 @@ export const TakeActionDropdown = React.memo(
       eventId: actionsData.eventId,
       indexName,
       refetch,
-      timelineId,
+      scopeId,
     });
 
     const { investigateInTimelineActionItems } = useInvestigateInTimeline({
@@ -216,12 +218,17 @@ export const TakeActionDropdown = React.memo(
       ]
     );
 
+    const isInDetections = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage].includes(
+      scopeId as TableId
+    );
+
     const { addToCaseActionItems } = useAddToCaseActions({
       ecsData,
       nonEcsData: detailsData?.map((d) => ({ field: d.field, value: d.values })) ?? [],
       onMenuItemClick,
       onSuccess: refetchFlyoutData,
-      timelineId,
+      isActiveTimelines: isActiveTimeline(scopeId),
+      isInDetections,
     });
 
     const items: React.ReactElement[] = useMemo(

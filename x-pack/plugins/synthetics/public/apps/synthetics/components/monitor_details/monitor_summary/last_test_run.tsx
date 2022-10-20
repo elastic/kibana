@@ -28,7 +28,6 @@ import {
   EncryptedSyntheticsSavedMonitor,
   Ping,
 } from '../../../../../../common/runtime_types';
-import { checkIsStalePing } from '../../../utils/monitor_test_result/check_pings';
 import { formatTestRunAt } from '../../../utils/monitor_test_result/test_time_formats';
 
 import { useSyntheticsSettingsContext } from '../../../contexts';
@@ -50,11 +49,10 @@ export const LastTestRun = () => {
     latestPing?.monitor?.check_group
   );
 
-  const hasStalePings = checkIsStalePing(monitor, latestPing);
-  const loading = hasStalePings || stepsLoading || pingsLoading;
+  const loading = stepsLoading || pingsLoading;
 
   return (
-    <EuiPanel css={{ minHeight: 356 }}>
+    <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 356 }}>
       <PanelHeader monitor={monitor} latestPing={latestPing} loading={loading} />
       {!loading && latestPing?.error ? (
         <EuiCallOut

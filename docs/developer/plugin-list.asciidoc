@@ -71,7 +71,7 @@ as uiSettings within the code.
 
 |{kib-repo}blob/{branch}/src/plugins/data_views/README.mdx[dataViews]
 |The data views API provides a consistent method of structuring and formatting documents
-and field lists across the various Kibana apps. Its typically used in conjunction with
+and field lists across the various Kibana apps. It's typically used in conjunction with
 <DocLink id="kibDevTutorialDataSearchAndSessions" section="high-level-search" text="SearchSource" /> for composing queries.
 
 
@@ -311,6 +311,10 @@ In general this plugin provides:
 |This Kibana plugin contains components and services for field list UI (as in fields sidebar on Discover and Lens pages).
 
 
+|{kib-repo}blob/{branch}/src/plugins/unified_histogram/README.md[unifiedHistogram]
+|The unifiedHistogram plugin provides UI components to create a layout including a resizable histogram and a main display.
+
+
 |{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]
 |Contains all the components of Kibana's unified search experience. Specifically:
 
@@ -434,6 +438,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_full_story/README.md[cloudFullStory]
 |Integrates with FullStory in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_gain_sight/README.md[cloudGainsight]
+|Integrates with Gainsight in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_links/README.md[cloudLinks]

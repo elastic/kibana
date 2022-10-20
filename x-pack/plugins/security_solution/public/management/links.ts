@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
+  calculatePermissionsFromCapabilities,
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
@@ -231,35 +232,54 @@ const excludeLinks = (linkIds: SecurityPageName[]) => ({
   links: links.links?.filter((link) => !linkIds.includes(link.id)),
 });
 
+const getHostIsolationExceptionTotal = async (http: CoreStart['http']) => {
+  const hostIsolationExceptionsApiClientInstance =
+    HostIsolationExceptionsApiClient.getInstance(http);
+  const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
+  return summaryResponse.total;
+};
+
 export const getManagementFilteredLinks = async (
   core: CoreStart,
   plugins: StartPlugins
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
   const isEndpointRbacEnabled = ExperimentalFeaturesService.get().endpointRbacEnabled;
+  const endpointPermissions = calculatePermissionsFromCapabilities(core.application.capabilities);
 
   try {
     const currentUserResponse = await plugins.security.authc.getCurrentUser();
-    const privileges = fleetAuthz
+    const { canAccessEndpointManagement, canIsolateHost, canReadActionsLogManagement } = fleetAuthz
       ? calculateEndpointAuthz(
           licenseService,
           fleetAuthz,
           currentUserResponse.roles,
-          isEndpointRbacEnabled
+          isEndpointRbacEnabled,
+          endpointPermissions
         )
       : getEndpointAuthzInitialState();
-    if (!privileges.canAccessEndpointManagement) {
+
+    if (!canAccessEndpointManagement) {
       return excludeLinks([
         SecurityPageName.hostIsolationExceptions,
         SecurityPageName.responseActionsHistory,
       ]);
     }
-    if (!privileges.canIsolateHost || !privileges.canReadActionsLogManagement) {
-      const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
-        core.http
-      );
-      const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
-      if (!summaryResponse.total) {
+
+    if (!canReadActionsLogManagement) {
+      // <= enterprise license
+      const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
+      if (!canIsolateHost && !hostExceptionCount) {
+        return excludeLinks([
+          SecurityPageName.hostIsolationExceptions,
+          SecurityPageName.responseActionsHistory,
+        ]);
+      }
+      return excludeLinks([SecurityPageName.responseActionsHistory]);
+    } else if (!canIsolateHost) {
+      const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
+      if (!hostExceptionCount) {
+        // <= platinum so exclude also links that require enterprise
         return excludeLinks([
           SecurityPageName.hostIsolationExceptions,
           SecurityPageName.responseActionsHistory,

@@ -7,10 +7,13 @@
 
 import { useCallback } from 'react';
 import { Filter } from '@kbn/es-query';
-import { useIndicatorsFiltersContext } from '../../indicators/hooks/use_indicators_filters_context';
-import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
-import { FilterIn, FilterOut, updateFiltersArray } from '../utils/filter';
-import { Indicator } from '../../../../common/types/indicator';
+import {
+  fieldAndValueValid,
+  getIndicatorFieldAndValue,
+  Indicator,
+  useIndicatorsFiltersContext,
+} from '../../indicators';
+import { FilterIn, FilterOut, updateFiltersArray } from '../utils';
 
 export interface UseFilterInParam {
   /**

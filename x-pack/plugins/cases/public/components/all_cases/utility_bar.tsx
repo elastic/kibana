@@ -5,153 +5,139 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useState } from 'react';
-import { EuiContextMenuPanel } from '@elastic/eui';
-import { CaseStatuses } from '../../../common';
+import type { FunctionComponent } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
-  UtilityBar,
-  UtilityBarAction,
-  UtilityBarGroup,
-  UtilityBarSection,
-  UtilityBarText,
-} from '../utility_bar';
+  EuiButtonEmpty,
+  EuiContextMenu,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import * as i18n from './translations';
-import { Cases, Case, FilterOptions } from '../../../common/ui/types';
-import { getBulkItems } from '../bulk_actions';
-import { useDeleteCases } from '../../containers/use_delete_cases';
-import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
-import { useUpdateCases } from '../../containers/use_bulk_update_case';
+import type { Case } from '../../../common/ui/types';
 import { useRefreshCases } from './use_on_refresh_cases';
+import { useBulkActions } from './use_bulk_actions';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface Props {
-  data: Cases;
-  enableBulkActions: boolean;
-  filterOptions: FilterOptions;
+  isSelectorView?: boolean;
+  totalCases: number;
   selectedCases: Case[];
   deselectCases: () => void;
 }
 
-export const getStatusToasterMessage = (status: CaseStatuses, cases: Case[]): string => {
-  const totalCases = cases.length;
-  const caseTitle = totalCases === 1 ? cases[0].title : '';
+export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
+  ({ isSelectorView, totalCases, selectedCases, deselectCases }) => {
+    const { euiTheme } = useEuiTheme();
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
+    const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+    const refreshCases = useRefreshCases();
+    const { permissions } = useCasesContext();
 
-  if (status === CaseStatuses.open) {
-    return i18n.REOPENED_CASES({ totalCases, caseTitle });
-  } else if (status === CaseStatuses['in-progress']) {
-    return i18n.MARK_IN_PROGRESS_CASES({ totalCases, caseTitle });
-  } else if (status === CaseStatuses.closed) {
-    return i18n.CLOSED_CASES({ totalCases, caseTitle });
-  }
+    const onRefresh = useCallback(() => {
+      deselectCases();
+      refreshCases();
+    }, [deselectCases, refreshCases]);
 
-  return '';
-};
-
-export const CasesTableUtilityBar: FunctionComponent<Props> = ({
-  data,
-  enableBulkActions = false,
-  filterOptions,
-  selectedCases,
-  deselectCases,
-}) => {
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const onCloseModal = useCallback(() => setIsModalVisible(false), []);
-  const refreshCases = useRefreshCases();
-
-  const { mutate: deleteCases } = useDeleteCases();
-  const { mutate: updateCases } = useUpdateCases();
-
-  const toggleBulkDeleteModal = useCallback((cases: Case[]) => {
-    setIsModalVisible(true);
-  }, []);
-
-  const handleUpdateCaseStatus = useCallback(
-    (status: CaseStatuses) => {
-      const casesToUpdate = selectedCases.map((theCase) => ({
-        status,
-        id: theCase.id,
-        version: theCase.version,
-      }));
-
-      updateCases({
-        cases: casesToUpdate,
-        successToasterTitle: getStatusToasterMessage(status, selectedCases),
-      });
-    },
-    [selectedCases, updateCases]
-  );
-
-  const getBulkItemsPopoverContent = useCallback(
-    (closePopover: () => void) => (
-      <EuiContextMenuPanel
-        data-test-subj="cases-bulk-actions"
-        items={getBulkItems({
-          caseStatus: filterOptions.status,
-          closePopover,
-          deleteCasesAction: toggleBulkDeleteModal,
-          selectedCases,
-          updateCaseStatus: handleUpdateCaseStatus,
-        })}
-      />
-    ),
-    [selectedCases, filterOptions.status, toggleBulkDeleteModal, handleUpdateCaseStatus]
-  );
-
-  const onConfirmDeletion = useCallback(() => {
-    setIsModalVisible(false);
-    deleteCases({
-      caseIds: selectedCases.map(({ id }) => id),
-      successToasterTitle: i18n.DELETED_CASES(selectedCases.length),
+    const { panels, modals } = useBulkActions({
+      selectedCases,
+      onAction: closePopover,
+      onActionSuccess: onRefresh,
     });
-  }, [deleteCases, selectedCases]);
 
-  const onRefresh = useCallback(() => {
-    deselectCases();
-    refreshCases();
-  }, [deselectCases, refreshCases]);
+    /**
+     * At least update or delete permissions needed to show bulk actions.
+     * Granular permission check for each action is performed
+     * in the useBulkActions hook.
+     */
+    const showBulkActions = (permissions.update || permissions.delete) && selectedCases.length > 0;
 
-  return (
-    <UtilityBar border>
-      <UtilityBarSection>
-        <UtilityBarGroup>
-          <UtilityBarText data-test-subj="case-table-case-count">
-            {i18n.SHOWING_CASES(data.total ?? 0)}
-          </UtilityBarText>
-        </UtilityBarGroup>
-        <UtilityBarGroup data-test-subj="case-table-utility-bar-actions">
-          {enableBulkActions && (
-            <>
-              <UtilityBarText data-test-subj="case-table-selected-case-count">
-                {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
-              </UtilityBarText>
-
-              <UtilityBarAction
-                data-test-subj="case-table-bulk-actions"
-                iconSide="right"
-                iconType="arrowDown"
-                popoverContent={getBulkItemsPopoverContent}
-              >
-                {i18n.BULK_ACTIONS}
-              </UtilityBarAction>
-            </>
-          )}
-          <UtilityBarAction
-            iconSide="left"
-            iconType="refresh"
-            onClick={onRefresh}
-            dataTestSubj="all-cases-refresh"
+    return (
+      <>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="flexStart"
+          gutterSize="s"
+          css={{
+            borderBottom: euiTheme.border.thin,
+            marginTop: 0,
+            marginBottom: 0,
+            paddingTop: euiTheme.size.s,
+            paddingBottom: euiTheme.size.s,
+          }}
+        >
+          <EuiFlexItem
+            data-test-subj="case-table-case-count"
+            grow={false}
+            css={{
+              borderRight: euiTheme.border.thin,
+              paddingRight: euiTheme.size.s,
+            }}
           >
-            {i18n.REFRESH}
-          </UtilityBarAction>
-        </UtilityBarGroup>
-      </UtilityBarSection>
-      {isModalVisible ? (
-        <ConfirmDeleteCaseModal
-          totalCasesToBeDeleted={selectedCases.length}
-          onCancel={onCloseModal}
-          onConfirm={onConfirmDeletion}
-        />
-      ) : null}
-    </UtilityBar>
-  );
-};
+            <EuiText size="xs" color="subdued">
+              {i18n.SHOWING_CASES(totalCases)}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem data-test-subj="case-table-utility-bar-actions" grow={false}>
+            <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+              {!isSelectorView && showBulkActions && (
+                <>
+                  <EuiFlexItem data-test-subj="case-table-selected-case-count" grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      isOpen={isPopoverOpen}
+                      closePopover={closePopover}
+                      panelPaddingSize="none"
+                      data-test-subj="case-table-bulk-actions-popover"
+                      button={
+                        <EuiButtonEmpty
+                          onClick={togglePopover}
+                          size="xs"
+                          iconSide="right"
+                          iconType="arrowDown"
+                          flush="left"
+                          data-test-subj="case-table-bulk-actions-link-icon"
+                        >
+                          {i18n.BULK_ACTIONS}
+                        </EuiButtonEmpty>
+                      }
+                    >
+                      <EuiContextMenu
+                        panels={panels}
+                        initialPanelId={0}
+                        data-test-subj="case-table-bulk-actions-context-menu"
+                      />
+                    </EuiPopover>
+                  </EuiFlexItem>
+                </>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={onRefresh}
+                  size="xs"
+                  iconSide="left"
+                  iconType="refresh"
+                  flush="left"
+                  data-test-subj="all-cases-refresh-link-icon"
+                >
+                  {i18n.REFRESH}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {modals}
+      </>
+    );
+  }
+);
+
 CasesTableUtilityBar.displayName = 'CasesTableUtilityBar';

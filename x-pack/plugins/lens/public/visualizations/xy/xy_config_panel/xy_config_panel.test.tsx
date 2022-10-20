@@ -18,7 +18,7 @@ import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EuiColorPicker } from '@elastic/eui';
-import { layerTypes } from '../../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { act } from 'react-dom/test-utils';
 
 jest.mock('lodash', () => {
@@ -41,7 +41,7 @@ describe('XY Config panels', () => {
       layers: [
         {
           seriesType: 'bar',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           layerId: 'first',
           splitAccessor: 'baz',
           xAccessor: 'foo',
@@ -273,6 +273,9 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -298,6 +301,9 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -315,7 +321,7 @@ describe('XY Config panels', () => {
         layers: [
           {
             seriesType: 'bar',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             layerId: 'first',
             splitAccessor: undefined,
             xAccessor: 'foo',
@@ -344,6 +350,9 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -356,7 +365,7 @@ describe('XY Config panels', () => {
         layers: [
           {
             seriesType: 'bar',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             layerId: 'first',
             splitAccessor: undefined,
             xAccessor: 'foo',
@@ -387,6 +396,9 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -399,7 +411,7 @@ describe('XY Config panels', () => {
         layers: [
           {
             seriesType: 'bar',
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
             layerId: 'first',
             splitAccessor: undefined,
             xAccessor: 'foo',
@@ -430,6 +442,9 @@ describe('XY Config panels', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
