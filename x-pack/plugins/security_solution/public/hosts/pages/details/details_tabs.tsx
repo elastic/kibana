@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 
@@ -16,7 +16,6 @@ import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anom
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { AnomaliesHostTable } from '../../../common/components/ml/tables/anomalies_host_table';
 import { EventsQueryTabBody } from '../../../common/components/events_tab';
-import { hostNameExistsFilter } from '../../../common/components/visualization_actions/utils';
 
 import type { HostDetailsTabsProps } from './types';
 import { type } from './utils';
@@ -34,8 +33,8 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
     filterQuery,
     indexNames,
     indexPattern,
-    pageFilters = [],
     hostDetailsPagePath,
+    hostDetailsFilter,
   }) => {
     const { from, to, isInitializing, deleteQuery, setQuery } = useGlobalTime();
 
@@ -52,11 +51,6 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
       hostName: detailName,
     };
 
-    const externalAlertPageFilters = useMemo(
-      () => [...hostNameExistsFilter, ...pageFilters],
-      [pageFilters]
-    );
-
     return (
       <Switch>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.authentications})`}>
@@ -71,10 +65,9 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
 
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.events})`}>
           <EventsQueryTabBody
-            {...tabProps}
-            pageFilters={pageFilters}
+            additionalFilters={hostDetailsFilter}
             tableId={TableId.hostsPageEvents}
-            externalAlertPageFilters={externalAlertPageFilters}
+            {...tabProps}
           />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.risk})`}>

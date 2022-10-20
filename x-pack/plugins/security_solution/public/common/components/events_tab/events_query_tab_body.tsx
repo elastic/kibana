@@ -52,10 +52,9 @@ export const ALERTS_EVENTS_HISTOGRAM_ID = 'alertsOrEventsHistogramQuery';
 type QueryTabBodyProps = UserQueryTabBodyProps | HostQueryTabBodyProps | NetworkQueryTabBodyProps;
 
 export type EventsQueryTabBodyComponentProps = QueryTabBodyProps & {
+  additionalFilters: Filter[];
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
   indexNames: string[];
-  pageFilters?: Filter[];
-  externalAlertPageFilters?: Filter[];
   setQuery: GlobalTimeArgs['setQuery'];
   tableId: TableId;
 };
@@ -63,12 +62,11 @@ export type EventsQueryTabBodyComponentProps = QueryTabBodyProps & {
 const EXTERNAL_ALERTS_URL_PARAM = 'onlyExternalAlerts';
 
 const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = ({
+  additionalFilters,
   deleteQuery,
   endDate,
   filterQuery,
   indexNames,
-  externalAlertPageFilters = [],
-  pageFilters = [],
   setQuery,
   startDate,
   tableId,
@@ -122,7 +120,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     };
   }, [deleteQuery]);
 
-  const additionalFilters = useMemo(
+  const toggleExternalAlertsCheckbox = useMemo(
     () => (
       <EuiCheckbox
         id="showExternalAlertsCheckbox"
@@ -146,11 +144,8 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   );
 
   const composedPageFilters = useMemo(
-    () => [
-      ...pageFilters,
-      ...(showExternalAlerts ? [defaultAlertsFilters, ...externalAlertPageFilters] : []),
-    ],
-    [showExternalAlerts, externalAlertPageFilters, pageFilters]
+    () => (showExternalAlerts ? [defaultAlertsFilters, ...additionalFilters] : additionalFilters),
+    [additionalFilters, showExternalAlerts]
   );
 
   return (
@@ -168,7 +163,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
         />
       )}
       <StatefulEventsViewer
-        additionalFilters={additionalFilters}
+        additionalFilters={toggleExternalAlertsCheckbox}
         defaultCellActions={defaultCellActions}
         start={startDate}
         end={endDate}

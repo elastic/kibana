@@ -80,7 +80,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   );
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
-  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
@@ -127,14 +127,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
         buildEsQuery(
           indexPattern,
           [query],
-          [...hostDetailsPageFilters, ...filters],
+          [...hostDetailsPageFilters, ...globalFilters],
           getEsQueryConfig(uiSettings)
         ),
       ];
     } catch (e) {
       return [undefined, e];
     }
-  }, [filters, indexPattern, query, uiSettings, hostDetailsPageFilters]);
+  }, [globalFilters, indexPattern, query, uiSettings, hostDetailsPageFilters]);
 
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
@@ -255,7 +255,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               indexNames={selectedPatterns}
               isInitializing={isInitializing}
               deleteQuery={deleteQuery}
-              pageFilters={hostDetailsPageFilters}
+              hostDetailsFilter={hostDetailsPageFilters}
               to={to}
               from={from}
               detailName={detailName}
