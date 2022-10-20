@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import { omit } from 'lodash/fp';
-
 import { ColumnHeaderOptions } from '../../../../common/types';
 import {
-  allowSorting,
   hasCellActions,
   mapSortDirectionToDirection,
   mapSortingColumns,
@@ -177,73 +174,6 @@ describe('helpers', () => {
           sortDirection: 'asc',
         },
       ]);
-    });
-  });
-
-  describe('allowSorting', () => {
-    const aggregatableField = {
-      category: 'cloud',
-      description:
-        'The cloud account or organization id used to identify different entities in a multi-tenant environment. Examples: AWS account id, Google Cloud ORG Id, or other unique identifier.',
-      example: '666777888999',
-      indexes: ['auditbeat', 'filebeat', 'packetbeat'],
-      name: 'cloud.account.id',
-      searchable: true,
-      type: 'string',
-      aggregatable: true, // <-- allow sorting when this is true
-      format: '',
-    };
-
-    test('it returns true for an aggregatable field', () => {
-      expect(
-        allowSorting({
-          browserField: aggregatableField,
-          fieldName: aggregatableField.name,
-        })
-      ).toBe(true);
-    });
-
-    test('it returns true for a allow-listed non-BrowserField', () => {
-      expect(
-        allowSorting({
-          browserField: undefined, // no BrowserField metadata for this field
-          fieldName: 'kibana.alert.rule.name', //  an allow-listed field name
-        })
-      ).toBe(true);
-    });
-
-    test('it returns false for a NON-aggregatable field (aggregatable is false)', () => {
-      const nonaggregatableField = {
-        ...aggregatableField,
-        aggregatable: false, // <-- NON-aggregatable
-      };
-
-      expect(
-        allowSorting({
-          browserField: nonaggregatableField,
-          fieldName: nonaggregatableField.name,
-        })
-      ).toBe(false);
-    });
-
-    test('it returns false if the BrowserField is missing the aggregatable property', () => {
-      const missingAggregatable = omit('aggregatable', aggregatableField);
-
-      expect(
-        allowSorting({
-          browserField: missingAggregatable,
-          fieldName: missingAggregatable.name,
-        })
-      ).toBe(false);
-    });
-
-    test("it returns false for a non-allowlisted field we don't have `BrowserField` metadata for it", () => {
-      expect(
-        allowSorting({
-          browserField: undefined, // <-- no metadata for this field
-          fieldName: 'non-allowlisted',
-        })
-      ).toBe(false);
     });
   });
 

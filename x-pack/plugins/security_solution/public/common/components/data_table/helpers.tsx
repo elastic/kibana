@@ -11,11 +11,7 @@ import { isEmpty } from 'lodash/fp';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { Ecs } from '../../../../common/ecs';
-import type {
-  BrowserField,
-  TimelineItem,
-  TimelineNonEcsData,
-} from '../../../../common/search_strategy';
+import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy';
 import type {
   ColumnHeaderOptions,
   SortColumnTable,
@@ -107,78 +103,6 @@ export const mapSortingColumns = ({
     };
   });
 
-export const allowSorting = ({
-  browserField,
-  fieldName,
-}: {
-  browserField: Partial<BrowserField> | undefined;
-  fieldName: string;
-}): boolean => {
-  const isAggregatable = browserField?.aggregatable ?? false;
-
-  const isAllowlistedNonBrowserField = [
-    'kibana.alert.ancestors.depth',
-    'kibana.alert.ancestors.id',
-    'kibana.alert.ancestors.rule',
-    'kibana.alert.ancestors.type',
-    'kibana.alert.original_event.action',
-    'kibana.alert.original_event.category',
-    'kibana.alert.original_event.code',
-    'kibana.alert.original_event.created',
-    'kibana.alert.original_event.dataset',
-    'kibana.alert.original_event.duration',
-    'kibana.alert.original_event.end',
-    'kibana.alert.original_event.hash',
-    'kibana.alert.original_event.id',
-    'kibana.alert.original_event.kind',
-    'kibana.alert.original_event.module',
-    'kibana.alert.original_event.original',
-    'kibana.alert.original_event.outcome',
-    'kibana.alert.original_event.provider',
-    'kibana.alert.original_event.risk_score',
-    'kibana.alert.original_event.risk_score_norm',
-    'kibana.alert.original_event.sequence',
-    'kibana.alert.original_event.severity',
-    'kibana.alert.original_event.start',
-    'kibana.alert.original_event.timezone',
-    'kibana.alert.original_event.type',
-    'kibana.alert.original_time',
-    'kibana.alert.reason',
-    'kibana.alert.rule.created_by',
-    'kibana.alert.rule.description',
-    'kibana.alert.rule.enabled',
-    'kibana.alert.rule.false_positives',
-    'kibana.alert.rule.from',
-    'kibana.alert.rule.uuid',
-    'kibana.alert.rule.immutable',
-    'kibana.alert.rule.interval',
-    'kibana.alert.rule.max_signals',
-    'kibana.alert.rule.name',
-    'kibana.alert.rule.note',
-    'kibana.alert.rule.references',
-    'kibana.alert.risk_score',
-    'kibana.alert.rule.rule_id',
-    'kibana.alert.severity',
-    'kibana.alert.rule.size',
-    'kibana.alert.rule.tags',
-    'kibana.alert.rule.threat',
-    'kibana.alert.rule.threat.tactic.id',
-    'kibana.alert.rule.threat.tactic.name',
-    'kibana.alert.rule.threat.tactic.reference',
-    'kibana.alert.rule.threat.technique.id',
-    'kibana.alert.rule.threat.technique.name',
-    'kibana.alert.rule.threat.technique.reference',
-    'kibana.alert.rule.timeline_id',
-    'kibana.alert.rule.timeline_title',
-    'kibana.alert.rule.to',
-    'kibana.alert.rule.type',
-    'kibana.alert.rule.updated_by',
-    'kibana.alert.rule.version',
-    'kibana.alert.workflow_status',
-  ].includes(fieldName);
-
-  return isAllowlistedNonBrowserField || isAggregatable;
-};
 export const addBuildingBlockStyle = (
   ecs: Ecs,
   theme: EuiTheme,
