@@ -16,7 +16,7 @@ import type {
   CustomBulkActionProp,
 } from '../../../../../common/types';
 import type { Refetch } from '../../../../store/t_grid/inputs';
-import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../../store/t_grid';
+import { TableState, tGridActions, TGridModel, tGridSelectors } from '../../../../store/t_grid';
 import { BulkActions } from '.';
 import { useBulkActionItems } from '../../../../hooks/use_bulk_action_items';
 
@@ -127,7 +127,6 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
       onUpdateSuccess,
       onUpdateFailure,
       customBulkActions,
-      timelineId: id,
     });
 
     return (
@@ -148,9 +147,9 @@ AlertBulkActionsComponent.displayName = 'AlertBulkActionsComponent';
 
 const makeMapStateToProps = () => {
   const getTGrid = tGridSelectors.getTGridByIdSelector();
-  const mapStateToProps = (state: TimelineState, { id }: OwnProps) => {
-    const timeline: TGridModel = getTGrid(state, id);
-    const { selectedEventIds, isSelectAllChecked } = timeline;
+  const mapStateToProps = (state: TableState, { id }: OwnProps) => {
+    const dataTable: TGridModel = getTGrid(state, id);
+    const { selectedEventIds, isSelectAllChecked } = dataTable;
 
     return {
       isSelectAllChecked,

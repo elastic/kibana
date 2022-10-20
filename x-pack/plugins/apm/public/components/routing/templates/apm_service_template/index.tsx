@@ -28,7 +28,7 @@ import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/ser
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { getAlertingCapabilities } from '../../../alerting/get_alerting_capabilities';
+import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { SearchBar } from '../../../shared/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
 import { BetaBadge } from '../../../shared/beta_badge';
@@ -226,8 +226,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.dependenciesTabLabel', {
         defaultMessage: 'Dependencies',
       }),
-      hidden:
-        !agentName || isRumAgentName(agentName) || isMobileAgentName(agentName),
+      hidden: !agentName || isRumAgentName(agentName),
     },
     {
       key: 'errors',
@@ -238,6 +237,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.errorsTabLabel', {
         defaultMessage: 'Errors',
       }),
+      hidden: isMobileAgentName(agentName),
     },
     {
       key: 'metrics',

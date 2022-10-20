@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, luceneStringToDsl } from '@kbn/es-query';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import type { DataView } from '@kbn/data-plugin/common';
+import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Query } from '@kbn/es-query';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -45,6 +45,7 @@ const DEFAULT_VALUES = {
 interface KibanaDeps {
   http: HttpSetup;
   docLinks: DocLinksStart;
+  dataViews: DataViewsPublicPluginStart;
   uiSettings: IUiSettingsClient;
   notifications: CoreStart['notifications'];
   storage: IStorageWrapper;
@@ -79,7 +80,7 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
     boundaryNameField,
   } = ruleParams;
 
-  const { http, docLinks, uiSettings, notifications, storage, usageCollection } =
+  const { http, docLinks, uiSettings, notifications, storage, usageCollection, dataViews } =
     useKibana<KibanaDeps>().services;
 
   const [indexPattern, _setIndexPattern] = useState<DataView>({
@@ -226,6 +227,7 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
             docLinks,
             uiSettings,
             data,
+            dataViews,
             storage,
             usageCollection,
           }}
@@ -281,6 +283,7 @@ export const GeoContainmentAlertTypeExpression: React.FunctionComponent<
             docLinks,
             uiSettings,
             data,
+            dataViews,
             storage,
             usageCollection,
           }}

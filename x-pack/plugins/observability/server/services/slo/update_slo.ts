@@ -9,10 +9,15 @@ import deepEqual from 'fast-deep-equal';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import { getSLOTransformId, SLO_INDEX_TEMPLATE_NAME } from '../../assets/constants';
-import { UpdateSLOParams, UpdateSLOResponse } from '../../types/rest_specs';
+import {
+  UpdateSLOParams,
+  UpdateSLOResponse,
+  updateSLOResponseSchema,
+} from '../../types/rest_specs';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 import { SLO } from '../../types/models';
+import { validateSLO } from '../../domain/services';
 
 export class UpdateSLO {
   constructor(
@@ -41,6 +46,7 @@ export class UpdateSLO {
   private updateSLO(originalSlo: SLO, params: UpdateSLOParams) {
     let hasBreakingChange = false;
     const updatedSlo: SLO = Object.assign({}, originalSlo, params, { updated_at: new Date() });
+    validateSLO(updatedSlo);
 
     if (!deepEqual(originalSlo.indicator, updatedSlo.indicator)) {
       hasBreakingChange = true;
@@ -73,7 +79,7 @@ export class UpdateSLO {
   }
 
   private toResponse(slo: SLO): UpdateSLOResponse {
-    return {
+    return updateSLOResponseSchema.encode({
       id: slo.id,
       name: slo.name,
       description: slo.description,
@@ -83,6 +89,6 @@ export class UpdateSLO {
       objective: slo.objective,
       created_at: slo.created_at,
       updated_at: slo.updated_at,
-    };
+    });
   }
 }
