@@ -47,7 +47,9 @@ describe('getSessionStatus', () => {
       idMapping: {},
       touched: moment(),
     };
-    expect(await getSessionStatus(deps, session, mockConfig)).toBe(SearchSessionStatus.IN_PROGRESS);
+    expect(await getSessionStatus(deps, session, mockConfig)).toEqual({
+      status: SearchSessionStatus.IN_PROGRESS,
+    });
   });
 
   test("returns an error status if there's at least one error", async () => {
@@ -74,7 +76,10 @@ describe('getSessionStatus', () => {
         c: { id: 'c' },
       },
     };
-    expect(await getSessionStatus(deps, session, mockConfig)).toBe(SearchSessionStatus.ERROR);
+    expect(await getSessionStatus(deps, session, mockConfig)).toEqual({
+      status: SearchSessionStatus.ERROR,
+      errors: ['Search b completed with a 500 status'],
+    });
   });
 
   test('expires a session if expired < now', async () => {
@@ -83,7 +88,9 @@ describe('getSessionStatus', () => {
       expires: moment().subtract(2, 'm'),
     };
 
-    expect(await getSessionStatus(deps, session, mockConfig)).toBe(SearchSessionStatus.EXPIRED);
+    expect(await getSessionStatus(deps, session, mockConfig)).toEqual({
+      status: SearchSessionStatus.EXPIRED,
+    });
   });
 
   test('doesnt expire if expire > now', async () => {
@@ -95,7 +102,9 @@ describe('getSessionStatus', () => {
       },
       expires: moment().add(2, 'm'),
     };
-    expect(await getSessionStatus(deps, session, mockConfig)).toBe(SearchSessionStatus.IN_PROGRESS);
+    expect(await getSessionStatus(deps, session, mockConfig)).toEqual({
+      status: SearchSessionStatus.IN_PROGRESS,
+    });
   });
 
   test('returns cancelled status if session was cancelled', async () => {
@@ -108,7 +117,7 @@ describe('getSessionStatus', () => {
     };
     expect(
       await getSessionStatus(deps, session as SearchSessionSavedObjectAttributes, mockConfig)
-    ).toBe(SearchSessionStatus.CANCELLED);
+    ).toEqual({ status: SearchSessionStatus.CANCELLED });
   });
 
   test('returns a complete status if all are complete', async () => {
@@ -121,7 +130,9 @@ describe('getSessionStatus', () => {
         c: { id: 'c' },
       },
     };
-    expect(await getSessionStatus(deps, session, mockConfig)).toBe(SearchSessionStatus.COMPLETE);
+    expect(await getSessionStatus(deps, session, mockConfig)).toEqual({
+      status: SearchSessionStatus.COMPLETE,
+    });
   });
 
   test('returns a running status if some are still running', async () => {
@@ -141,6 +152,8 @@ describe('getSessionStatus', () => {
         c: { id: 'c' },
       },
     };
-    expect(await getSessionStatus(deps, session, mockConfig)).toBe(SearchSessionStatus.IN_PROGRESS);
+    expect(await getSessionStatus(deps, session, mockConfig)).toEqual({
+      status: SearchSessionStatus.IN_PROGRESS,
+    });
   });
 });

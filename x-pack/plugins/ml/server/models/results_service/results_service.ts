@@ -193,8 +193,8 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
 
     const body = await mlClient.anomalySearch(
       {
-        size: maxRecords,
         body: {
+          size: maxRecords,
           query: {
             bool: {
               filter: [
@@ -386,8 +386,8 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
 
     const body = await mlClient.anomalySearch(
       {
-        size: 0,
         body: {
+          size: 0,
           query: {
             bool: {
               filter,
@@ -432,8 +432,8 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
   async function getCategoryExamples(jobId: string, categoryIds: any, maxExamples: number) {
     const body = await mlClient.anomalySearch(
       {
-        size: ANOMALIES_TABLE_DEFAULT_QUERY_SIZE, // Matches size of records in anomaly summary table.
         body: {
+          size: ANOMALIES_TABLE_DEFAULT_QUERY_SIZE, // Matches size of records in anomaly summary table.
           query: {
             bool: {
               filter: [{ term: { job_id: jobId } }, { terms: { category_id: categoryIds } }],
@@ -469,8 +469,8 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
   async function getCategoryDefinition(jobId: string, categoryId: string) {
     const body = await mlClient.anomalySearch<any>(
       {
-        size: 1,
         body: {
+          size: 1,
           query: {
             bool: {
               filter: [{ term: { job_id: jobId } }, { term: { category_id: categoryId } }],
@@ -601,8 +601,8 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       ];
       const results = await mlClient.anomalySearch<any>(
         {
-          size: 0,
           body: {
+            size: 0,
             query: {
               bool: {
                 must: mustMatchClauses,

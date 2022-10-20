@@ -94,6 +94,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.asyncSearch.batchedReduceSize (number)',
         'data.search.asyncSearch.keepAlive (duration)',
         'data.search.asyncSearch.waitForCompletion (duration)',
+        'data.search.asyncSearch.pollInterval (number)',
         'data.search.sessions.defaultExpiration (duration)',
         'data.search.sessions.enabled (boolean)',
         'data.search.sessions.management.expiresSoonWarning (duration)',
@@ -183,6 +184,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud_integrations.full_story.org_id (any)',
         // No PII. Just the list of event types we want to forward to FullStory.
         'xpack.cloud_integrations.full_story.eventTypesAllowlist (array)',
+        'xpack.cloud_integrations.gain_sight.org_id (any)',
         'xpack.cloud.id (string)',
         'xpack.cloud.organization_url (string)',
         'xpack.cloud.profile_url (string)',
