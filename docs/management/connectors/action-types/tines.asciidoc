@@ -1,15 +1,15 @@
 [role="xpack"]
 [[tines-action-type]]
-=== Tines connector
+== Tines connector
 ++++
 <titleabbrev>Tines</titleabbrev>
 ++++
 
-The Tines connector uses https://www.tines.com/docs/actions/types/webhook[Webhook actions] to send events via POST request.
+The Tines connector uses Tines's https://www.tines.com/docs/actions/types/webhook[Webhook actions] to send events via POST request.
 
 [float]
 [[tines-connector-configuration]]
-==== Connector configuration
+=== Connector configuration
 
 Tines connectors have the following configuration properties.
 
@@ -17,20 +17,38 @@ URL::        The Tines Tenant URL. If you are using the <<action-settings, `xpac
 Email::      The email used to sign in to Tines.
 API Token::  A Tines API token created by the user. https://www.tines.com/api/authentication#generate-api-token[Docs]
 
-[float]
-[[tines-connector-parameters]]
-==== Connector parameters
+[role="screenshot"]
+image::../images/tines-connector.png[Tines connector]
 
-Webhook actions have the following properties.
+[float]
+[[tines-action-parameters]]
+=== Action parameters
+
+Tines action have the following parameters.
 
 Story::   The Story to send the events to.
 Webhook:: The Webhook action from the previous story that will receive the events, it is the data entry point. 
 
+Test Slack action parameters.
+
+[role="screenshot"]
+image::../images/tines-params-test.png[Tines params test]
+
 [float]
 [[tines-action-format]]
-==== Action format
+=== Actions
 
-Tines connector will send the data to Tines in JSON format. 
+Once the Tines connector has been configured in an Alerting Rule.
+
+[role="screenshot"]
+image::../images/tines-alerting.png[Tines rule alert]
+
+It will send a POST request to the Tines webhook action on every action execution that had at least one result.
+
+==== Format
+
+Tines connector will send the data in JSON format.
+
 The message contains execution specific fields, such as `alertId`, `date`, `_index`, `kibanaBaseUrl`, along with the `rule` and `params` objects. 
 
 The number of alerts (signals) can be found at `state.signals_count`.
