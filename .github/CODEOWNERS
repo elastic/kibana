@@ -143,6 +143,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /src/core/types/elasticsearch @elastic/apm-ui
 /packages/kbn-utility-types/src/dot.ts @dgieselaar
 /packages/kbn-utility-types/src/dot_test.ts @dgieselaar
+/packages/kbn-adhoc-profiler @elastic/apm-ui
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
 #CC# /x-pack/plugins/observability/ @elastic/apm-ui
 
@@ -348,12 +349,12 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops @elastic/mlr-docs
 /docs/management/connectors/ @elastic/response-ops @elastic/mlr-docs
-#CC# /x-pack/plugins/stack_alerts/ @elastic/response-ops
+/x-pack/plugins/stack_alerts/ @elastic/response-ops
 /x-pack/plugins/cases/ @elastic/response-ops
 /x-pack/test/cases_api_integration/ @elastic/response-ops
 /x-pack/test/functional/services/cases/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/cases/ @elastic/response-ops
-/x-pack/test/api_integration/apis/cases @elastic/response-ops
+/x-pack/test/api_integration/apis/cases/ @elastic/response-ops
 
 # Enterprise Search
 /x-pack/plugins/enterprise_search @elastic/enterprise-search-frontend
@@ -855,6 +856,7 @@ packages/home/sample_data_card @elastic/shared-ux
 packages/home/sample_data_tab @elastic/shared-ux
 packages/home/sample_data_types @elastic/shared-ux
 packages/kbn-ace @elastic/platform-deployment-management
+packages/kbn-adhoc-profiler @elastic/apm-ui
 packages/kbn-alerts @elastic/security-solution
 packages/kbn-ambient-storybook-types @elastic/kibana-operations
 packages/kbn-ambient-ui-types @elastic/kibana-operations
@@ -905,6 +907,7 @@ packages/kbn-ftr-common-functional-services @elastic/kibana-operations
 packages/kbn-ftr-screenshot-filename @elastic/kibana-operations
 packages/kbn-generate @elastic/kibana-operations
 packages/kbn-get-repo-files @elastic/kibana-operations
+packages/kbn-guided-onboarding @elastic/platform-onboarding
 packages/kbn-handlebars @elastic/kibana-security
 packages/kbn-hapi-mocks @elastic/kibana-core
 packages/kbn-i18n @elastic/kibana-core
