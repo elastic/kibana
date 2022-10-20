@@ -78,7 +78,7 @@ export interface Props<Kind extends string = string> {
    *
    * @default false
    *
-   * @note passing "true" here implies immediate true as well.
+   * @note passing "true" here implies true for allowRepeatedUplods and immediate.
    */
   compressed?: boolean;
 }
@@ -103,14 +103,15 @@ export const UploadFile = <Kind extends string = string>({
   const { registry } = useFilesContext();
   const ref = useRef<null | EuiFilePicker>(null);
   const fileKind = registry.get(kindId);
+  const repeatedUploads = compressed || allowRepeatedUploads;
   const uploadState = useMemo(
     () =>
       createUploadState({
         client,
         fileKind,
-        allowRepeatedUploads,
+        allowRepeatedUploads: repeatedUploads,
       }),
-    [client, allowRepeatedUploads, fileKind]
+    [client, repeatedUploads, fileKind]
   );
 
   /**
