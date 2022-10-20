@@ -9,7 +9,7 @@
 import { skip, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Filter, uniqFilters } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
 import { EuiContextMenuPanel } from '@elastic/eui';
 
@@ -39,10 +39,11 @@ import { ControlGroupStrings } from '../control_group_strings';
 import { EditControlGroup } from '../editor/edit_control_group';
 import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
-import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
+import { ControlEmbeddable, ControlInput, ControlOutput, DataControlInput } from '../../types';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
 import { CreateTimeSliderControlButton } from '../editor/create_time_slider_control';
 import { TIME_SLIDER_CONTROL } from '../../time_slider';
+import { loadFieldRegistryFromDataViewId } from '../editor/data_control_editor_tools';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -70,6 +71,9 @@ export class ControlGroupContainer extends Container<
     typeof controlGroupReducers
   >;
 
+  public onFiltersPublished$: Subject<Filter[]>;
+  public onControlRemoved$: Subject<string>;
+
   public setLastUsedDataViewId = (lastUsedDataViewId: string) => {
     this.lastUsedDataViewId = lastUsedDataViewId;
   };
@@ -85,6 +89,27 @@ export class ControlGroupContainer extends Container<
   public closeAllFlyouts() {
     flyoutRef?.close();
     flyoutRef = undefined;
+  }
+
+  public async addDataControlFromField({
+    uuid,
+    dataViewId,
+    fieldName,
+    title,
+  }: {
+    uuid?: string;
+    dataViewId: string;
+    fieldName: string;
+    title?: string;
+  }) {
+    const fieldRegistry = await loadFieldRegistryFromDataViewId(dataViewId);
+    const field = fieldRegistry[fieldName];
+    return this.addNewEmbeddable(field.compatibleControlTypes[0], {
+      id: uuid,
+      dataViewId,
+      fieldName,
+      title: title ?? fieldName,
+    } as DataControlInput);
   }
 
   /**
@@ -185,6 +210,8 @@ export class ControlGroupContainer extends Container<
     );
 
     this.recalculateFilters$ = new Subject();
+    this.onFiltersPublished$ = new Subject<Filter[]>();
+    this.onControlRemoved$ = new Subject<string>();
 
     // build redux embeddable tools
     this.reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
@@ -249,6 +276,10 @@ export class ControlGroupContainer extends Container<
     return Object.keys(this.getInput().panels).length;
   };
 
+  public updateFilterContext = (filters: Filter[]) => {
+    this.updateInput({ filters });
+  };
+
   private recalculateFilters = () => {
     const allFilters: Filter[] = [];
     let timeslice;
@@ -259,7 +290,11 @@ export class ControlGroupContainer extends Container<
         timeslice = childOutput.timeslice;
       }
     });
-    this.updateOutput({ filters: uniqFilters(allFilters), timeslice });
+    // if filters are different, publish them
+    if (!compareFilters(this.output.filters ?? [], allFilters ?? [], COMPARE_ALL_OPTIONS)) {
+      this.updateOutput({ filters: uniqFilters(allFilters), timeslice });
+      this.onFiltersPublished$.next(allFilters);
+    }
   };
 
   private recalculateDataViews = () => {
@@ -304,6 +339,7 @@ export class ControlGroupContainer extends Container<
         order: currentOrder - 1,
       };
     }
+    this.onControlRemoved$.next(idToRemove);
     return newPanels;
   }
 

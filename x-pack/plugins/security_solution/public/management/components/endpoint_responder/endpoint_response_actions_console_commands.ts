@@ -10,6 +10,7 @@ import type {
   EndpointCapabilities,
   ConsoleResponseActionCommands,
 } from '../../../../common/endpoint/service/response_actions/constants';
+import { GetFileActionResult } from './get_file_action';
 import type { Command, CommandDefinition } from '../console';
 import { IsolateActionResult } from './isolate_action';
 import { ReleaseActionResult } from './release_action';
@@ -54,6 +55,7 @@ const commandToCapabilitiesMap = new Map<ConsoleResponseActionCommands, Endpoint
   ['kill-process', 'kill_process'],
   ['suspend-process', 'suspend_process'],
   ['processes', 'running_processes'],
+  ['get-file', 'get_file'],
 ]);
 
 const getRbacControl = ({
@@ -69,6 +71,7 @@ const getRbacControl = ({
     ['kill-process', privileges.canKillProcess],
     ['suspend-process', privileges.canSuspendProcess],
     ['processes', privileges.canGetRunningProcesses],
+    ['get-file', privileges.canWriteFileOperations],
   ]);
   return commandToPrivilegeMap.get(commandName as ConsoleResponseActionCommands) ?? false;
 };
@@ -361,6 +364,53 @@ export const getEndpointResponseActionsConsoleCommands = ({
       helpCommandPosition: 3,
       helpDisabled: doesEndpointSupportCommand('processes') === false,
       helpHidden: !getRbacControl({ commandName: 'processes', privileges: endpointPrivileges }),
+    },
+    {
+      name: 'get-file',
+      about: getCommandAboutInfo({
+        aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.getFile.about', {
+          defaultMessage: 'Retrieve a file from the host',
+        }),
+        isSupported: doesEndpointSupportCommand('processes'),
+      }),
+      RenderComponent: GetFileActionResult,
+      meta: {
+        endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
+      },
+      exampleUsage: 'get-file path "/full/path/to/file.txt" --comment "Possible malware"',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+      validate: capabilitiesAndPrivilegesValidator,
+      mustHaveArgs: true,
+      args: {
+        path: {
+          required: true,
+          allowMultiples: false,
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.getFile.pathArgAbout',
+            {
+              defaultMessage: 'The full file path to be retrieved',
+            }
+          ),
+          validate: (argData) => {
+            return emptyArgumentValidator(argData);
+          },
+        },
+        comment: {
+          required: false,
+          allowMultiples: false,
+          about: COMMENT_ARG_ABOUT,
+        },
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 6,
+      helpDisabled: !doesEndpointSupportCommand('get-file'),
+      helpHidden: !getRbacControl({
+        commandName: 'get-file',
+        privileges: endpointPrivileges,
+      }),
     },
   ];
 };

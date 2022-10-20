@@ -14,7 +14,7 @@ export interface Body {
 }
 
 export interface AnomaliesSearchResponse {
-  aggregations: {
+  aggregations?: {
     number_of_anomalies: {
       buckets: Array<{
         key: NotableAnomaliesJobId;
