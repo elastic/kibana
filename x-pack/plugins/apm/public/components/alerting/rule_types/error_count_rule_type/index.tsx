@@ -69,7 +69,7 @@ export function ErrorCountRuleType(props: Props) {
       });
       if (interval && start && end) {
         return callApmApi(
-          'GET /internal/apm/alerts/chart_preview/transaction_error_count',
+          'GET /internal/apm/rule_types/error_count/chart_preview',
           {
             params: {
               query: {

@@ -7,26 +7,26 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { AggregationType } from '../../../../common/rules/apm_rule_types';
+import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
-import { environmentQuery } from '../../../../common/utils/environment_query';
-import { AlertParams } from '../route';
+} from '../../../../../common/elasticsearch_fieldnames';
+import { environmentQuery } from '../../../../../common/utils/environment_query';
+import { AlertParams } from '../../route';
 import {
   getSearchTransactionsEvents,
   getDocumentTypeFilterForTransactions,
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
-} from '../../../lib/helpers/transactions';
-import { Setup } from '../../../lib/helpers/setup_request';
+} from '../../../../lib/helpers/transactions';
+import { Setup } from '../../../../lib/helpers/setup_request';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentLabel,
-} from '../../../../common/environment_filter_values';
-import { averageOrPercentileAgg } from '../average_or_percentile_agg';
+} from '../../../../../common/environment_filter_values';
+import { averageOrPercentileAgg } from '../../average_or_percentile_agg';
 
 export async function getTransactionDurationChartPreview({
   alertParams,

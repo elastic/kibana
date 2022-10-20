@@ -98,7 +98,7 @@ export function TransactionDurationRuleType(props: Props) {
       });
       if (interval && start && end) {
         return callApmApi(
-          'GET /internal/apm/alerts/chart_preview/transaction_duration',
+          'GET /internal/apm/rule_types/transaction_duration/chart_preview',
           {
             params: {
               query: {

@@ -72,7 +72,7 @@ export function TransactionErrorRateRuleType(props: Props) {
       });
       if (interval && start && end) {
         return callApmApi(
-          'GET /internal/apm/alerts/chart_preview/transaction_error_rate',
+          'GET /internal/apm/rule_types/transaction_error_rate/chart_preview',
           {
             params: {
               query: {

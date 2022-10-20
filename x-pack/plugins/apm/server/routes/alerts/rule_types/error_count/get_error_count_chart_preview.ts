@@ -7,10 +7,10 @@
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
-import { AlertParams } from '../route';
-import { environmentQuery } from '../../../../common/utils/environment_query';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
+import { AlertParams } from '../../route';
+import { environmentQuery } from '../../../../../common/utils/environment_query';
+import { Setup } from '../../../../lib/helpers/setup_request';
 
 export async function getTransactionErrorCountChartPreview({
   setup,
@@ -51,7 +51,7 @@ export async function getTransactionErrorCountChartPreview({
   };
 
   const resp = await apmEventClient.search(
-    'get_transaction_error_count_chart_preview',
+    'get_error_count_chart_preview',
     params
   );
 

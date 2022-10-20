@@ -9,19 +9,19 @@ import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../../common/elasticsearch_fieldnames';
-import { environmentQuery } from '../../../../common/utils/environment_query';
-import { AlertParams } from '../route';
+} from '../../../../../common/elasticsearch_fieldnames';
+import { environmentQuery } from '../../../../../common/utils/environment_query';
+import { AlertParams } from '../../route';
 import {
   getSearchTransactionsEvents,
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
-} from '../../../lib/helpers/transactions';
-import { Setup } from '../../../lib/helpers/setup_request';
+} from '../../../../lib/helpers/transactions';
+import { Setup } from '../../../../lib/helpers/setup_request';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
-} from '../../../lib/helpers/transaction_error_rate';
+} from '../../../../lib/helpers/transaction_error_rate';
 
 export async function getTransactionErrorRateChartPreview({
   setup,
