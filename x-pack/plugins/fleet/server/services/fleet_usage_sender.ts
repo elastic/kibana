@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable max-classes-per-file */
 import type {
   ConcreteTaskInstance,
   TaskManagerStartContract,
@@ -12,15 +11,11 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 
-import { ElasticV3ServerShipper } from '@kbn/analytics-shippers-elastic-v3-server';
-
 import type { Usage } from '../collectors/register';
 
 import { appContextService } from './app_context';
 
-export class FleetShipper extends ElasticV3ServerShipper {
-  public static shipperName = 'fleet_shipper';
-}
+const EVENT_TYPE = 'fleet_usage';
 
 export class FleetUsageSender {
   private taskManager?: TaskManagerStartContract;
@@ -47,7 +42,7 @@ export class FleetUsageSender {
               try {
                 const usageData = await fetchUsage();
                 appContextService.getLogger().debug(JSON.stringify(usageData));
-                core.analytics.reportEvent('Fleet Usage', usageData);
+                core.analytics.reportEvent(EVENT_TYPE, usageData);
               } catch (error) {
                 appContextService
                   .getLogger()
@@ -61,12 +56,6 @@ export class FleetUsageSender {
       },
     });
     this.registerTelemetryEventType(core);
-
-    core.analytics.registerShipper(FleetShipper, {
-      channelName: 'fleet-usages',
-      version: kibanaVersion,
-      sendTo: isProductionMode ? 'production' : 'staging',
-    });
   }
 
   public async start(taskManager: TaskManagerStartContract) {
@@ -90,7 +79,7 @@ export class FleetUsageSender {
    */
   private registerTelemetryEventType(core: CoreSetup): void {
     core.analytics.registerEventType({
-      eventType: 'Fleet Usage',
+      eventType: EVENT_TYPE,
       schema: {
         agents_enabled: { type: 'boolean', _meta: { description: 'agents enabled' } },
         agents: {
