@@ -15,19 +15,36 @@ import { useMetricsDataViewContext } from './hooks/use_data_view';
 import { HostsTable } from './components/hosts_table';
 import { InfraClientStartDeps } from '../../../types';
 import { useSourceContext } from '../../../containers/metrics_source';
+import { useTimeRangeUrlState } from './hooks/use_time_range_url_state';
 
 export const HostsContent: React.FunctionComponent = () => {
   const {
     services: { data },
   } = useKibana<InfraClientStartDeps>();
   const { source } = useSourceContext();
-  const [dateRange, setDateRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
+  const { timeRange: selectedTimeRange, setTimeRange: setSelectedTimeRange } =
+    useTimeRangeUrlState();
+
+  const [dateRange, setDateRange] = useState<TimeRange>({
+    from: selectedTimeRange.startTime,
+    to: selectedTimeRange.endTime,
+  });
   const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
   const { metricsDataView, hasFailedCreatingDataView, hasFailedFetchingDataView } =
     useMetricsDataViewContext();
   // needed to refresh the lens table when filters havent changed
   const [searchSessionId, setSearchSessionId] = useState(data.search.session.start());
   const [isLensLoading, setIsLensLoading] = useState(false);
+
+  const handleSelectedTimeRangeChange = useCallback(
+    (selectedTime: { startTime: string; endTime: string; isInvalid: boolean }) => {
+      if (selectedTime.isInvalid) {
+        return;
+      }
+      setSelectedTimeRange(selectedTime);
+    },
+    [setSelectedTimeRange]
+  );
 
   const onQuerySubmit = useCallback(
     (payload: { dateRange: TimeRange; query?: Query }) => {
@@ -37,8 +54,13 @@ export const HostsContent: React.FunctionComponent = () => {
       }
       setIsLensLoading(true);
       setSearchSessionId(data.search.session.start());
+      handleSelectedTimeRangeChange({
+        startTime: payload.dateRange.from,
+        endTime: payload.dateRange.to,
+        isInvalid: false,
+      });
     },
-    [setDateRange, setQuery, data.search.session]
+    [setDateRange, setQuery, data.search.session, handleSelectedTimeRangeChange]
   );
 
   const onLoading = useCallback(
