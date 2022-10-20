@@ -51,10 +51,10 @@ import { RuleDetailTabs } from '../details';
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
 interface ColumnsProps {
-  hasPermissions: boolean;
+  hasCRUDPermissions: boolean;
 }
 
-const useEnabledColumn = ({ hasPermissions }: ColumnsProps): TableColumn => {
+const useEnabledColumn = ({ hasCRUDPermissions }: ColumnsProps): TableColumn => {
   const hasMlPermissions = useHasMlPermissions();
   const hasActionsPrivileges = useHasActionsPrivileges();
   const { loadingRulesAction, loadingRuleIds } = useRulesTableContext().state;
@@ -71,14 +71,19 @@ const useEnabledColumn = ({ hasPermissions }: ColumnsProps): TableColumn => {
       render: (_, rule: Rule) => (
         <EuiToolTip
           position="top"
-          content={explainLackOfPermission(rule, hasMlPermissions, hasActionsPrivileges, true)}
+          content={explainLackOfPermission(
+            rule,
+            hasMlPermissions,
+            hasActionsPrivileges,
+            hasCRUDPermissions
+          )}
         >
           <RuleSwitch
             id={rule.id}
             enabled={rule.enabled}
             isDisabled={
               !canEditRuleWithActions(rule, hasActionsPrivileges) ||
-              !hasPermissions ||
+              !hasCRUDPermissions ||
               (isMlRule(rule.type) && !hasMlPermissions && !rule.enabled)
             }
             isLoading={loadingIds.includes(rule.id)}
@@ -88,7 +93,7 @@ const useEnabledColumn = ({ hasPermissions }: ColumnsProps): TableColumn => {
       width: '95px',
       sortable: true,
     }),
-    [hasActionsPrivileges, hasMlPermissions, hasPermissions, loadingIds]
+    [hasActionsPrivileges, hasMlPermissions, hasCRUDPermissions, loadingIds]
   );
 };
 
@@ -198,9 +203,9 @@ const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
   );
 };
 
-export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[] => {
+export const useRulesColumns = ({ hasCRUDPermissions }: ColumnsProps): TableColumn[] => {
   const actionsColumn = useActionsColumn();
-  const enabledColumn = useEnabledColumn({ hasPermissions });
+  const enabledColumn = useEnabledColumn({ hasCRUDPermissions });
   const ruleNameColumn = useRuleNameColumn();
   const { isInMemorySorting } = useRulesTableContext().state;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
@@ -295,12 +300,12 @@ export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[]
         width: '65px',
       },
       enabledColumn,
-      ...(hasPermissions ? [actionsColumn] : []),
+      ...(hasCRUDPermissions ? [actionsColumn] : []),
     ],
     [
       actionsColumn,
       enabledColumn,
-      hasPermissions,
+      hasCRUDPermissions,
       isInMemorySorting,
       ruleNameColumn,
       showRelatedIntegrations,
@@ -308,10 +313,10 @@ export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[]
   );
 };
 
-export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableColumn[] => {
+export const useMonitoringColumns = ({ hasCRUDPermissions }: ColumnsProps): TableColumn[] => {
   const docLinks = useKibana().services.docLinks;
   const actionsColumn = useActionsColumn();
-  const enabledColumn = useEnabledColumn({ hasPermissions });
+  const enabledColumn = useEnabledColumn({ hasCRUDPermissions });
   const ruleNameColumn = useRuleNameColumn();
   const { isInMemorySorting } = useRulesTableContext().state;
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
@@ -428,13 +433,13 @@ export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableCol
         width: '16%',
       },
       enabledColumn,
-      ...(hasPermissions ? [actionsColumn] : []),
+      ...(hasCRUDPermissions ? [actionsColumn] : []),
     ],
     [
       actionsColumn,
       docLinks.links.siem.troubleshootGaps,
       enabledColumn,
-      hasPermissions,
+      hasCRUDPermissions,
       isInMemorySorting,
       ruleNameColumn,
       showRelatedIntegrations,
