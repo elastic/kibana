@@ -35,6 +35,7 @@ export const SourceSearchBar: FC<SourceSearchBarProps> = ({ dataView, searchBar 
     http,
     docLinks,
     data,
+    dataViews,
     storage,
     unifiedSearch,
     usageCollection,
@@ -73,6 +74,7 @@ export const SourceSearchBar: FC<SourceSearchBarProps> = ({ dataView, searchBar 
             docLinks,
             uiSettings,
             data,
+            dataViews,
             storage,
             usageCollection,
           }}
