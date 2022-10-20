@@ -8,7 +8,7 @@
 import {
   ApmRuleType,
   RULE_TYPES_CONFIG,
-} from '../../../common/rules/apm_rule_types';
+} from '../../../../common/rules/apm_rule_types';
 
 export function getInitialAlertValues(
   ruleType: ApmRuleType | null,

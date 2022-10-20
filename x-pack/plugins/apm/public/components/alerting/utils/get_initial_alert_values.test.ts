@@ -9,7 +9,7 @@ import { getInitialAlertValues } from './get_initial_alert_values';
 import {
   ApmRuleType,
   RULE_TYPES_CONFIG,
-} from '../../../common/rules/apm_rule_types';
+} from '../../../../common/rules/apm_rule_types';
 
 test('handles null rule type and undefined service name', () => {
   expect(getInitialAlertValues(null, undefined)).toEqual({ tags: ['apm'] });

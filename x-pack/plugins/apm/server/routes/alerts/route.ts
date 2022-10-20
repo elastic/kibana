@@ -12,7 +12,7 @@ import { getTransactionErrorRateChartPreview } from './chart_preview/get_transac
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, rangeRt } from '../default_api_types';
-import { AggregationType } from '../../../common/alert_types';
+import { AggregationType } from '../../../common/rules/apm_rule_types';
 
 const alertParamsRt = t.intersection([
   t.partial({

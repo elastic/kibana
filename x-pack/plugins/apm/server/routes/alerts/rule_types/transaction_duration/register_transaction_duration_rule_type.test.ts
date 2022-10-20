@@ -8,7 +8,7 @@
 import { registerTransactionDurationRuleType } from './register_transaction_duration_rule_type';
 import { createRuleTypeMocks } from '../../test_utils';
 
-describe('registerTransactionDurationAlertType', () => {
+describe('registerTransactionDurationRuleType', () => {
   it('sends alert when value is greater than threashold', async () => {
     const { services, dependencies, executor, scheduleActions } =
       createRuleTypeMocks();

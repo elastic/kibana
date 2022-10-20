@@ -12,14 +12,14 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
-} from '../../../common/elasticsearch_fieldnames';
+} from '../../../../common/elasticsearch_fieldnames';
 import {
   ENVIRONMENT_ALL,
   getEnvironmentLabel,
   allOptionText,
-} from '../../../common/environment_filter_values';
-import { SuggestionsSelect } from '../shared/suggestions_select';
-import { PopoverExpression } from './service_alert_trigger/popover_expression';
+} from '../../../../common/environment_filter_values';
+import { SuggestionsSelect } from '../../shared/suggestions_select';
+import { PopoverExpression } from '../ui_components/popover_expression';
 
 export function ServiceField({
   allowAll = true,
@@ -143,10 +143,9 @@ export function IsAboveField({
   return (
     <PopoverExpression
       value={`${value}${unit}`}
-      title={i18n.translate(
-        'xpack.apm.transactionErrorRateAlertTrigger.isAbove',
-        { defaultMessage: 'is above' }
-      )}
+      title={i18n.translate('xpack.apm.transactionErrorRateRuleType.isAbove', {
+        defaultMessage: 'is above',
+      })}
     >
       <EuiFieldNumber
         min={0}

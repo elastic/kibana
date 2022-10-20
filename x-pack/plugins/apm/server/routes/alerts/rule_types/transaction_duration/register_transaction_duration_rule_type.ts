@@ -64,7 +64,7 @@ const paramsSchema = schema.object({
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
-export function registerTransactionDurationAlertType({
+export function registerTransactionDurationRuleType({
   alerting,
   ruleDataClient,
   config$,

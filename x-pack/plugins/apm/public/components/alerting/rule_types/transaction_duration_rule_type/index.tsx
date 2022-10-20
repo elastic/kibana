@@ -12,25 +12,29 @@ import React, { useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
-import { AggregationType } from '../../../../common/alert_types';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { getDurationFormatter } from '../../../../common/utils/formatters';
-import { useFetcher } from '../../../hooks/use_fetcher';
-import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
+import { AggregationType } from '../../../../../common/rules/apm_rule_types';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
-} from '../../shared/charts/transaction_charts/helper';
-import { ChartPreview } from '../chart_preview';
+} from '../../../shared/charts/transaction_charts/helper';
+import { ChartPreview } from '../../ui_components/chart_preview';
 import {
   EnvironmentField,
   IsAboveField,
   ServiceField,
   TransactionTypeField,
-} from '../fields';
-import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
-import { ServiceAlertTrigger } from '../service_alert_trigger';
-import { PopoverExpression } from '../service_alert_trigger/popover_expression';
+} from '../../utils/fields';
+import {
+  AlertMetadata,
+  getIntervalAndTimeRange,
+  TimeUnit,
+} from '../../utils/helper';
+import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
+import { PopoverExpression } from '../../ui_components/popover_expression';
 
 export interface RuleParams {
   aggregationType: AggregationType;
@@ -64,7 +68,7 @@ interface Props {
   setRuleProperty: (key: string, value: any) => void;
 }
 
-export function TransactionDurationAlertTrigger(props: Props) {
+export function TransactionDurationRuleType(props: Props) {
   const { services } = useKibana();
   const { ruleParams, metadata, setRuleParams, setRuleProperty } = props;
 
@@ -155,7 +159,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
     />,
     <PopoverExpression
       value={params.aggregationType}
-      title={i18n.translate('xpack.apm.transactionDurationAlertTrigger.when', {
+      title={i18n.translate('xpack.apm.transactionDurationRuleType.when', {
         defaultMessage: 'When',
       })}
     >
@@ -173,7 +177,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
     </PopoverExpression>,
     <IsAboveField
       value={params.threshold}
-      unit={i18n.translate('xpack.apm.transactionDurationAlertTrigger.ms', {
+      unit={i18n.translate('xpack.apm.transactionDurationRuleType.ms', {
         defaultMessage: 'ms',
       })}
       onChange={(value) => setRuleParams('threshold', value || 0)}
@@ -195,7 +199,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
   ];
 
   return (
-    <ServiceAlertTrigger
+    <ApmRuleParamsContainer
       chartPreview={chartPreview}
       defaults={params}
       fields={fields}
@@ -208,4 +212,4 @@ export function TransactionDurationAlertTrigger(props: Props) {
 // Default export is required for React.lazy loading
 //
 // eslint-disable-next-line import/no-default-export
-export default TransactionDurationAlertTrigger;
+export default TransactionDurationRuleType;

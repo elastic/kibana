@@ -22,9 +22,9 @@ import {
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
-import { Coordinate } from '../../../../typings/timeseries';
-import { useTheme } from '../../../hooks/use_theme';
-import { getTimeZone } from '../../shared/charts/helper/timezone';
+import { Coordinate } from '../../../../../typings/timeseries';
+import { useTheme } from '../../../../hooks/use_theme';
+import { getTimeZone } from '../../../shared/charts/helper/timezone';
 
 interface ChartPreviewProps {
   yTickFormat?: TickFormatter;

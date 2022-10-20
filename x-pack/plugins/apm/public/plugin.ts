@@ -51,7 +51,7 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { enableServiceGroups } from '@kbn/observability-plugin/public';
 import { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { registerApmRuleTypes } from './components/alerting/register_apm_rule_types';
+import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
   getApmEnrollmentFlyoutData,
   LazyApmCustomAssetsExtension,

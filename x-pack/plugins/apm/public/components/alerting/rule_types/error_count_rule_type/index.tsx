@@ -11,14 +11,22 @@ import React, { useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { asInteger } from '../../../../common/utils/formatters';
-import { useFetcher } from '../../../hooks/use_fetcher';
-import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
-import { ChartPreview } from '../chart_preview';
-import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
-import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
-import { ServiceAlertTrigger } from '../service_alert_trigger';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { asInteger } from '../../../../../common/utils/formatters';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
+import { ChartPreview } from '../../ui_components/chart_preview';
+import {
+  EnvironmentField,
+  IsAboveField,
+  ServiceField,
+} from '../../utils/fields';
+import {
+  AlertMetadata,
+  getIntervalAndTimeRange,
+  TimeUnit,
+} from '../../utils/helper';
+import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
 
 export interface RuleParams {
   windowSize?: number;
@@ -35,7 +43,7 @@ interface Props {
   setRuleProperty: (key: string, value: any) => void;
 }
 
-export function ErrorCountAlertTrigger(props: Props) {
+export function ErrorCountRuleType(props: Props) {
   const { services } = useKibana();
   const { ruleParams, metadata, setRuleParams, setRuleProperty } = props;
 
@@ -95,7 +103,7 @@ export function ErrorCountAlertTrigger(props: Props) {
     />,
     <IsAboveField
       value={params.threshold}
-      unit={i18n.translate('xpack.apm.errorCountAlertTrigger.errors', {
+      unit={i18n.translate('xpack.apm.errorCountRuleType.errors', {
         defaultMessage: ' errors',
       })}
       onChange={(value) => setRuleParams('threshold', value || 0)}
@@ -126,7 +134,7 @@ export function ErrorCountAlertTrigger(props: Props) {
   );
 
   return (
-    <ServiceAlertTrigger
+    <ApmRuleParamsContainer
       defaults={params}
       fields={fields}
       setRuleParams={setRuleParams}
@@ -139,4 +147,4 @@ export function ErrorCountAlertTrigger(props: Props) {
 // Default export is required for React.lazy loading
 //
 // eslint-disable-next-line import/no-default-export
-export default ErrorCountAlertTrigger;
+export default ErrorCountRuleType;

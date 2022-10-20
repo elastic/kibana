@@ -7,7 +7,7 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { AggregationType } from '../../../../common/alert_types';
+import { AggregationType } from '../../../../common/rules/apm_rule_types';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,

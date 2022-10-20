@@ -16,7 +16,7 @@ interface Props {
   chartPreview?: React.ReactNode;
 }
 
-export function ServiceAlertTrigger(props: Props) {
+export function ApmRuleParamsContainer(props: Props) {
   const { fields, setRuleParams, defaults, chartPreview } = props;
 
   const params: Record<string, any> = {

@@ -8,17 +8,17 @@
 import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { ServiceAlertTrigger } from '.';
+import { ApmRuleParamsContainer } from '.';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return <MemoryRouter>{children}</MemoryRouter>;
 }
 
-describe('ServiceAlertTrigger', () => {
+describe('ApmRuleParamsContainer', () => {
   it('renders', () => {
     expect(() =>
       render(
-        <ServiceAlertTrigger
+        <ApmRuleParamsContainer
           defaults={{}}
           fields={[null]}
           setRuleParams={() => {}}

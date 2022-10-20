@@ -12,8 +12,8 @@ import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/pu
 import {
   getAlertUrlErrorCount,
   getAlertUrlTransaction,
-} from '../../../common/utils/formatters';
-import { ApmRuleType } from '../../../common/rules/apm_rule_types';
+} from '../../../../common/utils/formatters';
+import { ApmRuleType } from '../../../../common/rules/apm_rule_types';
 
 // copied from elasticsearch_fieldnames.ts to limit page load bundle size
 const SERVICE_ENVIRONMENT = 'service.environment';
@@ -42,7 +42,7 @@ export function registerApmRuleTypes(
     documentationUrl(docLinks) {
       return `${docLinks.links.alerting.apmRules}`;
     },
-    ruleParamsExpression: lazy(() => import('./error_count_alert_trigger')),
+    ruleParamsExpression: lazy(() => import('./error_count_rule_type')),
     validate: () => ({
       errors: [],
     }),
@@ -84,7 +84,7 @@ export function registerApmRuleTypes(
       return `${docLinks.links.alerting.apmRules}`;
     },
     ruleParamsExpression: lazy(
-      () => import('./transaction_duration_alert_trigger')
+      () => import('./transaction_duration_rule_type')
     ),
     validate: () => ({
       errors: [],
@@ -126,7 +126,7 @@ export function registerApmRuleTypes(
       return `${docLinks.links.alerting.apmRules}`;
     },
     ruleParamsExpression: lazy(
-      () => import('./transaction_error_rate_alert_trigger')
+      () => import('./transaction_error_rate_rule_type')
     ),
     validate: () => ({
       errors: [],
@@ -165,7 +165,7 @@ export function registerApmRuleTypes(
       return `${docLinks.links.alerting.apmRules}`;
     },
     ruleParamsExpression: lazy(
-      () => import('./transaction_duration_anomaly_alert_trigger')
+      () => import('./transaction_duration_anomaly_rule_type')
     ),
     validate: () => ({
       errors: [],

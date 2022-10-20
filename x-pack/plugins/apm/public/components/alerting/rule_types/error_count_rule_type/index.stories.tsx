@@ -9,11 +9,10 @@ import { Meta, Story } from '@storybook/react';
 import React, { useState } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { RuleParams, ErrorCountAlertTrigger } from '.';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
-
-import { AlertMetadata } from '../helper';
+import { RuleParams, ErrorCountRuleType } from '.';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
+import { AlertMetadata } from '../../utils/helper';
 
 const coreMock = {
   http: { get: async () => ({}) },
@@ -29,8 +28,8 @@ interface Args {
 }
 
 const stories: Meta<{}> = {
-  title: 'alerting/ErrorCountAlertTrigger',
-  component: ErrorCountAlertTrigger,
+  title: 'alerting/ErrorCountRuleType',
+  component: ErrorCountRuleType,
   decorators: [
     (StoryComponent) => {
       createCallApmApi(coreMock);
@@ -58,7 +57,7 @@ export const CreatingInApmFromInventory: Story<Args> = ({
   }
 
   return (
-    <ErrorCountAlertTrigger
+    <ErrorCountRuleType
       ruleParams={params}
       metadata={metadata}
       setRuleParams={setRuleParams}
@@ -87,7 +86,7 @@ export const CreatingInApmFromService: Story<Args> = ({
   }
 
   return (
-    <ErrorCountAlertTrigger
+    <ErrorCountRuleType
       ruleParams={params}
       metadata={metadata}
       setRuleParams={setRuleParams}
@@ -116,7 +115,7 @@ export const EditingInStackManagement: Story<Args> = ({
   }
 
   return (
-    <ErrorCountAlertTrigger
+    <ErrorCountRuleType
       ruleParams={params}
       metadata={metadata}
       setRuleParams={setRuleParams}
@@ -146,7 +145,7 @@ export const CreatingInStackManagement: Story<Args> = ({
   }
 
   return (
-    <ErrorCountAlertTrigger
+    <ErrorCountRuleType
       ruleParams={params}
       metadata={metadata}
       setRuleParams={setRuleParams}

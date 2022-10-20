@@ -7,12 +7,12 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import * as stories from './error_count_alert_trigger.stories';
+import * as stories from './index.stories';
 import { composeStories } from '@storybook/testing-react';
 
 const { CreatingInApmFromService } = composeStories(stories);
 
-describe('ErrorCountAlertTrigger', () => {
+describe('ErrorCountRuleType', () => {
   it('renders', async () => {
     render(<CreatingInApmFromService />);
 

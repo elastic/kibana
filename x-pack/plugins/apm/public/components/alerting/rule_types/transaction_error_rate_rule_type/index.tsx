@@ -10,19 +10,23 @@ import React, { useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { asPercent } from '../../../../common/utils/formatters';
-import { useFetcher } from '../../../hooks/use_fetcher';
-import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
-import { ChartPreview } from '../chart_preview';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { asPercent } from '../../../../../common/utils/formatters';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
+import { ChartPreview } from '../../ui_components/chart_preview';
 import {
   EnvironmentField,
   IsAboveField,
   ServiceField,
   TransactionTypeField,
-} from '../fields';
-import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
-import { ServiceAlertTrigger } from '../service_alert_trigger';
+} from '../../utils/fields';
+import {
+  AlertMetadata,
+  getIntervalAndTimeRange,
+  TimeUnit,
+} from '../../utils/helper';
+import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
 
 interface RuleParams {
   windowSize?: number;
@@ -40,7 +44,7 @@ interface Props {
   setRuleProperty: (key: string, value: any) => void;
 }
 
-export function TransactionErrorRateAlertTrigger(props: Props) {
+export function TransactionErrorRateRuleType(props: Props) {
   const { services } = useKibana();
   const { ruleParams, metadata, setRuleParams, setRuleProperty } = props;
 
@@ -137,7 +141,7 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
   );
 
   return (
-    <ServiceAlertTrigger
+    <ApmRuleParamsContainer
       fields={fields}
       defaults={params}
       setRuleParams={setRuleParams}
@@ -150,4 +154,4 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
 // Default export is required for React.lazy loading
 //
 // eslint-disable-next-line import/no-default-export
-export default TransactionErrorRateAlertTrigger;
+export default TransactionErrorRateRuleType;

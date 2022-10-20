@@ -6,7 +6,7 @@
  */
 
 import { Capabilities } from '@kbn/core/public';
-import { ApmPluginSetupDeps } from '../../plugin';
+import { ApmPluginSetupDeps } from '../../../plugin';
 import { getAlertingCapabilities } from './get_alerting_capabilities';
 
 describe('getAlertingCapabilities', () => {

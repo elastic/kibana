@@ -10,17 +10,17 @@ import { defaults, omit } from 'lodash';
 import React, { useEffect } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { ANOMALY_SEVERITY } from '../../../../common/ml_constants';
-import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { ANOMALY_SEVERITY } from '../../../../../common/ml_constants';
+import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import {
   EnvironmentField,
   ServiceField,
   TransactionTypeField,
-} from '../fields';
-import { AlertMetadata } from '../helper';
-import { ServiceAlertTrigger } from '../service_alert_trigger';
-import { PopoverExpression } from '../service_alert_trigger/popover_expression';
+} from '../../utils/fields';
+import { AlertMetadata } from '../../utils/helper';
+import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
+import { PopoverExpression } from '../../ui_components/popover_expression';
 import {
   AnomalySeverity,
   SelectAnomalySeverity,
@@ -46,7 +46,7 @@ interface Props {
   setRuleProperty: (key: string, value: any) => void;
 }
 
-export function TransactionDurationAnomalyAlertTrigger(props: Props) {
+export function TransactionDurationAnomalyRuleType(props: Props) {
   const { services } = useKibana();
   const { ruleParams, metadata, setRuleParams, setRuleProperty } = props;
 
@@ -83,7 +83,7 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
     <PopoverExpression
       value={<AnomalySeverity type={params.anomalySeverityType} />}
       title={i18n.translate(
-        'xpack.apm.transactionDurationAnomalyAlertTrigger.anomalySeverity',
+        'xpack.apm.transactionDurationAnomalyRuleType.anomalySeverity',
         {
           defaultMessage: 'Has anomaly with severity',
         }
@@ -99,7 +99,7 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   ];
 
   return (
-    <ServiceAlertTrigger
+    <ApmRuleParamsContainer
       fields={fields}
       defaults={params}
       setRuleParams={setRuleParams}
@@ -111,4 +111,4 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
 // Default export is required for React.lazy loading
 //
 // eslint-disable-next-line import/no-default-export
-export default TransactionDurationAnomalyAlertTrigger;
+export default TransactionDurationAnomalyRuleType;

@@ -10,14 +10,14 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   ApmRuleType,
   APM_SERVER_FEATURE_ID,
-} from '../../../../common/rules/apm_rule_types';
-import { getInitialAlertValues } from '../get_initial_alert_values';
-import { ApmPluginStartDeps } from '../../../plugin';
-import { useServiceName } from '../../../hooks/use_service_name';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { AlertMetadata } from '../helper';
-import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { useTimeRange } from '../../../hooks/use_time_range';
+} from '../../../../../common/rules/apm_rule_types';
+import { getInitialAlertValues } from '../../utils/get_initial_alert_values';
+import { ApmPluginStartDeps } from '../../../../plugin';
+import { useServiceName } from '../../../../hooks/use_service_name';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { AlertMetadata } from '../../utils/helper';
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 
 interface Props {
   addFlyoutVisible: boolean;

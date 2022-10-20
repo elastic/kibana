@@ -9,16 +9,16 @@ import { Story } from '@storybook/react';
 import React, { ComponentType, useState } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { RuleParams, TransactionDurationAlertTrigger } from '.';
-import { AggregationType } from '../../../../common/alert_types';
+import { RuleParams, TransactionDurationRuleType } from '.';
+import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 
 const KibanaReactContext = createKibanaReactContext({
   notifications: { toasts: { add: () => {} } },
 } as unknown as Partial<CoreStart>);
 
 export default {
-  title: 'alerting/TransactionDurationAlertTrigger',
-  component: TransactionDurationAlertTrigger,
+  title: 'alerting/TransactionDurationRuleType',
+  component: TransactionDurationRuleType,
   decorators: [
     (StoryComponent: ComponentType) => {
       return (
@@ -48,7 +48,7 @@ export const Example: Story = () => {
   }
 
   return (
-    <TransactionDurationAlertTrigger
+    <TransactionDurationRuleType
       ruleParams={params}
       setRuleParams={setRuleParams}
       setRuleProperty={() => {}}
