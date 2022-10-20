@@ -192,9 +192,8 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
               checked={existsSelected ? 'on' : undefined}
               key={'exists-option'}
               onClick={() => {
-                console.log(existsSelected);
                 dispatch(selectExists(!Boolean(existsSelected)));
-                console.log(existsSelected);
+                // console.log(existsSelected);
               }}
             >
               <i>{`Exists (*)`}</i>

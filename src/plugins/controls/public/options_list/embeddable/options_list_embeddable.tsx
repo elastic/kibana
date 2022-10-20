@@ -21,6 +21,7 @@ import {
   buildPhraseFilter,
   buildPhrasesFilter,
   COMPARE_ALL_OPTIONS,
+  buildExistsFilter,
 } from '@kbn/es-query';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -156,7 +157,10 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       this.getInput$()
         .pipe(
           distinctUntilChanged(
-            (a, b) => isEqual(a.selectedOptions, b.selectedOptions) && a.exclude === b.exclude
+            (a, b) =>
+              isEqual(a.selectedOptions, b.selectedOptions) &&
+              a.exclude === b.exclude &&
+              a.existsSelected === b.existsSelected
           )
         )
         .subscribe(async ({ selectedOptions: newSelectedOptions }) => {
@@ -164,32 +168,47 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
             actions: {
               clearValidAndInvalidSelections,
               setValidAndInvalidSelections,
+              setIgnoredSelections,
               publishFilters,
             },
             dispatch,
           } = this.reduxEmbeddableTools;
-
+          // console.log('NEW SELECTIONS:', newSelectedOptions);
           if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
-            dispatch(clearValidAndInvalidSelections({}));
+            batch(() => {
+              dispatch(clearValidAndInvalidSelections({}));
+              dispatch(setIgnoredSelections([]));
+            });
           } else {
-            const { invalidSelections } = this.reduxEmbeddableTools.getState().componentState ?? {};
+            const { invalidSelections, ignoredSelections } =
+              this.reduxEmbeddableTools.getState().componentState ?? {};
             const newValidSelections: string[] = [];
             const newInvalidSelections: string[] = [];
+            const newIgnoredSelections: string[] = [];
             for (const selectedOption of newSelectedOptions) {
               if (invalidSelections?.includes(selectedOption)) {
                 newInvalidSelections.push(selectedOption);
                 continue;
               }
+              if (ignoredSelections?.includes(selectedOption)) {
+                newIgnoredSelections.push(selectedOption);
+                continue;
+              }
               newValidSelections.push(selectedOption);
             }
-            dispatch(
-              setValidAndInvalidSelections({
-                validSelections: newValidSelections,
-                invalidSelections: newInvalidSelections,
-              })
-            );
+            batch(() => {
+              dispatch(
+                setValidAndInvalidSelections({
+                  validSelections: newValidSelections,
+                  invalidSelections: newInvalidSelections,
+                })
+              );
+              dispatch(setIgnoredSelections(newIgnoredSelections));
+            });
           }
           const newFilters = await this.buildFilter();
+          // console.log('new filter 1:', newFilters);
+
           dispatch(publishFilters(newFilters));
         })
     );
@@ -350,6 +369,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
       // publish filter
       const newFilters = await this.buildFilter();
+      // console.log('new filter 2:', newFilters);
       batch(() => {
         dispatch(setLoading(false));
         dispatch(publishFilters(newFilters));
@@ -370,22 +390,28 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     const { getState } = this.reduxEmbeddableTools;
     const { validSelections } = getState().componentState ?? {};
     const { exclude } = this.getInput();
+    const { existsSelected } = getState().explicitInput ?? {};
 
-    if (!validSelections || isEmpty(validSelections)) {
+    if ((!validSelections || isEmpty(validSelections)) && !existsSelected) {
       return [];
     }
     const { dataView, field } = await this.getCurrentDataViewAndField();
     if (!dataView || !field) return;
 
-    let newFilter: Filter;
-    if (validSelections.length === 1) {
-      newFilter = buildPhraseFilter(field, validSelections[0], dataView);
-    } else {
-      newFilter = buildPhrasesFilter(field, validSelections, dataView);
+    let newFilter: Filter | undefined;
+    if (existsSelected) {
+      newFilter = buildExistsFilter(field, dataView);
+    } else if (validSelections) {
+      if (validSelections.length === 1) {
+        newFilter = buildPhraseFilter(field, validSelections[0], dataView);
+      } else {
+        newFilter = buildPhrasesFilter(field, validSelections, dataView);
+      }
     }
 
     newFilter.meta.key = field?.name;
     if (exclude) newFilter.meta.negate = true;
+    if (!newFilter) return [];
     return [newFilter];
   };
 
