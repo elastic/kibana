@@ -215,7 +215,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     expect(fieldGroups[FieldsGroupNames.AvailableFields]?.helpText).not.toBe('test');
   });
 
-  it('should work correctly when existence info is available only for one data view', async () => {
+  it('should work correctly when changing a data view and existence info is available only for one of them', async () => {
     const knownDataViewId = dataView.id!;
     let fieldGroups: FieldListGroups<DataViewField>;
     const props: GroupedFieldsParams<DataViewField> = {
@@ -233,10 +233,13 @@ describe('UnifiedFieldList useGroupedFields()', () => {
         isFieldsExistenceInfoUnavailable: (dataViewId) => dataViewId !== knownDataViewId,
       },
     };
-    const hook1 = renderHook(() => useGroupedFields(props));
-    await hook1.waitForNextUpdate();
 
-    fieldGroups = hook1.result.current.fieldGroups;
+    const { result, waitForNextUpdate, rerender } = renderHook(useGroupedFields, {
+      initialProps: props,
+    });
+    await waitForNextUpdate();
+
+    fieldGroups = result.current.fieldGroups;
 
     expect(
       Object.keys(fieldGroups!).map(
@@ -250,16 +253,15 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'MetaFields-3',
     ]);
 
-    const hook2 = renderHook(() =>
-      useGroupedFields({
-        ...props,
-        dataViewId: anotherDataView.id!,
-        allFields: anotherDataView.fields,
-      })
-    );
-    await hook2.waitForNextUpdate();
+    rerender({
+      ...props,
+      dataViewId: anotherDataView.id!,
+      allFields: anotherDataView.fields,
+    });
 
-    fieldGroups = hook2.result.current.fieldGroups;
+    await waitForNextUpdate();
+
+    fieldGroups = result.current.fieldGroups;
 
     expect(
       Object.keys(fieldGroups!).map(
