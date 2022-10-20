@@ -6,4 +6,9 @@
  */
 
 export type { EmailService, PlainTextEmail } from './types';
-export { getEmailService, type EmailServiceStartDeps } from './connectors_email_service_factory';
+export {
+  type EmailServiceSetupDeps,
+  type EmailServiceStartDeps,
+  checkEmailServiceConfiguration,
+  getEmailService,
+} from './connectors_email_service_factory';

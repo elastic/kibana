@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { EmailService, EmailServiceStartDeps } from './services';
+import type { EmailService, EmailServiceSetupDeps, EmailServiceStartDeps } from './services';
 
+export type NotificationsPluginSetupDeps = EmailServiceSetupDeps;
 export type NotificationsPluginStartDeps = EmailServiceStartDeps;
 
 export interface NotificationsPluginStart {

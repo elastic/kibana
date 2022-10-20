@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { PluginSetupContract, PluginStartContract } from '@kbn/actions-plugin/server';
 import { ConnectorsEmailService } from './connectors_email_service';
 import type { EmailService } from './types';
 import { PLUGIN_ID } from '../../common';
 import type { ConnectorsEmailConfigType } from '../config/connectors_email_config';
 
+export interface EmailServiceSetupDeps {
+  actions?: PluginSetupContract;
+}
+
 export interface EmailServiceStartDeps {
-  actions?: ActionsPluginStartContract;
+  actions?: PluginStartContract;
+}
+
+export interface CheckEmailServiceParams {
+  config: ConnectorsEmailConfigType;
+  plugins: EmailServiceSetupDeps;
 }
 
 export interface EmailServiceFactoryParams {
@@ -20,7 +29,7 @@ export interface EmailServiceFactoryParams {
   plugins: EmailServiceStartDeps;
 }
 
-export function getEmailService(params: EmailServiceFactoryParams): EmailService {
+export function checkEmailServiceConfiguration(params: CheckEmailServiceParams) {
   const {
     config,
     plugins: { actions },
@@ -38,9 +47,18 @@ export function getEmailService(params: EmailServiceFactoryParams): EmailService
   if (!actions.isPreconfiguredConnector(emailConnector)) {
     throw new Error(`Unexisting email connector '${emailConnector}' specified`);
   }
+}
 
-  actions.registerUnsecuredActionsClientAccess(PLUGIN_ID);
+export function getEmailService(params: EmailServiceFactoryParams): EmailService | undefined {
+  const {
+    config,
+    plugins: { actions },
+  } = params;
 
-  const unsecuredActionsClient = actions.getUnsecuredActionsClient();
-  return new ConnectorsEmailService(PLUGIN_ID, emailConnector, unsecuredActionsClient);
+  const emailConnector = config.connectors?.default?.email;
+  const unsecuredActionsClient = actions?.getUnsecuredActionsClient();
+
+  if (emailConnector && unsecuredActionsClient) {
+    return new ConnectorsEmailService(PLUGIN_ID, emailConnector, unsecuredActionsClient);
+  }
 }

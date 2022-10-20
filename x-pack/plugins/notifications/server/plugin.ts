@@ -5,9 +5,19 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
-import type { NotificationsPluginStartDeps, NotificationsPluginStart } from './types';
-import { type EmailService, getEmailService } from './services';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+} from '@kbn/core/server';
+import type {
+  NotificationsPluginSetupDeps,
+  NotificationsPluginStartDeps,
+  NotificationsPluginStart,
+} from './types';
+import { type EmailService, checkEmailServiceConfiguration, getEmailService } from './services';
 import type { NotificationsConfigType } from './config';
 
 export class NotificationsPlugin implements Plugin<void, NotificationsPluginStart> {
@@ -19,14 +29,20 @@ export class NotificationsPlugin implements Plugin<void, NotificationsPluginStar
     this.initialConfig = initializerContext.config.get();
   }
 
-  public setup() {}
+  public setup(core: CoreSetup, plugins: NotificationsPluginSetupDeps) {
+    try {
+      checkEmailServiceConfiguration({ config: this.initialConfig, plugins });
+    } catch (err) {
+      this.logger.warn(`Email service setup: ${err}`);
+    }
+  }
 
   public start(core: CoreStart, plugins: NotificationsPluginStartDeps) {
     let email: EmailService | undefined;
     try {
       email = getEmailService({ config: this.initialConfig, plugins });
     } catch (err) {
-      this.logger.warn(`Error creating email service: ${err}`);
+      this.logger.warn(`Error starting email service: ${err}`);
     }
 
     return { email };
