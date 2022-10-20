@@ -94,7 +94,6 @@ interface MLInferenceProcessorsActions {
   setAddInferencePipelineStep: (step: AddInferencePipelineSteps) => {
     step: AddInferencePipelineSteps;
   };
-  setCreateErrors(errors: string[]): { errors: string[] };
   setIndexName: (indexName: string) => { indexName: string };
   setInferencePipelineConfiguration: (configuration: InferencePipelineConfiguration) => {
     configuration: InferencePipelineConfiguration;
@@ -131,14 +130,14 @@ interface MLInferenceProcessorsValues {
   mappingData: typeof MappingsApiLogic.values.data;
   mappingStatus: Status;
   mlInferencePipeline?: MlInferencePipeline;
-  mlModelsData: typeof MLModelsApiLogic.values.data;
+  mlModelsData: TrainedModelConfigResponse[];
   mlModelsStatus: Status;
   simulatePipelineData: typeof SimulateMlInterfacePipelineApiLogic.values.data;
   simulatePipelineErrors: string[];
   simulatePipelineResult: IngestSimulateResponse;
   simulatePipelineStatus: Status;
   sourceFields: string[] | undefined;
-  supportedMLModels: typeof MLModelsApiLogic.values.data;
+  supportedMLModels: TrainedModelConfigResponse[];
 }
 
 export const MLInferenceLogic = kea<
@@ -148,7 +147,6 @@ export const MLInferenceLogic = kea<
     clearFormErrors: true,
     createPipeline: true,
     setAddInferencePipelineStep: (step: AddInferencePipelineSteps) => ({ step }),
-    setCreateErrors: (errors: string[]) => ({ errors }),
     setFormErrors: (inputErrors: AddInferencePipelineFormErrors) => ({ inputErrors }),
     setIndexName: (indexName: string) => ({ indexName }),
     setInferencePipelineConfiguration: (configuration: InferencePipelineConfiguration) => ({
@@ -208,7 +206,6 @@ export const MLInferenceLogic = kea<
         sourceField: configuration.sourceField,
       });
     },
-    makeCreatePipelineRequest: () => actions.setCreateErrors([]),
     setIndexName: ({ indexName }) => {
       actions.makeMLModelsRequest(undefined);
       actions.makeMappingRequest({ indexName });
@@ -268,7 +265,7 @@ export const MLInferenceLogic = kea<
       [],
       {
         createApiError: (_, error) => getErrorsFromHttpResponse(error),
-        setCreateErrors: (_, { errors }) => errors,
+        makeCreatePipelineRequest: () => [],
       },
     ],
     simulatePipelineErrors: [

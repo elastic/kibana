@@ -58,8 +58,17 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
   const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
 
   const { services } = useMlKibana();
-  const { unifiedSearch, data, storage, appName, notifications, http, docLinks, uiSettings } =
-    services;
+  const {
+    unifiedSearch,
+    data,
+    storage,
+    appName,
+    notifications,
+    http,
+    docLinks,
+    uiSettings,
+    dataViews,
+  } = services;
 
   const searchChangeHandler = (q: Query) => setSearchInput(q);
 
@@ -203,7 +212,16 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
               dataTestSubj="mlDFAnalyticsQueryInput"
               languageSwitcherPopoverAnchorPosition="rightDown"
               appName={appName}
-              deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, storage }}
+              deps={{
+                unifiedSearch,
+                notifications,
+                http,
+                docLinks,
+                uiSettings,
+                data,
+                storage,
+                dataViews,
+              }}
             />
           </EuiFlexItem>
           {filters && filters.options && (

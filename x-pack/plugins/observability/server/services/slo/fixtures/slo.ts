@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import uuid from 'uuid';
+import { Duration, DurationUnit } from '../../../types/models/duration';
+
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
@@ -13,37 +16,6 @@ import {
   SLO,
 } from '../../../types/models';
 import { CreateSLOParams } from '../../../types/rest_specs';
-
-const defaultSLO: Omit<SLO, 'indicator' | 'id' | 'created_at' | 'updated_at'> = {
-  name: 'irrelevant',
-  description: 'irrelevant',
-  time_window: {
-    duration: '7d',
-    is_rolling: true,
-  },
-  budgeting_method: 'occurrences',
-  objective: {
-    target: 0.999,
-  },
-  revision: 1,
-};
-
-export const createSLOParams = (indicator: Indicator): CreateSLOParams => ({
-  ...defaultSLO,
-  indicator,
-});
-
-export const createSLO = (indicator: Indicator): SLO => {
-  const now = new Date();
-  return {
-    ...defaultSLO,
-    id: uuid.v1(),
-    indicator,
-    revision: 1,
-    created_at: now,
-    updated_at: now,
-  };
-};
 
 export const createAPMTransactionErrorRateIndicator = (
   params: Partial<APMTransactionErrorRateIndicator['params']> = {}
@@ -72,3 +44,44 @@ export const createAPMTransactionDurationIndicator = (
     ...params,
   },
 });
+
+const defaultSLO: Omit<SLO, 'id' | 'revision' | 'created_at' | 'updated_at'> = {
+  name: 'irrelevant',
+  description: 'irrelevant',
+  time_window: {
+    duration: new Duration(7, DurationUnit.d),
+    is_rolling: true,
+  },
+  budgeting_method: 'occurrences',
+  objective: {
+    target: 0.999,
+  },
+  indicator: createAPMTransactionDurationIndicator(),
+};
+
+export const createSLOParams = (params: Partial<CreateSLOParams> = {}): CreateSLOParams => ({
+  ...defaultSLO,
+  ...params,
+});
+
+export const createSLO = (params: Partial<SLO> = {}): SLO => {
+  const now = new Date();
+  return cloneDeep({
+    ...defaultSLO,
+    id: uuid.v1(),
+    revision: 1,
+    created_at: now,
+    updated_at: now,
+    ...params,
+  });
+};
+
+export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO => {
+  return createSLO({
+    time_window: {
+      duration: new Duration(7, DurationUnit.d),
+      calendar: { start_time: new Date('2022-10-01T00:00:00.000Z') },
+    },
+    ...params,
+  });
+};
