@@ -22,9 +22,9 @@ import {
  * Details of a created pipeline.
  */
 export interface CreatedPipeline {
-  id: string;
-  created?: boolean;
   addedToParentPipeline?: boolean;
+  created?: boolean;
+  id: string;
 }
 
 /**
@@ -110,8 +110,8 @@ export const createMlInferencePipeline = async (
   });
 
   return Promise.resolve({
-    id: inferencePipelineGeneratedName,
     created: true,
+    id: inferencePipelineGeneratedName,
   });
 };
 
@@ -143,8 +143,8 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   // Verify the parent pipeline exists with a processors array
   if (!parentPipeline?.processors) {
     return Promise.resolve({
-      id: pipelineName,
       addedToParentPipeline: false,
+      id: pipelineName,
     });
   }
 
@@ -155,8 +155,8 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   );
   if (existingSubPipeline) {
     return Promise.resolve({
-      id: pipelineName,
       addedToParentPipeline: false,
+      id: pipelineName,
     });
   }
 
@@ -173,7 +173,7 @@ export const addSubPipelineToIndexSpecificMlPipeline = async (
   });
 
   return Promise.resolve({
-    id: pipelineName,
     addedToParentPipeline: true,
+    id: pipelineName,
   });
 };
