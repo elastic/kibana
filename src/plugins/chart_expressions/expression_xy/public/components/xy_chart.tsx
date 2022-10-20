@@ -523,12 +523,7 @@ export function XYChart({
     };
   };
 
-  const shouldShowValueLabels = uiState
-    ? valueLabels !== ValueLabelModes.HIDE
-    : // No stacked bar charts
-      dataLayers.every((layer) => !layer.isStacked) &&
-      // No histogram charts
-      !isHistogramViz;
+  const shouldShowValueLabels = !uiState || valueLabels !== ValueLabelModes.HIDE;
 
   const valueLabelsStyling =
     shouldShowValueLabels &&
