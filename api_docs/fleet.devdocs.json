@@ -13176,7 +13176,7 @@
           {
             "parentPluginId": "fleet",
             "id": "def-common.RegistryElasticsearch.index_template.settings",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "'index_template.settings'",
             "description": [],

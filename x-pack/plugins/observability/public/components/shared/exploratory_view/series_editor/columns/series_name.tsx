@@ -54,12 +54,14 @@ export function SeriesName({ series, seriesId }: Props) {
   const onOutsideClick = (event: Event) => {
     if (event.target !== buttonRef.current) {
       setIsEditingEnabled(false);
+      onSave();
     }
   };
 
   const onKeyDown: KeyboardEventHandler<HTMLInputElement> = (event) => {
     if (event.key === 'Enter') {
       setIsEditingEnabled(false);
+      onSave();
     }
   };
 
