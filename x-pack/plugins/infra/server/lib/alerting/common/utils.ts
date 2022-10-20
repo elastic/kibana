@@ -12,6 +12,7 @@ import type { IBasePath } from '@kbn/core/server';
 import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
 import {
   AlertExecutionDetails,
@@ -86,12 +87,29 @@ export const createScopedLogger = (
   };
 };
 
+export const getAlertDetailsPageEnabledForApp = (
+  config: ObservabilityConfig['unsafe']['alertDetails'] | null,
+  appName: keyof ObservabilityConfig['unsafe']['alertDetails']
+): boolean => {
+  if (!config) return false;
+
+  return config[appName].enabled;
+};
+
 export const getUrl = (basePath: IBasePath, relativeViewInAppUrl: string) =>
   basePath.publicBaseUrl
     ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
     : relativeViewInAppUrl;
 
-export const getViewInAppUrlInventory = (
+export const getSpaceUrlFragmentFromSpaceId = (spaceId: string) => {
+  if (spaceId === 'default') {
+    return '';
+  }
+
+  return `/s/${spaceId}`;
+};
+
+export const getViewInInventoryAppUrl = (
   criteria: InventoryMetricConditions[],
   nodeType: string,
   timestamp: string,
@@ -111,13 +129,15 @@ export const getViewInAppUrlInventory = (
   return getUrl(basePath, relativeViewInAppUrl);
 };
 
-export const LINK_TO_ALERT_DETAIL = '/app/observability/alerts';
+export const getViewInMetricsAppUrl = (basePath: IBasePath, spaceId: string) =>
+  getUrl(basePath, `${getSpaceUrlFragmentFromSpaceId(spaceId)}/${LINK_TO_METRICS_EXPLORER}`);
 
-export const getAlertDetailsPageEnabledForApp = (
-  config: ObservabilityConfig['unsafe']['alertDetails'] | null,
-  appName: keyof ObservabilityConfig['unsafe']['alertDetails']
-): boolean => {
-  if (!config) return false;
-
-  return config[appName].enabled;
-};
+export const getAlertDetailsUrl = (
+  basePath: IBasePath,
+  spaceId: string,
+  alertUuid: string | null
+) =>
+  getUrl(
+    basePath,
+    `${getSpaceUrlFragmentFromSpaceId(spaceId)}/app/observability/alerts/${alertUuid}`
+  );

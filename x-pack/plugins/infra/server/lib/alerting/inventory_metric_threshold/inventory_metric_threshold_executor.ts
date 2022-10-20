@@ -32,9 +32,8 @@ import {
 } from '../common/messages';
 import {
   createScopedLogger,
-  getViewInAppUrlInventory,
-  getUrl,
-  LINK_TO_ALERT_DETAIL,
+  getAlertDetailsUrl,
+  getViewInInventoryAppUrl,
   UNGROUPED_FACTORY_KEY,
 } from '../common/utils';
 import { evaluateCondition, ConditionResult } from './evaluate_condition';
@@ -67,7 +66,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     InventoryMetricThresholdAlertState,
     InventoryMetricThresholdAlertContext,
     InventoryMetricThresholdAllowedActionGroups
-  >(async ({ services, params, alertId, executionId, startedAt }) => {
+  >(async ({ services, params, alertId, executionId, spaceId, startedAt }) => {
     const startTime = Date.now();
 
     const { criteria, filterQuery, sourceId = 'default', nodeType, alertOnNoData } = params;
@@ -101,22 +100,21 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         const indexedStartedDate =
           getAlertStartedDate(UNGROUPED_FACTORY_KEY) ?? startedAt.toISOString();
         const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
-        const viewInAppUrl = getViewInAppUrlInventory(
-          criteria,
-          nodeType,
-          indexedStartedDate,
-          libs.basePath
-        );
 
         alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: getUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
+          alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
           alertState: stateToAlertMessage[AlertStates.ERROR],
           group: UNGROUPED_FACTORY_KEY,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
           reason,
           timestamp: startedAt.toISOString(),
           value: null,
-          viewInAppUrl,
+          viewInAppUrl: getViewInInventoryAppUrl(
+            criteria,
+            nodeType,
+            indexedStartedDate,
+            libs.basePath
+          ),
         });
 
         return {};
@@ -218,17 +216,11 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         const alert = alertFactory(instanceId, reason, additionalContext);
         const indexedStartedDate = getAlertStartedDate(instanceId) ?? startedAt.toISOString();
         const alertUuid = getAlertUuid(instanceId);
-        const viewInAppUrl = getViewInAppUrlInventory(
-          criteria,
-          nodeType,
-          indexedStartedDate,
-          libs.basePath
-        );
 
         scheduledActionsCount++;
 
         const context = {
-          alertDetailsUrl: getUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
+          alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
           alertState: stateToAlertMessage[nextState],
           group: instanceId,
           reason,
@@ -238,7 +230,12 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           value: mapToConditionsLookup(results, (result) =>
             formatMetric(result[instanceId].metric, result[instanceId].currentValue)
           ),
-          viewInAppUrl,
+          viewInAppUrl: getViewInInventoryAppUrl(
+            criteria,
+            nodeType,
+            indexedStartedDate,
+            libs.basePath
+          ),
           ...additionalContext,
         };
         alert.scheduleActions(actionGroupId, context);
@@ -253,21 +250,20 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       const indexedStartedDate =
         getAlertStartedDate(recoveredAlertInstanceId) ?? startedAt.toISOString();
       const alertUuid = getAlertUuid(recoveredAlertInstanceId);
-      const viewInAppUrl = getViewInAppUrlInventory(
-        criteria,
-        nodeType,
-        indexedStartedDate,
-        libs.basePath
-      );
 
       const context = {
-        alertDetailsUrl: getUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
+        alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertInstanceId,
         metric: mapToConditionsLookup(criteria, (c) => c.metric),
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         timestamp: startedAt.toISOString(),
-        viewInAppUrl,
+        viewInAppUrl: getViewInInventoryAppUrl(
+          criteria,
+          nodeType,
+          indexedStartedDate,
+          libs.basePath
+        ),
       };
       alert.setContext(context);
     }

@@ -28,11 +28,10 @@ import {
 } from '../common/messages';
 import {
   createScopedLogger,
-  getUrl,
-  LINK_TO_ALERT_DETAIL,
+  getAlertDetailsUrl,
+  getViewInMetricsAppUrl,
   UNGROUPED_FACTORY_KEY,
 } from '../common/utils';
-import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 
@@ -73,7 +72,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   >(async function (options) {
     const startTime = Date.now();
 
-    const { services, params, state, startedAt, alertId, executionId } = options;
+    const { services, params, state, startedAt, alertId, executionId, spaceId } = options;
+
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
@@ -112,14 +112,14 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
 
         alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: getUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
+          alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
           alertState: stateToAlertMessage[AlertStates.ERROR],
           group: UNGROUPED_FACTORY_KEY,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
           reason,
           timestamp,
           value: null,
-          viewInAppUrl: getUrl(libs.basePath, LINK_TO_METRICS_EXPLORER),
+          viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
         });
 
         return {
@@ -247,7 +247,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         scheduledActionsCount++;
 
         alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: getUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
+          alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
           alertState: stateToAlertMessage[nextState],
           group: alertInstanceId,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -261,7 +261,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
             alertResults,
             (result) => formatAlertResult(result[alertInstanceId]).currentValue
           ),
-          viewInAppUrl: getUrl(libs.basePath, LINK_TO_METRICS_EXPLORER),
+          viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
         });
       }
     }
@@ -271,17 +271,16 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
     for (const alert of recoveredAlerts) {
       const recoveredAlertInstanceId = alert.getId();
-      const viewInAppUrl = getUrl(libs.basePath, LINK_TO_METRICS_EXPLORER);
       const alertUuid = getAlertUuid(recoveredAlertInstanceId);
 
       const context = {
-        alertDetailsUrl: getUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
+        alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertInstanceId,
         metric: mapToConditionsLookup(criteria, (c) => c.metric),
         timestamp: startedAt.toISOString(),
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
-        viewInAppUrl,
+        viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
       };
       alert.setContext(context);
     }
