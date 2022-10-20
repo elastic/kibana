@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import uuid from 'uuid';
+import { Duration, DurationUnit } from '../../../types/models/duration';
 
-import { Duration, DurationUnit } from '../../../types/schema';
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
@@ -65,14 +66,14 @@ export const createSLOParams = (params: Partial<CreateSLOParams> = {}): CreateSL
 
 export const createSLO = (params: Partial<SLO> = {}): SLO => {
   const now = new Date();
-  return {
+  return cloneDeep({
     ...defaultSLO,
     id: uuid.v1(),
     revision: 1,
     created_at: now,
     updated_at: now,
     ...params,
-  };
+  });
 };
 
 export const createSLOWithCalendarTimeWindow = (params: Partial<SLO> = {}): SLO => {
