@@ -19,7 +19,6 @@ import {
   TestProviders,
 } from '../../../common/mock';
 import { HostDetailsTabs } from './details_tabs';
-import type { HostDetailsTabsProps } from './types';
 import { hostDetailsPagePath } from '../types';
 import { type } from './utils';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
@@ -114,10 +113,6 @@ describe('body', () => {
     },
   });
 
-  const componentProps: Record<string, Partial<HostDetailsTabsProps>> = {
-    events: { hostDetailsFilter: mockHostDetailsPageFilters },
-    alerts: { hostDetailsFilter: mockHostDetailsPageFilters },
-  };
   const mount = useMountAppended();
 
   Object.entries(scenariosMap).forEach(([path, componentName]) =>
@@ -181,7 +176,7 @@ describe('body', () => {
           title: 'filebeat-*,auditbeat-*,packetbeat-*',
         },
         hostName: 'host-1',
-        ...(componentProps[path] != null ? componentProps[path] : []),
+        ...(path === 'events' && { additionalFilters: mockHostDetailsPageFilters }),
       });
     })
   );
