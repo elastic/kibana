@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * from './get_datasource_info';
+export * from './datasource_info';
+export * from './adhoc_data_views_service';

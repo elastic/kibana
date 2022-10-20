@@ -9,7 +9,7 @@
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { convertToLens } from '.';
-import { createPanel, createSeries } from '../lib/__mocks__';
+import { createPanel, createSeries, mockAdHocDataViewsService } from '../lib/__mocks__';
 
 const mockGetMetricsColumns = jest.fn();
 const mockGetBucketsColumns = jest.fn();
@@ -18,8 +18,7 @@ const mockIsValidMetrics = jest.fn();
 const mockGetDatasourceValue = jest
   .fn()
   .mockImplementation(() => Promise.resolve(stubLogstashDataView));
-const mockGetDataSourceInfo = jest.fn();
-const mockDropGeneratedAdHocDataViews = jest.fn();
+const mockExtractOrGenerateDatasourceInfo = jest.fn();
 
 jest.mock('../../services', () => ({
   getDataViewsStart: jest.fn(() => mockGetDatasourceValue),
@@ -40,8 +39,8 @@ jest.mock('../lib/metrics', () => ({
 }));
 
 jest.mock('../lib/datasource', () => ({
-  getDataSourceInfo: jest.fn(() => mockGetDataSourceInfo()),
-  dropGeneratedAdHocDataViews: jest.fn(() => mockDropGeneratedAdHocDataViews()),
+  extractOrGenerateDatasourceInfo: jest.fn(() => mockExtractOrGenerateDatasourceInfo()),
+  AdHocDataViewsService: jest.fn(() => mockAdHocDataViewsService),
 }));
 
 describe('convertToLens', () => {
@@ -121,7 +120,7 @@ describe('convertToLens', () => {
 
   beforeEach(() => {
     mockIsValidMetrics.mockReturnValue(true);
-    mockGetDataSourceInfo.mockReturnValue({
+    mockExtractOrGenerateDatasourceInfo.mockReturnValue({
       indexPatternId: 'test-index-pattern',
       timeField: 'timeField',
       indexPattern: { id: 'test-index-pattern' },
@@ -140,7 +139,7 @@ describe('convertToLens', () => {
     const result = await convertToLens(model);
     expect(result).toBeNull();
     expect(mockIsValidMetrics).toBeCalledTimes(1);
-    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
+    expect(mockAdHocDataViewsService.clearAll).toBeCalledTimes(1);
   });
 
   test('should return null for invalid or unsupported metrics', async () => {
@@ -148,7 +147,7 @@ describe('convertToLens', () => {
     const result = await convertToLens(model);
     expect(result).toBeNull();
     expect(mockGetMetricsColumns).toBeCalledTimes(1);
-    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
+    expect(mockAdHocDataViewsService.clearAll).toBeCalledTimes(1);
   });
 
   test('should return null for invalid or unsupported buckets', async () => {
@@ -156,7 +155,7 @@ describe('convertToLens', () => {
     const result = await convertToLens(model);
     expect(result).toBeNull();
     expect(mockGetBucketsColumns).toBeCalledTimes(1);
-    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
+    expect(mockAdHocDataViewsService.clearAll).toBeCalledTimes(1);
   });
 
   test('should return state for valid model', async () => {
@@ -165,7 +164,7 @@ describe('convertToLens', () => {
     expect(result?.type).toBe('lnsMetric');
     expect(mockGetBucketsColumns).toBeCalledTimes(model.series.length);
     expect(mockGetConfigurationForMetric).toBeCalledTimes(1);
-    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(0);
+    expect(mockAdHocDataViewsService.clearAll).toBeCalledTimes(0);
   });
 
   test('should drop adhoc dataviews if action is required', async () => {
@@ -174,7 +173,7 @@ describe('convertToLens', () => {
     expect(result?.type).toBe('lnsMetric');
     expect(mockGetBucketsColumns).toBeCalledTimes(model.series.length);
     expect(mockGetConfigurationForMetric).toBeCalledTimes(1);
-    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
+    expect(mockAdHocDataViewsService.clearAll).toBeCalledTimes(1);
   });
 
   test('should skip hidden series', async () => {
@@ -191,11 +190,11 @@ describe('convertToLens', () => {
     expect(result).toBeDefined();
     expect(result?.type).toBe('lnsMetric');
     expect(mockIsValidMetrics).toBeCalledTimes(0);
-    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(0);
+    expect(mockAdHocDataViewsService.clearAll).toBeCalledTimes(0);
   });
 
   test('should return null if multiple indexPatterns are provided', async () => {
-    mockGetDataSourceInfo.mockReturnValueOnce({
+    mockExtractOrGenerateDatasourceInfo.mockReturnValueOnce({
       indexPatternId: 'test-index-pattern-1',
       timeField: 'timeField',
       indexPattern: { id: 'test-index-pattern-1' },
@@ -216,7 +215,7 @@ describe('convertToLens', () => {
       })
     );
     expect(result).toBeNull();
-    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
+    expect(mockAdHocDataViewsService.clearAll).toBeCalledTimes(1);
   });
 
   test('should return null if visible series is 2 and bucket is 1', async () => {
@@ -239,7 +238,7 @@ describe('convertToLens', () => {
       })
     );
     expect(result).toBeNull();
-    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
+    expect(mockAdHocDataViewsService.clearAll).toBeCalledTimes(1);
   });
 
   test('should return null if visible series is 2 and two not unique buckets', async () => {
@@ -262,7 +261,7 @@ describe('convertToLens', () => {
       })
     );
     expect(result).toBeNull();
-    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(1);
+    expect(mockAdHocDataViewsService.clearAll).toBeCalledTimes(1);
   });
 
   test('should return state if visible series is 2 and two unique buckets', async () => {
@@ -287,6 +286,6 @@ describe('convertToLens', () => {
     expect(result).toBeDefined();
     expect(result?.type).toBe('lnsMetric');
     expect(mockGetConfigurationForMetric).toBeCalledTimes(1);
-    expect(mockDropGeneratedAdHocDataViews).toBeCalledTimes(0);
+    expect(mockAdHocDataViewsService.clearAll).toBeCalledTimes(0);
   });
 });

@@ -16,18 +16,32 @@ import {
   PercentileRanksColumnWithCommonMeta,
 } from '../../convert';
 import { getLayers } from './layers';
-import { createPanel, createSeries } from '../../__mocks__';
+import { createPanel, createSeries, mockAdHocDataViewsService } from '../../__mocks__';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { AdHocDataViewsService } from '../../datasource';
+
+const mockExtractOrGenerateDatasourceInfo = jest.fn();
 
 jest.mock('uuid', () => ({
   v4: () => 'test-id',
+}));
+
+jest.mock('../../datasource', () => ({
+  extractOrGenerateDatasourceInfo: jest.fn(() => mockExtractOrGenerateDatasourceInfo()),
+  AdHocDataViewsService: jest.fn(() => mockAdHocDataViewsService),
 }));
 
 const mockedIndices = [
   {
     id: 'test',
     title: 'test',
+    timeFieldName: 'test_field',
+    getFieldByName: (name: string) => ({ aggregatable: name !== 'host' }),
+  },
+  {
+    id: 'test2',
+    title: 'test2',
     timeFieldName: 'test_field',
     getFieldByName: (name: string) => ({ aggregatable: name !== 'host' }),
   },
@@ -356,17 +370,26 @@ describe('getLayers', () => {
     ],
     series: [createSeries({ metrics: staticValueMetric })],
   });
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (mockAdHocDataViewsService.create as jest.Mock).mockReturnValue(mockedIndices[0]);
+    mockExtractOrGenerateDatasourceInfo.mockReturnValue({
+      indexPattern: mockedIndices[0],
+      indexPatternId: mockedIndices[0].id,
+      timeField: mockedIndices[0].timeFieldName,
+    });
+  });
 
   test.each<
     [
       string,
-      [Record<number, Layer>, Panel, DataViewsPublicPluginStart, boolean],
+      [Record<number, Layer>, Panel, DataViewsPublicPluginStart, AdHocDataViewsService, boolean],
       Array<Partial<XYLayerConfig>>
     ]
   >([
     [
       'data layer if columns do not include static column',
-      [dataSourceLayers, panel, indexPatternsService, false],
+      [dataSourceLayers, panel, indexPatternsService, mockAdHocDataViewsService, false],
       [
         {
           layerType: 'data',
@@ -387,7 +410,7 @@ describe('getLayers', () => {
     ],
     [
       'data layer with "left" axisMode if isSingleAxis is provided',
-      [dataSourceLayers, panel, indexPatternsService, true],
+      [dataSourceLayers, panel, indexPatternsService, mockAdHocDataViewsService, true],
       [
         {
           layerType: 'data',
@@ -408,7 +431,13 @@ describe('getLayers', () => {
     ],
     [
       'reference line layer if columns include static column',
-      [dataSourceLayersWithStatic, panelWithStaticValue, indexPatternsService, false],
+      [
+        dataSourceLayersWithStatic,
+        panelWithStaticValue,
+        indexPatternsService,
+        mockAdHocDataViewsService,
+        false,
+      ],
       [
         {
           layerType: 'referenceLine',
@@ -428,7 +457,13 @@ describe('getLayers', () => {
     ],
     [
       'correct colors if columns include percentile columns',
-      [dataSourceLayersWithPercentile, panelWithPercentileMetric, indexPatternsService, false],
+      [
+        dataSourceLayersWithPercentile,
+        panelWithPercentileMetric,
+        indexPatternsService,
+        mockAdHocDataViewsService,
+        false,
+      ],
       [
         {
           yConfig: [
@@ -452,6 +487,7 @@ describe('getLayers', () => {
         dataSourceLayersWithPercentileRank,
         panelWithPercentileRankMetric,
         indexPatternsService,
+        mockAdHocDataViewsService,
         false,
       ],
       [
@@ -473,7 +509,13 @@ describe('getLayers', () => {
     ],
     [
       'annotation layer gets correct params and converts color, extraFields and icons',
-      [dataSourceLayersWithStatic, panelWithSingleAnnotation, indexPatternsService, false],
+      [
+        dataSourceLayersWithStatic,
+        panelWithSingleAnnotation,
+        indexPatternsService,
+        mockAdHocDataViewsService,
+        false,
+      ],
       [
         {
           layerType: 'referenceLine',
@@ -523,6 +565,7 @@ describe('getLayers', () => {
         dataSourceLayersWithStatic,
         panelWithSingleAnnotationWithoutQueryStringAndTimefield,
         indexPatternsService,
+        mockAdHocDataViewsService,
         false,
       ],
       [
@@ -568,9 +611,32 @@ describe('getLayers', () => {
         },
       ],
     ],
-    [
-      'multiple annotations with different data views create separate layers',
-      [dataSourceLayersWithStatic, panelWithMultiAnnotations, indexPatternsService, false],
+  ])('should return %s', async (_, input, expected) => {
+    const layers = await getLayers(...input);
+    expect(layers).toEqual(expected.map(expect.objectContaining));
+  });
+
+  test('should return multiple annotations with different data views create separate layers', async () => {
+    mockExtractOrGenerateDatasourceInfo.mockReturnValueOnce({
+      indexPattern: mockedIndices[0],
+      indexPatternId: mockedIndices[0].id,
+      timeField: mockedIndices[0].timeFieldName,
+    });
+    mockExtractOrGenerateDatasourceInfo.mockReturnValueOnce({
+      indexPattern: mockedIndices[1],
+      indexPatternId: mockedIndices[1].id,
+      timeField: mockedIndices[1].timeFieldName,
+    });
+
+    const layers = await getLayers(
+      dataSourceLayersWithStatic,
+      panelWithMultiAnnotations,
+      indexPatternsService,
+      mockAdHocDataViewsService,
+      false
+    );
+
+    expect(layers).toEqual(
       [
         {
           layerType: 'referenceLine',
@@ -634,7 +700,7 @@ describe('getLayers', () => {
               type: 'query',
             },
           ],
-          indexPatternId: 'test',
+          indexPatternId: 'test2',
         },
         {
           layerId: 'test-id',
@@ -659,18 +725,29 @@ describe('getLayers', () => {
               type: 'query',
             },
           ],
-          indexPatternId: 'test2',
+          indexPatternId: 'test',
         },
-      ],
-    ],
-    [
-      'annotation layer gets correct dataView when none is defined',
-      [
-        dataSourceLayersWithStatic,
-        panelWithSingleAnnotationDefaultDataView,
-        indexPatternsService,
-        false,
-      ],
+      ].map(expect.objectContaining)
+    );
+    expect(mockExtractOrGenerateDatasourceInfo).toBeCalledTimes(3);
+  });
+
+  test('should return annotation layer gets correct dataView when none is defined', async () => {
+    mockExtractOrGenerateDatasourceInfo.mockReturnValue({
+      indexPattern: { ...mockedIndices[0], id: 'default' },
+      indexPatternId: 'default',
+      timeField: mockedIndices[0].timeFieldName,
+    });
+
+    const layers = await getLayers(
+      dataSourceLayersWithStatic,
+      panelWithSingleAnnotationDefaultDataView,
+      indexPatternsService,
+      mockAdHocDataViewsService,
+      false
+    );
+
+    expect(layers).toEqual(
       [
         {
           layerType: 'referenceLine',
@@ -712,10 +789,8 @@ describe('getLayers', () => {
           ],
           indexPatternId: 'default',
         },
-      ],
-    ],
-  ])('should return %s', async (_, input, expected) => {
-    const layers = await getLayers(...input);
-    expect(layers).toEqual(expected.map(expect.objectContaining));
+      ].map(expect.objectContaining)
+    );
+    expect(mockExtractOrGenerateDatasourceInfo).toBeCalledTimes(1);
   });
 });

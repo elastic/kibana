@@ -16,7 +16,7 @@ import {
 import { PANEL_TYPES, TSVB_METRIC_TYPES } from '../../../common/enums';
 import { Metric } from '../../../common/types';
 import { getDataViewsStart } from '../../services';
-import { dropGeneratedAdHocDataViews, getDataSourceInfo } from '../lib/datasource';
+import { AdHocDataViewsService, extractOrGenerateDatasourceInfo } from '../lib/datasource';
 import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import { getConfigurationForGauge as getConfiguration } from '../lib/configurations/metric';
 import {
@@ -52,9 +52,8 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
   timeRange,
   clearAdHocDataViews
 ) => {
-  let dataViewsToDrop: string[] = [];
   const dataViews = getDataViewsStart();
-
+  const adHocDataViewsService = new AdHocDataViewsService(dataViews);
   try {
     const series = model.series[0];
     // not valid time shift
@@ -71,21 +70,21 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
     }
 
     const reducedTimeRange = getReducedTimeRange(model, series, timeRange);
-    const datasourceInfo = await getDataSourceInfo(
+    const datasourceInfo = await extractOrGenerateDatasourceInfo(
       model.index_pattern,
       model.time_field,
       Boolean(series.override_index_pattern),
       series.series_index_pattern,
       series.series_time_field,
-      dataViews
+      dataViews,
+      adHocDataViewsService
     );
 
     if (!datasourceInfo) {
       throw invalidModelError();
     }
 
-    const { indexPatternId, indexPattern, adHocDataViewIds } = datasourceInfo;
-    dataViewsToDrop = adHocDataViewIds;
+    const { indexPatternId, indexPattern } = datasourceInfo;
 
     // handle multiple metrics
     const metricsColumns = getMetricsColumns(series, indexPattern!, model.series.length, {
@@ -144,8 +143,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
     const layers = Object.values(excludeMetaFromLayers({ 0: layer }));
 
     if (clearAdHocDataViews) {
-      dropGeneratedAdHocDataViews(dataViewsToDrop, dataViews);
-      dataViewsToDrop = [];
+      adHocDataViewsService.clearAll();
     }
 
     return {
@@ -155,7 +153,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
       indexPatternIds: getIndexPatternIds(layers),
     };
   } catch (e) {
-    dropGeneratedAdHocDataViews(dataViewsToDrop, dataViews);
+    adHocDataViewsService.clearAll();
     return null;
   }
 };

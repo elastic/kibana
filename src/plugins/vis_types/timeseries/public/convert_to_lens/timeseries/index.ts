@@ -16,7 +16,7 @@ import uuid from 'uuid';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
-import { dropGeneratedAdHocDataViews, getDataSourceInfo } from '../lib/datasource';
+import { AdHocDataViewsService, extractOrGenerateDatasourceInfo } from '../lib/datasource';
 import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import {
   getConfigurationForTimeseries as getConfiguration,
@@ -47,9 +47,8 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
   timeRange,
   clearAdHocDataViews
 ) => {
-  let dataViewsToDrop: string[] = [];
   const dataViews: DataViewsPublicPluginStart = getDataViewsStart();
-
+  const adHocDataViewsService = new AdHocDataViewsService(dataViews);
   try {
     const extendedLayers: Record<number, ExtendedLayer> = {};
     const seriesNum = model.series.filter((series) => !series.hidden).length;
@@ -69,20 +68,20 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
         throw invalidModelError();
       }
 
-      const datasourceInfo = await getDataSourceInfo(
+      const datasourceInfo = await extractOrGenerateDatasourceInfo(
         model.index_pattern,
         model.time_field,
         Boolean(series.override_index_pattern),
         series.series_index_pattern,
         series.series_time_field,
-        dataViews
+        dataViews,
+        adHocDataViewsService
       );
       if (!datasourceInfo) {
         throw invalidModelError();
       }
 
-      const { indexPatternId, indexPattern, timeField, adHocDataViewIds } = datasourceInfo;
-      dataViewsToDrop = adHocDataViewIds;
+      const { indexPatternId, indexPattern, timeField } = datasourceInfo;
 
       if (!timeField) {
         throw invalidModelError();
@@ -127,7 +126,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
       };
     }
 
-    const configLayers = await getLayers(extendedLayers, model, dataViews);
+    const configLayers = await getLayers(extendedLayers, model, dataViews, adHocDataViewsService);
     if (configLayers === null) {
       throw invalidModelError();
     }
@@ -142,8 +141,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
     }, []);
 
     if (clearAdHocDataViews) {
-      dropGeneratedAdHocDataViews(dataViewsToDrop, dataViews);
-      dataViewsToDrop = [];
+      adHocDataViewsService.clearAll();
     }
 
     return {
@@ -153,7 +151,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
       indexPatternIds: [...getIndexPatternIds(layers), ...annotationIndexPatterns],
     };
   } catch (e) {
-    dropGeneratedAdHocDataViews(dataViewsToDrop, dataViews);
+    adHocDataViewsService.clearAll();
     return null;
   }
 };

@@ -11,7 +11,7 @@ import { parseTimeShift } from '@kbn/data-plugin/common';
 import { getIndexPatternIds, Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PANEL_TYPES } from '../../../common/enums';
 import { getDataViewsStart } from '../../services';
-import { dropGeneratedAdHocDataViews, getDataSourceInfo } from '../lib/datasource';
+import { AdHocDataViewsService, extractOrGenerateDatasourceInfo } from '../lib/datasource';
 import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import { getConfigurationForTopN as getConfiguration, getLayers } from '../lib/configurations/xy';
 import { getReducedTimeRange, isValidMetrics } from '../lib/metrics';
@@ -35,8 +35,8 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
   timeRange,
   clearAdHocDataViews
 ) => {
-  let dataViewsToDrop: string[] = [];
   const dataViews = getDataViewsStart();
+  const adHocDataViewsService = new AdHocDataViewsService(dataViews);
   try {
     const extendedLayers: Record<number, ExtendedLayer> = {};
     const seriesNum = model.series.filter((series) => !series.hidden).length;
@@ -56,22 +56,21 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
         throw invalidModelError();
       }
 
-      const datasourceInfo = await getDataSourceInfo(
+      const datasourceInfo = await extractOrGenerateDatasourceInfo(
         model.index_pattern,
         model.time_field,
         Boolean(series.override_index_pattern),
         series.series_index_pattern,
         series.series_time_field,
-        dataViews
+        dataViews,
+        adHocDataViewsService
       );
 
       if (!datasourceInfo) {
         throw invalidModelError();
       }
 
-      const { indexPatternId, indexPattern, adHocDataViewIds } = datasourceInfo;
-      dataViewsToDrop = adHocDataViewIds;
-
+      const { indexPatternId, indexPattern } = datasourceInfo;
       const reducedTimeRange = getReducedTimeRange(model, series, timeRange);
 
       // handle multiple metrics
@@ -96,7 +95,13 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
       };
     }
 
-    const configLayers = await getLayers(extendedLayers, model, dataViews, true);
+    const configLayers = await getLayers(
+      extendedLayers,
+      model,
+      dataViews,
+      adHocDataViewsService,
+      true
+    );
     if (configLayers === null) {
       throw invalidModelError();
     }
@@ -104,8 +109,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
     const layers = Object.values(excludeMetaFromLayers(extendedLayers));
 
     if (clearAdHocDataViews) {
-      dropGeneratedAdHocDataViews(dataViewsToDrop, dataViews);
-      dataViewsToDrop = [];
+      adHocDataViewsService.clearAll();
     }
     return {
       type: 'lnsXY',
@@ -114,7 +118,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
       indexPatternIds: getIndexPatternIds(layers),
     };
   } catch (e) {
-    dropGeneratedAdHocDataViews(dataViewsToDrop, dataViews);
+    adHocDataViewsService.clearAll();
     return null;
   }
 };
