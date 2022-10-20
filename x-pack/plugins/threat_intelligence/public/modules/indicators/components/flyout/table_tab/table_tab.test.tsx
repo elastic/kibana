@@ -8,13 +8,9 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
-import {
-  generateMockIndicator,
-  Indicator,
-  RawIndicatorFieldId,
-} from '../../../../../../common/types/indicator';
+import { generateMockIndicator, Indicator, RawIndicatorFieldId } from '../../../types';
 import { IndicatorsFlyoutTable, TABLE_TEST_ID } from '.';
-import { unwrapValue } from '../../../utils/unwrap_value';
+import { unwrapValue } from '../../../utils';
 import { EMPTY_PROMPT_TEST_ID } from '../empty_prompt';
 
 const mockIndicator: Indicator = generateMockIndicator();

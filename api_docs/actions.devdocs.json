@@ -741,13 +741,9 @@
             "label": "request",
             "description": [],
             "signature": [
-              "<R>({ url, data, method, responseSchema, headers, ...config }: { url: string; responseSchema: ",
-              "Type",
-              "<R>; method?: ",
-              "Method",
-              " | undefined; } & ",
-              "AxiosRequestConfig",
-              "<any>) => Promise<",
+              "<R>({ url, data, method, responseSchema, headers, ...config }: ",
+              "SubActionRequestParams",
+              "<R>) => Promise<",
               "AxiosResponse",
               "<R, any>>"
             ],
@@ -763,13 +759,8 @@
                 "label": "{\n    url,\n    data,\n    method = 'get',\n    responseSchema,\n    headers,\n    ...config\n  }",
                 "description": [],
                 "signature": [
-                  "{ url: string; responseSchema: ",
-                  "Type",
-                  "<R>; method?: ",
-                  "Method",
-                  " | undefined; } & ",
-                  "AxiosRequestConfig",
-                  "<any>"
+                  "SubActionRequestParams",
+                  "<R>"
                 ],
                 "path": "x-pack/plugins/actions/server/sub_action_framework/sub_action_connector.ts",
                 "deprecated": false,
@@ -1246,59 +1237,12 @@
             "label": "renderParameterTemplates",
             "description": [],
             "signature": [
-              "((params: Params, variables: Record<string, unknown>, actionId?: string | undefined) => Params) | undefined"
+              "RenderParameterTemplates",
+              "<Params> | undefined"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "actions",
-                "id": "def-server.ActionType.renderParameterTemplates.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "params",
-                "description": [],
-                "signature": [
-                  "Params"
-                ],
-                "path": "x-pack/plugins/actions/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "actions",
-                "id": "def-server.ActionType.renderParameterTemplates.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "variables",
-                "description": [],
-                "signature": [
-                  "Record<string, unknown>"
-                ],
-                "path": "x-pack/plugins/actions/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "actions",
-                "id": "def-server.ActionType.renderParameterTemplates.$3",
-                "type": "string",
-                "tags": [],
-                "label": "actionId",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "x-pack/plugins/actions/server/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
+            "trackAdoption": false
           },
           {
             "parentPluginId": "actions",
@@ -1440,6 +1384,20 @@
             "description": [],
             "signature": [
               "Params"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionTypeExecutorOptions.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              "Logger"
             ],
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,

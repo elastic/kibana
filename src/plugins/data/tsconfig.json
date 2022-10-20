@@ -11,6 +11,7 @@
     "public/**/*",
     "server/**/*",
     "config.ts",
+    "config.mock.ts",
     "common/**/*.json",
     "public/**/*.json",
     "../../../typings/index.d.ts"
