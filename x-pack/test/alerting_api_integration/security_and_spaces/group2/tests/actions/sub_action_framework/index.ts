@@ -166,7 +166,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(execRes.body).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
-          retry: false,
+          retry: true,
           connector_id: res.body.id,
           service_message:
             'Request validation failed (Error: [id]: expected value of type [string] but got [undefined])',
@@ -245,7 +245,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(execRes.body).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
-          retry: false,
+          retry: true,
           connector_id: res.body.id,
           service_message: `Sub action \"notRegistered\" is not registered. Connector id: ${res.body.id}. Connector name: Test: Sub action connector. Connector type: .test-sub-action-connector`,
         });
@@ -265,7 +265,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(execRes.body).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
-          retry: false,
+          retry: true,
           connector_id: res.body.id,
           service_message: `Method \"notAFunction\" does not exists in service. Sub action: \"notAFunction\". Connector id: ${res.body.id}. Connector name: Test: Sub action connector. Connector type: .test-sub-action-connector`,
         });
@@ -285,7 +285,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(execRes.body).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
-          retry: false,
+          retry: true,
           connector_id: res.body.id,
           service_message: `Method \"notExist\" does not exists in service. Sub action: \"notExist\". Connector id: ${res.body.id}. Connector name: Test: Sub action connector. Connector type: .test-sub-action-connector`,
         });
@@ -308,7 +308,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
         expect(execRes.body).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
-          retry: false,
+          retry: true,
           connector_id: res.body.id,
           service_message: 'You should register at least one subAction for your connector type',
         });

@@ -242,7 +242,7 @@ export class ActionExecutor {
               message: 'an error occurred while running the action',
               serviceMessage: err.message,
               error: err,
-              retry: false,
+              retry: true,
             };
           }
         }
