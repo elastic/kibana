@@ -123,7 +123,7 @@ export const loadGlobalExecutionLogAggregations = async ({
         // whereas data grid sorts are 0 indexed.
         page: page + 1,
         sort: sortField.length ? JSON.stringify(sortField) : undefined,
-        namespaces: namespaces ? JSON.stringify(namespaces) : namespaces,
+        namespaces: namespaces ? JSON.stringify(namespaces) : undefined,
       },
     }
   );

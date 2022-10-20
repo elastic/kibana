@@ -80,7 +80,6 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
   }
 
   if (columnId === 'rule_name' && ruleId) {
-    // if (ruleOnDifferentSpace) return <>{value}</>;
     return <EuiLink onClick={onClickRuleName}>{value}</EuiLink>;
   }
 

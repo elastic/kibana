@@ -320,8 +320,18 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   );
 
   const onShowAllSpacesChange = useCallback(() => {
-    setShowFromAllSpaces(!showFromAllSpaces);
-  }, [showFromAllSpaces, setShowFromAllSpaces]);
+    setShowFromAllSpaces((prev) => !prev);
+    const nextShowFromAllSpaces = !showFromAllSpaces;
+
+    if (nextShowFromAllSpaces && !visibleColumns.includes('space_ids')) {
+      const ruleNameIndex = visibleColumns.findIndex((c) => c === 'rule_name');
+      const newVisibleColumns = [...visibleColumns];
+      newVisibleColumns.splice(ruleNameIndex + 1, 0, 'space_ids');
+      setVisibleColumns(newVisibleColumns);
+    } else if (!nextShowFromAllSpaces && visibleColumns.includes('space_ids')) {
+      setVisibleColumns(visibleColumns.filter((c) => c !== 'space_ids'));
+    }
+  }, [setShowFromAllSpaces, showFromAllSpaces, visibleColumns]);
 
   const renderList = () => {
     if (!logs) {

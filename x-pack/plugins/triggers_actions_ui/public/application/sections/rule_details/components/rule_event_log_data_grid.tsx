@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -460,24 +460,12 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
     ]
   );
 
-  useEffect(() => {
-    if (showSpaceColumns && !visibleColumns.includes('space_ids')) {
-      const ruleNameIndex = visibleColumns.findIndex((c) => c === 'rule_name');
-      const newVisibleColumns = [...visibleColumns];
-      newVisibleColumns.splice(ruleNameIndex + 1, 0, 'space_ids');
-      setVisibleColumns(newVisibleColumns);
-    } else if (!showSpaceColumns && visibleColumns.includes('space_ids')) {
-      setVisibleColumns(visibleColumns.filter((c) => c !== 'space_ids'));
-    }
-  }, [showSpaceColumns, setVisibleColumns, visibleColumns]);
-
-  const columnVisibilityProps = useMemo(
-    () => ({
+  const columnVisibilityProps = useMemo(() => {
+    return {
       visibleColumns,
       setVisibleColumns,
-    }),
-    [visibleColumns, setVisibleColumns]
-  );
+    };
+  }, [visibleColumns, setVisibleColumns]);
 
   const sortingProps = useMemo(
     () => ({
