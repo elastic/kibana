@@ -12,21 +12,29 @@ export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['dashboard']);
+  const log = getService('log');
 
   describe('Panel Actions', () => {
     before(async () => {
+      log.info(`loading "few panels" saved dashboard`);
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });
 
     it('allows to register links into the context menu', async () => {
+      log.info(`opening context menu`);
       await dashboardPanelActions.openContextMenu();
+      log.info(`checking if action exists`);
       const actionExists = await testSubjects.exists('embeddablePanelAction-samplePanelLink');
       if (!actionExists) {
+        log.info(`clicking "more" item`);
         await dashboardPanelActions.clickContextMenuMoreItem();
       }
+      log.info(`finding panel link`);
       const actionElement = await testSubjects.find('embeddablePanelAction-samplePanelLink');
+      log.info(`getting tag name`);
       const actionElementTag = await actionElement.getTagName();
       expect(actionElementTag).to.be('a');
+      log.info(`getting href`);
       const actionElementLink = await actionElement.getAttribute('href');
       expect(actionElementLink).to.be('https://example.com/kibana/test');
     });
