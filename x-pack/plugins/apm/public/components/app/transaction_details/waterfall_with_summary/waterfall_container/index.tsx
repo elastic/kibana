@@ -16,6 +16,7 @@ import {
 import { Waterfall } from './waterfall';
 import { WaterfallLegends } from './waterfall_legends';
 import { useCriticalPathEnabledSetting } from '../../../../../hooks/use_critical_path_enabled_setting';
+import { TechnicalPreviewBadge } from '../../../../shared/technical_preview_badge';
 
 interface Props {
   waterfallItemId?: string;
@@ -88,9 +89,18 @@ export function WaterfallContainer({
         <EuiFlexItem>
           <EuiCheckbox
             id="showCriticalPath"
-            label={i18n.translate('xpack.apm.waterfall.showCriticalPath', {
-              defaultMessage: 'Show critical path',
-            })}
+            label={
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  {i18n.translate('xpack.apm.waterfall.showCriticalPath', {
+                    defaultMessage: 'Show critical path',
+                  })}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <TechnicalPreviewBadge />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
             checked={showCriticalPath}
             onChange={(event) => {
               onShowCriticalPathChange(event.target.checked);

@@ -11,5 +11,8 @@ import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_contex
 export function useCriticalPathEnabledSetting() {
   const { core } = useApmPluginContext();
 
-  return core.uiSettings.get<boolean>(enableCriticalPath, false);
+  const isCriticalPathEnabled =
+    core.uiSettings.get<boolean>(enableCriticalPath);
+
+  return isCriticalPathEnabled;
 }
