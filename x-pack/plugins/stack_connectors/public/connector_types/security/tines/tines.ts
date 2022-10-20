@@ -31,12 +31,9 @@ export function getConnectorType(): ConnectorTypeModel<
     id: TINES_CONNECTOR_ID,
     actionTypeTitle: TINES_TITLE,
     iconClass: lazy(() => import('./logo')),
-    selectMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinActionTypes.tinesAction.selectMessageText',
-      {
-        defaultMessage: 'Send events to a Story.',
-      }
-    ),
+    selectMessage: i18n.translate('xpack.stackConnectors.security.tines.config.selectMessageText', {
+      defaultMessage: 'Send events to a Story.',
+    }),
     validateParams: async (
       actionParams: TinesExecuteActionParams
     ): Promise<GenericValidationResult<TinesExecuteActionParams>> => {
