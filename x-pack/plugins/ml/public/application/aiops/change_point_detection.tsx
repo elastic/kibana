@@ -58,6 +58,7 @@ export const ChangePointDetectionPage: FC = () => {
             'uiSettings',
             'unifiedSearch',
             'theme',
+            'lens',
           ])}
         />
       ) : null}

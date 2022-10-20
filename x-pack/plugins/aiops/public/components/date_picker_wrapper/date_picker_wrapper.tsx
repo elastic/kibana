@@ -21,13 +21,12 @@ import {
   OnTimeChangeProps,
 } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
-import { TimefilterContract, TimeHistoryContract, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { TimeHistoryContract, UI_SETTINGS } from '@kbn/data-plugin/public';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import useObservable from 'react-use/lib/useObservable';
-import { map } from 'rxjs/operators';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import { useRefreshIntervalUpdates, useTimeRangeUpdates } from '../../hooks/use_time_filter';
 import { useUrlState } from '../../hooks/use_url_state';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { aiopsRefresh$ } from '../../application/services/timefilter_refresh_service';
@@ -67,21 +66,6 @@ function updateLastRefresh(timeRange?: OnRefreshProps) {
   aiopsRefresh$.next({ lastRefresh: Date.now(), timeRange });
 }
 
-export const useRefreshIntervalUpdates = (timefilter: TimefilterContract) => {
-  return useObservable(
-    timefilter.getRefreshIntervalUpdate$().pipe(map(timefilter.getRefreshInterval)),
-    timefilter.getRefreshInterval()
-  );
-};
-
-export const useTimeRangeUpdates = (timefilter: TimefilterContract, absolute = false) => {
-  const getTimeCallback = absolute
-    ? timefilter.getAbsoluteTime.bind(timefilter)
-    : timefilter.getTime.bind(timefilter);
-
-  return useObservable(timefilter.getTimeUpdate$().pipe(map(getTimeCallback)), getTimeCallback());
-};
-
 export const DatePickerWrapper: FC = () => {
   const services = useAiopsAppContext();
   const { toasts } = services.notifications;
@@ -93,8 +77,8 @@ export const DatePickerWrapper: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
   const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(history);
 
-  const timeFilterRefreshInterval = useRefreshIntervalUpdates(timefilter);
-  const time = useTimeRangeUpdates(timefilter);
+  const timeFilterRefreshInterval = useRefreshIntervalUpdates();
+  const time = useTimeRangeUpdates();
 
   useEffect(
     function syncTimRangeFromUrlState() {

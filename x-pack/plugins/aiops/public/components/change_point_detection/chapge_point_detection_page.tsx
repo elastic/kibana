@@ -7,6 +7,8 @@
 import React, { FC } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { useTimeRangeUpdates } from '../../hooks/use_time_filter';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { SavedSearchSavedObject } from '../../application/utils/search_utils';
 import { PageHeader } from '../page_header';
 
@@ -19,9 +21,124 @@ export const ChangePointDetectionPage: FC<ChangePointDetectionPageProps> = ({
   dataView,
   savedSearch,
 }) => {
+  const {
+    lens: { EmbeddableComponent },
+  } = useAiopsAppContext();
+
+  const timeRange = useTimeRangeUpdates();
+
   return (
     <div data-test-subj="aiopsChanePointDetectionPage">
       <PageHeader dataView={dataView} />
+      <EmbeddableComponent
+        id="changePointChart"
+        style={{ height: 500 }}
+        timeRange={timeRange}
+        attributes={{
+          title: 'test_01',
+          description: '',
+          visualizationType: 'lnsXY',
+          type: 'lens',
+          references: [
+            {
+              type: 'index-pattern',
+              id: 'a65621a2-d2b9-45fa-a816-c57622139e2a',
+              name: 'indexpattern-datasource-layer-87968adb-d2da-47ed-a163-728b31bd75d6',
+            },
+          ],
+          state: {
+            visualization: {
+              legend: {
+                isVisible: true,
+                position: 'right',
+              },
+              valueLabels: 'hide',
+              fittingFunction: 'None',
+              axisTitlesVisibilitySettings: {
+                x: true,
+                yLeft: true,
+                yRight: true,
+              },
+              tickLabelsVisibilitySettings: {
+                x: true,
+                yLeft: true,
+                yRight: true,
+              },
+              labelsOrientation: {
+                x: 0,
+                yLeft: 0,
+                yRight: 0,
+              },
+              gridlinesVisibilitySettings: {
+                x: true,
+                yLeft: true,
+                yRight: true,
+              },
+              preferredSeriesType: 'line',
+              layers: [
+                {
+                  layerId: '87968adb-d2da-47ed-a163-728b31bd75d6',
+                  accessors: ['44b2de1e-e8bc-4ef1-b05a-47222c618d71'],
+                  position: 'top',
+                  seriesType: 'line',
+                  showGridlines: false,
+                  layerType: 'data',
+                  xAccessor: 'b233dc2b-67d0-4a47-b950-94c79c9fb0ae',
+                },
+              ],
+            },
+            query: {
+              query: '',
+              language: 'kuery',
+            },
+            filters: [],
+            datasourceStates: {
+              formBased: {
+                layers: {
+                  '87968adb-d2da-47ed-a163-728b31bd75d6': {
+                    columns: {
+                      'b233dc2b-67d0-4a47-b950-94c79c9fb0ae': {
+                        label: '@timestamp',
+                        dataType: 'date',
+                        operationType: 'date_histogram',
+                        sourceField: '@timestamp',
+                        isBucketed: true,
+                        scale: 'interval',
+                        params: {
+                          interval: '15m',
+                          includeEmptyRows: true,
+                          dropPartials: false,
+                        },
+                      },
+                      '44b2de1e-e8bc-4ef1-b05a-47222c618d71': {
+                        label: 'Median of value',
+                        dataType: 'number',
+                        operationType: 'median',
+                        sourceField: 'value',
+                        isBucketed: false,
+                        scale: 'ratio',
+                        params: {
+                          emptyAsNull: true,
+                        },
+                      },
+                    },
+                    columnOrder: [
+                      'b233dc2b-67d0-4a47-b950-94c79c9fb0ae',
+                      '44b2de1e-e8bc-4ef1-b05a-47222c618d71',
+                    ],
+                    incompleteColumns: {},
+                  },
+                },
+              },
+              textBased: {
+                layers: {},
+              },
+            },
+            internalReferences: [],
+            adHocDataViews: {},
+          },
+        }}
+      />
     </div>
   );
 };

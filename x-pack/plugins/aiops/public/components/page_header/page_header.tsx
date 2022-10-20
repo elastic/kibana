@@ -6,7 +6,14 @@
  */
 
 import React, { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiTitle,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
+} from '@elastic/eui';
 import { type DataView } from '@kbn/data-views-plugin/common';
 import { useTimefilter } from '../../hooks/use_time_filter';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
@@ -21,30 +28,38 @@ export const PageHeader: FC<PageHeaderProps> = ({ dataView }) => {
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s" alignItems={'center'}>
-        <EuiFlexItem grow={false} css={{ minWidth: '300px' }}>
-          <EuiTitle size="s">
-            <h2>{dataView.getName()}</h2>
-          </EuiTitle>
-        </EuiFlexItem>
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem>
+          <EuiPageContentHeader className="aiopsPageHeader">
+            <EuiPageContentHeaderSection>
+              <div className="dataViewTitleHeader">
+                <EuiTitle size="s">
+                  <h2>{dataView.getName()}</h2>
+                </EuiTitle>
+              </div>
+            </EuiPageContentHeaderSection>
 
-        <EuiFlexItem grow={true}>
-          <EuiFlexGroup gutterSize={'s'} alignItems={'center'} justifyContent={'flexEnd'}>
-            {dataView.timeFieldName !== undefined ? (
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="flexEnd"
+              gutterSize="s"
+              data-test-subj="aiopsTimeRangeSelectorSection"
+            >
+              {dataView.timeFieldName !== undefined && (
+                <EuiFlexItem grow={false}>
+                  <FullTimeRangeSelector
+                    dataView={dataView}
+                    query={undefined}
+                    disabled={false}
+                    timefilter={timefilter}
+                  />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
-                <FullTimeRangeSelector
-                  dataView={dataView}
-                  query={undefined}
-                  disabled={false}
-                  timefilter={timefilter}
-                />
+                <DatePickerWrapper />
               </EuiFlexItem>
-            ) : null}
-
-            <EuiFlexItem grow={false} css={{ width: '350px' }}>
-              <DatePickerWrapper />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </EuiFlexGroup>
+          </EuiPageContentHeader>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
