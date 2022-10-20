@@ -13,7 +13,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { CoreSetup, CoreStart, Plugin, CoreTheme, ApplicationStart } from '@kbn/core/public';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import type { GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart } from './types';
+import type {
+  AppPluginStartDependencies,
+  GuidedOnboardingPluginSetup,
+  GuidedOnboardingPluginStart,
+} from './types';
 import { GuidePanel } from './components';
 import { ApiService, apiService } from './services/api';
 
@@ -25,22 +29,28 @@ export class GuidedOnboardingPlugin
     return {};
   }
 
-  public start(core: CoreStart): GuidedOnboardingPluginStart {
+  public start(
+    core: CoreStart,
+    { cloud }: AppPluginStartDependencies
+  ): GuidedOnboardingPluginStart {
     const { chrome, http, theme, application } = core;
 
     // Initialize services
     apiService.setup(http);
 
-    chrome.navControls.registerExtension({
-      order: 1000,
-      mount: (target) =>
-        this.mount({
-          targetDomElement: target,
-          theme$: theme.theme$,
-          api: apiService,
-          application,
-        }),
-    });
+    // Guided onboarding UI is only available on cloud
+    if (cloud?.isCloudEnabled) {
+      chrome.navControls.registerExtension({
+        order: 1000,
+        mount: (target) =>
+          this.mount({
+            targetDomElement: target,
+            theme$: theme.theme$,
+            api: apiService,
+            application,
+          }),
+      });
+    }
 
     // Return methods that should be available to other plugins
     return {
