@@ -33,6 +33,8 @@ export const SYNTHETIC_CHECK_STEPS_ROUTE = '/journey/:checkGroupId/steps';
 
 export const MAPPING_ERROR_ROUTE = '/mapping-error';
 
+export const ERROR_DETAILS_ROUTE = '/error-details/:errorStateId';
+
 export enum STATUS {
   UP = 'up',
   DOWN = 'down',
