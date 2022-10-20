@@ -12,5 +12,8 @@
     "server/**/*.json",
     "public/**/*",
     "common/**/*"
+  ],
+  "references": [
+    { "path": "../actions/tsconfig.json" }
   ]
 }
