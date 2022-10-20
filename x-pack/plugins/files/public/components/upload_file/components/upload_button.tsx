@@ -25,7 +25,8 @@ export const UploadButton: FunctionComponent<Props> = ({ onClick }) => {
   return (
     <EuiButton
       key="uploadButton"
-      disabled={Boolean(!files.length || uploading || error)}
+      isLoading={uploading}
+      disabled={Boolean(!files.length || error)}
       onClick={onClick}
       size="s"
       data-test-subj="uploadButton"
