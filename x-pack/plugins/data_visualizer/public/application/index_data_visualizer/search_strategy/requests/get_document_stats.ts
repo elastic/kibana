@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { each, get, sortedIndex, first } from 'lodash';
+import { each, get, sortedIndex } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { DataPublicPluginStart, ISearchOptions } from '@kbn/data-plugin/public';
@@ -26,7 +26,6 @@ const MINIMUM_RANDOM_SAMPLER_SAMPLED_DOCS = 109;
 // The desired minimum threshold of randomly sampled documents for which the result is more meaningful
 const DESIRED_MINIMUM_RANDOM_SAMPLER_DOC_COUNT = 100000;
 
-const MINIMUM_RANDOM_SAMPLER_DOC_COUNT = 100000;
 export const getDocumentCountStatsRequest = (params: OverallStatsSearchStrategyParams) => {
   const {
     index,
@@ -132,14 +131,14 @@ export const getDocumentCountStats = async (
 
   const hasTimeField = timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0;
 
-  const getSearchParams = (aggregations: unknown) => ({
+  const getSearchParams = (aggregations: unknown, trackTotalHits = false) => ({
     index,
     body: {
       query,
       ...(aggregations !== undefined ? { aggs: aggregations } : {}),
       ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
     },
-    track_total_hits: !hasTimeField,
+    track_total_hits: trackTotalHits,
     size: 0,
   });
 
@@ -147,8 +146,8 @@ export const getDocumentCountStats = async (
     .search(
       {
         params: getSearchParams(
-          getAggsWithRandomSampling(initialDefaultProbability),
-          // Track total hits if time field is not defined
+          getEventRateAggsWithRandomSampling(initialDefaultProbability),
+          // // Track total hits if time field is not defined
           timeFieldName === undefined
         ),
       },
@@ -178,7 +177,6 @@ export const getDocumentCountStats = async (
       totalCount: trackedTotalHits ?? 0,
     };
   }
-
 
   if (isDefined(probability)) {
     return {

@@ -5,11 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+// @TODO: update ts
+// @ts-nocheck
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import DateMath from '@kbn/datemath';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { ESSearchResponse } from '@kbn/es-types';
+import { buildAggregationWithSamplingOption, SamplingOption } from './random_sampler_utils';
 import type { FieldStatsResponse } from '../types';
 import { getFieldExampleBuckets, canProvideExamplesForField } from './field_examples_calculator';
 
@@ -23,7 +26,6 @@ export type SearchHandler = ({
   size?: number;
 }) => Promise<estypes.SearchResponse<unknown>>;
 
-const SHARD_SIZE = 5000;
 const DEFAULT_TOP_VALUES_SIZE = 10;
 const SIMPLE_EXAMPLES_SIZE = 100;
 
@@ -37,6 +39,7 @@ export function buildSearchParams({
   aggs,
   fields,
   size,
+  trackTotalHits = true,
 }: {
   dataViewPattern: string;
   timeFieldName?: string;
@@ -47,6 +50,7 @@ export function buildSearchParams({
   aggs?: Record<string, estypes.AggregationsAggregationContainer>; // is used for aggregatable fields
   fields?: object[]; // is used for non-aggregatable fields
   size?: number; // is used for non-aggregatable fields
+  trackTotalHits?: boolean;
 }) {
   const filter = timeFieldName
     ? [
@@ -83,7 +87,7 @@ export function buildSearchParams({
       runtime_mappings: runtimeMappings,
       _source: fields?.length ? false : undefined,
     },
-    track_total_hits: true,
+    track_total_hits: trackTotalHits,
     size: size ?? 0,
   };
 }
@@ -95,6 +99,7 @@ export async function fetchAndCalculateFieldStats({
   fromDate,
   toDate,
   size,
+  samplingOption,
 }: {
   searchHandler: SearchHandler;
   dataView: DataView;
@@ -102,10 +107,11 @@ export async function fetchAndCalculateFieldStats({
   fromDate: string;
   toDate: string;
   size?: number;
+  samplingOption: SamplingOption;
 }) {
   if (!field.aggregatable) {
     return canProvideExamplesForField(field)
-      ? await getSimpleExamples(searchHandler, field, dataView)
+      ? await getSimpleExamples(searchHandler, field, samplingOption, dataView)
       : {};
   }
 
@@ -114,18 +120,18 @@ export async function fetchAndCalculateFieldStats({
   }
 
   if (field.type === 'histogram') {
-    return await getNumberHistogram(searchHandler, field, false);
+    return await getNumberHistogram(searchHandler, field, samplingOption, false);
   }
 
   if (field.type === 'number') {
-    return await getNumberHistogram(searchHandler, field);
+    return await getNumberHistogram(searchHandler, field, samplingOption);
   }
 
   if (field.type === 'date') {
-    return await getDateHistogram(searchHandler, field, { fromDate, toDate });
+    return await getDateHistogram(searchHandler, field, samplingOption, { fromDate, toDate });
   }
 
-  return await getStringSamples(searchHandler, field, size);
+  return await getStringSamples(searchHandler, field, samplingOption, size);
 }
 
 function canProvideAggregatedStatsForField(field: DataViewField): boolean {
@@ -149,6 +155,7 @@ export function canProvideStatsForField(field: DataViewField): boolean {
 export async function getNumberHistogram(
   aggSearchWithBody: SearchHandler,
   field: DataViewField,
+  samplingOption: SamplingOption,
   useTopHits = true
 ): Promise<FieldStatsResponse<string | number>> {
   const fieldRef = getFieldRef(field);
@@ -162,23 +169,16 @@ export async function getNumberHistogram(
     },
     sample_count: { value_count: { ...fieldRef } },
   };
-  const searchWithoutHits = {
-    sample: {
-      sampler: { shard_size: SHARD_SIZE },
-      aggs: { ...baseAggs },
-    },
-  };
-  const searchWithHits = {
-    sample: {
-      sampler: { shard_size: SHARD_SIZE },
-      aggs: {
-        ...baseAggs,
-        top_values: {
-          terms: { ...fieldRef, size: DEFAULT_TOP_VALUES_SIZE },
-        },
+  const searchWithoutHits = buildAggregationWithSamplingOption(baseAggs, samplingOption);
+  const searchWithHits = buildAggregationWithSamplingOption(
+    {
+      ...baseAggs,
+      top_values: {
+        terms: { ...fieldRef, size: DEFAULT_TOP_VALUES_SIZE },
       },
     },
-  };
+    samplingOption
+  );
 
   const minMaxResult = (await aggSearchWithBody({
     aggs: useTopHits ? searchWithHits : searchWithoutHits,
@@ -223,19 +223,16 @@ export async function getNumberHistogram(
     };
   }
 
-  const histogramBody = {
-    sample: {
-      sampler: { shard_size: SHARD_SIZE },
-      aggs: {
-        histo: {
-          histogram: {
-            field: field.name,
-            interval: histogramInterval,
-          },
-        },
+  const aggs = {
+    histo: {
+      histogram: {
+        field: field.name,
+        interval: histogramInterval,
       },
     },
   };
+
+  const histogramBody = buildAggregationWithSamplingOption(aggs, samplingOption);
   const histogramResult = (await aggSearchWithBody({ aggs: histogramBody })) as ESSearchResponse<
     unknown,
     { body: { aggs: typeof histogramBody } }
@@ -258,27 +255,25 @@ export async function getNumberHistogram(
 export async function getStringSamples(
   aggSearchWithBody: SearchHandler,
   field: DataViewField,
+  samplingOption: SamplingOption,
+
   size = DEFAULT_TOP_VALUES_SIZE
 ): Promise<FieldStatsResponse<string | number>> {
   const fieldRef = getFieldRef(field);
 
-  const topValuesBody = {
-    sample: {
-      sampler: { shard_size: SHARD_SIZE },
-      aggs: {
-        sample_count: { value_count: { ...fieldRef } },
-        top_values: {
-          terms: {
-            ...fieldRef,
-            size,
-            // 25 is the default shard size set for size:10 by Elasticsearch.
-            // Setting it to 25 for every size below 10 makes sure the shard size doesn't change for sizes 1-10, keeping the top terms stable.
-            shard_size: size <= 10 ? 25 : undefined,
-          },
-        },
+  const aggs = {
+    sample_count: { value_count: { ...fieldRef } },
+    top_values: {
+      terms: {
+        ...fieldRef,
+        size,
+        // 25 is the default shard size set for size:10 by Elasticsearch.
+        // Setting it to 25 for every size below 10 makes sure the shard size doesn't change for sizes 1-10, keeping the top terms stable.
+        shard_size: size <= 10 ? 25 : undefined,
       },
     },
   };
+  const topValuesBody = buildAggregationWithSamplingOption(aggs, samplingOption);
   const topValuesResult = (await aggSearchWithBody({ aggs: topValuesBody })) as ESSearchResponse<
     unknown,
     { body: { aggs: typeof topValuesBody } }
@@ -301,6 +296,7 @@ export async function getStringSamples(
 export async function getDateHistogram(
   aggSearchWithBody: SearchHandler,
   field: DataViewField,
+  samplingOption: SamplingOption,
   range: { fromDate: string; toDate: string }
 ): Promise<FieldStatsResponse<string | number>> {
   const fromDate = DateMath.parse(range.fromDate);
@@ -345,6 +341,7 @@ export async function getDateHistogram(
 export async function getSimpleExamples(
   search: SearchHandler,
   field: DataViewField,
+  samplingOption: SamplingOption,
   dataView: DataView
 ): Promise<FieldStatsResponse<string | number>> {
   try {
@@ -390,5 +387,6 @@ function getFieldRef(field: DataViewField) {
 }
 
 const getHitsTotal = (body: estypes.SearchResponse): number => {
+  if (body.hits.total === undefined) return 0;
   return (body.hits.total as estypes.SearchTotalHits).value ?? body.hits.total ?? 0;
 };
