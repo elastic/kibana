@@ -126,6 +126,10 @@ export const mockVersionProps = { _seq_no: 1, _primary_term: 1 };
 export const mockVersion = encodeHitVersion(mockVersionProps);
 export const mockTimestamp = '2017-08-14T15:49:14.886Z';
 export const mockTimestampFields = { updated_at: mockTimestamp };
+export const mockTimestampFieldsWithCreated = {
+  updated_at: mockTimestamp,
+  created_at: mockTimestamp,
+};
 export const REMOVE_REFS_COUNT = 42;
 
 export interface TypeIdTuple {

@@ -113,6 +113,7 @@ import {
   createGenericNotFoundErrorPayload,
   expectCreateResult,
   expectUpdateResult,
+  mockTimestampFieldsWithCreated,
 } from './repository.common.test';
 
 const { nodeTypes } = esKuery;
