@@ -1,0 +1,45 @@
+format_version: 1.0.0
+name: integration_to_input
+title: Custom Logs
+description: >-
+  This package goes from an integration package to an input package
+type: input
+version: 0.9.1
+license: basic
+categories:
+  - custom
+policy_templates:
+  - name: logs
+    type: logs
+    title: Custom log file
+    description: Collect your custom log files.
+    input: logfile
+    template_path: input.yml.hbs
+    vars:
+      - name: paths
+        type: text
+        title: Paths
+        multi: true
+        required: true
+        show_user: true
+      - name: tags
+        type: text
+        title: Tags
+        multi: true
+        required: true
+        show_user: false
+      - name: ignore_older
+        type: text
+        title: Ignore events older than
+        required: false
+        default: 72h
+icons:
+  - src: "/img/sample-logo.svg"
+    type: "image/svg+xml"
+screenshots:
+  - src: "/img/sample-screenshot.png"
+    title: "Sample screenshot"
+    size: "600x600"
+    type: "image/png"
+owner:
+  github: elastic/integrations

@@ -74,6 +74,48 @@ export default function (providerContext: FtrProviderContext) {
         kibanaServer,
       });
     });
+    describe.only('installs all assets when installing a package in non default space after installing in default space', async () => {
+      before(async () => {
+        if (!server.enabled) return;
+        await installPackageInSpace(pkgName, '0.1.1', 'default');
+        await installPackageInSpace(pkgName, pkgVersion, testSpaceId);
+      });
+      after(async () => {
+        if (!server.enabled) return;
+        await uninstallPackage(pkgName, pkgVersion);
+        await uninstallPackage(pkgName, '0.1.1');
+      });
+
+      it('Should create managed tag saved objects', async () => {
+        const defaultTag = await kibanaServer.savedObjects.get({
+          type: 'tag',
+          id: 'default-managed',
+          space: 'default',
+        });
+
+        expect(defaultTag).not.equal(undefined);
+        const spaceTag = await kibanaServer.savedObjects.get({
+          type: 'tag',
+          id: 'fleet_test_space-managed',
+          space: testSpaceId,
+        });
+        expect(spaceTag).not.equal(undefined);
+      });
+
+      expectAssetsInstalled({
+        pkgVersion,
+        pkgName,
+        es,
+        kibanaServer,
+      });
+
+      expectAssetsInstalled({
+        pkgVersion: '0.1.1',
+        pkgName,
+        es,
+        kibanaServer,
+      });
+    });
 
     describe('uninstalls all assets when uninstalling a package from a different space', async () => {
       before(async () => {
@@ -152,6 +194,7 @@ const expectAssetsInstalled = ({
       id: 'test_dashboard',
       space: testSpaceId,
     });
+
     expect(resDashboard.id).equal('test_dashboard');
 
     const resVis = await kibanaServer.savedObjects.get({
