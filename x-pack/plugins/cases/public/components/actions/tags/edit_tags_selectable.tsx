@@ -182,7 +182,12 @@ const NoMatchesMessage: React.FC<{ searchValue: string; onNewItem: (newTag: stri
     }, [onNewItem, searchValue]);
 
     return (
-      <EuiSelectableListItem isFocused={false} showIcons={false} onClick={onNewTagClick}>
+      <EuiSelectableListItem
+        isFocused={false}
+        showIcons={false}
+        onClick={onNewTagClick}
+        data-test-subj="cases-actions-tags-edit-selectable-add-new-tag"
+      >
         <FormattedMessage
           id="xpack.cases.actions.tags.newTagMessage"
           defaultMessage="Add {searchValue} as a tag"
@@ -201,7 +206,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
   onChangeTags,
 }) => {
   const [state, dispatch] = useReducer(tagsReducer, { tags, selectedCases }, getInitialTagsState);
-  const [searchValue, setSearchValue] = useState<string>();
+  const [searchValue, setSearchValue] = useState<string>('');
 
   const options: TagSelectableOption[] = useMemo(() => stateToOptions(state.tags), [state.tags]);
 
@@ -287,6 +292,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
       listProps={{ showIcons: false }}
       onChange={onChange}
       noMatchesMessage={<NoMatchesMessage searchValue={searchValue ?? ''} onNewItem={onNewItem} />}
+      data-test-subj="cases-actions-tags-edit-selectable"
     >
       {(list, search) => (
         <>
