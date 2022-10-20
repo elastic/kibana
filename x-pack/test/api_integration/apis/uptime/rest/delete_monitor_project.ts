@@ -399,8 +399,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             savedObjectsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-            '-' +
-            testPolicyId
+              '-' +
+              testPolicyId
         );
         expect(packagePolicy.policy_id).to.be(testPolicyId);
 
@@ -431,8 +431,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             savedObjectsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-            '-' +
-            testPolicyId
+              '-' +
+              testPolicyId
         );
         expect(packagePolicy2).to.be(undefined);
       } finally {
