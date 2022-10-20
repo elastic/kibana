@@ -41,6 +41,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { capitalize } from 'lodash';
 import { useTheme } from '@kbn/observability-plugin/public';
+import { useKibanaDateFormat } from '../../../../../../hooks/use_kibana_date_format';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import { useStatusByLocation } from '../../../../hooks/use_status_by_location';
 import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
@@ -119,7 +120,7 @@ function DetailFlyoutDurationChart({
             ],
             dataType: 'synthetics',
             selectedMetricField: 'monitor.duration.us',
-            name: 'All monitors response duration',
+            name: DURATION_SERIES_NAME,
             operationType: 'average',
           },
           {
@@ -141,7 +142,7 @@ function DetailFlyoutDurationChart({
             ],
             dataType: 'synthetics',
             selectedMetricField: 'monitor.duration.us',
-            name: 'Previous period',
+            name: PREVIOUS_PERIOD_SERIES_NAME,
             operationType: 'average',
           },
         ]}
@@ -411,26 +412,16 @@ export function MonitorDetailFlyout(props: Props) {
 }
 
 function freqeuncyStr(frequency: { number: string; unit: string }) {
-  return `Every ${frequency.number} ${unitToString(
-    frequency.unit,
-    parseInt(frequency.number, 10)
-  )}`;
+  return translateUnitMessage(
+    `${frequency.number} ${unitToString(frequency.unit, parseInt(frequency.number, 10))}`
+  );
 }
 
-function dateFmtString(timestamp: string) {
-  let dateString: string;
-  if (new Date(timestamp).toDateString() === new Date().toDateString()) {
-    dateString = `[${i18n.translate('xpack.synthetics.monitorList.dateString.today', {
-      defaultMessage: 'Today',
-    })}]`;
-  } else dateString = 'MMMM DD YYYY';
-  return dateString + ' @ HH:mm:ss';
-}
+const Time = ({ timestamp }: { timestamp?: string }) => {
+  const formatStr = useKibanaDateFormat();
 
-const Time = ({ timestamp }: { timestamp?: string }) =>
-  timestamp ? (
-    <time dateTime={timestamp}>{moment(timestamp).format(dateFmtString(timestamp))}</time>
-  ) : null;
+  return timestamp ? <time dateTime={timestamp}>{moment(timestamp).format(formatStr)}</time> : null;
+};
 
 function unitToString(unit: string, n: number) {
   switch (unit) {
@@ -507,6 +498,20 @@ const DURATION_HEADER_TEXT = i18n.translate('xpack.synthetics.monitorList.durati
   defaultMessage: 'Duration',
 });
 
+const DURATION_SERIES_NAME = i18n.translate(
+  'xpack.synthetics.monitorList.durationChart.durationSeriesName',
+  {
+    defaultMessage: 'Duration',
+  }
+);
+
+const PREVIOUS_PERIOD_SERIES_NAME = i18n.translate(
+  'xpack.synthetics.monitorList.durationChart.previousPeriodSeriesName',
+  {
+    defaultMessage: 'Previous period',
+  }
+);
+
 const MONITOR_DETAILS_HEADER_TEXT = i18n.translate(
   'xpack.synthetics.monitorList.monitorDetailsHeaderText',
   {
@@ -564,3 +569,11 @@ const MONITOR_STATUS_DOWN_LABEL = i18n.translate(
     description: '"Down" in the sense that a process is not running or available.',
   }
 );
+
+function translateUnitMessage(unitMsg: string) {
+  return i18n.translate('xpack.synthetics.monitorList.flyout.unitStr', {
+    defaultMessage: 'Every {unitMsg}',
+    values: { unitMsg },
+    description: 'This displays a message like "Every 10 minutes" or "Every 30 seconds"',
+  });
+}
