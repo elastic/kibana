@@ -6,7 +6,6 @@
  */
 
 import { expandFirstAlert, waitForAlertsPanelToBeLoaded } from '../../tasks/alerts';
-import { closeTimeline } from '../../tasks/timeline';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
