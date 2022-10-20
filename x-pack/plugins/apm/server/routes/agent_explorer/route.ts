@@ -4,8 +4,8 @@ import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from "../apm_routes/create_apm_server_route";
 import { environmentRt, kueryRt, probabilityRt, rangeRt } from '../default_api_types';
 import { AgentName } from './../../../typings/es_schemas/ui/fields/agent';
-import { getAgentsInstances } from './agent_instances/get_agents_instances';
-import { getAgentsLatestVersion } from './agent_version/get_agents_latest_version';
+import { getAgentsInstances } from './get_agents_instances';
+import { getAgentsLatestVersion } from './get_agents_latest_version';
 import { getAgents } from './get_agents';
 
 const agentExplorerRoute = createApmServerRoute({

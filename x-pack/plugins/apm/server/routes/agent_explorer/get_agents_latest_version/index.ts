@@ -8,8 +8,9 @@
 import { getInternalSavedObjectsClient } from '@kbn/apm-plugin/server/lib/helpers/get_internal_saved_objects_client';
 import { CoreSetup, Logger } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
+import { getAllAgentsName } from '../get_agent_url_repository';
 import { checkAgentsVersionExists, getSavedAgentsVersion, saveAgentsVersion } from './agents_version_saved_object';
-import { fetchAgentLatestReleaseVersion, getAllAgentsName } from './fetch_agents_latest_version';
+import { fetchAgentLatestReleaseVersion } from './fetch_agents_latest_version';
 
 const getAllAgentsLatestVersion = async () => {
 

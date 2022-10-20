@@ -1,14 +1,6 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
+import { AgentName, isElasticAgentName } from "@kbn/apm-plugin/typings/es_schemas/ui/fields/agent";
 
-import { AgentName, isElasticAgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
-import fetch from 'node-fetch';
-
-export const agentsRepoName: Record<AgentName, string | undefined> = {
+const agentsRepoName: Partial<Record<AgentName, string>> = {
   'go': 'apm-agent-go',
   'java': 'apm-agent-java',
   'js-base': 'apm-agent-rum-js',
@@ -20,7 +12,6 @@ export const agentsRepoName: Record<AgentName, string | undefined> = {
   'ruby': 'apm-agent-ruby',
   'php': 'apm-agent-php',
   'android/java': 'apm-agent-android',
-  'otlp': undefined,
   'opentelemetry/cpp': 'opentelemetry-cpp',
   'opentelemetry/dotnet': 'opentelemetry-dotnet',
   'opentelemetry/erlang': 'opentelemetry-erlang',
@@ -37,34 +28,25 @@ export const agentsRepoName: Record<AgentName, string | undefined> = {
 export const getAllAgentsName = () =>
   Object.entries(agentsRepoName).map(([agent, _]) => agent as AgentName);
 
-const getAgentReleasesApiUrl = (
+export const getAgentRepositoryDetails = (
   agentName: AgentName,
 ) => {
   const user = isElasticAgentName(agentName) ? 'elastic': 'open-telemetry';
-  const agentRepo = agentsRepoName[agentName];
+  const repository = agentsRepoName[agentName];
 
-  if (!agentRepo) {
+  if (!repository) {
     return undefined;
   }
 
-  return `https://api.github.com/repos/${user}/${agentRepo}/releases`;
+  return {user, repository};
 };
 
-export const fetchAgentLatestReleaseVersion = async (agent: AgentName) => {
-  const url = getAgentReleasesApiUrl(agent);
+export const getAgentRepositoryUrl = (
+  agentName: AgentName,
+) => {
+  const repositoryDetails = getAgentRepositoryDetails(agentName);
 
-  if (!url) {
-    return;
-  }
-
-  const response = await fetch(url);
-
-  const releases = await response.json();
-  const latestVersion = releases[0]?.tag_name.replace('v', '');
-
-  console.log(response.headers.get("X-RateLimit-Remaining"));
-
-  return {
-    [agent]: latestVersion
-  };
-}
+  return repositoryDetails
+    ? `https://github.com/${repositoryDetails.user}/${repositoryDetails.repository}`
+    : undefined;
+};
