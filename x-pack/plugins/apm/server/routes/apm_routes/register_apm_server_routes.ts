@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import * as t from 'io-ts';
-import { KibanaRequest, RouteRegistrar } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
-import agent from 'elastic-apm-node';
-import { ServerRouteRepository } from '@kbn/server-route-repository';
-import { merge } from 'lodash';
+import Boom from '@hapi/boom';
+import { RequestHandler } from '@kbn/core-http-server';
+import { KibanaRequest, RouteRegistrar } from '@kbn/core/server';
+import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
+import { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import {
   decodeRequestParams,
   parseEndpoint,
   routeValidationObject,
+  ServerRouteRepository,
 } from '@kbn/server-route-repository';
-import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
-import { InspectResponse } from '@kbn/observability-plugin/typings/common';
+import agent from 'elastic-apm-node';
+import * as t from 'io-ts';
+import { merge } from 'lodash';
+import { inspectCpuProfile } from '@kbn/adhoc-profiler';
 import { pickKeys } from '../../../common/utils/pick_keys';
-import { APMRouteHandlerResources, TelemetryUsageCounter } from '../typings';
 import type { ApmPluginRequestHandlerContext } from '../typings';
+import { APMRouteHandlerResources, TelemetryUsageCounter } from '../typings';
 
 const inspectRt = t.exact(
   t.partial({
@@ -64,6 +66,29 @@ export function registerRoutes({
 
   const router = core.setup.http.createRouter();
 
+  function wrapRouteHandlerInProfiler(
+    handler: RequestHandler<
+      unknown,
+      unknown,
+      unknown,
+      ApmPluginRequestHandlerContext
+    >
+  ): RequestHandler<
+    unknown,
+    { _profile?: 'inspect' },
+    unknown,
+    ApmPluginRequestHandlerContext
+  > {
+    return (context, request, response) => {
+      const { _profile } = request.query;
+      if (_profile === 'inspect') {
+        delete request.query._profile;
+        return inspectCpuProfile(() => handler(context, request, response));
+      }
+      return handler(context, request, response);
+    };
+  }
+
   routes.forEach((route) => {
     const { params, endpoint, options, handler } = route;
 
@@ -80,7 +105,7 @@ export function registerRoutes({
         options,
         validate: routeValidationObject,
       },
-      async (context, request, response) => {
+      wrapRouteHandlerInProfiler(async (context, request, response) => {
         if (agent.isStarted()) {
           agent.addLabels({
             plugin: 'apm',
@@ -186,7 +211,7 @@ export function registerRoutes({
           // cleanup
           inspectableEsQueriesMap.delete(request);
         }
-      }
+      })
     );
   });
 }
