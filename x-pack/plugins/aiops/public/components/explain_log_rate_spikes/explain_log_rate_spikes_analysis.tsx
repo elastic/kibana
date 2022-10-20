@@ -93,7 +93,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       searchQuery: JSON.stringify(searchQuery),
       // TODO Handle data view without time fields.
       timeFieldName: dataView.timeFieldName ?? '',
-      index: dataView.title,
+      index: dataView.getIndexPattern(),
       grouping: true,
       flushFix: true,
       ...windowParameters,
