@@ -491,10 +491,10 @@ export const LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES = i18n.translate(
   }
 );
 
-export const LACK_OF_RULE_EDITING_PRIVILEGES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfRuleEditingPrivileges',
+export const LACK_OF_KIBANA_SECURITY_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaSecurityPrivileges',
   {
-    defaultMessage: 'You do not have rule editing privileges',
+    defaultMessage: 'You do not have Kibana Security privileges',
   }
 );
 

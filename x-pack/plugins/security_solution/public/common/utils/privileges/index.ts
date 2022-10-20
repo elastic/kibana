@@ -50,7 +50,7 @@ export const explainLackOfPermission = (
   } else if (!canEditRuleWithActions(rule, hasReadActionsPrivileges)) {
     return i18nActions.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES;
   } else if (!hasUserCRUDPermission(canUserCRUD)) {
-    return i18nActions.LACK_OF_RULE_EDITING_PRIVILEGES;
+    return i18nActions.LACK_OF_KIBANA_SECURITY_PRIVILEGES;
   } else {
     return undefined;
   }
