@@ -20,12 +20,14 @@ import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import { coreMock } from '../mocks';
 
 import { PluginWrapper } from './plugin';
-import { PluginManifest, PluginType } from './types';
+
+import type { PluginManifest } from '@kbn/core-plugins-server';
 import {
   createPluginInitializerContext,
   createPluginSetupContext,
   InstanceInfo,
 } from './plugin_context';
+import { PluginType } from '@kbn/core-base-common';
 
 const mockPluginInitializer = jest.fn();
 const logger = loggingSystemMock.create();

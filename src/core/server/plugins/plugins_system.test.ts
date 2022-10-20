@@ -15,7 +15,7 @@ import {
 import { BehaviorSubject } from 'rxjs';
 
 import { REPO_ROOT } from '@kbn/utils';
-import type { PluginName } from '@kbn/core-base-common';
+import { type PluginName, PluginType } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { Logger } from '@kbn/logging';
 import { Env } from '@kbn/config';
@@ -23,7 +23,6 @@ import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { PluginWrapper } from './plugin';
-import { PluginType } from './types';
 import { PluginsSystem } from './plugins_system';
 import { coreMock } from '../mocks';
 

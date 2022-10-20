@@ -20,7 +20,7 @@ import {
   type SavedObjectsConfigType,
   savedObjectsConfig,
 } from '@kbn/core-saved-objects-base-server-internal';
-import { SharedGlobalConfig, SharedGlobalConfigKeys } from './types';
+import { SharedGlobalConfig, SharedGlobalConfigKeys } from '@kbn/core-plugins-server';
 
 const createGlobalConfig = ({
   elasticsearch,

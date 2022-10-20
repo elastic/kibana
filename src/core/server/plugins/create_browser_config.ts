@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExposedToBrowserDescriptor, PluginConfigDescriptor } from './types';
+import { ExposedToBrowserDescriptor, PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
 export const createBrowserConfig = <T = unknown>(
   config: T,

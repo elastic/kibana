@@ -21,7 +21,8 @@ import { PluginsService } from '../../plugins/plugins_service';
 import { BehaviorSubject, from } from 'rxjs';
 import { config } from '../../plugins/plugins_config';
 import { coreMock } from '../../mocks';
-import { AsyncPlugin, PluginType } from '../../plugins/types';
+import { PluginType } from '@kbn/core-base-common';
+import type { AsyncPlugin } from '@kbn/core-plugins-server';
 import { PluginWrapper } from '../../plugins/plugin';
 
 describe('PluginsService', () => {

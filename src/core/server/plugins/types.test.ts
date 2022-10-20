@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExposedToBrowserDescriptor } from './types';
+import type { ExposedToBrowserDescriptor } from '@kbn/core-plugins-server';
 
 describe('ExposedToBrowserDescriptor', () => {
   interface ConfigType {

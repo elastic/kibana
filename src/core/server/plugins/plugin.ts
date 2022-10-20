@@ -12,18 +12,17 @@ import { firstValueFrom, Subject } from 'rxjs';
 import { isPromise } from '@kbn/std';
 import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
-import { PluginType } from '@kbn/core-base-common';
-import {
+import { type PluginOpaqueId, PluginType } from '@kbn/core-base-common';
+import type {
   AsyncPlugin,
   Plugin,
   PluginConfigDescriptor,
   PluginInitializer,
   PluginInitializerContext,
   PluginManifest,
-  PluginOpaqueId,
   PrebootPlugin,
-} from './types';
-import { CorePreboot, CoreSetup, CoreStart } from '..';
+} from '@kbn/core-plugins-server';
+import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 
 const OSS_PATH_REGEX = /[\/|\\]src[\/|\\]plugins[\/|\\]/; // Matches src/plugins directory on POSIX and Windows
 const XPACK_PATH_REGEX = /[\/|\\]x-pack[\/|\\]plugins[\/|\\]/; // Matches x-pack/plugins directory on POSIX and Windows

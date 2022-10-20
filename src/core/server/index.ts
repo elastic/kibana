@@ -230,7 +230,6 @@ export type { NodeInfo, NodeRoles } from '@kbn/core-node-server';
 export { PluginType } from '@kbn/core-base-common';
 
 export type {
-  DiscoveredPlugin,
   PrebootPlugin,
   Plugin,
   AsyncPlugin,
@@ -239,11 +238,12 @@ export type {
   PluginInitializer,
   PluginInitializerContext,
   PluginManifest,
-  PluginName,
   SharedGlobalConfig,
   MakeUsageFromSchema,
   ExposedToBrowserDescriptor,
-} from './plugins';
+} from '@kbn/core-plugins-server';
+
+export type { PluginName, DiscoveredPlugin } from '@kbn/core-base-common';
 
 export type {
   SavedObject,

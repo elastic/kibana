@@ -21,12 +21,13 @@ import {
   InstanceInfo,
 } from './plugin_context';
 
-import { PluginManifest, PluginType } from './types';
+import { PluginType } from '@kbn/core-base-common';
+import type { PluginManifest } from '@kbn/core-plugins-server';
 import { Server } from '../server';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
 import { ConfigService, Env } from '@kbn/config';
 import { PluginWrapper } from './plugin';
-import { coreMock } from '../mocks';
+import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {
@@ -229,7 +230,7 @@ describe('createPluginPrebootSetupContext', () => {
       }),
     });
 
-    const corePreboot = coreMock.createInternalPreboot();
+    const corePreboot = coreInternalLifecycleMock.createInternalPreboot();
     const prebootSetupContext = createPluginPrebootSetupContext(coreContext, corePreboot, plugin);
 
     const holdSetupPromise = Promise.resolve(undefined);

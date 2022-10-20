@@ -13,7 +13,7 @@ import { promisify } from 'util';
 import { snakeCase } from 'lodash';
 import { isConfigPath, PackageInfo } from '@kbn/config';
 import { PluginType } from '@kbn/core-base-common';
-import { PluginManifest } from '../types';
+import { PluginManifest } from '@kbn/core-plugins-server';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { isCamelCase } from './is_camel_case';
 

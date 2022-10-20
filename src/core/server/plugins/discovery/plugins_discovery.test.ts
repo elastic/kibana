@@ -22,7 +22,7 @@ import type { NodeInfo } from '@kbn/core-node-server';
 import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
-import { PluginType } from '../types';
+import { PluginType } from '@kbn/core-base-common';
 
 const KIBANA_ROOT = process.cwd();
 

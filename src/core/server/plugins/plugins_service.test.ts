@@ -26,7 +26,8 @@ import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
 import { config } from './plugins_config';
 import { take } from 'rxjs/operators';
-import { DiscoveredPlugin, PluginConfigDescriptor, PluginType } from './types';
+import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
+import { DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
 
 const MockPluginsSystem: jest.Mock<PluginsSystem<PluginType>> = PluginsSystem as any;
 
