@@ -51,7 +51,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
         isDisabled={isLoading || isDeletingFile}
         iconType="eye"
       >
-        Pick a file
+        Select a file
       </EuiButton>,
       <EuiButton
         onClick={() => setShowUploadModal(true)}
