@@ -23,7 +23,9 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint
 import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
 import { INSUFFICIENT_PRIVILEGES_FOR_COMMAND } from '../../../../common/translations';
 
-describe('When using get-file aciton from response actions console', () => {
+jest.mock('../../../../common/components/user_privileges');
+
+describe('When using get-file action from response actions console', () => {
   let render: (
     capabilities?: EndpointCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
