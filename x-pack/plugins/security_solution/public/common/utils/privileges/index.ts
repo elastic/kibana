@@ -33,7 +33,7 @@ export const canEditRuleWithActions = (
 export const hasUserCRUDPermission = (canUserCRUD: boolean | null): boolean =>
   canUserCRUD != null ? canUserCRUD : true;
 
-export const getToolTipContent = (
+export const explainLackOfPermission = (
   rule: Rule | null | undefined,
   hasMlPermissions: boolean,
   hasReadActionsPrivileges:

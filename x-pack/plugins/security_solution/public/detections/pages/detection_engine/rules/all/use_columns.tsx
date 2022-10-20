@@ -22,7 +22,10 @@ import { FormattedRelativePreferenceDate } from '../../../../../common/component
 import { getRuleDetailsTabUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
-import { canEditRuleWithActions, getToolTipContent } from '../../../../../common/utils/privileges';
+import {
+  canEditRuleWithActions,
+  explainLackOfPermission,
+} from '../../../../../common/utils/privileges';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
 import { SeverityBadge } from '../../../../components/rules/severity_badge';
 import type { Rule } from '../../../../containers/detection_engine/rules';
@@ -68,7 +71,7 @@ const useEnabledColumn = ({ hasPermissions }: ColumnsProps): TableColumn => {
       render: (_, rule: Rule) => (
         <EuiToolTip
           position="top"
-          content={getToolTipContent(rule, hasMlPermissions, hasActionsPrivileges, true)}
+          content={explainLackOfPermission(rule, hasMlPermissions, hasActionsPrivileges, true)}
         >
           <RuleSwitch
             id={rule.id}

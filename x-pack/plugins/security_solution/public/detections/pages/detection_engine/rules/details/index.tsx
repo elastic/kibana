@@ -94,7 +94,7 @@ import {
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import {
-  getToolTipContent,
+  explainLackOfPermission,
   canEditRuleWithActions,
   isBoolean,
   hasUserCRUDPermission,
@@ -678,7 +678,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
                       position="top"
-                      content={getToolTipContent(
+                      content={explainLackOfPermission(
                         rule,
                         hasMlPermissions,
                         hasActionsPrivileges,
@@ -712,7 +712,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             !hasUserCRUDPermission(canUserCRUD) ||
                             (isMlRule(rule?.type) && !hasMlPermissions)
                           }
-                          disabledReason={getToolTipContent(
+                          disabledReason={explainLackOfPermission(
                             rule,
                             hasMlPermissions,
                             hasActionsPrivileges,
