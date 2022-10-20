@@ -25,13 +25,17 @@ import {
 } from '@elastic/eui';
 
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import type { ChromeHelpExtension } from '@kbn/core-chrome-browser';
+import type {
+  ChromeHelpExtension,
+  ChromeHelpExtensionMenuCustomLink,
+} from '@kbn/core-chrome-browser';
 import { GITHUB_CREATE_ISSUE_LINK, KIBANA_FEEDBACK_LINK } from '../../constants';
 import { HeaderExtension } from './header_extension';
 import { isModifiedOrPrevented } from './nav_link';
 
 interface Props {
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
+  globalHelpExtensionMenuLinks: ChromeHelpExtensionMenuCustomLink[];
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
   kibanaVersion: string;
@@ -80,6 +84,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
     const { kibanaVersion } = this.props;
 
     const defaultContent = this.renderDefaultContent();
+    const globalCustomContent = this.renderGlobalCustomContent();
     const customContent = this.renderCustomContent();
 
     const button = (
@@ -126,6 +131,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
         </EuiPopoverTitle>
 
         <div style={{ maxWidth: 240 }}>
+          {globalCustomContent}
           {defaultContent}
           {defaultContent && customContent && <EuiHorizontalRule margin="m" />}
           {customContent}
@@ -181,6 +187,19 @@ export class HeaderHelpMenu extends Component<Props, State> {
         </EuiButtonEmpty>
       </Fragment>
     );
+  }
+
+  private renderGlobalCustomContent() {
+    const { globalHelpExtensionMenuLinks, navigateToUrl } = this.props;
+
+    return globalHelpExtensionMenuLinks.map((link, index) => {
+      const { linkType, content: text, href, ...rest } = link;
+      return createCustomLink(index, text, true, {
+        href,
+        onClick: this.createOnClickHandler(href, navigateToUrl),
+        ...rest,
+      });
+    });
   }
 
   private renderCustomContent() {

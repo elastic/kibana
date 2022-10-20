@@ -23,6 +23,7 @@ import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
+  ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtension,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
@@ -103,6 +104,7 @@ export class ChromeService {
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
+    const globalHelpExtensionMenuLinks: ChromeHelpExtensionMenuCustomLink[] = [];
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
     const breadcrumbsAppendExtension$ = new BehaviorSubject<
@@ -213,6 +215,7 @@ export class ChromeService {
           customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
           kibanaDocLink={docLinks.links.kibana.guide}
           forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
+          globalHelpExtensionMenuLinks={globalHelpExtensionMenuLinks}
           helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
           helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
           homeHref={http.basePath.prepend('/app/home')}
@@ -251,6 +254,14 @@ export class ChromeService {
         breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension
       ) => {
         breadcrumbsAppendExtension$.next(breadcrumbsAppendExtension);
+      },
+
+      getGlobalHelpExtensionMenuLinks: () => globalHelpExtensionMenuLinks,
+
+      registerGlobalHelpExtensionMenuLink: (
+        globalHelpExtensionMenuLink: ChromeHelpExtensionMenuCustomLink
+      ) => {
+        globalHelpExtensionMenuLinks.push(globalHelpExtensionMenuLink);
       },
 
       getHelpExtension$: () => helpExtension$.pipe(takeUntil(this.stop$)),
