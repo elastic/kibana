@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
-import { findLast, cloneDeep, escape } from 'lodash';
+import { findLast, cloneDeep } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
 import { HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
@@ -57,7 +57,7 @@ export class ColorFormat extends FieldFormat {
   htmlConvert: HtmlContextTypeConvert = (val: string | number, options) => {
     const color = this.findColorRuleForVal(val) as typeof DEFAULT_CONVERTER_COLOR;
 
-    const displayVal = escape(asPrettyString(val, options));
+    const displayVal = asPrettyString(val, options);
     if (!color) return displayVal;
 
     return ReactDOM.renderToStaticMarkup(
