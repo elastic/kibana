@@ -5,18 +5,8 @@
  * 2.0.
  */
 
-import type { Filter } from '@kbn/es-query';
-import {
-  ColumnHeaderOptions,
-  ColumnId,
-  RowRendererId,
-  Sort,
-  DataExpandedDetail,
-  TimelineTypeLiteral,
-} from '.';
-
-import { Direction } from '../../search_strategy';
-import { DataProvider } from './data_provider';
+import type { Direction } from '@kbn/timelines-plugin/common';
+import type { ColumnHeaderOptions, ColumnId } from '../../../../common/data_table/columns';
 
 export type KueryFilterQueryKind = 'kuery' | 'lucene' | 'eql';
 
@@ -36,30 +26,6 @@ export interface SortColumnTable {
   columnType: string;
   esTypes?: string[];
   sortDirection: SortDirection;
-}
-
-export interface TimelinePersistInput {
-  id: string;
-  dataProviders?: DataProvider[];
-  dateRange?: {
-    start: string;
-    end: string;
-  };
-  excludedRowRendererIds?: RowRendererId[];
-  expandedDetail?: DataExpandedDetail;
-  filters?: Filter[];
-  columns: ColumnHeaderOptions[];
-  itemsPerPage?: number;
-  indexNames: string[];
-  kqlQuery?: {
-    filterQuery: SerializedFilterQuery | null;
-  };
-  show?: boolean;
-  sort?: Sort[];
-  showCheckboxes?: boolean;
-  timelineType?: TimelineTypeLiteral;
-  templateTimelineId?: string | null;
-  templateTimelineVersion?: number | null;
 }
 
 /** Invoked when a column is sorted */
@@ -90,9 +56,3 @@ export type OnSelectAll = ({ isSelected }: { isSelected: boolean }) => void;
 
 /** Invoked when columns are updated */
 export type OnUpdateColumns = (columns: ColumnHeaderOptions[]) => void;
-
-/** Invoked when a user pins an event */
-export type OnPinEvent = (eventId: string) => void;
-
-/** Invoked when a user unpins an event */
-export type OnUnPinEvent = (eventId: string) => void;

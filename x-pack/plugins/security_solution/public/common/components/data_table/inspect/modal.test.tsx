@@ -8,7 +8,7 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { getMockTheme } from '../../mock/kibana_react.mock';
+import { getMockTheme } from '../../../lib/kibana/kibana_react.mock';
 
 import { ModalInspectQuery, formatIndexPatternRequested, NO_ALERT_INDEX } from './modal';
 

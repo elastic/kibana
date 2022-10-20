@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
-import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import type { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import type { IFieldSubType } from '@kbn/es-query';
-import { BrowserFields } from '../../../search_strategy/index_fields';
-import { TimelineNonEcsData } from '../../../search_strategy/timeline';
-import { Ecs } from '../../../ecs';
+import type { Ecs } from '../../ecs';
+import type { BrowserFields, TimelineNonEcsData } from '../../search_strategy';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
@@ -19,11 +18,11 @@ export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 export type ColumnId = string;
 
 /**
- * A `TGridCellAction` function accepts `data`, where each row of data is
+ * A `DataTableCellAction` function accepts `data`, where each row of data is
  * represented as a `TimelineNonEcsData[]`. For example, `data[0]` would
  * contain a `TimelineNonEcsData[]` with the first row of data.
  *
- * A `TGridCellAction` returns a function that has access to all the
+ * A `DataTableCellAction` returns a function that has access to all the
  * `EuiDataGridColumnCellActionProps`, _plus_ access to `data`,
  *  which enables code like the following example to be written:
  *
@@ -43,7 +42,7 @@ export type ColumnId = string;
  * };
  * ```
  */
-export type TGridCellAction = ({
+export type DataTableCellAction = ({
   browserFields,
   data,
   ecsData,
@@ -75,7 +74,7 @@ export type ColumnHeaderOptions = Pick<
   | 'schema'
 > & {
   aggregatable?: boolean;
-  tGridCellActions?: TGridCellAction[];
+  dataTableCellActions?: DataTableCellAction[];
   category?: string;
   columnHeaderType: ColumnHeaderType;
   description?: string | null;
@@ -107,11 +106,4 @@ export interface ColumnRenderer {
     values: string[] | null | undefined;
     linkValues?: string[] | null | undefined;
   }) => React.ReactNode;
-}
-
-export interface SessionViewConfig {
-  sessionEntityId: string;
-  jumpToEntityId?: string;
-  jumpToCursor?: string;
-  investigatedAlertId?: string;
 }

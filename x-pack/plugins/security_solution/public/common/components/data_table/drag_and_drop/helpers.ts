@@ -9,12 +9,12 @@ import type { DropResult, FluidDragActions, Position } from 'react-beautiful-dnd
 import { KEYBOARD_DRAG_OFFSET, getFieldIdFromDraggable } from '@kbn/securitysolution-t-grid';
 import type { Dispatch } from 'redux';
 import { isString, keyBy } from 'lodash/fp';
-
-import { stopPropagationAndPreventDefault } from '../../../common/utils/accessibility';
-import type { BrowserField, BrowserFields } from '../../../common/search_strategy';
-import type { ColumnHeaderOptions } from '../../../common/types';
-import { TableId, tGridActions } from '../../store/t_grid';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../t_grid/body/constants';
+import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
+import { dataTableActions } from '../../../store/data_table';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../constants';
+import { TableId } from '../../../store/data_table/types';
+import type { BrowserField, BrowserFields } from '../../../containers/source';
+import type { ColumnHeaderOptions } from '../../../../../common/types';
 
 /**
  * Temporarily disables tab focus on child links of the draggable to work
@@ -174,7 +174,7 @@ export const addFieldToTimelineColumns = ({
 
   if (column != null) {
     dispatch(
-      tGridActions.upsertColumn({
+      dataTableActions.upsertColumn({
         column: {
           category: column.category,
           columnHeaderType: 'not-filtered',
@@ -194,7 +194,7 @@ export const addFieldToTimelineColumns = ({
   } else {
     // create a column definition, because it doesn't exist in the browserFields:
     dispatch(
-      tGridActions.upsertColumn({
+      dataTableActions.upsertColumn({
         column: {
           columnHeaderType: 'not-filtered',
           id: fieldId,

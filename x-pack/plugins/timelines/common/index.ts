@@ -18,12 +18,7 @@ export { DELETED_SECURITY_SOLUTION_DATA_VIEW } from './constants';
 
 export type {
   ActionProps,
-  AlertWorkflowStatus,
   CellValueElementProps,
-  ColumnId,
-  ColumnRenderer,
-  ColumnHeaderType,
-  ColumnHeaderOptions,
   ControlColumnProps,
   DataProvidersAnd,
   DataProvider,

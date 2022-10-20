@@ -17,14 +17,15 @@ import {
   getColumnHeaders,
   getSchema,
   getColumnHeader,
+  allowSorting,
 } from './helpers';
 import {
   DEFAULT_ACTION_BUTTON_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
 } from '../constants';
-import { mockBrowserFields } from '../../../../mock/browser_fields';
 import type { ColumnHeaderOptions } from '../../../../../common/types';
+import { mockBrowserFields } from '../../../containers/source/mock';
 
 window.matchMedia = jest.fn().mockImplementation((query) => {
   return {
@@ -487,6 +488,73 @@ describe('helpers', () => {
       expect(getActionsColumnWidth(ACTION_BUTTON_COUNT)).toEqual(
         DEFAULT_ACTION_BUTTON_WIDTH + expectedPadding
       );
+    });
+  });
+
+  describe('allowSorting', () => {
+    const aggregatableField = {
+      category: 'cloud',
+      description:
+        'The cloud account or organization id used to identify different entities in a multi-tenant environment. Examples: AWS account id, Google Cloud ORG Id, or other unique identifier.',
+      example: '666777888999',
+      indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+      name: 'cloud.account.id',
+      searchable: true,
+      type: 'string',
+      aggregatable: true, // <-- allow sorting when this is true
+      format: '',
+    };
+
+    test('it returns true for an aggregatable field', () => {
+      expect(
+        allowSorting({
+          browserField: aggregatableField,
+          fieldName: aggregatableField.name,
+        })
+      ).toBe(true);
+    });
+
+    test('it returns true for a allow-listed non-BrowserField', () => {
+      expect(
+        allowSorting({
+          browserField: undefined, // no BrowserField metadata for this field
+          fieldName: 'kibana.alert.rule.name', //  an allow-listed field name
+        })
+      ).toBe(true);
+    });
+
+    test('it returns false for a NON-aggregatable field (aggregatable is false)', () => {
+      const nonaggregatableField = {
+        ...aggregatableField,
+        aggregatable: false, // <-- NON-aggregatable
+      };
+
+      expect(
+        allowSorting({
+          browserField: nonaggregatableField,
+          fieldName: nonaggregatableField.name,
+        })
+      ).toBe(false);
+    });
+
+    test('it returns false if the BrowserField is missing the aggregatable property', () => {
+      const missingAggregatable = omit('aggregatable', aggregatableField);
+
+      expect(
+        allowSorting({
+          browserField: missingAggregatable,
+          fieldName: missingAggregatable.name,
+        })
+      ).toBe(false);
+    });
+
+    test("it returns false for a non-allowlisted field we don't have `BrowserField` metadata for it", () => {
+      expect(
+        allowSorting({
+          browserField: undefined, // <-- no metadata for this field
+          fieldName: 'non-allowlisted',
+        })
+      ).toBe(false);
     });
   });
 });

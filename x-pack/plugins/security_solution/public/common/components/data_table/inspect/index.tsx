@@ -9,10 +9,10 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useState } from 'react';
 import styled, { css } from 'styled-components';
+import type { InspectQuery } from '../../../store/data_table/inputs';
 
 import { ModalInspectQuery } from './modal';
 import * as i18n from './translations';
-import type { InspectQuery } from '../../store/t_grid/inputs';
 
 export const BUTTON_CLASS = 'inspectButtonComponent';
 

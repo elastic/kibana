@@ -25,6 +25,7 @@ import React, {
   useState,
   useContext,
   useRef,
+  lazy,
 } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
@@ -35,17 +36,15 @@ import type { Filter } from '@kbn/es-query';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { SetEventsDeleted, SetEventsLoading } from '../../../../common/data_table';
+import type { DataTableCellAction } from '../../../../common/data_table/columns';
 import type {
-  TGridCellAction,
-  BulkActionsProp,
   CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
+  OnRowSelected,
+  OnSelectAll,
   RowRenderer,
-  AlertStatus,
-  SortColumnTable,
-  SetEventsLoading,
-  SetEventsDeleted,
 } from '../../../../common/types/timeline';
 
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
@@ -60,33 +59,27 @@ import {
 } from './helpers';
 
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
-import type { OnRowSelected, OnSelectAll } from '../types';
-import type { Refetch } from '../../../store/t_grid/inputs';
 import type { Ecs } from '../../../../common/ecs';
-import { getPageRowIndex } from '../../../../common/utils/pagination';
-import { StatefulEventContext } from '../../stateful_event_context';
-import type { TGridModel, TableState } from '../../../store/t_grid';
-import { tGridActions, tGridSelectors } from '../../../store/t_grid';
-import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
 import * as i18n from './translations';
-import { AlertCount } from '../styles';
-import { checkBoxControlColumn } from './control_columns';
 import { REMOVE_COLUMN } from './column_headers/translations';
-import type { TimelinesStartPlugins } from '../../../types';
+import { dataTableActions, dataTableSelectors } from '../../store/data_table';
+import type { AlertWorkflowStatus, Refetch } from '../../types';
+import type { TableState, TGridModel } from '../../store/data_table/types';
 
+const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
 interface OwnProps {
   activePage: number;
   additionalControls?: React.ReactNode;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
   data: TimelineItem[];
-  defaultCellActions?: TGridCellAction[];
+  defaultCellActions?: DataTableCellAction[];
   disabledCellActions: string[];
   fieldBrowserOptions?: FieldBrowserOptions;
   filters?: Filter[];
   filterQuery?: string;
-  filterStatus?: AlertStatus;
+  filterStatus?: AlertWorkflowStatus;
   getRowRenderer?: ({
     data,
     rowRenderers,
@@ -287,7 +280,7 @@ export type StatefulBodyProps = OwnProps & PropsFromRedux;
  * that is shared across all implementations of the timeline.
  */
 
-export const BodyComponent = React.memo<StatefulBodyProps>(
+export const DataTableComponent = React.memo<StatefulBodyProps>(
   ({
     activePage,
     additionalControls,
@@ -329,14 +322,15 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     unit = defaultUnit,
   }) => {
-    const { triggersActionsUi } = useKibana<TimelinesStartPlugins>().services;
-
+    const {
+      triggersActionsUi: { getFieldBrowser },
+    } = useKibana().services;
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
     const dispatch = useDispatch();
-    const getManageTimeline = useMemo(() => tGridSelectors.getManageDataTableById(), []);
+    const getDataTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
     const { queryFields, selectAll, defaultColumns } = useDeepEqualSelector((state) =>
-      getManageTimeline(state, id)
+      getDataTable(state, id)
     );
 
     const alertCountText = useMemo(
@@ -444,21 +438,21 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     }, [hasAlertsCrud, selectedCount, showCheckboxes, bulkActions]);
 
     const onResetColumns = useCallback(() => {
-      dispatch(tGridActions.updateColumns({ id, columns: defaultColumns }));
+      dispatch(dataTableActions.updateColumns({ id, columns: defaultColumns }));
     }, [defaultColumns, dispatch, id]);
 
     const onToggleColumn = useCallback(
       (columnId: string) => {
         if (columnHeaders.some(({ id: columnHeaderId }) => columnId === columnHeaderId)) {
           dispatch(
-            tGridActions.removeColumn({
+            dataTableActions.removeColumn({
               columnId,
               id,
             })
           );
         } else {
           dispatch(
-            tGridActions.upsertColumn({
+            dataTableActions.upsertColumn({
               column: getColumnHeader(columnId, defaultColumns),
               id,
               index: 1,
@@ -497,7 +491,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             ) : (
               <>
                 {additionalControls ?? null}
-                {triggersActionsUi.getFieldBrowser({
+                {getFieldBrowser({
                   browserFields,
                   options: fieldBrowserOptions,
                   columnIds: columnHeaders.map(({ id: columnId }) => columnId),
@@ -534,15 +528,15 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         indexNames,
         onAlertStatusActionSuccess,
         onAlertStatusActionFailure,
-        onResetColumns,
-        onToggleColumn,
-        triggersActionsUi,
         additionalBulkActions,
         refetch,
         additionalControls,
+        getFieldBrowser,
         browserFields,
         fieldBrowserOptions,
         columnHeaders,
+        onResetColumns,
+        onToggleColumn,
       ]
     );
 
@@ -566,7 +560,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         }>
       ) => {
         dispatch(
-          tGridActions.updateSort({
+          dataTableActions.updateSort({
             id,
             sort: mapSortingColumns({ columns: nextSortingColumns, columnHeaders }),
           })
@@ -588,7 +582,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     const onColumnResize = useCallback(
       ({ columnId, width }: { columnId: string; width: number }) => {
         dispatch(
-          tGridActions.updateColumnWidth({
+          dataTableActions.updateColumnWidth({
             columnId,
             id,
             width,
@@ -601,7 +595,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     const onSetVisibleColumns = useCallback(
       (newVisibleColumns: string[]) => {
         dispatch(
-          tGridActions.updateColumnOrder({
+          dataTableActions.updateColumnOrder({
             columnIds: newVisibleColumns,
             id,
           })
@@ -612,14 +606,14 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     const setEventsLoading = useCallback<SetEventsLoading>(
       ({ eventIds, isLoading: loading }) => {
-        dispatch(tGridActions.setEventsLoading({ id, eventIds, isLoading: loading }));
+        dispatch(dataTableActions.setEventsLoading({ id, eventIds, isLoading: loading }));
       },
       [dispatch, id]
     );
 
     const setEventsDeleted = useCallback<SetEventsDeleted>(
       ({ eventIds, isDeleted }) => {
-        dispatch(tGridActions.setEventsDeleted({ id, eventIds, isDeleted }));
+        dispatch(dataTableActions.setEventsDeleted({ id, eventIds, isDeleted }));
       },
       [dispatch, id]
     );
@@ -682,8 +676,8 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
         columnHeaders.map((header) => {
-          const buildAction = (tGridCellAction: TGridCellAction) =>
-            tGridCellAction({
+          const buildAction = (dataTableCellAction: DataTableCellAction) =>
+            dataTableCellAction({
               browserFields,
               data: data.map((row) => row.data),
               ecsData: data.map((row) => row.ecs),
@@ -701,7 +695,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                   iconType: 'cross',
                   label: REMOVE_COLUMN,
                   onClick: () => {
-                    dispatch(tGridActions.removeColumn({ id, columnId: header.id }));
+                    dispatch(dataTableActions.removeColumn({ id, columnId: header.id }));
                   },
                   size: 'xs',
                 },
@@ -713,7 +707,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
             })
               ? {
                   cellActions:
-                    header.tGridCellActions?.map(buildAction) ??
+                    header.dataTableCellActions?.map(buildAction) ??
                     defaultCellActions?.map(buildAction),
                   visibleCellActions: 3,
                 }
@@ -797,7 +791,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
 
     const onChangeItemsPerPage = useCallback(
       (itemsChangedPerPage) => {
-        dispatch(tGridActions.updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }));
+        dispatch(dataTableActions.updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }));
       },
       [id, dispatch]
     );
@@ -850,7 +844,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
   }
 );
 
-BodyComponent.displayName = 'BodyComponent';
+DataTableComponent.displayName = 'DataTableComponent';
 
 const makeMapStateToProps = () => {
   const memoizedColumnHeaders: (
@@ -858,9 +852,9 @@ const makeMapStateToProps = () => {
     browserFields: BrowserFields
   ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
 
-  const getTGrid = tGridSelectors.getTGridByIdSelector();
+  const getDataTable = dataTableSelectors.getTableByIdSelector();
   const mapStateToProps = (state: TableState, { browserFields, id, hasAlertsCrud }: OwnProps) => {
-    const dataTable: TGridModel = getTGrid(state, id);
+    const dataTable: TGridModel = getDataTable(state, id);
     const {
       columns,
       isSelectAllChecked,
@@ -886,12 +880,13 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = {
-  clearSelected: tGridActions.clearSelected,
-  setSelected: tGridActions.setSelected,
+  clearSelected: dataTableActions.clearSelected,
+  setSelected: dataTableActions.setSelected,
 };
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
-export const StatefulBody: React.FunctionComponent<OwnProps> = connector(BodyComponent);
+export const StatefulDataTableComponent: React.FunctionComponent<OwnProps> =
+  connector(DataTableComponent);

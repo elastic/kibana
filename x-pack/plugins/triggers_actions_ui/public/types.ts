@@ -421,7 +421,6 @@ export interface FetchAlertData {
 export interface AlertsTableProps {
   alertsTableConfiguration: AlertsTableConfigurationRegistry;
   columns: EuiDataGridColumn[];
-  // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
   disabledCellActions: string[];
   flyoutSize?: EuiFlyoutSize;

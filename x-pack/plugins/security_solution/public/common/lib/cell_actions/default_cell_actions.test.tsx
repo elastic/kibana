@@ -10,12 +10,12 @@ import type {
   BrowserFields,
   TimelineNonEcsData,
 } from '@kbn/timelines-plugin/common/search_strategy';
-import type { TGridCellAction } from '@kbn/timelines-plugin/common/types';
 import type { Ecs } from '../../../../common/ecs';
 import type { ColumnHeaderType } from '../../../timelines/store/timeline/model';
 
 import { defaultCellActions } from './default_cell_actions';
 import { COLUMNS_WITH_LINKS, EmptyComponent } from './helpers';
+import type { DataTableCellAction } from '../../../../common/data_table/columns';
 
 describe('default cell actions', () => {
   const browserFields: BrowserFields = {};
@@ -37,8 +37,8 @@ describe('default cell actions', () => {
     ];
 
     const columnsWithCellActions: EuiDataGridColumn[] = columnHeaders.map((header) => {
-      const buildAction = (tGridCellAction: TGridCellAction) =>
-        tGridCellAction({
+      const buildAction = (dataTableCellAction: DataTableCellAction) =>
+        dataTableCellAction({
           browserFields,
           data,
           ecsData,
@@ -69,8 +69,8 @@ describe('default cell actions', () => {
   describe.each(columnHeadersToTest)('columns with a link action', (columnHeaders) => {
     test(`${columnHeaders.id ?? columnHeaders.type}`, () => {
       const columnsWithCellActions: EuiDataGridColumn[] = [columnHeaders].map((header) => {
-        const buildAction = (tGridCellAction: TGridCellAction) =>
-          tGridCellAction({
+        const buildAction = (dataTableCellAction: DataTableCellAction) =>
+          dataTableCellAction({
             browserFields,
             data,
             ecsData,

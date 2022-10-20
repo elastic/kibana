@@ -6,29 +6,12 @@
  */
 import { ComponentType, JSXElementConstructor } from 'react';
 import { EuiDataGridControlColumn, EuiDataGridCellValueElementProps } from '@elastic/eui';
-
-// Temporary import from triggers-actions-ui public types, it will not be needed after alerts table migrated
-import type {
-  FieldBrowserOptions,
-  CreateFieldComponent,
-  GetFieldTableColumns,
-  FieldBrowserProps,
-  BrowserFieldItem,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
-
 import { OnRowSelected, SortColumnTable } from '..';
 import { BrowserFields } from '../../../search_strategy/index_fields';
 import { ColumnHeaderOptions } from '../columns';
 import { TimelineItem, TimelineNonEcsData } from '../../../search_strategy';
 import { Ecs } from '../../../ecs';
 
-export {
-  FieldBrowserOptions,
-  CreateFieldComponent,
-  GetFieldTableColumns,
-  FieldBrowserProps,
-  BrowserFieldItem,
-};
 export interface ActionProps {
   action?: RowCellRender;
   ariaRowindex: number;
@@ -137,13 +120,3 @@ export interface BulkActionsObjectProp {
   customBulkActions?: CustomBulkAction[];
 }
 export type BulkActionsProp = boolean | BulkActionsObjectProp;
-
-export type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
-
-/**
- * @deprecated
- * TODO: remove when `acknowledged` migrations are finished
- */
-export type InProgressStatus = 'in-progress';
-
-export type AlertStatus = AlertWorkflowStatus | InProgressStatus;

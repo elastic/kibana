@@ -12,11 +12,8 @@ import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { Ecs } from '../../../../common/ecs';
 import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy';
-import type {
-  ColumnHeaderOptions,
-  SortColumnTable,
-  SortDirection,
-} from '../../../../common/types/timeline';
+import type { ColumnHeaderOptions, SortDirection } from '../../../../common/types/timeline';
+import type { SortColumnTable } from './types';
 
 /**
  * Creates mapping of eventID -> fieldData for given fieldsToKeep. Used to store additional field

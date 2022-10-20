@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 import type { EntityType, RowRenderer } from '@kbn/timelines-plugin/common';
-import type { TGridCellAction } from '@kbn/timelines-plugin/common/types';
+import type { DataTableCellAction } from '../../../../common/data_table/columns';
 import type { ControlColumnProps, TableId } from '../../../../common/types';
 import { dataTableActions } from '../../store/data_table';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -60,7 +60,7 @@ const TitleText = styled.span`
 `;
 
 export interface Props {
-  defaultCellActions?: TGridCellAction[];
+  defaultCellActions?: DataTableCellAction[];
   defaultModel: SubsetTGridModel;
   end: string;
   entityType: EntityType;

@@ -10,15 +10,13 @@ import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
 } from '@elastic/eui';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import moment from 'moment';
 import type { ComponentType } from 'react';
-import { Suspense } from 'react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, Suspense } from 'react';
 import styled from 'styled-components';
 
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';

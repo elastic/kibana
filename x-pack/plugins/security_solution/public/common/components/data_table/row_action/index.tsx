@@ -8,18 +8,20 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import type {
+  DataExpandedDetailType,
+  SetEventsDeleted,
+  SetEventsLoading,
+} from '../../../../../common/data_table';
+import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
 
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type {
   ColumnHeaderOptions,
   ControlColumnProps,
   OnRowSelected,
-  SetEventsLoading,
-  SetEventsDeleted,
-  DataExpandedDetailType,
 } from '../../../../../common/types/timeline';
-import { getMappedNonEcsValue } from '../data_driven_columns';
-import { tGridActions } from '../../../../store/t_grid';
+import { dataTableActions } from '../../../store/data_table';
 
 type Props = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -98,7 +100,7 @@ const RowActionComponent = ({
     };
 
     dispatch(
-      tGridActions.toggleDetailPanel({
+      dataTableActions.toggleDetailPanel({
         ...updatedExpandedDetail,
         tabType,
         id: tableId,

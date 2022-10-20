@@ -18,10 +18,10 @@ import type { DropResult, BeforeCapture } from 'react-beautiful-dnd';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { useDispatch } from 'react-redux';
 
-import type { BrowserFields } from '../../../common/search_strategy';
-import type { ColumnHeaderOptions } from '../../../common/types';
-import { useAddToTimelineSensor } from '../../hooks/use_add_to_timeline';
+import type { ColumnHeaderOptions } from '../../../../../common/types';
 import { addFieldToTimelineColumns, getTimelineIdFromColumnDroppableId } from './helpers';
+import type { BrowserFields } from '../../../containers/source';
+import { useKibana } from '../../../lib/kibana';
 
 export * from './draggable_keyboard_wrapper_hook';
 export * from './helpers';
@@ -32,14 +32,14 @@ interface Props {
   children: React.ReactNode;
 }
 
-const sensors = [useAddToTimelineSensor];
-
 const DragDropContextWrapperComponent: React.FC<Props> = ({
   browserFields,
   defaultsHeader,
   children,
 }) => {
   const dispatch = useDispatch();
+  const { timelines } = useKibana().services;
+  const sensors = [timelines.getUseAddToTimelineSensor()];
 
   const onDragEnd = useCallback(
     (result: DropResult) => {
