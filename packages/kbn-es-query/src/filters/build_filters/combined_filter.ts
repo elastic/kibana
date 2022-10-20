@@ -10,18 +10,20 @@ import { Filter, FilterMeta, FILTERS } from './types';
 import { buildEmptyFilter } from './build_empty_filter';
 
 /**
- * Each item in an COMBINED filter may represent either one filter (to be ORed) or an array of filters (ANDed together before
- * becoming part of the OR clause).
  * @public
  */
-export type FilterItem = Filter | FilterItem[];
+export enum BooleanRelation {
+  AND = 'AND',
+  OR = 'OR',
+}
 
 /**
  * @public
  */
 export interface CombinedFilterMeta extends FilterMeta {
   type: typeof FILTERS.COMBINED;
-  params: FilterItem[];
+  relation: BooleanRelation;
+  params: Filter[];
 }
 
 /**
@@ -39,18 +41,20 @@ export function isCombinedFilter(filter: Filter): filter is CombinedFilter {
 }
 
 /**
- * Builds an COMBINED filter. An COMBINED filter is a filter with multiple sub-filters. Each sub-filter (FilterItem) represents a
- * condition.
- * @param filters An array of CombinedFilterItem
+ * Builds an COMBINED filter. An COMBINED filter is a filter with multiple sub-filters. Each sub-filter (FilterItem)
+ * represents a condition.
+ * @param relation The type of relation with which to combine the filters (AND/OR)
+ * @param filters An array of sub-filters
  * @public
  */
-export function buildCombinedFilter(filters: FilterItem[]): CombinedFilter {
+export function buildCombinedFilter(relation: BooleanRelation, filters: Filter[]): CombinedFilter {
   const filter = buildEmptyFilter(false);
   return {
     ...filter,
     meta: {
       ...filter.meta,
       type: FILTERS.COMBINED,
+      relation,
       params: filters,
     },
   };

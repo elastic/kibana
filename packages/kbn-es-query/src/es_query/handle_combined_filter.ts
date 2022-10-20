@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { Filter, FilterItem, isCombinedFilter } from '../filters';
+import { Filter, isCombinedFilter } from '../filters';
 import { DataViewBase } from './types';
 import { buildQueryFromFilters, EsQueryFiltersConfig } from './from_filters';
+import { BooleanRelation } from '../filters/build_filters';
 
 /** @internal */
 export const handleCombinedFilter = (
@@ -18,24 +19,15 @@ export const handleCombinedFilter = (
 ): Filter => {
   if (!isCombinedFilter(filter)) return filter;
   const { params } = filter.meta;
-  const should = params.map((subFilter) => {
-    const subFilters = Array.isArray(subFilter) ? subFilter : [subFilter];
-    return { bool: buildQueryFromFilters(flattenFilters(subFilters), inputDataViews, options) };
-  });
-  return {
-    ...filter,
-    query: {
-      bool: {
-        should,
-        minimum_should_match: 1,
-      },
-    },
-  };
-};
 
-function flattenFilters(filters: FilterItem[]): Filter[] {
-  return filters.reduce<Filter[]>((result, filter) => {
-    if (Array.isArray(filter)) return [...result, ...flattenFilters(filter)];
-    return [...result, filter];
-  }, []);
-}
+  if (filter.meta.relation === BooleanRelation.AND) {
+    const query = buildQueryFromFilters(filter.meta.params, inputDataViews, options);
+    return { ...filter, query };
+  }
+
+  const should = params.map((subFilter) =>
+    buildQueryFromFilters([subFilter], inputDataViews, options)
+  );
+  const bool = { should, minimum_should_match: 1 };
+  return { ...filter, query: { bool } };
+};

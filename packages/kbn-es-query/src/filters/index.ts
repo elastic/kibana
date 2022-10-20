@@ -57,6 +57,7 @@ export {
   isScriptedPhraseFilter,
   isScriptedRangeFilter,
   getFilterParams,
+  BooleanRelation,
 } from './build_filters';
 
 export type {
@@ -79,7 +80,6 @@ export type {
   QueryStringFilter,
   CombinedFilter,
   CombinedFilterMeta,
-  FilterItem,
 } from './build_filters';
 
 export { FilterStateStore, FILTERS } from './build_filters/types';
