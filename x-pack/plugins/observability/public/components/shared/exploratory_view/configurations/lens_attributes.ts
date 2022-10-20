@@ -37,6 +37,7 @@ import {
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
 import {
   FILTER_RECORDS,
@@ -397,15 +398,14 @@ export class LensAttributes {
     return {
       ...buildNumberColumn(sourceField),
       label:
-        operationType === 'unique_count' || shortLabel
-          ? label || seriesConfig.labels[sourceField]
-          : i18n.translate('xpack.observability.expView.columns.operation.label', {
-              defaultMessage: '{operationType} of {sourceField}',
-              values: {
-                sourceField: label || seriesConfig.labels[sourceField],
-                operationType: capitalize(operationType),
-              },
-            }),
+        label ??
+        i18n.translate('xpack.observability.expView.columns.operation.label', {
+          defaultMessage: '{operationType} of {sourceField}',
+          values: {
+            sourceField: seriesConfig.labels[sourceField],
+            operationType: capitalize(operationType),
+          },
+        }),
       filter: columnFilter,
       operationType,
       params:
@@ -574,7 +574,7 @@ export class LensAttributes {
     const { type: fieldType } = fieldMeta ?? {};
 
     if (columnType === TERMS_COLUMN) {
-      return this.getTermsColumn(fieldName, columnLabel || label);
+      return this.getTermsColumn(fieldName, label || columnLabel);
     }
 
     if (fieldName === RECORDS_FIELD || columnType === FILTER_RECORDS) {
@@ -606,7 +606,7 @@ export class LensAttributes {
         columnType,
         columnFilter: columnFilters?.[0],
         operationType,
-        label: columnLabel || label,
+        label: label || columnLabel,
         seriesConfig: layerConfig.seriesConfig,
         shortLabel,
       });
@@ -615,7 +615,7 @@ export class LensAttributes {
       return this.getNumberOperationColumn({
         sourceField: fieldName,
         operationType: 'unique_count',
-        label: columnLabel || label,
+        label: label || columnLabel,
         seriesConfig: layerConfig.seriesConfig,
         columnFilter: columnFilters?.[0],
       });
@@ -687,8 +687,18 @@ export class LensAttributes {
 
   getMainYAxis(layerConfig: LayerConfig, layerId: string, columnFilter: string) {
     const { breakdown } = layerConfig;
-    const { sourceField, operationType, label, timeScale } =
-      layerConfig.seriesConfig.yAxisColumns[0];
+    const {
+      sourceField,
+      operationType,
+      label: colLabel,
+      timeScale,
+    } = layerConfig.seriesConfig.yAxisColumns[0];
+
+    let label = layerConfig.name || colLabel;
+
+    if (layerConfig.seriesConfig.reportType === ReportTypes.CORE_WEB_VITAL) {
+      label = colLabel;
+    }
 
     if (sourceField === RECORDS_PERCENTAGE_FIELD) {
       return [
@@ -1028,7 +1038,13 @@ export class LensAttributes {
 
   getXyState(): XYState {
     return {
-      legend: { isVisible: true, showSingleSeries: true, position: 'right' },
+      legend: {
+        isVisible: true,
+        showSingleSeries: true,
+        position: 'right',
+        legendSize: LegendSize.LARGE,
+        shouldTruncate: false,
+      },
       valueLabels: 'hide',
       fittingFunction: 'Linear',
       curveType: 'CURVE_MONOTONE_X' as XYCurveType,
