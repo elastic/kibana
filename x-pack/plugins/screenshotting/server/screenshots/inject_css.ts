@@ -34,7 +34,7 @@ export const injectCustomCss = async (
 
   const buffer = await fsp.readFile(filePath);
   try {
-    await browser.evaluate(
+    await browser.evaluate<string[]>(
       {
         fn: (css) => {
           const node = document.createElement('style');

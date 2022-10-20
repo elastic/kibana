@@ -53,7 +53,7 @@ export const waitForVisualizations = async (
   kbnLogger.debug(`waiting for ${toEqual} rendered elements to be in the DOM`);
 
   try {
-    await browser.waitFor({
+    await browser.waitFor<CompletedItemsCountParameters[]>({
       fn: getCompletedItemsCount,
       args: [{ renderCompleteSelector, context: CONTEXT_WAITFORELEMENTSTOBEINDOM, count: toEqual }],
       timeout,
