@@ -135,7 +135,7 @@ export const defineExplainLogRateSpikesRoute = (
           logDebugMessage('Ending analysis.');
           streamEnd();
         } else {
-          logDebugMessage('Stale end analysis call.');
+          logDebugMessage('end() was called again with isRunning alrady being fals.');
         }
       }
 
