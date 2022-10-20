@@ -94,10 +94,6 @@
   background: $euiColorEmptyShade;
 }
 
-.lnsFormula__docsSidebar {
-  background: $euiColorLightestShade;
-}
-
 .lnsFormulaOverflow {
   // Needs to be higher than the modal and all flyouts
   z-index: $euiZLevel9 + 1;
