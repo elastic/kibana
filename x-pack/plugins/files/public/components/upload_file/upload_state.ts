@@ -239,6 +239,10 @@ export class UploadState {
   public dispose = (): void => {
     for (const sub of this.subscriptions) sub.unsubscribe();
   };
+
+  public hasFiles(): boolean {
+    return this.files$$.getValue().length > 0;
+  }
 }
 
 export const createUploadState = ({

@@ -68,7 +68,7 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
           ref={ref}
           onChange={(fs) => {
             uploadState.setFiles(Array.from(fs ?? []));
-            if (immediate) uploadState.upload(meta);
+            if (immediate && uploadState.hasFiles()) uploadState.upload(meta);
           }}
           multiple={false}
           initialPromptText={initialFilePromptText}
