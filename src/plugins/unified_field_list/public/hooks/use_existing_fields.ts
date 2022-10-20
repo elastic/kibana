@@ -28,7 +28,7 @@ export interface ExistingFieldsInfo {
   hasDataViewRestrictions?: boolean;
 }
 
-export interface FetchExistenceInfoParams {
+export interface ExistingFieldsFetcherParams {
   dataViews: DataView[];
   fromDate: string;
   toDate: string;
@@ -43,6 +43,11 @@ export interface FetchExistenceInfoParams {
 }
 
 type ExistingFieldsByDataViewMap = Record<string, ExistingFieldsInfo>;
+
+export interface ExistingFieldsFetcher {
+  refetchFieldsExistenceInfo: (dataViewId?: string) => Promise<void>;
+  isProcessing: boolean;
+}
 
 export interface ExistingFieldsReader {
   hasFieldData: (dataViewId: string, fieldName: string) => boolean;
@@ -61,15 +66,11 @@ const globalMap$ = new BehaviorSubject<ExistingFieldsByDataViewMap>(initialData)
 let lastFetchRequestedAtTimestamp: number = 0; // persist last fetching time to skip older handlers if any
 
 export const useExistingFieldsFetcher = (
-  params: FetchExistenceInfoParams
-): {
-  refetchFieldsExistenceInfo: (dataViewId?: string) => Promise<void>;
-  isProcessing: boolean;
-} => {
+  params: ExistingFieldsFetcherParams
+): ExistingFieldsFetcher => {
   const mountedRef = useRef<boolean>(true);
   const [activeRequests, setActiveRequests] = useState<number>(0);
   const isProcessing = activeRequests > 0;
-  // const prevParamsRef = useRef<any[]>([]);
 
   const fetchFieldsExistenceInfo = useCallback(
     async ({
@@ -80,7 +81,7 @@ export const useExistingFieldsFetcher = (
       toDate,
       services: { dataViews, data, core },
       onNoData,
-    }: FetchExistenceInfoParams & { dataViewId: string | undefined }): Promise<void> => {
+    }: ExistingFieldsFetcherParams & { dataViewId: string | undefined }): Promise<void> => {
       if (!dataViewId) {
         return;
       }
@@ -94,15 +95,13 @@ export const useExistingFieldsFetcher = (
       const numberOfFetches = (currentInfo?.numberOfFetches ?? 0) + 1;
       const dataView = await dataViews.get(dataViewId);
 
-      // console.log('fetching', dataViewId);
-
       if (!dataView?.title) {
         return;
       }
 
       setActiveRequests((value) => value + 1);
 
-      const hasRestrictions = Boolean(dataView?.typeMeta?.aggs);
+      const hasRestrictions = Boolean(dataView?.getAggregationRestrictions?.());
       const info: ExistingFieldsInfo = {
         ...unknownInfo,
         numberOfFetches,
@@ -113,7 +112,6 @@ export const useExistingFieldsFetcher = (
           info.fetchStatus = ExistenceFetchStatus.succeeded;
           info.hasDataViewRestrictions = true;
         } else {
-          // console.log('requesting data');
           const result = await loadFieldExisting({
             dslQuery: await buildSafeEsQuery(
               dataView,
@@ -130,7 +128,6 @@ export const useExistingFieldsFetcher = (
             dataView,
           });
 
-          // console.log({ result });
           const existingFieldNames = result?.existingFieldNames || [];
 
           if (
@@ -152,7 +149,6 @@ export const useExistingFieldsFetcher = (
 
       // skip redundant results
       if (mountedRef.current && Date.now() >= lastFetchRequestedAtTimestamp) {
-        // console.log('finished', info);
         globalMap$.next({
           ...globalMap$.getValue(),
           [dataViewId]: info,
@@ -167,23 +163,6 @@ export const useExistingFieldsFetcher = (
   const dataViewsHash = getDataViewsHash(params.dataViews);
   const refetchFieldsExistenceInfo = useCallback(
     async (dataViewId?: string) => {
-      // const currentParams = [
-      //   fetchFieldsExistenceInfo,
-      //   dataViewsHash,
-      //   params.query,
-      //   params.filters,
-      //   params.fromDate,
-      //   params.toDate,
-      // ];
-      //
-      // currentParams.forEach((param, index) => {
-      //   if (param !== prevParamsRef.current[index]) {
-      //     console.log('different param', param, prevParamsRef.current[index]);
-      //   }
-      // });
-      //
-      // prevParamsRef.current = currentParams;
-      // console.log('refetch triggered', { dataViewId });
       lastFetchRequestedAtTimestamp = Date.now();
       // refetch only for the specified data view
       if (dataViewId) {
@@ -242,7 +221,6 @@ export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
 
   useEffect(() => {
     const subscription = globalMap$.subscribe((data) => {
-      // console.log('received', data);
       if (mountedRef.current && Object.keys(data).length > 0) {
         setExistingFieldsByDataViewMap((savedData) => ({
           ...savedData,
@@ -266,7 +244,7 @@ export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
           : Boolean(info?.existingFieldsByFieldNameMap[fieldName]);
       }
 
-      return true; // TODO: double check `true` returns
+      return true; // TODO: double check `true` returns when existence info is unknown
     },
     [existingFieldsByDataViewMap]
   );
@@ -311,7 +289,7 @@ export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
   );
 };
 
-export const resetFieldsExistenceCache = () => {
+export const resetExistingFieldsCache = () => {
   globalMap$.next(initialData);
 };
 
@@ -321,7 +299,7 @@ function getDataViewsHash(dataViews: DataView[]): string {
       // From Lens it's coming as IndexPattern type and not the real DataView type
       .map(
         (dataView) =>
-          `${dataView.id}:${dataView.title}:${dataView.timeFieldName}:${
+          `${dataView.id}:${dataView.title}:${dataView.timeFieldName || 'no-timefield'}:${
             dataView.fields?.length ?? 0 // adding a field will also trigger a refetch of fields existence data
           }`
       )

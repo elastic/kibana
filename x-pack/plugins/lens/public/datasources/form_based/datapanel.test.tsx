@@ -373,7 +373,7 @@ describe('FormBased Data Panel', () => {
     (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockClear();
     (UseExistingFieldsApi.useExistingFieldsReader as jest.Mock).mockClear();
     (UseExistingFieldsApi.useExistingFieldsFetcher as jest.Mock).mockClear();
-    UseExistingFieldsApi.resetFieldsExistenceCache();
+    UseExistingFieldsApi.resetExistingFieldsCache();
   });
 
   it('should render a warning if there are no index patterns', async () => {

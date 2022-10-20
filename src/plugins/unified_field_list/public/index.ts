@@ -53,10 +53,15 @@ export { ExistenceFetchStatus, FieldsGroupNames } from './types';
 export {
   useExistingFieldsFetcher,
   useExistingFieldsReader,
-  resetFieldsExistenceCache,
+  resetExistingFieldsCache,
   type ExistingFieldsInfo,
-  type FetchExistenceInfoParams,
+  type ExistingFieldsFetcherParams,
+  type ExistingFieldsFetcher,
   type ExistingFieldsReader,
 } from './hooks/use_existing_fields';
 
-export { useGroupedFields } from './hooks/use_grouped_fields';
+export {
+  useGroupedFields,
+  type GroupedFieldsParams,
+  type GroupedFieldsResult,
+} from './hooks/use_grouped_fields';
