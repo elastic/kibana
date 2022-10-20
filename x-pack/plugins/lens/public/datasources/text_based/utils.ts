@@ -115,6 +115,9 @@ export function getIndexPatternFromTextBasedQuery(query: AggregateQuery): string
   if ('sql' in query) {
     indexPattern = getIndexPatternFromSQLQuery(query.sql);
   }
+  if ('esql' in query) {
+    indexPattern = getIndexPatternFromSQLQuery(query.esql);
+  }
   // other textbased queries....
 
   return indexPattern;
