@@ -16,10 +16,6 @@ import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import { getHostActionFileDownloadUrl } from '../../services/response_actions/get_host_action_file_download_url';
 import type { ActionDetails } from '../../../../common/endpoint/types/actions';
 
-const PASSCODE_VALUE = Object.freeze({
-  passcode: 'elastic',
-});
-
 const STYLE_INHERIT_FONT_FAMILY = Object.freeze<CSSProperties>({
   fontFamily: 'inherit',
 });
@@ -70,7 +66,9 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
           <FormattedMessage
             id="xpack.securitySolution.responseActionFileDownloadLink.passcodeInfo"
             defaultMessage="(ZIP file passcode: {passcode})"
-            values={PASSCODE_VALUE}
+            values={{
+              passcode: 'elastic',
+            }}
           />
         </EuiText>
       </>
