@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -42,12 +41,7 @@ const TinesActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
     <EuiFlexItem>
       <EuiSpacer size="s" />
       <EuiTitle size="xxs">
-        <h4>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.components.builtinActionTypes.tinesAction.authenticationLabel"
-            defaultMessage="Authentication"
-          />
-        </h4>
+        <h4>{i18n.AUTHENTICATION_TITLE}</h4>
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem>

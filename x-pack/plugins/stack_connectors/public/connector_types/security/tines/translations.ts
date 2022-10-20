@@ -14,7 +14,12 @@ export const URL_LABEL = i18n.translate(
     defaultMessage: 'Tenant URL',
   }
 );
-
+export const AUTHENTICATION_TITLE = i18n.translate(
+  'xpack.stackConnectors.security.tines.config.authenticationTitle',
+  {
+    defaultMessage: 'Authentication',
+  }
+);
 export const EMAIL_LABEL = i18n.translate(
   'xpack.stackConnectors.security.tines.config.emailTextFieldLabel',
   {
