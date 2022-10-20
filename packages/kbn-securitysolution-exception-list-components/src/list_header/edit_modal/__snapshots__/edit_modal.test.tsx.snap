@@ -110,22 +110,15 @@ Object {
                     <div
                       class="euiFormRow__fieldWrapper"
                     >
-                      <div
-                        class="euiFormControlLayout"
+                      <textarea
+                        class="euiTextArea euiTextArea--resizeVertical"
+                        data-test-subj="editModalDescriptionTextField"
+                        id="generated-id"
+                        name="description"
+                        rows="6"
                       >
-                        <div
-                          class="euiFormControlLayout__childrenWrapper"
-                        >
-                          <input
-                            class="euiFieldText"
-                            data-test-subj="editModalDescriptionTextField"
-                            id="generated-id"
-                            name="description"
-                            type="text"
-                            value="list description"
-                          />
-                        </div>
-                      </div>
+                        list description
+                      </textarea>
                     </div>
                   </div>
                 </form>
