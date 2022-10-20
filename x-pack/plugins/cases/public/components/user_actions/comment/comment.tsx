@@ -24,10 +24,8 @@ const getDeleteLabelTitle = (userAction: UserActionResponse<CommentUserAction>) 
   const { comment } = userAction.payload;
 
   if (comment.type === CommentType.alert) {
-    const alertLabel =
-      Array.isArray(comment.alertId) && comment.alertId.length > 1
-        ? i18n.MULTIPLE_ALERTS(comment.alertId.length)
-        : i18n.ONE_ALERT;
+    const totalAlerts = Array.isArray(comment.alertId) ? comment.alertId.length : 1;
+    const alertLabel = i18n.MULTIPLE_ALERTS(totalAlerts);
 
     return `${i18n.REMOVED_FIELD} ${alertLabel}`;
   }

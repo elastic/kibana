@@ -28,7 +28,7 @@ describe('createDescriptionUserActionBuilder ', () => {
     jest.clearAllMocks();
   });
 
-  it('renders correctly  a description', async () => {
+  it('renders correctly description', async () => {
     const descriptionUserAction = getDescriptionUserAction({
       ...builderArgs,
       onUpdateField,

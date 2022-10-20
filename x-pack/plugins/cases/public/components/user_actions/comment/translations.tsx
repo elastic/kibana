@@ -22,14 +22,11 @@ export const DEFAULT_EVENT_ATTACHMENT_TITLE = i18n.translate(
   }
 );
 
-export const ONE_ALERT = i18n.translate('xpack.cases.caseView.alerts.oneAlert', {
-  defaultMessage: 'one alert',
-});
-
 export const MULTIPLE_ALERTS = (totalAlerts: number): string =>
   i18n.translate('xpack.cases.caseView.alerts.multipleAlerts', {
     values: { totalAlerts },
-    defaultMessage: '{totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}',
+    defaultMessage:
+      '{totalAlerts, plural, =1 {one} other {{totalAlerts}}} {totalAlerts, plural, =1 {alert} other {alerts}}',
   });
 
 export const ATTACHMENT = i18n.translate('xpack.cases.userActions.attachment', {
