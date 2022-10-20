@@ -35,6 +35,7 @@ export async function createApmTelemetry({
   taskManager,
   logger,
   kibanaVersion,
+  isProd,
 }: {
   core: CoreSetup;
   config$: Observable<APMConfig>;
@@ -42,6 +43,7 @@ export async function createApmTelemetry({
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   kibanaVersion: string;
+  isProd: boolean;
 }) {
   taskManager.registerTaskDefinitions({
     [APM_TELEMETRY_TASK_NAME]: {
@@ -93,6 +95,7 @@ export async function createApmTelemetry({
       indicesStats,
       transportRequest,
       savedObjectsClient,
+      isProd,
     });
 
     await savedObjectsClient.create(

@@ -6,11 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import reduceReducers from 'reduce-reducers';
+import type { Action, Store } from 'redux';
 import type { Subscription } from 'rxjs';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { combineLatestWith, pluck } from 'rxjs/operators';
-import type { AnyAction, Reducer } from 'redux';
+import { Subject } from 'rxjs';
+import { combineLatestWith } from 'rxjs/operators';
 import type {
   AppMountParameters,
   AppUpdater,
@@ -21,14 +20,12 @@ import type {
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { TimelineState } from '@kbn/timelines-plugin/public';
 import type {
   PluginSetup,
   PluginStart,
   SetupPlugins,
   StartPlugins,
   StartServices,
-  AppObservableLibs,
   SubPlugins,
   StartedSubPlugins,
   StartPluginsDependencies,
@@ -41,19 +38,13 @@ import {
   APP_ID,
   APP_UI_ID,
   APP_PATH,
-  DEFAULT_INDEX_KEY,
   APP_ICON_SOLUTION,
-  DETECTION_ENGINE_INDEX_URL,
-  SERVER_APP_ID,
-  SOURCERER_API_URL,
   ENABLE_GROUPED_NAVIGATION,
 } from '../common/constants';
 
 import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
 import type { LinksPermissions } from './common/links';
 import { updateAppLinks } from './common/links';
-import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
-import type { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
 import type { SecuritySolutionUiConfigType } from './common/types';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
@@ -67,10 +58,11 @@ import { getLazyEndpointGenericErrorsListExtension } from './management/pages/po
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { LazyEndpointCustomAssetsExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_custom_assets_extension';
-import type { SourcererModel, KibanaDataView } from './common/store/sourcerer/model';
-import { initDataView } from './common/store/sourcerer/model';
-import type { SecurityDataView } from './common/containers/sourcerer/api';
-
+import type { State } from './common/store/types';
+/**
+ * The Redux store type for the Security app.
+ */
+export type SecurityAppStore = Store<State, Action>;
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   readonly kibanaVersion: string;
   private config: SecuritySolutionUiConfigType;
@@ -169,6 +161,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
         const { renderApp } = await this.lazyApplicationDependencies();
+        const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
         return renderApp({
           ...params,
           services: await startServices(params),
@@ -190,6 +183,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
 
+        const { manageOldSiemRoutes } = await this.lazyHelpersForRoutes();
         const subscription = this.appUpdater$.subscribe(() => {
           // wait for app initialization to set the links
           manageOldSiemRoutes(coreStart);
@@ -275,6 +269,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   public stop() {
     licenseService.stop();
     return {};
+  }
+
+  private lazyHelpersForRoutes() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "lazyHelpersForRoutes" */
+      './helpers'
+    );
   }
 
   /**
@@ -390,96 +395,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     subPlugins: StartedSubPlugins
   ): Promise<SecurityAppStore> {
     if (!this._store) {
-      let signal: { name: string | null } = { name: null };
-      try {
-        if (coreStart.application.capabilities[SERVER_APP_ID].show === true) {
-          signal = await coreStart.http.fetch(DETECTION_ENGINE_INDEX_URL, {
-            method: 'GET',
-          });
-        }
-      } catch {
-        signal = { name: null };
-      }
+      const { createStoreFactory } = await this.lazyApplicationDependencies();
 
-      const configPatternList = coreStart.uiSettings.get(DEFAULT_INDEX_KEY);
-      let defaultDataView: SourcererModel['defaultDataView'];
-      let kibanaDataViews: SourcererModel['kibanaDataViews'];
-      try {
-        // check for/generate default Security Solution Kibana data view
-        const sourcererDataViews: SecurityDataView = await coreStart.http.fetch(SOURCERER_API_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            patternList: [...configPatternList, ...(signal.name != null ? [signal.name] : [])],
-          }),
-        });
-        defaultDataView = { ...initDataView, ...sourcererDataViews.defaultDataView };
-        kibanaDataViews = sourcererDataViews.kibanaDataViews.map((dataView: KibanaDataView) => ({
-          ...initDataView,
-          ...dataView,
-        }));
-      } catch (error) {
-        defaultDataView = { ...initDataView, error };
-        kibanaDataViews = [];
-      }
-      const { createStore, createInitialState } = await this.lazyApplicationDependencies();
-
-      const appLibs: AppObservableLibs = { kibana: coreStart };
-      const libs$ = new BehaviorSubject(appLibs);
-
-      const timelineInitialState = {
-        timeline: {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          ...subPlugins.timelines.store.initialState.timeline!,
-          timelineById: {
-            ...subPlugins.timelines.store.initialState.timeline.timelineById,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            ...subPlugins.alerts.storageTimelines!.timelineById,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            ...subPlugins.rules.storageTimelines!.timelineById,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            ...subPlugins.exceptions.storageTimelines!.timelineById,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            ...subPlugins.hosts.storageTimelines!.timelineById,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            ...subPlugins.network.storageTimelines!.timelineById,
-          },
-        },
-      };
-
-      const tGridReducer = startPlugins.timelines?.getTGridReducer() ?? {};
-      const timelineReducer = reduceReducers(
-        timelineInitialState.timeline,
-        tGridReducer,
-        subPlugins.timelines.store.reducer.timeline
-      ) as unknown as Reducer<TimelineState, AnyAction>;
-
-      this._store = createStore(
-        createInitialState(
-          {
-            ...subPlugins.hosts.store.initialState,
-            ...subPlugins.users.store.initialState,
-            ...subPlugins.network.store.initialState,
-            ...timelineInitialState,
-            ...subPlugins.management.store.initialState,
-          },
-          {
-            defaultDataView,
-            kibanaDataViews,
-            signalIndexName: signal.name,
-            enableExperimental: this.experimentalFeatures,
-          }
-        ),
-        {
-          ...subPlugins.hosts.store.reducer,
-          ...subPlugins.users.store.reducer,
-          ...subPlugins.network.store.reducer,
-          timeline: timelineReducer,
-          ...subPlugins.management.store.reducer,
-          ...tGridReducer,
-        },
-        libs$.pipe(pluck('kibana')),
+      this._store = await createStoreFactory(
+        coreStart,
+        startPlugins,
+        subPlugins,
         this.storage,
-        [...(subPlugins.management.store.middleware ?? [])]
+        this.experimentalFeatures
       );
     }
     if (startPlugins.timelines) {

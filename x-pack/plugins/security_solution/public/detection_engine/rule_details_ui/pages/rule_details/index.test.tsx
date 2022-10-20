@@ -8,6 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 import '../../../../common/mock/match_media';
 import {
@@ -162,7 +163,13 @@ const mockRule = {
   exceptions_list: [],
 };
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const store = createStore(
+  state,
+  SUB_PLUGINS_REDUCER,
+  { dataTable: tGridReducer },
+  kibanaObservable,
+  storage
+);
 
 describe('RuleDetailsPageComponent', () => {
   beforeAll(() => {
