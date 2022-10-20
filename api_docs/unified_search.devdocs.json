@@ -328,7 +328,7 @@
                 "section": "def-public.TimeHistoryContract",
                 "text": "TimeHistoryContract"
               },
-              " | undefined; customSubmitButton?: React.ReactNode; screenTitle?: string | undefined; showQueryBar?: boolean | undefined; showQueryInput?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; hiddenFilterPanelOptions?: ",
+              " | undefined; customSubmitButton?: React.ReactNode; screenTitle?: string | undefined; showQueryInput?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; hiddenFilterPanelOptions?: ",
               "FilterPanelOption",
               "[] | undefined; isRefreshPaused?: boolean | undefined; dateRangeFrom?: string | undefined; dateRangeTo?: string | undefined; showSaveQuery?: boolean | undefined; onQueryChange?: ((payload: { dateRange: ",
               "TimeRange",
@@ -1229,6 +1229,8 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
+              " | ",
+              "DataViewByIdOrTitle",
               ")[]"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",

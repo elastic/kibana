@@ -33,7 +33,6 @@ interface Props {
   query?: Query;
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   showLegend?: boolean;
-  timelineId?: string;
   runtimeMappings?: MappingRuntimeFields;
 }
 
@@ -46,7 +45,6 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
   query,
   showLegend,
   setAbsoluteRangeDatePickerTarget = InputsModelId.global,
-  timelineId,
   runtimeMappings,
 }) => {
   const dispatch = useDispatch();

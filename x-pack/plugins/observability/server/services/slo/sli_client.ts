@@ -5,65 +5,143 @@
  * 2.0.
  */
 
+import { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { assertNever } from '@kbn/std';
 import { SLO_DESTINATION_INDEX_NAME } from '../../assets/constants';
-import { InternalQueryError, NotSupportedError } from '../../errors';
-import { IndicatorData, SLO } from '../../types/models';
+import { toDateRange } from '../../domain/services/date_range';
+import { InternalQueryError } from '../../errors';
+import { Duration, IndicatorData, SLO } from '../../types/models';
+import { calendarAlignedTimeWindowSchema, rollingTimeWindowSchema } from '../../types/schema';
+import {
+  occurencesBudgetingMethodSchema,
+  timeslicesBudgetingMethodSchema,
+} from '../../types/schema';
 
 export interface SLIClient {
-  fetchDataForSLOTimeWindow(slo: SLO): Promise<IndicatorData>;
+  fetchCurrentSLIData(slo: SLO): Promise<IndicatorData>;
 }
+
+type AggKey = 'good' | 'total';
 
 export class DefaultSLIClient implements SLIClient {
   constructor(private esClient: ElasticsearchClient) {}
 
-  async fetchDataForSLOTimeWindow(slo: SLO): Promise<IndicatorData> {
-    if (slo.budgeting_method !== 'occurrences') {
-      throw new NotSupportedError(`Budgeting method: ${slo.budgeting_method}`);
+  async fetchCurrentSLIData(slo: SLO): Promise<IndicatorData> {
+    if (occurencesBudgetingMethodSchema.is(slo.budgeting_method)) {
+      const result = await this.esClient.search<unknown, Record<AggKey, AggregationsSumAggregate>>({
+        ...commonQuery(slo),
+        aggs: {
+          good: { sum: { field: 'slo.numerator' } },
+          total: { sum: { field: 'slo.denominator' } },
+        },
+      });
+
+      return handleResult(result.aggregations);
     }
 
-    const result = await this.esClient.search({
-      size: 0,
-      index: `${SLO_DESTINATION_INDEX_NAME}*`,
-      query: {
-        bool: {
-          filter: [{ term: { 'slo.id': slo.id } }, { term: { 'slo.revision': slo.revision } }],
-        },
-      },
-      aggs: {
-        full_window: {
-          date_range: {
-            field: '@timestamp',
-            ranges: [fromSLOTimeWindowToRange(slo)],
+    if (timeslicesBudgetingMethodSchema.is(slo.budgeting_method)) {
+      const result = await this.esClient.search<unknown, Record<AggKey, AggregationsSumAggregate>>({
+        ...commonQuery(slo),
+        aggs: {
+          slices: {
+            date_histogram: {
+              field: '@timestamp',
+              fixed_interval: toInterval(slo.objective.timeslice_window),
+            },
+            aggs: {
+              good: { sum: { field: 'slo.numerator' } },
+              total: { sum: { field: 'slo.denominator' } },
+              good_slice: {
+                bucket_script: {
+                  buckets_path: {
+                    good: 'good',
+                    total: 'total',
+                  },
+                  script: `params.good / params.total >= ${slo.objective.timeslice_target} ? 1 : 0`,
+                },
+              },
+              count_slice: {
+                bucket_script: {
+                  buckets_path: {},
+                  script: '1',
+                },
+              },
+            },
           },
-          aggs: {
-            good: { sum: { field: 'slo.numerator' } },
-            total: { sum: { field: 'slo.denominator' } },
+          good: {
+            sum_bucket: {
+              buckets_path: 'slices>good_slice.value',
+            },
+          },
+          total: {
+            sum_bucket: {
+              buckets_path: 'slices>count_slice.value',
+            },
           },
         },
-      },
-    });
+      });
 
-    // @ts-ignore buckets is not recognized
-    const aggs = result.aggregations?.full_window?.buckets[0];
-    if (aggs === undefined) {
-      throw new InternalQueryError('SLI aggregation query');
+      return handleResult(result.aggregations);
     }
 
-    return {
-      good: aggs.good.value,
-      total: aggs.total.value,
-    };
+    assertNever(slo.budgeting_method);
   }
 }
 
-function fromSLOTimeWindowToRange(slo: SLO): { from: string; to: string } {
-  if (!slo.time_window.is_rolling) {
-    throw new NotSupportedError(`Time window: ${slo.time_window.is_rolling}`);
+function fromSLOTimeWindowToEsRange(slo: SLO): { gte: string; lt: string } {
+  if (calendarAlignedTimeWindowSchema.is(slo.time_window)) {
+    const dateRange = toDateRange(slo.time_window);
+
+    return {
+      gte: `${dateRange.from.toISOString()}`,
+      lt: `${dateRange.to.toISOString()}`,
+    };
+  }
+
+  if (rollingTimeWindowSchema.is(slo.time_window)) {
+    return {
+      gte: `now-${slo.time_window.duration.value}${slo.time_window.duration.unit}/m`,
+      lt: `now/m`,
+    };
+  }
+
+  assertNever(slo.time_window);
+}
+
+function commonQuery(slo: SLO) {
+  return {
+    size: 0,
+    index: `${SLO_DESTINATION_INDEX_NAME}*`,
+    query: {
+      bool: {
+        filter: [
+          { term: { 'slo.id': slo.id } },
+          { term: { 'slo.revision': slo.revision } },
+          { range: { '@timestamp': fromSLOTimeWindowToEsRange(slo) } },
+        ],
+      },
+    },
+  };
+}
+
+function handleResult(
+  aggregations: Record<AggKey, AggregationsSumAggregate> | undefined
+): IndicatorData {
+  const good = aggregations?.good;
+  const total = aggregations?.total;
+  if (good === undefined || good.value === null || total === undefined || total.value === null) {
+    throw new InternalQueryError('SLI aggregation query');
   }
 
   return {
-    from: `now-${slo.time_window.duration}/m`,
-    to: 'now/m',
+    good: good.value,
+    total: total.value,
   };
+}
+
+function toInterval(duration: Duration | undefined): string {
+  if (duration === undefined) return '1m';
+
+  return `${duration.value}${duration.unit}`;
 }
