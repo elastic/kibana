@@ -4,13 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useGetUrlParams } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
+import { AvailabilityPanel } from '../monitor_summary/availability_panel';
+import { DurationPanel } from '../monitor_summary/duration_panel';
 import { MonitorDurationTrend } from '../monitor_summary/duration_trend';
 import { TestRunsTable } from '../monitor_summary/test_runs_table';
+import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
 
 export const MonitorHistory = () => {
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
@@ -27,6 +30,20 @@ export const MonitorHistory = () => {
               <EuiTitle size="xs">
                 <h3>{STATS_LABEL}</h3>
               </EuiTitle>
+              <EuiFlexGrid columns={2}>
+                <EuiFlexItem>Test runs</EuiFlexItem>
+                <EuiFlexItem>
+                  <AvailabilityPanel from={dateRangeStart} to={dateRangeEnd} />
+                </EuiFlexItem>
+                <EuiFlexItem>Complete</EuiFlexItem>
+                <EuiFlexItem>
+                  <DurationPanel from={dateRangeStart} to={dateRangeEnd} />
+                </EuiFlexItem>
+                <EuiFlexItem>Failed</EuiFlexItem>
+                <EuiFlexItem>
+                  <MonitorErrorsCount from={dateRangeStart} to={dateRangeEnd} />
+                </EuiFlexItem>
+              </EuiFlexGrid>
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem grow={2}>
