@@ -48,7 +48,7 @@ export const explainLackOfPermission = (
   } else if (isMlRule(rule.type) && !hasMlPermissions) {
     return detectionI18n.ML_RULES_DISABLED_MESSAGE;
   } else if (!canEditRuleWithActions(rule, hasReadActionsPrivileges)) {
-    return i18nActions.LACK_OF_KIBANA_PRIVILEGES;
+    return i18nActions.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES;
   } else if (!hasUserCRUDPermission(canUserCRUD)) {
     return i18nActions.LACK_OF_RULE_EDITING_PRIVILEGES;
   } else {

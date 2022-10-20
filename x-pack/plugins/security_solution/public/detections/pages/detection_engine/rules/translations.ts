@@ -484,8 +484,8 @@ export const EDIT_RULE_SETTINGS = i18n.translate(
   }
 );
 
-export const LACK_OF_KIBANA_PRIVILEGES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaPrivileges',
+export const LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaActionsFeaturePrivileges',
   {
     defaultMessage: 'You do not have Kibana Actions privileges',
   }

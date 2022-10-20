@@ -98,7 +98,7 @@ const RuleActionsOverflowComponent = ({
                 position="left"
                 content={
                   !canEditRuleWithActions(rule, canDuplicateRuleWithActions)
-                    ? i18nActions.LACK_OF_KIBANA_PRIVILEGES
+                    ? i18nActions.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES
                     : undefined
                 }
               >
