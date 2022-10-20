@@ -7,7 +7,6 @@
 
 import type { Filter, EsQueryConfig, Query } from '@kbn/es-query';
 import { DataViewBase, FilterStateStore } from '@kbn/es-query';
-import { assertUnreachable } from '@kbn/timelines-plugin/common/utility_types';
 import { get, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { elementOrChildrenHasFocus } from '../../../common/utils/accessibility';
@@ -19,9 +18,8 @@ import {
   IS_OPERATOR,
 } from '../../../common/types/timeline';
 import type { DataProvider, DataProvidersAnd } from '../../../common/types/timeline';
-
+import { assertUnreachable } from '../../../common/utility_types';
 import { convertToBuildEsQuery, escapeQueryValue } from '../utils/keury';
-
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
 import { TableId } from '../../types';
 import { ViewSelection } from './event_rendered_view/selector';

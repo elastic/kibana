@@ -744,9 +744,9 @@ describe('isStringOrNumberArray', () => {
   test('it returns false when value is an array of mixed types', () => {
     expect(isStringOrNumberArray(['mixed', 123, 'types'])).toBe(false);
   });
-  test('it returns false when value is an array of mixed types', () => {
+  test('it returns false when value is an array of bad values', () => {
     const badValues = [undefined, null, {}] as unknown as string[];
-    expect(isStringOrNumberArray(['mixed', 123, 'types', ...badValues])).toBe(false);
+    expect(isStringOrNumberArray(badValues)).toBe(false);
   });
 
   test('it returns true when value is an empty array', () => {
@@ -812,7 +812,7 @@ describe('buildISQueryMatch', () => {
   });
 });
 
-describe('buildISOneOfQueryMatch', () => {
+describe('buildISONEOFQueryMatch', () => {
   it('correcty computes IS ONE OF query with numbers', () => {
     expect(
       buildISONEOFQueryMatch({

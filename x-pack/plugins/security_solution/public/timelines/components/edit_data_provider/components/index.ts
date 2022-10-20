@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { ControlledComboboxInput } from './ControlledComboboxInput';
-export { ControlledDefaultInput } from './ControlledDefaultInput';
+export { ControlledComboboxInput } from './controlled_combobox_input';
+export { ControlledDefaultInput } from './controlled_default_input';

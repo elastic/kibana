@@ -32,8 +32,8 @@ import {
   selectionsAreValid,
 } from './helpers';
 
-import { ControlledComboboxInput } from './components';
-import { ControlledDefaultInput } from './components';
+import { ControlledComboboxInput, ControlledDefaultInput } from './components';
+
 import * as i18n from './translations';
 
 const EDIT_DATA_PROVIDER_WIDTH = 400;
