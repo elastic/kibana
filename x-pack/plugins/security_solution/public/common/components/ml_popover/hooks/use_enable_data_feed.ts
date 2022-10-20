@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../lib/telemetry';
 import { setupMlJob, startDatafeeds, stopDatafeeds } from '../api';
@@ -17,49 +17,52 @@ export const useEnableDataFeed = () => {
   const { addError } = useAppToasts();
   const [isLoading, setIsLoading] = useState(false);
 
-  const enableDatafeed = async (job: SecurityJob, latestTimestampMs: number, enable: boolean) => {
-    submitTelemetry(job, enable);
+  const enableDatafeed = useCallback(
+    async (job: SecurityJob, latestTimestampMs: number, enable: boolean) => {
+      submitTelemetry(job, enable);
 
-    if (!job.isInstalled) {
+      if (!job.isInstalled) {
+        setIsLoading(true);
+        try {
+          await setupMlJob({
+            configTemplate: job.moduleId,
+            indexPatternName: job.defaultIndexPattern,
+            jobIdErrorFilter: [job.id],
+            groups: job.groups,
+          });
+          setIsLoading(false);
+        } catch (error) {
+          addError(error, { title: i18n.CREATE_JOB_FAILURE });
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Max start time for job is no more than two weeks ago to ensure job performance
+      const date = new Date();
+      const maxStartTime = date.setDate(date.getDate() - 14);
+
       setIsLoading(true);
-      try {
-        await setupMlJob({
-          configTemplate: job.moduleId,
-          indexPatternName: job.defaultIndexPattern,
-          jobIdErrorFilter: [job.id],
-          groups: job.groups,
-        });
-        setIsLoading(false);
-      } catch (error) {
-        addError(error, { title: i18n.CREATE_JOB_FAILURE });
-        setIsLoading(false);
-        return;
+      if (enable) {
+        const startTime = Math.max(latestTimestampMs, maxStartTime);
+        try {
+          await startDatafeeds({ datafeedIds: [`datafeed-${job.id}`], start: startTime });
+        } catch (error) {
+          track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_ENABLE_FAILURE);
+          addError(error, { title: i18n.START_JOB_FAILURE });
+        }
+      } else {
+        try {
+          await stopDatafeeds({ datafeedIds: [`datafeed-${job.id}`] });
+        } catch (error) {
+          track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_DISABLE_FAILURE);
+          addError(error, { title: i18n.STOP_JOB_FAILURE });
+        }
       }
-    }
-
-    // Max start time for job is no more than two weeks ago to ensure job performance
-    const date = new Date();
-    const maxStartTime = date.setDate(date.getDate() - 14);
-
-    setIsLoading(true);
-    if (enable) {
-      const startTime = Math.max(latestTimestampMs, maxStartTime);
-      try {
-        await startDatafeeds({ datafeedIds: [`datafeed-${job.id}`], start: startTime });
-      } catch (error) {
-        track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_ENABLE_FAILURE);
-        addError(error, { title: i18n.START_JOB_FAILURE });
-      }
-    } else {
-      try {
-        await stopDatafeeds({ datafeedIds: [`datafeed-${job.id}`] });
-      } catch (error) {
-        track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.JOB_DISABLE_FAILURE);
-        addError(error, { title: i18n.STOP_JOB_FAILURE });
-      }
-    }
-    setIsLoading(false);
-  };
+      setIsLoading(false);
+    },
+    [addError]
+  );
 
   return { enableDatafeed, isLoading };
 };
