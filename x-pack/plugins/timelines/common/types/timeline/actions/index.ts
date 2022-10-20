@@ -92,7 +92,6 @@ export interface BulkActionsProps {
   onUpdateSuccess?: OnUpdateAlertStatusSuccess;
   onUpdateFailure?: OnUpdateAlertStatusError;
   customBulkActions?: CustomBulkActionProp[];
-  scopeId?: string;
 }
 
 export interface HeaderActionProps {

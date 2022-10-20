@@ -758,6 +758,16 @@ describe('metric visualization', () => {
     `);
   });
 
+  it('removes all accessors from a layer', () => {
+    const chk = visualization.removeLayer!(fullState, 'first');
+    expect(chk.metricAccessor).toBeUndefined();
+    expect(chk.trendlineLayerId).toBeUndefined();
+    expect(chk.trendlineLayerType).toBeUndefined();
+    expect(chk.trendlineMetricAccessor).toBeUndefined();
+    expect(chk.trendlineTimeAccessor).toBeUndefined();
+    expect(chk.trendlineBreakdownByAccessor).toBeUndefined();
+  });
+
   it('appends a trendline layer', () => {
     const newLayerId = 'new-layer-id';
     const chk = visualization.appendLayer!(fullState, newLayerId, 'metricTrendline', '');
@@ -767,6 +777,7 @@ describe('metric visualization', () => {
 
   it('removes trendline layer', () => {
     const chk = visualization.removeLayer!(fullStateWTrend, fullStateWTrend.trendlineLayerId);
+    expect(chk.metricAccessor).toBe('metric-col-id');
     expect(chk.trendlineLayerId).toBeUndefined();
     expect(chk.trendlineLayerType).toBeUndefined();
     expect(chk.trendlineMetricAccessor).toBeUndefined();

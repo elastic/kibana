@@ -36,6 +36,7 @@ import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps
 import { SinglePingResult } from '../../common/monitor_test_result/single_ping_result';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
 
+import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { useJourneySteps } from '../hooks/use_journey_steps';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 
@@ -103,9 +104,11 @@ const PanelHeader = ({
 
   const { basePath } = useSyntheticsSettingsContext();
 
+  const format = useKibanaDateFormat();
+
   const lastRunTimestamp = useMemo(
-    () => (latestPing?.timestamp ? formatTestRunAt(latestPing?.timestamp) : ''),
-    [latestPing?.timestamp]
+    () => (latestPing?.timestamp ? formatTestRunAt(latestPing?.timestamp, format) : ''),
+    [latestPing?.timestamp, format]
   );
 
   const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === DataStream.BROWSER;

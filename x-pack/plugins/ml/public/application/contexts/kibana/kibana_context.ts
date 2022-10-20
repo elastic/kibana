@@ -6,6 +6,7 @@
  */
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { useKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
@@ -27,6 +28,7 @@ import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   security?: SecurityPluginSetup;
   licenseManagement?: LicenseManagementUIPluginSetup;
   share: SharePluginStart;
