@@ -43,6 +43,7 @@
     "fieldFormats": "src/plugins/field_formats",
     "flot": "packages/kbn-flot-charts/lib",
     "guidedOnboarding": "src/plugins/guided_onboarding",
+    "guidedOnboardingPackage": "packages/kbn-guided-onboarding",
     "home": "src/plugins/home",
     "homePackages": "packages/home",
     "indexPatternEditor": "src/plugins/data_view_editor",

@@ -8,6 +8,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { BehaviorSubject, map, from, concatMap, of, Observable, firstValueFrom } from 'rxjs';
+import type { GuideState, GuideId, GuideStep, GuideStepIds } from '@kbn/guided-onboarding';
 
 import { GuidedOnboardingApi } from '../types';
 import {
@@ -21,7 +22,6 @@ import {
   isStepReadyToComplete,
 } from './helpers';
 import { API_BASE_PATH } from '../../common/constants';
-import type { GuideState, GuideId, GuideStep, GuideStepIds } from '../../common/types';
 
 export class ApiService implements GuidedOnboardingApi {
   private client: HttpSetup | undefined;
@@ -148,7 +148,7 @@ export class ApiService implements GuidedOnboardingApi {
 
       const updatedGuide: GuideState = {
         isActive: true,
-        status: 'in_progress',
+        status: 'not_started',
         steps: updatedSteps,
         guideId,
       };

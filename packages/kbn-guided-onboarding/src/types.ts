@@ -14,13 +14,21 @@ export type SearchStepIds = 'add_data' | 'browse_docs' | 'search_experience';
 
 export type GuideStepIds = ObservabilityStepIds | SecurityStepIds | SearchStepIds;
 
+export interface GuideState {
+  guideId: GuideId;
+  status: GuideStatus;
+  isActive?: boolean; // Drives the current guide shown in the dropdown panel
+  steps: GuideStep[];
+}
+
 /**
  * Allowed states for a guide:
- *  in_progress: Guide has been started
+ *  not_started: Guide has not been started
+ *  in_progress: At least one step in the guide has been started
  *  ready_to_complete: All steps have been completed, but the "Continue using Elastic" button has not been clicked
  *  complete: All steps and the guide have been completed
  */
-export type GuideStatus = 'in_progress' | 'ready_to_complete' | 'complete';
+export type GuideStatus = 'not_started' | 'in_progress' | 'ready_to_complete' | 'complete';
 
 /**
  * Allowed states for each step in a guide:
@@ -35,11 +43,4 @@ export type StepStatus = 'inactive' | 'active' | 'in_progress' | 'ready_to_compl
 export interface GuideStep {
   id: GuideStepIds;
   status: StepStatus;
-}
-
-export interface GuideState {
-  guideId: GuideId;
-  status: GuideStatus;
-  isActive?: boolean; // Drives the current guide shown in the dropdown panel
-  steps: GuideStep[];
 }

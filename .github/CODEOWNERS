@@ -905,6 +905,7 @@ packages/kbn-ftr-common-functional-services @elastic/kibana-operations
 packages/kbn-ftr-screenshot-filename @elastic/kibana-operations
 packages/kbn-generate @elastic/kibana-operations
 packages/kbn-get-repo-files @elastic/kibana-operations
+packages/kbn-guided-onboarding @elastic/platform-onboarding
 packages/kbn-handlebars @elastic/kibana-security
 packages/kbn-hapi-mocks @elastic/kibana-core
 packages/kbn-i18n @elastic/kibana-core

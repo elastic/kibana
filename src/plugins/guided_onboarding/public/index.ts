@@ -12,8 +12,10 @@ import { GuidedOnboardingPlugin } from './plugin';
 export function plugin(ctx: PluginInitializerContext) {
   return new GuidedOnboardingPlugin(ctx);
 }
-export type { GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart } from './types';
-
-export type { GuideId, GuideStepIds, GuideState, GuideStep } from '../common/types';
+export type {
+  GuidedOnboardingPluginSetup,
+  GuidedOnboardingPluginStart,
+  GuidedOnboardingApi,
+} from './types';
 
 export { guidesConfig } from './constants/guides_config';
