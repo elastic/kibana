@@ -37,6 +37,7 @@ export default function ({ getService, getPageObjects }) {
       log.info(`getting href`);
       const actionElementLink = await actionElement.getAttribute('href');
       expect(actionElementLink).to.be('https://example.com/kibana/test');
+      throw new Error(`that's what happens when you don't leave a note`);
     });
 
     it('Sample action appears in context menu in view mode', async () => {
