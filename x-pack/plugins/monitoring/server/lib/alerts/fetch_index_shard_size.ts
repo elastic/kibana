@@ -26,7 +26,7 @@ const memoizedIndexPatterns = (globPatterns: string) => {
   ) as RegExPatterns;
 };
 
-const gbMultiplier = 1000000000;
+const gbMultiplier = Math.pow(1024, 3);
 
 export async function fetchIndexShardSize(
   esClient: ElasticsearchClient,
