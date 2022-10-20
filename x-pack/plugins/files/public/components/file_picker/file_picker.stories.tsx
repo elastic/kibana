@@ -169,3 +169,30 @@ ErrorLoading.decorators = [
     );
   },
 ];
+
+export const TryFilter = Template.bind({});
+TryFilter.decorators = [
+  (Story) => {
+    const array = { files: [createFileJSON()], total: 1 };
+    return (
+      <>
+        <h2>Try entering a filter!</h2>
+        <FilesContext
+          client={
+            {
+              getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
+              list: async ({ name }: { name: string[] }) => {
+                if (name) {
+                  return { files: [], total: 0 };
+                }
+                return array;
+              },
+            } as unknown as FilesClient
+          }
+        >
+          <Story />
+        </FilesContext>
+      </>
+    );
+  },
+];
