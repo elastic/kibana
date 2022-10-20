@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel } from '@elastic/eui';
 
-import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
+import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
@@ -27,6 +27,8 @@ import { SecurityPageName } from '../../../../app/types';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../../../users/store/model';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useEnableDataFeed } from '../../../../common/components/ml_popover/hooks/use_enable_data_feed';
+import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 
 const TABLE_QUERY_ID = 'entityAnalyticsDashboardAnomaliesTable';
 
@@ -51,22 +53,40 @@ export const EntityAnalyticsAnomalies = () => {
   const [updatedAt, setUpdatedAt] = useState<number>(Date.now());
   const { toggleStatus, setToggleStatus } = useQueryToggle(TABLE_QUERY_ID);
   const { deleteQuery, setQuery, from, to } = useGlobalTime(false);
-  const { isLoading, data, refetch } = useNotableAnomaliesSearch({
+  const {
+    isLoading: isSearchLoading,
+    data,
+    refetch,
+  } = useNotableAnomaliesSearch({
     skip: !toggleStatus,
     from,
     to,
   });
-  const columns = useAnomaliesColumns(isLoading);
+  const { isLoading: isEnableDataFeedLoading, enableDatafeed } = useEnableDataFeed();
+
+  const handleJobStateChange = useCallback(
+    async (job: SecurityJob) => {
+      const result = await enableDatafeed(job, job.latestTimestampMs || 0, true);
+      refetch();
+      return result;
+    },
+    [refetch, enableDatafeed]
+  );
+
+  const columns = useAnomaliesColumns(
+    isSearchLoading || isEnableDataFeedLoading,
+    handleJobStateChange
+  );
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
 
   useEffect(() => {
     setUpdatedAt(Date.now());
-  }, [isLoading]); // Update the time when data loads
+  }, [isSearchLoading]); // Update the time when data loads
 
   useQueryInspector({
     refetch,
     queryId: TABLE_QUERY_ID,
-    loading: isLoading,
+    loading: isSearchLoading,
     setQuery,
     deleteQuery,
   });
@@ -87,12 +107,17 @@ export const EntityAnalyticsAnomalies = () => {
     return [onClick, href];
   }, [getSecuritySolutionLinkProps]);
 
+  const installedJobsIds = useMemo(
+    () => data.filter(({ job }) => !!job && job.isInstalled).map(({ job }) => job?.id ?? ''),
+    [data]
+  );
+
   return (
     <EuiPanel hasBorder data-test-subj={ENTITY_ANALYTICS_ANOMALIES_PANEL}>
       <HeaderSection
         title={i18n.ANOMALIES_TITLE}
         titleSize="s"
-        subtitle={<LastUpdatedAt isUpdating={isLoading} updatedAt={updatedAt} />}
+        subtitle={<LastUpdatedAt isUpdating={isSearchLoading} updatedAt={updatedAt} />}
         toggleStatus={toggleStatus}
         toggleQuery={setToggleStatus}
       >
@@ -124,12 +149,13 @@ export const EntityAnalyticsAnomalies = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </HeaderSection>
+      <MLJobsAwaitingNodeWarning jobIds={installedJobsIds} />
       {toggleStatus && (
         <EuiInMemoryTable
           responsive={false}
           items={data}
           columns={columns}
-          loading={isLoading}
+          loading={isSearchLoading}
           id={TABLE_QUERY_ID}
           sorting={TABLE_SORTING}
         />

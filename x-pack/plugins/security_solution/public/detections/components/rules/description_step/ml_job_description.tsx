@@ -73,7 +73,7 @@ const Wrapper = styled.div`
 `;
 
 const MlJobDescriptionComponent: React.FC<{ jobId: string }> = ({ jobId }) => {
-  const { jobs } = useSecurityJobs(false);
+  const { jobs } = useSecurityJobs();
   const {
     services: { http, ml },
   } = useKibana();

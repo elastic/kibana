@@ -41,24 +41,3 @@ export const MODULE_NOT_COMPATIBLE_TITLE = (incompatibleJobCount: number) =>
     defaultMessage:
       '{incompatibleJobCount} {incompatibleJobCount, plural, =1 {job} other {jobs}} are currently unavailable',
   });
-
-export const START_JOB_FAILURE = i18n.translate(
-  'xpack.securitySolution.components.mlPopup.errors.startJobFailureTitle',
-  {
-    defaultMessage: 'Start job failure',
-  }
-);
-
-export const STOP_JOB_FAILURE = i18n.translate(
-  'xpack.securitySolution.containers.errors.stopJobFailureTitle',
-  {
-    defaultMessage: 'Stop job failure',
-  }
-);
-
-export const CREATE_JOB_FAILURE = i18n.translate(
-  'xpack.securitySolution.components.mlPopup.errors.createJobFailureTitle',
-  {
-    defaultMessage: 'Create job failure',
-  }
-);
