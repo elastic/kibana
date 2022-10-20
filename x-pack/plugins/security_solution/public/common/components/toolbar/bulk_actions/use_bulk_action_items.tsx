@@ -7,17 +7,40 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { FILTER_CLOSED, FILTER_ACKNOWLEDGED, FILTER_OPEN } from '../../common/constants';
-import * as i18n from '../components/t_grid/translations';
-import type { AlertStatus, BulkActionsProps } from '../../common/types/timeline';
-import { useUpdateAlertsStatus } from '../container/use_update_alerts';
-import { useAppToasts } from './use_app_toasts';
-import { useStartTransaction } from '../lib/apm/use_start_transaction';
-import { APM_USER_INTERACTIONS } from '../lib/apm/constants';
+import type {
+  SetEventsDeleted,
+  SetEventsLoading,
+  OnUpdateAlertStatusSuccess,
+  OnUpdateAlertStatusError,
+  CustomBulkActionProp,
+} from '@kbn/timelines-plugin/common';
+import * as i18n from './translations';
+import { useUpdateAlertsStatus } from './use_update_alerts';
+import { useAppToasts } from '../../../hooks/use_app_toasts';
+import { useStartTransaction } from '../../../lib/apm/use_start_transaction';
+import { APM_USER_INTERACTIONS } from '../../../lib/apm/constants';
+import type { AlertWorkflowStatus } from '../../../types';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return { bool: { filter: { terms: { _id: eventIds } } } };
 };
+
+export interface BulkActionsProps {
+  eventIds: string[];
+  currentStatus?: AlertWorkflowStatus;
+  query?: string;
+  indexName: string;
+  setEventsLoading: SetEventsLoading;
+  setEventsDeleted: SetEventsDeleted;
+  showAlertStatusActions?: boolean;
+  onUpdateSuccess?: OnUpdateAlertStatusSuccess;
+  onUpdateFailure?: OnUpdateAlertStatusError;
+  customBulkActions?: CustomBulkActionProp[];
+}
+
+const FILTER_ACKNOWLEDGED: AlertWorkflowStatus = 'acknowledged';
+const FILTER_OPEN: AlertWorkflowStatus = 'open';
+const FILTER_CLOSED: AlertWorkflowStatus = 'closed';
 
 export const useBulkActionItems = ({
   eventIds,
@@ -31,12 +54,12 @@ export const useBulkActionItems = ({
   onUpdateFailure,
   customBulkActions,
 }: BulkActionsProps) => {
-  const { updateAlertStatus } = useUpdateAlertsStatus(true);
+  const { updateAlertStatus } = useUpdateAlertsStatus();
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
 
   const onAlertStatusUpdateSuccess = useCallback(
-    (updated: number, conflicts: number, newStatus: AlertStatus) => {
+    (updated: number, conflicts: number, newStatus: AlertWorkflowStatus) => {
       if (conflicts > 0) {
         // Partial failure
         addWarning({
@@ -52,7 +75,6 @@ export const useBulkActionItems = ({
           case 'open':
             title = i18n.OPENED_ALERT_SUCCESS_TOAST(updated);
             break;
-          case 'in-progress':
           case 'acknowledged':
             title = i18n.ACKNOWLEDGED_ALERT_SUCCESS_TOAST(updated);
         }
@@ -66,7 +88,7 @@ export const useBulkActionItems = ({
   );
 
   const onAlertStatusUpdateFailure = useCallback(
-    (newStatus: AlertStatus, error: Error) => {
+    (newStatus: AlertWorkflowStatus, error: Error) => {
       let title: string;
       switch (newStatus) {
         case 'closed':
@@ -75,7 +97,6 @@ export const useBulkActionItems = ({
         case 'open':
           title = i18n.OPENED_ALERT_FAILED_TOAST;
           break;
-        case 'in-progress':
         case 'acknowledged':
           title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
       }
@@ -88,7 +109,7 @@ export const useBulkActionItems = ({
   );
 
   const onClickUpdate = useCallback(
-    async (status: AlertStatus) => {
+    async (status: AlertWorkflowStatus) => {
       if (query) {
         startTransaction({ name: APM_USER_INTERACTIONS.BULK_QUERY_STATUS_UPDATE });
       } else if (eventIds.length > 1) {

@@ -5,29 +5,26 @@
  * 2.0.
  */
 
-import type { SetEventsDeleted, SetEventsLoading } from '@kbn/timelines-plugin/common';
-import type {
-  AlertStatus,
-  CustomBulkActionProp,
-  OnUpdateAlertStatusSuccess,
-  OnUpdateAlertStatusError,
-} from '@kbn/timelines-plugin/common/types';
-import type { TGridModel, TimelineState } from '@kbn/timelines-plugin/public';
-import { useBulkActionItems } from '@kbn/timelines-plugin/public';
-import { tGridSelectors } from '@kbn/timelines-plugin/public/store/t_grid';
-
 import React, { useCallback, useEffect, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
-import { timelineActions } from '../../../../timelines/store/timeline';
-
+import type {
+  CustomBulkActionProp,
+  OnUpdateAlertStatusError,
+  OnUpdateAlertStatusSuccess,
+  SetEventsDeleted,
+  SetEventsLoading,
+} from '@kbn/timelines-plugin/common';
 import { BulkActions } from '.';
-import type { Refetch } from '../../../store/inputs/model';
+import { useBulkActionItems } from './use_bulk_action_items';
+import { dataTableActions, dataTableSelectors } from '../../../store/data_table';
+import type { TGridModel } from '../../../store/data_table/model';
+import type { AlertWorkflowStatus, Refetch } from '../../../types';
 
 interface OwnProps {
   id: string;
   totalItems: number;
-  filterStatus?: AlertStatus;
+  filterStatus?: AlertWorkflowStatus;
   query?: string;
   indexName: string;
   showAlertStatusActions?: boolean;
@@ -65,7 +62,7 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     // Catches state change isSelectAllChecked->false (page checkbox) upon user selection change to reset toolbar select all
     useEffect(() => {
       if (isSelectAllChecked) {
-        dispatch(timelineActions.setTGridSelectAll({ id, selectAll: false }));
+        dispatch(dataTableActions.setTGridSelectAll({ id, selectAll: false }));
       } else {
         setShowClearSelection(false);
       }
@@ -75,19 +72,19 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     // Dispatches to stateful_body's selectAll via TimelineTypeContext props
     // as scope of response data required to actually set selectedEvents
     const onSelectAll = useCallback(() => {
-      dispatch(timelineActions.setTGridSelectAll({ id, selectAll: true }));
+      dispatch(dataTableActions.setTGridSelectAll({ id, selectAll: true }));
       setShowClearSelection(true);
     }, [dispatch, id]);
 
     // Callback for clearing entire selection from toolbar
     const onClearSelection = useCallback(() => {
       clearSelected({ id });
-      dispatch(timelineActions.setTGridSelectAll({ id, selectAll: false }));
+      dispatch(dataTableActions.setTGridSelectAll({ id, selectAll: false }));
       setShowClearSelection(false);
     }, [clearSelected, dispatch, id]);
 
     const onUpdateSuccess = useCallback(
-      (updated: number, conflicts: number, newStatus: AlertStatus) => {
+      (updated: number, conflicts: number, newStatus: AlertWorkflowStatus) => {
         refetch();
         if (onActionSuccess) {
           onActionSuccess(updated, conflicts, newStatus);
@@ -97,7 +94,7 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
     );
 
     const onUpdateFailure = useCallback(
-      (newStatus: AlertStatus, error: Error) => {
+      (newStatus: AlertWorkflowStatus, error: Error) => {
         refetch();
         if (onActionFailure) {
           onActionFailure(newStatus, error);
@@ -108,14 +105,14 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
 
     const setEventsLoading = useCallback<SetEventsLoading>(
       ({ eventIds, isLoading }) => {
-        dispatch(timelineActions.setEventsLoading({ id, eventIds, isLoading }));
+        dispatch(dataTableActions.setEventsLoading({ id, eventIds, isLoading }));
       },
       [dispatch, id]
     );
 
     const setEventsDeleted = useCallback<SetEventsDeleted>(
       ({ eventIds, isDeleted }) => {
-        dispatch(timelineActions.setEventsDeleted({ id, eventIds, isDeleted }));
+        dispatch(dataTableActions.setEventsDeleted({ id, eventIds, isDeleted }));
       },
       [dispatch, id]
     );
@@ -131,7 +128,6 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
       onUpdateSuccess,
       onUpdateFailure,
       customBulkActions,
-      timelineId: id,
     });
 
     return (
@@ -151,10 +147,10 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
 AlertBulkActionsComponent.displayName = 'AlertBulkActionsComponent';
 
 const makeMapStateToProps = () => {
-  const getTGrid = tGridSelectors.getTGridByIdSelector();
-  const mapStateToProps = (state: TimelineState, { id }: OwnProps) => {
-    const timeline: TGridModel = getTGrid(state, id);
-    const { selectedEventIds, isSelectAllChecked } = timeline;
+  const getTGrid = dataTableSelectors.getTableByIdSelector();
+  const mapStateToProps = (state: TableState, { id }: OwnProps) => {
+    const dataTable: TGridModel = getTGrid(state, id);
+    const { selectedEventIds, isSelectAllChecked } = dataTable;
 
     return {
       isSelectAllChecked,
@@ -165,7 +161,7 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = {
-  clearSelected: timelineActions.clearSelected,
+  clearSelected: dataTableActions.clearSelected,
 };
 
 const connector = connect(makeMapStateToProps, mapDispatchToProps);

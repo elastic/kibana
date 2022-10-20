@@ -4,18 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
+import {
   CriteriaWithPagination,
   EuiBasicTableProps,
   EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import moment from 'moment';
-import type { ComponentType } from 'react';
+import { ComponentType, Suspense } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -26,6 +27,7 @@ import type { TimelineItem } from '../../../../common/search_strategy';
 import type { RowRenderer } from '../../../../common/types';
 import { RuleName } from '../rule_name';
 import { isEventBuildingBlockType } from './helpers';
+import { AlertCount } from '../events_viewer/styles';
 
 const EventRenderedFlexItem = styled(EuiFlexItem)`
   div:first-child {
@@ -67,7 +69,6 @@ const StyledEuiBasicTable = styled(EuiBasicTable as BasicTableType)`
 `;
 
 export interface EventRenderedViewProps {
-  alertToolbar: React.ReactNode;
   appId: string;
   events: TimelineItem[];
   getRowRenderer?: ({
@@ -97,7 +98,6 @@ const PreferenceFormattedDateComponent = ({ value }: { value: Date }) => {
 export const PreferenceFormattedDate = React.memo(PreferenceFormattedDateComponent);
 
 const EventRenderedViewComponent = ({
-  alertToolbar,
   appId,
   events,
   getRowRenderer,
@@ -111,6 +111,48 @@ const EventRenderedViewComponent = ({
   timelineId,
   totalItemCount,
 }: EventRenderedViewProps) => {
+  const alertToolbar = useMemo(
+    () => (
+      <EuiFlexGroup gutterSize="m" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <AlertCount>{alertCountText}</AlertCount>
+        </EuiFlexItem>
+        {showBulkActions && (
+          <Suspense fallback={<EuiLoadingSpinner />}>
+            <StatefulAlertBulkActions
+              showAlertStatusActions={showAlertStatusActions}
+              data-test-subj="bulk-actions"
+              id={id}
+              totalItems={totalSelectAllAlerts ?? totalItems}
+              filterStatus={filterStatus}
+              query={filterQuery}
+              indexName={indexNames.join()}
+              onActionSuccess={onAlertStatusActionSuccess}
+              onActionFailure={onAlertStatusActionFailure}
+              customBulkActions={additionalBulkActions}
+              refetch={refetch}
+            />
+          </Suspense>
+        )}
+      </EuiFlexGroup>
+    ),
+    [
+      additionalBulkActions,
+      alertCountText,
+      filterQuery,
+      filterStatus,
+      id,
+      indexNames,
+      onAlertStatusActionFailure,
+      onAlertStatusActionSuccess,
+      refetch,
+      showAlertStatusActions,
+      showBulkActions,
+      totalItems,
+      totalSelectAllAlerts,
+    ]
+  );
+
   const ActionTitle = useMemo(
     () => (
       <EuiFlexGroup gutterSize="m">

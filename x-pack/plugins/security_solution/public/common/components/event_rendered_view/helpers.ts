@@ -10,3 +10,6 @@ import type { Ecs } from '../../../../common/ecs';
 
 export const isEventBuildingBlockType = (event: Ecs): boolean =>
   !isEmpty(event.kibana?.alert?.building_block_type);
+
+/** This local storage key stores the `Grid / Event rendered view` selection */
+export const ALERTS_TABLE_VIEW_SELECTION_KEY = 'securitySolution.alerts.table.view-selection';

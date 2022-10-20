@@ -26,9 +26,7 @@ import { HoverActionsConfig } from './components/hover_actions';
 export * from './store/t_grid';
 export interface TimelinesUIStart {
   getHoverActions: () => HoverActionsConfig;
-  getTGrid: <T extends TGridType = 'embedded'>(
-    props: GetTGridProps<T>
-  ) => ReactElement<GetTGridProps<T>>;
+  getTGrid: (props: TGridIntegratedProps) => ReactElement<TGridIntegratedProps>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getTGridReducer: () => any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -43,6 +41,8 @@ export interface TimelinesUIStart {
   setTGridEmbeddedStore: (store: Store) => void;
 }
 
+export type { TGridIntegratedProps } from './components/t_grid/integrated';
+
 export interface TimelinesStartPlugins {
   data: DataPublicPluginStart;
   cases: CasesUiStart;
@@ -51,15 +51,6 @@ export interface TimelinesStartPlugins {
 }
 
 export type TimelinesStartServices = CoreStart & TimelinesStartPlugins;
-interface TGridIntegratedCompProps extends TGridIntegratedProps {
-  type: 'embedded';
-}
-export type TGridType = 'embedded';
-export type GetTGridProps<T extends TGridType> = T extends 'embedded'
-  ? TGridIntegratedCompProps
-  : TGridIntegratedCompProps;
-export type TGridProps = TGridIntegratedCompProps;
-
 export interface StatefulEventContextType {
   tabType: string | undefined;
   timelineID: string;

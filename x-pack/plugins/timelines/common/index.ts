@@ -37,6 +37,9 @@ export type {
   SetEventsDeleted,
   SetEventsLoading,
   TimelineType,
+  OnUpdateAlertStatusSuccess,
+  OnUpdateAlertStatusError,
+  CustomBulkActionProp,
 } from './types';
 
 export { IS_OPERATOR, EXISTS_OPERATOR, DataProviderType } from './types';

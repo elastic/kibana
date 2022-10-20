@@ -274,5 +274,3 @@ export const getDefaultViewSelection = ({
   }
 };
 
-/** This local storage key stores the `Grid / Event rendered view` selection */
-export const ALERTS_TABLE_VIEW_SELECTION_KEY = 'securitySolution.alerts.table.view-selection';

@@ -81,19 +81,6 @@ export type CustomBulkActionProp = Omit<CustomBulkAction, 'onClick'> & {
   onClick: (eventIds: string[]) => void;
 };
 
-export interface BulkActionsProps {
-  eventIds: string[];
-  currentStatus?: AlertStatus;
-  query?: string;
-  indexName: string;
-  setEventsLoading: SetEventsLoading;
-  setEventsDeleted: SetEventsDeleted;
-  showAlertStatusActions?: boolean;
-  onUpdateSuccess?: OnUpdateAlertStatusSuccess;
-  onUpdateFailure?: OnUpdateAlertStatusError;
-  customBulkActions?: CustomBulkActionProp[];
-}
-
 export interface HeaderActionProps {
   width: number;
   browserFields: BrowserFields;

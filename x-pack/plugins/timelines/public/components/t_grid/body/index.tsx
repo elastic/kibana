@@ -20,7 +20,6 @@ import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, {
   ComponentType,
-  lazy,
   Suspense,
   useCallback,
   useEffect,
@@ -76,12 +75,9 @@ import { checkBoxControlColumn } from './control_columns';
 import { REMOVE_COLUMN } from './column_headers/translations';
 import { TimelinesStartPlugins } from '../../../types';
 
-const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
-
 interface OwnProps {
   activePage: number;
   additionalControls?: React.ReactNode;
-  appId?: string;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
   data: TimelineItem[];
@@ -848,8 +844,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               ref={dataGridRef}
             />
           </EuiDataGridContainer>
-          getRowRenderer={getRowRenderer}
-          timelineId={id}
         </StatefulEventContext.Provider>
       </>
     );
