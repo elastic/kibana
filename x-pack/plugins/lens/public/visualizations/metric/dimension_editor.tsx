@@ -527,7 +527,7 @@ export function DimensionEditorAdditionalSection({
               {
                 id: `${buttonIdPrefix}trendline`,
                 label: i18n.translate('xpack.lens.metric.supportingVisualization.trendline', {
-                  defaultMessage: 'Trend line',
+                  defaultMessage: 'Line',
                 }),
                 isDisabled: !supportsTrendline,
                 'data-test-subj': 'lnsMetric_supporting_visualization_trendline',
@@ -576,7 +576,7 @@ export function DimensionEditorAdditionalSection({
         {showingBar(state) && (
           <EuiFormRow
             label={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
-              defaultMessage: 'Bar direction',
+              defaultMessage: 'Bar orientation',
             })}
             fullWidth
             display="columnCompressed"
@@ -585,7 +585,7 @@ export function DimensionEditorAdditionalSection({
               isFullWidth
               buttonSize="compressed"
               legend={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
-                defaultMessage: 'Bar direction',
+                defaultMessage: 'Bar orientation',
               })}
               data-test-subj="lnsMetric_progress_direction_buttons"
               name="alignment"
