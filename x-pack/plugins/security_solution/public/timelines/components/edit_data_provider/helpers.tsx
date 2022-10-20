@@ -127,7 +127,7 @@ export const getExcludedFromSelection = (selectedOperator: EuiComboBoxOptionOpti
 };
 
 /** Ensure that a value passed to ControlledDefaultInput is not an array */
-export const sanatizeValue = (value: string | number | Array<unknown>): string =>
+export const sanatizeValue = (value: string | number | unknown[]): string =>
   Array.isArray(value) ? `${value[0]}` : `${value}`; // fun fact: value should never be an array
 
 /** Ensure if DataProvider is default that value is not template-like */
