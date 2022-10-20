@@ -109,7 +109,8 @@ describe('Guided setup', () => {
   });
 
   describe('Button component', () => {
-    test('should be disabled in there is no active guide', async () => {
+    // TODO check for the correct button behavior once https://github.com/elastic/kibana/issues/141129 is implemented
+    test.skip('should be disabled in there is no active guide', async () => {
       const { exists } = testBed;
       expect(exists('disabledGuideButton')).toBe(true);
       expect(exists('guideButton')).toBe(false);
@@ -280,9 +281,8 @@ describe('Guided setup', () => {
         component.update();
 
         expect(exists('quitGuideModal')).toBe(false);
-        // For now, the guide button is disabled once a user quits a guide
-        // This behavior will change once https://github.com/elastic/kibana/issues/141129 is implemented
-        expect(exists('disabledGuideButton')).toBe(true);
+
+        // TODO check for the correct button behavior once https://github.com/elastic/kibana/issues/141129 is implemented
       });
 
       test('cancels out of the quit guide confirmation modal', async () => {

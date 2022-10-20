@@ -104,7 +104,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.sessions.maxUpdateRetries (number)',
         'data.search.sessions.notTouchedTimeout (duration)',
         'enterpriseSearch.host (string)',
-        'guidedOnboarding.ui (boolean)',
         'home.disableWelcomeScreen (boolean)',
         'map.emsFileApiUrl (string)',
         'map.emsFontLibraryUrl (string)',
