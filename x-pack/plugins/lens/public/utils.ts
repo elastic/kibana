@@ -285,3 +285,8 @@ export const isOperationFromTheSameGroup = (op1?: DraggingIdentifier, op2?: Drag
     op1.layerId === op2.layerId
   );
 };
+
+export const sortDataViewRefs = (dataViewRefs: IndexPatternRef[]) =>
+  dataViewRefs.sort((a, b) => {
+    return a.title.localeCompare(b.title);
+  });

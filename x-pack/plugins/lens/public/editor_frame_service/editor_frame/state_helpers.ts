@@ -29,7 +29,7 @@ import {
 import { buildExpression } from './expression_helpers';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors';
 import { Document } from '../../persistence/saved_object_store';
-import { getActiveDatasourceIdFromDoc } from '../../utils';
+import { getActiveDatasourceIdFromDoc, sortDataViewRefs } from '../../utils';
 import type { ErrorMessage } from '../types';
 import {
   getMissingCurrentDatasource,
@@ -94,11 +94,6 @@ const getRefsForAdHocDataViewsFromContext = (
   );
   return adHocDataViewsList.map(({ id, title, name }) => ({ id, title, name }));
 };
-
-const sortDataViewRefs = (indexPatternRefs: IndexPatternRef[]) =>
-  indexPatternRefs.sort((a, b) => {
-    return a.title.localeCompare(b.title);
-  });
 
 export async function initializeDataViews(
   {

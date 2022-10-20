@@ -15,6 +15,7 @@ import { IndexPattern, IndexPatternField, IndexPatternMap, IndexPatternRef } fro
 import { documentField } from '../datasources/form_based/document_field';
 import { DateRange } from '../../common';
 import { DataViewsState } from '../state_management';
+import { sortDataViewRefs } from '../utils';
 
 type ErrorHandler = (err: Error) => void;
 type MinimalDataViewsContract = Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
@@ -118,11 +119,8 @@ export function convertDataViewIntoLensIndexPattern(
 export async function loadIndexPatternRefs(
   dataViews: MinimalDataViewsContract
 ): Promise<IndexPatternRef[]> {
-  const indexPatterns = await dataViews.getIdsWithTitle();
-
-  return indexPatterns.sort((a, b) => {
-    return a.title.localeCompare(b.title);
-  });
+  const indexPatternsRefs = await dataViews.getIdsWithTitle();
+  return sortDataViewRefs(indexPatternsRefs);
 }
 
 /**
