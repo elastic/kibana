@@ -70,7 +70,6 @@ describe('[Index management API Routes] fetch indices lib function', () => {
   test('frozen index', async () => {
     getIndices.mockResolvedValue({
       frozen_index: createTestIndexState({
-        // @ts-expect-error
         settings: { index: { number_of_shards: 1, number_of_replicas: 1, frozen: 'true' } },
       }),
     });

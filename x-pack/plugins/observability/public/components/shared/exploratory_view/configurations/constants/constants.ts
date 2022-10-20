@@ -6,6 +6,7 @@
  */
 import { OperationType } from '@kbn/lens-plugin/public';
 import { DOCUMENT_FIELD_NAME } from '@kbn/lens-plugin/common/constants';
+import { i18n } from '@kbn/i18n';
 import { ReportViewType } from '../../types';
 import {
   CLS_FIELD,
@@ -61,13 +62,21 @@ import {
 } from './labels';
 import {
   MONITOR_DURATION_US,
+  SYNTHETICS_BLOCKED_TIMINGS,
   SYNTHETICS_CLS,
+  SYNTHETICS_CONNECT_TIMINGS,
   SYNTHETICS_DCL,
+  SYNTHETICS_DNS_TIMINGS,
   SYNTHETICS_DOCUMENT_ONLOAD,
   SYNTHETICS_FCP,
   SYNTHETICS_LCP,
+  SYNTHETICS_RECEIVE_TIMINGS,
+  SYNTHETICS_SEND_TIMINGS,
+  SYNTHETICS_SSL_TIMINGS,
   SYNTHETICS_STEP_DURATION,
   SYNTHETICS_STEP_NAME,
+  SYNTHETICS_TOTAL_TIMINGS,
+  SYNTHETICS_WAIT_TIMINGS,
 } from './field_names/synthetics';
 
 export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
@@ -103,6 +112,30 @@ export const FieldLabels: Record<string, string> = {
   [SYNTHETICS_DOCUMENT_ONLOAD]: PAGE_LOAD_TIME_LABEL,
   [TRANSACTION_TIME_TO_FIRST_BYTE]: BACKEND_TIME_LABEL,
   [TRANSACTION_DURATION]: PAGE_LOAD_TIME_LABEL,
+  [SYNTHETICS_CONNECT_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.connect', {
+    defaultMessage: 'Connect',
+  }),
+  [SYNTHETICS_DNS_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.dns', {
+    defaultMessage: 'DNS',
+  }),
+  [SYNTHETICS_WAIT_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.wait', {
+    defaultMessage: 'Wait',
+  }),
+  [SYNTHETICS_SSL_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.ssl', {
+    defaultMessage: 'SSL',
+  }),
+  [SYNTHETICS_BLOCKED_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.blocked', {
+    defaultMessage: 'Blocked',
+  }),
+  [SYNTHETICS_SEND_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.send', {
+    defaultMessage: 'Send',
+  }),
+  [SYNTHETICS_RECEIVE_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.receive', {
+    defaultMessage: 'Receive',
+  }),
+  [SYNTHETICS_TOTAL_TIMINGS]: i18n.translate('xpack.observability.expView.synthetics.total', {
+    defaultMessage: 'Total',
+  }),
 
   'monitor.id': MONITOR_ID_LABEL,
   'monitor.status': MONITOR_STATUS_LABEL,
