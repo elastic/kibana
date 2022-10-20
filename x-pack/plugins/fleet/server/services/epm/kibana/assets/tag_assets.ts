@@ -23,12 +23,14 @@ export async function tagKibanaAssets({
   kibanaAssets,
   pkgTitle,
   pkgName,
+  spaceId,
 }: {
   savedObjectTagAssignmentService: IAssignmentService;
   savedObjectTagClient: ITagsClient;
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>;
   pkgTitle: string;
   pkgName: string;
+  spaceId: string;
 }) {
   const taggableAssets = Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
     if (!taggableTypes.includes(KibanaSavedObjectTypeMapping[assetType as KibanaAssetType])) {
@@ -56,7 +58,7 @@ export async function tagKibanaAssets({
         description: '',
         color: TAG_COLOR,
       },
-      { id: MANAGED_TAG_ID, overwrite: true, refresh: false }
+      { id: `${spaceId}-${MANAGED_TAG_ID}`, overwrite: true, refresh: false }
     );
   }
 
