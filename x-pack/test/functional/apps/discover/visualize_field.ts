@@ -95,7 +95,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.discover.createAdHocDataView('logst', true);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await testSubjects.click('discoverEditVisualization');
+      await testSubjects.click('unifiedHistogramEditVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await retry.try(async () => {
