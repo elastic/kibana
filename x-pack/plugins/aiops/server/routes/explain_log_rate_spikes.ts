@@ -274,7 +274,7 @@ export const defineExplainLogRateSpikesRoute = (
                   defaultMessage:
                     'Identified {fieldValuePairsCount, plural, one {# significant field/value pair} other {# significant field/value pairs}}.',
                   values: {
-                    fieldValuePairsCount: changePoints?.length ?? 0,
+                    fieldValuePairsCount: changePoints.length,
                   },
                 }
               ),
@@ -288,7 +288,7 @@ export const defineExplainLogRateSpikesRoute = (
           }
         }
 
-        if (changePoints?.length === 0) {
+        if (changePoints.length === 0) {
           logDebugMessage('Stopping analysis, did not find change points.');
           endWithUpdatedLoadingState();
           return;
@@ -634,7 +634,7 @@ export const defineExplainLogRateSpikesRoute = (
         logDebugMessage(`Fetch ${changePoints.length} field/value histograms.`);
 
         // time series filtered by fields
-        if (changePoints && overallTimeSeries !== undefined) {
+        if (changePoints.length > 0 && overallTimeSeries !== undefined) {
           const changePointsChunks = chunk(changePoints, chunkSize);
 
           for (const changePointsChunk of changePointsChunks) {
