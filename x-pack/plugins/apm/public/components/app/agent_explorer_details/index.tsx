@@ -7,8 +7,9 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { AgentExplorerFieldName } from '@kbn/apm-plugin/common/agent_explorer';
+import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
 import { i18n } from '@kbn/i18n';
-import { capitalize, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import uuid from 'uuid';
@@ -82,33 +83,29 @@ export function AgentExplorerDetails() {
 	const history = useHistory();
 
 	const {
-		query: { serviceName, agentName, sortField, sortDirection },
+		query: { serviceName, agentName },
 	} = useApmParams('/agent-explorer');
 
-	const agentsReq = useServicesMainStatisticsFetcher();
-	const agents = (agentsReq.data?.items ?? [])
-		.map((agent) => ({
-			serviceName: agent.serviceName,
-			environments: agent.environments,
-			agentName: agent.agents?.[0]?.name,
-			agentVersions: agent.agents?.[0]?.versions,
-			latestVersion: '',
-			instances: agent.instances,
-		}));
 
-	const isLoading = agentsReq.status === FETCH_STATUS.LOADING;
+	const agents =
+    useServicesMainStatisticsFetcher();
 
-	const serviceNameOptions = uniqBy(
-		agents.map((service) => ({ label: service.serviceName, value: service.serviceName })),
+	const isLoading = agents.status === FETCH_STATUS.LOADING;
+
+	const serviceNameOptions = [];
+	/* uniqBy(
+		agentsItems.map((service) => ({ label: service.serviceName, value: service.serviceName })),
 		'value',
-	);
+	); */
 
-	const agentLanguageOptions = uniqBy(
-		agents.map((service) => ({ label: capitalize(service.agentName ?? ''), value: service.agentName ?? '' })),
+	const agentLanguageOptions = [];
+	/* uniqBy(
+		agentsItems.map((service) => ({ label: service.language ?? '', value: service.language ?? '' })),
 		'value',
-	).filter((option) => option.label !== '');
+	).filter((option) => option.label !== ''); */
 
-	const isFailure = agentsReq.status === FETCH_STATUS.FAILURE;
+	const isFailure = agents.status === FETCH_STATUS.FAILURE;
+
 	const noItemsMessage = (
     <EuiEmptyPrompt
       title={
@@ -134,7 +131,7 @@ export function AgentExplorerDetails() {
 						title={i18n.translate(
 							'xpack.apm.agentExplorer.serviceNameSelect.label',
 							{
-								defaultMessage: 'service.name',
+								defaultMessage: 'Service name',
 							}
 						)}
 						options={serviceNameOptions}
@@ -159,7 +156,7 @@ export function AgentExplorerDetails() {
 						title={i18n.translate(
 							'xpack.apm.agentExplorer.agentLanguageSelect.label',
 							{
-								defaultMessage: 'agent.language',
+								defaultMessage: 'Agent language',
 							}
 						)}
 						options={agentLanguageOptions}
@@ -185,8 +182,8 @@ export function AgentExplorerDetails() {
 				<AgentList
 					isLoading={isLoading}
 					isFailure={isFailure}
-					items={agents}
-					initialSortField={AgentExplorerFieldName.Instances}
+					items={agents.data?.items ?? []}
+					initialSortField={AgentExplorerFieldName.Environments}
 					initialSortDirection='desc'
 					sortFn={(itemsToSort, sortField, sortDirection) => {
 						return orderAgentItems({

@@ -6,29 +6,23 @@
  */
 
 import {
-  EuiFlexGroup,
-  EuiFlexItem
+  EuiBasicTableColumn, EuiFlexGroup,
+  EuiFlexItem, EuiInMemoryTable
 } from '@elastic/eui';
 import { AgentExplorerFieldName, AgentExplorerListItem } from '@kbn/apm-plugin/common/agent_explorer';
+import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
-import React, { ReactNode, useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import { unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
+import { ItemsBadge } from '../../../shared/item_badge';
 import { ServiceLink } from '../../../shared/service_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { AgentExplorerDocsLink } from '../../agent_explorer_docs_link';
-import { ItemsBadge } from '../../../shared/item_badge';
-import { RIGHT_ALIGNMENT } from '@elastic/eui';
-import { EuiScreenReaderOnly } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
-import { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiInMemoryTable } from '@elastic/eui';
-import { AgentInstances } from '../agent_instances';
 
 function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
@@ -36,12 +30,8 @@ function formatString(value?: string | null) {
 
 export function getAgentsColumns({
   query,
-  toggleRow,
-  itemMap,
 }: {
   query: TypeOf<ApmRoutes, '/agent-explorer'>['query'];
-  toggleRow: (selectedServiceName: string) => void;
-  itemMap: Record<string, ReactNode>;
 }): Array<EuiBasicTableColumn<AgentExplorerListItem>> {
   return [
     {
@@ -87,26 +77,18 @@ export function getAgentsColumns({
       sortable: true,
     },
     {
-      field: AgentExplorerFieldName.Instances,
-      name: i18n.translate(
-        'xpack.apm.agentExplorerTable.instancesColumnLabel',
-        { defaultMessage: 'Instances' }
-      ),
-      sortable: true,
-    },
-    {
       field: AgentExplorerFieldName.AgentVersion,
       name: i18n.translate(
         'xpack.apm.agentExplorerTable.agentVersionColumnLabel',
         { defaultMessage: 'Agent Version' }
       ),
-      render: (_, { agentVersions }) => (
+      render: (_, { agentVersion }) => (
         <ItemsBadge
-          items={agentVersions ?? []}
+          items={agentVersion ?? []}
           multipleItemsMessage={i18n.translate(
             'xpack.apm.agentExplorerTable.agentVersionColumnLabel.multipleVersions',
             { 
-              values: { versionsCount: agentVersions.length },
+              values: { versionsCount: agentVersion.length },
               defaultMessage: '{versionsCount, plural, one {1 version} other {# versions}}',
             }
           )}
@@ -114,7 +96,7 @@ export function getAgentsColumns({
       ),
     },
     {
-      field: AgentExplorerFieldName.LatestVersion,
+      field: AgentExplorerFieldName.AgentLastVersion,
       name: i18n.translate(
         'xpack.apm.agentExplorerTable.latestVersionColumnLabel',
         { defaultMessage: 'Latest Version' }
@@ -122,58 +104,25 @@ export function getAgentsColumns({
       width: `${unit * 10}px`,
     },
     {
-      field: AgentExplorerFieldName.DocsLink,
+      field: AgentExplorerFieldName.AgentRepoUrl,
       name: i18n.translate(
         'xpack.apm.agentExplorerTable.agentDocsColumnLabel',
         { defaultMessage: 'Agent Docs' }
       ),
       width: `${unit * 10}px`,
-      render: (_, { agentName }) => (
+      render: (_, { agentName, agentRepoUrl }) => (
         <TruncateWithTooltip
           data-test-subj="apmAgentExplorerListDocsLink"
           text={formatString(`${agentName} agent docs`)}
           content={
             <AgentExplorerDocsLink
               agentName={agentName as AgentName}
+              repositoryUrl={agentRepoUrl}
             />
           }
         />
       ),
-    },
-    {
-      align: RIGHT_ALIGNMENT,
-      width: '40px',
-      isExpander: true,
-      name: (
-        <EuiScreenReaderOnly>
-          <span>
-            {i18n.translate('xpack.apm.storageExplorer.table.expandRow', {
-              defaultMessage: 'Expand row',
-            })}
-          </span>
-        </EuiScreenReaderOnly>
-      ),
-      render: ({ serviceName }: { serviceName: string }) => {
-        return (
-          <EuiButtonIcon
-            data-test-subj={`storageDetailsButton_${serviceName}`}
-            onClick={() => toggleRow(serviceName)}
-            aria-label={
-              itemMap[serviceName]
-                ? i18n.translate('xpack.apm.storageExplorer.table.collapse', {
-                    defaultMessage: 'Collapse',
-                  })
-                : i18n.translate('xpack.apm.storageExplorer.table.expand', {
-                    defaultMessage: 'Expand',
-                  })
-            }
-            iconType={
-              itemMap[serviceName] ? 'arrowUp' : 'arrowDown'
-            }
-          />
-        );
-      },
-    },
+    }
   ];
 }
 
@@ -202,15 +151,6 @@ export function AgentList({
   initialPageSize,
   sortFn,
 }: Props) {
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
-    Record<string, ReactNode>
-  >({});
-
-  useEffect(() => {
-    // Closes any open rows when fetching new items
-    setItemIdToExpandedRowMap({});
-  }, [items]);
-
   const {
     // removes pagination and sort instructions from the query so it won't be passed down to next route
     query: {
@@ -222,23 +162,9 @@ export function AgentList({
     },
   } = useApmParams('/agent-explorer');
 
-  const toggleRow = (selectedServiceName: string) => {
-    const expandedRowMapValues = { ...itemIdToExpandedRowMap };
-    if (expandedRowMapValues[selectedServiceName]) {
-      delete expandedRowMapValues[selectedServiceName];
-    } else {
-      expandedRowMapValues[selectedServiceName] = (
-        <AgentInstances
-          serviceName={selectedServiceName}
-        />
-      );
-    }
-    setItemIdToExpandedRowMap(expandedRowMapValues);
-  };
-
   const agentColumns = useMemo(
     () =>
-      getAgentsColumns({ query, toggleRow, itemMap: itemIdToExpandedRowMap }),
+      getAgentsColumns({ query }),
     [ query ]
   );
 
@@ -258,7 +184,6 @@ export function AgentList({
             }
           }}
           itemId="serviceName"
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           loading={isLoading}
           data-test-subj="agentExplorerTable"
           message={

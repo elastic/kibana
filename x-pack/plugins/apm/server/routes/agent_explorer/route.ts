@@ -3,10 +3,8 @@ import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from "../apm_routes/create_apm_server_route";
 import { environmentRt, kueryRt, probabilityRt, rangeRt } from '../default_api_types';
-import { AgentName } from './../../../typings/es_schemas/ui/fields/agent';
-import { getAgentsInstances } from './get_agents_instances';
-import { getAgentsLatestVersion } from './get_agents_latest_version';
 import { getAgents } from './get_agents';
+import { getAgentsInstances } from './get_agents_instances';
 
 const agentExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/agent_explorer',
@@ -26,19 +24,19 @@ const agentExplorerRoute = createApmServerRoute({
   async handler(resources): Promise<{
     items: Array<{
       serviceName: string;
-      instances: number;
       environments: string[];
-      agents: Array<{
-        name: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
-        versions: string[];
-      }>;
-      language: string;
+      agentName?: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
+      agentVersion: string[];
+      agentLastVersion?: string;
+      agentRepoUrl?: string;
     }>;
   }> {
     const {
       params,
       request,
       plugins: { security },
+      logger,
+      core,
     } = resources;
 
     const {
@@ -65,6 +63,8 @@ const agentExplorerRoute = createApmServerRoute({
       start,
       end,
       randomSampler,
+      core: core.setup,
+      logger,
     });
   },
 });
@@ -122,16 +122,7 @@ const agentExplorerDetailsRoute = createApmServerRoute({
   },
 });
 
-const agentLastVersionRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/agent_explorer/last_versions',
-  options: { tags: ['access:apm'] },
-  async handler({core, logger}): Promise<Partial<Record<AgentName, string>>> {
-    return getAgentsLatestVersion({core: core.setup, logger});
-  },
-});
-
 export const agentExplorerRouteRepository = {
   ...agentExplorerRoute,
   ...agentExplorerDetailsRoute,
-  ...agentLastVersionRoute,
 };

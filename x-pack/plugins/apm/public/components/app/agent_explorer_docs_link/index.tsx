@@ -9,20 +9,19 @@ import { EuiIcon, EuiLink } from '@elastic/eui';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import React from 'react';
 import { AgentName } from "../../../../typings/es_schemas/ui/fields/agent";
-import { getDocsLink } from './get_docs_link';
 import { FormattedMessage } from 'react-intl';
 
 interface AgentExplorerDocsLinkProps {
   agentName: AgentName;
+  repositoryUrl?: string;
 }
 
 export function AgentExplorerDocsLink({
-  agentName
+  agentName,
+  repositoryUrl
 }: AgentExplorerDocsLinkProps) {
 
-  const docsLink = getDocsLink(agentName);
-
-  if (!docsLink) {
+  if (!repositoryUrl) {
     return (
       <>
         {NOT_AVAILABLE_LABEL}
@@ -33,7 +32,7 @@ export function AgentExplorerDocsLink({
   return (
     <EuiLink
       data-test-subj={`agentExplorerDocsLink_${agentName}`}
-      href={docsLink}
+      href={repositoryUrl}
       target="_blank"
       external
     >

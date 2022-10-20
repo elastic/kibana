@@ -81,6 +81,11 @@ export async function getAgentsDetails({
                   field: AGENT_VERSION,
                 }
               },
+              {
+                exists: {
+                  field: SERVICE_NODE_NAME,
+                }
+              },
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
@@ -104,33 +109,31 @@ export async function getAgentsDetails({
                       field: SERVICE_NODE_NAME,
                     }
                   },
-                  agents: {
+                  serviceNodes: {
                     terms: {
-                      field: AGENT_NAME,
+                      field: SERVICE_NODE_NAME,
+                      size: maxNumServices,
                     },
                     aggs: {
-                      versions: {
+                      environments: {
                         terms: {
-                          field: AGENT_VERSION,
+                          field: SERVICE_ENVIRONMENT,
                         }
-                      }
-                    }
+                      },
+                      sample: {
+                        top_metrics: {
+                          metrics: [
+                            { field: AGENT_NAME } as const,
+                            { field: AGENT_VERSION } as const,
+                            { field: SERVICE_LANGUAGE_NAME } as const,
+                          ],
+                          sort: {
+                            '@timestamp': 'desc' as const,
+                          }
+                        },
+                      },
+                    },
                   },
-                  environments: {
-                    terms: {
-                      field: SERVICE_ENVIRONMENT,
-                    }
-                  },
-                  sample: {
-                    top_metrics: {
-                      metrics: [
-                        { field: SERVICE_LANGUAGE_NAME } as const
-                      ],
-                      sort: {
-                        '@timestamp': 'desc' as const,
-                      }
-                    }
-                  }
                 },
               },
             },
@@ -142,21 +145,27 @@ export async function getAgentsDetails({
 
   return (
     response.aggregations?.sample.services.buckets.map((bucket) => {
-      const agents = bucket.agents.buckets.map((agent) => ({
-        name: agent.key as AgentName,
-        versions: agent.versions.buckets.map(
-          (version) => version.key as string
-        ),
-      }));
+      const agent =
+        bucket.serviceNodes.buckets.reduce((acc, serviceNode) => ({
+          environments: Array.from(
+            new Set([
+              ...acc.environments,
+              ...serviceNode.environments.buckets.map((env) => env.key as string)
+            ])),
+          agentName: serviceNode.sample.top[0].metrics[AGENT_NAME] as AgentName,
+          agentVersion: Array.from(
+            new Set([
+              ...acc.agentVersion,
+              serviceNode.sample.top[0].metrics[AGENT_VERSION] as string
+            ])),
+        }),
+        { environments: [], agentVersion: []} as { environments: string[]; agentName?: AgentName; agentVersion: string[] });
 
       return {
         serviceName: bucket.key as string,
-        instances: bucket.instances.value,
-        agents,
-        environments: bucket.environments.buckets.map(
-          (version) => version.key as string
-        ),
-        language: bucket.sample.top[0].metrics[SERVICE_LANGUAGE_NAME] as string,
+        environments: agent.environments,
+        agentName: agent.agentName,
+        agentVersion: agent.agentVersion,
       };
     }) ?? []
   );
