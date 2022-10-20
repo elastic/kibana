@@ -22,7 +22,7 @@ import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
 import { createIndex } from '../../lib/indices/create_index';
-import { deleteMlInferencePipeline } from '../../lib/indices/delete_ml_inference_pipeline';
+import { deleteMlInferencePipeline } from '../../lib/indices/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';

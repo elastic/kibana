@@ -20,7 +20,7 @@ jest.mock('../../lib/indices/ml_inference/get_ml_inference_history', () => ({
 jest.mock('../../lib/indices/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors', () => ({
   getMlInferencePipelineProcessors: jest.fn(),
 }));
-jest.mock('../../lib/indices/delete_ml_inference_pipeline', () => ({
+jest.mock('../../lib/indices/ml_inference/pipeline_processors/delete_ml_inference_pipeline', () => ({
   deleteMlInferencePipeline: jest.fn(),
 }));
 jest.mock('../../lib/indices/exists_index', () => ({
@@ -36,7 +36,7 @@ jest.mock('../../lib/indices/ml_inference/pipeline_processors/put_ml_inference_p
   createAndReferenceMlInferencePipeline: jest.fn(),
 }));
 
-import { deleteMlInferencePipeline } from '../../lib/indices/delete_ml_inference_pipeline';
+import { deleteMlInferencePipeline } from '../../lib/indices/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { getMlInferenceHistory } from '../../lib/indices/ml_inference/get_ml_inference_history';
 import { getMlInferencePipelineProcessors } from '../../lib/indices/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
