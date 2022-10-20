@@ -107,7 +107,7 @@ interface Props {
   ownFocus: boolean;
   showOwnFocus?: boolean;
   showTopN: boolean;
-  timelineId?: string | null;
+  scopeId?: string | null;
   toggleColumn?: (column: ColumnHeaderOptions) => void;
   toggleTopN: () => void;
   values?: string[] | string | null;
@@ -149,7 +149,7 @@ export const HoverActions: React.FC<Props> = React.memo(
     ownFocus,
     showOwnFocus = true,
     showTopN,
-    timelineId,
+    scopeId,
     toggleColumn,
     toggleTopN,
     values,
@@ -178,11 +178,11 @@ export const HoverActions: React.FC<Props> = React.memo(
     const defaultFocusedButtonRef = useRef<HTMLButtonElement | null>(null);
 
     useEffect(() => {
-      if (isInit.current && goGetTimelineId != null && timelineId == null) {
+      if (isInit.current && goGetTimelineId != null && scopeId == null) {
         isInit.current = false;
         goGetTimelineId(true);
       }
-    }, [goGetTimelineId, timelineId]);
+    }, [goGetTimelineId, scopeId]);
 
     useEffect(() => {
       if (ownFocus) {
@@ -215,7 +215,7 @@ export const HoverActions: React.FC<Props> = React.memo(
       [ownFocus, toggleTopN]
     );
 
-    const isCaseView = timelineId === TimelineId.casePage;
+    const isCaseView = scopeId === TimelineId.casePage;
 
     const { overflowActionItems, allActionItems } = useHoverActionItems({
       dataProvider,
@@ -237,10 +237,10 @@ export const HoverActions: React.FC<Props> = React.memo(
       ownFocus,
       showTopN,
       stKeyboardEvent,
-      timelineId,
       toggleColumn,
       toggleTopN,
       values,
+      scopeId,
     });
 
     const Container = applyWidthAndPadding

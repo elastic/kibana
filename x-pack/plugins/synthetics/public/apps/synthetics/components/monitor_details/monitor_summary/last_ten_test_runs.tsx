@@ -118,8 +118,9 @@ export const LastTenTestRuns = () => {
     },
   ];
 
+  const historyIdParam = monitor?.[ConfigKey.CUSTOM_HEARTBEAT_ID] ?? monitor?.[ConfigKey.ID];
   return (
-    <EuiPanel css={{ minHeight: 200 }}>
+    <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 200 }}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
@@ -133,7 +134,8 @@ export const LastTenTestRuns = () => {
             iconType="list"
             iconSide="left"
             data-test-subj="monitorSummaryViewLastTestRun"
-            href={`${basePath}/app/uptime/monitor/${btoa(monitor?.id ?? '')}`}
+            disabled={!historyIdParam}
+            href={`${basePath}/app/uptime/monitor/${btoa(historyIdParam ?? '')}`}
           >
             {i18n.translate('xpack.synthetics.monitorDetails.summary.viewHistory', {
               defaultMessage: 'View History',

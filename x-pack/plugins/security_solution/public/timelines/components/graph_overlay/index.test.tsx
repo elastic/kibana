@@ -21,11 +21,12 @@ import {
   SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../../common/mock';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TableId, TimelineId } from '../../../../common/types/timeline';
 import { GraphOverlay } from '.';
 import { createStore } from '../../../common/store';
 import { useStateSyncingActions } from '../../../resolver/view/use_state_syncing_actions';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../../common/containers/use_full_screen', () => ({
   useGlobalFullScreen: jest.fn(),
@@ -68,7 +69,6 @@ jest.mock('react-redux', () => {
 
 describe('GraphOverlay', () => {
   const { storage } = createSecuritySolutionStorageMock();
-
   beforeEach(() => {
     jest.clearAllMocks();
     (useGlobalFullScreen as jest.Mock).mockReturnValue({
@@ -85,7 +85,7 @@ describe('GraphOverlay', () => {
     test('it has 100% width when NOT in full screen mode', () => {
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={TimelineId.test} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={TableId.test} />
         </TestProviders>
       );
 
@@ -105,7 +105,7 @@ describe('GraphOverlay', () => {
 
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={TimelineId.test} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={TableId.test} />
         </TestProviders>
       );
 
@@ -122,19 +122,20 @@ describe('GraphOverlay', () => {
               timeline: {
                 ...mockGlobalState.timeline,
                 timelineById: {
-                  test: {
-                    ...mockGlobalState.timeline.timelineById.test,
+                  [TimelineId.test]: {
+                    ...mockGlobalState.timeline.timelineById[TimelineId.test],
                     graphEventId: 'definitely-not-null',
                   },
                 },
               },
             },
             SUB_PLUGINS_REDUCER,
+            { dataTable: tGridReducer },
             kibanaObservable,
             storage
           )}
         >
-          <GraphOverlay timelineId={TimelineId.test} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={TableId.test} />
         </TestProviders>
       );
 
@@ -153,7 +154,7 @@ describe('GraphOverlay', () => {
     test('it has 100% width when NOT in full screen mode', () => {
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={timelineId} />
         </TestProviders>
       );
 
@@ -173,7 +174,7 @@ describe('GraphOverlay', () => {
 
       const wrapper = render(
         <TestProviders>
-          <GraphOverlay timelineId={timelineId} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={timelineId} />
         </TestProviders>
       );
 
@@ -208,11 +209,12 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
+            { dataTable: tGridReducer },
             kibanaObservable,
             storage
           )}
         >
-          <GraphOverlay timelineId={timelineId} SessionView={<div />} Navigation={<div />} />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={timelineId} />
         </TestProviders>
       );
 
@@ -247,14 +249,15 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
+            { dataTable: tGridReducer },
             kibanaObservable,
             storage
           )}
         >
           <GraphOverlay
-            timelineId={timelineId}
             SessionView={<div />}
             Navigation={<div>{'Close Session'}</div>}
+            scopeId={timelineId}
           />
         </TestProviders>
       );
@@ -288,15 +291,12 @@ describe('GraphOverlay', () => {
               },
             },
             SUB_PLUGINS_REDUCER,
+            { dataTable: tGridReducer },
             kibanaObservable,
             storage
           )}
         >
-          <GraphOverlay
-            timelineId={timelineId}
-            SessionView={<div />}
-            Navigation={<div>{'Close Session'}</div>}
-          />
+          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={timelineId} />
         </TestProviders>
       );
       wrapper.unmount();
