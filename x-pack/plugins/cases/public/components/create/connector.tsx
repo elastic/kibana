@@ -8,9 +8,13 @@
 import React, { memo, useCallback, useMemo, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
+import type { FieldHook, FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  UseField,
+  useFormData,
+  useFormContext,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ActionConnector } from '../../../common/api';
-import type { FieldHook, FieldConfig } from '../../common/shared_imports';
-import { UseField, useFormData, useFormContext } from '../../common/shared_imports';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import type { FormProps } from './schema';

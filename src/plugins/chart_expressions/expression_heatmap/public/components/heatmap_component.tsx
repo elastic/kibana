@@ -146,6 +146,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     uiState,
     interactive,
     syncTooltips,
+    syncCursor,
     renderComplete,
   }) => {
     const chartRef = useRef<Chart>(null);
@@ -576,7 +577,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               noResults={
                 <EmptyPlaceholder icon={IconChartHeatmap} renderComplete={onRenderChange} />
               }
-              onPointerUpdate={handleCursorUpdate}
+              onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
               externalPointerEvents={{
                 tooltip: { visible: syncTooltips },
               }}
@@ -618,8 +619,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               xScale={xScale}
               ySortPredicate={yAxisColumn ? getSortPredicate(yAxisColumn) : 'dataIndex'}
               xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
-              xAxisLabelName={xAxisColumn?.name}
-              yAxisLabelName={yAxisColumn?.name}
+              xAxisLabelName={xAxisColumn?.name || ''}
+              yAxisLabelName={yAxisColumn?.name || ''}
               xAxisTitle={args.gridConfig.isXAxisTitleVisible ? xAxisTitle : undefined}
               yAxisTitle={args.gridConfig.isYAxisTitleVisible ? yAxisTitle : undefined}
               xAxisLabelFormatter={(v) =>

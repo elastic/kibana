@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { GuideId, GuideState, GuideStepIds } from '../../common/types';
+import type { GuideId, GuideStepIds, GuideState, GuideStep } from '@kbn/guided-onboarding';
 import { guidesConfig } from '../constants/guides_config';
 import { GuideConfig, StepConfig } from '../types';
-import { GuideStep } from '../../common/types';
 
 export const getGuideConfig = (guideId?: GuideId): GuideConfig | undefined => {
   if (guideId && Object.keys(guidesConfig).includes(guideId)) {
