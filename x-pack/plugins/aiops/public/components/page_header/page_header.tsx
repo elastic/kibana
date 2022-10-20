@@ -14,17 +14,15 @@ import {
   EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
 } from '@elastic/eui';
-import { type DataView } from '@kbn/data-views-plugin/common';
+import { useDataSource } from '../../hooks/use_data_source';
 import { useTimefilter } from '../../hooks/use_time_filter';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DatePickerWrapper } from '../date_picker_wrapper';
 
-export interface PageHeaderProps {
-  dataView: DataView;
-}
-
-export const PageHeader: FC<PageHeaderProps> = ({ dataView }) => {
+export const PageHeader: FC = () => {
   const timefilter = useTimefilter({ timeRangeSelector: true });
+
+  const { dataView } = useDataSource();
 
   return (
     <>
