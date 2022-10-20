@@ -66,8 +66,9 @@ export class ColorFormat extends FieldFormat {
           color: color.text,
           backgroundColor: color.background,
         }}
-        dangerouslySetInnerHTML={{ __html: displayVal }} // eslint-disable-line react/no-danger
-      />
+      >
+        {displayVal}
+      </span>
     );
   };
 }
