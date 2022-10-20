@@ -61,7 +61,7 @@ export const fetchAggIntervals = async (
         ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
       },
     },
-    { signal: abortSignal }
+    { signal: abortSignal, maxRetries: 0 }
   );
 
   const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
