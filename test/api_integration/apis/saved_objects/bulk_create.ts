@@ -69,6 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
                 type: 'dashboard',
                 id: 'a01b2f57-fcfd-4864-b735-09e28f0d815e',
                 updated_at: resp.body.saved_objects[1].updated_at,
+                created_at: resp.body.saved_objects[1].created_at,
                 version: resp.body.saved_objects[1].version,
                 attributes: {
                   title: 'A great new dashboard',

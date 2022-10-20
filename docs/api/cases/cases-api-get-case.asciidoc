@@ -86,6 +86,7 @@ The API returns a JSON object with the retrieved case. For example:
   "status":"open",
   "updated_at":"2022-07-13T15:40:32.335Z",
   "updated_by":{"full_name":null,"email":null,"username":"elastic"},
+  "assignees":[{"uid":"u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"}],
   "connector":{"id":"none","name":"none","type":".none","fields":null},
   "external_service":null
 }
