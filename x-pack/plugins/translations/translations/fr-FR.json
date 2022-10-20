@@ -19170,7 +19170,6 @@
     "xpack.ml.dataframe.analyticsList.errorWithCheckingIfUserCanDeleteIndexNotificationErrorMessage": "Une erreur s'est produite lors de la vérification de la possibilité pour un utilisateur de supprimer {destinationIndex} : {error}",
     "xpack.ml.dataframe.analyticsList.fetchSourceDataViewForCloneErrorMessage": "Une erreur s’est produite lors de la vérification de l’existence de la vue de données {dataView} : {error}",
     "xpack.ml.dataframe.analyticsList.forceStopModalBody": "{analyticsId} est en état d'échec. Vous devez arrêter la tâche et corriger la défaillance.",
-    "xpack.ml.dataframe.analyticsList.noSourceDataViewForClone": "Impossible de cloner la tâche d'analyse. Il n’existe aucune vue de données pour l’index {dataView}.",
     "xpack.ml.dataframe.analyticsList.progressOfPhase": "Progression de la phase {currentPhase} : {progress}%",
     "xpack.ml.dataframe.analyticsList.rowCollapse": "Masquer les détails pour {analyticsId}",
     "xpack.ml.dataframe.analyticsList.rowExpand": "Afficher les détails pour {analyticsId}",
