@@ -27,13 +27,14 @@ export interface Props {
   accept?: string;
   immediate?: boolean;
   allowClear?: boolean;
+  compressed?: boolean;
   initialFilePromptText?: string;
 }
 
 const { euiFormMaxWidth, euiButtonHeightSmall } = euiThemeVars;
 
 export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
-  ({ meta, accept, immediate, allowClear = false, initialFilePromptText }, ref) => {
+  ({ compressed, meta, accept, immediate, allowClear = false, initialFilePromptText }, ref) => {
     const uploadState = useUploadState();
     const uploading = useBehaviorSubject(uploadState.uploading$);
     const error = useBehaviorSubject(uploadState.error$);
@@ -66,6 +67,7 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
           accept={accept}
           disabled={Boolean(done?.length || uploading)}
           aria-describedby={errorMessage ? errorId : undefined}
+          display={compressed ? 'default' : 'large'}
         />
 
         <EuiSpacer size="s" />

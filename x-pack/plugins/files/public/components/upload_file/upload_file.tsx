@@ -72,6 +72,13 @@ export interface Props<Kind extends string = string> {
    * Called when an error occurs during upload
    */
   onError?: (e: Error) => void;
+
+  /**
+   * Whether to display the component in it's compact form.
+   *
+   * @default false
+   */
+  compressed?: boolean;
 }
 
 /**
@@ -86,6 +93,7 @@ export const UploadFile = <Kind extends string = string>({
   onDone,
   onError,
   allowClear,
+  compressed,
   kind: kindId,
   immediate = false,
   allowRepeatedUploads = false,
@@ -122,6 +130,7 @@ export const UploadFile = <Kind extends string = string>({
   return (
     <context.Provider value={uploadState}>
       <Component
+        compressed={compressed}
         ref={ref}
         accept={fileKind.allowedMimeTypes?.join(',')}
         meta={meta}

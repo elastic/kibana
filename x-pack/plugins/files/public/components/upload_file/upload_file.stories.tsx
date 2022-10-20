@@ -139,3 +139,15 @@ ImmediateUploadAbort.args = {
     delete: async () => {},
   } as unknown as FilesClient,
 };
+
+export const Compressed = Template.bind({});
+Compressed.args = {
+  compressed: true,
+  client: {
+    create: async () => ({ file: { id: 'test' } }),
+    upload: async () => {
+      await sleep(60000);
+    },
+    delete: async () => {},
+  } as unknown as FilesClient,
+};
