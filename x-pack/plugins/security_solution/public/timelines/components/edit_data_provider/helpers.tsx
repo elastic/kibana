@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { findIndex } from 'lodash/fp';
+import { endsWith, findIndex, startsWith } from 'lodash/fp';
+
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { DataProviderType } from '@kbn/timelines-plugin/common';
 
 import type { BrowserField, BrowserFields } from '../../../common/containers/source';
 import { getAllFieldsByName } from '../../../common/containers/source';
@@ -20,19 +22,23 @@ import {
 import * as i18n from './translations';
 
 /** The list of operators to display in the `Operator` select  */
-export const operatorLabels: EuiComboBoxOptionOption[] = [
+export const operatorLabels = (type: DataProviderType): EuiComboBoxOptionOption[] => [
   {
     label: i18n.IS,
   },
   {
     label: i18n.IS_NOT,
   },
-  {
-    label: i18n.IS_ONE_OF,
-  },
-  {
-    label: i18n.IS_NOT_ONE_OF,
-  },
+  ...(type === DataProviderType.default
+    ? [
+        {
+          label: i18n.IS_ONE_OF,
+        },
+        {
+          label: i18n.IS_NOT_ONE_OF,
+        },
+      ]
+    : []),
   {
     label: i18n.EXISTS,
   },
@@ -67,16 +73,18 @@ export const selectionsAreValid = ({
   browserFields,
   selectedField,
   selectedOperator,
+  type,
 }: {
   browserFields: BrowserFields;
   selectedField: EuiComboBoxOptionOption[];
   selectedOperator: EuiComboBoxOptionOption[];
+  type: DataProviderType;
 }): boolean => {
   const fieldId = selectedField.length > 0 ? selectedField[0].label : '';
   const operator = selectedOperator.length > 0 ? selectedOperator[0].label : '';
 
   const fieldIsValid = browserFields && getAllFieldsByName(browserFields)[fieldId] != null;
-  const operatorIsValid = findIndex((o) => o.label === operator, operatorLabels) !== -1;
+  const operatorIsValid = findIndex((o) => o.label === operator, operatorLabels(type)) !== -1;
 
   return fieldIsValid && operatorIsValid;
 };
@@ -116,4 +124,16 @@ export const getExcludedFromSelection = (selectedOperator: EuiComboBoxOptionOpti
     default:
       return false;
   }
+};
+
+/** Ensure that a value passed to ControlledDefaultInput is not an array */
+export const sanatizeValue = (value: string | number | Array<unknown>): string =>
+  Array.isArray(value) ? `${value[0]}` : `${value}`; // fun fact: value should never be an array
+
+/** Ensure if DataProvider is default that value is not template-like */
+export const isValueFieldInvalid = (type: DataProviderType, value: string | number) => {
+  return (
+    type !== DataProviderType.template &&
+    (startsWith('{', sanatizeValue(value)) || endsWith('}', sanatizeValue(value)))
+  );
 };

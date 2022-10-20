@@ -146,8 +146,6 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
 
   const { euiTheme } = useEuiTheme();
 
-  console.log({ isDataInTimeline, test: combinedQueries?.filterQuery });
-
   return (
     <EuiPanel
       borderRadius="none"

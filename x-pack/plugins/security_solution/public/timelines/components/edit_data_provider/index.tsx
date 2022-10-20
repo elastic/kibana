@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import { noop, startsWith, endsWith } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiComboBox,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
 
 import type { BrowserFields } from '../../../common/containers/source';
@@ -33,6 +32,8 @@ import {
   selectionsAreValid,
 } from './helpers';
 
+import { ControlledComboboxInput } from './components';
+import { ControlledDefaultInput } from './components';
 import * as i18n from './translations';
 
 const EDIT_DATA_PROVIDER_WIDTH = 400;
@@ -58,9 +59,6 @@ interface Props {
   value: string | number | Array<string | number>;
   type?: DataProviderType;
 }
-
-const sanatizeValue = (value: string | number): string =>
-  Array.isArray(value) ? `${value[0]}` : `${value}`; // fun fact: value should never be an array
 
 export const getInitialOperatorLabel = (
   isExcluded: boolean,
@@ -104,8 +102,9 @@ export const StatefulEditDataProvider = React.memo<Props>(
     );
 
     const showComboBoxInput =
-      updatedOperator[0].label === i18n.IS_ONE_OF ||
-      updatedOperator[0].label === i18n.IS_NOT_ONE_OF;
+      updatedOperator.length > 0 &&
+      (updatedOperator[0].label === i18n.IS_ONE_OF ||
+        updatedOperator[0].label === i18n.IS_NOT_ONE_OF);
 
     const showValueInput =
       type !== DataProviderType.template &&
@@ -230,7 +229,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
                     data-test-subj="operator"
                     isClearable={false}
                     onChange={onOperatorSelected}
-                    options={operatorLabels}
+                    options={operatorLabels(type)}
                     placeholder={i18n.SELECT_AN_OPERATOR}
                     selectedOptions={updatedOperator}
                     singleSelection={{ asPlainText: true }}
@@ -283,6 +282,7 @@ export const StatefulEditDataProvider = React.memo<Props>(
                   fill={true}
                   isDisabled={
                     !selectionsAreValid({
+                      type,
                       browserFields,
                       selectedField: updatedField,
                       selectedOperator: updatedOperator,
@@ -303,127 +303,3 @@ export const StatefulEditDataProvider = React.memo<Props>(
 );
 
 StatefulEditDataProvider.displayName = 'StatefulEditDataProvider';
-
-function isStringOrNumberArray(
-  val: string | number | Array<string | number>
-): val is Array<string | number> {
-  return Array.isArray(val) && (typeof val[0] === 'string' || typeof val[0] === 'number');
-}
-
-const isValueFieldInvalid = (type: DataProviderType, value: string | number) =>
-  type !== DataProviderType.template &&
-  (startsWith('{', sanatizeValue(value)) || endsWith('}', sanatizeValue(value)));
-
-interface ControlledDataProviderInput {
-  disableButtonCallback: (disableButton: boolean) => void;
-  onChangeCallback: (value: string | number | string[]) => void;
-  type: DataProviderType;
-  value: string | number | Array<string | number>;
-}
-
-const getDefaultValue = (value: string | number | Array<string | number>): string | number => {
-  if (isStringOrNumberArray(value)) {
-    return value[0];
-  } else return value;
-};
-
-const ControlledDefaultInput = ({
-  value,
-  type,
-  disableButtonCallback,
-  onChangeCallback,
-}: ControlledDataProviderInput) => {
-  const [primitiveValue, setPrimitiveValue] = useState<string | number>(getDefaultValue(value));
-
-  const isInvalid = useMemo(
-    () => isValueFieldInvalid(type, primitiveValue),
-    [type, primitiveValue]
-  );
-
-  useEffect(() => {
-    onChangeCallback(primitiveValue);
-    disableButtonCallback(isInvalid);
-  }, [primitiveValue, isInvalid, onChangeCallback, disableButtonCallback]);
-
-  const onValueChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setPrimitiveValue(e.target.value);
-  }, []);
-
-  return (
-    <EuiFieldText
-      className={VALUE_INPUT_CLASS_NAME}
-      onChange={onValueChange}
-      placeholder={i18n.VALUE}
-      value={sanatizeValue(primitiveValue)}
-      isInvalid={isInvalid}
-    />
-  );
-};
-
-const convertValuesToComboboxValueArray = (
-  values: string | number | Array<string | number>
-): EuiComboBoxOptionOption[] => {
-  if (isStringOrNumberArray(values)) {
-    return values.map((item) => ({ label: String(item) }));
-  } else return [];
-};
-
-const convertComboboxValuesToStringArray = (values: EuiComboBoxOptionOption[]): string[] => {
-  return values.map((item) => item.label);
-};
-
-const ControlledComboboxInput = ({
-  value,
-  onChangeCallback,
-  type,
-  disableButtonCallback,
-}: ControlledDataProviderInput) => {
-  const [includeValues, setIncludeValues] = useState(convertValuesToComboboxValueArray(value));
-
-  const isInvalid = useMemo(
-    () => includeValues.every((item) => isValueFieldInvalid(type, item.label)),
-    [type, includeValues]
-  );
-
-  useEffect(() => {
-    onChangeCallback(convertComboboxValuesToStringArray(includeValues));
-    disableButtonCallback(isInvalid);
-  }, [includeValues, isInvalid, onChangeCallback, disableButtonCallback]);
-
-  const onCreateOption = (searchValue: string, flattenedOptions = includeValues) => {
-    const normalizedSearchValue = searchValue.trim().toLowerCase();
-
-    if (!normalizedSearchValue) {
-      return;
-    }
-
-    if (
-      flattenedOptions.findIndex(
-        (option) => option.label.trim().toLowerCase() === normalizedSearchValue
-      ) === -1
-    ) {
-      setIncludeValues([
-        ...includeValues,
-        {
-          label: searchValue,
-        },
-      ]);
-    }
-  };
-
-  const onIncludeValueChanged = useCallback((updatedIncludesValues: EuiComboBoxOptionOption[]) => {
-    setIncludeValues(updatedIncludesValues);
-  }, []);
-
-  return (
-    <EuiComboBox
-      noSuggestions
-      isClearable={true}
-      data-test-subj="operator"
-      selectedOptions={includeValues}
-      placeholder={i18n.ENTER_ONE_OR_MORE_VALUES}
-      onCreateOption={onCreateOption}
-      onChange={onIncludeValueChanged}
-    />
-  );
-};

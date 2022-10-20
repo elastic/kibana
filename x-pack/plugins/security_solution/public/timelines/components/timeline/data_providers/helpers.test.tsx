@@ -23,7 +23,7 @@ import {
   reorder,
   sourceAndDestinationAreSameDroppable,
   unFlattenGroups,
-  convertIsOneOfQueryStringArrayToDisplayValue,
+  getDisplayValue,
 } from './helpers';
 import {
   providerA,
@@ -1105,9 +1105,17 @@ describe('helpers', () => {
     });
   });
 
-  describe('convertIsOneOfQueryStringArrayToDisplayValue', () => {
-    it('converts a "is one of" query to correct format for a string array', () => {
-      expect(convertIsOneOfQueryStringArrayToDisplayValue(['a', 2, 'c'])).toBe('( a OR 2 OR c )');
+  describe('getDisplayValue', () => {
+    it('converts an array (is one of query) to correct format for a string array', () => {
+      expect(getDisplayValue(['a', 'b', 'c'])).toBe('( a OR b OR c )');
+      expect(getDisplayValue([1, 2, 3])).toBe('( 1 OR 2 OR 3 )');
+    });
+    it('handles an empty array', () => {
+      expect(getDisplayValue([])).toBe('');
+    });
+    it('returns a provided value if not an array', () => {
+      expect(getDisplayValue(1)).toBe(1);
+      expect(getDisplayValue('text')).toBe('text');
     });
   });
 });

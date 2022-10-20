@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DataProviderType } from '@kbn/timelines-plugin/common';
+
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import {
   EXISTS_OPERATOR,
@@ -17,6 +19,8 @@ import {
   getExcludedFromSelection,
   getFieldNames,
   getQueryOperatorFromSelection,
+  isValueFieldInvalid,
+  sanatizeValue,
   selectionsAreValid,
 } from './helpers';
 
@@ -136,6 +140,7 @@ describe('helpers', () => {
               label: 'is',
             },
           ],
+          type: DataProviderType.default,
         })
       ).toBe(true);
     });
@@ -154,6 +159,7 @@ describe('helpers', () => {
               label: 'is',
             },
           ],
+          type: DataProviderType.default,
         })
       ).toBe(false);
     });
@@ -169,9 +175,10 @@ describe('helpers', () => {
           ],
           selectedOperator: [
             {
-              label: 'is',
+              label: 'is one of',
             },
           ],
+          type: DataProviderType.default,
         })
       ).toBe(false);
     });
@@ -190,6 +197,7 @@ describe('helpers', () => {
               label: '',
             },
           ],
+          type: DataProviderType.default,
         })
       ).toBe(false);
     });
@@ -208,6 +216,25 @@ describe('helpers', () => {
               label: 'invalid-operator',
             },
           ],
+          type: DataProviderType.default,
+        })
+      ).toBe(false);
+    });
+    test('it should return false when the selected operator is "is one of", and the DataProviderType is template', () => {
+      expect(
+        selectionsAreValid({
+          browserFields: mockBrowserFields,
+          selectedField: [
+            {
+              label: 'destination.bytes',
+            },
+          ],
+          selectedOperator: [
+            {
+              label: 'is one of',
+            },
+          ],
+          type: DataProviderType.template,
         })
       ).toBe(false);
     });
@@ -352,6 +379,39 @@ describe('helpers', () => {
           },
         ])
       ).toBe(true);
+    });
+  });
+
+  describe('isValueFieldInvalid', () => {
+    it('returns false (not invalid) if DataProvierType type is template', () => {
+      expect(isValueFieldInvalid(DataProviderType.template, 'some string')).toBe(false);
+    });
+
+    it('returns false (not invalid) if DataProvierType type is default, and value is not template-like', () => {
+      expect(isValueFieldInvalid(DataProviderType.default, 'some string')).toBe(false);
+    });
+
+    it('returns true (invalid) if DataProvierType type is default, and value is template-like', () => {
+      expect(isValueFieldInvalid(DataProviderType.default, '{ oh nooo!')).toBe(true);
+      expect(isValueFieldInvalid(DataProviderType.default, 'oh nooo! }')).toBe(true);
+    });
+  });
+
+  describe('sanatizeValue', () => {
+    it("returns a provided value if it's a string or number as a string", () => {
+      expect(sanatizeValue('a string')).toBe('a string');
+      expect(sanatizeValue(1)).toBe('1');
+    });
+
+    it('returns the sting interpretation of the first value of an array', () => {
+      expect(sanatizeValue(['a string', 'another value'])).toBe('a string');
+      expect(sanatizeValue([1, 'another value'])).toBe('1');
+    });
+
+    it('handles odd array values', () => {
+      expect(sanatizeValue([])).toBe('undefined');
+      expect(sanatizeValue([null])).toBe('null');
+      expect(sanatizeValue([undefined])).toBe('undefined');
     });
   });
 });

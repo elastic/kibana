@@ -10,6 +10,7 @@ import type { DraggableLocation } from 'react-beautiful-dnd';
 import type { Dispatch } from 'redux';
 
 import { updateProviders } from '../../../store/timeline/actions';
+import { isStringOrNumberArray } from '../helpers';
 
 import type { DataProvider, DataProvidersAnd } from './data_provider';
 
@@ -347,13 +348,10 @@ export const getDisplayValue = (
   value: string | number | Array<string | number>
 ): string | number => {
   if (isStringOrNumberArray(value)) {
-    return `( ${value.join(' OR ')} )`;
+    if (value.length) {
+      return `( ${value.join(' OR ')} )`;
+    }
+    return '';
   }
   return value;
 };
-
-function isStringOrNumberArray(
-  val: string | number | Array<string | number>
-): val is Array<string | number> {
-  return Array.isArray(val) && (typeof val[0] === 'string' || typeof val[0] === 'number');
-}

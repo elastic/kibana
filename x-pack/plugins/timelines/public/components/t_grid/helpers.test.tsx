@@ -8,12 +8,21 @@
 import { cloneDeep } from 'lodash/fp';
 import { Filter, EsQueryConfig, FilterStateStore } from '@kbn/es-query';
 
-import { DataProviderType, TimelineId } from '../../../common/types/timeline';
 import {
+  DataProviderType,
+  EXISTS_OPERATOR,
+  IS_OPERATOR,
+  TimelineId,
+} from '../../../common/types/timeline';
+import {
+  buildEXISTSQueryMatch,
   buildGlobalQuery,
+  buildISONEOFQueryMatch,
+  buildISQueryMatch,
   combineQueries,
   getDefaultViewSelection,
   isSelectableView,
+  isStringOrNumberArray,
   isViewSelection,
   resolverIsShowing,
   showGlobalFilters,
@@ -756,5 +765,108 @@ describe('Combined Queries', () => {
         });
       });
     });
+  });
+});
+
+describe('isStringOrNumberArray', () => {
+  test('it returns false when value is not an array', () => {
+    expect(isStringOrNumberArray('just a string')).toBe(false);
+  });
+
+  test('it returns false when value is an array of mixed types', () => {
+    expect(isStringOrNumberArray(['mixed', 123, 'types'])).toBe(false);
+  });
+  test('it returns false when value is an array of mixed types', () => {
+    const badValues = [undefined, null, {}] as unknown as string[];
+    expect(isStringOrNumberArray(['mixed', 123, 'types', ...badValues])).toBe(false);
+  });
+
+  test('it returns true when value is an empty array', () => {
+    expect(isStringOrNumberArray([])).toBe(true);
+  });
+
+  test('it returns true when value is an array of all strings', () => {
+    expect(isStringOrNumberArray(['all', 'string', 'values'])).toBe(true);
+  });
+
+  test('it returns true when value is an array of all numbers', () => {
+    expect(isStringOrNumberArray([123, 456, 789])).toBe(true);
+  });
+});
+
+describe('buildEXISTSQueryMatch', () => {
+  it('correcty computes EXISTS query with no nested field', () => {
+    expect(
+      buildEXISTSQueryMatch({ isFieldTypeNested: false, field: 'host', browserFields: {} })
+    ).toBe(`host ${EXISTS_OPERATOR}`);
+  });
+  it('correcty computes EXISTS query with nested field', () => {
+    expect(
+      buildEXISTSQueryMatch({
+        isFieldTypeNested: true,
+        field: 'nestedField.firstAttributes',
+        browserFields: mockBrowserFields,
+      })
+    ).toBe(`nestedField: { firstAttributes: * }`);
+  });
+});
+
+describe('buildISQueryMatch', () => {
+  it('correcty computes IS query with no nested field', () => {
+    expect(
+      buildISQueryMatch({
+        isFieldTypeNested: false,
+        field: 'nestedField.thirdAttributes',
+        value: 100000,
+        browserFields: {},
+      })
+    ).toBe(`nestedField.thirdAttributes ${IS_OPERATOR} 100000`);
+  });
+  it('correcty computes IS query with nested date field', () => {
+    expect(
+      buildISQueryMatch({
+        isFieldTypeNested: true,
+        browserFields: mockBrowserFields,
+        field: 'nestedField.thirdAttributes',
+        value: 100000,
+      })
+    ).toBe(`nestedField: { thirdAttributes${IS_OPERATOR} \"100000\" }`);
+  });
+  it('correcty computes IS query with nested string field', () => {
+    expect(
+      buildISQueryMatch({
+        isFieldTypeNested: true,
+        browserFields: mockBrowserFields,
+        field: 'nestedField.secondAttributes',
+        value: 'text',
+      })
+    ).toBe(`nestedField: { secondAttributes${IS_OPERATOR} text }`);
+  });
+});
+
+describe('buildISOneOfQueryMatch', () => {
+  it('correcty computes IS ONE OF query with numbers', () => {
+    expect(
+      buildISONEOFQueryMatch({
+        field: 'kibana.alert.worflow_status',
+        value: [1, 2, 3],
+      })
+    ).toBe('kibana.alert.worflow_status : (1 OR 2 OR 3)');
+  });
+  it('correcty computes IS ONE OF query with strings', () => {
+    expect(
+      buildISONEOFQueryMatch({
+        field: 'kibana.alert.worflow_status',
+        value: ['a', 'b', 'c'],
+      })
+    ).toBe('kibana.alert.worflow_status : (a OR b OR c)');
+  });
+  it('correcty computes IS ONE OF query if value is an empty array', () => {
+    expect(
+      buildISONEOFQueryMatch({
+        field: 'kibana.alert.worflow_status',
+        value: [],
+      })
+    ).toBe("kibana.alert.worflow_status : ''");
   });
 });

@@ -7,6 +7,7 @@
 
 import type { Filter, EsQueryConfig, Query } from '@kbn/es-query';
 import { DataViewBase, FilterStateStore } from '@kbn/es-query';
+import { assertUnreachable } from '@kbn/timelines-plugin/common/utility_types';
 import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import {
@@ -101,30 +102,34 @@ const buildQueryMatch = (
   } = dataProvider;
 
   const isFieldTypeNested = checkIfFieldTypeIsNested(field, browserFields);
-  let queryString = excluded ? 'NOT ' : '';
+  const isExcluded = excluded ? 'NOT ' : '';
 
   switch (operator) {
-    case EXISTS_OPERATOR:
-      queryString =
-        queryString + buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested });
-      break;
     case IS_OPERATOR:
       if (!isStringOrNumberArray(value)) {
-        queryString =
-          queryString + type !== DataProviderType.template
+        return `${isExcluded}${
+          type !== DataProviderType.template
             ? buildISQueryMatch({ browserFields, field, isFieldTypeNested, value })
-            : buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested });
+            : buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested })
+        }`;
+      } else {
+        // what to return if it's not a suitable format
+        return isExcluded + `${field} : ${value.length ? JSON.stringify(value[0]) : 'null'}`;
       }
-      break;
+
+    case EXISTS_OPERATOR:
+      return isExcluded + buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested });
+
     case IS_ONE_OF_OPERATOR:
       if (isStringOrNumberArray(value)) {
-        queryString =
-          queryString + buildISONEOFQueryMatch({ browserFields, field, isFieldTypeNested, value });
+        return isExcluded + buildISONEOFQueryMatch({ field, value });
+      } else {
+        // what to return if it's not a suitable format
+        return isExcluded + `${field} : ${JSON.stringify(value)}`;
       }
-      break;
+    default:
+      assertUnreachable(operator);
   }
-
-  return queryString.trim();
 };
 
 export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: BrowserFields) =>
@@ -407,7 +412,7 @@ export const getDefaultViewSelection = ({
 /** This local storage key stores the `Grid / Event rendered view` selection */
 export const ALERTS_TABLE_VIEW_SELECTION_KEY = 'securitySolution.alerts.table.view-selection';
 
-const buildISQueryMatch = ({
+export const buildISQueryMatch = ({
   browserFields,
   field,
   isFieldTypeNested,
@@ -427,7 +432,7 @@ const buildISQueryMatch = ({
   }
 };
 
-const buildEXISTSQueryMatch = ({
+export const buildEXISTSQueryMatch = ({
   browserFields,
   field,
   isFieldTypeNested,
@@ -441,25 +446,22 @@ const buildEXISTSQueryMatch = ({
     : `${field} ${EXISTS_OPERATOR}`;
 };
 
-const buildISONEOFQueryMatch = ({
-  browserFields,
+export const buildISONEOFQueryMatch = ({
   field,
-  isFieldTypeNested,
   value,
 }: {
-  browserFields: BrowserFields;
   field: string;
-  isFieldTypeNested: boolean;
   value: Array<string | number>;
 }): string => {
-  return `${field} : ${value
-    .map((item) => (isNumber(item) ? Number(item) : `"${item}"`))
-    .join(' OR ')
-    .replace(/^\[/, '(')
-    .replace(/\]$/g, ')')}`;
+  const trimmedValue = field.trim();
+  if (value.length) {
+    return `${trimmedValue} : (${value
+      .map((item) => (isNumber(item) ? Number(item) : `${item.trim()}`))
+      .join(' OR ')})`;
+  }
+  return `${trimmedValue} : ''`;
 };
 
-const isStringOrNumberArray = (
-  val: string | number | Array<string | number>
-): val is Array<string | number> =>
-  Array.isArray(val) && (typeof val[0] === 'string' || typeof val[0] === 'number');
+export const isStringOrNumberArray = (value: unknown): value is Array<string | number> =>
+  Array.isArray(value) &&
+  (value.every((x) => typeof x === 'string') || value.every((x) => typeof x === 'number'));

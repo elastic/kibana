@@ -15,6 +15,7 @@ import {
   getTableSkipFocus,
   stopPropagationAndPreventDefault,
 } from '@kbn/timelines-plugin/public';
+import { assertUnreachable } from '@kbn/timelines-plugin/common/utility_types';
 import { escapeQueryValue } from '../../../common/lib/kuery';
 
 import type { DataProvider, DataProvidersAnd } from './data_providers/data_provider';
@@ -28,7 +29,7 @@ import type { BrowserFields } from '../../../common/containers/source';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
 
-const isNumber = (value: string | number) => !isNaN(Number(value));
+const isNumber = (value: string | number): value is number => !isNaN(Number(value));
 
 const convertDateFieldToQuery = (field: string, value: string | number) =>
   `${field}: ${isNumber(value) ? value : new Date(value).valueOf()}`;
@@ -99,34 +100,34 @@ const buildQueryMatch = (
   } = dataProvider;
 
   const isFieldTypeNested = checkIfFieldTypeIsNested(field, browserFields);
-  let queryString = excluded ? 'NOT ' : '';
+  const isExcluded = excluded ? 'NOT ' : '';
 
   switch (operator) {
     case IS_OPERATOR:
       if (!isStringOrNumberArray(value)) {
-        queryString =
-          queryString + type !== DataProviderType.template
+        return `${isExcluded}${
+          type !== DataProviderType.template
             ? buildISQueryMatch({ browserFields, field, isFieldTypeNested, value })
-            : buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested });
+            : buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested })
+        }`;
       } else {
-        queryString += `${field} : ${value[0]}`;
+        // what to return if it's not a suitable format
+        return isExcluded + `${field} : ${value.length ? JSON.stringify(value[0]) : 'null'}`;
       }
 
-      break;
     case EXISTS_OPERATOR:
-      queryString =
-        queryString + buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested });
-      break;
+      return isExcluded + buildEXISTSQueryMatch({ browserFields, field, isFieldTypeNested });
+
     case IS_ONE_OF_OPERATOR:
       if (isStringOrNumberArray(value)) {
-        queryString = queryString + buildISONEOFQueryMatch({ field, isFieldTypeNested, value });
+        return isExcluded + buildISONEOFQueryMatch({ field, value });
       } else {
-        queryString += `${field} : ${value}`;
+        // what to return if it's not a suitable format
+        return isExcluded + `${field} : ${JSON.stringify(value)}`;
       }
-      break;
+    default:
+      assertUnreachable(operator);
   }
-
-  return queryString.trim();
 };
 
 export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: BrowserFields) =>
@@ -275,7 +276,7 @@ export const resetKeyboardFocus = () => {
   document.querySelector<HTMLAnchorElement>('header.headerGlobalNav a.euiHeaderLogo')?.focus();
 };
 
-const buildISQueryMatch = ({
+export const buildISQueryMatch = ({
   browserFields,
   field,
   isFieldTypeNested,
@@ -295,7 +296,7 @@ const buildISQueryMatch = ({
   }
 };
 
-const buildEXISTSQueryMatch = ({
+export const buildEXISTSQueryMatch = ({
   browserFields,
   field,
   isFieldTypeNested,
@@ -305,26 +306,26 @@ const buildEXISTSQueryMatch = ({
   isFieldTypeNested: boolean;
 }): string => {
   return isFieldTypeNested
-    ? convertNestedFieldToExistQuery(field, browserFields)
-    : `${field} ${EXISTS_OPERATOR}`;
+    ? convertNestedFieldToExistQuery(field, browserFields).trim()
+    : `${field} ${EXISTS_OPERATOR}`.trim();
 };
 
-const buildISONEOFQueryMatch = ({
+export const buildISONEOFQueryMatch = ({
   field,
   value,
 }: {
   field: string;
-  isFieldTypeNested: boolean;
   value: Array<string | number>;
 }): string => {
-  return `${field} : ${value
-    .map((item) => (isNumber(item) ? Number(item) : `"${item}"`))
-    .join(' OR ')
-    .replace(/^\[/, '(')
-    .replace(/\]$/g, ')')}`;
+  const trimmedValue = field.trim();
+  if (value.length) {
+    return `${trimmedValue} : (${value
+      .map((item) => (isNumber(item) ? Number(item) : `${item.trim()}`))
+      .join(' OR ')})`;
+  }
+  return `${trimmedValue} : ''`;
 };
 
-const isStringOrNumberArray = (
-  val: string | number | Array<string | number>
-): val is Array<string | number> =>
-  Array.isArray(val) && (typeof val[0] === 'string' || typeof val[0] === 'number');
+export const isStringOrNumberArray = (value: unknown): value is Array<string | number> =>
+  Array.isArray(value) &&
+  (value.every((x) => typeof x === 'string') || value.every((x) => typeof x === 'number'));
