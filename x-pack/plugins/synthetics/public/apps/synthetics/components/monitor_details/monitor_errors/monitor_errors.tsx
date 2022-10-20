@@ -34,7 +34,7 @@ export const MonitorErrors = () => {
             <EuiTitle size="xs">
               <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{OVERVIEW_LABEL}</h3>
             </EuiTitle>
-            <MonitorErrorsCount time={{ to: dateRangeEnd, from: dateRangeStart }} />
+            <MonitorErrorsCount to={dateRangeEnd} from={dateRangeStart} />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={3}>
