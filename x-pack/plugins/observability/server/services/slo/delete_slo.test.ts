@@ -29,7 +29,7 @@ describe('DeleteSLO', () => {
 
   describe('happy path', () => {
     it('removes the transform, the roll up data and the SLO from the repository', async () => {
-      const slo = createSLO(createAPMTransactionErrorRateIndicator());
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
       mockRepository.findById.mockResolvedValueOnce(slo);
 
       await deleteSLO.execute(slo.id);

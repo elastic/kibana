@@ -103,6 +103,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
     appName,
     unifiedSearch,
     data,
+    dataViews,
     storage,
     notifications,
     http,
@@ -176,6 +177,7 @@ export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) 
             deps={{
               unifiedSearch,
               data,
+              dataViews,
               storage,
               notifications,
               http,

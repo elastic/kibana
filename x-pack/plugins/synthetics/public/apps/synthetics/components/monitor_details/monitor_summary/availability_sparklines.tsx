@@ -11,7 +11,12 @@ import { ReportTypes, useTheme } from '@kbn/observability-plugin/public';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 
-export const AvailabilitySparklines = () => {
+interface AvailabilitySparklinesProps {
+  from: string;
+  to: string;
+}
+
+export const AvailabilitySparklines = (props: AvailabilitySparklinesProps) => {
   const {
     services: {
       observability: { ExploratoryViewEmbeddable },
@@ -31,7 +36,7 @@ export const AvailabilitySparklines = () => {
         attributes={[
           {
             seriesType: 'area',
-            time: { from: 'now-30d/d', to: 'now' },
+            time: props,
             name: 'Monitor availability',
             dataType: 'synthetics',
             selectedMetricField: 'monitor_availability',

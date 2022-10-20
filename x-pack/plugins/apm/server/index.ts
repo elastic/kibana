@@ -116,7 +116,7 @@ export type ApmIndicesConfigName = keyof APMConfig['indices'];
 export const plugin = (initContext: PluginInitializerContext) =>
   new APMPlugin(initContext);
 
-export { APM_SERVER_FEATURE_ID } from '../common/alert_types';
+export { APM_SERVER_FEATURE_ID } from '../common/rules/apm_rule_types';
 export { APMPlugin } from './plugin';
 export type { APMPluginSetup } from './types';
 export type {
