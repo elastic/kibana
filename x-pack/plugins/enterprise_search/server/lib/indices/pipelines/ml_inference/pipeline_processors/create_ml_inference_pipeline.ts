@@ -47,10 +47,10 @@ export const createAndReferenceMlInferencePipeline = async (
     esClient
   );
 
-  return Promise.resolve({
+  return {
     ...createPipelineResult,
     addedToParentPipeline: addSubPipelineResult.addedToParentPipeline,
-  });
+  };
 };
 
 /**
@@ -97,8 +97,8 @@ export const createMlInferencePipeline = async (
     ...mlInferencePipeline,
   });
 
-  return Promise.resolve({
+  return {
     created: true,
     id: inferencePipelineGeneratedName,
-  });
+  };
 };
