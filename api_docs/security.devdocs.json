@@ -2366,6 +2366,25 @@
             "description": [
               "\nQuery string used to match name-related fields in user profiles. The following fields are treated as\nname-related: username, full_name and email."
             ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.UserProfileSuggestParams.hint",
+            "type": "Object",
+            "tags": [],
+            "label": "hint",
+            "description": [
+              "\nExtra search criteria to improve relevance of the suggestion result. A profile matching the\nspecified hint is ranked higher in the response. But not-matching the hint does not exclude a\nprofile from the response as long as it matches the `name` field query."
+            ],
+            "signature": [
+              "{ uids: string[]; } | undefined"
+            ],
             "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -16,30 +16,35 @@ import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_PIPELINE_NAME } from '../../../common/constants';
 import { ErrorCode } from '../../../common/types/error_codes';
+
+import type {
+  CreateMlInferencePipelineResponse,
+  AttachMlInferencePipelineResponse,
+} from '../../../common/types/pipelines';
+
 import { deleteConnectorById } from '../../lib/connectors/delete_connector';
 
 import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors/fetch_connectors';
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
 import { createIndex } from '../../lib/indices/create_index';
-import { deleteMlInferencePipeline } from '../../lib/indices/delete_ml_inference_pipeline';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
 import { fetchMlInferencePipelineHistory } from '../../lib/indices/fetch_ml_inference_pipeline_history';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
+import { attachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/attach_ml_pipeline';
+import { createAndReferenceMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/create_ml_inference_pipeline';
 import { getMlInferenceErrors } from '../../lib/ml_inference_pipeline/get_inference_errors';
 import { getMlInferencePipelines } from '../../lib/ml_inference_pipeline/get_inference_pipelines';
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
 import { getPipeline } from '../../lib/pipelines/get_pipeline';
+import { deleteMlInferencePipeline } from '../../lib/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
+import { detachMlInferencePipeline } from '../../lib/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
-import {
-  createAndReferenceMlInferencePipeline,
-  CreatedPipeline,
-} from '../../utils/create_ml_inference_pipeline';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
   isIndexNotFoundException,
@@ -354,10 +359,10 @@ export function registerIndexRoutes({
           indexName: schema.string(),
         }),
         body: schema.object({
-          pipeline_name: schema.string(),
-          model_id: schema.string(),
-          source_field: schema.string(),
           destination_field: schema.maybe(schema.nullable(schema.string())),
+          model_id: schema.string(),
+          pipeline_name: schema.string(),
+          source_field: schema.string(),
         }),
       },
     },
@@ -372,7 +377,7 @@ export function registerIndexRoutes({
         destination_field: destinationField,
       } = request.body;
 
-      let createPipelineResult: CreatedPipeline | undefined;
+      let createPipelineResult: CreateMlInferencePipelineResponse | undefined;
       try {
         // Create the sub-pipeline for inference
         createPipelineResult = await createAndReferenceMlInferencePipeline(
@@ -404,6 +409,45 @@ export function registerIndexRoutes({
       return response.ok({
         body: {
           created: createPipelineResult?.id,
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/attach',
+      validate: {
+        body: schema.object({
+          pipeline_name: schema.string(),
+        }),
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+      const { pipeline_name: pipelineName } = request.body;
+
+      let attachMlInferencePipelineResult: AttachMlInferencePipelineResponse | undefined;
+      try {
+        attachMlInferencePipelineResult = await attachMlInferencePipeline(
+          indexName,
+          pipelineName,
+          client.asCurrentUser
+        );
+      } catch (error) {
+        throw error;
+      }
+
+      return response.ok({
+        body: {
+          ...attachMlInferencePipelineResult,
+          created: false,
         },
         headers: { 'content-type': 'application/json' },
       });
@@ -702,6 +746,48 @@ export function registerIndexRoutes({
         body: pipelines,
         headers: { 'content-type': 'application/json' },
       });
+    })
+  );
+
+  router.delete(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/{pipelineName}/detach',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+          pipelineName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const pipelineName = decodeURIComponent(request.params.pipelineName);
+      const { client } = (await context.core).elasticsearch;
+
+      try {
+        const detachResult = await detachMlInferencePipeline(
+          indexName,
+          pipelineName,
+          client.asCurrentUser
+        );
+
+        return response.ok({
+          body: detachResult,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        if (isResourceNotFoundException(error)) {
+          // return specific message if pipeline doesn't exist
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: error.meta?.body?.error?.reason,
+            response,
+            statusCode: 404,
+          });
+        }
+        // otherwise, let the default handler wrap it
+        throw error;
+      }
     })
   );
 }

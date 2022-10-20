@@ -94,6 +94,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.asyncSearch.batchedReduceSize (number)',
         'data.search.asyncSearch.keepAlive (duration)',
         'data.search.asyncSearch.waitForCompletion (duration)',
+        'data.search.asyncSearch.pollInterval (number)',
         'data.search.sessions.defaultExpiration (duration)',
         'data.search.sessions.enabled (boolean)',
         'data.search.sessions.management.expiresSoonWarning (duration)',
