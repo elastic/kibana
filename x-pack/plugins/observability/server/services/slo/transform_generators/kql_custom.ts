@@ -12,6 +12,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
+import { InvalidTransformError } from '../../../errors';
 import { kqlCustomIndicatorSchema } from '../../../types/schema';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { TransformGenerator } from '.';
@@ -25,7 +26,7 @@ import { KQLCustomIndicator, SLO } from '../../../types/models';
 export class KQLCustomTransformGenerator implements TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
     if (!kqlCustomIndicatorSchema.is(slo.indicator)) {
-      throw new Error(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
+      throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
     return getSLOTransformTemplate(
@@ -42,7 +43,7 @@ export class KQLCustomTransformGenerator implements TransformGenerator {
   }
 
   private buildSource(slo: SLO, indicator: KQLCustomIndicator) {
-    const filter = toElasticsearchQuery(fromKueryExpression(indicator.params.query_filter));
+    const filter = getElastichsearchQueryOrThrow(indicator.params.query_filter);
     return {
       index: indicator.params.index,
       runtime_mappings: {
@@ -92,8 +93,8 @@ export class KQLCustomTransformGenerator implements TransformGenerator {
   }
 
   private buildAggregations(slo: SLO, indicator: KQLCustomIndicator) {
-    const numerator = toElasticsearchQuery(fromKueryExpression(indicator.params.numerator));
-    const denominator = toElasticsearchQuery(fromKueryExpression(indicator.params.denominator));
+    const numerator = getElastichsearchQueryOrThrow(indicator.params.numerator);
+    const denominator = getElastichsearchQueryOrThrow(indicator.params.denominator);
     return {
       'slo.numerator': {
         filter: numerator,
@@ -102,5 +103,13 @@ export class KQLCustomTransformGenerator implements TransformGenerator {
         filter: denominator,
       },
     };
+  }
+}
+
+function getElastichsearchQueryOrThrow(kuery: string) {
+  try {
+    return toElasticsearchQuery(fromKueryExpression(kuery));
+  } catch (err) {
+    throw new InvalidTransformError(`Invalid KQL: ${kuery}`);
   }
 }

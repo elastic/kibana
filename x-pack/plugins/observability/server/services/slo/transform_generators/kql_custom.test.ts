@@ -11,6 +11,27 @@ import { KQLCustomTransformGenerator } from './kql_custom';
 const generator = new KQLCustomTransformGenerator();
 
 describe('KQL Custom Transform Generator', () => {
+  describe('validation', () => {
+    it('throws when the KQL numerator is invalid', () => {
+      const anSLO = createSLO({
+        indicator: createKQLCustomIndicator({ numerator: '{ kql.query: invalid' }),
+      });
+      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL/);
+    });
+    it('throws when the KQL denominator is invalid', () => {
+      const anSLO = createSLO({
+        indicator: createKQLCustomIndicator({ denominator: '{ kql.query: invalid' }),
+      });
+      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL/);
+    });
+    it('throws when the KQL query_filter is invalid', () => {
+      const anSLO = createSLO({
+        indicator: createKQLCustomIndicator({ query_filter: '{ kql.query: invalid' }),
+      });
+      expect(() => generator.getTransformParams(anSLO)).toThrow(/Invalid KQL/);
+    });
+  });
+
   it('returns the correct transform params with every specified indicator params', async () => {
     const anSLO = createSLO({ indicator: createKQLCustomIndicator() });
     const transform = generator.getTransformParams(anSLO);
