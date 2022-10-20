@@ -33,7 +33,7 @@ export function EditRuleSettingButtonLink({
       ev.preventDefault();
       navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.rules,
-        path: getEditRuleUrl(ruleId ?? ''),
+        path: getEditRuleUrl(ruleId),
       });
     },
     [navigateToApp, ruleId]
@@ -47,7 +47,7 @@ export function EditRuleSettingButtonLink({
         iconType="controlsHorizontal"
         isDisabled={disabled}
         deepLinkId={SecurityPageName.rules}
-        path={getEditRuleUrl(ruleId ?? '')}
+        path={getEditRuleUrl(ruleId)}
       >
         {ruleI18n.EDIT_RULE_SETTINGS}
       </SecuritySolutionLinkButton>
