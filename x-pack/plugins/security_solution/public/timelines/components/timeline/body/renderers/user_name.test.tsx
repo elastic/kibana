@@ -125,7 +125,7 @@ describe('UserName', () => {
     const context = {
       enableHostDetailsFlyout: true,
       enableIpDetailsFlyout: true,
-      timelineID: 'detection',
+      timelineID: TimelineId.test,
       tabType: TimelineTabs.query,
     };
     const wrapper = mount(
@@ -139,12 +139,12 @@ describe('UserName', () => {
     wrapper.find('[data-test-subj="users-link-anchor"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
+        id: context.timelineID,
         panelView: 'userDetail',
         params: {
           userName: props.value,
         },
         tabType: context.tabType,
-        timelineId: context.timelineID,
       });
       expect(toggleExpandedDetail).not.toHaveBeenCalled();
     });

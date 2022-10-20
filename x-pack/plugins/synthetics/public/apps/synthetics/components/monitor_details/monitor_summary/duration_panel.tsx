@@ -13,7 +13,12 @@ import { ClientPluginsStart } from '../../../../../plugin';
 import { KpiWrapper } from './kpi_wrapper';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 
-export const DurationPanel = () => {
+interface DurationPanelProps {
+  from: string;
+  to: string;
+}
+
+export const DurationPanel = (props: DurationPanelProps) => {
   const {
     services: {
       observability: { ExploratoryViewEmbeddable },
@@ -27,7 +32,7 @@ export const DurationPanel = () => {
         reportType={ReportTypes.SINGLE_METRIC}
         attributes={[
           {
-            time: { from: 'now-30d', to: 'now' },
+            time: props,
             name: 'Monitor duration',
             dataType: 'synthetics',
             selectedMetricField: 'monitor_duration',

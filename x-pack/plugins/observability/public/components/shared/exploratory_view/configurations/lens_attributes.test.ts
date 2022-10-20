@@ -158,7 +158,7 @@ describe('Lens Attribute', () => {
         customLabel: true,
         dataType: 'number',
         isBucketed: false,
-        label: 'Pages loaded',
+        label: 'test-series',
         operationType: 'formula',
         params: {
           format: {
@@ -427,7 +427,13 @@ describe('Lens Attribute', () => {
           ],
         },
       ],
-      legend: { isVisible: true, showSingleSeries: true, position: 'right' },
+      legend: {
+        isVisible: true,
+        showSingleSeries: true,
+        position: 'right',
+        legendSize: 'large',
+        shouldTruncate: false,
+      },
       preferredSeriesType: 'line',
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
       valueLabels: 'hide',
@@ -545,7 +551,7 @@ describe('Lens Attribute', () => {
                 'transaction.type: page-load and processor.event: transaction and transaction.type : *',
             },
             isBucketed: false,
-            label: 'Pages loaded',
+            label: 'test-series',
             operationType: 'formula',
             params: {
               format: {
