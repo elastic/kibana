@@ -11,7 +11,7 @@ import React, { FC, useRef, MouseEventHandler, useCallback } from 'react';
 import type { RedirectAppLinksComponentProps } from '@kbn/shared-ux-link-redirect-app-types';
 
 import { navigateToUrlClickHandler } from './click_handler';
-import { RedirectAppLinksStyles } from './redirect_app_links.styles';
+import { redirectAppLinksStyles } from './redirect_app_links.styles';
 
 /**
  * Utility component that will intercept click events on children anchor (`<a>`) elements to call
@@ -32,7 +32,7 @@ export const RedirectAppLinks: FC<RedirectAppLinksComponentProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const styles = RedirectAppLinksStyles();
+  const styles = redirectAppLinksStyles();
 
   const handleClick: MouseEventHandler<HTMLDivElement> = useCallback(
     (event) =>

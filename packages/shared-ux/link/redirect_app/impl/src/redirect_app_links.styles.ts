@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export const RedirectAppLinksStyles = () => {
+export const redirectAppLinksStyles = () => {
   return {
     'align-items': 'flex-start',
     display: 'flex',
