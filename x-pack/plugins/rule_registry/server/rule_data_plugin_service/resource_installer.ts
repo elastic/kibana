@@ -183,7 +183,6 @@ export class ResourceInstaller {
       await clusterClient.indices.putSettings({
         index,
         body: {
-          // @ts-expect-error
           'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
         },
       });
