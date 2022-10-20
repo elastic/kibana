@@ -17,7 +17,7 @@ import {
 import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
-import { connectToQueryState, syncQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { cleanupUrlState } from '../utils/cleanup_url_state';
@@ -122,10 +122,9 @@ export const getDiscoverAppStateContainer = (
   const enhancedAppContainer = {
     ...appStateContainer,
     reset: (nextSavedSearch: SavedSearch) => {
-      addLog('🔗 [appState] reset to saved search', nextSavedSearch);
-      const resetState = getInitialState(stateStorage, nextSavedSearch, services);
-      addLog('🔗 [appState] reset to saved search new app state', resetState);
-      appStateContainer.set(resetState);
+      const nextAppState = getInitialState(stateStorage, nextSavedSearch, services);
+      addLog('🔗 [appState] reset appstate by savedsearch', { nextSavedSearch, nextAppState });
+      appStateContainer.set(nextAppState);
     },
     set: (value: AppState | null) => {
       if (value) {
@@ -138,9 +137,7 @@ export const getDiscoverAppStateContainer = (
         appStateContainer.set(value);
       }
     },
-    getPrevious: () => {
-      return previousAppState;
-    },
+    getPrevious: () => previousAppState,
     replace: replaceUrlState,
     push: pushUrlState,
     isEmptyURL: () => {
@@ -165,13 +162,14 @@ export const getDiscoverAppStateContainer = (
 
   const initializeAndSync = (currentSavedSearch: SavedSearch) => {
     addLog('🔗 [appState] initializeAndSync', currentSavedSearch);
+    const { filterManager, data } = services;
+
     // searchsource is the source of truth
     const dataView = currentSavedSearch.searchSource.getField('index');
     const filters = currentSavedSearch.searchSource.getField('filter');
     const query = currentSavedSearch.searchSource.getField('query');
-    const { filterManager, data } = services;
     if (appStateContainer.getState().index !== dataView?.id) {
-      // used data view is different than the given by url/state which is invalid
+      // used data view is different from the given by url/state which is invalid
       setState(appStateContainer, { index: dataView?.id });
     }
     // sync initial app filters from state to filterManager
@@ -194,7 +192,10 @@ export const getDiscoverAppStateContainer = (
     );
 
     // syncs `_g` portion of url with query services
-    const { stop: stopSyncingGlobalStateWithUrl } = syncQueryStateWithUrl(data.query, stateStorage);
+    const { stop: stopSyncingGlobalStateWithUrl } = syncGlobalQueryStateWithUrl(
+      data.query,
+      stateStorage
+    );
 
     // some filters may not be valid for this context, so update
     // the filter manager with a modified list of valid filters
@@ -205,6 +206,7 @@ export const getDiscoverAppStateContainer = (
     }
 
     const { start, stop } = initSyncState();
+    // current state need to be pushed to url
     replaceUrlState({}).then(() => start());
 
     return () => {
