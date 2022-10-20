@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { last } from 'lodash';
 import { useMemo } from 'react';
-import { SnapshotNode, SnapshotNodeMetric } from '../../../../../common/http_api';
+import type { SnapshotNode, SnapshotNodeMetric } from '../../../../../common/http_api';
 import { HostMetics } from '../components/hosts_table_columns';
 
 type MappedMetrics = Record<keyof HostMetics, SnapshotNodeMetric>;
@@ -14,7 +15,7 @@ type MappedMetrics = Record<keyof HostMetics, SnapshotNodeMetric>;
 export const useHostTable = (nodes: SnapshotNode[]) => {
   const items: MappedMetrics[] = useMemo(() => {
     return nodes.map(({ metrics, path }) => ({
-      ...path[0],
+      ...last(path),
       ...metrics.reduce((data, metric) => {
         data[metric.name as keyof HostMetics] = metric;
         return data;
