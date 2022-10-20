@@ -51,7 +51,6 @@ describe('UploadFile', () => {
       retryButton: `${baseTestSubj}.retryButton`,
       cancelButton: `${baseTestSubj}.cancelButton`,
       errorMessage: `${baseTestSubj}.error`,
-      successIcon: `${baseTestSubj}.uploadSuccessIcon`,
     };
 
     return {
@@ -110,12 +109,12 @@ describe('UploadFile', () => {
     client.create.mockResolvedValue({ file: { id: 'test', size: 1 } as FileJSON });
     client.upload.mockResolvedValue({ size: 1, ok: true });
 
-    const { actions, exists, testSubjects } = await initTestBed();
+    const { actions, find, exists, testSubjects } = await initTestBed();
     await actions.addFiles([{ name: 'test', size: 1 } as File]);
     await actions.upload();
     await sleep(1000);
     expect(exists(testSubjects.errorMessage)).toBe(false);
-    expect(exists(testSubjects.successIcon)).toBe(true);
+    expect(find(testSubjects.uploadButton).text()).toMatch(/upload complete/i);
     expect(onDone).toHaveBeenCalledTimes(1);
   });
 
