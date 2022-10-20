@@ -50,6 +50,7 @@ describe('UploadFile', () => {
       uploadButton: `${baseTestSubj}.uploadButton`,
       retryButton: `${baseTestSubj}.retryButton`,
       cancelButton: `${baseTestSubj}.cancelButton`,
+      cancelButtonIcon: `${baseTestSubj}.cancelButtonIcon`,
       errorMessage: `${baseTestSubj}.error`,
     };
 
@@ -198,5 +199,21 @@ describe('UploadFile', () => {
     expect(find(testSubjects.errorMessage).text()).toMatch(/File is too large/);
 
     expect(onDone).not.toHaveBeenCalled();
+  });
+
+  it('only shows the cancel control in compressed mode', async () => {
+    const { actions, testSubjects, exists } = await initTestBed({ compressed: true });
+    const assertButtons = () => {
+      expect(exists(testSubjects.cancelButtonIcon)).toBe(true);
+      expect(exists(testSubjects.cancelButton)).toBe(false);
+      expect(exists(testSubjects.retryButton)).toBe(false);
+      expect(exists(testSubjects.uploadButton)).toBe(false);
+    };
+
+    assertButtons();
+    await actions.addFiles([{ name: 'test', size: 1 } as File]);
+    assertButtons();
+    await actions.wait(1000);
+    assertButtons();
   });
 });

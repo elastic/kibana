@@ -77,6 +77,8 @@ export interface Props<Kind extends string = string> {
    * Whether to display the component in it's compact form.
    *
    * @default false
+   *
+   * @note passing "true" here implies immediate true as well.
    */
   compressed?: boolean;
 }
@@ -93,7 +95,7 @@ export const UploadFile = <Kind extends string = string>({
   onDone,
   onError,
   allowClear,
-  compressed,
+  compressed = false,
   kind: kindId,
   immediate = false,
   allowRepeatedUploads = false,
@@ -134,7 +136,7 @@ export const UploadFile = <Kind extends string = string>({
         ref={ref}
         accept={fileKind.allowedMimeTypes?.join(',')}
         meta={meta}
-        immediate={immediate}
+        immediate={compressed || immediate}
         allowClear={allowClear}
       />
     </context.Provider>
