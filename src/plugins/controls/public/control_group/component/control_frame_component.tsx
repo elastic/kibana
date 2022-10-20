@@ -187,13 +187,18 @@ export const ControlFrame = ({
         </>
       }
     >
-      {embeddable && (
+      {embeddable && !fatalError && (
         <div
           className={embeddableParentClassNames}
           id={`controlFrame--${embeddableId}`}
           ref={embeddableRoot}
         >
           {fatalError && <ControlFrameError error={fatalError} />}
+        </div>
+      )}
+      {fatalError && (
+        <div className={embeddableParentClassNames} id={`controlFrame--${embeddableId}`}>
+          {<ControlFrameError error={fatalError} />}
         </div>
       )}
       {!embeddable && (
