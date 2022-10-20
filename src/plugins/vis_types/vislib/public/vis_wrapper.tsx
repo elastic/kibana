@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useCallback } from 'react';
 import { EuiResizeObserver, EuiResizeObserverProps } from '@elastic/eui';
 import { debounce } from 'lodash';
 
@@ -47,6 +47,7 @@ const extractContainerType = (context?: KibanaExecutionContext): string | undefi
 const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWrapperProps) => {
   const chartDiv = useRef<HTMLDivElement>(null);
   const visController = useRef<VislibVisController | null>(null);
+  const skipRenderComplete = useRef<boolean>(true);
 
   const renderComplete = useMemo(
     () => () => {
@@ -65,28 +66,30 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
     [handlers, visConfig]
   );
 
-  const updateChart = useMemo(
+  const renderChart = useMemo(
     () =>
-      (skipRenderComplete = false) => {
+      debounce(() => {
         if (visController.current) {
           visController.current.render(
             visData,
             visConfig,
             handlers,
-            skipRenderComplete ? undefined : renderComplete
+            skipRenderComplete.current ? undefined : renderComplete
           );
         }
-      },
-    [handlers, renderComplete, visConfig, visData]
+        skipRenderComplete.current = true;
+      }, 100),
+    [handlers, renderComplete, skipRenderComplete, visConfig, visData]
   );
 
-  const onResize: EuiResizeObserverProps['onResize'] = useMemo(
-    () =>
-      debounce(() => {
-        updateChart(true);
-      }, 100),
-    [updateChart]
-  );
+  const onResize: EuiResizeObserverProps['onResize'] = useCallback(() => {
+    renderChart();
+  }, [renderChart]);
+
+  useEffect(() => {
+    skipRenderComplete.current = false;
+    renderChart();
+  }, [renderChart]);
 
   useEffect(() => {
     if (chartDiv.current) {
@@ -99,19 +102,17 @@ const VislibWrapper = ({ core, charts, visData, visConfig, handlers }: VislibWra
     };
   }, [core, charts]);
 
-  useEffect(updateChart, [updateChart]);
-
   useEffect(() => {
     if (handlers.uiState) {
       const uiState = handlers.uiState as PersistedState;
 
-      uiState.on('change', updateChart);
+      uiState.on('change', renderChart);
 
       return () => {
-        uiState?.off('change', updateChart);
+        uiState?.off('change', renderChart);
       };
     }
-  }, [handlers.uiState, updateChart]);
+  }, [handlers.uiState, renderChart]);
 
   return (
     <EuiResizeObserver onResize={onResize}>
