@@ -26,7 +26,6 @@ export const dataViewsServiceFactory: DataViewsServiceFactory = ({ startPlugins 
   getDataViews: async () => {
     try {
       const dataViews = await startPlugins.data.dataViews.getIdsWithTitle();
-      console.log({ dataViews });
       return dataViews.map(({ id, name, title }) => ({ id, name, title } as DataView));
     } catch (e) {
       notify.error(e, { title: strings.getIndicesFetchErrorMessage() });

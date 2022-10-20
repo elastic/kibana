@@ -71,7 +71,6 @@ export class DatasourceComponent extends PureComponent {
       .getServices()
       .dataViews.getDefaultDataView()
       .then((defaultDataView) => {
-        console.log('componnentDidMount', defaultDataView);
         this.setState({ defaultIndex: defaultDataView.title });
       });
   }

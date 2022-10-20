@@ -7,7 +7,7 @@
 
 import { DataView } from '@kbn/data-views-plugin/common';
 import { sortBy } from 'lodash';
-import React, { useRef, useState } from 'react';
+import React, { FC, useRef, useState } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { useDataViewsService } from '../../services';
 import {
@@ -17,7 +17,7 @@ import {
 
 type ESDataViewSelectProps = Omit<Props, 'indices' | 'loading'>;
 
-export const ESDataViewSelect: React.FunctionComponent<ESDataViewSelectProps> = (props) => {
+export const ESDataViewSelect: FC<ESDataViewSelectProps> = (props) => {
   const { value, onChange } = props;
 
   const [dataViews, setDataViews] = useState<Array<Pick<DataView, 'id' | 'name' | 'title'>>>([]);
@@ -27,7 +27,6 @@ export const ESDataViewSelect: React.FunctionComponent<ESDataViewSelectProps> = 
 
   useEffectOnce(() => {
     getDataViews().then((newDataViews) => {
-      console.log({ newDataViews });
       if (!mounted.current) {
         return;
       }
