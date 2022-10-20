@@ -231,15 +231,6 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      /*
-       * ATTENTION FUTURE DEVELOPER
-       *
-       * These tests should only be valid for 7.17.x
-       * You can run this test if you go to this file:
-       * x-pack/plugins/observability/public/pages/alerts/containers/alerts_table_t_grid/alerts_table_t_grid.tsx
-       * and at line 397 and change showCheckboxes to true
-       *
-       */
       describe.skip('Bulk Actions', () => {
         before(async () => {
           await security.testUser.setRoles(['global_alerts_logs_all_else_read']);

@@ -1229,6 +1229,8 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
+              " | ",
+              "DataViewByIdOrTitle",
               ")[]"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
