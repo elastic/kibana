@@ -1253,7 +1253,7 @@
                 "section": "def-public.IEmbeddable",
                 "text": "IEmbeddable"
               },
-              "<EEI, EEO>>(type: string, explicitInput: Partial<EEI>) => Promise<",
+              "<EEI, EEO>>(type: string, explicitInput: Partial<EEI>) => Promise<E | ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -1261,7 +1261,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              " | E>"
+              ">"
             ],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
