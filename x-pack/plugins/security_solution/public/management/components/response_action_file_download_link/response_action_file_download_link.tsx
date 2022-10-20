@@ -9,6 +9,7 @@ import type { CSSProperties } from 'react';
 import React, { memo } from 'react';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { MaybeImmutable } from '../../../../common/endpoint/types';
@@ -23,8 +24,14 @@ const STYLE_INHERIT_FONT_FAMILY = Object.freeze<CSSProperties>({
   fontFamily: 'inherit',
 });
 
+const DEFAULT_BUTTON_TITLE = i18n.translate(
+  'xpack.securitySolution.responseActionFileDownloadLink.downloadButtonLabel',
+  { defaultMessage: 'Click here to download' }
+);
+
 export interface ResponseActionFileDownloadLinkProps {
   action: MaybeImmutable<ActionDetails>;
+  buttonTitle?: string;
   'data-test-subj'?: string;
 }
 
@@ -35,7 +42,7 @@ export interface ResponseActionFileDownloadLinkProps {
  * NOTE: Currently displays only the link for the first host in the Action
  */
 export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLinkProps>(
-  ({ action, 'data-test-subj': dataTestSubj }) => {
+  ({ action, buttonTitle = DEFAULT_BUTTON_TITLE, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { canWriteFileOperations } = useUserPrivileges().endpointPrivileges;
 
@@ -53,12 +60,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
           style={STYLE_INHERIT_FONT_FAMILY}
           download
         >
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.securitySolution.responseActionFileDownloadLink.downloadButtonLabel"
-              defaultMessage="Click here to download"
-            />
-          </EuiText>
+          <EuiText size="s">{buttonTitle}</EuiText>
         </EuiButtonEmpty>
         <EuiText
           size="s"
