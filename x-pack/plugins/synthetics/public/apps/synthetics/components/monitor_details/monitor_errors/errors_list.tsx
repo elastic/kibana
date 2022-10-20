@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { MouseEvent, useMemo, useState } from 'react';
 import { EuiBasicTable, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
+import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { Ping } from '../../../../../../common/runtime_types';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
 import {
@@ -42,6 +43,8 @@ export const ErrorsList = () => {
 
   const history = useHistory();
 
+  const format = useKibanaDateFormat();
+
   const columns = [
     {
       field: '@timestamp',
@@ -50,7 +53,7 @@ export const ErrorsList = () => {
       render: (value: string, item: Ping) => {
         return (
           <EuiLink href={`${basePath}/app/synthetics/error-details/${item.state?.id}`}>
-            {formatTestRunAt(item.state!.started_at)}
+            {formatTestRunAt(item.state!.started_at, format)}
           </EuiLink>
         );
       },

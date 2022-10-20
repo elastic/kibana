@@ -36,6 +36,7 @@ import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/
 import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
 import { JourneyStepScreenshotContainer } from '../../common/monitor_test_result/journey_step_screenshot_container';
 
+import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { useJourneySteps } from '../hooks/use_journey_steps';
 
@@ -207,9 +208,10 @@ const TestDetailsLink = ({
   const { euiTheme } = useEuiTheme();
   const { basePath } = useSyntheticsSettingsContext();
 
+  const format = useKibanaDateFormat();
   const timestampText = (
     <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.medium }}>
-      {formatTestRunAt(timestamp)}
+      {formatTestRunAt(timestamp, format)}
     </EuiText>
   );
 
