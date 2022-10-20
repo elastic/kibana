@@ -18,7 +18,4 @@ export const rangeRt = t.type({
 export const probabilityRt = t.type({
   probability: toNumberRt,
 });
-
 export const kueryRt = t.type({ kuery: t.string });
-
-export const serviceNameRt = t.type({ serviceName: t.string });

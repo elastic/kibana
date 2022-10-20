@@ -6,7 +6,7 @@
  */
 
 import { QueryDslQueryContainer } from "@elastic/elasticsearch/lib/api/typesWithBodyKey";
-import { AGENT_NAME, AGENT_VERSION, SERVICE_ENVIRONMENT, SERVICE_NAME, SERVICE_NODE_NAME } from "@kbn/apm-plugin/common/elasticsearch_fieldnames";
+import { AGENT_NAME, AGENT_VERSION, SERVICE_ENVIRONMENT, SERVICE_LANGUAGE_NAME, SERVICE_NAME, SERVICE_NODE_NAME } from "@kbn/apm-plugin/common/elasticsearch_fieldnames";
 import { environmentQuery } from "@kbn/apm-plugin/common/utils/environment_query";
 import { AgentName } from "@kbn/apm-plugin/typings/es_schemas/ui/fields/agent";
 import { ProcessorEvent } from "@kbn/observability-plugin/common/processor_event";
@@ -31,7 +31,7 @@ export function agentNameQuery(
     return [];
   }
 
-  return [{ term: { [AGENT_NAME]: agentName } }];
+  return [{ term: { [SERVICE_LANGUAGE_NAME]: agentName } }];
 }
 
 interface AggregationParams {
@@ -121,6 +121,16 @@ export async function getAgentsDetails({
                       field: SERVICE_ENVIRONMENT,
                     }
                   },
+                  sample: {
+                    top_metrics: {
+                      metrics: [
+                        { field: SERVICE_LANGUAGE_NAME } as const
+                      ],
+                      sort: {
+                        '@timestamp': 'desc' as const,
+                      }
+                    }
+                  }
                 },
               },
             },
@@ -146,6 +156,7 @@ export async function getAgentsDetails({
         environments: bucket.environments.buckets.map(
           (version) => version.key as string
         ),
+        language: bucket.sample.top[0].metrics[SERVICE_LANGUAGE_NAME] as string,
       };
     }) ?? []
   );
