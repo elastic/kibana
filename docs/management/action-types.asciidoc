@@ -55,6 +55,10 @@ a| <<swimlane-action-type,{swimlane}>>
 
 | Create an incident in {swimlane}.
 
+a| <<tines-action-type,Tines>>
+
+| Send events to a Tines Story.
+
 a| <<webhook-action-type, {webhook}>>
 
 | Send a request to a web service.
