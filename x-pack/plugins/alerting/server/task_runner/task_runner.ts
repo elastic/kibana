@@ -306,7 +306,10 @@ export class TaskRunner<
     });
 
     if (this.ruleType.getSummarizedAlerts) {
-      this.ruleType.getSummarizedAlerts(new Date(), new Date(), spaceId);
+      // query based on time frame
+      this.ruleType.getSummarizedAlerts({ ruleId, start: new Date(), end: new Date(), spaceId });
+      // query previous run
+      this.ruleType.getSummarizedAlerts({ ruleId, executionUuid: '', spaceId });
     }
 
     const { updatedRuleTypeState, hasReachedAlertLimit, originalAlerts } =

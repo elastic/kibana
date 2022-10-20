@@ -19,7 +19,6 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -126,11 +125,20 @@ export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
 
-export type GetSummarizedAlertsFn = <TSearchRequest extends ESSearchRequest>(
-  start: Date,
-  end: Date,
-  spaceId: string
-) => Promise<ESSearchResponse<Partial<unknown>, TSearchRequest>>;
+export interface GetSummarizedAlertsFnOpts {
+  start?: Date;
+  end?: Date;
+  executionUuid?: string;
+  ruleId: string;
+  spaceId: string;
+}
+
+export interface SummarizedAlerts {
+  new: unknown[];
+  ongoing: unknown[];
+  recovered: unknown[];
+}
+export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
 
 export interface RuleType<
   Params extends RuleTypeParams = never,

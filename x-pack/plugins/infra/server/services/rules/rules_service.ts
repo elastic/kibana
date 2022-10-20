@@ -43,6 +43,7 @@ export class RulesService {
     const createGetSummarizedAlerts = createGetSummarizedAlertsFn({
       ruleDataClient,
       useNamespace: false,
+      isLifecycleAlert: true,
     });
 
     return {
