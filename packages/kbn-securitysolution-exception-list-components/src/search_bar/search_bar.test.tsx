@@ -11,7 +11,7 @@ import { fireEvent, render } from '@testing-library/react';
 
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
-import { SearchBar } from './search_bar';
+import { SearchBar } from '.';
 
 describe('SearchBar', () => {
   it('it does not display add exception button if user is read only', () => {
