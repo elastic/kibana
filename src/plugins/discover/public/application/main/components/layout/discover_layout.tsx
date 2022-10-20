@@ -171,8 +171,9 @@ export function DiscoverLayout({
 
   const contentCentered = resultState === 'uninitialized' || resultState === 'none';
   const onDataViewCreated = useCallback(
-    (nextDataView: DataView) => {
+    async (nextDataView: DataView) => {
       if (nextDataView.id) {
+        await stateContainer.actions.loadDataViewList();
         stateContainer.actions.changeDataView(nextDataView.id);
       }
     },

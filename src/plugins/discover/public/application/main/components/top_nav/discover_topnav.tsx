@@ -109,10 +109,11 @@ export const DiscoverTopNav = ({
     [editField, canEditDataView]
   );
 
-  const createNewDataView = useCallback(() => {
+  const createNewDataView = useCallback(async () => {
     closeDataViewEditor.current = dataViewEditor.openEditor({
       onSave: async (dataViewToSave) => {
         if (dataViewToSave.id) {
+          await stateContainer.actions.loadDataViewList();
           stateContainer.actions.changeDataView(dataViewToSave.id);
         }
       },
