@@ -33,13 +33,13 @@ jest.mock(
   })
 );
 jest.mock(
-  '../../lib/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline',
+  '../../lib/indices/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline',
   () => ({
     deleteMlInferencePipeline: jest.fn(),
   })
 );
 jest.mock(
-  '../../lib/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline',
+  '../../lib/indices/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline',
   () => ({
     detachMlInferencePipeline: jest.fn(),
   })
@@ -61,8 +61,8 @@ import { attachMlInferencePipeline } from '../../lib/indices/pipelines/ml_infere
 import { createAndReferenceMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/create_ml_inference_pipeline';
 import { getMlInferenceErrors } from '../../lib/ml_inference_pipeline/get_inference_errors';
 import { getMlInferencePipelines } from '../../lib/ml_inference_pipeline/get_inference_pipelines';
-import { deleteMlInferencePipeline } from '../../lib/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
-import { detachMlInferencePipeline } from '../../lib/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
+import { deleteMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
+import { detachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
 import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
 import { registerIndexRoutes } from './indices';
