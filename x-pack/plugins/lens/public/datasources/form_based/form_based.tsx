@@ -222,7 +222,7 @@ export function getFormBasedDatasource({
       // delete layers linked to this layer
       Object.keys(newLayers).forEach((id) => {
         const linkedLayers = newLayers[id]?.linkToLayers;
-        if (linkedLayers && linkedLayers.length && linkedLayers.includes(layerId)) {
+        if (linkedLayers && linkedLayers.includes(layerId)) {
           delete newLayers[id];
         }
       });
