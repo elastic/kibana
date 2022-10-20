@@ -6,7 +6,9 @@
  */
 import { KibanaRequest } from '@kbn/core/server';
 import { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { FileServiceFactory, FileServiceStart } from '.';
+import * as stream from 'stream';
+import { File } from '../common';
+import { FileClient, FileServiceFactory, FileServiceStart } from '.';
 
 export const createFileServiceMock = (): DeeplyMockedKeys<FileServiceStart> => ({
   create: jest.fn(),
@@ -26,3 +28,51 @@ export const createFileServiceFactoryMock = (): DeeplyMockedKeys<FileServiceFact
   asInternal: jest.fn(createFileServiceMock),
   asScoped: jest.fn((_: KibanaRequest) => createFileServiceMock()),
 });
+
+export const createFileMock = (): DeeplyMockedKeys<File> => {
+  const fileMock: DeeplyMockedKeys<File> = {
+    id: '123',
+    data: {
+      id: '123',
+      created: '2022-10-10T14:57:30.682Z',
+      updated: '2022-10-19T14:43:20.112Z',
+      name: 'test.txt',
+      mimeType: 'text/plain',
+      size: 1234,
+      extension: '.txt',
+      meta: {},
+      alt: undefined,
+      fileKind: 'none',
+      status: 'READY',
+    },
+    update: jest.fn(),
+    uploadContent: jest.fn(),
+    downloadContent: jest.fn().mockResolvedValue(new stream.Readable()),
+    delete: jest.fn(),
+    share: jest.fn(),
+    listShares: jest.fn(),
+    unshare: jest.fn(),
+    toJSON: jest.fn(),
+  };
+
+  fileMock.update.mockResolvedValue(fileMock);
+  fileMock.uploadContent.mockResolvedValue(fileMock);
+
+  return fileMock;
+};
+
+export const createFileClientMock = (): DeeplyMockedKeys<FileClient> => {
+  const fileMock = createFileMock();
+
+  return {
+    fileKind: 'none',
+    create: jest.fn().mockResolvedValue(fileMock),
+    get: jest.fn().mockResolvedValue(fileMock),
+    update: jest.fn(),
+    delete: jest.fn(),
+    find: jest.fn().mockResolvedValue({ files: [fileMock], total: 1 }),
+    share: jest.fn(),
+    unshare: jest.fn(),
+    listShares: jest.fn().mockResolvedValue({ shares: [] }),
+  };
+};
