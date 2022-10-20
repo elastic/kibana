@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiFlexGrid,
   EuiFlexItem,
@@ -24,28 +24,30 @@ import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import type { GuideState, GuideId, UseCase } from '@kbn/guided-onboarding';
+import { GuideCard, ObservabilityLinkCard } from '@kbn/guided-onboarding';
 
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
-import { UseCaseCard } from './use_case_card';
 
 const homeBreadcrumb = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
 const gettingStartedBreadcrumb = i18n.translate('home.breadcrumbs.gettingStartedTitle', {
-  defaultMessage: 'Getting Started',
+  defaultMessage: 'Guided setup',
 });
 const title = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelectionTitle', {
   defaultMessage: 'What would you like to do first?',
 });
 const subtitle = i18n.translate('home.guidedOnboarding.gettingStarted.useCaseSelectionSubtitle', {
-  defaultMessage:
-    'Select a starting point for a quick tour of how Elastic can help you do even more with your data.',
+  defaultMessage: 'Select a guide to help you make the most of your data.',
 });
 const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.buttonLabel', {
-  defaultMessage: `No thanks, I’ll explore on my own.`,
+  defaultMessage: `I’d like to do something else (skip)`,
 });
 
 export const GettingStarted = () => {
-  const { application, trackUiMetric, chrome } = getServices();
+  const { application, trackUiMetric, chrome, guidedOnboardingService, http, uiSettings } =
+    getServices();
+  const [guidesState, setGuidesState] = useState<GuideState[]>([]);
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -63,6 +65,17 @@ export const GettingStarted = () => {
     ]);
   }, [chrome, trackUiMetric]);
 
+  const fetchGuidesState = useCallback(async () => {
+    const allGuides = await guidedOnboardingService?.fetchAllGuidesState();
+    if (allGuides) {
+      setGuidesState(allGuides.state);
+    }
+  }, [guidedOnboardingService]);
+
+  useEffect(() => {
+    fetchGuidesState();
+  }, [fetchGuidesState]);
+
   const onSkip = () => {
     trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__skipped');
     // disable welcome screen on the home page
@@ -73,6 +86,12 @@ export const GettingStarted = () => {
   const paddingCss = css`
     padding: calc(${euiTheme.size.base}*3) calc(${euiTheme.size.base}*4);
   `;
+
+  const isDarkTheme = uiSettings.get<boolean>('theme:darkMode');
+  const activateGuide = async (useCase: UseCase, guideState?: GuideState) => {
+    await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
+    // TODO error handling https://github.com/elastic/kibana/issues/139798
+  };
   return (
     <KibanaPageTemplate panelled={false} grow>
       <EuiPageTemplate.Section alignment="center">
@@ -81,21 +100,36 @@ export const GettingStarted = () => {
             <h1>{title}</h1>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiText color="subdued" size="s" textAlign="center">
+          <EuiText size="m" textAlign="center">
             <p>{subtitle}</p>
           </EuiText>
           <EuiSpacer size="s" />
           <EuiSpacer size="xxl" />
-          <EuiFlexGrid columns={3} gutterSize="xl">
-            <EuiFlexItem>
-              <UseCaseCard useCase="search" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <UseCaseCard useCase="observability" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <UseCaseCard useCase="security" />
-            </EuiFlexItem>
+          <EuiFlexGrid columns={4} gutterSize="l">
+            {['search', 'observability', 'observabilityLink', 'security'].map((useCase) => {
+              if (useCase === 'observabilityLink') {
+                return (
+                  <EuiFlexItem>
+                    <ObservabilityLinkCard
+                      navigateToApp={application.navigateToApp}
+                      isDarkTheme={isDarkTheme}
+                      addBasePath={http.basePath.prepend}
+                    />
+                  </EuiFlexItem>
+                );
+              }
+              return (
+                <EuiFlexItem>
+                  <GuideCard
+                    useCase={useCase as UseCase}
+                    guides={guidesState}
+                    activateGuide={activateGuide}
+                    isDarkTheme={isDarkTheme}
+                    addBasePath={http.basePath.prepend}
+                  />
+                </EuiFlexItem>
+              );
+            })}
           </EuiFlexGrid>
           <EuiSpacer />
           <EuiHorizontalRule />
