@@ -1621,5 +1621,17 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         })
       );
     },
+
+    async findFieldIdsByType(
+      type: 'string' | 'number' | 'date',
+      group: 'available' | 'empty' | 'meta' = 'available'
+    ) {
+      const groupCapitalized = `${group[0].toUpperCase()}${group.slice(1).toLowerCase()}`;
+      const allFieldsForType = await find.allByCssSelector(
+        `[data-test-subj="lnsIndexPattern${groupCapitalized}Fields"] .lnsFieldItem--${type}`
+      );
+      // map to testSubjId
+      return Promise.all(allFieldsForType.map((el) => el.getAttribute('data-test-subj')));
+    },
   });
 }
