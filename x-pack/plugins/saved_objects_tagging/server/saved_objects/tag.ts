@@ -8,6 +8,8 @@
 import { SavedObject, SavedObjectsType } from '@kbn/core/server';
 import { tagSavedObjectTypeName, TagAttributes } from '../../common';
 
+import { migrateFleetManagedTagToV860 } from './migrations';
+
 export const tagType: SavedObjectsType = {
   name: tagSavedObjectTypeName,
   hidden: false,
@@ -31,5 +33,8 @@ export const tagType: SavedObjectsType = {
     defaultSearchField: 'name',
     icon: 'tag',
     getTitle: (obj: SavedObject<TagAttributes>) => obj.attributes.name,
+  },
+  migrations: {
+    '8.6.0': migrateFleetManagedTagToV860,
   },
 };
