@@ -49,6 +49,7 @@ describe('FeatureTableExpandedRow', () => {
         selectedFeaturePrivileges={['minimal_read']}
         onChange={jest.fn()}
         licenseAllowsSubFeatPrivCustomization={false}
+        allSpacesSelected={false}
       />
     );
 
@@ -86,6 +87,7 @@ describe('FeatureTableExpandedRow', () => {
         selectedFeaturePrivileges={['none']}
         onChange={jest.fn()}
         licenseAllowsSubFeatPrivCustomization={true}
+        allSpacesSelected={false}
       />
     );
 
@@ -118,6 +120,7 @@ describe('FeatureTableExpandedRow', () => {
         selectedFeaturePrivileges={['minimal_read']}
         onChange={jest.fn()}
         licenseAllowsSubFeatPrivCustomization={true}
+        allSpacesSelected={false}
       />
     );
 
@@ -153,6 +156,7 @@ describe('FeatureTableExpandedRow', () => {
         selectedFeaturePrivileges={['read']}
         onChange={jest.fn()}
         licenseAllowsSubFeatPrivCustomization={true}
+        allSpacesSelected={false}
       />
     );
 
@@ -186,6 +190,7 @@ describe('FeatureTableExpandedRow', () => {
         selectedFeaturePrivileges={['read']}
         onChange={jest.fn()}
         licenseAllowsSubFeatPrivCustomization={true}
+        allSpacesSelected={false}
       />
     );
 
@@ -223,6 +228,7 @@ describe('FeatureTableExpandedRow', () => {
         selectedFeaturePrivileges={['read']}
         onChange={onChange}
         licenseAllowsSubFeatPrivCustomization={true}
+        allSpacesSelected={false}
       />
     );
 
@@ -263,6 +269,7 @@ describe('FeatureTableExpandedRow', () => {
         selectedFeaturePrivileges={['minimal_read', 'cool_read', 'cool_toggle_2']}
         onChange={onChange}
         licenseAllowsSubFeatPrivCustomization={true}
+        allSpacesSelected={false}
       />
     );
 

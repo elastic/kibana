@@ -228,7 +228,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
         {
           requireAllSpaces: true,
           privilegesTooltip: i18n.translate(
-            'xpack.securitySolution.featureRegistry.subFeatures.endpointList.privilegesTooltip',
+            'xpack.securitySolution.featureRegistry.subFeatures.trustedApplications.privilegesTooltip',
             {
               defaultMessage: 'All Spaces is required for Trusted Applications access.',
             }
@@ -272,7 +272,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
         {
           requireAllSpaces: true,
           privilegesTooltip: i18n.translate(
-            'xpack.securitySolution.featureRegistry.subFeatures.endpointList.privilegesTooltip',
+            'xpack.securitySolution.featureRegistry.subFeatures.hostIsolationExceptions.privilegesTooltip',
             {
               defaultMessage: 'All Spaces is required for Host Isolation Exceptions access.',
             }
@@ -319,7 +319,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
         {
           requireAllSpaces: true,
           privilegesTooltip: i18n.translate(
-            'xpack.securitySolution.featureRegistry.subFeatures.endpointList.privilegesTooltip',
+            'xpack.securitySolution.featureRegistry.subFeatures.blockList.privilegesTooltip',
             {
               defaultMessage: 'All Spaces is required for Blocklist access.',
             }
@@ -360,7 +360,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
         {
           requireAllSpaces: true,
           privilegesTooltip: i18n.translate(
-            'xpack.securitySolution.featureRegistry.subFeatures.endpointList.privilegesTooltip',
+            'xpack.securitySolution.featureRegistry.subFeatures.eventFilters.privilegesTooltip',
             {
               defaultMessage: 'All Spaces is required for Event Filters access.',
             }
@@ -401,7 +401,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
         {
           requireAllSpaces: true,
           privilegesTooltip: i18n.translate(
-            'xpack.securitySolution.featureRegistry.subFeatures.endpointList.privilegesTooltip',
+            'xpack.securitySolution.featureRegistry.subFeatures.policyManagement.privilegesTooltip',
             {
               defaultMessage: 'All Spaces is required for Policy Management access.',
             }
@@ -445,7 +445,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
         {
           requireAllSpaces: true,
           privilegesTooltip: i18n.translate(
-            'xpack.securitySolution.featureRegistry.subFeatures.endpointList.privilegesTooltip',
+            'xpack.securitySolution.featureRegistry.subFeatures.actionsLogManagement.privilegesTooltip',
             {
               defaultMessage: 'All Spaces is required for Actions Log Management access.',
             }
@@ -492,7 +492,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
         {
           requireAllSpaces: true,
           privilegesTooltip: i18n.translate(
-            'xpack.securitySolution.featureRegistry.subFeatures.endpointList.privilegesTooltip',
+            'xpack.securitySolution.featureRegistry.subFeatures.hostIsolation.privilegesTooltip',
             {
               defaultMessage: 'All Spaces is required for Host Isolation access.',
             }
@@ -522,7 +522,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
         {
           requireAllSpaces: true,
           privilegesTooltip: i18n.translate(
-            'xpack.securitySolution.featureRegistry.subFeatures.endpointList.privilegesTooltip',
+            'xpack.securitySolution.featureRegistry.subFeatures.processOperations.privilegesTooltip',
             {
               defaultMessage: 'All Spaces is required for Process Operations access.',
             }
@@ -555,7 +555,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
         {
           requireAllSpaces: true,
           privilegesTooltip: i18n.translate(
-            'xpack.securitySolution.featureRegistry.subFeatures.endpointList.privilegesTooltip',
+            'xpack.securitySolution.featureRegistry.subFeatures.fileOperations.privilegesTooltip',
             {
               defaultMessage: 'All Spaces is required for File Operations access.',
             }
