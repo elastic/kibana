@@ -42,14 +42,15 @@ default space is used.
 ====
 
 `assignees`::
-(Optional, array of objects) Array containing assignee objects.
+(Optional, array of objects) Array containing users that are assigned to the case.
 +
 .Properties of assignee objects
 [%collapsible%open]
 =====
 `uid`::
-(Required, string) A user identifier to assign to the case.
-// TBD How are these values found?
+(Required, string) A unique identifier for the user profile. These identifiers
+can be found by using the
+{ref}/security-api-suggest-user-profile.html[suggest user profile API].
 =====
 
 `connector`::

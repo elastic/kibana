@@ -562,6 +562,7 @@ components:
       properties:
         assignees:
           type: array
+          description: An array containing users that are assigned to the case.
           nullable: true
           items:
             type: object
@@ -570,7 +571,7 @@ components:
             properties:
               uid:
                 type: string
-                description: A user identifier to assign to the case.
+                description: A unique identifier for the user profile. These identifiers can be found by using the suggest user profile API.
                 example: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
         connector:
           oneOf:
@@ -910,6 +911,7 @@ components:
       properties:
         assignees:
           type: array
+          description: An array containing users that are assigned to the case.
           nullable: true
           items:
             type: object
@@ -918,6 +920,7 @@ components:
             properties:
               uid:
                 type: string
+                description: A unique identifier for the user profile. You can use the get user profile API to retrieve more details.
                 example: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
         closed_at:
           type: string
@@ -1017,6 +1020,7 @@ components:
             properties:
               assignees:
                 type: array
+                description: An array containing users that are assigned to the case.
                 nullable: true
                 items:
                   type: object
@@ -1025,7 +1029,7 @@ components:
                   properties:
                     uid:
                       type: string
-                      description: A user identifier to assign to the case.
+                      description: A unique identifier for the user profile. These identifiers can be found by using the suggest user profile API.
                       example: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
               connector:
                 oneOf:

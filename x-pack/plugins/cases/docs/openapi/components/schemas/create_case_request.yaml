@@ -12,6 +12,7 @@ required:
 properties:
   assignees:
     type: array
+    description: An array containing users that are assigned to the case.
     nullable: true
     items:
       type: object
@@ -20,7 +21,7 @@ properties:
       properties:
         uid:
           type: string
-          description: A user identifier to assign to the case.
+          description: A unique identifier for the user profile. These identifiers can be found by using the suggest user profile API.
           example: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
   connector:
     oneOf:
