@@ -53,7 +53,7 @@ const unsupportedLanguageError = i18n.translate(
   }
 );
 
-export const useLogFilterState = ({ indexPattern }: { indexPattern?: DataViewBase }) => {
+export const useLogFilterState = ({ dataView }: { dataView?: DataViewBase }) => {
   const {
     notifications: { toasts },
     data: {
@@ -83,8 +83,10 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern?: DataViewBas
   }, [logFilterState.validationError, queryString, toasts]);
 
   const parseQuery = useCallback(
-    (filterQuery: Query) => buildEsQuery(indexPattern, filterQuery, [], kibanaQuerySettings),
-    [indexPattern, kibanaQuerySettings]
+    (filterQuery: Query) => {
+      return buildEsQuery(dataView, filterQuery, [], kibanaQuerySettings);
+    },
+    [dataView, kibanaQuerySettings]
   );
 
   const getNewLogFilterState = useCallback(
@@ -131,6 +133,13 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern?: DataViewBas
       };
     }, [getNewLogFilterState, queryString])
   );
+
+  // NOTE: If the dataView changes the query will need to be reparsed and the filter regenerated.
+  useEffect(() => {
+    if (dataView) {
+      setLogFilterState(getNewLogFilterState(queryString.getQuery()));
+    }
+  }, [dataView, getNewLogFilterState, queryString]);
 
   return {
     queryStringQuery: logFilterState.queryStringQuery, // NOTE: Query String Manager query.
