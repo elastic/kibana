@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { expect, Page } from '@elastic/synthetics';
+import { TIMEOUT_60_SEC } from '@kbn/observability-plugin/e2e/utils';
 import { FormMonitorType } from '../../common/runtime_types/monitor_management';
 import { loginPageProvider } from './login';
 import { utilsPageProvider } from './utils';
@@ -82,7 +83,7 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
 
     async navigateToEditMonitor() {
       await this.clickByTestSubj('syntheticsMonitorListActions');
-      await page.click('text=Edit');
+      await page.click('text=Edit', TIMEOUT_60_SEC);
       await this.findByText('Edit monitor');
     },
 
