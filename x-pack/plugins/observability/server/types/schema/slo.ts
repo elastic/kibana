@@ -6,16 +6,24 @@
  */
 
 import * as t from 'io-ts';
+import { durationType } from './duration';
 
-const rollingTimeWindowSchema = t.type({
-  duration: t.string,
-  is_rolling: t.literal<boolean>(true),
-});
+const occurencesBudgetingMethodSchema = t.literal<string>('occurrences');
+const timeslicesBudgetingMethodSchema = t.literal<string>('timeslices');
 
-const budgetingMethodSchema = t.literal('occurrences');
+const budgetingMethodSchema = t.union([
+  occurencesBudgetingMethodSchema,
+  timeslicesBudgetingMethodSchema,
+]);
 
-const objectiveSchema = t.type({
-  target: t.number,
-});
+const objectiveSchema = t.intersection([
+  t.type({ target: t.number }),
+  t.partial({ timeslice_target: t.number, timeslice_window: durationType }),
+]);
 
-export { rollingTimeWindowSchema, budgetingMethodSchema, objectiveSchema };
+export {
+  budgetingMethodSchema,
+  occurencesBudgetingMethodSchema,
+  timeslicesBudgetingMethodSchema,
+  objectiveSchema,
+};

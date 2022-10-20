@@ -29,7 +29,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
   public async getChartTimespan() {
-    return await this.testSubjects.getAttribute('discoverChart', 'data-time-range');
+    return await this.testSubjects.getAttribute('unifiedHistogramChart', 'data-time-range');
   }
 
   public async getDocTable() {
@@ -207,40 +207,40 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async isChartVisible() {
-    return await this.testSubjects.exists('discoverChart');
+    return await this.testSubjects.exists('unifiedHistogramChart');
   }
 
   public async toggleChartVisibility() {
-    await this.testSubjects.moveMouseTo('discoverChartOptionsToggle');
-    await this.testSubjects.click('discoverChartOptionsToggle');
-    await this.testSubjects.exists('discoverChartToggle');
-    await this.testSubjects.click('discoverChartToggle');
+    await this.testSubjects.moveMouseTo('unifiedHistogramChartOptionsToggle');
+    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
+    await this.testSubjects.exists('unifiedHistogramChartToggle');
+    await this.testSubjects.click('unifiedHistogramChartToggle');
     await this.header.waitUntilLoadingHasFinished();
   }
 
   public async getChartInterval() {
-    await this.testSubjects.click('discoverChartOptionsToggle');
-    await this.testSubjects.click('discoverTimeIntervalPanel');
-    const selectedOption = await this.find.byCssSelector(`.discoverIntervalSelected`);
+    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
+    await this.testSubjects.click('unifiedHistogramTimeIntervalPanel');
+    const selectedOption = await this.find.byCssSelector(`.unifiedHistogramIntervalSelected`);
     return selectedOption.getVisibleText();
   }
 
   public async getChartIntervalWarningIcon() {
-    await this.testSubjects.click('discoverChartOptionsToggle');
+    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
     await this.header.waitUntilLoadingHasFinished();
     return await this.find.existsByCssSelector('.euiToolTipAnchor');
   }
 
   public async setChartInterval(interval: string) {
-    await this.testSubjects.click('discoverChartOptionsToggle');
-    await this.testSubjects.click('discoverTimeIntervalPanel');
-    await this.testSubjects.click(`discoverTimeInterval-${interval}`);
+    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
+    await this.testSubjects.click('unifiedHistogramTimeIntervalPanel');
+    await this.testSubjects.click(`unifiedHistogramTimeInterval-${interval}`);
     return await this.header.waitUntilLoadingHasFinished();
   }
 
   public async getHitCount() {
     await this.header.waitUntilLoadingHasFinished();
-    return await this.testSubjects.getVisibleText('discoverQueryHits');
+    return await this.testSubjects.getVisibleText('unifiedHistogramQueryHits');
   }
 
   public async getDocHeader() {
@@ -573,7 +573,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async waitForChartLoadingComplete(renderCount: number) {
-    await this.elasticChart.waitForRenderingCount(renderCount, 'discoverChart');
+    await this.elasticChart.waitForRenderingCount(renderCount, 'unifiedHistogramChart');
   }
 
   public async waitForDocTableLoadingComplete() {

@@ -1805,6 +1805,17 @@
           },
           {
             "parentPluginId": "expressionXY",
+            "id": "def-common.XYChartProps.syncCursor",
+            "type": "boolean",
+            "tags": [],
+            "label": "syncCursor",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_xy/common/types/expression_renderers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionXY",
             "id": "def-common.XYChartProps.syncColors",
             "type": "boolean",
             "tags": [],

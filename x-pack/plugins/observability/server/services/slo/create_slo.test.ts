@@ -31,7 +31,7 @@ describe('CreateSLO', () => {
 
   describe('happy path', () => {
     it('calls the expected services', async () => {
-      const sloParams = createSLOParams(createAPMTransactionErrorRateIndicator());
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
       mockTransformManager.install.mockResolvedValue('slo-transform-id');
 
       const response = await createSLO.execute(sloParams);
@@ -51,7 +51,7 @@ describe('CreateSLO', () => {
   describe('unhappy path', () => {
     it('deletes the SLO when transform installation fails', async () => {
       mockTransformManager.install.mockRejectedValue(new Error('Transform install error'));
-      const sloParams = createSLOParams(createAPMTransactionErrorRateIndicator());
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 
       await expect(createSLO.execute(sloParams)).rejects.toThrowError('Transform install error');
       expect(mockRepository.deleteById).toBeCalled();
@@ -60,7 +60,7 @@ describe('CreateSLO', () => {
     it('removes the transform and deletes the SLO when transform start fails', async () => {
       mockTransformManager.install.mockResolvedValue('slo-transform-id');
       mockTransformManager.start.mockRejectedValue(new Error('Transform start error'));
-      const sloParams = createSLOParams(createAPMTransactionErrorRateIndicator());
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 
       await expect(createSLO.execute(sloParams)).rejects.toThrowError('Transform start error');
       expect(mockTransformManager.uninstall).toBeCalledWith('slo-transform-id');
