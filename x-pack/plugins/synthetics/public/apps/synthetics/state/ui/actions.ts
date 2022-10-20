@@ -27,3 +27,12 @@ export const toggleIntegrationsPopover = createAction<PopoverState>(
 );
 
 export const setSelectedMonitorId = createAction<string>('[UI] SET MONITOR ID');
+
+interface ScaledDateActionPayload {
+  formatString: string;
+  format: { [key: number]: string };
+}
+
+export const setScaledDateAction = createAction<ScaledDateActionPayload>(
+  '[UI] SCALED DATE ACTION PAYLOAD'
+);

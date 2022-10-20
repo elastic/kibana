@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { MouseEvent, useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import React, { MouseEvent, useMemo, useState } from 'react';
 import {
   EuiSpacer,
   EuiText,
@@ -14,18 +15,20 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
+  EuiLink,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import moment from 'moment';
 import { ErrorDetailsLink } from '../../common/links/error_details_link';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { Ping, PingState } from '../../../../../../common/runtime_types';
+import { DEFAULT_FORMAT, getDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
 import {
   formatTestDuration,
   formatTestRunAt,
-  useDateFormatForTest,
 } from '../../../utils/monitor_test_result/test_time_formats';
+import { selectScaledDateFormat } from '../../../state';
 
 export const ErrorsList = ({
   errorStates,
@@ -35,6 +38,15 @@ export const ErrorsList = ({
   loading: boolean;
 }) => {
   const { monitorId } = useParams<{ monitorId: string }>();
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [sortField, setSortField] = useState('@timestamp');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const { format } = useSelector(selectScaledDateFormat);
+
+  // const { errorStates, loading } = useMonitorErrors();
+
+  const items = errorStates.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize);
 
   const checkGroups = useMemo(() => {
     return errorStates.map((error) => error.monitor.check_group!);
@@ -46,7 +58,7 @@ export const ErrorsList = ({
 
   const history = useHistory();
 
-  const format = useDateFormatForTest();
+  // const format = useDateFormatForTest();
 
   const selectedLocation = useSelectedLocation();
 
@@ -57,7 +69,7 @@ export const ErrorsList = ({
       sortable: (a: PingState) => {
         return moment(a.state.started_at).valueOf();
       },
-      render: (value: string, item: PingState) => {
+      render: (value: string, item: Ping) => {
         const link = (
           <ErrorDetailsLink
             configId={monitorId}
@@ -69,10 +81,21 @@ export const ErrorsList = ({
         if (!isActive) {
           return link;
         }
-
+        const timestamp = item.state!.started_at;
         return (
           <EuiFlexGroup gutterSize="m" alignItems="center">
-            <EuiFlexItem grow={false}>{link}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {
+                <EuiLink href={`${basePath}/app/synthetics/error-details/${item.state?.id}`}>
+                  {formatTestRunAt(
+                    timestamp,
+                    format
+                      ? getDateFormat(format, Date.now().valueOf() - Number(timestamp))
+                      : DEFAULT_FORMAT
+                  )}
+                </EuiLink>
+              }
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBadge iconType="clock" iconSide="right">
                 Active

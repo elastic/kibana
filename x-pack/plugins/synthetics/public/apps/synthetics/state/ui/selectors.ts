@@ -31,3 +31,8 @@ export const selectEsKuery = createSelector(uiStateSelector, ({ esKuery }) => es
 export const selectSearchText = createSelector(uiStateSelector, ({ searchText }) => searchText);
 
 export const selectMonitorId = createSelector(uiStateSelector, ({ monitorId }) => monitorId);
+
+export const selectScaledDateFormat = createSelector(
+  uiStateSelector,
+  ({ scaledDateFormat: format, scaledDateFormatString: formatString }) => ({ format, formatString })
+);

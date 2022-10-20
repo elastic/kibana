@@ -5,10 +5,76 @@
  * 2.0.
  */
 
+import moment, { Moment } from 'moment';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectScaledDateFormat, setScaledDateAction } from '../apps/synthetics/state';
 import { kibanaService } from '../utils/kibana_service';
 
-const DEFAULT_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+export const DEFAULT_FORMAT = 'MMM D, YYYY @ HH:mm:ss';
 
-export function useKibanaDateFormat() {
-  return kibanaService.core.uiSettings.get('dateFormat', DEFAULT_FORMAT);
+type AcceptedInputs = Moment | Date | number | string | undefined;
+
+export function toNumeric(timestamp: AcceptedInputs): number | undefined {
+  if (moment.isMoment(timestamp) || timestamp instanceof Date) return timestamp.valueOf();
+  if (typeof timestamp === 'string') {
+    return Number.isNaN(Number(timestamp)) ? new Date(timestamp).valueOf() : Number(timestamp);
+  }
+  return timestamp;
+}
+
+export function isExpectedFormat(maybeValue: unknown): maybeValue is [string, string] {
+  return (
+    Array.isArray(maybeValue) &&
+    maybeValue.length === 2 &&
+    typeof maybeValue[0] === 'string' &&
+    typeof maybeValue[1] === 'string'
+  );
+}
+
+export function getDateFormat(bounds: { [key: number]: string }, diff: number): string {
+  let format: string = DEFAULT_FORMAT;
+  for (const bound of Object.entries(bounds)) {
+    if (diff > Number(bound[0])) {
+      format = bound[1];
+    } else break;
+  }
+  return format;
+}
+
+const INVALID_FORMAT_MESSAGE =
+  'Invalid date format specified. See Kibana Advanced Settings key `dateFormat:scaled`.';
+
+export function useKibanaDateFormat(timestamp: AcceptedInputs): string {
+  const now = moment.now();
+  const numericTimestamp = toNumeric(timestamp);
+  const dispatch = useDispatch();
+  const { format, formatString } = useSelector(selectScaledDateFormat);
+  const value = kibanaService.core.uiSettings.getAll()['dateFormat:scaled']?.value ?? '';
+
+  useEffect(() => {
+    if (typeof value === 'string' && value !== formatString) {
+      const newFormat = JSON.parse(value);
+
+      // array for simple sorting
+      const bounds: Array<{ bound: number; format: string }> = [];
+      for (const scale of newFormat) {
+        if (!isExpectedFormat(scale)) throw Error(INVALID_FORMAT_MESSAGE);
+        const bound = moment.duration(scale[0]).asMilliseconds();
+        bounds.push({ bound, format: scale[1] });
+      }
+      bounds.sort(({ bound: a }, { bound: b }) => a - b);
+      const action = setScaledDateAction({
+        formatString: value,
+        format: bounds.reduce((prev, cur) => ({ ...prev, [cur.bound]: cur.format }), {}),
+      });
+      dispatch(action);
+    }
+  }, [dispatch, formatString, value]);
+
+  if (format === null || numericTimestamp === undefined) {
+    return DEFAULT_FORMAT;
+  }
+
+  return getDateFormat(format, now - numericTimestamp);
 }
