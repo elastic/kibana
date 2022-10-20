@@ -12,13 +12,14 @@ import { getTransactionErrorRateChartPreview } from './chart_preview/get_transac
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, rangeRt } from '../default_api_types';
+import { AggregationType } from '../../../common/alert_types';
 
 const alertParamsRt = t.intersection([
   t.partial({
     aggregationType: t.union([
-      t.literal('avg'),
-      t.literal('95th'),
-      t.literal('99th'),
+      t.literal(AggregationType.Avg),
+      t.literal(AggregationType.P95),
+      t.literal(AggregationType.P99),
     ]),
     serviceName: t.string,
     transactionType: t.string,
@@ -80,7 +81,10 @@ const transactionDurationChartPreview = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    latencyChartPreview: Array<{ x: number; y: number | null }>;
+    latencyChartPreview: Array<{
+      name: string;
+      data: Array<{ x: number; y: number | null }>;
+    }>;
   }> => {
     const setup = await setupRequest(resources);
 

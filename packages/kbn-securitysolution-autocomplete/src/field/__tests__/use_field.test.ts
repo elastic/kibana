@@ -346,6 +346,18 @@ describe('useField', () => {
         ]);
       });
     });
+    it('should invoke onChange with custom option if one is sent', () => {
+      const { result } = renderHook(() => useField({ indexPattern, onChange: onChangeMock }));
+      act(() => {
+        result.current.handleCreateCustomOption('madeUpField');
+        expect(onChangeMock).toHaveBeenCalledWith([
+          {
+            name: 'madeUpField',
+            type: 'text',
+          },
+        ]);
+      });
+    });
   });
 
   describe('fieldWidth', () => {

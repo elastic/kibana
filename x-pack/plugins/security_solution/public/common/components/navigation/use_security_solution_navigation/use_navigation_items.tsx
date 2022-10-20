@@ -133,6 +133,7 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
             {
               ...securityNavGroup[SecurityNavGroupKey.manage],
               items: [
+                // TODO: also hide other management pages based on authz privileges
                 navTabs[SecurityPageName.endpoints],
                 ...(isPolicyListEnabled ? [navTabs[SecurityPageName.policies]] : []),
                 navTabs[SecurityPageName.trustedApps],
