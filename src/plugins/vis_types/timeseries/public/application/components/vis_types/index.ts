@@ -68,5 +68,5 @@ export interface TimeseriesVisProps {
   indexPattern?: FetchedIndexPattern['indexPattern'];
   /** @deprecated please use indexPattern.fieldFormatMap instead **/
   fieldFormatMap?: FieldFormatMap;
-  initialRender: () => void;
+  initialRender: () => void | undefined;
 }
