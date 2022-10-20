@@ -231,6 +231,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
             handlers.getExecutionContext?.()?.description,
         },
         syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
+        syncCursor: handlers?.isSyncCursorEnabled?.() ?? true,
       },
     };
   },

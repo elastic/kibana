@@ -60,7 +60,6 @@ export const HostsContent: React.FunctionComponent = () => {
       {metricsDataView ? (
         <>
           <SearchBar
-            showQueryBar={true}
             showFilterBar={false}
             showDatePicker={true}
             showAutoRefreshOnly={false}

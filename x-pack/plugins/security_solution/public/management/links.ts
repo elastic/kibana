@@ -232,6 +232,13 @@ const excludeLinks = (linkIds: SecurityPageName[]) => ({
   links: links.links?.filter((link) => !linkIds.includes(link.id)),
 });
 
+const getHostIsolationExceptionTotal = async (http: CoreStart['http']) => {
+  const hostIsolationExceptionsApiClientInstance =
+    HostIsolationExceptionsApiClient.getInstance(http);
+  const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
+  return summaryResponse.total;
+};
+
 export const getManagementFilteredLinks = async (
   core: CoreStart,
   plugins: StartPlugins
@@ -239,10 +246,11 @@ export const getManagementFilteredLinks = async (
   const fleetAuthz = plugins.fleet?.authz;
   const isEndpointRbacEnabled = ExperimentalFeaturesService.get().endpointRbacEnabled;
   const endpointPermissions = calculatePermissionsFromCapabilities(core.application.capabilities);
+  const linksToExclude: SecurityPageName[] = [];
 
   try {
     const currentUserResponse = await plugins.security.authc.getCurrentUser();
-    const privileges = fleetAuthz
+    const { canReadActionsLogManagement, canIsolateHost, canUnIsolateHost } = fleetAuthz
       ? calculateEndpointAuthz(
           licenseService,
           fleetAuthz,
@@ -251,28 +259,29 @@ export const getManagementFilteredLinks = async (
           endpointPermissions
         )
       : getEndpointAuthzInitialState();
-    if (!privileges.canAccessEndpointManagement) {
-      return excludeLinks([
-        SecurityPageName.hostIsolationExceptions,
-        SecurityPageName.responseActionsHistory,
-      ]);
+
+    if (!canReadActionsLogManagement) {
+      linksToExclude.push(SecurityPageName.responseActionsHistory);
     }
-    if (!privileges.canIsolateHost || !privileges.canReadActionsLogManagement) {
-      const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
-        core.http
-      );
-      const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
-      if (!summaryResponse.total) {
-        return excludeLinks([
-          SecurityPageName.hostIsolationExceptions,
-          SecurityPageName.responseActionsHistory,
-        ]);
+
+    if (!canIsolateHost && canUnIsolateHost) {
+      let shouldSeeHIEToBeAbleToDeleteEntries: boolean;
+      try {
+        const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
+        shouldSeeHIEToBeAbleToDeleteEntries = hostExceptionCount !== 0;
+      } catch {
+        shouldSeeHIEToBeAbleToDeleteEntries = false;
       }
-      return excludeLinks([SecurityPageName.responseActionsHistory]);
+
+      if (!shouldSeeHIEToBeAbleToDeleteEntries) {
+        linksToExclude.push(SecurityPageName.hostIsolationExceptions);
+      }
+    } else if (!canIsolateHost) {
+      linksToExclude.push(SecurityPageName.hostIsolationExceptions);
     }
   } catch {
-    return excludeLinks([SecurityPageName.hostIsolationExceptions]);
+    linksToExclude.push(SecurityPageName.hostIsolationExceptions);
   }
 
-  return links;
+  return excludeLinks(linksToExclude);
 };

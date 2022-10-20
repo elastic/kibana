@@ -94,7 +94,7 @@ describe('filter popover', () => {
     expect(instance.find(QueryStringInput).props()).toEqual(
       expect.objectContaining({
         dataTestSubj: 'indexPattern-filters-queryStringInput',
-        indexPatterns: ['my-fake-index-pattern'],
+        indexPatterns: [{ type: 'id', value: '1' }],
         isInvalid: false,
         query: { language: 'kuery', query: 'bytes >= 1' },
       })

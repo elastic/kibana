@@ -313,34 +313,36 @@ export type TimelineWithoutExternalRefs = Omit<SavedTimeline, 'dataViewId' | 'sa
  */
 
 export enum TimelineId {
+  active = 'timeline-1',
+  casePage = 'timeline-case',
+  test = 'timeline-test', // Reserved for testing purposes
+}
+
+export enum TableId {
   usersPageEvents = 'users-page-events',
   hostsPageEvents = 'hosts-page-events',
   networkPageEvents = 'network-page-events',
   hostsPageSessions = 'hosts-page-sessions-v2', // the v2 is to cache bust localstorage settings as default columns were reworked.
-  detectionsRulesDetailsPage = 'detections-rules-details-page',
-  detectionsPage = 'detections-page',
-  active = 'timeline-1',
-  casePage = 'timeline-case',
-  test = 'test', // Reserved for testing purposes
+  alertsOnRuleDetailsPage = 'alerts-rules-details-page',
+  alertsOnAlertsPage = 'alerts-page',
+  test = 'table-test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
   rulePreview = 'rule-preview',
   kubernetesPageSessions = 'kubernetes-page-sessions',
 }
 
-export const TimelineIdLiteralRt = runtimeTypes.union([
-  runtimeTypes.literal(TimelineId.usersPageEvents),
-  runtimeTypes.literal(TimelineId.hostsPageEvents),
-  runtimeTypes.literal(TimelineId.networkPageEvents),
-  runtimeTypes.literal(TimelineId.hostsPageSessions),
-  runtimeTypes.literal(TimelineId.detectionsRulesDetailsPage),
-  runtimeTypes.literal(TimelineId.detectionsPage),
-  runtimeTypes.literal(TimelineId.active),
-  runtimeTypes.literal(TimelineId.test),
-  runtimeTypes.literal(TimelineId.rulePreview),
-  runtimeTypes.literal(TimelineId.kubernetesPageSessions),
+export const TableIdLiteralRt = runtimeTypes.union([
+  runtimeTypes.literal(TableId.usersPageEvents),
+  runtimeTypes.literal(TableId.hostsPageEvents),
+  runtimeTypes.literal(TableId.networkPageEvents),
+  runtimeTypes.literal(TableId.hostsPageSessions),
+  runtimeTypes.literal(TableId.alertsOnRuleDetailsPage),
+  runtimeTypes.literal(TableId.alertsOnAlertsPage),
+  runtimeTypes.literal(TableId.test),
+  runtimeTypes.literal(TableId.rulePreview),
+  runtimeTypes.literal(TableId.kubernetesPageSessions),
 ]);
-
-export type TimelineIdLiteral = runtimeTypes.TypeOf<typeof TimelineIdLiteralRt>;
+export type TableIdLiteral = runtimeTypes.TypeOf<typeof TableIdLiteralRt>;
 
 export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection([
   SavedTimelineRuntimeType,
@@ -528,7 +530,7 @@ export type TimelineExpandedDetail = {
 
 export type ToggleDetailPanel = TimelineExpandedDetailType & {
   tabType?: TimelineTabs;
-  timelineId: string;
+  id: string;
 };
 
 export const pageInfoTimeline = runtimeTypes.type({
