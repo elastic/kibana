@@ -17,12 +17,18 @@ import { ErrorCode } from '../../../common/types/error_codes';
 jest.mock('../../lib/indices/ml_inference/get_ml_inference_history', () => ({
   getMlInferenceHistory: jest.fn(),
 }));
-jest.mock('../../lib/indices/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors', () => ({
-  getMlInferencePipelineProcessors: jest.fn(),
-}));
-jest.mock('../../lib/indices/ml_inference/pipeline_processors/delete_ml_inference_pipeline', () => ({
-  deleteMlInferencePipeline: jest.fn(),
-}));
+jest.mock(
+  '../../lib/indices/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors',
+  () => ({
+    getMlInferencePipelineProcessors: jest.fn(),
+  })
+);
+jest.mock(
+  '../../lib/indices/ml_inference/pipeline_processors/delete_ml_inference_pipeline',
+  () => ({
+    deleteMlInferencePipeline: jest.fn(),
+  })
+);
 jest.mock('../../lib/indices/exists_index', () => ({
   indexOrAliasExists: jest.fn(),
 }));
@@ -36,13 +42,13 @@ jest.mock('../../lib/indices/ml_inference/pipeline_processors/put_ml_inference_p
   createAndReferenceMlInferencePipeline: jest.fn(),
 }));
 
-import { deleteMlInferencePipeline } from '../../lib/indices/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
-import { getMlInferenceHistory } from '../../lib/indices/ml_inference/get_ml_inference_history';
-import { getMlInferencePipelineProcessors } from '../../lib/indices/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
 import { getMlInferenceErrors } from '../../lib/indices/ml_inference/get_ml_inference_errors';
-import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
+import { getMlInferenceHistory } from '../../lib/indices/ml_inference/get_ml_inference_history';
+import { deleteMlInferencePipeline } from '../../lib/indices/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
+import { getMlInferencePipelineProcessors } from '../../lib/indices/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
 import { createAndReferenceMlInferencePipeline } from '../../lib/indices/ml_inference/pipeline_processors/put_ml_inference_pipeline';
+import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
 import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
 import { registerIndexRoutes } from './indices';

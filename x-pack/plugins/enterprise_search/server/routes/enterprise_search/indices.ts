@@ -22,24 +22,24 @@ import { fetchConnectorByIndexName, fetchConnectors } from '../../lib/connectors
 import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
 
 import { createIndex } from '../../lib/indices/create_index';
-import { deleteMlInferencePipeline } from '../../lib/indices/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
 import { fetchIndex } from '../../lib/indices/fetch_index';
 import { fetchIndices } from '../../lib/indices/fetch_indices';
-import { getMlInferenceHistory } from '../../lib/indices/ml_inference/get_ml_inference_history';
-import { getMlInferencePipelineProcessors } from '../../lib/indices/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
 import { generateApiKey } from '../../lib/indices/generate_api_key';
 import { getMlInferenceErrors } from '../../lib/indices/ml_inference/get_ml_inference_errors';
-import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
-import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
-import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
-import { getPipeline } from '../../lib/pipelines/get_pipeline';
-import { RouteDependencies } from '../../plugin';
-import { createError } from '../../utils/create_error';
+import { getMlInferenceHistory } from '../../lib/indices/ml_inference/get_ml_inference_history';
+import { deleteMlInferencePipeline } from '../../lib/indices/ml_inference/pipeline_processors/delete_ml_inference_pipeline';
+import { getMlInferencePipelineProcessors } from '../../lib/indices/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
 import {
   createAndReferenceMlInferencePipeline,
   CreatedPipeline,
 } from '../../lib/indices/ml_inference/pipeline_processors/put_ml_inference_pipeline';
+import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
+import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
+import { getPipeline } from '../../lib/pipelines/get_pipeline';
+import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
+import { RouteDependencies } from '../../plugin';
+import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
   isIndexNotFoundException,
