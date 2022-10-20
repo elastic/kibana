@@ -390,6 +390,33 @@ describe('with compression', () => {
   });
 });
 
+describe('compression.brotli', () => {
+  describe('enabled', () => {
+    it('defaults to `false`', () => {
+      expect(config.schema.validate({}).compression.brotli.enabled).toEqual(false);
+    });
+  });
+  describe('quality', () => {
+    it('defaults to `3`', () => {
+      expect(config.schema.validate({}).compression.brotli.quality).toEqual(3);
+    });
+    it('does not accepts value superior to `11`', () => {
+      expect(() =>
+        config.schema.validate({ compression: { brotli: { quality: 12 } } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[compression.brotli.quality]: Value must be equal to or lower than [11]."`
+      );
+    });
+    it('does not accepts value inferior to `0`', () => {
+      expect(() =>
+        config.schema.validate({ compression: { brotli: { quality: -1 } } })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[compression.brotli.quality]: Value must be equal to or greater than [0]."`
+      );
+    });
+  });
+});
+
 describe('cors', () => {
   describe('allowOrigin', () => {
     it('list cannot be empty', () => {

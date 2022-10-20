@@ -149,15 +149,17 @@ export class HttpServer {
   ): Promise<HttpServerSetup> {
     const serverOptions = getServerOptions(config);
     const listenerOptions = getListenerOptions(config);
+    this.config = config;
     this.server = createServer(serverOptions, listenerOptions);
     await this.server.register([HapiStaticFiles]);
-    await this.server.register({
-      plugin: Brok,
-      options: {
-        compress: { quality: 3 },
-      },
-    });
-    this.config = config;
+    if (config.compression.brotli.enabled) {
+      await this.server.register({
+        plugin: Brok,
+        options: {
+          compress: { quality: config.compression.brotli.quality },
+        },
+      });
+    }
 
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
