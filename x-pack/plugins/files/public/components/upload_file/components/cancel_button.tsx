@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { useBehaviorSubject } from '../../use_behavior_subject';
@@ -20,7 +20,7 @@ export const CancelButton: FunctionComponent<Props> = ({ onClick }) => {
   const uploadState = useUploadState();
   const uploading = useBehaviorSubject(uploadState.uploading$);
   return (
-    <EuiButtonEmpty
+    <EuiButton
       key="cancelButton"
       size="s"
       data-test-subj="cancelButton"
@@ -29,6 +29,6 @@ export const CancelButton: FunctionComponent<Props> = ({ onClick }) => {
       color="danger"
     >
       {i18nTexts.cancel}
-    </EuiButtonEmpty>
+    </EuiButton>
   );
 };
