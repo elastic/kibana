@@ -39,7 +39,7 @@ import { createError } from '../../utils/create_error';
 import {
   createAndReferenceMlInferencePipeline,
   CreatedPipeline,
-} from '../../utils/create_ml_inference_pipeline';
+} from '../../lib/indices/ml_inference/pipeline_processors/put_ml_inference_pipeline';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
   isIndexNotFoundException,

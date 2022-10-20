@@ -8,15 +8,15 @@
 import { IngestGetPipelineResponse, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { formatPipelineName } from '../../common/ml_inference_pipeline';
-import { ErrorCode } from '../../common/types/error_codes';
+import { formatPipelineName } from '../../../../../common/ml_inference_pipeline';
+import { ErrorCode } from '../../../../../common/types/error_codes';
 
-import { formatMlPipelineBody } from '../lib/pipelines/create_pipeline_definitions';
+import { formatMlPipelineBody } from '../../../pipelines/create_pipeline_definitions';
 
 import {
   getInferencePipelineNameFromIndexName,
   getPrefixedInferencePipelineProcessorName,
-} from './ml_inference_pipeline_utils';
+} from '../../../../utils/ml_inference_pipeline_utils';
 
 /**
  * Details of a created pipeline.
