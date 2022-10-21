@@ -7,8 +7,10 @@
  */
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { parse } from 'query-string';
+import type { IncomingMessage } from 'http';
 import type { RouteDependencies } from '../../..';
 import { API_BASE_PATH } from '../../../../../common/constants';
+import { streamToJSON } from '../../../../lib/utils';
 
 interface Settings {
   indices: boolean;
@@ -17,40 +19,74 @@ interface Settings {
   dataStreams: boolean;
 }
 
+const RESPONSE_SIZE_LIMIT = 10 * 1024 * 1024;
+// Limit the response size to 10MB, because the response can be very large and sending it to the client
+// can cause the browser to hang.
+
 async function getMappings(esClient: IScopedClusterClient, settings: Settings) {
   if (settings.fields) {
-    return esClient.asInternalUser.indices.getMapping();
+    const stream = await esClient.asInternalUser.indices.getMapping(undefined, {
+      asStream: true,
+    });
+    return streamToJSON(stream as unknown as IncomingMessage, RESPONSE_SIZE_LIMIT);
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
-  return Promise.resolve({});
+  return {};
 }
 
 async function getAliases(esClient: IScopedClusterClient, settings: Settings) {
   if (settings.indices) {
-    return esClient.asInternalUser.indices.getAlias();
+    const stream = await esClient.asInternalUser.indices.getAlias(undefined, {
+      asStream: true,
+    });
+    return streamToJSON(stream as unknown as IncomingMessage, RESPONSE_SIZE_LIMIT);
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
-  return Promise.resolve({});
+  return {};
 }
 
 async function getDataStreams(esClient: IScopedClusterClient, settings: Settings) {
   if (settings.dataStreams) {
-    return esClient.asInternalUser.indices.getDataStream();
+    const stream = await esClient.asInternalUser.indices.getDataStream(undefined, {
+      asStream: true,
+    });
+    return streamToJSON(stream as unknown as IncomingMessage, RESPONSE_SIZE_LIMIT);
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
-  return Promise.resolve({});
+  return {};
 }
 
-async function getTemplates(esClient: IScopedClusterClient, settings: Settings) {
+async function getLegacyTemplates(esClient: IScopedClusterClient, settings: Settings) {
   if (settings.templates) {
-    return Promise.all([
-      esClient.asInternalUser.indices.getTemplate(),
-      esClient.asInternalUser.indices.getIndexTemplate(),
-      esClient.asInternalUser.cluster.getComponentTemplate(),
-    ]);
+    const stream = await esClient.asInternalUser.indices.getTemplate(undefined, {
+      asStream: true,
+    });
+    return streamToJSON(stream as unknown as IncomingMessage, RESPONSE_SIZE_LIMIT);
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
-  return Promise.resolve([]);
+  return {};
+}
+
+async function getComponentTemplates(esClient: IScopedClusterClient, settings: Settings) {
+  if (settings.templates) {
+    const stream = await esClient.asInternalUser.cluster.getComponentTemplate(undefined, {
+      asStream: true,
+    });
+    return streamToJSON(stream as unknown as IncomingMessage, RESPONSE_SIZE_LIMIT);
+  }
+  // If the user doesn't want autocomplete suggestions, then clear any that exist.
+  return {};
+}
+
+async function getIndexTemplates(esClient: IScopedClusterClient, settings: Settings) {
+  if (settings.templates) {
+    const stream = await esClient.asInternalUser.indices.getIndexTemplate(undefined, {
+      asStream: true,
+    });
+    return streamToJSON(stream as unknown as IncomingMessage, RESPONSE_SIZE_LIMIT);
+  }
+  // If the user doesn't want autocomplete suggestions, then clear any that exist.
+  return {};
 }
 
 export function registerGetRoute({ router, lib: { handleEsError } }: RouteDependencies) {
@@ -71,11 +107,32 @@ export function registerGetRoute({ router, lib: { handleEsError } }: RouteDepend
         }
 
         const esClient = (await ctx.core).elasticsearch.client;
-        const mappings = await getMappings(esClient, settings);
-        const aliases = await getAliases(esClient, settings);
-        const dataStreams = await getDataStreams(esClient, settings);
-        const [legacyTemplates = {}, indexTemplates = {}, componentTemplates = {}] =
-          await getTemplates(esClient, settings);
+
+        // Wait for all requests to complete, in case one of them fails return the successfull ones
+        const results = await Promise.allSettled([
+          getMappings(esClient, settings),
+          getAliases(esClient, settings),
+          getDataStreams(esClient, settings),
+          getLegacyTemplates(esClient, settings),
+          getIndexTemplates(esClient, settings),
+          getComponentTemplates(esClient, settings),
+        ]);
+
+        const [
+          mappings,
+          aliases,
+          dataStreams,
+          legacyTemplates,
+          indexTemplates,
+          componentTemplates,
+        ] = results.map((result) => {
+          // If the request was successful, return the result
+          if (result.status === 'fulfilled') {
+            return result.value;
+          }
+          // If the request failed, return an empty object
+          return {};
+        });
 
         return response.ok({
           body: {
