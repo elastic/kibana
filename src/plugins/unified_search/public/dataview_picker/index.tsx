@@ -53,7 +53,7 @@ export interface DataViewPickerProps {
   /**
    * The adHocDataviews.
    */
-  adHocDataViews: DataView[];
+  adHocDataViews?: DataView[];
   /**
    * Saved data views
    */
