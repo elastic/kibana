@@ -117,7 +117,6 @@ export const SearchPanel: FC<Props> = ({
           displayStyle={'inPage'}
           isClearable={true}
           customSubmitButton={<div />}
-          // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
           onFiltersUpdated={(filters: Filter[]) => searchHandler({ filters })}
         />
       </EuiFlexItem>
