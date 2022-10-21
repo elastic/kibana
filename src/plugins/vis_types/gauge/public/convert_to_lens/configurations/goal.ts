@@ -7,7 +7,11 @@
  */
 
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { Column, MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
+import {
+  CollapseFunction,
+  Column,
+  MetricVisConfiguration,
+} from '@kbn/visualizations-plugin/common';
 import { GaugeVisParams } from '../../types';
 
 export const getConfiguration = (
@@ -28,15 +32,15 @@ export const getConfiguration = (
     };
     maxAccessor: string;
     columnsWithoutReferenced: Column[];
-    bucketCollapseFn?: Record<string, string[]>;
+    bucketCollapseFn?: Record<CollapseFunction, string[]>;
   }
 ): MetricVisConfiguration => {
   const [metricAccessor] = metrics;
   const [breakdownByAccessor] = buckets.all;
   const collapseFn = bucketCollapseFn
-    ? Object.keys(bucketCollapseFn).find((key) =>
-        bucketCollapseFn[key].includes(breakdownByAccessor)
-      )
+    ? (Object.keys(bucketCollapseFn).find((key) =>
+        bucketCollapseFn[key as CollapseFunction].includes(breakdownByAccessor)
+      ) as CollapseFunction)
     : undefined;
   return {
     layerId,
@@ -45,6 +49,7 @@ export const getConfiguration = (
     metricAccessor,
     breakdownByAccessor,
     maxAccessor,
+    showBar: Boolean(maxAccessor),
     collapseFn,
     subtitle: gauge.labels.show && gauge.style.subText ? gauge.style.subText : undefined,
   };

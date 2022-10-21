@@ -7,7 +7,7 @@ id: kibDevDocsDeprecationsByApi
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 description: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2022-10-14
+date: 2022-10-21
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 ---
 
@@ -27,22 +27,19 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibCorePluginApi" section="def-public.SavedObjectAttributes" text="SavedObjectAttributes"/> | savedObjects, embeddable, fleet, visualizations, dashboard, infra, canvas, graph, actions, alerting, enterpriseSearch, securitySolution, taskManager, savedSearch, ml, @kbn/core-saved-objects-server-internal | - |
 | <DocLink id="kibCorePluginApi" section="def-server.SavedObjectAttributes" text="SavedObjectAttributes"/> | savedObjects, embeddable, fleet, visualizations, dashboard, infra, canvas, graph, actions, alerting, enterpriseSearch, securitySolution, taskManager, savedSearch, ml, @kbn/core-saved-objects-server-internal | - |
 | <DocLink id="kibDataPluginApi" section="def-public.syncQueryStateWithUrl" text="syncQueryStateWithUrl"/> | discover, maps, monitoring | - |
-| <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.indexPatterns" text="indexPatterns"/> | unifiedSearch, discover, maps, infra, graph, securitySolution, stackAlerts, inputControlVis, savedObjects | - |
-| <DocLink id="kibDataPluginApi" section="def-common.DataView.title" text="title"/> | timelines, securitySolution, lists, threatIntelligence, dataViews, dataViewEditor, unifiedSearch, triggersActionsUi, savedObjectsManagement, unifiedFieldList, discover, aiops, presentationUtil, controls, lens, observability, infra, maps, dataVisualizer, ml, fleet, visTypeTimeseries, apm, reporting, graph, stackAlerts, synthetics, transform, upgradeAssistant, ux, dataViewManagement, inputControlVis, visDefaultEditor, visTypeTimelion, visTypeVega, data | - |
-| <DocLink id="kibDataPluginApi" section="def-server.DataView.title" text="title"/> | timelines, securitySolution, lists, threatIntelligence, dataViews, dataViewEditor, unifiedSearch, triggersActionsUi, savedObjectsManagement, unifiedFieldList, discover, aiops, presentationUtil, controls, lens, observability, infra, maps, dataVisualizer, ml, fleet, visTypeTimeseries, apm, reporting, graph, stackAlerts, synthetics, transform, upgradeAssistant, ux, dataViewManagement, inputControlVis, visDefaultEditor, visTypeTimelion, visTypeVega, data | - |
-| <DocLink id="kibDataViewsPluginApi" section="def-public.DataView.title" text="title"/> | timelines, securitySolution, lists, threatIntelligence, data, dataViewEditor, unifiedSearch, triggersActionsUi, savedObjectsManagement, unifiedFieldList, discover, aiops, presentationUtil, controls, lens, observability, infra, maps, dataVisualizer, ml, fleet, visTypeTimeseries, apm, reporting, graph, stackAlerts, synthetics, transform, upgradeAssistant, ux, dataViewManagement, inputControlVis, visDefaultEditor, visTypeTimelion, visTypeVega | - |
+| <DocLink id="kibDataPluginApi" section="def-common.DataView.title" text="title"/> | securitySolution, timelines, lists, threatIntelligence, dataViews, dataViewEditor, unifiedSearch, triggersActionsUi, savedObjectsManagement, unifiedFieldList, aiops, presentationUtil, controls, lens, observability, infra, maps, dataVisualizer, ml, fleet, visTypeTimeseries, apm, reporting, graph, stackAlerts, synthetics, transform, upgradeAssistant, ux, dataViewManagement, inputControlVis, visDefaultEditor, visTypeTimelion, visTypeVega, discover, data | - |
+| <DocLink id="kibDataPluginApi" section="def-server.DataView.title" text="title"/> | securitySolution, timelines, lists, threatIntelligence, dataViews, dataViewEditor, unifiedSearch, triggersActionsUi, savedObjectsManagement, unifiedFieldList, aiops, presentationUtil, controls, lens, observability, infra, maps, dataVisualizer, ml, fleet, visTypeTimeseries, apm, reporting, graph, stackAlerts, synthetics, transform, upgradeAssistant, ux, dataViewManagement, inputControlVis, visDefaultEditor, visTypeTimelion, visTypeVega, discover, data | - |
+| <DocLink id="kibDataViewsPluginApi" section="def-public.DataView.title" text="title"/> | securitySolution, timelines, lists, threatIntelligence, data, dataViewEditor, unifiedSearch, triggersActionsUi, savedObjectsManagement, unifiedFieldList, aiops, presentationUtil, controls, lens, observability, infra, maps, dataVisualizer, ml, fleet, visTypeTimeseries, apm, reporting, graph, stackAlerts, synthetics, transform, upgradeAssistant, ux, dataViewManagement, inputControlVis, visDefaultEditor, visTypeTimelion, visTypeVega, discover | - |
 | <DocLink id="kibUiActionsPluginApi" section="def-public.UiActionsService.executeTriggerActions" text="executeTriggerActions"/> | data, discover, embeddable | - |
 | <DocLink id="kibCorePluginApi" section="def-public.UiSettingsParams.metric" text="metric"/> | advancedSettings, discover | - |
 | <DocLink id="kibCorePluginApi" section="def-server.UiSettingsParams.metric" text="metric"/> | advancedSettings, discover | - |
+| <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.indexPatterns" text="indexPatterns"/> | maps, infra, graph, securitySolution, stackAlerts, inputControlVis, savedObjects | - |
 | <DocLink id="kibDataPluginApi" section="def-common.EqlSearchStrategyRequest.options" text="options"/> | securitySolution | - |
 | <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authc" text="authc"/> | encryptedSavedObjects, actions, data, ml, logstash, securitySolution, cloudChat | - |
 | <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.fieldFormats" text="fieldFormats"/> | dashboard, dataVisualizer, stackAlerts, expressionPartitionVis | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.flattenHit" text="flattenHit"/> | dataViews, maps | - |
 | <DocLink id="kibDataPluginApi" section="def-server.DataView.flattenHit" text="flattenHit"/> | dataViews, maps | - |
 | <DocLink id="kibDataViewsPluginApi" section="def-public.DataView.flattenHit" text="flattenHit"/> | maps | - |
-| <DocLink id="kibLensPluginApi" section="def-public.layerTypes" text="layerTypes"/> | maps, ml | - |
-| <DocLink id="kibDataViewsPluginApi" section="def-server.getFieldByName" text="getFieldByName"/> | unifiedSearch | - |
-| <DocLink id="kibDataViewsPluginApi" section="def-server.findIndexPatternById" text="findIndexPatternById"/> | unifiedSearch | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | visTypeTimeseries, graph, dataViewManagement, dataViews | - |
 | <DocLink id="kibDataPluginApi" section="def-server.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | visTypeTimeseries, graph, dataViewManagement, dataViews | - |
 | <DocLink id="kibDataViewsPluginApi" section="def-public.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | visTypeTimeseries, graph, dataViewManagement | - |
@@ -52,6 +49,8 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.getScriptedFields" text="getScriptedFields"/> | dataViews, dataViewManagement | - |
 | <DocLink id="kibDataPluginApi" section="def-server.DataView.removeScriptedField" text="removeScriptedField"/> | dataViewManagement, dataViews | - |
 | <DocLink id="kibDataPluginApi" section="def-server.DataView.getScriptedFields" text="getScriptedFields"/> | dataViews, dataViewManagement | - |
+| <DocLink id="kibDataViewsPluginApi" section="def-server.getFieldByName" text="getFieldByName"/> | unifiedSearch | - |
+| <DocLink id="kibDataViewsPluginApi" section="def-server.findIndexPatternById" text="findIndexPatternById"/> | unifiedSearch | - |
 | <DocLink id="kibKibanaReactPluginApi" section="def-public.RedirectAppLinks" text="RedirectAppLinks"/> | home, data, esUiShared, spaces, savedObjectsManagement, fleet, observability, ml, apm, indexLifecycleManagement, synthetics, upgradeAssistant, ux, kibanaOverview | - |
 | <DocLink id="kibCorePluginApi" section="def-public.SavedObjectsImportSuccess.createNewCopy" text="createNewCopy"/> | spaces, savedObjectsManagement | - |
 | <DocLink id="kibCorePluginApi" section="def-server.SavedObjectsImportSuccess.createNewCopy" text="createNewCopy"/> | spaces, savedObjectsManagement | - |

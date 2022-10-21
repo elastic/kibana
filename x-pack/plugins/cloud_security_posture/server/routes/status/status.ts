@@ -44,8 +44,10 @@ const getHealthyAgents = async (
     agentPolicies
   );
 
-  // TODO: should be fixed - currently returns all agents instead of healthy agents only
-  return Object.values(agentStatusesByAgentPolicyId).reduce((sum, status) => sum + status.total, 0);
+  return Object.values(agentStatusesByAgentPolicyId).reduce(
+    (sum, status) => sum + status.online + status.updating,
+    0
+  );
 };
 
 const calculateCspStatusCode = (

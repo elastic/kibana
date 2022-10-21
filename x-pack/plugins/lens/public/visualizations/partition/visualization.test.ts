@@ -20,6 +20,7 @@ import { FramePublicAPI } from '../../types';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { cloneDeep } from 'lodash';
 import { PartitionChartsMeta } from './partition_charts_meta';
+import { CollapseFunction } from '../../../common/expressions';
 
 jest.mock('../../id_generator');
 
@@ -77,7 +78,7 @@ describe('pie_visualization', () => {
       it("doesn't count collapsed dimensions", () => {
         const localState = cloneDeep(state);
         localState.layers[0].collapseFns = {
-          [colIds[0]]: 'some-fn',
+          [colIds[0]]: 'some-fn' as CollapseFunction,
         };
 
         expect(pieVisualization.getErrorMessages(localState)).toHaveLength(0);

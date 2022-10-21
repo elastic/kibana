@@ -14,9 +14,9 @@ import {
 import React from 'react';
 import { CopyToClipboardButtonEmpty } from '../../copy_to_clipboard/copy_to_clipboard';
 import { FilterInButtonEmpty, FilterOutButtonEmpty } from '../../../../query_bar';
-import { AddToTimelineButtonEmpty } from '../../../../timeline/components/add_to_timeline';
+import { AddToTimelineButtonEmpty } from '../../../../timeline';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../utils/field_value';
-import { Indicator } from '../../../../../../common/types/indicator';
+import { Indicator } from '../../../types';
 import { Pagination } from '../../../services/fetch_indicators';
 import { useStyles } from './styles';
 

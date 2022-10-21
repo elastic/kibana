@@ -542,12 +542,12 @@ export const commonMigratePartitionChartGroups = (
   }>;
 };
 
-export const commonMigratePartitionMetrics = (attributes: LensDocShape850<unknown>) => {
+export const commonMigratePartitionMetrics = (attributes: LensDocShape860<unknown>) => {
   if (attributes.visualizationType !== 'lnsPie') {
-    return attributes as LensDocShape850<unknown>;
+    return attributes as LensDocShape860<unknown>;
   }
 
-  const partitionAttributes = attributes as LensDocShape850<{
+  const partitionAttributes = attributes as LensDocShape860<{
     shape: string;
     layers: Array<{ metric: string }>;
   }>;
@@ -565,7 +565,7 @@ export const commonMigratePartitionMetrics = (attributes: LensDocShape850<unknow
         })),
       },
     },
-  } as LensDocShape850<{
+  } as LensDocShape860<{
     shape: string;
     layers: Array<{ metrics: string[] }>;
   }>;

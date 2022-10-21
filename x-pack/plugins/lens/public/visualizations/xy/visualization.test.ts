@@ -293,6 +293,7 @@ describe('xy_visualization', () => {
               label: 'date_histogram',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -1686,6 +1687,7 @@ describe('xy_visualization', () => {
               label: 'date_histogram',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -1716,6 +1718,7 @@ describe('xy_visualization', () => {
               label: 'date_histogram',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -1760,6 +1763,7 @@ describe('xy_visualization', () => {
               label: 'histogram',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -1792,6 +1796,7 @@ describe('xy_visualization', () => {
               label: 'top values',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -1822,6 +1827,7 @@ describe('xy_visualization', () => {
               label: 'top values',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -1931,6 +1937,7 @@ describe('xy_visualization', () => {
               label: 'date_histogram',
               isStaticValue: false,
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;

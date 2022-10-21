@@ -866,7 +866,7 @@ export function splitIndexPatternNames(indexPatternName: string): string[] {
  * Resolves the longest time interval from the list.
  * @param timeIntervals Collection of the strings representing time intervals, e.g. ['15m', '1h', '2d']
  */
-export function resolveMaxTimeInterval(timeIntervals: string[]): number | undefined {
+export function resolveMaxTimeInterval(timeIntervals: estypes.Duration[]): number | undefined {
   const result = Math.max(
     ...timeIntervals
       .map((b) => parseInterval(b))

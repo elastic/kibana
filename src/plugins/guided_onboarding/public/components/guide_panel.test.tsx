@@ -12,9 +12,9 @@ import React from 'react';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { HttpSetup } from '@kbn/core/public';
+import type { GuideState } from '@kbn/guided-onboarding';
 
 import { guidesConfig } from '../constants/guides_config';
-import type { GuideState } from '../../common/types';
 import { apiService } from '../services/api';
 import { GuidePanel } from './guide_panel';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
@@ -109,7 +109,8 @@ describe('Guided setup', () => {
   });
 
   describe('Button component', () => {
-    test('should be disabled in there is no active guide', async () => {
+    // TODO check for the correct button behavior once https://github.com/elastic/kibana/issues/141129 is implemented
+    test.skip('should be disabled in there is no active guide', async () => {
       const { exists } = testBed;
       expect(exists('disabledGuideButton')).toBe(true);
       expect(exists('guideButton')).toBe(false);
@@ -192,8 +193,8 @@ describe('Guided setup', () => {
       expect(exists('guideProgress')).toBe(true);
     });
 
-    test('should show the "Continue using Elastic" button when all steps has been completed', async () => {
-      const { component, exists } = testBed;
+    test('should show the completed state when all steps has been completed', async () => {
+      const { component, exists, find } = testBed;
 
       const readyToCompleteGuideState: GuideState = {
         guideId: 'search',
@@ -217,6 +218,10 @@ describe('Guided setup', () => {
 
       await updateComponentWithState(component, readyToCompleteGuideState, true);
 
+      expect(find('guideTitle').text()).toContain('Well done');
+      expect(find('guideDescription').text()).toContain(
+        `You've completed the Elastic Enterprise Search guide`
+      );
       expect(exists('useElasticButton')).toBe(true);
     });
 
@@ -276,9 +281,8 @@ describe('Guided setup', () => {
         component.update();
 
         expect(exists('quitGuideModal')).toBe(false);
-        // For now, the guide button is disabled once a user quits a guide
-        // This behavior will change once https://github.com/elastic/kibana/issues/141129 is implemented
-        expect(exists('disabledGuideButton')).toBe(true);
+
+        // TODO check for the correct button behavior once https://github.com/elastic/kibana/issues/141129 is implemented
       });
 
       test('cancels out of the quit guide confirmation modal', async () => {

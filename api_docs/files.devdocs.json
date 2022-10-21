@@ -284,7 +284,7 @@
               "\nList all file objects, of a given {@link FileKind}.\n"
             ],
             "signature": [
-              "(args: Readonly<{ page?: number | undefined; perPage?: number | undefined; } & {}> & { kind: string; }) => Promise<{ files: ",
+              "(args: Readonly<{ name?: string | string[] | undefined; status?: string | string[] | undefined; meta?: Readonly<{} & {}> | undefined; extension?: string | string[] | undefined; } & {}> & Readonly<{ page?: number | undefined; perPage?: number | undefined; } & {}> & { kind: string; }) => Promise<{ files: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -292,7 +292,7 @@
                 "section": "def-common.FileJSON",
                 "text": "FileJSON"
               },
-              "<M>[]; }>"
+              "<M>[]; total: number; }>"
             ],
             "path": "x-pack/plugins/files/public/types.ts",
             "deprecated": false,
@@ -1093,7 +1093,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<M>[]; }; update: { file: ",
+          "<M>[]; total: number; }; update: { file: ",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1141,7 +1141,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<unknown>[]; }; }"
+          "<unknown>[]; total: number; }; }"
         ],
         "path": "x-pack/plugins/files/public/types.ts",
         "deprecated": false,
@@ -1174,7 +1174,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<M>; }>; list: (arg?: Omit<Readonly<{ page?: number | undefined; perPage?: number | undefined; } & {}> & { kind: string; }, \"kind\"> | undefined) => Promise<{ files: ",
+          "<M>; }>; list: (arg?: Omit<Readonly<{ name?: string | string[] | undefined; status?: string | string[] | undefined; meta?: Readonly<{} & {}> | undefined; extension?: string | string[] | undefined; } & {}> & Readonly<{ page?: number | undefined; perPage?: number | undefined; } & {}> & { kind: string; }, \"kind\"> | undefined) => Promise<{ files: ",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1182,7 +1182,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<M>[]; }>; update: (arg: Omit<Readonly<{ name?: string | undefined; meta?: Readonly<{} & {}> | undefined; alt?: string | undefined; } & {}> & Readonly<{} & { id: string; }> & { kind: string; }, \"kind\">) => Promise<{ file: ",
+          "<M>[]; total: number; }>; update: (arg: Omit<Readonly<{ name?: string | undefined; meta?: Readonly<{} & {}> | undefined; alt?: string | undefined; } & {}> & Readonly<{} & { id: string; }> & { kind: string; }, \"kind\">) => Promise<{ file: ",
           {
             "pluginId": "files",
             "scope": "common",
@@ -1238,7 +1238,7 @@
             "section": "def-common.FileJSON",
             "text": "FileJSON"
           },
-          "<unknown>[]; }>; }"
+          "<unknown>[]; total: number; }>; }"
         ],
         "path": "x-pack/plugins/files/public/types.ts",
         "deprecated": false,
@@ -1650,15 +1650,13 @@
               "UpdateResponse",
               "<TDocumentR>>; }; asyncSearch: ",
               "default",
-              "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; helpers: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
               ") => ",
-              "default",
-              "; Internal: ",
               "default",
               "; autoscaling: ",
               "default",
@@ -3230,65 +3228,6 @@
           },
           {
             "parentPluginId": "files",
-            "id": "def-server.FileClient.list",
-            "type": "Function",
-            "tags": [],
-            "label": "list",
-            "description": [
-              "\nSee {@link FileMetadataClient.list}\n"
-            ],
-            "signature": [
-              "(arg?: ",
-              {
-                "pluginId": "files",
-                "scope": "server",
-                "docId": "kibFilesPluginApi",
-                "section": "def-server.ListArg",
-                "text": "ListArg"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "files",
-                "scope": "common",
-                "docId": "kibFilesPluginApi",
-                "section": "def-common.File",
-                "text": "File"
-              },
-              "<unknown>[]>"
-            ],
-            "path": "x-pack/plugins/files/server/file_client/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "files",
-                "id": "def-server.FileClient.list.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "arg",
-                "description": [
-                  "- Argument to list files"
-                ],
-                "signature": [
-                  {
-                    "pluginId": "files",
-                    "scope": "server",
-                    "docId": "kibFilesPluginApi",
-                    "section": "def-server.ListArg",
-                    "text": "ListArg"
-                  },
-                  " | undefined"
-                ],
-                "path": "x-pack/plugins/files/server/file_client/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "files",
             "id": "def-server.FileClient.find",
             "type": "Function",
             "tags": [],
@@ -3297,7 +3236,7 @@
               "\nSee {@link FileMetadataClient.find}.\n"
             ],
             "signature": [
-              "(arg: ",
+              "(arg?: ",
               {
                 "pluginId": "files",
                 "scope": "server",
@@ -3305,7 +3244,7 @@
                 "section": "def-server.FindFileArgs",
                 "text": "FindFileArgs"
               },
-              ") => Promise<",
+              " | undefined) => Promise<{ files: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -3313,7 +3252,7 @@
                 "section": "def-common.File",
                 "text": "File"
               },
-              "<unknown>[]>"
+              "<unknown>[]; total: number; }>"
             ],
             "path": "x-pack/plugins/files/server/file_client/types.ts",
             "deprecated": false,
@@ -3335,12 +3274,13 @@
                     "docId": "kibFilesPluginApi",
                     "section": "def-server.FindFileArgs",
                     "text": "FindFileArgs"
-                  }
+                  },
+                  " | undefined"
                 ],
                 "path": "x-pack/plugins/files/server/file_client/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -3804,65 +3744,6 @@
           },
           {
             "parentPluginId": "files",
-            "id": "def-server.FileMetadataClient.list",
-            "type": "Function",
-            "tags": [],
-            "label": "list",
-            "description": [
-              "\nList all instances of metadata for a file kind.\n"
-            ],
-            "signature": [
-              "(arg?: ",
-              {
-                "pluginId": "files",
-                "scope": "server",
-                "docId": "kibFilesPluginApi",
-                "section": "def-server.ListArg",
-                "text": "ListArg"
-              },
-              " | undefined) => Promise<",
-              {
-                "pluginId": "files",
-                "scope": "server",
-                "docId": "kibFilesPluginApi",
-                "section": "def-server.FileDescriptor",
-                "text": "FileDescriptor"
-              },
-              "<unknown>[]>"
-            ],
-            "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "files",
-                "id": "def-server.FileMetadataClient.list.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "arg",
-                "description": [
-                  "- Arguments to list file metadata"
-                ],
-                "signature": [
-                  {
-                    "pluginId": "files",
-                    "scope": "server",
-                    "docId": "kibFilesPluginApi",
-                    "section": "def-server.ListArg",
-                    "text": "ListArg"
-                  },
-                  " | undefined"
-                ],
-                "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "files",
             "id": "def-server.FileMetadataClient.find",
             "type": "Function",
             "tags": [],
@@ -3871,7 +3752,7 @@
               "\nSearch for a set of file kind instances that match the filters.\n"
             ],
             "signature": [
-              "(arg: ",
+              "(arg?: ",
               {
                 "pluginId": "files",
                 "scope": "server",
@@ -3879,7 +3760,7 @@
                 "section": "def-server.FindFileArgs",
                 "text": "FindFileArgs"
               },
-              ") => Promise<",
+              " | undefined) => Promise<{ total: number; files: ",
               {
                 "pluginId": "files",
                 "scope": "server",
@@ -3887,7 +3768,7 @@
                 "section": "def-server.FileDescriptor",
                 "text": "FileDescriptor"
               },
-              "<unknown>[]>"
+              "<unknown>[]; }>"
             ],
             "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
             "deprecated": false,
@@ -3909,12 +3790,13 @@
                     "docId": "kibFilesPluginApi",
                     "section": "def-server.FindFileArgs",
                     "text": "FindFileArgs"
-                  }
+                  },
+                  " | undefined"
                 ],
                 "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -4317,7 +4199,7 @@
                 "section": "def-server.FindFileArgs",
                 "text": "FindFileArgs"
               },
-              ") => Promise<",
+              ") => Promise<{ files: ",
               {
                 "pluginId": "files",
                 "scope": "common",
@@ -4325,7 +4207,7 @@
                 "section": "def-common.FileJSON",
                 "text": "FileJSON"
               },
-              "<M>[]>"
+              "<M>[]; total: number; }>"
             ],
             "path": "x-pack/plugins/files/server/file_service/file_service.ts",
             "deprecated": false,
@@ -4347,64 +4229,6 @@
                     "docId": "kibFilesPluginApi",
                     "section": "def-server.FindFileArgs",
                     "text": "FindFileArgs"
-                  }
-                ],
-                "path": "x-pack/plugins/files/server/file_service/file_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-server.FileServiceStart.list",
-            "type": "Function",
-            "tags": [],
-            "label": "list",
-            "description": [
-              "\nList all files of specific file kind.\n"
-            ],
-            "signature": [
-              "<M>(args: ",
-              {
-                "pluginId": "files",
-                "scope": "server",
-                "docId": "kibFilesPluginApi",
-                "section": "def-server.ListFilesArgs",
-                "text": "ListFilesArgs"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "files",
-                "scope": "common",
-                "docId": "kibFilesPluginApi",
-                "section": "def-common.File",
-                "text": "File"
-              },
-              "<M>[]>"
-            ],
-            "path": "x-pack/plugins/files/server/file_service/file_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "files",
-                "id": "def-server.FileServiceStart.list.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "args",
-                "description": [
-                  "- list files args"
-                ],
-                "signature": [
-                  {
-                    "pluginId": "files",
-                    "scope": "server",
-                    "docId": "kibFilesPluginApi",
-                    "section": "def-server.ListFilesArgs",
-                    "text": "ListFilesArgs"
                   }
                 ],
                 "path": "x-pack/plugins/files/server/file_service/file_service.ts",
@@ -5159,53 +4983,6 @@
       },
       {
         "parentPluginId": "files",
-        "id": "def-server.ListArg",
-        "type": "Interface",
-        "tags": [],
-        "label": "ListArg",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "files",
-            "scope": "server",
-            "docId": "kibFilesPluginApi",
-            "section": "def-server.ListArg",
-            "text": "ListArg"
-          },
-          " extends ",
-          {
-            "pluginId": "files",
-            "scope": "common",
-            "docId": "kibFilesPluginApi",
-            "section": "def-common.Pagination",
-            "text": "Pagination"
-          }
-        ],
-        "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "files",
-            "id": "def-server.ListArg.fileKind",
-            "type": "string",
-            "tags": [],
-            "label": "fileKind",
-            "description": [
-              "\nThe file kind to scope this query to"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/files/server/file_client/file_metadata_client/file_metadata_client.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "files",
         "id": "def-server.ListArgs",
         "type": "Interface",
         "tags": [],
@@ -5247,52 +5024,6 @@
               "string | undefined"
             ],
             "path": "x-pack/plugins/files/server/file_share_service/internal_file_share_service.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "files",
-        "id": "def-server.ListFilesArgs",
-        "type": "Interface",
-        "tags": [],
-        "label": "ListFilesArgs",
-        "description": [
-          "\nArguments list files."
-        ],
-        "signature": [
-          {
-            "pluginId": "files",
-            "scope": "server",
-            "docId": "kibFilesPluginApi",
-            "section": "def-server.ListFilesArgs",
-            "text": "ListFilesArgs"
-          },
-          " extends ",
-          {
-            "pluginId": "files",
-            "scope": "common",
-            "docId": "kibFilesPluginApi",
-            "section": "def-common.Pagination",
-            "text": "Pagination"
-          }
-        ],
-        "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "files",
-            "id": "def-server.ListFilesArgs.fileKind",
-            "type": "string",
-            "tags": [],
-            "label": "fileKind",
-            "description": [
-              "\nFile kind, must correspond to a registered {@link FileKind}."
-            ],
-            "path": "x-pack/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
