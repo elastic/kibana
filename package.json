@@ -658,7 +658,7 @@
     "uuid": "3.3.2",
     "vega": "^5.22.1",
     "vega-interpreter": "^1.0.4",
-    "vega-lite": "^5.5.0",
+    "vega-lite": "^5.6.0",
     "vega-schema-url-parser": "^2.2.0",
     "vega-spec-injector": "^0.0.2",
     "vega-tooltip": "^0.28.0",
