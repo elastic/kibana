@@ -17,7 +17,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getScopedHistory } from '../../kibana_services';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDataView } from '../../hooks/use_data_view';
-import type { DiscoverMainStateParams } from '../../hooks/use_root_breadcrumb';
+import type { HistoryLocationState } from '../../build_services';
 
 export interface DocUrlParams {
   dataViewId: string;
@@ -33,7 +33,7 @@ export const SingleDocRoute = () => {
   const id = query.get('id');
 
   const locationState = useRef(getScopedHistory().location.state).current as
-    | DiscoverMainStateParams
+    | HistoryLocationState
     | undefined;
 
   useExecutionContext(core.executionContext, {
@@ -49,7 +49,6 @@ export const SingleDocRoute = () => {
 
   const { dataView, error } = useDataView({
     dataViewId: decodeURIComponent(dataViewId),
-    locationState,
   });
 
   if (error) {
@@ -94,7 +93,7 @@ export const SingleDocRoute = () => {
 
   return (
     <div className="app-container">
-      <Doc id={id} index={index} dataView={dataView} locationState={locationState} />
+      <Doc id={id} index={index} dataView={dataView} referrer={locationState?.referrer} />
     </div>
   );
 };

@@ -16,6 +16,7 @@ import { MemoryRouter } from 'react-router-dom';
 const mockServices = {
   singleDocLocator: { navigate: jest.fn() },
   contextLocator: { navigate: jest.fn() },
+  locator: { getUrl: jest.fn(() => 'mock-referrer') },
   filterManager: {
     getAppFilters: jest.fn(() => []),
     getGlobalFilters: jest.fn(() => []),
@@ -41,7 +42,7 @@ const dataViewMock = {
 } as unknown as DataView;
 
 describe('useNavigationProps', () => {
-  it('should call single doc callback with correct params', () => {
+  it('should call single doc callback with correct params', async () => {
     const { result } = renderHook(
       () =>
         useNavigationProps({
@@ -60,29 +61,19 @@ describe('useNavigationProps', () => {
     );
 
     const commonParams = {
-      index: {
-        fields: [],
-        id: '1',
-        title: 'test',
-      },
-      query: {
-        language: 'kuery',
-        query: 'response:200',
-      },
+      dataViewId: '1',
       rowId: 'mock-id',
-      savedSearchId: undefined,
-      columns: ['mock-column'],
-      timeRange: {
-        from: 'now-15m',
-        to: 'now',
-      },
-      filters: [],
+      referrer: 'mock-referrer',
     };
 
-    result.current.onOpenSurrDocs({ preventDefault: jest.fn() } as unknown as Event);
-    expect(mockServices.contextLocator.navigate.mock.calls[0][0]).toEqual(commonParams);
+    await result.current.onOpenSurrDocs({ preventDefault: jest.fn() } as unknown as Event);
+    expect(mockServices.contextLocator.navigate.mock.calls[0][0]).toEqual({
+      ...commonParams,
+      columns: ['mock-column'],
+      filters: [],
+    });
 
-    result.current.onOpenSingleDoc({ preventDefault: jest.fn() } as unknown as Event);
+    await result.current.onOpenSingleDoc({ preventDefault: jest.fn() } as unknown as Event);
     expect(mockServices.singleDocLocator.navigate.mock.calls[0][0]).toEqual({
       ...commonParams,
       rowIndex: 'mock-index',

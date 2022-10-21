@@ -11,19 +11,15 @@ import type { Filter } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { DiscoverMainStateParams } from '../../../hooks/use_root_breadcrumb';
-
+import type { HistoryLocationState } from '../../../build_services';
 export const DISCOVER_CONTEXT_APP_LOCATOR = 'DISCOVER_CONTEXT_APP_LOCATOR';
 
-export interface DiscoverContextAppLocatorParams
-  extends DiscoverMainStateParams,
-    SerializableRecord {
-  /**
-   * String id for saved dataViews and spec for adhoc data views
-   */
-  index: string | DataViewSpec;
+export interface DiscoverContextAppLocatorParams extends SerializableRecord {
+  dataViewId: string;
   rowId: string;
+  columns?: string[];
+  filters?: Filter[];
+  referrer: string; // discover main view url
 }
 
 export type DiscoverContextAppLocator = LocatorPublic<DiscoverContextAppLocatorParams>;
@@ -41,7 +37,7 @@ export class DiscoverContextAppLocatorDefinition
 
   public readonly getLocation = async (params: DiscoverContextAppLocatorParams) => {
     const useHash = this.deps.useHash;
-    const { index, rowId, columns, filters, timeRange, query, savedSearchId } = params;
+    const { dataViewId, rowId, columns, filters, referrer } = params;
 
     const appState: { filters?: Filter[]; columns?: string[] } = {};
     const queryState: GlobalQueryStateFromUrl = {};
@@ -52,21 +48,7 @@ export class DiscoverContextAppLocatorDefinition
 
     if (filters && filters.length) queryState.filters = filters?.filter((f) => isFilterPinned(f));
 
-    const state: DiscoverMainStateParams = {
-      index,
-      timeRange,
-      query,
-      filters,
-      columns,
-      savedSearchId,
-    };
-
-    let dataViewId;
-    if (typeof index === 'string') {
-      dataViewId = index;
-    } else {
-      dataViewId = index.id;
-    }
+    const state: HistoryLocationState = { referrer };
 
     let path = `#/context/${dataViewId}/${rowId}`;
     path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);

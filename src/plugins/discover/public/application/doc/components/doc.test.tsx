@@ -57,7 +57,7 @@ async function mountDoc(update = false) {
     id: '1',
     index: 'index1',
     dataView: dataViewMock,
-    locationState: { index: { id: '1', title: 'index1' } },
+    referrer: 'mock-referrer',
   } as DocProps;
   let comp!: ReactWrapper;
   const services = {

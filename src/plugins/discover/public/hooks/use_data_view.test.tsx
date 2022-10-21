@@ -10,8 +10,6 @@ import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
 import { useDataView } from './use_data_view';
-import { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { DiscoverMainStateParams } from './use_root_breadcrumb';
 
 const adhocDataView = {
   id: '2',
@@ -37,14 +35,8 @@ const mockServices = {
   },
 };
 
-const render = async ({
-  dataViewId,
-  locationState,
-}: {
-  dataViewId: string;
-  locationState?: DiscoverMainStateParams;
-}) => {
-  const hookResult = renderHook(() => useDataView({ dataViewId, locationState }), {
+const render = async ({ dataViewId }: { dataViewId: string }) => {
+  const hookResult = renderHook(() => useDataView({ dataViewId }), {
     wrapper: ({ children }) => (
       <KibanaContextProvider services={mockServices}>{children}</KibanaContextProvider>
     ),
@@ -56,7 +48,7 @@ const render = async ({
 
 describe('useDataView', () => {
   it('should load save data view', async () => {
-    const { result } = await render({ dataViewId: '1', locationState: { index: '1' } });
+    const { result } = await render({ dataViewId: '1' });
     expect(mockServices.dataViews.get).toHaveBeenCalledWith('1');
     expect(result.current.dataView).toEqual(dataViews[0]);
   });
@@ -66,30 +58,15 @@ describe('useDataView', () => {
       Promise.reject(new Error('can not load'))
     );
 
-    const { result } = await render({ dataViewId: '1', locationState: { index: '1' } });
+    const { result } = await render({ dataViewId: '1' });
     expect(result.current.error!.message).toEqual('can not load');
   });
 
   it('should get adhoc data view from cache', async () => {
-    const { result } = await render({
-      dataViewId: '2',
-      locationState: { index: adhocDataView as unknown as DataViewSpec },
-    });
+    const { result } = await render({ dataViewId: '2' });
 
     expect(mockServices.dataViews.get).toHaveBeenCalledWith(adhocDataView.id);
     expect(mockServices.dataViews.create).toBeCalledTimes(0);
-    expect(result.current.dataView).toEqual(adhocDataView);
-  });
-
-  it('should create new adhoc data view in cache', async () => {
-    mockServices.dataViews.get.mockImplementationOnce(() => Promise.resolve(undefined));
-    const { result } = await render({
-      dataViewId: '2',
-      locationState: { index: adhocDataView as unknown as DataViewSpec },
-    });
-
-    expect(mockServices.dataViews.get).toHaveBeenCalledWith(adhocDataView.id);
-    expect(mockServices.dataViews.create).toHaveBeenCalledWith(adhocDataView);
     expect(result.current.dataView).toEqual(adhocDataView);
   });
 });

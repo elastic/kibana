@@ -16,7 +16,7 @@ const setup = () => {
 };
 
 const stateParams = {
-  index: { id: dataViewId },
+  dataViewId,
   columns: ['mock-column'],
   filters: [
     {
@@ -44,10 +44,11 @@ describe('Discover single doc url generator', () => {
       rowId: 'mock-row-id',
       rowIndex: 'mock-row-index',
       ...stateParams,
+      referrer: 'mock-referrer',
     });
 
     expect(app).toBe('discover');
-    expect(state).toEqual(stateParams);
+    expect(state).toEqual({ referrer: 'mock-referrer' });
     expect(path).toMatchInlineSnapshot(
       `"#/doc/c367b774-a4c2-11ea-bb37-0242ac130002/mock-row-index?id=mock-row-id"`
     );

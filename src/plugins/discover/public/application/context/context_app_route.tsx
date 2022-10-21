@@ -13,7 +13,7 @@ import { ContextApp } from './context_app';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { getScopedHistory } from '../../kibana_services';
 import { useDataView } from '../../hooks/use_data_view';
-import type { DiscoverMainStateParams } from '../../hooks/use_root_breadcrumb';
+import type { HistoryLocationState } from '../../build_services';
 
 export interface ContextUrlParams {
   dataViewId: string;
@@ -22,14 +22,14 @@ export interface ContextUrlParams {
 
 export function ContextAppRoute() {
   const locationState = React.useRef(
-    getScopedHistory().location.state as DiscoverMainStateParams | undefined
+    getScopedHistory().location.state as HistoryLocationState | undefined
   ).current;
 
   const { dataViewId: encodedDataViewId, id } = useParams<ContextUrlParams>();
   const dataViewId = decodeURIComponent(encodedDataViewId);
   const anchorId = decodeURIComponent(id);
 
-  const { dataView, error } = useDataView({ dataViewId, locationState });
+  const { dataView, error } = useDataView({ dataViewId });
 
   if (error) {
     return (
@@ -57,5 +57,5 @@ export function ContextAppRoute() {
     return <LoadingIndicator />;
   }
 
-  return <ContextApp anchorId={anchorId} dataView={dataView} locationState={locationState} />;
+  return <ContextApp anchorId={anchorId} dataView={dataView} referrer={locationState?.referrer} />;
 }

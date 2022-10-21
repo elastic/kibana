@@ -8,17 +8,15 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import { DataViewSpec } from '@kbn/data-views-plugin/public';
-import type { DiscoverMainStateParams } from '../../hooks/use_root_breadcrumb';
+import type { HistoryLocationState } from '../../build_services';
 
 export const DISCOVER_SINGLE_DOC_LOCATOR = 'DISCOVER_SINGLE_DOC_LOCATOR';
 
-export interface DiscoverSingleDocLocatorParams
-  extends DiscoverMainStateParams,
-    SerializableRecord {
-  index: string | DataViewSpec;
+export interface DiscoverSingleDocLocatorParams extends SerializableRecord {
+  dataViewId: string;
   rowId: string;
   rowIndex: string;
+  referrer: string; // discover main view url
 }
 
 export type DiscoverSingleDocLocator = LocatorPublic<DiscoverSingleDocLocatorParams>;
@@ -31,23 +29,9 @@ export class DiscoverSingleDocLocatorDefinition
   constructor() {}
 
   public readonly getLocation = async (params: DiscoverSingleDocLocatorParams) => {
-    const { index, rowId, rowIndex, timeRange, query, savedSearchId, columns, filters } = params;
+    const { dataViewId, rowId, rowIndex, referrer } = params;
 
-    const state: DiscoverMainStateParams = {
-      index,
-      timeRange,
-      query,
-      filters,
-      columns,
-      savedSearchId,
-    };
-
-    let dataViewId;
-    if (typeof index === 'string') {
-      dataViewId = index;
-    } else {
-      dataViewId = index.id;
-    }
+    const state: HistoryLocationState = { referrer };
 
     const path = `#/doc/${dataViewId}/${rowIndex}?id=${rowId}`;
 

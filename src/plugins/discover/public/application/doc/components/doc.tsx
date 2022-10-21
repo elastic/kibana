@@ -18,10 +18,6 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { getRootBreadcrumbs } from '../../../utils/breadcrumbs';
-import {
-  type DiscoverMainStateParams,
-  useRootBreadcrumb,
-} from '../../../hooks/use_root_breadcrumb';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { ElasticRequestState } from '../types';
 import { useEsDocSearch } from '../../../hooks/use_es_doc_search';
@@ -45,9 +41,9 @@ export interface DocProps {
    */
   requestSource?: boolean;
   /**
-   * State to build discover main url
+   * Discover main view url
    */
-  locationState?: DiscoverMainStateParams;
+  referrer?: string;
 }
 
 export function Doc(props: DocProps) {
@@ -61,14 +57,12 @@ export function Doc(props: DocProps) {
     singleDocTitle.current?.focus();
   }, []);
 
-  const breadcrumb = useRootBreadcrumb({ dataViewId: dataView.id!, ...props.locationState });
-
   useEffect(() => {
     chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs(breadcrumb),
+      ...getRootBreadcrumbs(props.referrer),
       { text: `${props.index}#${props.id}` },
     ]);
-  }, [chrome, breadcrumb, props.index, props.id, dataView, locator]);
+  }, [chrome, props.referrer, props.index, props.id, dataView, locator]);
 
   return (
     <EuiPage>
