@@ -131,7 +131,7 @@ import { useSignalHelpers } from '../../../../common/containers/sourcerer/use_si
 import { HeaderPage } from '../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
 import type { NavTab } from '../../../../common/components/navigation/types';
-import { EditRuleSettingButtonLink } from '../../../../detections/pages/detection_engine/rules/details/components/edit_rule_settings_button_link';
+import { EditRuleSettingButtonLink } from './edit_rule_settings_button_link';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
