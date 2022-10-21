@@ -10,7 +10,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { METRICSET_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
 
-export async function getSearchAggregatedServiceMetrics({
+export async function getSearchServiceMetrics({
   serviceMetricsEnabled,
   start,
   end,
@@ -24,7 +24,7 @@ export async function getSearchAggregatedServiceMetrics({
   kuery: string;
 }): Promise<boolean> {
   if (serviceMetricsEnabled) {
-    return getHasAggregatedServicesMetrics({
+    return getHasServicesMetrics({
       start,
       end,
       apmEventClient,
@@ -35,7 +35,7 @@ export async function getSearchAggregatedServiceMetrics({
   return false;
 }
 
-export async function getHasAggregatedServicesMetrics({
+export async function getHasServicesMetrics({
   start,
   end,
   apmEventClient,

@@ -44,6 +44,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 
 import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
 import { calculateAuthz, calculatePackagePrivilegesFromCapabilities } from '../common/authz';
@@ -101,6 +102,7 @@ export interface FleetStartDeps {
   share: SharePluginStart;
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
+  guidedOnboarding: GuidedOnboardingPluginStart;
 }
 
 export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {
@@ -110,6 +112,7 @@ export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, '
   discover?: DiscoverStart;
   spaces?: SpacesPluginStart;
   authz: FleetAuthz;
+  guidedOnboarding: GuidedOnboardingPluginStart;
 }
 
 export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDeps, FleetStartDeps> {

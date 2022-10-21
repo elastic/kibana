@@ -25,8 +25,8 @@ export const searchConfig: GuideConfig = {
         'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
       ],
       location: {
-        appID: 'guidedOnboardingExample',
-        path: 'stepOne',
+        appID: 'enterpriseSearch',
+        path: '',
       },
     },
     {
@@ -40,6 +40,12 @@ export const searchConfig: GuideConfig = {
       location: {
         appID: 'guidedOnboardingExample',
         path: 'stepTwo',
+      },
+      manualCompletion: {
+        title: 'Manual completion step title',
+        description:
+          'Mark the step complete by opening the panel and clicking the button "Mark done"',
+        readyToCompleteOnNavigation: true,
       },
     },
     {

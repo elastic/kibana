@@ -2,27 +2,7 @@
   "id": "cloud",
   "client": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "cloud",
-        "id": "def-public.Chat",
-        "type": "Function",
-        "tags": [],
-        "label": "Chat",
-        "description": [
-          "\nA lazily-loaded component that will display a trigger that will allow the user to chat with a\nhuman operator when the service is enabled; otherwise, it renders nothing."
-        ],
-        "signature": [
-          "() => JSX.Element"
-        ],
-        "path": "x-pack/plugins/cloud/public/components/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "cloud",
@@ -132,22 +112,6 @@
             "path": "x-pack/plugins/cloud/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "cloud",
-            "id": "def-public.CloudConfigType.chat",
-            "type": "Object",
-            "tags": [],
-            "label": "chat",
-            "description": [
-              "Configuration to enable live chat in Cloud-enabled instances of Kibana."
-            ],
-            "signature": [
-              "{ enabled: boolean; chatURL: string; }"
-            ],
-            "path": "x-pack/plugins/cloud/public/plugin.tsx",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -209,6 +173,83 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.isCloudEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCloudEnabled",
+            "description": [
+              "\n`true` when Kibana is running on Elastic Cloud."
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.cloudId",
+            "type": "string",
+            "tags": [],
+            "label": "cloudId",
+            "description": [
+              "\nCloud ID. Undefined if not running on Cloud."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.deploymentUrl",
+            "type": "string",
+            "tags": [],
+            "label": "deploymentUrl",
+            "description": [
+              "\nThe full URL to the deployment management page on Elastic Cloud. Undefined if not running on Cloud."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.profileUrl",
+            "type": "string",
+            "tags": [],
+            "label": "profileUrl",
+            "description": [
+              "\nThe full URL to the user profile page on Elastic Cloud. Undefined if not running on Cloud."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "cloud",
+            "id": "def-public.CloudStart.organizationUrl",
+            "type": "string",
+            "tags": [],
+            "label": "organizationUrl",
+            "description": [
+              "\nThe full URL to the organization management page on Elastic Cloud. Undefined if not running on Cloud."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/cloud/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -336,6 +377,38 @@
           "path": "x-pack/plugins/cloud/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cloud",
+          "id": "def-public.CloudSetup.registerCloudService",
+          "type": "Function",
+          "tags": [],
+          "label": "registerCloudService",
+          "description": [],
+          "signature": [
+            "(contextProvider: React.FC<{}>) => void"
+          ],
+          "path": "x-pack/plugins/cloud/public/plugin.tsx",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "cloud",
+              "id": "def-public.CloudSetup.registerCloudService.$1",
+              "type": "Function",
+              "tags": [],
+              "label": "contextProvider",
+              "description": [],
+              "signature": [
+                "React.FC<{}>"
+              ],
+              "path": "x-pack/plugins/cloud/public/plugin.tsx",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",

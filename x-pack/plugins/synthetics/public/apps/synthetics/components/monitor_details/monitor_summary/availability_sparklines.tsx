@@ -31,7 +31,7 @@ export const AvailabilitySparklines = () => {
         attributes={[
           {
             seriesType: 'area',
-            time: { from: 'now-15m/m', to: 'now' },
+            time: { from: 'now-30d/d', to: 'now' },
             name: 'Monitor availability',
             dataType: 'synthetics',
             selectedMetricField: 'monitor_availability',

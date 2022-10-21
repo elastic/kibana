@@ -122,6 +122,17 @@ export function runLengthDecode(input: Buffer, outputSize?: number): number[] {
     }
   }
 
+  // Due to truncation of the frame types for stacktraces longer than 255,
+  // the expected output size and the actual decoded size can be different.
+  // Ordinarily, these two values should be the same.
+  //
+  // We have decided to fill in the remainder of the output array with zeroes
+  // as a reasonable default. Without this step, the output array would have
+  // undefined values.
+  for (let i = idx; i < size; i++) {
+    output[i] = 0;
+  }
+
   return output;
 }
 
@@ -272,34 +283,38 @@ export async function mgetStackTraces({
   const executableDocIDs = new Set<string>();
 
   const t0 = Date.now();
-  // flatMap() is significantly slower than an explicit for loop
-  for (const res of stackResponses) {
-    for (const trace of res.docs) {
-      if ('error' in trace) {
-        continue;
-      }
-      // Sometimes we don't find the trace.
-      // This is due to ES delays writing (data is not immediately seen after write).
-      // Also, ES doesn't know about transactions.
-      if (trace.found) {
-        const traceid = trace._id as StackTraceID;
-        let stackTrace = traceLRU.get(traceid) as StackTrace;
-        if (!stackTrace) {
-          stackTrace = decodeStackTrace(trace._source as EncodedStackTrace);
-          traceLRU.set(traceid, stackTrace);
-        }
 
-        totalFrames += stackTrace.FrameIDs.length;
-        stackTraces.set(traceid, stackTrace);
-        for (const frameID of stackTrace.FrameIDs) {
-          stackFrameDocIDs.add(frameID);
+  await withProfilingSpan('decode_stacktraces', async () => {
+    // flatMap() is significantly slower than an explicit for loop
+    for (const res of stackResponses) {
+      for (const trace of res.docs) {
+        if ('error' in trace) {
+          continue;
         }
-        for (const fileID of stackTrace.FileIDs) {
-          executableDocIDs.add(fileID);
+        // Sometimes we don't find the trace.
+        // This is due to ES delays writing (data is not immediately seen after write).
+        // Also, ES doesn't know about transactions.
+        if (trace.found) {
+          const traceid = trace._id as StackTraceID;
+          let stackTrace = traceLRU.get(traceid) as StackTrace;
+          if (!stackTrace) {
+            stackTrace = decodeStackTrace(trace._source as EncodedStackTrace);
+            traceLRU.set(traceid, stackTrace);
+          }
+
+          totalFrames += stackTrace.FrameIDs.length;
+          stackTraces.set(traceid, stackTrace);
+          for (const frameID of stackTrace.FrameIDs) {
+            stackFrameDocIDs.add(frameID);
+          }
+          for (const fileID of stackTrace.FileIDs) {
+            executableDocIDs.add(fileID);
+          }
         }
       }
     }
-  }
+  });
+
   logger.info(`processing data took ${Date.now() - t0} ms`);
 
   if (stackTraces.size !== 0) {

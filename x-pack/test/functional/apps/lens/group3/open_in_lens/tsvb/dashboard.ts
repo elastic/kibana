@@ -45,8 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.openContextMenu();
       await panelActions.clickEdit();
 
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
@@ -74,8 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.openContextMenu();
       await panelActions.clickEdit();
 
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('legacyMtrVis');
       await retry.try(async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');

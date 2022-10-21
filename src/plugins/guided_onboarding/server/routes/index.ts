@@ -8,6 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
+import { API_BASE_PATH } from '../../common/constants';
 import type { GuideState } from '../../common/types';
 import { guidedSetupSavedObjectsType } from '../saved_objects';
 
@@ -35,7 +36,7 @@ export function defineRoutes(router: IRouter) {
   // Fetch all guides state; optionally pass the query param ?active=true to only return the active guide
   router.get(
     {
-      path: '/api/guided_onboarding/state',
+      path: `${API_BASE_PATH}/state`,
       validate: {
         query: schema.object({
           active: schema.maybe(schema.boolean()),
@@ -69,7 +70,7 @@ export function defineRoutes(router: IRouter) {
   // will also check any existing active guides and update them to an "inactive" state
   router.put(
     {
-      path: '/api/guided_onboarding/state',
+      path: `${API_BASE_PATH}/state`,
       validate: {
         body: schema.object({
           status: schema.string(),

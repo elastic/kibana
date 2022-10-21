@@ -17,7 +17,9 @@ import { LayoutDirection } from '@elastic/charts';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
-import { LayerType } from '../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { LayerType } from '../../../common';
+import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import { getSuggestions } from './suggestions';
 import {
   Visualization,
@@ -26,13 +28,11 @@ import {
   AccessorConfig,
   Suggestion,
 } from '../../types';
-import { layerTypes } from '../../../common';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import { DimensionEditor } from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
-import { FormatSelectorOptions } from '../../indexpattern_datasource/dimension_panel/format_selector';
-import { IndexPatternLayer } from '../../indexpattern_datasource/types';
+import { FormatSelectorOptions } from '../../datasources/form_based/dimension_panel/format_selector';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -55,16 +55,6 @@ export interface MetricVisualizationState {
   color?: string;
   palette?: PaletteOutput<CustomPaletteParams>;
   maxCols?: number;
-}
-
-interface MetricDatasourceState {
-  [prop: string]: unknown;
-  layers: IndexPatternLayer[];
-}
-
-export interface MetricSuggestion extends Suggestion {
-  datasourceState: MetricDatasourceState;
-  visualizationState: MetricVisualizationState;
 }
 
 export const supportedDataTypes = new Set(['number']);
@@ -248,7 +238,7 @@ export const getMetricVisualization = ({
     return (
       state ?? {
         layerId: addNewLayer(),
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         palette: mainPalette,
       }
     );
@@ -402,7 +392,7 @@ export const getMetricVisualization = ({
   getSupportedLayers(state) {
     return [
       {
-        type: layerTypes.DATA,
+        type: LayerTypes.DATA,
         label: i18n.translate('xpack.lens.metric.addLayer', {
           defaultMessage: 'Visualization',
         }),
@@ -503,15 +493,17 @@ export const getMetricVisualization = ({
   },
 
   getSuggestionFromConvertToLensContext({ suggestions, context }) {
-    const allSuggestions = suggestions as MetricSuggestion[];
-    return {
+    const allSuggestions = suggestions as Array<
+      Suggestion<MetricVisualizationState, FormBasedPersistedState>
+    >;
+    const suggestion: Suggestion<MetricVisualizationState, FormBasedPersistedState> = {
       ...allSuggestions[0],
       datasourceState: {
         ...allSuggestions[0].datasourceState,
         layers: allSuggestions.reduce(
           (acc, s) => ({
             ...acc,
-            ...s.datasourceState.layers,
+            ...s.datasourceState?.layers,
           }),
           {}
         ),
@@ -521,5 +513,6 @@ export const getMetricVisualization = ({
         ...context.configuration,
       },
     };
+    return suggestion;
   },
 });

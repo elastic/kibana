@@ -61,6 +61,11 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
         await this.clickCreateFirstConnectorButton();
       }
     },
+    async tableFinishedLoading() {
+      await find.byCssSelector(
+        '.euiBasicTable[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)'
+      );
+    },
     async searchConnectors(searchText: string) {
       const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
       await searchBox.click();

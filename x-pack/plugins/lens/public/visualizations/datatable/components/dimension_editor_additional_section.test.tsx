@@ -14,7 +14,7 @@ import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TableDimensionEditorAdditionalSection } from './dimension_editor_addtional_section';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { layerTypes } from '../../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 
 describe('data table dimension editor additional section', () => {
   let frame: FramePublicAPI;
@@ -27,7 +27,7 @@ describe('data table dimension editor additional section', () => {
   function testState(): DatatableVisualizationState {
     return {
       layerId: 'first',
-      layerType: layerTypes.DATA,
+      layerType: LayerTypes.DATA,
       columns: [
         {
           columnId: 'foo',

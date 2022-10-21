@@ -493,7 +493,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   <div css={styles.editorContainer}>
                     {!isCompactFocused && (
                       <EuiBadge
-                        color="default"
+                        color={euiTheme.colors.lightShade}
                         css={styles.linesBadge}
                         data-test-subj="unifiedTextLangEditor-inline-lines-badge"
                       >
@@ -566,7 +566,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     data-test-subj="unifiedTextLangEditor-expand"
                     css={{
                       borderRadius: 0,
-                      backgroundColor: '#e9edf3',
+                      backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                       border: '1px solid rgb(17 43 134 / 10%) !important',
                     }}
                   />
@@ -602,7 +602,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         css={{
                           borderTopLeftRadius: 0,
                           borderBottomLeftRadius: 0,
-                          backgroundColor: '#e9edf3',
+                          backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                           border: '1px solid rgb(17 43 134 / 10%) !important',
                           borderLeft: 'transparent !important',
                         }}

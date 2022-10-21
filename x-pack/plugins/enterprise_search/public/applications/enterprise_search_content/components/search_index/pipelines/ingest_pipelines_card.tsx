@@ -35,7 +35,7 @@ import { IngestPipelineModal } from './ingest_pipeline_modal';
 import { PipelinesLogic } from './pipelines_logic';
 
 export const IngestPipelinesCard: React.FC = () => {
-  const { indexName } = useValues(IndexViewLogic);
+  const { indexName, ingestionMethod } = useValues(IndexViewLogic);
 
   const { canSetPipeline, index, pipelineName, pipelineState, showModal } =
     useValues(PipelinesLogic);
@@ -60,6 +60,7 @@ export const IngestPipelinesCard: React.FC = () => {
         createCustomPipelines={() => createCustomPipeline({ indexName })}
         displayOnly={!canSetPipeline}
         indexName={indexName}
+        ingestionMethod={ingestionMethod}
         isGated={isGated}
         isLoading={false}
         pipeline={{ ...pipelineState, name: pipelineName }}
@@ -72,6 +73,7 @@ export const IngestPipelinesCard: React.FC = () => {
           <EuiPanel color="primary">
             <CustomPipelinePanel
               indexName={indexName}
+              ingestionMethod={ingestionMethod}
               pipelineSuffix="custom"
               processorsCount={customPipeline.processors?.length ?? 0}
             />
@@ -85,11 +87,14 @@ export const IngestPipelinesCard: React.FC = () => {
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem>
                   <EuiTitle size="xs">
-                    <h4>{pipelineState.name}</h4>
+                    <h4>{pipelineName}</h4>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={openModal}>
+                  <EuiButtonEmpty
+                    data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-settings`}
+                    onClick={openModal}
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.indices.pipelines.ingestPipelinesCard.settings.label',
                       { defaultMessage: 'Settings' }
@@ -103,6 +108,7 @@ export const IngestPipelinesCard: React.FC = () => {
                 {isApiIndex(index) && (
                   <EuiFlexItem>
                     <EuiAccordion
+                      data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-viewCurlRequest`}
                       buttonContent={i18n.translate(
                         'xpack.enterpriseSearch.content.indices.pipelines.ingestPipelinesCard.accordion.label',
                         { defaultMessage: 'View sample cURL request' }

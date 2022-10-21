@@ -51,6 +51,9 @@ import {
   markDuplicates,
 } from './queries/get_simple_hierarchical_tree';
 
+// 10s ping frequency to keep the stream alive.
+const PING_FREQUENCY = 10000;
+
 // Overall progress is a float from 0 to 1.
 const LOADED_FIELD_CANDIDATES = 0.2;
 const PROGRESS_STEP_P_VALUES = 0.5;
@@ -77,12 +80,12 @@ export const defineExplainLogRateSpikesRoute = (
 
       let logMessageCounter = 1;
 
-      function logInfoMessage(msg: string) {
-        logger.info(`Explain Log Rate Spikes #${logMessageCounter}: ${msg}`);
+      function logDebugMessage(msg: string) {
+        logger.debug(`Explain Log Rate Spikes #${logMessageCounter}: ${msg}`);
         logMessageCounter++;
       }
 
-      logInfoMessage('Starting analysis.');
+      logDebugMessage('Starting analysis.');
 
       const groupingEnabled = !!request.body.grouping;
 
@@ -90,15 +93,16 @@ export const defineExplainLogRateSpikesRoute = (
 
       const controller = new AbortController();
 
+      let isRunning = false;
       let loaded = 0;
       let shouldStop = false;
       request.events.aborted$.subscribe(() => {
-        logInfoMessage('aborted$ subscription trigger.');
+        logDebugMessage('aborted$ subscription trigger.');
         shouldStop = true;
         controller.abort();
       });
       request.events.completed$.subscribe(() => {
-        logInfoMessage('completed$ subscription trigger.');
+        logDebugMessage('completed$ subscription trigger.');
         shouldStop = true;
         controller.abort();
       });
@@ -107,17 +111,26 @@ export const defineExplainLogRateSpikesRoute = (
         end: streamEnd,
         push,
         responseWithHeaders,
-      } = streamFactory<AiopsExplainLogRateSpikesApiAction>(request.headers, logger, true);
+      } = streamFactory<AiopsExplainLogRateSpikesApiAction>(
+        request.headers,
+        logger,
+        request.body.compressResponse,
+        request.body.flushFix
+      );
 
-      function pushPing() {
-        push(pingAction());
+      function pushPingWithTimeout() {
+        setTimeout(() => {
+          if (isRunning) {
+            logDebugMessage('Ping message.');
+            push(pingAction());
+            pushPingWithTimeout();
+          }
+        }, PING_FREQUENCY);
       }
 
-      const pingInterval = setInterval(pushPing, 1000);
-
       function end() {
-        logInfoMessage('Ending analysis.');
-        clearInterval(pingInterval);
+        isRunning = false;
+        logDebugMessage('Ending analysis.');
         streamEnd();
       }
 
@@ -139,15 +152,16 @@ export const defineExplainLogRateSpikesRoute = (
       }
 
       function pushError(m: string) {
-        logInfoMessage('Push error.');
+        logDebugMessage('Push error.');
         push(addErrorAction(m));
       }
 
-      // Async IIFE to run the analysis while not blocking returning `responseWithHeaders`.
-      (async () => {
-        logInfoMessage('Reset.');
+      async function runAnalysis() {
+        isRunning = true;
+        logDebugMessage('Reset.');
         push(resetAction());
-        logInfoMessage('Load field candidates.');
+        pushPingWithTimeout();
+        logDebugMessage('Load field candidates.');
         push(
           updateLoadingStateAction({
             ccsWarning: false,
@@ -204,11 +218,11 @@ export const defineExplainLogRateSpikesRoute = (
 
         const fieldCandidatesChunks = chunk(fieldCandidates, chunkSize);
 
-        logInfoMessage('Fetch p-values.');
+        logDebugMessage('Fetch p-values.');
 
         for (const fieldCandidatesChunk of fieldCandidatesChunks) {
           chunkCount++;
-          logInfoMessage(`Fetch p-values. Chunk ${chunkCount} of ${fieldCandidatesChunks.length}`);
+          logDebugMessage(`Fetch p-values. Chunk ${chunkCount} of ${fieldCandidatesChunks.length}`);
           let pValues: Awaited<ReturnType<typeof fetchChangePointPValues>>;
           try {
             pValues = await fetchChangePointPValues(
@@ -258,7 +272,7 @@ export const defineExplainLogRateSpikesRoute = (
           );
 
           if (shouldStop) {
-            logInfoMessage('shouldStop fetching p-values.');
+            logDebugMessage('shouldStop fetching p-values.');
 
             end();
             return;
@@ -266,7 +280,7 @@ export const defineExplainLogRateSpikesRoute = (
         }
 
         if (changePoints?.length === 0) {
-          logInfoMessage('Stopping analysis, did not find change points.');
+          logDebugMessage('Stopping analysis, did not find change points.');
           endWithUpdatedLoadingState();
           return;
         }
@@ -275,7 +289,7 @@ export const defineExplainLogRateSpikesRoute = (
           { fieldName: request.body.timeFieldName, type: KBN_FIELD_TYPES.DATE },
         ];
 
-        logInfoMessage('Fetch overall histogram.');
+        logDebugMessage('Fetch overall histogram.');
 
         let overallTimeSeries: NumericChartData | undefined;
         try {
@@ -313,7 +327,7 @@ export const defineExplainLogRateSpikesRoute = (
         }
 
         if (groupingEnabled) {
-          logInfoMessage('Group results.');
+          logDebugMessage('Group results.');
 
           push(
             updateLoadingStateAction({
@@ -498,7 +512,7 @@ export const defineExplainLogRateSpikesRoute = (
 
               pushHistogramDataLoadingState();
 
-              logInfoMessage('Fetch group histograms.');
+              logDebugMessage('Fetch group histograms.');
 
               await asyncForEach(changePointGroups, async (cpg) => {
                 if (overallTimeSeries !== undefined) {
@@ -577,7 +591,7 @@ export const defineExplainLogRateSpikesRoute = (
 
         loaded += PROGRESS_STEP_HISTOGRAMS_GROUPS;
 
-        logInfoMessage('Fetch field/value histograms.');
+        logDebugMessage('Fetch field/value histograms.');
 
         // time series filtered by fields
         if (changePoints && overallTimeSeries !== undefined) {
@@ -661,7 +675,10 @@ export const defineExplainLogRateSpikesRoute = (
         }
 
         endWithUpdatedLoadingState();
-      })();
+      }
+
+      // Do not call this using `await` so it will run asynchronously while we return the stream already.
+      runAnalysis();
 
       return response.ok(responseWithHeaders);
     }

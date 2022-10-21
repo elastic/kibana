@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { CasePostRequest, ConnectorTypeFields } from '../../../common/api';
+import type { CasePostRequest, ConnectorTypeFields } from '../../../common/api';
 import { isInvalidTag } from '../../../common/utils/validators';
 import { MAX_TITLE_LENGTH } from '../../../common/constants';
-import {
-  FIELD_TYPES,
-  fieldValidators,
-  FormSchema,
-  VALIDATION_TYPES,
-} from '../../common/shared_imports';
+import type { FormSchema } from '../../common/shared_imports';
+import { FIELD_TYPES, fieldValidators, VALIDATION_TYPES } from '../../common/shared_imports';
 import * as i18n from './translations';
 
 import { OptionalFieldLabel } from './optional_field_label';

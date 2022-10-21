@@ -25,6 +25,10 @@ Problems? If you're an Elastic Enterprise Search engineer, please reach out to @
 
 Don't forget to read Kibana's [contributing documentation](https://github.com/elastic/kibana/#building-and-running-kibana-andor-contributing-code) and developer guides for more general info on the Kibana ecosystem.
 
+### Server development
+
+Kibana runs both a frontend and a backend/middleware server. For server development guidelines, see [SERVER.md](SERVER.md).
+
 ### Kea
 
 Enterprise Search uses [Kea.js](https://github.com/keajs/kea) to manage our React/Redux state for us. Kea state is handled in our `*Logic` files and exposes [values](https://v2.keajs.org/docs/guide/concepts#values) and [actions](https://v2.keajs.org/docs/guide/concepts#actions) for our components to get and set state with.

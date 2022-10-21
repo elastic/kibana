@@ -122,7 +122,7 @@ const RuleActionsFormComponent = ({ rulesCount, onClose, onConfirm }: RuleAction
   const throttleFieldComponentProps = useMemo(
     () => ({
       idAria: 'bulkEditRulesRuleActionThrottle',
-      dataTestSubj: 'bulkEditRulesRuleActionThrottle',
+      'data-test-subj': 'bulkEditRulesRuleActionThrottle',
       hasNoInitialSelection: false,
       euiFieldProps: {
         options: THROTTLE_OPTIONS_FOR_BULK_RULE_ACTIONS,

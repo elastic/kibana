@@ -110,7 +110,7 @@ declare global {
   }
 }
 
-export type XYChartRenderProps = XYChartProps & {
+export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   chartsThemeService: ChartsPluginSetup['theme'];
   chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   data: DataPublicPluginStart;

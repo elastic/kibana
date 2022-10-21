@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { sortBy } from 'lodash';
-import { CurrentUserProfile } from '../types';
+import type { CurrentUserProfile } from '../types';
 
 export const getSortField = (profile: UserProfileWithAvatar) =>
   profile.user.full_name?.toLowerCase() ??

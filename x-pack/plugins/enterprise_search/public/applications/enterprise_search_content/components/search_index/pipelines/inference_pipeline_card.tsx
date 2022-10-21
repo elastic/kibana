@@ -20,6 +20,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
+  EuiTextColor,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
@@ -30,7 +31,10 @@ import { InferencePipeline, TrainedModelState } from '../../../../../../common/t
 import { CANCEL_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
 import { HttpLogic } from '../../../../shared/http';
 import { ML_MANAGE_TRAINED_MODELS_PATH } from '../../../routes';
+import { getMLType, getModelDisplayTitle } from '../../shared/ml_inference/utils';
 import { IndexNameLogic } from '../index_name_logic';
+
+import { IndexViewLogic } from '../index_view_logic';
 
 import { TrainedModelHealth } from './ml_model_health';
 import { PipelinesLogic } from './pipelines_logic';
@@ -38,6 +42,7 @@ import { PipelinesLogic } from './pipelines_logic';
 export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => {
   const { http } = useValues(HttpLogic);
   const { indexName } = useValues(IndexNameLogic);
+  const { ingestionMethod } = useValues(IndexViewLogic);
   const [isPopOverOpen, setIsPopOverOpen] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const { deleteMlPipeline } = useActions(PipelinesLogic);
@@ -45,8 +50,9 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
     setShowConfirmDelete(true);
     setIsPopOverOpen(false);
   };
-  const { pipelineName, types } = pipeline;
-
+  const { pipelineName, types: modelTypes } = pipeline;
+  const modelType = getMLType(modelTypes);
+  const modelTitle = getModelDisplayTitle(modelType);
   const actionButton = (
     <EuiButtonEmpty
       iconSide="right"
@@ -67,7 +73,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
               <EuiTitle size="xs">
-                <h4>{pipelineName}</h4>
+                <h4>{modelTitle ?? pipelineName}</h4>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -85,6 +91,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                   <EuiFlexItem>
                     <div>
                       <EuiButtonEmpty
+                        data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-stackManagement`}
                         size="s"
                         flush="both"
                         iconType="eye"
@@ -103,6 +110,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                   <EuiFlexItem>
                     <div>
                       <EuiButtonEmpty
+                        data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-deletePipeline`}
                         size="s"
                         flush="both"
                         iconType="trash"
@@ -125,6 +133,11 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
+                {modelTitle && (
+                  <EuiFlexItem>
+                    <EuiTextColor color="subdued">{pipelineName}</EuiTextColor>
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <TrainedModelHealth {...pipeline} />
                 </EuiFlexItem>
@@ -138,6 +151,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                       )}
                     >
                       <EuiButtonIcon
+                        data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-fixIssueInTrainedModels`}
                         href={http.basePath.prepend(ML_MANAGE_TRAINED_MODELS_PATH)}
                         display="base"
                         size="xs"
@@ -146,7 +160,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                     </EuiToolTip>
                   </EuiFlexItem>
                 )}
-                {types.map((type) => (
+                {(modelType.length > 0 ? [modelType] : modelTypes).map((type) => (
                   <EuiFlexItem grow={false} key={type}>
                     <EuiFlexGroup gutterSize="xs">
                       <EuiFlexItem>

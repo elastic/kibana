@@ -2550,10 +2550,6 @@
               "path": "src/plugins/data/server/search/session/session_service.ts"
             },
             {
-              "plugin": "cloud",
-              "path": "x-pack/plugins/cloud/server/routes/chat.ts"
-            },
-            {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/server/routes/annotations.ts"
             },
@@ -2588,6 +2584,10 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/preview_rules_route.ts"
+            },
+            {
+              "plugin": "cloudChat",
+              "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/routes/chat.ts"
             },
             {
               "plugin": "securitySolution",
@@ -2720,24 +2720,6 @@
           "path": "x-pack/plugins/security/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
-        },
-        {
-          "parentPluginId": "security",
-          "id": "def-server.SecurityPluginSetup.setIsElasticCloudDeployment",
-          "type": "Function",
-          "tags": [],
-          "label": "setIsElasticCloudDeployment",
-          "description": [
-            "\nSets the flag to indicate that Kibana is running inside an Elastic Cloud deployment. This flag is supposed to be\nset by the Cloud plugin and can be only once."
-          ],
-          "signature": [
-            "() => void"
-          ],
-          "path": "x-pack/plugins/security/server/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [],
-          "returnComment": []
         }
       ],
       "lifecycle": "setup",

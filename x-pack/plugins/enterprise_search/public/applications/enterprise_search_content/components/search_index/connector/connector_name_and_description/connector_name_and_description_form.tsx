@@ -76,12 +76,17 @@ export const ConnectorNameAndDescriptionForm: React.FC = () => {
       <EuiFormRow>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton type="submit" isLoading={status === Status.LOADING}>
+            <EuiButton
+              data-telemetry-id="entSearchContent-connector-configuration-nameAndDescription-save"
+              type="submit"
+              isLoading={status === Status.LOADING}
+            >
               {SAVE_BUTTON_LABEL}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-telemetry-id="entSearchContent-connector-configuration-nameAndDescription-cancel"
               isDisabled={status === Status.LOADING}
               onClick={() => {
                 setIsEditing(false);

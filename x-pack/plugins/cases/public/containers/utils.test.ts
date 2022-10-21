@@ -11,7 +11,7 @@ import {
   createUpdateSuccessToaster,
 } from './utils';
 
-import { Case } from './types';
+import type { Case } from './types';
 
 const caseBeforeUpdate = {
   comments: [

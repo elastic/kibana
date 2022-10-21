@@ -7365,6 +7365,105 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.getStopsWithColorsFromRanges",
+        "type": "Function",
+        "tags": [],
+        "label": "getStopsWithColorsFromRanges",
+        "description": [],
+        "signature": [
+          "(ranges: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Range",
+            "text": "Range"
+          },
+          "[], colorSchema: ",
+          {
+            "pluginId": "charts",
+            "scope": "common",
+            "docId": "kibChartsPluginApi",
+            "section": "def-common.ColorSchemas",
+            "text": "ColorSchemas"
+          },
+          ", invertColors?: boolean) => ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.PaletteConfig",
+            "text": "PaletteConfig"
+          }
+        ],
+        "path": "src/plugins/visualizations/common/utils/palette.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.getStopsWithColorsFromRanges.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "ranges",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Range",
+                "text": "Range"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/visualizations/common/utils/palette.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.getStopsWithColorsFromRanges.$2",
+            "type": "Enum",
+            "tags": [],
+            "label": "colorSchema",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "charts",
+                "scope": "common",
+                "docId": "kibChartsPluginApi",
+                "section": "def-common.ColorSchemas",
+                "text": "ColorSchemas"
+              }
+            ],
+            "path": "src/plugins/visualizations/common/utils/palette.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.getStopsWithColorsFromRanges.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "invertColors",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/plugins/visualizations/common/utils/palette.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.isAnnotationsLayer",
         "type": "Function",
         "tags": [],
@@ -8233,6 +8332,59 @@
               "Params"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/columns.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.BasicFullPercentageModeConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "BasicFullPercentageModeConfig",
+        "description": [],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.BasicFullPercentageModeConfig.isPercentageMode",
+            "type": "boolean",
+            "tags": [],
+            "label": "isPercentageMode",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.BasicPercentageModeConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "BasicPercentageModeConfig",
+        "description": [],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.BasicPercentageModeConfig.isPercentageMode",
+            "type": "boolean",
+            "tags": [],
+            "label": "isPercentageMode",
+            "description": [],
+            "signature": [
+              "false"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9483,6 +9635,42 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.MinMax",
+        "type": "Interface",
+        "tags": [],
+        "label": "MinMax",
+        "description": [],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.MinMax.min",
+            "type": "number",
+            "tags": [],
+            "label": "min",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.MinMax.max",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.MovingAverageParams",
         "type": "Interface",
         "tags": [],
@@ -9659,6 +9847,48 @@
             "label": "enabled",
             "description": [],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.PaletteConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "PaletteConfig",
+        "description": [],
+        "path": "src/plugins/visualizations/common/utils/palette.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PaletteConfig.color",
+            "type": "Array",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "(string | undefined)[]"
+            ],
+            "path": "src/plugins/visualizations/common/utils/palette.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PaletteConfig.stop",
+            "type": "Array",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "number[]"
+            ],
+            "path": "src/plugins/visualizations/common/utils/palette.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -12833,6 +13063,96 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.GaugeCentralMajorMode",
+        "type": "Type",
+        "tags": [],
+        "label": "GaugeCentralMajorMode",
+        "description": [],
+        "signature": [
+          "\"none\" | \"auto\" | \"custom\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeColorMode",
+        "type": "Type",
+        "tags": [],
+        "label": "GaugeColorMode",
+        "description": [],
+        "signature": [
+          "\"none\" | \"palette\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeLabelMajorMode",
+        "type": "Type",
+        "tags": [],
+        "label": "GaugeLabelMajorMode",
+        "description": [],
+        "signature": [
+          "\"none\" | \"auto\" | \"custom\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeShape",
+        "type": "Type",
+        "tags": [],
+        "label": "GaugeShape",
+        "description": [],
+        "signature": [
+          "\"horizontalBullet\" | \"verticalBullet\" | \"arc\" | \"circle\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeTicksPosition",
+        "type": "Type",
+        "tags": [],
+        "label": "GaugeTicksPosition",
+        "description": [],
+        "signature": [
+          "\"auto\" | \"hidden\" | \"bands\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeVisConfiguration",
+        "type": "Type",
+        "tags": [],
+        "label": "GaugeVisConfiguration",
+        "description": [],
+        "signature": [
+          "GaugeState & { layerId: string; layerType: \"data\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.GenericColumnWithMeta",
         "type": "Type",
         "tags": [],
@@ -12900,6 +13220,21 @@
         "description": [],
         "signature": [
           "\"default\" | \"hide\" | \"show\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.LENS_GAUGE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LENS_GAUGE_ID",
+        "description": [],
+        "signature": [
+          "\"lnsGauge\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
@@ -13160,6 +13495,64 @@
           "\"pie\" | \"donut\" | \"treemap\" | \"mosaic\" | \"waffle\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.PercentageModeConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "PercentageModeConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.BasicPercentageModeConfig",
+            "text": "BasicPercentageModeConfig"
+          },
+          " | ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.PercentageModeConfigWithMinMax",
+            "text": "PercentageModeConfigWithMinMax"
+          }
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.PercentageModeConfigWithMinMax",
+        "type": "Type",
+        "tags": [],
+        "label": "PercentageModeConfigWithMinMax",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.BasicFullPercentageModeConfig",
+            "text": "BasicFullPercentageModeConfig"
+          },
+          " & ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.MinMax",
+            "text": "MinMax"
+          }
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13640,6 +14033,96 @@
           "{ readonly NONE: \"none\"; readonly ABOVE: \"above\"; readonly BELOW: \"below\"; }"
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeCentralMajorModes",
+        "type": "Object",
+        "tags": [],
+        "label": "GaugeCentralMajorModes",
+        "description": [],
+        "signature": [
+          "{ readonly AUTO: \"auto\"; readonly CUSTOM: \"custom\"; readonly NONE: \"none\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeColorModes",
+        "type": "Object",
+        "tags": [],
+        "label": "GaugeColorModes",
+        "description": [],
+        "signature": [
+          "{ readonly PALETTE: \"palette\"; readonly NONE: \"none\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeLabelMajorModes",
+        "type": "Object",
+        "tags": [],
+        "label": "GaugeLabelMajorModes",
+        "description": [],
+        "signature": [
+          "{ readonly AUTO: \"auto\"; readonly CUSTOM: \"custom\"; readonly NONE: \"none\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeShapes",
+        "type": "Object",
+        "tags": [],
+        "label": "GaugeShapes",
+        "description": [],
+        "signature": [
+          "{ readonly HORIZONTAL_BULLET: \"horizontalBullet\"; readonly VERTICAL_BULLET: \"verticalBullet\"; readonly ARC: \"arc\"; readonly CIRCLE: \"circle\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeTicksPositions",
+        "type": "Object",
+        "tags": [],
+        "label": "GaugeTicksPositions",
+        "description": [],
+        "signature": [
+          "{ readonly HIDDEN: \"hidden\"; readonly AUTO: \"auto\"; readonly BANDS: \"bands\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GROUP_ID",
+        "type": "Object",
+        "tags": [],
+        "label": "GROUP_ID",
+        "description": [],
+        "signature": [
+          "{ readonly METRIC: \"metric\"; readonly MIN: \"min\"; readonly MAX: \"max\"; readonly GOAL: \"goal\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

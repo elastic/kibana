@@ -23,6 +23,7 @@ import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
+  ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   comment,
@@ -30,7 +31,10 @@ import {
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
+import type {
+  ExceptionsBuilderExceptionItem,
+  ExceptionsBuilderReturnExceptionItem,
+} from '@kbn/securitysolution-list-utils';
 import {
   getOperatorType,
   getNewExceptionItem,
@@ -169,10 +173,10 @@ export const prepareExceptionItemsForBulkClose = (
  * @param comments new Comment
  */
 export const enrichNewExceptionItemsWithComments = (
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[],
   comments: Array<Comment | CreateComment>
-): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
-  return exceptionItems.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
+): ExceptionsBuilderReturnExceptionItem[] => {
+  return exceptionItems.map((item: ExceptionsBuilderReturnExceptionItem) => {
     return {
       ...item,
       comments,
@@ -197,9 +201,9 @@ export const buildGetAlertByIdQuery = (id: string | undefined) => ({
  * and new comments
  */
 export const enrichExistingExceptionItemWithComments = (
-  exceptionItem: ExceptionListItemSchema | CreateExceptionListItemSchema,
+  exceptionItem: ExceptionsBuilderReturnExceptionItem,
   comments: Array<Comment | CreateComment>
-): ExceptionListItemSchema | CreateExceptionListItemSchema => {
+): ExceptionsBuilderReturnExceptionItem => {
   const formattedComments = comments.map((item) => {
     if (comment.is(item)) {
       const { id, comment: existingComment } = item;
@@ -226,10 +230,10 @@ export const enrichExistingExceptionItemWithComments = (
  * @param osTypes array of os values
  */
 export const enrichExceptionItemsWithOS = (
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[],
   osTypes: OsTypeArray
-): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
-  return exceptionItems.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
+): ExceptionsBuilderReturnExceptionItem[] => {
+  return exceptionItems.map((item: ExceptionsBuilderReturnExceptionItem) => {
     return {
       ...item,
       os_types: osTypes,
@@ -255,8 +259,8 @@ export const retrieveAlertOsTypes = (alertData?: AlertData): OsTypeArray => {
  * Returns given exceptionItems with all hash-related entries lowercased
  */
 export const lowercaseHashValues = (
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
-): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[]
+): ExceptionsBuilderReturnExceptionItem[] => {
   return exceptionItems.map((item) => {
     const newEntries = item.entries.map((itemEntry) => {
       if (itemEntry.field.includes('.hash')) {
@@ -281,9 +285,7 @@ export const lowercaseHashValues = (
   });
 };
 
-export const entryHasListType = (
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
-) => {
+export const entryHasListType = (exceptionItems: ExceptionsBuilderReturnExceptionItem[]) => {
   for (const { entries } of exceptionItems) {
     for (const exceptionEntry of entries ?? []) {
       if (getOperatorType(exceptionEntry) === OperatorTypeEnum.LIST) {
@@ -755,7 +757,7 @@ export const getPrepopulatedBehaviorException = ({
  * Determines whether or not any entries within the given exceptionItems contain values not in the specified ECS mapping
  */
 export const entryHasNonEcsType = (
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[],
   indexPatterns: DataViewBase
 ): boolean => {
   const doesFieldNameExist = (exceptionEntry: Entry): boolean => {
@@ -841,4 +843,58 @@ export const defaultEndpointExceptionItems = (
         })
       );
   }
+};
+
+/**
+ * Adds user defined name to all new exceptionItems
+ * @param exceptionItems new or existing ExceptionItem[]
+ * @param name new exception item name
+ */
+export const enrichNewExceptionItemsWithName = (
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[],
+  name: string
+): ExceptionsBuilderReturnExceptionItem[] => {
+  return exceptionItems.map((item: ExceptionsBuilderReturnExceptionItem) => {
+    return {
+      ...item,
+      name,
+    };
+  });
+};
+
+/**
+ * Modifies exception items to prepare for creating as rule_default
+ * list items
+ * @param exceptionItems new or existing ExceptionItem[]
+ */
+export const enrichRuleExceptions = (
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[]
+): ExceptionsBuilderReturnExceptionItem[] => {
+  return exceptionItems.map((item: ExceptionsBuilderReturnExceptionItem) => {
+    return {
+      ...item,
+      list_id: undefined,
+      namespace_type: 'single',
+    };
+  });
+};
+
+/**
+ * Prepares items to be added to shared exception lists
+ * @param exceptionItems new or existing ExceptionItem[]
+ * @param lists shared exception lists that were selected to add items to
+ */
+export const enrichSharedExceptions = (
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[],
+  lists: ExceptionListSchema[]
+): ExceptionsBuilderReturnExceptionItem[] => {
+  return lists.flatMap((list) => {
+    return exceptionItems.map((item) => {
+      return {
+        ...item,
+        list_id: list.list_id,
+        namespace_type: list.namespace_type,
+      };
+    });
+  });
 };

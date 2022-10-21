@@ -8,9 +8,9 @@
 import React from 'react';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { AnnotationsPanel } from '.';
 import { FramePublicAPI } from '../../../../types';
-import { layerTypes } from '../../../..';
 import { createMockFramePublicAPI } from '../../../../mocks';
 import { State } from '../../types';
 import { Position } from '@elastic/charts';
@@ -18,7 +18,7 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import moment from 'moment';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { createMockDataViewsState } from '../../../../data_views_service/mocks';
-import { createMockedIndexPattern } from '../../../../indexpattern_datasource/mocks';
+import { createMockedIndexPattern } from '../../../../datasources/form_based/mocks';
 import { act } from 'react-dom/test-utils';
 import { EuiButtonGroup } from '@elastic/eui';
 
@@ -59,7 +59,7 @@ describe('AnnotationsPanel', () => {
       preferredSeriesType: 'bar',
       layers: [
         {
-          layerType: layerTypes.ANNOTATIONS,
+          layerType: LayerTypes.ANNOTATIONS,
           layerId: 'annotation',
           indexPatternId: 'indexPattern1',
           annotations: [customLineStaticAnnotation],

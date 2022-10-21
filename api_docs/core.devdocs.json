@@ -521,6 +521,10 @@
                 "path": "src/plugins/dashboard/public/services/analytics/analytics_service.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/fleet_usage_sender.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
               },
@@ -907,8 +911,8 @@
                 "path": "x-pack/plugins/cloud/common/register_cloud_deployment_id_analytics_context.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.tsx"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.ts"
               },
               {
                 "plugin": "telemetry",
@@ -979,44 +983,52 @@
                 "path": "packages/core/status/core-status-server-internal/src/status_service.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/analytics_service.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/analytics_service.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -10931,14 +10943,6 @@
             "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/risk_score/containers/onboarding/api/saved_objects.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/risk_score/containers/onboarding/api/saved_objects.ts"
-          },
-          {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
           },
@@ -11089,18 +11093,6 @@
           {
             "plugin": "alerting",
             "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations.ts"
           },
           {
             "plugin": "alerting",
@@ -11281,6 +11273,22 @@
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/common/types/modules.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
           },
           {
             "plugin": "dashboard",
@@ -14791,6 +14799,14 @@
             "path": "x-pack/plugins/security_solution/public/app/app.tsx"
           },
           {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/hooks/timeline/use_timeline_save_prompt.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/hooks/timeline/use_timeline_save_prompt.ts"
+          },
+          {
             "plugin": "@kbn/core-application-browser-internal",
             "path": "packages/core/application/core-application-browser-internal/src/ui/app_container.tsx"
           },
@@ -15374,7 +15390,11 @@
           "SavedObjectsFindOptionsReference",
           " | ",
           "SavedObjectsFindOptionsReference",
-          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; preference?: string | undefined; }"
+          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+          "SavedObjectsFindOptionsReference",
+          " | ",
+          "SavedObjectsFindOptionsReference",
+          "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; preference?: string | undefined; }"
         ],
         "path": "node_modules/@types/kbn__core-saved-objects-api-browser/index.d.ts",
         "deprecated": false,
@@ -19272,6 +19292,10 @@
                 "path": "src/plugins/dashboard/public/services/analytics/analytics_service.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/fleet_usage_sender.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/plugins/osquery/server/lib/telemetry/sender.ts"
               },
@@ -19658,8 +19682,8 @@
                 "path": "x-pack/plugins/cloud/common/register_cloud_deployment_id_analytics_context.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.tsx"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.ts"
               },
               {
                 "plugin": "telemetry",
@@ -19730,44 +19754,52 @@
                 "path": "packages/core/status/core-status-server-internal/src/status_service.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/analytics_service.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/analytics_service.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
-                "plugin": "cloud",
-                "path": "x-pack/plugins/cloud/public/plugin.test.ts"
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/public/analytics/register_user_context.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",
@@ -21813,13 +21845,7 @@
               "<",
               "RequestHandlerContext",
               "> & { resources: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.HttpResources",
-                "text": "HttpResources"
-              },
+              "HttpResources",
               "; }"
             ],
             "path": "src/core/server/index.ts",
@@ -24616,6 +24642,31 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.maxIdleSockets",
+            "type": "number",
+            "tags": [],
+            "label": "maxIdleSockets",
+            "description": [],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.ElasticsearchClientConfig.idleSocketTimeout",
+            "type": "Object",
+            "tags": [],
+            "label": "idleSocketTimeout",
+            "description": [],
+            "signature": [
+              "moment.Duration"
+            ],
+            "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.ElasticsearchClientConfig.compression",
             "type": "boolean",
             "tags": [],
@@ -25938,7 +25989,10 @@
         "description": [
           "\nHttpResources service is responsible for serving static & dynamic assets for Kibana application via HTTP.\nProvides API allowing plug-ins to respond with:\n- a pre-configured HTML page bootstrapping Kibana client app\n- custom HTML page\n- custom JS script file."
         ],
-        "path": "src/core/server/http_resources/types.ts",
+        "signature": [
+          "HttpResources"
+        ],
+        "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -25959,16 +26013,10 @@
               ">(route: ",
               "RouteConfig",
               "<P, Q, B, \"get\">, handler: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.HttpResourcesRequestHandler",
-                "text": "HttpResourcesRequestHandler"
-              },
+              "HttpResourcesRequestHandler",
               "<P, Q, B, Context>) => void"
             ],
-            "path": "src/core/server/http_resources/types.ts",
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -25983,7 +26031,7 @@
                   "RouteConfig",
                   "<P, Q, B, \"get\">"
                 ],
-                "path": "src/core/server/http_resources/types.ts",
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -25996,16 +26044,10 @@
                 "label": "handler",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.HttpResourcesRequestHandler",
-                    "text": "HttpResourcesRequestHandler"
-                  },
+                  "HttpResourcesRequestHandler",
                   "<P, Q, B, Context>"
                 ],
-                "path": "src/core/server/http_resources/types.ts",
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -26025,7 +26067,10 @@
         "description": [
           "\nAllows to configure HTTP response parameters"
         ],
-        "path": "src/core/server/http_resources/types.ts",
+        "signature": [
+          "HttpResourcesRenderOptions"
+        ],
+        "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -26042,7 +26087,7 @@
               "ResponseHeaders",
               " | undefined"
             ],
-            "path": "src/core/server/http_resources/types.ts",
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -26058,7 +26103,10 @@
         "description": [
           "\nExtended set of {@link KibanaResponseFactory} helpers used to respond with HTML or JS resource."
         ],
-        "path": "src/core/server/http_resources/types.ts",
+        "signature": [
+          "HttpResourcesServiceToolkit"
+        ],
+        "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -26073,18 +26121,12 @@
             ],
             "signature": [
               "(options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.HttpResourcesRenderOptions",
-                "text": "HttpResourcesRenderOptions"
-              },
+              "HttpResourcesRenderOptions",
               " | undefined) => Promise<",
               "IKibanaResponse",
               "<any>>"
             ],
-            "path": "src/core/server/http_resources/types.ts",
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -26096,16 +26138,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.HttpResourcesRenderOptions",
-                    "text": "HttpResourcesRenderOptions"
-                  },
+                  "HttpResourcesRenderOptions",
                   " | undefined"
                 ],
-                "path": "src/core/server/http_resources/types.ts",
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -26124,18 +26160,12 @@
             ],
             "signature": [
               "(options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.HttpResourcesRenderOptions",
-                "text": "HttpResourcesRenderOptions"
-              },
+              "HttpResourcesRenderOptions",
               " | undefined) => Promise<",
               "IKibanaResponse",
               "<any>>"
             ],
-            "path": "src/core/server/http_resources/types.ts",
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -26147,16 +26177,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.HttpResourcesRenderOptions",
-                    "text": "HttpResourcesRenderOptions"
-                  },
+                  "HttpResourcesRenderOptions",
                   " | undefined"
                 ],
-                "path": "src/core/server/http_resources/types.ts",
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -26180,7 +26204,7 @@
               "IKibanaResponse",
               "<any>"
             ],
-            "path": "src/core/server/http_resources/types.ts",
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -26194,7 +26218,7 @@
                 "signature": [
                   "HttpResponseOptions"
                 ],
-                "path": "src/core/server/http_resources/types.ts",
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -26218,7 +26242,7 @@
               "IKibanaResponse",
               "<any>"
             ],
-            "path": "src/core/server/http_resources/types.ts",
+            "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -26232,7 +26256,7 @@
                 "signature": [
                   "HttpResponseOptions"
                 ],
-                "path": "src/core/server/http_resources/types.ts",
+                "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -27392,7 +27416,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "UpdateResponse",
-              "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocumentR>>; }; asyncSearch: ",
+              "default",
+              "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -27401,8 +27427,6 @@
               ") => ",
               "default",
               "; Internal: ",
-              "default",
-              "; asyncSearch: ",
               "default",
               "; autoscaling: ",
               "default",
@@ -32565,7 +32589,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "UpdateResponse",
-              "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocumentR>>; }; asyncSearch: ",
+              "default",
+              "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -32574,8 +32600,6 @@
               ") => ",
               "default",
               "; Internal: ",
-              "default",
-              "; asyncSearch: ",
               "default",
               "; autoscaling: ",
               "default",
@@ -33769,7 +33793,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "UpdateResponse",
-              "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocumentR>>; }; asyncSearch: ",
+              "default",
+              "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -33778,8 +33804,6 @@
               ") => ",
               "default",
               "; Internal: ",
-              "default",
-              "; asyncSearch: ",
               "default",
               "; autoscaling: ",
               "default",
@@ -36876,6 +36900,22 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.OpsMetrics.elasticsearch_client",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearch_client",
+            "description": [
+              "\nMetrics related to the elasticsearch client"
+            ],
+            "signature": [
+              "ElasticsearchClientsMetrics"
+            ],
+            "path": "node_modules/@types/kbn__core-metrics-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.OpsMetrics.process",
             "type": "Object",
             "tags": [
@@ -38307,7 +38347,9 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "UpdateResponse",
-              "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocumentR>>; }; asyncSearch: ",
+              "default",
+              "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -38316,8 +38358,6 @@
               ") => ",
               "default",
               "; Internal: ",
-              "default",
-              "; asyncSearch: ",
               "default",
               "; autoscaling: ",
               "default",
@@ -40583,14 +40623,6 @@
             "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
           },
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/risk_score/containers/onboarding/api/saved_objects.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/risk_score/containers/onboarding/api/saved_objects.ts"
-          },
-          {
             "plugin": "savedObjects",
             "path": "src/plugins/saved_objects/public/saved_object/saved_object.test.ts"
           },
@@ -40741,18 +40773,6 @@
           {
             "plugin": "alerting",
             "path": "x-pack/plugins/alerting/server/saved_objects/geo_containment/migrations.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations.ts"
-          },
-          {
-            "plugin": "alerting",
-            "path": "x-pack/plugins/alerting/server/saved_objects/migrations.ts"
           },
           {
             "plugin": "alerting",
@@ -40933,6 +40953,22 @@
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/common/types/modules.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.11/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
+          },
+          {
+            "plugin": "alerting",
+            "path": "x-pack/plugins/alerting/server/saved_objects/migrations/7.15/index.ts"
           },
           {
             "plugin": "dashboard",
@@ -44300,6 +44336,41 @@
             "label": "hasReferenceOperator",
             "description": [
               "\nThe operator to use when searching by multiple references using the `hasReference` option. Defaults to `OR`"
+            ],
+            "signature": [
+              "\"AND\" | \"OR\" | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsFindOptions.hasNoReference",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasNoReference",
+            "description": [
+              "\nSearch for documents *not* having a reference to the specified objects.\nUse `hasNoReferenceOperator` to specify the operator to use when searching for multiple references."
+            ],
+            "signature": [
+              "SavedObjectsFindOptionsReference",
+              " | ",
+              "SavedObjectsFindOptionsReference",
+              "[] | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsFindOptions.hasNoReferenceOperator",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasNoReferenceOperator",
+            "description": [
+              "\nThe operator to use when searching by multiple references using the `hasNoReference` option. Defaults to `OR`"
             ],
             "signature": [
               "\"AND\" | \"OR\" | undefined"
@@ -50592,7 +50663,9 @@
           "TransportRequestOptions",
           " | undefined): Promise<",
           "UpdateResponse",
-          "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+          "<TDocumentR>>; }; asyncSearch: ",
+          "default",
+          "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
           "default",
           "; helpers: ",
           "default",
@@ -50601,8 +50674,6 @@
           ") => ",
           "default",
           "; Internal: ",
-          "default",
-          "; asyncSearch: ",
           "default",
           "; autoscaling: ",
           "default",
@@ -51888,20 +51959,14 @@
           "<T>): ",
           "IKibanaResponse",
           "<any>; } & ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.HttpResourcesServiceToolkit",
-            "text": "HttpResourcesServiceToolkit"
-          },
+          "HttpResourcesServiceToolkit",
           ") => ",
           "IKibanaResponse",
           "<any> | Promise<",
           "IKibanaResponse",
           "<any>>"
         ],
-        "path": "src/core/server/http_resources/types.ts",
+        "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -51970,7 +52035,7 @@
         "signature": [
           "HttpResponseOptions"
         ],
-        "path": "src/core/server/http_resources/types.ts",
+        "path": "node_modules/@types/kbn__core-http-resources-server/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -53691,7 +53756,11 @@
           "SavedObjectsFindOptionsReference",
           " | ",
           "SavedObjectsFindOptionsReference",
-          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; }"
+          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+          "SavedObjectsFindOptionsReference",
+          " | ",
+          "SavedObjectsFindOptionsReference",
+          "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; }"
         ],
         "path": "node_modules/@types/kbn__core-saved-objects-api-server/index.d.ts",
         "deprecated": false,
@@ -53944,10 +54013,9 @@
           "\n A user credentials container.\nIt accommodates the necessary auth credentials to impersonate the current user.\n"
         ],
         "signature": [
-          "FakeRequest",
-          " | ",
           "KibanaRequest",
-          "<unknown, unknown, unknown, any>"
+          "<unknown, unknown, unknown, any> | ",
+          "FakeRequest"
         ],
         "path": "node_modules/@types/kbn__core-elasticsearch-server/index.d.ts",
         "deprecated": false,

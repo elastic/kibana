@@ -230,6 +230,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
             (handlers.variables?.embeddableTitle as string) ??
             handlers.getExecutionContext?.()?.description,
         },
+        syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
       },
     };
   },

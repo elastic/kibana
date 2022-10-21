@@ -33,7 +33,7 @@ export function registerActionListRoutes(
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
-      { all: ['canAccessEndpointManagement'] },
+      { all: ['canReadSecuritySolution'] },
       endpointContext.logFactory.get('endpointActionList'),
       actionListHandler(endpointContext)
     )

@@ -4109,6 +4109,9 @@
               "items": {
                 "type": "keyword"
               }
+            },
+            "total": {
+              "type": "long"
             }
           }
         },

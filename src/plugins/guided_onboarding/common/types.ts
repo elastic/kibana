@@ -9,7 +9,7 @@
 export type GuideId = 'observability' | 'security' | 'search';
 
 export type ObservabilityStepIds = 'add_data' | 'view_dashboard' | 'tour_observability';
-export type SecurityStepIds = 'add_data' | 'rules' | 'alerts' | 'cases';
+export type SecurityStepIds = 'add_data' | 'rules' | 'alertsCases';
 export type SearchStepIds = 'add_data' | 'browse_docs' | 'search_experience';
 
 export type GuideStepIds = ObservabilityStepIds | SecurityStepIds | SearchStepIds;
@@ -27,9 +27,10 @@ export type GuideStatus = 'in_progress' | 'ready_to_complete' | 'complete';
  *  inactive: Step has not started
  *  active: Step is ready to start (i.e., the guide has been started)
  *  in_progress: Step has been started and is in progress
+ *  ready_to_complete: Step can be manually completed
  *  complete: Step has been completed
  */
-export type StepStatus = 'inactive' | 'active' | 'in_progress' | 'complete';
+export type StepStatus = 'inactive' | 'active' | 'in_progress' | 'ready_to_complete' | 'complete';
 
 export interface GuideStep {
   id: GuideStepIds;

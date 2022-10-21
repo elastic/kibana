@@ -7,11 +7,11 @@
 
 import * as t from 'io-ts';
 
-import { listArray, list_id } from '@kbn/securitysolution-io-ts-list-types';
+import { exceptionListSchema, listArray, list_id } from '@kbn/securitysolution-io-ts-list-types';
 
 import { rule_id, id, name } from '../common/schemas';
 
-export const ruleReferenceSchema = t.exact(
+export const ruleReferenceRuleInfoSchema = t.exact(
   t.type({
     name,
     id,
@@ -20,9 +20,25 @@ export const ruleReferenceSchema = t.exact(
   })
 );
 
-export type RuleReferenceSchema = t.OutputOf<typeof ruleReferenceSchema>;
+export type ExceptionListRuleReferencesInfoSchema = t.OutputOf<typeof ruleReferenceRuleInfoSchema>;
 
-export const rulesReferencedByExceptionListSchema = t.record(list_id, t.array(ruleReferenceSchema));
+export const exceptionListRuleReferencesSchema = t.intersection([
+  exceptionListSchema,
+  t.exact(
+    t.type({
+      referenced_rules: t.array(ruleReferenceRuleInfoSchema),
+    })
+  ),
+]);
+
+export type ExceptionListRuleReferencesSchema = t.OutputOf<
+  typeof exceptionListRuleReferencesSchema
+>;
+
+export const rulesReferencedByExceptionListSchema = t.record(
+  list_id,
+  exceptionListRuleReferencesSchema
+);
 
 export type RuleReferencesSchema = t.OutputOf<typeof rulesReferencedByExceptionListSchema>;
 

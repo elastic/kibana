@@ -10,7 +10,8 @@ import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
 import { TestProviders } from '../../common/mock';
-import { Form, useForm, FormHook } from '../../common/shared_imports';
+import type { FormHook } from '../../common/shared_imports';
+import { Form, useForm } from '../../common/shared_imports';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { timelineIntegrationMock } from '../__mock__/timeline';
 import { getFormMock } from '../__mock__/form';

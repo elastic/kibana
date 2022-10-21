@@ -8,7 +8,7 @@
 import * as t from 'io-ts';
 import { TraceSearchType } from '../../../common/trace_explorer';
 import { setupRequest } from '../../lib/helpers/setup_request';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
   environmentRt,
@@ -56,7 +56,7 @@ const tracesRoute = createApmServerRoute({
       getRandomSampler({ security, request, probability }),
     ]);
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       ...setup,
       kuery,
       start,

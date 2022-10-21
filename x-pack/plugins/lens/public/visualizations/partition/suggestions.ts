@@ -7,6 +7,7 @@
 
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type {
   SuggestionRequest,
   TableSuggestionColumn,
@@ -14,13 +15,12 @@ import type {
 } from '../../types';
 import {
   CategoryDisplay,
-  layerTypes,
   LegendDisplay,
   NumberDisplay,
   PieChartTypes,
   PieVisualizationState,
-  isPartitionShape,
 } from '../../../common';
+import { isPartitionShape } from '../../../common/visualizations';
 import type { PieChartType } from '../../../common/types';
 import { PartitionChartsMeta } from './partition_charts_meta';
 
@@ -135,7 +135,7 @@ export function suggestions({
                 layerId: table.layerId,
                 primaryGroups: groups.map((col) => col.columnId),
                 metrics: metricColumns,
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
@@ -145,7 +145,7 @@ export function suggestions({
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,
                 nestedLegend: false,
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
               },
         ],
       },
@@ -204,7 +204,7 @@ export function suggestions({
                   state.layers[0].categoryDisplay === CategoryDisplay.INSIDE
                     ? CategoryDisplay.DEFAULT
                     : state.layers[0].categoryDisplay,
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
@@ -214,7 +214,7 @@ export function suggestions({
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,
                 nestedLegend: false,
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
               },
         ],
       },
@@ -249,7 +249,7 @@ export function suggestions({
                 secondaryGroups: groups[1] ? [groups[1].columnId] : [],
                 metrics: metricColumns,
                 categoryDisplay: CategoryDisplay.DEFAULT,
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
@@ -260,7 +260,7 @@ export function suggestions({
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,
                 nestedLegend: false,
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
               },
         ],
       },
@@ -288,8 +288,9 @@ export function suggestions({
                 layerId: table.layerId,
                 primaryGroups: groups.map((col) => col.columnId),
                 metrics: metricColumns,
+                secondaryGroups: [],
                 categoryDisplay: CategoryDisplay.DEFAULT,
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
               }
             : {
                 layerId: table.layerId,
@@ -299,7 +300,7 @@ export function suggestions({
                 categoryDisplay: CategoryDisplay.DEFAULT,
                 legendDisplay: LegendDisplay.DEFAULT,
                 nestedLegend: false,
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
               },
         ],
       },

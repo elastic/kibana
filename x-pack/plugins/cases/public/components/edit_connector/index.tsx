@@ -19,18 +19,20 @@ import {
 import styled from 'styled-components';
 import { isEmpty, noop } from 'lodash/fp';
 
-import { FieldConfig, Form, UseField, useForm } from '../../common/shared_imports';
-import { Case } from '../../../common/ui/types';
-import { ActionConnector, ConnectorTypeFields, NONE_CONNECTOR_ID } from '../../../common/api';
+import type { FieldConfig } from '../../common/shared_imports';
+import { Form, UseField, useForm } from '../../common/shared_imports';
+import type { Case } from '../../../common/ui/types';
+import type { ActionConnector, ConnectorTypeFields } from '../../../common/api';
+import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
-import { CaseUserActions } from '../../containers/types';
+import type { CaseUserActions } from '../../containers/types';
 import { schema } from './schema';
 import { getConnectorFieldsFromUserActions } from './helpers';
 import * as i18n from './translations';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { usePushToService } from '../use_push_to_service';
-import { CaseServices } from '../../containers/use_get_case_user_actions';
+import type { CaseServices } from '../../containers/use_get_case_user_actions';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 import { useCasesContext } from '../cases_context/use_cases_context';
 

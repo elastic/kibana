@@ -104,3 +104,33 @@ export const RANGE_MODES = {
   Range: 'range',
   Histogram: 'histogram',
 } as const;
+
+export const GaugeShapes = {
+  HORIZONTAL_BULLET: 'horizontalBullet',
+  VERTICAL_BULLET: 'verticalBullet',
+  ARC: 'arc',
+  CIRCLE: 'circle',
+} as const;
+
+export const GaugeTicksPositions = {
+  HIDDEN: 'hidden',
+  AUTO: 'auto',
+  BANDS: 'bands',
+} as const;
+
+export const GaugeLabelMajorModes = {
+  AUTO: 'auto',
+  CUSTOM: 'custom',
+  NONE: 'none',
+} as const;
+
+export const GaugeCentralMajorModes = {
+  AUTO: 'auto',
+  CUSTOM: 'custom',
+  NONE: 'none',
+} as const;
+
+export const GaugeColorModes = {
+  PALETTE: 'palette',
+  NONE: 'none',
+} as const;

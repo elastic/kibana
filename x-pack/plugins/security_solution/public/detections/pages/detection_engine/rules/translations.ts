@@ -1105,3 +1105,10 @@ export const CANCEL_BUTTON_LABEL = i18n.translate(
     defaultMessage: 'Cancel',
   }
 );
+
+export const SAVED_QUERY_LOAD_ERROR_TOAST = i18n.translate(
+  'xpack.securitySolution.hooks.useGetSavedQuery.errorToastMessage',
+  {
+    defaultMessage: 'Failed to load the saved query',
+  }
+);

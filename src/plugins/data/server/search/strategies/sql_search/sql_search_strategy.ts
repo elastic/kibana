@@ -20,8 +20,10 @@ import type {
 import { pollSearch } from '../../../../common';
 import { getDefaultAsyncGetParams, getDefaultAsyncSubmitParams } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
+import { SearchConfigSchema } from '../../../../config';
 
 export const sqlSearchStrategyProvider = (
+  searchConfig: SearchConfigSchema,
   logger: Logger,
   useInternalUser: boolean = false
 ): ISearchStrategy<SqlSearchStrategyRequest, SqlSearchStrategyResponse> => {
@@ -42,11 +44,6 @@ export const sqlSearchStrategyProvider = (
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const startTime = Date.now();
 
-    // disable search sessions until session task manager supports SQL
-    // https://github.com/elastic/kibana/issues/127880
-    // const sessionConfig = searchSessionsClient.getConfig();
-    const sessionConfig = null;
-
     const search = async () => {
       const { keep_cursor: keepCursor, ...params } = request.params ?? {};
       let body: SqlQueryResponse;
@@ -56,7 +53,7 @@ export const sqlSearchStrategyProvider = (
         ({ body, headers } = await client.sql.getAsync(
           {
             format: params?.format ?? 'json',
-            ...getDefaultAsyncGetParams(sessionConfig, options),
+            ...getDefaultAsyncGetParams(searchConfig, options),
             id,
           },
           { ...options.transport, signal: options.abortSignal, meta: true }
@@ -65,7 +62,7 @@ export const sqlSearchStrategyProvider = (
         ({ headers, body } = await client.sql.query(
           {
             format: params.format ?? 'json',
-            ...getDefaultAsyncSubmitParams(sessionConfig, options),
+            ...getDefaultAsyncSubmitParams(searchConfig, options),
             ...params,
           },
           { ...options.transport, signal: options.abortSignal, meta: true }

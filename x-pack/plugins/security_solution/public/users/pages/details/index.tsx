@@ -18,6 +18,7 @@ import { useDispatch } from 'react-redux';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 
 import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
@@ -31,7 +32,6 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
-import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import { inputsSelectors } from '../../../common/store';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { setUsersDetailsTablesActivePageToZero } from '../../store/actions';
@@ -93,25 +93,36 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
 
-  const kibana = useKibana();
+  const {
+    services: { uiSettings },
+  } = useKibana();
+
   const usersDetailsPageFilters: Filter[] = useMemo(
     () => getUsersDetailsPageFilters(detailName),
     [detailName]
   );
-  const getFilters = () => [...usersDetailsPageFilters, ...filters];
 
   const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
 
-  const [filterQuery, kqlError] = convertToBuildEsQuery({
-    config: getEsQueryConfig(kibana.services.uiSettings),
-    indexPattern,
-    queries: [query],
-    filters: getFilters(),
-  });
+  const [rawFilteredQuery, kqlError] = useMemo(() => {
+    try {
+      return [
+        buildEsQuery(
+          indexPattern,
+          [query],
+          [...usersDetailsPageFilters, ...filters],
+          getEsQueryConfig(uiSettings)
+        ),
+      ];
+    } catch (e) {
+      return [undefined, e];
+    }
+  }, [filters, indexPattern, query, uiSettings, usersDetailsPageFilters]);
 
+  const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
     id: QUERY_ID,
-    filterQuery,
+    filterQuery: stringifiedAdditionalFilters,
     kqlError,
     query,
     startDate: from,
@@ -207,12 +218,17 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               <>
                 <EuiFlexGroup>
                   <EuiFlexItem>
-                    <AlertsByStatus signalIndexName={signalIndexName} entityFilter={entityFilter} />
+                    <AlertsByStatus
+                      signalIndexName={signalIndexName}
+                      entityFilter={entityFilter}
+                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <AlertCountByRuleByStatus
                       entityFilter={entityFilter}
                       signalIndexName={signalIndexName}
+                      additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -231,7 +247,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             <UsersDetailsTabs
               deleteQuery={deleteQuery}
               detailName={detailName}
-              filterQuery={filterQuery}
+              filterQuery={stringifiedAdditionalFilters}
               from={from}
               indexNames={selectedPatterns}
               indexPattern={indexPattern}

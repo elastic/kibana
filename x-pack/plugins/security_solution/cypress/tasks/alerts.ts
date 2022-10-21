@@ -16,7 +16,6 @@ import {
   GROUP_BY_TOP_INPUT,
   ACKNOWLEDGED_ALERTS_FILTER_BTN,
   LOADING_ALERTS_PANEL,
-  MANAGE_ALERT_DETECTION_RULES_BTN,
   MARK_ALERT_ACKNOWLEDGED_BTN,
   OPEN_ALERT_BTN,
   OPENED_ALERTS_FILTER_BTN,
@@ -105,10 +104,6 @@ export const goToClosedAlerts = () => {
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
   cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
-};
-
-export const goToManageAlertsDetectionRules = () => {
-  cy.get(MANAGE_ALERT_DETECTION_RULES_BTN).should('exist').click({ force: true });
 };
 
 export const goToOpenedAlerts = () => {

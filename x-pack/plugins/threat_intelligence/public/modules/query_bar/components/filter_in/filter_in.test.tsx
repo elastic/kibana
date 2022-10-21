@@ -9,11 +9,16 @@ import React, { FunctionComponent } from 'react';
 import { render } from '@testing-library/react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
-import { useIndicatorsFiltersContext } from '../../../indicators/hooks/use_indicators_filters_context';
+import { useIndicatorsFiltersContext } from '../../../indicators';
 import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
-import { FilterInButtonIcon, FilterInContextMenu, FilterInCellAction } from '.';
+import {
+  FilterInButtonEmpty,
+  FilterInButtonIcon,
+  FilterInCellAction,
+  FilterInContextMenu,
+} from '.';
 
-jest.mock('../../../indicators/hooks/use_indicators_filters_context');
+jest.mock('../../../indicators/hooks/use_filters_context');
 
 const mockIndicator: Indicator = generateMockIndicator();
 
@@ -43,6 +48,15 @@ describe('<FilterInButtonIcon /> <FilterInContextMenu /> <FilterInCellAction />'
   it('should render one EuiButtonIcon', () => {
     const component = render(
       <FilterInButtonIcon data={mockIndicator} field={mockField} data-test-subj={mockTestId} />
+    );
+
+    expect(component.getByTestId(mockTestId)).toBeInTheDocument();
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render one EuiButtonEmpty', () => {
+    const component = render(
+      <FilterInButtonEmpty data={mockIndicator} field={mockField} data-test-subj={mockTestId} />
     );
 
     expect(component.getByTestId(mockTestId)).toBeInTheDocument();

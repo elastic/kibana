@@ -9,7 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../constants';
 import {
-  RESPONSE_ACTION_COMMANDS,
+  RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
 } from '../service/response_actions/constants';
 
@@ -78,7 +78,7 @@ export const ActionDetailsRequestSchema = {
 // TODO: fix the odd TS error
 const commandsSchema = schema.oneOf(
   // @ts-expect-error TS2769: No overload matches this call
-  RESPONSE_ACTION_COMMANDS.map((command) => schema.literal(command))
+  RESPONSE_ACTION_API_COMMANDS_NAMES.map((command) => schema.literal(command))
 );
 
 // TODO: fix the odd TS error
@@ -115,3 +115,13 @@ export const EndpointActionListRequestSchema = {
 };
 
 export type EndpointActionListRequestQuery = TypeOf<typeof EndpointActionListRequestSchema.query>;
+
+export const EndpointActionGetFileSchema = {
+  body: schema.object({
+    ...BaseActionRequestSchema,
+
+    parameters: schema.object({
+      path: schema.string({ minLength: 1 }),
+    }),
+  }),
+};

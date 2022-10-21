@@ -15,7 +15,7 @@ import { VisualOptionsPopover } from '.';
 import { ToolbarPopover, ValueLabelsSettings } from '../../../../shared_components';
 import { MissingValuesOptions } from './missing_values_option';
 import { FillOpacityOption } from './fill_opacity_option';
-import { layerTypes } from '../../../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 
 describe('Visual options popover', () => {
   let frame: FramePublicAPI;
@@ -28,7 +28,7 @@ describe('Visual options popover', () => {
       layers: [
         {
           seriesType: 'bar',
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           layerId: 'first',
           splitAccessor: 'baz',
           xAccessor: 'foo',
@@ -234,7 +234,7 @@ describe('Visual options popover', () => {
             { ...state.layers[0], seriesType: 'bar' } as XYLayerConfig,
             {
               seriesType: 'bar',
-              layerType: layerTypes.DATA,
+              layerType: LayerTypes.DATA,
               layerId: 'second',
               splitAccessor: 'baz',
               xAccessor: 'foo',

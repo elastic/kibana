@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { UserActionPropertyActions, UserActionPropertyActionsProps } from './property_actions';
+import type { UserActionPropertyActionsProps } from './property_actions';
+import { UserActionPropertyActions } from './property_actions';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';

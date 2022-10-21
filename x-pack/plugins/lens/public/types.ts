@@ -47,7 +47,7 @@ import {
   LENS_EDIT_PAGESIZE_ACTION,
 } from './visualizations/datatable/components/constants';
 import type { LensInspector } from './lens_inspector_service';
-import type { FormatSelectorOptions } from './indexpattern_datasource/dimension_panel/format_selector';
+import type { FormatSelectorOptions } from './datasources/form_based/dimension_panel/format_selector';
 import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { Document } from './persistence/saved_object_store';
@@ -281,6 +281,8 @@ export interface Datasource<T = unknown, P = unknown> {
       staticValue?: unknown;
     }
   ) => T;
+
+  getSelectedFields?: (state: T) => string[];
 
   renderDataPanel: (
     domElement: Element,
@@ -759,14 +761,14 @@ export interface VisualizationDimensionChangeProps<T> {
   frame: FramePublicAPI;
 }
 
-export interface Suggestion {
+export interface Suggestion<T = unknown, V = unknown> {
   visualizationId: string;
-  datasourceState?: unknown;
+  datasourceState?: V;
   datasourceId?: string;
   columns: number;
   score: number;
   title: string;
-  visualizationState: unknown;
+  visualizationState: T;
   previewExpression?: Ast | string;
   previewIcon: IconType;
   hide?: boolean;
@@ -1167,7 +1169,7 @@ export interface Visualization<T = unknown, P = unknown> {
 
   getSuggestionFromConvertToLensContext?: (
     props: VisualizationStateFromContextChangeProps
-  ) => Suggestion | undefined;
+  ) => Suggestion<T> | undefined;
 }
 
 // Use same technique as TriggerContext

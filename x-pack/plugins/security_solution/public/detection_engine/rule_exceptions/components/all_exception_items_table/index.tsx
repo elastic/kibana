@@ -162,8 +162,17 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const [isLoadingReferences, isFetchReferencesError, allReferences] =
-    useFindExceptionListReferences(exceptionListsToQuery);
+  const [isLoadingReferences, isFetchReferencesError, allReferences, fetchReferences] =
+    useFindExceptionListReferences();
+
+  useEffect(() => {
+    if (fetchReferences != null && exceptionListsToQuery.length) {
+      const listsToQuery = exceptionListsToQuery.map(
+        ({ id, list_id: listId, namespace_type: namespaceType }) => ({ id, listId, namespaceType })
+      );
+      fetchReferences(listsToQuery);
+    }
+  }, [exceptionListsToQuery, fetchReferences]);
 
   useEffect(() => {
     if (isFetchReferencesError) {

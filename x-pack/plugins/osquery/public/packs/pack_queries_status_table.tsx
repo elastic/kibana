@@ -151,7 +151,7 @@ function getLensAttributes(
     ],
     state: {
       datasourceStates: {
-        indexpattern: {
+        formBased: {
           layers: {
             layer1: dataLayer,
           },

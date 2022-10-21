@@ -92,6 +92,7 @@ export type HeatmapInput = Datatable;
 export interface HeatmapExpressionProps {
   data: Datatable;
   args: HeatmapArguments;
+  syncTooltips: boolean;
 }
 
 export interface HeatmapRender {

@@ -7,6 +7,6 @@
 import { EuiText } from '@elastic/eui';
 import React from 'react';
 
-export const ErrorsTabContent = () => {
+export const MonitorErrors = () => {
   return <EuiText>Monitor errors tabs content</EuiText>;
 };

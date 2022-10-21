@@ -11,6 +11,9 @@ import { RequestHandlerContext } from '@kbn/core/server';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
+jest.mock('../../lib/indices/fetch_ml_inference_pipeline_history', () => ({
+  fetchMlInferencePipelineHistory: jest.fn(),
+}));
 jest.mock('../../lib/indices/fetch_ml_inference_pipeline_processors', () => ({
   fetchMlInferencePipelineProcessors: jest.fn(),
 }));
@@ -23,10 +26,15 @@ jest.mock('../../lib/indices/delete_ml_inference_pipeline', () => ({
 jest.mock('../../lib/indices/exists_index', () => ({
   indexOrAliasExists: jest.fn(),
 }));
+jest.mock('../../lib/ml_inference_pipeline/get_inference_errors', () => ({
+  getMlInferenceErrors: jest.fn(),
+}));
 
 import { deleteMlInferencePipeline } from '../../lib/indices/delete_ml_inference_pipeline';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
+import { fetchMlInferencePipelineHistory } from '../../lib/indices/fetch_ml_inference_pipeline_history';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/fetch_ml_inference_pipeline_processors';
+import { getMlInferenceErrors } from '../../lib/ml_inference_pipeline/get_inference_errors';
 import { createAndReferenceMlInferencePipeline } from '../../utils/create_ml_inference_pipeline';
 import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
@@ -40,12 +48,71 @@ describe('Enterprise Search Managed Indices', () => {
         putPipeline: jest.fn(),
         simulate: jest.fn(),
       },
+      search: jest.fn(),
     },
   };
 
   const mockCore = {
     elasticsearch: { client: mockClient },
   };
+
+  describe('GET /internal/enterprise_search/indices/{indexName}/ml_inference/errors', () => {
+    beforeEach(() => {
+      const context = {
+        core: Promise.resolve(mockCore),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
+      mockRouter = new MockRouter({
+        context,
+        method: 'get',
+        path: '/internal/enterprise_search/indices/{indexName}/ml_inference/errors',
+      });
+
+      registerIndexRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('fails validation without index_name', () => {
+      const request = {
+        params: {},
+      };
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fetches ML inference errors', async () => {
+      const errorsResult = [
+        {
+          message: 'Error message 1',
+          doc_count: 100,
+          timestamp: '2022-10-05T13:50:36.100Z',
+        },
+        {
+          message: 'Error message 2',
+          doc_count: 200,
+          timestamp: '2022-10-05T13:50:36.200Z',
+        },
+      ];
+
+      (getMlInferenceErrors as jest.Mock).mockImplementationOnce(() => {
+        return Promise.resolve(errorsResult);
+      });
+
+      await mockRouter.callRoute({
+        params: { indexName: 'my-index-name' },
+      });
+
+      expect(getMlInferenceErrors).toHaveBeenCalledWith('my-index-name', mockClient.asCurrentUser);
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: {
+          errors: errorsResult,
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+  });
 
   describe('GET /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors', () => {
     beforeEach(() => {
@@ -467,6 +534,82 @@ describe('Enterprise Search Managed Indices', () => {
       expect(mockRouter.response.ok).toHaveBeenCalledWith({
         body: putResponse,
         headers: { 'content-type': 'application/json' },
+      });
+    });
+  });
+
+  describe('GET /internal/enterprise_search/indices/{indexName}/ml_inference/history', () => {
+    beforeEach(() => {
+      const context = {
+        core: Promise.resolve(mockCore),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
+      mockRouter = new MockRouter({
+        context,
+        method: 'get',
+        path: '/internal/enterprise_search/indices/{indexName}/ml_inference/history',
+      });
+
+      registerIndexRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('fails validation without indexName', () => {
+      const request = {
+        params: {},
+      };
+
+      mockRouter.shouldThrow(request);
+    });
+
+    it('fetches ML inference history', async () => {
+      const historyResult = {
+        history: [
+          {
+            pipeline: 'test-001',
+            doc_count: 10,
+          },
+          {
+            pipeline: 'test-002',
+            doc_count: 13,
+          },
+        ],
+      };
+
+      (fetchMlInferencePipelineHistory as jest.Mock).mockResolvedValueOnce(historyResult);
+
+      await mockRouter.callRoute({
+        params: { indexName: 'unit-test-index' },
+      });
+
+      expect(fetchMlInferencePipelineHistory).toHaveBeenCalledWith(
+        mockClient.asCurrentUser,
+        'unit-test-index'
+      );
+
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: historyResult,
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+
+    it('fails if fetching history fails', async () => {
+      (fetchMlInferencePipelineHistory as jest.Mock).mockRejectedValueOnce(new Error('Oh No!!!'));
+
+      await mockRouter.callRoute({
+        params: { indexName: 'unit-test-index' },
+      });
+
+      expect(mockRouter.response.customError).toHaveBeenCalledWith({
+        body: {
+          attributes: {
+            error_code: 'uncaught_exception',
+          },
+          message: 'Enterprise Search encountered an error. Check Kibana Server logs for details.',
+        },
+        statusCode: 502,
       });
     });
   });

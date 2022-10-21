@@ -18,9 +18,11 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ProcessesEntry,
+  EndpointActionDataParameterTypes,
+  ActionResponseOutput,
 } from '../types';
 import { ActivityLogItemTypes } from '../types';
-import { RESPONSE_ACTION_COMMANDS } from '../service/response_actions/constants';
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../service/response_actions/constants';
 
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
@@ -75,6 +77,32 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       );
     });
 
+    const command = overrides?.EndpointActions?.data?.command ?? this.randomResponseActionCommand();
+    let parameters: EndpointActionDataParameterTypes = overrides?.EndpointActions?.data?.parameters;
+    let output: ActionResponseOutput = overrides?.EndpointActions?.data
+      ?.output as ActionResponseOutput;
+
+    if (command === 'get-file') {
+      if (!parameters) {
+        parameters = {
+          file: '/some/path/bad_file.txt',
+        };
+      }
+
+      if (!output) {
+        output = {
+          type: 'json',
+          content: {
+            file: {
+              name: 'bad_file.txt',
+              path: '/some/path/bad_file.txt',
+              size: 221,
+            },
+          },
+        };
+      }
+    }
+
     return merge(
       {
         '@timestamp': timeStamp.toISOString(),
@@ -84,14 +112,14 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         EndpointActions: {
           action_id: this.seededUUIDv4(),
           completed_at: timeStamp.toISOString(),
-          data: {
-            command: this.randomResponseActionCommand(),
-            comment: '',
-            parameters: undefined,
-          },
           // randomly before a few hours/minutes/seconds later
           started_at: new Date(startedAtTimes[this.randomN(startedAtTimes.length)]).toISOString(),
-          output: undefined,
+          data: {
+            command,
+            comment: '',
+            parameters,
+            output,
+          },
         },
         error: undefined,
       },
@@ -160,7 +188,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         type: ActivityLogItemTypes.RESPONSE,
         item: {
           id: this.seededUUIDv4(),
-          data: this.generateResponse(),
+          data: this.generateResponse({ ...(overrides?.item?.data ?? {}) }),
         },
       },
       overrides
@@ -217,6 +245,6 @@ export class EndpointActionGenerator extends BaseDataGenerator {
   }
 
   protected randomResponseActionCommand() {
-    return this.randomChoice(RESPONSE_ACTION_COMMANDS);
+    return this.randomChoice(RESPONSE_ACTION_API_COMMANDS_NAMES);
   }
 }

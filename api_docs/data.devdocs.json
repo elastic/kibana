@@ -2588,7 +2588,7 @@
                 "description": [],
                 "signature": [
                   "PluginInitializerContext",
-                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; pageSize: number; trackingInterval: moment.Duration; cleanupInterval: moment.Duration; expireInterval: moment.Duration; monitoringTaskTimeout: moment.Duration; notTouchedTimeout: moment.Duration; notTouchedInProgressTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>>"
+                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{} & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>>"
                 ],
                 "path": "src/plugins/data/public/plugin.ts",
                 "deprecated": false,
@@ -7525,6 +7525,22 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.IKibanaSearchResponse.isStored",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isStored",
+            "description": [
+              "\nIndicates whether the search has been saved to a search-session object and long keepAlive was set"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.IKibanaSearchResponse.warning",
             "type": "string",
             "tags": [],
@@ -7641,6 +7657,22 @@
             "label": "isStored",
             "description": [
               "\nWhether the session is already saved (i.e. sent to background)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ISearchOptions.isSearchStored",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSearchStored",
+            "description": [
+              "\nWhether the search was successfully polled after session was saved. Search was added to a session saved object and keepAlive extended."
             ],
             "signature": [
               "boolean | undefined"
@@ -11748,7 +11780,7 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; pageSize: number; trackingInterval: moment.Duration; cleanupInterval: moment.Duration; expireInterval: moment.Duration; monitoringTaskTimeout: moment.Duration; notTouchedTimeout: moment.Duration; notTouchedInProgressTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>>"
+                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{} & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>>"
                 ],
                 "path": "src/plugins/data/server/plugin.ts",
                 "deprecated": false,
@@ -12016,14 +12048,862 @@
             "parentPluginId": "data",
             "id": "def-server.DataView.title",
             "type": "string",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "title",
             "description": [
               "\nTitle of data view"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/get_query_filter.ts"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/public/mock/index_pattern.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/mock/index_pattern.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+              },
+              {
+                "plugin": "threatIntelligence",
+                "path": "x-pack/plugins/threat_intelligence/public/common/mocks/mock_security_context.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_exceptions/components/flyout_components/alerts_actions/utils.test.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/data_views/data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/data_views/data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/data_views/data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/data_views/data_view.ts"
+              },
+              {
+                "plugin": "dataViewEditor",
+                "path": "src/plugins/data_view_editor/public/components/data_view_editor_flyout_content.tsx"
+              },
+              {
+                "plugin": "unifiedSearch",
+                "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
+              },
+              {
+                "plugin": "unifiedSearch",
+                "path": "src/plugins/unified_search/public/query_string_input/fetch_index_patterns.ts"
+              },
+              {
+                "plugin": "unifiedSearch",
+                "path": "src/plugins/unified_search/public/dataview_picker/change_dataview.tsx"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
+              },
+              {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/hooks/use_es_doc_search.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/utils/resolve_data_view.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/utils/resolve_data_view.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/components/top_nav/discover_topnav.tsx"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/public/hooks/use_data.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/public/components/full_time_range_selector/full_time_range_selector_service.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes_analysis.tsx"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
+              },
+              {
+                "plugin": "presentationUtil",
+                "path": "src/plugins/presentation_util/public/services/storybook/data_views.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/scaling_form.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/top_hits_form.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/trigger_actions/visualize_geo_field_action.ts"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/full_time_range_selector/full_time_range_selector_service.ts"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service_analytics.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service_analytics.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/components/configuration_step/configuration_step_details.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/data_loader/data_loader.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/components/configuration_step/configuration_step_form.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/components/configuration_step/configuration_step_form.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/components/configuration_step/configuration_step_form.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/components/configuration_step/configuration_step_form.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_clone/clone_action_name.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/index_or_search/preconfigured_job_redirect.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/job_type/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/job_type/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/job_type/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/components/full_time_range_selector/full_time_range_selector_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/components/pick_fields_step/components/bucket_span_estimator/estimate_bucket_span.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/components/datafeed_step/components/data_view/change_data_view.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/new_job/wizard_steps.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/components/job_settings_form.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/quick_create_job.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/outlier_exploration/use_outlier_data.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/exploration_results_table/use_exploration_results.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_dataset.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_log_level.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/components/rules/eql_query_bar/validators.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/details/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/search_source_expression_form.tsx"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/filter_group/filter_group.tsx"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_details/step_details_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/wizard/wizard.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/hooks/use_step_define_form.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/hooks/use_step_define_form.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_summary.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_summary.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_summary.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_search_items/common.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/services/es_index_service.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
+              },
+              {
+                "plugin": "ux",
+                "path": "x-pack/plugins/ux/public/components/app/rum_dashboard/local_uifilters/use_data_view.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/common/dependency_mocks/index_patterns.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/common/dependency_mocks/index_patterns.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/common/dependency_mocks/index_patterns.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.test.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/remove_nested_field_children.test.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/common.test.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/data_views/data_views.story.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/field_editor/components/scripting_help/test_script.tsx"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/field_editor/field_editor.tsx"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/create_edit_field/create_edit_field.tsx"
+              },
+              {
+                "plugin": "inputControlVis",
+                "path": "src/plugins/input_control_vis/public/control/list_control_factory.ts"
+              },
+              {
+                "plugin": "inputControlVis",
+                "path": "src/plugins/input_control_vis/public/control/range_control_factory.ts"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/server/routes/field_stats.ts"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/server/routes/field_stats.ts"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/plugins/vis_default_editor/public/components/controls/field.tsx"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/plugins/vis_default_editor/public/components/controls/field.tsx"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/plugins/vis_default_editor/public/components/agg_select.tsx"
+              },
+              {
+                "plugin": "inputControlVis",
+                "path": "src/plugins/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
+              },
+              {
+                "plugin": "visTypeTimelion",
+                "path": "src/plugins/vis_types/timelion/public/helpers/arg_value_suggestions.ts"
+              },
+              {
+                "plugin": "visTypeTimelion",
+                "path": "src/plugins/vis_types/timelion/public/helpers/arg_value_suggestions.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.ts"
+              },
+              {
+                "plugin": "visTypeVega",
+                "path": "src/plugins/vis_types/vega/public/data_model/search_api.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/hooks/use_adhoc_data_views.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/data_views/data_views.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "data",
@@ -12361,6 +13241,60 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataView.getIndexPattern",
+            "type": "Function",
+            "tags": [],
+            "label": "getIndexPattern",
+            "description": [
+              "\nGet index pattern"
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "index pattern string"
+            ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataView.setIndexPattern",
+            "type": "Function",
+            "tags": [],
+            "label": "setIndexPattern",
+            "description": [
+              "\nSet index pattern"
+            ],
+            "signature": [
+              "(indexPattern: string) => void"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataView.setIndexPattern.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -15659,7 +16593,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "UpdateResponse",
-                  "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocumentR>>; }; asyncSearch: ",
+                  "default",
+                  "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; helpers: ",
                   "default",
@@ -15668,8 +16604,6 @@
                   ") => ",
                   "default",
                   "; Internal: ",
-                  "default",
-                  "; asyncSearch: ",
                   "default",
                   "; autoscaling: ",
                   "default",
@@ -17021,6 +17955,22 @@
             "label": "isStored",
             "description": [
               "\nWhether the session is already saved (i.e. sent to background)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.ISearchOptions.isSearchStored",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSearchStored",
+            "description": [
+              "\nWhether the search was successfully polled after session was saved. Search was added to a session saved object and keepAlive extended."
             ],
             "signature": [
               "boolean | undefined"
@@ -18496,14 +19446,862 @@
             "parentPluginId": "data",
             "id": "def-common.DataView.title",
             "type": "string",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "title",
             "description": [
               "\nTitle of data view"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/containers/detection_engine/exceptions/get_es_query_filter.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/get_query_filter.ts"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/public/mock/index_pattern.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/mock/index_pattern.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+              },
+              {
+                "plugin": "lists",
+                "path": "x-pack/plugins/lists/public/exceptions/components/builder/helpers.test.ts"
+              },
+              {
+                "plugin": "threatIntelligence",
+                "path": "x-pack/plugins/threat_intelligence/public/common/mocks/mock_security_context.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_exceptions/components/flyout_components/alerts_actions/utils.test.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/data_views/data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/data_views/data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/data_views/data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/data_views/data_view.ts"
+              },
+              {
+                "plugin": "dataViewEditor",
+                "path": "src/plugins/data_view_editor/public/components/data_view_editor_flyout_content.tsx"
+              },
+              {
+                "plugin": "unifiedSearch",
+                "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
+              },
+              {
+                "plugin": "unifiedSearch",
+                "path": "src/plugins/unified_search/public/query_string_input/fetch_index_patterns.ts"
+              },
+              {
+                "plugin": "unifiedSearch",
+                "path": "src/plugins/unified_search/public/dataview_picker/change_dataview.tsx"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/update_data_view.ts"
+              },
+              {
+                "plugin": "triggersActionsUi",
+                "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
+              },
+              {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/public/services/field_stats/load_field_stats.ts"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/hooks/use_es_doc_search.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/utils/resolve_data_view.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/utils/resolve_data_view.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/components/top_nav/discover_topnav.tsx"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/public/hooks/use_data.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/public/components/full_time_range_selector/full_time_range_selector_service.ts"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes_analysis.tsx"
+              },
+              {
+                "plugin": "aiops",
+                "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
+              },
+              {
+                "plugin": "presentationUtil",
+                "path": "src/plugins/presentation_util/public/services/storybook/data_views.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/options_list/options_list_service.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/data_views_service/loader.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/utils/observability_data_views/observability_data_views.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/report_definition_field.tsx"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/use_filter_values.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/series_editor/columns/filter_value_btn.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/scaling_form.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/top_hits_form.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/trigger_actions/visualize_geo_field_action.ts"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/full_time_range_selector/full_time_range_selector_service.ts"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/actions_panel/actions_panel.tsx"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/util/index_utils.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service_analytics.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service_analytics.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/components/configuration_step/configuration_step_details.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/datavisualizer/index_based/data_loader/data_loader.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/components/configuration_step/configuration_step_form.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/components/configuration_step/configuration_step_form.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/components/configuration_step/configuration_step_form.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/components/configuration_step/configuration_step_form.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_creation/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/action_clone/clone_action_name.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/index_or_search/preconfigured_job_redirect.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/job_type/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/job_type/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/job_type/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/new_job_capabilities_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/job_creator/job_creator.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/chart_loader/chart_loader.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/common/results_loader/categorization_examples_loader.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/components/full_time_range_selector/full_time_range_selector_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/components/pick_fields_step/components/bucket_span_estimator/estimate_bucket_span.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/components/datafeed_step/components/data_view/change_data_view.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/new_job/wizard_steps.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/components/job_settings_form.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/recognize/page.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/jobs/new_job/job_from_lens/quick_create_job.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/outlier_exploration/use_outlier_data.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/exploration_results_table/use_exploration_results.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/embeddables/anomaly_charts/anomaly_charts_embeddable.tsx"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_dataset.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_log_level.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_frame_analytics/index_patterns.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/job_service/new_job_caps/rollup.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/lib/alerts/alerting_service.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/models/data_recognizer/data_recognizer.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/get_fields.ts"
+              },
+              {
+                "plugin": "apm",
+                "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/components/rules/eql_query_bar/validators.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/components/rules/step_define_rule/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/details/index.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/boundary_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/expressions/entity_index_expression.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/index.tsx"
+              },
+              {
+                "plugin": "stackAlerts",
+                "path": "x-pack/plugins/stack_alerts/public/alert_types/es_query/expression/search_source_expression_form.tsx"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/filter_group/filter_group.tsx"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/public/legacy_uptime/components/overview/alerts/monitor_expressions/filters_expression_select.tsx"
+              },
+              {
+                "plugin": "timelines",
+                "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_details/step_details_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/wizard/wizard.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/filter_agg/components/filter_term_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_index_data.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/hooks/use_step_define_form.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/hooks/use_step_define_form.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_form.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_summary.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_summary.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/step_define_summary.tsx"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/hooks/use_search_items/common.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/services/es_index_service.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+              },
+              {
+                "plugin": "upgradeAssistant",
+                "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
+              },
+              {
+                "plugin": "ux",
+                "path": "x-pack/plugins/ux/public/components/app/rum_dashboard/local_uifilters/use_data_view.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/state_management/datasource.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/common/dependency_mocks/index_patterns.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/common/dependency_mocks/index_patterns.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/common/dependency_mocks/index_patterns.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.test.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/remove_nested_field_children.test.ts"
+              },
+              {
+                "plugin": "transform",
+                "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/common.test.ts"
+              },
+              {
+                "plugin": "controls",
+                "path": "src/plugins/controls/public/services/data_views/data_views.story.ts"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/edit_index_pattern.tsx"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/field_editor/components/scripting_help/test_script.tsx"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/field_editor/field_editor.tsx"
+              },
+              {
+                "plugin": "dataViewManagement",
+                "path": "src/plugins/data_view_management/public/components/edit_index_pattern/create_edit_field/create_edit_field.tsx"
+              },
+              {
+                "plugin": "inputControlVis",
+                "path": "src/plugins/input_control_vis/public/control/list_control_factory.ts"
+              },
+              {
+                "plugin": "inputControlVis",
+                "path": "src/plugins/input_control_vis/public/control/range_control_factory.ts"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/server/routes/field_stats.ts"
+              },
+              {
+                "plugin": "unifiedFieldList",
+                "path": "src/plugins/unified_field_list/server/routes/field_stats.ts"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/plugins/vis_default_editor/public/components/controls/field.tsx"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/plugins/vis_default_editor/public/components/controls/field.tsx"
+              },
+              {
+                "plugin": "visDefaultEditor",
+                "path": "src/plugins/vis_default_editor/public/components/agg_select.tsx"
+              },
+              {
+                "plugin": "inputControlVis",
+                "path": "src/plugins/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
+              },
+              {
+                "plugin": "visTypeTimelion",
+                "path": "src/plugins/vis_types/timelion/public/helpers/arg_value_suggestions.ts"
+              },
+              {
+                "plugin": "visTypeTimelion",
+                "path": "src/plugins/vis_types/timelion/public/helpers/arg_value_suggestions.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.ts"
+              },
+              {
+                "plugin": "visTypeVega",
+                "path": "src/plugins/vis_types/vega/public/data_model/search_api.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/hooks/use_adhoc_data_views.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/public/convert_to_lens/lib/datasource/get_datasource_info.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/data_views/data_views.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/plugins/lens/public/data_views_service/loader.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
+              }
+            ]
           },
           {
             "parentPluginId": "data",
@@ -18841,6 +20639,60 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataView.getIndexPattern",
+            "type": "Function",
+            "tags": [],
+            "label": "getIndexPattern",
+            "description": [
+              "\nGet index pattern"
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "index pattern string"
+            ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataView.setIndexPattern",
+            "type": "Function",
+            "tags": [],
+            "label": "setIndexPattern",
+            "description": [
+              "\nSet index pattern"
+            ],
+            "signature": [
+              "(indexPattern: string) => void"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataView.setIndexPattern.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {

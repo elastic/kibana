@@ -22,8 +22,6 @@ export const ALERT_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.sev
 
 export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
 
-export const ALERTS = '[data-test-subj="events-viewer-panel"][data-test-subj="event"]';
-
 export const ALERTS_COUNT =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="server-side-event-count"]';
 

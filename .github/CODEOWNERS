@@ -332,11 +332,15 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/plugins/event_log/ @elastic/response-ops
 /x-pack/plugins/task_manager/ @elastic/response-ops
 /x-pack/plugins/stack_connectors/ @elastic/response-ops
-/x-pack/plugins/stack_connectors/public/connector_types/stack/ @elastic/response-ops-execution
-/x-pack/plugins/stack_connectors/server/connector_types/stack/ @elastic/response-ops-execution
-/x-pack/plugins/stack_connectors/public/connector_types/cases/ @elastic/response-ops-cases
-/x-pack/plugins/stack_connectors/server/connector_types/cases/ @elastic/response-ops-cases
+/x-pack/plugins/stack_connectors/public/connector_types/stack/ @elastic/response-ops @elastic/response-ops-execution
+/x-pack/plugins/stack_connectors/server/connector_types/stack/ @elastic/response-ops @elastic/response-ops-execution
+/x-pack/plugins/stack_connectors/public/connector_types/cases/ @elastic/response-ops @elastic/response-ops-cases
+/x-pack/plugins/stack_connectors/server/connector_types/cases/ @elastic/response-ops @elastic/response-ops-cases
 /x-pack/test/alerting_api_integration/ @elastic/response-ops
+/x-pack/test/alerting_api_integration/basic/tests/actions/connector_types/stack/ @elastic/response-ops @elastic/response-ops-execution
+/x-pack/test/alerting_api_integration/basic/tests/actions/connector_types/cases/ @elastic/response-ops @elastic/response-ops-cases
+/x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/stack/ @elastic/response-ops @elastic/response-ops-execution
+/x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/cases/ @elastic/response-ops @elastic/response-ops-cases
 /x-pack/test/plugin_api_integration/test_suites/task_manager/ @elastic/response-ops
 /x-pack/plugins/triggers_actions_ui/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui/ @elastic/response-ops
@@ -504,6 +508,11 @@ x-pack/examples/files_example @elastic/kibana-app-services
 
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/fleet @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules @elastic/security-detections-response-rules
+/x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/create_rule_exceptions_route* @elastic/security-solution-platform
+/x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/find_rule_exceptions_route* @elastic/security-solution-platform
+/x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/import_rules_route* @elastic/security-solution-platform
+/x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/preview_rules_route* @elastic/security-detections-response-alerts
+/x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils @elastic/security-solution-platform
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/tags @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_monitoring @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules @elastic/security-detections-response-rules
@@ -824,6 +833,7 @@ packages/core/status/core-status-server-internal @elastic/kibana-core
 packages/core/status/core-status-server-mocks @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-deprecations-getters @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-http-setup-browser @elastic/kibana-core
+packages/core/test-helpers/core-test-helpers-so-type-serializer @elastic/kibana-core
 packages/core/theme/core-theme-browser @elastic/kibana-core
 packages/core/theme/core-theme-browser-internal @elastic/kibana-core
 packages/core/theme/core-theme-browser-mocks @elastic/kibana-core
@@ -854,6 +864,7 @@ packages/kbn-babel-plugin-synthetic-packages @elastic/kibana-operations
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-bazel-packages @elastic/kibana-operations
 packages/kbn-bazel-runner @elastic/kibana-operations
+packages/kbn-cases-components @elastic/response-ops
 packages/kbn-chart-icons @elastic/kibana-vis-editors
 packages/kbn-ci-stats-core @elastic/kibana-operations
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations

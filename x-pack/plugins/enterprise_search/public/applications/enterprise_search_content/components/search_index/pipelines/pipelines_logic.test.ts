@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
-import { connectorIndex } from '../../../__mocks__/view_index.mock';
+import { apiIndex, connectorIndex } from '../../../__mocks__/view_index.mock';
+
+import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 import { UpdatePipelineApiLogic } from '../../../api/connector/update_pipeline_api_logic';
+import { FetchCustomPipelineApiLogic } from '../../../api/index/fetch_custom_pipeline_api_logic';
 import { FetchIndexApiLogic } from '../../../api/index/fetch_index_api_logic';
 
 import { PipelinesLogic } from './pipelines_logic';
@@ -40,6 +42,7 @@ describe('PipelinesLogic', () => {
   const { mount } = new LogicMounter(PipelinesLogic);
   const { mount: mountFetchIndexApiLogic } = new LogicMounter(FetchIndexApiLogic);
   const { mount: mountUpdatePipelineLogic } = new LogicMounter(UpdatePipelineApiLogic);
+  const { mount: mountFetchCustomPipelineApiLogic } = new LogicMounter(FetchCustomPipelineApiLogic);
   const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   const newPipeline = {
@@ -51,6 +54,7 @@ describe('PipelinesLogic', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mountFetchIndexApiLogic();
+    mountFetchCustomPipelineApiLogic();
     mountUpdatePipelineLogic();
     mount();
   });
@@ -192,6 +196,42 @@ describe('PipelinesLogic', () => {
         expect(PipelinesLogic.actions.makeRequest).toHaveBeenCalledWith({
           connectorId: '2',
           pipeline: DEFAULT_PIPELINE_VALUES,
+        });
+      });
+    });
+    describe('fetchCustomPipelineSuccess', () => {
+      it('should support api indices with custom ingest pipelines', () => {
+        PipelinesLogic.actions.fetchIndexApiSuccess({
+          ...apiIndex,
+        });
+        const indexName = apiIndex.name;
+        const indexPipelines: Record<string, IngestPipeline> = {
+          [indexName]: {
+            processors: [],
+            version: 1,
+          },
+          [`${indexName}@custom`]: {
+            processors: [],
+            version: 1,
+          },
+          [`${indexName}@ml-inference`]: {
+            processors: [],
+            version: 1,
+          },
+        };
+        PipelinesLogic.actions.fetchCustomPipelineSuccess(indexPipelines);
+
+        expect(PipelinesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          customPipelineData: indexPipelines,
+          index: {
+            ...apiIndex,
+          },
+          indexName,
+          pipelineName: indexName,
+          canSetPipeline: false,
+          hasIndexIngestionPipeline: true,
+          canUseMlInferencePipeline: true,
         });
       });
     });

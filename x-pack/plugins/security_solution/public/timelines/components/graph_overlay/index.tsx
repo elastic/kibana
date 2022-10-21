@@ -46,7 +46,7 @@ const OverlayContainer = styled.div`
 const FullScreenOverlayStyles = css`
   position: fixed;
   top: 0;
-  bottom: 0;
+  bottom: 2em;
   left: 0;
   right: 0;
   z-index: ${euiThemeVars.euiZLevel3};

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FormSchema, FIELD_TYPES } from '../../common/shared_imports';
+import type { FormSchema } from '../../common/shared_imports';
+import { FIELD_TYPES } from '../../common/shared_imports';
 
 export interface FormProps {
   connectorId: string;

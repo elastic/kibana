@@ -8,14 +8,15 @@
 import React, { useState, VFC } from 'react';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FilterInContextMenu } from '../../../../query_bar/components/filter_in';
-import { FilterOutContextMenu } from '../../../../query_bar/components/filter_out';
+import { CopyToClipboardContextMenu } from '../../copy_to_clipboard';
+import { FilterInContextMenu, FilterOutContextMenu } from '../../../../query_bar';
 import { AddToTimelineContextMenu } from '../../../../timeline/components/add_to_timeline';
 
 export const POPOVER_BUTTON_TEST_ID = 'tiBarchartPopoverButton';
 export const TIMELINE_BUTTON_TEST_ID = 'tiBarchartTimelineButton';
 export const FILTER_IN_BUTTON_TEST_ID = 'tiBarchartFilterInButton';
 export const FILTER_OUT_BUTTON_TEST_ID = 'tiBarchartFilterOutButton';
+export const COPY_TO_CLIPBOARD_BUTTON_TEST_ID = 'tiBarchartCopyToClipboardButton';
 
 const BUTTON_LABEL = i18n.translate('xpack.threatIntelligence.indicator.barChart.popover', {
   defaultMessage: 'More actions',
@@ -42,6 +43,7 @@ export const IndicatorBarchartLegendAction: VFC<IndicatorBarchartLegendActionPro
     <FilterInContextMenu data={data} field={field} data-test-subj={FILTER_IN_BUTTON_TEST_ID} />,
     <FilterOutContextMenu data={data} field={field} data-test-subj={FILTER_OUT_BUTTON_TEST_ID} />,
     <AddToTimelineContextMenu data={data} field={field} data-test-subj={TIMELINE_BUTTON_TEST_ID} />,
+    <CopyToClipboardContextMenu value={data} data-test-subj={COPY_TO_CLIPBOARD_BUTTON_TEST_ID} />,
   ];
 
   return (
