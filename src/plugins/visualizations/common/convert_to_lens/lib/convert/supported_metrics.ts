@@ -154,6 +154,9 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     supportedDataTypes: {
       default: ['number'],
       heatmap: ['number'],
+      line: ['number'],
+      area: ['number'],
+      histogram: ['number'],
     },
   },
   min: {
@@ -163,6 +166,9 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     supportedDataTypes: {
       default: supportedDataTypesWithDate,
       heatmap: ['number'],
+      line: ['number'],
+      area: ['number'],
+      histogram: ['number'],
     },
   },
   percentiles: {
