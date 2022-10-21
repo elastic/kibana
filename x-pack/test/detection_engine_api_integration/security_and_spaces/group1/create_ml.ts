@@ -17,7 +17,7 @@ import {
   SPACE_IDS,
   VERSION,
 } from '@kbn/rule-data-utils';
-import { MachineLearningCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { MachineLearningRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -47,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const siemModule = 'security_linux_v3';
   const mlJobId = 'v3_linux_anomalous_network_activity';
-  const testRule: MachineLearningCreateSchema = {
+  const testRule: MachineLearningRuleCreateProps = {
     name: 'Test ML rule',
     description: 'Test ML rule description',
     risk_score: 50,
@@ -185,7 +185,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should create 7 alerts from ML rule when records meet anomaly_threshold', async () => {
-      const rule: MachineLearningCreateSchema = {
+      const rule: MachineLearningRuleCreateProps = {
         ...testRule,
         anomaly_threshold: 20,
       };

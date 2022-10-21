@@ -9,12 +9,12 @@ import type { List } from '@kbn/securitysolution-io-ts-list-types';
 
 import type {
   RiskScoreMapping,
+  Severity,
+  SeverityMapping,
   ThreatIndex,
   ThreatMapping,
   Threats,
   Type,
-  SeverityMapping,
-  Severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase, Filter } from '@kbn/es-query';
 import type { RuleAction } from '@kbn/alerting-plugin/common';
@@ -25,16 +25,16 @@ import type { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import type { FieldValueTimeline } from '../../../components/rules/pick_timeline';
 import type { FieldValueThreshold } from '../../../components/rules/threshold_input';
 import type {
-  Author,
   BuildingBlockType,
-  License,
   RelatedIntegrationArray,
   RequiredFieldArray,
+  RuleAuthorArray,
+  RuleLicense,
   RuleNameOverride,
-  SortOrder,
   SetupGuide,
   TimestampOverride,
-} from '../../../../../common/detection_engine/schemas/common';
+} from '../../../../../common/detection_engine/rule_schema';
+import type { SortOrder } from '../../../../../common/detection_engine/schemas/common';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import type {
   RuleResponseAction,
@@ -215,12 +215,12 @@ export interface DefineStepRuleJson {
 }
 
 export interface AboutStepRuleJson {
-  author: Author;
+  author: RuleAuthorArray;
   building_block_type?: BuildingBlockType;
   exceptions_list?: List[];
   name: string;
   description: string;
-  license: License;
+  license: RuleLicense;
   severity: string;
   severity_mapping: SeverityMapping;
   risk_score: number;

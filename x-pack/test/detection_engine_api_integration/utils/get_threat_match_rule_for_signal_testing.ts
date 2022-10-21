@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ThreatMatchCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { getRuleForSignalTesting } from './get_rule_for_signal_testing';
 
 /**
@@ -19,7 +19,7 @@ export const getThreatMatchRuleForSignalTesting = (
   index: string[],
   ruleId = 'threat-match-rule',
   enabled = true
-): ThreatMatchCreateSchema => ({
+): ThreatMatchRuleCreateProps => ({
   ...getRuleForSignalTesting(index, ruleId, enabled),
   type: 'threat_match',
   language: 'kuery',

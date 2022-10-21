@@ -25,11 +25,11 @@ import { orderBy, get } from 'lodash';
 
 import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
 import {
-  EqlCreateSchema,
-  QueryCreateSchema,
-  SavedQueryCreateSchema,
-  ThresholdCreateSchema,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+  EqlRuleCreateProps,
+  QueryRuleCreateProps,
+  SavedQueryRuleCreateProps,
+  ThresholdRuleCreateProps,
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
 import {
   ALERT_ANCESTORS,
@@ -92,7 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should have the specific audit record for _id or none of these tests below will pass', async () => {
-        const rule: QueryCreateSchema = {
+        const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['auditbeat-*']),
           query: `_id:${ID}`,
         };
@@ -105,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should abide by max_signals > 100', async () => {
         const maxSignals = 500;
-        const rule: QueryCreateSchema = {
+        const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['auditbeat-*']),
           max_signals: maxSignals,
         };
@@ -117,7 +117,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should have recorded the rule_id within the signal', async () => {
-        const rule: QueryCreateSchema = {
+        const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['auditbeat-*']),
           query: `_id:${ID}`,
         };
@@ -129,7 +129,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should query and get back expected signal structure using a basic KQL query', async () => {
-        const rule: QueryCreateSchema = {
+        const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['auditbeat-*']),
           query: `_id:${ID}`,
         };
@@ -162,7 +162,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should query and get back expected signal structure using a saved query rule', async () => {
-        const rule: SavedQueryCreateSchema = {
+        const rule: SavedQueryRuleCreateProps = {
           ...getRuleForSignalTesting(['auditbeat-*']),
           type: 'saved_query',
           query: `_id:${ID}`,
@@ -196,7 +196,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should query and get back expected signal structure when it is a signal on a signal', async () => {
-        const rule: QueryCreateSchema = {
+        const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['auditbeat-*']),
           query: `_id:${ID}`,
         };
@@ -205,7 +205,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForSignalsToBePresent(supertest, log, 1, [createdId]);
 
         // Run signals on top of that 1 signal which should create a single signal (on top of) a signal
-        const ruleForSignals: QueryCreateSchema = {
+        const ruleForSignals: QueryRuleCreateProps = {
           ...getRuleForSignalTesting([`.alerts-security.alerts-default*`]),
           rule_id: 'signal-on-signal',
         };
@@ -260,7 +260,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates a correctly formatted signal from EQL non-sequence queries', async () => {
-          const rule: EqlCreateSchema = {
+          const rule: EqlRuleCreateProps = {
             ...getEqlRuleForSignalTesting(['auditbeat-*']),
             query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
           };
@@ -364,7 +364,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates up to max_signals for non-sequence EQL queries', async () => {
-          const rule: EqlCreateSchema = getEqlRuleForSignalTesting(['auditbeat-*']);
+          const rule: EqlRuleCreateProps = getEqlRuleForSignalTesting(['auditbeat-*']);
           const { id } = await createRule(supertest, log, rule);
           await waitForRuleSuccessOrStatus(supertest, log, id);
           await waitForSignalsToBePresent(supertest, log, 100, [id]);
@@ -376,7 +376,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('uses the provided event_category_override', async () => {
-          const rule: EqlCreateSchema = {
+          const rule: EqlRuleCreateProps = {
             ...getEqlRuleForSignalTesting(['auditbeat-*']),
             query: 'config_change where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
             event_category_override: 'auditd.message_type',
@@ -449,7 +449,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('uses the provided timestamp_field', async () => {
-          const rule: EqlCreateSchema = {
+          const rule: EqlRuleCreateProps = {
             ...getEqlRuleForSignalTesting(['fake.index.1']),
             query: 'any where true',
             timestamp_field: 'created_at',
@@ -465,7 +465,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('uses the provided tiebreaker_field', async () => {
-          const rule: EqlCreateSchema = {
+          const rule: EqlRuleCreateProps = {
             ...getEqlRuleForSignalTesting(['fake.index.1']),
             query: 'any where true',
             tiebreaker_field: 'locale',
@@ -481,7 +481,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates building block signals from EQL sequences in the expected form', async () => {
-          const rule: EqlCreateSchema = {
+          const rule: EqlRuleCreateProps = {
             ...getEqlRuleForSignalTesting(['auditbeat-*']),
             query: 'sequence by host.name [anomoly where true] [any where true]', // TODO: spelling
           };
@@ -629,7 +629,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates shell signals from EQL sequences in the expected form', async () => {
-          const rule: EqlCreateSchema = {
+          const rule: EqlRuleCreateProps = {
             ...getEqlRuleForSignalTesting(['auditbeat-*']),
             query: 'sequence by host.name [anomoly where true] [any where true]',
           };
@@ -715,7 +715,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates up to max_signals with an EQL rule', async () => {
-          const rule: EqlCreateSchema = {
+          const rule: EqlRuleCreateProps = {
             ...getEqlRuleForSignalTesting(['auditbeat-*']),
             query: 'sequence by host.name [any where true] [any where true]',
             max_signals: 200,
@@ -739,7 +739,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates signals when an index name contains special characters to encode', async () => {
-          const rule: EqlCreateSchema = {
+          const rule: EqlRuleCreateProps = {
             ...getEqlRuleForSignalTesting(['auditbeat-*', '<my-index-{now/d}*>']),
             query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
           };
@@ -751,7 +751,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('uses the provided filters', async () => {
-          const rule: EqlCreateSchema = {
+          const rule: EqlRuleCreateProps = {
             ...getEqlRuleForSignalTesting(['auditbeat-*']),
             query: 'any where true',
             filters: [
@@ -808,7 +808,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           it('should be enriched with host risk score', async () => {
-            const rule: EqlCreateSchema = {
+            const rule: EqlRuleCreateProps = {
               ...getEqlRuleForSignalTesting(['auditbeat-*']),
               query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
             };
@@ -829,7 +829,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('Threshold Rules', () => {
         it('generates 1 signal from Threshold rules when threshold is met', async () => {
-          const rule: ThresholdCreateSchema = {
+          const rule: ThresholdRuleCreateProps = {
             ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             threshold: {
               field: ['host.id'],
@@ -877,7 +877,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates 2 signals from Threshold rules when threshold is met', async () => {
-          const rule: ThresholdCreateSchema = {
+          const rule: ThresholdRuleCreateProps = {
             ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             threshold: {
               field: 'host.id',
@@ -892,7 +892,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('applies the provided query before bucketing ', async () => {
-          const rule: ThresholdCreateSchema = {
+          const rule: ThresholdRuleCreateProps = {
             ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             query: 'host.id:"2ab45fc1c41e4c84bbd02202a7e5761f"',
             threshold: {
@@ -908,7 +908,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates no signals from Threshold rules when threshold is met and cardinality is not met', async () => {
-          const rule: ThresholdCreateSchema = {
+          const rule: ThresholdRuleCreateProps = {
             ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             threshold: {
               field: 'host.id',
@@ -927,7 +927,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates no signals from Threshold rules when cardinality is met and threshold is not met', async () => {
-          const rule: ThresholdCreateSchema = {
+          const rule: ThresholdRuleCreateProps = {
             ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             threshold: {
               field: 'host.id',
@@ -946,7 +946,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates signals from Threshold rules when threshold and cardinality are both met', async () => {
-          const rule: ThresholdCreateSchema = {
+          const rule: ThresholdRuleCreateProps = {
             ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             threshold: {
               field: 'host.id',
@@ -1004,7 +1004,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should not generate signals if only one field meets the threshold requirement', async () => {
-          const rule: ThresholdCreateSchema = {
+          const rule: ThresholdRuleCreateProps = {
             ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             threshold: {
               field: ['host.id', 'process.name'],
@@ -1017,7 +1017,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates signals from Threshold rules when bucketing by multiple fields', async () => {
-          const rule: ThresholdCreateSchema = {
+          const rule: ThresholdRuleCreateProps = {
             ...getThresholdRuleForSignalTesting(['auditbeat-*']),
             threshold: {
               field: ['host.id', 'process.name', 'event.module'],
@@ -1086,7 +1086,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           it('applies timestamp override when using single field', async () => {
-            const rule: ThresholdCreateSchema = {
+            const rule: ThresholdRuleCreateProps = {
               ...getThresholdRuleForSignalTesting(['timestamp-fallback-test']),
               threshold: {
                 field: 'host.name',
@@ -1116,7 +1116,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           it('applies timestamp override when using multiple fields', async () => {
-            const rule: ThresholdCreateSchema = {
+            const rule: ThresholdRuleCreateProps = {
               ...getThresholdRuleForSignalTesting(['timestamp-fallback-test']),
               threshold: {
                 field: ['host.name', 'source.ip'],
@@ -1156,7 +1156,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           it('should be enriched with host risk score', async () => {
-            const rule: ThresholdCreateSchema = {
+            const rule: ThresholdRuleCreateProps = {
               ...getThresholdRuleForSignalTesting(['auditbeat-*']),
               threshold: {
                 field: 'host.name',
@@ -1181,7 +1181,7 @@ export default ({ getService }: FtrProviderContext) => {
       describe('Enrich alerts: query rule', () => {
         describe('without index avalable', () => {
           it('should do not have risk score fields', async () => {
-            const rule: QueryCreateSchema = {
+            const rule: QueryRuleCreateProps = {
               ...getRuleForSignalTesting(['auditbeat-*']),
               query: `_id:${ID}`,
             };
@@ -1206,7 +1206,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           it('should host have risk score field and do not have user risk score', async () => {
-            const rule: QueryCreateSchema = {
+            const rule: QueryRuleCreateProps = {
               ...getRuleForSignalTesting(['auditbeat-*']),
               query: `_id:${ID} or _id:GBbXBmkBR346wHgn5_eR or _id:x10zJ2oE9v5HJNSHhyxi`,
             };
@@ -1247,7 +1247,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           it('should have host and user risk score fields', async () => {
-            const rule: QueryCreateSchema = {
+            const rule: QueryRuleCreateProps = {
               ...getRuleForSignalTesting(['auditbeat-*']),
               query: `_id:${ID}`,
             };
@@ -1282,7 +1282,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
       });
 
-      const executeRuleAndGetSignals = async (rule: QueryCreateSchema) => {
+      const executeRuleAndGetSignals = async (rule: QueryRuleCreateProps) => {
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccessOrStatus(supertest, log, id);
         await waitForSignalsToBePresent(supertest, log, 4, [id]);
@@ -1293,7 +1293,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
 
       it('should get default severity and risk score if there is no mapping', async () => {
-        const rule: QueryCreateSchema = {
+        const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['signal_overrides']),
           severity: 'medium',
           risk_score: 75,
@@ -1312,7 +1312,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should get overridden severity if the rule has a mapping for it', async () => {
-        const rule: QueryCreateSchema = {
+        const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['signal_overrides']),
           severity: 'medium',
           severity_mapping: [
@@ -1347,7 +1347,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should get overridden risk score if the rule has a mapping for it', async () => {
-        const rule: QueryCreateSchema = {
+        const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['signal_overrides']),
           severity: 'medium',
           risk_score: 75,
@@ -1380,7 +1380,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should get overridden severity and risk score if the rule has both mappings', async () => {
-        const rule: QueryCreateSchema = {
+        const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['signal_overrides']),
           severity: 'medium',
           severity_mapping: [
@@ -1440,7 +1440,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should generate signals with name_override field', async () => {
-        const rule: QueryCreateSchema = {
+        const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['auditbeat-*']),
           rule_name_override: 'event.action',
         };
@@ -1503,7 +1503,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not generate duplicate signals', async () => {
-        const rule: QueryCreateSchema = {
+        const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['auditbeat-*']),
           query: `_id:${ID}`,
         };

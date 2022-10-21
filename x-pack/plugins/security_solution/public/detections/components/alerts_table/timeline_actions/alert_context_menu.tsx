@@ -42,7 +42,7 @@ import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/t
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
 import { isAlertFromEndpointAlert } from '../../../../common/utils/endpoint_alert_check';
-import type { Rule } from '../../../containers/detection_engine/rules/types';
+import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
 
 interface AlertContextMenuProps {
   ariaLabel?: string;

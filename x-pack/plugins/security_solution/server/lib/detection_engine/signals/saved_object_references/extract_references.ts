@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
 
-import type { RuleParams } from '../../schemas/rule_schemas';
+import type { RuleParams } from '../../rule_schema';
 
 import { isMachineLearningParams } from '../utils';
 

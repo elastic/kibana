@@ -23,7 +23,7 @@ import { useCreateOrUpdateException } from '../../logic/use_create_update_except
 import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import * as helpers from '../../utils/helpers';
-import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
+import type { Rule } from '../../../rule_management/logic/types';
 import * as i18n from './translations';
 
 import { TestProviders } from '../../../../common/mock';
@@ -31,15 +31,14 @@ import { TestProviders } from '../../../../common/mock';
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
-} from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+} from '../../../../../common/detection_engine/rule_schema/mocks';
 import type { AlertData } from '../../utils/types';
-import { useFindRules } from '../../../../detections/pages/detection_engine/rules/all/rules_table/use_find_rules';
+import { useFindRules } from '../../../rule_management/logic/use_find_rules';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/containers/source');
-jest.mock('../../../../detections/containers/detection_engine/rules');
 jest.mock('../../logic/use_create_update_exception');
 jest.mock('../../logic/use_exception_flyout_data');
 jest.mock('../../logic/use_find_references');
@@ -47,9 +46,9 @@ jest.mock('@kbn/securitysolution-hook-utils', () => ({
   ...jest.requireActual('@kbn/securitysolution-hook-utils'),
   useAsync: jest.fn(),
 }));
-jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
+jest.mock('../../../rule_management/logic/use_rule');
 jest.mock('@kbn/lists-plugin/public');
-jest.mock('../../../../detections/pages/detection_engine/rules/all/rules_table/use_find_rules');
+jest.mock('../../../rule_management/logic/use_find_rules');
 
 const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as jest.Mock<
   ReturnType<typeof getExceptionBuilderComponentLazy>

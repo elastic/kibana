@@ -12,7 +12,7 @@ import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import * as i18n from './translations';
-import type { Rule } from '../../../../../detections/containers/detection_engine/rules/types';
+import type { Rule } from '../../../../rule_management/logic/types';
 import { ExceptionsAddToRulesOptions } from '../add_to_rules_options';
 import { ExceptionsAddToListsOptions } from '../add_to_lists_options';
 

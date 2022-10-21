@@ -94,14 +94,14 @@ export const MODAL_ERROR_ACCORDION_TEXT = i18n.translate(
   }
 );
 
-export const DISSASOCIATE_LIST_SUCCESS = (id: string) =>
-  i18n.translate('xpack.securitySolution.exceptions.dissasociateListSuccessText', {
+export const DISASSOCIATE_LIST_SUCCESS = (id: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.disassociateListSuccessText', {
     values: { id },
     defaultMessage: 'Exception list ({id}) has successfully been removed',
   });
 
-export const DISSASOCIATE_EXCEPTION_LIST_ERROR = i18n.translate(
-  'xpack.securitySolution.exceptions.dissasociateExceptionListError',
+export const DISASSOCIATE_EXCEPTION_LIST_ERROR = i18n.translate(
+  'xpack.securitySolution.exceptions.disassociateExceptionListError',
   {
     defaultMessage: 'Failed to remove exception list',
   }

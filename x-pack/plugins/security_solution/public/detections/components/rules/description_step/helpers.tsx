@@ -36,7 +36,8 @@ import * as i18nRiskScore from '../risk_score_mapping/translations';
 import type {
   RequiredFieldArray,
   Threshold,
-} from '../../../../../common/detection_engine/schemas/common';
+} from '../../../../../common/detection_engine/rule_schema';
+
 import * as i18n from './translations';
 import type { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';

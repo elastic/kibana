@@ -58,8 +58,6 @@ export const RULES_TABLE_AUTOREFRESH_INDICATOR = '[data-test-subj="loadingRulesI
 
 export const RISK_SCORE = '[data-test-subj="riskScore"]';
 
-export const RELOAD_PREBUILT_RULES_BTN = '[data-test-subj="reloadPrebuiltRulesBtn"]';
-
 export const SECOND_RULE = 1;
 
 export const RULE_CHECKBOX = '.euiTableRow .euiCheckbox__input';

@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import type { WrapSequences } from '../../signals/types';
 import { buildAlertGroupFromSequence } from './utils/build_alert_group_from_sequence';
 import type { ConfigType } from '../../../../config';
-import type { CompleteRule, RuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, RuleParams } from '../../rule_schema';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,

@@ -18,7 +18,7 @@ import { buildRelatedIntegrationsDescription } from '../related_integrations/int
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
-} from '../../../../../common/detection_engine/schemas/common';
+} from '../../../../../common/detection_engine/rule_schema';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -48,7 +48,7 @@ import { buildMlJobsDescription } from './ml_job_description';
 import { buildActionsDescription } from './actions_description';
 import { buildThrottleDescription } from './throttle_description';
 import { THREAT_QUERY_LABEL } from './translations';
-import { filterEmptyThreats } from '../../../pages/detection_engine/rules/create/helpers';
+import { filterEmptyThreats } from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   &.euiDescriptionList--column .euiDescriptionList__title {

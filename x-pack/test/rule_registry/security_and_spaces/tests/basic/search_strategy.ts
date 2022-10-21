@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { QueryCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   deleteSignalsIndex,
@@ -118,7 +118,7 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
         await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
 
-        const rule: QueryCreateSchema = {
+        const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['auditbeat-*']),
           query: `_id:${ID}`,
         };

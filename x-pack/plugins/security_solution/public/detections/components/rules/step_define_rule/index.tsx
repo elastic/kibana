@@ -36,7 +36,7 @@ import type { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common
 import {
   filterRuleFieldsForType,
   getStepDataDataSource,
-} from '../../../pages/detection_engine/rules/create/helpers';
+} from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
 import type { DefineStepRule, RuleStepProps } from '../../../pages/detection_engine/rules/types';
 import { RuleStep, DataSourceType } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';

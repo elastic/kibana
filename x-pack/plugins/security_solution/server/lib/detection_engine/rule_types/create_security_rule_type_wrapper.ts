@@ -25,14 +25,18 @@ import {
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import type { CreateSecurityRuleTypeWrapper } from './types';
 import { getListClient } from './utils/get_list_client';
-import type { NotificationRuleTypeParams } from '../notifications/schedule_notification_actions';
-import { scheduleNotificationActions } from '../notifications/schedule_notification_actions';
-import { getNotificationResultsLink } from '../notifications/utils';
+// eslint-disable-next-line no-restricted-imports
+import type { NotificationRuleTypeParams } from '../rule_actions_legacy';
+// eslint-disable-next-line no-restricted-imports
+import {
+  scheduleNotificationActions,
+  scheduleThrottledNotificationActions,
+  getNotificationResultsLink,
+} from '../rule_actions_legacy';
 import { createResultObject } from './utils';
 import { bulkCreateFactory, wrapHitsFactory, wrapSequencesFactory } from './factories';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
 import { truncateList } from '../rule_monitoring';
-import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
 import { extractReferences, injectReferences } from '../signals/saved_object_references';
 import { withSecuritySpan } from '../../../utils/with_security_span';

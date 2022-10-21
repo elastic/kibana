@@ -15,7 +15,7 @@ import { getMergeStrategy } from '../../../signals/source_fields_merging/strateg
 import type { BaseSignalHit, SignalSource, SignalSourceHit } from '../../../signals/types';
 import { additionalAlertFields, buildAlert } from './build_alert';
 import { filterSource } from './filter_source';
-import type { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import { buildRuleNameFromMapping } from '../../../signals/mappings/build_rule_name_from_mapping';
 import { buildSeverityFromMapping } from '../../../signals/mappings/build_severity_from_mapping';
 import { buildRiskScoreFromMapping } from '../../../signals/mappings/build_risk_score_from_mapping';

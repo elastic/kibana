@@ -7,10 +7,10 @@
 
 import { Readable } from 'stream';
 
-import type { HapiReadableStream } from '../../rules/types';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
-import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
+import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
+import type { HapiReadableStream } from '../../rule_management/logic/import/hapi_readable_stream';
 
 /**
  * Given a string, builds a hapi stream as our
@@ -34,7 +34,7 @@ export const buildHapiStream = (string: string, filename = 'file.ndjson'): HapiR
   return stream;
 };
 
-export const getOutputRuleAlertForRest = (): FullResponseSchema => ({
+export const getOutputRuleAlertForRest = (): RuleResponse => ({
   author: ['Elastic'],
   actions: [],
   building_block_type: 'default',

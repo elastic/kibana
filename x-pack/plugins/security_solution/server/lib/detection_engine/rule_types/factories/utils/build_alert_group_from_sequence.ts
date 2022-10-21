@@ -16,7 +16,7 @@ import { buildBulkBody } from './build_bulk_body';
 import type { EqlSequence } from '../../../../../../common/detection_engine/types';
 import { generateBuildingBlockIds } from './generate_building_block_ids';
 import type { BuildReasonMessage } from '../../../signals/reason_formatters';
-import type { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_GROUP_ID,

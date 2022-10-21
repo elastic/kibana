@@ -22,7 +22,7 @@ import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution
 
 import * as i18n from './translations';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
+import type { Rule } from '../../../rule_management/logic/types';
 import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
 import { useAddRuleDefaultException } from '../../logic/use_add_rule_exception';
 

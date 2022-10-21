@@ -8,7 +8,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import type { DataViewBase } from '@kbn/es-query';
 
-import type { Rule } from '../../../detections/containers/detection_engine/rules/types';
+import type { Rule } from '../../rule_management/logic/types';
 import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
 import { useKibana } from '../../../common/lib/kibana';
 import { useFetchIndex } from '../../../common/containers/source';

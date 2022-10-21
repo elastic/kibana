@@ -6,35 +6,33 @@
  */
 
 import expect from '@kbn/expect';
-
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '@kbn/security-solution-plugin/common/constants';
-
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import {
   BulkAction,
   BulkActionEditType,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request/perform_bulk_action_schema';
-import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
+  createLegacyRuleAction,
   createRule,
   createSignalsIndex,
   deleteAllAlerts,
   deleteSignalsIndex,
+  getLegacyActionSO,
+  getSimpleMlRule,
   getSimpleRule,
   getSimpleRuleOutput,
-  removeServerGeneratedProperties,
-  createLegacyRuleAction,
-  getLegacyActionSO,
-  installPrePackagedRules,
-  getSimpleMlRule,
-  getWebHookAction,
   getSlackAction,
+  getWebHookAction,
+  installPrePackagedRules,
+  removeServerGeneratedProperties,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -374,7 +372,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(rulesResponse.total).to.eql(2);
 
-      rulesResponse.data.forEach((rule: FullResponseSchema) => {
+      rulesResponse.data.forEach((rule: RuleResponse) => {
         expect(rule.actions).to.eql([
           {
             action_type_id: '.slack',
