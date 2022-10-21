@@ -66,7 +66,7 @@ const isDataViewField = (field: string | DataViewField): field is DataViewField 
   return false;
 };
 
-const isValidAgg = (agg: SchemaConfig<METRIC_TYPES>, dataView: DataView) => {
+const isValidAgg = (visType: string, agg: SchemaConfig<METRIC_TYPES>, dataView: DataView) => {
   const aggregation = SUPPORTED_METRICS[agg.aggType];
   if (!aggregation) {
     return false;
@@ -77,7 +77,7 @@ const isValidAgg = (agg: SchemaConfig<METRIC_TYPES>, dataView: DataView) => {
     }
     const sourceField = getFieldNameFromField(agg.aggParams?.field);
     const field = dataView.getFieldByName(sourceField!);
-    if (!isFieldValid(field, aggregation)) {
+    if (!isFieldValid(visType, field, aggregation)) {
       return false;
     }
   }
@@ -86,13 +86,14 @@ const isValidAgg = (agg: SchemaConfig<METRIC_TYPES>, dataView: DataView) => {
 };
 
 const getFormulaForAggsWithoutParams = (
+  visType: string,
   agg: SchemaConfig<METRIC_TYPES>,
   dataView: DataView,
   selector: string | undefined,
   reducedTimeRange?: string
 ) => {
   const op = SUPPORTED_METRICS[agg.aggType];
-  if (!isValidAgg(agg, dataView) || !op) {
+  if (!isValidAgg(visType, agg, dataView) || !op) {
     return null;
   }
 
@@ -101,6 +102,7 @@ const getFormulaForAggsWithoutParams = (
 };
 
 const getFormulaForPercentileRanks = (
+  visType: string,
   agg: SchemaConfig<METRIC_TYPES.PERCENTILE_RANKS>,
   dataView: DataView,
   selector: string | undefined,
@@ -108,7 +110,7 @@ const getFormulaForPercentileRanks = (
 ) => {
   const value = Number(agg.aggId?.split('.')[1]);
   const op = SUPPORTED_METRICS[agg.aggType];
-  if (!isValidAgg(agg, dataView) || !op) {
+  if (!isValidAgg(visType, agg, dataView) || !op) {
     return null;
   }
 
@@ -117,6 +119,7 @@ const getFormulaForPercentileRanks = (
 };
 
 const getFormulaForPercentile = (
+  visType: string,
   agg: SchemaConfig<METRIC_TYPES.PERCENTILES>,
   dataView: DataView,
   selector: string,
@@ -124,7 +127,7 @@ const getFormulaForPercentile = (
 ) => {
   const percentile = Number(agg.aggId?.split('.')[1]);
   const op = SUPPORTED_METRICS[agg.aggType];
-  if (!isValidAgg(agg, dataView) || !op) {
+  if (!isValidAgg(visType, agg, dataView) || !op) {
     return null;
   }
 
@@ -155,6 +158,7 @@ const getFormulaForSubMetric = ({
   if (METRIC_OPS_WITHOUT_PARAMS.includes(op.name)) {
     const metricAgg = agg as MetricAggsWithoutParams;
     return getFormulaForAggsWithoutParams(
+      visType,
       metricAgg,
       dataView,
       metricAgg.aggParams && 'field' in metricAgg.aggParams
@@ -169,6 +173,7 @@ const getFormulaForSubMetric = ({
     const percentileRanksAgg = agg as SchemaConfig<METRIC_TYPES.PERCENTILE_RANKS>;
 
     return getFormulaForPercentileRanks(
+      visType,
       percentileRanksAgg,
       dataView,
       percentileRanksAgg.aggParams?.field
@@ -233,6 +238,7 @@ export const getFormulaForAgg = ({
 
   if (isPercentileAgg(agg)) {
     return getFormulaForPercentile(
+      visType,
       agg,
       dataView,
       getFieldNameFromField(agg.aggParams?.field) ?? ''
@@ -241,6 +247,7 @@ export const getFormulaForAgg = ({
 
   if (isPercentileRankAgg(agg)) {
     return getFormulaForPercentileRanks(
+      visType,
       agg,
       dataView,
       getFieldNameFromField(agg.aggParams?.field) ?? ''
@@ -248,13 +255,14 @@ export const getFormulaForAgg = ({
   }
 
   if (isStdDevAgg(agg) && agg.aggId) {
-    if (!isValidAgg(agg, dataView)) {
+    if (!isValidAgg(visType, agg, dataView)) {
       return null;
     }
     return getStdDeviationFormula(agg.aggId, getFieldNameFromField(agg.aggParams?.field) ?? '');
   }
 
   return getFormulaForAggsWithoutParams(
+    visType,
     agg,
     dataView,
     isMetricWithField(agg) ? getFieldNameFromField(agg.aggParams?.field) ?? '' : ''

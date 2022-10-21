@@ -18,10 +18,12 @@ interface AggWithFormula {
   formula: string;
 }
 
+type SupportedDataTypes = { [key: string]: readonly string[] } & { default: readonly string[] };
+
 export type AggOptions<T> = {
   isFullReference: boolean;
   isFieldRequired: boolean;
-  supportedDataTypes: readonly string[];
+  supportedDataTypes: SupportedDataTypes;
 } & (T extends Exclude<Operation, 'formula'> ? Agg : AggWithFormula);
 
 // list of supported TSVB aggregation types in Lens
@@ -62,9 +64,9 @@ export type SupportedMetrics = LocalSupportedMetrics & {
   [Key in UnsupportedSupportedMetrics]?: null;
 };
 
-const supportedDataTypesWithDate = ['number', 'date', 'histogram'] as const;
-const supportedDataTypes = ['number', 'histogram'] as const;
-const extendedSupportedDataTypes = [
+const supportedDataTypesWithDate: readonly string[] = ['number', 'date', 'histogram'];
+const supportedDataTypes: readonly string[] = ['number', 'histogram'];
+const extendedSupportedDataTypes: readonly string[] = [
   'string',
   'boolean',
   'number',
@@ -74,44 +76,44 @@ const extendedSupportedDataTypes = [
   'date',
   'date_range',
   'murmur3',
-] as const;
+];
 
 export const SUPPORTED_METRICS: SupportedMetrics = {
   avg: {
     name: 'average',
     isFullReference: false,
     isFieldRequired: true,
-    supportedDataTypes: ['number'],
+    supportedDataTypes: { default: ['number'] },
   },
   cardinality: {
     name: 'unique_count',
     isFullReference: false,
     isFieldRequired: true,
-    supportedDataTypes: extendedSupportedDataTypes,
+    supportedDataTypes: { default: extendedSupportedDataTypes },
   },
   count: {
     name: 'count',
     isFullReference: false,
     isFieldRequired: false,
-    supportedDataTypes: [],
+    supportedDataTypes: { default: ['number'] },
   },
   moving_avg: {
     name: 'moving_average',
     isFullReference: true,
     isFieldRequired: true,
-    supportedDataTypes: ['number'],
+    supportedDataTypes: { default: ['number'] },
   },
   derivative: {
     name: 'differences',
     isFullReference: true,
     isFieldRequired: true,
-    supportedDataTypes: ['number'],
+    supportedDataTypes: { default: ['number'] },
   },
   cumulative_sum: {
     name: 'cumulative_sum',
     isFullReference: true,
     isFieldRequired: true,
-    supportedDataTypes: ['number'],
+    supportedDataTypes: { default: ['number'] },
   },
   avg_bucket: {
     name: 'formula',
@@ -119,7 +121,7 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     isFieldRequired: true,
     isFormula: true,
     formula: 'overall_average',
-    supportedDataTypes: ['number'],
+    supportedDataTypes: { default: ['number'] },
   },
   max_bucket: {
     name: 'formula',
@@ -127,7 +129,7 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     isFieldRequired: true,
     isFormula: true,
     formula: 'overall_max',
-    supportedDataTypes: ['number'],
+    supportedDataTypes: { default: ['number'] },
   },
   min_bucket: {
     name: 'formula',
@@ -135,7 +137,7 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     isFieldRequired: true,
     isFormula: true,
     formula: 'overall_min',
-    supportedDataTypes: ['number'],
+    supportedDataTypes: { default: ['number'] },
   },
   sum_bucket: {
     name: 'formula',
@@ -143,79 +145,85 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
     isFieldRequired: true,
     isFormula: true,
     formula: 'overall_sum',
-    supportedDataTypes: ['number'],
+    supportedDataTypes: { default: ['number'] },
   },
   max: {
     name: 'max',
     isFullReference: false,
     isFieldRequired: true,
-    supportedDataTypes: supportedDataTypesWithDate,
+    supportedDataTypes: {
+      default: ['number'],
+      heatmap: ['number'],
+    },
   },
   min: {
     name: 'min',
     isFullReference: false,
     isFieldRequired: true,
-    supportedDataTypes: supportedDataTypesWithDate,
+    supportedDataTypes: {
+      default: supportedDataTypesWithDate,
+      heatmap: ['number'],
+    },
   },
   percentiles: {
     name: 'percentile',
     isFullReference: false,
     isFieldRequired: true,
-    supportedDataTypes,
+    supportedDataTypes: { default: supportedDataTypes },
   },
   single_percentile: {
     name: 'percentile',
     isFullReference: false,
     isFieldRequired: true,
-    supportedDataTypes,
+    supportedDataTypes: { default: supportedDataTypes },
   },
   percentile_ranks: {
     name: 'percentile_rank',
     isFullReference: false,
     isFieldRequired: true,
-    supportedDataTypes,
+    supportedDataTypes: { default: supportedDataTypes },
   },
   single_percentile_rank: {
     name: 'percentile_rank',
     isFullReference: false,
     isFieldRequired: true,
-    supportedDataTypes,
+    supportedDataTypes: { default: supportedDataTypes },
   },
   sum: {
     name: 'sum',
     isFullReference: false,
     isFieldRequired: true,
-    supportedDataTypes,
+    supportedDataTypes: { default: supportedDataTypes },
   },
   top_hits: {
     name: 'last_value',
     isFullReference: false,
     isFieldRequired: true,
-    supportedDataTypes: extendedSupportedDataTypes,
+    supportedDataTypes: { default: extendedSupportedDataTypes },
   },
   top_metrics: {
     name: 'last_value',
     isFullReference: false,
     isFieldRequired: true,
-    supportedDataTypes: extendedSupportedDataTypes,
+    supportedDataTypes: { default: extendedSupportedDataTypes },
   },
   value_count: {
     name: 'count',
     isFullReference: false,
     isFieldRequired: true,
-    supportedDataTypes: extendedSupportedDataTypes,
+    supportedDataTypes: { default: extendedSupportedDataTypes },
   },
   std_dev: {
     name: 'standard_deviation',
     isFullReference: false,
     isFieldRequired: true,
-    supportedDataTypes,
+    supportedDataTypes: { default: supportedDataTypes },
   },
   median: {
     name: 'median',
     isFullReference: false,
     isFieldRequired: true,
-    supportedDataTypes,
+    supportedDataTypes: { default: supportedDataTypes },
   },
 } as const;
 
