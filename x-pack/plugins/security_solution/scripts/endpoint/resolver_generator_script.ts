@@ -126,11 +126,6 @@ async function addRole(
       })) as AxiosResponse
     ).data;
 
-    if (addedRole) {
-      console.log(`Role ${role.roleName} added successfully!`);
-    } else {
-      console.log(`Role ${role.roleName} already exists!`);
-    }
     return {
       roleName: role.roleName,
       // rbacPermissions: role.rbacPermissions,
@@ -144,12 +139,13 @@ async function addRole(
 interface UserInfo {
   username: string;
   password: string;
+  roles: string[];
 }
 
 async function addUser(
   esClient: Client,
-  user?: { username: string; password: string }
-  // roles?: string[]
+  user?: { username: string; password: string },
+  roles?: string[]
 ): Promise<UserInfo | undefined> {
   if (!user) {
     return;
@@ -440,10 +436,16 @@ async function main() {
 
   if (argv.rbacUser) {
     const newRoleData = argv.rbacUser;
-    console.log('rbac arg', newRoleData);
     const role = await addRole(kbnClient, newRoleData ? { roleName: newRoleData } : undefined);
     if (role) {
-      console.log('completed a role');
+      console.log(`Successfully added role: ${newRoleData}`);
+      const basicUser = await addUser(client, {
+        username: 'withHostIsolation',
+        password: 'changeme',
+        roles: [newRoleData],
+      });
+    } else {
+      console.log(`Failed to add role, ${newRoleData}`);
     }
   }
 
