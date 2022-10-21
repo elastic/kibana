@@ -42,7 +42,7 @@ export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
       'data-test-subj': 'editRuleAction',
       description: i18n.EDIT_RULE_SETTINGS,
       name: !hasActionsPrivileges ? (
-        <EuiToolTip position="left" content={i18n.EDIT_RULE_SETTINGS_TOOLTIP}>
+        <EuiToolTip position="left" content={i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES}>
           <>{i18n.EDIT_RULE_SETTINGS}</>
         </EuiToolTip>
       ) : (
@@ -58,7 +58,7 @@ export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
       description: i18n.DUPLICATE_RULE,
       icon: 'copy',
       name: !hasActionsPrivileges ? (
-        <EuiToolTip position="left" content={i18n.EDIT_RULE_SETTINGS_TOOLTIP}>
+        <EuiToolTip position="left" content={i18n.LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES}>
           <>{i18n.DUPLICATE_RULE}</>
         </EuiToolTip>
       ) : (

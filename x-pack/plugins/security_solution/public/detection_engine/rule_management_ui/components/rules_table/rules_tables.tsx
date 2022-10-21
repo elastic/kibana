@@ -35,7 +35,7 @@ import { AllRulesTabs } from './rules_table_toolbar';
 import { RulesTableUtilityBar } from './rules_table_utility_bar';
 import { useMonitoringColumns, useRulesColumns } from './use_columns';
 import { useUserData } from '../../../../detections/components/user_info';
-import { userHasPermissions } from '../../../../detections/pages/detection_engine/rules/helpers';
+import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -58,7 +58,7 @@ const NO_ITEMS_MESSAGE = (
 // eslint-disable-next-line complexity
 export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const [{ canUserCRUD }] = useUserData();
-  const hasPermissions = userHasPermissions(canUserCRUD);
+  const hasPermissions = hasUserCRUDPermission(canUserCRUD);
 
   const tableRef = useRef<EuiBasicTable>(null);
   const rulesTableContext = useRulesTableContext();
@@ -140,8 +140,8 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     [setPage, setPerPage, setSortingOptions]
   );
 
-  const rulesColumns = useRulesColumns({ hasPermissions });
-  const monitoringColumns = useMonitoringColumns({ hasPermissions });
+  const rulesColumns = useRulesColumns({ hasCRUDPermissions: hasPermissions });
+  const monitoringColumns = useMonitoringColumns({ hasCRUDPermissions: hasPermissions });
 
   const isSelectAllCalled = useRef(false);
 

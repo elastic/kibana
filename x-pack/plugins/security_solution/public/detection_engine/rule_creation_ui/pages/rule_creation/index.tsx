@@ -22,6 +22,7 @@ import { isThreatMatchRule } from '../../../../../common/detection_engine/utils'
 import { useCreateRule } from '../../../rule_management/logic';
 import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
+import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 
 import {
   getDetectionEngineUrl,
@@ -41,7 +42,6 @@ import * as RuleI18n from '../../../../detections/pages/detection_engine/rules/t
 import {
   redirectToDetections,
   getActionMessageParams,
-  userHasPermissions,
   MaxWidthEuiFlexItem,
 } from '../../../../detections/pages/detection_engine/rules/helpers';
 import type {
@@ -360,7 +360,7 @@ const CreateRulePageComponent: React.FC = () => {
       path: getDetectionEngineUrl(),
     });
     return null;
-  } else if (!userHasPermissions(canUserCRUD)) {
+  } else if (!hasUserCRUDPermission(canUserCRUD)) {
     navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRulesUrl(),

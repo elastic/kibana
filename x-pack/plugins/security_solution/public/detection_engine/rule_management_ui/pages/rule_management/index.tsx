@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+
 import { APP_UI_ID } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -16,27 +17,29 @@ import { getDetectionEngineUrl } from '../../../../common/components/link_to/red
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useKibana } from '../../../../common/lib/kibana';
+import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
+
 import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
 import { MlJobCompatibilityCallout } from '../../../../detections/components/callouts/ml_job_compatibility_callout';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
 import { LoadPrePackagedRules } from '../../../../detections/components/rules/pre_packaged_rules/load_prepackaged_rules';
 import { LoadPrePackagedRulesButton } from '../../../../detections/components/rules/pre_packaged_rules/load_prepackaged_rules_button';
 import { UpdatePrePackagedRulesCallOut } from '../../../../detections/components/rules/pre_packaged_rules/update_callout';
-import { useUserData } from '../../../../detections/components/user_info';
 import { ValueListsFlyout } from '../../../../detections/components/value_lists_management_flyout';
+import { useUserData } from '../../../../detections/components/user_info';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
-import {
-  redirectToDetections,
-  userHasPermissions,
-} from '../../../../detections/pages/detection_engine/rules/helpers';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import { redirectToDetections } from '../../../../detections/pages/detection_engine/rules/helpers';
+
 import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/use_find_rules_query';
 import { importRules } from '../../../rule_management/logic';
 import { usePrePackagedRulesInstallationStatus } from '../../../rule_management/logic/use_pre_packaged_rules_installation_status';
 import { usePrePackagedTimelinesInstallationStatus } from '../../../rule_management/logic/use_pre_packaged_timelines_installation_status';
+
 import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
+
+import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -125,7 +128,7 @@ const RulesPageComponent: React.FC = () => {
                 <EuiButton
                   data-test-subj="rules-import-modal-button"
                   iconType="importAction"
-                  isDisabled={!userHasPermissions(canUserCRUD) || loading}
+                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
                   onClick={showImportModal}
                 >
                   {i18n.IMPORT_RULE}
@@ -136,7 +139,7 @@ const RulesPageComponent: React.FC = () => {
                   data-test-subj="create-new-rule"
                   fill
                   iconType="plusInCircle"
-                  isDisabled={!userHasPermissions(canUserCRUD) || loading}
+                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
                   deepLinkId={SecurityPageName.rulesCreate}
                 >
                   {i18n.ADD_NEW_RULE}

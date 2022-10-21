@@ -10,7 +10,7 @@ import React, { memo } from 'react';
 import styled from 'styled-components';
 import { SecurityPageName } from '../../../../app/types';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
-import { userHasPermissions } from '../../../pages/detection_engine/rules/helpers';
+import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { useUserData } from '../../user_info';
 import { LoadPrePackagedRules } from './load_prepackaged_rules';
 import { LoadPrePackagedRulesButton } from './load_prepackaged_rules_button';
@@ -24,7 +24,7 @@ EmptyPrompt.displayName = 'EmptyPrompt';
 
 const PrePackagedRulesPromptComponent = () => {
   const [{ canUserCRUD }] = useUserData();
-  const hasPermissions = userHasPermissions(canUserCRUD);
+  const hasPermissions = hasUserCRUDPermission(canUserCRUD);
 
   return (
     <EmptyPrompt

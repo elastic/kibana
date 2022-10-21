@@ -18,7 +18,6 @@ import {
   getPrePackagedRuleInstallationStatus,
   getPrePackagedTimelineInstallationStatus,
   determineDetailsValue,
-  userHasPermissions,
   fillEmptySeverityMappings,
 } from './helpers';
 import {
@@ -448,29 +447,6 @@ describe('rule helpers', () => {
       };
 
       expect(result).toEqual(aboutRuleDetailsData);
-    });
-  });
-
-  describe('userHasPermissions', () => {
-    test("returns true when user's CRUD operations are null", () => {
-      const result: boolean = userHasPermissions(null);
-      const userHasPermissionsExpectedResult = true;
-
-      expect(result).toEqual(userHasPermissionsExpectedResult);
-    });
-
-    test('returns false when user cannot CRUD', () => {
-      const result: boolean = userHasPermissions(false);
-      const userHasPermissionsExpectedResult = false;
-
-      expect(result).toEqual(userHasPermissionsExpectedResult);
-    });
-
-    test('returns true when user can CRUD', () => {
-      const result: boolean = userHasPermissions(true);
-      const userHasPermissionsExpectedResult = true;
-
-      expect(result).toEqual(userHasPermissionsExpectedResult);
     });
   });
 

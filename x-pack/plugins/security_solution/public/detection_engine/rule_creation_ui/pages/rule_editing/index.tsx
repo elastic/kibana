@@ -25,6 +25,7 @@ import type { RuleUpdateProps } from '../../../../../common/detection_engine/rul
 import { useRule, useUpdateRule } from '../../../rule_management/logic';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
+import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import {
   getRuleDetailsUrl,
   getDetectionEngineUrl,
@@ -49,7 +50,6 @@ import {
   getStepsData,
   redirectToDetections,
   getActionMessageParams,
-  userHasPermissions,
   MaxWidthEuiFlexItem,
 } from '../../../../detections/pages/detection_engine/rules/helpers';
 import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
@@ -453,7 +453,7 @@ const EditRulePageComponent: FC = () => {
       path: getDetectionEngineUrl(),
     });
     return null;
-  } else if (!userHasPermissions(canUserCRUD)) {
+  } else if (!hasUserCRUDPermission(canUserCRUD)) {
     navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRuleDetailsUrl(ruleId ?? ''),

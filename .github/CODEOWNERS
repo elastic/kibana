@@ -143,7 +143,6 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /src/core/types/elasticsearch @elastic/apm-ui
 /packages/kbn-utility-types/src/dot.ts @dgieselaar
 /packages/kbn-utility-types/src/dot_test.ts @dgieselaar
-/packages/kbn-adhoc-profiler @elastic/apm-ui
 #CC# /src/plugins/apm_oss/ @elastic/apm-ui
 #CC# /x-pack/plugins/observability/ @elastic/apm-ui
 
@@ -861,7 +860,6 @@ packages/home/sample_data_card @elastic/shared-ux
 packages/home/sample_data_tab @elastic/shared-ux
 packages/home/sample_data_types @elastic/shared-ux
 packages/kbn-ace @elastic/platform-deployment-management
-packages/kbn-adhoc-profiler @elastic/apm-ui
 packages/kbn-alerts @elastic/security-solution
 packages/kbn-ambient-storybook-types @elastic/kibana-operations
 packages/kbn-ambient-ui-types @elastic/kibana-operations
