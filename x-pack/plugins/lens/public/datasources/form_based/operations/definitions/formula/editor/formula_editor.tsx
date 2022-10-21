@@ -600,7 +600,9 @@ export function FormulaEditor({
                 column: currentPosition.startColumn + cursorOffset,
                 lineNumber: currentPosition.startLineNumber,
               });
-              editor.trigger('lens', 'editor.action.triggerSuggest', {});
+              if (editOperation?.text !== '=') {
+                editor.trigger('lens', 'editor.action.triggerSuggest', {});
+              }
             }, 0);
           }
         }
