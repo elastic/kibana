@@ -94,7 +94,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
   if (model.series[0].aggregate_by) {
     if (
       !model.series[0].aggregate_function ||
-      !['sum', 'avg', 'min', 'max'].includes(model.series[0].aggregate_function)
+      !['sum', 'mean', 'min', 'max'].includes(model.series[0].aggregate_function)
     ) {
       return null;
     }
@@ -113,7 +113,10 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
     }
 
     columnStates.push(
-      getColumnState(bucketsColumns[0].columnId, model.series[0].aggregate_function)
+      getColumnState(
+        bucketsColumns[0].columnId,
+        model.series[0].aggregate_function === 'mean' ? 'avg' : model.series[0].aggregate_function
+      )
     );
   }
 
@@ -151,6 +154,10 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
     }
 
     metrics.push(...metricsColumns);
+  }
+
+  if (!metrics.length || metrics.every((metric) => metric.operationType === 'static_value')) {
+    return null;
   }
 
   const extendedLayer: ExtendedLayer = {
