@@ -484,10 +484,17 @@ export const EDIT_RULE_SETTINGS = i18n.translate(
   }
 );
 
-export const EDIT_RULE_SETTINGS_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.editRuleSettingsToolTip',
+export const LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaActionsFeaturePrivileges',
   {
     defaultMessage: 'You do not have Kibana Actions privileges',
+  }
+);
+
+export const LACK_OF_KIBANA_SECURITY_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaSecurityPrivileges',
+  {
+    defaultMessage: 'You do not have Kibana Security privileges',
   }
 );
 

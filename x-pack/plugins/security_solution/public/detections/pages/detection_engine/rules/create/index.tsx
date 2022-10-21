@@ -18,6 +18,7 @@ import React, { useCallback, useRef, useState, useMemo, useEffect } from 'react'
 import styled from 'styled-components';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import { isThreatMatchRule } from '../../../../../../common/detection_engine/utils';
 import { useCreateRule } from '../../../../containers/detection_engine/rules';
 import type { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
@@ -38,12 +39,7 @@ import { StepAboutRule } from '../../../../components/rules/step_about_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
 import { StepRuleActions } from '../../../../components/rules/step_rule_actions';
 import * as RuleI18n from '../translations';
-import {
-  redirectToDetections,
-  getActionMessageParams,
-  userHasPermissions,
-  MaxWidthEuiFlexItem,
-} from '../helpers';
+import { redirectToDetections, getActionMessageParams, MaxWidthEuiFlexItem } from '../helpers';
 import type {
   AboutStepRule,
   DefineStepRule,
@@ -364,7 +360,7 @@ const CreateRulePageComponent: React.FC = () => {
       path: getDetectionEngineUrl(),
     });
     return null;
-  } else if (!userHasPermissions(canUserCRUD)) {
+  } else if (!hasUserCRUDPermission(canUserCRUD)) {
     navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRulesUrl(),

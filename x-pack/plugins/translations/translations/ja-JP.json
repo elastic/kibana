@@ -27308,7 +27308,7 @@
     "xpack.securitySolution.detectionEngine.rules.allRules.actions.deleteRuleDescription": "ルールの削除",
     "xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleDescription": "ルールの複製",
     "xpack.securitySolution.detectionEngine.rules.allRules.actions.editRuleSettingsDescription": "ルール設定の編集",
-    "xpack.securitySolution.detectionEngine.rules.allRules.actions.editRuleSettingsToolTip": "Kibana アクション特権がありません",
+    "xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaActionsFeaturePrivileges": "Kibana アクション特権がありません",
     "xpack.securitySolution.detectionEngine.rules.allRules.actions.exportRuleDescription": "ルールのエクスポート",
     "xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deleteSelectedImmutableTitle": "選択には削除できないイミュータブルルールがあります",
     "xpack.securitySolution.detectionEngine.rules.allRules.batchActionsTitle": "一斉アクション",
