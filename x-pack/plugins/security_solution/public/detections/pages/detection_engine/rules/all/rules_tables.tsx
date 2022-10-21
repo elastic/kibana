@@ -179,8 +179,8 @@ export const RulesTables = React.memo<RulesTableProps>(
       [setPage, setPerPage, setSortingOptions]
     );
 
-    const rulesColumns = useRulesColumns({ hasPermissions });
-    const monitoringColumns = useMonitoringColumns({ hasPermissions });
+    const rulesColumns = useRulesColumns({ hasCRUDPermissions: hasPermissions });
+    const monitoringColumns = useMonitoringColumns({ hasCRUDPermissions: hasPermissions });
 
     const handleCreatePrePackagedRules = useCallback(async () => {
       if (createPrePackagedRules != null) {

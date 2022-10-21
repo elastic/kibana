@@ -21,6 +21,7 @@ import { useParams } from 'react-router-dom';
 import { noop } from 'lodash';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import type { UpdateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { useRule, useUpdateRule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
@@ -49,7 +50,6 @@ import {
   getStepsData,
   redirectToDetections,
   getActionMessageParams,
-  userHasPermissions,
   MaxWidthEuiFlexItem,
 } from '../helpers';
 import * as ruleI18n from '../translations';
@@ -454,7 +454,7 @@ const EditRulePageComponent: FC = () => {
       path: getDetectionEngineUrl(),
     });
     return null;
-  } else if (!userHasPermissions(canUserCRUD)) {
+  } else if (!hasUserCRUDPermission(canUserCRUD)) {
     navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRuleDetailsUrl(ruleId ?? ''),

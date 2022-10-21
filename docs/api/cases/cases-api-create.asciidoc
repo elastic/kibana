@@ -34,6 +34,18 @@ default space is used.
 [role="child_attributes"]
 === {api-request-body-title}
 
+`assignees`::
+(Optional, array of objects) Array containing users that are assigned to the case.
++
+.Properties of assignee objects
+[%collapsible%open]
+=====
+`uid`:: 
+(Required, string) A unique identifier for the user profile. These identifiers
+can be found by using the
+{ref}/security-api-suggest-user-profile.html[suggest user profile API].
+=====
+
 `connector`::
 (Required, object) An object that contains the connector configuration.
 +
@@ -207,6 +219,7 @@ the case identifier, version, and creation time. For example:
   "totalAlerts": 0,
   "title": "Case title 1",
   "tags": [ "tag 1" ],
+  "assignees": [],
   "settings": {
     "syncAlerts": true
   },
