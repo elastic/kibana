@@ -76,7 +76,7 @@ function DocumentationContent({ language, sections }: DocumentationProps) {
       >
         {i18n.translate('languageDocumentationPopover.header', {
           defaultMessage: '{language} reference',
-          values: { language: language.toUpperCase() },
+          values: { language },
         })}
       </EuiPopoverTitle>
       <EuiFlexGroup
