@@ -454,8 +454,8 @@ export const getMetricVisualization = ({
     return newState;
   },
 
-  getRemoveOperation(_state, _layerId) {
-    return 'clear';
+  getRemoveOperation(state, layerId) {
+    return layerId === state.trendlineLayerId ? 'remove' : 'clear';
   },
 
   getLayersToLinkTo(state, newLayerId: string): string[] {
