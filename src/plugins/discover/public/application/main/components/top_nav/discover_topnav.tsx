@@ -212,7 +212,7 @@ export const DiscoverTopNav = ({
     trigger: {
       label: dataView?.getName() || '',
       'data-test-subj': 'discover-dataView-switch-link',
-      title: dataView?.title || '',
+      title: dataView?.getIndexPattern() || '',
     },
     currentDataViewId: dataView?.id,
     onAddField: addField,
