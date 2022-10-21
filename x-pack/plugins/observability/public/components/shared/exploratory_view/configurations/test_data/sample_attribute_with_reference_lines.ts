@@ -67,7 +67,7 @@ export const sampleAttributeWithReferenceLines = {
                     'transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)',
                 },
                 isBucketed: false,
-                label: 'Pages loaded',
+                label: 'test-series',
                 operationType: 'formula',
                 params: {
                   format: {
@@ -322,6 +322,8 @@ export const sampleAttributeWithReferenceLines = {
         isVisible: true,
         position: 'right',
         showSingleSeries: true,
+        legendSize: 'large',
+        shouldTruncate: false,
       },
       preferredSeriesType: 'line',
       tickLabelsVisibilitySettings: {
