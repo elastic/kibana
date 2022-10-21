@@ -216,7 +216,7 @@ export const IndexPatternTable = ({
 
   const columns: Array<EuiBasicTableColumn<IndexPatternTableItem>> = [
     {
-      field: 'title',
+      field: 'name',
       name: i18n.translate('indexPatternManagement.dataViewTable.nameColumn', {
         defaultMessage: 'Name',
       }),
