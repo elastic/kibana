@@ -7,15 +7,13 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { DataViewsContract, type DataView } from '@kbn/data-views-plugin/public';
+import { type DataView } from '@kbn/data-views-plugin/public';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import type { FilterManager } from '@kbn/data-plugin/public';
-import type { ToastsStart } from '@kbn/core-notifications-browser';
-import { getUiActions } from '../../../kibana_services';
+import { DiscoverServices } from '../../../build_services';
 import { useConfirmPersistencePrompt } from '../../../hooks/use_confirm_persistence_prompt';
 import { getUiActions, getUrlTracker } from '../../../kibana_services';
 import { DiscoverStateContainer } from '../services/discover_state';
@@ -23,18 +21,14 @@ import { useFiltersValidation } from './use_filters_validation';
 
 export const useAdHocDataViews = ({
   dataView,
-  dataViews,
-  stateContainer, filterManager, toastNotifications,
-
-
-
+  stateContainer,
+  services,
 }: {
   dataView: DataView;
-  dataViews: DataViewsContract;
   stateContainer: DiscoverStateContainer;
-  filterManager: FilterManager;
-  toastNotifications: ToastsStart;
+  services: DiscoverServices;
 }) => {
+  const { filterManager, toastNotifications, dataViews } = services;
   const [adHocDataViewList, setAdHocDataViewList] = useState<DataView[]>(
     !dataView.isPersisted() ? [dataView] : []
   );
@@ -51,7 +45,11 @@ export const useAdHocDataViews = ({
   /**
    * Takes care of checking data view id references in filters
    */
-  useFiltersValidation({ savedSearch, filterManager, toastNotifications });
+  useFiltersValidation({
+    savedSearch: stateContainer.savedSearchState.get(),
+    filterManager,
+    toastNotifications,
+  });
 
   /**
    * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
@@ -60,6 +58,8 @@ export const useAdHocDataViews = ({
   const updateAdHocDataViewId = useCallback(
     async (dataViewToUpdate: DataView) => {
       const newDataView = await dataViews.create({ ...dataViewToUpdate.toSpec(), id: undefined });
+      if (!newDataView.id) return;
+
       const savedSearch = stateContainer.savedSearchState.get();
 
       dataViews.clearInstanceCache(dataViewToUpdate.id);
@@ -79,8 +79,9 @@ export const useAdHocDataViews = ({
         usedDataViews: [],
       } as ActionExecutionContext);
 
-      stateContainer.replaceUrlAppState({ index: newDataView.id });
-      getUrlTracker().setUrlTracking(newDataView);
+      stateContainer.actions.changeDataView(newDataView.id, true);
+      const trackingEnabled = Boolean(newDataView.isPersisted() || savedSearch.id);
+      getUrlTracker().setTrackingEnabled(trackingEnabled);
       return newDataView;
     },
     [dataViews, stateContainer]
@@ -95,6 +96,9 @@ export const useAdHocDataViews = ({
     const currentDataView = savedSearch.searchSource.getField('index')!;
     if (currentDataView && !currentDataView.isPersisted()) {
       const createdDataView = await openConfirmSavePrompt(currentDataView);
+      if (!createdDataView?.id) {
+        return;
+      }
       savedSearch.searchSource.setField('index', createdDataView);
 
       // update saved search with saved data view
@@ -105,19 +109,8 @@ export const useAdHocDataViews = ({
       await stateContainer.actions.changeDataView(createdDataView.id!, true);
       getUrlTracker().setTrackingEnabled(true);
       return createdDataView;
-        // update saved search with saved data view
-        if (savedSearch.id) {
-          await updateSavedSearch({ savedSearch, dataView: createdDataView });
-        }
-        await stateContainer.actions.loadDataViewList();
-        await stateContainer.actions.changeDataView(createdDataView.id!, true);
-        getUrlTracker().setTrackingEnabled(true);
-        return createdDataView;
-      }
-      return undefined;
     }
     return currentDataView;
-  }, [stateContainer, openConfirmSavePrompt, updateSavedSearch]);
   }, [stateContainer, openConfirmSavePrompt, updateSavedSearch]);
 
   return { adHocDataViewList, persistDataView, updateAdHocDataViewId };

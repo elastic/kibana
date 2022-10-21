@@ -22,7 +22,6 @@ import {
   FieldPopoverHeaderProps,
   FieldPopoverVisualize,
 } from '@kbn/unified-field-list-plugin/public';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';

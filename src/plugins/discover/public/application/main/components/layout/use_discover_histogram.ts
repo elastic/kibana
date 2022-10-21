@@ -14,27 +14,25 @@ import {
 } from '@kbn/unified-field-list-plugin/public';
 import { buildChartData } from '@kbn/unified-histogram-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { DiscoverStateContainer } from '../../services/discover_state';
+import { SavedSearchData } from '../../services/discover_data_state_container';
 import { getUiActions } from '../../../../kibana_services';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDataState } from '../../hooks/use_data_state';
-import type { SavedSearchData } from '../../hooks/use_saved_search';
-import type { AppState, GetStateReturn } from '../../services/discover_state';
 
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramHeight';
 
 export const useDiscoverHistogram = ({
   stateContainer,
-  state,
   savedSearchData$,
   dataView,
   savedSearch,
   isTimeBased,
   isPlainRecord,
 }: {
-  stateContainer: GetStateReturn;
-  state: AppState;
+  stateContainer: DiscoverStateContainer;
   savedSearchData$: SavedSearchData;
   dataView: DataView;
   savedSearch: SavedSearch;
@@ -42,11 +40,11 @@ export const useDiscoverHistogram = ({
   isPlainRecord: boolean;
 }) => {
   const { storage, data } = useDiscoverServices();
+  const state = stateContainer.appState.getState();
 
   /**
    * Visualize
    */
-
   const timeField = dataView.timeFieldName && dataView.getFieldByName(dataView.timeFieldName);
   const [canVisualize, setCanVisualize] = useState(false);
 

@@ -161,7 +161,7 @@ export function DiscoverLayout({
       return;
     }
     stateContainer.actions.onFieldEdited();
-  }, [dataView, updateAdHocDataViewId]);
+  }, [stateContainer, dataView, updateAdHocDataViewId]);
 
   const onDisableFilters = useCallback(() => {
     const disabledFilters = filterManager

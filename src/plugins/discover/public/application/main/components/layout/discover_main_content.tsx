@@ -13,8 +13,8 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { SavedSearchData } from '../../services/discover_data_state_container';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SavedSearchData } from '../../services/discover_data_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataTableRecord } from '../../../../types';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
@@ -91,7 +91,6 @@ export const DiscoverMainContent = ({
     onTimeIntervalChange,
   } = useDiscoverHistogram({
     stateContainer,
-    stateContainer.appStateContainer.get(),
     savedSearchData$,
     dataView,
     savedSearch,

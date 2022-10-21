@@ -45,6 +45,7 @@ export function useDiscoverState({
   const { adHocDataViewList, persistDataView, updateAdHocDataViewId } = useAdHocDataViews({
     dataView,
     stateContainer,
+    services,
   });
 
   /**
