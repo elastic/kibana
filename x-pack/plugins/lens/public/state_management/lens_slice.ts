@@ -996,9 +996,12 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
             );
           }) ?? [];
         if (layerDatasourceId) {
-          state.datasourceStates[layerDatasourceId].state = datasourceMap[
-            layerDatasourceId
-          ].removeLayer(current(state).datasourceStates[layerDatasourceId].state, layerId);
+          const { newState } = datasourceMap[layerDatasourceId].removeLayer(
+            current(state).datasourceStates[layerDatasourceId].state,
+            layerId
+          );
+          state.datasourceStates[layerDatasourceId].state = newState;
+          // TODO - call removeLayer for any extra (linked) layers removed by the datasource
         }
       });
     },
