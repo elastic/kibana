@@ -11,8 +11,8 @@ import { initPromisePool } from '../../../../../utils/promise_pool';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
-import type { GetInstalledIntegrationsResponse } from '../../../../../../common/detection_engine/fleet_integrations';
-import { GET_INSTALLED_INTEGRATIONS_URL } from '../../../../../../common/detection_engine/fleet_integrations';
+import type { GetInstalledIntegrationsResponse } from '../../../../../../common/detection_engine/fleet_integrations/api/get_installed_integrations/response_schema';
+import { GET_INSTALLED_INTEGRATIONS_URL } from '../../../../../../common/detection_engine/fleet_integrations/api/urls';
 import { createInstalledIntegrationSet } from './installed_integration_set';
 
 const MAX_CONCURRENT_REQUESTS_TO_PACKAGE_REGISTRY = 5;

@@ -11,7 +11,7 @@ import semver from 'semver';
 import type {
   InstalledIntegration,
   InstalledIntegrationArray,
-} from '../../../../../common/detection_engine/fleet_integrations';
+} from '../../../../../common/detection_engine/fleet_integrations/model/installed_integrations';
 import type {
   RelatedIntegration,
   RelatedIntegrationArray,

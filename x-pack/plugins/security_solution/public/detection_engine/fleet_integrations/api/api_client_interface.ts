@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GetInstalledIntegrationsResponse } from '../../../../common/detection_engine/fleet_integrations';
+import type { GetInstalledIntegrationsResponse } from '../../../../common/detection_engine/fleet_integrations/api/get_installed_integrations/response_schema';
 
 export interface IFleetIntegrationsApiClient {
   /**
