@@ -23,6 +23,7 @@ const getOrderByWithAgg = ({
   agg,
   dataView,
   aggs,
+  visType,
   metricColumns,
 }: CommonBucketConverterArgs<BUCKET_TYPES.TERMS>): OrderByWithAgg | null => {
   if (!agg.aggParams) {
@@ -37,11 +38,12 @@ const getOrderByWithAgg = ({
     if (!agg.aggParams.orderAgg) {
       return null;
     }
-    const orderMetricColumn = convertMetricToColumns(
-      convertToSchemaConfig(agg.aggParams.orderAgg),
+    const orderMetricColumn = convertMetricToColumns({
+      agg: convertToSchemaConfig(agg.aggParams.orderAgg),
       dataView,
-      aggs
-    );
+      aggs,
+      visType,
+    });
     if (!orderMetricColumn) {
       return null;
     }
@@ -73,12 +75,13 @@ export const convertToTermsParams = ({
   dataView,
   aggs,
   metricColumns,
+  visType,
 }: CommonBucketConverterArgs<BUCKET_TYPES.TERMS>): TermsParams | null => {
   if (!agg.aggParams) {
     return null;
   }
 
-  const orderByWithAgg = getOrderByWithAgg({ agg, dataView, aggs, metricColumns });
+  const orderByWithAgg = getOrderByWithAgg({ agg, dataView, aggs, metricColumns, visType });
   if (orderByWithAgg === null) {
     return null;
   }
@@ -107,7 +110,7 @@ export const convertToTermsParams = ({
 
 export const convertToTermsColumn = (
   aggId: string,
-  { agg, dataView, aggs, metricColumns }: CommonBucketConverterArgs<BUCKET_TYPES.TERMS>,
+  { agg, dataView, aggs, metricColumns, visType }: CommonBucketConverterArgs<BUCKET_TYPES.TERMS>,
   label: string,
   isSplit: boolean
 ): TermsColumn | null => {
@@ -121,7 +124,7 @@ export const convertToTermsColumn = (
     return null;
   }
 
-  const params = convertToTermsParams({ agg, dataView, aggs, metricColumns });
+  const params = convertToTermsParams({ agg, dataView, aggs, metricColumns, visType });
   if (!params) {
     return null;
   }

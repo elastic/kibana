@@ -23,6 +23,7 @@ jest.mock('../../../vis_schemas', () => ({
 }));
 
 describe('convertToDateHistogramColumn', () => {
+  const visType = 'heatmap';
   const aggId = `some-id`;
   const aggParams: AggParamsTerms = {
     field: stubLogstashDataView.fields[0].name,
@@ -79,6 +80,7 @@ describe('convertToDateHistogramColumn', () => {
           dataView: stubLogstashDataView,
           aggs,
           metricColumns,
+          visType,
         },
         '',
         false,
@@ -95,6 +97,7 @@ describe('convertToDateHistogramColumn', () => {
           dataView: stubLogstashDataView,
           aggs,
           metricColumns,
+          visType,
         },
         '',
         false,
@@ -123,6 +126,7 @@ describe('convertToDateHistogramColumn', () => {
           dataView: stubLogstashDataView,
           aggs,
           metricColumns,
+          visType,
         },
         '',
         false,
@@ -152,6 +156,7 @@ describe('convertToDateHistogramColumn', () => {
           dataView: stubLogstashDataView,
           aggs,
           metricColumns,
+          visType,
         },
         '',
         false,
@@ -170,6 +175,7 @@ describe('convertToDateHistogramColumn', () => {
           dataView: stubLogstashDataView,
           aggs,
           metricColumns,
+          visType,
         },
         '',
         false,
@@ -188,6 +194,7 @@ describe('convertToDateHistogramColumn', () => {
           dataView: stubLogstashDataView,
           aggs,
           metricColumns,
+          visType,
         },
         '',
         false,
@@ -208,6 +215,7 @@ describe('convertToDateHistogramColumn', () => {
           dataView: stubLogstashDataView,
           aggs,
           metricColumns,
+          visType,
         },
         '',
         false,

@@ -138,6 +138,7 @@ const getFormulaForSubMetric = ({
   agg,
   dataView,
   aggs,
+  visType,
 }: ExtendedColumnConverterArgs<METRIC_TYPES>): string | null => {
   const op = SUPPORTED_METRICS[agg.aggType];
   if (!op) {
@@ -148,7 +149,7 @@ const getFormulaForSubMetric = ({
     PARENT_PIPELINE_OPS.includes(op.name) ||
     SIBLING_PIPELINE_AGGS.includes(agg.aggType as METRIC_TYPES)
   ) {
-    return getFormulaForPipelineAgg({ agg: agg as PipelineAggs, aggs, dataView });
+    return getFormulaForPipelineAgg({ agg: agg as PipelineAggs, aggs, dataView, visType });
   }
 
   if (METRIC_OPS_WITHOUT_PARAMS.includes(op.name)) {
@@ -181,6 +182,7 @@ export const getFormulaForPipelineAgg = ({
   agg,
   dataView,
   aggs,
+  visType,
 }: ExtendedColumnConverterArgs<
   | METRIC_TYPES.CUMULATIVE_SUM
   | METRIC_TYPES.DERIVATIVE
@@ -205,6 +207,7 @@ export const getFormulaForPipelineAgg = ({
     agg: metricAgg,
     aggs,
     dataView,
+    visType,
   });
   if (subFormula === null) {
     return null;
@@ -222,9 +225,10 @@ export const getFormulaForAgg = ({
   agg,
   aggs,
   dataView,
+  visType,
 }: ExtendedColumnConverterArgs<METRIC_TYPES>) => {
   if (isPipeline(agg)) {
-    return getFormulaForPipelineAgg({ agg, aggs, dataView });
+    return getFormulaForPipelineAgg({ agg, aggs, dataView, visType });
   }
 
   if (isPercentileAgg(agg)) {

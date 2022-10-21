@@ -288,6 +288,19 @@ export interface HeatmapLegendConfig {
   legendSize?: LegendSize;
   type: 'heatmap_legend';
 }
+
+export interface HeatmapGridConfig {
+  strokeWidth?: number;
+  strokeColor?: string;
+  isCellLabelVisible: boolean;
+  isYAxisLabelVisible: boolean;
+  isYAxisTitleVisible: boolean;
+  yTitle?: string;
+  isXAxisLabelVisible: boolean;
+  isXAxisTitleVisible: boolean;
+  xTitle?: string;
+  type: 'heatmap_grid';
+}
 export interface HeatmapArguments {
   percentageMode?: boolean;
   lastRangeIsRightOpen?: boolean;
@@ -300,7 +313,7 @@ export interface HeatmapArguments {
   splitRowAccessor?: string | ExpressionValueVisDimension;
   splitColumnAccessor?: string | ExpressionValueVisDimension;
   legend: HeatmapLegendConfig;
-  gridConfig: HeatmapLegendConfig;
+  gridConfig: HeatmapGridConfig;
   ariaLabel?: string;
 }
 

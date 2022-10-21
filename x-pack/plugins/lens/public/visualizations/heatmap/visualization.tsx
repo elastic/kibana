@@ -17,6 +17,7 @@ import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { HeatmapConfiguration } from '@kbn/visualizations-plugin/common';
 import type { OperationMetadata, Suggestion, Visualization } from '../../types';
 import type { HeatmapVisualizationState } from './types';
 import { getSuggestions } from './suggestions';
@@ -545,7 +546,7 @@ export const getHeatmapVisualization = ({
       },
       visualizationState: {
         ...allSuggestions[0].visualizationState,
-        ...context.configuration,
+        ...(context.configuration as HeatmapConfiguration),
       },
     };
     return suggestion;

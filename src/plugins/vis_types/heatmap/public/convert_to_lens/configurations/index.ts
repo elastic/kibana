@@ -25,10 +25,14 @@ export const getConfiguration = (
     };
     columns: Column[];
   }
-): HeatmapConfiguration => {
+): HeatmapConfiguration | null => {
   const [valueAccessor] = metrics;
   const xColumn = columns.find(({ isBucketed, isSplit }) => isBucketed && !isSplit);
   const yColumn = columns.find(({ isBucketed, isSplit }) => isBucketed && isSplit);
+  if (yColumn && !xColumn) {
+    return null;
+  }
+
   return {
     layerId,
     layerType: 'data',
@@ -39,9 +43,12 @@ export const getConfiguration = (
       position: 'bottom',
     },
     gridConfig: {
-      type: 'heatmap_legend',
-      isVisible: true,
-      position: 'bottom',
+      type: 'heatmap_grid',
+      isCellLabelVisible: false,
+      isYAxisLabelVisible: false,
+      isYAxisTitleVisible: false,
+      isXAxisLabelVisible: false,
+      isXAxisTitleVisible: false,
     },
     valueAccessor,
     xAccessor: xColumn?.columnId,
