@@ -136,7 +136,6 @@ export const SearchPanel: FC<Props> = ({
           onQuerySubmit={(params: { dateRange: TimeRange; query?: Query | undefined }) =>
             searchHandler({ query: params.query })
           }
-          // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
           onFiltersUpdated={(filters: Filter[]) => searchHandler({ filters })}
           indexPatterns={[dataView]}
           placeholder={i18n.translate('xpack.dataVisualizer.searchPanel.queryBarPlaceholderText', {
