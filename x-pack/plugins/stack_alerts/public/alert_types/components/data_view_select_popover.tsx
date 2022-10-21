@@ -24,16 +24,15 @@ import type { DataViewListItem, DataView } from '@kbn/data-views-plugin/public';
 import { DataViewSelector } from '@kbn/unified-search-plugin/public';
 import { useTriggerUiActionServices } from '../es_query/util';
 
-interface DiscoverAlertMetadata {
+export interface DataViewSelectPopoverMetaData extends Record<string, unknown> {
   adHocDataViewList: DataView[];
-  [key: string]: unknown;
 }
 
 export interface DataViewSelectPopoverProps {
   dataView: DataView;
-  metadata?: Record<string, unknown>;
+  metadata?: DataViewSelectPopoverMetaData;
   onSelectDataView: (selectedDataView: DataView) => void;
-  onChangeMetaData: (metadata: Record<string, unknown>) => void;
+  onChangeMetaData: (metadata: DataViewSelectPopoverMetaData) => void;
 }
 
 const toDataViewListItem = (dataView: DataView): DataViewListItem => {
@@ -45,21 +44,20 @@ const toDataViewListItem = (dataView: DataView): DataViewListItem => {
 };
 
 export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopoverProps> = ({
-  metadata = { adHocDataViewList: [], savedDataViewList: [] },
+  metadata = { adHocDataViewList: [] },
   dataView,
   onSelectDataView,
   onChangeMetaData,
 }) => {
   const { dataViews, dataViewEditor } = useTriggerUiActionServices();
-  const context = metadata as DiscoverAlertMetadata;
   const [dataViewItems, setDataViewsItems] = useState<DataViewListItem[]>([]);
   const [dataViewPopoverOpen, setDataViewPopoverOpen] = useState(false);
 
   const closeDataViewEditor = useRef<() => void | undefined>();
 
   const allDataViewItems = useMemo(
-    () => [...dataViewItems, ...context.adHocDataViewList.map(toDataViewListItem)],
-    [context.adHocDataViewList, dataViewItems]
+    () => [...dataViewItems, ...metadata.adHocDataViewList.map(toDataViewListItem)],
+    [dataViewItems, metadata.adHocDataViewList]
   );
 
   const closeDataViewPopover = useCallback(() => setDataViewPopoverOpen(false), []);
@@ -83,11 +81,11 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
   const onAddAdHocDataView = useCallback(
     (adHocDataView: DataView) => {
       onChangeMetaData({
-        ...context,
-        adHocDataViewList: [...context.adHocDataViewList, toDataViewListItem(adHocDataView)],
+        ...metadata,
+        adHocDataViewList: [...metadata.adHocDataViewList, adHocDataView],
       });
     },
-    [context, onChangeMetaData]
+    [metadata, onChangeMetaData]
   );
 
   const createDataView = useMemo(
