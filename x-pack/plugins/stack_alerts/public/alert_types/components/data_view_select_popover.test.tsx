@@ -25,6 +25,7 @@ const selectedDataView = {
 
 const props: DataViewSelectPopoverProps = {
   onSelectDataView: () => {},
+  onChangeMetaData: () => {},
   dataView: selectedDataView,
 };
 

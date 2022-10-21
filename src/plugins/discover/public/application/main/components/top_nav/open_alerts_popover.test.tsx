@@ -11,7 +11,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { AlertsPopover, type DiscoverAlertServices } from './open_alerts_popover';
+import { AlertsPopover } from './open_alerts_popover';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../../../../__mocks__/data_view';
@@ -27,9 +27,8 @@ const mount = (dataView = dataViewMock) =>
         savedQueryId={undefined}
         adHocDataViews={[]}
         services={discoverServiceMock}
-        addAdHocDataView={jest.fn()}
+        updateDataViewList={jest.fn()}
         onClose={jest.fn()}
-        discoverAlertServices={{} as DiscoverAlertServices}
         I18nContext={Context}
       />
     </KibanaContextProvider>

@@ -212,6 +212,7 @@ const setup = (alertParams: EsQueryAlertParams<SearchType.searchSource>) => {
         data: dataMock,
         uiSettings: uiSettingsMock,
         dataViewEditor: dataViewEditorMock,
+        unifiedSearch: unifiedSearchMock,
       }}
     >
       <SearchSourceExpression
@@ -228,6 +229,8 @@ const setup = (alertParams: EsQueryAlertParams<SearchType.searchSource>) => {
         defaultActionGroupId=""
         actionGroups={[]}
         charts={chartsStartMock}
+        metadata={{ adHocDataViewList: [] }}
+        onChangeMetaData={jest.fn()}
       />
     </KibanaContextProvider>
   );

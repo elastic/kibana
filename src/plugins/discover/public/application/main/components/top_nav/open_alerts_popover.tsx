@@ -33,7 +33,7 @@ interface AlertsPopoverProps {
   adHocDataViews: DataView[];
   I18nContext: I18nStart['Context'];
   services: DiscoverServices;
-  onAddAdHocDataViews: (dataViews: DataView[]) => void;
+  updateDataViewList: (dataViews: DataView[]) => Promise<void>;
 }
 
 export function AlertsPopover({
@@ -43,7 +43,7 @@ export function AlertsPopover({
   adHocDataViews,
   services,
   onClose: originalOnClose,
-  onAddAdHocDataViews,
+  updateDataViewList,
 }: AlertsPopoverProps) {
   const dataView = searchSource.getField('index')!;
   const { triggersActionsUi } = services;
@@ -86,7 +86,7 @@ export function AlertsPopover({
     }
 
     const onFinishFlyoutInteraction = (metadata: DiscoverAlertMetadata) => {
-      onAddAdHocDataViews(metadata.adHocDataViewList);
+      updateDataViewList(metadata.adHocDataViewList);
     };
 
     return triggersActionsUi?.getAddAlertFlyout({
@@ -108,7 +108,7 @@ export function AlertsPopover({
     triggersActionsUi,
     discoverMetadata,
     getParams,
-    onAddAdHocDataViews,
+    updateDataViewList,
     onClose,
   ]);
 
@@ -181,7 +181,7 @@ export function openAlertsPopover({
   services,
   adHocDataViews,
   savedQueryId,
-  onAddAdHocDataViews,
+  updateDataViewList,
 }: {
   I18nContext: I18nStart['Context'];
   anchorElement: HTMLElement;
@@ -189,7 +189,7 @@ export function openAlertsPopover({
   services: DiscoverServices;
   adHocDataViews: DataView[];
   savedQueryId?: string;
-  onAddAdHocDataViews: (dataViews: DataView[]) => void;
+  updateDataViewList: (dataViews: DataView[]) => Promise<void>;
 }) {
   if (isOpen) {
     closeAlertsPopover();
@@ -210,7 +210,7 @@ export function openAlertsPopover({
           adHocDataViews={adHocDataViews}
           I18nContext={I18nContext}
           services={services}
-          onAddAdHocDataViews={onAddAdHocDataViews}
+          updateDataViewList={updateDataViewList}
         />
       </KibanaContextProvider>
     </I18nContext>

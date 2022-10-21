@@ -21,7 +21,6 @@ import { ISearchSource } from '@kbn/data-plugin/common';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { useDiscoverAlertContext as useDiscoverAlertContextMock } from '@kbn/discover-plugin/public';
 import { act } from 'react-dom/test-utils';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { ReactWrapper } from 'enzyme';
@@ -138,6 +137,7 @@ const savedQueryMock = {
 
 const dataMock = dataPluginMock.createStartContract();
 const dataViewsMock = dataViewPluginMocks.createStartContract();
+const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
 
 (dataMock.search.searchSource.create as jest.Mock).mockImplementation(() =>
   Promise.resolve(searchSourceMock)
@@ -155,7 +155,8 @@ dataMock.query.savedQueries.findSavedQueries = jest.fn(() =>
 
 const Wrapper: React.FC<{
   ruleParams: EsQueryAlertParams<SearchType.searchSource> | EsQueryAlertParams<SearchType.esQuery>;
-}> = ({ ruleParams }) => {
+  metadata?: Record<string, unknown>;
+}> = ({ ruleParams, metadata }) => {
   const [currentRuleParams, setCurrentRuleParams] = useState<CommonAlertParams>(ruleParams);
   const errors = {
     index: [],
@@ -188,12 +189,15 @@ const Wrapper: React.FC<{
       defaultActionGroupId=""
       actionGroups={[]}
       charts={chartsStartMock}
+      metadata={metadata}
+      onChangeMetaData={jest.fn()}
     />
   );
 };
 
 const setup = (
-  ruleParams: EsQueryAlertParams<SearchType.searchSource> | EsQueryAlertParams<SearchType.esQuery>
+  ruleParams: EsQueryAlertParams<SearchType.searchSource> | EsQueryAlertParams<SearchType.esQuery>,
+  metadata?: Record<string, unknown>
 ) => {
   return mountWithIntl(
     <KibanaContextProvider
@@ -203,20 +207,17 @@ const setup = (
         uiSettings: uiSettingsMock,
         docLinks: docLinksMock,
         http: httpMock,
-        dataViewEditor: dataViewEditorPluginMock.createStartContract(),
+        unifiedSearch: unifiedSearchMock,
+        dataViewEditor: dataViewEditorMock,
       }}
     >
-      <Wrapper ruleParams={ruleParams} />
+      <Wrapper ruleParams={ruleParams} metadata={metadata} />
     </KibanaContextProvider>
   );
 };
 
 describe('EsQueryAlertTypeExpression', () => {
   test('should render options by default', async () => {
-    (useDiscoverAlertContextMock as jest.Mock).mockImplementation(() => ({
-      initialAdHocDataViewList: [],
-      isManagementPage: true,
-    }));
     const wrapper = setup({} as EsQueryAlertParams<SearchType.esQuery>);
     expect(findTestSubject(wrapper, 'queryFormTypeChooserTitle').exists()).toBeTruthy();
     expect(findTestSubject(wrapper, 'queryFormType_searchSource').exists()).toBeTruthy();
@@ -225,10 +226,6 @@ describe('EsQueryAlertTypeExpression', () => {
   });
 
   test('should switch to QueryDSL form type on selection and return back on cancel', async () => {
-    (useDiscoverAlertContextMock as jest.Mock).mockImplementation(() => ({
-      initialAdHocDataViewList: [],
-      isManagementPage: true,
-    }));
     let wrapper = setup({} as EsQueryAlertParams<SearchType.esQuery>);
     await act(async () => {
       findTestSubject(wrapper, 'queryFormType_esQuery').simulate('click');
@@ -248,10 +245,6 @@ describe('EsQueryAlertTypeExpression', () => {
   });
 
   test('should switch to KQL or Lucene form type on selection and return back on cancel', async () => {
-    (useDiscoverAlertContextMock as jest.Mock).mockImplementation(() => ({
-      initialAdHocDataViewList: [],
-      isManagementPage: true,
-    }));
     let wrapper = setup({} as EsQueryAlertParams<SearchType.searchSource>);
     await act(async () => {
       findTestSubject(wrapper, 'queryFormType_searchSource').simulate('click');
@@ -269,14 +262,9 @@ describe('EsQueryAlertTypeExpression', () => {
   });
 
   test('should render QueryDSL view without the form type chooser', async () => {
-    (useDiscoverAlertContextMock as jest.Mock).mockImplementation(() => ({
-      initialAdHocDataViewList: [],
-      isManagementPage: false,
-    }));
-
     let wrapper: ReactWrapper;
     await act(async () => {
-      wrapper = setup(defaultEsQueryRuleParams);
+      wrapper = setup(defaultEsQueryRuleParams, {});
       wrapper = await wrapper.update();
     });
     expect(findTestSubject(wrapper!, 'queryFormTypeChooserTitle').exists()).toBeFalsy();
@@ -285,13 +273,9 @@ describe('EsQueryAlertTypeExpression', () => {
   });
 
   test('should render KQL and Lucene view without the form type chooser', async () => {
-    (useDiscoverAlertContextMock as jest.Mock).mockImplementation(() => ({
-      initialAdHocDataViewList: [],
-      isManagementPage: false,
-    }));
     let wrapper: ReactWrapper;
     await act(async () => {
-      wrapper = setup(defaultSearchSourceRuleParams);
+      wrapper = setup(defaultSearchSourceRuleParams, { adHocDataViewList: [] });
       wrapper = await wrapper.update();
     });
     wrapper = await wrapper!.update();

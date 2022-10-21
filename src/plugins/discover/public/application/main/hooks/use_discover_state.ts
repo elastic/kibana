@@ -8,7 +8,7 @@
 import { useMemo, useEffect, useState, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
-import { DataViewListItem, DataViewType } from '@kbn/data-views-plugin/public';
+import { type DataViewListItem, type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
@@ -36,7 +36,7 @@ export function useDiscoverState({
   history,
   savedSearch,
   setExpandedDoc,
-  dataViewList,
+  dataViewList: initialDataViewList,
 }: {
   services: DiscoverServices;
   savedSearch: SavedSearch;
@@ -135,6 +135,19 @@ export function useDiscoverState({
       toastNotifications,
     });
 
+  const [savedDataViewList, setSavedDataViewList] = useState(initialDataViewList);
+
+  /**
+   * Updates data views selector state
+   */
+  const updateDataViewList = useCallback(
+    async (newAdHocDataViews: DataView[]) => {
+      setSavedDataViewList(await data.dataViews.getIdsWithTitle());
+      onAddAdHocDataViews(newAdHocDataViews);
+    },
+    [data.dataViews, onAddAdHocDataViews]
+  );
+
   /**
    * Data fetching logic
    */
@@ -154,7 +167,7 @@ export function useDiscoverState({
     documents$: data$.documents$,
     dataViews,
     stateContainer,
-    dataViewList,
+    dataViewList: savedDataViewList,
     savedSearch,
   });
 
@@ -307,8 +320,9 @@ export function useDiscoverState({
     state,
     stateContainer,
     adHocDataViewList,
+    savedDataViewList,
     persistDataView,
     updateAdHocDataViewId,
-    onAddAdHocDataViews,
+    updateDataViewList,
   };
 }

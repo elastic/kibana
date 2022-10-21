@@ -91,11 +91,7 @@ export const EsQueryAlertTypeExpression: React.FunctionComponent<
       )}
 
       {ruleParams.searchType && isSearchSource && (
-        <SearchSourceExpressionMemoized
-          {...props}
-          ruleParams={ruleParams}
-          unifiedSearch={props.unifiedSearch}
-        />
+        <SearchSourceExpressionMemoized {...props} ruleParams={ruleParams} />
       )}
 
       {ruleParams.searchType && !isSearchSource && (

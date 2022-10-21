@@ -61,6 +61,7 @@ export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
   adHocDataViews,
+  savedDataViews,
   onChangeDataView,
   onAddField,
   onDataViewCreated,
@@ -96,7 +97,9 @@ export function ChangeDataView({
 
   useEffect(() => {
     const fetchDataViews = async () => {
-      const dataViewsRefs = await data.dataViews.getIdsWithTitle();
+      const dataViewsRefs = savedDataViews
+        ? savedDataViews
+        : await data.dataViews.getIdsWithTitle();
       if (adHocDataViews?.length) {
         adHocDataViews.forEach((adHocDataView) => {
           if (adHocDataView.id) {
@@ -111,7 +114,7 @@ export function ChangeDataView({
       setDataViewsList(dataViewsRefs);
     };
     fetchDataViews();
-  }, [data, currentDataViewId, adHocDataViews]);
+  }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
 
   useEffect(() => {
     if (trigger.label) {

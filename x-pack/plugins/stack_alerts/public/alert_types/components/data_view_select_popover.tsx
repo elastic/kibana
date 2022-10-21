@@ -77,9 +77,7 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
     const ids = await dataViews.getIds();
     const dataViewsList = await Promise.all(ids.map((id) => dataViews.get(id)));
 
-    setDataViewsItems(
-      dataViewsList.filter((current) => current.isTimeBased()).map(toDataViewListItem)
-    );
+    setDataViewsItems(dataViewsList.map(toDataViewListItem));
   }, [dataViews]);
 
   const onAddAdHocDataView = useCallback(
