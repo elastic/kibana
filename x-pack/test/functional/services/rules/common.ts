@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type SuperTest from 'supertest';
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 import { ProvidedType } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -17,6 +19,7 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
   const find = getService('find');
   const retry = getService('retry');
   const browser = getService('browser');
+  const supertest = getService('supertest');
 
   return {
     async clickCreateAlertButton() {
@@ -37,6 +40,34 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');
       await testSubjects.setValue('throttleInput', value);
+    },
+
+    async createConnector(
+    {
+      name,
+      config,
+      secrets,
+      connectorTypeId,
+      supertest,
+    }: {
+      name: string;
+      config: Record<string, unknown>;
+      secrets: Record<string, unknown>;
+      connectorTypeId: string;
+      supertest: SuperTest.SuperTest<SuperTest.Test>;
+    }) {
+      const { body: createdAction } = await supertest
+        .post(`/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name,
+          config,
+          secrets,
+          connector_type_id: connectorTypeId,
+        })
+        .expect(200);
+    
+      return createdAction;
     },
 
     async defineIndexThresholdAlert(alertName: string) {
