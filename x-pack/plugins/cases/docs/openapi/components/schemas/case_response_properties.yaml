@@ -41,20 +41,16 @@ properties:
         - $ref: 'user_comment_response_properties.yaml'
   connector:
     title: Case response properties for connectors
-    type: object
-    properties:
-      fields:
-        $ref: 'case_response_connector_field_properties.yaml'
-      id:
-        description: The identifier for the connector. To create a case without a connector, use `none`.
-        type: string
-        example: none
-      name:
-        description: The name of the connector. To create a case without a connector, use `none`.
-        type: string
-        example: none
-      type:
-        $ref: 'connector_types.yaml'
+    discriminator:
+      propertyName: type
+    oneOf:
+      - $ref: 'connector_properties_none.yaml'
+      - $ref: 'connector_properties_cases_webhook.yaml'
+      - $ref: 'connector_properties_jira.yaml'
+      - $ref: 'connector_properties_resilient.yaml'
+      - $ref: 'connector_properties_servicenow.yaml'
+      - $ref: 'connector_properties_servicenow_sir.yaml'
+      - $ref: 'connector_properties_swimlane.yaml'
   created_at:
     type: string
     format: date-time
