@@ -61,6 +61,7 @@ export function LayerPanels(
   const dispatchLens = useLensDispatch();
 
   const layerIds = activeVisualization.getLayerIds(visualization.state);
+  const hiddenLayersIds = activeVisualization?.getHiddenLayerIds?.(visualization.state) ?? [];
   const {
     setNextFocusedId: setNextFocusedLayerId,
     removeRef: removeLayerRef,
@@ -277,7 +278,7 @@ export function LayerPanels(
                   activeVisualization,
                   visualization.state,
                   layerId,
-                  layerIds.length
+                  layerIds.length - hiddenLayersIds.length
                 ) === 'clear'
               }
               onEmptyDimensionAdd={(columnId, { groupId }) => {

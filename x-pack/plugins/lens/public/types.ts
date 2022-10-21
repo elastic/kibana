@@ -969,6 +969,8 @@ export interface Visualization<T = unknown, P = unknown> {
   ) => T;
   /** Frame needs to know which layers the visualization is currently using */
   getLayerIds: (state: T) => string[];
+  /** Return the hidden layer ids if any */
+  getHiddenLayerIds?: (state: T) => string[];
   /** Reset button on each layer triggers this */
   clearLayer: (state: T, layerId: string, indexPatternId: string) => T;
   /** Reset button on each layer triggers this */

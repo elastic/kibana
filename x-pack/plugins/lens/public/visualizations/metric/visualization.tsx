@@ -363,6 +363,10 @@ export const getMetricVisualization = ({
     return state.trendlineLayerId ? [state.layerId, state.trendlineLayerId] : [state.layerId];
   },
 
+  getHiddenLayerIds(state) {
+    return state.trendlineLayerId ? [state.trendlineLayerId] : [];
+  },
+
   getDescription() {
     return {
       icon: IconChartMetric,

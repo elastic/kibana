@@ -793,6 +793,13 @@ describe('metric visualization', () => {
     ]);
   });
 
+  test('getHiddenLayerIds', () => {
+    expect(visualization?.getHiddenLayerIds?.(fullState)).toEqual([]);
+    expect(visualization?.getHiddenLayerIds?.(fullStateWTrend)).toEqual([
+      fullStateWTrend.trendlineLayerId,
+    ]);
+  });
+
   test('getLayersToLinkTo', () => {
     expect(
       visualization.getLayersToLinkTo!(fullStateWTrend, fullStateWTrend.trendlineLayerId)
