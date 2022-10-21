@@ -16,6 +16,10 @@ interface Props {
 }
 
 const UserActionPropertyActionsComponent: React.FC<Props> = ({ isLoading, propertyActions }) => {
+  if (propertyActions.length === 0) {
+    return null;
+  }
+
   return (
     <EuiFlexItem grow={false}>
       {isLoading ? (

@@ -10,7 +10,11 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+import {
+  noCasesPermissions,
+  onlyDeleteCasesPermission,
+  createAppMockRenderer,
+} from '../../../common/mock';
 import { RegisteredAttachmentsPropertyActions } from './registered_attachments_property_actions';
 
 describe('RegisteredAttachmentsPropertyActions', () => {
@@ -76,5 +80,19 @@ describe('RegisteredAttachmentsPropertyActions', () => {
 
     userEvent.click(result.getByText('Delete'));
     expect(props.onDelete).toHaveBeenCalled();
+  });
+
+  it('does not show the property actions without delete permissions', async () => {
+    appMock = createAppMockRenderer({ permissions: noCasesPermissions() });
+    const result = appMock.render(<RegisteredAttachmentsPropertyActions {...props} />);
+
+    expect(result.queryByTestId('property-actions')).not.toBeInTheDocument();
+  });
+
+  it('does show the property actions with only delete permissions', async () => {
+    appMock = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
+    const result = appMock.render(<RegisteredAttachmentsPropertyActions {...props} />);
+
+    expect(result.getByTestId('property-actions')).toBeInTheDocument();
   });
 });

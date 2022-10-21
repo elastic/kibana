@@ -9,7 +9,7 @@ import React from 'react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer, noCasesPermissions } from '../../../common/mock';
 import { DescriptionPropertyActions } from './description_property_actions';
 
 describe('DescriptionPropertyActions', () => {
@@ -67,5 +67,12 @@ describe('DescriptionPropertyActions', () => {
     userEvent.click(result.getByTestId('property-actions-quote'));
 
     expect(props.onQuote).toHaveBeenCalled();
+  });
+
+  it('does not show the property actions without permissions', async () => {
+    appMock = createAppMockRenderer({ permissions: noCasesPermissions() });
+    const result = appMock.render(<DescriptionPropertyActions {...props} />);
+
+    expect(result.queryByTestId('property-actions')).not.toBeInTheDocument();
   });
 });

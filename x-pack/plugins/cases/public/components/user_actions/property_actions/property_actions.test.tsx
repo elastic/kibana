@@ -50,4 +50,13 @@ describe('UserActionPropertyActions', () => {
     expect(result.getByTestId('property-actions-group').children.length).toBe(1);
     expect(result.queryByTestId('property-actions-pencil')).toBeInTheDocument();
   });
+
+  it('does not render if properties are empty', async () => {
+    const result = appMock.render(
+      <UserActionPropertyActions {...props} isLoading={false} propertyActions={[]} />
+    );
+
+    expect(result.queryByTestId('property-actions')).not.toBeInTheDocument();
+    expect(result.queryByTestId('user-action-title-loading')).not.toBeInTheDocument();
+  });
 });
