@@ -18,8 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let serverLogConnectorId: string;
 
     before(async () => {
-    const connectorName = `server-log-connector`;
-    serverLogConnectorId = await createServerLogConnector(connectorName);
+      const connectorName = `server-log-connector`;
+      serverLogConnectorId = await createServerLogConnector(connectorName);
     });
 
     after(async () => {
@@ -38,20 +38,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
       );
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await commonScreenshots.takeScreenshot('connector-listing', screenshotDirectories, 1400, 1024);
-     });
-   });
-  
+      await commonScreenshots.takeScreenshot(
+        'connector-listing',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+    });
+  });
+
   const createServerLogConnector = async (name: string) => {
     return rules.common.createConnector({
       name,
-      config: { },
-      secrets: { },
+      config: {},
+      secrets: {},
       connectorTypeId: '.server-log',
       supertest,
     });
   };
-  
+
   const deleteConnector = (id: string) =>
     supertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'foo').expect(204, '');
 }

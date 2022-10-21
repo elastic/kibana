@@ -7,7 +7,6 @@
 
 import type SuperTest from 'supertest';
 import expect from '@kbn/expect';
-import { asyncForEach } from '@kbn/std';
 import { ProvidedType } from '@kbn/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -42,8 +41,7 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
       await testSubjects.setValue('throttleInput', value);
     },
 
-    async createConnector(
-    {
+    async createConnector({
       name,
       config,
       secrets,
@@ -66,7 +64,7 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
           connector_type_id: connectorTypeId,
         })
         .expect(200);
-    
+
       return createdAction;
     },
 
