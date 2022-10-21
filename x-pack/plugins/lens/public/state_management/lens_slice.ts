@@ -7,7 +7,7 @@
 
 import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { mapValues } from 'lodash';
+import { mapValues, uniq } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { History } from 'history';
 import { LensEmbeddableInput } from '..';
@@ -400,16 +400,23 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           layerIds.length
         ) === 'clear';
 
+      let removedLayerIds: string[] = [];
+
       state.datasourceStates = mapValues(
         state.datasourceStates,
         (datasourceState, datasourceId) => {
           const datasource = datasourceMap[datasourceId!];
+
+          const { newState, removedLayerIds: removedLayerIdsForThisDatasource } = isOnlyLayer
+            ? datasource.clearLayer(datasourceState.state, layerId)
+            : datasource.removeLayer(datasourceState.state, layerId);
+
+          removedLayerIds = [...removedLayerIds, ...removedLayerIdsForThisDatasource];
+
           return {
             ...datasourceState,
             ...(datasourceId === state.activeDatasourceId && {
-              state: isOnlyLayer
-                ? datasource.clearLayer(datasourceState.state, layerId)
-                : datasource.removeLayer(datasourceState.state, layerId),
+              state: newState,
             }),
           };
         }
@@ -419,10 +426,22 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       const currentDataViewsId = activeDataSource.getUsedDataView(
         state.datasourceStates[state.activeDatasourceId!].state
       );
-      state.visualization.state =
-        isOnlyLayer || !activeVisualization.removeLayer
-          ? activeVisualization.clearLayer(state.visualization.state, layerId, currentDataViewsId)
-          : activeVisualization.removeLayer(state.visualization.state, layerId);
+
+      if (isOnlyLayer || !activeVisualization.removeLayer) {
+        state.visualization.state = activeVisualization.clearLayer(
+          state.visualization.state,
+          layerId,
+          currentDataViewsId
+        );
+      }
+
+      uniq(removedLayerIds).forEach(
+        (removedId) =>
+          (state.visualization.state = activeVisualization.removeLayer?.(
+            state.visualization.state,
+            removedId
+          ))
+      );
     },
     [changeIndexPattern.type]: (
       state,

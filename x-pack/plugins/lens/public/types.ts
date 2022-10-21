@@ -265,8 +265,8 @@ export interface Datasource<T = unknown, P = unknown> {
 
   insertLayer: (state: T, newLayerId: string, linkToLayers?: string[]) => T;
   createEmptyLayer: (indexPatternId: string) => T;
-  removeLayer: (state: T, layerId: string) => T;
-  clearLayer: (state: T, layerId: string) => T;
+  removeLayer: (state: T, layerId: string) => { newState: T; removedLayerIds: string[] };
+  clearLayer: (state: T, layerId: string) => { newState: T; removedLayerIds: string[] };
   cloneLayer: (
     state: T,
     layerId: string,
