@@ -56,7 +56,7 @@ export const convertToLens: ConvertHeatmapToLensVisualization = async (vis, time
 
   const [layerConfig] = layers;
 
-  if (!layerConfig.buckets.all.length) {
+  if (!layerConfig.buckets.all.length || layerConfig.metrics.length > 1) {
     return null;
   }
 
