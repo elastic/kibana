@@ -27342,7 +27342,7 @@
     "xpack.securitySolution.detectionEngine.rules.allRules.actions.deleteRuleDescription": "删除规则",
     "xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleDescription": "复制规则",
     "xpack.securitySolution.detectionEngine.rules.allRules.actions.editRuleSettingsDescription": "编辑规则设置",
-    "xpack.securitySolution.detectionEngine.rules.allRules.actions.editRuleSettingsToolTip": "您没有 Kibana 操作权限",
+    "xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaActionsFeaturePrivileges": "您没有 Kibana 操作权限",
     "xpack.securitySolution.detectionEngine.rules.allRules.actions.exportRuleDescription": "导出规则",
     "xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deleteSelectedImmutableTitle": "选择内容包含无法删除的不可变规则",
     "xpack.securitySolution.detectionEngine.rules.allRules.batchActionsTitle": "批处理操作",

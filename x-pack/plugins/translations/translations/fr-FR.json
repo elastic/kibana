@@ -27333,7 +27333,7 @@
     "xpack.securitySolution.detectionEngine.rules.allRules.actions.deleteRuleDescription": "Supprimer la règle",
     "xpack.securitySolution.detectionEngine.rules.allRules.actions.duplicateRuleDescription": "Dupliquer la règle",
     "xpack.securitySolution.detectionEngine.rules.allRules.actions.editRuleSettingsDescription": "Modifier les paramètres de règles",
-    "xpack.securitySolution.detectionEngine.rules.allRules.actions.editRuleSettingsToolTip": "Vous ne disposez pas des privilèges d'actions Kibana",
+    "xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaActionsFeaturePrivileges": "Vous ne disposez pas des privilèges d'actions Kibana",
     "xpack.securitySolution.detectionEngine.rules.allRules.actions.exportRuleDescription": "Exporter la règle",
     "xpack.securitySolution.detectionEngine.rules.allRules.batchActions.deleteSelectedImmutableTitle": "La sélection contient des règles immuables qui ne peuvent pas être supprimées",
     "xpack.securitySolution.detectionEngine.rules.allRules.batchActionsTitle": "Actions groupées",
