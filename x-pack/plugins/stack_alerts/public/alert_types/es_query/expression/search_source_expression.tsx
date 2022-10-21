@@ -11,13 +11,14 @@ import { EuiSpacer, EuiLoadingSpinner, EuiEmptyPrompt, EuiCallOut } from '@elast
 import { ISearchSource } from '@kbn/data-plugin/common';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { SavedQuery } from '@kbn/data-plugin/public';
-import { EsQueryAlertParams, SearchType } from '../types';
+import { EsQueryAlertMetaData, EsQueryAlertParams, SearchType } from '../types';
 import { SearchSourceExpressionForm } from './search_source_expression_form';
 import { DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
 
 export type SearchSourceExpressionProps = RuleTypeParamsExpressionProps<
-  EsQueryAlertParams<SearchType.searchSource>
+  EsQueryAlertParams<SearchType.searchSource>,
+  EsQueryAlertMetaData
 >;
 
 export const SearchSourceExpression = ({

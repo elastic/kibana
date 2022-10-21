@@ -19,10 +19,6 @@ import { updateSearchSource } from '../../utils/update_search_source';
 const container = document.createElement('div');
 let isOpen = false;
 
-interface DiscoverAlertMetadata {
-  adHocDataViewList: DataView[];
-}
-
 const ALERT_TYPE_ID = '.es-query';
 
 interface AlertsPopoverProps {
@@ -34,6 +30,11 @@ interface AlertsPopoverProps {
   I18nContext: I18nStart['Context'];
   services: DiscoverServices;
   onAddAdHocDataViews: (dataViews: DataView[]) => void;
+}
+
+interface EsQueryAlertMetaData {
+  isManagementPage?: boolean;
+  adHocDataViewList: DataView[];
 }
 
 export function AlertsPopover({
@@ -72,10 +73,10 @@ export function AlertsPopover({
     };
   }, [savedQueryId, searchSource, services]);
 
-  const discoverMetadata: DiscoverAlertMetadata = useMemo(
+  const discoverMetadata: EsQueryAlertMetaData = useMemo(
     () => ({
+      isManagementPage: false,
       adHocDataViewList: adHocDataViews,
-      savedDataViewList: [], // might be filled while in flyout
     }),
     [adHocDataViews]
   );
@@ -85,7 +86,7 @@ export function AlertsPopover({
       return;
     }
 
-    const onFinishFlyoutInteraction = (metadata: DiscoverAlertMetadata) => {
+    const onFinishFlyoutInteraction = (metadata: EsQueryAlertMetaData) => {
       onAddAdHocDataViews(metadata.adHocDataViewList);
     };
 
@@ -93,11 +94,11 @@ export function AlertsPopover({
       metadata: discoverMetadata,
       consumer: 'discover',
       onClose: (_, metadata) => {
-        onFinishFlyoutInteraction(metadata as DiscoverAlertMetadata);
+        onFinishFlyoutInteraction(metadata as EsQueryAlertMetaData);
         onClose();
       },
       onSave: async (metadata) => {
-        onFinishFlyoutInteraction(metadata as DiscoverAlertMetadata);
+        onFinishFlyoutInteraction(metadata as EsQueryAlertMetaData);
       },
       canChangeTrigger: false,
       ruleTypeId: ALERT_TYPE_ID,
