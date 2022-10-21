@@ -1795,6 +1795,20 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
+            "id": "def-common.SimpleSavedObject.createdAt",
+            "type": "string",
+            "tags": [],
+            "label": "createdAt",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-browser",
             "id": "def-common.SimpleSavedObject.namespaces",
             "type": "Array",
             "tags": [],

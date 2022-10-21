@@ -211,18 +211,6 @@
               },
               {
                 "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/hooks/use_data.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/full_time_range_selector/full_time_range_selector_service.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes_analysis.tsx"
-              },
-              {
-                "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
               {
@@ -8138,18 +8126,6 @@
               },
               {
                 "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/hooks/use_data.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/full_time_range_selector/full_time_range_selector_service.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes_analysis.tsx"
-              },
-              {
-                "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
               {
@@ -15209,18 +15185,6 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/hooks/use_data.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/full_time_range_selector/full_time_range_selector_service.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes_analysis.tsx"
               },
               {
                 "plugin": "aiops",
@@ -23205,6 +23169,22 @@
             "label": "version",
             "description": [
               "An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.SavedObject.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [
+              "Timestamp of the time this document had been created."
             ],
             "signature": [
               "string | undefined"
