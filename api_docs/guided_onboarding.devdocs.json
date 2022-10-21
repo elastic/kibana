@@ -108,7 +108,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"complete\" | \"in_progress\" | \"inactive\" | \"active\""
+              "\"complete\" | \"in_progress\" | \"ready_to_complete\" | \"inactive\" | \"active\""
             ],
             "path": "src/plugins/guided_onboarding/common/types.ts",
             "deprecated": false,

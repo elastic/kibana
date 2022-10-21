@@ -52,11 +52,11 @@ import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/pub
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
-  IndexPatternDatasource as IndexPatternDatasourceType,
-  IndexPatternDatasourceSetupPlugins,
+  FormBasedDatasource as FormBasedDatasourceType,
+  FormBasedDatasourceSetupPlugins,
   FormulaPublicApi,
-} from './indexpattern_datasource';
-import type { TextBasedLanguagesDatasource as TextBasedLanguagesDatasourceType } from './text_based_languages_datasource';
+} from './datasources/form_based';
+import type { TextBasedDatasource as TextBasedDatasourceType } from './datasources/text_based';
 
 import type {
   XyVisualization as XyVisualizationType,
@@ -231,8 +231,8 @@ export class LensPlugin {
   private editorFrameService: EditorFrameServiceType | undefined;
   private editorFrameSetup: EditorFrameSetup | undefined;
   private queuedVisualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
-  private indexpatternDatasource: IndexPatternDatasourceType | undefined;
-  private textBasedLanguagesDatasource: TextBasedLanguagesDatasourceType | undefined;
+  private FormBasedDatasource: FormBasedDatasourceType | undefined;
+  private TextBasedDatasource: TextBasedDatasourceType | undefined;
   private xyVisualization: XyVisualizationType | undefined;
   private legacyMetricVisualization: LegacyMetricVisualizationType | undefined;
   private metricVisualization: MetricVisualizationType | undefined;
@@ -423,19 +423,19 @@ export class LensPlugin {
     const {
       DatatableVisualization,
       EditorFrameService,
-      IndexPatternDatasource,
+      FormBasedDatasource,
       XyVisualization,
       LegacyMetricVisualization,
       MetricVisualization,
       PieVisualization,
       HeatmapVisualization,
       GaugeVisualization,
-      TextBasedLanguagesDatasource,
+      TextBasedDatasource,
     } = await import('./async_services');
     this.datatableVisualization = new DatatableVisualization();
     this.editorFrameService = new EditorFrameService();
-    this.indexpatternDatasource = new IndexPatternDatasource();
-    this.textBasedLanguagesDatasource = new TextBasedLanguagesDatasource();
+    this.FormBasedDatasource = new FormBasedDatasource();
+    this.TextBasedDatasource = new TextBasedDatasource();
     this.xyVisualization = new XyVisualization();
     this.legacyMetricVisualization = new LegacyMetricVisualization();
     this.metricVisualization = new MetricVisualization();
@@ -445,7 +445,7 @@ export class LensPlugin {
 
     const editorFrameSetupInterface = this.editorFrameService.setup();
 
-    const dependencies: IndexPatternDatasourceSetupPlugins &
+    const dependencies: FormBasedDatasourceSetupPlugins &
       XyVisualizationPluginSetupPlugins &
       DatatableVisualizationPluginSetupPlugins &
       LegacyMetricVisualizationPluginSetupPlugins &
@@ -458,8 +458,8 @@ export class LensPlugin {
       formatFactory,
       eventAnnotation,
     };
-    this.indexpatternDatasource.setup(core, dependencies);
-    this.textBasedLanguagesDatasource.setup(core, dependencies);
+    this.FormBasedDatasource.setup(core, dependencies);
+    this.TextBasedDatasource.setup(core, dependencies);
     this.xyVisualization.setup(core, dependencies);
     this.datatableVisualization.setup(core, dependencies);
     this.legacyMetricVisualization.setup(core, dependencies);

@@ -125,7 +125,6 @@ export function DiscoverSidebarComponent({
   stateContainer,
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
-  const query = useAppStateSelector((state) => state.query);
   const selectedDataView = useInternalStateSelector((state) => state.dataView!);
 
   const [fields, setFields] = useState<DataViewField[] | null>(null);
@@ -134,6 +133,7 @@ export function DiscoverSidebarComponent({
   const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
   const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
   const isPlainRecord = !onAddFilter;
+  const query = useAppStateSelector((state) => state.query);
 
   useEffect(() => {
     if (documents) {
@@ -360,7 +360,7 @@ export function DiscoverSidebarComponent({
             trigger={{
               label: selectedDataView?.getName() || '',
               'data-test-subj': 'dataView-switch-link',
-              title: selectedDataView?.title || '',
+              title: selectedDataView?.getIndexPattern() || '',
               fullWidth: true,
             }}
           />

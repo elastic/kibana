@@ -5271,10 +5271,10 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.PackageClient.getRegistryPackage",
+            "id": "def-server.PackageClient.getPackage",
             "type": "Function",
             "tags": [],
-            "label": "getRegistryPackage",
+            "label": "getPackage",
             "description": [],
             "signature": [
               "(packageName: string, packageVersion: string) => Promise<{ packageInfo: ",
@@ -5282,8 +5282,8 @@
                 "pluginId": "fleet",
                 "scope": "common",
                 "docId": "kibFleetPluginApi",
-                "section": "def-common.RegistryPackage",
-                "text": "RegistryPackage"
+                "section": "def-common.ArchivePackage",
+                "text": "ArchivePackage"
               },
               "; paths: string[]; }>"
             ],
@@ -5293,7 +5293,7 @@
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackageClient.getRegistryPackage.$1",
+                "id": "def-server.PackageClient.getPackage.$1",
                 "type": "string",
                 "tags": [],
                 "label": "packageName",
@@ -5308,7 +5308,7 @@
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackageClient.getRegistryPackage.$2",
+                "id": "def-server.PackageClient.getPackage.$2",
                 "type": "string",
                 "tags": [],
                 "label": "packageVersion",
@@ -13176,7 +13176,7 @@
           {
             "parentPluginId": "fleet",
             "id": "def-common.RegistryElasticsearch.index_template.settings",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "'index_template.settings'",
             "description": [],

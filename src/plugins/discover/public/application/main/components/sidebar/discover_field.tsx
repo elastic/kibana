@@ -30,6 +30,7 @@ import { getFieldTypeName } from '../../../../utils/get_field_type_name';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { SHOW_LEGACY_FIELD_TOP_VALUES, PLUGIN_ID } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
 
 function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows
@@ -260,7 +261,6 @@ export interface DiscoverFieldProps {
    * Optionally show or hide field stats in the popover
    */
   showFieldStats?: boolean;
-
   /**
    * Columns
    */

@@ -6,38 +6,27 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-  useEuiTheme,
-  useIsWithinBreakpoints,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import React, { RefObject, useCallback, useMemo, useState } from 'react';
+import React, { RefObject, useCallback } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
-import { css } from '@emotion/css';
+import { UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { SavedSearchData } from '../../services/discover_data_state_container';
-import { CHART_HIDDEN_KEY } from '../chart/discover_chart';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataTableRecord } from '../../../../types';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import { DiscoverChart } from '../chart';
 import { FieldStatisticsTable } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
-import { DiscoverPanels, DISCOVER_PANELS_MODE } from './discover_panels';
+import { useDiscoverHistogram } from './use_discover_histogram';
 
-const DiscoverChartMemoized = React.memo(DiscoverChart);
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
-
-export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramHeight';
 
 export interface DiscoverMainContentProps {
   isPlainRecord: boolean;
@@ -51,7 +40,7 @@ export interface DiscoverMainContentProps {
   isTimeBased: boolean;
   viewMode: VIEW_MODE;
   onAddFilter: DocViewFilterFn | undefined;
-  onFieldEdited: () => void;
+  onFieldEdited: () => Promise<void>;
   columns: string[];
   resizeRef: RefObject<HTMLDivElement>;
 }
@@ -72,9 +61,8 @@ export const DiscoverMainContent = ({
   columns,
   resizeRef,
 }: DiscoverMainContentProps) => {
-  const { trackUiMetric, storage } = useDiscoverServices();
-  const hideChart = useAppStateSelector((state) => state.hideChart);
-  const interval = useAppStateSelector((state) => state.interval);
+  const services = useDiscoverServices();
+  const { trackUiMetric } = services;
   const query = useAppStateSelector((state) => state.query);
   const filters = useAppStateSelector((state) => state.filters);
 
@@ -93,134 +81,96 @@ export const DiscoverMainContent = ({
     [trackUiMetric, stateContainer]
   );
 
-  const topPanelNode = useMemo(
-    () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
-    []
-  );
-
-  const mainPanelNode = useMemo(
-    () => createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } }),
-    []
-  );
-
-  const actualHideChart =
-    hideChart || (hideChart === undefined && storage.get(CHART_HIDDEN_KEY)) || !isTimeBased;
-  const showFixedPanels = useIsWithinBreakpoints(['xs', 's']) || isPlainRecord || actualHideChart;
-  const { euiTheme } = useEuiTheme();
-  const defaultTopPanelHeight = euiTheme.base * 12;
-  const minTopPanelHeight = euiTheme.base * 8;
-  const minMainPanelHeight = euiTheme.base * 10;
-
-  const [topPanelHeight, setTopPanelHeight] = useState(
-    Number(storage.get(HISTOGRAM_HEIGHT_KEY)) || defaultTopPanelHeight
-  );
-
-  const storeTopPanelHeight = useCallback(
-    (newTopPanelHeight: number) => {
-      storage.set(HISTOGRAM_HEIGHT_KEY, newTopPanelHeight);
-      setTopPanelHeight(newTopPanelHeight);
-    },
-    [storage]
-  );
-
-  const resetTopPanelHeight = useCallback(
-    () => storeTopPanelHeight(defaultTopPanelHeight),
-    [storeTopPanelHeight, defaultTopPanelHeight]
-  );
-
-  const onTopPanelHeightChange = useCallback(
-    (newTopPanelHeight: number) => storeTopPanelHeight(newTopPanelHeight),
-    [storeTopPanelHeight]
-  );
-
-  const chartClassName =
-    showFixedPanels && !hideChart
-      ? css`
-          height: ${defaultTopPanelHeight}px;
-        `
-      : 'eui-fullHeight';
-
-  const panelsMode = isPlainRecord
-    ? DISCOVER_PANELS_MODE.SINGLE
-    : showFixedPanels
-    ? DISCOVER_PANELS_MODE.FIXED
-    : DISCOVER_PANELS_MODE.RESIZABLE;
+  const {
+    topPanelHeight,
+    hits,
+    chart,
+    onEditVisualization,
+    onTopPanelHeightChange,
+    onChartHiddenChange,
+    onTimeIntervalChange,
+  } = useDiscoverHistogram({
+    stateContainer,
+    stateContainer.appStateContainer.get(),
+    savedSearchData$,
+    dataView,
+    savedSearch,
+    isTimeBased,
+    isPlainRecord,
+  });
 
   return (
-    <>
-      <InPortal node={topPanelNode}>
-        <DiscoverChartMemoized
-          className={chartClassName}
-          savedSearch={savedSearch}
-          savedSearchDataChart$={savedSearchData$.charts$}
-          savedSearchDataTotalHits$={savedSearchData$.totalHits$}
-          stateContainer={stateContainer}
-          dataView={dataView}
-          hideChart={actualHideChart}
-          interval={interval}
-          isTimeBased={isTimeBased}
-          appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="m" />}
-          onResetChartHeight={
-            panelsMode === DISCOVER_PANELS_MODE.RESIZABLE ? resetTopPanelHeight : undefined
-          }
-        />
-      </InPortal>
-      <InPortal node={mainPanelNode}>
-        <EuiFlexGroup
-          className="eui-fullHeight"
-          direction="column"
-          gutterSize="none"
-          responsive={false}
-        >
-          {!isPlainRecord && (
-            <EuiFlexItem grow={false}>
-              {!showFixedPanels && <EuiSpacer size="s" />}
-              <EuiHorizontalRule margin="none" />
-              <DocumentViewModeToggle
-                viewMode={viewMode}
-                setDiscoverViewMode={setDiscoverViewMode}
+    <UnifiedHistogramLayout
+      className="dscPageContent__inner"
+      services={services}
+      hits={hits}
+      chart={chart}
+      resizeRef={resizeRef}
+      topPanelHeight={topPanelHeight}
+      appendHitsCounter={
+        savedSearch?.id ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="refresh"
+              data-test-subj="resetSavedSearch"
+              onClick={stateContainer.savedSearchState.undo}
+              size="s"
+              aria-label={i18n.translate('discover.reloadSavedSearchButton', {
+                defaultMessage: 'Reset search',
+              })}
+            >
+              <FormattedMessage
+                id="discover.reloadSavedSearchButton"
+                defaultMessage="Reset search"
               />
-            </EuiFlexItem>
-          )}
-          {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
-            <DiscoverDocuments
-              documents$={savedSearchData$.documents$}
-              expandedDoc={expandedDoc}
-              dataView={dataView}
-              navigateTo={navigateTo}
-              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-              savedSearch={savedSearch}
-              setExpandedDoc={setExpandedDoc}
-              stateContainer={stateContainer}
-              onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
-            />
-          ) : (
-            <FieldStatisticsTableMemoized
-              availableFields$={savedSearchData$.availableFields$}
-              savedSearch={savedSearch}
-              dataView={dataView}
-              query={query}
-              filters={filters}
-              columns={columns}
-              stateContainer={stateContainer}
-              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
-              trackUiMetric={trackUiMetric}
-              savedSearchDataTotalHits$={savedSearchData$.totalHits$}
-            />
-          )}
-        </EuiFlexGroup>
-      </InPortal>
-      <DiscoverPanels
-        className="dscPageContent__inner"
-        mode={panelsMode}
-        resizeRef={resizeRef}
-        topPanelHeight={topPanelHeight}
-        minTopPanelHeight={minTopPanelHeight}
-        minMainPanelHeight={minMainPanelHeight}
-        topPanel={<OutPortal node={topPanelNode} />}
-        mainPanel={<OutPortal node={mainPanelNode} />}
-        onTopPanelHeightChange={onTopPanelHeightChange}
-      />
-    </>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : undefined
+      }
+      onTopPanelHeightChange={onTopPanelHeightChange}
+      onEditVisualization={onEditVisualization}
+      onChartHiddenChange={onChartHiddenChange}
+      onTimeIntervalChange={onTimeIntervalChange}
+    >
+      <EuiFlexGroup
+        className="eui-fullHeight"
+        direction="column"
+        gutterSize="none"
+        responsive={false}
+      >
+        {!isPlainRecord && (
+          <EuiFlexItem grow={false}>
+            <EuiHorizontalRule margin="none" />
+            <DocumentViewModeToggle viewMode={viewMode} setDiscoverViewMode={setDiscoverViewMode} />
+          </EuiFlexItem>
+        )}
+        {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
+          <DiscoverDocuments
+            documents$={savedSearchData$.documents$}
+            expandedDoc={expandedDoc}
+            dataView={dataView}
+            navigateTo={navigateTo}
+            onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+            savedSearch={savedSearch}
+            setExpandedDoc={setExpandedDoc}
+            stateContainer={stateContainer}
+            onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
+          />
+        ) : (
+          <FieldStatisticsTableMemoized
+            availableFields$={savedSearchData$.availableFields$}
+            savedSearch={savedSearch}
+            dataView={dataView}
+            query={query}
+            filters={filters}
+            columns={columns}
+            stateContainer={stateContainer}
+            onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+            trackUiMetric={trackUiMetric}
+            savedSearchDataTotalHits$={savedSearchData$.totalHits$}
+          />
+        )}
+      </EuiFlexGroup>
+    </UnifiedHistogramLayout>
   );
 };

@@ -28,6 +28,7 @@ import { useParams } from 'react-router-dom';
 import { mockHistory, Router } from '../../../../../common/mock/router';
 
 import { fillEmptySeverityMappings } from '../helpers';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -169,7 +170,13 @@ const mockRule = {
   exceptions_list: [],
 };
 const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const store = createStore(
+  state,
+  SUB_PLUGINS_REDUCER,
+  { dataTable: tGridReducer },
+  kibanaObservable,
+  storage
+);
 
 describe('RuleDetailsPageComponent', () => {
   beforeAll(() => {

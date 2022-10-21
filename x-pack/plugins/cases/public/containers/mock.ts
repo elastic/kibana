@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionLicense, Cases, Case, CasesStatus, CaseUserActions, Comment } from './types';
+import type { ActionLicense, Cases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
 import type {
   ResolvedCase,
@@ -16,31 +16,33 @@ import type {
   ExternalReferenceComment,
   PersistableComment,
 } from '../../common/ui/types';
-import {
-  Actions,
-  ActionTypes,
+import type {
   CaseConnector,
   CaseResponse,
   CasesFindResponse,
   CasesResponse,
   CasesStatusResponse,
-  CaseStatuses,
   CaseUserActionResponse,
   CaseUserActionsResponse,
   CommentResponse,
-  CommentType,
-  ConnectorTypes,
   UserAction,
   UserActionTypes,
   UserActionWithResponse,
   CommentUserAction,
+} from '../../common/api';
+import {
+  Actions,
+  ActionTypes,
+  CaseStatuses,
+  CommentType,
+  ConnectorTypes,
   CaseSeverity,
   ExternalReferenceStorageType,
 } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import { SnakeToCamelCase } from '../../common/types';
+import type { SnakeToCamelCase } from '../../common/types';
 import { covertToSnakeCase } from './utils';
-import {
+import type {
   ExternalReferenceAttachmentType,
   AttachmentViewObject,
   PersistableStateAttachmentType,

@@ -6,10 +6,12 @@
  */
 
 import React, { memo } from 'react';
-import { EuiCommentProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { UserActionCopyLink } from './copy_link';
-import { Actions, UserActionPropertyActions } from './property_actions';
+import type { Actions } from './property_actions';
+import { UserActionPropertyActions } from './property_actions';
 
 export interface UserActionContentToolbarProps {
   commentMarkdown?: string;

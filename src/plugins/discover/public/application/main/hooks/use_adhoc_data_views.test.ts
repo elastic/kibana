@@ -78,8 +78,15 @@ describe('useAdHocDataViews', () => {
         dataViews: mockDiscoverServices.dataViews,
         stateContainer: {
           appStateContainer: { getState: jest.fn().mockReturnValue({}) },
+          replaceUrlAppState: jest.fn(),
+          kbnUrlStateStorage: {
+            kbnUrlControls: { flush: jest.fn() },
+          },
         } as unknown as GetStateReturn,
-        onChangeDataView: jest.fn(),
+        setUrlTracking: jest.fn(),
+        dataViews: mockDiscoverServices.dataViews,
+        filterManager: mockDiscoverServices.filterManager,
+        toastNotifications: mockDiscoverServices.toastNotifications,
       })
     );
 
@@ -103,8 +110,15 @@ describe('useAdHocDataViews', () => {
         dataViews: mockDiscoverServices.dataViews,
         stateContainer: {
           appStateContainer: { getState: jest.fn().mockReturnValue({}) },
+          replaceUrlAppState: jest.fn(),
+          kbnUrlStateStorage: {
+            kbnUrlControls: { flush: jest.fn() },
+          },
         } as unknown as GetStateReturn,
-        onChangeDataView: jest.fn(),
+        setUrlTracking: jest.fn(),
+        dataViews: mockDiscoverServices.dataViews,
+        filterManager: mockDiscoverServices.filterManager,
+        toastNotifications: mockDiscoverServices.toastNotifications,
       })
     );
 

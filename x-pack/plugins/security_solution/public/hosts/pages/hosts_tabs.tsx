@@ -22,7 +22,7 @@ import {
   UncommonProcessQueryTabBody,
   SessionsTabBody,
 } from './navigation';
-import { TimelineId } from '../../../common/types';
+import { TableId } from '../../../common/types';
 import { hostNameExistsFilter } from '../../common/components/visualization_actions/utils';
 
 export const HostsTabs = memo<HostsTabsProps>(
@@ -70,7 +70,7 @@ export const HostsTabs = memo<HostsTabsProps>(
           <EventsQueryTabBody
             {...tabProps}
             pageFilters={pageFilters}
-            timelineId={TimelineId.hostsPageEvents}
+            tableId={TableId.hostsPageEvents}
             externalAlertPageFilters={externalAlertPageFilters}
           />
         </Route>

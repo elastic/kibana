@@ -10,10 +10,10 @@ import classNames from 'classnames';
 import { ThemeContext } from 'styled-components';
 
 import { EuiToken } from '@elastic/eui';
-import { CommentResponseActionsType } from '../../../../common/api';
-import { UserActionBuilder, UserActionBuilderArgs } from '../types';
+import type { CommentResponseActionsType } from '../../../../common/api';
+import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
-import { SnakeToCamelCase } from '../../../../common/types';
+import type { SnakeToCamelCase } from '../../../../common/types';
 import { UserActionCopyLink } from '../copy_link';
 import { MarkdownRenderer } from '../../markdown_editor';
 import { ContentWrapper } from '../markdown_form';

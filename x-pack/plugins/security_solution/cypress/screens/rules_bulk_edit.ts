@@ -64,8 +64,6 @@ export const UPDATE_SCHEDULE_INTERVAL_INPUT =
 export const UPDATE_SCHEDULE_LOOKBACK_INPUT =
   '[data-test-subj="bulkEditRulesScheduleLookbackSelector"]';
 
-export const UPDATE_SCHEDULE_TIME_INTERVAL = '[data-test-subj="interval"]';
-
 export const UPDATE_SCHEDULE_TIME_UNIT_SELECT = '[data-test-subj="timeType"]';
 
 export const RULES_BULK_EDIT_ACTIONS_THROTTLE_INPUT =

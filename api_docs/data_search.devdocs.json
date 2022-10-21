@@ -1485,7 +1485,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>"
+                  "Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{} & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
                 "deprecated": false,
@@ -1685,7 +1685,7 @@
                 "section": "def-common.SearchSessionSavedObjectAttributes",
                 "text": "SearchSessionSavedObjectAttributes"
               },
-              "> | undefined>"
+              ">>"
             ],
             "path": "src/plugins/data/server/search/session/session_service.ts",
             "deprecated": false,
@@ -2575,7 +2575,7 @@
                 "section": "def-common.SearchSessionSavedObjectAttributes",
                 "text": "SearchSessionSavedObjectAttributes"
               },
-              "> | undefined>; get: (sessionId: string) => Promise<",
+              ">>; get: (sessionId: string) => Promise<",
               "SavedObject",
               "<",
               {
@@ -6730,7 +6730,7 @@
                 "section": "def-common.RequestAdapter",
                 "text": "RequestAdapter"
               },
-              " | undefined, abortSignal?: AbortSignal | undefined, searchSessionId?: string | undefined) => Promise<",
+              " | undefined, abortSignal?: AbortSignal | undefined, searchSessionId?: string | undefined, disableShardFailureWarning?: boolean | undefined) => Promise<",
               "SearchResponse",
               "<any, Record<string, ",
               "AggregationsAggregate",
@@ -7082,6 +7082,20 @@
                 ],
                 "signature": [
                   "string | undefined"
+                ],
+                "path": "src/plugins/data/common/search/aggs/agg_type.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggType.postFlightRequest.$8",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "disableShardFailureWarning",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
                 ],
                 "path": "src/plugins/data/common/search/aggs/agg_type.ts",
                 "deprecated": false,
@@ -16131,7 +16145,7 @@
             "id": "def-common.pollSearch.$3",
             "type": "Object",
             "tags": [],
-            "label": "{ pollInterval = 1000, abortSignal }",
+            "label": "{ pollInterval, abortSignal }",
             "description": [],
             "signature": [
               {
@@ -26200,7 +26214,7 @@
             "tags": [],
             "label": "pollInterval",
             "description": [
-              "\nThe number of milliseconds to wait between receiving a response and sending another request"
+              "\nThe number of milliseconds to wait between receiving a response and sending another request\nIf not provided, then a default 1 second interval with back-off up to 5 seconds interval is used"
             ],
             "signature": [
               "number | undefined"

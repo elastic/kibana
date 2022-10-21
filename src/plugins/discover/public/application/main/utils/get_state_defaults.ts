@@ -18,7 +18,7 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../../common';
-import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
+import { CHART_HIDDEN_KEY } from '../components/layout/use_discover_histogram';
 
 function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {

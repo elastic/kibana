@@ -16,11 +16,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
-import {
-  DataDocuments$,
-  DataDocumentsMsg,
-  RecordRawType,
-} from '../../services/discover_data_state_container';
+import { DataDocuments$, RecordRawType } from '../../services/discover_data_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
@@ -91,7 +87,7 @@ function DiscoverDocumentsComponent({
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
 
-  const documentState: DataDocumentsMsg = useDataState(documents$);
+  const documentState = useDataState(documents$);
   const isLoading = documentState.fetchStatus === FetchStatus.LOADING;
   const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const rows = useMemo(() => documentState.result || [], [documentState.result]);

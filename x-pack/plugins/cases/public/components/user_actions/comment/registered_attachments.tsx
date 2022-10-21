@@ -15,12 +15,12 @@ import React, { Suspense } from 'react';
 import { memoize } from 'lodash';
 
 import { EuiCallOut, EuiCode, EuiLoadingSpinner } from '@elastic/eui';
-import { AttachmentType } from '../../../client/attachment_framework/types';
-import { AttachmentTypeRegistry } from '../../../../common/registry';
-import { CommentResponse } from '../../../../common/api';
-import { UserActionBuilder, UserActionBuilderArgs } from '../types';
+import type { AttachmentType } from '../../../client/attachment_framework/types';
+import type { AttachmentTypeRegistry } from '../../../../common/registry';
+import type { CommentResponse } from '../../../../common/api';
+import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
-import { SnakeToCamelCase } from '../../../../common/types';
+import type { SnakeToCamelCase } from '../../../../common/types';
 import { ATTACHMENT_NOT_REGISTERED_ERROR, DEFAULT_EVENT_ATTACHMENT_TITLE } from './translations';
 import { UserActionContentToolbar } from '../content_toolbar';
 import * as i18n from '../translations';

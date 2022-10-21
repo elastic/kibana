@@ -12,7 +12,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { IAggType } from '@kbn/data-plugin/public';
 import { IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
-import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
+import type {
+  Datatable,
+  ExpressionRenderDefinition,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DatatableComponent } from './components/table_basic';
@@ -20,6 +24,30 @@ import { DatatableComponent } from './components/table_basic';
 import type { ILensInterpreterRenderHandlers } from '../../types';
 import type { FormatFactory } from '../../../common';
 import type { DatatableProps } from '../../../common/expressions';
+
+async function columnsFilterable(table: Datatable, handlers: IInterpreterRenderHandlers) {
+  if (!table.rows.length) {
+    return;
+  }
+  return Promise.all(
+    table.columns.map(async (column, colIndex) => {
+      return Boolean(
+        await handlers.hasCompatibleActions?.({
+          name: 'filter',
+          data: {
+            data: [
+              {
+                table,
+                column: colIndex,
+                row: 0,
+              },
+            ],
+          },
+        })
+      );
+    })
+  );
+}
 
 export const getDatatableRenderer = (dependencies: {
   formatFactory: FormatFactory;
@@ -87,6 +115,7 @@ export const getDatatableRenderer = (dependencies: {
             paletteService={dependencies.paletteService}
             getType={resolvedGetType}
             rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
+            columnFilterable={await columnsFilterable(config.data, handlers)}
             interactive={isInteractive()}
             uiSettings={dependencies.uiSettings}
             renderComplete={renderComplete}

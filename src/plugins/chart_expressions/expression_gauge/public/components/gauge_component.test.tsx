@@ -94,6 +94,7 @@ describe('GaugeComponent', function () {
 
   beforeAll(async () => {
     wrapperProps = {
+      canNavigateToLens: false,
       data: createData(),
       chartsThemeService,
       args,

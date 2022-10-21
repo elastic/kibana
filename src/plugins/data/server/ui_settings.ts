@@ -295,7 +295,7 @@ export function getUiSettings(
       name: i18n.translate('data.advancedSettings.histogram.maxBarsTitle', {
         defaultMessage: 'Maximum buckets',
       }),
-      value: 100,
+      value: 1000,
       description: i18n.translate('data.advancedSettings.histogram.maxBarsText', {
         defaultMessage: `
           Limits the density of date and number histograms across Kibana

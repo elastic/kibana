@@ -3752,6 +3752,26 @@
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.guidedOnboarding",
+            "type": "Object",
+            "tags": [],
+            "label": "guidedOnboarding",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "guidedOnboarding",
+                "scope": "public",
+                "docId": "kibGuidedOnboardingPluginApi",
+                "section": "def-public.GuidedOnboardingPluginStart",
+                "text": "GuidedOnboardingPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4073,8 +4093,11 @@
             "label": "metricOptions",
             "description": [],
             "signature": [
+              "(",
               "MetricOption",
-              "[] | undefined"
+              " | { id: string; field?: string | undefined; label: string; items: ",
+              "MetricOption",
+              "[]; columnType?: string | undefined; })[] | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
@@ -4591,7 +4614,7 @@
             "label": "values",
             "description": [],
             "signature": [
-              "string[] | undefined"
+              "(string | number)[] | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
@@ -4605,7 +4628,7 @@
             "label": "notValues",
             "description": [],
             "signature": [
-              "string[] | undefined"
+              "(string | number)[] | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
             "deprecated": false,
@@ -6050,17 +6073,15 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "UpdateResponse",
-                  "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocumentR>>; }; asyncSearch: ",
+                  "default",
+                  "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; helpers: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
                   ") => ",
-                  "default",
-                  "; Internal: ",
-                  "default",
-                  "; asyncSearch: ",
                   "default",
                   "; autoscaling: ",
                   "default",
@@ -7759,7 +7780,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; time_window: { duration: string; is_rolling: boolean; }; budgeting_method: \"occurrences\"; objective: { target: number; }; revision: number; created_at: Date; updated_at: Date; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: \"occurrences\"; objective: { target: number; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; }; }; revision: number; created_at: string; updated_at: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7862,12 +7883,26 @@
           "<\"4xx\">, ",
           "LiteralC",
           "<\"5xx\">]>>; }>]>; }>]>; time_window: ",
+          "UnionC",
+          "<[",
           "TypeC",
           "<{ duration: ",
-          "StringC",
-          "; is_rolling: ",
+          "Type",
+          "<",
+          "Duration",
+          ", string, unknown>; is_rolling: ",
           "LiteralC",
-          "<boolean>; }>; budgeting_method: ",
+          "<boolean>; }>, ",
+          "TypeC",
+          "<{ duration: ",
+          "Type",
+          "<",
+          "Duration",
+          ", string, unknown>; calendar: ",
+          "TypeC",
+          "<{ start_time: ",
+          "Type",
+          "<Date, string, unknown>; }>; }>]>; budgeting_method: ",
           "LiteralC",
           "<\"occurrences\">; objective: ",
           "TypeC",
@@ -7881,7 +7916,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; time_window: { duration: string; is_rolling: boolean; }; budgeting_method: \"occurrences\"; objective: { target: number; }; created_at: Date; updated_at: Date; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: \"occurrences\"; objective: { target: number; }; created_at: string; updated_at: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -7980,12 +8015,26 @@
           "<\"4xx\">, ",
           "LiteralC",
           "<\"5xx\">]>>; }>]>; }>]>; time_window: ",
+          "UnionC",
+          "<[",
           "TypeC",
           "<{ duration: ",
-          "StringC",
-          "; is_rolling: ",
+          "Type",
+          "<",
+          "Duration",
+          ", string, unknown>; is_rolling: ",
           "LiteralC",
-          "<boolean>; }>; budgeting_method: ",
+          "<boolean>; }>, ",
+          "TypeC",
+          "<{ duration: ",
+          "Type",
+          "<",
+          "Duration",
+          ", string, unknown>; calendar: ",
+          "TypeC",
+          "<{ start_time: ",
+          "Type",
+          "<Date, string, unknown>; }>; }>]>; budgeting_method: ",
           "LiteralC",
           "<\"occurrences\">; objective: ",
           "TypeC",
@@ -8054,7 +8103,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly unsafe: Readonly<{} & { slo: Readonly<{} & { enabled: boolean; }>; alertDetails: Readonly<{} & { enabled: boolean; }>; }>; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; }"
+          "{ readonly unsafe: Readonly<{} & { slo: Readonly<{} & { enabled: boolean; }>; alertDetails: Readonly<{} & { apm: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; uptime: Readonly<{} & { enabled: boolean; }>; }>; }>; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; }"
         ],
         "path": "x-pack/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -8109,7 +8158,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; time_window: { duration: string; is_rolling: boolean; }; budgeting_method: \"occurrences\"; objective: { target: number; }; revision: number; created_at: Date; updated_at: Date; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: \"occurrences\"; objective: { target: number; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; }; }; revision: number; created_at: string; updated_at: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8212,12 +8261,26 @@
           "<\"4xx\">, ",
           "LiteralC",
           "<\"5xx\">]>>; }>]>; }>]>; time_window: ",
+          "UnionC",
+          "<[",
           "TypeC",
           "<{ duration: ",
-          "StringC",
-          "; is_rolling: ",
+          "Type",
+          "<",
+          "Duration",
+          ", string, unknown>; is_rolling: ",
           "LiteralC",
-          "<boolean>; }>; budgeting_method: ",
+          "<boolean>; }>, ",
+          "TypeC",
+          "<{ duration: ",
+          "Type",
+          "<",
+          "Duration",
+          ", string, unknown>; calendar: ",
+          "TypeC",
+          "<{ start_time: ",
+          "Type",
+          "<Date, string, unknown>; }>; }>]>; budgeting_method: ",
           "LiteralC",
           "<\"occurrences\">; objective: ",
           "TypeC",
@@ -8231,7 +8294,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; time_window: { duration: string; is_rolling: boolean; }; budgeting_method: \"occurrences\"; objective: { target: number; }; created_at: Date; updated_at: Date; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; time_window: { duration: string; is_rolling: boolean; } | { duration: string; calendar: { start_time: string; }; }; budgeting_method: \"occurrences\"; objective: { target: number; }; created_at: string; updated_at: string; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8330,12 +8393,26 @@
           "<\"4xx\">, ",
           "LiteralC",
           "<\"5xx\">]>>; }>]>; }>]>; time_window: ",
+          "UnionC",
+          "<[",
           "TypeC",
           "<{ duration: ",
-          "StringC",
-          "; is_rolling: ",
+          "Type",
+          "<",
+          "Duration",
+          ", string, unknown>; is_rolling: ",
           "LiteralC",
-          "<boolean>; }>; budgeting_method: ",
+          "<boolean>; }>, ",
+          "TypeC",
+          "<{ duration: ",
+          "Type",
+          "<",
+          "Duration",
+          ", string, unknown>; calendar: ",
+          "TypeC",
+          "<{ start_time: ",
+          "Type",
+          "<Date, string, unknown>; }>; }>]>; budgeting_method: ",
           "LiteralC",
           "<\"occurrences\">; objective: ",
           "TypeC",
@@ -10561,6 +10638,21 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-common.NETWORK_TIMINGS_FIELDS",
+        "type": "Array",
+        "tags": [],
+        "label": "NETWORK_TIMINGS_FIELDS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "x-pack/plugins/observability/common/field_names/synthetics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.observabilityAppId",
         "type": "string",
         "tags": [],
@@ -10585,6 +10677,141 @@
           "\"observability\""
         ],
         "path": "x-pack/plugins/observability/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.SYNTHETICS_BLOCKED_TIMINGS",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_BLOCKED_TIMINGS",
+        "description": [],
+        "signature": [
+          "\"synthetics.payload.timings.blocked\""
+        ],
+        "path": "x-pack/plugins/observability/common/field_names/synthetics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.SYNTHETICS_CONNECT_TIMINGS",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_CONNECT_TIMINGS",
+        "description": [],
+        "signature": [
+          "\"synthetics.payload.timings.connect\""
+        ],
+        "path": "x-pack/plugins/observability/common/field_names/synthetics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.SYNTHETICS_DNS_TIMINGS",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_DNS_TIMINGS",
+        "description": [],
+        "signature": [
+          "\"synthetics.payload.timings.dns\""
+        ],
+        "path": "x-pack/plugins/observability/common/field_names/synthetics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.SYNTHETICS_RECEIVE_TIMINGS",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_RECEIVE_TIMINGS",
+        "description": [],
+        "signature": [
+          "\"synthetics.payload.timings.receive\""
+        ],
+        "path": "x-pack/plugins/observability/common/field_names/synthetics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.SYNTHETICS_SEND_TIMINGS",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_SEND_TIMINGS",
+        "description": [],
+        "signature": [
+          "\"synthetics.payload.timings.send\""
+        ],
+        "path": "x-pack/plugins/observability/common/field_names/synthetics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.SYNTHETICS_SSL_TIMINGS",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_SSL_TIMINGS",
+        "description": [],
+        "signature": [
+          "\"synthetics.payload.timings.ssl\""
+        ],
+        "path": "x-pack/plugins/observability/common/field_names/synthetics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.SYNTHETICS_STEP_DURATION",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_STEP_DURATION",
+        "description": [],
+        "signature": [
+          "\"synthetics.step.duration.us\""
+        ],
+        "path": "x-pack/plugins/observability/common/field_names/synthetics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.SYNTHETICS_TOTAL_TIMINGS",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_TOTAL_TIMINGS",
+        "description": [],
+        "signature": [
+          "\"synthetics.payload.timings.total\""
+        ],
+        "path": "x-pack/plugins/observability/common/field_names/synthetics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.SYNTHETICS_WAIT_TIMINGS",
+        "type": "string",
+        "tags": [],
+        "label": "SYNTHETICS_WAIT_TIMINGS",
+        "description": [],
+        "signature": [
+          "\"synthetics.payload.timings.wait\""
+        ],
+        "path": "x-pack/plugins/observability/common/field_names/synthetics.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

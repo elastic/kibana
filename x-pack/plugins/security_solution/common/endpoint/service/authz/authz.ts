@@ -172,14 +172,16 @@ export const calculateEndpointAuthz = (
     canWritePolicyManagement,
     canReadPolicyManagement,
     canWriteActionsLogManagement,
-    canReadActionsLogManagement: canReadActionsLogManagement && isPlatinumPlusLicense,
+    canReadActionsLogManagement: canReadActionsLogManagement && isEnterpriseLicense,
     // Response Actions
     canIsolateHost: canIsolateHost && isPlatinumPlusLicense,
     canUnIsolateHost: canIsolateHost,
     canKillProcess: canWriteProcessOperations && isEnterpriseLicense,
     canSuspendProcess: canWriteProcessOperations && isEnterpriseLicense,
     canGetRunningProcesses: canWriteProcessOperations && isEnterpriseLicense,
-    canAccessResponseConsole: hasEndpointManagementAccess && isEnterpriseLicense,
+    canAccessResponseConsole:
+      isEnterpriseLicense &&
+      (canIsolateHost || canWriteProcessOperations || canWriteFileOperations),
     canWriteFileOperations: canWriteFileOperations && isEnterpriseLicense,
     // artifacts
     canWriteTrustedApplications,

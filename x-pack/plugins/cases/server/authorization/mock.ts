@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Authorization } from './authorization';
+import type { Authorization } from './authorization';
 
 type Schema = PublicMethodsOf<Authorization>;
 export type AuthorizationMock = jest.Mocked<Schema>;

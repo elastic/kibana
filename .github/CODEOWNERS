@@ -18,6 +18,7 @@
 /x-pack/plugins/graph/ @elastic/kibana-data-discovery
 /x-pack/test/functional/apps/graph @elastic/kibana-data-discovery
 /src/plugins/unified_field_list/ @elastic/kibana-data-discovery
+/src/plugins/unified_histogram/ @elastic/kibana-data-discovery
 /src/plugins/saved_objects_finder/ @elastic/kibana-data-discovery
 
 # Vis Editors
@@ -347,12 +348,12 @@ x-pack/examples/files_example @elastic/kibana-app-services
 /x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts/ @elastic/response-ops
 /docs/user/alerting/ @elastic/response-ops @elastic/mlr-docs
 /docs/management/connectors/ @elastic/response-ops @elastic/mlr-docs
-#CC# /x-pack/plugins/stack_alerts/ @elastic/response-ops
+/x-pack/plugins/stack_alerts/ @elastic/response-ops
 /x-pack/plugins/cases/ @elastic/response-ops
 /x-pack/test/cases_api_integration/ @elastic/response-ops
 /x-pack/test/functional/services/cases/ @elastic/response-ops
 /x-pack/test/functional_with_es_ssl/apps/cases/ @elastic/response-ops
-/x-pack/test/api_integration/apis/cases @elastic/response-ops
+/x-pack/test/api_integration/apis/cases/ @elastic/response-ops
 
 # Enterprise Search
 /x-pack/plugins/enterprise_search @elastic/enterprise-search-frontend
@@ -687,6 +688,7 @@ packages/analytics/shippers/elastic_v3/browser @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/common @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/server @elastic/kibana-core
 packages/analytics/shippers/fullstory @elastic/kibana-core
+packages/analytics/shippers/gainsight @elastic/kibana-core
 packages/content-management/table_list @elastic/shared-ux
 packages/core/analytics/core-analytics-browser @elastic/kibana-core
 packages/core/analytics/core-analytics-browser-internal @elastic/kibana-core
@@ -834,6 +836,7 @@ packages/core/status/core-status-server-mocks @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-deprecations-getters @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-http-setup-browser @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-so-type-serializer @elastic/kibana-core
+packages/core/test-helpers/core-test-helpers-test-utils @elastic/kibana-core
 packages/core/theme/core-theme-browser @elastic/kibana-core
 packages/core/theme/core-theme-browser-internal @elastic/kibana-core
 packages/core/theme/core-theme-browser-mocks @elastic/kibana-core
@@ -864,6 +867,7 @@ packages/kbn-babel-plugin-synthetic-packages @elastic/kibana-operations
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-bazel-packages @elastic/kibana-operations
 packages/kbn-bazel-runner @elastic/kibana-operations
+packages/kbn-cases-components @elastic/response-ops
 packages/kbn-chart-icons @elastic/kibana-vis-editors
 packages/kbn-ci-stats-core @elastic/kibana-operations
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
@@ -901,6 +905,7 @@ packages/kbn-ftr-common-functional-services @elastic/kibana-operations
 packages/kbn-ftr-screenshot-filename @elastic/kibana-operations
 packages/kbn-generate @elastic/kibana-operations
 packages/kbn-get-repo-files @elastic/kibana-operations
+packages/kbn-guided-onboarding @elastic/platform-onboarding
 packages/kbn-handlebars @elastic/kibana-security
 packages/kbn-hapi-mocks @elastic/kibana-core
 packages/kbn-i18n @elastic/kibana-core
@@ -911,6 +916,7 @@ packages/kbn-io-ts-utils @elastic/apm-ui
 packages/kbn-jest-serializers @elastic/kibana-operations
 packages/kbn-journeys @elastic/kibana-operations
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
+packages/kbn-language-documentation-popover @elastic/kibana-vis-editors
 packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
 packages/kbn-managed-vscode-config @elastic/kibana-operations
@@ -987,6 +993,9 @@ packages/shared-ux/card/no_data/types @elastic/shared-ux
 packages/shared-ux/link/redirect_app/impl @elastic/shared-ux
 packages/shared-ux/link/redirect_app/mocks @elastic/shared-ux
 packages/shared-ux/link/redirect_app/types @elastic/shared-ux
+packages/shared-ux/markdown/impl @elastic/shared-ux
+packages/shared-ux/markdown/mocks @elastic/shared-ux
+packages/shared-ux/markdown/types @elastic/shared-ux
 packages/shared-ux/page/analytics_no_data/impl @elastic/shared-ux
 packages/shared-ux/page/analytics_no_data/mocks @elastic/shared-ux
 packages/shared-ux/page/analytics_no_data/types @elastic/shared-ux

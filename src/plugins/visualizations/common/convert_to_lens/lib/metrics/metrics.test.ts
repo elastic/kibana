@@ -598,7 +598,7 @@ describe('convertMetricToColumns valid cases', () => {
         { aggType: METRIC_TYPES.AVG_BUCKET } as SchemaConfig<METRIC_TYPES>,
         dataView,
         [],
-        { isPercentageMode: true },
+        { isPercentageMode: true, min: 0, max: 100 },
       ],
       result,
       mockConvertToColumnInPercentageMode,

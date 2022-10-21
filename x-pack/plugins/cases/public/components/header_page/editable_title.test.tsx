@@ -8,13 +8,10 @@
 import React from 'react';
 
 import '../../common/mock/match_media';
-import {
-  AppMockRenderer,
-  createAppMockRenderer,
-  readCasesPermissions,
-  TestProviders,
-} from '../../common/mock';
-import { EditableTitle, EditableTitleProps } from './editable_title';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../../common/mock';
+import type { EditableTitleProps } from './editable_title';
+import { EditableTitle } from './editable_title';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
 describe('EditableTitle', () => {

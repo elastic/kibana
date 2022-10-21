@@ -67,6 +67,7 @@ export const UNISOLATE_HOST_ROUTE_V2 = `${BASE_ENDPOINT_ACTION_ROUTE}/unisolate`
 export const GET_PROCESSES_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/running_procs`;
 export const KILL_PROCESS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/kill_process`;
 export const SUSPEND_PROCESS_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/suspend_process`;
+export const GET_FILE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/get_file`;
 
 /** Endpoint Actions Routes */
 export const ENDPOINT_ACTION_LOG_ROUTE = `${BASE_ENDPOINT_ROUTE}/action_log/{agent_id}`;
@@ -79,25 +80,6 @@ export const failedFleetActionErrorCode = '424';
 export const ENDPOINT_DEFAULT_PAGE = 0;
 export const ENDPOINT_DEFAULT_PAGE_SIZE = 10;
 
-/**
- * The list of possible capabilities, reported by the endpoint in the metadata document
- */
-export const RESPONDER_CAPABILITIES = [
-  'isolation',
-  'kill_process',
-  'suspend_process',
-  'running_processes',
-] as const;
-
-export type ResponderCapabilities = typeof RESPONDER_CAPABILITIES[number];
-
-/** The list of possible responder command names **/
-export const RESPONDER_COMMANDS = [
-  'isolate',
-  'release',
-  'kill-process',
-  'suspend-process',
-  'processes',
-] as const;
-
-export type ResponderCommands = typeof RESPONDER_COMMANDS[number];
+export const ENDPOINT_ERROR_CODES: Record<string, number> = {
+  ES_CONNECTION_ERROR: -272,
+};

@@ -27,7 +27,7 @@ export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'navigateTo'> & {
   stateContainer: DiscoverStateContainer;
   isPlainRecord: boolean;
   textBasedLanguageModeErrors?: Error;
-  onFieldEdited: (dataView?: DataView) => void;
+  onFieldEdited: (dataView?: DataView) => Promise<void>;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
   adHocDataViewList: DataView[];
@@ -95,7 +95,7 @@ export const DiscoverTopNav = ({
                 },
                 fieldName,
                 onSave: async (field, nextDataView) => {
-                  onFieldEdited(nextDataView);
+                  await onFieldEdited(nextDataView);
                 },
               });
             }
@@ -171,7 +171,7 @@ export const DiscoverTopNav = ({
     trigger: {
       label: dataView?.getName() || '',
       'data-test-subj': 'discover-dataView-switch-link',
-      title: dataView?.title || '',
+      title: dataView?.getIndexPattern() || '',
     },
     currentDataViewId: dataView?.id,
     onAddField: addField,

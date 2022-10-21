@@ -23,24 +23,85 @@ import { DiscoverLayoutProps } from './types';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { Chart } from '../chart/point_series';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
-import {
-  AvailableFields$,
-  DataCharts$,
-  DataDocuments$,
-  DataMain$,
-  DataTotalHits$,
-  RecordRawType,
-} from '../../services/discover_data_state_container';
+import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
+import type { UnifiedHistogramChartData } from '@kbn/unified-histogram-plugin/public';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { setTimeout } from 'timers/promises';
+import { act } from 'react-dom/test-utils';
+
+jest.mock('@kbn/unified-histogram-plugin/public', () => {
+  const originalModule = jest.requireActual('@kbn/unified-histogram-plugin/public');
+
+  const chartData = {
+    xAxisOrderedValues: [
+      1623880800000, 1623967200000, 1624053600000, 1624140000000, 1624226400000, 1624312800000,
+      1624399200000, 1624485600000, 1624572000000, 1624658400000, 1624744800000, 1624831200000,
+      1624917600000, 1625004000000, 1625090400000,
+    ],
+    xAxisFormat: { id: 'date', params: { pattern: 'YYYY-MM-DD' } },
+    xAxisLabel: 'order_date per day',
+    yAxisFormat: { id: 'number' },
+    ordered: {
+      date: true,
+      interval: {
+        asMilliseconds: jest.fn(),
+      },
+      intervalESUnit: 'd',
+      intervalESValue: 1,
+      min: '2021-03-18T08:28:56.411Z',
+      max: '2021-07-01T07:28:56.411Z',
+    },
+    yAxisLabel: 'Count',
+    values: [
+      { x: 1623880800000, y: 134 },
+      { x: 1623967200000, y: 152 },
+      { x: 1624053600000, y: 141 },
+      { x: 1624140000000, y: 138 },
+      { x: 1624226400000, y: 142 },
+      { x: 1624312800000, y: 157 },
+      { x: 1624399200000, y: 149 },
+      { x: 1624485600000, y: 146 },
+      { x: 1624572000000, y: 170 },
+      { x: 1624658400000, y: 137 },
+      { x: 1624744800000, y: 150 },
+      { x: 1624831200000, y: 144 },
+      { x: 1624917600000, y: 147 },
+      { x: 1625004000000, y: 137 },
+      { x: 1625090400000, y: 66 },
+    ],
+  } as unknown as UnifiedHistogramChartData;
+
+  return {
+    ...originalModule,
+    buildChartData: jest.fn().mockImplementation(() => ({
+      chartData,
+      bucketInterval: {
+        scaled: true,
+        description: 'test',
+        scale: 2,
+      },
+    })),
+  };
+});
+
+function getAppStateContainer() {
+  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
+  appStateContainer.set({
+    query: { query: '', language: 'lucene' },
+    filters: [],
+  });
+  return appStateContainer;
+}
 
 setHeaderActionMenuMounter(jest.fn());
 
-function mountComponent(
+async function mountComponent(
   dataView: DataView,
   prevSidebarClosed?: boolean,
   mountOptions: { attachTo?: HTMLElement } = {},
@@ -81,53 +142,9 @@ function mountComponent(
     result: Number(esHits.length),
   }) as DataTotalHits$;
 
-  const chartData = {
-    xAxisOrderedValues: [
-      1623880800000, 1623967200000, 1624053600000, 1624140000000, 1624226400000, 1624312800000,
-      1624399200000, 1624485600000, 1624572000000, 1624658400000, 1624744800000, 1624831200000,
-      1624917600000, 1625004000000, 1625090400000,
-    ],
-    xAxisFormat: { id: 'date', params: { pattern: 'YYYY-MM-DD' } },
-    xAxisLabel: 'order_date per day',
-    yAxisFormat: { id: 'number' },
-    ordered: {
-      date: true,
-      interval: {
-        asMilliseconds: jest.fn(),
-      },
-      intervalESUnit: 'd',
-      intervalESValue: 1,
-      min: '2021-03-18T08:28:56.411Z',
-      max: '2021-07-01T07:28:56.411Z',
-    },
-    yAxisLabel: 'Count',
-    values: [
-      { x: 1623880800000, y: 134 },
-      { x: 1623967200000, y: 152 },
-      { x: 1624053600000, y: 141 },
-      { x: 1624140000000, y: 138 },
-      { x: 1624226400000, y: 142 },
-      { x: 1624312800000, y: 157 },
-      { x: 1624399200000, y: 149 },
-      { x: 1624485600000, y: 146 },
-      { x: 1624572000000, y: 170 },
-      { x: 1624658400000, y: 137 },
-      { x: 1624744800000, y: 150 },
-      { x: 1624831200000, y: 144 },
-      { x: 1624917600000, y: 147 },
-      { x: 1625004000000, y: 137 },
-      { x: 1625090400000, y: 66 },
-    ],
-  } as unknown as Chart;
-
   const charts$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    chartData,
-    bucketInterval: {
-      scaled: true,
-      description: 'test',
-      scale: 2,
-    },
+    response: {} as unknown as SearchResponse,
   }) as DataCharts$;
 
   const savedSearchData$ = {
@@ -165,43 +182,57 @@ function mountComponent(
     adHocDataViewList: [],
   };
 
-  return mountWithIntl(
+  const component = mountWithIntl(
     <KibanaContextProvider services={services}>
-      <DiscoverLayout {...(props as DiscoverLayoutProps)} />
+      <DiscoverAppStateProvider value={getAppStateContainer()}>
+        <DiscoverLayout {...(props as DiscoverLayoutProps)} />
+      </DiscoverAppStateProvider>
     </KibanaContextProvider>,
     mountOptions
   );
+
+  // DiscoverMainContent uses UnifiedHistogramLayout which
+  // is lazy loaded, so we need to wait for it to be loaded
+  await act(() => setTimeout(0));
+
+  return component;
 }
 
 describe('Discover component', () => {
-  test('selected data view without time field displays no chart toggle', () => {
+  test('selected data view without time field displays no chart toggle', async () => {
     const container = document.createElement('div');
-    mountComponent(dataViewMock, undefined, { attachTo: container });
-    expect(container.querySelector('[data-test-subj="discoverChartOptionsToggle"]')).toBeNull();
+    await mountComponent(dataViewMock, undefined, { attachTo: container });
+    expect(
+      container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
+    ).toBeNull();
   });
 
-  test('selected data view with time field displays chart toggle', () => {
+  test('selected data view with time field displays chart toggle', async () => {
     const container = document.createElement('div');
-    mountComponent(dataViewWithTimefieldMock, undefined, { attachTo: container });
-    expect(container.querySelector('[data-test-subj="discoverChartOptionsToggle"]')).not.toBeNull();
+    await mountComponent(dataViewWithTimefieldMock, undefined, { attachTo: container });
+    expect(
+      container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
+    ).not.toBeNull();
   });
 
-  test('sql query displays no chart toggle', () => {
+  test('sql query displays no chart toggle', async () => {
     const container = document.createElement('div');
-    mountComponent(
+    await mountComponent(
       dataViewWithTimefieldMock,
       false,
       { attachTo: container },
       { sql: 'SELECT * FROM test' },
       true
     );
-    expect(container.querySelector('[data-test-subj="discoverChartOptionsToggle"]')).toBeNull();
+    expect(
+      container.querySelector('[data-test-subj="unifiedHistogramChartOptionsToggle"]')
+    ).toBeNull();
   });
 
-  test('the saved search title h1 gains focus on navigate', () => {
+  test('the saved search title h1 gains focus on navigate', async () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
-    const component = mountComponent(dataViewWithTimefieldMock, undefined, {
+    const component = await mountComponent(dataViewWithTimefieldMock, undefined, {
       attachTo: container,
     });
     expect(
@@ -210,18 +241,18 @@ describe('Discover component', () => {
   });
 
   describe('sidebar', () => {
-    test('should be opened if discover:sidebarClosed was not set', () => {
-      const component = mountComponent(dataViewWithTimefieldMock, undefined);
+    test('should be opened if discover:sidebarClosed was not set', async () => {
+      const component = await mountComponent(dataViewWithTimefieldMock, undefined);
       expect(component.find(DiscoverSidebar).length).toBe(1);
     });
 
-    test('should be opened if discover:sidebarClosed is false', () => {
-      const component = mountComponent(dataViewWithTimefieldMock, false);
+    test('should be opened if discover:sidebarClosed is false', async () => {
+      const component = await mountComponent(dataViewWithTimefieldMock, false);
       expect(component.find(DiscoverSidebar).length).toBe(1);
     });
 
-    test('should be closed if discover:sidebarClosed is true', () => {
-      const component = mountComponent(dataViewWithTimefieldMock, true);
+    test('should be closed if discover:sidebarClosed is true', async () => {
+      const component = await mountComponent(dataViewWithTimefieldMock, true);
       expect(component.find(DiscoverSidebar).length).toBe(0);
     });
   });

@@ -2588,7 +2588,7 @@
                 "description": [],
                 "signature": [
                   "PluginInitializerContext",
-                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>>"
+                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{} & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>>"
                 ],
                 "path": "src/plugins/data/public/plugin.ts",
                 "deprecated": false,
@@ -11490,10 +11490,6 @@
               "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
             },
             {
-              "plugin": "discover",
-              "path": "src/plugins/discover/public/plugin.tsx"
-            },
-            {
               "plugin": "maps",
               "path": "x-pack/plugins/maps/public/kibana_services.ts"
             },
@@ -11780,7 +11776,7 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>>"
+                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{} & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>>"
                 ],
                 "path": "src/plugins/data/server/plugin.ts",
                 "deprecated": false,
@@ -12060,12 +12056,8 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
-              },
-              {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -12073,7 +12065,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -12082,10 +12074,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -12210,26 +12198,6 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/hooks/use_es_doc_search.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/utils/resolve_data_view.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/utils/resolve_data_view.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/top_nav/discover_topnav.tsx"
               },
               {
                 "plugin": "aiops",
@@ -12874,10 +12842,6 @@
               {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
               },
               {
                 "plugin": "dataViews",
@@ -14948,7 +14912,7 @@
               "\nGet default index pattern"
             ],
             "signature": [
-              "() => Promise<",
+              "(displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -14961,7 +14925,25 @@
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.getDefault.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -15229,7 +15211,7 @@
               "\nRefresh field list for a given index pattern."
             ],
             "signature": [
-              "(indexPattern: ",
+              "(dataView: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -15237,7 +15219,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ") => Promise<void>"
+              ", displayErrors?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -15248,7 +15230,7 @@
                 "id": "def-server.DataViewsService.refreshFields.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "indexPattern",
+                "label": "dataView",
                 "description": [],
                 "signature": [
                   {
@@ -15258,6 +15240,23 @@
                     "section": "def-common.DataView",
                     "text": "DataView"
                   }
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.refreshFields.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -15431,7 +15430,7 @@
               "\nGet an index pattern by id, cache optimized."
             ],
             "signature": [
-              "(id: string) => Promise<",
+              "(id: string, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -15459,6 +15458,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.get.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -15481,7 +15497,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", skipFetchFields?: boolean) => Promise<",
+              ", skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -15532,6 +15548,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.create.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": [
@@ -15556,7 +15589,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", override?: boolean, skipFetchFields?: boolean) => Promise<",
+              ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -15626,6 +15659,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.createAndSave.$4",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -15648,7 +15698,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean) => Promise<",
+              ", override?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -15701,6 +15751,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.createSavedObject.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -15723,7 +15790,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error | ",
+              ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void | Error | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -15780,6 +15847,23 @@
                 "tags": [],
                 "label": "ignoreErrors",
                 "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.updateSavedObject.$4",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
                 "signature": [
                   "boolean"
                 ],
@@ -16593,17 +16677,15 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "UpdateResponse",
-                  "<TDocumentR>>; }; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocumentR>>; }; asyncSearch: ",
+                  "default",
+                  "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; helpers: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
                   ") => ",
-                  "default",
-                  "; Internal: ",
-                  "default",
-                  "; asyncSearch: ",
                   "default",
                   "; autoscaling: ",
                   "default",
@@ -19458,12 +19540,8 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
-              },
-              {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -19471,7 +19549,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -19480,10 +19558,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -19608,26 +19682,6 @@
               {
                 "plugin": "unifiedFieldList",
                 "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/hooks/use_es_doc_search.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/utils/resolve_data_view.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/utils/resolve_data_view.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/top_nav/discover_topnav.tsx"
               },
               {
                 "plugin": "aiops",
@@ -20272,10 +20326,6 @@
               {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
               },
               {
                 "plugin": "dataViews",
@@ -23172,7 +23222,7 @@
               "\nGet default index pattern"
             ],
             "signature": [
-              "() => Promise<",
+              "(displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -23185,7 +23235,25 @@
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.getDefault.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -23453,7 +23521,7 @@
               "\nRefresh field list for a given index pattern."
             ],
             "signature": [
-              "(indexPattern: ",
+              "(dataView: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -23461,7 +23529,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ") => Promise<void>"
+              ", displayErrors?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -23472,7 +23540,7 @@
                 "id": "def-common.DataViewsService.refreshFields.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "indexPattern",
+                "label": "dataView",
                 "description": [],
                 "signature": [
                   {
@@ -23482,6 +23550,23 @@
                     "section": "def-common.DataView",
                     "text": "DataView"
                   }
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.refreshFields.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
@@ -23655,7 +23740,7 @@
               "\nGet an index pattern by id, cache optimized."
             ],
             "signature": [
-              "(id: string) => Promise<",
+              "(id: string, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -23683,6 +23768,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.get.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -23705,7 +23807,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", skipFetchFields?: boolean) => Promise<",
+              ", skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -23756,6 +23858,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.create.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": [
@@ -23780,7 +23899,7 @@
                 "section": "def-common.DataViewSpec",
                 "text": "DataViewSpec"
               },
-              ", override?: boolean, skipFetchFields?: boolean) => Promise<",
+              ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -23850,6 +23969,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.createAndSave.$4",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -23872,7 +24008,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", override?: boolean) => Promise<",
+              ", override?: boolean, displayErrors?: boolean) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -23925,6 +24061,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.createSavedObject.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -23947,7 +24100,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error | ",
+              ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void | Error | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -24004,6 +24157,23 @@
                 "tags": [],
                 "label": "ignoreErrors",
                 "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.updateSavedObject.$4",
+                "type": "boolean",
+                "tags": [],
+                "label": "displayErrors",
+                "description": [
+                  "- If set false, API consumer is responsible for displaying and handling errors."
+                ],
                 "signature": [
                   "boolean"
                 ],
@@ -25926,7 +26096,7 @@
           "\nData views service interface"
         ],
         "signature": [
-          "{ get: (id: string) => Promise<",
+          "{ get: (id: string, displayErrors?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25942,7 +26112,7 @@
             "section": "def-common.DataViewSpec",
             "text": "DataViewSpec"
           },
-          ", skipFetchFields?: boolean) => Promise<",
+          ", skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25976,7 +26146,7 @@
             "section": "def-common.DataViewSavedObjectAttrs",
             "text": "DataViewSavedObjectAttrs"
           },
-          ">[] | null | undefined>; getDefault: () => Promise<",
+          ">[] | null | undefined>; getDefault: (displayErrors?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -26032,7 +26202,7 @@
             "section": "def-common.FieldSpec",
             "text": "FieldSpec"
           },
-          "[]>; refreshFields: (indexPattern: ",
+          "[]>; refreshFields: (dataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -26040,7 +26210,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ") => Promise<void>; fieldArrayToMap: (fields: ",
+          ", displayErrors?: boolean) => Promise<void>; fieldArrayToMap: (fields: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -26090,7 +26260,7 @@
             "section": "def-common.DataViewSpec",
             "text": "DataViewSpec"
           },
-          ", override?: boolean, skipFetchFields?: boolean) => Promise<",
+          ", override?: boolean, skipFetchFields?: boolean, displayErrors?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -26106,7 +26276,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ", override?: boolean) => Promise<",
+          ", override?: boolean, displayErrors?: boolean) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -26122,7 +26292,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error | ",
+          ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void | Error | ",
           {
             "pluginId": "dataViews",
             "scope": "common",

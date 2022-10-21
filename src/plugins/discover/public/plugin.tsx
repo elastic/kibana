@@ -32,6 +32,7 @@ import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -164,6 +165,7 @@ export interface DiscoverSetupPlugins {
  * @internal
  */
 export interface DiscoverStartPlugins {
+  dataViews: DataViewsServicePublic;
   dataViewEditor: DataViewEditorStart;
   uiActions: UiActionsStart;
   embeddable: EmbeddableStart;
@@ -305,7 +307,7 @@ export class DiscoverPlugin
         );
 
         // make sure the data view list is up to date
-        await discoverStartPlugins.data.indexPatterns.clearCache();
+        await discoverStartPlugins.dataViews.clearCache();
 
         const { renderApp } = await import('./application');
         // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown

@@ -72,7 +72,7 @@ export function getStateColumnActions({
   useNewFieldsApi: boolean;
   setAppState: DiscoverGetStateReturn['setAppState'] | ContextGetStateReturn['setAppState'];
   columns?: string[];
-  sort?: string[][];
+  sort: string[][] | undefined;
 }) {
   function onAddColumn(columnName: string) {
     popularizeField(dataView, columnName, dataViews, capabilities);
@@ -96,10 +96,10 @@ export function getStateColumnActions({
   }
 
   function onSetColumns(nextColumns: string[], hideTimeColumn: boolean) {
-    // The next line should gone when classic table will be removed
+    // The next line should be gone when classic table will be removed
     const actualColumns =
       !hideTimeColumn && dataView.timeFieldName && dataView.timeFieldName === nextColumns[0]
-        ? nextColumns.slice(1)
+        ? (nextColumns || []).slice(1)
         : nextColumns;
 
     setAppState({ columns: actualColumns });

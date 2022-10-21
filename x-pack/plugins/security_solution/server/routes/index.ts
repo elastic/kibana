@@ -118,7 +118,8 @@ export const initRoutes = (
     ruleOptions,
     securityRuleTypeOptions,
     previewRuleDataClient,
-    getStartServices
+    getStartServices,
+    logger
   );
   createRuleExceptionsRoute(router);
 

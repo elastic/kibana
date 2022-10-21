@@ -23,21 +23,18 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import {
-  AvailableFields$,
-  DataDocuments$,
-  RecordRawType,
-} from '../../services/discover_data_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { DiscoverStateContainer } from '../../services/discover_state';
+import { AvailableFields$, DataDocuments$, RecordRawType } from '../../services/discover_data_state_container';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { FetchStatus } from '../../../types';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -86,7 +83,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * callback to execute on edit runtime field
    */
-  onFieldEdited: (dataView?: DataView) => void;
+  onFieldEdited: (dataView?: DataView) => Promise<void>;
   /**
    * callback to execute on create dataview
    */
@@ -109,9 +106,9 @@ export interface DiscoverSidebarResponsiveProps {
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
-  const query = useAppStateSelector((state) => state.query);
-
-  const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
+  const isPlainRecord = useAppStateSelector(
+    (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
+  );
   const { selectedDataView, onFieldEdited, onDataViewCreated } = props;
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);

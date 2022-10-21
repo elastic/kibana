@@ -5,13 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Query, AggregateQuery } from '@kbn/es-query';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { AggregateQuery, Query } from '@kbn/es-query';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { addLog } from '../../../utils/addLog';
-import { Chart } from '../components/chart/point_series';
 import { DataTableRecord } from '../../../types';
 import { AppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
@@ -30,12 +30,6 @@ export interface SavedSearchData {
   totalHits$: DataTotalHits$;
   charts$: DataCharts$;
   availableFields$: AvailableFields$;
-}
-
-export interface TimechartBucketInterval {
-  scaled?: boolean;
-  description?: string;
-  scale?: number;
 }
 
 export type DataMain$ = BehaviorSubject<DataMainMsg>;
@@ -87,8 +81,7 @@ export interface DataTotalHitsMsg extends DataMsg {
 }
 
 export interface DataChartsMessage extends DataMsg {
-  bucketInterval?: TimechartBucketInterval;
-  chartData?: Chart;
+  response?: SearchResponse;
 }
 
 export interface DataAvailableFieldsMsg extends DataMsg {

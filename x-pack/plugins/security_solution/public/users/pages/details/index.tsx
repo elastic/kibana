@@ -19,7 +19,8 @@ import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-
+import { TableId } from '../../../../common/types';
+import { dataTableSelectors } from '../../../common/store/data_table';
 import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { AlertCountByRuleByStatus } from '../../../common/components/alert_count_by_status';
@@ -45,8 +46,6 @@ import { type } from './utils';
 import { getUsersDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
-import { timelineSelectors } from '../../../timelines/store/timeline';
-import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -74,9 +73,9 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 }) => {
   const dispatch = useDispatch();
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
-    (state) => (getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults).graphEventId
+    (state) => (getTable(state, TableId.hostsPageEvents) ?? timelineDefaults).graphEventId
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),

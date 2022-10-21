@@ -29,6 +29,15 @@ import {
   DataMainMsg,
   DataTotalHitsMsg,
   SavedSearchData,
+} from '../hooks/use_saved_search';
+
+import { fetchDocuments } from './fetch_documents';
+import { fetchSql } from './fetch_sql';
+import { fetchChart } from './fetch_chart';
+import { fetchTotalHits } from './fetch_total_hits';
+import { buildDataTableRecord } from '../../../utils/build_data_record';
+import { dataViewMock } from '../../../__mocks__/data_view';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 } from '../services/discover_data_state_container';
 
 jest.mock('./fetch_documents', () => ({
@@ -99,8 +108,7 @@ describe('test fetchAll', () => {
     mockFetchTotalHits.mockReset().mockResolvedValue(42);
     mockFetchChart
       .mockReset()
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .mockResolvedValue({ totalHits: 42, chartData: {} as any, bucketInterval: {} });
+      .mockResolvedValue({ totalHits: 42, response: {} as unknown as SearchResponse });
   });
 
   test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', async () => {
@@ -157,7 +165,7 @@ describe('test fetchAll', () => {
     ]);
   });
 
-  test('emits loading and chartData on charts$ correctly', async () => {
+  test('emits loading and response on charts$ correctly', async () => {
     const collect = subjectCollector(subjects.charts$);
     searchSource.getField('index')!.isTimeBased = () => true;
     await fetchAll(subjects, searchSource, false, deps);
@@ -167,8 +175,7 @@ describe('test fetchAll', () => {
       {
         fetchStatus: FetchStatus.COMPLETE,
         recordRawType: 'document',
-        bucketInterval: {},
-        chartData: {},
+        response: {},
       },
     ]);
   });
@@ -176,8 +183,7 @@ describe('test fetchAll', () => {
   test('should use charts query to fetch total hit count when chart is visible', async () => {
     const collect = subjectCollector(subjects.totalHits$);
     searchSource.getField('index')!.isTimeBased = () => true;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mockFetchChart.mockResolvedValue({ bucketInterval: {}, chartData: {} as any, totalHits: 32 });
+    mockFetchChart.mockResolvedValue({ totalHits: 32, response: {} as unknown as SearchResponse });
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },

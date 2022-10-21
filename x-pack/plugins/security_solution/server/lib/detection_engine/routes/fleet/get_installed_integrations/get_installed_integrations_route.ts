@@ -50,7 +50,7 @@ export const getInstalledIntegrationsRoute = (
           concurrency: MAX_CONCURRENT_REQUESTS_TO_PACKAGE_REGISTRY,
           items: set.getPackages(),
           executor: async (packageInfo) => {
-            const registryPackage = await fleet.packages.getRegistryPackage(
+            const registryPackage = await fleet.packages.getPackage(
               packageInfo.package_name,
               packageInfo.package_version
             );

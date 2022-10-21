@@ -5,25 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
-import {
-  DataPublicPluginStart,
-  isCompleteResponse,
-  search,
-  ISearchSource,
-  tabifyAggResponse,
-} from '@kbn/data-plugin/public';
-import { TimechartBucketInterval } from '../services/discover_data_state_container';
-import { getChartAggConfigs, getDimensions } from '.';
-import { buildPointSeriesData, Chart } from '../components/chart/point_series';
+import { DataPublicPluginStart, isCompleteResponse, ISearchSource } from '@kbn/data-plugin/public';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { getChartAggConfigs } from '@kbn/unified-histogram-plugin/public';
 import { FetchDeps } from './fetch_all';
 
 interface Result {
   totalHits: number;
-  chartData: Chart;
-  bucketInterval: TimechartBucketInterval | undefined;
+  response: SearchResponse;
 }
 
 export function fetchChart(
@@ -55,20 +48,10 @@ export function fetchChart(
     })
     .pipe(
       filter((res) => isCompleteResponse(res)),
-      map((res) => {
-        const bucketAggConfig = chartAggConfigs.aggs[1];
-        const tabifiedData = tabifyAggResponse(chartAggConfigs, res.rawResponse);
-        const dimensions = getDimensions(chartAggConfigs, data);
-        const bucketInterval = search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
-          ? bucketAggConfig?.buckets?.getInterval()
-          : undefined;
-        const chartData = buildPointSeriesData(tabifiedData, dimensions!);
-        return {
-          chartData,
-          bucketInterval,
-          totalHits: res.rawResponse.hits.total as number,
-        };
-      })
+      map((res) => ({
+        response: res.rawResponse,
+        totalHits: res.rawResponse.hits.total as number,
+      }))
     );
 
   return lastValueFrom(fetch$);
@@ -76,14 +59,14 @@ export function fetchChart(
 
 export function updateSearchSource(
   searchSource: ISearchSource,
-  interval: string,
+  timeInterval: string,
   data: DataPublicPluginStart
 ) {
   const dataView = searchSource.getField('index')!;
   searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(dataView));
   searchSource.setField('size', 0);
   searchSource.setField('trackTotalHits', true);
-  const chartAggConfigs = getChartAggConfigs(searchSource, interval, data);
+  const chartAggConfigs = getChartAggConfigs({ dataView, timeInterval, data });
   searchSource.setField('aggs', chartAggConfigs.toDsl());
   searchSource.removeField('sort');
   searchSource.removeField('fields');
