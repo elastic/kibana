@@ -457,17 +457,18 @@ export function DimensionEditorAdditionalSection({
     supportingVisHelpTexts.push(
       !hasDefaultTimeField
         ? i18n.translate('xpack.lens.metric.supportingVis.needDefaultTimeField', {
-            defaultMessage: 'Use a data view with a default time field to enable trend lines.',
+            defaultMessage:
+              'Line visualizations require use of a data view with a default time field.',
           })
         : metricHasReducedTimeRange
         ? i18n.translate('xpack.lens.metric.supportingVis.metricHasReducedTimeRange', {
             defaultMessage:
-              'Remove the reduced time range on this dimension to enable trend lines.',
+              'Line visualizations cannot be used when a reduced time range is applied to the primary metric.',
           })
         : secondaryMetricHasReducedTimeRange
         ? i18n.translate('xpack.lens.metric.supportingVis.secondaryMetricHasReducedTimeRange', {
             defaultMessage:
-              'Remove the reduced time range on the secondary metric dimension to enable trend lines.',
+              'Line visualizations cannot be used when a reduced time range is applied to the secondary metric.',
           })
         : ''
     );
@@ -476,7 +477,7 @@ export function DimensionEditorAdditionalSection({
   if (!state.maxAccessor) {
     supportingVisHelpTexts.push(
       i18n.translate('xpack.lens.metric.summportingVis.needMaxDimension', {
-        defaultMessage: 'Add a maximum dimension to enable the progress bar.',
+        defaultMessage: 'Bar visualizations require a maximum value to be defined.',
       })
     );
   }
