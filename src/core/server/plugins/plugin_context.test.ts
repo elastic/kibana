@@ -22,13 +22,14 @@ import {
 } from './plugin_context';
 
 import { PluginType } from '@kbn/core-base-common';
-import type { PluginManifest } from '@kbn/core-plugins-server';
-import { Server } from '../server';
+import { PluginManifest } from '@kbn/core-plugins-server';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
 import { ConfigService, Env } from '@kbn/config';
 import { PluginWrapper } from './plugin';
-import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 
+import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
+// TODO: Refactor to use coreSetup and coreStart for mocking the config.
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {
     id: 'some-plugin-id',
@@ -55,7 +56,6 @@ describe('createPluginInitializerContext', () => {
   let opaqueId: symbol;
   let env: Env;
   let coreContext: CoreContext;
-  let server: Server;
   let instanceInfo: InstanceInfo;
   let nodeInfo: NodeInfo;
 
@@ -68,10 +68,12 @@ describe('createPluginInitializerContext', () => {
     };
     nodeInfo = nodeServiceMock.createInternalPrebootContract();
     env = Env.createDefault(REPO_ROOT, getEnvOptions());
-    const config$ = rawConfigServiceMock.create({ rawConfig: {} });
-    server = new Server(config$, env, logger);
-    server.setupCoreConfig();
-    coreContext = { coreId, env, logger, configService: server.configService };
+    // I need to go through coreSetup and coreStart to properly set up this mocked instance
+    coreContext = mockCoreContext.create({
+      env,
+      logger,
+      configService: configServiceMock.create(),
+    });
   });
 
   describe('context.config', () => {
@@ -116,7 +118,45 @@ describe('createPluginInitializerContext', () => {
     });
 
     it('config.globalConfig$ should be an observable for the global config', async () => {
+      const config$ = rawConfigServiceMock.create({
+        rawConfig: {
+          elasticsearch: {
+            shardTimeout: '30s',
+            requestTimeout: '30s',
+            pingTimeout: '30s',
+          },
+          path: { data: fromRoot('data') },
+          savedObjects: { maxImportPayloadBytes: 26214400 },
+        },
+      });
+
+      const configService = new ConfigService(config$, env, logger);
+      configService.setSchema(
+        'elasticsearch',
+        schema.object({
+          shardTimeout: schema.duration({ defaultValue: '30s' }),
+          requestTimeout: schema.duration({ defaultValue: '30s' }),
+          pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
+        })
+      );
+      configService.setSchema(
+        'path',
+        schema.object({
+          data: schema.string(),
+        })
+      );
+      configService.setSchema(
+        'savedObjects',
+        schema.object({
+          maxImportPayloadBytes: schema.byteSize({ defaultValue: new ByteSizeValue(0) }),
+        })
+      );
+      await configService.validate();
+
+      coreContext = { coreId, env, logger, configService };
+
       const manifest = createPluginManifest();
+
       const pluginInitializerContext = createPluginInitializerContext({
         coreContext,
         opaqueId,

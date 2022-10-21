@@ -17,8 +17,6 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
-import { coreMock } from '../mocks';
-
 import { PluginWrapper } from './plugin';
 
 import type { PluginManifest } from '@kbn/core-plugins-server';
@@ -28,6 +26,7 @@ import {
   InstanceInfo,
 } from './plugin_context';
 import { PluginType } from '@kbn/core-base-common';
+import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 
 const mockPluginInitializer = jest.fn();
 const logger = loggingSystemMock.create();
@@ -74,7 +73,7 @@ let coreContext: CoreContext;
 let instanceInfo: InstanceInfo;
 let nodeInfo: NodeInfo;
 
-const setupDeps = coreMock.createInternalSetup();
+const setupDeps = coreInternalLifecycleMock.createInternalSetup();
 
 beforeEach(() => {
   coreId = Symbol('core');

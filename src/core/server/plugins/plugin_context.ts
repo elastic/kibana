@@ -12,6 +12,7 @@ import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
 import type { IRouter, IContextProvider } from '@kbn/core-http-server';
 import { PluginInitializerContext, PluginManifest } from '@kbn/core-plugins-server';
+import { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import type { RequestHandlerContext } from '..';
 import { PluginWrapper } from './plugin';
 import {
@@ -20,7 +21,6 @@ import {
   PluginsServiceStartDeps,
 } from './plugins_service';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
-import { CorePreboot, CoreSetup, CoreStart } from '..';
 
 /** @internal */
 export interface InstanceInfo {

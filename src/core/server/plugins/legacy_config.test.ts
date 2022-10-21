@@ -8,18 +8,20 @@
 
 import { take } from 'rxjs/operators';
 import { ConfigService, Env } from '@kbn/config';
-import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
+import { configServiceMock, getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import { REPO_ROOT } from '@kbn/utils';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { duration } from 'moment';
 import { fromRoot } from '@kbn/utils';
-import { ByteSizeValue } from '@kbn/config-schema';
-import { Server } from '../server';
-
+import { ByteSizeValue, schema } from '@kbn/config-schema';
+import { CoreContext } from '@kbn/core-base-server-internal';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
+// TODO: Refactor to use coreSetup and coreStart for mocking the config.
 describe('Legacy config', () => {
   let env: Env;
   let logger: ReturnType<typeof loggingSystemMock.create>;
+  let coreContext: CoreContext;
 
   beforeEach(() => {
     env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -27,10 +29,37 @@ describe('Legacy config', () => {
   });
 
   const createConfigService = (rawConfig: Record<string, any> = {}): ConfigService => {
-    const rawConfigService = rawConfigServiceMock.create({ rawConfig });
-    const server = new Server(rawConfigService, env, logger);
-    server.setupCoreConfig();
-    return server.configService;
+    // I need to use coreSetup to properly setup these mocks. See packages/core/lifecycle/core-lifecycle-server-mocks/src/core_setup.mock.ts
+    coreContext = mockCoreContext.create({
+      env,
+      logger,
+      configService: configServiceMock.create(),
+    });
+    const config$ = rawConfigServiceMock.create({
+      rawConfig: {
+        elasticsearch: { shardTimeout: '30s', requestTimeout: '30s', pingTimeout: '30s' },
+        path: { data: fromRoot('data') },
+        savedObjects: { maxImportPayloadBytes: 26214400 },
+      },
+    });
+
+    const configService = new ConfigService(config$, env, logger);
+    configService.setSchema(
+      'elasticsearch',
+      schema.object({
+        shardTimeout: schema.duration({ defaultValue: '30s' }),
+        requestTimeout: schema.duration({ defaultValue: '30s' }),
+        pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
+      })
+    );
+    configService.setSchema('path', schema.object({ data: schema.string() }));
+    configService.setSchema(
+      'savedObjects',
+      schema.object({
+        maxImportPayloadBytes: schema.byteSize({ defaultValue: new ByteSizeValue(0) }),
+      })
+    );
+    return configService;
   };
 
   describe('getGlobalConfig', () => {

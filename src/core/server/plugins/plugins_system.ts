@@ -11,7 +11,7 @@ import type { DiscoveredPlugin, PluginName } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import { PluginType } from '@kbn/core-base-common';
-import { PluginWrapper } from './plugin';
+import type { PluginWrapper } from './plugin';
 import { type PluginDependencies } from './types';
 import {
   createPluginPrebootSetupContext,
