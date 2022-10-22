@@ -11176,19 +11176,19 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
             "plugin": "taskManager",
@@ -40916,19 +40916,19 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
             "plugin": "taskManager",
