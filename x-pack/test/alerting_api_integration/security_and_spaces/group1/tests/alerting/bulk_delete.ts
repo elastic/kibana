@@ -470,7 +470,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     }
 
-    describe.only('Validation tests', () => {
+    describe('Validation tests', () => {
       const { user, space } = SuperuserAtSpace1;
       it('should throw an error when bulk delete of rules when both ids and filter supplied in payload', async () => {
         const { body: createdRule1 } = await supertest
@@ -552,7 +552,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.body).to.eql({
           error: 'Bad Request',
-          message: "Either 'ids' or 'filter' properties in method's arguments should be provided",
+          message: "Either 'ids' or 'filter' property in method's arguments should be provided",
           statusCode: 400,
         });
       });
