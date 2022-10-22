@@ -133,45 +133,6 @@ describe('bulkDelete', () => {
     });
   });
 
-  test('should delete rules, one success and one with 500 error', async () => {
-    mockCreatePointInTimeFinderAsInternalUser();
-    unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
-      statuses: [
-        { id: 'id1', type: 'alert', success: true },
-        {
-          id: 'id2',
-          type: 'alert',
-          success: false,
-          error: {
-            error: '',
-            message: 'UPS',
-            statusCode: 500,
-          },
-        },
-      ],
-    });
-
-    const result = await rulesClient.bulkDeleteRules({ filter: '' });
-
-    expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
-    expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
-      existingDecryptedRule1,
-      existingDecryptedRule2,
-    ]);
-    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledTimes(1);
-    expect(taskManager.bulkRemoveIfExist).toHaveBeenCalledWith(['taskId1']);
-    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
-    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
-      { apiKeys: ['MTIzOmFiYw=='] },
-      expect.anything(),
-      expect.anything()
-    );
-    expect(result).toStrictEqual({
-      errors: [{ message: 'UPS', rule: { id: 'id2', name: 'n/a' }, status: 500 }],
-      total: 2,
-    });
-  });
-
   test('should try to delete rules, one successful and one with 500 error', async () => {
     mockCreatePointInTimeFinderAsInternalUser();
     unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
