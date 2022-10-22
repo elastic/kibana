@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import { verifyAccessAndContext, handleDisabledApiKeysError } from './lib';
-import { ILicenseState } from '../lib';
+import { ILicenseState, RuleTypeDisabledError } from '../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
 export const bulkDeleteRulesRoute = ({
@@ -33,8 +33,16 @@ export const bulkDeleteRulesRoute = ({
         verifyAccessAndContext(licenseState, async (context, req, res) => {
           const rulesClient = (await context.alerting).getRulesClient();
           const { filter, ids } = req.body;
-          const result = await rulesClient.bulkDeleteRules({ filter, ids });
-          return res.ok({ body: result });
+
+          try {
+            const result = await rulesClient.bulkDeleteRules({ filter, ids });
+            return res.ok({ body: result });
+          } catch (e) {
+            if (e instanceof RuleTypeDisabledError) {
+              return e.sendResponse(res);
+            }
+            throw e;
+          }
         })
       )
     )
