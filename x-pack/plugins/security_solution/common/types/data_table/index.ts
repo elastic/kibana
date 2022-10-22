@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { EuiDataGridColumn } from '@elastic/eui';
-import type { ColumnHeaderOptions } from '../../../../common/types';
-import type { SortColumnTable } from '../../components/data_table/types';
-import type { TGridModel, TGridModelSettings } from './model';
+import { TGridModel } from "./model";
+import * as runtimeTypes from 'io-ts';
 
 /** The state of all timelines is stored here */
 export interface DataTableState {
@@ -39,14 +37,27 @@ export enum TableId {
   usersPageEvents = 'users-page-events',
   hostsPageEvents = 'hosts-page-events',
   networkPageEvents = 'network-page-events',
-  hostsPageSessions = 'hosts-page-sessions-v2',
+  hostsPageSessions = 'hosts-page-sessions-v2', // the v2 is to cache bust localstorage settings as default columns were reworked.
   alertsOnRuleDetailsPage = 'alerts-rules-details-page',
   alertsOnAlertsPage = 'alerts-page',
-  casePage = 'timeline-case',
   test = 'table-test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
+  rulePreview = 'rule-preview',
   kubernetesPageSessions = 'kubernetes-page-sessions',
 }
+
+export const TableIdLiteralRt = runtimeTypes.union([
+  runtimeTypes.literal(TableId.usersPageEvents),
+  runtimeTypes.literal(TableId.hostsPageEvents),
+  runtimeTypes.literal(TableId.networkPageEvents),
+  runtimeTypes.literal(TableId.hostsPageSessions),
+  runtimeTypes.literal(TableId.alertsOnRuleDetailsPage),
+  runtimeTypes.literal(TableId.alertsOnAlertsPage),
+  runtimeTypes.literal(TableId.test),
+  runtimeTypes.literal(TableId.rulePreview),
+  runtimeTypes.literal(TableId.kubernetesPageSessions),
+]);
+export type TableIdLiteral = runtimeTypes.TypeOf<typeof TableIdLiteralRt>;
 
 export enum TimelineId {
   active = 'timeline-1',

@@ -16,8 +16,8 @@
 
 import { TimelinesPlugin } from './plugin';
 
-export type { TimelinesUIStart, TableState, TableById, SubsetTGridModel } from './types';
-export type { SortDirection, State as TGridState, TGridModel } from './types';
+export type { TimelinesUIStart } from './types';
+export type { SortDirection } from './types';
 export type { OnColumnFocused } from '../common/utils/accessibility';
 
 export {
@@ -43,12 +43,6 @@ export {
   stopPropagationAndPreventDefault,
 } from '../common/utils/accessibility';
 
-export {
-  addFieldToTimelineColumns,
-  getTimelineIdFromColumnDroppableId,
-} from './components/drag_and_drop/helpers';
-
-export { getPageRowIndex } from '../common/utils/pagination';
 export {
   convertKueryToElasticSearchQuery,
   convertToBuildEsQuery,

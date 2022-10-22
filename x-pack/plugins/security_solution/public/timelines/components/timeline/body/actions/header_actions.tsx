@@ -11,7 +11,6 @@ import { EuiButtonIcon, EuiCheckbox, EuiToolTip, useDataGridColumnSorting } from
 import { useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
-import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import { isActiveTimeline } from '../../../../../helpers';
 import type { HeaderActionProps, SortDirection } from '../../../../../../common/types/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';

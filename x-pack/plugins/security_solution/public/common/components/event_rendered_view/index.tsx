@@ -16,17 +16,28 @@ import { ALERT_REASON, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-u
 import { get } from 'lodash';
 import moment from 'moment';
 import type { ComponentType } from 'react';
-import React, { useCallback, useMemo, Suspense } from 'react';
+import React, { useCallback, useMemo, Suspense, lazy } from 'react';
 import styled from 'styled-components';
 
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
+import type { ConnectedProps } from 'react-redux';
+import { connect } from 'react-redux';
 import type { Ecs } from '../../../../common/ecs';
 import type { TimelineItem } from '../../../../common/search_strategy';
 import type { RowRenderer } from '../../../../common/types';
 import { RuleName } from '../rule_name';
 import { isEventBuildingBlockType } from './helpers';
-import { AlertCount } from '../events_viewer/styles';
+import { AlertCount } from '../toolbar/alert/styles';
+import { defaultUnit } from '../toolbar/alert';
+import { dataTableActions, dataTableSelectors } from '../../store/data_table';
+import type { TGridModel } from '../../store/data_table/model';
+import type { TableState } from '../../store/data_table/types';
+import type { Refetch } from '../../store/data_table/inputs';
+import type { AlertWorkflowStatus } from '../../types';
+import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
+
+const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
 
 const EventRenderedFlexItem = styled(EuiFlexItem)`
   div:first-child {
@@ -70,6 +81,8 @@ const StyledEuiBasicTable = styled(EuiBasicTable as BasicTableType)`
 export interface EventRenderedViewProps {
   appId: string;
   events: TimelineItem[];
+  bulkActions?: BulkActionsProp;
+  id: string;
   getRowRenderer?: ({
     data,
     rowRenderers,
@@ -86,7 +99,17 @@ export interface EventRenderedViewProps {
   rowRenderers: RowRenderer[];
   timelineId: string;
   totalItemCount: number;
+  unit?: (total: number) => React.ReactNode;
+  hasAlertsCrud?: boolean;
+  refetch: Refetch;
+  totalSelectAllAlerts?: number;
+  filterQuery?: string;
+  filterStatus?: AlertWorkflowStatus;
+  indexNames: string[];
 }
+
+export type StatefulEventRenderedViewProps = EventRenderedViewProps & PropsFromRedux;
+
 const PreferenceFormattedDateComponent = ({ value }: { value: Date }) => {
   const tz = useUiSetting<string>('dateFormat:tz');
   const dateFormat = useUiSetting<string>('dateFormat');
@@ -99,6 +122,8 @@ export const PreferenceFormattedDate = React.memo(PreferenceFormattedDateCompone
 const EventRenderedViewComponent = ({
   appId,
   events,
+  bulkActions,
+  id,
   getRowRenderer,
   leadingControlColumns,
   onChangePage,
@@ -109,7 +134,74 @@ const EventRenderedViewComponent = ({
   rowRenderers,
   timelineId,
   totalItemCount,
-}: EventRenderedViewProps) => {
+  unit = defaultUnit,
+  selectedEventIds,
+  showCheckboxes,
+  hasAlertsCrud,
+  refetch,
+  totalSelectAllAlerts,
+  filterQuery,
+  filterStatus,
+  indexNames,
+}: StatefulEventRenderedViewProps) => {
+  const alertCountText = useMemo(
+    () => `${totalItemCount.toLocaleString()} ${unit(totalItemCount)}`,
+    [totalItemCount, unit]
+  );
+
+  const selectedCount = useMemo(() => Object.keys(selectedEventIds).length, [selectedEventIds]);
+  const showBulkActions = useMemo(() => {
+    if (!hasAlertsCrud) {
+      return false;
+    }
+
+    if (selectedCount === 0 || !showCheckboxes) {
+      return false;
+    }
+    if (typeof bulkActions === 'boolean') {
+      return bulkActions;
+    }
+    return (bulkActions?.customBulkActions?.length || bulkActions?.alertStatusActions) ?? true;
+  }, [hasAlertsCrud, selectedCount, showCheckboxes, bulkActions]);
+
+  const showAlertStatusActions = useMemo(() => {
+    if (!hasAlertsCrud) {
+      return false;
+    }
+    if (typeof bulkActions === 'boolean') {
+      return bulkActions;
+    }
+    return (bulkActions && bulkActions.alertStatusActions) ?? true;
+  }, [bulkActions, hasAlertsCrud]);
+
+  const onAlertStatusActionSuccess = useMemo(() => {
+    if (bulkActions && bulkActions !== true) {
+      return bulkActions.onAlertStatusActionSuccess;
+    }
+  }, [bulkActions]);
+
+  const onAlertStatusActionFailure = useMemo(() => {
+    if (bulkActions && bulkActions !== true) {
+      return bulkActions.onAlertStatusActionFailure;
+    }
+  }, [bulkActions]);
+
+  const additionalBulkActions = useMemo(() => {
+    if (bulkActions && bulkActions !== true && bulkActions.customBulkActions !== undefined) {
+      return bulkActions.customBulkActions.map((action) => {
+        return {
+          ...action,
+          onClick: (eventIds: string[]) => {
+            const items = events.filter((item) => {
+              return eventIds.find((event) => item._id === event);
+            });
+            action.onClick(items);
+          },
+        };
+      });
+    }
+  }, [bulkActions, events]);
+
   const alertToolbar = useMemo(
     () => (
       <EuiFlexGroup gutterSize="m" alignItems="center">
@@ -122,7 +214,7 @@ const EventRenderedViewComponent = ({
               showAlertStatusActions={showAlertStatusActions}
               data-test-subj="bulk-actions"
               id={id}
-              totalItems={totalSelectAllAlerts ?? totalItems}
+              totalItems={totalSelectAllAlerts ?? totalItemCount}
               filterStatus={filterStatus}
               query={filterQuery}
               indexName={indexNames.join()}
@@ -147,7 +239,7 @@ const EventRenderedViewComponent = ({
       refetch,
       showAlertStatusActions,
       showBulkActions,
-      totalItems,
+      totalItemCount,
       totalSelectAllAlerts,
     ]
   );
@@ -313,3 +405,30 @@ const EventRenderedViewComponent = ({
 };
 
 export const EventRenderedView = React.memo(EventRenderedViewComponent);
+
+const makeMapStateToProps = () => {
+  const getDataTable = dataTableSelectors.getTableByIdSelector();
+  const mapStateToProps = (state: TableState, { id, hasAlertsCrud }: EventRenderedViewProps) => {
+    const dataTable: TGridModel = getDataTable(state, id);
+    const { selectedEventIds, showCheckboxes } = dataTable;
+
+    return {
+      id,
+      selectedEventIds,
+      showCheckboxes: hasAlertsCrud === true && showCheckboxes,
+    };
+  };
+  return mapStateToProps;
+};
+
+const mapDispatchToProps = {
+  clearSelected: dataTableActions.clearSelected,
+  setSelected: dataTableActions.setSelected,
+};
+
+const connector = connect(makeMapStateToProps, mapDispatchToProps);
+
+type PropsFromRedux = ConnectedProps<typeof connector>;
+
+export const StatefulEventRenderedView: React.FunctionComponent<EventRenderedViewProps> =
+  connector(EventRenderedView);

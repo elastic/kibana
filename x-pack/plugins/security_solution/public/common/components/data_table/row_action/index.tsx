@@ -8,11 +8,7 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import type {
-  DataExpandedDetailType,
-  SetEventsDeleted,
-  SetEventsLoading,
-} from '../../../../../common/data_table';
+import type { SetEventsDeleted, SetEventsLoading } from '../../../../../common/data_table';
 import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
 
 import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
@@ -20,6 +16,7 @@ import type {
   ColumnHeaderOptions,
   ControlColumnProps,
   OnRowSelected,
+  TimelineExpandedDetailType,
 } from '../../../../../common/types/timeline';
 import { dataTableActions } from '../../../store/data_table';
 
@@ -91,7 +88,7 @@ const RowActionComponent = ({
   );
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
-    const updatedExpandedDetail: DataExpandedDetailType = {
+    const updatedExpandedDetail: TimelineExpandedDetailType = {
       panelView: 'eventDetail',
       params: {
         eventId: eventId ?? '',

@@ -318,32 +318,6 @@ export enum TimelineId {
   test = 'timeline-test', // Reserved for testing purposes
 }
 
-export enum TableId {
-  usersPageEvents = 'users-page-events',
-  hostsPageEvents = 'hosts-page-events',
-  networkPageEvents = 'network-page-events',
-  hostsPageSessions = 'hosts-page-sessions-v2', // the v2 is to cache bust localstorage settings as default columns were reworked.
-  alertsOnRuleDetailsPage = 'alerts-rules-details-page',
-  alertsOnAlertsPage = 'alerts-page',
-  test = 'table-test', // Reserved for testing purposes
-  alternateTest = 'alternateTest',
-  rulePreview = 'rule-preview',
-  kubernetesPageSessions = 'kubernetes-page-sessions',
-}
-
-export const TableIdLiteralRt = runtimeTypes.union([
-  runtimeTypes.literal(TableId.usersPageEvents),
-  runtimeTypes.literal(TableId.hostsPageEvents),
-  runtimeTypes.literal(TableId.networkPageEvents),
-  runtimeTypes.literal(TableId.hostsPageSessions),
-  runtimeTypes.literal(TableId.alertsOnRuleDetailsPage),
-  runtimeTypes.literal(TableId.alertsOnAlertsPage),
-  runtimeTypes.literal(TableId.test),
-  runtimeTypes.literal(TableId.rulePreview),
-  runtimeTypes.literal(TableId.kubernetesPageSessions),
-]);
-export type TableIdLiteral = runtimeTypes.TypeOf<typeof TableIdLiteralRt>;
-
 export const TimelineSavedToReturnObjectRuntimeType = runtimeTypes.intersection([
   SavedTimelineRuntimeType,
   runtimeTypes.type({

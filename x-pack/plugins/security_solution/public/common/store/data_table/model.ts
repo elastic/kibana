@@ -7,13 +7,11 @@
 
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type { TimelineNonEcsData } from '../../../common/search_strategy';
-import type {
-  ColumnHeaderOptions,
-  DataExpandedDetail,
-  SortColumnTable,
-  SessionViewConfig,
-} from '../../../common/types/timeline';
+import type { TimelineNonEcsData } from '../../../../common/search_strategy';
+import type { SessionViewConfig } from '../../../timelines/components/timeline/session_tab_content/use_session_view';
+import type { ColumnHeaderOptions, TimelineExpandedDetail } from '../../../../common/types';
+import type { SortColumnTable } from '../../components/data_table/types';
+
 export interface TGridModelSettings {
   defaultColumns: Array<
     Pick<EuiDataGridColumn, 'display' | 'displayAsText' | 'id' | 'initialWidth'> &
@@ -24,7 +22,7 @@ export interface TGridModelSettings {
   selectAll: boolean;
   /** When true, shows checkboxes enabling selection. Selected events store in selectedEventIds **/
   showCheckboxes: boolean;
-  /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
+  /**  Specifies which column the data table is sorted on, and the direction (ascending / descending) */
   sort: SortColumnTable[];
   title: string;
   unit?: (n: number) => string | React.ReactNode;
@@ -40,7 +38,7 @@ export interface TGridModel extends TGridModelSettings {
   /** Events to not be rendered **/
   deletedEventIds: string[];
   /** This holds the view information for the flyout when viewing data in a consuming view (i.e. hosts page) or the side panel in the primary data view */
-  expandedDetail: DataExpandedDetail;
+  expandedDetail: TimelineExpandedDetail;
   filters?: Filter[];
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;

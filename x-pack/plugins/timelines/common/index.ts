@@ -19,12 +19,9 @@ export { DELETED_SECURITY_SOLUTION_DATA_VIEW } from './constants';
 export type {
   ActionProps,
   CellValueElementProps,
-  ControlColumnProps,
   DataProvidersAnd,
   DataProvider,
   GenericActionRowCellRenderProps,
-  HeaderActionProps,
-  HeaderCellRender,
   QueryOperator,
   QueryMatch,
   RowCellRender,
@@ -32,8 +29,6 @@ export type {
   SetEventsDeleted,
   SetEventsLoading,
   TimelineType,
-  OnUpdateAlertStatusSuccess,
-  OnUpdateAlertStatusError,
   CustomBulkActionProp,
 } from './types';
 

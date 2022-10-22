@@ -17,16 +17,7 @@ import { EuiDataGrid, EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import type { ComponentType } from 'react';
-import React, {
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useContext,
-  useRef,
-  lazy,
-} from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useContext, useRef, lazy } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 
@@ -35,7 +26,7 @@ import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import type { Filter } from '@kbn/es-query';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type { SetEventsDeleted, SetEventsLoading } from '../../../../common/data_table';
 import type { DataTableCellAction } from '../../../../common/data_table/columns';
 import type {
@@ -59,13 +50,22 @@ import {
 } from './helpers';
 
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
-import type { Ecs } from '../../../../common/ecs';
 import { RowAction } from './row_action';
-import * as i18n from './translations';
 import { REMOVE_COLUMN } from './column_headers/translations';
 import { dataTableActions, dataTableSelectors } from '../../store/data_table';
 import type { AlertWorkflowStatus, Refetch } from '../../types';
 import type { TableState, TGridModel } from '../../store/data_table/types';
+import { AlertCount, defaultUnit } from '../toolbar/alert';
+import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
+import type { SortColumnTable } from './types';
+import { useKibana } from '../../lib/kibana';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { checkBoxControlColumn } from '../control_columns';
+import { getPageRowIndex } from './pagination';
+
+const DATA_TABLE_ARIA_LABEL = i18n.translate('xpack.timelines.tgrid.body.ariaLabel', {
+  defaultMessage: 'Alerts',
+});
 
 const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
 interface OwnProps {
@@ -80,16 +80,8 @@ interface OwnProps {
   filters?: Filter[];
   filterQuery?: string;
   filterStatus?: AlertWorkflowStatus;
-  getRowRenderer?: ({
-    data,
-    rowRenderers,
-  }: {
-    data: Ecs;
-    rowRenderers: RowRenderer[];
-  }) => RowRenderer | null;
   id: string;
   indexNames: string[];
-  isEventViewer?: boolean;
   itemsPerPageOptions: number[];
   leadingControlColumns?: ControlColumnProps[];
   loadPage: (newActivePage: number) => void;
@@ -100,21 +92,10 @@ interface OwnProps {
   rowRenderers: RowRenderer[];
   tabType: string;
   totalItems: number;
-  trailingControlColumns?: ControlColumnProps[];
   unit?: (total: number) => React.ReactNode;
   hasAlertsCrud?: boolean;
-  hasAlertsCrudPermissions?: ({
-    ruleConsumer,
-    ruleProducer,
-  }: {
-    ruleConsumer: string;
-    ruleProducer?: string;
-  }) => boolean;
-  totalSelectAllAlerts?: number;
   showCheckboxes?: boolean;
 }
-
-const defaultUnit = (n: number) => i18n.ALERTS_UNIT(n);
 
 const ES_LIMIT_COUNT = 9999;
 
@@ -137,7 +118,6 @@ const transformControlColumns = ({
   controlColumns,
   data,
   fieldBrowserOptions,
-  isEventViewer = false,
   loadingEventIds,
   onRowSelected,
   onRuleChange,
@@ -160,7 +140,6 @@ const transformControlColumns = ({
   data: TimelineItem[];
   disabledCellActions: string[];
   fieldBrowserOptions?: FieldBrowserOptions;
-  isEventViewer?: boolean;
   loadingEventIds: string[];
   onRowSelected: OnRowSelected;
   onRuleChange?: () => void;
@@ -197,7 +176,7 @@ const transformControlColumns = ({
                 browserFields={browserFields}
                 fieldBrowserOptions={fieldBrowserOptions}
                 columnHeaders={columnHeaders}
-                isEventViewer={isEventViewer}
+                isEventViewer={false}
                 isSelectAllChecked={isSelectAllChecked}
                 onSelectAll={onSelectPage}
                 showEventsSelect={false}
@@ -250,7 +229,7 @@ const transformControlColumns = ({
             index={i}
             isDetails={isDetails}
             isExpanded={isExpanded}
-            isEventViewer={isEventViewer}
+            isEventViewer={false}
             isExpandable={isExpandable}
             loadingEventIds={loadingEventIds}
             onRowSelected={onRowSelected}
@@ -295,12 +274,9 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
     filterQuery,
     filters,
     filterStatus,
-    getRowRenderer,
     hasAlertsCrud,
-    hasAlertsCrudPermissions,
     id,
     indexNames,
-    isEventViewer = false,
     isLoading,
     isSelectAllChecked,
     itemsPerPageOptions,
@@ -318,8 +294,6 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
     sort,
     tabType,
     totalItems,
-    totalSelectAllAlerts,
-    trailingControlColumns = EMPTY_CONTROL_COLUMNS,
     unit = defaultUnit,
   }) => {
     const {
@@ -621,7 +595,6 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
     const [leadingTGridControlColumns, trailingTGridControlColumns] = useMemo(() => {
       return [
         showCheckboxes ? [checkBoxControlColumn, ...leadingControlColumns] : leadingControlColumns,
-        trailingControlColumns,
       ].map((controlColumns) =>
         transformControlColumns({
           columnHeaders,
@@ -629,7 +602,6 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
           data,
           disabledCellActions,
           fieldBrowserOptions,
-          isEventViewer,
           loadingEventIds,
           onRowSelected,
           onRuleChange,
@@ -651,12 +623,10 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
     }, [
       showCheckboxes,
       leadingControlColumns,
-      trailingControlColumns,
       columnHeaders,
       data,
       disabledCellActions,
       fieldBrowserOptions,
-      isEventViewer,
       id,
       loadingEventIds,
       onRowSelected,
@@ -803,42 +773,33 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
       [loadPage]
     );
 
-    // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
-    const [activeStatefulEventContext] = useState({
-      timelineID: id,
-      tabType,
-      enableHostDetailsFlyout: true,
-      enableIpDetailsFlyout: true,
-    });
     return (
       <>
-        <StatefulEventContext.Provider value={activeStatefulEventContext}>
-          <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
-            <EuiDataGrid
-              id={'body-data-grid'}
-              data-test-subj="body-data-grid"
-              aria-label={i18n.TGRID_BODY_ARIA_LABEL}
-              columns={columnsWithCellActions}
-              columnVisibility={{ visibleColumns, setVisibleColumns: onSetVisibleColumns }}
-              gridStyle={gridStyle}
-              leadingControlColumns={leadingTGridControlColumns}
-              trailingControlColumns={trailingTGridControlColumns}
-              toolbarVisibility={toolbarVisibility}
-              rowCount={totalItems}
-              renderCellValue={renderTGridCellValue}
-              sorting={{ columns: sortingColumns, onSort }}
-              onColumnResize={onColumnResize}
-              pagination={{
-                pageIndex: activePage,
-                pageSize,
-                pageSizeOptions: itemsPerPageOptions,
-                onChangeItemsPerPage,
-                onChangePage,
-              }}
-              ref={dataGridRef}
-            />
-          </EuiDataGridContainer>
-        </StatefulEventContext.Provider>
+        <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
+          <EuiDataGrid
+            id={'body-data-grid'}
+            data-test-subj="body-data-grid"
+            aria-label={DATA_TABLE_ARIA_LABEL}
+            columns={columnsWithCellActions}
+            columnVisibility={{ visibleColumns, setVisibleColumns: onSetVisibleColumns }}
+            gridStyle={gridStyle}
+            leadingControlColumns={leadingTGridControlColumns}
+            trailingControlColumns={trailingTGridControlColumns}
+            toolbarVisibility={toolbarVisibility}
+            rowCount={totalItems}
+            renderCellValue={renderTGridCellValue}
+            sorting={{ columns: sortingColumns, onSort }}
+            onColumnResize={onColumnResize}
+            pagination={{
+              pageIndex: activePage,
+              pageSize,
+              pageSizeOptions: itemsPerPageOptions,
+              onChangeItemsPerPage,
+              onChangePage,
+            }}
+            ref={dataGridRef}
+          />
+        </EuiDataGridContainer>
       </>
     );
   }

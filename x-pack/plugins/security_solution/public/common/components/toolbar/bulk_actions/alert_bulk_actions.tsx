@@ -20,6 +20,7 @@ import { useBulkActionItems } from './use_bulk_action_items';
 import { dataTableActions, dataTableSelectors } from '../../../store/data_table';
 import type { TGridModel } from '../../../store/data_table/model';
 import type { AlertWorkflowStatus, Refetch } from '../../../types';
+import type { TableState } from '../../../store/data_table/types';
 
 interface OwnProps {
   id: string;

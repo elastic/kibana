@@ -39,14 +39,6 @@ export const UpdatedFlexItem = styled(EuiFlexItem)<{ $show: boolean }>`
   ${({ $show }) => ($show ? '' : 'visibility: hidden;')}
 `;
 
-export const AlertCount = styled.span`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  border-right: ${({ theme }) => theme.eui.euiBorderThin};
-  margin-right: ${({ theme }) => theme.eui.euiSizeS};
-  padding-right: ${({ theme }) => theme.eui.euiSizeM};
-`;
-
 export const EventsContainerLoading = styled.div.attrs(({ className = '' }) => ({
   className: `${SELECTOR_TIMELINE_GLOBAL_CONTAINER} ${className}`,
 }))`

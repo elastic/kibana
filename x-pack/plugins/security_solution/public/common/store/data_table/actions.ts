@@ -6,13 +6,10 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import type { TimelineNonEcsData } from '../../../common/search_strategy';
-import type {
-  ColumnHeaderOptions,
-  SortColumnTable,
-  DataExpandedDetailType,
-  SessionViewConfig,
-} from '../../../common/types/timeline';
+import type { SessionViewConfig } from '../../../timelines/components/timeline/session_tab_content/use_session_view';
+import type { TimelineNonEcsData } from '../../../../common/search_strategy';
+import type { ColumnHeaderOptions, TimelineExpandedDetailType } from '../../../../common/types';
+import type { SortColumnTable } from '../../components/data_table/types';
 import type { InitialyzeTGridSettings, TGridPersistInput } from './types';
 
 const actionCreator = actionCreatorFactory('x-pack/timelines/t-grid');
@@ -42,7 +39,7 @@ export const updateColumnWidth = actionCreator<{
   width: number;
 }>('UPDATE_COLUMN_WIDTH');
 
-export type TableToggleDetailPanel = DataExpandedDetailType & {
+export type TableToggleDetailPanel = TimelineExpandedDetailType & {
   tabType?: string;
   id: string;
 };

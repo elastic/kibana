@@ -6,19 +6,21 @@
  */
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useRef, useCallback, useMemo, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
-import type { EntityType, RowRenderer } from '@kbn/timelines-plugin/common';
+import type { Direction, EntityType, RowRenderer } from '@kbn/timelines-plugin/common';
+import { isEmpty } from 'lodash';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataTableCellAction } from '../../../../common/data_table/columns';
-import type { ControlColumnProps, TableId } from '../../../../common/types';
-import { dataTableActions } from '../../store/data_table';
+import type { ControlColumnProps } from '../../../../common/types';
+import { dataTableActions, dataTableSelectors } from '../../store/data_table';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
 import type { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
@@ -37,14 +39,25 @@ import {
 import type { SubsetTGridModel } from '../../store/data_table/model';
 import {
   EventsContainerLoading,
+  FullWidthFlexGroupTable,
+  ScrollableFlexItem,
   StyledEuiPanel,
   UpdatedFlexGroup,
   UpdatedFlexItem,
 } from './styles';
 import type { ViewSelection } from '../event_rendered_view/selector';
 import { SummaryViewSelector } from '../event_rendered_view/selector';
-
-const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { defaultHeaders } from '../data_table/column_headers/default_headers';
+import { getDefaultViewSelection, resolverIsShowing, getCombinedFilterQuery } from './helpers';
+import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../event_rendered_view/helpers';
+import { useTimelineEvents } from './use_timelines_events';
+import { TableContext, TGridEmpty, TGridLoading } from './shared';
+import type { TableId } from '../../store/data_table/types';
+import { InspectButton } from '../data_table/inspect';
+import { StatefulDataTableComponent } from '../data_table';
+import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
+import type { AlertWorkflowStatus } from '../../types';
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
@@ -59,6 +72,8 @@ const TitleText = styled.span`
   margin-right: 12px;
 `;
 
+const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
+
 export interface Props {
   defaultCellActions?: DataTableCellAction[];
   defaultModel: SubsetTGridModel;
@@ -70,7 +85,7 @@ export interface Props {
   start: string;
   showTotalCount?: boolean;
   pageFilters?: Filter[];
-  currentFilter?: Status;
+  currentFilter?: AlertWorkflowStatus;
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
@@ -123,12 +138,13 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   } = useSelector((state: State) => eventsViewerSelector(state, tableId));
 
   const [tableView, setTableView] = useState<ViewSelection>(
-    getDefaultViewSelection({ timelineId: id, value: storage.get(ALERTS_TABLE_VIEW_SELECTION_KEY) })
+    getDefaultViewSelection({
+      timelineId: tableId,
+      value: storage.get(ALERTS_TABLE_VIEW_SELECTION_KEY),
+    })
   );
 
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
-
-  const { timelines: timelinesUi } = useKibana().services;
   const {
     browserFields,
     dataViewId,
@@ -225,24 +241,15 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     removeColumn: (columnId) => dispatch(dataTableActions.removeColumn({ columnId, id: tableId })),
   });
 
-  // Only show the table-spanning loading indicator when the query is loading and we
-  // don't have data (e.g. for the initial fetch).
-  // Subsequent fetches (e.g. for pagination) will show a small loading indicator on
-  // top of the table and the table will display the current page until the next page
-  // is fetched. This prevents a flicker when paginating.
-  const showFullLoading = loading && !hasAlerts;
-
   const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
-  const tableContext = useMemo(() => ({ tableId: id }), [id]);
+  const tableContext = useMemo(() => ({ tableId }), [tableId]);
 
-  const isLive = input.policy.kind === 'interval';
-  // -----------------------------------------------
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-  const { uiSettings } = useKibana<CoreStart>().services;
+  const { uiSettings } = useKibana().services;
 
-  const getManageDataTable = useMemo(() => tGridSelectors.getManageDataTableById(), []);
+  const getManageDataTable = useMemo(() => dataTableSelectors.getManageDataTableById(), []);
 
-  const { queryFields } = useDeepEqualSelector((state) => getManageDataTable(state, id ?? ''));
+  const { queryFields } = useDeepEqualSelector((state) => getManageDataTable(state, tableId));
 
   const esQueryConfig = getEsQueryConfig(uiSettings);
 
@@ -279,7 +286,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   const sortField = useMemo(
     () =>
-      sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
+      (sort as Sort[]).map(({ columnId, columnType, esTypes, sortDirection }) => ({
         field: columnId,
         type: columnType,
         direction: sortDirection as Direction,
@@ -298,8 +305,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
       entityType,
       fields,
       filterQuery,
-      id,
-      indexNames,
+      id: tableId,
+      indexNames: selectedPatterns,
       limit: itemsPerPage,
       runtimeMappings,
       skip: !canQueryTimeline,
@@ -308,8 +315,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     });
 
   useEffect(() => {
-    dispatch(tGridActions.updateIsLoading({ id, isLoading: loading }));
-  }, [dispatch, id, loading]);
+    dispatch(dataTableActions.updateIsLoading({ id: tableId, isLoading: loading }));
+  }, [dispatch, tableId, loading]);
 
   const totalCountMinusDeleted = useMemo(
     () => (totalCount > 0 ? totalCount - deletedEventIds.length : 0),
@@ -317,6 +324,13 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   );
 
   const hasAlerts = totalCountMinusDeleted > 0;
+
+  // Only show the table-spanning loading indicator when the query is loading and we
+  // don't have data (e.g. for the initial fetch).
+  // Subsequent fetches (e.g. for pagination) will show a small loading indicator on
+  // top of the table and the table will display the current page until the next page
+  // is fetched. This prevents a flicker when paginating.
+  const showFullLoading = loading && !hasAlerts;
 
   const nonDeletedEvents = useMemo(
     () => events.filter((e) => !deletedEventIds.includes(e._id)),
@@ -328,20 +342,20 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
 
   // Clear checkbox selection when new events are fetched
   useEffect(() => {
-    dispatch(tGridActions.clearSelected({ id }));
+    dispatch(dataTableActions.clearSelected({ id: tableId }));
     dispatch(
-      tGridActions.setTGridSelectAll({
-        id,
+      dataTableActions.setTGridSelectAll({
+        id: tableId,
         selectAll: false,
       })
     );
-  }, [nonDeletedEvents, dispatch, id]);
+  }, [nonDeletedEvents, dispatch, tableId]);
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
         <InspectButtonContainer>
           <EventsContainerLoading
-            data-timeline-id={id}
+            data-timeline-id={tableId}
             data-test-subj={`events-container-loading-${loading}`}
           >
             <UpdatedFlexGroup
@@ -358,7 +372,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
                 {!resolverIsShowing(graphEventId) && additionalFilters}
               </UpdatedFlexItem>
               {tGridEventRenderedViewEnabled &&
-                ['alerts-page', 'alerts-rules-details-page'].includes(id) && (
+                ['alerts-page', 'alerts-rules-details-page'].includes(tableId) && (
                   <UpdatedFlexItem grow={false} $show={!loading}>
                     <SummaryViewSelector viewSelected={tableView} onViewChange={setTableView} />
                   </UpdatedFlexItem>
@@ -382,7 +396,35 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
                     $visible={!graphEventId && graphOverlay == null}
                     gutterSize="none"
                   >
-                    <ScrollableFlexItem grow={1}> </ScrollableFlexItem>
+                    <ScrollableFlexItem grow={1}>
+                      <StatefulDataTableComponent
+                        activePage={pageInfo.activePage}
+                        browserFields={browserFields}
+                        data={nonDeletedEvents}
+                        disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
+                        id={tableId}
+                        indexNames={selectedPatterns}
+                        itemsPerPageOptions={itemsPerPageOptions}
+                        loadPage={loadPage}
+                        pageSize={pageInfo.querySize}
+                        refetch={refetch}
+                        renderCellValue={renderCellValue}
+                        rowRenderers={rowRenderers}
+                        tabType={'query'}
+                        totalItems={totalCountMinusDeleted}
+                        bulkActions={bulkActions}
+                        fieldBrowserOptions={fieldBrowserOptions}
+                        defaultCellActions={defaultCellActions}
+                        filterQuery={filterQuery}
+                        hasAlertsCrud={hasAlertsCrud}
+                        showCheckboxes={showCheckboxes}
+                        unit={unit}
+                        filters={filters}
+                        filterStatus={currentFilter}
+                        onRuleChange={onRuleChange}
+                        leadingControlColumns={leadingControlColumns}
+                      />
+                    </ScrollableFlexItem>
                   </FullWidthFlexGroupTable>
                 )}
               </StyledEuiPanel>
