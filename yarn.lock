@@ -3201,6 +3201,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-plugins-server-internal@link:bazel-bin/packages/core/plugins/core-plugins-server-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-plugins-server@link:bazel-bin/packages/core/plugins/core-plugins-server":
   version "0.0.0"
   uid ""
@@ -7421,6 +7425,10 @@
   uid ""
 
 "@types/kbn__core-plugins-browser@link:bazel-bin/packages/core/plugins/core-plugins-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-server-internal@link:bazel-bin/packages/core/plugins/core-plugins-server-internal/npm_module_types":
   version "0.0.0"
   uid ""
 

@@ -74,9 +74,12 @@ import {
   InternalCoreSetup,
   InternalCoreStart,
 } from '@kbn/core-lifecycle-server-internal';
+import {
+  DiscoveredPlugins,
+  PluginsService,
+  config as pluginsConfig,
+} from '@kbn/core-plugins-server-internal';
 import { CoreApp } from './core_app';
-import { PluginsService, config as pluginsConfig } from './plugins';
-import { DiscoveredPlugins } from './plugins';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';

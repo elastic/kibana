@@ -24,7 +24,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { PluginWrapper } from './plugin';
 import { PluginsSystem } from './plugins_system';
-import { coreMock } from '../mocks';
+import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 
 function createPlugin(
   id: string,
@@ -62,9 +62,9 @@ function createPlugin(
   });
 }
 
-const prebootDeps = coreMock.createInternalPreboot();
-const setupDeps = coreMock.createInternalSetup();
-const startDeps = coreMock.createInternalStart();
+const prebootDeps = coreInternalLifecycleMock.createInternalPreboot();
+const setupDeps = coreInternalLifecycleMock.createInternalSetup();
+const startDeps = coreInternalLifecycleMock.createInternalStart();
 
 let pluginsSystem: PluginsSystem<PluginType.standard>;
 let configService: ReturnType<typeof configServiceMock.create>;

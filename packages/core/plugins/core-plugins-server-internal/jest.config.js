@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-export const mockPackage = {
-  raw: { __dirname: '/tmp' } as any,
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/plugins/core-plugins-server-internal'],
 };
-
-jest.doMock('load-json-file', () => ({
-  sync: () => mockPackage.raw,
-}));
-
-export const mockDiscover = jest.fn();
-jest.mock('@kbn/core-plugins-server-internal', () => ({ discover: mockDiscover }));

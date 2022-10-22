@@ -19,7 +19,7 @@ import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
-import { coreMock } from '../mocks';
+import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { PluginDiscoveryError } from './discovery';
 import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';
@@ -41,9 +41,9 @@ let standardMockPluginSystem: jest.Mocked<PluginsSystem<PluginType.standard>>;
 let environmentPreboot: ReturnType<typeof environmentServiceMock.createPrebootContract>;
 let nodePreboot: ReturnType<typeof nodeServiceMock.createInternalPrebootContract>;
 
-const prebootDeps = coreMock.createInternalPreboot();
-const setupDeps = coreMock.createInternalSetup();
-const startDeps = coreMock.createInternalStart();
+const prebootDeps = coreInternalLifecycleMock.createInternalPreboot();
+const setupDeps = coreInternalLifecycleMock.createInternalSetup();
+const startDeps = coreInternalLifecycleMock.createInternalStart();
 const logger = loggingSystemMock.create();
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());

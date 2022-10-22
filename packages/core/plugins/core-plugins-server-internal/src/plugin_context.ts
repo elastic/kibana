@@ -13,7 +13,7 @@ import type { NodeInfo } from '@kbn/core-node-server';
 import type { IRouter, IContextProvider } from '@kbn/core-http-server';
 import { PluginInitializerContext, PluginManifest } from '@kbn/core-plugins-server';
 import { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
-import type { RequestHandlerContext } from '..';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { PluginWrapper } from './plugin';
 import {
   PluginsServicePrebootSetupDeps,

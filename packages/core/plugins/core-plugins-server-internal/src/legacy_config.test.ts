@@ -8,33 +8,33 @@
 
 import { take } from 'rxjs/operators';
 import { ConfigService, Env } from '@kbn/config';
-import { configServiceMock, getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
+import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import { REPO_ROOT } from '@kbn/utils';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { duration } from 'moment';
 import { fromRoot } from '@kbn/utils';
 import { ByteSizeValue, schema } from '@kbn/config-schema';
-import { CoreContext } from '@kbn/core-base-server-internal';
-import { mockCoreContext } from '@kbn/core-base-server-mocks';
+// import { CoreContext } from '@kbn/core-base-server-internal';
+// import { mockCoreContext } from '@kbn/core-base-server-mocks';
 // TODO: Refactor to use coreSetup and coreStart for mocking the config.
 describe('Legacy config', () => {
   let env: Env;
   let logger: ReturnType<typeof loggingSystemMock.create>;
-  let coreContext: CoreContext;
+  // let coreContext: CoreContext;
 
   beforeEach(() => {
     env = Env.createDefault(REPO_ROOT, getEnvOptions());
     logger = loggingSystemMock.create();
   });
 
-  const createConfigService = (rawConfig: Record<string, any> = {}): ConfigService => {
+  const createConfigService = (): ConfigService => {
     // I need to use coreSetup to properly setup these mocks. See packages/core/lifecycle/core-lifecycle-server-mocks/src/core_setup.mock.ts
-    coreContext = mockCoreContext.create({
-      env,
-      logger,
-      configService: configServiceMock.create(),
-    });
+    // coreContext = mockCoreContext.create({
+    //   env,
+    //   logger,
+    //   configService: configServiceMock.create(),
+    // });
     const config$ = rawConfigServiceMock.create({
       rawConfig: {
         elasticsearch: { shardTimeout: '30s', requestTimeout: '30s', pingTimeout: '30s' },

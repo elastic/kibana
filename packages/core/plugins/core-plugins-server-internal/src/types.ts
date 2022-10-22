@@ -8,10 +8,6 @@
 
 import type { PluginName, PluginOpaqueId } from '@kbn/core-base-common';
 
-// re-exporting for now to avoid adapting all imports, will be removed later on in the migration process
-// export type { PluginName, PluginOpaqueId, DiscoveredPlugin } from '@kbn/core-base-common';
-// export { PluginType } from '@kbn/core-base-common';
-
 /** @internal */
 export interface PluginDependencies {
   asNames: ReadonlyMap<PluginName, PluginName[]>;
