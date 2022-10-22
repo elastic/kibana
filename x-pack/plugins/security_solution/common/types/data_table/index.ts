@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TGridModel } from "./model";
 import * as runtimeTypes from 'io-ts';
+import type { TGridModel } from './model';
 
 /** The state of all timelines is stored here */
 export interface DataTableState {
