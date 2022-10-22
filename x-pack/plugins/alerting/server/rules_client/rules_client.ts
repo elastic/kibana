@@ -33,6 +33,7 @@ import {
   SavedObjectsUtils,
   SavedObjectAttributes,
   SavedObjectsBulkUpdateObject,
+  SavedObjectsBulkDeleteObject,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 import { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
@@ -1847,7 +1848,7 @@ export class RulesClient {
         }
       );
 
-    const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+    const rules: SavedObjectsBulkDeleteObject[] = [];
     const apiKeysToInvalidate: string[] = [];
     const taskIdsToDelete: string[] = [];
     const errors: BulkDeleteError[] = [];
