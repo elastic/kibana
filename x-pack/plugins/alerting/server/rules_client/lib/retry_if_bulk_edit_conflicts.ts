@@ -12,7 +12,7 @@ import { Logger, SavedObjectsBulkUpdateObject, SavedObjectsUpdateResponse } from
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { BulkEditError } from '../rules_client';
 import { RawRule } from '../../types';
-import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTES } from './wait_before_next_retry';
+import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 
 // max number of failed SO ids in one retry filter
 const MaxIdsNumberInRetryFilter = 1000;
@@ -49,7 +49,7 @@ export const retryIfBulkEditConflicts = async (
   name: string,
   bulkEditOperation: BulkEditOperation,
   filter: KueryNode | null,
-  retries: number = RETRY_IF_CONFLICTS_ATTEMPTES,
+  retries: number = RETRY_IF_CONFLICTS_ATTEMPTS,
   accApiKeysToInvalidate: string[] = [],
   accResults: Array<SavedObjectsUpdateResponse<RawRule>> = [],
   accErrors: BulkEditError[] = []

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const RETRY_IF_CONFLICTS_ATTEMPTES = 2;
+export const RETRY_IF_CONFLICTS_ATTEMPTS = 2;
 
 // milliseconds to wait before retrying when conflicts occur
 // note: we considered making this random, to help avoid a stampede, but
@@ -17,7 +17,7 @@ const RETRY_IF_CONFLICTS_DELAY = 250;
  * exponential delay before retry with adding random delay
  */
 export const waitBeforeNextRetry = async (retries: number): Promise<void> => {
-  const exponentialDelayMultiplier = 1 + (RETRY_IF_CONFLICTS_ATTEMPTES - retries) ** 2;
+  const exponentialDelayMultiplier = 1 + (RETRY_IF_CONFLICTS_ATTEMPTS - retries) ** 2;
   const randomDelayMs = Math.floor(Math.random() * 100);
 
   await new Promise((resolve) =>

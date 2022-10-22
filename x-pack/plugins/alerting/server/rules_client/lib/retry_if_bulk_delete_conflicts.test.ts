@@ -9,7 +9,7 @@ import { KueryNode } from '@kbn/es-query';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { retryIfBulkDeleteConflicts } from './retry_if_bulk_delete_conflicts';
-import { RETRY_IF_CONFLICTS_ATTEMPTES } from './wait_before_next_retry';
+import { RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 import type { BulkDeleteError } from '../rules_client';
 
 const mockFilter: KueryNode = {
@@ -49,7 +49,7 @@ const getOperationConflictsTimes = (times: number) => {
 const OperationSuccessful = async () => mockSuccessfulResult;
 const conflictOperationMock = jest.fn();
 
-describe('retryIfBulkEditConflicts', () => {
+describe('retryIfBulkDeleteConflicts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -76,14 +76,14 @@ describe('retryIfBulkEditConflicts', () => {
     ).rejects.toThrowError('Test failure');
   });
 
-  test(`should return conflict errors when number of retries exceeds ${RETRY_IF_CONFLICTS_ATTEMPTES}`, async () => {
+  test(`should return conflict errors when number of retries exceeds ${RETRY_IF_CONFLICTS_ATTEMPTS}`, async () => {
     const result = await retryIfBulkDeleteConflicts(
       mockLogger,
-      getOperationConflictsTimes(RETRY_IF_CONFLICTS_ATTEMPTES + 1),
+      getOperationConflictsTimes(RETRY_IF_CONFLICTS_ATTEMPTS + 1),
       mockFilter
     );
 
     expect(result.errors).toEqual([error409]);
-    expect(mockLogger.warn).toBeCalledWith('Bulk delele rules conflicts, exceeded retries');
+    expect(mockLogger.warn).toBeCalledWith('Bulk delete rules conflicts, exceeded retries');
   });
 });

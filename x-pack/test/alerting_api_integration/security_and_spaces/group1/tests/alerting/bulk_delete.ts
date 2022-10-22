@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 
@@ -413,39 +413,6 @@ export default ({ getService }: FtrProviderContext) => {
           }
         });
 
-        it('should throw an error when bulk delete of rules when both ids and filter supplied in payload', async () => {
-          const { body: createdRule1 } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(getTestRuleData({ tags: ['foo'] }))
-            .expect(200);
-
-          const response = await supertestWithoutAuth
-            .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_delete`)
-            .set('kbn-xsrf', 'foo')
-            .send({ filter: 'fake_filter', ids: [createdRule1.id] })
-            .auth(user.username, user.password);
-
-          switch (scenario.id) {
-            case 'no_kibana_privileges at space1':
-            case 'space_1_all at space2':
-            case 'global_read at space1':
-            case 'space_1_all_alerts_none_actions at space1':
-            case 'superuser at space1':
-            case 'space_1_all at space1':
-            case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.statusCode).to.eql(400);
-              expect(response.body.message).to.eql(
-                "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"
-              );
-              objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
-              await getScheduledTask(createdRule1.scheduled_task_id);
-              break;
-            default:
-              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-          }
-        });
-
         it('should not delete rule from another space', async () => {
           const { body: createdRule } = await supertest
             .post(`${getUrlPrefix('other')}/api/alerting/rule`)
@@ -500,37 +467,95 @@ export default ({ getService }: FtrProviderContext) => {
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
-
-        it('should return an error if we pass more than 1000 ids', async () => {
-          const ids = [...Array(1001)].map((_, i) => `rule${i}`);
-
-          const response = await supertestWithoutAuth
-            .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_delete`)
-            .set('kbn-xsrf', 'foo')
-            .send({ ids })
-            .auth(user.username, user.password);
-
-          switch (scenario.id) {
-            case 'no_kibana_privileges at space1':
-            case 'space_1_all at space2':
-            case 'global_read at space1':
-            case 'space_1_all_alerts_none_actions at space1':
-            case 'superuser at space1':
-            case 'space_1_all at space1':
-            case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql({
-                error: 'Bad Request',
-                message:
-                  '[request body.ids]: array size is [1001], but cannot be greater than [1000]',
-                statusCode: 400,
-              });
-              expect(response.statusCode).to.eql(400);
-              break;
-            default:
-              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-          }
-        });
       });
     }
+
+    describe.only('Validation tests', () => {
+      const { user, space } = SuperuserAtSpace1;
+      it('should throw an error when bulk delete of rules when both ids and filter supplied in payload', async () => {
+        const { body: createdRule1 } = await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData({ tags: ['foo'] }))
+          .expect(200);
+
+        const response = await supertestWithoutAuth
+          .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_delete`)
+          .set('kbn-xsrf', 'foo')
+          .send({ filter: 'fake_filter', ids: [createdRule1.id] })
+          .auth(user.username, user.password);
+
+        expect(response.statusCode).to.eql(400);
+        expect(response.body.message).to.eql(
+          "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method's arguments"
+        );
+        objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
+        await getScheduledTask(createdRule1.scheduled_task_id);
+      });
+
+      it('should return an error if we pass more than 1000 ids', async () => {
+        const ids = [...Array(1001)].map((_, i) => `rule${i}`);
+
+        const response = await supertestWithoutAuth
+          .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_delete`)
+          .set('kbn-xsrf', 'foo')
+          .send({ ids })
+          .auth(user.username, user.password);
+
+        expect(response.body).to.eql({
+          error: 'Bad Request',
+          message: '[request body.ids]: array size is [1001], but cannot be greater than [1000]',
+          statusCode: 400,
+        });
+      });
+
+      it('should return an error if we do not pass any arguments', async () => {
+        await supertest
+          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData())
+          .expect(200);
+
+        const response = await supertestWithoutAuth
+          .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_delete`)
+          .set('kbn-xsrf', 'foo')
+          .send({})
+          .auth(user.username, user.password);
+
+        expect(response.body).to.eql({
+          error: 'Bad Request',
+          message: "Either 'ids' or 'filter' property in method's arguments should be provided",
+          statusCode: 400,
+        });
+      });
+
+      it('should return an error if we pass empty ids array', async () => {
+        const response = await supertestWithoutAuth
+          .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_delete`)
+          .set('kbn-xsrf', 'foo')
+          .send({ ids: [] })
+          .auth(user.username, user.password);
+
+        expect(response.body).to.eql({
+          error: 'Bad Request',
+          message: '[request body.ids]: array size is [0], but cannot be smaller than [1]',
+          statusCode: 400,
+        });
+      });
+
+      it('should return an error if we pass empty string instead of fiter', async () => {
+        const response = await supertestWithoutAuth
+          .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_delete`)
+          .set('kbn-xsrf', 'foo')
+          .send({ filter: '' })
+          .auth(user.username, user.password);
+
+        expect(response.body).to.eql({
+          error: 'Bad Request',
+          message: "Either 'ids' or 'filter' properties in method's arguments should be provided",
+          statusCode: 400,
+        });
+      });
+    });
   });
 };

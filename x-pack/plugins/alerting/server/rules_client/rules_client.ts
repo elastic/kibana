@@ -1737,9 +1737,19 @@ export class RulesClient {
     const filter = (options as BulkDeleteOptionsFilter).filter;
     const ids = (options as BulkDeleteOptionsIds).ids;
 
+    if (!ids && !filter) {
+      throw Boom.badRequest(
+        "Either 'ids' or 'filter' property in method's arguments should be provided"
+      );
+    }
+
+    if (ids?.length === 0) {
+      throw Boom.badRequest("'ids' property should not be an empty array");
+    }
+
     if (ids && filter) {
       throw Boom.badRequest(
-        "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments"
+        "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method's arguments"
       );
     }
 

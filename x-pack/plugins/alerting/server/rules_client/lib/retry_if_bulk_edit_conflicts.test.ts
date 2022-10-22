@@ -7,7 +7,7 @@
 import { KueryNode } from '@kbn/es-query';
 
 import { retryIfBulkEditConflicts } from './retry_if_bulk_edit_conflicts';
-import { RETRY_IF_CONFLICTS_ATTEMPTES } from './wait_before_next_retry';
+import { RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 const mockFilter: KueryNode = {
@@ -110,11 +110,11 @@ describe('retryIfBulkEditConflicts', () => {
     ).rejects.toThrowError('Test failure');
   });
 
-  test(`should return conflict errors when number of retries exceeds ${RETRY_IF_CONFLICTS_ATTEMPTES}`, async () => {
+  test(`should return conflict errors when number of retries exceeds ${RETRY_IF_CONFLICTS_ATTEMPTS}`, async () => {
     const result = await retryIfBulkEditConflicts(
       mockLogger,
       mockOperationName,
-      getOperationConflictsTimes(RETRY_IF_CONFLICTS_ATTEMPTES + 1),
+      getOperationConflictsTimes(RETRY_IF_CONFLICTS_ATTEMPTS + 1),
       mockFilter
     );
 
@@ -130,7 +130,7 @@ describe('retryIfBulkEditConflicts', () => {
     expect(mockLogger.warn).toBeCalledWith(`${mockOperationName} conflicts, exceeded retries`);
   });
 
-  for (let i = 1; i <= RETRY_IF_CONFLICTS_ATTEMPTES; i++) {
+  for (let i = 1; i <= RETRY_IF_CONFLICTS_ATTEMPTS; i++) {
     test(`should work when operation conflicts ${i} times`, async () => {
       const result = await retryIfBulkEditConflicts(
         mockLogger,

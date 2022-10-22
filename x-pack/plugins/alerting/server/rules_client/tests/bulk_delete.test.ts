@@ -360,7 +360,7 @@ describe('bulkDelete', () => {
     });
   });
 
-  test('should thow an error if number of matched rules greater than 10.000', async () => {
+  test('should thow an error if number of matched rules greater than 10,000', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       aggregations: {
         alertTypeId: {

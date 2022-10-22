@@ -11,7 +11,7 @@ import { KueryNode } from '@kbn/es-query';
 import { Logger } from '@kbn/core/server';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { BulkDeleteError } from '../rules_client';
-import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTES } from './wait_before_next_retry';
+import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
 
 const MAX_RULES_IDS_IN_RETRY = 1000;
 
@@ -44,7 +44,7 @@ export const retryIfBulkDeleteConflicts = async (
   logger: Logger,
   bulkDeleteOperation: BulkDeleteOperation,
   filter: KueryNode | null,
-  retries: number = RETRY_IF_CONFLICTS_ATTEMPTES,
+  retries: number = RETRY_IF_CONFLICTS_ATTEMPTS,
   accApiKeysToInvalidate: string[] = [],
   accErrors: BulkDeleteError[] = [],
   accTaskIdsToDelete: string[] = []
@@ -79,7 +79,7 @@ export const retryIfBulkDeleteConflicts = async (
     }
 
     if (retries <= 0) {
-      logger.warn('Bulk delele rules conflicts, exceeded retries');
+      logger.warn('Bulk delete rules conflicts, exceeded retries');
 
       return {
         apiKeysToInvalidate,
@@ -89,7 +89,7 @@ export const retryIfBulkDeleteConflicts = async (
     }
 
     logger.debug(
-      `Bulk delele rules conflicts, retrying ..., ${ruleIdsWithConflictError.length} saved objects conflicted`
+      `Bulk delete rules conflicts, retrying ..., ${ruleIdsWithConflictError.length} saved objects conflicted`
     );
 
     await waitBeforeNextRetry(retries);
