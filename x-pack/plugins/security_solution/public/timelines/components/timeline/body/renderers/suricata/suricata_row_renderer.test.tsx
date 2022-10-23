@@ -38,7 +38,7 @@ describe('suricata_row_renderer', () => {
 
   const getWrapper = async (childrenComponent: JSX.Element) => {
     const wrapper = mount(childrenComponent);
-    await waitFor(() => wrapper.find('[data-test-subj="suricataRefs"]').exists()); // check for presence of query input
+    await waitFor(() => wrapper.find('[data-test-subj="suricataRefs"]').exists());
     return wrapper;
   };
 

@@ -131,6 +131,11 @@ jest.mock('../../fields_browser/create_field_button', () => ({
 
 describe('Body', () => {
   const mount = useMountAppended();
+  const getWrapper = async (childrenComponent: JSX.Element) => {
+    const wrapper = mount(childrenComponent);
+    await waitFor(() => wrapper.find('[data-test-subj="suricataRefs"]').exists());
+    return wrapper;
+  };
   const mockRefetch = jest.fn();
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 
@@ -145,7 +150,7 @@ describe('Body', () => {
     activePage: 0,
     browserFields: mockBrowserFields,
     data: mockTimelineData,
-    id: 'timeline-test',
+    id: TimelineId.test,
     refetch: mockRefetch,
     renderCellValue: DefaultCellRenderer,
     rowRenderers: defaultRowRenderers,
@@ -161,56 +166,73 @@ describe('Body', () => {
       mockDispatch.mockClear();
     });
 
-    test('it renders the column headers', () => {
-      const wrapper = mount(
+    test('it renders the column headers', async () => {
+      const wrapper = await getWrapper(
         <TestProviders>
           <StatefulBody {...props} />
         </TestProviders>
       );
-
       expect(wrapper.find('[data-test-subj="column-headers"]').first().exists()).toEqual(true);
-    });
+    }, 20000);
 
-    test('it renders the scroll container', () => {
-      const wrapper = mount(
+    test('it renders the scroll container', async () => {
+      const wrapper = await getWrapper(
         <TestProviders>
           <StatefulBody {...props} />
         </TestProviders>
       );
-
       expect(wrapper.find('[data-test-subj="timeline-body"]').first().exists()).toEqual(true);
-    });
+    }, 20000);
 
-    test('it renders events', () => {
-      const wrapper = mount(
+    test('it renders events', async () => {
+      const wrapper = await getWrapper(
         <TestProviders>
           <StatefulBody {...props} />
         </TestProviders>
       );
-
       expect(wrapper.find('[data-test-subj="events"]').first().exists()).toEqual(true);
-    });
+    }, 20000);
 
     test('it renders a tooltip for timestamp', async () => {
+      const { storage } = createSecuritySolutionStorageMock();
       const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
-      const testProps = { ...props, columnHeaders: headersJustTimestamp };
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulBody {...testProps} />
+      const state: State = {
+        ...mockGlobalState,
+        timeline: {
+          ...mockGlobalState.timeline,
+          timelineById: {
+            ...mockGlobalState.timeline.timelineById,
+            [TimelineId.test]: {
+              ...mockGlobalState.timeline.timelineById[TimelineId.test],
+              id: TimelineId.test,
+              columns: headersJustTimestamp,
+            },
+          },
+        },
+      };
+
+      const store = createStore(
+        state,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
+
+      const wrapper = await getWrapper(
+        <TestProviders store={store}>
+          <StatefulBody {...props} />
         </TestProviders>
       );
-      wrapper.update();
-      await waitFor(() => {
-        wrapper.update();
-        headersJustTimestamp.forEach(() => {
-          expect(
-            wrapper
-              .find('[data-test-subj="data-driven-columns"]')
-              .first()
-              .find('[data-test-subj="localized-date-tool-tip"]')
-              .exists()
-          ).toEqual(true);
-        });
+
+      headersJustTimestamp.forEach(() => {
+        expect(
+          wrapper
+            .find('[data-test-subj="data-driven-columns"]')
+            .first()
+            .find('[data-test-subj="localized-date-tool-tip"]')
+            .exists()
+        ).toEqual(true);
       });
     }, 20000);
   });
@@ -230,14 +252,15 @@ describe('Body', () => {
       mockDispatch.mockClear();
     });
 
-    test('Add a note to an event', () => {
-      const wrapper = mount(
+    test('Add a note to an event', async () => {
+      const wrapper = await getWrapper(
         <TestProviders>
           <StatefulBody {...props} />
         </TestProviders>
       );
-      addaNoteToEvent(wrapper, 'hello world');
 
+      addaNoteToEvent(wrapper, 'hello world');
+      wrapper.update();
       expect(mockDispatch).toHaveBeenNthCalledWith(
         3,
         expect.objectContaining({
@@ -260,9 +283,9 @@ describe('Body', () => {
           id: 'timeline-test',
         })
       );
-    });
+    }, 20000);
 
-    test('Add two notes to an event', () => {
+    test('Add two notes to an event', async () => {
       const { storage } = createSecuritySolutionStorageMock();
       const state: State = {
         ...mockGlobalState,
@@ -293,7 +316,8 @@ describe('Body', () => {
         </TestProviders>
       );
 
-      const wrapper = mount(<Proxy {...props} />);
+      const wrapper = await getWrapper(<Proxy {...props} />);
+
       addaNoteToEvent(wrapper, 'hello world');
       mockDispatch.mockClear();
       addaNoteToEvent(wrapper, 'new hello world');
@@ -319,7 +343,7 @@ describe('Body', () => {
           id: 'timeline-test',
         })
       );
-    });
+    }, 20000);
   });
 
   describe('event details', () => {
@@ -327,7 +351,7 @@ describe('Body', () => {
       mockDispatch.mockReset();
     });
     test('call the right reduce action to show event details for query tab', async () => {
-      const wrapper = mount(
+      const wrapper = await getWrapper(
         <TestProviders>
           <StatefulBody {...props} />
         </TestProviders>
@@ -349,10 +373,10 @@ describe('Body', () => {
         },
         type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
-    });
+    }, 20000);
 
     test('call the right reduce action to show event details for pinned tab', async () => {
-      const wrapper = mount(
+      const wrapper = await getWrapper(
         <TestProviders>
           <StatefulBody {...props} tabType={TimelineTabs.pinned} />
         </TestProviders>
@@ -374,10 +398,10 @@ describe('Body', () => {
         },
         type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
-    });
+    }, 20000);
 
     test('call the right reduce action to show event details for notes tab', async () => {
-      const wrapper = mount(
+      const wrapper = await getWrapper(
         <TestProviders>
           <StatefulBody {...props} tabType={TimelineTabs.notes} />
         </TestProviders>
@@ -399,6 +423,6 @@ describe('Body', () => {
         },
         type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
-    });
+    }, 20000);
   });
 });
