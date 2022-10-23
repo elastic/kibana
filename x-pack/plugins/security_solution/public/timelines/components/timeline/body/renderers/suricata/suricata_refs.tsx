@@ -43,7 +43,7 @@ export const SuricataRefs = React.memo<{ signatureId: number }>(({ signatureId }
   }, []);
 
   return (
-    <EuiFlexGroup gutterSize="none" justifyContent="center" wrap>
+    <EuiFlexGroup data-test-subj="suricataRefs" gutterSize="none" justifyContent="center" wrap>
       {linksFromSignature &&
         linksFromSignature.map((link) => (
           <LinkEuiFlexItem key={link} grow={false}>
