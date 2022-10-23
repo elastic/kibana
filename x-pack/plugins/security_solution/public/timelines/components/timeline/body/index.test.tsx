@@ -125,13 +125,6 @@ jest.mock(
       children({ isVisible: true })
 );
 
-jest.mock('../../../../common/lib/helpers/scheduler', () => ({
-  requestIdleCallbackViaScheduler: (callback: () => void, opts?: unknown) => {
-    callback();
-  },
-  maxDelay: () => 3000,
-}));
-
 jest.mock('../../fields_browser/create_field_button', () => ({
   useCreateFieldButton: () => <></>,
 }));

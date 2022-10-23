@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { TableId } from '../../../../../../common/types/timeline';
+import { TableId, TimelineId } from '../../../../../../common/types/timeline';
 import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../../common/mock';
 import { Actions, isAlert } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -97,7 +97,7 @@ const defaultProps = {
   setEventsLoading: () => {},
   showCheckboxes: true,
   showNotes: false,
-  timelineId: 'test',
+  timelineId: TimelineId.test,
   toggleShowNotes: () => {},
 };
 
