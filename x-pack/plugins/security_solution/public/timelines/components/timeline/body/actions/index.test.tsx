@@ -271,7 +271,7 @@ describe('Actions', () => {
           <Actions
             {...defaultProps}
             ecsData={ecsData}
-            timelineId={TableId.kubernetesPageSessions}
+            timelineId={TableId.kubernetesPageSessions} // not a bug, this needs to be fixed by providing a generic interface for actions registry
           />
         </TestProviders>
       );
