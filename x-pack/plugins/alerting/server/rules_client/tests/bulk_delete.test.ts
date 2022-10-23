@@ -151,7 +151,7 @@ describe('bulkDelete', () => {
       ],
     });
 
-    const result = await rulesClient.bulkDeleteRules({ filter: '' });
+    const result = await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.bulkDelete).toHaveBeenCalledWith([
@@ -334,7 +334,7 @@ describe('bulkDelete', () => {
       total: 10001,
     });
 
-    await expect(rulesClient.bulkDeleteRules({ filter: '' })).rejects.toThrow(
+    await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrow(
       'More than 10000 rules matched for bulk delete'
     );
   });
@@ -351,7 +351,7 @@ describe('bulkDelete', () => {
       total: 2,
     });
 
-    await expect(rulesClient.bulkDeleteRules({ filter: '' })).rejects.toThrow(
+    await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrow(
       'No rules found for bulk delete'
     );
   });
@@ -368,7 +368,7 @@ describe('bulkDelete', () => {
         ],
       });
 
-      await rulesClient.bulkDeleteRules({ filter: '' });
+      await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_delete');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('unknown');
@@ -391,7 +391,7 @@ describe('bulkDelete', () => {
         statuses: [{ id: 'id1', type: 'alert', success: true }],
       });
 
-      await expect(rulesClient.bulkDeleteRules({ filter: '' })).rejects.toThrowError(
+      await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrowError(
         'Unauthorized'
       );
 
@@ -408,7 +408,9 @@ describe('bulkDelete', () => {
         statuses: [{ id: 'id1', type: 'alert', success: true }],
       });
 
-      await expect(rulesClient.bulkDeleteRules({ filter: '' })).rejects.toThrowError('Error');
+      await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrowError(
+        'Error'
+      );
 
       expect(auditLogger.log.mock.calls[0][0]?.event?.action).toEqual('rule_delete');
       expect(auditLogger.log.mock.calls[0][0]?.event?.outcome).toEqual('failure');
