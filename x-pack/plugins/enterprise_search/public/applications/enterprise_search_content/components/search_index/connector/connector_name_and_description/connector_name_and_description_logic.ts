@@ -26,7 +26,7 @@ import {
   FetchIndexApiParams,
   FetchIndexApiResponse,
 } from '../../../../api/index/fetch_index_api_logic';
-import { isConnectorIndex } from '../../../../utils/indices';
+import { isConnectorIndex, isCrawlerIndex } from '../../../../utils/indices';
 
 type NameAndDescription = Partial<Pick<Connector, 'name' | 'description'>>;
 
@@ -72,7 +72,9 @@ export const ConnectorNameAndDescriptionLogic = kea<
   },
   events: ({ actions, values }) => ({
     afterMount: () =>
-      actions.setNameAndDescription(isConnectorIndex(values.index) ? values.index.connector : {}),
+      actions.setNameAndDescription(
+        isConnectorIndex(values.index) || isCrawlerIndex(values.index) ? values.index.connector : {}
+      ),
   }),
   listeners: ({ actions, values }) => ({
     apiError: (error) => flashAPIErrors(error),
@@ -92,7 +94,7 @@ export const ConnectorNameAndDescriptionLogic = kea<
     },
     makeRequest: () => clearFlashMessages(),
     saveNameAndDescription: () => {
-      if (isConnectorIndex(values.index)) {
+      if (isConnectorIndex(values.index) || isCrawlerIndex(values.index)) {
         actions.makeRequest({
           connectorId: values.index.connector.id,
           indexName: values.index.connector.index_name,
