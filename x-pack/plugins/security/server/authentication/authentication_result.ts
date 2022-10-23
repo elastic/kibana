@@ -223,13 +223,6 @@ export class AuthenticationResult {
   }
 
   /**
-   * URL that should be used to redirect user to complete authentication (only available for `redirected` result).
-   */
-  public set redirectURL(url) {
-    this.options.redirectURL = url;
-  }
-
-  /**
    * Constructor is not supposed to be used directly, please use corresponding static factory methods instead.
    * @param status Indicates the status of the authentication result.
    * @param [options] Optional argument that includes additional authentication options.

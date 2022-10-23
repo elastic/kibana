@@ -296,14 +296,6 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.userProfileGrant).toBe(userProfileGrant);
       expect(authenticationResult.error).toBeUndefined();
     });
-
-    it('should be able to update the redirectURL after the AuthenticationResult has been created', () => {
-      const newRedirectURL = '/some/other/url';
-      const authenticationResult = AuthenticationResult.redirectTo('/redirect/url');
-      authenticationResult.redirectURL = newRedirectURL;
-
-      expect(authenticationResult.redirectURL).toBe(newRedirectURL);
-    });
   });
 
   describe('shouldUpdateState', () => {

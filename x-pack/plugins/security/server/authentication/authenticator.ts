@@ -406,7 +406,7 @@ export class Authenticator {
         existingSession.value?.provider.name === providerName &&
         existingSession.value?.provider.type === provider.type;
 
-      const authenticationResult = await provider.authenticate(
+      let authenticationResult = await provider.authenticate(
         request,
         ownsSession ? existingSession.value!.state : null
       );
@@ -426,9 +426,12 @@ export class Authenticator {
               `${this.options.basePath.get(request)}/login`
             )
           ) {
-            authenticationResult.redirectURL += `&${LOGOUT_REASON_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-              existingSession.error.code
-            )}`;
+            authenticationResult = AuthenticationResult.redirectTo(
+              authenticationResult.redirectURL +
+                `&${LOGOUT_REASON_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+                  existingSession.error.code
+                )}`
+            );
           }
           return enrichWithUserProfileId(
             this.handlePreAccessRedirects(request, authenticationResult, sessionUpdateResult),
