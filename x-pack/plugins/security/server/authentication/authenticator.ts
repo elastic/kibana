@@ -423,7 +423,7 @@ export class Authenticator {
             // TODO: Should this just be `instanceof SessionError`?
             existingSession.error instanceof SessionExpiredError &&
             authenticationResult.redirectURL?.startsWith(
-              `${this.options.basePath.get(request)}/login`
+              `${this.options.basePath.get(request)}/login?`
             )
           ) {
             authenticationResult = AuthenticationResult.redirectTo(
