@@ -10,7 +10,6 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { retryIfBulkDeleteConflicts } from './retry_if_bulk_delete_conflicts';
 import { RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
-import type { BulkDeleteError } from '../rules_client';
 
 const mockFilter: KueryNode = {
   type: 'function',
@@ -18,11 +17,13 @@ const mockFilter: KueryNode = {
 };
 
 const mockLogger = loggingSystemMock.create().get();
+
 const mockSuccessfulResult = {
-  apiKeysToInvalidate: [] as string[],
-  errors: [] as BulkDeleteError[],
-  taskIdsToDelete: [] as string[],
+  apiKeysToInvalidate: ['apiKey1'],
+  errors: [],
+  taskIdsToDelete: ['taskId1'],
 };
+
 const error409 = {
   message: 'some fake message',
   status: 409,
@@ -38,7 +39,8 @@ const getOperationConflictsTimes = (times: number) => {
     times--;
     if (times >= 0) {
       return {
-        ...mockSuccessfulResult,
+        apiKeysToInvalidate: [],
+        taskIdsToDelete: [],
         errors: [error409],
       };
     }
@@ -54,14 +56,10 @@ describe('retryIfBulkDeleteConflicts', () => {
     jest.resetAllMocks();
   });
 
-  test('should work when operation is a success', async () => {
+  test('should work when operation is successful', async () => {
     const result = await retryIfBulkDeleteConflicts(mockLogger, OperationSuccessful, mockFilter);
 
-    expect(result).toEqual({
-      apiKeysToInvalidate: [],
-      errors: [],
-      taskIdsToDelete: [],
-    });
+    expect(result).toEqual(mockSuccessfulResult);
   });
 
   test('should throw error when operation fails', async () => {
@@ -86,4 +84,17 @@ describe('retryIfBulkDeleteConflicts', () => {
     expect(result.errors).toEqual([error409]);
     expect(mockLogger.warn).toBeCalledWith('Bulk delete rules conflicts, exceeded retries');
   });
+
+  for (let i = 1; i <= RETRY_IF_CONFLICTS_ATTEMPTS; i++) {
+    test(`should work when operation conflicts ${i} times`, async () => {
+      const result = await retryIfBulkDeleteConflicts(
+        mockLogger,
+        getOperationConflictsTimes(i),
+        mockFilter
+      );
+
+      expect(conflictOperationMock.mock.calls.length).toBe(i + 1);
+      expect(result).toStrictEqual(mockSuccessfulResult);
+    });
+  }
 });
