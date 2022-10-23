@@ -35,7 +35,7 @@ export const SEARCH_PLACEHOLDER = i18n.translate('xpack.cases.actions.tags.searc
 });
 
 export const EDITED_TAGS = (totalCases: number) =>
-  i18n.translate('xpack.cases.containers.deletedCases', {
+  i18n.translate('xpack.cases.containers.editedCases', {
     values: { totalCases },
     defaultMessage: 'Edited {totalCases, plural, =1 {case} other {{totalCases} cases}}',
   });
