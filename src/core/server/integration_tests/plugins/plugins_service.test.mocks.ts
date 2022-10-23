@@ -15,4 +15,23 @@ jest.doMock('load-json-file', () => ({
 }));
 
 export const mockDiscover = jest.fn();
-jest.mock('@kbn/core-plugins-server-internal', () => ({ discover: mockDiscover }));
+jest.mock('@kbn/core-plugins-server-internal', () => {
+  const realModule = jest.requireActual('@kbn/core-plugins-server-internal');
+
+  return {
+    ...realModule,
+    discover: mockDiscover,
+  };
+});
+
+// was:
+// export const mockPackage = {
+//   raw: { __dirname: '/tmp' } as any,
+// };
+
+// jest.doMock('load-json-file', () => ({
+//   sync: () => mockPackage.raw,
+// }));
+
+// export const mockDiscover = jest.fn();
+// jest.mock('../../plugins/discovery/plugins_discovery', () => ({ discover: mockDiscover }));
