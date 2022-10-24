@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { throwError as throwErrorRx, of } from 'rxjs';
+import { of, throwError as throwErrorRx } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
 import { fetchTotalHits } from './fetch_total_hits';
@@ -13,6 +13,7 @@ import { discoverServiceMock } from '../../../__mocks__/services';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import { FetchDeps } from './fetch_all';
+import { FetchStatus } from '../../types';
 
 const getDeps = () =>
   ({
@@ -21,6 +22,8 @@ const getDeps = () =>
     searchSessionId: '123',
     data: discoverServiceMock.data,
     savedSearch: savedSearchMock,
+    services: discoverServiceMock,
+    initialFetchStatus: FetchStatus.LOADING,
   } as FetchDeps);
 
 describe('test fetchTotalHits', () => {

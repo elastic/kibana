@@ -22,6 +22,8 @@ import { buildDataTableRecord } from '../../../../utils/build_data_record';
 import { EsHitRecord } from '../../../../types';
 import { AppState } from '../../services/discover_app_state_container';
 import { DataDocuments$ } from '../../services/discover_data_state_container';
+import { DiscoverMainProvider } from '../../services/discover_state_react';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -35,6 +37,7 @@ function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     fetchStatus,
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   }) as DataDocuments$;
+  const stateContainer = getDiscoverStateMock({});
 
   const props = {
     expandedDoc: undefined,
@@ -45,14 +48,16 @@ function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     searchSource: documents$,
     setExpandedDoc: jest.fn(),
     state: { columns: [] },
-    stateContainer: { setAppState: () => {} } as unknown as DiscoverStateContainer,
+    stateContainer,
     navigateTo: jest.fn(),
     onFieldEdited: jest.fn(),
   };
 
   return mountWithIntl(
     <KibanaContextProvider services={services}>
-      <DiscoverDocuments {...props} />
+      <DiscoverMainProvider value={stateContainer}>
+        <DiscoverDocuments {...props} />
+      </DiscoverMainProvider>
     </KibanaContextProvider>
   );
 }
@@ -84,6 +89,9 @@ describe('Discover documents layout', () => {
       setAppState: (newState: Partial<AppState>) => {
         state = { ...state, ...newState };
       },
+      appState: {
+        getState: () => state,
+      },
     } as unknown as DiscoverStateContainer;
 
     onResize(
@@ -91,8 +99,7 @@ describe('Discover documents layout', () => {
         columnId: 'someField',
         width: 205.5435345534,
       },
-      stateContainer,
-      state
+      stateContainer
     );
 
     expect(state.grid?.columns?.someField.width).toEqual(206);

@@ -11,17 +11,14 @@ import { reduce } from 'rxjs/operators';
 import { SearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchAll } from './fetch_all';
-
 import { fetchDocuments } from './fetch_documents';
 import { fetchSql } from './fetch_sql';
 import { fetchChart } from './fetch_chart';
 import { fetchTotalHits } from './fetch_total_hits';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 import { dataViewMock } from '../../../__mocks__/data_view';
-import { AppState } from '../services/discover_app_state_container';
 import {
   DataAvailableFieldsMsg,
   DataChartsMessage,
@@ -29,16 +26,8 @@ import {
   DataMainMsg,
   DataTotalHitsMsg,
   SavedSearchData,
-} from '../hooks/use_saved_search';
-
-import { fetchDocuments } from './fetch_documents';
-import { fetchSql } from './fetch_sql';
-import { fetchChart } from './fetch_chart';
-import { fetchTotalHits } from './fetch_total_hits';
-import { buildDataTableRecord } from '../../../utils/build_data_record';
-import { dataViewMock } from '../../../__mocks__/data_view';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 } from '../services/discover_data_state_container';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
@@ -74,7 +63,7 @@ function subjectCollector<T>(subject: Subject<T>): () => Promise<T[]> {
 
 describe('test fetchAll', () => {
   let subjects: SavedSearchData;
-  let deps: Parameters<typeof fetchAll>[3];
+  let deps: Parameters<typeof fetchAll>[4];
   let searchSource: SearchSource;
   beforeEach(() => {
     subjects = {
@@ -87,18 +76,11 @@ describe('test fetchAll', () => {
       }),
     };
     deps = {
-      appStateContainer: {
-        getState: () => {
-          return { interval: 'auto' };
-        },
-      } as ReduxLikeStateContainer<AppState>,
       abortController: new AbortController(),
       data: discoverServiceMock.data,
       inspectorAdapters: { requests: new RequestAdapter() },
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
-      useNewFieldsApi: true,
-      savedSearch: savedSearchMock,
       services: discoverServiceMock,
     };
     searchSource = savedSearchMock.searchSource.createChild();
@@ -116,7 +98,7 @@ describe('test fetchAll', () => {
 
     subjects.main$.subscribe((value) => stateArr.push(value.fetchStatus));
 
-    await fetchAll(subjects, searchSource, false, deps);
+    await fetchAll(subjects, savedSearchMock, false, { interval: 'auto' }, deps);
 
     expect(stateArr).toEqual([
       FetchStatus.UNINITIALIZED,
@@ -133,7 +115,7 @@ describe('test fetchAll', () => {
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue(documents);
-    await fetchAll(subjects, searchSource, false, deps);
+    await fetchAll(subjects, savedSearchMock, false, {}, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
@@ -156,7 +138,7 @@ describe('test fetchAll', () => {
     mockFetchDocuments.mockResolvedValue(documents);
 
     mockFetchTotalHits.mockResolvedValue(42);
-    await fetchAll(subjects, searchSource, false, deps);
+    await fetchAll(subjects, savedSearchMock, false, {}, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
@@ -168,7 +150,7 @@ describe('test fetchAll', () => {
   test('emits loading and response on charts$ correctly', async () => {
     const collect = subjectCollector(subjects.charts$);
     searchSource.getField('index')!.isTimeBased = () => true;
-    await fetchAll(subjects, searchSource, false, deps);
+    await fetchAll(subjects, savedSearchMock, false, {}, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
@@ -184,7 +166,7 @@ describe('test fetchAll', () => {
     const collect = subjectCollector(subjects.totalHits$);
     searchSource.getField('index')!.isTimeBased = () => true;
     mockFetchChart.mockResolvedValue({ totalHits: 32, response: {} as unknown as SearchResponse });
-    await fetchAll(subjects, searchSource, false, deps);
+    await fetchAll(subjects, savedSearchMock, false, {}, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
@@ -202,7 +184,7 @@ describe('test fetchAll', () => {
     const hits = [{ _id: '1', _index: 'logs' }];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchDocuments.mockResolvedValue(documents);
-    await fetchAll(subjects, searchSource, false, deps);
+    await fetchAll(subjects, savedSearchMock, false, {}, deps);
     expect(await collectTotalHits()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
@@ -226,7 +208,7 @@ describe('test fetchAll', () => {
     const collectMain = subjectCollector(subjects.main$);
     searchSource.getField('index')!.isTimeBased = () => false;
     mockFetchDocuments.mockRejectedValue({ msg: 'This query failed' });
-    await fetchAll(subjects, searchSource, false, deps);
+    await fetchAll(subjects, savedSearchMock, false, {}, deps);
     expect(await collectMain()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
@@ -250,21 +232,14 @@ describe('test fetchAll', () => {
     mockFetchSQL.mockResolvedValue(documents);
     const query = { sql: 'SELECT * from foo' };
     deps = {
-      appStateContainer: {
-        getState: () => {
-          return { interval: 'auto', query };
-        },
-      } as unknown as ReduxLikeStateContainer<AppState>,
       abortController: new AbortController(),
       data: discoverServiceMock.data,
       inspectorAdapters: { requests: new RequestAdapter() },
       searchSessionId: '123',
       initialFetchStatus: FetchStatus.UNINITIALIZED,
-      useNewFieldsApi: true,
-      savedSearch: savedSearchMock,
       services: discoverServiceMock,
     };
-    await fetchAll(subjects, searchSource, false, deps);
+    await fetchAll(subjects, savedSearchMock, false, { interval: 'auto', query }, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
       { fetchStatus: FetchStatus.LOADING, recordRawType: 'plain', query },

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { SortOrder } from '@kbn/saved-search-plugin/public';
-import { AppStateContainer } from '../../services/discover_app_state_container';
+import { DiscoverAppStateContainer } from '../../services/discover_app_state_container';
 import { SavedSearchContainer } from '../../services/discover_saved_search_container';
 import { getUrlTracker } from '../../../../kibana_services';
 import { DiscoverServices } from '../../../../build_services';
@@ -33,7 +33,7 @@ export async function changeDataView(
     savedSearchContainer,
     services,
   }: {
-    appStateContainer: AppStateContainer;
+    appStateContainer: DiscoverAppStateContainer;
     savedSearchContainer: SavedSearchContainer;
     services: DiscoverServices;
   }

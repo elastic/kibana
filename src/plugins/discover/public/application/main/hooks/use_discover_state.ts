@@ -8,7 +8,7 @@
 import { useEffect } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
-import { DiscoverStateContainer, useSavedSearch } from '../services/discover_state';
+import { DiscoverStateContainer, useSavedSearchPersisted } from '../services/discover_state';
 import { DiscoverServices } from '../../../build_services';
 import { useSearchSession } from './use_search_session';
 import { DataTableRecord } from '../../../types';
@@ -29,7 +29,7 @@ export function useDiscoverState({
   const dataViewList = useInternalStateSelector((state) => state.dataViews);
   const dataView = useInternalStateSelector((state) => state.dataView!);
 
-  const savedSearch = useSavedSearch();
+  const savedSearch = useSavedSearchPersisted();
   /**
    * Search session logic
    */
@@ -84,7 +84,6 @@ export function useDiscoverState({
   }, [dataView, stateContainer]);
 
   return {
-    stateContainer,
     adHocDataViewList,
     persistDataView,
     updateAdHocDataViewId,

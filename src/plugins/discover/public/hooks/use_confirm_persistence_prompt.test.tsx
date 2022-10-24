@@ -12,6 +12,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
 import { discoverServiceMock as mockDiscoverServices } from '../__mocks__/services';
 import { useConfirmPersistencePrompt } from './use_confirm_persistence_prompt';
+import { getDiscoverStateMock } from '../__mocks__/discover_state.mock';
 
 jest.mock('./show_confirm_panel', () => {
   return {
@@ -31,8 +32,10 @@ const mockDataView = {
 describe('useConfirmPersistencePrompt', () => {
   it('should save data view correctly', async () => {
     mockDiscoverServices.dataViews.createAndSave = jest.fn().mockResolvedValue(mockDataView);
+    const stateContainer = getDiscoverStateMock({});
     const hook = renderHook(
-      (d: DataView) => useConfirmPersistencePrompt(() => Promise.resolve(mockDataView)),
+      (d: DataView) =>
+        useConfirmPersistencePrompt(() => Promise.resolve(mockDataView), stateContainer),
       {
         initialProps: mockDataView,
         wrapper: ({ children }) => (
@@ -48,11 +51,13 @@ describe('useConfirmPersistencePrompt', () => {
   });
 
   it('should show error toast if creation failed', async () => {
+    const stateContainer = getDiscoverStateMock({});
     mockDiscoverServices.dataViews.createAndSave = jest
       .fn()
       .mockRejectedValue(new Error('failed to save'));
     const hook = renderHook(
-      (d: DataView) => useConfirmPersistencePrompt(() => Promise.resolve(mockDataView)),
+      (d: DataView) =>
+        useConfirmPersistencePrompt(() => Promise.resolve(mockDataView), stateContainer),
       {
         initialProps: mockDataView,
         wrapper: ({ children }) => (

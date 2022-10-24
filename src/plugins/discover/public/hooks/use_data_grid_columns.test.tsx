@@ -43,9 +43,7 @@ describe('useColumns', () => {
     const { result } = renderHook(() => {
       return useColumns({
         ...defaultProps,
-        state: {
-          columns: ['Time', '_source'],
-        },
+        columns: ['Time', '_source'],
         useNewFieldsApi: true,
       });
     });
@@ -57,9 +55,7 @@ describe('useColumns', () => {
     const { result } = renderHook(() => {
       return useColumns({
         ...defaultProps,
-        state: {
-          columns: [],
-        },
+        columns: [],
       });
     });
     expect(result.current.columns).toEqual([]);

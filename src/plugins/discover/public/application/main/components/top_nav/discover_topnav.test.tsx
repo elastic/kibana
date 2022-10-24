@@ -8,13 +8,13 @@
 
 import React from 'react';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import { dataViewMock } from '../../../../__mocks__/data_view';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { Query } from '@kbn/es-query';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { DiscoverMainProvider } from '../../services/discover_state_react';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -30,7 +30,6 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
 
   return {
     stateContainer: getDiscoverStateMock({ isTimeBased: true }),
-    dataView: dataViewMock,
     navigateTo: jest.fn(),
     query: {} as Query,
     savedQuery: '',
@@ -46,14 +45,23 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
 describe('Discover topnav component', () => {
   test('generated config of TopNavMenu config is correct when discover save permissions are assigned', () => {
     const props = getProps(true);
-    const component = shallowWithIntl(<DiscoverTopNav {...props} />);
+    const component = shallowWithIntl(<DiscoverTopNav {...props} />, {
+      context: {
+        wrappingComponent: DiscoverMainProvider,
+        wrappingComponentProps: { value: getDiscoverStateMock({}) },
+      },
+    });
     const topMenuConfig = component.props().config.map((obj: TopNavMenuData) => obj.id);
     expect(topMenuConfig).toEqual(['options', 'new', 'open', 'share', 'inspect', 'save']);
   });
 
   test('generated config of TopNavMenu config is correct when no discover save permissions are assigned', () => {
     const props = getProps(false);
-    const component = shallowWithIntl(<DiscoverTopNav {...props} />);
+    const component = shallowWithIntl(
+      <DiscoverMainProvider value={getDiscoverStateMock({})}>
+        <DiscoverTopNav {...props} />
+      </DiscoverMainProvider>
+    );
     const topMenuConfig = component.props().config.map((obj: TopNavMenuData) => obj.id);
     expect(topMenuConfig).toEqual(['options', 'new', 'open', 'share', 'inspect']);
   });

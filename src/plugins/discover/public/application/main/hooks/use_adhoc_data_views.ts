@@ -58,7 +58,6 @@ export const useAdHocDataViews = ({
   const updateAdHocDataViewId = useCallback(
     async (dataViewToUpdate: DataView) => {
       const newDataView = await dataViews.create({ ...dataViewToUpdate.toSpec(), id: undefined });
-      if (!newDataView.id) return;
 
       const savedSearch = stateContainer.savedSearchState.get();
 
@@ -78,10 +77,13 @@ export const useAdHocDataViews = ({
         toDataView: newDataView.id,
         usedDataViews: [],
       } as ActionExecutionContext);
+      if (newDataView.id) {
+        stateContainer.actions.changeDataView(newDataView.id, true);
+      }
 
-      stateContainer.actions.changeDataView(newDataView.id, true);
       const trackingEnabled = Boolean(newDataView.isPersisted() || savedSearch.id);
       getUrlTracker().setTrackingEnabled(trackingEnabled);
+
       return newDataView;
     },
     [dataViews, stateContainer]

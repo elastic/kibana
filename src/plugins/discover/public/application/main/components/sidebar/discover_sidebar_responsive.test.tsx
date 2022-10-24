@@ -27,7 +27,12 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
+import {
+  AvailableFields$,
+  DataDocuments$,
+  RecordRawType,
+} from '../../services/discover_data_state_container';
+import { DiscoverMainProvider } from '../../services/discover_state_react';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -163,6 +168,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     onDataViewCreated: jest.fn(),
     useNewFieldsApi: true,
+    stateContainer: getDiscoverStateMock({ isTimeBased: true }),
   };
 }
 
@@ -173,17 +179,18 @@ describe('discover responsive sidebar', function () {
   beforeAll(async () => {
     props = getCompProps();
     await act(async () => {
-      const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
-      appStateContainer.set({
+      const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+      stateContainer.appState.set({
         query: { query: '', language: 'lucene' },
         filters: [],
       });
+      stateContainer.internalState.transitions.setDataView(stubLogstashDataView);
 
       comp = await mountWithIntl(
         <KibanaContextProvider services={mockServices}>
-          <DiscoverAppStateProvider value={appStateContainer}>
+          <DiscoverMainProvider value={stateContainer}>
             <DiscoverSidebarResponsive {...props} />
-          </DiscoverAppStateProvider>
+          </DiscoverMainProvider>
         </KibanaContextProvider>
       );
       // wait for lazy modules
@@ -259,15 +266,16 @@ describe('discover responsive sidebar', function () {
         result: getDataTableRecords(stubLogstashDataView),
       }) as DataDocuments$,
     };
-    const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
-    appStateContainer.set({
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    stateContainer.appState.set({
       query: { sql: 'SELECT * FROM `index`' },
     });
+    stateContainer.internalState.transitions.setDataView(stubLogstashDataView);
     const compInViewerMode = mountWithIntl(
       <KibanaContextProvider services={mockServices}>
-        <DiscoverAppStateProvider value={appStateContainer}>
+        <DiscoverMainProvider value={stateContainer}>
           <DiscoverSidebarResponsive {...propsWithTextBasedMode} />
-        </DiscoverAppStateProvider>
+        </DiscoverMainProvider>
       </KibanaContextProvider>
     );
     expect(findTestSubject(compInViewerMode, 'indexPattern-add-field_btn').length).toBe(0);
@@ -284,16 +292,17 @@ describe('discover responsive sidebar', function () {
         },
       },
     };
-    const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
-    appStateContainer.set({
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    stateContainer.appState.set({
       query: { query: '', language: 'lucene' },
       filters: [],
     });
+    stateContainer.internalState.transitions.setDataView(stubLogstashDataView);
     const compInViewerMode = mountWithIntl(
       <KibanaContextProvider services={mockedServicesInViewerMode}>
-        <DiscoverAppStateProvider value={appStateContainer}>
+        <DiscoverMainProvider value={stateContainer}>
           <DiscoverSidebarResponsive {...props} />
-        </DiscoverAppStateProvider>
+        </DiscoverMainProvider>
       </KibanaContextProvider>
     );
     expect(

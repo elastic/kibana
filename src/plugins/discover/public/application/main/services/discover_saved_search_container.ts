@@ -14,7 +14,7 @@ import { differenceWith, isEqual, toPairs } from 'lodash';
 import { updateSavedSearch } from '../utils/update_saved_search';
 import { addLog } from '../../../utils/addLog';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import { AppState, AppStateContainer } from './discover_app_state_container';
+import { AppState, DiscoverAppStateContainer } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { persistSavedSearch } from '../utils/persist_saved_search';
@@ -56,7 +56,7 @@ export function getSavedSearchContainer({
   services,
 }: {
   savedSearch: SavedSearch;
-  appStateContainer: AppStateContainer;
+  appStateContainer: DiscoverAppStateContainer;
   services: DiscoverServices;
 }): SavedSearchContainer {
   const savedSearchPersisted$ = new BehaviorSubject(savedSearch);

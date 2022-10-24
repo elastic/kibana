@@ -7,30 +7,24 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { DataViewListItem, SearchSource } from '@kbn/data-plugin/public';
-import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { useDiscoverState } from './use_discover_state';
-import { dataViewMock } from '../../../__mocks__/data_view';
 import { setUrlTracker } from '../../../kibana_services';
 import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';
+import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 setUrlTracker(urlTrackerMock);
 
 describe('test useDiscoverState', () => {
   test('return is valid', async () => {
-    const { history } = createSearchSessionMock();
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 
     const { result } = renderHook(() => {
       return useDiscoverState({
         services: discoverServiceMock,
-        history,
-        savedSearch: savedSearchMock,
         setExpandedDoc: jest.fn(),
-        dataViewList: [dataViewMock as DataViewListItem],
+        stateContainer,
       });
     });
-    expect(result.current.stateContainer).toBeInstanceOf(Object);
-    expect(result.current.searchSource).toBeInstanceOf(SearchSource);
+    expect(result.current.adHocDataViewList).toBeInstanceOf(Object);
   });
 });

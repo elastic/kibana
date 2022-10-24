@@ -20,7 +20,7 @@ import { DiscoverLayoutProps } from '../types';
 setHeaderActionMenuMounter(() => void 0);
 
 const DiscoverLayoutStory = (layoutProps: DiscoverLayoutProps) => {
-  const [state, setState] = useState(layoutProps.state);
+  const [state, setState] = useState({});
 
   const setAppState = (newState: Partial<AppState>) => {
     setState((prevState) => ({ ...prevState, ...newState }));
@@ -31,7 +31,6 @@ const DiscoverLayoutStory = (layoutProps: DiscoverLayoutProps) => {
   return (
     <DiscoverLayout
       {...layoutProps}
-      state={state}
       stateContainer={{
         ...layoutProps.stateContainer,
         appState: { ...layoutProps.stateContainer.appState, getState },

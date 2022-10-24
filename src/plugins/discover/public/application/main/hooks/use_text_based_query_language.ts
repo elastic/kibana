@@ -71,10 +71,9 @@ export function useTextBasedQueryLanguage({
           // check if state needs to contain column transformation due to a different columns in the resultset
           const firstRow = next.result![0];
           const firstRowColumns = Object.keys(firstRow.raw).slice(0, MAX_NUM_OF_COLUMNS);
-          if (
-            !isEqual(firstRowColumns, prev.current.columns) &&
-            !isEqual(query, prev.current.query)
-          ) {
+          const hasQueryChanged = !isEqual(query, prev.current.query);
+          const haveColumnsChanged = !isEqual(firstRowColumns, prev.current.columns);
+          if (hasQueryChanged && haveColumnsChanged) {
             prev.current = { columns: firstRowColumns, query };
             nextColumns = firstRowColumns;
           }

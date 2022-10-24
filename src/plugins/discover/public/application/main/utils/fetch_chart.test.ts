@@ -105,7 +105,7 @@ describe('test fetchCharts', () => {
   test('resolves with summarized chart data', async () => {
     savedSearchMockWithTimeField.searchSource.fetch$ = () => of(requestResult);
 
-    const result = await fetchChart(savedSearchMockWithTimeField.searchSource, getDeps());
+    const result = await fetchChart(savedSearchMockWithTimeField.searchSource, 'auto', getDeps());
     expect(result).toHaveProperty('totalHits', 42);
     expect(result).toHaveProperty('response');
   });
@@ -114,9 +114,9 @@ describe('test fetchCharts', () => {
     savedSearchMockWithTimeField.searchSource.fetch$ = () =>
       throwErrorRx(() => new Error('Oh noes!'));
 
-    await expect(fetchChart(savedSearchMockWithTimeField.searchSource, getDeps())).rejects.toEqual(
-      new Error('Oh noes!')
-    );
+    await expect(
+      fetchChart(savedSearchMockWithTimeField.searchSource, 'auto', getDeps())
+    ).rejects.toEqual(new Error('Oh noes!'));
   });
 
   test('fetch$ is called with request specific execution context', async () => {
@@ -124,7 +124,7 @@ describe('test fetchCharts', () => {
 
     savedSearchMockWithTimeField.searchSource.fetch$ = fetch$Mock;
 
-    await fetchChart(savedSearchMockWithTimeField.searchSource, getDeps());
+    await fetchChart(savedSearchMockWithTimeField.searchSource, 'auto', getDeps());
     expect(fetch$Mock.mock.calls[0][0].executionContext).toMatchInlineSnapshot(`
       Object {
         "description": "fetch chart data and total hits",

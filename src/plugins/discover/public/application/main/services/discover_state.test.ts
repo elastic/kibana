@@ -14,7 +14,11 @@ import {
 import { createBrowserHistory, History } from 'history';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
-import { savedSearchMock, savedSearchMockWithTimeField } from '../../../__mocks__/saved_search';
+import {
+  savedSearchMock,
+  savedSearchMockWithTimeField,
+  savedSearchMockWithTimeFieldNew,
+} from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 
 let history: History;
@@ -130,7 +134,7 @@ describe('Test discover state with legacy migration', () => {
       "/#?_a=(query:(query_string:(analyze_wildcard:!t,query:'type:nice%20name:%22yeah%22')))"
     );
     state = getDiscoverStateContainer({
-      savedSearch: savedSearchMock,
+      savedSearch: savedSearchMockWithTimeFieldNew,
       services: discoverServiceMock,
       history,
     });

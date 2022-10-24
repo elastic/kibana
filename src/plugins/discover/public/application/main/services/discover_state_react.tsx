@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { DiscoverStateContainer, DiscoverStateProvider } from './discover_state';
-import { AppStateProvider } from './discover_app_state_container';
+import { DiscoverAppStateProvider } from './discover_app_state_container';
 import { InternalStateProvider } from './discover_internal_state_container';
 
 export const DiscoverMainProvider = ({
@@ -20,9 +20,9 @@ export const DiscoverMainProvider = ({
 }) => {
   return (
     <DiscoverStateProvider value={value}>
-      <AppStateProvider value={value.appState}>
+      <DiscoverAppStateProvider value={value.appState}>
         <InternalStateProvider value={value.internalState}>{children}</InternalStateProvider>
-      </AppStateProvider>
+      </DiscoverAppStateProvider>
     </DiscoverStateProvider>
   );
 };

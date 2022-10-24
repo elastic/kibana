@@ -34,6 +34,14 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { setTimeout } from 'timers/promises';
 import { act } from 'react-dom/test-utils';
+import {
+  AvailableFields$,
+  DataCharts$,
+  DataDocuments$,
+  DataMain$,
+  DataTotalHits$,
+  RecordRawType,
+} from '../../services/discover_data_state_container';
 
 jest.mock('@kbn/unified-histogram-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/unified-histogram-plugin/public');
@@ -91,7 +99,7 @@ jest.mock('@kbn/unified-histogram-plugin/public', () => {
 });
 
 function getAppStateContainer() {
-  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
+  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
   appStateContainer.set({
     query: { query: '', language: 'lucene' },
     filters: [],

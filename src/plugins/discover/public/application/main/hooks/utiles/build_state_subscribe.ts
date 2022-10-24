@@ -7,7 +7,7 @@
  */
 import { differenceWith, isEqual, toPairs } from 'lodash';
 import { SavedSearchContainer } from '../../services/discover_saved_search_container';
-import { AppState, AppStateContainer } from '../../services/discover_app_state_container';
+import { AppState, DiscoverAppStateContainer } from '../../services/discover_app_state_container';
 import { DiscoverServices } from '../../../../build_services';
 import { addLog } from '../../../../utils/addLog';
 import { loadDataView, resolveDataView } from '../../utils/resolve_data_view';
@@ -23,7 +23,7 @@ export const buildStateSubscribe =
     internalStateContainer,
     services,
   }: {
-    appStateContainer: AppStateContainer;
+    appStateContainer: DiscoverAppStateContainer;
     savedSearchContainer: SavedSearchContainer;
     dataStateContainer: DataStateContainer;
     internalStateContainer: InternalStateContainer;

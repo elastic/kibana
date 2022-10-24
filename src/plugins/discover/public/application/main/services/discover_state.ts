@@ -34,7 +34,7 @@ import {
 } from './discover_internal_state_container';
 import {
   AppState,
-  AppStateContainer,
+  DiscoverAppStateContainer,
   getDiscoverAppStateContainer,
 } from './discover_app_state_container';
 import { DataStateContainer, getDataStateContainer } from './discover_data_state_container';
@@ -70,11 +70,13 @@ export interface DiscoverStateContainer {
   /**
    * App state, the _a part of the URL
    */
-  appState: AppStateContainer;
+  appState: DiscoverAppStateContainer;
 
   internalState: InternalStateContainer;
 
   savedSearchState: SavedSearchContainer;
+
+  searchSessionManager: DiscoverSearchSessionManager;
 
   dataState: DataStateContainer;
   /**
@@ -164,6 +166,8 @@ export function getDiscoverStateContainer({
     services,
   });
 
+  const internalStateContainer = getInternalStateContainer();
+
   const setAppState = appStateContainer.update;
 
   const pauseAutoRefreshInterval = async () => {
@@ -185,7 +189,6 @@ export function getDiscoverStateContainer({
     getSavedSearch: savedSearchContainer.get,
   });
 
-  const internalStateContainer = getInternalStateContainer();
   let unsubscribeSync: (() => void) | undefined;
   const fetchData = (reset?: boolean) => {
     addLog('🧭 [discoverState] fetch data', { reset });
@@ -198,6 +201,7 @@ export function getDiscoverStateContainer({
     internalState: internalStateContainer,
     dataState: dataStateContainer,
     savedSearchState: savedSearchContainer,
+    searchSessionManager,
     setAppState,
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     actions: {
@@ -377,13 +381,25 @@ function createStateHelpers() {
       container!.savedSearchState.savedSearch$.getValue()
     );
   };
+  const useSavedSearchPersisted = () => {
+    const container = useContainer();
+    return useObservable<SavedSearch>(
+      container!.savedSearchState.savedSearchPersisted$,
+      container!.savedSearchState.savedSearchPersisted$.getValue()
+    );
+  };
   return {
     Provider: context.Provider,
     useSavedSearch,
+    useSavedSearchPersisted,
   };
 }
 
-export const { Provider: DiscoverStateProvider, useSavedSearch } = createStateHelpers();
+export const {
+  Provider: DiscoverStateProvider,
+  useSavedSearch,
+  useSavedSearchPersisted,
+} = createStateHelpers();
 
 /**
  * Helper function to merge a given new state with the existing state and to set the given state

@@ -31,7 +31,7 @@ import { addLog } from '../../../utils/addLog';
 
 export const APP_STATE_URL_KEY = '_a';
 
-export interface AppStateContainer extends ReduxLikeStateContainer<AppState> {
+export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<AppState> {
   getPrevious: () => AppState;
   syncState: () => ISyncStateRef;
   update: (newPartial: AppState, replace?: boolean) => void;
@@ -42,7 +42,7 @@ export interface AppStateContainer extends ReduxLikeStateContainer<AppState> {
   isEmptyURL: () => boolean;
 }
 
-export const { Provider: AppStateProvider, useSelector: useAppStateSelector } =
+export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelector } =
   createStateContainerReactHelpers<ReduxLikeStateContainer<AppState>>();
 
 export interface AppState {
@@ -104,7 +104,7 @@ export const getDiscoverAppStateContainer = (
   stateStorage: IKbnUrlStateStorage,
   savedSearch: SavedSearch,
   services: DiscoverServices
-): AppStateContainer => {
+): DiscoverAppStateContainer => {
   let previousAppState: AppState = {};
   const initialState = getInitialState(stateStorage, savedSearch, services);
   const appStateContainer = createStateContainer<AppState>(initialState);
@@ -229,7 +229,6 @@ function getInitialState(
   services: DiscoverServices
 ) {
   const appStateFromUrl = cleanupUrlState(stateStorage.get(APP_STATE_URL_KEY) as AppStateUrl);
-
   const defaultAppState = getStateDefaults({
     savedSearch,
     services,

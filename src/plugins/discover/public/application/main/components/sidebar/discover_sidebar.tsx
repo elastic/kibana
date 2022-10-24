@@ -126,7 +126,6 @@ export function DiscoverSidebarComponent({
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
   const selectedDataView = useInternalStateSelector((state) => state.dataView!);
-
   const [fields, setFields] = useState<DataViewField[] | null>(null);
   const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
   const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);

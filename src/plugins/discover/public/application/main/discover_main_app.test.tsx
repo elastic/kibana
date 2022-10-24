@@ -17,16 +17,17 @@ import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { urlTrackerMock } from '../../__mocks__/url_tracker.mock';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
-import { AppStateProvider } from './services/discover_app_state_container';
-import { InternalStateProvider } from './services/discover_internal_state_container';
+import { DiscoverMainProvider } from './services/discover_state_react';
 
 setHeaderActionMenuMounter(jest.fn());
 setUrlTracker(urlTrackerMock);
 
 describe('DiscoverMainApp', () => {
   test('renders', () => {
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    stateContainer.internalState.transitions.setDataView(dataViewMock);
     const props = {
-      stateContainer: getDiscoverStateMock(),
+      stateContainer,
     };
     const history = createMemoryHistory({
       initialEntries: ['/'],
@@ -35,16 +36,13 @@ describe('DiscoverMainApp', () => {
     const component = mountWithIntl(
       <Router history={history}>
         <KibanaContextProvider services={discoverServiceMock}>
-          <AppStateProvider value={props.stateContainer.appState}>
-            <InternalStateProvider value={props.stateContainer.internalState}>
-              <DiscoverMainApp {...props} />
-            </InternalStateProvider>
-          </AppStateProvider>
+          <DiscoverMainProvider value={props.stateContainer}>
+            <DiscoverMainApp {...props} />
+          </DiscoverMainProvider>
         </KibanaContextProvider>
       </Router>
     );
 
     expect(component.find(DiscoverTopNav).exists()).toBe(true);
-    expect(component.find(DiscoverTopNav).prop('dataView')).toEqual(dataViewMock);
   });
 });

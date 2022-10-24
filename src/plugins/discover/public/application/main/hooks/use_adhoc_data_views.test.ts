@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { discoverServiceMock as mockDiscoverServices } from '../../../__mocks__/services';
-import { GetStateReturn } from '../services/discover_state';
+import {
+  discoverServiceMock,
+  discoverServiceMock as mockDiscoverServices,
+} from '../../../__mocks__/services';
 import { useAdHocDataViews } from './use_adhoc_data_views';
 import * as persistencePromptModule from '../../../hooks/use_confirm_persistence_prompt';
 import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';
 import { setUrlTracker } from '../../../kibana_services';
+import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 
 jest.mock('../../../hooks/use_confirm_persistence_prompt', () => {
   const createdDataView = {
@@ -65,28 +67,13 @@ const mockDataView = {
   toSpec: () => ({}),
 } as DataView;
 
-const savedSearchMock = {
-  id: 'some-id',
-  searchSource: createSearchSourceMock({ index: mockDataView }),
-};
-
 describe('useAdHocDataViews', () => {
   it('should save data view with new id and update saved search', async () => {
     const hook = renderHook((d: DataView) =>
       useAdHocDataViews({
         dataView: mockDataView,
-        dataViews: mockDiscoverServices.dataViews,
-        stateContainer: {
-          appStateContainer: { getState: jest.fn().mockReturnValue({}) },
-          replaceUrlAppState: jest.fn(),
-          kbnUrlStateStorage: {
-            kbnUrlControls: { flush: jest.fn() },
-          },
-        } as unknown as GetStateReturn,
-        setUrlTracking: jest.fn(),
-        dataViews: mockDiscoverServices.dataViews,
-        filterManager: mockDiscoverServices.filterManager,
-        toastNotifications: mockDiscoverServices.toastNotifications,
+        stateContainer: getDiscoverStateMock({ isTimeBased: true }),
+        services: discoverServiceMock,
       })
     );
 
@@ -107,18 +94,8 @@ describe('useAdHocDataViews', () => {
     const hook = renderHook((d: DataView) =>
       useAdHocDataViews({
         dataView: mockDataView,
-        dataViews: mockDiscoverServices.dataViews,
-        stateContainer: {
-          appStateContainer: { getState: jest.fn().mockReturnValue({}) },
-          replaceUrlAppState: jest.fn(),
-          kbnUrlStateStorage: {
-            kbnUrlControls: { flush: jest.fn() },
-          },
-        } as unknown as GetStateReturn,
-        setUrlTracking: jest.fn(),
-        dataViews: mockDiscoverServices.dataViews,
-        filterManager: mockDiscoverServices.filterManager,
-        toastNotifications: mockDiscoverServices.toastNotifications,
+        stateContainer: getDiscoverStateMock({ isTimeBased: true }),
+        services: discoverServiceMock,
       })
     );
 

@@ -92,12 +92,18 @@ function getServicesMock(hasESData = true, hasUserDataView = true) {
 
   discoverServiceMock.data.search.searchSource.createEmpty = jest.fn(() => {
     const fields: Record<string, unknown> = {};
+
     const empty = {
       ...searchSourceInstanceMock,
-      setField: (key: string, value: unknown) => (fields[key] = value),
       getField: (key: string) => fields[key],
-    };
-    return empty as unknown as SearchSource;
+    } as unknown as SearchSource;
+
+    empty.setField = jest.fn((key: string, value: unknown) => {
+      fields[key] = value;
+      return empty;
+    });
+
+    return empty;
   });
   return discoverServiceMock;
 }

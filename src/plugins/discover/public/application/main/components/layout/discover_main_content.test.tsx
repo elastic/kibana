@@ -25,7 +25,7 @@ import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle'
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverStateProvider } from '../../services/discover_state_react';
+import { DiscoverStateProvider } from '../../services/discover_state';
 import {
   UnifiedHistogramChartData,
   UnifiedHistogramLayout,
@@ -40,6 +40,7 @@ import {
   DataTotalHits$,
   RecordRawType,
 } from '../../services/discover_data_state_container';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 jest.mock('@kbn/unified-histogram-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/unified-histogram-plugin/public');

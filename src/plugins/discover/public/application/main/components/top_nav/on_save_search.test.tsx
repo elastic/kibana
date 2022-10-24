@@ -42,7 +42,7 @@ describe('onSaveSearch', () => {
       navigateTo: jest.fn(),
       savedSearch: savedSearchMock,
       services: serviceMock,
-      state: stateMock,
+      stateContainer: stateMock,
       updateAdHocDataViewId: jest.fn(),
     });
 
@@ -70,7 +70,7 @@ describe('onSaveSearch', () => {
         tags: ['tag1', 'tag2'],
       },
       services: serviceMock,
-      state: stateMock,
+      stateContainer: stateMock,
       updateAdHocDataViewId: jest.fn(),
     });
     expect(saveModal?.props.tags).toEqual(['tag1', 'tag2']);
@@ -99,7 +99,7 @@ describe('onSaveSearch', () => {
       navigateTo: jest.fn(),
       savedSearch,
       services: serviceMock,
-      state: stateMock,
+      stateContainer: stateMock,
       updateAdHocDataViewId: jest.fn(),
     });
     expect(savedSearch.tags).toEqual(['tag1', 'tag2']);
@@ -107,7 +107,7 @@ describe('onSaveSearch', () => {
       .spyOn(persistSavedSearchUtils, 'persistSavedSearch')
       .mockImplementationOnce((newSavedSearch, _) => {
         savedSearch = newSavedSearch;
-        return Promise.resolve({ id: newSavedSearch.id });
+        return Promise.resolve(newSavedSearch.id);
       });
     saveModal?.props.onSave({
       newTitle: savedSearch.title,
@@ -146,7 +146,7 @@ describe('onSaveSearch', () => {
         ...serviceMock,
         savedObjectsTagging: undefined,
       },
-      state: stateMock,
+      stateContainer: stateMock,
       updateAdHocDataViewId: jest.fn(),
     });
     expect(savedSearch.tags).toEqual(['tag1', 'tag2']);
@@ -154,7 +154,7 @@ describe('onSaveSearch', () => {
       .spyOn(persistSavedSearchUtils, 'persistSavedSearch')
       .mockImplementationOnce((newSavedSearch, _) => {
         savedSearch = newSavedSearch;
-        return Promise.resolve({ id: newSavedSearch.id });
+        return Promise.resolve(newSavedSearch.id);
       });
     saveModal?.props.onSave({
       newTitle: savedSearch.title,

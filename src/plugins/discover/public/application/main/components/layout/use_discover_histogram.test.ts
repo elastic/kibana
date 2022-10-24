@@ -19,8 +19,8 @@ import {
   DataMain$,
   DataTotalHits$,
   RecordRawType,
-} from '../../hooks/use_saved_search';
-import type { GetStateReturn } from '../../services/discover_state';
+} from '../../services/discover_data_state_container';
+import type { DiscoverStateContainer } from '../../services/discover_state';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
@@ -33,6 +33,7 @@ import {
 } from './use_discover_histogram';
 import { setTimeout } from 'timers/promises';
 import { calculateBounds } from '@kbn/data-plugin/public';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
 const mockData = dataPluginMock.createStartContract();
 
@@ -68,7 +69,13 @@ describe('useDiscoverHistogram', () => {
     isTimeBased = true,
     canVisualize = true,
     storage = new LocalStorageMock({}) as unknown as Storage,
-    stateContainer = {},
+    stateContainer = {
+      appState: {
+        getState: () => {
+          return { interval: 'auto', hideChart: false };
+        },
+      },
+    },
   }: {
     isPlainRecord?: boolean;
     isTimeBased?: boolean;
@@ -160,8 +167,7 @@ describe('useDiscoverHistogram', () => {
 
     const hook = renderHook(() => {
       return useDiscoverHistogram({
-        stateContainer: stateContainer as GetStateReturn,
-        state: { interval: 'auto', hideChart: false },
+        stateContainer: stateContainer as DiscoverStateContainer,
         savedSearchData$,
         dataView: dataViewWithTimefieldMock,
         savedSearch: savedSearchMock,
@@ -268,6 +274,7 @@ describe('useDiscoverHistogram', () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       storage.set = jest.fn();
       const stateContainer = {
+        ...getDiscoverStateMock({ isTimeBased: true }),
         setAppState: jest.fn(),
       };
       const { result } = await renderUseDiscoverHistogram({
@@ -283,11 +290,10 @@ describe('useDiscoverHistogram', () => {
 
     it('should update interval when onTimeIntervalChange is called', async () => {
       const stateContainer = {
+        ...getDiscoverStateMock({ isTimeBased: true }),
         setAppState: jest.fn(),
       };
-      const { result } = await renderUseDiscoverHistogram({
-        stateContainer,
-      });
+      const { result } = await renderUseDiscoverHistogram({ stateContainer });
       act(() => {
         result.current.onTimeIntervalChange('auto');
       });

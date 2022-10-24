@@ -24,7 +24,7 @@ export function fetchChart(
   interval: string,
   { abortController, data, inspectorAdapters, searchSessionId }: FetchDeps
 ): Promise<Result> {
-  const chartAggConfigs = updateSearchSource(searchSource, interval, data);
+  updateSearchSource(searchSource, interval, data);
 
   const executionContext = {
     description: 'fetch chart data and total hits',

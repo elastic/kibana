@@ -7,14 +7,22 @@
  */
 import { createBrowserHistory } from 'history';
 import { getDiscoverStateContainer } from '../application/main/services/discover_state';
-import { savedSearchMockWithTimeField, savedSearchMock } from './saved_search';
+import {
+  savedSearchMockWithTimeField,
+  savedSearchMock,
+  savedSearchMockWithTimeFieldNew,
+} from './saved_search';
 import { discoverServiceMock } from './services';
 
-export function getDiscoverStateMock({ isTimeBased = true }) {
+export function getDiscoverStateMock({ isTimeBased = true, isNew = false }) {
   const history = createBrowserHistory();
   history.push('/');
   return getDiscoverStateContainer({
-    savedSearch: isTimeBased ? savedSearchMockWithTimeField : savedSearchMock,
+    savedSearch: isNew
+      ? savedSearchMockWithTimeFieldNew
+      : isTimeBased
+      ? savedSearchMockWithTimeField
+      : savedSearchMock,
     services: discoverServiceMock,
     history,
   });

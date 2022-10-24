@@ -130,5 +130,8 @@ export const discoverServiceMock = {
     getRefreshInterval: jest.fn(() => ({
       pause: jest.fn(),
     })),
+    getTime: jest.fn(() => {
+      return { from: '2021-07-07T00:05:13.590', to: '2021-07-07T11:20:13.590' };
+    }),
   },
 } as unknown as DiscoverServices;
