@@ -100,8 +100,11 @@ export const IntegrationPreference = ({
   useEffect(() => {
     const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
     setPrereleaseIntegrationsEnabled(isEnabled);
-    onPrereleaseEnabledChange(isEnabled);
-  }, [settings?.item.prerelease_integrations_enabled, onPrereleaseEnabledChange]);
+  }, [settings?.item.prerelease_integrations_enabled]);
+
+  useEffect(() => {
+    onPrereleaseEnabledChange(prereleaseIntegrationsEnabled);
+  }, [onPrereleaseEnabledChange, prereleaseIntegrationsEnabled]);
 
   const updateSettings = useCallback(async (prerelease: boolean) => {
     const res = await sendPutSettings({
