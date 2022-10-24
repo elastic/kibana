@@ -43,6 +43,8 @@ export const RedirectAppLinks: FC<RedirectAppLinksComponentProps> = ({
   );
 
   return (
-    <div onClick={handleClick} ref={containerRef}>{children}</div>
+    <div onClick={handleClick} ref={containerRef}>
+      {children}
+    </div>
   );
 };
