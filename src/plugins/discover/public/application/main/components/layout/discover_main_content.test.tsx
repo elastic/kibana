@@ -25,7 +25,6 @@ import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle'
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverStateProvider } from '../../services/discover_state';
 import {
   UnifiedHistogramChartData,
   UnifiedHistogramLayout,
@@ -41,6 +40,7 @@ import {
   RecordRawType,
 } from '../../services/discover_data_state_container';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { DiscoverMainProvider } from '../../services/discover_state_react';
 
 jest.mock('@kbn/unified-histogram-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/unified-histogram-plugin/public');
@@ -103,14 +103,14 @@ const mountComponent = async ({
   isTimeBased = true,
   storage,
   savedSearch = savedSearchMock,
-  resetSavedSearch = jest.fn(),
+  undo = jest.fn(),
 }: {
   isPlainRecord?: boolean;
   hideChart?: boolean;
   isTimeBased?: boolean;
   storage?: Storage;
   savedSearch?: SavedSearch;
-  resetSavedSearch?: () => void;
+  undo?: () => void;
 } = {}) => {
   let services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
@@ -160,6 +160,9 @@ const mountComponent = async ({
     hideChart,
     columns: [],
   });
+  if (undo) {
+    stateContainer.savedSearchState.undo = undo;
+  }
 
   const props: DiscoverMainContentProps = {
     isPlainRecord,
@@ -182,9 +185,9 @@ const mountComponent = async ({
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>
       <KibanaThemeProvider theme$={coreTheme$}>
-        <DiscoverStateProvider value={stateContainer}>
+        <DiscoverMainProvider value={stateContainer}>
           <DiscoverMainContent {...props} />
-        </DiscoverStateProvider>
+        </DiscoverMainProvider>
       </KibanaThemeProvider>
     </KibanaContextProvider>
   );
@@ -271,11 +274,12 @@ describe('Discover main content component', () => {
       expect(findTestSubject(component, 'resetSavedSearch').length).toBe(0);
     });
 
-    it('should call resetSavedSearch when clicked', async () => {
-      const resetSavedSearch = jest.fn();
-      const component = await mountComponent({ resetSavedSearch });
+    it('should call savedSearch.undo when clicked', async () => {
+      const undo = jest.fn();
+
+      const component = await mountComponent({ undo });
       findTestSubject(component, 'resetSavedSearch').simulate('click');
-      expect(resetSavedSearch).toHaveBeenCalled();
+      expect(undo).toHaveBeenCalled();
     });
   });
 });
