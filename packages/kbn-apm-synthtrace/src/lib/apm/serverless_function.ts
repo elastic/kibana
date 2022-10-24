@@ -16,6 +16,7 @@ export class ServerlessFunction extends Entity<ApmFields> {
       ...this.fields,
       ['service.node.name']: instanceName,
       'host.name': instanceName,
+      'host.architecture': 'arm',
       ...apmFields,
     });
   }

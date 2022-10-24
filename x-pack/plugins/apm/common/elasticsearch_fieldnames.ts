@@ -123,6 +123,7 @@ export const HOST = 'host';
 export const HOST_HOSTNAME = 'host.hostname'; // Do not use. Please use `HOST_NAME` instead.
 export const HOST_NAME = 'host.name';
 export const HOST_OS_PLATFORM = 'host.os.platform';
+export const HOST_ARCHITECTURE = 'host.architecture';
 export const CONTAINER_ID = 'container.id';
 export const CONTAINER = 'container';
 export const CONTAINER_IMAGE = 'container.image.name';
