@@ -101,7 +101,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
         metricStateOptions: {
           titlePosition: 'bottom',
           colorMode: 'Labels',
-          palette: getColorPallet('danger'),
+          palette: getColorPalette('danger'),
         },
         columnType: FORMULA_COLUMN,
         formula: 'unique_count(state.id, kql=\'monitor.status: "down"\')',
@@ -124,7 +124,7 @@ export function getSyntheticsSingleMetricConfig({ dataView }: ConfigProps): Seri
   };
 }
 
-const getColorPallet = (color: 'danger' | 'warning' | 'success'): LegacyMetricState['palette'] => {
+const getColorPalette = (color: 'danger' | 'warning' | 'success'): LegacyMetricState['palette'] => {
   const statusPalette = euiPaletteForStatus(5);
 
   // TODO: add more colors
