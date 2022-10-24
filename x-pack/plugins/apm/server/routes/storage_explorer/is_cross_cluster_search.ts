@@ -6,15 +6,9 @@
  */
 
 import { Setup } from '../../lib/helpers/setup_request';
+import { getApmIndicesCombined } from './indices_stats_helpers';
 
 export function isCrossClusterSearch(setup: Setup) {
-  const {
-    indices: { transaction, span, metric, error },
-  } = setup;
-
-  const indicesIncludeRemoteCluster = [transaction, span, metric, error].some(
-    (indices) => indices.includes(':')
-  );
-
-  return indicesIncludeRemoteCluster;
+  // Check if a remote cluster is set in APM indices
+  return getApmIndicesCombined(setup).includes(':');
 }

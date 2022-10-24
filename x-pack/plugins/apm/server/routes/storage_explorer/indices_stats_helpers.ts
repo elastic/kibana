@@ -98,7 +98,7 @@ export async function getIndicesInfo({
   return indicesInfo;
 }
 
-function getApmIndicesCombined(setup: Setup) {
+export function getApmIndicesCombined(setup: Setup) {
   const {
     indices: { transaction, span, metric, error },
   } = setup;
