@@ -90,7 +90,7 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
       memory:
         hit._source.beats_stats?.metrics?.beat?.memstats?.memory_alloc ??
         hit._source.beat?.stats?.memstats?.memory?.alloc,
-      cgroup_memory: hit._source.beats_stats?.metrics?.beat?.cgroup?.memory.mem.usage.bytes,
+      cgroup_memory: hit._source.beats_stats?.metrics?.beat?.cgroup?.mem.usage.bytes,
       version: stats?.beat?.version,
       time_of_last_event: hit._source.beats_stats?.timestamp ?? hit._source['@timestamp'],
     });
