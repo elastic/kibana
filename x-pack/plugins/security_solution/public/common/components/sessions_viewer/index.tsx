@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { EVENT_ACTION } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { ENTRY_SESSION_ENTITY_ID_PROPERTY, EventAction } from '@kbn/session-view-plugin/public';
@@ -19,8 +20,9 @@ import * as i18n from './translations';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { useLicense } from '../../hooks/use_license';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TableId } from '../../../../common/types/timeline';
 export const TEST_ID = 'security_solution:sessions_viewer:sessions_view';
+import { dataTableActions } from '../../store/data_table';
 
 export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
   query: {
@@ -59,7 +61,7 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
 };
 
 const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
-  timelineId,
+  tableId,
   endDate,
   entityType = 'sessions',
   pageFilters,
@@ -93,7 +95,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   );
   const isEnterprisePlus = useLicense().isEnterprise();
   const ACTION_BUTTON_COUNT =
-    isEnterprisePlus || timelineId === TimelineId.kubernetesPageSessions ? 5 : 4;
+    isEnterprisePlus || tableId === TableId.kubernetesPageSessions ? 5 : 4;
   const leadingControlColumns = useMemo(
     () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
     [ACTION_BUTTON_COUNT]
@@ -102,6 +104,17 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   const unit = (c: number) =>
     c > 1 ? i18n.TOTAL_COUNT_OF_SESSIONS : i18n.SINGLE_COUNT_OF_SESSIONS;
 
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(
+      dataTableActions.initializeTGridSettings({
+        id: tableId,
+        title: i18n.SESSIONS_TITLE,
+      })
+    );
+  }, [dispatch, tableId]);
+
   return (
     <div data-test-subj={TEST_ID}>
       <StatefulEventsViewer
@@ -109,7 +122,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
         defaultModel={getSessionsDefaultModel(columns, defaultColumns)}
         end={endDate}
         entityType={entityType}
-        id={timelineId}
+        tableId={tableId}
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
