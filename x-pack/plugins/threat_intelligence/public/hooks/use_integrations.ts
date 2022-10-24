@@ -44,7 +44,7 @@ export const useIntegrations = () => {
 
   const queryClient = useQueryClient();
 
-  // cancel integrations call if it takes too long (we don't want the UI
+  // cancel slow integrations call to unblock the UI
   setTimeout(() => queryClient.cancelQueries(queryKey), INTEGRATIONS_CALL_TIMEOUT);
 
   return query;
