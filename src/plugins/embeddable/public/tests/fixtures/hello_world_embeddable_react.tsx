@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
-export * from './hello_world_embeddable';
-export * from './hello_world_embeddable_factory';
-export * from './hello_world_embeddable_react';
+import React from 'react';
+import { HelloWorldEmbeddable } from './hello_world_embeddable';
+
+export class HelloWorldEmbeddableReact extends HelloWorldEmbeddable {
+  public render() {
+    return <div data-test-subj="helloWorldEmbeddable">HELLO WORLD!</div>;
+  }
+}
