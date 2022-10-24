@@ -633,7 +633,7 @@ export const metrics = {
   }),
 
   apm_cgroup_memory_limit: new ApmMetric({
-    field: 'beats_stats.metrics.beat.cgroup.memory.mem.limit.bytes',
+    field: 'beats_stats.metrics.beat.cgroup.mem.limit.bytes',
     label: i18n.translate('xpack.monitoring.metrics.apmInstance.memory.memoryLimitLabel', {
       defaultMessage: 'Memory Limit',
     }),

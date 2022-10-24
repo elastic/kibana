@@ -597,7 +597,7 @@ Object {
     "derivativeNormalizedUnits": true,
     "description": "Memory limit of the container",
     "docType": undefined,
-    "field": "beats_stats.metrics.beat.cgroup.memory.mem.limit.bytes",
+    "field": "beats_stats.metrics.beat.cgroup.mem.limit.bytes",
     "fieldSource": undefined,
     "format": "0,0.0 b",
     "getDateHistogramSubAggs": undefined,
