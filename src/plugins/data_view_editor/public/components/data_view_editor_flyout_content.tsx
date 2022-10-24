@@ -335,7 +335,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             })}
           >
             {i18n.translate('indexPatternEditor.goToManagementPage', {
-              defaultMessage: 'Edit in Stack Management',
+              defaultMessage: 'Manage settings and view field details',
             })}
           </EuiLink>
         )}
