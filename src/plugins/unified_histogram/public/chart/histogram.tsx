@@ -78,10 +78,13 @@ export function Histogram({
   const { euiTheme } = useEuiTheme();
   const chartCss = css`
     flex-grow: 1;
-    padding: 0;
 
     & > div {
       height: 100%;
+    }
+
+    & .echLegend .echLegendList {
+      padding-right: ${euiTheme.size.s};
     }
   `;
 

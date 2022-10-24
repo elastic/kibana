@@ -14,6 +14,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataTableRecord } from '../../../../types';
 import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_mode_toggle';
@@ -88,10 +89,12 @@ export const DiscoverMainContent = ({
     topPanelHeight,
     hits,
     chart,
+    breakdown,
     onEditVisualization,
     onTopPanelHeightChange,
     onChartHiddenChange,
     onTimeIntervalChange,
+    onBreakdownFieldChange,
   } = useDiscoverHistogram({
     stateContainer,
     state,
@@ -102,6 +105,10 @@ export const DiscoverMainContent = ({
     isPlainRecord,
   });
 
+  const resetSearchButtonWrapper = css`
+    overflow: hidden;
+  `;
+
   return (
     <UnifiedHistogramLayout
       className="dscPageContent__inner"
@@ -109,12 +116,12 @@ export const DiscoverMainContent = ({
       dataView={dataView}
       hits={hits}
       chart={chart}
-      breakdown={{ field: dataView.fields.getByName('DestWeather') }}
+      breakdown={breakdown}
       resizeRef={resizeRef}
       topPanelHeight={topPanelHeight}
       appendHitsCounter={
         savedSearch?.id ? (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} css={resetSearchButtonWrapper}>
             <EuiButtonEmpty
               iconType="refresh"
               data-test-subj="resetSavedSearch"
@@ -136,6 +143,7 @@ export const DiscoverMainContent = ({
       onEditVisualization={onEditVisualization}
       onChartHiddenChange={onChartHiddenChange}
       onTimeIntervalChange={onTimeIntervalChange}
+      onBreakdownFieldChange={onBreakdownFieldChange}
     >
       <EuiFlexGroup
         className="eui-fullHeight"

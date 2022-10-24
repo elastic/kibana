@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import {
   getVisualizeInformation,
@@ -23,6 +23,7 @@ import type { AppState, GetStateReturn } from '../../services/discover_state';
 
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramHeight';
+export const HISTOGRAM_BREAKDOWN_FIELD_KEY = 'discover:histogramBreakdownField';
 
 export const useDiscoverHistogram = ({
   stateContainer,
@@ -170,13 +171,37 @@ export const useDiscoverHistogram = ({
     ]
   );
 
+  /**
+   * Breakdown
+   */
+
+  const [field, setField] = useState(() => {
+    const fieldName = storage.get(HISTOGRAM_BREAKDOWN_FIELD_KEY);
+    return dataView.getFieldByName(fieldName);
+  });
+
+  const onBreakdownFieldChange = useCallback(
+    (breakdownField: DataViewField | undefined) => {
+      storage.set(HISTOGRAM_BREAKDOWN_FIELD_KEY, breakdownField?.name);
+      setField(breakdownField);
+    },
+    [storage]
+  );
+
+  const breakdown = useMemo(
+    () => (isPlainRecord || !isTimeBased ? undefined : { field }),
+    [field, isPlainRecord, isTimeBased]
+  );
+
   return {
     topPanelHeight,
     hits,
     chart,
+    breakdown,
     onEditVisualization: canVisualize ? onEditVisualization : undefined,
     onTopPanelHeightChange,
     onChartHiddenChange,
     onTimeIntervalChange,
+    onBreakdownFieldChange,
   };
 };

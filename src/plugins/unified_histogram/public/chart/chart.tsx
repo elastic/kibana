@@ -10,8 +10,6 @@ import type { ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButtonIcon,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
 import { useChartPanels } from './use_chart_panels';
@@ -32,6 +30,7 @@ import type {
   UnifiedHistogramHitsContext,
   UnifiedHistogramServices,
 } from '../types';
+import { BreakdownFieldSelector } from '../breakdown/breakdown_field_selector';
 
 export interface ChartProps {
   className?: string;
@@ -46,6 +45,7 @@ export interface ChartProps {
   onResetChartHeight?: () => void;
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
+  onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
 }
 
 const HistogramMemoized = memo(Histogram);
@@ -63,6 +63,7 @@ export function Chart({
   onResetChartHeight,
   onChartHiddenChange,
   onTimeIntervalChange,
+  onBreakdownFieldChange,
 }: ChartProps) {
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
 
@@ -99,9 +100,12 @@ export function Chart({
     onResetChartHeight,
   });
 
+  const chartVisible = chart && !chart.hidden;
+
   const { euiTheme } = useEuiTheme();
   const resultCountCss = css`
-    padding: ${euiTheme.size.s} ${euiTheme.size.s} 0 ${euiTheme.size.s};
+    padding: ${euiTheme.size.s} ${euiTheme.size.s} ${chartVisible ? 0 : euiTheme.size.s}
+      ${euiTheme.size.s};
     min-height: ${euiTheme.base * 2.5}px;
   `;
   const resultCountTitleCss = css`
@@ -126,16 +130,18 @@ export function Chart({
       stroke-width: 1;
     }
   `;
-
-  const options = dataView.fields
-    .filter((field) => field.aggregatable)
-    .map((field) => ({ label: field.name }));
-
-  const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>();
-
-  const onChange = (newOptions: EuiComboBoxOptionOption[]) => {
-    setSelectedOptions(newOptions);
-  };
+  const breakdownFieldSelectorGroupCss = css`
+    width: 100%;
+  `;
+  const breakdownFieldSelectorItemCss = css`
+    align-items: flex-end;
+    padding-left: ${euiTheme.size.s};
+  `;
+  const chartToolButtonCss = css`
+    display: flex;
+    justify-content: center;
+    padding-left: ${euiTheme.size.s};
+  `;
 
   return (
     <EuiFlexGroup
@@ -155,23 +161,25 @@ export function Chart({
             {hits && <HitsCounter hits={hits} append={appendHitsCounter} />}
           </EuiFlexItem>
           {chart && (
-            <EuiFlexItem grow={false} css={resultCountToggleCss}>
-              <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiComboBox
-                    prepend="Breakdown by"
-                    singleSelection={{ asPlainText: true }}
-                    options={options}
-                    selectedOptions={selectedOptions}
-                    onChange={onChange}
-                    compressed
-                    css={css`
-                      width: ${euiTheme.base * 22}px;
-                    `}
-                  />
-                </EuiFlexItem>
+            <EuiFlexItem css={resultCountToggleCss}>
+              <EuiFlexGroup
+                direction="row"
+                gutterSize="none"
+                responsive={false}
+                justifyContent="flexEnd"
+                css={breakdownFieldSelectorGroupCss}
+              >
+                {chartVisible && (
+                  <EuiFlexItem css={breakdownFieldSelectorItemCss}>
+                    <BreakdownFieldSelector
+                      dataView={dataView}
+                      breakdown={breakdown}
+                      onBreakdownFieldChange={onBreakdownFieldChange}
+                    />
+                  </EuiFlexItem>
+                )}
                 {onEditVisualization && (
-                  <EuiFlexItem grow={false}>
+                  <EuiFlexItem grow={false} css={chartToolButtonCss}>
                     <EuiToolTip
                       content={i18n.translate('unifiedHistogram.editVisualizationButton', {
                         defaultMessage: 'Edit visualization',
@@ -189,7 +197,7 @@ export function Chart({
                     </EuiToolTip>
                   </EuiFlexItem>
                 )}
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} css={chartToolButtonCss}>
                   <EuiPopover
                     id="unifiedHistogramChartOptions"
                     button={
@@ -222,7 +230,7 @@ export function Chart({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {chart && !chart.hidden && (
+      {chartVisible && (
         <EuiFlexItem>
           <section
             ref={(element) => (chartRef.current.element = element)}
@@ -236,9 +244,7 @@ export function Chart({
               services={services}
               dataView={dataView}
               chart={chart}
-              breakdown={{
-                field: dataView.fields.find((field) => field.name === selectedOptions?.[0]?.label),
-              }}
+              breakdown={breakdown}
             />
           </section>
           {appendHistogram}

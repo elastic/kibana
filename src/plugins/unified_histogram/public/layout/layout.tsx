@@ -11,7 +11,7 @@ import type { PropsWithChildren, ReactElement, RefObject } from 'react';
 import React, { useMemo } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { Chart } from '../chart';
 import { Panels, PANELS_MODE } from '../panels';
 import type {
@@ -65,6 +65,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Callback to update the time interval -- should set {@link UnifiedHistogramChartContext.timeInterval} to timeInterval
    */
   onTimeIntervalChange?: (timeInterval: string) => void;
+  /**
+   * Callback to update the breakdown field -- should set {@link UnifiedHistogramBreakdownContext.field} to breakdownField
+   */
+  onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
 }
 
 export const UnifiedHistogramLayout = ({
@@ -81,6 +85,7 @@ export const UnifiedHistogramLayout = ({
   onEditVisualization,
   onChartHiddenChange,
   onTimeIntervalChange,
+  onBreakdownFieldChange,
   children,
 }: UnifiedHistogramLayoutProps) => {
   const topPanelNode = useMemo(
@@ -97,7 +102,7 @@ export const UnifiedHistogramLayout = ({
   const showFixedPanels = isMobile || !chart || chart.hidden;
   const { euiTheme } = useEuiTheme();
   const defaultTopPanelHeight = euiTheme.base * 12;
-  const minTopPanelHeight = euiTheme.base * 8;
+  const minTopPanelHeight = euiTheme.base * 11;
   const minMainPanelHeight = euiTheme.base * 10;
 
   const chartClassName =
@@ -138,6 +143,7 @@ export const UnifiedHistogramLayout = ({
           onResetChartHeight={onResetChartHeight}
           onChartHiddenChange={onChartHiddenChange}
           onTimeIntervalChange={onTimeIntervalChange}
+          onBreakdownFieldChange={onBreakdownFieldChange}
         />
       </InPortal>
       <InPortal node={mainPanelNode}>{children}</InPortal>
