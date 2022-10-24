@@ -20,7 +20,7 @@ export type StepConfig = Pick<
   EuiTourStepProps,
   'step' | 'content' | 'anchorPosition' | 'title' | 'initialFocus' | 'anchor'
 > & {
-  anchor: ElementTarget;
+  anchor?: ElementTarget;
   dataTestSubj: string;
   hideNextButton?: boolean;
   imageConfig?: {
@@ -53,7 +53,6 @@ const alertsCasesConfig: StepConfig[] = [
           'To help you practice triaging alerts, we enabled a rule to create your first alert.',
       }
     ),
-    anchor: `[tour-step="${getTourAnchor(1, SecurityStepId.alertsCases)}"]`,
     anchorPosition: 'downCenter',
     dataTestSubj: getTourAnchor(1, SecurityStepId.alertsCases),
   },
@@ -70,7 +69,6 @@ const alertsCasesConfig: StepConfig[] = [
           "Some information is provided at-a-glance in the table, but for full details, you'll want to open the alert.",
       }
     ),
-    anchor: `[tour-step="${getTourAnchor(2, SecurityStepId.alertsCases)}"]`,
     anchorPosition: 'rightUp',
     initialFocus: `[tour-step="${getTourAnchor(2, SecurityStepId.alertsCases)}"]`,
     dataTestSubj: getTourAnchor(2, SecurityStepId.alertsCases),
@@ -92,7 +90,8 @@ const alertsCasesConfig: StepConfig[] = [
           'Learn more about alerts by checking out all the information available on each tab.',
       }
     ),
-    anchor: `[tour-step="${getTourAnchor(3, SecurityStepId.alertsCases)}"]`,
+    // needs to use anchor to properly place tour step
+    anchor: `[tour-step="${getTourAnchor(3, SecurityStepId.alertsCases)}"] .euiTabs`,
     anchorPosition: 'leftUp',
     dataTestSubj: getTourAnchor(3, SecurityStepId.alertsCases),
   },
@@ -105,7 +104,6 @@ const alertsCasesConfig: StepConfig[] = [
     content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.addToCase.tourContent', {
       defaultMessage: 'From the Take action menu, add the alert to a new case.',
     }),
-    anchor: `[tour-step="${getTourAnchor(4, SecurityStepId.alertsCases)}"]`,
     anchorPosition: 'upRight',
     dataTestSubj: getTourAnchor(4, SecurityStepId.alertsCases),
     hideNextButton: true,

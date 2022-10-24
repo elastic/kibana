@@ -12,14 +12,14 @@ import { EuiButton, EuiImage, EuiSpacer, EuiText, EuiTourStep } from '@elastic/e
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useTourContext } from './tour';
-import { securityTourConfig, SecurityStepId, getTourAnchor } from './tour_config';
-import { Delayed } from './helpers';
+import { securityTourConfig, SecurityStepId } from './tour_config';
 interface SecurityTourStep {
+  children?: React.ReactElement;
   step: number;
   stepId: SecurityStepId;
 }
 
-export const SecurityTourStep = ({ step, stepId }: SecurityTourStep) => {
+export const SecurityTourStep = ({ children, step, stepId }: SecurityTourStep) => {
   const { activeStep, incrementStep, isTourShown } = useTourContext();
   const tourStep = useMemo(
     () => securityTourConfig[stepId].find((config) => config.step === step),
@@ -30,10 +30,10 @@ export const SecurityTourStep = ({ step, stepId }: SecurityTourStep) => {
   // we are also managing the context on the siem end in the background
   const overrideContext = step === 5 && stepId === SecurityStepId.alertsCases;
   if (tourStep == null || ((step !== activeStep || !isTourShown(stepId)) && !overrideContext)) {
-    return null;
+    return children ? children : null;
   }
 
-  const { content, imageConfig, dataTestSubj, hideNextButton = false, ...rest } = tourStep;
+  const { anchor, content, imageConfig, dataTestSubj, hideNextButton = false, ...rest } = tourStep;
 
   const footerAction: EuiTourStepProps['footerAction'] = !hideNextButton ? (
     <EuiButton
@@ -52,63 +52,65 @@ export const SecurityTourStep = ({ step, stepId }: SecurityTourStep) => {
       {/* Passing empty element instead of undefined. If undefined "Skip tour" button is shown, we do not want that*/}
     </>
   );
-  return (
-    <EuiTourStep
-      {...rest}
-      content={
-        <>
-          <EuiText size="xs">
-            <p>{content}</p>
-          </EuiText>
-          {imageConfig && (
-            <>
-              <EuiSpacer size="m" />
-              <EuiImage alt={imageConfig.altText} src={imageConfig.src} size="fullWidth" />
-            </>
-          )}
-        </>
-      }
-      footerAction={footerAction}
-      // we would not have mounted this component if it was not open
-      isStepOpen
-      // guided onboarding does not allow skipping tour through the steps
-      onFinish={() => null}
-      stepsTotal={securityTourConfig[stepId].length}
-      // TODO: re-add panelProps
-      // EUI has a bug https://github.com/elastic/eui/issues/6297
-      // where any panelProps overwrite their panelProps,
-      // so we lose cool things like the EuiBeacon
-      // panelProps={{
-      //   'data-test-subj': dataTestSubj,
-      // }}
-    />
+
+  const commonProps = {
+    ...rest,
+    content: (
+      <>
+        <EuiText size="xs">
+          <p>{content}</p>
+        </EuiText>
+        {imageConfig && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiImage alt={imageConfig.altText} src={imageConfig.src} size="fullWidth" />
+          </>
+        )}
+      </>
+    ),
+    footerAction,
+    // we would not have mounted this component if it was not open
+    isStepOpen: true,
+    // guided onboarding does not allow skipping tour through the steps
+    onFinish: () => null,
+    stepsTotal: securityTourConfig[stepId].length,
+    // TODO: re-add panelProps
+    // EUI has a bug https://github.com/elastic/eui/issues/6297
+    // where any panelProps overwrite their panelProps,
+    // so we lose cool things like the EuiBeacon
+    // panelProps: {
+    //   'data-test-subj': dataTestSubj,
+    // }
+  };
+
+  // tour step either needs children or an anchor element
+  //  see type EuiTourStepAnchorProps
+  return anchor != null ? (
+    <>
+      <EuiTourStep {...commonProps} anchor={anchor} />
+      <>{children}</>
+    </>
+  ) : children != null ? (
+    <EuiTourStep {...commonProps}>{children}</EuiTourStep>
+  ) : (
+    <>{/* we should never be here, see type EuiTourStepAnchorProps */ children}</>
   );
 };
 
 interface GuidedOnboardingTourStep extends SecurityTourStep {
-  // if true, this component renders the tour step only (not the anchor)
-  altAnchor?: boolean;
-  children: React.ReactNode;
-  isTourAnchor: boolean;
+  // can be false if the anchor is an iterative element
+  // do not use this as an "is tour active" check, the SecurityTourStep checks that anyway
+  isTourAnchor?: boolean;
 }
 
 // wraps tour anchor component
 // and gives the tour step itself a place to mount once it is active
 // mounts the tour step with a delay to ensure the anchor will render first
 export const GuidedOnboardingTourStep = ({
-  altAnchor = false,
   children,
-  isTourAnchor,
-  step,
-  stepId,
+  // can be false if the anchor is an iterative element
+  // do not use this as an "is tour active" check, the SecurityTourStep checks that anyway
+  isTourAnchor = true,
+  ...props
 }: GuidedOnboardingTourStep) =>
-  isTourAnchor ? (
-    <span tour-step={altAnchor ? '' : getTourAnchor(step, stepId)}>
-      <Delayed>
-        <SecurityTourStep step={step} stepId={stepId} />
-      </Delayed>
-      {children}
-    </span>
-  ) : (
-    <>{children}</>
-  );
+  isTourAnchor ? <SecurityTourStep {...props}>{children}</SecurityTourStep> : <>{children}</>;

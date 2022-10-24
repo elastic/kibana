@@ -22,7 +22,6 @@ import { isEmpty } from 'lodash';
 
 import { GuidedOnboardingTourStep } from '../guided_onboarding/tour_step';
 import { isDetectionsAlertsTable } from '../top_n/helpers';
-import { useTourContext } from '../guided_onboarding';
 import { getTourAnchor, SecurityStepId } from '../guided_onboarding/tour_config';
 import type { AlertRawEventData } from './osquery_tab';
 import { useOsqueryTab } from './osquery_tab';
@@ -182,42 +181,24 @@ const EventDetailsComponent: React.FC<Props> = ({
         : null,
     [detailsEcsData]
   );
-  const { isTourShown } = useTourContext();
 
-  const isTourAnchor = useMemo(
-    () => isDetectionsAlertsTable(scopeId) && isTourShown(SecurityStepId.alertsCases),
-    [isTourShown, scopeId]
-  );
+  const isTourAnchor = useMemo(() => isDetectionsAlertsTable(scopeId), [scopeId]);
 
   const showThreatSummary = useMemo(() => {
     const hasEnrichments = enrichmentCount > 0;
     const hasRiskInfoWithLicense = isLicenseValid && (hostRisk || userRisk);
     return hasEnrichments || hasRiskInfoWithLicense;
   }, [enrichmentCount, hostRisk, isLicenseValid, userRisk]);
-  const TourStep = useCallback(
-    () => (
-      <GuidedOnboardingTourStep
-        altAnchor
-        isTourAnchor={isTourAnchor}
-        step={3}
-        stepId={SecurityStepId.alertsCases}
-      >
-        <></>
-      </GuidedOnboardingTourStep>
-    ),
-    [isTourAnchor]
-  );
+
   const summaryTab: EventViewTab | undefined = useMemo(
     () =>
       isAlert
         ? {
-            ...(isTourAnchor ? { 'tour-step': getTourAnchor(3, SecurityStepId.alertsCases) } : {}),
             id: EventsViewType.summaryView,
             name: i18n.OVERVIEW,
             'data-test-subj': 'overviewTab',
             content: (
               <>
-                <TourStep />
                 <EuiSpacer size="m" />
                 <Overview
                   browserFields={browserFields}
@@ -294,8 +275,6 @@ const EventDetailsComponent: React.FC<Props> = ({
         : undefined,
     [
       isAlert,
-      isTourAnchor,
-      TourStep,
       browserFields,
       scopeId,
       data,
@@ -416,18 +395,12 @@ const EventDetailsComponent: React.FC<Props> = ({
     rawEventData: rawEventData as AlertRawEventData,
   });
 
-  // intervention for not being able to put the actual tour step tag in ourselves
-  const possibleTourStepTag = useMemo(
-    () => (isTourAnchor ? { 'tour-step': getTourAnchor(3, SecurityStepId.alertsCases) } : {}),
-    [isTourAnchor]
-  );
-
   const tabs = useMemo(
     () =>
-      [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab]
-        .filter((tab: EventViewTab | undefined): tab is EventViewTab => !!tab)
-        .map((tab) => ({ ...tab, ...possibleTourStepTag })),
-    [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab, possibleTourStepTag]
+      [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab].filter(
+        (tab: EventViewTab | undefined): tab is EventViewTab => !!tab
+      ),
+    [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab]
   );
 
   const selectedTab = useMemo(
@@ -436,13 +409,20 @@ const EventDetailsComponent: React.FC<Props> = ({
   );
 
   return (
-    <StyledEuiTabbedContent
-      data-test-subj="eventDetails"
-      tabs={tabs}
-      selectedTab={selectedTab}
-      onTabClick={handleTabClick}
-      key="event-summary-tabs"
-    />
+    <GuidedOnboardingTourStep
+      isTourAnchor={isTourAnchor}
+      step={3}
+      stepId={SecurityStepId.alertsCases}
+    >
+      <StyledEuiTabbedContent
+        {...(isTourAnchor ? { 'tour-step': getTourAnchor(3, SecurityStepId.alertsCases) } : {})}
+        data-test-subj="eventDetails"
+        tabs={tabs}
+        selectedTab={selectedTab}
+        onTabClick={handleTabClick}
+        key="event-summary-tabs"
+      />
+    </GuidedOnboardingTourStep>
   );
 };
 EventDetailsComponent.displayName = 'EventDetailsComponent';

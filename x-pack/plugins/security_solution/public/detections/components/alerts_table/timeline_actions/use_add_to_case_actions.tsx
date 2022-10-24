@@ -82,9 +82,9 @@ export const useAddToCaseActions = ({
       ...(isTourShown(SecurityStepId.alertsCases) && activeStep === 4
         ? {
             optionalContent: (
-              <GuidedOnboardingTourStep isTourAnchor step={5} stepId={SecurityStepId.alertsCases}>
-                <p />
-              </GuidedOnboardingTourStep>
+              // isTourAnchor=true no matter what in order to
+              // force active guide step outside of security solution (cases)
+              <GuidedOnboardingTourStep isTourAnchor step={5} stepId={SecurityStepId.alertsCases} />
             ),
           }
         : {}),
