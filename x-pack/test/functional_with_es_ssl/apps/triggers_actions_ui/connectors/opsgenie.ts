@@ -163,9 +163,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('should default to the create alert action', async () => {
-        expect(await testSubjects.getAttribute('opsgenie-subActionSelect', 'value')).to.eql(
-          'createAlert'
-        );
+        await testSubjects.existOrFail('messageInput');
 
         expect(await testSubjects.getAttribute('aliasInput', 'value')).to.eql(defaultAlias);
       });
@@ -174,33 +172,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('addNewActionConnectorActionGroup-0');
         await testSubjects.click('addNewActionConnectorActionGroup-0-option-recovered');
 
-        expect(await testSubjects.getAttribute('opsgenie-subActionSelect', 'value')).to.eql(
-          'closeAlert'
-        );
         expect(await testSubjects.getAttribute('aliasInput', 'value')).to.eql(defaultAlias);
-      });
-
-      it('should preserve the alias when switching between create and close alert actions', async () => {
-        await testSubjects.setValue('aliasInput', 'new alias');
-        await testSubjects.selectValue('opsgenie-subActionSelect', 'closeAlert');
-
-        expect(await testSubjects.getAttribute('opsgenie-subActionSelect', 'value')).to.be(
-          'closeAlert'
-        );
-        expect(await testSubjects.getAttribute('aliasInput', 'value')).to.be('new alias');
-      });
-
-      it('should not preserve the message when switching to close alert and back to create alert', async () => {
-        await testSubjects.setValue('messageInput', 'a message');
-        await testSubjects.selectValue('opsgenie-subActionSelect', 'closeAlert');
-
+        await testSubjects.existOrFail('noteTextArea');
         await testSubjects.missingOrFail('messageInput');
-        await retry.waitFor('message input to be displayed', async () => {
-          await testSubjects.selectValue('opsgenie-subActionSelect', 'createAlert');
-          return await testSubjects.exists('messageInput');
-        });
-
-        expect(await testSubjects.getAttribute('messageInput', 'value')).to.be('');
       });
 
       it('should not preserve the alias when switching run when to recover', async () => {

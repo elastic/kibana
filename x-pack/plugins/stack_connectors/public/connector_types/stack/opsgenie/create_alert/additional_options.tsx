@@ -13,9 +13,7 @@ import {
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
 import * as i18n from '../translations';
-import { Tags } from './tags';
 import { CreateAlertProps } from '.';
-import { Priority } from './priority';
 
 type AdditionalOptionsProps = Pick<
   CreateAlertProps,
@@ -30,15 +28,6 @@ const AdditionalOptionsComponent: React.FC<AdditionalOptionsProps> = ({
 }) => {
   return (
     <>
-      <EuiSpacer size={'m'} />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <Tags values={subActionParams?.tags ?? []} onChange={editOptionalSubAction} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <Priority priority={subActionParams?.priority} onChange={editOptionalSubAction} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <EuiSpacer size={'m'} />
       <EuiFlexGroup>
         <EuiFlexItem>

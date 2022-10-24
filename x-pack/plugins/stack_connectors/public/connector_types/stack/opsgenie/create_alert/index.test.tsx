@@ -58,6 +58,8 @@ describe('CreateAlert', () => {
 
     expect(screen.getByTestId('opsgenie-message-row')).toBeInTheDocument();
     expect(screen.getByTestId('opsgenie-alias-row')).toBeInTheDocument();
+    expect(screen.getByTestId('opsgenie-tags')).toBeInTheDocument();
+    expect(screen.getByTestId('opsgenie-prioritySelect')).toBeInTheDocument();
     expect(screen.getByText('Description')).toBeInTheDocument();
   });
 
@@ -68,6 +70,7 @@ describe('CreateAlert', () => {
           ...options,
           subActionParams: {
             message: 'a message',
+            tags: ['super tag'],
             alias: 'an alias',
             description: 'a description',
           },
@@ -75,6 +78,7 @@ describe('CreateAlert', () => {
       />
     );
 
+    expect(within(screen.getByTestId('opsgenie-tags')).getByText('super tag')).toBeInTheDocument();
     expect(
       within(screen.getByTestId('opsgenie-message-row')).getByDisplayValue('a message')
     ).toBeInTheDocument();

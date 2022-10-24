@@ -11,7 +11,7 @@ import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import type {
   OpsgenieActionParams,
   OpsgenieCreateAlertParams,
@@ -21,6 +21,8 @@ import { EditActionCallback } from '../types';
 import { DisplayMoreOptions } from '../display_more_options';
 import { AdditionalOptions } from './additional_options';
 import { JsonEditor } from './json_editor';
+import { Tags } from './tags';
+import { Priority } from './priority';
 
 type FormViewProps = Omit<CreateAlertProps, 'editAction'>;
 
@@ -55,6 +57,15 @@ const FormView: React.FC<FormViewProps> = ({
           errors={errors['subActionParams.message'] as string[]}
         />
       </EuiFormRow>
+      <EuiSpacer size={'m'} />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <Tags values={subActionParams?.tags ?? []} onChange={editOptionalSubAction} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <Priority priority={subActionParams?.priority} onChange={editOptionalSubAction} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <TextAreaWithMessageVariables
         index={index}
         editAction={editOptionalSubAction}

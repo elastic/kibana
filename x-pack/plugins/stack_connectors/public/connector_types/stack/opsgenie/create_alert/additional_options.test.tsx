@@ -22,8 +22,6 @@ describe('AdditionalOptions', () => {
   it('renders the component with empty states', () => {
     render(<AdditionalOptions {...options} />);
 
-    expect(screen.getByTestId('opsgenie-tags')).toBeInTheDocument();
-    expect(screen.getByTestId('opsgenie-prioritySelect')).toBeInTheDocument();
     expect(screen.getByTestId('opsgenie-entity-row')).toBeInTheDocument();
     expect(screen.getByTestId('opsgenie-source-row')).toBeInTheDocument();
     expect(screen.getByTestId('opsgenie-user-row')).toBeInTheDocument();
@@ -49,7 +47,6 @@ describe('AdditionalOptions', () => {
     expect(
       within(screen.getByTestId('opsgenie-entity-row')).getByDisplayValue('entity')
     ).toBeInTheDocument();
-    expect(within(screen.getByTestId('opsgenie-tags')).getByText('super tag')).toBeInTheDocument();
     expect(
       within(screen.getByTestId('opsgenie-entity-row')).getByDisplayValue('entity')
     ).toBeInTheDocument();
