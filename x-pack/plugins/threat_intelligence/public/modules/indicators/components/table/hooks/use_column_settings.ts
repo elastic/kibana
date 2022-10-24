@@ -8,9 +8,9 @@
 import { EuiDataGridColumn, EuiDataGridSorting } from '@elastic/eui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import negate from 'lodash/negate';
-import { RawIndicatorFieldId } from '../../../../../../common/types/indicator';
-import { useKibana } from '../../../../../hooks/use_kibana';
-import { translateFieldLabel } from '../../indicator_field_label';
+import { RawIndicatorFieldId } from '../../../types';
+import { useKibana } from '../../../../../hooks';
+import { translateFieldLabel } from '../../field_label';
 
 export const DEFAULT_COLUMNS: EuiDataGridColumn[] = [
   RawIndicatorFieldId.TimeStamp,

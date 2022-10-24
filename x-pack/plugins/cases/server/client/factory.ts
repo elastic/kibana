@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import {
+import type {
   KibanaRequest,
   SavedObjectsServiceStart,
   Logger,
   ElasticsearchClient,
   SavedObjectsClientContract,
+  IBasePath,
 } from '@kbn/core/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -30,10 +31,11 @@ import {
 } from '../services';
 
 import { AuthorizationAuditLogger } from '../authorization';
-import { CasesClient, createCasesClient } from '.';
-import { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
-import { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
-import { CasesServices } from './types';
+import type { CasesClient } from '.';
+import { createCasesClient } from '.';
+import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
+import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
+import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
 
 interface CasesClientFactoryArgs {
@@ -46,6 +48,7 @@ interface CasesClientFactoryArgs {
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  publicBaseUrl?: IBasePath['publicBaseUrl'];
 }
 
 /**
@@ -126,6 +129,7 @@ export class CasesClientFactory {
       persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry: this.options.externalReferenceAttachmentTypeRegistry,
       securityStartPlugin: this.options.securityPluginStart,
+      publicBaseUrl: this.options.publicBaseUrl,
     });
   }
 

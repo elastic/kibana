@@ -12,7 +12,7 @@ import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/co
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map';
 import { notifyFeatureUsage } from '../../feature';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceMap } from './get_service_map';
 import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
@@ -128,7 +128,7 @@ const serviceMapRoute = createApmServerRoute({
 
     const serviceNames = compact([serviceName]);
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       start,
@@ -183,7 +183,7 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
       query: { environment, start, end, offset },
     } = params;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       start,

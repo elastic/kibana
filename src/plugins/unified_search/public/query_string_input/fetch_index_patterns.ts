@@ -7,26 +7,47 @@
  */
 
 import { isEmpty } from 'lodash';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+
+export interface DataViewByIdOrTitle {
+  type: 'title' | 'id';
+  value: string;
+}
 
 export async function fetchIndexPatterns(
   indexPatternsService: DataViewsContract,
-  indexPatternStrings: string[]
-) {
+  indexPatternStrings: DataViewByIdOrTitle[]
+): Promise<DataView[]> {
   if (!indexPatternStrings || isEmpty(indexPatternStrings)) {
     return [];
   }
 
-  const searchString = indexPatternStrings.map((string) => `"${string}"`).join(' | ');
+  const searchStringList: string[] = [];
+  const searchIdsList: string[] = [];
+  for (const { type, value } of indexPatternStrings) {
+    if (type === 'title') {
+      searchStringList.push(value);
+    } else {
+      searchIdsList.push(value);
+    }
+  }
 
-  const exactMatches = (await indexPatternsService.find(searchString)).filter((ip) =>
-    indexPatternStrings.includes(ip.title)
-  );
+  const searchString = searchStringList.map((value) => `"${value}"`).join(' | ');
+
+  const [searchMatches, ...matchesById] = await Promise.all([
+    indexPatternsService.find(searchString),
+    ...searchIdsList.map((id) => indexPatternsService.get(id)),
+  ]);
+
+  const exactMatches = [
+    ...searchMatches.filter((ip) => searchStringList.includes(ip.title)),
+    ...matchesById,
+  ];
 
   const allMatches =
     exactMatches.length === indexPatternStrings.length
       ? exactMatches
       : [...exactMatches, await indexPatternsService.getDefault()];
 
-  return allMatches;
+  return allMatches.filter((d: DataView | null): d is DataView => d != null);
 }

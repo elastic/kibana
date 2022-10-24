@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { CriteriaWithPagination } from '@elastic/eui';
+import type { CriteriaWithPagination, Direction } from '@elastic/eui';
+
+import type { SortColumnField } from './components';
 
 /** Action to trigger a fetch of the table items */
 export interface OnFetchItemsAction {
@@ -52,6 +54,15 @@ export interface OnTableChangeAction<T> {
   data: CriteriaWithPagination<T>;
 }
 
+/** Action to update the sort column of the table */
+export interface OnTableSortChangeAction<T> {
+  type: 'onTableSortChange';
+  data: {
+    field: SortColumnField;
+    direction: Direction;
+  };
+}
+
 /** Action to display the delete confirmation modal  */
 export interface ShowConfirmDeleteItemsModalAction {
   type: 'showConfirmDeleteItemsModal';
@@ -70,5 +81,6 @@ export type Action<T> =
   | DeleteItemsActions
   | OnSelectionChangeAction<T>
   | OnTableChangeAction<T>
+  | OnTableSortChangeAction<T>
   | ShowConfirmDeleteItemsModalAction
   | OnSearchQueryChangeAction;

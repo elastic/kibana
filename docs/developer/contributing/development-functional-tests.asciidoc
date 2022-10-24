@@ -67,14 +67,6 @@ export TEST_ES_PASS=<password>
 node scripts/functional_test_runner
 ----------
 
-** If you are running x-pack functional tests, start server and runner from {blob}xpack[x-pack] folder:
-+
-["source", "shell"]
-----------
-node scripts/functional_tests_server.js
-node ../scripts/functional_test_runner.js
-----------
-
 ** Selenium tests are run in headless mode on CI. Locally the same tests will be executed in a real browser. You can activate headless mode by setting the environment variable:
 +
 ["source", "shell"]

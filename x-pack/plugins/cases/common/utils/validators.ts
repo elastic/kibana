@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseAssignees } from '../api';
+import type { CaseAssignees } from '../api';
 import { MAX_ASSIGNEES_PER_CASE } from '../constants';
 
 export const isInvalidTag = (value: string) => value.trim() === '';
