@@ -18,7 +18,8 @@ import {
   EuiPanel,
   useEuiTheme,
 } from '@elastic/eui';
-import { buildEmptyFilter, FieldFilter, Filter, getFilterParams } from '@kbn/es-query';
+import type { FieldFilter, Filter } from '@kbn/es-query';
+import { buildEmptyFilter, getFilterParams, BooleanRelation } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { cx, css } from '@emotion/css';
@@ -29,7 +30,7 @@ import or from '../assets/or.svg';
 import { FieldInput } from './filters_builder_filter_item_field_input';
 import { OperatorInput } from './filters_builder_filter_item_operator_input';
 import { ParamsEditor } from './filters_builder_filter_item_params_editor';
-import { ConditionTypes, getConditionalOperationType } from '../../utils';
+import { getConditionalOperationType } from '../../utils';
 import { FiltersBuilderContextType } from '../filters_builder_context';
 import { FilterGroup } from '../filters_builder_filter_group';
 import type { Path } from '../filters_builder_types';
@@ -91,7 +92,7 @@ export function FilterItem({
   let params: Filter['meta']['params'] | undefined;
 
   if (!conditionalOperationType) {
-    field = getFieldFromFilter(filter as FieldFilter, dataView);
+    field = getFieldFromFilter(filter as FieldFilter, dataView!);
     operator = getOperatorFromFilter(filter);
     params = getFilterParams(filter);
   }
@@ -146,21 +147,21 @@ export function FilterItem({
   }, [dispatch, path]);
 
   const onAddFilter = useCallback(
-    (conditionalType: ConditionTypes) => {
+    (conditionalType: BooleanRelation) => {
       dispatch({
         type: 'addFilter',
         payload: {
           path,
-          filter: buildEmptyFilter(false, dataView.id),
+          filter: buildEmptyFilter(false, dataView?.id),
           conditionalType,
         },
       });
     },
-    [dispatch, dataView.id, path]
+    [dispatch, dataView?.id, path]
   );
 
-  const onAddButtonClick = useCallback(() => onAddFilter(ConditionTypes.AND), [onAddFilter]);
-  const onOrButtonClick = useCallback(() => onAddFilter(ConditionTypes.OR), [onAddFilter]);
+  const onAddButtonClick = useCallback(() => onAddFilter(BooleanRelation.AND), [onAddFilter]);
+  const onOrButtonClick = useCallback(() => onAddFilter(BooleanRelation.OR), [onAddFilter]);
 
   if (!dataView) {
     return null;

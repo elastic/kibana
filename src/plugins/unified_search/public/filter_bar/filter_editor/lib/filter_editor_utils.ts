@@ -63,7 +63,7 @@ export function isFilterValid(
   operator?: Operator,
   params?: any
 ) {
-  if (!indexPattern || !field || !operator) {
+  if (!indexPattern || !field || !operator || !params) {
     return false;
   }
   switch (operator.type) {

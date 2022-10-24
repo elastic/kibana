@@ -7,10 +7,11 @@
  */
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import type { Filter, FilterItem } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { BooleanRelation } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
 import { buildCombinedFilter, isCombinedFilter } from '@kbn/es-query';
-import { ConditionTypes, getConditionalOperationType } from '../utils';
+import { getConditionalOperationType } from '../utils';
 import type { Operator } from '../filter_bar/filter_editor';
 
 const PATH_SEPARATOR = '.';
@@ -21,14 +22,10 @@ const PATH_SEPARATOR = '.';
  */
 export const getPathInArray = (path: string) => path.split(PATH_SEPARATOR).map((i) => +i);
 
-const getGroupedFilters = (filter: FilterItem) =>
+const getGroupedFilters = (filter: Filter) =>
   Array.isArray(filter) ? filter : filter?.meta?.params;
 
-const doForFilterByPath = <T>(
-  filters: FilterItem[],
-  path: string,
-  action: (filter: FilterItem) => T
-) => {
+const doForFilterByPath = <T>(filters: Filter[], path: string, action: (filter: Filter) => T) => {
   const pathArray = getPathInArray(path);
   let f = filters[pathArray[0]];
   for (let i = 1, depth = pathArray.length; i < depth; i++) {
@@ -37,10 +34,10 @@ const doForFilterByPath = <T>(
   return action(f);
 };
 
-const getContainerMetaByPath = (filters: FilterItem[], pathInArray: number[]) => {
-  let targetArray: FilterItem[] = filters;
-  let parentFilter: FilterItem | undefined;
-  let parentConditionType = ConditionTypes.AND;
+const getContainerMetaByPath = (filters: Filter[], pathInArray: number[]) => {
+  let targetArray: Filter[] = filters;
+  let parentFilter: Filter | undefined;
+  let parentConditionType = BooleanRelation.AND;
 
   if (pathInArray.length > 1) {
     parentFilter = getFilterByPath(filters, getParentFilterPath(pathInArray));
@@ -60,10 +57,10 @@ const getParentFilterPath = (pathInArray: number[]) =>
 
 /**
  * The method corrects the positions of the filters after removing some filter from the filters.
- * @param {FilterItem[]} filters - an array of filters that may contain filters that are incorrectly nested for later display in the UI.
+ * @param {Filter[]} filters - an array of filters that may contain filters that are incorrectly nested for later display in the UI.
  */
-export const normalizeFilters = (filters: FilterItem[]) => {
-  const doRecursive = (f: FilterItem, parent: FilterItem) => {
+export const normalizeFilters = (filters: Filter[]) => {
+  const doRecursive = (f: Filter, parent: Filter[] | Filter) => {
     if (Array.isArray(f)) {
       return normalizeArray(f, parent);
     } else if (isCombinedFilter(f)) {
@@ -72,9 +69,9 @@ export const normalizeFilters = (filters: FilterItem[]) => {
     return f;
   };
 
-  const normalizeArray = (filtersArray: FilterItem[], parent: FilterItem): FilterItem[] => {
+  const normalizeArray = (filtersArray: Filter[], parent: Filter[] | Filter): Filter[] => {
     const partiallyNormalized = filtersArray
-      .map((item) => {
+      .map((item: Filter) => {
         const normalized = doRecursive(item, filtersArray);
 
         if (Array.isArray(normalized)) {
@@ -87,12 +84,12 @@ export const normalizeFilters = (filters: FilterItem[]) => {
         }
         return normalized;
       }, [])
-      .filter(Boolean) as FilterItem[];
+      .filter(Boolean) as Filter[];
 
     return Array.isArray(parent) ? partiallyNormalized.flat() : partiallyNormalized;
   };
 
-  const normalizeCombined = (combinedFilter: Filter): FilterItem => {
+  const normalizeCombined = (combinedFilter: Filter): Filter => {
     const combinedFilters = getGroupedFilters(combinedFilter);
     if (combinedFilters.length < 2) {
       return combinedFilters[0];
@@ -112,24 +109,24 @@ export const normalizeFilters = (filters: FilterItem[]) => {
 
 /**
  * Find filter by path.
- * @param {FilterItem[]} filters - filters in which the search for the desired filter will occur.
+ * @param {Filter[]} filters - filters in which the search for the desired filter will occur.
  * @param {string} path - path to filter.
  */
-export const getFilterByPath = (filters: FilterItem[], path: string) =>
+export const getFilterByPath = (filters: Filter[], path: string) =>
   doForFilterByPath(filters, path, (f) => f);
 
 /**
  * Method to add a filter to a specified location in a filter group.
  * @param {Filter[]} filters - array of filters where the new filter will be added.
- * @param {FilterItem} filter - new filter.
+ * @param {Filter} filter - new filter.
  * @param {string} path - path to filter.
- * @param {ConditionTypes} conditionalType - OR/AND relationships between filters.
+ * @param {BooleanRelation} conditionalType - OR/AND relationships between filters.
  */
 export const addFilter = (
   filters: Filter[],
-  filter: FilterItem,
+  filter: Filter,
   path: string,
-  conditionalType: ConditionTypes
+  conditionalType: BooleanRelation
 ) => {
   const newFilters = cloneDeep(filters);
   const pathInArray = getPathInArray(path);
@@ -137,11 +134,19 @@ export const addFilter = (
   const selector = pathInArray[pathInArray.length - 1];
 
   if (parentConditionType !== conditionalType) {
-    if (conditionalType === ConditionTypes.OR) {
-      targetArray.splice(selector, 1, buildCombinedFilter([targetArray[selector], filter]));
+    if (conditionalType === BooleanRelation.OR) {
+      targetArray.splice(
+        selector,
+        1,
+        buildCombinedFilter(BooleanRelation.OR, [targetArray[selector], filter])
+      );
     }
-    if (conditionalType === ConditionTypes.AND) {
-      targetArray.splice(selector, 1, [targetArray[selector], filter]);
+    if (conditionalType === BooleanRelation.AND) {
+      targetArray.splice(
+        selector,
+        1,
+        buildCombinedFilter(BooleanRelation.AND, [targetArray[selector], filter])
+      );
     }
   } else {
     targetArray.splice(selector + 1, 0, filter);
@@ -171,20 +176,20 @@ export const removeFilter = (filters: Filter[], path: string) => {
  * @param {Filter[]} filters - array of filters.
  * @param {string} from - filter path before moving.
  * @param {string} to - filter path where the filter will be moved.
- * @param {ConditionTypes} conditionalType - OR/AND relationships between filters.
+ * @param {BooleanRelation} conditionalType - OR/AND relationships between filters.
  */
 export const moveFilter = (
   filters: Filter[],
   from: string,
   to: string,
-  conditionalType: ConditionTypes
+  conditionalType: BooleanRelation
 ) => {
   const addFilterThenRemoveFilter = (
     source: Filter[],
-    addedFilter: FilterItem,
+    addedFilter: Filter,
     pathFrom: string,
     pathTo: string,
-    conditional: ConditionTypes
+    conditional: BooleanRelation
   ) => {
     const newFiltersWithFilter = addFilter(source, addedFilter, pathTo, conditional);
     return removeFilter(newFiltersWithFilter, pathFrom);
@@ -192,10 +197,10 @@ export const moveFilter = (
 
   const removeFilterThenAddFilter = (
     source: Filter[],
-    removableFilter: FilterItem,
+    removableFilter: Filter,
     pathFrom: string,
     pathTo: string,
-    conditional: ConditionTypes
+    conditional: BooleanRelation
   ) => {
     const newFiltersWithoutFilter = removeFilter(source, pathFrom);
     return addFilter(newFiltersWithoutFilter, removableFilter, pathTo, conditional);

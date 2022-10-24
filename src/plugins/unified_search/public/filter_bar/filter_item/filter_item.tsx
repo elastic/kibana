@@ -83,7 +83,7 @@ export function FilterItem(props: FilterItemProps) {
     }
   }
 
-  function handleIconClick(e: MouseEvent<HTMLInputElement>) {
+  function handleIconClick() {
     props.onRemove();
     setIsPopoverOpen(false);
   }
@@ -318,6 +318,7 @@ export function FilterItem(props: FilterItemProps) {
     filterLabelStatus: valueLabelConfig.status,
     errorMessage: valueLabelConfig.message,
     className: getClasses(!!filter.meta.negate, valueLabelConfig),
+    dataViews: indexPatterns,
     iconOnClick: handleIconClick,
     onClick: handleBadgeClick,
     'data-test-subj': getDataTestSubj(valueLabelConfig),

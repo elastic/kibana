@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { buildEmptyFilter, Filter, FilterItem } from '@kbn/es-query';
-import { ConditionTypes } from '../utils';
+import { buildEmptyFilter, type Filter, BooleanRelation } from '@kbn/es-query';
 import {
   getFilterByPath,
   getPathInArray,
@@ -176,8 +175,8 @@ describe('filters_builder_utils', () => {
 
   describe('getConditionalOperationType', () => {
     let filter: Filter;
-    let filtersWithOrRelationships: FilterItem;
-    let groupOfFilters: FilterItem;
+    let filtersWithOrRelationships: Filter;
+    let groupOfFilters: Filter;
 
     beforeAll(() => {
       filter = filters[0];
@@ -187,8 +186,8 @@ describe('filters_builder_utils', () => {
 
     test('should return correct ConditionalOperationType', () => {
       expect(getConditionalOperationType(filter)).toBeUndefined();
-      expect(getConditionalOperationType(filtersWithOrRelationships)).toBe(ConditionTypes.OR);
-      expect(getConditionalOperationType(groupOfFilters)).toBe(ConditionTypes.AND);
+      expect(getConditionalOperationType(filtersWithOrRelationships)).toBe(BooleanRelation.OR);
+      expect(getConditionalOperationType(groupOfFilters)).toBe(BooleanRelation.AND);
     });
   });
 
@@ -204,7 +203,7 @@ describe('filters_builder_utils', () => {
     const emptyFilter = buildEmptyFilter(false);
 
     test('should add filter into filters after zero element', () => {
-      const enlargedFilters = addFilter(filters, emptyFilter, '0', ConditionTypes.AND);
+      const enlargedFilters = addFilter(filters, emptyFilter, '0', BooleanRelation.AND);
       expect(getFilterByPath(enlargedFilters, '1')).toMatchInlineSnapshot(`
         Object {
           "$state": Object {
@@ -238,7 +237,7 @@ describe('filters_builder_utils', () => {
   describe('moveFilter', () => {
     test('should move filter from "0" path to "2" path into filters', () => {
       const filterBeforeMoving = getFilterByPath(filters, '0');
-      const filtersAfterMovingFilter = moveFilter(filters, '0', '2', ConditionTypes.AND);
+      const filtersAfterMovingFilter = moveFilter(filters, '0', '2', BooleanRelation.AND);
       const filterObtainedAfterFilterMovingFilters = getFilterByPath(filtersAfterMovingFilter, '2');
       expect(filterBeforeMoving).toEqual(filterObtainedAfterFilterMovingFilters);
     });
