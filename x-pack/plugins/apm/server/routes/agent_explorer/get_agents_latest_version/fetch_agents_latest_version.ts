@@ -31,8 +31,6 @@ export const fetchAgentLatestReleaseVersion = async (agent: AgentName) => {
   const releases = await response.json();
   const latestVersion = releases[0]?.tag_name.replace('v', '');
 
-  console.log(response.headers.get("X-RateLimit-Remaining"));
-
   return {
     [agent]: latestVersion
   };
