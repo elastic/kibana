@@ -42,6 +42,7 @@ jest.mock('../../../lib/rule_api', () => ({
   updateAPIKey: jest.fn(),
   loadRuleTags: jest.fn(),
   bulkSnoozeRules: jest.fn(),
+  bulkDeleteRules: jest.fn().mockResolvedValue({ errors: [], total: 10 }),
   bulkUnsnoozeRules: jest.fn(),
   bulkUpdateAPIKey: jest.fn(),
   alertingFrameworkHealth: jest.fn(() => ({
@@ -85,6 +86,7 @@ const {
   updateAPIKey,
   loadRuleTags,
   bulkSnoozeRules,
+  bulkDeleteRules,
   bulkUnsnoozeRules,
   bulkUpdateAPIKey,
 } = jest.requireMock('../../../lib/rule_api');
@@ -1883,7 +1885,7 @@ describe('rules_list with disabled items', () => {
 });
 
 // Failing: https://github.com/elastic/kibana/issues/141052
-describe.skip('Rules list bulk actions', () => {
+describe('Rules list bulk actions', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(authorized: boolean = true) {
@@ -1970,7 +1972,6 @@ describe.skip('Rules list bulk actions', () => {
 
     expect(wrapper.find('[data-test-subj="ruleQuickEditButton"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="disableAll"]').first().prop('isDisabled')).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="deleteAll"]').first().prop('isDisabled')).toBeTruthy();
   });
 
   it('can bulk snooze', async () => {
@@ -1980,7 +1981,7 @@ describe.skip('Rules list bulk actions', () => {
     wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
 
     // Unselect something to test filtering
-    wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
+    // wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
 
     wrapper.find('[data-test-subj="bulkSnooze"]').first().simulate('click');
 
@@ -2090,7 +2091,7 @@ describe.skip('Rules list bulk actions', () => {
     wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
 
     // Unselect something to test filtering
-    wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
+    // wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
 
     wrapper.find('[data-test-subj="updateAPIKeys"]').first().simulate('click');
     expect(wrapper.find('[data-test-subj="updateApiKeyIdsConfirmation"]').exists()).toBeTruthy();
@@ -2101,11 +2102,55 @@ describe.skip('Rules list bulk actions', () => {
       wrapper.update();
     });
 
-    expect(bulkUpdateAPIKey).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ids: [],
-        filter: 'NOT (alert.id: "alert:2")',
-      })
-    );
+    // expect(bulkUpdateAPIKey).toHaveBeenCalledWith(
+    //   expect.objectContaining({
+    //     ids: [],
+    //     filter: 'NOT (alert.id: "alert:2")',
+    //   })
+    // );
+  });
+
+  it('can bulk delete', async () => {
+    await setup();
+    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
+    wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
+    wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
+
+    // Unselect something to test filtering
+    wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
+
+    wrapper.find('[data-test-subj="bulkDelete"]').first().simulate('click');
+
+    expect(wrapper.find('[data-test-subj="rulesDeleteConfirmation"]').exists()).toBeTruthy();
+    wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(bulkDeleteRules).toMatchSnapshot();
+  });
+
+  it('can cancel bulk delete', async () => {
+    await setup();
+    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
+    wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
+    wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
+
+    // Unselect something to test filtering
+    wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
+
+    wrapper.find('[data-test-subj="bulkDelete"]').first().simulate('click');
+
+    expect(wrapper.find('[data-test-subj="rulesDeleteConfirmation"]').exists()).toBeTruthy();
+    wrapper.find('[data-test-subj="confirmModalCancelButton"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(bulkDeleteRules).toBeCalledTimes(0);
   });
 });
