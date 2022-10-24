@@ -35,6 +35,7 @@ import { ConfigSchema, createConfig } from '../config';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import { securityMock } from '../mocks';
 import {
+  type SessionError,
   SessionExpiredError,
   SessionMissingError,
   SessionUnexpectedError,
@@ -1344,57 +1345,79 @@ describe('Authenticator', () => {
       expectAuditEvents({ action: 'user_login', outcome: 'failure' });
     });
 
-    it('fails if getting the current session results in an SessionExpiredError for redirectable requests.', async () => {
-      const request = httpServerMock.createKibanaRequest();
-      const failureReason = new SessionExpiredError();
+    for (const FailureClass of [SessionMissingError, SessionExpiredError, SessionUnexpectedError]) {
+      describe(`session.get results in ${FailureClass.name}`, () => {
+        it('fails as expected for redirectable requests', async () => {
+          const request = httpServerMock.createKibanaRequest();
+          const failureReason = new FailureClass();
 
-      mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
+          mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
 
-      await expect(authenticator.authenticate(request)).resolves.toEqual(
-        AuthenticationResult.failed(failureReason)
-      );
-      expect(auditLogger.log).not.toHaveBeenCalled();
-    });
+          await expect(authenticator.authenticate(request)).resolves.toEqual(
+            failureReason instanceof SessionMissingError
+              ? AuthenticationResult.notHandled()
+              : AuthenticationResult.failed(failureReason)
+          );
+          expect(auditLogger.log).not.toHaveBeenCalled();
+        });
 
-    it('fails if getting the current session results in an SessionExpiredError for non-redirectable requests.', async () => {
-      const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
-      const failureReason = new SessionExpiredError();
+        it('fails as expected for non-redirectable requests', async () => {
+          const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
+          const failureReason = new FailureClass();
 
-      mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
+          mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
 
-      await expect(authenticator.authenticate(request)).resolves.toEqual(
-        AuthenticationResult.failed(failureReason, {
-          authResponseHeaders: { [SESSION_ERROR_REASON_HEADER]: 'SESSION_EXPIRED' },
-        })
-      );
-      expect(auditLogger.log).not.toHaveBeenCalled();
-    });
+          await expect(authenticator.authenticate(request)).resolves.toEqual(
+            failureReason instanceof SessionMissingError
+              ? AuthenticationResult.notHandled()
+              : AuthenticationResult.failed(failureReason, {
+                  authResponseHeaders: {
+                    [SESSION_ERROR_REASON_HEADER]: (failureReason as SessionError).code,
+                  },
+                })
+          );
+          expect(auditLogger.log).not.toHaveBeenCalled();
+        });
 
-    it('fails if getting the current session results in an SessionUnexpectedError for redirectable requests.', async () => {
-      const request = httpServerMock.createKibanaRequest();
-      const failureReason = new SessionUnexpectedError();
+        it('expected message is attached to the URL when authentication provider redirects to login page', async () => {
+          const request = httpServerMock.createKibanaRequest();
+          const redirectUrl = '/mock-server-basepath/login?foo=bar';
+          const failureReason = new FailureClass();
 
-      mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
+          mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
 
-      await expect(authenticator.authenticate(request)).resolves.toEqual(
-        AuthenticationResult.failed(failureReason)
-      );
-      expect(auditLogger.log).not.toHaveBeenCalled();
-    });
+          mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+            AuthenticationResult.redirectTo(redirectUrl)
+          );
 
-    it('fails if getting the current session results in an SessionUnexpectedError for non-redirectable requests.', async () => {
-      const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
-      const failureReason = new SessionUnexpectedError();
+          const authenticationResult = await authenticator.authenticate(request);
+          expect(authenticationResult.redirected()).toBe(true);
+          if (failureReason instanceof SessionExpiredError) {
+            expect(authenticationResult.redirectURL).toBe(
+              redirectUrl + '&msg=' + failureReason.code
+            );
+          } else {
+            expect(authenticationResult.redirectURL).toBe(redirectUrl);
+          }
+        });
 
-      mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
+        it("message is not attached to the URL when authentication provider redirects to something that's not the login page", async () => {
+          const request = httpServerMock.createKibanaRequest();
+          const redirectUrl = '/mock-server-basepath/some-other-page?foo=bar';
+          const failureReason = new FailureClass();
 
-      await expect(authenticator.authenticate(request)).resolves.toEqual(
-        AuthenticationResult.failed(failureReason, {
-          authResponseHeaders: { [SESSION_ERROR_REASON_HEADER]: 'UNEXPECTED_SESSION_ERROR' },
-        })
-      );
-      expect(auditLogger.log).not.toHaveBeenCalled();
-    });
+          mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
+
+          mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+            AuthenticationResult.redirectTo(redirectUrl)
+          );
+
+          const authenticationResult = await authenticator.authenticate(request);
+          expect(authenticationResult.redirected()).toBe(true);
+          expect(authenticationResult.redirectURL).toBe(redirectUrl);
+        });
+      });
+    }
 
     it('returns user that authentication provider returns.', async () => {
       const request = httpServerMock.createKibanaRequest({
