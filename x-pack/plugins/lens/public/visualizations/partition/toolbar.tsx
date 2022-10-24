@@ -32,7 +32,7 @@ import {
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { shouldShowValuesInLegend } from './render_helpers';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { isCollapsed } from './visualization';
+import { shouldShowPaletteOnDimension } from './visualization';
 
 const legendOptions: Array<{
   value: SharedPieLayerState['legendDisplay'];
@@ -314,13 +314,9 @@ export function DimensionEditor(
     return null;
   }
 
-  const firstNonCollapsedColumnId = currentLayer.primaryGroups.find(
-    (columnId) => !isCollapsed(columnId, currentLayer)
-  );
-
   return (
     <>
-      {props.accessor === firstNonCollapsedColumnId && (
+      {shouldShowPaletteOnDimension(props.accessor, currentLayer) && (
         <PalettePicker
           palettes={props.paletteService}
           activePalette={props.state.palette}
@@ -329,25 +325,29 @@ export function DimensionEditor(
           }}
         />
       )}
-      <CollapseSetting
-        value={currentLayer?.collapseFns?.[props.accessor] || ''}
-        onChange={(collapseFn) => {
-          props.setState({
-            ...props.state,
-            layers: props.state.layers.map((layer) =>
-              layer.layerId !== props.layerId
-                ? layer
-                : {
-                    ...layer,
-                    collapseFns: {
-                      ...layer.collapseFns,
-                      [props.accessor]: collapseFn,
-                    },
-                  }
-            ),
-          });
-        }}
-      />
+      {[...currentLayer.primaryGroups, ...(currentLayer.secondaryGroups ?? [])].includes(
+        props.accessor
+      ) && (
+        <CollapseSetting
+          value={currentLayer?.collapseFns?.[props.accessor] || ''}
+          onChange={(collapseFn) => {
+            props.setState({
+              ...props.state,
+              layers: props.state.layers.map((layer) =>
+                layer.layerId !== props.layerId
+                  ? layer
+                  : {
+                      ...layer,
+                      collapseFns: {
+                        ...layer.collapseFns,
+                        [props.accessor]: collapseFn,
+                      },
+                    }
+              ),
+            });
+          }}
+        />
+      )}
     </>
   );
 }
