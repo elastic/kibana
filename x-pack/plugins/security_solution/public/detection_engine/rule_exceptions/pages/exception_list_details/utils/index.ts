@@ -6,7 +6,7 @@
  */
 
 import type { Rule as UIRule } from '@kbn/securitysolution-exception-list-components';
-import type { Rule } from '../../../../../detections/containers/detection_engine/rules/types';
+import type { Rule } from '../../../../rule_management/logic/types';
 
 export const mapListRulesToUIRules = (listRules: Rule[]): UIRule[] | [] => {
   if (!listRules.length) return [];

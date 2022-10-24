@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExceptionListInfo } from '../../../../detections/pages/detection_engine/rules/all/exceptions/use_all_exception_lists';
+import type { ExceptionListInfo } from '../../../rule_exceptions_ui/pages/exceptions/use_all_exception_lists';
 
 export type { ExceptionListInfo as ExceptionListWithRules };
 

@@ -20,7 +20,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { Rule } from '../../../../../detections/containers/detection_engine/rules/types';
+import type { Rule } from '../../../../rule_management/logic/types';
 import { ExceptionsAddToRulesTable } from '../../../components/flyout_components/add_to_rules_table';
 import * as i18n from '../translations';
 
