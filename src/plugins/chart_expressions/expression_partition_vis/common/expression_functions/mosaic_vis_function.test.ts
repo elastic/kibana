@@ -53,16 +53,14 @@ describe('interpreter/functions#mosaicVis', () => {
       truncate: 100,
       last_level: false,
     },
-    metrics: [
-      {
-        type: 'vis_dimension',
-        accessor: 0,
-        format: {
-          id: 'number',
-          params: {},
-        },
+    metric: {
+      type: 'vis_dimension',
+      accessor: 0,
+      format: {
+        id: 'number',
+        params: {},
       },
-    ],
+    },
     buckets: [
       {
         type: 'vis_dimension',

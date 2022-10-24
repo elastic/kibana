@@ -135,7 +135,7 @@ function getLensAttributes(
         legendDisplay: 'default',
         nestedLegend: false,
         layerId: 'layer1',
-        metric: 'ed999e9d-204c-465b-897f-fe1a125b39ed',
+        metrics: ['ed999e9d-204c-465b-897f-fe1a125b39ed'],
         numberDisplay: 'percent',
         primaryGroups: ['8690befd-fd69-4246-af4a-dd485d2a3b38'],
         categoryDisplay: 'default',

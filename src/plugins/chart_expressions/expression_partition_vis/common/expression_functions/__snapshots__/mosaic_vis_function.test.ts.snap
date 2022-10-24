@@ -116,16 +116,14 @@ Object {
       "legendPosition": "right",
       "legendSize": "medium",
       "maxLegendLines": 2,
-      "metrics": Array [
-        Object {
-          "accessor": 0,
-          "format": Object {
-            "id": "number",
-            "params": Object {},
-          },
-          "type": "vis_dimension",
+      "metric": Object {
+        "accessor": 0,
+        "format": Object {
+          "id": "number",
+          "params": Object {},
         },
-      ],
+        "type": "vis_dimension",
+      },
       "nestedLegend": true,
       "palette": Object {
         "name": "kibana_palette",

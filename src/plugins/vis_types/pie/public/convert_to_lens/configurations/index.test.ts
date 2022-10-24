@@ -32,7 +32,7 @@ describe('getConfiguration', () => {
           legendMaxLines: 1,
           legendPosition: 'right',
           legendSize: 'large',
-          metric: 'metric-1',
+          metrics: ['metric-1'],
           nestedLegend: true,
           numberDisplay: 'percent',
           percentDecimals: 2,
