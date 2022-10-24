@@ -29,9 +29,10 @@ interface Props {
   addBasePath: (path: string) => string;
   application: ApplicationStart;
   isDarkMode: boolean;
+  isCloudEnabled: boolean;
 }
 
-export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode }) => {
+export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isCloudEnabled }) => {
   const { trackUiMetric } = getServices();
   const canAccessIntegrations = application.capabilities.navLinks.integrations;
   if (canAccessIntegrations) {
@@ -67,12 +68,30 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode }) => 
             <EuiSpacer />
 
             <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+              {isCloudEnabled && (
+                <EuiFlexItem grow={false}>
+                  {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                  <EuiButton
+                    data-test-subj="guidedOnboardingLink"
+                    fill
+                    href={addBasePath('#/getting_started')}
+                    onClick={(event: MouseEvent) => {
+                      trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding_link');
+                    }}
+                  >
+                    <FormattedMessage
+                      id="home.addData.guidedOnboardingLinkLabel"
+                      defaultMessage="Launch Guided setup"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
                 <RedirectAppLinks application={application}>
                   {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                   <EuiButton
                     data-test-subj="homeAddData"
-                    fill
+                    fill={!isCloudEnabled}
                     href={addBasePath('/app/integrations/browse')}
                     iconType="plusInCircle"
                     onClick={(event: MouseEvent) => {

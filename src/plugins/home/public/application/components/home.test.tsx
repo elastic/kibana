@@ -59,6 +59,7 @@ describe('home', () => {
         return `base_path/${url}`;
       },
       hasUserDataView: jest.fn(async () => true),
+      isCloudEnabled: false,
     };
   });
 
@@ -225,6 +226,14 @@ describe('home', () => {
 
     test("should show the normal home page if user doesn't have access to integrations", async () => {
       mockHasIntegrationsPermission = false;
+
+      const component = await renderHome();
+
+      expect(component.find(Welcome).exists()).toBe(false);
+    });
+
+    test('should redirect to guided onboarding on Cloud instead of welcome screen', async () => {
+      defaultProps.isCloudEnabled = true;
 
       const component = await renderHome();
 
