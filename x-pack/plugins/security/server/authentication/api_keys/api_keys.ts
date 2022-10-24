@@ -6,6 +6,7 @@
  */
 
 /* eslint-disable max-classes-per-file */
+import type { SecurityAuthenticateResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
@@ -18,6 +19,7 @@ import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,
 } from '../http_authentication';
+import { getFakeKibanaRequest } from './fake_kibana_request';
 
 /**
  * Represents the options to create an APIKey class instance that will be
@@ -333,6 +335,32 @@ export class APIKeys {
     }
 
     return result;
+  }
+
+  /**
+   * Tries to validate an API key.
+   * @param apiKey ApiKey.
+   */
+  async validate(apiKey: Pick<CreateAPIKeyResult, 'id' | 'api_key'>) {
+    if (!this.license.isEnabled()) {
+      return { isValid: false };
+    }
+
+    const fakeRequest = getFakeKibanaRequest(apiKey);
+
+    this.logger.debug(`Trying to validate an API key as current user`);
+
+    let result: SecurityAuthenticateResponse;
+
+    try {
+      result = await this.clusterClient.asScoped(fakeRequest).asCurrentUser.security.authenticate();
+      this.logger.debug(`API key was validated successfully`);
+      return { isValid: true, result };
+    } catch (e) {
+      this.logger.info(`Failed to validate API key ${e.message}`);
+    }
+
+    return { isValid: false };
   }
 
   private doesErrorIndicateAPIKeysAreDisabled(e: Record<string, any>) {

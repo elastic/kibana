@@ -12,7 +12,7 @@ import { kibanaService } from '../../../../../../utils/kibana_service';
 import * as labels from './labels';
 
 export const EnablementEmptyState = () => {
-  const { error, enablement, enableSynthetics, loading, invalidApiKeyError } = useEnablement();
+  const { error, enablement, enableSynthetics, loading } = useEnablement();
   const [shouldFocusEnablementButton, setShouldFocusEnablementButton] = useState(false);
   const [isEnabling, setIsEnabling] = useState(false);
   const { isEnabled, canEnable } = enablement;
@@ -54,10 +54,6 @@ export const EnablementEmptyState = () => {
       buttonRef.current?.focus();
     }
   }, [shouldFocusEnablementButton]);
-
-  if (invalidApiKeyError) {
-    return <div>APi key is invalid</div>;
-  }
 
   return !isEnabled && !loading ? (
     <EuiEmptyPrompt
