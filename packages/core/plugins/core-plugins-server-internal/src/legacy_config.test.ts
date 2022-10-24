@@ -5,60 +5,42 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { from } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { ConfigService, Env } from '@kbn/config';
-import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
+import { IConfigService } from '@kbn/config';
+import { configServiceMock } from '@kbn/config-mocks';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
-import { REPO_ROOT } from '@kbn/utils';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { duration } from 'moment';
 import { fromRoot } from '@kbn/utils';
-import { ByteSizeValue, schema } from '@kbn/config-schema';
-// import { CoreContext } from '@kbn/core-base-server-internal';
-// import { mockCoreContext } from '@kbn/core-base-server-mocks';
-// TODO: Refactor to use coreSetup and coreStart for mocking the config.
+import { ByteSizeValue } from '@kbn/config-schema';
+
 describe('Legacy config', () => {
-  let env: Env;
-  let logger: ReturnType<typeof loggingSystemMock.create>;
-  // let coreContext: CoreContext;
-
-  beforeEach(() => {
-    env = Env.createDefault(REPO_ROOT, getEnvOptions());
-    logger = loggingSystemMock.create();
-  });
-
-  const createConfigService = (): ConfigService => {
-    // I need to use coreSetup to properly setup these mocks. See packages/core/lifecycle/core-lifecycle-server-mocks/src/core_setup.mock.ts
-    // coreContext = mockCoreContext.create({
-    //   env,
-    //   logger,
-    //   configService: configServiceMock.create(),
-    // });
-    const config$ = rawConfigServiceMock.create({
-      rawConfig: {
-        elasticsearch: { shardTimeout: '30s', requestTimeout: '30s', pingTimeout: '30s' },
-        path: { data: fromRoot('data') },
-        savedObjects: { maxImportPayloadBytes: 26214400 },
-      },
+  const createConfigService = (): IConfigService => {
+    const configService = configServiceMock.create();
+    const getPathConfig = (path: string | string[]) => {
+      switch (path) {
+        case 'elasticsearch':
+          return {
+            shardTimeout: duration(30, 's'),
+            requestTimeout: duration(30, 's'),
+            pingTimeout: duration(30, 's'),
+            someOtherProps: 'unused',
+          };
+        case 'path':
+          return { data: fromRoot('data'), someOtherProps: 'unused' };
+        case 'savedObjects':
+          return { maxImportPayloadBytes: new ByteSizeValue(26214400), someOtherProps: 'unused' };
+        default:
+          return {};
+      }
+    };
+    configService.atPath.mockImplementation((path) => {
+      return from([getPathConfig(path)]);
+    });
+    configService.atPathSync.mockImplementation((path) => {
+      return getPathConfig(path);
     });
 
-    const configService = new ConfigService(config$, env, logger);
-    configService.setSchema(
-      'elasticsearch',
-      schema.object({
-        shardTimeout: schema.duration({ defaultValue: '30s' }),
-        requestTimeout: schema.duration({ defaultValue: '30s' }),
-        pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
-      })
-    );
-    configService.setSchema('path', schema.object({ data: schema.string() }));
-    configService.setSchema(
-      'savedObjects',
-      schema.object({
-        maxImportPayloadBytes: schema.byteSize({ defaultValue: new ByteSizeValue(0) }),
-      })
-    );
     return configService;
   };
 
