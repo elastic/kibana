@@ -4,24 +4,17 @@ The Notifications plugin provides a set of services to help Solutions and plugin
 
 ## Notifications Plugin public API
 
-### Setup
-
-The `setup` function exposes the following interface:
-
-- `email: Promise<IEmailService>`:
-  A service that must be obtained asynchronously, and can be used to send plain text emails.
-
 ### Start
 
 The `start` function exposes the following interface:
 
-- `email: Promise<IEmailService>`:
-  A service that must be obtained asynchronously, and can be used to send plain text emails.
+- `email: EmailService`:
+  A simple service that can be used to send plain text emails.
 
 
 ### Usage
 
-To use the exposed plugin start and setup contracts:
+To use the exposed plugin start contract:
 
 1. Make sure `notifications` is in your `optionalPlugins` in the `kibana.json` file:
 
@@ -33,7 +26,7 @@ To use the exposed plugin start and setup contracts:
 }
 ```
 
-2. Use the exposed contracts:
+2. Use the exposed contract:
 
 ```ts
 // <plugin>/server/plugin.ts
@@ -44,16 +37,18 @@ interface MyPluginStartDeps {
 }
 
 class MyPlugin {
-  public async start(
+  public start(
     core: CoreStart,
     { notifications }: MyPluginStartDeps
   ) {
-    const emailService = await notifications.email;
-    emailService.sendPlainTextEmail({
-        to: 'foo@bar.com',
-        subject: 'Some subject',
-        message: 'Hello world!',
-    });
+    const emailService = notifications.email;
+    if (emailService) {
+      emailService.sendPlainTextEmail({
+          to: 'foo@bar.com',
+          subject: 'Some subject',
+          message: 'Hello world!',
+      });
+    }
     ...
   }
 }
