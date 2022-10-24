@@ -85,6 +85,22 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObject.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [
+              "Timestamp of the time this document had been created."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
             "id": "def-common.SavedObject.updated_at",
             "type": "string",
             "tags": [],
