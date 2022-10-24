@@ -553,7 +553,7 @@
     "prop-types": "^15.8.1",
     "proxy-from-env": "1.0.0",
     "puid": "1.0.7",
-    "puppeteer": "^10.2.0",
+    "puppeteer": "18.1.0",
     "query-string": "^6.13.2",
     "rbush": "^3.0.1",
     "re-resizable": "^6.1.1",
