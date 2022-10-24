@@ -45,6 +45,7 @@ function FilterRow({
   const { services } = useKibana<VisDefaultEditorKibanaServices>();
   const {
     data,
+    dataViews,
     unifiedSearch,
     usageCollection,
     storage,
@@ -118,6 +119,7 @@ function FilterRow({
           size="s"
           deps={{
             data,
+            dataViews,
             unifiedSearch,
             usageCollection,
             storage,
