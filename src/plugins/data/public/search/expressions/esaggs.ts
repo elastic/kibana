@@ -48,7 +48,12 @@ export function getFunctionDefinition({
         const aggConfigs = aggs.createAggConfigs(
           indexPattern,
           args.aggs?.map((agg) => agg.value) ?? [],
-          { hierarchical: args.metricsAtAllLevels, partialRows: args.partialRows }
+          {
+            hierarchical: args.metricsAtAllLevels,
+            partialRows: args.partialRows,
+            probability: args.probability,
+            samplerSeed: args.samplerSeed,
+          }
         );
 
         const { handleEsaggsRequest } = await import('../../../common/search/expressions');

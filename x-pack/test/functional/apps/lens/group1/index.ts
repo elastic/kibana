@@ -79,6 +79,7 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       loadTestFile(require.resolve('./table_dashboard'));
       loadTestFile(require.resolve('./table'));
       loadTestFile(require.resolve('./text_based_languages'));
+      loadTestFile(require.resolve('./layer_actions'));
     }
   });
 };
