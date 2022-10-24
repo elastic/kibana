@@ -16,7 +16,7 @@ import { FilterExpressionBadge } from './filter_badge_expression';
 export interface FilterBadgeGroupProps {
   filters: Filter[];
   dataViews: DataView[];
-  conditionType?: BooleanRelation;
+  booleanRelation?: BooleanRelation;
   isRootLevel?: boolean;
 }
 
@@ -35,7 +35,7 @@ const BooleanRelationDelimiter = ({ conditional }: { conditional: BooleanRelatio
 export function FilterBadgeGroup({
   filters,
   dataViews,
-  conditionType,
+  booleanRelation,
   isRootLevel,
 }: FilterBadgeGroupProps) {
   return (
@@ -43,8 +43,8 @@ export function FilterBadgeGroup({
       {filters.map((filter, index, acc) => (
         <>
           <FilterExpressionBadge filter={filter} dataViews={dataViews} isRootLevel={isRootLevel} />
-          {conditionType && index + 1 < acc.length ? (
-            <BooleanRelationDelimiter conditional={conditionType} />
+          {booleanRelation && index + 1 < acc.length ? (
+            <BooleanRelationDelimiter conditional={booleanRelation} />
           ) : null}
         </>
       ))}

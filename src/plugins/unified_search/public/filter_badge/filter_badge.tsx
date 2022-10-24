@@ -94,7 +94,7 @@ function FilterBadge({
           <FilterBadgeGroup
             filters={isCombinedFilter(filter) ? filter.meta.params : [filter]}
             dataViews={dataViews}
-            conditionType={rootLevelConditionType}
+            booleanRelation={rootLevelConditionType}
             isRootLevel={true}
           />
         </EuiFlexGroup>

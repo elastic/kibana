@@ -113,7 +113,7 @@ function FiltersBuilder({
         }}
       >
         <EuiDragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragActive}>
-          <FilterGroup filters={state.filters} conditionType={rootLevelConditionType} path={''} />
+          <FilterGroup filters={state.filters} booleanRelation={rootLevelConditionType} path={''} />
         </EuiDragDropContext>
       </FiltersBuilderContextType.Provider>
     </div>

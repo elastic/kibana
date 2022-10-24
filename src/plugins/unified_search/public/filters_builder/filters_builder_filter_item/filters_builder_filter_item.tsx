@@ -177,7 +177,7 @@ export function FilterItem({
       {conditionalOperationType ? (
         <FilterGroup
           path={path}
-          conditionType={conditionalOperationType}
+          booleanRelation={conditionalOperationType}
           filters={Array.isArray(filter) ? filter : filter.meta?.params}
           reverseBackground={!reverseBackground}
           renderedLevel={renderedLevel + 1}

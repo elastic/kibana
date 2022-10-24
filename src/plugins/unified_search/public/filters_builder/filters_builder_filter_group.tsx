@@ -27,7 +27,7 @@ import { getPathInArray } from './filters_builder_utils';
 
 export interface FilterGroupProps {
   filters: Filter[];
-  conditionType: BooleanRelation;
+  booleanRelation: BooleanRelation;
   path: Path;
 
   /** @internal used for recursive rendering **/
@@ -38,10 +38,10 @@ export interface FilterGroupProps {
 /** @internal **/
 const Delimiter = ({
   color,
-  conditionType,
+  booleanRelation,
 }: {
   color: 'subdued' | 'plain';
-  conditionType: BooleanRelation;
+  booleanRelation: BooleanRelation;
 }) => {
   const xsPadding = useEuiPaddingSize('xs');
   const mPadding = useEuiPaddingSize('m');
@@ -68,9 +68,9 @@ const Delimiter = ({
       <EuiHorizontalRule margin="s" />
       <EuiText size="xs" className="filter-builder__delimiter_text">
         {i18n.translate('unifiedSearch.filter.filtersBuilder.delimiterLabel', {
-          defaultMessage: '{conditionType}',
+          defaultMessage: '{booleanRelation}',
           values: {
-            conditionType,
+            booleanRelation,
           },
         })}
       </EuiText>
@@ -80,7 +80,7 @@ const Delimiter = ({
 
 export const FilterGroup = ({
   filters,
-  conditionType,
+  booleanRelation,
   path,
   reverseBackground = false,
   renderedLevel = 0,
@@ -91,8 +91,8 @@ export const FilterGroup = ({
 
   const pathInArray = getPathInArray(path);
   const isDepthReached = maxDepth <= pathInArray.length;
-  const orDisabled = hideOr || (isDepthReached && conditionType === BooleanRelation.AND);
-  const andDisabled = isDepthReached && conditionType === BooleanRelation.OR;
+  const orDisabled = hideOr || (isDepthReached && booleanRelation === BooleanRelation.AND);
+  const andDisabled = isDepthReached && booleanRelation === BooleanRelation.OR;
 
   const removeDisabled = pathInArray.length <= 1 && filters.length === 1;
   const shouldNormalizeFirstLevel =
@@ -121,10 +121,10 @@ export const FilterGroup = ({
         />
       </EuiFlexItem>
 
-      {conditionType && index + 1 < acc.length ? (
+      {booleanRelation && index + 1 < acc.length ? (
         <EuiFlexItem>
-          {conditionType === BooleanRelation.OR && (
-            <Delimiter color={color} conditionType={conditionType} />
+          {booleanRelation === BooleanRelation.OR && (
+            <Delimiter color={color} booleanRelation={booleanRelation} />
           )}
         </EuiFlexItem>
       ) : null}

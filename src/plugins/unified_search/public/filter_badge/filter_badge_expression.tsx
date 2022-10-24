@@ -21,7 +21,7 @@ import { getBooleanRelationType } from '../utils';
 export interface FilterBadgeExpressionProps {
   filter: Filter;
   dataViews: DataView[];
-  conditionType?: BooleanRelation;
+  booleanRelation?: BooleanRelation;
   isRootLevel?: boolean;
 }
 
@@ -64,7 +64,7 @@ export function FilterExpressionBadge({
       <FilterBadgeGroup
         filters={Array.isArray(filter) ? filter : filter.meta?.params}
         dataViews={dataViews}
-        conditionType={conditionalOperationType}
+        booleanRelation={conditionalOperationType}
       />
       {!isRootLevel ? (
         <span css={paddingRight}>
