@@ -7,25 +7,7 @@
 
 import { either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
-
-enum DurationUnit {
-  'd' = 'd',
-  'w' = 'w',
-  'M' = 'M',
-  'Q' = 'Q',
-  'Y' = 'Y',
-}
-
-class Duration {
-  constructor(public readonly value: number, public readonly unit: DurationUnit) {
-    if (isNaN(value) || value <= 0) {
-      throw new Error('invalid duration value');
-    }
-    if (!Object.values(DurationUnit).includes(unit as unknown as DurationUnit)) {
-      throw new Error('invalid duration unit');
-    }
-  }
-}
+import { Duration, DurationUnit } from '../models/duration';
 
 const durationType = new t.Type<Duration, string, unknown>(
   'Duration',
@@ -45,4 +27,4 @@ const durationType = new t.Type<Duration, string, unknown>(
   (duration: Duration): string => `${duration.value}${duration.unit}`
 );
 
-export { Duration, DurationUnit, durationType };
+export { durationType };
