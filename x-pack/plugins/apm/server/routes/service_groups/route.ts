@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import Boom from '@hapi/boom';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { kueryRt, rangeRt } from '../default_api_types';
@@ -14,7 +15,10 @@ import { getServiceGroup } from './get_service_group';
 import { saveServiceGroup } from './save_service_group';
 import { deleteServiceGroup } from './delete_service_group';
 import { lookupServices } from './lookup_services';
-import { SavedServiceGroup } from '../../../common/service_groups';
+import {
+  validateServiceGroupKuery,
+  SavedServiceGroup,
+} from '../../../common/service_groups';
 import { getServicesCounts } from './get_services_counts';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
@@ -120,6 +124,10 @@ const serviceGroupSaveRoute = createApmServerRoute({
     const {
       savedObjects: { client: savedObjectsClient },
     } = await context.core;
+    const { isValid, message } = validateServiceGroupKuery(params.body.kuery);
+    if (!isValid) {
+      throw Boom.badRequest(message);
+    }
 
     await saveServiceGroup({
       savedObjectsClient,

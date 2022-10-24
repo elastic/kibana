@@ -37,6 +37,7 @@ import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import { getSourceFieldsAgg, getSourceFields } from '../../get_source_fields';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -124,6 +125,7 @@ export function registerErrorCountRuleType({
                   ],
                   size: 10000,
                 },
+                aggs: getSourceFieldsAgg(),
               },
             },
           },
@@ -137,13 +139,19 @@ export function registerErrorCountRuleType({
         const errorCountResults =
           response.aggregations?.error_counts.buckets.map((bucket) => {
             const [serviceName, environment] = bucket.key;
-            return { serviceName, environment, errorCount: bucket.doc_count };
+            return {
+              serviceName,
+              environment,
+              errorCount: bucket.doc_count,
+              sourceFields: getSourceFields(bucket),
+            };
           }) ?? [];
 
         errorCountResults
           .filter((result) => result.errorCount >= ruleParams.threshold)
           .forEach((result) => {
-            const { serviceName, environment, errorCount } = result;
+            const { serviceName, environment, errorCount, sourceFields } =
+              result;
             const alertReason = formatErrorCountReason({
               serviceName,
               threshold: ruleParams.threshold,
@@ -176,6 +184,7 @@ export function registerErrorCountRuleType({
                   [ALERT_EVALUATION_VALUE]: errorCount,
                   [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
                   [ALERT_REASON]: alertReason,
+                  ...sourceFields,
                 },
               })
               .scheduleActions(ruleTypeConfig.defaultActionGroupId, {

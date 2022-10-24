@@ -17,7 +17,7 @@ import {
   APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
   MAX_NUMBER_OF_SERVICE_GROUPS,
 } from '../../../../common/service_groups';
-import { getKueryFields } from '../../helpers/get_kuery_fields';
+import { getKueryFields } from '../../../../common/utils/get_kuery_fields';
 import {
   AGENT_NAME,
   AGENT_VERSION,

@@ -5,6 +5,18 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
+import { getKueryFields } from './utils/get_kuery_fields';
+import {
+  AGENT_NAME,
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_LANGUAGE_NAME,
+} from './elasticsearch_fieldnames';
+import { i18n } from '@kbn/i18n';
+
+const LABELS = 'labels'; // implies labels.* wildcard
+
 export const APM_SERVICE_GROUP_SAVED_OBJECT_TYPE = 'apm-service-group';
 export const SERVICE_GROUP_COLOR_DEFAULT = '#D1DAE7';
 export const MAX_NUMBER_OF_SERVICE_GROUPS = 500;
@@ -19,4 +31,48 @@ export interface ServiceGroup {
 export interface SavedServiceGroup extends ServiceGroup {
   id: string;
   updatedAt: number;
+}
+
+export const SERVICE_GROUP_SUPPORTED_FIELDS = [
+  AGENT_NAME,
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_LANGUAGE_NAME,
+  LABELS,
+];
+
+export function isSupportedField(fieldName: string) {
+  return (
+    fieldName.startsWith(LABELS) ||
+    SERVICE_GROUP_SUPPORTED_FIELDS.includes(fieldName)
+  );
+}
+
+export function validateServiceGroupKuery(kuery: string) {
+  try {
+    const kueryFields = getKueryFields([fromKueryExpression(kuery)]);
+    const unsupportedKueryFields = kueryFields.filter(
+      (fieldName) => !isSupportedField(fieldName)
+    );
+    if (unsupportedKueryFields.length > 0) {
+      return {
+        isValid: false,
+        isParsingError: false,
+        message: i18n.translate(
+          'xpack.apm.serviceGroups.selectServicesForm.title',
+          {
+            defaultMessage:
+              'Query filter for service group does not support fields [{unsupportedFieldNames}]',
+            values: {
+              unsupportedFieldNames: unsupportedKueryFields.join(', '),
+            },
+          }
+        ),
+      };
+    } else {
+      return { isValid: true, isParsingError: false, message: '' };
+    }
+  } catch (error) {
+    return { isValid: false, isParsingError: true, message: error.message };
+  }
 }
