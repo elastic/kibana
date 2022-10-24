@@ -25,9 +25,12 @@ export const Img = React.forwardRef<HTMLImageElement, Props>(
       `,
       !src
         ? css`
-            position: absolute; // ensure that the image is visible at the top
-            top: 0;
             visibility: hidden;
+            position: absolute; // ensure that empty img tag occupies full container
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
           `
         : undefined,
       size ? sizes[size] : undefined,
