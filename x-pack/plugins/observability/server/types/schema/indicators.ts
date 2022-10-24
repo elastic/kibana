@@ -8,8 +8,7 @@
 import * as t from 'io-ts';
 import { allOrAnyString } from './common';
 
-const apmTransactionDurationIndicatorTypeSchema = t.literal<string>('slo.apm.transaction_duration');
-
+const apmTransactionDurationIndicatorTypeSchema = t.literal('slo.apm.transaction_duration');
 const apmTransactionDurationIndicatorSchema = t.type({
   type: apmTransactionDurationIndicatorTypeSchema,
   params: t.type({
@@ -21,10 +20,7 @@ const apmTransactionDurationIndicatorSchema = t.type({
   }),
 });
 
-const apmTransactionErrorRateIndicatorTypeSchema = t.literal<string>(
-  'slo.apm.transaction_error_rate'
-);
-
+const apmTransactionErrorRateIndicatorTypeSchema = t.literal('slo.apm.transaction_error_rate');
 const apmTransactionErrorRateIndicatorSchema = t.type({
   type: apmTransactionErrorRateIndicatorTypeSchema,
   params: t.intersection([
@@ -42,16 +38,29 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
   ]),
 });
 
+const kqlCustomIndicatorTypeSchema = t.literal('slo.kql.custom');
+const kqlCustomIndicatorSchema = t.type({
+  type: kqlCustomIndicatorTypeSchema,
+  params: t.type({
+    index: t.string,
+    query_filter: t.string,
+    numerator: t.string,
+    denominator: t.string,
+  }),
+});
+
 const indicatorDataSchema = t.type({ good: t.number, total: t.number });
 
 const indicatorTypesSchema = t.union([
   apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorTypeSchema,
+  kqlCustomIndicatorTypeSchema,
 ]);
 
 const indicatorSchema = t.union([
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
+  kqlCustomIndicatorSchema,
 ]);
 
 export {
@@ -59,6 +68,8 @@ export {
   apmTransactionDurationIndicatorTypeSchema,
   apmTransactionErrorRateIndicatorSchema,
   apmTransactionErrorRateIndicatorTypeSchema,
+  kqlCustomIndicatorSchema,
+  kqlCustomIndicatorTypeSchema,
   indicatorSchema,
   indicatorTypesSchema,
   indicatorDataSchema,

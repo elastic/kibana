@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiLink, EuiText } from '@elastic/eui';
 import React, { FC } from 'react';
 import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { DeepReadonly } from '../../../../../../../common/types/common';
 import { DataFrameAnalyticsConfig, isOutlierAnalysis } from '../../../../common';
 import { isClassificationAnalysis, isRegressionAnalysis } from '../../../../common/analytics';
@@ -401,9 +403,15 @@ export const useNavigateToWizardWithClonedJob = () => {
     services: {
       notifications: { toasts },
       data: { dataViews },
+      http: { basePath },
+      application: { capabilities },
+      theme,
     },
   } = useMlKibana();
+  const theme$ = theme.theme$;
   const navigateToPath = useNavigateToPath();
+  const canCreateDataView =
+    capabilities.savedObjectsManagement.edit === true || capabilities.indexPatterns.save === true;
 
   return async (item: Pick<DataFrameAnalyticsListRow, 'config' | 'stats'>) => {
     const sourceIndex = Array.isArray(item.config.source.index)
@@ -416,13 +424,42 @@ export const useNavigateToWizardWithClonedJob = () => {
       if (dv !== undefined) {
         sourceIndexId = dv.id;
       } else {
-        toasts.addDanger(
-          i18n.translate('xpack.ml.dataframe.analyticsList.noSourceDataViewForClone', {
-            defaultMessage:
-              'Unable to clone the analytics job. No data view exists for index {dataView}.',
-            values: { dataView: sourceIndex },
-          })
-        );
+        toasts.addDanger({
+          title: toMountPoint(
+            wrapWithTheme(
+              <>
+                <FormattedMessage
+                  id="xpack.ml.dataframe.analyticsList.noSourceDataViewForClone"
+                  defaultMessage="Unable to clone the analytics job. No data view exists for index {sourceIndex}."
+                  values={{ sourceIndex }}
+                />
+                {canCreateDataView ? (
+                  <EuiText size="xs" color="text">
+                    <FormattedMessage
+                      id="xpack.ml.dataframe.analytics.cloneAction.dataViewPromptLink"
+                      defaultMessage="{linkToDataViewManagement}"
+                      values={{
+                        linkToDataViewManagement: (
+                          <EuiLink
+                            href={`${basePath.get()}/app/management/kibana/dataViews/create`}
+                            target="_blank"
+                          >
+                            <FormattedMessage
+                              id="xpack.ml.dataframe.analytics.cloneAction.dataViewPromptLinkText"
+                              defaultMessage="Create a data view for {sourceIndex}"
+                              values={{ sourceIndex }}
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </EuiText>
+                ) : null}
+              </>,
+              theme$
+            )
+          ),
+        });
       }
     } catch (e) {
       const error = extractErrorMessage(e);
