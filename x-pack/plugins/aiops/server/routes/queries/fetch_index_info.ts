@@ -75,10 +75,14 @@ export const fetchIndexInfo = async (
     }
   });
 
-  const resp = await esClient.search(getRandomDocsRequest(params), {
-    signal: abortSignal,
-    maxRetries: 0,
-  });
+  // Only the deviation window will be used to identify field candidates and sample probability based on total doc count.
+  const resp = await esClient.search(
+    getRandomDocsRequest({ ...params, start: params.deviationMin, end: params.deviationMax }),
+    {
+      signal: abortSignal,
+      maxRetries: 0,
+    }
+  );
   const sampledDocs = resp.hits.hits.map((d) => d.fields ?? {});
 
   // Get all field names for each returned doc and flatten it
