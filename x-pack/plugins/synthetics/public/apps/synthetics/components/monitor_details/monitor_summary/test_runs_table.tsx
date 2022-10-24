@@ -48,6 +48,7 @@ interface TestRunsTableProps {
 
 export const TestRunsTable = ({ paginable = true }: TestRunsTableProps) => {
   const { basePath } = useSyntheticsSettingsContext();
+  const [page, setPage] = useState({ index: 0, size: 10 });
 
   const [sortField, setSortField] = useState<SortableField>('timestamp');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -68,7 +69,10 @@ export const TestRunsTable = ({ paginable = true }: TestRunsTableProps) => {
     },
   };
 
-  const handleTableChange = ({ page, sort }: Criteria<Ping>) => {
+  const handleTableChange = ({ page: newPage, sort }: Criteria<Ping>) => {
+    if (newPage !== undefined) {
+      setPage(newPage);
+    }
     if (sort !== undefined) {
       setSortField(sort.field as SortableField);
       setSortDirection(sort.direction);
@@ -166,6 +170,16 @@ export const TestRunsTable = ({ paginable = true }: TestRunsTableProps) => {
         tableLayout={'auto'}
         sorting={sorting}
         onChange={handleTableChange}
+        pagination={
+          paginable
+            ? {
+                pageIndex: page.index,
+                pageSize: page.size,
+                totalItemCount: 20, // FIXME
+                pageSizeOptions: [10, 20, 50], // TODO Confirm with Henry,
+              }
+            : undefined
+        }
       />
     </EuiPanel>
   );
