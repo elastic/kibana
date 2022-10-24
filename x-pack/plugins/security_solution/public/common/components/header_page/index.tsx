@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiProgress, EuiPageHeader, EuiPageHeaderSection, EuiSpacer } from '@elastic/eui';
+import { EuiProgress, EuiPageHeader, EuiPageHeaderSection, EuiSpacer, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import styled, { css } from 'styled-components';
 
@@ -69,6 +69,8 @@ export interface HeaderPageProps extends HeaderProps {
   subtitle2?: SubtitleProps['items'];
   title: TitleProp;
   titleNode?: React.ReactElement;
+  headerAction?: () => void;
+  headerActionLabel?: string;
 }
 
 export const HeaderLinkBack: React.FC<{ backOptions: BackOptions }> = React.memo(
@@ -108,9 +110,11 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   subtitle2,
   title,
   titleNode,
+  headerAction,
+  headerActionLabel,
 }) => (
   <>
-    <EuiPageHeader alignItems="center" bottomBorder={border}>
+    <EuiPageHeader alignItems="center" bottomBorder={border} rightSideItems={[ headerAction && <EuiButton fill onClick={headerAction}>{headerActionLabel}</EuiButton>]}>
       <HeaderSection>
         {backOptions && <HeaderLinkBack backOptions={backOptions} />}
         {!backOptions && backComponent && <>{backComponent}</>}
