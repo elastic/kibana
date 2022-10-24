@@ -285,6 +285,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     }
     // @ts-expect-error
     global.serverStartupBreakdown.preboot['register-descriptors'] =
+    // @ts-expect-error
       performance.now() - global.initTime;
 
     // Validate config and handle enabled statuses.
