@@ -653,6 +653,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
           ? ML_JOB_AGGREGATION.LAT_LONG
           : mlFunctionToESAggregation(detector.function),
       timeField: job.data_description.time_field!,
+      // @ts-expect-error bucket_span is of type estypes.Duration
       interval: job.analysis_config.bucket_span,
       datafeedConfig: job.datafeed_config!,
       summaryCountFieldName: job.analysis_config.summary_count_field_name,
@@ -1889,8 +1890,8 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
     const response = await mlClient.anomalySearch<estypes.SearchResponse<RecordForInfluencer>>(
       {
-        size: maxResults !== undefined ? maxResults : 100,
         body: {
+          size: maxResults !== undefined ? maxResults : 100,
           query: {
             bool: {
               filter: [

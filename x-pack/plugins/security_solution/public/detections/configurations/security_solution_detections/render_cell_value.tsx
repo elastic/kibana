@@ -38,7 +38,7 @@ export const RenderCellValue: React.FC<
   colIndex,
   rowRenderers,
   setCellProps,
-  timelineId,
+  scopeId,
   truncate,
 }) => (
   <DefaultCellRenderer
@@ -58,7 +58,7 @@ export const RenderCellValue: React.FC<
     colIndex={colIndex}
     rowRenderers={rowRenderers}
     setCellProps={setCellProps}
-    timelineId={timelineId}
+    scopeId={scopeId}
     truncate={truncate}
   />
 );
@@ -115,7 +115,7 @@ export const useRenderCellValue = ({
         colIndex={colIndex}
         rowRenderers={rowRenderers}
         setCellProps={setCellProps}
-        timelineId={TimelineId.casePage}
+        scopeId={TimelineId.casePage}
         truncate={truncate}
       />
     );

@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { TimelineId } from '../../../../../../common/types/timeline';
+import { TableId } from '../../../../../../common/types/timeline';
 import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../../common/mock';
 import { Actions, isAlert } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -271,7 +271,7 @@ describe('Actions', () => {
           <Actions
             {...defaultProps}
             ecsData={ecsData}
-            timelineId={TimelineId.kubernetesPageSessions}
+            timelineId={TableId.kubernetesPageSessions}
           />
         </TestProviders>
       );

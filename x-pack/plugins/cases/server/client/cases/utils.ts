@@ -6,19 +6,16 @@
  */
 
 import { uniqBy, isEmpty } from 'lodash';
-import { UserProfile } from '@kbn/security-plugin/common';
-import { IBasePath } from '@kbn/core-http-browser';
+import type { UserProfile } from '@kbn/security-plugin/common';
+import type { IBasePath } from '@kbn/core-http-browser';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
-import {
+import type {
   ActionConnector,
   CaseFullExternalService,
   CaseResponse,
   CaseUserActionsResponse,
   CommentResponse,
-  CommentType,
-  ActionTypes,
-  CaseStatuses,
   User,
   CaseAttributes,
   CaseAssignees,
@@ -26,10 +23,11 @@ import {
   CaseField,
   ThirdPartyField,
 } from '../../../common/api';
-import { CasesClientGetAlertsResponse } from '../alerts/types';
-import { ExternalServiceComment, ExternalServiceIncident } from './types';
+import { CommentType, ActionTypes, CaseStatuses } from '../../../common/api';
+import type { CasesClientGetAlertsResponse } from '../alerts/types';
+import type { ExternalServiceComment, ExternalServiceIncident } from './types';
 import { getAlertIds } from '../utils';
-import { CasesConnectorsMap } from '../../connectors';
+import type { CasesConnectorsMap } from '../../connectors';
 import { getCaseViewPath } from '../../common/utils';
 import * as i18n from './translations';
 

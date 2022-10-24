@@ -77,7 +77,7 @@ export const StatefulRowRenderer = ({
                 {rowRenderer.renderRow({
                   data: event.ecs,
                   isDraggable: true,
-                  timelineId,
+                  scopeId: timelineId,
                 })}
               </div>
             </EuiFocusTrap>
