@@ -249,6 +249,62 @@ describe('Guided setup', () => {
 
         expect(find('activeStepButtonLabel').text()).toEqual('Mark done');
       });
+
+      test('should render the step description as a paragraph if it is only one sentence', async () => {
+        const { component, find } = testBed;
+
+        const mockSingleSentenceStepDescriptionGuideState: GuideState = {
+          guideId: 'observability',
+          isActive: true,
+          status: 'in_progress',
+          steps: [
+            {
+              id: 'add_data',
+              status: 'complete',
+            },
+            {
+              id: 'view_dashboard',
+              status: 'complete',
+            },
+            {
+              id: 'tour_observability',
+              status: 'in_progress',
+            },
+          ],
+        };
+
+        await updateComponentWithState(
+          component,
+          mockSingleSentenceStepDescriptionGuideState,
+          true
+        );
+
+        expect(
+          find('guidePanelStepDescription')
+            .last()
+            .containsMatchingElement(
+              <p>{guidesConfig.observability.steps[2].descriptionList[0]}</p>
+            )
+        ).toBe(true);
+      });
+
+      test('should render the step description as an unordered list if it is more than one sentence', async () => {
+        const { component, find } = testBed;
+
+        await updateComponentWithState(component, mockActiveSearchGuideState, true);
+
+        expect(
+          find('guidePanelStepDescription')
+            .first()
+            .containsMatchingElement(
+              <ul>
+                {guidesConfig.search.steps[0].descriptionList.map((description, i) => (
+                  <li key={i}>{description}</li>
+                ))}
+              </ul>
+            )
+        ).toBe(true);
+      });
     });
 
     describe('Quit guide modal', () => {
