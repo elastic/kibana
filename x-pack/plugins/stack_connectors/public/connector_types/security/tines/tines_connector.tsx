@@ -32,6 +32,7 @@ const TinesActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         componentProps={{
           euiFieldProps: { readOnly, 'data-test-subj': 'tinesUrlInput', fullWidth: true },
         }}
+        helpText={i18n.AUTHENTICATION_HELP}
       />
     </EuiFlexItem>
     <EuiFlexItem>
@@ -51,6 +52,7 @@ const TinesActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         componentProps={{
           euiFieldProps: { readOnly, 'data-test-subj': 'tinesEmailInput' },
         }}
+        helpText={i18n.EMAIL_HELP}
       />
     </EuiFlexItem>
     <EuiFlexItem>
@@ -64,6 +66,7 @@ const TinesActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         componentProps={{
           euiFieldProps: { readOnly, 'data-test-subj': 'tinesTokenInput' },
         }}
+        helpText={i18n.TOKEN_HELP}
       />
     </EuiFlexItem>
   </EuiFlexGroup>

@@ -176,7 +176,12 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <EuiFormRow fullWidth error={errors.story} label={i18n.STORY_LABEL}>
+        <EuiFormRow
+          fullWidth
+          error={errors.story}
+          label={i18n.STORY_LABEL}
+          helpText={i18n.STORY_HELP}
+        >
           <EuiComboBox
             aria-label={i18n.STORY_PLACEHOLDER}
             placeholder={i18n.STORY_ARIA_LABEL}
@@ -189,7 +194,12 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
             data-test-subj="tines-storySelector"
           />
         </EuiFormRow>
-        <EuiFormRow fullWidth error={errors.webhook} label={i18n.WEBHOOK_LABEL}>
+        <EuiFormRow
+          fullWidth
+          error={errors.webhook}
+          label={i18n.WEBHOOK_LABEL}
+          helpText={i18n.WEBHOOK_HELP}
+        >
           <EuiComboBox
             aria-label={i18n.WEBHOOK_ARIA_LABEL}
             placeholder={

@@ -20,18 +20,30 @@ export const AUTHENTICATION_TITLE = i18n.translate(
     defaultMessage: 'Authentication',
   }
 );
+export const AUTHENTICATION_HELP = i18n.translate(
+  'xpack.stackConnectors.security.tines.config.authenticationHelp',
+  {
+    defaultMessage: 'The Tines tenant url',
+  }
+);
 export const EMAIL_LABEL = i18n.translate(
   'xpack.stackConnectors.security.tines.config.emailTextFieldLabel',
   {
     defaultMessage: 'Email',
   }
 );
+export const EMAIL_HELP = i18n.translate('xpack.stackConnectors.security.tines.config.emailHelp', {
+  defaultMessage: 'The email address used in your Tines profile',
+});
 export const TOKEN_LABEL = i18n.translate(
   'xpack.stackConnectors.security.tines.config.tokenTextFieldLabel',
   {
-    defaultMessage: 'Auth token',
+    defaultMessage: 'API token',
   }
 );
+export const TOKEN_HELP = i18n.translate('xpack.stackConnectors.security.tines.config.tokenHelp', {
+  defaultMessage: 'You can create a API tokens in your Tines profile',
+});
 
 export const URL_INVALID = i18n.translate(
   'xpack.stackConnectors.security.tines.config.error.invalidUrlTextField',
@@ -60,6 +72,9 @@ export const STORY_LABEL = i18n.translate(
     defaultMessage: 'Tines Story',
   }
 );
+export const STORY_HELP = i18n.translate('xpack.stackConnectors.security.tines.params.storyHelp', {
+  defaultMessage: 'The Tines story to send the events to',
+});
 export const STORY_PLACEHOLDER = i18n.translate(
   'xpack.stackConnectors.security.tines.params.storyPlaceholder',
   {
@@ -77,6 +92,12 @@ export const WEBHOOK_LABEL = i18n.translate(
   'xpack.stackConnectors.security.tines.params.webhookFieldLabel',
   {
     defaultMessage: 'Tines Webhook Action',
+  }
+);
+export const WEBHOOK_HELP = i18n.translate(
+  'xpack.stackConnectors.security.tines.params.webhookHelp',
+  {
+    defaultMessage: 'The data entry action in the story',
   }
 );
 export const WEBHOOK_PLACEHOLDER = i18n.translate(
