@@ -55,6 +55,7 @@ describe('Expression', () => {
           currentOptions,
         }}
         dataViews={dataViewMock}
+        onChangeMetaData={() => {}}
       />
     );
 

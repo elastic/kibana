@@ -55,6 +55,7 @@ describe('Expression', () => {
         setRuleProperty={() => {}}
         metadata={currentOptions}
         dataViews={dataViewMock}
+        onChangeMetaData={() => {}}
       />
     );
 
@@ -121,6 +122,7 @@ describe('Expression', () => {
         setRuleProperty={() => {}}
         metadata={{}}
         dataViews={dataViewMock}
+        onChangeMetaData={() => {}}
       />
     );
 
