@@ -160,6 +160,7 @@ export const useCasesColumns = ({
         }
         return getEmptyTagValue();
       },
+      width: '20%',
     },
   ];
 
