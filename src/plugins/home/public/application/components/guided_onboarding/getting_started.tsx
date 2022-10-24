@@ -78,6 +78,12 @@ export const GettingStarted = () => {
     fetchGuidesState();
   }, [fetchGuidesState]);
 
+  useEffect(() => {
+    if (cloud?.isCloudEnabled === false) {
+      return history.push('/');
+    }
+  }, [cloud, history]);
+
   const onSkip = () => {
     trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__skipped');
     // disable welcome screen on the home page
@@ -94,10 +100,6 @@ export const GettingStarted = () => {
     await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
     // TODO error handling https://github.com/elastic/kibana/issues/139798
   };
-
-  if (cloud?.isCloudEnabled === false) {
-    return history.push('/');
-  }
 
   return (
     <KibanaPageTemplate panelled={false} grow>
@@ -116,7 +118,7 @@ export const GettingStarted = () => {
             {['search', 'observability', 'observabilityLink', 'security'].map((useCase) => {
               if (useCase === 'observabilityLink') {
                 return (
-                  <EuiFlexItem>
+                  <EuiFlexItem key={`linkCard-${useCase}`}>
                     <ObservabilityLinkCard
                       navigateToApp={application.navigateToApp}
                       isDarkTheme={isDarkTheme}
@@ -126,7 +128,7 @@ export const GettingStarted = () => {
                 );
               }
               return (
-                <EuiFlexItem>
+                <EuiFlexItem key={`guideCard-${useCase}`}>
                   <GuideCard
                     useCase={useCase as UseCase}
                     guides={guidesState}
