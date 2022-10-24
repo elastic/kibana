@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import React from 'react';
-
-describe('Search Experiences Guide Component', () => {
-
-});
+describe('Search Experiences Guide Component', () => {});

@@ -65,7 +65,6 @@ import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/t
 import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
 
 import { ConfigType } from '.';
-import { Search } from 'brace';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;

@@ -103,8 +103,7 @@ export const SEARCH_EXPERIENCES_PLUGIN = {
     defaultMessage: 'Search Experiences',
   }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.searchExperiences.productDescription', {
-    defaultMessage:
-      'Build an intuitive, engaging search experience without reinventing the wheel.',
+    defaultMessage: 'Build an intuitive, engaging search experience without reinventing the wheel.',
   }),
   URL: '/app/enterprise_search/search_experiences',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
