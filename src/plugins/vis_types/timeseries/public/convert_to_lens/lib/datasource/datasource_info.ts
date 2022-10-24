@@ -64,6 +64,7 @@ export const extractOrGenerateDatasourceInfo = async (
       }
     } else {
       indexPattern = await dataViews.get(indexPatternId);
+
       if (!timeField) {
         timeField = indexPattern.timeFieldName;
       }
