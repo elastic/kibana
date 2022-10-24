@@ -18,7 +18,6 @@ import { type DataViewField } from '@kbn/data-views-plugin/public';
 import moment from 'moment';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useTimefilter, useTimeRangeUpdates } from '../../hooks/use_time_filter';
-import { ChartComponentProps } from './chart_component';
 import { useChangePointRequest } from './use_change_point_agg_request';
 import { type TimeBuckets } from '../../../common/time_buckets';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -38,7 +37,7 @@ export const ChangePointDetectionContext = createContext<{
   splitFieldsOptions: DataViewField[];
   updateRequestParams: (update: Partial<ChangePointDetectionRequestParams>) => void;
   isLoading: boolean;
-  annotation: ChartComponentProps['annotation'] | undefined;
+  annotations: ChangePointAnnotation[];
 }>({
   isLoading: false,
   splitFieldsOptions: [],
@@ -46,8 +45,27 @@ export const ChangePointDetectionContext = createContext<{
   requestParams: {} as ChangePointDetectionRequestParams,
   timeBuckets: {} as TimeBuckets,
   updateRequestParams: () => {},
-  annotation: undefined,
+  annotations: [],
 });
+
+export type ChangePointType =
+  | 'dip'
+  | 'distribution_change'
+  | 'non_stationary'
+  | 'spike'
+  | 'stationary'
+  | 'step_change'
+  | 'trend_change'
+  | 'indeterminable';
+
+interface ChangePointAnnotation {
+  label: string;
+  timestamp: string;
+  endTimestamp: string;
+  group_field: string;
+  type: ChangePointType;
+  p_value?: number;
+}
 
 export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   const { dataView } = useDataSource();
@@ -56,7 +74,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   } = useAiopsAppContext();
   const timefilter = useTimefilter();
   const timeBuckets = useTimeBuckets();
-  const [annotation, setAnnotation] = useState<ChartComponentProps['annotation']>();
+  const [annotations, setAnnotations] = useState<ChangePointAnnotation[]>([]);
 
   const timeRange = useTimeRangeUpdates();
 
@@ -99,32 +117,44 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   const { runRequest, isLoading } = useChangePointRequest(timeBuckets, requestParams, timeRange);
 
   const fetchChangePoints = useCallback(async () => {
+    const interval = timeBuckets.getInterval().asSeconds();
+
+    if (!interval) return;
+
     const result = await runRequest();
     if (!result.rawResponse.aggregations) {
       toasts.addDanger('No agg results');
       return;
     }
 
-    const changePointType = Object.keys(
-      result.rawResponse.aggregations.change_point_request.type
-    )[0] as string;
+    const groups = result.rawResponse.aggregations.groupings.buckets
+      .map((v) => {
+        const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
 
-    if (changePointType === 'indeterminable') {
-      toasts.addWarning(
-        // @ts-ignore
-        result.rawResponse.aggregations.change_point_request.type[changePointType].reason
-      );
-      return;
-    }
+        if (changePointType === 'indeterminable') {
+          toasts.addWarning(
+            // @ts-ignore
+            v.change_point_request.type[changePointType].reason
+          );
+          return;
+        }
 
-    const timeAsString = result.rawResponse.aggregations.change_point_request.bucket.key;
-    setAnnotation({
-      timestamp: timeAsString,
-      // @ts-ignore
-      endTimestamp: moment(timeAsString).add(timeBuckets.getInterval()).toISOString(),
-      label: changePointType,
-    });
-  }, [timeBuckets, runRequest, setAnnotation, toasts]);
+        const timeAsString = v.change_point_request.bucket?.key;
+
+        return {
+          group_field: v.key,
+          type: changePointType,
+          p_value: v.change_point_request.type[changePointType].p_value,
+          timestamp: timeAsString,
+          // @ts-ignore
+          endTimestamp: moment(timeAsString).add(timeBuckets.getInterval()).toISOString(),
+          label: changePointType,
+        } as ChangePointAnnotation;
+      })
+      .filter((v): v is ChangePointAnnotation => !!v);
+
+    setAnnotations(groups);
+  }, [timeBuckets, runRequest, setAnnotations, toasts]);
 
   useEffect(
     function fetchAggResults() {
@@ -140,7 +170,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     updateRequestParams,
     metricFieldOptions,
     splitFieldsOptions,
-    annotation,
+    annotations,
   };
 
   return (

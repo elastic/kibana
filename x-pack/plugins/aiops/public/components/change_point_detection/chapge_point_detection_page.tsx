@@ -5,7 +5,18 @@
  * 2.0.
  */
 import React, { FC, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiDescriptionList,
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiProgress,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { useChangePontDetectionContext } from './change_point_detection_context';
 import { MetricFieldSelector } from './metric_field_selector';
 import { SplitFieldSelector } from './split_field_selector';
@@ -14,7 +25,7 @@ import { PageHeader } from '../page_header';
 import { ChartComponent } from './chart_component';
 
 export const ChangePointDetectionPage: FC = () => {
-  const { isLoading, requestParams, updateRequestParams, annotation } =
+  const { isLoading, requestParams, updateRequestParams, annotations } =
     useChangePontDetectionContext();
 
   const setFn = useCallback(
@@ -41,7 +52,6 @@ export const ChangePointDetectionPage: FC = () => {
   return (
     <div data-test-subj="aiopsChanePointDetectionPage">
       <PageHeader />
-      {isLoading ? <EuiProgress size="xs" color="accent" /> : null}
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems={'center'}>
         <EuiFlexItem grow={false}>
@@ -54,7 +64,35 @@ export const ChangePointDetectionPage: FC = () => {
           <SplitFieldSelector value={requestParams.splitField} onChange={setSplitField} />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <ChartComponent annotation={annotation} />
+
+      {isLoading ? (
+        <EuiProgress size="xs" color="accent" />
+      ) : (
+        <EuiHorizontalRule size="full" margin="s" />
+      )}
+
+      <EuiFlexGrid columns={2} responsive gutterSize={'s'}>
+        {annotations.map((v) => {
+          return (
+            <EuiFlexItem key={v.group_field}>
+              <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
+                <EuiTitle size="xxs">
+                  <h3>{v.group_field}</h3>
+                </EuiTitle>
+                <EuiBadge color="hollow">{v.type}</EuiBadge>
+
+                {v.p_value ? (
+                  <EuiDescriptionList
+                    type="inline"
+                    listItems={[{ title: 'p_value', description: v.p_value }]}
+                  />
+                ) : null}
+                <ChartComponent annotation={v} />
+              </EuiPanel>
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGrid>
     </div>
   );
 };
