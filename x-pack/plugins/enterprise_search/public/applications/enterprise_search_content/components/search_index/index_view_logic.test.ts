@@ -6,7 +6,7 @@
  */
 
 import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_logic';
-import { apiIndex, connectorIndex, crawlerIndex } from '../../__mocks__/view_index.mock';
+import { apiIndex, connectorIndex, connectorCrawlerIndex } from '../../__mocks__/view_index.mock';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
@@ -122,8 +122,8 @@ describe('IndexViewLogic', () => {
       });
       it('should call fetchCrawler if index is a crawler ', () => {
         IndexViewLogic.actions.fetchCrawlerData = jest.fn();
-        IndexNameLogic.actions.setIndexName('crawler');
-        FetchIndexApiLogic.actions.apiSuccess(crawlerIndex);
+        IndexNameLogic.actions.setIndexName('connector-crawler');
+        FetchIndexApiLogic.actions.apiSuccess(connectorCrawlerIndex);
 
         expect(IndexViewLogic.actions.createNewFetchIndexTimeout).toHaveBeenCalled();
         expect(IndexViewLogic.actions.fetchCrawlerData).toHaveBeenCalled();
@@ -131,7 +131,7 @@ describe('IndexViewLogic', () => {
       it('should not call fetchCrawler if index is a crawler but indexName does not match', () => {
         IndexViewLogic.actions.fetchCrawlerData = jest.fn();
         IndexNameLogic.actions.setIndexName('api');
-        FetchIndexApiLogic.actions.apiSuccess(crawlerIndex);
+        FetchIndexApiLogic.actions.apiSuccess(connectorCrawlerIndex);
 
         expect(IndexViewLogic.actions.createNewFetchIndexTimeout).toHaveBeenCalled();
         expect(IndexViewLogic.actions.fetchCrawlerData).not.toHaveBeenCalled();

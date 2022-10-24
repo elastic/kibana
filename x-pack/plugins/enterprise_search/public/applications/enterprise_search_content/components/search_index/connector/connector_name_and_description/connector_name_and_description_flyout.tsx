@@ -27,6 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { Status } from '../../../../../../../common/types/api';
+import { CANCEL_BUTTON_LABEL } from '../../../../../shared/constants';
 
 import { ConnectorNameAndDescriptionApiLogic } from '../../../../api/connector/update_connector_name_and_description_api_logic';
 
@@ -35,22 +36,23 @@ import { ConnectorNameAndDescriptionLogic } from './connector_name_and_descripti
 
 export const ConnectorNameAndDescriptionFlyout: React.FC = () => {
   const { status } = useValues(ConnectorNameAndDescriptionApiLogic);
-  const { isEditing, nameAndDescription, localNameAndDescription } = useValues(
-    ConnectorNameAndDescriptionLogic
-  );
+  const { isEditing } = useValues(ConnectorNameAndDescriptionLogic);
   const { saveNameAndDescription, setIsEditing } = useActions(ConnectorNameAndDescriptionLogic);
 
-  console.log({
-    nameAndDescription: JSON.stringify(nameAndDescription),
-    localNameAndDescription: JSON.stringify(localNameAndDescription),
-  });
   if (!isEditing) return null;
 
   return (
     <EuiFlyout onClose={() => setIsEditing(false)} size="s">
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h3>Describe this crawler</h3>
+          <h3>
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.indices.configurationConnector.nameAndDescriptionFlyout.title',
+              {
+                defaultMessage: 'Describe this crawler',
+              }
+            )}
+          </h3>
         </EuiTitle>
       </EuiFlyoutHeader>
 
@@ -58,7 +60,7 @@ export const ConnectorNameAndDescriptionFlyout: React.FC = () => {
         <EuiFormRow>
           <EuiText size="s">
             {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.configurationConnector.nameAndDescriptionForm.description',
+              'xpack.enterpriseSearch.content.indices.configurationConnector.nameAndDescriptionFlyout.description',
               {
                 defaultMessage:
                   'By naming and describing this connector your colleagues and wider team will know what this connector is meant for.',
@@ -77,12 +79,17 @@ export const ConnectorNameAndDescriptionFlyout: React.FC = () => {
               onClick={() => setIsEditing(false)}
               isDisabled={status === Status.LOADING}
             >
-              Cancel
+              {CANCEL_BUTTON_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton isLoading={status === Status.LOADING} fill onClick={saveNameAndDescription}>
-              Save name and description
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.configurationConnector.nameAndDescriptionFlyout.saveButtonLabel',
+                {
+                  defaultMessage: 'Save name and description',
+                }
+              )}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

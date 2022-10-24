@@ -6,7 +6,7 @@
  */
 
 import { setMockValues } from '../../../../../__mocks__/kea_logic';
-import { crawlerIndex } from '../../../../__mocks__/view_index.mock';
+import { connectorCrawlerIndex } from '../../../../__mocks__/view_index.mock';
 
 import React from 'react';
 
@@ -20,7 +20,7 @@ const DEFAULT_VALUES = {
   // LicensingLogic
   hasPlatinumLicense: true,
   // IndexViewLogic
-  indexName: crawlerIndex.name,
+  indexName: connectorCrawlerIndex.name,
   ingestionMethod: 'crawler',
   // KibanaLogic
   isCloud: false,
