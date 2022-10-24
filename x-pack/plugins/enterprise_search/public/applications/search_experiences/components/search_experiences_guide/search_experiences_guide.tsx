@@ -18,22 +18,18 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiImage,
-  useEuiTheme,
   EuiHorizontalRule,
   EuiCard,
   EuiIcon,
 } from '@elastic/eui';
 
 import { SEARCH_EXPERIENCES_PLUGIN } from '../../../../../common/constants';
-import welcomeGraphicDark from '../../../../assets/images/welcome_dark.svg';
-import welcomeGraphicLight from '../../../../assets/images/welcome_light.svg';
+import searchExperiencesIllustration from '../../../../assets/images/search_experiences.svg';
 
 import { SetElasticsearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchSearchExperiencesPageTemplate } from '../layout';
 
 export const SearchExperiencesGuide: React.FC = () => {
-  const { colorMode } = useEuiTheme();
-
   return (
     <EnterpriseSearchSearchExperiencesPageTemplate
       restrictWidth
@@ -129,7 +125,7 @@ export const SearchExperiencesGuide: React.FC = () => {
             <EuiImage
               size="xl"
               float="right"
-              src={colorMode === 'LIGHT' ? welcomeGraphicLight : welcomeGraphicDark}
+              src={searchExperiencesIllustration}
               alt="Search experiences illustration"
             />
           </EuiFlexItem>
