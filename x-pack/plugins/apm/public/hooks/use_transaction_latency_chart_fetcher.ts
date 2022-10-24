@@ -6,7 +6,6 @@
  */
 
 import { useMemo } from 'react';
-import { LatencyAggregationType } from '../../common/latency_aggregation_types';
 import { usePreviousPeriodLabel } from './use_previous_period_text';
 import { isTimeComparison } from '../components/shared/time_comparison/get_comparison_options';
 import { useFetcher } from './use_fetcher';
