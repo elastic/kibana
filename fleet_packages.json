@@ -38,5 +38,9 @@
   {
     "name": "synthetics",
     "version": "0.10.3"
+  },
+  {
+    "name": "security_detection_engine",
+    "version": "8.3.2"
   }
 ]

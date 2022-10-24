@@ -56,6 +56,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     if (
       (await doAnyChangesMatch([
+        /^fleet_packages\.json/, // It contains reference to prebuilt detection rules, we want to run security solution tests if it changes
         /^x-pack\/plugins\/lists/,
         /^x-pack\/plugins\/security_solution/,
         /^x-pack\/plugins\/timelines/,
