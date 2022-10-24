@@ -31,7 +31,7 @@ describe('UsersGridPage', () => {
     coreStart = coreMock.createStart();
   });
 
-  it('renders the list of users', async () => {
+  it('renders the list of users and create button', async () => {
     const apiClientMock = userAPIClientMock.create();
     apiClientMock.getUsers.mockImplementation(() => {
       return Promise.resolve<User[]>([
@@ -71,6 +71,7 @@ describe('UsersGridPage', () => {
     expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(2);
     expect(findTestSubject(wrapper, 'userDisabled')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'createUserButton')).toHaveLength(1);
   });
 
   it('renders the loading indication on the table when fetching user with data', async () => {
@@ -374,6 +375,46 @@ describe('UsersGridPage', () => {
         enabled: true,
       },
     ]);
+  });
+
+  it('hides controls when `readOnly` is enabled', async () => {
+    const apiClientMock = userAPIClientMock.create();
+    apiClientMock.getUsers.mockImplementation(() => {
+      return Promise.resolve<User[]>([
+        {
+          username: 'foo',
+          email: 'foo@bar.net',
+          full_name: 'foo bar',
+          roles: ['kibana_user'],
+          enabled: true,
+        },
+        {
+          username: 'reserved',
+          email: 'reserved@bar.net',
+          full_name: '',
+          roles: ['superuser'],
+          enabled: true,
+          metadata: {
+            _reserved: true,
+          },
+        },
+      ]);
+    });
+
+    const wrapper = mountWithIntl(
+      <UsersGridPage
+        userAPIClient={apiClientMock}
+        rolesAPIClient={rolesAPIClientMock.create()}
+        notifications={coreStart.notifications}
+        history={history}
+        navigateToApp={coreStart.application.navigateToApp}
+        readOnly
+      />
+    );
+
+    await waitForRender(wrapper);
+
+    expect(findTestSubject(wrapper, 'createUserButton')).toHaveLength(0);
   });
 });
 
