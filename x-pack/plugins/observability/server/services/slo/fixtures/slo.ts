@@ -13,6 +13,7 @@ import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
   Indicator,
+  KQLCustomIndicator,
   SLO,
 } from '../../../types/models';
 import { CreateSLOParams } from '../../../types/rest_specs';
@@ -41,6 +42,19 @@ export const createAPMTransactionDurationIndicator = (
     transaction_name: 'irrelevant',
     transaction_type: 'irrelevant',
     'threshold.us': 500000,
+    ...params,
+  },
+});
+
+export const createKQLCustomIndicator = (
+  params: Partial<KQLCustomIndicator['params']> = {}
+): Indicator => ({
+  type: 'slo.kql.custom',
+  params: {
+    index: 'my-index*',
+    query_filter: 'labels.groupId: group-3',
+    numerator: 'latency < 300',
+    denominator: '',
     ...params,
   },
 });
