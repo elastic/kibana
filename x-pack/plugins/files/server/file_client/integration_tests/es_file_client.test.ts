@@ -11,11 +11,7 @@ import { createEsFileClient } from '../create_es_file_client';
 import { FileClient } from '../types';
 import { FileMetadata } from '../../../common';
 
-/**
- * This file client is using Elasticsearch interfaces directly to manage files.
- */
-// FLAKY: https://github.com/elastic/kibana/issues/139565
-describe.skip('ES-index-backed file client', () => {
+describe('ES-index-backed file client', () => {
   let esClient: TestEnvironmentUtils['esClient'];
   let fileClient: FileClient;
   let testHarness: TestEnvironmentUtils;
@@ -110,7 +106,7 @@ describe.skip('ES-index-backed file client', () => {
     await file3.uploadContent(Readable.from(['test']));
 
     {
-      const results = await fileClient.find({
+      const { files: results } = await fileClient.find({
         status: ['READY'],
         meta: { test: '3' },
       });
@@ -125,7 +121,7 @@ describe.skip('ES-index-backed file client', () => {
     }
 
     {
-      const results = await fileClient.find({
+      const { files: results } = await fileClient.find({
         status: ['READY', 'AWAITING_UPLOAD'],
       });
 
@@ -182,10 +178,10 @@ describe.skip('ES-index-backed file client', () => {
       },
     });
 
-    const list = await fileClient.list();
+    const { files } = await fileClient.find();
 
-    expect(list).toHaveLength(1);
-    expect(list[0].toJSON()).toEqual(
+    expect(files).toHaveLength(1);
+    expect(files[0].toJSON()).toEqual(
       expect.objectContaining({
         id: '123',
         fileKind: 'none',
@@ -197,6 +193,9 @@ describe.skip('ES-index-backed file client', () => {
       })
     );
 
-    await Promise.all([fileClient.delete({ id: id1 }), fileClient.delete({ id: id2 })]);
+    await Promise.all([
+      fileClient.delete({ id: id1, hasContent: false }),
+      fileClient.delete({ id: id2, hasContent: false }),
+    ]);
   });
 });

@@ -31,12 +31,12 @@ import {
 import { useSyntheticsSettingsContext } from '../../../contexts/synthetics_settings_context';
 
 import { sortPings } from '../../../utils/monitor_test_result/sort_pings';
-import { checkIsStalePing } from '../../../utils/monitor_test_result/check_pings';
 import { selectPingsLoading, selectMonitorRecentPings, selectPingsError } from '../../../state';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
 import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
 import { JourneyStepScreenshotContainer } from '../../common/monitor_test_result/journey_step_screenshot_container';
 
+import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { useJourneySteps } from '../hooks/use_journey_steps';
 
@@ -56,8 +56,6 @@ export const LastTenTestRuns = () => {
   const { monitor } = useSelectedMonitor();
 
   const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === DataStream.BROWSER;
-  const hasStalePings = checkIsStalePing(monitor, pings?.[0]);
-  const loading = hasStalePings || pingsLoading;
 
   const sorting: EuiTableSortingType<Ping> = {
     sort: {
@@ -121,8 +119,9 @@ export const LastTenTestRuns = () => {
     },
   ];
 
+  const historyIdParam = monitor?.[ConfigKey.CUSTOM_HEARTBEAT_ID] ?? monitor?.[ConfigKey.ID];
   return (
-    <EuiPanel css={{ minHeight: 200 }}>
+    <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 200 }}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
@@ -136,7 +135,8 @@ export const LastTenTestRuns = () => {
             iconType="list"
             iconSide="left"
             data-test-subj="monitorSummaryViewLastTestRun"
-            href={`${basePath}/app/uptime/monitor/${btoa(monitor?.id ?? '')}`}
+            disabled={!historyIdParam}
+            href={`${basePath}/app/uptime/monitor/${btoa(historyIdParam ?? '')}`}
           >
             {i18n.translate('xpack.synthetics.monitorDetails.summary.viewHistory', {
               defaultMessage: 'View History',
@@ -146,12 +146,12 @@ export const LastTenTestRuns = () => {
       </EuiFlexGroup>
       <EuiBasicTable
         compressed={false}
-        loading={loading}
+        loading={pingsLoading}
         columns={columns}
         error={pingsError?.body?.message}
-        items={hasStalePings ? [] : sortedPings}
+        items={sortedPings}
         noItemsMessage={
-          loading
+          pingsLoading
             ? i18n.translate('xpack.synthetics.monitorDetails.loadingTestRuns', {
                 defaultMessage: 'Loading test runs...',
               })
@@ -208,9 +208,10 @@ const TestDetailsLink = ({
   const { euiTheme } = useEuiTheme();
   const { basePath } = useSyntheticsSettingsContext();
 
+  const format = useKibanaDateFormat();
   const timestampText = (
     <EuiText size="s" css={{ fontWeight: euiTheme.font.weight.medium }}>
-      {formatTestRunAt(timestamp)}
+      {formatTestRunAt(timestamp, format)}
     </EuiText>
   );
 

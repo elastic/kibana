@@ -6,7 +6,7 @@
  */
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { CaseAggregationResult } from '../types';
+import type { CaseAggregationResult } from '../types';
 import {
   findValueInBuckets,
   getAggregationsBuckets,

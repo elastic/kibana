@@ -1,0 +1,9 @@
+title: Case response properties for updated_by
+type: object
+nullable: true
+properties:
+  $ref: 'user_properties.yaml'
+required:
+  - email
+  - full_name
+  - username

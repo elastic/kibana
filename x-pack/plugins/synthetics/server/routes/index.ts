@@ -18,6 +18,8 @@ import {
   getSyntheticsMonitorOverviewRoute,
   getSyntheticsMonitorRoute,
 } from './monitor_cruds/get_monitor';
+import { deleteSyntheticsMonitorProjectRoute } from './monitor_cruds/delete_monitor_project';
+import { getSyntheticsProjectMonitorsRoute } from './monitor_cruds/get_monitor_project';
 import { runOnceSyntheticsMonitorRoute } from './synthetics_service/run_once_monitor';
 import { getServiceAllowedRoute } from './synthetics_service/get_service_allowed';
 import { testNowMonitorRoute } from './synthetics_service/test_now_monitor';
@@ -31,16 +33,19 @@ import {
   SyntheticsRestApiRouteFactory,
   SyntheticsStreamingRouteFactory,
 } from '../legacy_uptime/routes';
+import { getHasZipUrlMonitorRoute } from './fleet/get_has_zip_url_monitors';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsMonitorRoute,
   getSyntheticsEnablementRoute,
   deleteSyntheticsMonitorRoute,
+  deleteSyntheticsMonitorProjectRoute,
   disableSyntheticsRoute,
   editSyntheticsMonitorRoute,
   enableSyntheticsRoute,
   getServiceLocationsRoute,
   getSyntheticsMonitorRoute,
+  getSyntheticsProjectMonitorsRoute,
   getAllSyntheticsMonitorRoute,
   getSyntheticsMonitorOverviewRoute,
   installIndexTemplatesRoute,
@@ -49,6 +54,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getServiceAllowedRoute,
   getAPIKeySyntheticsRoute,
   syntheticsGetPingsRoute,
+  getHasZipUrlMonitorRoute,
   createGetCurrentStatusRoute,
 ];
 

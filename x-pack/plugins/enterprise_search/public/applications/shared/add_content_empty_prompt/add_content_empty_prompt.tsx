@@ -60,7 +60,7 @@ export const AddContentEmptyPrompt: React.FC<EmptyPromptProps> = ({ title, butto
                 <p>
                   {i18n.translate('xpack.enterpriseSearch.emptyState.description', {
                     defaultMessage:
-                      'An Elasticsearch index is where your content gets stored. Get started by creating an Elasticsearch index and selecting an ingestion method. Options include the Elastic web crawler, third party data integrations, or using Elasticsearch API endpoints.',
+                      'Your content is stored in an Elasticsearch index. Get started by creating an Elasticsearch index and selecting an ingestion method. Options include the Elastic web crawler, third party data integrations, or using Elasticsearch API endpoints.',
                   })}
                 </p>
                 <p>

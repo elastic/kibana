@@ -47,9 +47,9 @@ journey('AddPrivateLocationMonitor', async ({ page, params: { kibanaUrl } }) => 
 
     await page.click('[data-test-subj="superDatePickerApplyTimeButton"]');
   });
-  step('Click [placeholder="Find apps, content, and more. Ex: Discover"]', async () => {
-    await page.click('[placeholder="Find apps, content, and more. Ex: Discover"]');
-    await page.fill('[placeholder="Find apps, content, and more. Ex: Discover"]', 'integ');
+  step('Click [placeholder="Find apps, content, and more."]', async () => {
+    await page.click('[placeholder="Find apps, content, and more."]');
+    await page.fill('[placeholder="Find apps, content, and more."]', 'integ');
     await Promise.all([
       page.waitForNavigation(/* { url: '${kibanaUrl}/app/integrations/browse' }*/),
       page.click('text=Integrations'),

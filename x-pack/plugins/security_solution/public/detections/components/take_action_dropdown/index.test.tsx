@@ -36,7 +36,7 @@ import {
 import { getUserPrivilegesMockDefaultValue } from '../../../common/components/user_privileges/__mocks__';
 import { allCasesPermissions } from '../../../cases_test_utils';
 import { HostStatus } from '../../../../common/endpoint/types';
-import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
+import { ENDPOINT_CAPABILITIES } from '../../../../common/endpoint/service/response_actions/constants';
 
 jest.mock('../../../common/components/user_privileges');
 
@@ -108,7 +108,7 @@ describe('take action dropdown', () => {
       onAddIsolationStatusClick: jest.fn(),
       refetch: jest.fn(),
       refetchFlyoutData: jest.fn(),
-      timelineId: TimelineId.active,
+      scopeId: TimelineId.active,
       onOsqueryClick: jest.fn(),
     };
 
@@ -367,6 +367,50 @@ describe('take action dropdown', () => {
       });
     });
 
+    describe('should correctly enable/disable the "Isolate Host" button', () => {
+      let wrapper: ReactWrapper;
+
+      const render = (): ReactWrapper => {
+        wrapper = mount(
+          <TestProviders>
+            <TakeActionDropdown {...defaultProps} />
+          </TestProviders>
+        );
+        wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
+
+        return wrapper;
+      };
+
+      const isolateHostButtonExists = (): ReturnType<typeof wrapper.exists> => {
+        return wrapper.exists('[data-test-subj="isolate-host-action-item"]');
+      };
+
+      beforeEach(() => {
+        setTypeOnEcsDataWithAgentType();
+      });
+
+      it('should show Isolate host button if user has "Host isolation" privileges set to all', async () => {
+        (useUserPrivileges as jest.Mock).mockReturnValue({
+          ...mockInitialUserPrivilegesState(),
+          endpointPrivileges: { loading: false, canIsolateHost: true },
+        });
+        render();
+
+        await waitFor(() => {
+          expect(isolateHostButtonExists()).toBeTruthy();
+        });
+      });
+      it('should hide Isolate host button if user has "Host isolation" privileges set to none', () => {
+        (useUserPrivileges as jest.Mock).mockReturnValue({
+          ...mockInitialUserPrivilegesState(),
+          endpointPrivileges: { loading: false, canIsolateHost: false },
+        });
+        render();
+
+        expect(isolateHostButtonExists()).toBeFalsy();
+      });
+    });
+
     describe('should correctly enable/disable the "Respond" button', () => {
       let wrapper: ReactWrapper;
       let apiMocks: ReturnType<typeof endpointMetadataHttpMocks>;
@@ -470,7 +514,7 @@ describe('take action dropdown', () => {
                 ...getApiResponse().metadata,
                 Endpoint: {
                   ...getApiResponse().metadata.Endpoint,
-                  capabilities: [...RESPONDER_CAPABILITIES],
+                  capabilities: [...ENDPOINT_CAPABILITIES],
                 },
               },
               host_status: HostStatus.UNENROLLED,

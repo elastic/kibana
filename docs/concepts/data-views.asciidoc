@@ -65,14 +65,14 @@ based on different timestamps.
 
 . To specify your own {data-source} name, click *Show advanced settings*, then enter the name in the *Custom {data-source} ID* field. For example, enter your {es} index alias name.
 
-. Click *Save {data-source} to {kib}*.
-+
-[[reload-fields]] {kib} is now configured to use your {es} data. When a new field is added to an index,
-the {data-source} field list is updated
-the next time the {data-source} is loaded, for example, when you load the page or
-move between {kib} apps.
+. [[reload-fields]] To use this data in searches and visualizations that you intend to save, click *Save {data-source} to {kib}*.
 
-. Select this {data-source} when you search and visualize your data.
+. To explore your data without creating a {data-source}, click *Use without saving*.
++
+This allows you to explore your data in *Discover*, *Lens*, and *Maps*
+without making it visible to others in your space. You can save the {data-source} later
+if you create a search or visualization that you want to share.
+
 
 [float]
 [[rollup-data-view]]

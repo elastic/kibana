@@ -95,7 +95,7 @@ export interface StackFrameMetadata {
   // StackTrace.Type
   FrameType: FrameType;
 
-  // StackFrame.LineNumber?
+  // StackTrace.AddressOrLine
   AddressOrLine: number;
   // StackFrame.FunctionName
   FunctionName: string;
@@ -187,7 +187,7 @@ export function getCalleeLabel(metadata: StackFrameMetadata) {
   if (metadata.FunctionName !== '') {
     const sourceFilename = metadata.SourceFilename;
     const sourceURL = sourceFilename ? sourceFilename.split('/').pop() : '';
-    return `${getExeFileName(metadata)}: ${getFunctionName(metadata)} in ${sourceURL} #${
+    return `${getExeFileName(metadata)}: ${getFunctionName(metadata)} in ${sourceURL}#${
       metadata.SourceLine
     }`;
   }

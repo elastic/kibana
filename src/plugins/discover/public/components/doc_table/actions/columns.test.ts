@@ -13,7 +13,7 @@ import { dataViewsMock } from '../../../__mocks__/data_views';
 import { Capabilities } from '@kbn/core/types';
 import { AppState } from '../../../application/main/services/discover_state';
 
-function getStateColumnAction(state: {}, setAppState: (state: Partial<AppState>) => void) {
+function getStateColumnAction(state: AppState, setAppState: (state: Partial<AppState>) => void) {
   return getStateColumnActions({
     capabilities: {
       discover: {
@@ -25,7 +25,8 @@ function getStateColumnAction(state: {}, setAppState: (state: Partial<AppState>)
     dataViews: dataViewsMock,
     useNewFieldsApi: true,
     setAppState,
-    state,
+    columns: state.columns,
+    sort: state.sort,
   });
 }
 

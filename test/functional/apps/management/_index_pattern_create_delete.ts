@@ -128,6 +128,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
         });
       });
+      it('can save with same name', async () => {
+        await PageObjects.settings.editIndexPattern(
+          'logstash-*,hello_world*',
+          '@timestamp',
+          'Logstash Star',
+          true
+        );
+
+        await retry.try(async () => {
+          expect(await testSubjects.getVisibleText('indexPatternTitle')).to.contain(
+            `Logstash Star`
+          );
+        });
+      });
       it('shows edit confirm message when editing index-pattern', async () => {
         await PageObjects.settings.editIndexPattern(
           'logstash-2*',

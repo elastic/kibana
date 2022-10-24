@@ -43,14 +43,14 @@ import {
   resetKeyboardFocus,
   showGlobalFilters,
 } from '../../timelines/components/timeline/helpers';
-import { timelineSelectors } from '../../timelines/store/timeline';
-import { TimelineId } from '../../../common/types/timeline';
-import { timelineDefaults } from '../../timelines/store/timeline/defaults';
+import { TableId } from '../../../common/types/timeline';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
-import { filterNetworkExternalAlertData } from '../../common/components/visualization_actions/utils';
+import { sourceOrDestinationIpExistsFilter } from '../../common/components/visualization_actions/utils';
 import { LandingPageComponent } from '../../common/components/landing_page';
+import { dataTableSelectors } from '../../common/store/data_table';
+import { tableDefaults } from '../../common/store/data_table/defaults';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -65,9 +65,9 @@ const ID = 'NetworkQueryId';
 const NetworkComponent = React.memo<NetworkComponentProps>(
   ({ hasMlUserPermissions, capabilitiesFetched }) => {
     const containerElement = useRef<HTMLDivElement | null>(null);
-    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+    const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
     const graphEventId = useShallowEqualSelector(
-      (state) => (getTimeline(state, TimelineId.networkPageEvents) ?? timelineDefaults).graphEventId
+      (state) => (getTable(state, TableId.networkPageEvents) ?? tableDefaults).graphEventId
     );
     const getGlobalFiltersQuerySelector = useMemo(
       () => inputsSelectors.globalFiltersQuerySelector(),
@@ -75,7 +75,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
     );
     const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
     const query = useDeepEqualSelector(getGlobalQuerySelector);
-    const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+    const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
     const { to, from, setQuery, isInitializing } = useGlobalTime();
     const { globalFullScreen } = useGlobalFullScreen();
@@ -86,12 +86,10 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
 
     const tabsFilters = useMemo(() => {
       if (tabName === NetworkRouteType.events) {
-        return filters.length > 0
-          ? [...filters, ...filterNetworkExternalAlertData]
-          : filterNetworkExternalAlertData;
+        return [...globalFilters, ...sourceOrDestinationIpExistsFilter];
       }
-      return filters;
-    }, [tabName, filters]);
+      return globalFilters;
+    }, [tabName, globalFilters]);
 
     const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
 
@@ -123,8 +121,9 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       config: getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
       queries: [query],
-      filters,
+      filters: globalFilters,
     });
+
     const [tabsFilterQuery] = convertToBuildEsQuery({
       config: getEsQueryConfig(kibana.services.uiSettings),
       indexPattern,
@@ -165,7 +164,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                     >
                       <EmbeddedMap
                         query={query}
-                        filters={filters}
+                        filters={globalFilters}
                         startDate={from}
                         endDate={to}
                         setQuery={setQuery}

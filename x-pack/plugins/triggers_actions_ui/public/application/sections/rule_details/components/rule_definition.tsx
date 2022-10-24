@@ -164,6 +164,21 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
 
             <EuiSpacer size="m" />
 
+            <EuiFlexGroup>
+              <ItemTitleRuleSummary>
+                {i18n.translate('xpack.triggersActionsUI.ruleDetails.runsEvery', {
+                  defaultMessage: 'Runs every',
+                })}
+              </ItemTitleRuleSummary>
+
+              <ItemValueRuleSummary
+                data-test-subj="ruleSummaryRuleInterval"
+                itemValue={formatDuration(rule.schedule.interval)}
+              />
+            </EuiFlexGroup>
+
+            <EuiSpacer size="m" />
+
             <EuiFlexGroup alignItems="center">
               <ItemTitleRuleSummary>
                 {i18n.translate('xpack.triggersActionsUI.ruleDetails.conditionsTitle', {
@@ -188,20 +203,6 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup>
-              <ItemTitleRuleSummary>
-                {i18n.translate('xpack.triggersActionsUI.ruleDetails.runsEvery', {
-                  defaultMessage: 'Runs every',
-                })}
-              </ItemTitleRuleSummary>
-
-              <ItemValueRuleSummary
-                data-test-subj="ruleSummaryRuleInterval"
-                itemValue={formatDuration(rule.schedule.interval)}
-              />
-            </EuiFlexGroup>
 
             <EuiSpacer size="m" />
 
@@ -213,8 +214,8 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
               </ItemTitleRuleSummary>
               <ItemValueRuleSummary itemValue={String(getNotifyText())} />
             </EuiFlexGroup>
-
-            <EuiSpacer size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem>
             <EuiFlexGroup alignItems="baseline">
               <ItemTitleRuleSummary>
                 {i18n.translate('xpack.triggersActionsUI.ruleDetails.actions', {
