@@ -8,10 +8,10 @@
 import { orderBy } from 'lodash';
 import expect from '@kbn/expect';
 
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
-import { NewTermsCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request/rule_schemas.mock';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
+import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema/mocks';
 import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_engine/schemas/alerts';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -114,7 +114,7 @@ export default ({ getService }: FtrProviderContext) => {
     // suricata-sensor-san-francisco appears in a document at 2019-02-19T20:42:08.230Z, but also appears
     // in earlier documents so is not new. An alert should not be generated for that term.
     it('should generate 1 alert with 1 selected field', async () => {
-      const rule: NewTermsCreateSchema = {
+      const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         new_terms_fields: ['host.name'],
         from: '2019-02-19T20:42:00.000Z',
@@ -258,7 +258,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should generate 3 alerts when 1 document has 3 new values', async () => {
-      const rule: NewTermsCreateSchema = {
+      const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         new_terms_fields: ['host.ip'],
         from: '2019-02-19T20:42:00.000Z',
@@ -289,7 +289,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should generate alerts for every term when history window is small', async () => {
-      const rule: NewTermsCreateSchema = {
+      const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         new_terms_fields: ['host.name'],
         from: '2019-02-19T20:42:00.000Z',
@@ -337,7 +337,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should generate the correct alerts', async () => {
-        const rule: NewTermsCreateSchema = {
+        const rule: NewTermsRuleCreateProps = {
           ...getCreateNewTermsRulesSchemaMock('rule-1', true),
           // myfakeindex-3 does not have event.ingested mapped so we can test if the runtime field
           // 'kibana.combined_timestamp' handles unmapped fields properly
@@ -364,7 +364,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should apply exceptions', async () => {
-      const rule: NewTermsCreateSchema = {
+      const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         new_terms_fields: ['host.name'],
         from: '2019-02-19T20:42:00.000Z',
@@ -402,7 +402,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should work for max signals > 100', async () => {
       const maxSignals = 200;
-      const rule: NewTermsCreateSchema = {
+      const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
         new_terms_fields: ['process.pid'],
         from: '2018-02-19T20:42:00.000Z',
@@ -445,7 +445,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should be enriched with host risk score', async () => {
-        const rule: NewTermsCreateSchema = {
+        const rule: NewTermsRuleCreateProps = {
           ...getCreateNewTermsRulesSchemaMock('rule-1', true),
           new_terms_fields: ['host.name'],
           from: '2019-02-19T20:42:00.000Z',
