@@ -22,9 +22,9 @@ import {
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 
-import { getSampleDashboardInput } from '../test_helpers';
-import { pluginServices } from '../../services/plugin_services';
-import { DashboardContainer } from '../embeddable/dashboard_container';
+import { getSampleDashboardInput } from '../mocks';
+import { DashboardContainer } from '../dashboard_container';
+import { pluginServices } from '../services/plugin_services';
 import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 import { LibraryNotificationAction } from './library_notification_action';
 

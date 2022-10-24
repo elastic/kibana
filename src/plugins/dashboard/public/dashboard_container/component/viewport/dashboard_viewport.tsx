@@ -7,168 +7,72 @@
  */
 
 import React from 'react';
-import { Subscription } from 'rxjs';
 
-import {
-  CalloutProps,
-  ControlGroupContainer,
-  LazyControlsCallout,
-} from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
-import { context } from '@kbn/kibana-react-plugin/public';
-import { ExitFullScreenButton as ExitFullScreenButtonUi } from '@kbn/kibana-react-plugin/public';
+import { ExitFullScreenButton } from '@kbn/kibana-react-plugin/public';
+import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 
-import { DashboardContainer, DashboardLoadedInfo } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
-import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
+import { DashboardReduxState } from '../../types';
 import { pluginServices } from '../../../services/plugin_services';
+import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
+import { dashboardContainerReducers } from '../../state/dashboard_container_reducers';
+import { DashboardContainer, DashboardLoadedInfo } from '../../embeddable/dashboard_container';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
-  controlGroup?: ControlGroupContainer;
   onDataLoaded?: (data: DashboardLoadedInfo) => void;
 }
 
-interface State {
-  isFullScreenMode: boolean;
-  controlGroupReady: boolean;
-  useMargins: boolean;
-  title: string;
-  description?: string;
-  panelCount: number;
-  isEmbeddedExternally?: boolean;
-}
+export const DashboardViewport = ({ onDataLoaded, container }: DashboardViewportProps) => {
+  const { chrome } = pluginServices.getServices();
 
-const ControlsCallout = withSuspense<CalloutProps>(LazyControlsCallout);
+  const reduxContainerContext = useReduxContainerContext<
+    DashboardReduxState,
+    typeof dashboardContainerReducers
+  >();
 
-export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
-  static contextType = context;
-  private controlsRoot: React.RefObject<HTMLDivElement>;
+  const {
+    actions: { setFullScreenMode },
+    useEmbeddableSelector: select,
+    useEmbeddableDispatch,
+  } = reduxContainerContext;
+  const dispatch = useEmbeddableDispatch();
 
-  private subscription?: Subscription;
-  private mounted: boolean = false;
-  constructor(props: DashboardViewportProps) {
-    super(props);
-    const { isFullScreenMode, panels, useMargins, title, isEmbeddedExternally } =
-      this.props.container.getInput();
+  const panelCount = Object.keys(select((state) => state.explicitInput.panels)).length;
+  const isEditMode = select((state) => state.explicitInput.viewMode) === ViewMode.EDIT;
+  const dashboardTitle = select((state) => state.explicitInput.title);
+  const description = select((state) => state.explicitInput.description);
+  const useMargins = select((state) => state.explicitInput.options.useMargins);
 
-    this.controlsRoot = React.createRef();
+  const isFullScreenMode = select((state) => state.componentState.fullScreenMode);
 
-    this.state = {
-      controlGroupReady: !this.props.controlGroup,
-      isFullScreenMode,
-      panelCount: Object.values(panels).length,
-      useMargins,
-      title,
-      isEmbeddedExternally,
-    };
-  }
-
-  public componentDidMount() {
-    this.mounted = true;
-    this.subscription = this.props.container.getInput$().subscribe(() => {
-      const { isFullScreenMode, useMargins, title, description, isEmbeddedExternally, panels } =
-        this.props.container.getInput();
-      if (this.mounted) {
-        this.setState({
-          panelCount: Object.values(panels).length,
-          isEmbeddedExternally,
-          isFullScreenMode,
-          description,
-          useMargins,
-          title,
-        });
-      }
-    });
-    if (this.props.controlGroup && this.controlsRoot.current) {
-      this.props.controlGroup.render(this.controlsRoot.current);
-    }
-    if (this.props.controlGroup) {
-      this.props.controlGroup?.untilReady().then(() => this.setState({ controlGroupReady: true }));
-    }
-  }
-
-  public componentWillUnmount() {
-    this.mounted = false;
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-  }
-
-  public onExitFullScreenMode = () => {
-    this.props.container.updateInput({
-      isFullScreenMode: false,
-    });
-  };
-
-  public render() {
-    const { container, controlGroup } = this.props;
-    const isEditMode = container.getInput().viewMode !== ViewMode.VIEW;
-    const { isEmbeddedExternally, isFullScreenMode, panelCount, title, description, useMargins } =
-      this.state;
-
-    const {
-      settings: { isProjectEnabledInLabs, uiSettings },
-      chrome,
-    } = pluginServices.getServices();
-    const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
-
-    const hideAnnouncements = Boolean(uiSettings.get('hideAnnouncements'));
-
-    return (
-      <>
-        {controlsEnabled ? (
-          <>
-            {!hideAnnouncements &&
-            isEditMode &&
-            panelCount !== 0 &&
-            controlGroup?.getPanelCount() === 0 ? (
-              <ControlsCallout
-                getCreateControlButton={() => {
-                  return controlGroup?.getCreateControlButton('callout');
-                }}
-              />
-            ) : null}
-
-            {container.getInput().viewMode !== ViewMode.PRINT && (
-              <div
-                className={
-                  controlGroup && controlGroup.getPanelCount() > 0
-                    ? 'dshDashboardViewport-controls'
-                    : ''
-                }
-                ref={this.controlsRoot}
-              />
-            )}
-          </>
-        ) : null}
-        <div
-          data-shared-items-count={panelCount}
-          data-shared-items-container
-          data-title={title}
-          data-description={description}
-          className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
-        >
-          {isFullScreenMode && (
-            // TODO: Replace with Shared UX ExitFullScreenButton once https://github.com/elastic/kibana/issues/140311 is resolved
-            <ExitFullScreenButtonUi
-              chrome={chrome as CoreStart['chrome']}
-              onExitFullScreenMode={this.onExitFullScreenMode}
-              toggleChrome={!isEmbeddedExternally}
-            />
-          )}
-          {this.props.container.getPanelCount() === 0 && (
-            <div className="dshDashboardEmptyScreen">
-              <DashboardEmptyScreen isEditMode={isEditMode} />
-            </div>
-          )}
-          {this.state.controlGroupReady && (
-            <DashboardGrid container={container} onDataLoaded={this.props.onDataLoaded} />
-          )}
-        </div>
-      </>
-    );
-  }
-}
+  // TODO Is embedded externally
+  return (
+    <>
+      <div
+        data-shared-items-count={panelCount}
+        data-shared-items-container
+        data-title={dashboardTitle}
+        data-description={description}
+        className={useMargins ? 'dshDashboardViewport-withMargins' : 'dshDashboardViewport'}
+      >
+        {isFullScreenMode && (
+          // TODO: Replace with Shared UX ExitFullScreenButton once https://github.com/elastic/kibana/issues/140311 is resolved
+          <ExitFullScreenButton
+            chrome={chrome as CoreStart['chrome']}
+            onExitFullScreenMode={() => dispatch(setFullScreenMode(false))}
+            toggleChrome={true}
+          />
+        )}
+        {panelCount === 0 && (
+          <div className="dshDashboardEmptyScreen">
+            <DashboardEmptyScreen isEditMode={isEditMode} />
+          </div>
+        )}
+        <DashboardGrid onDataLoaded={onDataLoaded} container={container} />
+      </div>
+    </>
+  );
+};

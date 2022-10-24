@@ -17,7 +17,7 @@ import type {
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
 import { ReplacePanelFlyout } from './replace_panel_flyout';
-import { pluginServices } from '../../services/plugin_services';
+import { pluginServices } from '../services/plugin_services';
 
 export async function openReplacePanelFlyout(options: {
   embeddable: IContainer;

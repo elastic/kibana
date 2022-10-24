@@ -7,28 +7,30 @@
  */
 import React, { useCallback, useState } from 'react';
 import { omit } from 'lodash';
+
 import {
+  EuiText,
+  EuiRadio,
+  EuiPanel,
   EuiButton,
-  EuiButtonEmpty,
+  EuiSpacer,
   EuiFormRow,
+  EuiFocusTrap,
   EuiModalBody,
+  EuiButtonEmpty,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiPanel,
-  EuiRadio,
-  EuiSpacer,
-  EuiText,
-  EuiFocusTrap,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
 import { IEmbeddable, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
-import { dashboardCopyToDashboardAction } from '../../dashboard_strings';
-import { createDashboardEditUrl } from '../..';
-import { type DashboardContainer, DashboardPanelState } from '..';
-import { pluginServices } from '../../services/plugin_services';
-import { CREATE_NEW_DASHBOARD_URL } from '../dashboard_constants';
+
+import { DashboardPanelState } from '../../common';
+import { pluginServices } from '../services/plugin_services';
+import { type DashboardContainer } from '../dashboard_container';
+import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
+import { createDashboardEditUrl, CREATE_NEW_DASHBOARD_URL } from '../dashboard_constants';
 
 interface CopyToDashboardModalProps {
   PresentationUtilContext: React.FC;
@@ -97,14 +99,14 @@ export function CopyToDashboardModal({
           <PresentationUtilContext>
             <EuiModalHeader>
               <EuiModalHeaderTitle>
-                <h2 id={titleId}>{dashboardCopyToDashboardAction.getDisplayName()}</h2>
+                <h2 id={titleId}>{dashboardCopyToDashboardActionStrings.getDisplayName()}</h2>
               </EuiModalHeaderTitle>
             </EuiModalHeader>
 
             <EuiModalBody>
               <>
                 <EuiText>
-                  <p id={descriptionId}>{dashboardCopyToDashboardAction.getDescription()}</p>
+                  <p id={descriptionId}>{dashboardCopyToDashboardActionStrings.getDescription()}</p>
                 </EuiText>
                 <EuiSpacer />
                 <EuiFormRow hasChildLabel={false}>
@@ -121,7 +123,7 @@ export function CopyToDashboardModal({
                             data-test-subj="add-to-existing-dashboard-option"
                             id="existing-dashboard-option"
                             name="dashboard-option"
-                            label={dashboardCopyToDashboardAction.getExistingDashboardOption()}
+                            label={dashboardCopyToDashboardActionStrings.getExistingDashboardOption()}
                             onChange={() => setDashboardOption('existing')}
                           />
                           <div className="savAddDashboard__searchDashboards">
@@ -142,7 +144,7 @@ export function CopyToDashboardModal({
                             id="new-dashboard-option"
                             name="dashboard-option"
                             disabled={!dashboardId}
-                            label={dashboardCopyToDashboardAction.getNewDashboardOption()}
+                            label={dashboardCopyToDashboardActionStrings.getNewDashboardOption()}
                             onChange={() => setDashboardOption('new')}
                           />
                           <EuiSpacer size="s" />
@@ -156,7 +158,7 @@ export function CopyToDashboardModal({
 
             <EuiModalFooter>
               <EuiButtonEmpty data-test-subj="cancelCopyToButton" onClick={() => closeModal()}>
-                {dashboardCopyToDashboardAction.getCancelButtonName()}
+                {dashboardCopyToDashboardActionStrings.getCancelButtonName()}
               </EuiButtonEmpty>
               <EuiButton
                 fill
@@ -164,7 +166,7 @@ export function CopyToDashboardModal({
                 onClick={onSubmit}
                 disabled={dashboardOption === 'existing' && !selectedDashboard}
               >
-                {dashboardCopyToDashboardAction.getAcceptButtonName()}
+                {dashboardCopyToDashboardActionStrings.getAcceptButtonName()}
               </EuiButton>
             </EuiModalFooter>
           </PresentationUtilContext>

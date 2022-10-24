@@ -9,8 +9,9 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
+
 import { pluginServices } from '../../../services/plugin_services';
+import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 describe('DashboardEmptyScreen', () => {
   const DashboardServicesProvider = pluginServices.getContextProvider();

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import './index.scss';
+import './_dashboard_app.scss';
 import React from 'react';
 import { History } from 'history';
 import { parse, ParsedQuery } from 'query-string';

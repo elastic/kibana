@@ -7,17 +7,10 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-
-import { DashboardContainer } from '../embeddable/dashboard_container';
-import { getSampleDashboardInput } from '../test_helpers';
-import {
-  LibraryNotificationPopover,
-  LibraryNotificationProps,
-} from './library_notification_popover';
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiPopover } from '@elastic/eui';
-import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
+
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
@@ -25,7 +18,15 @@ import {
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { pluginServices } from '../../services/plugin_services';
+import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+
+import {
+  LibraryNotificationPopover,
+  LibraryNotificationProps,
+} from './library_notification_popover';
+import { getSampleDashboardInput } from '../mocks';
+import { DashboardContainer } from '../dashboard_container';
+import { pluginServices } from '../services/plugin_services';
 
 describe('LibraryNotificationPopover', () => {
   const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);

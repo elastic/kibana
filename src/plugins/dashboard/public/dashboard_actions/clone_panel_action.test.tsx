@@ -6,14 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { DashboardPanelState } from '../embeddable';
-import { DashboardContainer } from '../embeddable/dashboard_container';
-import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
-
-import { coreMock } from '@kbn/core/public/mocks';
-import { CoreStart } from '@kbn/core/public';
-import { ClonePanelAction } from './clone_panel_action';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
@@ -21,8 +13,16 @@ import {
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+import { CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { ErrorEmbeddable, IContainer, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { pluginServices } from '../../services/plugin_services';
+
+import { DashboardPanelState } from '../../common';
+import { ClonePanelAction } from './clone_panel_action';
+import { DashboardContainer } from '../dashboard_container';
+import { pluginServices } from '../services/plugin_services';
+import { getSampleDashboardInput, getSampleDashboardPanel } from '../mocks';
 
 let container: DashboardContainer;
 let byRefOrValEmbeddable: ContactCardEmbeddable;

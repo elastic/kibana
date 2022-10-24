@@ -15,7 +15,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Embeddable, type EmbeddableInput, type IContainer } from '@kbn/embeddable-plugin/public';
 
 import { PLACEHOLDER_EMBEDDABLE } from '.';
-import { pluginServices } from '../../../services/plugin_services';
+import { pluginServices } from '../services/plugin_services';
 
 export class PlaceholderEmbeddable extends Embeddable {
   public readonly type = PLACEHOLDER_EMBEDDABLE;

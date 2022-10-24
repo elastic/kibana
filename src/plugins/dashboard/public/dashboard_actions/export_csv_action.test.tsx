@@ -6,11 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-
-import { DashboardContainer } from '../embeddable/dashboard_container';
-import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
@@ -18,10 +13,15 @@ import {
   ContactCardExportableEmbeddableFactory,
   CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+import { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { ExportCSVAction } from './export_csv_action';
 import { LINE_FEED_CHARACTER } from '@kbn/data-plugin/common/exports/export_csv';
-import { pluginServices } from '../../services/plugin_services';
+import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+
+import { ExportCSVAction } from './export_csv_action';
+import { DashboardContainer } from '../dashboard_container';
+import { pluginServices } from '../services/plugin_services';
+import { getSampleDashboardInput, getSampleDashboardPanel } from '../mocks';
 
 describe('Export CSV action', () => {
   let container: DashboardContainer;

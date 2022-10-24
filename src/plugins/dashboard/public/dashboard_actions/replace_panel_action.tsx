@@ -8,10 +8,10 @@
 
 import { type IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import type { DashboardContainer } from '../embeddable';
+
 import { openReplacePanelFlyout } from './open_replace_panel_flyout';
-import { dashboardReplacePanelAction } from '../../dashboard_strings';
-import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
+import { dashboardReplacePanelActionStrings } from './_dashboard_actions_strings';
+import { type DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
 
 export const ACTION_REPLACE_PANEL = 'replacePanel';
 
@@ -34,7 +34,7 @@ export class ReplacePanelAction implements Action<ReplacePanelActionContext> {
     if (!embeddable.parent || !isDashboard(embeddable.parent)) {
       throw new IncompatibleActionError();
     }
-    return dashboardReplacePanelAction.getDisplayName();
+    return dashboardReplacePanelActionStrings.getDisplayName();
   }
 
   public getIconType({ embeddable }: ReplacePanelActionContext) {

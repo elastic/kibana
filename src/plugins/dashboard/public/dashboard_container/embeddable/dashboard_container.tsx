@@ -53,7 +53,7 @@ import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardContainerOutput, DashboardReduxState } from '../types';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { DashboardSavedObjectService } from '../../services/dashboard_saved_object/types';
-import { dashboardContainerInputIsByValue } from '@kbn/dashboard-plugin/common/dashboard_container/type_guards';
+import { dashboardContainerInputIsByValue } from '../../../common/dashboard_container/type_guards';
 import { dashboardStateLoadWasSuccessful } from '../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
 
 export interface DashboardLoadedInfo {
@@ -163,6 +163,13 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     // );
   }
 
+  public getInputAsValueType = () => {
+    if (!dashboardContainerInputIsByValue(this.input)) {
+      throw new Error('cannot get input as value type until after dahsboard input is unwrapped.');
+    }
+    return this.getInput() as DashboardContainerByValueInput;
+  };
+
   private async unwrapDashboardContainerInput(): Promise<DashboardContainerByValueInput> {
     if (dashboardContainerInputIsByValue(this.input)) {
       return this.input;
@@ -246,11 +253,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       <I18nProvider>
         <KibanaThemeProvider theme$={this.theme$}>
           <DashboardReduxWrapper>
-            <DashboardViewport
-              container={this}
-              controlGroup={this.controlGroup}
-              onDataLoaded={this.onDataLoaded.bind(this)}
-            />
+            <DashboardViewport onDataLoaded={this.onDataLoaded.bind(this)} container={this} />
           </DashboardReduxWrapper>
         </KibanaThemeProvider>
       </I18nProvider>,
@@ -281,7 +284,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       executionContext,
     } = this.input as DashboardContainerByValueInput;
 
-    let combinedFilters = filters;
+    const combinedFilters = filters;
 
     // TODO Control group
     // if (this.controlGroup) {
@@ -303,9 +306,23 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     };
   }
 
-  //------------------------------------------------------------------------------------------------------
+  // ------------------------------------------------------------------------------------------------------
   // Dashboard API
-  //------------------------------------------------------------------------------------------------------
+  // ------------------------------------------------------------------------------------------------------
+
+  public getExpandedPanelId = () => {
+    if (!this.reduxEmbeddableTools) throw new Error();
+    return this.reduxEmbeddableTools.getState().componentState.expandedPanelId;
+  };
+
+  public setExpandedPanelId = (newId?: string) => {
+    if (!this.reduxEmbeddableTools) throw new Error();
+    const {
+      actions: { setExpandedPanelId },
+      dispatch,
+    } = this.reduxEmbeddableTools;
+    dispatch(setExpandedPanelId(newId));
+  };
 
   /**
    * Gets all the dataviews that are actively being used in the dashboard

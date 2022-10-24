@@ -14,15 +14,13 @@ import {
 import { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/types';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common/types';
 
-import {
-  SavedDashboardPanel,
-  DashboardPanelState,
-  DashboardContainerStateWithType,
-} from '../types';
+import { SavedDashboardPanel } from '../types';
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
-} from '../lib/dashboard_panel_converters';
+} from '../../lib/dashboard_panel_converters';
+import { DashboardPanelState } from '../../dashboard_container/types';
+import { DashboardContainerStateWithType } from '../../types';
 
 export interface ExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;

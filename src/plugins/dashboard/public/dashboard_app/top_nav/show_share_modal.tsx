@@ -12,24 +12,29 @@ import React, { ReactElement, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCheckboxGroup } from '@elastic/eui';
 import type { Capabilities } from '@kbn/core/public';
+import { SerializableRecord } from '@kbn/utility-types';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 
-import type { DashboardState } from '../../types';
 import { dashboardUrlParams } from '../dashboard_router';
 import { shareModalStrings } from '../../dashboard_strings';
-import { convertPanelMapToSavedPanels } from '../../../common';
+import {
+  convertPanelMapToSavedPanels,
+  DashboardOptions,
+  SharedDashboardState,
+} from '../../../common';
 import { pluginServices } from '../../services/plugin_services';
-import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
-import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator';
+import type { DashboardContainerByValueInput } from '../../../common';
+import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../locator/locator';
 
 const showFilterBarId = 'showFilterBar';
 
 export interface ShowShareModalProps {
   isDirty: boolean;
+  savedObjectId?: string;
   anchorElement: HTMLElement;
-  currentDashboardState: DashboardState;
+  currentDashboardState: DashboardContainerByValueInput;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -43,6 +48,7 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
 export function ShowShareModal({
   isDirty,
   anchorElement,
+  savedObjectId,
   currentDashboardState,
 }: ShowShareModalProps) {
   const {
@@ -122,15 +128,15 @@ export function ShowShareModal({
     DashboardAppLocatorParams,
     'options' | 'query' | 'savedQuery' | 'filters' | 'panels' | 'controlGroupInput'
   > = {};
-  const { savedObjectId, title } = currentDashboardState;
+  const { title } = currentDashboardState;
   const unsavedDashboardState = dashboardSessionStorage.getState(savedObjectId);
 
   if (unsavedDashboardState) {
     unsavedStateForLocator = {
       query: unsavedDashboardState.query,
       filters: unsavedDashboardState.filters,
-      options: unsavedDashboardState.options,
       savedQuery: unsavedDashboardState.savedQuery,
+      options: unsavedDashboardState.options as unknown as DashboardOptions & SerializableRecord,
       controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
       panels: unsavedDashboardState.panels
         ? (convertPanelMapToSavedPanels(
@@ -151,6 +157,11 @@ export function ShowShareModal({
     ...unsavedStateForLocator,
   };
 
+  const shareableDashboardState: SharedDashboardState = {
+    ...currentDashboardState,
+    panels: convertPanelMapToSavedPanels(currentDashboardState.panels, kibanaVersion),
+  };
+
   toggleShareContextMenu({
     isDirty,
     anchorElement,
@@ -158,9 +169,7 @@ export function ShowShareModal({
     allowShortUrl,
     shareableUrl: setStateToKbnUrl(
       '_a',
-      stateToRawDashboardState({
-        state: currentDashboardState,
-      }),
+      shareableDashboardState,
       { useHash: false, storeInHashQuery: true },
       unhashUrl(window.location.href)
     ),

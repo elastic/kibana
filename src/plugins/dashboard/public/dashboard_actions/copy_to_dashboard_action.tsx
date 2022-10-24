@@ -9,15 +9,14 @@
 import React from 'react';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 
-import { dashboardCopyToDashboardAction } from '../../dashboard_strings';
-import { DashboardContainer } from '../embeddable';
+import { pluginServices } from '../services/plugin_services';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
-import { pluginServices } from '../../services/plugin_services';
-import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
+import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
+import { DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
 
 export const ACTION_COPY_TO_DASHBOARD = 'copyToDashboard';
 
@@ -58,7 +57,7 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
       throw new IncompatibleActionError();
     }
 
-    return dashboardCopyToDashboardAction.getDisplayName();
+    return dashboardCopyToDashboardActionStrings.getDisplayName();
   }
 
   public getIconType({ embeddable }: CopyToDashboardActionContext) {

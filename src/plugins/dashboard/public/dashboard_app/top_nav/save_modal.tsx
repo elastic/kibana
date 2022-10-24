@@ -12,8 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 
-import type { DashboardSaveOptions } from '../../types';
 import { pluginServices } from '../../services/plugin_services';
+import type { DashboardSaveOptions } from '../../dashboard_container/types';
 
 interface Props {
   onSave: ({

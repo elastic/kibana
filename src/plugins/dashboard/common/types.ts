@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { EmbeddableInput, EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+
 import { SavedDashboardPanel } from './dashboard_saved_object/types';
-import { DashboardContainerByValueInput } from './dashboard_container/types';
+import { DashboardContainerByValueInput, DashboardPanelState } from './dashboard_container/types';
 
 export interface DashboardOptions {
   hidePanelTitles: boolean;
@@ -40,4 +43,15 @@ export interface GridData {
   x: number;
   y: number;
   i: string;
+}
+
+/**
+ * Types below this line are copied here because so many important types are tied up in public. These types should be
+ * moved from public into common. TODO DELETE THIS TYPE
+ */
+export interface DashboardContainerStateWithType extends EmbeddableStateWithType {
+  panels: {
+    [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
+  };
+  controlGroupInput?: PersistableControlGroupInput;
 }

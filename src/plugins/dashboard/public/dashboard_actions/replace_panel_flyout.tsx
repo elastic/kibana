@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
-import { Toast } from '@kbn/core/public';
+
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -16,9 +16,11 @@ import {
   IEmbeddable,
   SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
-import { DashboardPanelState } from '../embeddable';
-import { dashboardReplacePanelAction } from '../../dashboard_strings';
-import { pluginServices } from '../../services/plugin_services';
+import { Toast } from '@kbn/core/public';
+
+import { DashboardPanelState } from '../../common';
+import { pluginServices } from '../services/plugin_services';
+import { dashboardReplacePanelActionStrings } from './_dashboard_actions_strings';
 
 interface Props {
   container: IContainer;
@@ -48,7 +50,7 @@ export class ReplacePanelFlyout extends React.Component<Props> {
     }
 
     this.lastToast = toasts.addSuccess({
-      title: dashboardReplacePanelAction.getSuccessMessage(name),
+      title: dashboardReplacePanelActionStrings.getSuccessMessage(name),
       'data-test-subj': 'addObjectToContainerSuccess',
     });
   };
@@ -93,7 +95,7 @@ export class ReplacePanelFlyout extends React.Component<Props> {
     const SavedObjectFinder = this.props.savedObjectsFinder;
     const savedObjectsFinder = (
       <SavedObjectFinder
-        noItemsMessage={dashboardReplacePanelAction.getNoMatchingObjectsMessage()}
+        noItemsMessage={dashboardReplacePanelActionStrings.getNoMatchingObjectsMessage()}
         savedObjectMetaData={[...getEmbeddableFactories()]
           .filter(
             (embeddableFactory) =>

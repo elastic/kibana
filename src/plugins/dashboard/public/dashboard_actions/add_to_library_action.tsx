@@ -10,17 +10,17 @@ import {
   ViewMode,
   type PanelState,
   type IEmbeddable,
+  isErrorEmbeddable,
   PanelNotFoundError,
   type EmbeddableInput,
-  isErrorEmbeddable,
   isReferenceOrValueEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { dashboardAddToLibraryAction } from '../../dashboard_strings';
-import { type DashboardPanelState, type DashboardContainer } from '..';
-import { pluginServices } from '../../services/plugin_services';
-import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
+import { DashboardPanelState } from '../../common';
+import { pluginServices } from '../services/plugin_services';
+import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings';
+import { DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '../dashboard_container';
 
 export const ACTION_ADD_TO_LIBRARY = 'saveToLibrary';
 
@@ -47,7 +47,7 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
       throw new IncompatibleActionError();
     }
-    return dashboardAddToLibraryAction.getDisplayName();
+    return dashboardAddToLibraryActionStrings.getDisplayName();
   }
 
   public getIconType({ embeddable }: AddToLibraryActionContext) {
@@ -94,7 +94,7 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
     };
     dashboard.replacePanel(panelToReplace, newPanel, true);
 
-    const title = dashboardAddToLibraryAction.getSuccessMessage(
+    const title = dashboardAddToLibraryActionStrings.getSuccessMessage(
       embeddable.getTitle() ? `'${embeddable.getTitle()}'` : ''
     );
     this.toastsService.addSuccess({

@@ -7,24 +7,22 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
 import sizeMe from 'react-sizeme';
 import classNames from 'classnames';
-import { Subscription } from 'rxjs';
 import 'react-resizable/css/styles.css';
 import 'react-grid-layout/css/styles.css';
+import React, { useCallback, useMemo, useRef } from 'react';
 import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
 
-import { injectI18n } from '@kbn/i18n-react';
 import { ViewMode, EmbeddablePhaseEvent } from '@kbn/embeddable-plugin/public';
+import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 
-import { DashboardContainer, DashboardLoadedInfo } from '../dashboard_container';
-import { GridData } from '../../../../common';
+import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
-import { DashboardLoadedEventStatus, DashboardPanelState } from '../types';
+import { DashboardLoadedEventStatus, DashboardReduxState } from '../../types';
+import { dashboardContainerReducers } from '../../state/dashboard_container_reducers';
+import { DashboardContainer, DashboardLoadedInfo } from '../../embeddable/dashboard_container';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../../../dashboard_constants';
-import { pluginServices } from '../../../services/plugin_services';
-import { dashboardSavedObjectErrorStrings } from '../../../dashboard_strings';
 
 let lastValidGridSize = 0;
 
@@ -102,135 +100,110 @@ function ResponsiveGrid({
 const config = { monitorWidth: true };
 const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
-export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
-  container: DashboardContainer;
+export interface DashboardGridProps {
   onDataLoaded?: (data: DashboardLoadedInfo) => void;
-}
-
-interface State {
-  focusedPanelIndex?: string;
-  isLayoutInvalid: boolean;
-  layout?: GridData[];
-  panels: { [key: string]: DashboardPanelState };
-  viewMode: ViewMode;
-  useMargins: boolean;
-  expandedPanelId?: string;
+  container: DashboardContainer;
 }
 
 interface PanelLayout extends Layout {
   i: string;
 }
 
-class DashboardGridUi extends React.Component<DashboardGridProps, State> {
-  private subscription?: Subscription;
-  private mounted: boolean = false;
+interface DashboardPerformanceTracker {
+  panelIds: Record<string, Record<string, number>>;
+  loadStartTime: number;
+  lastTimeToData: number;
+  status: DashboardLoadedEventStatus;
+  doneCount: number;
+}
 
-  constructor(props: DashboardGridProps) {
-    super(props);
+const defaultPerformanceTracker: DashboardPerformanceTracker = {
+  panelIds: {},
+  loadStartTime: performance.now(),
+  lastTimeToData: 0,
+  status: 'done',
+  doneCount: 0,
+};
 
-    this.state = {
-      layout: [],
-      isLayoutInvalid: false,
-      focusedPanelIndex: undefined,
-      panels: this.props.container.getInput().panels,
-      viewMode: this.props.container.getInput().viewMode,
-      useMargins: this.props.container.getInput().useMargins,
-      expandedPanelId: this.props.container.getInput().expandedPanelId,
-    };
-  }
+export const DashboardGrid = ({ container, onDataLoaded }: DashboardGridProps) => {
+  const reduxContainerContext = useReduxContainerContext<
+    DashboardReduxState,
+    typeof dashboardContainerReducers
+  >();
 
-  public componentDidMount() {
-    this.mounted = true;
-    let isLayoutInvalid = false;
-    let layout;
+  const {
+    actions: { setPanels },
+    useEmbeddableSelector: select,
+    useEmbeddableDispatch,
+  } = reduxContainerContext;
+  const dispatch = useEmbeddableDispatch();
 
-    const {
-      notifications: { toasts },
-    } = pluginServices.getServices();
+  const panels = select((state) => state.explicitInput.panels);
+  const viewMode = select((state) => state.explicitInput.viewMode);
+  const useMargins = select((state) => state.explicitInput.options.useMargins);
+  const expandedPanelId = select((state) => state.componentState.expandedPanelId);
 
-    try {
-      layout = this.buildLayoutFromPanels();
-    } catch (error) {
-      console.error(error); // eslint-disable-line no-console
-      isLayoutInvalid = true;
-      toasts.addDanger(dashboardSavedObjectErrorStrings.getDashboardGridError(error.message));
-    }
-    this.setState({
-      layout,
-      isLayoutInvalid,
-    });
+  const layout = useMemo(() => Object.values(panels).map((panel) => panel.gridData), [panels]);
+  const panelsInOrder = useMemo(
+    () => Object.keys(panels).map((key: string) => panels[key]),
+    [panels]
+  );
 
-    this.subscription = this.props.container.getInput$().subscribe(() => {
-      const { panels, viewMode, useMargins, expandedPanelId } = this.props.container.getInput();
-      if (this.mounted) {
-        this.setState({
-          panels,
-          viewMode,
-          useMargins,
-          expandedPanelId,
-        });
+  // reset performance tracker on each render.
+  const performanceRefs = useRef<DashboardPerformanceTracker>(defaultPerformanceTracker);
+  performanceRefs.current = defaultPerformanceTracker;
+
+  const onPanelStatusChange = useCallback(
+    (info: EmbeddablePhaseEvent) => {
+      if (!onDataLoaded) return;
+
+      if (performanceRefs.current.panelIds[info.id] === undefined || info.status === 'loading') {
+        performanceRefs.current.panelIds[info.id] = {};
+      } else if (info.status === 'error') {
+        performanceRefs.current.status = 'error';
+      } else if (info.status === 'loaded') {
+        performanceRefs.current.lastTimeToData = performance.now();
       }
-    });
-  }
 
-  public componentWillUnmount() {
-    this.mounted = false;
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-  }
+      performanceRefs.current.panelIds[info.id][info.status] = performance.now();
 
-  public buildLayoutFromPanels = (): GridData[] => {
-    return _.map(this.state.panels, (panel) => {
-      return panel.gridData;
-    });
-  };
+      if (info.status === 'error' || info.status === 'rendered') {
+        performanceRefs.current.doneCount++;
+        if (performanceRefs.current.doneCount === panelsInOrder.length) {
+          const doneTime = performance.now();
+          const data: DashboardLoadedInfo = {
+            timeToData:
+              (performanceRefs.current.lastTimeToData || doneTime) -
+              performanceRefs.current.loadStartTime,
+            timeToDone: doneTime - performanceRefs.current.loadStartTime,
+            numOfPanels: panelsInOrder.length,
+            status,
+          };
+          onDataLoaded(data);
+        }
+      }
+    },
+    [onDataLoaded, panelsInOrder]
+  );
 
-  public onLayoutChange = (layout: PanelLayout[]) => {
-    const panels = this.state.panels;
-    const updatedPanels: { [key: string]: DashboardPanelState } = layout.reduce(
-      (updatedPanelsAcc, panelLayout) => {
-        updatedPanelsAcc[panelLayout.i] = {
-          ...panels[panelLayout.i],
-          gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
-        };
-        return updatedPanelsAcc;
-      },
-      {} as { [key: string]: DashboardPanelState }
-    );
-    this.onPanelsUpdated(updatedPanels);
-  };
+  const onLayoutChange = useCallback(
+    (newLayout: PanelLayout[]) => {
+      const updatedPanels: { [key: string]: DashboardPanelState } = newLayout.reduce(
+        (updatedPanelsAcc, panelLayout) => {
+          updatedPanelsAcc[panelLayout.i] = {
+            ...panels[panelLayout.i],
+            gridData: _.pick(panelLayout, ['x', 'y', 'w', 'h', 'i']),
+          };
+          return updatedPanelsAcc;
+        },
+        {} as { [key: string]: DashboardPanelState }
+      );
+      dispatch(setPanels(updatedPanels));
+    },
+    [dispatch, panels, setPanels]
+  );
 
-  public onPanelsUpdated = (panels: { [key: string]: DashboardPanelState }) => {
-    this.props.container.updateInput({
-      panels,
-    });
-  };
-
-  public onPanelFocused = (focusedPanelIndex: string): void => {
-    this.setState({ focusedPanelIndex });
-  };
-
-  public onPanelBlurred = (blurredPanelIndex: string): void => {
-    if (this.state.focusedPanelIndex === blurredPanelIndex) {
-      this.setState({ focusedPanelIndex: undefined });
-    }
-  };
-
-  public render() {
-    if (this.state.isLayoutInvalid) {
-      return null;
-    }
-
-    const { container } = this.props;
-    const { focusedPanelIndex, panels, expandedPanelId, viewMode } = this.state;
-    const isViewMode = viewMode === ViewMode.VIEW;
-
-    // Part of our unofficial API - need to render in a consistent order for plugins.
-    const panelsInOrder = Object.keys(panels).map((key: string) => {
-      return panels[key] as DashboardPanelState;
-    });
-
+  const dashboardPanels = useMemo(() => {
     panelsInOrder.sort((panelA, panelB) => {
       if (panelA.gridData.y === panelB.gridData.y) {
         return panelA.gridData.x - panelB.gridData.x;
@@ -239,47 +212,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       }
     });
 
-    const panelIds: Record<string, Record<string, number>> = {};
-    const loadStartTime = performance.now();
-    let lastTimeToData = 0;
-    let status: DashboardLoadedEventStatus = 'done';
-    let doneCount = 0;
-
-    /**
-     * Sends an event
-     *
-     * @param info
-     * @returns
-     */
-    const onPanelStatusChange = (info: EmbeddablePhaseEvent) => {
-      if (!this.props.onDataLoaded) return;
-
-      if (panelIds[info.id] === undefined || info.status === 'loading') {
-        panelIds[info.id] = {};
-      } else if (info.status === 'error') {
-        status = 'error';
-      } else if (info.status === 'loaded') {
-        lastTimeToData = performance.now();
-      }
-
-      panelIds[info.id][info.status] = performance.now();
-
-      if (info.status === 'error' || info.status === 'rendered') {
-        doneCount++;
-        if (doneCount === panelsInOrder.length) {
-          const doneTime = performance.now();
-          const data: DashboardLoadedInfo = {
-            timeToData: (lastTimeToData || doneTime) - loadStartTime,
-            timeToDone: doneTime - loadStartTime,
-            numOfPanels: panelsInOrder.length,
-            status,
-          };
-          this.props.onDataLoaded(data);
-        }
-      }
-    };
-
-    const dashboardPanels = _.map(panelsInOrder, ({ explicitInput, type }, index) => (
+    return panelsInOrder.map(({ explicitInput, type }, index) => (
       <DashboardGridItem
         key={explicitInput.id}
         id={explicitInput.id}
@@ -287,28 +220,26 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         type={type}
         container={container}
         expandedPanelId={expandedPanelId}
-        focusedPanelId={focusedPanelIndex}
+        focusedPanelId={''} // TODO Panel focus / blur?
         onPanelStatusChange={onPanelStatusChange}
       />
     ));
+  }, [container, expandedPanelId, panelsInOrder, onPanelStatusChange]);
 
-    // in print mode, dashboard layout is not controlled by React Grid Layout
-    if (viewMode === ViewMode.PRINT) {
-      return <>{dashboardPanels}</>;
-    }
-
-    return (
-      <ResponsiveSizedGrid
-        isViewMode={isViewMode}
-        layout={this.buildLayoutFromPanels()}
-        onLayoutChange={this.onLayoutChange}
-        maximizedPanelId={expandedPanelId}
-        useMargins={this.state.useMargins}
-      >
-        {dashboardPanels}
-      </ResponsiveSizedGrid>
-    );
+  // in print mode, dashboard layout is not controlled by React Grid Layout
+  if (viewMode === ViewMode.PRINT) {
+    return <>{dashboardPanels}</>;
   }
-}
 
-export const DashboardGrid = injectI18n(DashboardGridUi);
+  return (
+    <ResponsiveSizedGrid
+      layout={layout}
+      useMargins={useMargins}
+      onLayoutChange={onLayoutChange}
+      maximizedPanelId={expandedPanelId}
+      isViewMode={viewMode === ViewMode.VIEW}
+    >
+      {dashboardPanels}
+    </ResponsiveSizedGrid>
+  );
+};

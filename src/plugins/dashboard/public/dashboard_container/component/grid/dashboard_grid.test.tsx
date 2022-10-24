@@ -11,16 +11,16 @@ import sizeMe from 'react-sizeme';
 import React from 'react';
 import { skip } from 'rxjs/operators';
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-
-import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
-import { DashboardContainer } from '../dashboard_container';
-import { getSampleDashboardInput } from '../../test_helpers';
 import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+
+import { DashboardContainer } from '../..';
+import { getSampleDashboardInput } from '../../../mocks';
 import { pluginServices } from '../../../services/plugin_services';
+import { DashboardGrid, DashboardGridProps } from './dashboard_grid';
 
 let dashboardContainer: DashboardContainer | undefined;
 const DashboardServicesProvider = pluginServices.getContextProvider();
@@ -111,6 +111,7 @@ test.skip('DashboardGrid removes panel when removed from container', () => {
   expect(panelElements.length).toBe(1);
 });
 
+// TODO: Reinstate these tests
 // unhandled promise rejection: https://github.com/elastic/kibana/issues/112699
 test.skip('DashboardGrid renders expanded panel', () => {
   const { props } = prepare();
@@ -120,7 +121,7 @@ test.skip('DashboardGrid renders expanded panel', () => {
     </DashboardServicesProvider>
   );
 
-  props.container.updateInput({ expandedPanelId: '1' });
+  // props.container.updateInput({ expandedPanelId: '1' });
   component.update();
   // Both panels should still exist in the dom, so nothing needs to be re-fetched once minimized.
   expect(component.find('EmbeddableChildPanel').length).toBe(2);
@@ -129,7 +130,7 @@ test.skip('DashboardGrid renders expanded panel', () => {
     (component.find('DashboardGridUi').state() as { expandedPanelId?: string }).expandedPanelId
   ).toBe('1');
 
-  props.container.updateInput({ expandedPanelId: undefined });
+  // props.container.updateInput({ expandedPanelId: undefined });
   component.update();
   expect(component.find('EmbeddableChildPanel').length).toBe(2);
 
@@ -156,5 +157,5 @@ test.skip('DashboardGrid unmount unsubscribes', async (done) => {
       done();
     });
 
-  props.container.updateInput({ expandedPanelId: '1' });
+  // props.container.updateInput({ expandedPanelId: '1' });
 });

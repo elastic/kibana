@@ -8,16 +8,16 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { flow } from 'lodash';
-import type { Filter, TimeRange, Query } from '@kbn/es-query';
-import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
-import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import type { SavedDashboardPanel } from '../common/types';
-import type { RawDashboardState } from './types';
-import { DashboardConstants } from './dashboard_constants';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { Filter, TimeRange, Query } from '@kbn/es-query';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
+
+import { DASHBOARD_APP_ID, SEARCH_SESSION_ID } from '../../dashboard_constants';
+import { DashboardContainerByValueInput, SavedDashboardPanel } from '../../../common';
 
 /**
  * Useful for ensuring that we don't pass any non-serializable values to history.push (for example, functions).
@@ -106,7 +106,7 @@ export type DashboardAppLocatorParams = {
    */
   tags?: string[];
 
-  options?: RawDashboardState['options'];
+  options?: DashboardContainerByValueInput['options'] & SerializableRecord;
 
   /**
    * Control group input
@@ -179,7 +179,7 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
     );
 
     if (params.searchSessionId) {
-      path = `${path}&${DashboardConstants.SEARCH_SESSION_ID}=${params.searchSessionId}`;
+      path = `${path}&${SEARCH_SESSION_ID}=${params.searchSessionId}`;
     }
 
     return {

@@ -14,7 +14,6 @@ import {
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
@@ -22,11 +21,13 @@ import {
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 
-import { getSampleDashboardInput } from '../test_helpers';
-import { pluginServices } from '../../services/plugin_services';
+import { getSampleDashboardInput } from '../mocks';
+import { DashboardPanelState } from '../../common';
+import { DashboardContainer } from '../dashboard_container';
+import { pluginServices } from '../services/plugin_services';
 import { UnlinkFromLibraryAction } from './unlink_from_library_action';
-import { DashboardContainer } from '../embeddable/dashboard_container';
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable & ReferenceOrValueEmbeddable;
@@ -148,7 +149,11 @@ test('Unlink unwraps all attributes from savedObject', async () => {
     (key) => !originalPanelKeySet.has(key)
   );
   expect(newPanelId).toBeDefined();
-  const newPanel = container.getInput().panels[newPanelId!];
+  const newPanel = container.getInput().panels[newPanelId!] as DashboardPanelState & {
+    explicitInput: { attributes: unknown };
+  };
   expect(newPanel.type).toEqual(embeddable.type);
-  expect(newPanel.explicitInput.attributes).toEqual(complicatedAttributes);
+  expect((newPanel.explicitInput as { attributes: unknown }).attributes).toEqual(
+    complicatedAttributes
+  );
 });

@@ -17,12 +17,12 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import type { DashboardRedirect } from '../../types';
+import type { DashboardRedirect } from '../types';
+import { DashboardAttributes } from '../../../common';
 import { pluginServices } from '../../services/plugin_services';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
-import { dashboardUnsavedListingStrings, getNewDashboardTitle } from '../../dashboard_strings';
+import { dashboardUnsavedListingStrings, getNewDashboardTitle } from '../_dashboard_app_strings';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
-import { DashboardAttributes } from '../embeddable';
 
 const DashboardUnsavedItem = ({
   id,

@@ -22,9 +22,9 @@ import {
 import { type Query, type AggregateQuery, Filter } from '@kbn/es-query';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 
-import { getSampleDashboardInput } from '../test_helpers';
-import { pluginServices } from '../../services/plugin_services';
-import { DashboardContainer } from '../embeddable/dashboard_container';
+import { getSampleDashboardInput } from '../mocks';
+import { DashboardContainer } from '../dashboard_container';
+import { pluginServices } from '../services/plugin_services';
 import { FiltersNotificationBadge } from './filters_notification_badge';
 
 const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);

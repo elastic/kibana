@@ -18,9 +18,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { dashboardLibraryNotification } from '../../dashboard_strings';
 import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 import { LibraryNotificationActionContext } from './library_notification_action';
+import { dashboardLibraryNotificationStrings } from './_dashboard_actions_strings';
 
 export interface LibraryNotificationProps {
   context: LibraryNotificationActionContext;
@@ -48,7 +48,7 @@ export function LibraryNotificationPopover({
           iconType={icon}
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           data-test-subj={`embeddablePanelNotification-${id}`}
-          aria-label={dashboardLibraryNotification.getPopoverAriaLabel()}
+          aria-label={dashboardLibraryNotificationStrings.getPopoverAriaLabel()}
         />
       }
       isOpen={isPopoverOpen}
@@ -58,7 +58,7 @@ export function LibraryNotificationPopover({
       <EuiPopoverTitle>{displayName}</EuiPopoverTitle>
       <div style={{ width: '300px' }}>
         <EuiText>
-          <p>{dashboardLibraryNotification.getTooltip()}</p>
+          <p>{dashboardLibraryNotificationStrings.getTooltip()}</p>
         </EuiText>
       </div>
       <EuiPopoverFooter>

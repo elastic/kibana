@@ -20,8 +20,8 @@ import {
 } from '@elastic/eui';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-import type { SavedObjectsFindOptionsReference, SimpleSavedObject } from '@kbn/core/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { SavedObjectsFindOptionsReference, SimpleSavedObject } from '@kbn/core/public';
 import { TableListView, type UserContentCommonSchema } from '@kbn/content-management-table-list';
 
 import {
@@ -30,17 +30,17 @@ import {
   noItemsStrings,
   dashboardUnsavedListingStrings,
   getNewDashboardTitle,
-  dashboardSavedObjectErrorStrings,
-} from '../../dashboard_strings';
-import { DashboardConstants } from '../..';
-import { DashboardRedirect } from '../../types';
+  dashboardListingErrorStrings,
+} from '../_dashboard_app_strings';
+import { DashboardRedirect } from '../types';
+import { DashboardAttributes } from '../../../common';
 import { pluginServices } from '../../services/plugin_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../dashboard_constants';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
 import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { DashboardAppNoDataPage, isDashboardAppInNoDataState } from '../dashboard_app_no_data';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../../services/dashboard_session_storage/dashboard_session_storage_service';
-import { DashboardAttributes } from '../embeddable';
 
 const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
 const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
@@ -283,11 +283,11 @@ export const DashboardListing = ({
       await Promise.all(
         dashboardsToDelete.map(({ id }) => {
           dashboardSessionStorage.clearState(id);
-          return savedObjectsClient.delete(DashboardConstants.DASHBOARD_SAVED_OBJECT_TYPE, id);
+          return savedObjectsClient.delete(DASHBOARD_SAVED_OBJECT_TYPE, id);
         })
       ).catch((error) => {
         toasts.addError(error, {
-          title: dashboardSavedObjectErrorStrings.getErrorDeletingDashboardToast(),
+          title: dashboardListingErrorStrings.getErrorDeletingDashboardToast(),
         });
       });
       setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());

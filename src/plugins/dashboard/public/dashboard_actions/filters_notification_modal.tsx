@@ -24,24 +24,25 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { DataView } from '@kbn/data-views-plugin/public';
+
 import {
+  ViewMode,
+  IEmbeddable,
   EditPanelAction,
   FilterableEmbeddable,
-  IEmbeddable,
-  ViewMode,
 } from '@kbn/embeddable-plugin/public';
 import {
-  type AggregateQuery,
   type Filter,
-  getAggregateQueryMode,
   isOfQueryType,
+  type AggregateQuery,
+  getAggregateQueryMode,
 } from '@kbn/es-query';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 
+import { DashboardContainer } from '../dashboard_container';
 import { FiltersNotificationActionContext } from './filters_notification_badge';
-import { DashboardContainer } from '../embeddable';
-import { dashboardFilterNotificationBadge } from '../../dashboard_strings';
+import { dashboardFilterNotificationBadgeStrings } from './_dashboard_actions_strings';
 
 export interface FiltersNotificationProps {
   context: FiltersNotificationActionContext;
@@ -101,14 +102,14 @@ export function FiltersNotificationModal({
           <EuiForm component="div">
             {queryString !== '' && (
               <EuiFormRow
-                label={dashboardFilterNotificationBadge.getQueryTitle()}
+                label={dashboardFilterNotificationBadgeStrings.getQueryTitle()}
                 display="rowCompressed"
               >
                 <EuiCodeBlock
                   language={queryLanguage}
                   paddingSize="none"
                   transparentBackground
-                  aria-labelledby={`${dashboardFilterNotificationBadge.getQueryTitle()}: ${queryString}`}
+                  aria-labelledby={`${dashboardFilterNotificationBadgeStrings.getQueryTitle()}: ${queryString}`}
                   tabIndex={0} // focus so that keyboard controls will not skip over the code block
                 >
                   {queryString}
@@ -117,7 +118,7 @@ export function FiltersNotificationModal({
             )}
             {filters && filters.length > 0 && (
               <EuiFormRow
-                label={dashboardFilterNotificationBadge.getFiltersTitle()}
+                label={dashboardFilterNotificationBadgeStrings.getFiltersTitle()}
                 css={css`
                   max-width: fit-content;
                 `}
@@ -139,7 +140,7 @@ export function FiltersNotificationModal({
                 onClick={onClose}
                 data-test-subj="filtersNotificationModal__closeButton"
               >
-                {dashboardFilterNotificationBadge.getCloseButtonTitle()}
+                {dashboardFilterNotificationBadgeStrings.getCloseButtonTitle()}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -151,7 +152,7 @@ export function FiltersNotificationModal({
                 }}
                 fill
               >
-                {dashboardFilterNotificationBadge.getEditButtonTitle()}
+                {dashboardFilterNotificationBadgeStrings.getEditButtonTitle()}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

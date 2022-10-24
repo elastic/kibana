@@ -7,13 +7,14 @@
  */
 
 import { PanelState, EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../dashboard_constants';
-import { DashboardPanelState } from '../types';
+
 import {
   IPanelPlacementArgs,
   findTopLeftMostOpenSpace,
   PanelPlacementMethod,
 } from './dashboard_panel_placement';
+import { DashboardPanelState } from '../../../../common';
+import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../dashboard_constants';
 
 /**
  * Creates and initializes a basic panel state.

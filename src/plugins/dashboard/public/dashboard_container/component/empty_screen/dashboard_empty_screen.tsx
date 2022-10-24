@@ -18,8 +18,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { emptyScreenStrings } from '../../../dashboard_strings';
 import { pluginServices } from '../../../services/plugin_services';
+import { emptyScreenStrings } from '../../_dashboard_container_strings';
 
 export interface DashboardEmptyScreenProps {
   isEditMode?: boolean;

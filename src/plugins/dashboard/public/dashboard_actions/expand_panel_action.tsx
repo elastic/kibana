@@ -9,9 +9,8 @@
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { REMOVEME_DashboardContainerInput, DASHBOARD_CONTAINER_TYPE } from '../..';
-import { dashboardExpandPanelAction } from '../../dashboard_strings';
-import { type DashboardContainer } from '../embeddable';
+import { DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '../dashboard_container';
+import { dashboardExpandPanelActionStrings } from './_dashboard_actions_strings';
 
 export const ACTION_EXPAND_PANEL = 'togglePanel';
 
@@ -24,10 +23,7 @@ function isExpanded(embeddable: IEmbeddable) {
     throw new IncompatibleActionError();
   }
 
-  return (
-    embeddable.id ===
-    (embeddable.parent.getInput() as REMOVEME_DashboardContainerInput).expandedPanelId
-  );
+  return embeddable.id === (embeddable.parent as DashboardContainer).getExpandedPanelId();
 }
 
 export interface ExpandPanelActionContext {
@@ -47,8 +43,8 @@ export class ExpandPanelAction implements Action<ExpandPanelActionContext> {
     }
 
     return isExpanded(embeddable)
-      ? dashboardExpandPanelAction.getMinimizeTitle()
-      : dashboardExpandPanelAction.getMaximizeTitle();
+      ? dashboardExpandPanelActionStrings.getMinimizeTitle()
+      : dashboardExpandPanelActionStrings.getMaximizeTitle();
   }
 
   public getIconType({ embeddable }: ExpandPanelActionContext) {
@@ -68,8 +64,6 @@ export class ExpandPanelAction implements Action<ExpandPanelActionContext> {
       throw new IncompatibleActionError();
     }
     const newValue = isExpanded(embeddable) ? undefined : embeddable.id;
-    embeddable.parent.updateInput({
-      expandedPanelId: newValue,
-    });
+    (embeddable.parent as DashboardContainer).setExpandedPanelId(newValue);
   }
 }

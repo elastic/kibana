@@ -50,6 +50,7 @@ export interface DashboardContainerByValueInput extends EmbeddableInput {
   title: string;
   tags: string[];
   viewMode: ViewMode;
+  lastSavedId?: string;
   description?: string;
   options: DashboardOptions;
   isEmbeddedExternally?: boolean;

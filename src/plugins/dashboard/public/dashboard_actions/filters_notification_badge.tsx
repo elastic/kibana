@@ -8,16 +8,16 @@
 
 import React from 'react';
 
-import { EditPanelAction, isFilterableEmbeddable } from '@kbn/embeddable-plugin/public';
 import { type AggregateQuery } from '@kbn/es-query';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { type IEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { EditPanelAction, isFilterableEmbeddable } from '@kbn/embeddable-plugin/public';
 
-import { dashboardFilterNotificationBadge } from '../../dashboard_strings';
-import { pluginServices } from '../../services/plugin_services';
+import { pluginServices } from '../services/plugin_services';
+import { dashboardFilterNotificationBadgeStrings } from './_dashboard_actions_strings';
 
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 
@@ -30,7 +30,7 @@ export class FiltersNotificationBadge implements Action<FiltersNotificationActio
   public readonly type = BADGE_FILTERS_NOTIFICATION;
   public readonly order = 2;
 
-  private displayName = dashboardFilterNotificationBadge.getDisplayName();
+  private displayName = dashboardFilterNotificationBadgeStrings.getDisplayName();
   private icon = 'filter';
   private applicationService;
   private embeddableService;

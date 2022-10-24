@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import uuid from 'uuid';
 import { has } from 'lodash';
 import { ReactElement } from 'react';
 
@@ -21,7 +22,6 @@ import {
   DEFAULT_DASHBOARD_INPUT,
 } from '../../../dashboard_constants';
 import { DashboardSavedObjectRequiredServices } from '../types';
-import { cleanFiltersForSerialize } from '../../../REMOVE_application/lib/filter_utils';
 import {
   convertSavedPanelsToPanelMap,
   DashboardAttributes,
@@ -29,7 +29,6 @@ import {
   DashboardOptions,
   injectReferences,
 } from '../../../../common';
-import uuid from 'uuid';
 
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
@@ -60,6 +59,13 @@ export const dashboardStateLoadWasSuccessful = (
   incoming?: LoadDashboardFromSavedObjectReturn
 ): incoming is SuccessfulLoadDashboardFromSavedObjectReturn => {
   return Boolean(incoming && incoming?.dashboardInput && !incoming.redirectedToAlias);
+};
+
+const cleanFiltersForSerialize = (filters: Filter[]): Filter[] => {
+  return filters.map((filter) => {
+    if (filter.meta.value) delete filter.meta.value;
+    return filter;
+  });
 };
 
 export const loadDashboardStateFromSavedObject = async ({

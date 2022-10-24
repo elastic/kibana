@@ -16,9 +16,9 @@ import {
   ViewMode,
 } from '@kbn/embeddable-plugin/public';
 
-import { DashboardPanelState } from '../types';
-import { DashboardContainer } from '..';
+import { DashboardPanelState } from '../../../../common';
 import { pluginServices } from '../../../services/plugin_services';
+import { DashboardContainer } from '../..';
 
 type PanelProps = Pick<EmbeddableChildPanel, 'container'>;
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;

@@ -26,11 +26,11 @@ import type { SavedObject } from '@kbn/saved-objects-plugin/public';
 import {
   placePanelBeside,
   IPanelPlacementBesideArgs,
-} from '../embeddable/panel/dashboard_panel_placement';
-import { pluginServices } from '../../services/plugin_services';
-import { dashboardClonePanelAction } from '../../dashboard_strings';
-import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
-import { type DashboardPanelState, type DashboardContainer } from '..';
+} from '../dashboard_container/component/panel/dashboard_panel_placement';
+import { type DashboardPanelState } from '../../common';
+import { pluginServices } from '../services/plugin_services';
+import { dashboardClonePanelActionStrings } from './_dashboard_actions_strings';
+import { DASHBOARD_CONTAINER_TYPE, type DashboardContainer } from '../dashboard_container';
 
 export const ACTION_CLONE_PANEL = 'clonePanel';
 
@@ -55,7 +55,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
       throw new IncompatibleActionError();
     }
-    return dashboardClonePanelAction.getDisplayName();
+    return dashboardClonePanelActionStrings.getDisplayName();
   }
 
   public getIconType({ embeddable }: ClonePanelActionContext) {
@@ -102,7 +102,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
   private async getCloneTitle(embeddable: IEmbeddable, rawTitle: string) {
     if (rawTitle === '') return ''; // If
 
-    const clonedTag = dashboardClonePanelAction.getClonedTag();
+    const clonedTag = dashboardClonePanelActionStrings.getClonedTag();
     const cloneRegex = new RegExp(`\\(${clonedTag}\\)`, 'g');
     const cloneNumberRegex = new RegExp(`\\(${clonedTag} [0-9]+\\)`, 'g');
     const baseTitle = rawTitle.replace(cloneNumberRegex, '').replace(cloneRegex, '').trim();
@@ -201,7 +201,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
       }
     }
     this.toastsService.addSuccess({
-      title: dashboardClonePanelAction.getSuccessMessage(),
+      title: dashboardClonePanelActionStrings.getSuccessMessage(),
       'data-test-subj': 'addObjectToContainerSuccess',
     });
     return panelState;

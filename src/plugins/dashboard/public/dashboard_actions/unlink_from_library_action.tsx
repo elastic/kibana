@@ -16,10 +16,11 @@ import {
   isReferenceOrValueEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { dashboardUnlinkFromLibraryAction } from '../../dashboard_strings';
-import { type DashboardPanelState, type DashboardContainer } from '..';
-import { pluginServices } from '../../services/plugin_services';
-import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
+
+import { DashboardPanelState } from '../../common';
+import { pluginServices } from '../services/plugin_services';
+import { dashboardUnlinkFromLibraryActionStrings } from './_dashboard_actions_strings';
+import { type DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
 
 export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
 
@@ -44,7 +45,7 @@ export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionCo
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
       throw new IncompatibleActionError();
     }
-    return dashboardUnlinkFromLibraryAction.getDisplayName();
+    return dashboardUnlinkFromLibraryActionStrings.getDisplayName();
   }
 
   public getIconType({ embeddable }: UnlinkFromLibraryActionContext) {
@@ -87,7 +88,7 @@ export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionCo
     };
     dashboard.replacePanel(panelToReplace, newPanel, true);
 
-    const title = dashboardUnlinkFromLibraryAction.getSuccessMessage(
+    const title = dashboardUnlinkFromLibraryActionStrings.getSuccessMessage(
       embeddable.getTitle() ? `'${embeddable.getTitle()}'` : ''
     );
 

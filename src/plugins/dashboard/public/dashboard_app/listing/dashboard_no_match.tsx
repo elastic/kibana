@@ -14,9 +14,9 @@ import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { DashboardConstants } from '../..';
+import { LANDING_PAGE_PATH } from '../../dashboard_constants';
 import { pluginServices } from '../../services/plugin_services';
-import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
+import { useDashboardMountContext } from '../dashboard_mount_context';
 
 let bannerId: string | undefined;
 
@@ -66,7 +66,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
         }
       }, 15000);
 
-      history.replace(DashboardConstants.LANDING_PAGE_PATH);
+      history.replace(LANDING_PAGE_PATH);
     }
   }, [restorePreviousUrl, navigateToLegacyKibanaUrl, banners, theme$, history]);
 

@@ -7,14 +7,9 @@
  */
 
 import React from 'react';
-import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
-import { FilterableEmbeddable, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
-
-import { DashboardContainer } from '../embeddable/dashboard_container';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { getSampleDashboardInput } from '../test_helpers';
+import { act } from 'react-dom/test-utils';
 import { EuiModalFooter } from '@elastic/eui';
-import { FiltersNotificationModal, FiltersNotificationProps } from './filters_notification_modal';
+
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
@@ -22,8 +17,14 @@ import {
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { act } from 'react-dom/test-utils';
-import { pluginServices } from '../../services/plugin_services';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+import { FilterableEmbeddable, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+
+import { getSampleDashboardInput } from '../mocks';
+import { DashboardContainer } from '../dashboard_container';
+import { pluginServices } from '../services/plugin_services';
+import { FiltersNotificationModal, FiltersNotificationProps } from './filters_notification_modal';
 
 describe('LibraryNotificationPopover', () => {
   const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);

@@ -14,13 +14,13 @@ import {
   isErrorEmbeddable,
   isReferenceOrValueEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { KibanaThemeProvider, reactToUiComponent } from '@kbn/kibana-react-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { KibanaThemeProvider, reactToUiComponent } from '@kbn/kibana-react-plugin/public';
 
-import { pluginServices } from '../../services/plugin_services';
+import { pluginServices } from '../services/plugin_services';
 import { UnlinkFromLibraryAction } from './unlink_from_library_action';
-import { dashboardLibraryNotification } from '../../dashboard_strings';
 import { LibraryNotificationPopover } from './library_notification_popover';
+import { dashboardLibraryNotificationStrings } from './_dashboard_actions_strings';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
 
@@ -43,7 +43,7 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
     } = pluginServices.getServices());
   }
 
-  private displayName = dashboardLibraryNotification.getDisplayName();
+  private displayName = dashboardLibraryNotificationStrings.getDisplayName();
 
   private icon = 'folderCheck';
 

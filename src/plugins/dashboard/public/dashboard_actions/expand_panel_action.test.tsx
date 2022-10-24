@@ -59,11 +59,11 @@ beforeEach(async () => {
 test('Sets the embeddable expanded panel id on the parent', async () => {
   const expandPanelAction = new ExpandPanelAction();
 
-  expect(container.getInput().expandedPanelId).toBeUndefined();
+  expect(container.getExpandedPanelId()).toBeUndefined();
 
   expandPanelAction.execute({ embeddable });
 
-  expect(container.getInput().expandedPanelId).toBe(embeddable.id);
+  expect(container.getExpandedPanelId()).toBe(embeddable.id);
 });
 
 test('Is not compatible when embeddable is not in a dashboard container', async () => {

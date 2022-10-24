@@ -10,7 +10,7 @@ import type { QueryState } from '@kbn/data-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
-  DashboardConstants,
+  DASHBOARD_APP_ID,
   createDashboardEditUrl,
   GLOBAL_STATE_STORAGE_KEY,
 } from '../../dashboard_constants';

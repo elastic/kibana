@@ -25,10 +25,10 @@ import type {
   EmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
 
-import { DashboardContainer } from '..';
-import { DashboardConstants, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
-import { dashboardReplacePanelAction } from '../../dashboard_strings';
+import { DashboardContainer } from '../../dashboard_container';
 import { pluginServices } from '../../services/plugin_services';
+import { getPanelAddedSuccessString } from '../_dashboard_app_strings';
+import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 
 interface Props {
   /** Dashboard container */
@@ -237,9 +237,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
 
         if (newEmbeddable) {
           toasts.addSuccess({
-            title: dashboardReplacePanelAction.getSuccessMessage(
-              `'${newEmbeddable.getInput().title}'` || ''
-            ),
+            title: getPanelAddedSuccessString(`'${newEmbeddable.getInput().title}'` || ''),
             'data-test-subj': 'addEmbeddableToDashboardSuccess',
           });
         }

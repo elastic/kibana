@@ -16,7 +16,7 @@ import { getSavedObjectFinder } from '@kbn/saved-objects-plugin/public';
 
 import { ExportCSVAction } from './export_csv_action';
 import { ClonePanelAction } from './clone_panel_action';
-import { DashboardStartDependencies } from '../../plugin';
+import { DashboardStartDependencies } from '../plugin';
 import { ExpandPanelAction } from './expand_panel_action';
 import { ReplacePanelAction } from './replace_panel_action';
 import { AddToLibraryAction } from './add_to_library_action';

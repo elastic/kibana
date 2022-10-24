@@ -13,8 +13,8 @@ import { downloadMultipleAs } from '@kbn/share-plugin/public';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import type { Adapters, IEmbeddable } from '@kbn/embeddable-plugin/public';
 
-import { dashboardExportCsvAction } from '../../dashboard_strings';
-import { pluginServices } from '../../services/plugin_services';
+import { dashboardExportCsvActionStrings } from './_dashboard_actions_strings';
+import { pluginServices } from '../services/plugin_services';
 
 export const ACTION_EXPORT_CSV = 'ACTION_EXPORT_CSV';
 
@@ -48,7 +48,7 @@ export class ExportCSVAction implements Action<ExportContext> {
   }
 
   public readonly getDisplayName = (context: ExportContext): string =>
-    dashboardExportCsvAction.getDisplayName();
+    dashboardExportCsvActionStrings.getDisplayName();
 
   public async isCompatible(context: ExportContext): Promise<boolean> {
     return !!this.hasDatatableContent(context.embeddable?.getInspectorAdapters?.());
@@ -89,7 +89,7 @@ export class ExportCSVAction implements Action<ExportContext> {
           // skip empty datatables
           if (datatable) {
             const postFix = datatables.length > 1 ? `-${i + 1}` : '';
-            const untitledFilename = dashboardExportCsvAction.getUntitledFilename();
+            const untitledFilename = dashboardExportCsvActionStrings.getUntitledFilename();
 
             memo[`${context!.embeddable!.getTitle() || untitledFilename}${postFix}.csv`] = {
               content: exporters.datatableToCSV(datatable, {

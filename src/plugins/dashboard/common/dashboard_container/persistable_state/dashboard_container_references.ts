@@ -13,7 +13,8 @@ import {
 } from '@kbn/embeddable-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
 import { CONTROL_GROUP_TYPE, PersistableControlGroupInput } from '@kbn/controls-plugin/common';
-import { DashboardContainerStateWithType, DashboardPanelState } from '../types';
+import { DashboardPanelState } from '../types';
+import { DashboardContainerStateWithType } from '../../types';
 
 const getPanelStatePrefix = (state: DashboardPanelState) => `${state.explicitInput.id}:`;
 
