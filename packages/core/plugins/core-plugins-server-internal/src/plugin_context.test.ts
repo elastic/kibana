@@ -68,7 +68,6 @@ describe('createPluginInitializerContext', () => {
     };
     nodeInfo = nodeServiceMock.createInternalPrebootContract();
     env = Env.createDefault(REPO_ROOT, getEnvOptions());
-    // I need to go through coreSetup and coreStart to properly set up this mocked instance
     coreContext = mockCoreContext.create({
       env,
       logger,

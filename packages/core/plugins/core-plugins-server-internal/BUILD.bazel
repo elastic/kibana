@@ -40,13 +40,11 @@ RUNTIME_DEPS = [
   "@npm//semver",
   "@npm//type-detect",
   "@npm//lodash",
-
   "//packages/kbn-std",
   "//packages/kbn-config",
   "//packages/kbn-config-schema",
   "//packages/kbn-logging",
   "//packages/kbn-utils",
-
   "//packages/core/base/core-base-common",
   "//packages/core/base/core-base-server-internal",
   "//packages/core/lifecycle/core-lifecycle-server-internal",
