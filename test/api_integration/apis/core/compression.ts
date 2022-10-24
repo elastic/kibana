@@ -56,8 +56,5 @@ export default function ({ getService }: FtrProviderContext) {
     describe('against an application page', () => {
       compressionSuite('/app/kibana');
     });
-    describe('against an endpoint', () => {
-      compressionSuite('/api/status');
-    });
   });
 }
