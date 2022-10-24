@@ -25,11 +25,13 @@ import { connect, useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
 
 import { isTab } from '@kbn/timelines-plugin/public';
+import { tableDefaults } from '../../../common/store/data_table/defaults';
+import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SecurityPageName } from '../../../app/types';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TableId } from '../../../../common/types/timeline';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import type { UpdateDateRange } from '../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../common/components/filters_global';
@@ -55,8 +57,6 @@ import {
   resetKeyboardFocus,
   showGlobalFilters,
 } from '../../../timelines/components/timeline/helpers';
-import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import {
   buildAlertStatusFilter,
   buildShowBuildingBlockFilter,
@@ -92,19 +92,18 @@ type DetectionEngineComponentProps = PropsFromRedux;
 const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   clearEventsDeleted,
   clearEventsLoading,
-  clearSelected,
 }) => {
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
-    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).graphEventId
+    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).graphEventId
   );
   const updatedAt = useShallowEqualSelector(
-    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).updated
+    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).updated
   );
   const isAlertsLoading = useShallowEqualSelector(
-    (state) => (getTimeline(state, TimelineId.detectionsPage) ?? timelineDefaults).isLoading
+    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -197,7 +196,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   // Callback for when open/closed filter changes
   const onFilterGroupChangedCallback = useCallback(
     (newFilterGroup: Status) => {
-      const timelineId = TimelineId.detectionsPage;
+      const timelineId = TableId.alertsOnAlertsPage;
       clearEventsLoading({ id: timelineId });
       clearEventsDeleted({ id: timelineId });
       setFilterGroup(newFilterGroup);
@@ -378,7 +377,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer size="l" />
             </Display>
             <AlertsTable
-              timelineId={TimelineId.detectionsPage}
+              tableId={TableId.alertsOnAlertsPage}
               loading={loading}
               hasIndexWrite={hasIndexWrite ?? false}
               hasIndexMaintenance={hasIndexMaintenance ?? false}
@@ -401,11 +400,11 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
 };
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  clearSelected: ({ id }: { id: string }) => dispatch(timelineActions.clearSelected({ id })),
+  clearSelected: ({ id }: { id: string }) => dispatch(dataTableActions.clearSelected({ id })),
   clearEventsLoading: ({ id }: { id: string }) =>
-    dispatch(timelineActions.clearEventsLoading({ id })),
+    dispatch(dataTableActions.clearEventsLoading({ id })),
   clearEventsDeleted: ({ id }: { id: string }) =>
-    dispatch(timelineActions.clearEventsDeleted({ id })),
+    dispatch(dataTableActions.clearEventsDeleted({ id })),
 });
 
 const connector = connect(null, mapDispatchToProps);

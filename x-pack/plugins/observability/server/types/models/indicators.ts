@@ -9,14 +9,15 @@ import * as t from 'io-ts';
 import {
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
+  indicatorDataSchema,
   indicatorSchema,
   indicatorTypesSchema,
+  kqlCustomIndicatorSchema,
 } from '../schema';
-
-const indicatorDataSchema = t.type({ good: t.number, total: t.number });
 
 type APMTransactionErrorRateIndicator = t.TypeOf<typeof apmTransactionErrorRateIndicatorSchema>;
 type APMTransactionDurationIndicator = t.TypeOf<typeof apmTransactionDurationIndicatorSchema>;
+type KQLCustomIndicator = t.TypeOf<typeof kqlCustomIndicatorSchema>;
 type Indicator = t.TypeOf<typeof indicatorSchema>;
 type IndicatorTypes = t.TypeOf<typeof indicatorTypesSchema>;
 type IndicatorData = t.TypeOf<typeof indicatorDataSchema>;
@@ -26,5 +27,6 @@ export type {
   IndicatorTypes,
   APMTransactionErrorRateIndicator,
   APMTransactionDurationIndicator,
+  KQLCustomIndicator,
   IndicatorData,
 };

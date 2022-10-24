@@ -440,9 +440,10 @@ export const getMetricVisualization = ({
     return { ...state, trendlineLayerId: layerId, trendlineLayerType: layerType };
   },
 
-  removeLayer(state) {
+  removeLayer(state, layerId) {
     const newState: MetricVisualizationState = {
       ...state,
+      ...(state.layerId === layerId && { metricAccessor: undefined }),
       trendlineLayerId: undefined,
       trendlineLayerType: undefined,
       trendlineMetricAccessor: undefined,

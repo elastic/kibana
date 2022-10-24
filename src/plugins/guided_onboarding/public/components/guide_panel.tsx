@@ -30,8 +30,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ApplicationStart } from '@kbn/core/public';
+import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboarding';
 
-import type { GuideState, GuideStep as GuideStepStatus } from '../../common/types';
 import type { GuideConfig, StepConfig } from '../types';
 
 import type { ApiService } from '../services/api';
@@ -74,18 +74,19 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   const handleStepButtonClick = async (step: GuideStepStatus, stepConfig: StepConfig) => {
     if (guideState) {
       const { id, status } = step;
+
       if (status === 'ready_to_complete') {
         return await api.completeGuideStep(guideState?.guideId, id);
       }
 
-      if (status === 'active') {
-        await api.startGuideStep(guideState!.guideId, id);
-      }
       if (status === 'active' || status === 'in_progress') {
+        await api.startGuideStep(guideState!.guideId, id);
+
         if (stepConfig.location) {
           await application.navigateToApp(stepConfig.location.appID, {
             path: stepConfig.location.path,
           });
+
           if (stepConfig.manualCompletion?.readyToCompleteOnNavigation) {
             await api.completeGuideStep(guideState.guideId, id);
           }
@@ -140,20 +141,8 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   // TODO handle loading, error state
   // https://github.com/elastic/kibana/issues/139799, https://github.com/elastic/kibana/issues/139798
   if (!guideConfig) {
-    return (
-      <EuiButton
-        onClick={toggleGuide}
-        color="success"
-        fill
-        isDisabled={true}
-        size="s"
-        data-test-subj="disabledGuideButton"
-      >
-        {i18n.translate('guidedOnboarding.disabledGuidedSetupButtonLabel', {
-          defaultMessage: 'Setup guide',
-        })}
-      </EuiButton>
-    );
+    // TODO button show/hide logic https://github.com/elastic/kibana/issues/141129
+    return null;
   }
 
   const stepsCompleted = getProgress(guideState);

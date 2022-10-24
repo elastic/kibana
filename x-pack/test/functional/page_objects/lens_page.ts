@@ -600,6 +600,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await this.waitForVisualization();
     },
 
+    async dragRangeInput(testId: string, steps: number = 1, direction: 'left' | 'right' = 'right') {
+      const inputEl = await testSubjects.find(testId);
+      await inputEl.focus();
+      const browserKey = direction === 'left' ? browser.keys.LEFT : browser.keys.RIGHT;
+      while (steps--) {
+        await browser.pressKeys(browserKey);
+      }
+    },
+
+    async getRangeInputValue(testId: string) {
+      return (await testSubjects.find(testId)).getAttribute('value');
+    },
+
     async isTopLevelAggregation() {
       return await testSubjects.isEuiSwitchChecked('indexPattern-nesting-switch');
     },
@@ -797,6 +810,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async changeAxisSide(newSide: string) {
       await testSubjects.click(`lnsXY_axisSide_groups_${newSide}`);
+    },
+
+    async getSelectedAxisSide() {
+      const axisSideGroups = await find.allByCssSelector(
+        `[data-test-subj^="lnsXY_axisSide_groups_"]`
+      );
+      for (const axisSideGroup of axisSideGroups) {
+        const input = await axisSideGroup.findByTagName('input');
+        const isSelected = await input.isSelected();
+        if (isSelected) {
+          return axisSideGroup?.getVisibleText();
+        }
+      }
     },
 
     /** Counts the visible warnings in the config panel */
@@ -1102,6 +1128,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         'lnsPalettePanel_dynamicColoring_progression_custom_stops_value',
         String(value)
       );
+    },
+
+    async openLayerContextMenu(index: number = 0) {
+      await testSubjects.click(`lnsLayerSplitButton--${index}`);
     },
 
     async toggleColumnVisibility(dimension: string, no = 1) {

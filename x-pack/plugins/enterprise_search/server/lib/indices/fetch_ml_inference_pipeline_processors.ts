@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
@@ -16,31 +17,62 @@ export type InferencePipelineData = InferencePipeline & {
   trainedModelName: string;
 };
 
-export const fetchMlInferencePipelineProcessorNames = async (
-  client: ElasticsearchClient,
-  indexName: string
-): Promise<string[]> => {
+export const fetchMlInferencePipelines = async (client: ElasticsearchClient) => {
   try {
-    const mlInferencePipelineName = getInferencePipelineNameFromIndexName(indexName);
-    const {
-      [mlInferencePipelineName]: { processors: mlInferencePipelineProcessors = [] },
-    } = await client.ingest.getPipeline({
-      id: mlInferencePipelineName,
+    return await client.ingest.getPipeline({
+      id: getInferencePipelineNameFromIndexName('*'),
     });
+  } catch (error) {
+    // The GET /_ingest/pipeline API returns an empty object on 404 Not Found. If there are no `@ml-inference`
+    // pipelines then return an empty record of pipelines
+    return {};
+  }
+};
 
-    return mlInferencePipelineProcessors
-      .map((obj) => obj.pipeline?.name)
-      .filter((name): name is string => name !== undefined);
-  } catch (err) {
-    // The GET /_ingest/pipeline API returns an empty object on 404 Not Found. If someone provides
-    // a bad index name, catch the error and return an empty array of names.
+export const getMlInferencePipelineProcessorNamesFromPipelines = (
+  indexName: string,
+  pipelines: IngestGetPipelineResponse
+): string[] => {
+  const mlInferencePipelineName = getInferencePipelineNameFromIndexName(indexName);
+  if (pipelines?.[mlInferencePipelineName]?.processors === undefined) {
     return [];
   }
+  const {
+    [mlInferencePipelineName]: { processors: mlInferencePipelineProcessors = [] },
+  } = pipelines;
+
+  return mlInferencePipelineProcessors
+    .map((obj) => obj.pipeline?.name)
+    .filter((name): name is string => name !== undefined);
+};
+
+export const getProcessorPipelineMap = (
+  pipelines: IngestGetPipelineResponse
+): Record<string, string[]> => {
+  const result: Record<string, string[]> = {};
+  const addPipelineToProcessorMap = (processorName: string, pipelineName: string) => {
+    if (processorName in result) {
+      result[processorName].push(pipelineName);
+    } else {
+      result[processorName] = [pipelineName];
+    }
+  };
+
+  Object.entries(pipelines).forEach(([name, pipeline]) =>
+    pipeline?.processors?.forEach((processor) => {
+      if (processor.pipeline?.name !== undefined) {
+        addPipelineToProcessorMap(processor.pipeline.name, name);
+      }
+    })
+  );
+
+  return result;
 };
 
 export const fetchPipelineProcessorInferenceData = async (
   client: ElasticsearchClient,
-  mlInferencePipelineProcessorNames: string[]
+  mlInferencePipelineProcessorNames: string[],
+  pipelineProcessorsMap: Record<string, string[]>
 ): Promise<InferencePipelineData[]> => {
   const mlInferencePipelineProcessorConfigs = await client.ingest.getPipeline({
     id: mlInferencePipelineProcessorNames.join(),
@@ -61,6 +93,7 @@ export const fetchPipelineProcessorInferenceData = async (
           modelId: trainedModelName,
           modelState: TrainedModelState.NotDeployed,
           pipelineName: pipelineProcessorName,
+          pipelineReferences: pipelineProcessorsMap?.[pipelineProcessorName] ?? [],
           trainedModelName,
           types: [],
         });
@@ -96,6 +129,7 @@ export const getMlModelConfigsForModelIds = async (
         modelId: modelNamesInCurrentSpace.includes(trainedModelName) ? trainedModelName : undefined,
         modelState: TrainedModelState.NotDeployed,
         pipelineName: '',
+        pipelineReferences: [],
         trainedModelName,
         types: getMlModelTypesForModelConfig(trainedModelData),
       };
@@ -155,9 +189,9 @@ export const fetchAndAddTrainedModelData = async (
     return {
       ...data,
       modelId,
-      types,
       modelState,
       modelStateReason,
+      types,
     };
   });
 };
@@ -171,9 +205,11 @@ export const fetchMlInferencePipelineProcessors = async (
     return Promise.reject(new Error('Machine Learning is not enabled'));
   }
 
-  const mlInferencePipelineProcessorNames = await fetchMlInferencePipelineProcessorNames(
-    client,
-    indexName
+  const allMlPipelines = await fetchMlInferencePipelines(client);
+  const pipelineProcessorsPipelineCountMap = getProcessorPipelineMap(allMlPipelines);
+  const mlInferencePipelineProcessorNames = getMlInferencePipelineProcessorNamesFromPipelines(
+    indexName,
+    allMlPipelines
   );
 
   // Elasticsearch's GET pipelines API call will return all of the pipeline data if no ids are
@@ -183,7 +219,8 @@ export const fetchMlInferencePipelineProcessors = async (
 
   const pipelineProcessorInferenceData = await fetchPipelineProcessorInferenceData(
     client,
-    mlInferencePipelineProcessorNames
+    mlInferencePipelineProcessorNames,
+    pipelineProcessorsPipelineCountMap
   );
 
   // Elasticsearch's GET trained models and GET trained model stats API calls will return the

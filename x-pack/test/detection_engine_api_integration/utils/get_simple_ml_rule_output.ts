@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { MachineLearningResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { MachineLearningRule } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { getMockSharedResponseSchema } from './get_simple_rule_output';
 import { removeServerGeneratedProperties } from './remove_server_generated_properties';
 
-const getBaseMlRuleOutput = (ruleId = 'rule-1'): MachineLearningResponseSchema => {
+const getBaseMlRuleOutput = (ruleId = 'rule-1'): MachineLearningRule => {
   return {
     ...getMockSharedResponseSchema(ruleId),
     name: 'Simple ML Rule',

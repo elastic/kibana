@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { ValueLabelConfig } from '../../common/types';
 
 const valueLabelsOptions: Array<{
@@ -54,7 +54,26 @@ export const ValueLabelsSettings: FC<VisualOptionsProps> = ({
   const isSelected =
     valueLabelsOptions.find(({ value }) => value === valueLabels)?.id || 'value_labels_hide';
   return (
-    <EuiFormRow display="columnCompressed" label={<span>{label}</span>}>
+    <EuiFormRow
+      display="columnCompressed"
+      label={
+        <span>
+          {label}{' '}
+          <EuiIconTip
+            color="subdued"
+            content={i18n.translate('xpack.lens.shared.chartValueLabelVisibilityTooltip', {
+              defaultMessage: 'If there is not enough space, value labels might be hidden',
+            })}
+            iconProps={{
+              className: 'eui-alignTop',
+            }}
+            position="top"
+            size="s"
+            type="questionInCircle"
+          />
+        </span>
+      }
+    >
       <EuiButtonGroup
         isFullWidth
         legend={label}
