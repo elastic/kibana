@@ -25,7 +25,9 @@ import type {
 } from '../common/api_routes';
 
 type UnscopedClientMethodFrom<E extends HttpApiInterfaceEntryDefinition> = (
-  args: E['inputs']['body'] & E['inputs']['params'] & E['inputs']['query']
+  args: E['inputs']['body'] &
+    E['inputs']['params'] &
+    E['inputs']['query'] & { abortSignal?: AbortSignal }
 ) => Promise<E['output']>;
 
 /**

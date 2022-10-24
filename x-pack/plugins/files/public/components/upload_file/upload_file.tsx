@@ -7,7 +7,6 @@
 
 import { EuiFilePicker } from '@elastic/eui';
 import React, { type FunctionComponent, useRef, useEffect, useMemo } from 'react';
-import { FilesClient } from '../../types';
 
 import { useFilesContext } from '../context';
 
@@ -38,10 +37,6 @@ export interface Props<Kind extends string = string> {
    */
   kind: Kind;
   /**
-   * A files client that will be used process uploads.
-   */
-  client: FilesClient<any>;
-  /**
    * Allow users to clear a file after uploading.
    *
    * @note this will NOT delete an uploaded file.
@@ -57,12 +52,20 @@ export interface Props<Kind extends string = string> {
    */
   meta?: Record<string, unknown>;
   /**
+   * Whether to display the file picker with width 100%;
+   */
+  fullWidth?: boolean;
+  /**
    * Whether this component should display a "done" state after processing an
    * upload or return to the initial state to allow for another upload.
    *
    * @default false
    */
   allowRepeatedUploads?: boolean;
+  /**
+   * The initial text prompt
+   */
+  initialPromptText?: string;
   /**
    * Called when the an upload process fully completes
    */
@@ -81,6 +84,13 @@ export interface Props<Kind extends string = string> {
    * @note passing "true" here implies true for allowRepeatedUplods and immediate.
    */
   compressed?: boolean;
+
+  /**
+   * Allow upload more than one file at a time
+   *
+   * @default false
+   */
+  multiple?: boolean;
 }
 
 /**
@@ -91,16 +101,18 @@ export interface Props<Kind extends string = string> {
  */
 export const UploadFile = <Kind extends string = string>({
   meta,
-  client,
   onDone,
   onError,
+  fullWidth,
   allowClear,
   compressed = false,
   kind: kindId,
+  multiple = false,
+  initialPromptText,
   immediate = false,
   allowRepeatedUploads = false,
 }: Props<Kind>): ReturnType<FunctionComponent> => {
-  const { registry } = useFilesContext();
+  const { registry, client } = useFilesContext();
   const ref = useRef<null | EuiFilePicker>(null);
   const fileKind = registry.get(kindId);
   const repeatedUploads = compressed || allowRepeatedUploads;
@@ -139,6 +151,9 @@ export const UploadFile = <Kind extends string = string>({
         meta={meta}
         immediate={compressed || immediate}
         allowClear={allowClear}
+        fullWidth={fullWidth}
+        initialFilePromptText={initialPromptText}
+        multiple={multiple}
       />
     </context.Provider>
   );

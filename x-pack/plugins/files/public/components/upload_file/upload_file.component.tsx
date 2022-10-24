@@ -26,6 +26,8 @@ import { useUploadState } from './context';
 export interface Props {
   meta?: unknown;
   accept?: string;
+  multiple?: boolean;
+  fullWidth?: boolean;
   immediate?: boolean;
   allowClear?: boolean;
   compressed?: boolean;
@@ -40,7 +42,19 @@ const horizontalContainer = css`
 `;
 
 export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
-  ({ compressed, meta, accept, immediate, allowClear = false, initialFilePromptText }, ref) => {
+  (
+    {
+      compressed,
+      meta,
+      accept,
+      immediate,
+      allowClear = false,
+      multiple,
+      initialFilePromptText,
+      fullWidth,
+    },
+    ref
+  ) => {
     const { euiTheme } = useEuiTheme();
     const uploadState = useUploadState();
     const uploading = useBehaviorSubject(uploadState.uploading$);
@@ -57,12 +71,13 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
         data-test-subj="filesUploadFile"
         css={[
           css`
-            max-width: ${euiFormMaxWidth};
+            max-width: ${fullWidth ? '100%' : euiFormMaxWidth};
           `,
           compressed ? horizontalContainer : undefined,
         ]}
       >
         <EuiFilePicker
+          fullWidth={fullWidth}
           aria-label={i18nTexts.defaultPickerLabel}
           id={id}
           ref={ref}
@@ -70,7 +85,7 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
             uploadState.setFiles(Array.from(fs ?? []));
             if (immediate && uploadState.hasFiles()) uploadState.upload(meta);
           }}
-          multiple={false}
+          multiple={multiple}
           initialPromptText={initialFilePromptText}
           isLoading={uploading}
           isInvalid={isInvalid}
@@ -96,6 +111,7 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
           alignItems={compressed ? 'center' : 'flexStart'}
           direction={compressed ? undefined : 'rowReverse'}
           gutterSize={compressed ? 'none' : 'm'}
+          responsive={false}
         >
           <EuiFlexItem grow={false}>
             <ControlButton
