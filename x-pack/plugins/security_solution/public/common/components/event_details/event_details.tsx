@@ -274,23 +274,23 @@ const EventDetailsComponent: React.FC<Props> = ({
           }
         : undefined,
     [
-      isAlert,
+      allEnrichments,
       browserFields,
-      scopeId,
       data,
+      detailsEcsData,
+      goToTableTab,
+      handleOnEventClosed,
+      hostRisk,
       id,
       indexName,
-      handleOnEventClosed,
+      isAlert,
+      isDraggable,
+      isEnrichmentsLoading,
       isReadOnly,
       renderer,
-      detailsEcsData,
-      isDraggable,
-      goToTableTab,
+      scopeId,
       showThreatSummary,
-      hostRisk,
       userRisk,
-      allEnrichments,
-      isEnrichmentsLoading,
     ]
   );
 
