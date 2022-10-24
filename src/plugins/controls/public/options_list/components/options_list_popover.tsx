@@ -67,7 +67,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   const field = select((state) => state.componentState.field);
 
   const selectedOptions = select((state) => state.explicitInput.selectedOptions);
-  const allowExclude = select((state) => state.explicitInput.allowExclude);
+  const hideExclude = select((state) => state.explicitInput.hideExclude);
   const singleSelect = select((state) => state.explicitInput.singleSelect);
   const title = select((state) => state.explicitInput.title);
   const exclude = select((state) => state.explicitInput.exclude);
@@ -267,7 +267,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
           </>
         )}
       </div>
-      {!allowExclude && (
+      {!hideExclude && (
         <EuiPopoverFooter
           paddingSize="s"
           css={css`

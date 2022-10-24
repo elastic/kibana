@@ -37,8 +37,8 @@ export const OptionsListStrings = {
         defaultMessage:
           'Wait to display results until the list is complete. This setting is useful for large data sets, but the results might take longer to populate.',
       }),
-    getAllowExclude: () =>
-      i18n.translate('controls.optionsList.editor.allowExclude', {
+    getHideExcludeTitle: () =>
+      i18n.translate('controls.optionsList.editor.hideExclude', {
         defaultMessage: 'Allow selections to be excluded',
       }),
   },
