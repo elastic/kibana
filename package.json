@@ -768,7 +768,7 @@
     "micromatch": "3.1.10",
     "minimist": "^1.2.6",
     "mkdirp": "0.5.1",
-    "mocha": "^9.1.0",
+    "mocha": "^10.1.0",
     "mocha-junit-reporter": "^2.0.2",
     "mochawesome": "^7.0.1",
     "mochawesome-merge": "^4.2.1",
