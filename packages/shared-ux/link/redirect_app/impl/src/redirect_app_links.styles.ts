@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { css } from "@emotion/react";
+import { css } from '@emotion/react';
 
 export const redirectAppLinksStyles = css({
   display: 'flex',
