@@ -41,11 +41,11 @@ export function checkEmailServiceConfiguration(params: CheckEmailServiceParams) 
 
   const emailConnector = config.connectors?.default?.email;
   if (!emailConnector) {
-    throw new Error('Email connector not specified');
+    throw new Error('Email connector not specified.');
   }
 
   if (!actions.isPreconfiguredConnector(emailConnector)) {
-    throw new Error(`Unexisting email connector '${emailConnector}' specified`);
+    throw new Error(`Unexisting email connector '${emailConnector}' specified.`);
   }
 }
 

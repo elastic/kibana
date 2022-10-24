@@ -23,24 +23,32 @@ import type { NotificationsConfigType } from './config';
 export class NotificationsPlugin implements Plugin<void, NotificationsPluginStart> {
   private readonly logger: Logger;
   private readonly initialConfig: NotificationsConfigType;
+  private emailServiceSetupSuccessful: boolean;
 
   constructor(initializerContext: PluginInitializerContext<NotificationsConfigType>) {
     this.logger = initializerContext.logger.get();
     this.initialConfig = initializerContext.config.get();
+    this.emailServiceSetupSuccessful = false;
   }
 
   public setup(core: CoreSetup, plugins: NotificationsPluginSetupDeps) {
     try {
-      checkEmailServiceConfiguration({ config: this.initialConfig, plugins });
+      checkEmailServiceConfiguration({
+        config: this.initialConfig,
+        plugins,
+      });
+      this.emailServiceSetupSuccessful = true;
     } catch (err) {
-      this.logger.warn(`Email service setup: ${err}`);
+      this.logger.warn(`Email Service Setup ${err}`);
     }
   }
 
   public start(core: CoreStart, plugins: NotificationsPluginStartDeps) {
     let email: EmailService | undefined;
     try {
-      email = getEmailService({ config: this.initialConfig, plugins });
+      if (this.emailServiceSetupSuccessful) {
+        email = getEmailService({ config: this.initialConfig, plugins });
+      }
     } catch (err) {
       this.logger.warn(`Error starting email service: ${err}`);
     }
