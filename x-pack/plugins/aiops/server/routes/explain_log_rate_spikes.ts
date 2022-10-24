@@ -216,6 +216,7 @@ export const defineExplainLogRateSpikesRoute = (
             return;
           }
 
+          logDebugMessage(`Total document count: ${totalDocCount}`);
           logDebugMessage(`Sample probability: ${sampleProbability}`);
 
           loaded += LOADED_FIELD_CANDIDATES;
