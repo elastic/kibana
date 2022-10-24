@@ -187,8 +187,7 @@ Object {
         "range": Object {
           "@timestamp": Object {
             "format": "strict_date_optional_time",
-            "gte": "now-15min",
-            "lte": "now",
+            "lte": "2022-10-24T08:36:17.068Z",
           },
         },
       },
