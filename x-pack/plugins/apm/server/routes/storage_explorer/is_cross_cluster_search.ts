@@ -7,14 +7,14 @@
 
 import { Setup } from '../../lib/helpers/setup_request';
 
-export function IsCrossClusterSearch(setup: Setup) {
+export function isCrossClusterSearch(setup: Setup) {
   const {
     indices: { transaction, span, metric, error },
   } = setup;
 
-  const isCrossClusterSearch = [transaction, span, metric, error].some(
+  const indicesIncludeRemoteCluster = [transaction, span, metric, error].some(
     (indices) => indices.includes(':')
   );
 
-  return isCrossClusterSearch;
+  return indicesIncludeRemoteCluster;
 }

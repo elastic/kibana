@@ -36,7 +36,7 @@ import {
   getMainSummaryStats,
   getTracesPerMinute,
 } from './get_summary_statistics';
-import { IsCrossClusterSearch } from './is_cross_cluster_search';
+import { isCrossClusterSearch } from './is_cross_cluster_search';
 import { getServiceNamesFromTermsEnum } from '../services/get_services/get_sorted_and_filtered_services';
 
 const storageExplorerRoute = createApmServerRoute({
@@ -373,8 +373,7 @@ const storageExplorerIsCrossClusterSearchRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ isCrossClusterSearch: boolean }> => {
     const setup = await setupRequest(resources);
-    const isCrossClusterSearch = IsCrossClusterSearch(setup);
-    return { isCrossClusterSearch };
+    return { isCrossClusterSearch: isCrossClusterSearch(setup) };
   },
 });
 
