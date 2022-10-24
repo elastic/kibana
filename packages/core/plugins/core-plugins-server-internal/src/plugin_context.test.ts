@@ -28,7 +28,8 @@ import { PluginWrapper } from './plugin';
 
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
-// TODO: Refactor to use coreSetup and coreStart for mocking the config.
+import { createCoreContextConfigServiceMock } from './test_helpers';
+
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {
     id: 'some-plugin-id',
@@ -117,40 +118,7 @@ describe('createPluginInitializerContext', () => {
     });
 
     it('config.globalConfig$ should be an observable for the global config', async () => {
-      const config$ = rawConfigServiceMock.create({
-        rawConfig: {
-          elasticsearch: {
-            shardTimeout: '30s',
-            requestTimeout: '30s',
-            pingTimeout: '30s',
-          },
-          path: { data: fromRoot('data') },
-          savedObjects: { maxImportPayloadBytes: 26214400 },
-        },
-      });
-
-      const configService = new ConfigService(config$, env, logger);
-      configService.setSchema(
-        'elasticsearch',
-        schema.object({
-          shardTimeout: schema.duration({ defaultValue: '30s' }),
-          requestTimeout: schema.duration({ defaultValue: '30s' }),
-          pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
-        })
-      );
-      configService.setSchema(
-        'path',
-        schema.object({
-          data: schema.string(),
-        })
-      );
-      configService.setSchema(
-        'savedObjects',
-        schema.object({
-          maxImportPayloadBytes: schema.byteSize({ defaultValue: new ByteSizeValue(0) }),
-        })
-      );
-      await configService.validate();
+      const configService = createCoreContextConfigServiceMock();
 
       coreContext = { coreId, env, logger, configService };
 

@@ -5,48 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { from } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { IConfigService } from '@kbn/config';
-import { configServiceMock } from '@kbn/config-mocks';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import { duration } from 'moment';
 import { fromRoot } from '@kbn/utils';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { createCoreContextConfigServiceMock } from './test_helpers';
 
 describe('Legacy config', () => {
-  const createConfigService = (): IConfigService => {
-    const configService = configServiceMock.create();
-    const getPathConfig = (path: string | string[]) => {
-      switch (path) {
-        case 'elasticsearch':
-          return {
-            shardTimeout: duration(30, 's'),
-            requestTimeout: duration(30, 's'),
-            pingTimeout: duration(30, 's'),
-            someOtherProps: 'unused',
-          };
-        case 'path':
-          return { data: fromRoot('data'), someOtherProps: 'unused' };
-        case 'savedObjects':
-          return { maxImportPayloadBytes: new ByteSizeValue(26214400), someOtherProps: 'unused' };
-        default:
-          return {};
-      }
-    };
-    configService.atPath.mockImplementation((path) => {
-      return from([getPathConfig(path)]);
-    });
-    configService.atPathSync.mockImplementation((path) => {
-      return getPathConfig(path);
-    });
-
-    return configService;
-  };
-
   describe('getGlobalConfig', () => {
     it('should return the global config', async () => {
-      const configService = createConfigService();
+      const configService = createCoreContextConfigServiceMock();
       await configService.validate();
 
       const legacyConfig = getGlobalConfig(configService);
@@ -65,7 +34,7 @@ describe('Legacy config', () => {
 
   describe('getGlobalConfig$', () => {
     it('should return an observable for the global config', async () => {
-      const configService = createConfigService();
+      const configService = createCoreContextConfigServiceMock();
 
       const legacyConfig = await getGlobalConfig$(configService).pipe(take(1)).toPromise();
 
