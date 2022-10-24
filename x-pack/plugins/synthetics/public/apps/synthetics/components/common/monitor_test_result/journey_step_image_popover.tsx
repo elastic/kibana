@@ -71,6 +71,7 @@ const RecomposedScreenshotImage: React.FC<
   setImageData,
   isStepFailed,
   isLoading,
+  asThumbnail,
 }) => {
   // initially an undefined URL value is passed to the image display, and a loading spinner is rendered.
   // `useCompositeImage` will call `setImageData` when the image is composited, and the updated `imageData` will display.
@@ -83,6 +84,7 @@ const RecomposedScreenshotImage: React.FC<
       imageData={imageData}
       isStepFailed={isStepFailed}
       isLoading={isLoading}
+      asThumbnail={asThumbnail}
     />
   );
 };
@@ -135,6 +137,7 @@ const JourneyStepImage: React.FC<
         setImageData={setImageData}
         isStepFailed={isStepFailed}
         isLoading={isLoading}
+        asThumbnail={asThumbnail}
       />
     );
   }
