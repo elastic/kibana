@@ -14,12 +14,19 @@ export type MappedMetrics = Record<keyof HostMetics, number | null | undefined>;
 
 export const useHostTable = (nodes: SnapshotNode[]) => {
   const items: HostNodeRow[] = useMemo(() => {
+    const valuesMapping: Record<keyof HostMetics, 'value' | 'avg' | 'max'> = {
+      cpuCores: 'value',
+      rx: 'avg',
+      tx: 'avg',
+      memory: 'avg',
+      memoryTotal: 'avg',
+    };
     return nodes.map(({ metrics, path, name }) => ({
       name,
       os: last(path)?.os ?? '-',
       ...metrics.reduce((data, metric) => {
-        data[metric.name as keyof HostMetics] =
-          metric.name === 'cpuCores' ? metric?.value : metric?.avg;
+        const metricName = metric.name as keyof HostMetics;
+        data[metricName] = metric[valuesMapping[metricName]];
         return data;
       }, {} as HostMetics),
     }));
