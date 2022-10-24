@@ -14,6 +14,7 @@ import { parseExpression, ExpressionAstExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
 import { ExpressionFunctionDefinition } from '..';
 import { ExecutionContract } from './execution_contract';
+import { ExpressionValueBoxed } from '../expression_types';
 
 beforeAll(() => {
   if (typeof performance === 'undefined') {
@@ -744,6 +745,79 @@ describe('Execution', () => {
         });
       });
     });
+
+    test('continues execution when error state is gone', async () => {
+      testScheduler.run(({ cold, expectObservable, flush }) => {
+        const a = 1;
+        const b = 2;
+        const c = 3;
+        const d = 4;
+        const observable$ = cold('abcd|', { a, b, c, d });
+        const flakyFn = jest
+          .fn()
+          .mockImplementationOnce((value) => value)
+          .mockImplementationOnce(() => {
+            throw new Error('Some error.');
+          })
+          .mockReturnValueOnce({ type: 'something' })
+          .mockImplementationOnce((value) => value);
+        const spyFn = jest.fn((input, { arg }) => arg);
+
+        const executor = createUnitTestExecutor();
+        executor.registerFunction({
+          name: 'observable',
+          args: {},
+          help: '',
+          fn: () => observable$,
+        });
+        executor.registerFunction({
+          name: 'flaky',
+          args: {},
+          help: '',
+          fn: (value) => flakyFn(value),
+        });
+        executor.registerFunction({
+          name: 'spy',
+          args: {
+            arg: {
+              help: '',
+              types: ['number'],
+            },
+          },
+          help: '',
+          fn: (input, args) => spyFn(input, args),
+        });
+
+        const result = executor.run('spy arg={observable | flaky}', null, {});
+
+        expectObservable(result).toBe('abcd|', {
+          a: { partial: true, result: a },
+          b: {
+            partial: true,
+            result: {
+              type: 'error',
+              error: expect.objectContaining({ message: '[spy] > [flaky] > Some error.' }),
+            },
+          },
+          c: {
+            partial: true,
+            result: {
+              type: 'error',
+              error: expect.objectContaining({
+                message: `[spy] > Can not cast 'something' to any of 'number'`,
+              }),
+            },
+          },
+          d: { partial: false, result: d },
+        });
+
+        flush();
+
+        expect(spyFn).toHaveBeenCalledTimes(2);
+        expect(spyFn).toHaveBeenNthCalledWith(1, null, { arg: a });
+        expect(spyFn).toHaveBeenNthCalledWith(2, null, { arg: d });
+      });
+    });
   });
 
   describe('when arguments are missing', () => {
@@ -844,6 +918,38 @@ describe('Execution', () => {
       const { result } = await lastValueFrom(executor.run('validateArg arg="valid"', null));
 
       expect(result).toBe('something');
+    });
+  });
+
+  describe('when arguments are incorrect', () => {
+    it('when required argument is missing and has not alias, returns error', async () => {
+      const incorrectArg: ExpressionFunctionDefinition<
+        'incorrectArg',
+        unknown,
+        { arg: ExpressionValueBoxed<'something'> },
+        unknown
+      > = {
+        name: 'incorrectArg',
+        args: {
+          arg: {
+            help: '',
+            required: true,
+            types: ['something'],
+          },
+        },
+        help: '',
+        fn: jest.fn(),
+      };
+      const executor = createUnitTestExecutor();
+      executor.registerFunction(incorrectArg);
+      const { result } = await lastValueFrom(executor.run('incorrectArg arg="string"', null, {}));
+
+      expect(result).toMatchObject({
+        type: 'error',
+        error: {
+          message: `[incorrectArg] > Can not cast 'string' to any of 'something'`,
+        },
+      });
     });
   });
 
