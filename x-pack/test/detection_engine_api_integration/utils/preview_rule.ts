@@ -7,10 +7,10 @@
 
 import type SuperTest from 'supertest';
 import type {
-  CreateRulesSchema,
+  RuleCreateProps,
   PreviewRulesSchema,
   RulePreviewLogs,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 import { DETECTION_ENGINE_RULES_PREVIEW } from '@kbn/security-solution-plugin/common/constants';
 
@@ -28,7 +28,7 @@ export const previewRule = async ({
   timeframeEnd = new Date(),
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
-  rule: CreateRulesSchema;
+  rule: RuleCreateProps;
   invocationCount?: number;
   timeframeEnd?: Date;
 }): Promise<{

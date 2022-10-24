@@ -9,9 +9,9 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import type { NonEmptyEntriesArray, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import type {
-  CreateRulesSchema,
+  RuleCreateProps,
   RulePreviewLogs,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 import { createContainerWithEntries } from './create_container_with_entries';
 import { createContainerWithEndpointEntries } from './create_container_with_endpoint_entries';
@@ -38,7 +38,7 @@ export const previewRuleWithExceptionEntries = async ({
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   log: ToolingLog;
-  rule: CreateRulesSchema;
+  rule: RuleCreateProps;
   entries: NonEmptyEntriesArray[];
   endpointEntries?: Array<{
     entries: NonEmptyEntriesArray;
