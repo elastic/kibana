@@ -49,8 +49,8 @@ export async function getPackages(
     excludeInstallStatus?: boolean;
   } & Registry.SearchParams
 ) {
-  const { savedObjectsClient, experimental, category, excludeInstallStatus = false } = options;
-  const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
+  const { savedObjectsClient, prerelease, category, excludeInstallStatus = false } = options;
+  const registryItems = await Registry.fetchList({ category, prerelease }).then((items) => {
     return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }, { id: item.name })
     );
@@ -91,7 +91,7 @@ export async function getLimitedPackages(options: {
   const { savedObjectsClient } = options;
   const allPackages = await getPackages({
     savedObjectsClient,
-    experimental: true,
+    prerelease: true,
   });
   const installedPackages = allPackages.filter(
     (pkg) => pkg.status === installationStatuses.Installed
@@ -126,6 +126,7 @@ export async function getPackageInfo({
   pkgVersion,
   skipArchive = false,
   ignoreUnverified = false,
+  prerelease = false,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -133,10 +134,11 @@ export async function getPackageInfo({
   /** Avoid loading the registry archive into the cache (only use for performance reasons). Defaults to `false` */
   skipArchive?: boolean;
   ignoreUnverified?: boolean;
+  prerelease?: boolean;
 }): Promise<PackageInfo> {
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
-    Registry.fetchFindLatestPackageOrUndefined(pkgName),
+    Registry.fetchFindLatestPackageOrUndefined(pkgName, { prerelease }),
   ]);
 
   if (!savedObject && !latestPackage) {

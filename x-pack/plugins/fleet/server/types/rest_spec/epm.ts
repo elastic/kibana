@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 export const GetCategoriesRequestSchema = {
   query: schema.object({
-    experimental: schema.maybe(schema.boolean()),
+    prerelease: schema.maybe(schema.boolean()),
     include_policy_templates: schema.maybe(schema.boolean()),
   }),
 };
@@ -17,7 +17,7 @@ export const GetCategoriesRequestSchema = {
 export const GetPackagesRequestSchema = {
   query: schema.object({
     category: schema.maybe(schema.string()),
-    experimental: schema.maybe(schema.boolean()),
+    prerelease: schema.maybe(schema.boolean()),
     excludeInstallStatus: schema.maybe(schema.boolean({ defaultValue: false })),
   }),
 };
@@ -37,12 +37,17 @@ export const GetInfoRequestSchema = {
   }),
   query: schema.object({
     ignoreUnverified: schema.maybe(schema.boolean()),
+    prerelease: schema.maybe(schema.boolean()),
   }),
 };
 
 export const GetInfoRequestSchemaDeprecated = {
   params: schema.object({
     pkgkey: schema.string(),
+  }),
+  query: schema.object({
+    ignoreUnverified: schema.maybe(schema.boolean()),
+    prerelease: schema.maybe(schema.boolean()),
   }),
 };
 

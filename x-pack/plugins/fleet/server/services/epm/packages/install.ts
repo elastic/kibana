@@ -100,6 +100,7 @@ export async function ensureInstalledPackage(options: {
   pkgVersion?: string;
   spaceId?: string;
   force?: boolean;
+  prerelease?: boolean;
 }): Promise<Installation> {
   const {
     savedObjectsClient,
@@ -108,12 +109,13 @@ export async function ensureInstalledPackage(options: {
     pkgVersion,
     force = false,
     spaceId = DEFAULT_SPACE_ID,
+    prerelease = false,
   } = options;
 
   // If pkgVersion isn't specified, find the latest package version
   const pkgKeyProps = pkgVersion
     ? { name: pkgName, version: pkgVersion }
-    : await Registry.fetchFindLatestPackageOrThrow(pkgName);
+    : await Registry.fetchFindLatestPackageOrThrow(pkgName, { prerelease });
 
   const installedPackageResult = await isPackageVersionOrLaterInstalled({
     savedObjectsClient,
@@ -234,6 +236,7 @@ interface InstallRegistryPackageParams {
   force?: boolean;
   neverIgnoreVerificationError?: boolean;
   ignoreConstraints?: boolean;
+  prerelease?: boolean;
 }
 interface InstallUploadedArchiveParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -272,6 +275,7 @@ async function installPackageFromRegistry({
   force = false,
   ignoreConstraints = false,
   neverIgnoreVerificationError = false,
+  prerelease = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -301,6 +305,7 @@ async function installPackageFromRegistry({
     const [latestPackage, { paths, packageInfo, verificationResult }] = await Promise.all([
       Registry.fetchFindLatestPackageOrThrow(pkgName, {
         ignoreConstraints,
+        prerelease,
       }),
       Registry.getPackage(pkgName, pkgVersion, {
         ignoreUnverified: force && !neverIgnoreVerificationError,

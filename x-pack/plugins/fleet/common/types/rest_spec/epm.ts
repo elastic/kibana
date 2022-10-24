@@ -17,7 +17,7 @@ import type {
 
 export interface GetCategoriesRequest {
   query: {
-    experimental?: boolean;
+    prerelease?: boolean;
     include_policy_templates?: boolean;
   };
 }
@@ -31,7 +31,7 @@ export interface GetCategoriesResponse {
 export interface GetPackagesRequest {
   query: {
     category?: string;
-    experimental?: boolean;
+    prerelease?: boolean;
     excludeInstallStatus?: boolean;
   };
 }

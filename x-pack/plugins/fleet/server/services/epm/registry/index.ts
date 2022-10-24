@@ -55,7 +55,7 @@ import { getRegistryUrl } from './registry_url';
 
 export interface SearchParams {
   category?: CategoryId;
-  experimental?: boolean;
+  prerelease?: boolean;
 }
 
 export const splitPkgKey = split;
@@ -70,8 +70,8 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
     if (params.category) {
       url.searchParams.set('category', params.category);
     }
-    if (params.experimental) {
-      url.searchParams.set('experimental', params.experimental.toString());
+    if (params.prerelease) {
+      url.searchParams.set('prerelease', params.prerelease.toString());
     }
   }
 
@@ -80,8 +80,9 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-interface FetchFindLatestPackageOptions {
+export interface FetchFindLatestPackageOptions {
   ignoreConstraints?: boolean;
+  prerelease?: boolean;
 }
 
 async function _fetchFindLatestPackage(
@@ -90,12 +91,20 @@ async function _fetchFindLatestPackage(
 ) {
   return withPackageSpan(`Find latest package ${packageName}`, async () => {
     const logger = appContextService.getLogger();
-    const { ignoreConstraints = false } = options ?? {};
+    const { ignoreConstraints = false, prerelease = false } = options ?? {};
 
     const bundledPackage = await getBundledPackageByName(packageName);
 
+    // temporary workaround to allow synthetics package beta version until there is a GA available
+    // needed because synthetics is installed by default on kibana startup
+    const prereleaseAllowedExceptions = ['synthetics'];
+
+    const prereleaseEnabled = prerelease || prereleaseAllowedExceptions.includes(packageName);
+
     const registryUrl = getRegistryUrl();
-    const url = new URL(`${registryUrl}/search?package=${packageName}&experimental=true`);
+    const url = new URL(
+      `${registryUrl}/search?package=${packageName}&prerelease=${prereleaseEnabled}`
+    );
 
     if (!ignoreConstraints) {
       setKibanaVersion(url);
@@ -106,6 +115,40 @@ async function _fetchFindLatestPackage(
       const searchResults: RegistryPackage[] = JSON.parse(res);
 
       const latestPackageFromRegistry = searchResults[0] ?? null;
+
+      // TODO remove, for local testing
+      if (packageName === 'endpoint' && prerelease === true) {
+        const dummyBeta = {
+          name: 'endpoint',
+          title: 'Elastic Defend',
+          version: '0.19.1',
+          release: 'beta',
+          description:
+            'Protect your hosts and cloud workloads with threat prevention, detection, and deep security data visibility.',
+          type: 'integration',
+          download: '/epr/endpoint/endpoint-0.19.1.zip',
+          path: '/package/endpoint/0.19.1',
+          icons: [
+            {
+              src: '/img/security-logo-color-64px.svg',
+              path: '/package/endpoint/0.19.1/img/security-logo-color-64px.svg',
+              size: '16x16',
+              type: 'image/svg+xml',
+            },
+          ],
+          policy_templates: [
+            {
+              name: 'endpoint',
+              title: 'Endpoint Security Integration',
+              description: 'Interact with the endpoint.',
+            },
+          ],
+          conditions: { kibana: { version: '^7.13.0' } },
+          owner: { github: 'elastic/security-onboarding-and-lifecycle-mgt' },
+          categories: ['security'],
+        };
+        return dummyBeta;
+      }
 
       if (bundledPackage && semverGte(bundledPackage.version, latestPackageFromRegistry.version)) {
         return bundledPackage;
@@ -224,8 +267,8 @@ export async function fetchCategories(
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/categories`);
   if (params) {
-    if (params.experimental) {
-      url.searchParams.set('experimental', params.experimental.toString());
+    if (params.prerelease) {
+      url.searchParams.set('prerelease', params.prerelease.toString());
     }
     if (params.include_policy_templates) {
       url.searchParams.set('include_policy_templates', params.include_policy_templates.toString());

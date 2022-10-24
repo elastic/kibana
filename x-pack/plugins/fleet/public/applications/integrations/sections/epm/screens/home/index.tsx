@@ -108,8 +108,9 @@ export const mapToCard = ({
 };
 
 export const EPMHomePage: React.FC = () => {
+  // loading packages to find installed ones
   const { data: allPackages, isLoading } = useGetPackages({
-    experimental: true,
+    prerelease: true,
   });
 
   const installedPackages = useMemo(
@@ -132,7 +133,7 @@ export const EPMHomePage: React.FC = () => {
       </Route>
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_all}>
         <DefaultLayout section="browse" sectionsWithWarning={sectionsWithWarning}>
-          <AvailablePackages allPackages={allPackages} isLoading={isLoading} />
+          <AvailablePackages />
         </DefaultLayout>
       </Route>
     </Switch>

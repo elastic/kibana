@@ -17,6 +17,7 @@ import {
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSelect,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -36,6 +37,7 @@ import {
   useAuthz,
   usePermissionCheck,
   useIntegrationsStateContext,
+  useGetSettings,
 } from '../../../../hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { ExperimentalFeaturesService } from '../../../../services';
@@ -107,7 +109,7 @@ export function Detail() {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const { getFromIntegrations } = useIntegrationsStateContext();
   const { pkgkey, panel } = useParams<DetailParams>();
-  const { getHref } = useLink();
+  const { getHref, getPath } = useLink();
   const canInstallPackages = useAuthz().integrations.installPackages;
   const canReadPackageSettings = useAuthz().integrations.readPackageSettings;
   const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
@@ -153,6 +155,17 @@ export function Detail() {
     packageInfo.savedObject &&
     semverLt(packageInfo.savedObject.attributes.version, packageInfo.latestVersion);
 
+  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] =
+    React.useState<boolean>(false);
+
+  const { data: settings } = useGetSettings();
+
+  useEffect(() => {
+    const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
+    setPrereleaseIntegrationsEnabled(isEnabled);
+  }, [settings?.item.prerelease_integrations_enabled]);
+
+  // TODO delay get package info until prerelease setting loaded
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   // Fetch package info
   const {
@@ -161,7 +174,28 @@ export function Detail() {
     isLoading: packageInfoLoading,
     isInitialRequest: packageIsInitialRequest,
     resendRequest: refreshPackageInfo,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion);
+  } = useGetPackageInfoByKey(pkgName, pkgVersion, { prerelease: prereleaseIntegrationsEnabled });
+
+  const [latestGAVersion, setLatestGAVersion] = useState<string | undefined>();
+  const [latestPrereleaseVersion, setLatestPrereleaseVersion] = useState<string | undefined>();
+
+  // fetch latest GA version (prerelease=false)
+  const { data: packageInfoLatestGAData } = useGetPackageInfoByKey(pkgName, '', {
+    prerelease: false,
+  });
+
+  useEffect(() => {
+    setLatestGAVersion(packageInfoLatestGAData?.item.version);
+  }, [packageInfoLatestGAData?.item.version]);
+
+  // fetch latest Prerelease version (prerelease=true)
+  const { data: packageInfoLatestPrereleaseData } = useGetPackageInfoByKey(pkgName, '', {
+    prerelease: true,
+  });
+
+  useEffect(() => {
+    setLatestPrereleaseVersion(packageInfoLatestPrereleaseData?.item.version);
+  }, [packageInfoLatestPrereleaseData?.item.version]);
 
   const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
     useIsFirstTimeAgentUser();
@@ -339,7 +373,36 @@ export function Detail() {
                 }),
                 content: (
                   <EuiFlexGroup gutterSize="s">
-                    <EuiFlexItem>{packageInfo.version}</EuiFlexItem>
+                    <EuiFlexItem>
+                      {prereleaseIntegrationsEnabled &&
+                      latestGAVersion !== latestPrereleaseVersion &&
+                      (!packageInfo?.version ||
+                        packageInfo.version === latestGAVersion ||
+                        packageInfo.version === latestPrereleaseVersion) ? (
+                        <EuiSelect
+                          options={[
+                            {
+                              value: latestPrereleaseVersion,
+                              text: latestPrereleaseVersion,
+                            },
+                            {
+                              value: latestGAVersion,
+                              text: latestGAVersion,
+                            },
+                          ]}
+                          value={packageInfo.version}
+                          onChange={(event) => {
+                            const version = event.target.value;
+                            const path = getPath('integration_details_overview', {
+                              pkgkey: `${packageInfo.name}-${version}`,
+                            });
+                            history.push(path);
+                          }}
+                        />
+                      ) : (
+                        packageInfo.version
+                      )}
+                    </EuiFlexItem>
                     {updateAvailable ? (
                       <EuiFlexItem grow={false}>
                         <UpdateIcon />
@@ -416,6 +479,11 @@ export function Detail() {
       missingSecurityConfiguration,
       integrationInfo?.title,
       handleAddIntegrationPolicyClick,
+      getPath,
+      history,
+      latestGAVersion,
+      latestPrereleaseVersion,
+      prereleaseIntegrationsEnabled,
     ]
   );
 
@@ -605,7 +673,11 @@ export function Detail() {
       ) : (
         <Switch>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_overview}>
-            <OverviewPage packageInfo={packageInfo} integrationInfo={integrationInfo} />
+            <OverviewPage
+              packageInfo={packageInfo}
+              integrationInfo={integrationInfo}
+              latestGAVersion={latestGAVersion}
+            />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_settings}>
             <SettingsPage packageInfo={packageInfo} theme$={services.theme.theme$} />

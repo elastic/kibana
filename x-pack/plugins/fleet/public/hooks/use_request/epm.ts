@@ -44,7 +44,7 @@ export const useGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
   return useRequest<GetCategoriesResponse>({
     path: epmRouteService.getCategoriesPath(),
     method: 'get',
-    query: { experimental: true, ...query },
+    query,
   });
 };
 
@@ -52,7 +52,7 @@ export const useGetPackages = (query: GetPackagesRequest['query'] = {}) => {
   return useRequest<GetPackagesResponse>({
     path: epmRouteService.getListPath(),
     method: 'get',
-    query: { experimental: true, ...query },
+    query,
   });
 };
 
@@ -60,7 +60,7 @@ export const sendGetPackages = (query: GetPackagesRequest['query'] = {}) => {
   return sendRequest<GetPackagesResponse>({
     path: epmRouteService.getListPath(),
     method: 'get',
-    query: { experimental: true, ...query },
+    query,
   });
 };
 
@@ -74,14 +74,22 @@ export const useGetLimitedPackages = () => {
 export const useGetPackageInfoByKey = (
   pkgName: string,
   pkgVersion?: string,
-  ignoreUnverified: boolean = false
+  options?: {
+    ignoreUnverified?: boolean;
+    prerelease?: boolean;
+  }
 ) => {
   const confirmOpenUnverified = useConfirmOpenUnverified();
-  const [ignoreUnverifiedQueryParam, setIgnoreUnverifiedQueryParam] = useState(ignoreUnverified);
+  const [ignoreUnverifiedQueryParam, setIgnoreUnverifiedQueryParam] = useState(
+    options?.ignoreUnverified
+  );
   const res = useRequest<GetInfoResponse>({
     path: epmRouteService.getInfoPath(pkgName, pkgVersion),
     method: 'get',
-    query: ignoreUnverifiedQueryParam ? { ignoreUnverified: ignoreUnverifiedQueryParam } : {},
+    query: {
+      ...options,
+      ...(ignoreUnverifiedQueryParam ? { ignoreUnverified: ignoreUnverifiedQueryParam } : {}),
+    },
   });
 
   useEffect(() => {
@@ -111,12 +119,15 @@ export const useGetPackageStats = (pkgName: string) => {
 export const sendGetPackageInfoByKey = (
   pkgName: string,
   pkgVersion?: string,
-  ignoreUnverified?: boolean
+  options?: {
+    ignoreUnverified?: boolean;
+    prerelease?: boolean;
+  }
 ) => {
   return sendRequest<GetInfoResponse>({
     path: epmRouteService.getInfoPath(pkgName, pkgVersion),
     method: 'get',
-    query: ignoreUnverified ? { ignoreUnverified } : {},
+    query: options,
   });
 };
 
