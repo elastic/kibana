@@ -9,10 +9,10 @@
 import { type Filter, isCombinedFilter, CombinedFilter } from '@kbn/es-query';
 
 /**
- * Defines a conditional operation type (AND/OR) from the filter otherwise returns undefined.
+ * Defines a boolean relation type (AND/OR) from the filter otherwise returns undefined.
  * @param {Filter} filter
  */
-export const getConditionalOperationType = (filter: Filter | CombinedFilter) => {
+export const getBooleanRelationType = (filter: Filter | CombinedFilter) => {
   if (isCombinedFilter(filter)) {
     return filter.meta.relation;
   }

@@ -120,28 +120,28 @@ export const getFilterByPath = (filters: Filter[], path: string) =>
  * @param {Filter[]} filters - array of filters where the new filter will be added.
  * @param {Filter} filter - new filter.
  * @param {string} path - path to filter.
- * @param {BooleanRelation} conditionalType - OR/AND relationships between filters.
+ * @param {BooleanRelation} booleanRelation - OR/AND relationships between filters.
  */
 export const addFilter = (
   filters: Filter[],
   filter: Filter,
   path: string,
-  conditionalType: BooleanRelation
+  booleanRelation: BooleanRelation
 ) => {
   const newFilters = cloneDeep(filters);
   const pathInArray = getPathInArray(path);
   const { targetArray, parentConditionType } = getContainerMetaByPath(newFilters, pathInArray);
   const selector = pathInArray[pathInArray.length - 1];
 
-  if (parentConditionType !== conditionalType) {
-    if (conditionalType === BooleanRelation.OR) {
+  if (parentConditionType !== booleanRelation) {
+    if (booleanRelation === BooleanRelation.OR) {
       targetArray.splice(
         selector,
         1,
         buildCombinedFilter(BooleanRelation.OR, [targetArray[selector], filter])
       );
     }
-    if (conditionalType === BooleanRelation.AND) {
+    if (booleanRelation === BooleanRelation.AND) {
       targetArray.splice(
         selector,
         1,
@@ -176,13 +176,13 @@ export const removeFilter = (filters: Filter[], path: string) => {
  * @param {Filter[]} filters - array of filters.
  * @param {string} from - filter path before moving.
  * @param {string} to - filter path where the filter will be moved.
- * @param {BooleanRelation} conditionalType - OR/AND relationships between filters.
+ * @param {BooleanRelation} booleanRelation - OR/AND relationships between filters.
  */
 export const moveFilter = (
   filters: Filter[],
   from: string,
   to: string,
-  conditionalType: BooleanRelation
+  booleanRelation: BooleanRelation
 ) => {
   const addFilterThenRemoveFilter = (
     source: Filter[],
@@ -219,21 +219,21 @@ export const moveFilter = (
     const { parentConditionType } = getContainerMetaByPath(newFilters, pathInArrayTo);
     const filterMovementDirection = Number(filterPositionTo) - Number(filterPositionFrom);
 
-    if (filterMovementDirection === -1 && parentConditionType === conditionalType) {
+    if (filterMovementDirection === -1 && parentConditionType === booleanRelation) {
       return filters;
     }
 
     if (filterMovementDirection >= -1) {
-      return addFilterThenRemoveFilter(newFilters, movingFilter, from, to, conditionalType);
+      return addFilterThenRemoveFilter(newFilters, movingFilter, from, to, booleanRelation);
     } else {
-      return removeFilterThenAddFilter(newFilters, movingFilter, from, to, conditionalType);
+      return removeFilterThenAddFilter(newFilters, movingFilter, from, to, booleanRelation);
     }
   }
 
   if (pathInArrayTo.length > pathInArrayFrom.length) {
-    return addFilterThenRemoveFilter(newFilters, movingFilter, from, to, conditionalType);
+    return addFilterThenRemoveFilter(newFilters, movingFilter, from, to, booleanRelation);
   } else {
-    return removeFilterThenAddFilter(newFilters, movingFilter, from, to, conditionalType);
+    return removeFilterThenAddFilter(newFilters, movingFilter, from, to, booleanRelation);
   }
 };
 

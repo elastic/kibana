@@ -17,7 +17,7 @@ import { FiltersBuilderReducer } from './filters_builder_reducer';
 
 export interface FiltersBuilderProps {
   filters: Filter[];
-  dataView?: DataView;
+  dataView: DataView;
   onChange: (filters: Filter[]) => void;
   timeRangeForSuggestionsOverride?: boolean;
   maxDepth?: number;
@@ -63,7 +63,7 @@ function FiltersBuilder({
   }, [filters, onChange, state.filters]);
 
   const handleMoveFilter = useCallback(
-    (pathFrom: string, pathTo: string, conditionalType: BooleanRelation) => {
+    (pathFrom: string, pathTo: string, booleanRelation: BooleanRelation) => {
       if (pathFrom === pathTo) {
         return null;
       }
@@ -73,7 +73,7 @@ function FiltersBuilder({
         payload: {
           pathFrom,
           pathTo,
-          conditionalType,
+          booleanRelation,
         },
       });
     },
