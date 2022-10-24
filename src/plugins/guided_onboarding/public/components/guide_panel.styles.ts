@@ -43,5 +43,15 @@ export const getGuidePanelStyles = (euiTheme: EuiThemeComputed) => ({
       background: ${euiTheme.colors.ghost};
       padding: 24px 30px;
     `,
+    flyoutFooterLink: css`
+      color: ${euiTheme.colors.darkShade};
+      font-weight: 400;
+
+      svg[data-icon-type='questionInCircle'] {
+        width: 21px;
+        height: 21px;
+        margin-left: -2px;
+      }
+    `,
   },
 });
