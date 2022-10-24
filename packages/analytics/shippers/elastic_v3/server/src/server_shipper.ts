@@ -136,7 +136,9 @@ export class ElasticV3ServerShipper implements IShipper {
     if (performanceEvents.length > 0) {
       const eventNames = performanceEvents.map((e) => e.properties.eventName);
       this.initContext.logger.info(
-        `[Server shipper]: asked to report ${performanceEvents.length} performance events - ${eventNames.join(',')}`
+        `[Server shipper]: asked to report ${
+          performanceEvents.length
+        } performance events - ${eventNames.join(',')}`
       );
     }
 
@@ -162,7 +164,9 @@ export class ElasticV3ServerShipper implements IShipper {
     if (performanceEvents.length > 0) {
       const eventNames = performanceEvents.map((e) => e.properties.eventName);
       this.initContext.logger.info(
-        `[Server shipper]: pushing ${performanceEvents.length} performance events into queue - ${eventNames.join(',')}`
+        `[Server shipper]: pushing ${
+          performanceEvents.length
+        } performance events into queue - ${eventNames.join(',')}`
       );
     }
 
@@ -174,9 +178,7 @@ export class ElasticV3ServerShipper implements IShipper {
    * Triggers a flush of the internal queue to attempt to send any events held in the queue.
    */
   public shutdown() {
-    this.initContext.logger.info(
-      '[Server shipper]: shutdown'
-    );
+    this.initContext.logger.info('[Server shipper]: shutdown');
     this.shutdown$.next();
     this.shutdown$.complete();
     this.isOptedIn$.complete();
@@ -342,7 +344,9 @@ export class ElasticV3ServerShipper implements IShipper {
     if (performanceEvents.length > 0) {
       const eventNames = performanceEvents.map((e) => e.properties.eventName);
       this.initContext.logger.info(
-        `[Server shipper]: sending ${performanceEvents.length} performance events - ${eventNames.join(',')}`
+        `[Server shipper]: sending ${
+          performanceEvents.length
+        } performance events - ${eventNames.join(',')}`
       );
     }
 
