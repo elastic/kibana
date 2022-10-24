@@ -9,9 +9,15 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { ReportTypes } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
+import { KpiWrapper } from './kpi_wrapper';
 import { ClientPluginsStart } from '../../../../../plugin';
 
-export const MonitorErrorsCount = () => {
+interface MonitorErrorsCountProps {
+  from: string;
+  to: string;
+}
+
+export const MonitorErrorsCount = (props: MonitorErrorsCountProps) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
@@ -19,21 +25,20 @@ export const MonitorErrorsCount = () => {
   const { monitorId } = useParams<{ monitorId: string }>();
 
   return (
-    <ExploratoryViewEmbeddable
-      align="left"
-      reportType={ReportTypes.SINGLE_METRIC}
-      attributes={[
-        {
-          time: {
-            from: 'now-1h',
-            to: 'now',
+    <KpiWrapper>
+      <ExploratoryViewEmbeddable
+        align="left"
+        reportType={ReportTypes.SINGLE_METRIC}
+        attributes={[
+          {
+            time: props,
+            reportDefinitions: { config_id: [monitorId] },
+            dataType: 'synthetics',
+            selectedMetricField: 'state.id',
+            name: 'synthetics-series-1',
           },
-          reportDefinitions: { config_id: [monitorId] },
-          dataType: 'synthetics',
-          selectedMetricField: 'state.id',
-          name: 'synthetics-series-1',
-        },
-      ]}
-    />
+        ]}
+      />
+    </KpiWrapper>
   );
 };

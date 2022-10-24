@@ -34,7 +34,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   linkValues,
   rowRenderers,
   setCellProps,
-  timelineId,
+  scopeId,
   truncate,
 }) => {
   const asPlainText = useMemo(() => {
@@ -61,7 +61,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
           isDraggable,
           linkValues,
           rowRenderers,
-          timelineId,
+          scopeId,
           truncate,
           values,
         })}
@@ -70,7 +70,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
         <ExpandedCellValueActions
           field={header}
           globalFilters={globalFilters}
-          timelineId={timelineId}
+          scopeId={scopeId}
           value={values}
         />
       )}

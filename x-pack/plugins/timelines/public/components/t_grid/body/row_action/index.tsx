@@ -16,9 +16,8 @@ import type {
   OnRowSelected,
   SetEventsLoading,
   SetEventsDeleted,
-  TimelineExpandedDetailType,
+  DataExpandedDetailType,
 } from '../../../../../common/types/timeline';
-import { TimelineTabs } from '../../../../../common/types/timeline';
 import { getMappedNonEcsValue } from '../data_driven_columns';
 import { tGridActions } from '../../../../store/t_grid';
 
@@ -34,8 +33,8 @@ type Props = EuiDataGridCellValueElementProps & {
   onRuleChange?: () => void;
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
-  tabType?: TimelineTabs;
-  timelineId: string;
+  tabType?: string;
+  tableId: string;
   width: number;
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
@@ -57,7 +56,7 @@ const RowActionComponent = ({
   selectedEventIds,
   showCheckboxes,
   tabType,
-  timelineId,
+  tableId,
   setEventsLoading,
   setEventsDeleted,
   width,
@@ -90,7 +89,7 @@ const RowActionComponent = ({
   );
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
-    const updatedExpandedDetail: TimelineExpandedDetailType = {
+    const updatedExpandedDetail: DataExpandedDetailType = {
       panelView: 'eventDetail',
       params: {
         eventId: eventId ?? '',
@@ -102,10 +101,10 @@ const RowActionComponent = ({
       tGridActions.toggleDetailPanel({
         ...updatedExpandedDetail,
         tabType,
-        timelineId,
+        id: tableId,
       })
     );
-  }, [dispatch, eventId, indexName, tabType, timelineId]);
+  }, [dispatch, eventId, indexName, tabType, tableId]);
 
   const Action = controlColumn.rowCellRender;
 
@@ -135,7 +134,7 @@ const RowActionComponent = ({
           rowIndex={rowIndex}
           showCheckboxes={showCheckboxes}
           tabType={tabType}
-          timelineId={timelineId}
+          timelineId={tableId}
           width={width}
           setEventsLoading={setEventsLoading}
           setEventsDeleted={setEventsDeleted}

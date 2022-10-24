@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 import datemath, { Unit } from '@kbn/datemath';
 import { IKibanaResponse, SavedObjectsClientContract } from '@kbn/core/server';
@@ -40,7 +41,7 @@ export async function queryMonitorStatus(
   const pageCount = Math.ceil(ids.length / idSize);
   const promises: Array<Promise<any>> = [];
   for (let i = 0; i < pageCount; i++) {
-    const params = {
+    const params: estypes.SearchRequest = {
       size: 0,
       query: {
         bool: {
@@ -49,13 +50,14 @@ export async function queryMonitorStatus(
               range: {
                 '@timestamp': {
                   gte: maxPeriod,
+                  // @ts-expect-error can't mix number and string in client definition
                   lte: 'now',
                 },
               },
             },
             {
               terms: {
-                'monitor.id': ids.slice(i * idSize, i * idSize + idSize),
+                'monitor.id': (ids as string[]).slice(i * idSize, i * idSize + idSize),
               },
             },
             {
@@ -100,6 +102,7 @@ export async function queryMonitorStatus(
         },
       },
     };
+
     promises.push(esClient.baseESClient.search(params));
   }
   let up = 0;

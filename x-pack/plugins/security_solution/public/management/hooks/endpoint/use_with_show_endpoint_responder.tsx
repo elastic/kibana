@@ -58,7 +58,9 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
             },
             PageTitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
             PageBodyComponent: () => <OfflineCallout endpointId={endpointAgentId} />,
-            ActionComponents: [ActionLogButton],
+            ActionComponents: endpointPrivileges.canReadActionsLogManagement
+              ? [ActionLogButton]
+              : undefined,
           })
           .show();
       }

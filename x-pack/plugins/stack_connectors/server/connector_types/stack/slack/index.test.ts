@@ -42,7 +42,6 @@ beforeEach(() => {
     async executor(options) {
       return { status: 'ok', actionId: options.actionId };
     },
-    logger: mockedLogger,
   });
 });
 
@@ -170,7 +169,6 @@ describe('execute()', () => {
 
     connectorType = getConnectorType({
       executor: mockSlackExecutor,
-      logger: mockedLogger,
     });
   });
 
@@ -182,6 +180,7 @@ describe('execute()', () => {
       secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
       configurationUtilities,
+      logger: mockedLogger,
     });
     expect(response).toMatchInlineSnapshot(`
       Object {
@@ -201,6 +200,7 @@ describe('execute()', () => {
         secrets: { webhookUrl: 'http://example.com' },
         params: { message: 'failure: this invocation should fail' },
         configurationUtilities,
+        logger: mockedLogger,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"slack mockExecutor failure: this invocation should fail"`
@@ -217,9 +217,7 @@ describe('execute()', () => {
       proxyBypassHosts: undefined,
       proxyOnlyHosts: undefined,
     });
-    const connectorTypeProxy = getConnectorType({
-      logger: mockedLogger,
-    });
+    const connectorTypeProxy = getConnectorType({});
     await connectorTypeProxy.executor({
       actionId: 'some-id',
       services,
@@ -227,6 +225,7 @@ describe('execute()', () => {
       secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
       configurationUtilities: configUtils,
+      logger: mockedLogger,
     });
     expect(mockedLogger.debug).toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'
@@ -244,9 +243,7 @@ describe('execute()', () => {
       proxyBypassHosts: new Set(['example.com']),
       proxyOnlyHosts: undefined,
     });
-    const connectorTypeProxy = getConnectorType({
-      logger: mockedLogger,
-    });
+    const connectorTypeProxy = getConnectorType({});
     await connectorTypeProxy.executor({
       actionId: 'some-id',
       services,
@@ -254,6 +251,7 @@ describe('execute()', () => {
       secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
       configurationUtilities: configUtils,
+      logger: mockedLogger,
     });
     expect(mockedLogger.debug).not.toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'
@@ -271,9 +269,7 @@ describe('execute()', () => {
       proxyBypassHosts: new Set(['not-example.com']),
       proxyOnlyHosts: undefined,
     });
-    const connectorTypeProxy = getConnectorType({
-      logger: mockedLogger,
-    });
+    const connectorTypeProxy = getConnectorType({});
     await connectorTypeProxy.executor({
       actionId: 'some-id',
       services,
@@ -281,6 +277,7 @@ describe('execute()', () => {
       secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
       configurationUtilities: configUtils,
+      logger: mockedLogger,
     });
     expect(mockedLogger.debug).toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'
@@ -298,9 +295,7 @@ describe('execute()', () => {
       proxyBypassHosts: undefined,
       proxyOnlyHosts: new Set(['example.com']),
     });
-    const connectorTypeProxy = getConnectorType({
-      logger: mockedLogger,
-    });
+    const connectorTypeProxy = getConnectorType({});
     await connectorTypeProxy.executor({
       actionId: 'some-id',
       services,
@@ -308,6 +303,7 @@ describe('execute()', () => {
       secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
       configurationUtilities: configUtils,
+      logger: mockedLogger,
     });
     expect(mockedLogger.debug).toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'
@@ -325,9 +321,7 @@ describe('execute()', () => {
       proxyBypassHosts: undefined,
       proxyOnlyHosts: new Set(['not-example.com']),
     });
-    const connectorTypeProxy = getConnectorType({
-      logger: mockedLogger,
-    });
+    const connectorTypeProxy = getConnectorType({});
     await connectorTypeProxy.executor({
       actionId: 'some-id',
       services,
@@ -335,6 +329,7 @@ describe('execute()', () => {
       secrets: { webhookUrl: 'http://example.com' },
       params: { message: 'this invocation should succeed' },
       configurationUtilities: configUtils,
+      logger: mockedLogger,
     });
     expect(mockedLogger.debug).not.toHaveBeenCalledWith(
       'IncomingWebhook was called with proxyUrl https://someproxyhost'

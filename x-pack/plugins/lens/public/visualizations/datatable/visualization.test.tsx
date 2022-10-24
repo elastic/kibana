@@ -526,6 +526,7 @@ describe('Datatable Visualization', () => {
         label: 'label',
         isStaticValue: false,
         hasTimeShift: false,
+        hasReducedTimeRange: false,
       });
 
       const expression = datatableVisualization.toExpression(
@@ -577,6 +578,7 @@ describe('Datatable Visualization', () => {
         label: 'label',
         isStaticValue: false,
         hasTimeShift: false,
+        hasReducedTimeRange: false,
       });
 
       const expression = datatableVisualization.toExpression(
@@ -712,6 +714,7 @@ describe('Datatable Visualization', () => {
         label: 'label',
         isStaticValue: false,
         hasTimeShift: false,
+        hasReducedTimeRange: false,
       });
 
       const error = datatableVisualization.getErrorMessages({
@@ -737,6 +740,7 @@ describe('Datatable Visualization', () => {
         label: 'label',
         isStaticValue: false,
         hasTimeShift: false,
+        hasReducedTimeRange: false,
       });
 
       const error = datatableVisualization.getErrorMessages({

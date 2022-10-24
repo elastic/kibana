@@ -19,8 +19,10 @@ import { InferencePipelineCard } from './inference_pipeline_card';
 import { TrainedModelHealth } from './ml_model_health';
 
 export const DEFAULT_VALUES: InferencePipeline = {
+  modelId: 'sample-bert-ner-model',
   modelState: TrainedModelState.Started,
   pipelineName: 'Sample Processor',
+  pipelineReferences: [],
   types: ['pytorch', 'ner'],
 };
 
