@@ -25,7 +25,7 @@ export const Delayed = ({ children, waitBeforeShow = 500 }: Delayed) => {
 };
 
 /**
- * OLM team - when you implement your steps, you may or may not want to use local storage. I did not need it for the 'alertsCases' step
+ * OLM/D&R team - when you implement your steps, you may or may not want to use local storage. I did not need it for the 'alertsCases' step
  * For now I have commented the local storage helpers out. If you end up not using them, please delete. Thanks!
  * export const SECURITY_TOUR_ACTIVE_KEY = 'guidedOnboarding.security.tourActive';
  * export const SECURITY_TOUR_STEP_KEY = 'guidedOnboarding.security.tourStep';

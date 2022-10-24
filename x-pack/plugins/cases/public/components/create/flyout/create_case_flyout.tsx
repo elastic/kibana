@@ -75,7 +75,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
   ({ afterCaseCreated, onClose, onSuccess, attachments, optionalContent }) => {
     const handleCancel = onClose || function () {};
     const handleOnSuccess = onSuccess || async function () {};
-    console.log('optional content??', optionalContent);
+
     return (
       <QueryClientProvider client={casesQueryClient}>
         <GlobalStyle />
