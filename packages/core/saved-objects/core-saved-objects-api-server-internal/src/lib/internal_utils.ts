@@ -131,7 +131,7 @@ export function getSavedObjectFromSource<T>(
   id: string,
   doc: { _seq_no?: number; _primary_term?: number; _source: SavedObjectsRawDocSource }
 ): SavedObject<T> {
-  const { originId, updated_at: updatedAt } = doc._source;
+  const { originId, updated_at: updatedAt, created_at: createdAt } = doc._source;
 
   let namespaces: string[] = [];
   if (!registry.isNamespaceAgnostic(type)) {
@@ -146,6 +146,7 @@ export function getSavedObjectFromSource<T>(
     namespaces,
     ...(originId && { originId }),
     ...(updatedAt && { updated_at: updatedAt }),
+    ...(createdAt && { created_at: createdAt }),
     version: encodeHitVersion(doc),
     attributes: doc._source[type],
     references: doc._source.references || [],
