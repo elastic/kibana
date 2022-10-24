@@ -19,6 +19,9 @@ import {
   EuiButtonEmpty,
   EuiImage,
   useEuiTheme,
+  EuiHorizontalRule,
+  EuiCard,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { SEARCH_EXPERIENCES_PLUGIN } from '../../../../../common/constants';
@@ -33,28 +36,9 @@ export const SearchExperiencesGuide: React.FC = () => {
 
   return (
     <EnterpriseSearchSearchExperiencesPageTemplate
+      restrictWidth
       pageHeader={{
-        pageTitle: 'Build a search experience',
-        rightSideItems: [
-          <EuiButton
-            href={SEARCH_EXPERIENCES_PLUGIN.DOCUMENTATION_URL}
-            target="_blank"
-            color="primary"
-            fill
-            iconType={'popout'}
-            iconSide="right"
-          >
-            Visit the Search UI documentation
-          </EuiButton>,
-          <EuiButtonEmpty
-            href={SEARCH_EXPERIENCES_PLUGIN.GITHUB_URL}
-            target="_blank"
-            iconType={'popout'}
-            iconSide="right"
-          >
-            Search UI on Github
-          </EuiButtonEmpty>,
-        ],
+        pageTitle: 'Build a search experience with Search UI',
       }}
     >
       <SetPageChrome />
@@ -63,12 +47,13 @@ export const SearchExperiencesGuide: React.FC = () => {
           className="addContentEmptyPrompt"
           justifyContent="spaceBetween"
           direction="row"
+          responsive
         >
           <EuiFlexItem grow>
             <EuiFlexGroup direction="column" justifyContent="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiTitle>
-                  <h2>Get Started with Search UI</h2>
+                  <h2>About Search UI</h2>
                 </EuiTitle>
                 <EuiSpacer size="l" />
                 <EuiText grow={false}>
@@ -83,15 +68,41 @@ export const SearchExperiencesGuide: React.FC = () => {
                   </p>
                 </EuiText>
               </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      href={SEARCH_EXPERIENCES_PLUGIN.DOCUMENTATION_URL}
+                      target="_blank"
+                      color="primary"
+                      fill
+                      iconType={'popout'}
+                      iconSide="right"
+                    >
+                      Visit the Search UI documentation
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      href={SEARCH_EXPERIENCES_PLUGIN.GITHUB_URL}
+                      target="_blank"
+                      iconType={'popout'}
+                      iconSide="right"
+                    >
+                      Search UI on Github
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
-                  <h3>Features</h3>
+                <EuiTitle>
+                  <h2>Features</h2>
                 </EuiTitle>
                 <EuiSpacer size="l" />
                 <EuiText grow={false}>
                   <ul>
                     <li>
-                      <strong>You know, for search</strong> &mdash; Maintained by Elastic, the team behind Elasticsearch.
+                      <strong>You know, for search</strong> &mdash; Built and maintained by Elastic.
                     </li>
                     <li>
                       <strong>Speedy Implementation</strong> &mdash; Build a complete search
@@ -120,6 +131,40 @@ export const SearchExperiencesGuide: React.FC = () => {
               float="right"
               src={colorMode === 'LIGHT' ? welcomeGraphicLight : welcomeGraphicDark}
               alt="Search experiences illustration"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiHorizontalRule margin="xxl" />
+        <EuiTitle>
+          <h2>Get started quickly with a tutorial</h2>
+        </EuiTitle>
+        <EuiSpacer size="xl" />
+        <EuiFlexGroup responsive>
+          <EuiFlexItem>
+            <EuiCard
+              icon={<EuiIcon size="xl" type="logoElasticsearch" />}
+              title="Elasticsearch"
+              description="Build a search experience with Elasticsearch and Search UI."
+              href={SEARCH_EXPERIENCES_PLUGIN.ELASTICSEARCH_TUTORIAL_URL}
+              target="_blank"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCard
+              icon={<EuiIcon size="xl" type="logoAppSearch" />}
+              title="App Search"
+              description="Build a search experience with App Search and Search UI."
+              href={SEARCH_EXPERIENCES_PLUGIN.APP_SEARCH_TUTORIAL_URL}
+              target="_blank"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCard
+              icon={<EuiIcon size="xl" type="logoWorkplaceSearch" />}
+              title="Workplace Search"
+              description="Build a search experience with Workplace Search and Search UI."
+              href={SEARCH_EXPERIENCES_PLUGIN.WORKPLACE_SEARCH_TUTORIAL_URL}
+              target="_blank"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
