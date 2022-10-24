@@ -6,10 +6,12 @@
  */
 
 import { cpu } from './snapshot/cpu';
+import { cpuCores } from './snapshot/cpu_cores';
 import { count } from '../../shared/metrics/snapshot/count';
 import { load } from './snapshot/load';
 import { logRate } from './snapshot/log_rate';
 import { memory } from './snapshot/memory';
+import { memoryTotal } from './snapshot/memory_total';
 import { rx } from './snapshot/rx';
 import { tx } from './snapshot/tx';
 
@@ -33,7 +35,7 @@ import { hostDockerInfo } from './tsvb/host_docker_info';
 
 import { InventoryMetrics } from '../../types';
 
-const exposedHostSnapshotMetrics = { cpu, load, logRate, memory, rx, tx };
+const exposedHostSnapshotMetrics = { cpu, load, logRate, memory, rx, tx, cpuCores, memoryTotal };
 // not sure why this is the only model with "count"
 const hostSnapshotMetrics = { count, ...exposedHostSnapshotMetrics };
 

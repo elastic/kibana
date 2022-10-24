@@ -7,11 +7,11 @@
 
 import * as t from 'io-ts';
 
-import { from } from '@kbn/securitysolution-io-ts-alerting-types';
+import { RuleIntervalFrom } from '@kbn/securitysolution-io-ts-alerting-types';
 
 export const getSignalsMigrationStatusSchema = t.exact(
   t.type({
-    from,
+    from: RuleIntervalFrom,
   })
 );
 
