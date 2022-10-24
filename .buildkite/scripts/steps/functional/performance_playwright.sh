@@ -68,6 +68,9 @@ while read -r journey; do
   --retry-connrefused \
   -I -XGET "${TEST_ES_URL}/_cluster/health?wait_for_nodes=>=1&wait_for_status=yellow" \
   > /dev/null
+
+  curl -I -XGET "${TEST_ES_URL}/_cat/indices"
+  curl -I -XGET "${TEST_ES_URL}/_cat/count?v=true"
   # curl \
   #   --fail \
   #   --silent \
@@ -79,7 +82,7 @@ while read -r journey; do
 
   echo "✅ ES is ready and will run in the background"
 
-  phases=("WARMUP" "TEST")
+  phases=("TEST")
   status=0
   for phase in "${phases[@]}"; do
     echo "--- $journey - $phase"
