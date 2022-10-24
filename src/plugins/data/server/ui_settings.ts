@@ -346,7 +346,7 @@ export function getUiSettings(
   "to": "now"
 }`,
       type: 'json',
-      description: i18n.translate('data.advancedSettings.timepicker.timeDefaultsText', {
+      description: i18n.translate('data.advancedSettings.timepicker.timeDefaultsDescription', {
         defaultMessage:
           'The timefilter selection to use when Kibana is started without one. Must be an object containing "from" and "to" (see {acceptedFormatsLink}).',
         values: {
