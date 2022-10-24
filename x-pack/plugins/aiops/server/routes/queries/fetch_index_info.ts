@@ -42,14 +42,16 @@ export const getRandomDocsRequest = (
       },
     },
     size: POPULATED_DOC_COUNT_SAMPLE_SIZE,
+    // Used to determine sample probability for follow up queries
+    track_total_hits: true,
   },
 });
 
-export const fetchFieldCandidates = async (
+export const fetchIndexInfo = async (
   esClient: ElasticsearchClient,
   params: AiopsExplainLogRateSpikesSchema,
   abortSignal?: AbortSignal
-): Promise<string[]> => {
+): Promise<{ fieldCandidates: string[]; sampleProbability: number; totalDocCount: number }> => {
   const { index } = params;
   // Get all supported fields
   const respMapping = await esClient.fieldCaps(
@@ -80,13 +82,22 @@ export const fetchFieldCandidates = async (
   const sampledDocs = resp.hits.hits.map((d) => d.fields ?? {});
 
   // Get all field names for each returned doc and flatten it
-  // to a list of unique field names used across all docs.
-  // and filter by list of acceptable fields and some APM specific unique fields.
+  // to a list of unique field names used across all docs
+  // and filter by list of acceptable fields.
   [...new Set(sampledDocs.map(Object.keys).flat(1))].forEach((field) => {
     if (acceptableFields.has(field)) {
       finalFieldCandidates.add(field);
     }
   });
 
-  return [...finalFieldCandidates];
+  const totalDocCount = (resp.hits.total as estypes.SearchTotalHits).value;
+
+  const minDocCount = 50000;
+  let sampleProbability = 1;
+
+  if (totalDocCount > minDocCount) {
+    sampleProbability = Math.min(0.5, minDocCount / totalDocCount);
+  }
+
+  return { fieldCandidates: [...finalFieldCandidates], sampleProbability, totalDocCount };
 };

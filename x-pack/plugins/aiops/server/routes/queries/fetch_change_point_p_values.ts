@@ -23,7 +23,8 @@ import { getRequestBase } from './get_request_base';
 
 export const getChangePointRequest = (
   params: AiopsExplainLogRateSpikesSchema,
-  fieldName: string
+  fieldName: string,
+  sampleProbability: number = 1
 ): estypes.SearchRequest => {
   const query = getQueryWithParams({
     params,
@@ -50,34 +51,45 @@ export const getChangePointRequest = (
     ];
   }
 
-  const body = {
-    query,
-    size: 0,
-    aggs: {
-      change_point_p_value: {
-        significant_terms: {
-          field: fieldName,
-          background_filter: {
-            bool: {
-              filter: [
-                ...filter,
-                {
-                  range: {
-                    [timeFieldName]: {
-                      gte: params.baselineMin,
-                      lt: params.baselineMax,
-                      format: 'epoch_millis',
+  // frequent items can be slow, so use the random sampler
+  const aggs: Record<string, estypes.AggregationsAggregationContainer> = {
+    sample: {
+      random_sampler: {
+        probability: sampleProbability,
+      },
+      aggs: {
+        change_point_p_value: {
+          significant_terms: {
+            field: fieldName,
+            background_filter: {
+              bool: {
+                filter: [
+                  ...filter,
+                  {
+                    range: {
+                      [timeFieldName]: {
+                        gte: params.baselineMin,
+                        lt: params.baselineMax,
+                        format: 'epoch_millis',
+                      },
                     },
                   },
-                },
-              ],
+                ],
+              },
             },
+            // @ts-expect-error `p_value` is not yet part of `AggregationsAggregationContainer`
+            p_value: { background_is_superset: false },
+            size: 1000,
           },
-          p_value: { background_is_superset: false },
-          size: 1000,
         },
       },
     },
+  };
+
+  const body = {
+    query,
+    size: 0,
+    aggs,
   };
 
   return {
@@ -92,11 +104,16 @@ interface Aggs extends estypes.AggregationsSignificantLongTermsAggregate {
   buckets: estypes.AggregationsSignificantLongTermsBucket[];
 }
 
+interface PValuesAggregation extends estypes.AggregationsSamplerAggregation {
+  change_point_p_value: Aggs;
+}
+
 export const fetchChangePointPValues = async (
   esClient: ElasticsearchClient,
   params: AiopsExplainLogRateSpikesSchema,
   fieldNames: string[],
   logger: Logger,
+  sampleProbability: number = 1,
   emitError: (m: string) => void,
   abortSignal?: AbortSignal
 ): Promise<ChangePoint[]> => {
@@ -104,12 +121,9 @@ export const fetchChangePointPValues = async (
 
   const settledPromises = await Promise.allSettled(
     fieldNames.map((fieldName) =>
-      esClient.search<unknown, { change_point_p_value: Aggs }>(
-        getChangePointRequest(params, fieldName),
-        {
-          signal: abortSignal,
-          maxRetries: 0,
-        }
+      esClient.search<unknown, { sample: PValuesAggregation }>(
+        getChangePointRequest(params, fieldName, sampleProbability),
+        { signal: abortSignal, maxRetries: 0 }
       )
     )
   );
@@ -144,7 +158,7 @@ export const fetchChangePointPValues = async (
       continue;
     }
 
-    const overallResult = resp.aggregations.change_point_p_value;
+    const overallResult = resp.aggregations.sample.change_point_p_value;
 
     for (const bucket of overallResult.buckets) {
       const pValue = Math.exp(-bucket.score);

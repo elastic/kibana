@@ -38,7 +38,7 @@ import { isRequestAbortedError } from '../lib/is_request_aborted_error';
 import type { AiopsLicense } from '../types';
 
 import { fetchChangePointPValues } from './queries/fetch_change_point_p_values';
-import { fetchFieldCandidates } from './queries/fetch_field_candidates';
+import { fetchIndexInfo } from './queries/fetch_index_info';
 import {
   dropDuplicates,
   fetchFrequentItems,
@@ -182,17 +182,41 @@ export const defineExplainLogRateSpikesRoute = (
             })
           );
 
-          let fieldCandidates: Awaited<ReturnType<typeof fetchFieldCandidates>>;
+          // Step 1: Index Info: Field candidates, total doc count, sample probability
+
+          const fieldCandidates: Awaited<ReturnType<typeof fetchIndexInfo>>['fieldCandidates'] = [];
+          let sampleProbability = 1;
+          let totalDocCount = 0;
+
+          logDebugMessage('Fetch field candidates.');
+          push(
+            updateLoadingStateAction({
+              ccsWarning: false,
+              loaded,
+              loadingState: i18n.translate(
+                'xpack.aiops.explainLogRateSpikes.loadingState.loadingFieldCandidates',
+                {
+                  defaultMessage: 'Loading field candidates.',
+                }
+              ),
+            })
+          );
+
           try {
-            fieldCandidates = await fetchFieldCandidates(client, request.body, abortSignal);
+            const indexInfo = await fetchIndexInfo(client, request.body, abortSignal);
+            fieldCandidates.push(...indexInfo.fieldCandidates);
+            sampleProbability = indexInfo.sampleProbability;
+            totalDocCount = indexInfo.totalDocCount;
           } catch (e) {
             if (!isRequestAbortedError(e)) {
-              logger.error(`Failed to fetch field candidates, got: \n${e.toString()}`);
-              pushError(`Failed to fetch field candidates.`);
+              logger.error(`Failed to fetch index information, got: \n${e.toString()}`);
+              pushError(`Failed to fetch index information.`);
             }
             end();
             return;
           }
+
+          logDebugMessage(`Sample probability: ${sampleProbability}`);
 
           loaded += LOADED_FIELD_CANDIDATES;
 
@@ -245,6 +269,7 @@ export const defineExplainLogRateSpikesRoute = (
                 request.body,
                 fieldCandidatesChunk,
                 logger,
+                sampleProbability,
                 pushError,
                 abortSignal
               );
@@ -396,6 +421,7 @@ export const defineExplainLogRateSpikesRoute = (
                 request.body.deviationMin,
                 request.body.deviationMax,
                 logger,
+                sampleProbability,
                 pushError,
                 abortSignal
               );
