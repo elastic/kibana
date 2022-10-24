@@ -27,10 +27,9 @@ export const getPaletteForHeatmap = async (params: HeatmapVisParams) => {
 
   if (isHeatmapVisParamsWithRanges(params)) {
     const percentageModeConfig = getPercentageModeConfig(params, false);
-
     return getPalette(params, percentageModeConfig, params.percentageMode);
   }
-  // palette is type of percent, if user wants dynamic calulated ranges
+
   const { color, stop = [] } = getStopsWithColorsFromColorsNumber(
     params.colorsNumber,
     params.colorSchema,
