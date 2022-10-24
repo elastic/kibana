@@ -212,6 +212,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
 
       setData({
         datafeedConfig: job.datafeed_config,
+        // @ts-expect-error bucket_span is of type estypes.Duration
         bucketSpan: job.analysis_config.bucket_span,
         isInitialized: true,
         modelSnapshotData: modelSnapshotResultsLine.map(setLineAnnotationHeader),

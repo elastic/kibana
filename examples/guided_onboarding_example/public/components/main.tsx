@@ -25,13 +25,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type {
-  GuidedOnboardingPluginStart,
-  GuideState,
-  GuideStepIds,
-  GuideId,
-  GuideStep,
-} from '@kbn/guided-onboarding-plugin/public';
+import type { GuideState, GuideStepIds, GuideId, GuideStep } from '@kbn/guided-onboarding';
+import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { guidesConfig } from '@kbn/guided-onboarding-plugin/public';
 
 interface MainProps {
@@ -48,7 +43,7 @@ export const Main = (props: MainProps) => {
   const [guidesState, setGuidesState] = useState<GuideState[] | undefined>(undefined);
   const [activeGuide, setActiveGuide] = useState<GuideState | undefined>(undefined);
 
-  const [selectedGuide, setSelectedGuide] = useState<GuideId | undefined>(undefined);
+  const [selectedGuide, setSelectedGuide] = useState<GuideId | undefined>('observability');
   const [selectedStep, setSelectedStep] = useState<GuideStepIds | undefined>(undefined);
 
   useEffect(() => {

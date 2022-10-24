@@ -39,10 +39,10 @@ export const createGetLogEntriesQuery = (
   return {
     index: logEntriesIndex,
     allow_no_indices: true,
-    track_scores: false,
-    track_total_hits: false,
     body: {
       size,
+      track_scores: false,
+      track_total_hits: false,
       query: {
         bool: {
           filter: [
