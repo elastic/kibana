@@ -85,6 +85,13 @@ export const PreviewHistogram = ({
     [timeframeOptions]
   );
   const endDate = useMemo(() => timeframeOptions.timeframeEnd.toISOString(), [timeframeOptions]);
+  // It seems like the Table/Grid component uses end date value as a non-inclusive one,
+  // thus the alerts which have timestamp equal to the end date value are not displayed in the table.
+  // To fix that, we extend end date value by 1s to make sure all alerts are included in the table.
+  const extendedEndDate = useMemo(
+    () => timeframeOptions.timeframeEnd.add('1', 's').toISOString(),
+    [timeframeOptions]
+  );
   const isEqlRule = useMemo(() => ruleType === 'eql', [ruleType]);
   const isMlRule = useMemo(() => ruleType === 'machine_learning', [ruleType]);
 
@@ -204,7 +211,7 @@ export const PreviewHistogram = ({
             columns,
             deletedEventIds,
             disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
-            end: 'now+5m',
+            end: extendedEndDate,
             start: startDate,
             entityType: 'events',
             filters: [],
