@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type {
   CountIndexPatternColumn,
   DateHistogramIndexPatternColumn,
@@ -17,18 +17,18 @@ import type {
 } from '@kbn/lens-plugin/public';
 
 export const getLensAttributes = ({
-  data,
+  filters,
+  query,
   dataView,
   timeInterval,
   breakdownField,
 }: {
-  data: DataPublicPluginStart;
+  filters: Filter[];
+  query: Query | AggregateQuery;
   dataView: DataView;
   timeInterval: string | undefined;
   breakdownField: DataViewField | undefined;
 }) => {
-  const filters = data.query.filterManager.getFilters();
-  const query = data.query.queryString.getQuery();
   const showBreakdown = breakdownField?.aggregatable;
 
   let columnOrder = ['date_column', 'count_column'];

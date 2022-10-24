@@ -33,9 +33,11 @@ export function Histogram({
   chart: { timeInterval, bucketInterval, data: chartData },
   breakdown: { field: breakdownField } = {},
 }: HistogramProps) {
+  const filters = data.query.filterManager.getFilters();
+  const query = data.query.queryString.getQuery();
   const attributes = useMemo(
-    () => getLensAttributes({ data, dataView, timeInterval, breakdownField }),
-    [breakdownField, data, dataView, timeInterval]
+    () => getLensAttributes({ filters, query, dataView, timeInterval, breakdownField }),
+    [breakdownField, dataView, filters, query, timeInterval]
   );
 
   const { timefilter } = data.query.timefilter;
