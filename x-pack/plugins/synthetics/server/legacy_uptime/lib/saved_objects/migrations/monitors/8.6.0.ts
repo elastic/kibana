@@ -6,24 +6,28 @@
  */
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import { ConfigKey, SyntheticsMonitor } from '../../../../../../common/runtime_types';
+import { ConfigKey, SyntheticsMonitorWithSecrets } from '../../../../../../common/runtime_types';
 
 export const migration860 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => {
-  return encryptedSavedObjects.createMigration<SyntheticsMonitor, SyntheticsMonitor>({
+  return encryptedSavedObjects.createMigration<
+    SyntheticsMonitorWithSecrets,
+    SyntheticsMonitorWithSecrets
+  >({
     isMigrationNeededPredicate: function shouldBeMigrated(
       doc
-    ): doc is SavedObjectUnsanitizedDoc<SyntheticsMonitor> {
+    ): doc is SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets> {
       return true;
     },
     migration: (
-      doc: SavedObjectUnsanitizedDoc<SyntheticsMonitor>
-    ): SavedObjectUnsanitizedDoc<SyntheticsMonitor> => {
+      doc: SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets>
+    ): SavedObjectUnsanitizedDoc<SyntheticsMonitorWithSecrets> => {
       const { attributes, id } = doc;
       return {
         ...doc,
         attributes: {
           ...attributes,
           [ConfigKey.ID]: attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
+          [ConfigKey.CONFIG_ID]: id,
         },
       };
     },

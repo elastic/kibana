@@ -7,7 +7,7 @@
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migration860 } from './8.6.0';
 import { migrationMocks } from '@kbn/core/server/mocks';
-import { ConfigKey } from '../../../../../../common/runtime_types';
+import { ConfigKey, SyntheticsMonitorWithSecrets } from '../../../../../../common/runtime_types';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -49,7 +49,7 @@ const monitor850UI = {
     revision: 1,
     secrets:
       '{"password":"","check.request.body":{"type":"text","value":""},"check.request.headers":{},"check.response.body.negative":[],"check.response.body.positive":[],"check.response.headers":{},"ssl.key":"","ssl.key_passphrase":"","username":""}',
-  },
+  } as SyntheticsMonitorWithSecrets,
   references: [],
   coreMigrationVersion: '8.5.0',
 };
@@ -77,7 +77,7 @@ const monitor850Project = {
         geo: { lat: 41.25, lon: -95.86 },
         url: 'https://us-central.synthetics.elastic.dev',
         isServiceManaged: true,
-        status: 'beta',
+        status: 'ga',
         isInvalid: false,
       },
     ],
@@ -115,7 +115,7 @@ const monitor850Project = {
     revision: 1,
     secrets:
       '{"params":"{\\"url\\":\\"https://elastic.github.io/synthetics-demo/\\"}","source.inline.script":"","source.project.content":"UEsDBBQACAAIAAAAIQAAAAAAAAAAAAAAAAAXAAAAam91cm5leXMvb25lLmpvdXJuZXkudHNVkL1uwzAMhHc/BeFJAQyrLdAlQYouXbp3KjqwMhMrlUVVohMYgd+9in+AdCHED6c7kloDpkSy1R+JYtINd9bb356Mw/hDuqGzToOXlsSapIWSPOkT99HTkDR7qpemllTYLnAUuMLCKkhCoYKOvRWOMMIhcgflKzlM2e/OudwVZ4xgIqHQ+/wd9qA8drSB/QtcC1h96j6RuvUA0kYWcdYftzATgIYv3jE2W3h8qBbWh5k8r8DlGG+Gm2YiY67jZpfrMvuUXIG6QsBjfgSM2KWsWYeBaTlVOuy9aQFDcNagWPZllW86eAPqTgyAF7QyudVHFlazY91HN+Wu+bc67orPErNP+V1+1QeOb2hapXDy+3ejzLL+D1BLBwgqc7lrFgEAAMYBAABQSwECLQMUAAgACAAAACEAKnO5axYBAADGAQAAFwAAAAAAAAAAACAApIEAAAAAam91cm5leXMvb25lLmpvdXJuZXkudHNQSwUGAAAAAAEAAQBFAAAAWwEAAAAA","source.zip_url.username":"","source.zip_url.password":"","synthetics_args":[],"ssl.key":"","ssl.key_passphrase":""}',
-  },
+  } as SyntheticsMonitorWithSecrets,
   references: [],
   coreMigrationVersion: '8.5.0',
 };
@@ -127,66 +127,85 @@ describe('Case migrations v8.5.0 -> v8.6.0', () => {
   });
 
   it('UI monitors - adds saved object id to the id field', () => {
-    expect(migration860(encryptedSavedObjectsSetup)(monitor850UI)).toEqual({
+    expect(migration860(encryptedSavedObjectsSetup)(monitor850UI, context)).toEqual({
       ...monitor850UI,
       attributes: {
         ...monitor850UI.attributes,
         [ConfigKey.ID]: monitor850UI.id,
+        [ConfigKey.CONFIG_ID]: monitor850UI.id,
       },
     });
   });
 
   it('project monitors - adds custom heartbeat id to id field', () => {
-    expect(migration860(encryptedSavedObjectsSetup)(monitor850Project)).toEqual({
+    expect(migration860(encryptedSavedObjectsSetup)(monitor850Project, context)).toEqual({
       ...monitor850Project,
       attributes: {
         ...monitor850Project.attributes,
         [ConfigKey.ID]: monitor850Project.attributes[ConfigKey.CUSTOM_HEARTBEAT_ID],
+        [ConfigKey.CONFIG_ID]: monitor850Project.id,
       },
     });
   });
 
   it('handles empty custom heartbeat id string', () => {
+    const attributes = { ...monitor850UI.attributes, [ConfigKey.CUSTOM_HEARTBEAT_ID]: '' };
     expect(
-      migration860(encryptedSavedObjectsSetup)({
-        ...monitor850UI,
-        attributes: { ...monitor850UI.attributes, [ConfigKey.CUSTOM_HEARTBEAT_ID]: '' },
-      })
+      migration860(encryptedSavedObjectsSetup)(
+        {
+          ...monitor850UI,
+          attributes,
+        },
+        context
+      )
     ).toEqual({
       ...monitor850UI,
       attributes: {
-        ...monitor850UI.attributes,
+        ...attributes,
         [ConfigKey.ID]: monitor850UI.id,
+        [ConfigKey.CONFIG_ID]: monitor850UI.id,
       },
     });
   });
 
   it('handles null custom heartbeat id string', () => {
+    const attributes = { ...monitor850UI.attributes, [ConfigKey.CUSTOM_HEARTBEAT_ID]: null };
+
     expect(
-      migration860(encryptedSavedObjectsSetup)({
-        ...monitor850UI,
-        attributes: { ...monitor850UI.attributes, [ConfigKey.CUSTOM_HEARTBEAT_ID]: null },
-      })
+      migration860(encryptedSavedObjectsSetup)(
+        {
+          ...monitor850UI,
+          // @ts-ignore
+          attributes,
+        },
+        context
+      )
     ).toEqual({
       ...monitor850UI,
       attributes: {
-        ...monitor850UI.attributes,
+        ...attributes,
         [ConfigKey.ID]: monitor850UI.id,
+        [ConfigKey.CONFIG_ID]: monitor850UI.id,
       },
     });
   });
 
   it('handles undefined custom heartbeat id string', () => {
+    const attributes = { ...monitor850UI.attributes, [ConfigKey.CUSTOM_HEARTBEAT_ID]: undefined };
     expect(
-      migration860(encryptedSavedObjectsSetup)({
-        ...monitor850UI,
-        attributes: { ...monitor850UI.attributes, [ConfigKey.CUSTOM_HEARTBEAT_ID]: undefined },
-      })
+      migration860(encryptedSavedObjectsSetup)(
+        {
+          ...monitor850UI,
+          attributes,
+        },
+        context
+      )
     ).toEqual({
       ...monitor850UI,
       attributes: {
-        ...monitor850UI.attributes,
+        ...attributes,
         [ConfigKey.ID]: monitor850UI.id,
+        [ConfigKey.CONFIG_ID]: monitor850UI.id,
       },
     });
   });
