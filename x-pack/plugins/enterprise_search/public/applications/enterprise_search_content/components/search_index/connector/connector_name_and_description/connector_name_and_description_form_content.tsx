@@ -11,7 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import { EuiFieldText, EuiFormRow, EuiTextArea } from '@elastic/eui';
 
-import { NAME_LABEL, DESCRIPTION_LABEL } from '../../../../../shared/constants';
+import { NAME_LABEL, DESCRIPTION_LABEL, OPTIONAL_LABEL } from '../../../../../shared/constants';
 
 import { ConnectorNameAndDescriptionLogic } from './connector_name_and_description_logic';
 
@@ -34,7 +34,7 @@ export const ConnectorNameAndDescriptionFormContent: React.FC = () => {
       </EuiFormRow>
       <EuiFormRow label={DESCRIPTION_LABEL}>
         <EuiTextArea
-          placeholder={'Optional'}
+          placeholder={OPTIONAL_LABEL}
           value={description || ''}
           onChange={(event) => {
             updateLocalNameAndDescription({ description: event.target.value });
