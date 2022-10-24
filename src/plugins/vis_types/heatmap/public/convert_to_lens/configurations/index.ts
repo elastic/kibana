@@ -9,8 +9,9 @@
 import { Column, HeatmapConfiguration } from '@kbn/visualizations-plugin/common';
 import { Vis } from '@kbn/visualizations-plugin/public';
 import { HeatmapVisParams } from '../../types';
+import { getPaletteForHeatmap } from './palette';
 
-export const getConfiguration = (
+export const getConfiguration = async (
   layerId: string,
   vis: Vis<HeatmapVisParams>,
   {
@@ -25,7 +26,7 @@ export const getConfiguration = (
     };
     columns: Column[];
   }
-): HeatmapConfiguration | null => {
+): Promise<HeatmapConfiguration | null> => {
   const [valueAccessor] = metrics;
   const xColumn = columns.find(({ isBucketed, isSplit }) => isBucketed && !isSplit);
   const yColumn = columns.find(({ isBucketed, isSplit }) => isBucketed && isSplit);
@@ -33,8 +34,9 @@ export const getConfiguration = (
     return null;
   }
   const { params, uiState } = vis;
-  const state = uiState.get('vis');
+  const state = uiState.get('vis', {});
 
+  const palette = await getPaletteForHeatmap(params);
   return {
     layerId,
     layerType: 'data',
@@ -55,5 +57,6 @@ export const getConfiguration = (
     valueAccessor,
     xAccessor: xColumn?.columnId,
     yAccessor: yColumn?.columnId,
+    palette: palette ? { ...palette, accessor: valueAccessor } : undefined,
   };
 };

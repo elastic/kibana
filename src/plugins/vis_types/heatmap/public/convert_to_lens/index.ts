@@ -63,7 +63,7 @@ export const convertToLens: ConvertHeatmapToLensVisualization = async (vis, time
   const layerId = uuid();
 
   const indexPatternId = dataView.id!;
-  const configuration = getConfiguration(layerId, vis, layerConfig);
+  const configuration = await getConfiguration(layerId, vis, layerConfig);
   if (configuration === null) {
     return null;
   }

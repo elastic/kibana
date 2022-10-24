@@ -10,7 +10,6 @@ import { HorizontalAlignment, LayoutDirection, Position, VerticalAlignment } fro
 import { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { KibanaQueryOutput } from '@kbn/data-plugin/common';
-import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { LegendSize } from '../../constants';
 import {
   CategoryDisplayTypes,
@@ -306,7 +305,7 @@ export interface HeatmapArguments {
   lastRangeIsRightOpen?: boolean;
   showTooltip?: boolean;
   highlightInHover?: boolean;
-  palette?: PaletteOutput<CustomPaletteState>;
+  palette?: PaletteOutput<CustomPaletteParams>;
   xAccessor?: string | ExpressionValueVisDimension;
   yAccessor?: string | ExpressionValueVisDimension;
   valueAccessor?: string | ExpressionValueVisDimension;
