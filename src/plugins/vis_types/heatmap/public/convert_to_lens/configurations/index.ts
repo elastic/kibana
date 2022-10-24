@@ -32,6 +32,8 @@ export const getConfiguration = (
   if (yColumn && !xColumn) {
     return null;
   }
+  const { params, uiState } = vis;
+  const state = uiState.get('vis');
 
   return {
     layerId,
@@ -39,8 +41,8 @@ export const getConfiguration = (
     shape: 'heatmap',
     legend: {
       type: 'heatmap_legend',
-      isVisible: true,
-      position: 'bottom',
+      isVisible: state.legendOpen,
+      position: params.legendPosition,
     },
     gridConfig: {
       type: 'heatmap_grid',
