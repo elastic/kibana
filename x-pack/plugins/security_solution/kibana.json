@@ -32,7 +32,8 @@
     "timelines",
     "triggersActionsUi",
     "uiActions",
-    "unifiedSearch"
+    "unifiedSearch",
+    "files"
   ],
   "optionalPlugins": [
     "cloudExperiments",

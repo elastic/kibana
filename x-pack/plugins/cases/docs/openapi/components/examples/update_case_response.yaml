@@ -31,6 +31,7 @@ value:
         "full_name": null,
         "username": "elastic"
       },
+      "assignees": [],
       "connector": {
         "id": "131d4448-abe0-4789-939d-8ef60680b498",
         "name": "My connector",
