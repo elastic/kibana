@@ -20,8 +20,9 @@ export class ConnectorsEmailService implements EmailService {
     const actions = params.to.map((to) => ({
       id: this.connectorId,
       params: {
-        ...params,
-        to,
+        to: [to],
+        subject: params.subject,
+        message: params.message,
       },
       relatedSavedObjects: params.context?.length ? params.context : undefined,
     }));
