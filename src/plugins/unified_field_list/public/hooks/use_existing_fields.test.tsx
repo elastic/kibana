@@ -10,6 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { createStubDataView, stubFieldSpecMap } from '@kbn/data-plugin/public/stubs';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import {
   useExistingFieldsFetcher,
   useExistingFieldsReader,
@@ -62,11 +63,18 @@ describe('UnifiedFieldList useExistingFields', () => {
 
   beforeEach(() => {
     const dataViews = dataViewPluginMocks.createStartContract();
+    const core = coreMock.createStart();
     mockedServices = {
       dataViews,
       data: dataPluginMock.createStartContract(),
-      core: coreMock.createStart(),
+      core,
     };
+
+    core.uiSettings.get.mockImplementation((key: string) => {
+      if (key === UI_SETTINGS.META_FIELDS) {
+        return ['_id'];
+      }
+    });
 
     dataViews.get.mockImplementation(async (id: string) => {
       return [dataView, anotherDataView, dataViewWithRestrictions].find((dw) => dw.id === id)!;
@@ -462,5 +470,67 @@ describe('UnifiedFieldList useExistingFields', () => {
         timeFieldName: dataView.timeFieldName,
       })
     );
+  });
+
+  it('should call onNoData callback only once', async () => {
+    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(async () => {
+      return {
+        existingFieldNames: ['_id'],
+      };
+    });
+
+    const params: ExistingFieldsFetcherParams = {
+      dataViews: [dataView],
+      services: mockedServices,
+      fromDate: '2019-01-01',
+      toDate: '2020-01-01',
+      query: { query: '', language: 'lucene' },
+      filters: [],
+      onNoData: jest.fn(),
+    };
+    const hookFetcher = renderHook(useExistingFieldsFetcher, {
+      initialProps: params,
+    });
+
+    const hookReader = renderHook(useExistingFieldsReader);
+    await hookFetcher.waitForNextUpdate();
+
+    expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fromDate: '2019-01-01',
+        toDate: '2020-01-01',
+        dslQuery,
+        dataView,
+        timeFieldName: dataView.timeFieldName,
+      })
+    );
+
+    expect(hookReader.result.current.getFieldsExistenceStatus(dataView.id!)).toBe(
+      ExistenceFetchStatus.succeeded
+    );
+
+    expect(params.onNoData).toHaveBeenCalledWith(dataView.id);
+    expect(params.onNoData).toHaveBeenCalledTimes(1);
+
+    hookFetcher.rerender({
+      ...params,
+      fromDate: '2021-01-01',
+      toDate: '2022-01-01',
+    });
+
+    await hookFetcher.waitForNextUpdate();
+
+    expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        fromDate: '2021-01-01',
+        toDate: '2022-01-01',
+        dslQuery,
+        dataView,
+        timeFieldName: dataView.timeFieldName,
+      })
+    );
+
+    expect(params.onNoData).toHaveBeenCalledTimes(1); // still 1 time
   });
 });
