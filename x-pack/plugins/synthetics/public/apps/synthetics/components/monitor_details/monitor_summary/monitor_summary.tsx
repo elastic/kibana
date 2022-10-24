@@ -107,7 +107,7 @@ export const MonitorSummary = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <TestRunsTable />
+      <TestRunsTable paginable={false} />
     </>
   );
 };

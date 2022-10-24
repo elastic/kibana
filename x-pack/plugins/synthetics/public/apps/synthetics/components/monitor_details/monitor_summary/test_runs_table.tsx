@@ -42,7 +42,11 @@ import { useJourneySteps } from '../hooks/use_journey_steps';
 
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
 
-export const TestRunsTable = () => {
+interface TestRunsTableProps {
+  paginable?: boolean;
+}
+
+export const TestRunsTable = ({ paginable = true }: TestRunsTableProps) => {
   const { basePath } = useSyntheticsSettingsContext();
 
   const [sortField, setSortField] = useState<SortableField>('timestamp');
@@ -125,7 +129,7 @@ export const TestRunsTable = () => {
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h3>{pings?.length >= 10 ? LAST_10_TEST_RUNS : TEST_RUNS}</h3>
+            <h3>{paginable || pings?.length < 10 ? TEST_RUNS : LAST_10_TEST_RUNS}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={true} />
