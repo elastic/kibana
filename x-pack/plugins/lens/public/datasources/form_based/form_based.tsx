@@ -221,6 +221,14 @@ export function getFormBasedDatasource({
       const newLayers = { ...state.layers };
       delete newLayers[layerId];
 
+      // delete layers linked to this layer
+      Object.keys(newLayers).forEach((id) => {
+        const linkedLayers = newLayers[id]?.linkToLayers;
+        if (linkedLayers && linkedLayers.includes(layerId)) {
+          delete newLayers[id];
+        }
+      });
+
       return {
         ...state,
         layers: newLayers,
