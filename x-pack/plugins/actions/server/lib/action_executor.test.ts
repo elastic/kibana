@@ -781,7 +781,7 @@ test('logs a warning and error when alert executor throws an error', async () =>
   executorMock.mockRejectedValue(err);
   await actionExecutor.execute(executeParams);
   expect(loggerMock.warn).toBeCalledWith(
-    'action execution failure: test:1: action-1: an error occurred while running the action: this action execution is intended to fail'
+    'action execution failure: test:1: action-1: an error occurred while running the action: this action execution is intended to fail; retry: true'
   );
   expect(loggerMock.error).toBeCalledWith(err, {
     error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
