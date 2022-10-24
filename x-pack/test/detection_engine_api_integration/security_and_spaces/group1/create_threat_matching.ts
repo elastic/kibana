@@ -22,10 +22,11 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
-import { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
-
-import { getCreateThreatMatchRulesSchemaMock } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request/rule_schemas.mock';
-import { getThreatMatchingSchemaPartialMock } from '@kbn/security-solution-plugin/common/detection_engine/schemas/response/rules_schema.mocks';
+import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import {
+  getCreateThreatMatchRulesSchemaMock,
+  getThreatMatchingSchemaPartialMock,
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema/mocks';
 import { ENRICHMENT_TYPES } from '@kbn/security-solution-plugin/common/cti/constants';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
 import {
@@ -146,7 +147,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should be able to execute and get 10 signals when doing a specific query', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: RuleCreateProps = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
@@ -332,7 +333,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return 0 matches if the mapping does not match against anything in the mapping', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: RuleCreateProps = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
@@ -367,7 +368,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return 0 signals when using an AND and one of the clauses does not have data', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: RuleCreateProps = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
@@ -406,7 +407,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return 0 signals when using an AND and one of the clauses has a made up value that does not exist', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: RuleCreateProps = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
@@ -447,7 +448,7 @@ export default ({ getService }: FtrProviderContext) => {
       describe('timeout behavior', () => {
         // Flaky
         it.skip('will return an error if a rule execution exceeds the rule interval', async () => {
-          const rule: CreateRulesSchema = {
+          const rule: RuleCreateProps = {
             description: 'Detecting root and admin users',
             name: 'Query with a short interval',
             severity: 'high',
@@ -503,7 +504,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('enriches signals with the single indicator that matched', async () => {
-          const rule: CreateRulesSchema = {
+          const rule: RuleCreateProps = {
             description: 'Detecting root and admin users',
             name: 'Query with a rule id',
             severity: 'high',
@@ -594,7 +595,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('enriches signals with multiple indicators if several matched', async () => {
-          const rule: CreateRulesSchema = {
+          const rule: RuleCreateProps = {
             description: 'Detecting root and admin users',
             name: 'Query with a rule id',
             severity: 'high',
@@ -674,7 +675,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('adds a single indicator that matched multiple fields', async () => {
-          const rule: CreateRulesSchema = {
+          const rule: RuleCreateProps = {
             description: 'Detecting root and admin users',
             name: 'Query with a rule id',
             severity: 'high',
@@ -786,7 +787,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates multiple signals with multiple matches', async () => {
-          const rule: CreateRulesSchema = {
+          const rule: RuleCreateProps = {
             description: 'Detecting root and admin users',
             name: 'Query with a rule id',
             severity: 'high',
@@ -936,7 +937,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('enriches signals with the single indicator that matched', async () => {
-          const rule: CreateRulesSchema = {
+          const rule: RuleCreateProps = {
             description: 'Detecting root and admin users',
             name: 'Query with a rule id',
             severity: 'high',
@@ -1027,7 +1028,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('enriches signals with multiple indicators if several matched', async () => {
-          const rule: CreateRulesSchema = {
+          const rule: RuleCreateProps = {
             description: 'Detecting root and admin users',
             name: 'Query with a rule id',
             severity: 'high',
@@ -1107,7 +1108,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('adds a single indicator that matched multiple fields', async () => {
-          const rule: CreateRulesSchema = {
+          const rule: RuleCreateProps = {
             description: 'Detecting root and admin users',
             name: 'Query with a rule id',
             severity: 'high',
@@ -1219,7 +1220,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('generates multiple signals with multiple matches', async () => {
-          const rule: CreateRulesSchema = {
+          const rule: RuleCreateProps = {
             description: 'Detecting root and admin users',
             name: 'Query with a rule id',
             severity: 'high',
@@ -1369,7 +1370,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should be enriched with host risk score', async () => {
-          const rule: CreateRulesSchema = {
+          const rule: RuleCreateProps = {
             description: 'Detecting root and admin users',
             name: 'Query with a rule id',
             severity: 'high',

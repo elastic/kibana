@@ -80,6 +80,7 @@ describe('EventsQueryTabBody', () => {
     type: HostsType.page,
     endDate: new Date('2000').toISOString(),
     startDate: new Date('2000').toISOString(),
+    additionalFilters: [],
   };
 
   beforeEach(() => {

@@ -2588,7 +2588,7 @@
                 "description": [],
                 "signature": [
                   "PluginInitializerContext",
-                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{} & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>>"
+                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>>"
                 ],
                 "path": "src/plugins/data/public/plugin.ts",
                 "deprecated": false,
@@ -3509,7 +3509,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.ts"
               }
             ],
             "children": [],
@@ -3823,19 +3823,19 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.test.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.test.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.test.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.test.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "inputControlVis",
@@ -8037,6 +8037,22 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.SavedObject.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [
+              "Timestamp of the time this document had been created."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.SavedObject.updated_at",
             "type": "string",
             "tags": [],
@@ -11486,10 +11502,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "unifiedSearch",
-              "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx"
-            },
-            {
               "plugin": "maps",
               "path": "x-pack/plugins/maps/public/kibana_services.ts"
             },
@@ -11776,7 +11788,7 @@
                     "section": "def-server.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{} & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>>"
+                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>>"
                 ],
                 "path": "src/plugins/data/server/plugin.ts",
                 "deprecated": false,
@@ -12201,18 +12213,6 @@
               },
               {
                 "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/hooks/use_data.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/full_time_range_selector/full_time_range_selector_service.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes_analysis.tsx"
-              },
-              {
-                "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
               {
@@ -12557,7 +12557,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/details/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -19685,18 +19685,6 @@
               },
               {
                 "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/hooks/use_data.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/full_time_range_selector/full_time_range_selector_service.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes_analysis.tsx"
-              },
-              {
-                "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
               {
@@ -20041,7 +20029,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/details/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -25654,6 +25642,22 @@
             "label": "version",
             "description": [
               "An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SavedObject.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [
+              "Timestamp of the time this document had been created."
             ],
             "signature": [
               "string | undefined"
