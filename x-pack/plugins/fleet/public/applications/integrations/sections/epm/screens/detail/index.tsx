@@ -360,6 +360,44 @@ export function Detail() {
     ]
   );
 
+  const showVersionSelect = useMemo(
+    () =>
+      prereleaseIntegrationsEnabled &&
+      latestGAVersion !== latestPrereleaseVersion &&
+      (!packageInfo?.version ||
+        packageInfo.version === latestGAVersion ||
+        packageInfo.version === latestPrereleaseVersion),
+    [prereleaseIntegrationsEnabled, latestGAVersion, latestPrereleaseVersion, packageInfo?.version]
+  );
+
+  const versionOptions = useMemo(
+    () => [
+      {
+        value: latestPrereleaseVersion,
+        text: latestPrereleaseVersion,
+      },
+      {
+        value: latestGAVersion,
+        text: latestGAVersion,
+      },
+    ],
+    [latestPrereleaseVersion, latestGAVersion]
+  );
+
+  const versionLabel = i18n.translate('xpack.fleet.epm.versionLabel', {
+    defaultMessage: 'Version',
+  });
+
+  const onVersionChange = useCallback(
+    (version: string, packageName: string) => {
+      const path = getPath('integration_details_overview', {
+        pkgkey: `${packageName}-${version}`,
+      });
+      history.push(path);
+    },
+    [getPath, history]
+  );
+
   const headerRightContent = useMemo(
     () =>
       packageInfo ? (
@@ -368,36 +406,18 @@ export function Detail() {
           <EuiFlexGroup justifyContent="flexEnd" direction="row">
             {[
               {
-                label: i18n.translate('xpack.fleet.epm.versionLabel', {
-                  defaultMessage: 'Version',
-                }),
+                label: showVersionSelect ? undefined : versionLabel,
                 content: (
                   <EuiFlexGroup gutterSize="s">
                     <EuiFlexItem>
-                      {prereleaseIntegrationsEnabled &&
-                      latestGAVersion !== latestPrereleaseVersion &&
-                      (!packageInfo?.version ||
-                        packageInfo.version === latestGAVersion ||
-                        packageInfo.version === latestPrereleaseVersion) ? (
+                      {showVersionSelect ? (
                         <EuiSelect
-                          options={[
-                            {
-                              value: latestPrereleaseVersion,
-                              text: latestPrereleaseVersion,
-                            },
-                            {
-                              value: latestGAVersion,
-                              text: latestGAVersion,
-                            },
-                          ]}
+                          prepend={versionLabel}
+                          options={versionOptions}
                           value={packageInfo.version}
-                          onChange={(event) => {
-                            const version = event.target.value;
-                            const path = getPath('integration_details_overview', {
-                              pkgkey: `${packageInfo.name}-${version}`,
-                            });
-                            history.push(path);
-                          }}
+                          onChange={(event) =>
+                            onVersionChange(event.target.value, packageInfo.name)
+                          }
                         />
                       ) : (
                         packageInfo.version
@@ -479,11 +499,10 @@ export function Detail() {
       missingSecurityConfiguration,
       integrationInfo?.title,
       handleAddIntegrationPolicyClick,
-      getPath,
-      history,
-      latestGAVersion,
-      latestPrereleaseVersion,
-      prereleaseIntegrationsEnabled,
+      onVersionChange,
+      showVersionSelect,
+      versionLabel,
+      versionOptions,
     ]
   );
 
