@@ -21,11 +21,14 @@ import {
   emptyStackFrame,
   Executable,
   FileID,
+  getAddressFromStackFrameID,
+  getFileIDFromStackFrameID,
   StackFrame,
   StackFrameID,
   StackTrace,
   StackTraceID,
 } from '../../common/profiling';
+import { runLengthDecodeBase64Url } from '../../common/run_length_encoding';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { DownsampledEventsIndex } from './downsampling';
@@ -52,87 +55,6 @@ export type EncodedStackTrace = DedotObject<{
   [ProfilingESField.StacktraceFrameTypes]: string;
 }>;
 
-// runLengthEncode run-length encodes the input array.
-//
-// The input is a list of uint8s. The output is a binary stream of
-// 2-byte pairs (first byte is the length and the second byte is the
-// binary representation of the object) in reverse order.
-//
-// E.g. uint8 array [0, 0, 0, 0, 0, 2, 2, 2] is converted into the byte
-// array [5, 0, 3, 2].
-export function runLengthEncode(input: number[]): Buffer {
-  const output: number[] = [];
-
-  if (input.length === 0) {
-    return Buffer.from(output);
-  }
-
-  let count = 1;
-  let current = input[0];
-
-  for (let i = 1; i < input.length; i++) {
-    const next = input[i];
-
-    if (next === current && count < 255) {
-      count++;
-      continue;
-    }
-
-    output.push(count, current);
-
-    count = 1;
-    current = next;
-  }
-
-  output.push(count, current);
-
-  return Buffer.from(output);
-}
-
-// runLengthDecode decodes a run-length encoding for the input array.
-//
-// The input is a binary stream of 2-byte pairs (first byte is the length and the
-// second byte is the binary representation of the object). The output is a list of
-// uint8s.
-//
-// E.g. byte array [5, 0, 3, 2] is converted into an uint8 array like
-// [0, 0, 0, 0, 0, 2, 2, 2].
-export function runLengthDecode(input: Buffer, outputSize?: number): number[] {
-  let size;
-
-  if (typeof outputSize === 'undefined') {
-    size = 0;
-    for (let i = 0; i < input.length; i += 2) {
-      size += input[i];
-    }
-  } else {
-    size = outputSize;
-  }
-
-  const output: number[] = new Array(size);
-
-  let idx = 0;
-  for (let i = 0; i < input.length; i += 2) {
-    for (let j = 0; j < input[i]; j++) {
-      output[idx] = input[i + 1];
-      idx++;
-    }
-  }
-
-  // Due to truncation of the frame types for stacktraces longer than 255,
-  // the expected output size and the actual decoded size can be different.
-  // Ordinarily, these two values should be the same.
-  //
-  // We have decided to fill in the remainder of the output array with zeroes
-  // as a reasonable default. Without this step, the output array would have
-  // undefined values.
-  for (let i = idx; i < size; i++) {
-    output[i] = 0;
-  }
-
-  return output;
-}
-
 // decodeStackTrace unpacks an encoded stack trace from Elasticsearch
 export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
   const inputFrameIDs = input.Stacktrace.frame.ids;
@@ -152,19 +74,15 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
   // However, since the file ID is base64-encoded using 21.33 bytes
   // (16 * 4 / 3), then the 22 bytes have an extra 4 bits from the
   // address (see diagram in definition of EncodedStackTrace).
-  for (let i = 0; i < countsFrameIDs; i++) {
-    const pos = i * BASE64_FRAME_ID_LENGTH;
+  for (let i = 0, pos = 0; i < countsFrameIDs; i++, pos += BASE64_FRAME_ID_LENGTH) {
     const frameID = inputFrameIDs.slice(pos, pos + BASE64_FRAME_ID_LENGTH);
-    const buf = Buffer.from(frameID, 'base64url');
-
-    fileIDs[i] = buf.toString('base64url', 0, 16);
-    addressOrLines[i] = Number(buf.readBigUInt64BE(16));
     frameIDs[i] = frameID;
+    fileIDs[i] = getFileIDFromStackFrameID(frameID);
+    addressOrLines[i] = getAddressFromStackFrameID(frameID);
   }
 
   // Step 2: Convert the run-length byte encoding into a list of uint8s.
-  const types = Buffer.from(inputFrameTypes, 'base64url');
-  const typeIDs = runLengthDecode(types, countsFrameIDs);
+  const typeIDs = runLengthDecodeBase64Url(inputFrameTypes, inputFrameTypes.length, countsFrameIDs);
 
   return {
     AddressOrLines: addressOrLines,
