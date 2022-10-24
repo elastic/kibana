@@ -66,7 +66,6 @@
 /src/plugins/bfetch/ @elastic/kibana-app-services
 /src/plugins/data/ @elastic/kibana-app-services
 /src/plugins/data_views/ @elastic/kibana-app-services
-/src/plugins/embeddable/ @elastic/kibana-app-services
 /src/plugins/expressions/ @elastic/kibana-app-services
 /src/plugins/field_formats/ @elastic/kibana-app-services
 /src/plugins/data_view_editor/ @elastic/kibana-app-services
@@ -172,6 +171,7 @@ x-pack/examples/files_example @elastic/kibana-app-services
 ### END Observability Plugins
 
 # Presentation
+/src/plugins/embeddable/ @elastic/kibana-presentation
 /src/plugins/dashboard/ @elastic/kibana-presentation
 /src/plugins/expression_error/ @elastic/kibana-presentation
 /src/plugins/expression_image/ @elastic/kibana-presentation
