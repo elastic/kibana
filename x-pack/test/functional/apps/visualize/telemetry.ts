@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         checkTelemetry(`render_agg_based_${vis}`));
     });
 
-    ['vega', 'tsvb_timeseries', 'lens_vis_dashboard'].forEach((vis) => {
+    ['vega', 'tsvb_top_n', 'lens_vis_dashboard'].forEach((vis) => {
       it(`should trigger render event for ${vis} visualization once`, async () =>
         checkTelemetry(`render_${vis}`));
     });

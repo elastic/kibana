@@ -12,6 +12,7 @@ const ANALYTICS_LOCAL_STORAGE_KEY = 'analytics';
 
 export class UsageCollectionService extends FtrService {
   private readonly browser = this.ctx.getService('browser');
+  private readonly pageObjects = this.ctx.getPageObjects(['common']);
 
   public async getUICounterEvents(): Promise<
     Array<{
@@ -23,6 +24,8 @@ export class UsageCollectionService extends FtrService {
     }>
   > {
     try {
+      // Setting the value to the local storage is a bit slow, to make sure the value is set a little delay was added
+      await this.pageObjects.common.sleep(200);
       const rawValue = await this.browser.getLocalStorageItem(ANALYTICS_LOCAL_STORAGE_KEY);
 
       if (rawValue) {
