@@ -7,17 +7,27 @@
 
 import React, { FC, useMemo } from 'react';
 import { type TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { useRequestParams } from './change_point_detection_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useTimeRangeUpdates } from '../../hooks/use_time_filter';
 
-export const ChartComponent: FC = React.memo(() => {
+export interface ChartComponentProps {
+  annotation: {
+    label: string;
+    timestamp: string;
+    endTimestamp: string;
+  };
+}
+
+export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation }) => {
   const {
     lens: { EmbeddableComponent },
   } = useAiopsAppContext();
 
   const timeRange = useTimeRangeUpdates();
   const { dataView } = useDataSource();
+  const requestParams = useRequestParams();
 
   const attributes = useMemo<TypedLensByValueInput['attributes']>(() => {
     return {
@@ -76,27 +86,31 @@ export const ChartComponent: FC = React.memo(() => {
               layerType: 'data',
               xAccessor: '877e6638-bfaa-43ec-afb9-2241dc8e1c86',
             },
-            {
-              layerId: '8d26ab67-b841-4877-9d02-55bf270f9caf',
-              layerType: 'annotations',
-              annotations: [
-                {
-                  type: 'manual',
-                  label: 'Change point detected',
-                  icon: 'bell',
-                  key: {
-                    type: 'range',
-                    timestamp: '2021-08-16T00:00:00.000Z',
-                    endTimestamp: '2021-08-16T10:30:00.000Z',
+            ...(annotation
+              ? [
+                  {
+                    layerId: '8d26ab67-b841-4877-9d02-55bf270f9caf',
+                    layerType: 'annotations',
+                    annotations: [
+                      {
+                        type: 'manual',
+                        label: annotation.label,
+                        icon: 'bell',
+                        key: {
+                          type: 'range',
+                          timestamp: annotation.timestamp,
+                          endTimestamp: annotation.endTimestamp,
+                        },
+                        id: 'a8fb297c-8d96-4011-93c0-45af110d5302',
+                        isHidden: false,
+                        color: '#F04E981A',
+                        outside: false,
+                      },
+                    ],
+                    ignoreGlobalFilters: true,
                   },
-                  id: 'a8fb297c-8d96-4011-93c0-45af110d5302',
-                  isHidden: false,
-                  color: '#F04E981A',
-                  outside: false,
-                },
-              ],
-              ignoreGlobalFilters: true,
-            },
+                ]
+              : []),
           ],
         },
         query: {
@@ -123,10 +137,10 @@ export const ChartComponent: FC = React.memo(() => {
                     },
                   },
                   'e9f26d17-fb36-4982-8539-03f1849cbed0': {
-                    label: 'Median of value',
+                    label: `${requestParams.fn}(${requestParams.metricField})`,
                     dataType: 'number',
-                    operationType: 'median',
-                    sourceField: 'value',
+                    operationType: requestParams.fn,
+                    sourceField: requestParams.metricField,
                     isBucketed: false,
                     scale: 'ratio',
                     params: {
@@ -150,7 +164,7 @@ export const ChartComponent: FC = React.memo(() => {
         adHocDataViews: {},
       },
     };
-  }, [dataView.id]);
+  }, [dataView.id, annotation, requestParams]);
 
   return (
     <EmbeddableComponent

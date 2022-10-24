@@ -35,8 +35,8 @@ export const FunctionPicker: FC<FunctionPickerProps> = React.memo(({ value, onCh
             text: 'max',
           },
           {
-            value: 'avg',
-            text: 'avg',
+            value: 'sum',
+            text: 'sum',
           },
         ]}
         value={value}
