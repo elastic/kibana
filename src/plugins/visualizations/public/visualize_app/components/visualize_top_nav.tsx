@@ -20,7 +20,7 @@ import type {
   VisualizeEditorVisInstance,
 } from '../types';
 import { VISUALIZE_APP_NAME } from '../../../common/constants';
-import { getTopNavConfig, isFallbackDataView } from '../utils';
+import { getTopNavConfig } from '../utils';
 import type { NavigateToLensContext } from '../../../common';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
@@ -65,6 +65,12 @@ const TopNav = ({
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
   const [editInLensConfig, setEditInLensConfig] = useState<NavigateToLensContext | null>();
   const [navigateToLens, setNavigateToLens] = useState(false);
+
+  const selectedDataView = vis.data.indexPattern;
+  const [adHocDataViews] = useState(
+    selectedDataView && !selectedDataView.isPersisted() ? [selectedDataView] : []
+  );
+
   // If the user has clicked the edit in lens button, we want to hide the badge.
   // The information is stored in local storage to persist across reloads.
   const [hideTryInLensBadge, setHideTryInLensBadge] = useLocalStorage(
@@ -276,10 +282,7 @@ const TopNav = ({
   }, [services.data.query.timefilter.timefilter, doReload]);
 
   const shouldShowDataViewPicker = Boolean(
-    vis.type.editorConfig?.enableDataViewChange &&
-      ((vis.data.indexPattern && !vis.data.savedSearchId) ||
-        isFallbackDataView(vis.data.indexPattern)) &&
-      indexPatterns.length
+    vis.type.editorConfig?.enableDataViewChange && vis.data.indexPattern
   );
 
   const onChangeDataView = useCallback(
@@ -291,7 +294,7 @@ const TopNav = ({
     [stateContainer.transitions]
   );
 
-  const isMissingCurrentDataView = isFallbackDataView(vis.data.indexPattern);
+  const isMissingCurrentDataView = !vis.data.indexPattern;
 
   return isChromeVisible ? (
     /**
@@ -317,9 +320,9 @@ const TopNav = ({
       showQueryInput={showQueryInput}
       showSaveQuery={Boolean(services.visualizeCapabilities.saveQuery)}
       dataViewPickerComponentProps={
-        shouldShowDataViewPicker && vis.data.indexPattern
+        shouldShowDataViewPicker && selectedDataView
           ? {
-              currentDataViewId: vis.data.indexPattern.id,
+              currentDataViewId: selectedDataView.id,
               trigger: {
                 label: isMissingCurrentDataView
                   ? i18n.translate('visualizations.fallbackDataView.label', {
@@ -334,10 +337,11 @@ const TopNav = ({
                             }),
                       },
                     })
-                  : vis.data.indexPattern.getName(),
+                  : selectedDataView.getName(),
               },
               isMissingCurrent: isMissingCurrentDataView,
               onChangeDataView,
+              adHocDataViews,
             }
           : undefined
       }
