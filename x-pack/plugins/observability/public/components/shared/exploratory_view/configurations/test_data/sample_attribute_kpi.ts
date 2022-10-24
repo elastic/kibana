@@ -45,7 +45,7 @@ export const sampleAttributeKpi = {
                   query: 'transaction.type: page-load and processor.event: transaction',
                 },
                 isBucketed: false,
-                label: 'Page views',
+                label: 'test-series',
                 operationType: 'count',
                 scale: 'ratio',
                 sourceField: RECORDS_FIELD,
@@ -95,6 +95,8 @@ export const sampleAttributeKpi = {
         isVisible: true,
         showSingleSeries: true,
         position: 'right',
+        legendSize: 'large',
+        shouldTruncate: false,
       },
       preferredSeriesType: 'line',
       tickLabelsVisibilitySettings: {

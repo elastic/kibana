@@ -10,7 +10,7 @@ import { ALERT_UUID } from '@kbn/rule-data-utils';
 
 import type { ConfigType } from '../../../../config';
 import type { SignalSource, SimpleHit } from '../../signals/types';
-import type { CompleteRule, RuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, RuleParams } from '../../rule_schema';
 import { generateId } from '../../signals/utils';
 import { buildBulkBody } from './utils/build_bulk_body';
 import type { BuildReasonMessage } from '../../signals/reason_formatters';

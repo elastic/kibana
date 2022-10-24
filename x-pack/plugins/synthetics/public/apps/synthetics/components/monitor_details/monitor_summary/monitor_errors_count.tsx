@@ -12,7 +12,12 @@ import { useParams } from 'react-router-dom';
 import { KpiWrapper } from './kpi_wrapper';
 import { ClientPluginsStart } from '../../../../../plugin';
 
-export const MonitorErrorsCount = ({ time }: { time?: { to: string; from: string } }) => {
+interface MonitorErrorsCountProps {
+  from: string;
+  to: string;
+}
+
+export const MonitorErrorsCount = (props: MonitorErrorsCountProps) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
@@ -26,10 +31,7 @@ export const MonitorErrorsCount = ({ time }: { time?: { to: string; from: string
         reportType={ReportTypes.SINGLE_METRIC}
         attributes={[
           {
-            time: {
-              from: 'now-30d/d',
-              to: 'now',
-            },
+            time: props,
             reportDefinitions: { config_id: [monitorId] },
             dataType: 'synthetics',
             selectedMetricField: 'state.id',

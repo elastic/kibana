@@ -799,6 +799,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(`lnsXY_axisSide_groups_${newSide}`);
     },
 
+    async getSelectedAxisSide() {
+      const axisSideGroups = await find.allByCssSelector(
+        `[data-test-subj^="lnsXY_axisSide_groups_"]`
+      );
+      for (const axisSideGroup of axisSideGroups) {
+        const input = await axisSideGroup.findByTagName('input');
+        const isSelected = await input.isSelected();
+        if (isSelected) {
+          return axisSideGroup?.getVisibleText();
+        }
+      }
+    },
+
     /** Counts the visible warnings in the config panel */
     async getErrorCount() {
       const moreButton = await testSubjects.exists('configuration-failure-more-errors');
