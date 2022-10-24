@@ -95,11 +95,15 @@ export const GuideStep = ({
             <EuiSpacer size="s" />
 
             <EuiText size="s">
-              <ul>
-                {stepConfig.descriptionList.map((description, index) => {
-                  return <li key={`description-${index}`}>{description}</li>;
-                })}
-              </ul>
+              {stepConfig.descriptionList.length === 1 ? (
+                <p>{stepConfig.descriptionList[0]}</p> // If there is only one description, render it as a paragraph
+              ) : (
+                <ul>
+                  {stepConfig.descriptionList.map((description, index) => {
+                    return <li key={`description-${index}`}>{description}</li>;
+                  })}
+                </ul>
+              )}
             </EuiText>
 
             <EuiSpacer />
