@@ -228,8 +228,12 @@ function TableListViewComp<T extends UserContentCommonSchema>({
               item={record}
               getDetailViewLink={getDetailViewLink}
               onClickTitle={onClickTitle}
-              onClickTag={(tag) => {
-                addOrRemoveIncludeTagFilter(tag);
+              onClickTag={(tag, isCtrlKey) => {
+                if (isCtrlKey) {
+                  addOrRemoveExcludeTagFilter(tag);
+                } else {
+                  addOrRemoveIncludeTagFilter(tag);
+                }
               }}
               searchTerm={searchQuery.text}
             />
@@ -300,6 +304,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     onClickTitle,
     searchQuery.text,
     addOrRemoveIncludeTagFilter,
+    addOrRemoveExcludeTagFilter,
     DateFormatterComp,
   ]);
 

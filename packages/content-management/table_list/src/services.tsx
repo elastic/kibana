@@ -48,7 +48,11 @@ export interface Services {
   DateFormatterComp?: DateFormatter;
   /** Handler to retrieve the list of available tags */
   getTagList: () => Tag[];
-  TagList: FC<{ references: SavedObjectsReference[]; onClick?: (tag: Tag) => void }>;
+  TagList: FC<{
+    references: SavedObjectsReference[];
+    onClick?: (tag: Tag) => void;
+    tagRender?: (tag: Tag) => JSX.Element;
+  }>;
   /** Predicate function to indicate if some of the saved object references are tags */
   itemHasTags: (references: SavedObjectsReference[]) => boolean;
   /** Handler to return the url to navigate to the kibana tags management */
@@ -118,6 +122,7 @@ export interface TableListViewKibanaDependencies {
             references: SavedObjectsReference[];
           };
           onClick?: (tag: Tag) => void;
+          tagRender?: (tag: Tag) => JSX.Element;
         }>;
       };
       parseSearchQuery: (
@@ -163,12 +168,12 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
   }, [savedObjectsTagging]);
 
   const TagList = useMemo(() => {
-    const Comp: Services['TagList'] = ({ references, onClick }) => {
+    const Comp: Services['TagList'] = ({ references, onClick, tagRender }) => {
       if (!savedObjectsTagging?.ui.components.TagList) {
         return null;
       }
       const PluginTagList = savedObjectsTagging.ui.components.TagList;
-      return <PluginTagList object={{ references }} onClick={onClick} />;
+      return <PluginTagList object={{ references }} onClick={onClick} tagRender={tagRender} />;
     };
 
     return Comp;

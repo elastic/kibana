@@ -241,6 +241,7 @@ export const TagFilterPanel: FC<Props> = ({
         panelClassName="euiFilterGroup__popoverPanel"
       >
         <EuiFlexGroup direction="column" gutterSize="none">
+          {/* Selectable */}
           <EuiFlexItem>
             <EuiSelectable<any>
               singleSelection={false}
@@ -264,6 +265,8 @@ export const TagFilterPanel: FC<Props> = ({
               )}
             </EuiSelectable>
           </EuiFlexItem>
+
+          {/* Clear selection + help text */}
           <EuiFlexItem css={footerCSS}>
             {totalActiveFilters > 0 && (
               <EuiButtonEmpty
@@ -280,6 +283,8 @@ export const TagFilterPanel: FC<Props> = ({
             </EuiText>
             <EuiSpacer size="s" />
           </EuiFlexItem>
+
+          {/* Link to manage all tags */}
           <EuiFlexItem css={bottomBarCSS}>
             <span>
               <RedirectAppLinks

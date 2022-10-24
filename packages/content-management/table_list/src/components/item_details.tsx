@@ -13,6 +13,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { Tag } from '../types';
 import { useServices } from '../services';
 import type { UserContentCommonSchema, Props as TableListViewProps } from '../table_list_view';
+import { TagBadge } from './tag_badge';
 
 type InheritedProps<T extends UserContentCommonSchema> = Pick<
   TableListViewProps<T>,
@@ -21,7 +22,7 @@ type InheritedProps<T extends UserContentCommonSchema> = Pick<
 interface Props<T extends UserContentCommonSchema> extends InheritedProps<T> {
   item: T;
   searchTerm?: string;
-  onClickTag: (tag: Tag) => void;
+  onClickTag: (tag: Tag, isCtrlKey: boolean) => void;
 }
 
 /**
@@ -116,7 +117,10 @@ export function ItemDetails<T extends UserContentCommonSchema>({
       {hasTags && (
         <>
           <EuiSpacer size="s" />
-          <TagList references={references} onClick={onClickTag} />
+          <TagList
+            references={references}
+            tagRender={(tag) => <TagBadge tag={tag} onClick={onClickTag} />}
+          />
         </>
       )}
     </div>
