@@ -28,6 +28,7 @@ export const canFilter = async (
 export const getFilterClickData = (
   clickedLayers: LayerValue[],
   bucketColumns: Array<Partial<BucketColumns>>,
+  metricColId: string,
   visData: Datatable,
   originalVisData: Datatable, // before multiple metrics are consolidated with collapseMetricColumns
   numOriginalMetrics: number,
@@ -82,6 +83,16 @@ export const getFilterClickData = (
 
   // Allows filtering with the small multiples value
   if (splitChartDimension) {
+    if (!bucketColumns[0].id) {
+      // this is a split chart without any real bucket columns, so filter by the metric column
+      data.push({
+        column: visData.columns.findIndex((col) => col.id === metricColId),
+        row: rowIndex,
+        table: visData,
+        value: visData.columns.find((col) => col.id === metricColId)?.name,
+      });
+    }
+
     data.push({
       column: visData.columns.findIndex((col) => col.id === splitChartDimension.id),
       row: rowIndex,

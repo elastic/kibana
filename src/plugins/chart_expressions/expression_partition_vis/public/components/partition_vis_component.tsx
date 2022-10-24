@@ -176,6 +176,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       const data = getFilterClickData(
         clickedLayers,
         buckets,
+        metricColumn.id,
         vData,
         originalVisData,
         visParams.dimensions.metrics.length,
@@ -184,7 +185,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       );
       props.fireEvent({ name: 'filter', data: { data } });
     },
-    [originalVisData, props, visParams.dimensions.metrics.length]
+    [metricColumn.id, originalVisData, props, visParams.dimensions.metrics.length]
   );
 
   // handles legend action event data

@@ -52,7 +52,7 @@ describe('consolidateMetricColumns', () => {
     };
 
     const result = consolidateMetricColumns(table, ['1', '2'], ['3', '4']);
-    expect(result.bucketAccessors).toEqual(['1', 'metric-name']);
+    expect(result.bucketAccessors).toEqual(['1', '2', 'metric-name']);
     expect(result.metricAccessor).toEqual('value');
     expect(result.table).toMatchInlineSnapshot(`
       Object {
@@ -65,10 +65,16 @@ describe('consolidateMetricColumns', () => {
             "name": "bucket1",
           },
           Object {
+            "id": "2",
+            "meta": Object {
+              "type": "string",
+            },
+            "name": "bucket2",
+          },
+          Object {
             "id": "metric-name",
             "meta": Object {
               "sourceParams": Object {
-                "combinedWithBucketColumn": true,
                 "consolidatedMetricsColumn": true,
               },
               "type": "string",
@@ -86,42 +92,50 @@ describe('consolidateMetricColumns', () => {
         "rows": Array [
           Object {
             "1": "square",
-            "metric-name": "<formatted>red</formatted> - metric1",
+            "2": "red",
+            "metric-name": "metric1",
             "value": 1,
           },
           Object {
             "1": "square",
-            "metric-name": "<formatted>red</formatted> - metric2",
+            "2": "red",
+            "metric-name": "metric2",
             "value": 2,
           },
           Object {
             "1": "square",
-            "metric-name": "<formatted>blue</formatted> - metric1",
+            "2": "blue",
+            "metric-name": "metric1",
             "value": 3,
           },
           Object {
             "1": "square",
-            "metric-name": "<formatted>blue</formatted> - metric2",
+            "2": "blue",
+            "metric-name": "metric2",
             "value": 4,
           },
           Object {
             "1": "circle",
-            "metric-name": "<formatted>red</formatted> - metric1",
+            "2": "red",
+            "metric-name": "metric1",
             "value": 5,
           },
           Object {
             "1": "circle",
-            "metric-name": "<formatted>red</formatted> - metric2",
+            "2": "red",
+            "metric-name": "metric2",
             "value": 6,
           },
           Object {
             "1": "circle",
-            "metric-name": "<formatted>blue</formatted> - metric1",
+            "2": "blue",
+            "metric-name": "metric1",
             "value": 7,
           },
           Object {
             "1": "circle",
-            "metric-name": "<formatted>blue</formatted> - metric2",
+            "2": "blue",
+            "metric-name": "metric2",
             "value": 8,
           },
         ],

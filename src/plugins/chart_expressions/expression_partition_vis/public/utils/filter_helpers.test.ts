@@ -27,7 +27,14 @@ describe('getFilterClickData', () => {
         smAccessorValue: '',
       },
     ];
-    const data = getFilterClickData(clickedLayers, bucketColumns, visData, visData, 1);
+    const data = getFilterClickData(
+      clickedLayers,
+      bucketColumns,
+      visData.columns[1].id,
+      visData,
+      visData,
+      1
+    );
     expect(data.length).toEqual(clickedLayers.length);
     expect(data[0].value).toEqual('Logstash Airways');
     expect(data[0].row).toEqual(0);
@@ -45,7 +52,14 @@ describe('getFilterClickData', () => {
         smAccessorValue: '',
       },
     ];
-    const data = getFilterClickData(clickedLayers, bucketColumns, visData, visData, 1);
+    const data = getFilterClickData(
+      clickedLayers,
+      bucketColumns,
+      visData.columns[1].id,
+      visData,
+      visData,
+      1
+    );
     expect(data.length).toEqual(clickedLayers.length);
     expect(data[0].value).toEqual('ES-Air');
     expect(data[0].row).toEqual(4);
@@ -70,6 +84,7 @@ describe('getFilterClickData', () => {
     const data = getFilterClickData(
       clickedLayers,
       bucketColumns,
+      visData.columns[1].id,
       visData,
       visData,
       1,
@@ -100,6 +115,7 @@ describe('getFilterClickData', () => {
     const data = getFilterClickData(
       clickedLayers,
       [{ name: 'Count' }],
+      visData.columns[1].id,
       visData,
       visData,
       1,
@@ -108,8 +124,11 @@ describe('getFilterClickData', () => {
     expect(data.length).toEqual(2);
     expect(data[0].value).toEqual('Count');
     expect(data[0].row).toEqual(4);
-    expect(data[1].column).toEqual(0);
+    expect(data[0].column).toEqual(1);
+
     expect(data[1].value).toEqual('ES-Air');
+    expect(data[1].row).toEqual(4);
+    expect(data[1].column).toEqual(0);
   });
 
   describe('multi-metric scenarios', () => {
@@ -181,6 +200,7 @@ describe('getFilterClickData', () => {
         const data = getFilterClickData(
           clickedLayers,
           localBucketColumns,
+          'value',
           consolidatedTable,
           originalTable,
           2
