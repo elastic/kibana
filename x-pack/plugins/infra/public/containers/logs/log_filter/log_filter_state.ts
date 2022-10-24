@@ -53,7 +53,7 @@ const unsupportedLanguageError = i18n.translate(
   }
 );
 
-export const useLogFilterState = ({ dataView }: { dataView?: DataViewBase }) => {
+export const useLogFilterState = ({ dataView }: { dataView: DataViewBase }) => {
   const {
     notifications: { toasts },
     data: {

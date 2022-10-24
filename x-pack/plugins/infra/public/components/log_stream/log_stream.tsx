@@ -7,11 +7,11 @@
 
 import { buildEsQuery, Filter, Query } from '@kbn/es-query';
 import { JsonValue } from '@kbn/utility-types';
+import { noop } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { noop } from 'lodash';
 import { LogEntryCursor } from '../../../common/log_entry';
 import { defaultLogViewsStaticConfig } from '../../../common/log_views';
 import { BuiltEsQuery, useLogStream } from '../../containers/logs/log_stream';
