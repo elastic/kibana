@@ -10,6 +10,7 @@ import React, { FC } from 'react';
 
 import { useServices } from './services';
 import { RedirectAppLinks as Component } from './redirect_app_links.component';
+import { redirectAppLinksStyles } from './redirect_app_links.styles';
 
 /**
  * A service-enabled component that provides Kibana-specific functionality to the `RedirectAppLinks`
@@ -23,7 +24,7 @@ import { RedirectAppLinks as Component } from './redirect_app_links.component';
  * ```
  */
 export const RedirectAppLinks: FC<{ className?: string }> = ({ className, children }) => (
-  <Component {...useServices()} className={className}>
+  <Component css={redirectAppLinksStyles} {...useServices()} className={className}>
     {children}
   </Component>
 );

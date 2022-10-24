@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-export const redirectAppLinksStyles = () => {
-  return {
-    'align-items': 'flex-start',
-    display: 'flex',
-    flex: 1,
-    'flex-direction': 'column',
-  };
-};
+import { css } from "@emotion/react";
+
+export const redirectAppLinksStyles = css({
+  display: 'flex',
+  alignItems: 'flex-start',
+  flex: '1',
+  flexDirection: 'column',
+});
