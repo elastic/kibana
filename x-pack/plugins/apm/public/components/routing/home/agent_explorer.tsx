@@ -20,7 +20,7 @@ export const agentExplorer = {
     ),
     params: t.type({
       query: t.partial({
-        agentName: t.string,
+        agentLanguage: t.string,
         serviceName: t.string,
       }),
     }),

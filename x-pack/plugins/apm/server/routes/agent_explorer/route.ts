@@ -4,7 +4,7 @@ import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from "../apm_routes/create_apm_server_route";
 import { environmentRt, kueryRt, probabilityRt, rangeRt } from '../default_api_types';
 import { getAgents } from './get_agents';
-import { getAgentsInstances } from './get_agents_instances';
+import { getAgentsFilters } from './get_agents_filters';
 
 const agentExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/agent_explorer',
@@ -17,7 +17,7 @@ const agentExplorerRoute = createApmServerRoute({
       probabilityRt,
       t.partial({
         serviceName: t.string,
-        agentName: t.string,
+        agentLanguage: t.string,
       }),
     ]),
   }),
@@ -46,7 +46,7 @@ const agentExplorerRoute = createApmServerRoute({
       end,
       probability,
       serviceName,
-      agentName,
+      agentLanguage,
     } = params.query;
 
     const [setup, randomSampler] = await Promise.all([
@@ -57,7 +57,7 @@ const agentExplorerRoute = createApmServerRoute({
     return getAgents({
       environment,
       serviceName,
-      agentName,
+      agentLanguage,
       kuery,
       setup,
       start,
@@ -69,25 +69,19 @@ const agentExplorerRoute = createApmServerRoute({
   },
 });
 
-const agentExplorerDetailsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/agent_explorer/{serviceName}/agent_instance_details',
+const agentExplorerFiltersRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/agent_explorer/filters',
   options: { tags: ['access:apm'] },
   params: t.type({
-    path: t.type({ serviceName: t.string }),
     query: t.intersection([
-      kueryRt,
+      environmentRt,
       rangeRt,
       probabilityRt,
     ]),
   }),
   async handler(resources): Promise<{
-    items: Array<{
-      agentId: string;
-      environments: string[];
-      agentName: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
-      agentVersion: string;
-      lastReport: string;
-    }>;
+    services: string[];
+    languages: string[];
   }> {
     const {
       params,
@@ -96,24 +90,19 @@ const agentExplorerDetailsRoute = createApmServerRoute({
     } = resources;
 
     const {
-      kuery,
+      environment,
       start,
       end,
       probability,
     } = params.query;
-
-    const {
-      serviceName,
-    } = params.path;
 
     const [setup, randomSampler] = await Promise.all([
       setupRequest(resources),
       getRandomSampler({ security, request, probability }),
     ]);
 
-    return getAgentsInstances({
-      serviceName,
-      kuery,
+    return getAgentsFilters({
+      environment,
       setup,
       start,
       end,
@@ -124,5 +113,5 @@ const agentExplorerDetailsRoute = createApmServerRoute({
 
 export const agentExplorerRouteRepository = {
   ...agentExplorerRoute,
-  ...agentExplorerDetailsRoute,
+  ...agentExplorerFiltersRoute,
 };

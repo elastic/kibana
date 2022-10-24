@@ -16,11 +16,9 @@ const sorts: Record<Partial<AgentExplorerFieldName>, SortValueGetter> = {
   [AgentExplorerFieldName.Environments]: (item) =>
     item.environments?.join(', ').toLowerCase() ?? '',
   [AgentExplorerFieldName.AgentName]: (item) => (item.agentName ?? '').toLowerCase(),
-  [AgentExplorerFieldName.AgentVersion]: (item) => 
-    item.agentVersions?.join(', ').toLowerCase() ?? '',
-  [AgentExplorerFieldName.LatestVersion]: (item) => item.latestVersion,
-  [AgentExplorerFieldName.DocsLink]: (item) => '',
-  [AgentExplorerFieldName.Instances]: (item) => item.instances,
+  [AgentExplorerFieldName.AgentVersion]: (item) => item.agentVersion?.join(', ').toLowerCase() ?? '',
+  [AgentExplorerFieldName.AgentLastVersion]: (item) => '',
+  [AgentExplorerFieldName.AgentRepoUrl]: (item) => '',
 };
 
 export function orderAgentItems({

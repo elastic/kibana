@@ -17,7 +17,7 @@ const MAX_NUMBER_OF_SERVICES = 500;
 export async function getAgentItems({
   environment,
   serviceName,
-  agentName,
+  agentLanguage,
   kuery,
   setup,
   start,
@@ -26,7 +26,7 @@ export async function getAgentItems({
 }: {
   environment: string;
   serviceName?: string;
-  agentName?: string;
+  agentLanguage?: string;
   kuery: string;
   setup: AgenItemsSetup;
   start: number;
@@ -37,7 +37,7 @@ export async function getAgentItems({
     const params = {
       environment,
       serviceName,
-      agentName,
+      agentLanguage,
       kuery,
       setup,
       maxNumServices: MAX_NUMBER_OF_SERVICES,

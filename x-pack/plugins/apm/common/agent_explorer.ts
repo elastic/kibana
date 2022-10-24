@@ -16,13 +16,6 @@ export interface AgentExplorerListItem {
   agentRepoUrl?: string;
 }
 
-export interface AgentExplorerDetailsListItem {
-  instanceName: string;
-  environments?: string[];
-  version: string;
-  lastReport: Date;
-}
-
 export enum AgentExplorerFieldName {
   ServiceName = 'serviceName',
   Environments = 'environments',
@@ -30,11 +23,4 @@ export enum AgentExplorerFieldName {
   AgentVersion = 'agentVersion',
   AgentLastVersion = 'agentLastVersion',
   AgentRepoUrl = 'agentRepoUrl',
-}
-
-export enum AgentExplorerDetailsFieldName {
-  InstanceName = 'instanceName',
-  Environments = 'environments',
-  Version = 'version',
-  lastReport = 'lastReport',
 }

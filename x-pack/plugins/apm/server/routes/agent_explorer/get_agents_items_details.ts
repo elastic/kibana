@@ -24,7 +24,7 @@ export function serviceNameQuery(
   return [{ term: { [SERVICE_NAME]: serviceName } }];
 }
 
-export function agentNameQuery(
+export function agentLanguageQuery(
   agentName?: string
 ): QueryDslQueryContainer[] {
   if (!agentName) {
@@ -37,7 +37,7 @@ export function agentNameQuery(
 interface AggregationParams {
   environment: string;
   serviceName?: string;
-  agentName?: string;
+  agentLanguage?: string;
   kuery: string;
   setup: AgenItemsSetup;
   maxNumServices: number;
@@ -48,7 +48,7 @@ interface AggregationParams {
 
 export async function getAgentsDetails({
   environment,
-  agentName,
+  agentLanguage,
   serviceName,
   kuery,
   setup,
@@ -90,7 +90,7 @@ export async function getAgentsDetails({
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
               ...serviceNameQuery(serviceName),
-              ...agentNameQuery(agentName),
+              ...agentLanguageQuery(agentLanguage),
             ],
           },
         },

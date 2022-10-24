@@ -10,7 +10,7 @@ import { getAgentRepositoryUrl } from "./get_agent_url_repository";
 export async function getAgents({
   environment,
   serviceName,
-  agentName,
+  agentLanguage,
   kuery,
   setup,
   start,
@@ -21,7 +21,7 @@ export async function getAgents({
 }: {
   environment: string;
   serviceName?: string;
-  agentName?: string;
+  agentLanguage?: string;
   kuery: string;
   setup: Setup;
   start: number;
@@ -36,7 +36,7 @@ export async function getAgents({
       getAgentItems({
         environment,
         serviceName,
-        agentName,
+        agentLanguage,
         kuery,
         setup,
         start,

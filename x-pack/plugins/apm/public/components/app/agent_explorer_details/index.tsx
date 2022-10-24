@@ -7,9 +7,7 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { AgentExplorerFieldName } from '@kbn/apm-plugin/common/agent_explorer';
-import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
 import { i18n } from '@kbn/i18n';
-import { uniqBy } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import uuid from 'uuid';
@@ -25,12 +23,12 @@ import { FilterSelect } from './filter_select';
 
 const INITIAL_PAGE_SIZE = 25;
 
-function useServicesMainStatisticsFetcher() {
+function useAgentExplorerFetcher() {
 	const {
 		query: {
 			environment,
 			serviceName,
-			agentName,
+			agentLanguage,
 			kuery,
 			page = 0,
 			pageSize = INITIAL_PAGE_SIZE,
@@ -41,7 +39,26 @@ function useServicesMainStatisticsFetcher() {
 
 	const { start, end } = useTimeRange({ rangeFrom: 'now-24h', rangeTo: 'now' });
 
-	return useProgressiveFetcher(
+	const filters = useProgressiveFetcher(
+		(callApmApi) => {
+			return callApmApi('GET /internal/apm/agent_explorer/filters', {
+				params: {
+					query: {
+						environment,
+						start,
+						end,
+					},
+				},
+			});
+		},
+		[
+			environment,
+			start,
+			end,
+		]
+	);
+
+	const agents = useProgressiveFetcher(
 		(callApmApi) => {
 			if (start && end) {
 				return callApmApi('GET /internal/apm/agent_explorer', {
@@ -49,7 +66,7 @@ function useServicesMainStatisticsFetcher() {
 						query: {
 							environment,
 							serviceName,
-							agentName,
+							agentLanguage,
 							kuery,
 							start,
 							end,
@@ -66,7 +83,7 @@ function useServicesMainStatisticsFetcher() {
 		[
 			environment,
 			serviceName,
-			agentName,
+			agentLanguage,
 			kuery,
 			start,
 			end,
@@ -77,47 +94,43 @@ function useServicesMainStatisticsFetcher() {
 			sortDirection,
 		]
 	);
+
+	return {
+		agents,
+		filters,
+	}
 }
 
 export function AgentExplorerDetails() {
 	const history = useHistory();
 
 	const {
-		query: { serviceName, agentName },
+		query: { serviceName, agentLanguage },
 	} = useApmParams('/agent-explorer');
 
-
-	const agents =
-    useServicesMainStatisticsFetcher();
+	const { agents, filters } =
+		useAgentExplorerFetcher();
 
 	const isLoading = agents.status === FETCH_STATUS.LOADING;
+	const isFilterLoading = filters.status === FETCH_STATUS.LOADING;
 
-	const serviceNameOptions = [];
-	/* uniqBy(
-		agentsItems.map((service) => ({ label: service.serviceName, value: service.serviceName })),
-		'value',
-	); */
-
-	const agentLanguageOptions = [];
-	/* uniqBy(
-		agentsItems.map((service) => ({ label: service.language ?? '', value: service.language ?? '' })),
-		'value',
-	).filter((option) => option.label !== ''); */
+	const serviceNameOptions = (filters.data?.services ?? []).map((service) => ({ label: service, value: service }));
+	const agentLanguageOptions = (filters.data?.languages ?? []).map((language) => ({ label: language, value: language }));
 
 	const isFailure = agents.status === FETCH_STATUS.FAILURE;
 
 	const noItemsMessage = (
-    <EuiEmptyPrompt
-      title={
-        <div>
-          {i18n.translate('xpack.apm.agentExplorer.notFoundLabel', {
-            defaultMessage: 'No Agents found',
-          })}
-        </div>
-      }
-      titleSize="s"
-    />
-  );
+		<EuiEmptyPrompt
+			title={
+				<div>
+					{i18n.translate('xpack.apm.agentExplorer.notFoundLabel', {
+						defaultMessage: 'No Agents found',
+					})}
+				</div>
+			}
+			titleSize="s"
+		/>
+	);
 
 	return (
 		<EuiFlexGroup direction="column" gutterSize="s">
@@ -142,7 +155,7 @@ export function AgentExplorerDetails() {
 								defaultMessage: 'All',
 							}
 						)}
-						isLoading={isLoading}
+						isLoading={isFilterLoading}
 						onChange={(value) => {
 							urlHelpers.push(history, {
 								query: { serviceName: value ?? '' },
@@ -160,17 +173,17 @@ export function AgentExplorerDetails() {
 							}
 						)}
 						options={agentLanguageOptions}
-						value={agentName}
+						value={agentLanguage}
 						placeholder={i18n.translate(
 							'xpack.apm.agentExplorer.agentLanguageSelect.placeholder',
 							{
 								defaultMessage: 'All',
 							}
 						)}
-						isLoading={isLoading}
+						isLoading={isFilterLoading}
 						onChange={(value) => {
 							urlHelpers.push(history, {
-								query: { agentName: value ?? '' },
+								query: { agentLanguage: value ?? '' },
 							});
 						}}
 						dataTestSubj='agentExplorerAgentLanguageSelect'
