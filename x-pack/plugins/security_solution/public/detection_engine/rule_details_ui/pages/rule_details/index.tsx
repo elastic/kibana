@@ -693,7 +693,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             !isExistingRule ||
                             !canEditRuleWithActions(rule, hasActionsPrivileges) ||
                             !hasUserCRUDPermission(canUserCRUD) ||
-                            (isMlRule(rule?.type) && !hasMlPermissions && !rule?.enabled)
+                            (isMlRule(rule?.type) && !hasMlPermissions)
                           }
                           enabled={isExistingRule && (rule?.enabled ?? false)}
                           onChange={handleOnChangeEnabledRule}
