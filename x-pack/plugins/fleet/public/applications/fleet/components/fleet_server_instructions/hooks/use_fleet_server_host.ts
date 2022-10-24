@@ -8,22 +8,49 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { intersection } from 'lodash';
 
-import { sendPostFleetServerHost, useGetFleetServerHosts } from '../../../hooks';
+import {
+  sendPostFleetServerHost,
+  useGetFleetServerHosts,
+  useComboInput,
+  useInput,
+} from '../../../hooks';
 import type { FleetServerHost } from '../../../types';
+
+import {
+  validateName,
+  validateFleetServerHosts,
+} from '../../../sections/settings/components/fleet_server_hosts_flyout/use_fleet_server_host_form';
 
 export interface FleetServerHostForm {
   saveFleetServerHost: (host: FleetServerHost) => Promise<void>;
   fleetServerHost?: FleetServerHost;
-  fleetServerHostSettings: string[];
   isFleetServerHostSubmitted: boolean;
   setFleetServerHost: React.Dispatch<React.SetStateAction<FleetServerHost | undefined>>;
+  validate: () => boolean;
   error?: string;
+  inputs: {
+    hostUrlsInput: ReturnType<typeof useComboInput>;
+    nameInput: ReturnType<typeof useInput>;
+  };
 }
 
 export const useFleetServerHost = (): FleetServerHostForm => {
   const [fleetServerHost, setFleetServerHost] = useState<FleetServerHost>();
   const [isFleetServerHostSubmitted, setIsFleetServerHostSubmitted] = useState<boolean>(false);
-  const [error, setError] = useState<string>();
+
+  const isPreconfigured = fleetServerHost?.is_preconfigured ?? false;
+  const nameInput = useInput(fleetServerHost?.name ?? '', validateName, isPreconfigured);
+
+  const hostUrlsInput = useComboInput(
+    'hostUrls',
+    fleetServerHost?.host_urls || [],
+    validateFleetServerHosts,
+    isPreconfigured
+  );
+  const validate = useCallback(
+    () => hostUrlsInput.validate() && nameInput.validate(),
+    [hostUrlsInput, nameInput]
+  );
 
   const { data } = useGetFleetServerHosts();
 
@@ -43,11 +70,6 @@ export const useFleetServerHost = (): FleetServerHostForm => {
     async (newFleetServerHost: FleetServerHost) => {
       setIsFleetServerHostSubmitted(false);
       setFleetServerHost(newFleetServerHost);
-
-      // if (!isValid) {
-      //   console.log('not valid, return');
-      //   return;
-      // }
 
       const fleetServerHostExists = data?.items.reduce((acc, curr) => {
         const hostsIntersection = intersection(curr.host_urls, newFleetServerHost?.host_urls);
@@ -77,9 +99,12 @@ export const useFleetServerHost = (): FleetServerHostForm => {
   return {
     saveFleetServerHost,
     fleetServerHost,
-    fleetServerHostSettings: data?.items[0]?.host_urls ?? [],
     isFleetServerHostSubmitted,
     setFleetServerHost,
-    error,
+    validate,
+    inputs: {
+      hostUrlsInput,
+      nameInput,
+    },
   };
 };

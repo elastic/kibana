@@ -8,22 +8,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import {
-  sendCreateAgentPolicy,
-  sendGetOneAgentPolicy,
-  useStartServices,
-  useComboInput,
-  useInput,
-} from '../../../hooks';
+import type { useComboInput, useInput } from '../../../hooks';
+import { sendCreateAgentPolicy, sendGetOneAgentPolicy, useStartServices } from '../../../hooks';
 
 import type { NewAgentPolicy } from '../../../types';
 
 import type { FleetServerHost } from '../../../types';
-
-import {
-  validateName,
-  validateFleetServerHosts,
-} from '../../../sections/settings/components/fleet_server_hosts_flyout/use_fleet_server_host_form';
 
 import { useSelectFleetServerPolicy } from './use_select_fleet_server_policy';
 import { useServiceToken } from './use_service_token';
@@ -49,7 +39,10 @@ export interface QuickStartCreateForm {
   isFleetServerHostSubmitted: boolean;
   fleetServerPolicyId?: string;
   serviceToken?: string;
-  inputs: any;
+  inputs: {
+    hostUrlsInput: ReturnType<typeof useComboInput>;
+    nameInput: ReturnType<typeof useInput>;
+  };
 }
 
 /**
@@ -68,6 +61,8 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
     saveFleetServerHost,
     error: fleetServerError,
     setFleetServerHost,
+    validate,
+    inputs,
   } = useFleetServerHost();
 
   // When a validation error is surfaced from the Fleet Server host form, we want to treat it
@@ -81,28 +76,14 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
   const { fleetServerPolicyId, setFleetServerPolicyId } = useSelectFleetServerPolicy();
   const { serviceToken, generateServiceToken } = useServiceToken();
 
-  const isPreconfigured = fleetServerHost?.is_preconfigured ?? false;
-  const nameInput = useInput(fleetServerHost?.name ?? '', validateName, isPreconfigured);
-
-  const hostUrlsInput = useComboInput(
-    'hostUrls',
-    fleetServerHost?.host_urls || [],
-    validateFleetServerHosts,
-    isPreconfigured
-  );
-  const validate = useCallback(
-    () => hostUrlsInput.validate() && nameInput.validate(),
-    [hostUrlsInput, nameInput]
-  );
-
   const submit = useCallback(async () => {
     try {
       if (validate()) {
         setStatus('loading');
 
         const newFleetServerHost = {
-          name: nameInput.value,
-          host_urls: hostUrlsInput.value,
+          name: inputs.nameInput.value,
+          host_urls: inputs.hostUrlsInput.value,
           is_default: true,
           id: 'fleet-server-host',
           is_preconfigured: false,
@@ -141,14 +122,14 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
       setError(err.message);
     }
   }, [
-    nameInput.value,
-    hostUrlsInput.value,
+    validate,
+    inputs.nameInput.value,
+    inputs.hostUrlsInput.value,
     setFleetServerHost,
     saveFleetServerHost,
     generateServiceToken,
     setFleetServerPolicyId,
     notifications.toasts,
-    validate,
   ]);
 
   return {
@@ -159,9 +140,6 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
     fleetServerHost,
     isFleetServerHostSubmitted,
     serviceToken,
-    inputs: {
-      hostUrlsInput,
-      nameInput,
-    },
+    inputs,
   };
 };

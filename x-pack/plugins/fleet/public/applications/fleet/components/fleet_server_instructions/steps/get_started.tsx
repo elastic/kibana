@@ -94,36 +94,18 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
       <EuiSpacer size="m" />
 
       <EuiForm onSubmit={submit}>
-        {/* <EuiFlexGroup>
-          <EuiFlexItem
-            css={css`
-              max-width: 100%;
-            `}
-          >
-            <FleetServerHostComboBox
-              fleetServerHost={fleetServerHost}
-              fleetServerHostSettings={fleetServerHostSettings}
-              isDisabled={status === 'loading'}
-              isInvalid={!!error}
-              onFleetServerHostChange={onFleetServerHostChange}
-            />
-
-            {status === 'error' && <EuiFormErrorText>{error}</EuiFormErrorText>}
-          </EuiFlexItem>
-        </EuiFlexGroup> */}
         <EuiFormRow
           fullWidth
           label={
             <FormattedMessage
               id="xpack.fleet.settings.fleetServerFlyout.nameInputLabel"
-              defaultMessage="Name (optional)"
+              defaultMessage="Name"
             />
           }
           {...inputs.nameInput.formRowProps}
         >
           <EuiFieldText
             data-test-subj="fleetServerHostsFlyout.nameInput"
-            isInvalid={!!error}
             fullWidth
             placeholder={i18n.translate(
               'xpack.fleet.settings.fleetServerFlyout.nameInputPlaceholder',
