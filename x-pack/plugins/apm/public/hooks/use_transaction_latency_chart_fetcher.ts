@@ -32,17 +32,6 @@ export function useTransactionLatencyChartsFetcher({
     query: { rangeFrom, rangeTo, offset, comparisonEnabled },
   } = useApmParams('/services/{serviceName}');
 
-  // console.log('environment', environment);
-  // console.log('kuery', kuery);
-  // console.log('transactionType', transactionType);
-  // console.log('serviceName', serviceName);
-  // console.log('transactionName', transactionName);
-  // console.log('latencyAggregationType', latencyAggregationType);
-  // console.log('rangeFrom', rangeFrom);
-  // console.log('rangeTo', rangeTo);
-  // console.log('offset', offset);
-  // console.log('comparisonEnabled', comparisonEnabled);
-
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { data, error, status } = useFetcher(
@@ -98,97 +87,6 @@ export function useTransactionLatencyChartsFetcher({
         latencyChart: data,
         latencyAggregationType,
         previousPeriodLabel,
-      }),
-    // It should only update when the data has changed
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data]
-  );
-
-  return {
-    latencyChartsData: memoizedData,
-    latencyChartsStatus: status,
-    latencyChartsError: error,
-  };
-}
-
-export function useTransactionLatencyChartsFetcherWithoutAPMContext({
-  kuery,
-  environment,
-  rangeFrom,
-  rangeTo,
-  serviceName,
-  transactionType,
-  latencyAggregationType,
-  transactionName,
-  offset,
-  comparisonEnabled,
-}: {
-  kuery: string;
-  environment: string;
-  rangeFrom: string;
-  rangeTo: string;
-  serviceName: string;
-  transactionType: string;
-  latencyAggregationType: LatencyAggregationType;
-  transactionName?: string;
-  offset: string;
-  comparisonEnabled: boolean;
-}) {
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { data, error, status } = useFetcher(
-    (callApmApi) => {
-      if (
-        serviceName &&
-        start &&
-        end &&
-        transactionType &&
-        latencyAggregationType
-      ) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/transactions/charts/latency',
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-                transactionType,
-                transactionName,
-                latencyAggregationType,
-                offset:
-                  comparisonEnabled && isTimeComparison(offset)
-                    ? offset
-                    : undefined,
-              },
-            },
-          }
-        );
-      }
-    },
-    [
-      serviceName,
-      start,
-      end,
-      transactionType,
-      latencyAggregationType,
-      environment,
-      kuery,
-      transactionName,
-      comparisonEnabled,
-      offset,
-    ]
-  );
-
-  // const previousPeriodLabel = usePreviousPeriodLabel();
-  const memoizedData = useMemo(
-    () =>
-      getLatencyChartSelector({
-        latencyChart: data,
-        latencyAggregationType,
-        previousPeriodLabel: '',
       }),
     // It should only update when the data has changed
     // eslint-disable-next-line react-hooks/exhaustive-deps
