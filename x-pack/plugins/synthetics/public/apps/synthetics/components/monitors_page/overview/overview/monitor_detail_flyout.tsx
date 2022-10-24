@@ -103,7 +103,7 @@ function DetailFlyoutDurationChart({
         attributes={[
           {
             seriesType: 'area',
-            color: theme.eui.euiColorVis1,
+            color: theme?.eui?.euiColorVis1,
             time: {
               from: currentDurationChartFrom ?? DEFAULT_DURATION_CHART_FROM,
               to: currentDurationChartTo ?? DEFAULT_CURRENT_DURATION_CHART_TO,
@@ -125,7 +125,7 @@ function DetailFlyoutDurationChart({
           },
           {
             seriesType: 'line',
-            color: theme.eui.euiColorVis7,
+            color: theme?.eui?.euiColorVis7,
             time: {
               from: previousDurationChartFrom ?? DEFAULT_PREVIOUS_DURATION_CHART_FROM,
               to: previousDurationChartTo ?? DEFAULT_PREVIOUS_DURATION_CHART_TO,
