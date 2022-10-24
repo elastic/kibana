@@ -158,8 +158,10 @@ export async function getServerlessSummary({
       awsLambdaPriceFactor,
       awsLambdaRequestCostPerMillion,
       architecture: (
-        response.aggregations?.sample?.hits?.hits?.[0]?._source as MetricRaw
-      ).host?.architecture as AwsLambdaArchitecture,
+        response.aggregations?.sample?.hits?.hits?.[0]?._source as
+          | MetricRaw
+          | undefined
+      )?.host?.architecture as AwsLambdaArchitecture,
       transactionThroughput,
       billedDuration: response.aggregations?.faasBilledDurationAvg.value,
       totalMemory: response.aggregations?.avgTotalMemory.value,
