@@ -24,16 +24,13 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./create_rules'));
     loadTestFile(require.resolve('./preview_rules'));
     loadTestFile(require.resolve('./create_rules_bulk'));
-    loadTestFile(require.resolve('./create_ml'));
     loadTestFile(require.resolve('./create_new_terms'));
-    loadTestFile(require.resolve('./create_threat_matching'));
     loadTestFile(require.resolve('./create_rule_exceptions'));
     loadTestFile(require.resolve('./delete_rules'));
     loadTestFile(require.resolve('./delete_rules_bulk'));
     loadTestFile(require.resolve('./export_rules'));
     loadTestFile(require.resolve('./find_rules'));
     loadTestFile(require.resolve('./find_rule_exception_references'));
-    loadTestFile(require.resolve('./generating_signals'));
     loadTestFile(require.resolve('./get_prepackaged_rules_status'));
   });
 };
