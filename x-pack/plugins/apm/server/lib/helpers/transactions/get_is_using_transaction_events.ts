@@ -7,7 +7,7 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { getSearchAggregatedTransactions } from '.';
+import { getSearchTransactionsEvents } from '.';
 import { Setup } from '../setup_request';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
@@ -23,7 +23,7 @@ export async function getIsUsingTransactionEvents({
   start?: number;
   end?: number;
 }): Promise<boolean> {
-  const searchesAggregatedTransactions = await getSearchAggregatedTransactions({
+  const searchesAggregatedTransactions = await getSearchTransactionsEvents({
     config,
     start,
     end,

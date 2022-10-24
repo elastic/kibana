@@ -29,6 +29,7 @@ export type FieldGroups = Record<
     isAffectedByTimeFilter: boolean;
     hideDetails?: boolean;
     defaultNoFieldsMessage?: string;
+    hideIfEmpty?: boolean;
   }
 >;
 
@@ -161,55 +162,58 @@ export const FieldList = React.memo(function FieldList({
           )}
         </ul>
         <EuiSpacer size="s" />
-        {fieldGroupsToShow.map(([key, fieldGroup], index) => (
-          <Fragment key={key}>
-            <FieldsAccordion
-              dropOntoWorkspace={dropOntoWorkspace}
-              hasSuggestionForField={hasSuggestionForField}
-              initialIsOpen={Boolean(accordionState[key])}
-              key={key}
-              id={`lnsIndexPattern${key}`}
-              label={fieldGroup.title}
-              helpTooltip={fieldGroup.helpText}
-              exists={exists}
-              editField={editField}
-              removeField={removeField}
-              hideDetails={fieldGroup.hideDetails}
-              hasLoaded={!!hasSyncedExistingFields}
-              fieldsCount={fieldGroup.fields.length}
-              isFiltered={fieldGroup.fieldCount !== fieldGroup.fields.length}
-              paginatedFields={paginatedFields[key]}
-              fieldProps={fieldProps}
-              groupIndex={index + 1}
-              onToggle={(open) => {
-                setAccordionState((s) => ({
-                  ...s,
-                  [key]: open,
-                }));
-                const displayedFieldLength = getDisplayedFieldsLength(fieldGroups, {
-                  ...accordionState,
-                  [key]: open,
-                });
-                setPageSize(
-                  Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength))
-                );
-              }}
-              showExistenceFetchError={existenceFetchFailed}
-              showExistenceFetchTimeout={existenceFetchTimeout}
-              renderCallout={
-                <NoFieldsCallout
-                  isAffectedByGlobalFilter={fieldGroup.isAffectedByGlobalFilter}
-                  isAffectedByTimerange={fieldGroup.isAffectedByTimeFilter}
-                  isAffectedByFieldFilter={fieldGroup.fieldCount !== fieldGroup.fields.length}
-                  existFieldsInIndex={!!existFieldsInIndex}
-                  defaultNoFieldsMessage={fieldGroup.defaultNoFieldsMessage}
-                />
-              }
-              uiActions={uiActions}
-            />
-            <EuiSpacer size="m" />
-          </Fragment>
-        ))}
+        {fieldGroupsToShow.map(([key, fieldGroup], index) => {
+          if (Boolean(fieldGroup.hideIfEmpty) && !fieldGroup.fields.length) return null;
+          return (
+            <Fragment key={key}>
+              <FieldsAccordion
+                dropOntoWorkspace={dropOntoWorkspace}
+                hasSuggestionForField={hasSuggestionForField}
+                initialIsOpen={Boolean(accordionState[key])}
+                key={key}
+                id={`lnsIndexPattern${key}`}
+                label={fieldGroup.title}
+                helpTooltip={fieldGroup.helpText}
+                exists={exists}
+                editField={editField}
+                removeField={removeField}
+                hideDetails={fieldGroup.hideDetails}
+                hasLoaded={!!hasSyncedExistingFields}
+                fieldsCount={fieldGroup.fields.length}
+                isFiltered={fieldGroup.fieldCount !== fieldGroup.fields.length}
+                paginatedFields={paginatedFields[key]}
+                fieldProps={fieldProps}
+                groupIndex={index + 1}
+                onToggle={(open) => {
+                  setAccordionState((s) => ({
+                    ...s,
+                    [key]: open,
+                  }));
+                  const displayedFieldLength = getDisplayedFieldsLength(fieldGroups, {
+                    ...accordionState,
+                    [key]: open,
+                  });
+                  setPageSize(
+                    Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength))
+                  );
+                }}
+                showExistenceFetchError={existenceFetchFailed}
+                showExistenceFetchTimeout={existenceFetchTimeout}
+                renderCallout={
+                  <NoFieldsCallout
+                    isAffectedByGlobalFilter={fieldGroup.isAffectedByGlobalFilter}
+                    isAffectedByTimerange={fieldGroup.isAffectedByTimeFilter}
+                    isAffectedByFieldFilter={fieldGroup.fieldCount !== fieldGroup.fields.length}
+                    existFieldsInIndex={!!existFieldsInIndex}
+                    defaultNoFieldsMessage={fieldGroup.defaultNoFieldsMessage}
+                  />
+                }
+                uiActions={uiActions}
+              />
+              <EuiSpacer size="m" />
+            </Fragment>
+          );
+        })}
       </div>
     </div>
   );

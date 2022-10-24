@@ -101,6 +101,8 @@ Object {
       ],
       "type": "datatable",
     },
+    "syncCursor": true,
+    "syncTooltips": false,
   },
 }
 `;

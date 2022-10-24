@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
+import { BUCKET_TYPES, IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/common';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import {
   AggBasedColumn,
@@ -27,6 +27,7 @@ import {
   getBucketColumns,
   getColumnIds,
   getColumnsWithoutReferenced,
+  getCustomBucketColumns,
   getMetricsWithoutDuplicates,
   isReferenced,
   isValidVis,
@@ -104,6 +105,7 @@ describe('getColumnsWithoutReferenced', () => {
 describe('getBucketCollapseFn', () => {
   const metric1: SchemaConfig<METRIC_TYPES.AVG> = {
     accessor: 0,
+    aggId: '1',
     label: '',
     format: {
       id: undefined,
@@ -115,21 +117,25 @@ describe('getBucketCollapseFn', () => {
 
   const metric2: SchemaConfig<METRIC_TYPES.AVG_BUCKET> = {
     ...metric1,
+    aggId: '2',
     aggType: METRIC_TYPES.AVG_BUCKET,
   };
 
   const metric3: SchemaConfig<METRIC_TYPES.MAX_BUCKET> = {
     ...metric1,
+    aggId: '3',
     aggType: METRIC_TYPES.MAX_BUCKET,
   };
 
   const metric4: SchemaConfig<METRIC_TYPES.MIN_BUCKET> = {
     ...metric1,
+    aggId: '4',
     aggType: METRIC_TYPES.MIN_BUCKET,
   };
 
   const metric5: SchemaConfig<METRIC_TYPES.SUM_BUCKET> = {
     ...metric1,
+    aggId: '5',
     aggType: METRIC_TYPES.SUM_BUCKET,
   };
 
@@ -151,18 +157,54 @@ describe('getBucketCollapseFn', () => {
   test.each<
     [
       string,
-      [Array<SchemaConfig<SupportedAggregation>>, AggBasedColumn[]],
-      Record<string, string | undefined>
+      [
+        Array<SchemaConfig<SupportedAggregation>>,
+        AggBasedColumn[],
+        Record<string, string>,
+        AggBasedColumn[]
+      ],
+      Record<string, string[]>
     ]
   >([
-    ['avg', [[metric1, metric2], [customBucketColum]], { [customBucketColum.columnId]: 'avg' }],
-    ['max', [[metric1, metric3], [customBucketColum]], { [customBucketColum.columnId]: 'max' }],
-    ['min', [[metric1, metric4], [customBucketColum]], { [customBucketColum.columnId]: 'min' }],
-    ['sum', [[metric1, metric5], [customBucketColum]], { [customBucketColum.columnId]: 'sum' }],
     [
-      'undefined if no sibling pipeline agg is provided',
-      [[metric1], [customBucketColum]],
-      { [customBucketColum.columnId]: undefined },
+      'avg',
+      [
+        [metric1, metric2],
+        [customBucketColum],
+        { test: 'bucket-1' },
+        [{ columnId: 'test', meta: { aggId: metric2.aggId } } as AggBasedColumn],
+      ],
+      { sum: [], min: [], max: [], avg: [customBucketColum.columnId] },
+    ],
+    [
+      'max',
+      [
+        [metric1, metric3],
+        [customBucketColum],
+        { test: 'bucket-1' },
+        [{ columnId: 'test', meta: { aggId: metric3.aggId } } as AggBasedColumn],
+      ],
+      { sum: [], min: [], max: [customBucketColum.columnId], avg: [] },
+    ],
+    [
+      'min',
+      [
+        [metric1, metric4],
+        [customBucketColum],
+        { test: 'bucket-1' },
+        [{ columnId: 'test', meta: { aggId: metric4.aggId } } as AggBasedColumn],
+      ],
+      { sum: [], min: [customBucketColum.columnId], max: [], avg: [] },
+    ],
+    [
+      'sum',
+      [
+        [metric1, metric5],
+        [customBucketColum],
+        { test: 'bucket-1' },
+        [{ columnId: 'test', meta: { aggId: metric5.aggId } } as AggBasedColumn],
+      ],
+      { sum: [customBucketColum.columnId], min: [], max: [], avg: [] },
     ],
   ])('should return%s', (_, input, expected) => {
     expect(getBucketCollapseFn(...input)).toEqual(expected);
@@ -606,5 +648,78 @@ describe('getColumnIds', () => {
       colId3,
       colId4,
     ]);
+  });
+
+  describe('getCustomBucketColumns', () => {
+    const dataView = stubLogstashDataView;
+    const baseMetric = {
+      accessor: 0,
+      label: '',
+      format: {
+        id: undefined,
+        params: undefined,
+      },
+      params: {},
+    };
+    const metric1: SchemaConfig<METRIC_TYPES.COUNT> = {
+      ...baseMetric,
+      accessor: 2,
+      aggType: METRIC_TYPES.COUNT,
+      aggId: '3',
+    };
+    const metric2: SchemaConfig<METRIC_TYPES.MAX> = {
+      ...baseMetric,
+      accessor: 3,
+      aggType: METRIC_TYPES.MAX,
+      aggId: '4',
+    };
+    const customBucketsWithMetricIds = [
+      {
+        customBucket: {} as IAggConfig,
+        metricIds: ['3', '4'],
+      },
+      {
+        customBucket: {} as IAggConfig,
+        metricIds: ['5'],
+      },
+    ];
+    test('return custom buckets columns and map', () => {
+      mockConvertBucketToColumns.mockReturnValueOnce({
+        columnId: 'col-1',
+        operationType: 'date_histogram',
+      });
+      mockConvertBucketToColumns.mockReturnValueOnce({
+        columnId: 'col-2',
+        operationType: 'terms',
+      });
+      expect(
+        getCustomBucketColumns(
+          customBucketsWithMetricIds,
+          [
+            { columnId: 'col-3', meta: { aggId: '3' } },
+            { columnId: 'col-4', meta: { aggId: '4' } },
+            { columnId: 'col-5', meta: { aggId: '5' } },
+          ] as AggBasedColumn[],
+          dataView,
+          [metric1, metric2]
+        )
+      ).toEqual({
+        customBucketColumns: [
+          {
+            columnId: 'col-1',
+            operationType: 'date_histogram',
+          },
+          {
+            columnId: 'col-2',
+            operationType: 'terms',
+          },
+        ],
+        customBucketsMap: {
+          'col-3': 'col-1',
+          'col-4': 'col-1',
+          'col-5': 'col-2',
+        },
+      });
+    });
   });
 });

@@ -42,7 +42,8 @@ export const RenderCellValue: React.FC<
   rowIndex,
   colIndex,
   setCellProps,
-  timelineId,
+  scopeId,
+  key,
 }) => {
   const value =
     useGetMappedNonEcsValue({
@@ -85,7 +86,8 @@ export const RenderCellValue: React.FC<
           rowIndex={rowIndex}
           colIndex={colIndex}
           setCellProps={setCellProps}
-          timelineId={timelineId}
+          scopeId={scopeId}
+          key={key}
         />
       );
   }

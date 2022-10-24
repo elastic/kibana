@@ -20,7 +20,8 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import type { StepStatus, GuideStepIds } from '../../common/types';
+
+import type { StepStatus } from '@kbn/guided-onboarding';
 import type { StepConfig } from '../types';
 import { getGuidePanelStepStyles } from './guide_panel_step.styles';
 
@@ -29,7 +30,7 @@ interface GuideStepProps {
   stepStatus: StepStatus;
   stepConfig: StepConfig;
   stepNumber: number;
-  navigateToStep: (stepId: GuideStepIds, stepLocation: StepConfig['location']) => void;
+  handleButtonClick: () => void;
 }
 
 export const GuideStep = ({
@@ -37,7 +38,7 @@ export const GuideStep = ({
   stepStatus,
   stepNumber,
   stepConfig,
-  navigateToStep,
+  handleButtonClick,
 }: GuideStepProps) => {
   const { euiTheme } = useEuiTheme();
   const styles = getGuidePanelStepStyles(euiTheme, stepStatus);
@@ -58,6 +59,26 @@ export const GuideStep = ({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+  const isAccordionOpen =
+    stepStatus === 'in_progress' || stepStatus === 'active' || stepStatus === 'ready_to_complete';
+
+  const getStepButtonLabel = (): string => {
+    switch (stepStatus) {
+      case 'active':
+        return i18n.translate('guidedOnboarding.dropdownPanel.startStepButtonLabel', {
+          defaultMessage: 'Start',
+        });
+      case 'in_progress':
+        return i18n.translate('guidedOnboarding.dropdownPanel.continueStepButtonLabel', {
+          defaultMessage: 'Continue',
+        });
+      case 'ready_to_complete':
+        return i18n.translate('guidedOnboarding.dropdownPanel.markDoneStepButtonLabel', {
+          defaultMessage: 'Mark done',
+        });
+    }
+    return '';
+  };
 
   return (
     <div data-test-subj="guidePanelStep">
@@ -68,7 +89,7 @@ export const GuideStep = ({
           id={accordionId}
           buttonContent={stepTitleContent}
           arrowDisplay="right"
-          initialIsOpen={stepStatus === 'in_progress' || stepStatus === 'active'}
+          initialIsOpen={isAccordionOpen}
         >
           <>
             <EuiSpacer size="s" />
@@ -82,21 +103,15 @@ export const GuideStep = ({
             </EuiText>
 
             <EuiSpacer />
-            {(stepStatus === 'in_progress' || stepStatus === 'active') && (
+            {isAccordionOpen && (
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    onClick={() => navigateToStep(stepConfig.id, stepConfig.location)}
+                    onClick={() => handleButtonClick()}
                     fill
-                    data-test-subj="activeStepButtonLabel"
+                    data-test-subj="activeStepButton"
                   >
-                    {stepStatus === 'active'
-                      ? i18n.translate('guidedOnboarding.dropdownPanel.startStepButtonLabel', {
-                          defaultMessage: 'Start',
-                        })
-                      : i18n.translate('guidedOnboarding.dropdownPanel.continueStepButtonLabel', {
-                          defaultMessage: 'Continue',
-                        })}
+                    {getStepButtonLabel()}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>

@@ -6,14 +6,16 @@
  */
 
 import React, { useCallback } from 'react';
+import type {
+  EuiTableActionsColumnType,
+  EuiTableComputedColumnType,
+  EuiTableFieldDataColumnType,
+} from '@elastic/eui';
 import {
   EuiBadgeGroup,
   EuiBadge,
   EuiButton,
   EuiLink,
-  EuiTableActionsColumnType,
-  EuiTableComputedColumnType,
-  EuiTableFieldDataColumnType,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -22,10 +24,12 @@ import {
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
+import { Status } from '@kbn/cases-components';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { Case } from '../../../common/ui/types';
-import { CaseStatuses, ActionConnector, CaseSeverity } from '../../../common/api';
+import type { Case } from '../../../common/ui/types';
+import type { ActionConnector } from '../../../common/api';
+import { CaseStatuses, CaseSeverity } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
@@ -41,10 +45,9 @@ import { severities } from '../severity/config';
 import { UserToolTip } from '../user_profiles/user_tooltip';
 import { useAssignees } from '../../containers/user_profiles/use_assignees';
 import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
-import { CurrentUserProfile } from '../types';
+import type { CurrentUserProfile } from '../types';
 import { SmallUserAvatar } from '../user_profiles/small_user_avatar';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { Status } from '../status';
 
 type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -157,6 +160,7 @@ export const useCasesColumns = ({
         }
         return getEmptyTagValue();
       },
+      width: '20%',
     },
   ];
 
@@ -302,7 +306,7 @@ export const useCasesColumns = ({
           return getEmptyTagValue();
         }
 
-        return <Status type={theCase.status} />;
+        return <Status status={theCase.status} />;
       },
     },
     {

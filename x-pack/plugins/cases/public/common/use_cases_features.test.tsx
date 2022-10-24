@@ -8,10 +8,12 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { CasesContextFeatures } from '../../common/ui';
-import { useCasesFeatures, UseCasesFeatures } from './use_cases_features';
+import type { CasesContextFeatures } from '../../common/ui';
+import type { UseCasesFeatures } from './use_cases_features';
+import { useCasesFeatures } from './use_cases_features';
 import { TestProviders } from './mock/test_providers';
-import { LicenseType, LICENSE_TYPE } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { LICENSE_TYPE } from '@kbn/licensing-plugin/common/types';
 
 describe('useCasesFeatures', () => {
   // isAlertsEnabled, isSyncAlertsEnabled, alerts

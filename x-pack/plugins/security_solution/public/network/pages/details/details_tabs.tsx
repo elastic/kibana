@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Switch } from 'react-router-dom';
 
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { DataViewBase, Filter } from '@kbn/es-query';
 import { Route } from '@kbn/kibana-react-plugin/public';
-import { TimelineId } from '@kbn/timelines-plugin/common';
-import { getNetworkDetailsPageFilter } from '../../../common/components/visualization_actions/utils';
+import { TableId } from '../../../../common/types';
 import { AnomaliesNetworkTable } from '../../../common/components/ml/tables/anomalies_network_table';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { EventsQueryTabBody } from '../../../common/components/events_tab/events_query_tab_body';
@@ -43,20 +42,16 @@ interface NetworkDetailTabsProps {
   setQuery: GlobalTimeArgs['setQuery'];
   indexPattern: DataViewBase;
   flowTarget: FlowTargetSourceDest;
+  networkDetailsFilter: Filter[];
 }
 
 export const NetworkDetailsTabs = React.memo<NetworkDetailTabsProps>(
-  ({ indexPattern, flowTarget, ...rest }) => {
+  ({ flowTarget, indexPattern, networkDetailsFilter, ...rest }) => {
     const type = networkModel.NetworkType.details;
 
     const commonProps = { ...rest, type };
     const flowTabProps = { ...commonProps, indexPattern };
     const commonPropsWithFlowTarget = { ...commonProps, flowTarget };
-
-    const networkDetailsPageFilters: Filter[] = useMemo(
-      () => getNetworkDetailsPageFilter(rest.ip),
-      [rest.ip]
-    );
 
     return (
       <Switch>
@@ -116,9 +111,9 @@ export const NetworkDetailsTabs = React.memo<NetworkDetailTabsProps>(
           path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget/:tabName(${NetworkDetailsRouteType.events})`}
         >
           <EventsQueryTabBody
-            pageFilters={networkDetailsPageFilters}
-            timelineId={TimelineId.networkPageEvents}
+            additionalFilters={networkDetailsFilter}
             {...commonProps}
+            tableId={TableId.networkPageEvents}
           />
         </Route>
       </Switch>

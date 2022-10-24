@@ -28,6 +28,14 @@ export class NotificationsService {
     private readonly mlSavedObjectService: MLSavedObjectService
   ) {}
 
+  private getDefaultCountResponse() {
+    return {
+      error: 0,
+      warning: 0,
+      info: 0,
+    } as NotificationsCountResponse;
+  }
+
   /**
    * Provides entity IDs per type for the current space.
    * @private
@@ -217,7 +225,11 @@ export class NotificationsService {
           },
         });
 
-        const byLevel = responseBody.aggregations!
+        if (!responseBody.aggregations) {
+          return this.getDefaultCountResponse();
+        }
+
+        const byLevel = responseBody.aggregations
           .by_level as estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
 
         return Array.isArray(byLevel.buckets)
@@ -229,17 +241,14 @@ export class NotificationsService {
       })
     );
 
-    return res.reduce(
-      (acc, curr) => {
-        for (const levelKey in curr) {
-          if (curr.hasOwnProperty(levelKey)) {
-            acc[levelKey as MlNotificationMessageLevel] +=
-              curr[levelKey as MlNotificationMessageLevel];
-          }
+    return res.reduce((acc, curr) => {
+      for (const levelKey in curr) {
+        if (curr.hasOwnProperty(levelKey)) {
+          acc[levelKey as MlNotificationMessageLevel] +=
+            curr[levelKey as MlNotificationMessageLevel];
         }
-        return acc;
-      },
-      { error: 0, warning: 0, info: 0 } as NotificationsCountResponse
-    );
+      }
+      return acc;
+    }, this.getDefaultCountResponse());
   }
 }

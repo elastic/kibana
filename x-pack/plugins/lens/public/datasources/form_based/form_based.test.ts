@@ -298,10 +298,26 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
+  describe('#getSelectedFields', () => {
+    it('should return the fields used per layer', async () => {
+      expect(FormBasedDatasource?.getSelectedFields?.(baseState)).toEqual(['op']);
+    });
+
+    it('should return empty array for empty layers', async () => {
+      const state = {
+        ...baseState,
+        layers: {},
+      };
+      expect(FormBasedDatasource?.getSelectedFields?.(state)).toEqual([]);
+    });
+  });
+
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = FormBasedDatasource.initialize();
-      expect(FormBasedDatasource.toExpression(state, 'first', indexPatterns)).toEqual(null);
+      expect(
+        FormBasedDatasource.toExpression(state, 'first', indexPatterns, 'testing-seed')
+      ).toEqual(null);
     });
 
     it('should create a table when there is a formula without aggs', async () => {
@@ -324,7 +340,9 @@ describe('IndexPattern Data Source', () => {
           },
         },
       };
-      expect(FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns)).toEqual({
+      expect(
+        FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns, 'testing-seed')
+      ).toEqual({
         chain: [
           {
             function: 'createTable',
@@ -371,8 +389,9 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      expect(FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns))
-        .toMatchInlineSnapshot(`
+      expect(
+        FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns, 'testing-seed')
+      ).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
             Object {
@@ -473,6 +492,12 @@ describe('IndexPattern Data Source', () => {
                 "partialRows": Array [
                   false,
                 ],
+                "probability": Array [
+                  1,
+                ],
+                "samplerSeed": Array [
+                  1889181588,
+                ],
                 "timeFields": Array [
                   "timestamp",
                 ],
@@ -546,7 +571,12 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        'testing-seed'
+      ) as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
     });
 
@@ -581,7 +611,12 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        'testing-seed'
+      ) as Ast;
       expect((ast.chain[1].arguments.aggs[1] as Ast).chain[0].arguments.timeShift).toEqual(['1d']);
     });
 
@@ -788,7 +823,12 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        'testing-seed'
+      ) as Ast;
       const count = (ast.chain[1].arguments.aggs[1] as Ast).chain[0];
       const sum = (ast.chain[1].arguments.aggs[2] as Ast).chain[0];
       const average = (ast.chain[1].arguments.aggs[3] as Ast).chain[0];
@@ -852,7 +892,12 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        'testing-seed'
+      ) as Ast;
       expect(ast.chain[1].arguments.aggs[0]).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
@@ -976,7 +1021,12 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        'testing-seed'
+      ) as Ast;
       const timeScaleCalls = ast.chain.filter((fn) => fn.function === 'lens_time_scale');
       const formatCalls = ast.chain.filter((fn) => fn.function === 'lens_format_column');
       expect(timeScaleCalls).toHaveLength(1);
@@ -1041,7 +1091,12 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        'testing-seed'
+      ) as Ast;
       const filteredMetricAgg = (ast.chain[1].arguments.aggs[0] as Ast).chain[0].arguments;
       const metricAgg = (filteredMetricAgg.customMetric[0] as Ast).chain[0].arguments;
       const bucketAgg = (filteredMetricAgg.customBucket[0] as Ast).chain[0].arguments;
@@ -1092,7 +1147,12 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        'testing-seed'
+      ) as Ast;
       const formatIndex = ast.chain.findIndex((fn) => fn.function === 'lens_format_column');
       const calculationIndex = ast.chain.findIndex((fn) => fn.function === 'moving_average');
       expect(calculationIndex).toBeLessThan(formatIndex);
@@ -1140,7 +1200,12 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        'testing-seed'
+      ) as Ast;
       expect(ast.chain[1].arguments.metricsAtAllLevels).toEqual([false]);
       expect(JSON.parse(ast.chain[2].arguments.idMap[0] as string)).toEqual({
         'col-0-0': [expect.objectContaining({ id: 'bucket1' })],
@@ -1179,7 +1244,12 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        'testing-seed'
+      ) as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp']);
       expect(ast.chain[1].arguments.timeFields).not.toContain('timefield');
     });
@@ -1236,7 +1306,7 @@ describe('IndexPattern Data Source', () => {
 
         const optimizeMock = jest.spyOn(operationDefinitionMap.percentile, 'optimizeEsAggs');
 
-        FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns);
+        FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns, 'testing-seed');
 
         expect(operationDefinitionMap.percentile.optimizeEsAggs).toHaveBeenCalledTimes(1);
 
@@ -1304,7 +1374,12 @@ describe('IndexPattern Data Source', () => {
             return { aggs: aggs.reverse(), esAggsIdMap };
           });
 
-        const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+        const ast = FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          'testing-seed'
+        ) as Ast;
 
         expect(operationDefinitionMap.percentile.optimizeEsAggs).toHaveBeenCalledTimes(1);
 
@@ -1368,7 +1443,12 @@ describe('IndexPattern Data Source', () => {
           },
         };
 
-        const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+        const ast = FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          'testing-seed'
+        ) as Ast;
 
         const idMap = JSON.parse(ast.chain[2].arguments.idMap as unknown as string);
 
@@ -1473,7 +1553,12 @@ describe('IndexPattern Data Source', () => {
           },
         };
 
-        const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+        const ast = FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          'testing-seed'
+        ) as Ast;
         // @ts-expect-error we can't isolate just the reference type
         expect(operationDefinitionMap.testReference.toExpression).toHaveBeenCalled();
         expect(ast.chain[3]).toEqual('mock');
@@ -1506,7 +1591,12 @@ describe('IndexPattern Data Source', () => {
           },
         };
 
-        const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+        const ast = FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          'testing-seed'
+        ) as Ast;
 
         expect(JSON.parse(ast.chain[2].arguments.idMap[0] as string)).toEqual({
           'col-0-0': [
@@ -1593,7 +1683,12 @@ describe('IndexPattern Data Source', () => {
           },
         };
 
-        const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+        const ast = FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          'testing-seed'
+        ) as Ast;
         const chainLength = ast.chain.length;
         expect(ast.chain[chainLength - 2].arguments.name).toEqual(['math']);
         expect(ast.chain[chainLength - 1].arguments.id).toEqual(['formula']);
@@ -1617,8 +1712,9 @@ describe('IndexPattern Data Source', () => {
           },
         },
         currentIndexPatternId: '1',
+        sampling: 1,
       };
-      expect(FormBasedDatasource.insertLayer(state, 'newLayer')).toEqual({
+      expect(FormBasedDatasource.insertLayer(state, 'newLayer', ['link-to-id'])).toEqual({
         ...state,
         layers: {
           ...state.layers,
@@ -1626,6 +1722,8 @@ describe('IndexPattern Data Source', () => {
             indexPatternId: '1',
             columnOrder: [],
             columns: {},
+            sampling: 1,
+            linkToLayers: ['link-to-id'],
           },
         },
       });
@@ -1658,6 +1756,29 @@ describe('IndexPattern Data Source', () => {
             columns: {},
           },
         },
+      });
+    });
+
+    it('should remove linked layers', () => {
+      const state = {
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+          second: {
+            indexPatternId: '2',
+            columnOrder: [],
+            columns: {},
+            linkToLayers: ['first'],
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(FormBasedDatasource.removeLayer(state, 'first')).toEqual({
+        ...state,
+        layers: {},
       });
     });
   });
@@ -1853,6 +1974,7 @@ describe('IndexPattern Data Source', () => {
           isBucketed: true,
           isStaticValue: false,
           hasTimeShift: false,
+          hasReducedTimeRange: false,
         } as OperationDescriptor);
       });
 
@@ -2708,6 +2830,43 @@ describe('IndexPattern Data Source', () => {
         expect(publicAPI.getMaxPossibleNumValues('non-existant')).toEqual(null);
       });
     });
+
+    test('hasDefaultTimeField', () => {
+      const indexPatternWithDefaultTimeField = {
+        id: '1',
+        title: 'my-fake-index-pattern',
+        timeFieldName: 'timestamp',
+        hasRestrictions: false,
+        fields: fieldsOne,
+        getFieldByName: getFieldByNameFactory(fieldsOne),
+        spec: {},
+        isPersisted: true,
+      };
+
+      const indexPatternWithoutDefaultTimeField = {
+        ...indexPatternWithDefaultTimeField,
+        timeFieldName: '',
+      };
+
+      expect(
+        FormBasedDatasource.getPublicAPI({
+          state: baseState,
+          layerId: 'first',
+          indexPatterns: {
+            1: indexPatternWithDefaultTimeField,
+          },
+        }).hasDefaultTimeField()
+      ).toBe(true);
+      expect(
+        FormBasedDatasource.getPublicAPI({
+          state: baseState,
+          layerId: 'first',
+          indexPatterns: {
+            1: indexPatternWithoutDefaultTimeField,
+          },
+        }).hasDefaultTimeField()
+      ).toBe(false);
+    });
   });
 
   describe('#getErrorMessages', () => {
@@ -3204,6 +3363,7 @@ describe('IndexPattern Data Source', () => {
         FormBasedDatasource.initializeDimension!(state, 'first', indexPatterns, {
           columnId: 'newStatic',
           groupId: 'a',
+          visualizationGroups: [],
         })
       ).toBe(state);
     });
@@ -3232,6 +3392,7 @@ describe('IndexPattern Data Source', () => {
           columnId: 'newStatic',
           groupId: 'a',
           staticValue: 0, // use a falsy value to check also this corner case
+          visualizationGroups: [],
         })
       ).toEqual({
         ...state,
@@ -3256,6 +3417,272 @@ describe('IndexPattern Data Source', () => {
             },
           },
         },
+      });
+    });
+
+    it('should add a new date histogram column if autoTimeField is passed', () => {
+      const state = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: '___records___',
+                operationType: 'count',
+              },
+            },
+          },
+        },
+      } as FormBasedPrivateState;
+      expect(
+        FormBasedDatasource.initializeDimension!(state, 'first', indexPatterns, {
+          columnId: 'newTime',
+          groupId: 'a',
+          autoTimeField: true,
+          visualizationGroups: [],
+        })
+      ).toEqual({
+        ...state,
+        layers: {
+          ...state.layers,
+          first: {
+            ...state.layers.first,
+            incompleteColumns: {},
+            columnOrder: ['newTime', 'metric'],
+            columns: {
+              ...state.layers.first.columns,
+              newTime: {
+                dataType: 'date',
+                isBucketed: true,
+                label: 'timestampLabel',
+                operationType: 'date_histogram',
+                params: { dropPartials: false, includeEmptyRows: true, interval: 'auto' },
+                scale: 'interval',
+                sourceField: 'timestamp',
+              },
+            },
+          },
+        },
+      });
+    });
+  });
+
+  describe('#syncColumns', () => {
+    it('copies linked columns', () => {
+      const links: Parameters<Datasource['syncColumns']>[0]['links'] = [
+        {
+          from: {
+            columnId: 'col1',
+            layerId: 'first',
+            groupId: 'foo',
+          },
+          to: {
+            columnId: 'col1',
+            layerId: 'second',
+            groupId: 'foo',
+          },
+        },
+        {
+          from: {
+            columnId: 'col2',
+            layerId: 'first',
+            groupId: 'foo',
+          },
+          to: {
+            columnId: 'new-col',
+            layerId: 'second',
+            groupId: 'foo',
+          },
+        },
+      ];
+
+      const newState = FormBasedDatasource.syncColumns({
+        state: {
+          currentIndexPatternId: 'foo',
+          layers: {
+            first: {
+              indexPatternId: 'foo',
+              columnOrder: [],
+              columns: {
+                col1: {
+                  operationType: 'sum',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'field1',
+                  customLabel: false,
+                  timeScale: 'd',
+                } as SumIndexPatternColumn,
+                col2: {
+                  sourceField: 'field2',
+                  operationType: 'count',
+                  customLabel: false,
+                  timeScale: 'h',
+                } as CountIndexPatternColumn,
+              },
+            },
+            second: {
+              indexPatternId: 'foo',
+              columnOrder: [],
+              columns: {
+                col1: {
+                  sourceField: 'field1',
+                  operationType: 'count',
+                  customLabel: false,
+                  timeScale: 'd',
+                } as CountIndexPatternColumn,
+              },
+            },
+          },
+        },
+        links,
+        indexPatterns,
+        getDimensionGroups: () => [],
+      });
+
+      expect(newState).toMatchInlineSnapshot(`
+        Object {
+          "currentIndexPatternId": "foo",
+          "layers": Object {
+            "first": Object {
+              "columnOrder": Array [],
+              "columns": Object {
+                "col1": Object {
+                  "customLabel": false,
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "",
+                  "operationType": "sum",
+                  "sourceField": "field1",
+                  "timeScale": "d",
+                },
+                "col2": Object {
+                  "customLabel": false,
+                  "operationType": "count",
+                  "sourceField": "field2",
+                  "timeScale": "h",
+                },
+              },
+              "indexPatternId": "foo",
+            },
+            "second": Object {
+              "columnOrder": Array [
+                "col1",
+                "new-col",
+              ],
+              "columns": Object {
+                "col1": Object {
+                  "customLabel": false,
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "",
+                  "operationType": "sum",
+                  "sourceField": "field1",
+                  "timeScale": "d",
+                },
+                "new-col": Object {
+                  "customLabel": false,
+                  "operationType": "count",
+                  "sourceField": "field2",
+                  "timeScale": "h",
+                },
+              },
+              "indexPatternId": "foo",
+            },
+          },
+        }
+      `);
+    });
+
+    it('updates terms order by references', () => {
+      const links: Parameters<Datasource['syncColumns']>[0]['links'] = [
+        {
+          from: {
+            columnId: 'col1FirstLayer',
+            layerId: 'first',
+            groupId: 'foo',
+          },
+          to: {
+            columnId: 'col1SecondLayer',
+            layerId: 'second',
+            groupId: 'foo',
+          },
+        },
+        {
+          from: {
+            columnId: 'col2',
+            layerId: 'first',
+            groupId: 'foo',
+          },
+          to: {
+            columnId: 'new-col',
+            layerId: 'second',
+            groupId: 'foo',
+          },
+        },
+      ];
+
+      const newState = FormBasedDatasource.syncColumns({
+        state: {
+          currentIndexPatternId: 'foo',
+          layers: {
+            first: {
+              indexPatternId: 'foo',
+              columnOrder: [],
+              columns: {
+                col1FirstLayer: {
+                  operationType: 'sum',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'field1',
+                  customLabel: false,
+                  timeScale: 'd',
+                } as SumIndexPatternColumn,
+                col2: {
+                  operationType: 'terms',
+                  sourceField: 'field2',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  params: {
+                    orderBy: {
+                      columnId: 'col1FirstLayer',
+                      type: 'column',
+                    },
+                  },
+                } as TermsIndexPatternColumn,
+              },
+            },
+            second: {
+              indexPatternId: 'foo',
+              columnOrder: [],
+              columns: {
+                col1SecondLayer: {
+                  sourceField: 'field1',
+                  operationType: 'count',
+                  customLabel: false,
+                  timeScale: 'd',
+                } as CountIndexPatternColumn,
+              },
+            },
+          },
+        },
+        links,
+        indexPatterns,
+        getDimensionGroups: () => [],
+      });
+
+      expect(
+        (newState.layers.second.columns['new-col'] as TermsIndexPatternColumn).params.orderBy
+      ).toEqual({
+        type: 'column',
+        columnId: 'col1SecondLayer',
       });
     });
   });

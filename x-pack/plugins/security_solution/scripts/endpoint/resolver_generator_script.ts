@@ -16,10 +16,12 @@ import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
 import type { Role } from '@kbn/security-plugin/common';
 import type { AxiosResponse } from 'axios';
+import { METADATA_DATASTREAM } from '../../common/endpoint/constants';
 import { EndpointMetadataGenerator } from '../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { fetchStackVersion } from './common/stack_services';
+import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from './common/constants';
 
 main();
 
@@ -227,19 +229,19 @@ async function main() {
     eventIndex: {
       alias: 'ei',
       describe: 'index to store events in',
-      default: 'logs-endpoint.events.process-default',
+      default: ENDPOINT_EVENTS_INDEX,
       type: 'string',
     },
     alertIndex: {
       alias: 'ai',
       describe: 'index to store alerts in',
-      default: 'logs-endpoint.alerts-default',
+      default: ENDPOINT_ALERTS_INDEX,
       type: 'string',
     },
     metadataIndex: {
       alias: 'mi',
       describe: 'index to store host metadata in',
-      default: 'metrics-endpoint.metadata-default',
+      default: METADATA_DATASTREAM,
       type: 'string',
     },
     policyIndex: {

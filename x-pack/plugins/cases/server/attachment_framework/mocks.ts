@@ -7,15 +7,15 @@
 
 import { omit } from 'lodash';
 import { CommentType, SECURITY_SOLUTION_OWNER } from '../../common';
-import {
+import type {
   AttributesTypeExternalReferenceNoSO,
   AttributesTypeExternalReferenceSO,
   AttributesTypePersistableState,
   CommentRequestPersistableStateType,
-  ExternalReferenceStorageType,
 } from '../../common/api';
+import { ExternalReferenceStorageType } from '../../common/api';
 import { PersistableStateAttachmentTypeRegistry } from './persistable_state_registry';
-import { PersistableStateAttachmentTypeSetup, PersistableStateAttachmentState } from './types';
+import type { PersistableStateAttachmentTypeSetup, PersistableStateAttachmentState } from './types';
 
 export const getPersistableAttachment = (): PersistableStateAttachmentTypeSetup => ({
   id: '.test',

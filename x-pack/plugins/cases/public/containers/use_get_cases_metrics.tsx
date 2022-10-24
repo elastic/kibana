@@ -10,9 +10,9 @@ import { useCasesContext } from '../components/cases_context/use_cases_context';
 import * as i18n from './translations';
 import { useHttp } from '../common/lib/kibana';
 import { getCasesMetrics } from '../api';
-import { CasesMetrics } from './types';
+import type { CasesMetrics } from './types';
 import { useCasesToast } from '../common/use_cases_toast';
-import { ServerError } from '../types';
+import type { ServerError } from '../types';
 import { casesQueriesKeys } from './constants';
 
 export const useGetCasesMetrics = () => {
