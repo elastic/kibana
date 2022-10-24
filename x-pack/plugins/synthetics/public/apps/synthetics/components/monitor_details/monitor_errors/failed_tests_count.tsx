@@ -7,17 +7,11 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { ReportTypes } from '@kbn/observability-plugin/public';
-import { KpiWrapper } from './kpi_wrapper';
 import { ClientPluginsStart } from '../../../../../plugin';
+import { KpiWrapper } from '../monitor_summary/kpi_wrapper';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 
-interface MonitorErrorsCountProps {
-  from: string;
-  to: string;
-}
-
-export const MonitorErrorsCount = (props: MonitorErrorsCountProps) => {
+export const FailedTestsCount = (time: { to: string; from: string }) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
@@ -27,14 +21,15 @@ export const MonitorErrorsCount = (props: MonitorErrorsCountProps) => {
   return (
     <KpiWrapper>
       <ExploratoryViewEmbeddable
-        align="left"
-        reportType={ReportTypes.SINGLE_METRIC}
+        reportType="single-metric"
         attributes={[
           {
-            time: props,
-            reportDefinitions: { config_id: [monitorId] },
+            time,
+            reportDefinitions: {
+              'monitor.id': [monitorId],
+            },
             dataType: 'synthetics',
-            selectedMetricField: 'monitor_errors',
+            selectedMetricField: 'monitor_failed_tests',
             name: 'synthetics-series-1',
           },
         ]}

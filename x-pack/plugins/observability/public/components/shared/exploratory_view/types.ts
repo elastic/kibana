@@ -23,6 +23,7 @@ import {
   FieldFormatParams as BaseFieldFormatParams,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
+import { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { FORMULA_COLUMN } from './configurations/constants';
 
 export const ReportViewTypes = {
@@ -167,3 +168,7 @@ export interface BuilderItem {
 }
 
 export type SupportedOperations = 'average' | 'median' | 'sum' | 'unique_count' | 'min' | 'max';
+
+type TermColumnParams = TermsIndexPatternColumn['params'];
+
+export type TermColumnParamsOrderBy = TermColumnParams['orderBy'];
