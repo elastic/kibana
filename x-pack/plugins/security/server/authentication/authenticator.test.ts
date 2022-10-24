@@ -1399,9 +1399,10 @@ describe('Authenticator', () => {
           } else {
             expect(authenticationResult.redirectURL).toBe(redirectUrl);
           }
+          expect(auditLogger.log).not.toHaveBeenCalled();
         });
 
-        it("message is not attached to the URL when authentication provider redirects to something that's not the login page", async () => {
+        it('should not get a message attached to the redirect URL when authentication provider redirects to something that is not the login page', async () => {
           const request = httpServerMock.createKibanaRequest();
           const redirectUrl = '/mock-server-basepath/some-other-page?foo=bar';
           const failureReason = new FailureClass();
@@ -1415,6 +1416,7 @@ describe('Authenticator', () => {
           const authenticationResult = await authenticator.authenticate(request);
           expect(authenticationResult.redirected()).toBe(true);
           expect(authenticationResult.redirectURL).toBe(redirectUrl);
+          expect(auditLogger.log).not.toHaveBeenCalled();
         });
       });
     }
