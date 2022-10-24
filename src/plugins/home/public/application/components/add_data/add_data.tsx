@@ -44,7 +44,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
         aria-labelledby="homDataAdd__title"
       >
         <EuiFlexGroup alignItems="flexEnd">
-          <EuiFlexItem>
+          <EuiFlexItem grow={true}>
             <EuiTitle size="s">
               <h2 id="homDataAdd__title">
                 <FormattedMessage
@@ -67,7 +67,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
 
             <EuiSpacer />
 
-            <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+            <EuiFlexGroup gutterSize="m">
               {isCloudEnabled && (
                 <EuiFlexItem grow={false}>
                   {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
@@ -98,6 +98,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                       trackUiMetric(METRIC_TYPE.CLICK, 'home_tutorial_directory');
                       createAppNavigationHandler('/app/integrations/browse')(event);
                     }}
+                    fullWidth
                   >
                     <FormattedMessage
                       id="home.addData.addDataButtonLabel"
