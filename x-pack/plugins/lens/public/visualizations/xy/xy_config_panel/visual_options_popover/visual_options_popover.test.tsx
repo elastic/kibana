@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { Position } from '@elastic/charts';
-import type { FramePublicAPI, DatasourcePublicAPI } from '../../../../types';
+import type { FramePublicAPI } from '../../../../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../../mocks';
 import { State, XYLayerConfig } from '../../types';
 import { VisualOptionsPopover } from '.';
@@ -43,21 +43,6 @@ describe('Visual options popover', () => {
     frame.datasourceLayers = {
       first: createMockDatasource('test').publicAPIMock,
     };
-  });
-  it('should disable the visual options for stacked bar charts', () => {
-    const state = testState();
-    const component = shallow(
-      <VisualOptionsPopover
-        datasourceLayers={frame.datasourceLayers}
-        setState={jest.fn()}
-        state={{
-          ...state,
-          layers: [{ ...state.layers[0], seriesType: 'bar_stacked' } as XYLayerConfig],
-        }}
-      />
-    );
-
-    expect(component.find(ToolbarPopover).prop('isDisabled')).toEqual(true);
   });
 
   it('should disable the values and fitting for percentage area charts', () => {
@@ -107,28 +92,6 @@ describe('Visual options popover', () => {
     );
 
     expect(component.find(ToolbarPopover).prop('isDisabled')).toEqual(false);
-  });
-
-  it('should disabled the popover if there is histogram series', () => {
-    // make it detect an histogram series
-    const datasourceLayers = frame.datasourceLayers as Record<string, DatasourcePublicAPI>;
-    datasourceLayers.first.getOperationForColumnId = jest.fn().mockReturnValueOnce({
-      isBucketed: true,
-      scale: 'interval',
-    });
-    const state = testState();
-    const component = shallow(
-      <VisualOptionsPopover
-        datasourceLayers={frame.datasourceLayers}
-        setState={jest.fn()}
-        state={{
-          ...state,
-          layers: [{ ...state.layers[0] }],
-        }}
-      />
-    );
-
-    expect(component.find(ToolbarPopover).prop('isDisabled')).toEqual(true);
   });
 
   it('should hide the fitting option for bar series', () => {

@@ -315,7 +315,9 @@ describe('IndexPattern Data Source', () => {
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = FormBasedDatasource.initialize();
-      expect(FormBasedDatasource.toExpression(state, 'first', indexPatterns)).toEqual(null);
+      expect(
+        FormBasedDatasource.toExpression(state, 'first', indexPatterns, 'testing-seed')
+      ).toEqual(null);
     });
 
     it('should create a table when there is a formula without aggs', async () => {
@@ -338,7 +340,9 @@ describe('IndexPattern Data Source', () => {
           },
         },
       };
-      expect(FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns)).toEqual({
+      expect(
+        FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns, 'testing-seed')
+      ).toEqual({
         chain: [
           {
             function: 'createTable',
@@ -385,8 +389,9 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      expect(FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns))
-        .toMatchInlineSnapshot(`
+      expect(
+        FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns, 'testing-seed')
+      ).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
             Object {
@@ -487,6 +492,12 @@ describe('IndexPattern Data Source', () => {
                 "partialRows": Array [
                   false,
                 ],
+                "probability": Array [
+                  1,
+                ],
+                "samplerSeed": Array [
+                  1889181588,
+                ],
                 "timeFields": Array [
                   "timestamp",
                 ],
@@ -560,7 +571,12 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        'testing-seed'
+      ) as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp', 'another_datefield']);
     });
 
@@ -595,7 +611,12 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        'testing-seed'
+      ) as Ast;
       expect((ast.chain[1].arguments.aggs[1] as Ast).chain[0].arguments.timeShift).toEqual(['1d']);
     });
 
@@ -802,7 +823,12 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        'testing-seed'
+      ) as Ast;
       const count = (ast.chain[1].arguments.aggs[1] as Ast).chain[0];
       const sum = (ast.chain[1].arguments.aggs[2] as Ast).chain[0];
       const average = (ast.chain[1].arguments.aggs[3] as Ast).chain[0];
@@ -866,7 +892,12 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        'testing-seed'
+      ) as Ast;
       expect(ast.chain[1].arguments.aggs[0]).toMatchInlineSnapshot(`
         Object {
           "chain": Array [
@@ -990,7 +1021,12 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        'testing-seed'
+      ) as Ast;
       const timeScaleCalls = ast.chain.filter((fn) => fn.function === 'lens_time_scale');
       const formatCalls = ast.chain.filter((fn) => fn.function === 'lens_format_column');
       expect(timeScaleCalls).toHaveLength(1);
@@ -1055,7 +1091,12 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        'testing-seed'
+      ) as Ast;
       const filteredMetricAgg = (ast.chain[1].arguments.aggs[0] as Ast).chain[0].arguments;
       const metricAgg = (filteredMetricAgg.customMetric[0] as Ast).chain[0].arguments;
       const bucketAgg = (filteredMetricAgg.customBucket[0] as Ast).chain[0].arguments;
@@ -1106,7 +1147,12 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        'testing-seed'
+      ) as Ast;
       const formatIndex = ast.chain.findIndex((fn) => fn.function === 'lens_format_column');
       const calculationIndex = ast.chain.findIndex((fn) => fn.function === 'moving_average');
       expect(calculationIndex).toBeLessThan(formatIndex);
@@ -1154,7 +1200,12 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        'testing-seed'
+      ) as Ast;
       expect(ast.chain[1].arguments.metricsAtAllLevels).toEqual([false]);
       expect(JSON.parse(ast.chain[2].arguments.idMap[0] as string)).toEqual({
         'col-0-0': [expect.objectContaining({ id: 'bucket1' })],
@@ -1193,7 +1244,12 @@ describe('IndexPattern Data Source', () => {
         },
       };
 
-      const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+      const ast = FormBasedDatasource.toExpression(
+        queryBaseState,
+        'first',
+        indexPatterns,
+        'testing-seed'
+      ) as Ast;
       expect(ast.chain[1].arguments.timeFields).toEqual(['timestamp']);
       expect(ast.chain[1].arguments.timeFields).not.toContain('timefield');
     });
@@ -1250,7 +1306,7 @@ describe('IndexPattern Data Source', () => {
 
         const optimizeMock = jest.spyOn(operationDefinitionMap.percentile, 'optimizeEsAggs');
 
-        FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns);
+        FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns, 'testing-seed');
 
         expect(operationDefinitionMap.percentile.optimizeEsAggs).toHaveBeenCalledTimes(1);
 
@@ -1318,7 +1374,12 @@ describe('IndexPattern Data Source', () => {
             return { aggs: aggs.reverse(), esAggsIdMap };
           });
 
-        const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+        const ast = FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          'testing-seed'
+        ) as Ast;
 
         expect(operationDefinitionMap.percentile.optimizeEsAggs).toHaveBeenCalledTimes(1);
 
@@ -1382,7 +1443,12 @@ describe('IndexPattern Data Source', () => {
           },
         };
 
-        const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+        const ast = FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          'testing-seed'
+        ) as Ast;
 
         const idMap = JSON.parse(ast.chain[2].arguments.idMap as unknown as string);
 
@@ -1487,7 +1553,12 @@ describe('IndexPattern Data Source', () => {
           },
         };
 
-        const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+        const ast = FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          'testing-seed'
+        ) as Ast;
         // @ts-expect-error we can't isolate just the reference type
         expect(operationDefinitionMap.testReference.toExpression).toHaveBeenCalled();
         expect(ast.chain[3]).toEqual('mock');
@@ -1520,7 +1591,12 @@ describe('IndexPattern Data Source', () => {
           },
         };
 
-        const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+        const ast = FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          'testing-seed'
+        ) as Ast;
 
         expect(JSON.parse(ast.chain[2].arguments.idMap[0] as string)).toEqual({
           'col-0-0': [
@@ -1607,7 +1683,12 @@ describe('IndexPattern Data Source', () => {
           },
         };
 
-        const ast = FormBasedDatasource.toExpression(queryBaseState, 'first', indexPatterns) as Ast;
+        const ast = FormBasedDatasource.toExpression(
+          queryBaseState,
+          'first',
+          indexPatterns,
+          'testing-seed'
+        ) as Ast;
         const chainLength = ast.chain.length;
         expect(ast.chain[chainLength - 2].arguments.name).toEqual(['math']);
         expect(ast.chain[chainLength - 1].arguments.id).toEqual(['formula']);
@@ -1631,6 +1712,7 @@ describe('IndexPattern Data Source', () => {
           },
         },
         currentIndexPatternId: '1',
+        sampling: 1,
       };
       expect(FormBasedDatasource.insertLayer(state, 'newLayer', ['link-to-id'])).toEqual({
         ...state,
@@ -1640,6 +1722,7 @@ describe('IndexPattern Data Source', () => {
             indexPatternId: '1',
             columnOrder: [],
             columns: {},
+            sampling: 1,
             linkToLayers: ['link-to-id'],
           },
         },
@@ -1673,6 +1756,29 @@ describe('IndexPattern Data Source', () => {
             columns: {},
           },
         },
+      });
+    });
+
+    it('should remove linked layers', () => {
+      const state = {
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+          second: {
+            indexPatternId: '2',
+            columnOrder: [],
+            columns: {},
+            linkToLayers: ['first'],
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(FormBasedDatasource.removeLayer(state, 'first')).toEqual({
+        ...state,
+        layers: {},
       });
     });
   });
