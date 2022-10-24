@@ -8,14 +8,14 @@
 import type { FileKind, FileImageMetadata } from '@kbn/files-plugin/common';
 
 export const PLUGIN_ID = 'filesExample';
-export const PLUGIN_NAME = 'filesExample';
+export const PLUGIN_NAME = 'Files example';
 
 const httpTags = {
   tags: [`access:${PLUGIN_ID}`],
 };
 
 export const exampleFileKind: FileKind = {
-  id: 'filesExample',
+  id: PLUGIN_ID,
   allowedMimeTypes: ['image/png'],
   http: {
     create: httpTags,
