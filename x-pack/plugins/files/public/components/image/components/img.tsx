@@ -12,20 +12,20 @@ import { css } from '@emotion/react';
 import { sizes } from '../styles';
 
 export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
-  hidden: boolean;
   size?: EuiImageSize;
   observerRef: (el: null | HTMLImageElement) => void;
 }
 
 export const Img = React.forwardRef<HTMLImageElement, Props>(
-  ({ observerRef, src, hidden, size, ...rest }, ref) => {
+  ({ observerRef, src, size, ...rest }, ref) => {
     const { euiTheme } = useEuiTheme();
     const styles = [
       css`
         transition: opacity ${euiTheme.animation.extraFast};
       `,
-      hidden
+      !src
         ? css`
+            position: absolute;
             visibility: hidden;
           `
         : undefined,
