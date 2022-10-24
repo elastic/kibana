@@ -61,7 +61,7 @@ const paramsSchema = schema.object({
   ]),
 });
 
-const alertTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
+const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 
 export function registerAnomalyRuleType({
   logger,
@@ -78,9 +78,9 @@ export function registerAnomalyRuleType({
   alerting.registerType(
     createLifecycleRuleType({
       id: ApmRuleType.Anomaly,
-      name: alertTypeConfig.name,
-      actionGroups: alertTypeConfig.actionGroups,
-      defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
+      name: ruleTypeConfig.name,
+      actionGroups: ruleTypeConfig.actionGroups,
+      defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
       validate: {
         params: paramsSchema,
       },
@@ -272,7 +272,7 @@ export function registerAnomalyRuleType({
                 [ALERT_REASON]: reasonMessage,
               },
             })
-            .scheduleActions(alertTypeConfig.defaultActionGroupId, {
+            .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
               serviceName,
               transactionType,
               environment: getEnvironmentLabel(environment),
