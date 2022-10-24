@@ -24,7 +24,7 @@ import type {
   RuleReferences,
 } from '@kbn/securitysolution-exception-list-components';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { findRuleExceptionReferences } from '../../../../../detections/containers/detection_engine/rules';
+import { findRuleExceptionReferences } from '../../../../rule_management/api/api';
 import type {
   DeleteExceptionItem,
   DeleteExceptionList,

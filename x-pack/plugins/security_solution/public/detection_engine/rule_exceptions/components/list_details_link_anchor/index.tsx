@@ -9,7 +9,7 @@ import React from 'react';
 import type { FC } from 'react';
 import { SecurityPageName } from '../../../../../common/constants';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
-import { RuleDetailTabs } from '../../../../detections/pages/detection_engine/rules/details';
+import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 
 interface LinkAnchorProps {
