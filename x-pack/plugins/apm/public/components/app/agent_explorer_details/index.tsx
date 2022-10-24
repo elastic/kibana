@@ -87,11 +87,6 @@ function useAgentExplorerFetcher() {
 			kuery,
 			start,
 			end,
-			// not used, but needed to update the requestId to call the details statistics API when table is options are updated
-			page,
-			pageSize,
-			sortField,
-			sortDirection,
 		]
 	);
 
