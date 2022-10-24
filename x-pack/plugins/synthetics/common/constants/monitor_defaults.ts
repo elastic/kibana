@@ -48,8 +48,6 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.UI,
   [ConfigKey.JOURNEY_ID]: '',
   [ConfigKey.CONFIG_HASH]: '',
-
-  // Deprecated, slated to be removed in a future version
   [ConfigKey.ID]: '',
 };
 

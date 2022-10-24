@@ -35,8 +35,6 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.CUSTOM_HEARTBEAT_ID]: null,
   [ConfigKey.ORIGINAL_SPACE]: null,
   [ConfigKey.CONFIG_HASH]: null,
-
-  // Deprecated, slated to be removed in a later releae
   [ConfigKey.ID]: null,
 };
 

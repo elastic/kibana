@@ -30,10 +30,7 @@ import {
   MonitorFields,
   PrivateLocation,
 } from '../../../common/runtime_types';
-import {
-  syntheticsMonitorType,
-  syntheticsMonitor,
-} from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { formatSecrets, normalizeSecrets } from '../utils/secrets';
 import {
@@ -347,7 +344,7 @@ export class ProjectMonitorFormatter {
       monitors,
       async (monitor) =>
         this.encryptedSavedObjectsClient.getDecryptedAsInternalUser<SyntheticsMonitorWithSecrets>(
-          syntheticsMonitor.name,
+          syntheticsMonitorType,
           monitor.id,
           {
             namespace: monitor.namespaces?.[0],

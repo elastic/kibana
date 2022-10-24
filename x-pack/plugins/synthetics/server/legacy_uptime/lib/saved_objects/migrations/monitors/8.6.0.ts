@@ -1,0 +1,31 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { ConfigKey, SyntheticsMonitor } from '../../../../../../common/runtime_types';
+
+export const migration860 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => {
+  return encryptedSavedObjects.createMigration<SyntheticsMonitor, SyntheticsMonitor>({
+    isMigrationNeededPredicate: function shouldBeMigrated(
+      doc
+    ): doc is SavedObjectUnsanitizedDoc<SyntheticsMonitor> {
+      return true;
+    },
+    migration: (
+      doc: SavedObjectUnsanitizedDoc<SyntheticsMonitor>
+    ): SavedObjectUnsanitizedDoc<SyntheticsMonitor> => {
+      const { attributes, id } = doc;
+      return {
+        ...doc,
+        attributes: {
+          ...attributes,
+          [ConfigKey.ID]: attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
+        },
+      };
+    },
+  });
+};
