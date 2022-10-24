@@ -507,7 +507,7 @@ export function DimensionEditorAdditionalSection({
             defaultMessage: 'Type',
           })}
           helpText={supportingVisHelpTexts.map((text) => (
-            <div>{text}</div>
+            <p>{text}</p>
           ))}
         >
           <EuiButtonGroup
