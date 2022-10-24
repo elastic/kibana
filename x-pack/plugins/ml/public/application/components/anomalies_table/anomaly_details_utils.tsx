@@ -629,21 +629,21 @@ const impactTooltips = {
       'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip.low',
       {
         defaultMessage:
-          'The difference between actual and typical values in this bucket have a moderate impact.',
+          'The difference between actual and typical values in this bucket has a moderate impact.',
       }
     ),
     medium: i18n.translate(
       'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip.medium',
       {
         defaultMessage:
-          'The difference between actual and typical values in this bucket have a significant impact.',
+          'The difference between actual and typical values in this bucket has a significant impact.',
       }
     ),
     high: i18n.translate(
       'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip.high',
       {
         defaultMessage:
-          'The difference between actual and typical values in this bucket have a high impact.',
+          'The difference between actual and typical values in this bucket has a high impact.',
       }
     ),
   },
@@ -652,21 +652,21 @@ const impactTooltips = {
       'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multiBucketTooltip.low',
       {
         defaultMessage:
-          'The difference between actual and typical values in the past 12 buckets have a moderate impact.',
+          'The differences between actual and typical values in the past 12 buckets have a moderate impact.',
       }
     ),
     medium: i18n.translate(
       'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multiBucketTooltip.medium',
       {
         defaultMessage:
-          'The difference between actual and typical values in the past 12 buckets have a significant impact.',
+          'The differences between actual and typical values in the past 12 buckets have a significant impact.',
       }
     ),
     high: i18n.translate(
       'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multiBucketTooltip.high',
       {
         defaultMessage:
-          'The difference between actual and typical values in the past 12 buckets have a high impact.',
+          'The differences between actual and typical values in the past 12 buckets have a high impact.',
       }
     ),
   },
