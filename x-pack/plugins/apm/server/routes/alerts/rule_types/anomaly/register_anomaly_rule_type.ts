@@ -61,7 +61,7 @@ const paramsSchema = schema.object({
   ]),
 });
 
-const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
+const alertTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 
 export function registerAnomalyRuleType({
   logger,
@@ -78,9 +78,9 @@ export function registerAnomalyRuleType({
   alerting.registerType(
     createLifecycleRuleType({
       id: ApmRuleType.Anomaly,
-      name: ruleTypeConfig.name,
-      actionGroups: ruleTypeConfig.actionGroups,
-      defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
+      name: alertTypeConfig.name,
+      actionGroups: alertTypeConfig.actionGroups,
+      defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
       validate: {
         params: paramsSchema,
       },
@@ -145,6 +145,7 @@ export function registerAnomalyRuleType({
         const jobIds = mlJobs.map((job) => job.jobId);
         const anomalySearchParams = {
           body: {
+            track_total_hits: false,
             size: 0,
             query: {
               bool: {
@@ -271,7 +272,7 @@ export function registerAnomalyRuleType({
                 [ALERT_REASON]: reasonMessage,
               },
             })
-            .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
+            .scheduleActions(alertTypeConfig.defaultActionGroupId, {
               serviceName,
               transactionType,
               environment: getEnvironmentLabel(environment),
