@@ -431,6 +431,7 @@ export class Server {
 
     // @ts-expect-error
     global.serverStartupBreakdown.start['saved-object-start-promise'] =
+    // @ts-expect-error
       performance.now() - global.initTime;
 
     soStartSpan?.end();

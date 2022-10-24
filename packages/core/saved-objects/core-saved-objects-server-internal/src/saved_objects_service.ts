@@ -251,6 +251,7 @@ export class SavedObjectsService
 
         // @ts-ignore
         global.serverStartupBreakdown.start['post-migrations'] =
+        // @ts-ignore
           performance.now() - global.initTime;
       }
     }
