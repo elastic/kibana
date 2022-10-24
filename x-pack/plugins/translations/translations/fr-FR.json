@@ -19627,7 +19627,6 @@
     "xpack.ml.anomaliesTable.anomalyDetails.initialRecordScoreTooltip": "Score normalisé compris entre 0 et 100, qui indique l'importance relative de l'enregistrement des anomalies lorsque le groupe a été initialement traité.",
     "xpack.ml.anomaliesTable.anomalyDetails.interimResultLabel": "Résultat temporaire",
     "xpack.ml.anomaliesTable.anomalyDetails.jobIdTitle": "ID tâche",
-    "xpack.ml.anomaliesTable.anomalyDetails.multiBucketImpactTitle": "Impact multi-groupe",
     "xpack.ml.anomaliesTable.anomalyDetails.probabilityTitle": "Probabilité",
     "xpack.ml.anomaliesTable.anomalyDetails.recordScoreTitle": "Score d'enregistrement",
     "xpack.ml.anomaliesTable.anomalyDetails.recordScoreTooltip": "Score normalisé compris entre 0 et 100, qui indique l'importance relative du résultat d'enregistrement des anomalies. Cette valeur peut changer au fil de l'analyse de nouvelles données.",
