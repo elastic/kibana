@@ -34,7 +34,8 @@ export const getPaletteForHeatmap = async (params: HeatmapVisParams) => {
   const { color, stop = [] } = getStopsWithColorsFromColorsNumber(
     params.colorsNumber,
     params.colorSchema,
-    params.invertColors
+    params.invertColors,
+    true
   );
   const colorsRange: Range[] = [{ from: stop[0], to: stop[stop.length - 1], type: 'range' }];
   const { colorSchema, invertColors, percentageMode } = params;
