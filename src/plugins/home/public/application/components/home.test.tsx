@@ -14,6 +14,7 @@ import { Home } from './home';
 import { Welcome } from './welcome';
 
 let mockHasIntegrationsPermission = true;
+const mockNavigateToUrl = jest.fn();
 jest.mock('../kibana_services', () => ({
   getServices: () => ({
     getBasePath: () => 'path',
@@ -23,6 +24,7 @@ jest.mock('../kibana_services', () => ({
       setBreadcrumbs: () => {},
     },
     application: {
+      navigateToUrl: mockNavigateToUrl,
       capabilities: {
         navLinks: {
           integrations: mockHasIntegrationsPermission,
@@ -233,11 +235,13 @@ describe('home', () => {
     });
 
     test('should redirect to guided onboarding on Cloud instead of welcome screen', async () => {
-      defaultProps.isCloudEnabled = true;
+      const isCloudEnabled = true;
+      const hasUserDataView = jest.fn(async () => false);
 
-      const component = await renderHome();
+      const component = await renderHome({ isCloudEnabled, hasUserDataView });
 
       expect(component.find(Welcome).exists()).toBe(false);
+      expect(mockNavigateToUrl).toHaveBeenCalledTimes(1);
     });
   });
 

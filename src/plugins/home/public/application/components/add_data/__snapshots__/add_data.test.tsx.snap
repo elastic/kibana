@@ -10,9 +10,7 @@ exports[`AddData render 1`] = `
   <EuiFlexGroup
     alignItems="flexEnd"
   >
-    <EuiFlexItem
-      grow={true}
-    >
+    <EuiFlexItem>
       <EuiTitle
         size="s"
       >
