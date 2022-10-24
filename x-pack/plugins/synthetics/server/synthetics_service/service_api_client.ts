@@ -189,6 +189,9 @@ export class ServiceAPIClient {
             }),
             catchError((err: AxiosError<{ reason: string; status: number }>) => {
               pushErrors.push({ locationId: id, error: err.response?.data! });
+              const reason = err.response?.data?.reason ?? '';
+
+              err.message = `Failed to call service location ${url} with method ${method} with ${allMonitors.length} monitors:  ${err.message}, ${reason}`;
               this.logger.error(err);
               sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
                 reason: err.response?.data?.reason,
@@ -199,9 +202,6 @@ export class ServiceAPIClient {
                 url,
                 kibanaVersion: this.server.kibanaVersion,
               });
-              if (err.response?.data?.reason) {
-                this.logger.error(err.response?.data?.reason);
-              }
               // we don't want to throw an unhandled exception here
               return of(true);
             })
