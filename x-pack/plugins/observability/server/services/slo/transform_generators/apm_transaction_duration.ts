@@ -10,6 +10,7 @@ import {
   MappingRuntimeFieldType,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { InvalidTransformError } from '../../../errors';
 import { ALL_VALUE, apmTransactionDurationIndicatorSchema } from '../../../types/schema';
 import {
   SLO_DESTINATION_INDEX_NAME,
@@ -25,7 +26,7 @@ const APM_SOURCE_INDEX = 'metrics-apm*';
 export class ApmTransactionDurationTransformGenerator implements TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
     if (!apmTransactionDurationIndicatorSchema.is(slo.indicator)) {
-      throw new Error(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
+      throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
     return getSLOTransformTemplate(
@@ -129,26 +130,6 @@ export class ApmTransactionDurationTransformGenerator implements TransformGenera
         date_histogram: {
           field: '@timestamp',
           calendar_interval: '1m' as AggregationsCalendarInterval,
-        },
-      },
-      'slo.context.transaction.name': {
-        terms: {
-          field: 'transaction.name',
-        },
-      },
-      'slo.context.transaction.type': {
-        terms: {
-          field: 'transaction.type',
-        },
-      },
-      'slo.context.service.name': {
-        terms: {
-          field: 'service.name',
-        },
-      },
-      'slo.context.service.environment': {
-        terms: {
-          field: 'service.environment',
         },
       },
     };

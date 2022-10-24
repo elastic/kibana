@@ -30,9 +30,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ApplicationStart } from '@kbn/core/public';
+import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboarding';
 
-import type { GuideState, GuideStep as GuideStepStatus } from '../../common/types';
-import type { StepConfig } from '../types';
+import type { GuideConfig, StepConfig } from '../types';
 
 import type { ApiService } from '../services/api';
 import { getGuideConfig } from '../services/helpers';
@@ -74,18 +74,19 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   const handleStepButtonClick = async (step: GuideStepStatus, stepConfig: StepConfig) => {
     if (guideState) {
       const { id, status } = step;
+
       if (status === 'ready_to_complete') {
         return await api.completeGuideStep(guideState?.guideId, id);
       }
 
-      if (status === 'active') {
-        await api.startGuideStep(guideState!.guideId, id);
-      }
       if (status === 'active' || status === 'in_progress') {
+        await api.startGuideStep(guideState!.guideId, id);
+
         if (stepConfig.location) {
           await application.navigateToApp(stepConfig.location.appID, {
             path: stepConfig.location.path,
           });
+
           if (stepConfig.manualCompletion?.readyToCompleteOnNavigation) {
             await api.completeGuideStep(guideState.guideId, id);
           }
@@ -99,8 +100,15 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
     application.navigateToApp('home', { path: '#getting_started' });
   };
 
-  const completeGuide = async () => {
+  const completeGuide = async (
+    completedGuideRedirectLocation: GuideConfig['completedGuideRedirectLocation']
+  ) => {
     await api.completeGuide(guideState!.guideId);
+
+    if (completedGuideRedirectLocation) {
+      const { appID, path } = completedGuideRedirectLocation;
+      application.navigateToApp(appID, { path });
+    }
   };
 
   const openQuitGuideModal = () => {
@@ -133,23 +141,12 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
   // TODO handle loading, error state
   // https://github.com/elastic/kibana/issues/139799, https://github.com/elastic/kibana/issues/139798
   if (!guideConfig) {
-    return (
-      <EuiButton
-        onClick={toggleGuide}
-        color="success"
-        fill
-        isDisabled={true}
-        size="s"
-        data-test-subj="disabledGuideButton"
-      >
-        {i18n.translate('guidedOnboarding.disabledGuidedSetupButtonLabel', {
-          defaultMessage: 'Setup guide',
-        })}
-      </EuiButton>
-    );
+    // TODO button show/hide logic https://github.com/elastic/kibana/issues/141129
+    return null;
   }
 
   const stepsCompleted = getProgress(guideState);
+  const isGuideReadyToComplete = guideState?.status === 'ready_to_complete';
 
   return (
     <>
@@ -182,7 +179,13 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
             </EuiButtonEmpty>
 
             <EuiTitle size="m">
-              <h2>{guideConfig?.title}</h2>
+              <h2 data-test-subj="guideTitle">
+                {isGuideReadyToComplete
+                  ? i18n.translate('guidedOnboarding.dropdownPanel.completeGuideFlyoutTitle', {
+                      defaultMessage: 'Well done!',
+                    })
+                  : guideConfig.title}
+              </h2>
             </EuiTitle>
 
             <EuiSpacer size="s" />
@@ -192,7 +195,19 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
           <EuiFlyoutBody css={styles.flyoutOverrides.flyoutBody}>
             <div>
               <EuiText size="m">
-                <p>{guideConfig?.description}</p>
+                <p data-test-subj="guideDescription">
+                  {isGuideReadyToComplete
+                    ? i18n.translate(
+                        'guidedOnboarding.dropdownPanel.completeGuideFlyoutDescription',
+                        {
+                          defaultMessage: `You've completed the Elastic {guideName} guide.`,
+                          values: {
+                            guideName: guideConfig.guideName,
+                          },
+                        }
+                      )
+                    : guideConfig.description}
+                </p>
               </EuiText>
 
               {guideConfig.docs && (
@@ -212,9 +227,15 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                   <EuiSpacer size="xl" />
                   <EuiProgress
                     data-test-subj="guideProgress"
-                    label={i18n.translate('guidedOnboarding.dropdownPanel.progressLabel', {
-                      defaultMessage: 'Progress',
-                    })}
+                    label={
+                      isGuideReadyToComplete
+                        ? i18n.translate('guidedOnboarding.dropdownPanel.completedLabel', {
+                            defaultMessage: 'Completed',
+                          })
+                        : i18n.translate('guidedOnboarding.dropdownPanel.progressLabel', {
+                            defaultMessage: 'Progress',
+                          })
+                    }
                     value={stepsCompleted}
                     valueText={i18n.translate('guidedOnboarding.dropdownPanel.progressValueLabel', {
                       defaultMessage: '{stepCount} steps',
@@ -250,10 +271,14 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                 }
               })}
 
-              {guideState?.status === 'ready_to_complete' && (
+              {isGuideReadyToComplete && (
                 <EuiFlexGroup justifyContent="flexEnd">
                   <EuiFlexItem grow={false}>
-                    <EuiButton onClick={completeGuide} fill data-test-subj="useElasticButton">
+                    <EuiButton
+                      onClick={() => completeGuide(guideConfig.completedGuideRedirectLocation)}
+                      fill
+                      data-test-subj="useElasticButton"
+                    >
                       {i18n.translate('guidedOnboarding.dropdownPanel.elasticButtonLabel', {
                         defaultMessage: 'Continue using Elastic',
                       })}

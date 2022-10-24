@@ -29,7 +29,13 @@ import {
   DEFAULT_SIGNALS_INDEX,
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
-import { TimelineType, TimelineStatus, TimelineTabs } from '../../../common/types/timeline';
+import {
+  TimelineType,
+  TimelineStatus,
+  TimelineTabs,
+  TableId,
+  TimelineId,
+} from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
@@ -300,15 +306,14 @@ export const mockGlobalState: State = {
       newTimelineModel: null,
     },
     timelineById: {
-      test: {
+      [TimelineId.test]: {
         activeTab: TimelineTabs.query,
         prevActiveTab: TimelineTabs.notes,
         dataViewId: DEFAULT_DATA_VIEW_ID,
         deletedEventIds: [],
         documentType: '',
         queryFields: [],
-        selectAll: false,
-        id: 'test',
+        id: TimelineId.test,
         savedObjectId: null,
         columns: defaultHeaders,
         defaultColumns: defaultHeaders,
@@ -328,7 +333,6 @@ export const mockGlobalState: State = {
         historyIds: [],
         isFavorite: false,
         isLive: false,
-        isSelectAllChecked: false,
         isLoading: false,
         kqlMode: 'filter',
         kqlQuery: { filterQuery: null },
@@ -342,10 +346,8 @@ export const mockGlobalState: State = {
           start: '2020-07-07T08:20:18.966Z',
           end: '2020-07-08T08:20:18.966Z',
         },
-        selectedEventIds: {},
         sessionViewConfig: null,
         show: false,
-        showCheckboxes: false,
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
         itemsPerPageOptions: [5, 10, 20],
@@ -360,9 +362,47 @@ export const mockGlobalState: State = {
         isSaving: false,
         version: null,
         status: TimelineStatus.active,
+        isSelectAllChecked: false,
+        selectedEventIds: {},
       },
     },
     insertTimeline: null,
+  },
+  dataTable: {
+    tableById: {
+      [TableId.test]: {
+        columns: defaultHeaders,
+        defaultColumns: defaultHeaders,
+        dataViewId: 'security-solution-default',
+        deletedEventIds: [],
+        expandedDetail: {},
+        filters: [],
+        indexNames: ['.alerts-security.alerts-default'],
+        isSelectAllChecked: false,
+        itemsPerPage: 25,
+        itemsPerPageOptions: [10, 25, 50, 100],
+        loadingEventIds: [],
+        selectedEventIds: {},
+        showCheckboxes: false,
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: 'desc',
+          },
+        ],
+        graphEventId: '',
+        sessionViewConfig: null,
+        selectAll: false,
+        id: TableId.test,
+        title: '',
+        initialized: true,
+        updated: 1663882629000,
+        isLoading: false,
+        queryFields: [],
+      },
+    },
   },
   sourcerer: {
     ...mockSourcererState,
