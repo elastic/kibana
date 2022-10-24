@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-describe('Search Experiences Guide Component', () => {});
+import React from 'react';
+
+import { SearchExperiencesGuide } from './search_experiences_guide';
+
+describe('Search Experiences Guide Component', () => {
+  it('renders', () => {
+    <SearchExperiencesGuide />;
+  });
+});

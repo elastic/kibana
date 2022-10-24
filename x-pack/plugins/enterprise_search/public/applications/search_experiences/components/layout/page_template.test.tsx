@@ -17,14 +17,14 @@ import { SetElasticsearchChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper } from '../../../shared/layout';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
 
-import { EnterpriseSearchElasticsearchPageTemplate } from './page_template';
+import { EnterpriseSearchSearchExperiencesPageTemplate } from './page_template';
 
-describe('EnterpriseSearchElasticsearchPageTemplate', () => {
+describe('EnterpriseSearchSearchExperiencesPageTemplate', () => {
   it('renders', () => {
     const wrapper = shallow(
-      <EnterpriseSearchElasticsearchPageTemplate>
+      <EnterpriseSearchSearchExperiencesPageTemplate>
         <div className="hello">world</div>
-      </EnterpriseSearchElasticsearchPageTemplate>
+      </EnterpriseSearchSearchExperiencesPageTemplate>
     );
 
     expect(wrapper.type()).toEqual(EnterpriseSearchPageTemplateWrapper);
@@ -35,7 +35,7 @@ describe('EnterpriseSearchElasticsearchPageTemplate', () => {
   describe('page chrome', () => {
     it('takes a breadcrumb array & renders a product-specific page chrome', () => {
       const wrapper = shallow(
-        <EnterpriseSearchElasticsearchPageTemplate pageChrome={['Some page']} />
+        <EnterpriseSearchSearchExperiencesPageTemplate pageChrome={['Some page']} />
       );
       const setPageChrome = wrapper
         .find(EnterpriseSearchPageTemplateWrapper)
@@ -49,7 +49,7 @@ describe('EnterpriseSearchElasticsearchPageTemplate', () => {
   describe('page telemetry', () => {
     it('takes a metric & renders product-specific telemetry viewed event', () => {
       const wrapper = shallow(
-        <EnterpriseSearchElasticsearchPageTemplate pageViewTelemetry="some_page" />
+        <EnterpriseSearchSearchExperiencesPageTemplate pageViewTelemetry="some_page" />
       );
 
       expect(wrapper.find(SendEnterpriseSearchTelemetry).prop('action')).toEqual('viewed');
@@ -60,7 +60,7 @@ describe('EnterpriseSearchElasticsearchPageTemplate', () => {
   describe('props', () => {
     it('passes down any ...pageTemplateProps that EnterpriseSearchPageTemplateWrapper accepts', () => {
       const wrapper = shallow(
-        <EnterpriseSearchElasticsearchPageTemplate
+        <EnterpriseSearchSearchExperiencesPageTemplate
           pageHeader={{ pageTitle: 'hello world' }}
           isLoading={false}
           emptyState={<div />}
