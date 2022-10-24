@@ -77,6 +77,7 @@ export function Histogram({
 
   const { euiTheme } = useEuiTheme();
   const chartCss = css`
+    position: relative;
     flex-grow: 1;
 
     & > div {
@@ -85,6 +86,13 @@ export function Histogram({
 
     & .echLegend .echLegendList {
       padding-right: ${euiTheme.size.s};
+    }
+
+    & > .euiLoadingChart {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
     }
   `;
 
