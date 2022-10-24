@@ -531,7 +531,7 @@ const MONITOR_ID_ITEM_TEXT = i18n.translate('xpack.synthetics.monitorList.monito
 });
 
 const CLOSE_FLYOUT_TEXT = i18n.translate('xpack.synthetics.monitorList.closeFlyoutText', {
-  defaultMessage: 'Cancel',
+  defaultMessage: 'Close',
 });
 
 const GO_TO_MONITOR_LINK_TEXT = i18n.translate('xpack.synthetics.monitorList.goToMonitorLinkText', {
