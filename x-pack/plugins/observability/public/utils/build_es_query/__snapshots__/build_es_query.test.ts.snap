@@ -167,34 +167,3 @@ Object {
 }
 `;
 
-exports[`buildEsQuery should generate correct es query for {"timeRange":{"from":"now-15min","to":"now"},"kuery":"kibana.alert.status: \\"recovered\\""} 1`] = `
-Object {
-  "bool": Object {
-    "filter": Array [
-      Object {
-        "bool": Object {
-          "minimum_should_match": 1,
-          "should": Array [
-            Object {
-              "match_phrase": Object {
-                "kibana.alert.status": "recovered",
-              },
-            },
-          ],
-        },
-      },
-      Object {
-        "range": Object {
-          "@timestamp": Object {
-            "format": "strict_date_optional_time",
-            "lte": "2022-10-24T08:36:17.068Z",
-          },
-        },
-      },
-    ],
-    "must": Array [],
-    "must_not": Array [],
-    "should": Array [],
-  },
-}
-`;
