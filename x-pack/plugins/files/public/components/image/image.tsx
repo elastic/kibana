@@ -32,15 +32,6 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
    * Emits when the image first becomes visible
    */
   onFirstVisible?: () => void;
-
-  /**
-   * As an optimisation images are only loaded when they are visible.
-   * This setting overrides this behavior and loads an image as soon as the
-   * component mounts.
-   *
-   * @default true
-   */
-  lazy?: boolean;
 }
 
 /**
@@ -55,25 +46,12 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
  */
 export const Image = React.forwardRef<HTMLImageElement, Props>(
   (
-    {
-      src,
-      alt,
-      onFirstVisible,
-      onLoad,
-      onError,
-      meta,
-      wrapperProps,
-      size = 'original',
-      lazy = true,
-      ...rest
-    },
+    { src, alt, onFirstVisible, onLoad, onError, meta, wrapperProps, size = 'original', ...rest },
     ref
   ) => {
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
     const [blurDelayExpired, setBlurDelayExpired] = useState(false);
     const { isVisible, ref: observerRef } = useViewportObserver({ onFirstVisible });
-
-    const loadImage = lazy ? isVisible : true;
 
     useEffect(() => {
       let unmounted = false;
@@ -112,8 +90,7 @@ export const Image = React.forwardRef<HTMLImageElement, Props>(
           observerRef={observerRef}
           ref={ref}
           size={size}
-          hidden={!loadImage}
-          src={loadImage ? src : undefined}
+          src={isVisible ? src : undefined}
           alt={alt}
           onLoad={(ev) => {
             setIsLoaded(true);
