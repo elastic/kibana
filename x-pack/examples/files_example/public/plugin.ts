@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AppNavLinkStatus } from '@kbn/core-application-browser';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_NAME, exampleFileKind, MyImageMetadata } from '../common';
 import { FilesExamplePluginsStart, FilesExamplePluginsSetup } from './types';
@@ -12,12 +13,22 @@ import { FilesExamplePluginsStart, FilesExamplePluginsSetup } from './types';
 export class FilesExamplePlugin
   implements Plugin<unknown, unknown, FilesExamplePluginsSetup, FilesExamplePluginsStart>
 {
-  public setup(core: CoreSetup<FilesExamplePluginsStart>, { files }: FilesExamplePluginsSetup) {
+  public setup(
+    core: CoreSetup<FilesExamplePluginsStart>,
+    { files, developerExamples }: FilesExamplePluginsSetup
+  ) {
     files.registerFileKind(exampleFileKind);
+
+    developerExamples.register({
+      appId: PLUGIN_ID,
+      title: PLUGIN_NAME,
+      description: 'Example plugin for the files plugin',
+    });
 
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
+      navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application');

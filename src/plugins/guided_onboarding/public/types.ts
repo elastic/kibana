@@ -17,10 +17,6 @@ export interface GuidedOnboardingPluginStart {
   guidedOnboardingApi?: GuidedOnboardingApi;
 }
 
-export interface ClientConfigType {
-  ui: boolean;
-}
-
 export interface GuidedOnboardingApi {
   setup: (httpClient: HttpSetup) => void;
   fetchActiveGuideState$: () => Observable<GuideState | undefined>;
