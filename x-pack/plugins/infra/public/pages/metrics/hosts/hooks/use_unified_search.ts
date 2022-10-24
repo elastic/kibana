@@ -13,6 +13,7 @@ import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
 import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
+import { useTimeRangeUrlState } from './use_time_range_url_state';
 
 const DEFAULT_FROM_MINUTES_VALUE = 15;
 
@@ -25,9 +26,12 @@ export const useUnifiedSearch = () => {
     data: { query: queryManager },
   } = services;
 
+  const { timeRange: selectedTimeRange, setTimeRange: setSelectedTimeRange } =
+    useTimeRangeUrlState();
+
   const [getTime, setTime] = useKibanaTimefilterTime({
-    from: `now-${DEFAULT_FROM_MINUTES_VALUE}m`,
-    to: 'now',
+    from: selectedTimeRange.startTime,
+    to: selectedTimeRange.endTime,
   });
   const { queryString, filterManager } = queryManager;
 
@@ -42,10 +46,28 @@ export const useUnifiedSearch = () => {
     to: toTS,
   };
 
+  const handleSelectedTimeRangeChange = useCallback(
+    (selectedTime: { startTime: string; endTime: string; isInvalid: boolean }) => {
+      if (selectedTime.isInvalid) {
+        return;
+      }
+      setSelectedTimeRange(selectedTime);
+    },
+    [setSelectedTimeRange]
+  );
+
   const submitFilterChange = useCallback(
     (query?: Query, dateRange?: TimeRange, filters?: Filter[]) => {
       if (filters) {
         filterManager.setFilters(filters);
+      }
+
+      if (dateRange) {
+        handleSelectedTimeRangeChange({
+          startTime: dateRange.from,
+          endTime: dateRange.to,
+          isInvalid: false,
+        });
       }
 
       setTime({
@@ -58,7 +80,7 @@ export const useUnifiedSearch = () => {
       // This can be removed once we get the state from the URL
       forceUpdate();
     },
-    [filterManager, queryString, getTime, setTime]
+    [setTime, getTime, queryString, filterManager, handleSelectedTimeRangeChange]
   );
 
   const saveQuery = useCallback(
