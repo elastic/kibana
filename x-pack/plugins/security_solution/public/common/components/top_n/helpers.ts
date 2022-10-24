@@ -93,7 +93,7 @@ export const alertEvents: TopNOption[] = [
 ];
 
 /** A (stable) array containing the default Top N options */
-export const defaultOptions = [...rawEvents, ...alertEvents];
+export const defaultOptions = [...alertEvents, ...rawEvents];
 
 /**
  * Returns the options to be displayed in a Top N view select. When
