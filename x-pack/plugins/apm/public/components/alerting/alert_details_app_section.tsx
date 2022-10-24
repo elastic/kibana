@@ -38,7 +38,7 @@ export function AlertDetailsAppSection({ rule }: AlertDetailsAppSectionProps) {
     params.aggregationType as LatencyAggregationType;
   const serviceName = String(params.serviceName);
   const transactionType = String(params.transactionType);
-  const comparisonEnabled = true;
+  const comparisonEnabled = false;
   const offset = '1d';
   const rangeFrom = 'now-2h';
   const rangeTo = 'now';
