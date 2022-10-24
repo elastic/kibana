@@ -19,7 +19,7 @@ interface SecurityTourStep {
   stepId: SecurityStepId;
 }
 
-const SecurityTourStep = ({ step, stepId }: SecurityTourStep) => {
+export const SecurityTourStep = ({ step, stepId }: SecurityTourStep) => {
   const { activeStep, incrementStep, isTourShown } = useTourContext();
   const tourStep = useMemo(
     () => securityTourConfig[stepId].find((config) => config.step === step),
@@ -69,7 +69,7 @@ const SecurityTourStep = ({ step, stepId }: SecurityTourStep) => {
         </>
       }
       footerAction={footerAction}
-      // we wouldn't even mount if it was not open
+      // we would not have mounted this component if it was not open
       isStepOpen
       // guided onboarding does not allow skipping tour through the steps
       onFinish={() => null}

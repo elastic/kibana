@@ -55,7 +55,7 @@ const alertsCasesConfig: StepConfig[] = [
     ),
     anchor: `[tour-step="${getTourAnchor(1, SecurityStepId.alertsCases)}"]`,
     anchorPosition: 'downCenter',
-    dataTestSubj: 'tourStep-alerts-1',
+    dataTestSubj: getTourAnchor(1, SecurityStepId.alertsCases),
   },
   {
     ...defaultConfig,
@@ -73,7 +73,7 @@ const alertsCasesConfig: StepConfig[] = [
     anchor: `[tour-step="${getTourAnchor(2, SecurityStepId.alertsCases)}"]`,
     anchorPosition: 'rightUp',
     initialFocus: `[tour-step="${getTourAnchor(2, SecurityStepId.alertsCases)}"]`,
-    dataTestSubj: 'tourStep-alerts-2',
+    dataTestSubj: getTourAnchor(2, SecurityStepId.alertsCases),
     hideNextButton: true,
   },
   {
@@ -94,7 +94,7 @@ const alertsCasesConfig: StepConfig[] = [
     ),
     anchor: `[tour-step="${getTourAnchor(3, SecurityStepId.alertsCases)}"]`,
     anchorPosition: 'leftUp',
-    dataTestSubj: 'tourStep-alerts-3',
+    dataTestSubj: getTourAnchor(3, SecurityStepId.alertsCases),
   },
   {
     ...defaultConfig,
@@ -107,7 +107,7 @@ const alertsCasesConfig: StepConfig[] = [
     }),
     anchor: `[tour-step="${getTourAnchor(4, SecurityStepId.alertsCases)}"]`,
     anchorPosition: 'upRight',
-    dataTestSubj: 'tourStep-alerts-4',
+    dataTestSubj: getTourAnchor(4, SecurityStepId.alertsCases),
     hideNextButton: true,
   },
   {
@@ -124,7 +124,7 @@ const alertsCasesConfig: StepConfig[] = [
     ),
     anchor: `[data-test-subj="create-case-flyout"]`,
     anchorPosition: 'leftUp',
-    dataTestSubj: 'tourStep-alerts-5',
+    dataTestSubj: getTourAnchor(5, SecurityStepId.alertsCases),
     hideNextButton: true,
   },
 ];
