@@ -1075,7 +1075,7 @@
         "metric": {
           "app": "apm",
           "description": "Memory usage of the container",
-          "field": "beats_stats.metrics.beat.cgroup.memory.mem.usage.bytes",
+          "field": "beats_stats.metrics.beat.cgroup.mem.usage.bytes",
           "format": "0,0.0 b",
           "hasCalculation": false,
           "isDerivative": false,

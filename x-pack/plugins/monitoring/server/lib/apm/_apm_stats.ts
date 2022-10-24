@@ -9,7 +9,7 @@ import type { ElasticsearchResponse } from '../../../common/types/es';
 
 const getMemPath = (cgroup?: boolean) =>
   cgroup
-    ? 'beats_stats.metrics.beat.cgroup.memory.mem.usage.bytes'
+    ? 'beats_stats.metrics.beat.cgroup.mem.usage.bytes'
     : 'beats_stats.metrics.beat.memstats.rss';
 
 export const getDiffCalculation = (max: number | null, min: number | null) => {

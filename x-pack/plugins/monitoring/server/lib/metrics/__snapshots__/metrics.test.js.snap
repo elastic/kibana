@@ -623,7 +623,7 @@ Object {
     "derivativeNormalizedUnits": true,
     "description": "Memory usage of the container",
     "docType": undefined,
-    "field": "beats_stats.metrics.beat.cgroup.memory.mem.usage.bytes",
+    "field": "beats_stats.metrics.beat.cgroup.mem.usage.bytes",
     "fieldSource": undefined,
     "format": "0,0.0 b",
     "getDateHistogramSubAggs": undefined,
