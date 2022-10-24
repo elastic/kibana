@@ -79,7 +79,7 @@ export async function getIsUsingServiceDestinationMetrics({
         },
         body: {
           track_total_hits: 1,
-          size: 1,
+          size: 0,
           terminate_after: 1,
           query: {
             bool: {

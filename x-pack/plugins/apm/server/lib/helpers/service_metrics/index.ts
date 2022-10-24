@@ -54,7 +54,7 @@ export async function getHasServicesMetrics({
       },
       body: {
         track_total_hits: 1,
-        size: 1,
+        size: 0,
         query: {
           bool: {
             filter: [
