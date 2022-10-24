@@ -7,37 +7,47 @@
 
 import React, { FocusEventHandler } from 'react';
 import { EuiComboBox } from '@elastic/eui';
+import { DataView } from '@kbn/data-views-plugin/common';
 
-export interface ESIndexSelectProps {
+type DataViewOption = Pick<DataView, 'id' | 'name' | 'title'>;
+
+export interface ESDataViewSelectProps {
   loading: boolean;
   value: string;
-  indices: string[];
-  onChange: (index: string) => void;
+  dataViews: DataViewOption[];
+  onChange: (string: string) => void;
   onBlur: FocusEventHandler<HTMLDivElement> | undefined;
   onFocus: FocusEventHandler<HTMLDivElement> | undefined;
 }
 
 const defaultIndex = '_all';
+const defaultOption = { value: defaultIndex, label: defaultIndex };
 
-export const ESIndexSelect: React.FunctionComponent<ESIndexSelectProps> = ({
+export const ESDataViewSelect: React.FunctionComponent<ESDataViewSelectProps> = ({
   value = defaultIndex,
   loading,
-  indices,
+  dataViews,
   onChange,
   onFocus,
   onBlur,
 }) => {
-  const selectedOption = value !== defaultIndex ? [{ label: value }] : [];
-  const options = indices.map((index) => ({ label: index }));
+  const selectedDataView = dataViews.find((view) => value === view.title) as DataView;
+
+  const selectedOption = selectedDataView
+    ? { value: selectedDataView.title, label: selectedDataView.name }
+    : { value, label: value };
+  const options = dataViews.map(({ name, title }) => ({ value: title, label: name }));
 
   return (
     <EuiComboBox
-      selectedOptions={selectedOption}
-      onChange={([index]) => onChange(index?.label ?? defaultIndex)}
+      selectedOptions={[selectedOption]}
+      onChange={([view]) => {
+        onChange(view.value || defaultOption.value);
+      }}
       onSearchChange={(searchValue) => {
         // resets input when user starts typing
         if (searchValue) {
-          onChange(defaultIndex);
+          onChange(defaultOption.value);
         }
       }}
       onBlur={onBlur}
@@ -46,7 +56,7 @@ export const ESIndexSelect: React.FunctionComponent<ESIndexSelectProps> = ({
       options={options}
       singleSelection={{ asPlainText: true }}
       isClearable={false}
-      onCreateOption={(input) => onChange(input || defaultIndex)}
+      onCreateOption={(input) => onChange(input || defaultOption.value)}
       compressed
     />
   );

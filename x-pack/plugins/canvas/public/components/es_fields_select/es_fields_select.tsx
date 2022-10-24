@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
-import { getFields } from '../../lib/es_service';
+import { useDataViewsService } from '../../services';
 import {
   ESFieldsSelect as Component,
   ESFieldsSelectProps as Props,
@@ -21,6 +21,7 @@ export const ESFieldsSelect: React.FunctionComponent<ESFieldsSelectProps> = (pro
   const [fields, setFields] = useState<string[]>([]);
   const prevIndex = usePrevious(index);
   const mounted = useRef(true);
+  const { getFields } = useDataViewsService();
 
   useEffect(() => {
     if (prevIndex !== index) {
@@ -36,7 +37,7 @@ export const ESFieldsSelect: React.FunctionComponent<ESFieldsSelectProps> = (pro
         }
       });
     }
-  }, [fields, index, onChange, prevIndex, selected]);
+  }, [fields, index, onChange, prevIndex, selected, getFields]);
 
   useEffect(
     () => () => {
