@@ -15,6 +15,7 @@ import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { CspInlineDescriptionList } from '../../../../components/csp_inline_description_list';
 import type { Evaluation } from '../../../../../common/types';
 import { CspFinding } from '../../../../../common/schemas/csp_finding';
@@ -37,6 +38,7 @@ import { ResourceFindingsTable } from './resource_findings_table';
 import { FindingsSearchBar } from '../../layout/findings_search_bar';
 import { ErrorCallout } from '../../layout/error_callout';
 import { FindingsDistributionBar } from '../../layout/findings_distribution_bar';
+import { LOCAL_STORAGE_PAGINATION_RESOURCE_FINDINGS_KEY } from '../../../../../common/constants';
 
 const getDefaultQuery = ({
   query,
@@ -90,6 +92,10 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const params = useParams<{ resourceId: string }>();
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
+  const [pageSizes, setPageSize] = useLocalStorage(
+    LOCAL_STORAGE_PAGINATION_RESOURCE_FINDINGS_KEY,
+    urlQuery.pageSize
+  );
 
   /**
    * Page URL query to ES query
@@ -105,7 +111,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
    */
   const resourceFindings = useResourceFindings({
     ...getPaginationQuery({
-      pageSize: urlQuery.pageSize,
+      pageSize: pageSizes,
       pageIndex: urlQuery.pageIndex,
     }),
     sort: urlQuery.sort,
@@ -195,16 +201,17 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
             loading={resourceFindings.isFetching}
             items={resourceFindings.data?.page || []}
             pagination={getPaginationTableParams({
-              pageSize: urlQuery.pageSize,
+              pageSize: pageSizes,
               pageIndex: urlQuery.pageIndex,
               totalItemCount: resourceFindings.data?.total || 0,
             })}
             sorting={{
               sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
             }}
-            setTableOptions={({ page, sort }) =>
-              setUrlQuery({ pageIndex: page.index, pageSize: page.size, sort })
-            }
+            setTableOptions={({ page, sort }) => {
+              setPageSize(page.size);
+              setUrlQuery({ pageIndex: page.index, pageSize: page.size, sort });
+            }}
             onAddFilter={(field, value, negate) =>
               setUrlQuery({
                 pageIndex: 0,
