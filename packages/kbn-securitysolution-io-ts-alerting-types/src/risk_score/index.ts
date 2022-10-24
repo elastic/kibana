@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
@@ -16,6 +14,7 @@ import { Either } from 'fp-ts/lib/Either';
  *   - Natural Number (positive integer and not a float),
  *   - Between the values [0 and 100] inclusive.
  */
+export type RiskScore = t.TypeOf<typeof RiskScore>;
 export const RiskScore = new t.Type<number, number, unknown>(
   'RiskScore',
   t.number.is,
@@ -26,11 +25,3 @@ export const RiskScore = new t.Type<number, number, unknown>(
   },
   t.identity
 );
-
-export type RiskScoreC = typeof RiskScore;
-
-export const risk_score = RiskScore;
-export type RiskScore = t.TypeOf<typeof risk_score>;
-
-export const riskScoreOrUndefined = t.union([risk_score, t.undefined]);
-export type RiskScoreOrUndefined = t.TypeOf<typeof riskScoreOrUndefined>;

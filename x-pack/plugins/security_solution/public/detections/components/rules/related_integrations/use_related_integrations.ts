@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 
-import type { RelatedIntegrationArray } from '../../../../../common/detection_engine/schemas/common';
+import type { RelatedIntegrationArray } from '../../../../../common/detection_engine/rule_schema';
 import type { IntegrationDetails } from './integration_details';
 import { calculateIntegrationDetails } from './integration_details';
 import { useInstalledIntegrations } from './use_installed_integrations';
