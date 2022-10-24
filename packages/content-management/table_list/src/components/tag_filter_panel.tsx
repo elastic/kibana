@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState, useEffect, useCallback, useRef, MouseEvent } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import type { FC, MouseEvent } from 'react';
 import {
   Query,
   EuiPopover,
@@ -31,6 +32,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { useServices } from '../services';
 import type { Tag } from '../types';
+import { CtrlClickDetect } from './ctrl_click_detect';
 
 const toArray = (item: unknown) => (Array.isArray(item) ? item : [item]);
 
@@ -70,12 +72,6 @@ export const TagFilterPanel: FC<Props> = ({
   const [options, setOptions] = useState<TagOptionItem[]>([]);
   const [tagSelection, setTagSelection] = useState<TagSelection>({});
   const { navigateToUrl, currentAppId$, getTagManagementUrl } = useServices();
-  const optionItemsRef = useRef<
-    Array<{
-      tag: Tag;
-      el: HTMLDivElement | HTMLSpanElement | null;
-    }>
-  >([]);
   const isSearchVisible = options.length > 10;
   const totalActiveFilters = Object.keys(tagSelection).length;
 
@@ -110,20 +106,13 @@ export const TagFilterPanel: FC<Props> = ({
     };
   }
 
-  const togglePopOver = () => {
-    setIsPopoverOpen((prev) => {
-      if (prev === false) {
-        optionItemsRef.current = [];
-        // Refresh the tag list whenever we open the pop over
-        updateTagList();
-      }
-      return !prev;
-    });
-  };
+  const togglePopOver = useCallback(() => {
+    setIsPopoverOpen((prev) => !prev);
+  }, []);
 
-  const closePopover = () => {
+  const closePopover = useCallback(() => {
     setIsPopoverOpen(false);
-  };
+  }, []);
 
   const onSelectChange = useCallback(
     (updatedOptions: TagOptionItem[]) => {
@@ -136,66 +125,67 @@ export const TagFilterPanel: FC<Props> = ({
   );
 
   const onOptionClick = useCallback(
-    (tag: Tag) => (e: MouseEvent) => {
-      e.preventDefault();
+    (tag: Tag) =>
+      (e: MouseEvent, { isCtrlKey }: { isCtrlKey: boolean }) => {
+        e.preventDefault();
 
-      if (e.ctrlKey) {
-        addOrRemoveExcludeTagFilter(tag);
-      } else {
-        addOrRemoveIncludeTagFilter(tag);
-      }
+        if (isCtrlKey) {
+          addOrRemoveExcludeTagFilter(tag);
+        } else {
+          addOrRemoveIncludeTagFilter(tag);
+        }
 
-      setIsPopoverOpen(false);
-      e.stopPropagation();
-    },
+        setIsPopoverOpen(false);
+
+        e.stopPropagation();
+      },
     [addOrRemoveIncludeTagFilter, addOrRemoveExcludeTagFilter]
   );
 
   const updateTagList = useCallback(() => {
     const tags = getTagList();
 
-    setOptions(
-      tags.map((tag, i) => {
-        const { name, id, color } = tag;
-        let checked;
-        if (tagSelection[name]) {
-          checked = tagSelection[name] === 'include' ? ('on' as const) : ('off' as const);
-        }
-        return {
-          name,
-          label: name,
-          value: id ?? '',
-          tag,
-          checked,
-          view: (
-            <EuiFlexGroup
-              gutterSize="xs"
-              justifyContent="spaceBetween"
-              onClick={onOptionClick(tag)}
-              ref={(el) => {
-                optionItemsRef.current[i] = { tag, el };
-              }}
-            >
-              <EuiFlexItem>
-                <EuiHealth
-                  color={color}
-                  data-test-subj={`tag-searchbar-option-${testSubjFriendly(name)}`}
-                >
-                  <span>
-                    <EuiText>{name}</EuiText>
-                  </span>
-                </EuiHealth>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color={checked !== undefined ? 'accent' : undefined}>
-                  {tagsToTableItemMap[id ?? '']?.length ?? 0}
-                </EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-        };
-      })
-    );
+    const tagsToSelectOptions = tags.map((tag) => {
+      const { name, id, color } = tag;
+      let checked: 'on' | 'off' | undefined;
+
+      if (tagSelection[name]) {
+        checked = tagSelection[name] === 'include' ? 'on' : 'off';
+      }
+
+      return {
+        name,
+        label: name,
+        value: id ?? '',
+        tag,
+        checked,
+        view: (
+          <CtrlClickDetect onClick={onOptionClick(tag)}>
+            {(ref) => (
+              <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" ref={ref}>
+                <EuiFlexItem>
+                  <EuiHealth
+                    color={color}
+                    data-test-subj={`tag-searchbar-option-${testSubjFriendly(name)}`}
+                  >
+                    <span>
+                      <EuiText>{name}</EuiText>
+                    </span>
+                  </EuiHealth>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color={checked !== undefined ? 'accent' : undefined}>
+                    {tagsToTableItemMap[id ?? '']?.length ?? 0}
+                  </EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
+          </CtrlClickDetect>
+        ),
+      };
+    });
+
+    setOptions(tagsToSelectOptions);
   }, [getTagList, tagsToTableItemMap, tagSelection, onOptionClick]);
 
   useEffect(() => {
@@ -223,24 +213,10 @@ export const TagFilterPanel: FC<Props> = ({
 
   useEffect(() => {
     if (isPopoverOpen) {
-      setImmediate(() => {
-        optionItemsRef.current.forEach(({ el, tag }) => {
-          if (el) {
-            el.addEventListener(
-              'contextmenu',
-              (e) => {
-                // Disable context menu as on Mac "ctrl + click" equals "right clicking" which opens the context menu
-                e.preventDefault();
-                addOrRemoveExcludeTagFilter(tag);
-                setIsPopoverOpen(false);
-              },
-              false
-            );
-          }
-        });
-      });
+      // Refresh the tag list whenever we open the pop over
+      updateTagList();
     }
-  }, [isPopoverOpen, addOrRemoveExcludeTagFilter]);
+  }, [isPopoverOpen, updateTagList]);
 
   return (
     <>
