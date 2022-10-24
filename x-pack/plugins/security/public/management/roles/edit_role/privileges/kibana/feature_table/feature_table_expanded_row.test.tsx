@@ -279,4 +279,78 @@ describe('FeatureTableExpandedRow', () => {
 
     expect(onChange).toHaveBeenCalledWith('with_sub_features', ['read']);
   });
+
+  it('require all spaces enabled and allSpacesSelected is false: option is enabled', () => {
+    const role = createRole([
+      {
+        base: [],
+        feature: {
+          with_require_all_spaces_sub_features: ['cool_toggle_1'],
+        },
+        spaces: ['foo'],
+      },
+    ]);
+
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+    const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+    const feature = kibanaPrivileges.getSecuredFeature('with_require_all_spaces_sub_features');
+    const onChange = jest.fn();
+
+    const wrapper = mountWithIntl(
+      <FeatureTableExpandedRow
+        feature={feature}
+        privilegeIndex={0}
+        privilegeCalculator={calculator}
+        selectedFeaturePrivileges={['cool_toggle_1']}
+        onChange={onChange}
+        licenseAllowsSubFeatPrivCustomization={true}
+        allSpacesSelected={false}
+      />
+    );
+
+    act(() => {
+      findTestSubject(wrapper, 'customizeSubFeaturePrivileges').simulate('click');
+    });
+
+    const object = findTestSubject(wrapper, 'cool_toggle_1');
+
+    expect(object.hasClass('euiButtonGroup--isDisabled')).toBeFalsy();
+  });
+
+  it('require all spaces enabled and allSpacesSelected is true: option is disabled', () => {
+    const role = createRole([
+      {
+        base: [],
+        feature: {
+          with_require_all_spaces_sub_features: ['cool_toggle_1'],
+        },
+        spaces: ['foo'],
+      },
+    ]);
+
+    const kibanaPrivileges = createKibanaPrivileges(kibanaFeatures);
+    const calculator = new PrivilegeFormCalculator(kibanaPrivileges, role);
+    const feature = kibanaPrivileges.getSecuredFeature('with_require_all_spaces_sub_features');
+    const onChange = jest.fn();
+
+    const wrapper = mountWithIntl(
+      <FeatureTableExpandedRow
+        feature={feature}
+        privilegeIndex={0}
+        privilegeCalculator={calculator}
+        selectedFeaturePrivileges={['cool_toggle_1']}
+        onChange={onChange}
+        licenseAllowsSubFeatPrivCustomization={true}
+        allSpacesSelected={true}
+      />
+    );
+
+    act(() => {
+      findTestSubject(wrapper, 'customizeSubFeaturePrivileges').simulate('click');
+    });
+
+    const object = findTestSubject(wrapper, 'mutexSubFeaturePrivilegeControl');
+
+    expect(object.hasClass('euiButtonGroup--isDisabled')).toBeTruthy();
+  });
 });
