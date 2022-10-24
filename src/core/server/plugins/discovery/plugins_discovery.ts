@@ -65,7 +65,7 @@ export function discover({
     tap((x) => {
       // @ts-expect-error
       global.serverStartupBreakdown.preboot['discovered-paths'] =
-      // @ts-expect-error
+        // @ts-expect-error
         performance.now() - global.initTime;
     }),
     mergeMap((pathAndErrors) => {
@@ -83,7 +83,7 @@ export function discover({
     tap((x) => {
       // @ts-expect-error
       global.serverStartupBreakdown.preboot['created-plugins'] =
-      // @ts-expect-error
+        // @ts-expect-error
         performance.now() - global.initTime;
     }),
     shareReplay()

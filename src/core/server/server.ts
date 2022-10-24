@@ -431,7 +431,7 @@ export class Server {
 
     // @ts-expect-error
     global.serverStartupBreakdown.start['saved-object-start-promise'] =
-    // @ts-expect-error
+      // @ts-expect-error
       performance.now() - global.initTime;
 
     soStartSpan?.end();
@@ -479,7 +479,9 @@ export class Server {
     // @ts-expect-error
     global.serverStartupBreakdown.start['report-kibana'] = performance.now() - global.initTime;
     // @ts-expect-error
-    this.log.info('SERVER STARTUP TIMING ' + JSON.stringify(global.serverStartupBreakdown, null, 2));
+    this.log.info(
+      'SERVER STARTUP TIMING ' + JSON.stringify(global.serverStartupBreakdown, null, 2)
+    );
     return this.coreStart;
   }
 
