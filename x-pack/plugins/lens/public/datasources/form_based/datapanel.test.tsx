@@ -922,21 +922,6 @@ describe('FormBased Data Panel', () => {
       );
     });
 
-    // it('should allow field details when timeout', () => {
-    //   const wrapper = mountWithIntl(
-    //     <InnerFormBasedDataPanel
-    //       {...props}
-    //       frame={getFrameAPIMock({ existenceFetchTimeout: true })}
-    //     />
-    //   );
-    //
-    //   expect(wrapper.find(FieldListGrouped).prop('fieldGroups')).toEqual(
-    //     expect.objectContaining({
-    //       AvailableFields: expect.objectContaining({ hideDetails: false }),
-    //     })
-    //   );
-    // });
-
     it('should filter down by name', async () => {
       const wrapper = await mountAndWaitForLazyModules(<InnerFormBasedDataPanel {...props} />);
 
