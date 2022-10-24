@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
-import { getSuggestions } from './get_suggestions';
+import { getSuggestionsWithTermsEnum } from './get_suggestions_with_terms_enum';
 import { getSuggestionsWithTermsAggregation } from './get_suggestions_with_terms_aggregation';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
@@ -41,28 +41,32 @@ const suggestionsRoute = createApmServerRoute({
       maxSuggestions
     );
 
-    const suggestions = serviceName
-      ? await getSuggestionsWithTermsAggregation({
-          fieldName,
-          fieldValue,
-          searchAggregatedTransactions,
-          serviceName,
-          setup,
-          size,
-          start,
-          end,
-        })
-      : await getSuggestions({
-          fieldName,
-          fieldValue,
-          searchAggregatedTransactions,
-          setup,
-          size,
-          start,
-          end,
-        });
+    if (!serviceName) {
+      const suggestions = await getSuggestionsWithTermsEnum({
+        fieldName,
+        fieldValue,
+        searchAggregatedTransactions,
+        setup,
+        size,
+        start,
+        end,
+      });
 
-    return suggestions;
+      if (suggestions.terms.length > 0) {
+        return suggestions;
+      }
+    }
+
+    return getSuggestionsWithTermsAggregation({
+      fieldName,
+      fieldValue,
+      searchAggregatedTransactions,
+      serviceName,
+      setup,
+      size,
+      start,
+      end,
+    });
   },
 });
 

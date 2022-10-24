@@ -18,7 +18,7 @@ import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
 import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
-import { ServiceAlertTrigger } from '../service_alert_trigger';
+import { APMFields } from '../service_alert_trigger';
 
 export interface RuleParams {
   windowSize?: number;
@@ -32,12 +32,11 @@ interface Props {
   ruleParams: RuleParams;
   metadata?: AlertMetadata;
   setRuleParams: (key: string, value: any) => void;
-  setRuleProperty: (key: string, value: any) => void;
 }
 
 export function ErrorCountAlertTrigger(props: Props) {
   const { services } = useKibana();
-  const { ruleParams, metadata, setRuleParams, setRuleProperty } = props;
+  const { ruleParams, metadata, setRuleParams } = props;
 
   useEffect(() => {
     createCallApmApi(services as CoreStart);
@@ -126,11 +125,10 @@ export function ErrorCountAlertTrigger(props: Props) {
   );
 
   return (
-    <ServiceAlertTrigger
+    <APMFields
       defaults={params}
       fields={fields}
       setRuleParams={setRuleParams}
-      setRuleProperty={setRuleProperty}
       chartPreview={chartPreview}
     />
   );

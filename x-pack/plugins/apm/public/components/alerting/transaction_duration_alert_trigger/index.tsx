@@ -5,13 +5,29 @@
  * 2.0.
  */
 
-import { EuiSelect } from '@elastic/eui';
+import {
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiSelect,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiTitle,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiPopover,
+  EuiIcon,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { defaults, map, omit } from 'lodash';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  TRANSACTION_NAME,
+  CONTAINER_ID,
+  KUBERNETES_POD_NAME,
+} from '../../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
@@ -22,13 +38,13 @@ import {
 } from '../../shared/charts/transaction_charts/helper';
 import { ChartPreview } from '../chart_preview';
 import {
+  CustomFilterField,
   EnvironmentField,
   IsAboveField,
   ServiceField,
   TransactionTypeField,
 } from '../fields';
 import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
-import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
 
 export interface RuleParams {
@@ -66,17 +82,14 @@ interface Props {
   ruleParams: RuleParams;
   metadata?: AlertMetadata;
   setRuleParams: (key: string, value: any) => void;
-  setRuleProperty: (key: string, value: any) => void;
 }
 
-export function TransactionDurationAlertTrigger(props: Props) {
+export function TransactionDurationAlertTrigger({
+  ruleParams,
+  metadata,
+  setRuleParams,
+}: Props) {
   const { services } = useKibana();
-  const { ruleParams, metadata, setRuleParams, setRuleProperty } = props;
-
-  useEffect(() => {
-    createCallApmApi(services as CoreStart);
-  }, [services]);
-
   const params = defaults(
     {
       ...omit(metadata, ['start', 'end']),
@@ -90,6 +103,13 @@ export function TransactionDurationAlertTrigger(props: Props) {
       environment: ENVIRONMENT_ALL.value,
     }
   );
+
+  const [customFilters, setCustomFilters] = useState<Record<string, string>>(
+    {}
+  );
+
+  useEffect(() => createCallApmApi(services as CoreStart), [services]);
+  useInitialRuleValues({ ruleParams: params, setRuleParams });
 
   const { data } = useFetcher(
     (callApmApi) => {
@@ -144,20 +164,22 @@ export function TransactionDurationAlertTrigger(props: Props) {
     />
   );
 
-  const fields = [
+  const filterFields = [
     <ServiceField
-      allowAll={false}
       currentValue={params.serviceName}
       onChange={(value) => setRuleParams('serviceName', value)}
-    />,
-    <TransactionTypeField
-      currentValue={params.transactionType}
-      onChange={(value) => setRuleParams('transactionType', value)}
     />,
     <EnvironmentField
       currentValue={params.environment}
       onChange={(value) => setRuleParams('environment', value)}
     />,
+    <TransactionTypeField
+      currentValue={params.transactionType}
+      onChange={(value) => setRuleParams('transactionType', value)}
+    />,
+  ];
+
+  const fields = [
     <PopoverExpression
       value={params.aggregationType}
       title={i18n.translate('xpack.apm.transactionDurationAlertTrigger.when', {
@@ -200,13 +222,69 @@ export function TransactionDurationAlertTrigger(props: Props) {
   ];
 
   return (
-    <ServiceAlertTrigger
-      chartPreview={chartPreview}
-      defaults={params}
-      fields={fields}
-      setRuleParams={setRuleParams}
-      setRuleProperty={setRuleProperty}
-    />
+    <>
+      <EuiSpacer size="l" />
+      <EuiTitle size="xs">
+        <h4>Filters</h4>
+      </EuiTitle>
+      <EuiFlexGroup gutterSize="m" direction="column">
+        {filterFields.map((field, index) => (
+          <EuiFlexItem key={index}>{field}</EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+
+      <EuiFlexGroup gutterSize="m" direction="column">
+        {Object.entries(customFilters).map(([fieldName, fieldValue]) => (
+          <>
+            <EuiFlexItem key={fieldName}>
+              <EuiFlexGroup gutterSize="m" direction="row">
+                <EuiFlexItem>
+                  <CustomFilterField
+                    serviceName={params.serviceName}
+                    fieldName={fieldName}
+                    currentValue={fieldValue}
+                    title={fieldName}
+                    onChange={(value) => {
+                      if (value) {
+                        setCustomFilters((state) => {
+                          return { ...state, [fieldName]: value };
+                        });
+                      }
+                    }}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiIcon type="cross" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </>
+        ))}
+      </EuiFlexGroup>
+
+      <EuiSpacer size="l" />
+
+      <AddFilterButton
+        customFilters={customFilters}
+        onClickAddCustomFilter={(value) =>
+          setCustomFilters((state) => ({ ...state, [value]: '' }))
+        }
+      />
+
+      <EuiSpacer size="l" />
+      <EuiTitle size="xs">
+        <h4>Conditions</h4>
+      </EuiTitle>
+      <EuiFlexGrid gutterSize="l" direction="row" columns={2}>
+        {fields.map((field, index) => (
+          <EuiFlexItem grow={false} key={index}>
+            {field}
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
+      {chartPreview}
+      <EuiSpacer size="m" />
+    </>
   );
 }
 
@@ -214,3 +292,103 @@ export function TransactionDurationAlertTrigger(props: Props) {
 //
 // eslint-disable-next-line import/no-default-export
 export default TransactionDurationAlertTrigger;
+
+function useInitialRuleValues({
+  setRuleParams,
+  ruleParams,
+}: {
+  setRuleParams: (key: string, value: any) => void;
+  ruleParams: Record<string, any>;
+}) {
+  // const params: Record<string, any> = {
+  //   ...ruleParams,
+  // };
+
+  useEffect(() => {
+    // we only want to run this on mount to set default values
+    Object.keys(ruleParams).forEach((key) => {
+      setRuleParams(key, ruleParams[key]);
+    });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+}
+
+const INITIAL_CUSTOM_FILTERS = [
+  {
+    fieldLabel: 'Transaction name',
+    fieldName: TRANSACTION_NAME,
+  },
+  {
+    fieldLabel: 'Container id',
+    fieldName: CONTAINER_ID,
+  },
+  {
+    fieldLabel: 'Pod id',
+    fieldName: KUBERNETES_POD_NAME,
+  },
+];
+
+function AddFilterButton({
+  customFilters,
+  onClickAddCustomFilter,
+}: {
+  customFilters: Record<string, string>;
+  onClickAddCustomFilter: (value: string) => void;
+}) {
+  const options = INITIAL_CUSTOM_FILTERS.filter(
+    (item) => !customFilters[item.fieldName]
+  );
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState<string>();
+
+  useEffect(() => {
+    if (options.length > 0) {
+      setSelectedFilter(options[0].fieldName);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customFilters]);
+
+  if (options.length === 0) {
+    return null;
+  }
+
+  return (
+    <EuiPopover
+      isOpen={popoverOpen}
+      anchorPosition="downLeft"
+      closePopover={() => setPopoverOpen(false)}
+      button={
+        <EuiButtonEmpty
+          size="s"
+          onClick={() => setPopoverOpen((state) => !state)}
+        >
+          Add filter
+        </EuiButtonEmpty>
+      }
+      repositionOnScroll
+    >
+      <EuiSelect
+        value={selectedFilter}
+        options={options.map((option) => ({
+          text: option.fieldLabel,
+          value: option.fieldName,
+        }))}
+        compressed
+        onChange={(e) => setSelectedFilter(e.target.value)}
+      />
+      <EuiButton
+        disabled={!selectedFilter}
+        onClick={() => {
+          if (selectedFilter) {
+            setPopoverOpen(false);
+            onClickAddCustomFilter(selectedFilter);
+          }
+        }}
+      >
+        Add
+      </EuiButton>
+    </EuiPopover>
+  );
+}

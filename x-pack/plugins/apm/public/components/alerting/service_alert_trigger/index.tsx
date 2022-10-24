@@ -10,13 +10,12 @@ import React, { useEffect } from 'react';
 
 interface Props {
   setRuleParams: (key: string, value: any) => void;
-  setRuleProperty: (key: string, value: any) => void;
   defaults: Record<string, any>;
   fields: React.ReactNode[];
   chartPreview?: React.ReactNode;
 }
 
-export function ServiceAlertTrigger(props: Props) {
+export function APMFields(props: Props) {
   const { fields, setRuleParams, defaults, chartPreview } = props;
 
   const params: Record<string, any> = {

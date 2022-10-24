@@ -15,6 +15,7 @@ interface SuggestionsSelectProps {
   customOptionText?: string;
   defaultValue?: string;
   fieldName: string;
+  serviceName?: string;
   start: string;
   end: string;
   onChange: (value?: string) => void;
@@ -30,6 +31,7 @@ export function SuggestionsSelect({
   customOptionText,
   defaultValue,
   fieldName,
+  serviceName,
   start,
   end,
   onChange,
@@ -55,6 +57,7 @@ export function SuggestionsSelect({
       return callApmApi('GET /internal/apm/suggestions', {
         params: {
           query: {
+            serviceName,
             fieldName,
             fieldValue: searchValue,
             start,
@@ -63,7 +66,7 @@ export function SuggestionsSelect({
         },
       });
     },
-    [fieldName, searchValue, start, end],
+    [fieldName, serviceName, searchValue, start, end],
     { preservePreviousData: false }
   );
 

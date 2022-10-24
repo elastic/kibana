@@ -22,11 +22,9 @@ import { SuggestionsSelect } from '../shared/suggestions_select';
 import { PopoverExpression } from './service_alert_trigger/popover_expression';
 
 export function ServiceField({
-  allowAll = true,
   currentValue,
   onChange,
 }: {
-  allowAll?: boolean;
   currentValue?: string;
   onChange: (value?: string) => void;
 }) {
@@ -38,7 +36,7 @@ export function ServiceField({
       })}
     >
       <SuggestionsSelect
-        customOptions={allowAll ? [ENVIRONMENT_ALL] : undefined}
+        customOptions={[ENVIRONMENT_ALL]}
         customOptionText={i18n.translate(
           'xpack.apm.serviceNamesSelectCustomOptionText',
           {
@@ -122,6 +120,38 @@ export function TransactionTypeField({
             defaultMessage: 'Select transaction type',
           }
         )}
+        start={moment().subtract(24, 'h').toISOString()}
+        end={moment().toISOString()}
+      />
+    </PopoverExpression>
+  );
+}
+
+export function CustomFilterField({
+  serviceName,
+  title,
+  fieldName,
+  currentValue,
+  onChange,
+}: {
+  serviceName?: string;
+  title: string;
+  fieldName: string;
+  currentValue?: string;
+  onChange: (value?: string) => void;
+}) {
+  console.log({ serviceName });
+  return (
+    <PopoverExpression value={currentValue || allOptionText} title={title}>
+      <SuggestionsSelect
+        serviceName={serviceName}
+        customOptions={[{ label: 'All', value: '_all_' }]}
+        defaultValue={currentValue}
+        fieldName={fieldName}
+        onChange={onChange}
+        placeholder={i18n.translate('xpack.apm.customFilter', {
+          defaultMessage: `Select ${title}`,
+        })}
         start={moment().subtract(24, 'h').toISOString()}
         end={moment().toISOString()}
       />

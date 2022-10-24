@@ -22,7 +22,7 @@ import {
   TransactionTypeField,
 } from '../fields';
 import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
-import { ServiceAlertTrigger } from '../service_alert_trigger';
+import { APMFields } from '../service_alert_trigger';
 
 interface RuleParams {
   windowSize?: number;
@@ -37,12 +37,11 @@ interface Props {
   ruleParams: RuleParams;
   metadata?: AlertMetadata;
   setRuleParams: (key: string, value: any) => void;
-  setRuleProperty: (key: string, value: any) => void;
 }
 
 export function TransactionErrorRateAlertTrigger(props: Props) {
   const { services } = useKibana();
-  const { ruleParams, metadata, setRuleParams, setRuleProperty } = props;
+  const { ruleParams, metadata, setRuleParams } = props;
 
   useEffect(() => {
     createCallApmApi(services as CoreStart);
@@ -137,11 +136,10 @@ export function TransactionErrorRateAlertTrigger(props: Props) {
   );
 
   return (
-    <ServiceAlertTrigger
+    <APMFields
       fields={fields}
       defaults={params}
       setRuleParams={setRuleParams}
-      setRuleProperty={setRuleProperty}
       chartPreview={chartPreview}
     />
   );

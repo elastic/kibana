@@ -20,7 +20,7 @@ interface Props {
   description: string;
   fieldLabel: string;
   value?: string;
-  allowAll?: boolean;
+
   onChange: (value?: string) => void;
   dataTestSubj?: string;
 }
@@ -31,7 +31,6 @@ export function FormRowSuggestionsSelect({
   description,
   fieldLabel,
   value,
-  allowAll = true,
   onChange,
   dataTestSubj,
 }: Props) {
@@ -43,7 +42,7 @@ export function FormRowSuggestionsSelect({
     >
       <EuiFormRow label={fieldLabel}>
         <SuggestionsSelect
-          customOptions={allowAll ? [ALL_OPTION] : undefined}
+          customOptions={[ALL_OPTION]}
           defaultValue={value ? getOptionLabel(value) : undefined}
           fieldName={fieldName}
           onChange={onChange}
