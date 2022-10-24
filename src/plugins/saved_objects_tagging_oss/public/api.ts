@@ -226,6 +226,8 @@ export interface TagListComponentProps {
    * Handler to execute when clicking on a tag
    */
   onClick?: (tag: TagWithOptionalId) => void;
+
+  tagRender?: (tag: TagWithOptionalId) => JSX.Element;
 }
 
 /**
