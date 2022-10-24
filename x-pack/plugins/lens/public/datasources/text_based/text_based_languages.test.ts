@@ -217,21 +217,24 @@ describe('IndexPattern Data Source', () => {
   describe('#removeLayer', () => {
     it('should remove a layer', () => {
       expect(TextBasedDatasource.removeLayer(baseState, 'a')).toEqual({
-        ...baseState,
-        layers: {
-          a: {
-            columns: [],
-            allColumns: [
-              {
-                columnId: 'col1',
-                fieldName: 'Test 1',
-                meta: {
-                  type: 'number',
+        removedLayerIds: ['a'],
+        newState: {
+          ...baseState,
+          layers: {
+            a: {
+              columns: [],
+              allColumns: [
+                {
+                  columnId: 'col1',
+                  fieldName: 'Test 1',
+                  meta: {
+                    type: 'number',
+                  },
                 },
-              },
-            ],
-            query: { sql: 'SELECT * FROM foo' },
-            index: 'foo',
+              ],
+              query: { sql: 'SELECT * FROM foo' },
+              index: 'foo',
+            },
           },
         },
       });

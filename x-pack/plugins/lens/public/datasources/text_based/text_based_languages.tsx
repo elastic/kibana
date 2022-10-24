@@ -281,18 +281,24 @@ export function getTextBasedDatasource({
       };
 
       return {
-        ...state,
-        layers: newLayers,
-        fieldList: state.fieldList,
+        removedLayerIds: [layerId],
+        newState: {
+          ...state,
+          layers: newLayers,
+          fieldList: state.fieldList,
+        },
       };
     },
 
     clearLayer(state: TextBasedPrivateState, layerId: string) {
       return {
-        ...state,
-        layers: {
-          ...state.layers,
-          [layerId]: { ...state.layers[layerId], columns: [] },
+        removedLayerIds: [],
+        newState: {
+          ...state,
+          layers: {
+            ...state.layers,
+            [layerId]: { ...state.layers[layerId], columns: [] },
+          },
         },
       };
     },
