@@ -74,7 +74,7 @@ export function getLayerConfigs(
 
       layerConfigs.push({
         filters,
-        indexPattern: dataView,
+        dataView,
         seriesConfig,
         time: series.time,
         name: series.name,

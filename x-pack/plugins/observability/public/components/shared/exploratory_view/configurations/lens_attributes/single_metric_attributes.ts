@@ -48,7 +48,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
   }
 
   getSingleMetricLayer() {
-    const { seriesConfig, selectedMetricField, operationType, indexPattern } = this.layerConfigs[0];
+    const { seriesConfig, selectedMetricField, operationType, dataView } = this.layerConfigs[0];
 
     const metricOption = parseCustomFieldName(seriesConfig, selectedMetricField);
 
@@ -69,7 +69,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
         return this.getFormulaLayer({
           formula,
           label: columnLabel,
-          dataView: indexPattern,
+          dataView,
           format,
           filter: columnFilter,
         });
@@ -197,12 +197,16 @@ export class SingleMetricLensAttributes extends LensAttributes {
 
     const visualization = this.getMetricState();
 
+    const { internalReferences, adHocDataViews } = this.getReferences();
+
     return {
       title: 'Prefilled from exploratory view app',
       description: String(refresh),
       visualizationType: 'lnsLegacyMetric',
-      references: this.getReferences(),
+      references: [],
       state: {
+        internalReferences,
+        adHocDataViews,
         visualization,
         datasourceStates: {
           formBased: {
