@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { getMlInferenceErrors } from './get_inference_errors';
+import { getMlInferenceErrors } from './get_ml_inference_errors';
 
 describe('getMlInferenceErrors', () => {
   const indexName = 'my-index';
