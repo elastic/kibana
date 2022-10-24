@@ -392,9 +392,8 @@ export function MonitorDetailFlyout(props: Props) {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    // `detailLink` can be undefined
+                    // `detailLink` can be undefined, in this case, disable the button
                     isDisabled={!detailLink}
-                    fill
                     href={detailLink}
                     iconType="sortRight"
                     iconSide="right"
