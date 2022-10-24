@@ -69,7 +69,7 @@ import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import type { StatusServiceSetup } from '@kbn/core-status-server';
 import type { UiSettingsServiceSetup, UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { HttpResources } from './http_resources';
+import type { HttpResources } from '@kbn/core-http-resources-server';
 import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
 export type { PluginOpaqueId } from '@kbn/core-base-common';
@@ -228,7 +228,7 @@ export type {
   HttpResourcesResponseOptions,
   HttpResourcesServiceToolkit,
   HttpResourcesRequestHandler,
-} from './http_resources';
+} from '@kbn/core-http-resources-server';
 
 export type {
   LoggingServiceSetup,

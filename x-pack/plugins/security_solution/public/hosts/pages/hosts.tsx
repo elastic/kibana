@@ -25,7 +25,7 @@ import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
-import { TimelineId } from '../../../common/types/timeline';
+import { TableId } from '../../../common/types/timeline';
 import { LastEventIndexKey, RiskScoreEntity } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/kuery';
@@ -46,15 +46,15 @@ import {
   resetKeyboardFocus,
   showGlobalFilters,
 } from '../../timelines/components/timeline/helpers';
-import { timelineSelectors } from '../../timelines/store/timeline';
-import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
 import { LandingPageComponent } from '../../common/components/landing_page';
 import { hostNameExistsFilter } from '../../common/components/visualization_actions/utils';
+import { dataTableSelectors } from '../../common/store/data_table';
 import { useLicense } from '../../common/hooks/use_license';
+import { tableDefaults } from '../../common/store/data_table/defaults';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -67,9 +67,9 @@ const StyledFullHeightContainer = styled.div`
 
 const HostsComponent = () => {
   const containerElement = useRef<HTMLDivElement | null>(null);
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
-    (state) => (getTimeline(state, TimelineId.hostsPageEvents) ?? timelineDefaults).graphEventId
+    (state) => (getTable(state, TableId.hostsPageEvents) ?? tableDefaults).graphEventId
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -77,7 +77,8 @@ const HostsComponent = () => {
   );
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
-  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+
   const getHostRiskScoreFilterQuerySelector = useMemo(
     () => hostsSelectors.hostRiskScoreSeverityFilterSelector(),
     []
@@ -93,27 +94,27 @@ const HostsComponent = () => {
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
     if (tabName === HostsTableType.events) {
-      return filters.length > 0 ? [...filters, ...hostNameExistsFilter] : hostNameExistsFilter;
+      return [...globalFilters, ...hostNameExistsFilter];
     }
 
     if (tabName === HostsTableType.risk) {
       const severityFilter = generateSeverityFilter(severitySelection, RiskScoreEntity.host);
-
-      return [...severityFilter, ...hostNameExistsFilter, ...filters];
+      return [...globalFilters, ...hostNameExistsFilter, ...severityFilter];
     }
-    return filters;
-  }, [severitySelection, tabName, filters]);
+
+    return globalFilters;
+  }, [globalFilters, severitySelection, tabName]);
 
   const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
-  const [filterQuery, kqlError] = useMemo(
+  const [globalFilterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
-        filters,
+        filters: globalFilters,
       }),
-    [filters, indexPattern, uiSettings, query]
+    [globalFilters, indexPattern, uiSettings, query]
   );
   const [tabsFilterQuery] = useMemo(
     () =>
@@ -126,7 +127,14 @@ const HostsComponent = () => {
     [indexPattern, query, tabsFilters, uiSettings]
   );
 
-  useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
+  useInvalidFilterQuery({
+    id: ID,
+    filterQuery: globalFilterQuery,
+    kqlError,
+    query,
+    startDate: from,
+    endDate: to,
+  });
 
   const isEnterprisePlus = useLicense().isEnterprise();
 
@@ -191,13 +199,12 @@ const HostsComponent = () => {
             <HostsTabs
               deleteQuery={deleteQuery}
               to={to}
-              filterQuery={tabsFilterQuery || ''}
+              filterQuery={tabsFilterQuery}
               isInitializing={isInitializing}
               indexNames={selectedPatterns}
               setQuery={setQuery}
               from={from}
               type={hostsModel.HostsType.page}
-              pageFilters={tabsFilters}
             />
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>

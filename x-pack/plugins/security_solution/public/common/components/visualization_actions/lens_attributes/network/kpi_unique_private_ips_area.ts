@@ -82,7 +82,7 @@ export const kpiUniquePrivateIpsAreaLensAttributes: LensAttributes = {
     },
     filters: [],
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           '38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7': {
             columns: {

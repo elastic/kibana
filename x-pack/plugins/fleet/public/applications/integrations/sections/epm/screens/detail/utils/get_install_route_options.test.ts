@@ -22,6 +22,7 @@ describe('getInstallPkgRouteOptions', () => {
       integration: 'myintegration',
       pkgkey: 'myintegration-1.0.0',
       isFirstTimeAgentUser: false,
+      isGuidedOnboardingActive: false,
       isCloud: false,
       isExperimentalAddIntegrationPageEnabled: false,
     };
@@ -51,6 +52,7 @@ describe('getInstallPkgRouteOptions', () => {
       pkgkey: 'myintegration-1.0.0',
       agentPolicyId: '12345',
       isFirstTimeAgentUser: false,
+      isGuidedOnboardingActive: false,
       isCloud: false,
       isExperimentalAddIntegrationPageEnabled: false,
     };
@@ -78,6 +80,7 @@ describe('getInstallPkgRouteOptions', () => {
       integration: 'myintegration',
       pkgkey: 'myintegration-1.0.0',
       isFirstTimeAgentUser: true,
+      isGuidedOnboardingActive: false,
       isCloud: true,
       isExperimentalAddIntegrationPageEnabled: true,
     };
@@ -105,6 +108,7 @@ describe('getInstallPkgRouteOptions', () => {
       integration: 'myintegration',
       pkgkey: 'apm-1.0.0',
       isFirstTimeAgentUser: true,
+      isGuidedOnboardingActive: false,
       isCloud: true,
       isExperimentalAddIntegrationPageEnabled: true,
     };
@@ -137,6 +141,7 @@ describe('getInstallPkgRouteOptions', () => {
       integration: 'myintegration',
       pkgkey: 'endpoint-1.0.0',
       isFirstTimeAgentUser: true,
+      isGuidedOnboardingActive: false,
       isCloud: true,
       isExperimentalAddIntegrationPageEnabled: true,
     };

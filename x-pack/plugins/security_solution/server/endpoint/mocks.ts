@@ -5,10 +5,25 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
-import { loggingSystemMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  httpServiceMock,
+  loggingSystemMock,
+  savedObjectsClientMock,
+  savedObjectsServiceMock,
+} from '@kbn/core/server/mocks';
+import type {
+  KibanaRequest,
+  RouteConfig,
+  SavedObjectsClientContract,
+  RequestHandler,
+  IRouter,
+} from '@kbn/core/server';
 import { listMock } from '@kbn/lists-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
@@ -25,6 +40,8 @@ import {
 // a restricted path.
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { createFleetAuthzMock } from '@kbn/fleet-plugin/common';
+import type { RequestFixtureOptions } from '@kbn/core-http-router-server-mocks';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { xpackMocks } from '../fixtures';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import type {
@@ -135,6 +152,10 @@ export const createMockEndpointAppContextServiceStartContract =
       securityMock.createMockAuthenticatedUser({ roles: ['superuser'] })
     );
 
+    security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+      jest.fn(() => ({ privileges: { kibana: [] } }))
+    );
+
     return {
       agentService,
       agentPolicyService,
@@ -188,3 +209,77 @@ export function createRouteHandlerContext(
   context.core.savedObjects.client = savedObjectsClient;
   return context;
 }
+
+export interface HttpApiTestSetupMock<P = any, Q = any, B = any> {
+  routerMock: ReturnType<typeof httpServiceMock.createRouter>;
+  scopedEsClusterClientMock: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;
+  savedObjectClientMock: ReturnType<typeof savedObjectsClientMock.create>;
+  endpointAppContextMock: EndpointAppContext;
+  httpResponseMock: ReturnType<typeof httpServerMock.createResponseFactory>;
+  httpHandlerContextMock: ReturnType<typeof requestContextMock.convertContext>;
+  getEsClientMock: (type?: 'internalUser' | 'currentUser') => ElasticsearchClientMock;
+  createRequestMock: (options?: RequestFixtureOptions<P, Q, B>) => KibanaRequest<P, Q, B>;
+  /** Retrieves the handler that was registered with the `router` for a given `method` and `path` */
+  getRegisteredRouteHandler: (
+    method: keyof Pick<IRouter, 'get' | 'put' | 'post' | 'patch' | 'delete'>,
+    path: string
+  ) => RequestHandler;
+}
+
+/**
+ * Returns all of the setup needed to test an HTTP api handler
+ */
+export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApiTestSetupMock<
+  P,
+  Q,
+  B
+> => {
+  const routerMock = httpServiceMock.createRouter();
+  const endpointAppContextMock = createMockEndpointAppContext();
+  const scopedEsClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+  const savedObjectClientMock = savedObjectsClientMock.create();
+  const httpHandlerContextMock = requestContextMock.convertContext(
+    createRouteHandlerContext(scopedEsClusterClientMock, savedObjectClientMock)
+  );
+  const httpResponseMock = httpServerMock.createResponseFactory();
+  const getRegisteredRouteHandler: HttpApiTestSetupMock['getRegisteredRouteHandler'] = (
+    method,
+    path
+  ): RequestHandler => {
+    const methodCalls = routerMock[method].mock.calls as Array<
+      [route: RouteConfig<unknown, unknown, unknown, 'get'>, handler: RequestHandler]
+    >;
+    const handler = methodCalls.find(([routeConfig]) => routeConfig.path.startsWith(path));
+
+    if (!handler) {
+      throw new Error(`Handler for [${method}][${path}] not found`);
+    }
+
+    return handler[1];
+  };
+
+  return {
+    routerMock,
+
+    endpointAppContextMock,
+    scopedEsClusterClientMock,
+    savedObjectClientMock,
+
+    httpHandlerContextMock,
+    httpResponseMock,
+
+    createRequestMock: (options: RequestFixtureOptions<P, Q, B> = {}): KibanaRequest<P, Q, B> => {
+      return httpServerMock.createKibanaRequest<P, Q, B>(options);
+    },
+
+    getEsClientMock: (
+      type: 'internalUser' | 'currentUser' = 'internalUser'
+    ): ElasticsearchClientMock => {
+      return type === 'currentUser'
+        ? scopedEsClusterClientMock.asCurrentUser
+        : scopedEsClusterClientMock.asInternalUser;
+    },
+
+    getRegisteredRouteHandler,
+  };
+};

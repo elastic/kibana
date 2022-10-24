@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { SLO } from '../../types/models';
-import { GetSLOResponse } from '../../types/rest_specs';
+import { ErrorBudget, SLO } from '../../types/models';
+import { GetSLOResponse, getSLOResponseSchema } from '../../types/rest_specs';
 import { SLORepository } from './slo_repository';
+import { SLIClient } from './sli_client';
+import { computeSLI, computeErrorBudget } from '../../domain/services';
 
 export class GetSLO {
-  constructor(private repository: SLORepository) {}
+  constructor(private repository: SLORepository, private sliClient: SLIClient) {}
 
   public async execute(sloId: string): Promise<GetSLOResponse> {
     const slo = await this.repository.findById(sloId);
-    return this.toResponse(slo);
+    const sliData = await this.sliClient.fetchCurrentSLIData(slo);
+    const sliValue = computeSLI(sliData);
+    const errorBudget = computeErrorBudget(slo, sliData);
+    return this.toResponse(slo, sliValue, errorBudget);
   }
 
-  private toResponse(slo: SLO): GetSLOResponse {
-    return {
+  private toResponse(slo: SLO, sliValue: number, errorBudget: ErrorBudget): GetSLOResponse {
+    return getSLOResponseSchema.encode({
       id: slo.id,
       name: slo.name,
       description: slo.description,
@@ -26,6 +31,15 @@ export class GetSLO {
       time_window: slo.time_window,
       budgeting_method: slo.budgeting_method,
       objective: slo.objective,
-    };
+      summary: {
+        sli_value: sliValue,
+        error_budget: {
+          ...errorBudget,
+        },
+      },
+      revision: slo.revision,
+      created_at: slo.created_at,
+      updated_at: slo.updated_at,
+    });
   }
 }

@@ -12,7 +12,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import { RuleDetails } from './rule_details';
 import { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
-import { EuiBadge, EuiFlexItem, EuiButtonEmpty, EuiPageHeaderProps } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiPageHeaderProps } from '@elastic/eui';
 import {
   ActionGroup,
   RuleExecutionStatusErrorReasons,
@@ -211,19 +211,17 @@ describe('rule_details', () => {
           },
         ];
 
+        const wrapper = mountWithIntl(
+          <RuleDetails
+            rule={rule}
+            ruleType={ruleType}
+            actionTypes={actionTypes}
+            {...mockRuleApis}
+          />
+        );
+
         expect(
-          mountWithIntl(
-            <RuleDetails
-              rule={rule}
-              ruleType={ruleType}
-              actionTypes={actionTypes}
-              {...mockRuleApis}
-            />
-          ).containsMatchingElement(
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{actionTypes[0].name}</EuiBadge>
-            </EuiFlexItem>
-          )
+          wrapper.find('[data-test-subj="actionConnectorName-0-Server log"]').exists
         ).toBeTruthy();
       });
 
@@ -275,19 +273,10 @@ describe('rule_details', () => {
         );
 
         expect(
-          details.containsMatchingElement(
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{actionTypes[0].name}</EuiBadge>
-            </EuiFlexItem>
-          )
+          details.find('[data-test-subj="actionConnectorName-0-Server log"]').exists
         ).toBeTruthy();
-
         expect(
-          details.containsMatchingElement(
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{actionTypes[1].name}</EuiBadge>
-            </EuiFlexItem>
-          )
+          details.find('[data-test-subj="actionConnectorName-0-Send email"]').exists
         ).toBeTruthy();
       });
     });
@@ -579,16 +568,12 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const brokenConnectorIndicator = wrapper
-        .find('[data-test-subj="actionWithBrokenConnector"]')
-        .first();
       const brokenConnectorWarningBanner = wrapper
         .find('[data-test-subj="actionWithBrokenConnectorWarningBanner"]')
         .first();
       const brokenConnectorWarningBannerAction = wrapper
         .find('[data-test-subj="actionWithBrokenConnectorWarningBannerEdit"]')
         .first();
-      expect(brokenConnectorIndicator.exists()).toBeTruthy();
       expect(brokenConnectorWarningBanner.exists()).toBeTruthy();
       expect(brokenConnectorWarningBannerAction.exists()).toBeTruthy();
     });
@@ -627,16 +612,12 @@ describe('rule_details', () => {
         await nextTick();
         wrapper.update();
       });
-      const brokenConnectorIndicator = wrapper
-        .find('[data-test-subj="actionWithBrokenConnector"]')
-        .first();
       const brokenConnectorWarningBanner = wrapper
         .find('[data-test-subj="actionWithBrokenConnectorWarningBanner"]')
         .first();
       const brokenConnectorWarningBannerAction = wrapper
         .find('[data-test-subj="actionWithBrokenConnectorWarningBannerEdit"]')
         .first();
-      expect(brokenConnectorIndicator.exists()).toBeTruthy();
       expect(brokenConnectorWarningBanner.exists()).toBeTruthy();
       expect(brokenConnectorWarningBannerAction.exists()).toBeFalsy();
     });

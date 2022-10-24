@@ -10,6 +10,11 @@ import type { GuideConfig } from '../../types';
 
 export const securityConfig: GuideConfig = {
   title: 'Get started with SIEM',
+  guideName: 'Security',
+  completedGuideRedirectLocation: {
+    appID: 'security',
+    path: '/app/security/dashboards',
+  },
   description:
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
   steps: [
@@ -21,6 +26,11 @@ export const securityConfig: GuideConfig = {
         'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
         'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
       ],
+      integration: 'endpoint',
+      location: {
+        appID: 'integrations',
+        path: '/browse/security',
+      },
     },
     {
       id: 'rules',
@@ -30,24 +40,28 @@ export const securityConfig: GuideConfig = {
         'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
         'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
       ],
+      manualCompletion: {
+        title: 'Manual completion step title',
+        description:
+          'Mark the step complete by opening the panel and clicking the button "Mark done"',
+      },
+      location: {
+        appID: 'securitySolutionUI',
+        path: '/rules',
+      },
     },
     {
-      id: 'alerts',
-      title: 'View Alerts',
+      id: 'alertsCases',
+      title: 'Alerts and cases',
       descriptionList: [
         'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
         'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
       ],
-    },
-    {
-      id: 'cases',
-      title: 'Cases and investigations',
-      descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      ],
+      location: {
+        appID: 'securitySolutionUI',
+        path: '/alerts',
+      },
     },
   ],
 };
