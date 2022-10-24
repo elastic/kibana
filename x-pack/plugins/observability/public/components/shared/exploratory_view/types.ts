@@ -91,7 +91,10 @@ export interface SeriesConfig {
       }
   >;
   textDefinitionFields?: string[];
-  metricOptions?: MetricOption[];
+  metricOptions?: Array<
+    | MetricOption
+    | { id: string; field?: string; label: string; items: MetricOption[]; columnType?: string }
+  >;
   labels: Record<string, string>;
   hasOperationType: boolean;
   palette?: PaletteOutput;
@@ -124,8 +127,8 @@ export interface SeriesUrl {
 
 export interface UrlFilter {
   field: string;
-  values?: string[];
-  notValues?: string[];
+  values?: Array<string | number>;
+  notValues?: Array<string | number>;
   wildcards?: string[];
   notWildcards?: string[];
 }

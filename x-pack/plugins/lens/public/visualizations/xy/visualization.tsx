@@ -31,13 +31,13 @@ import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
 import { LayerHeader, LayerHeaderContent } from './xy_config_panel/layer_header';
-import type { Visualization, AccessorConfig, FramePublicAPI } from '../../types';
+import type { Visualization, AccessorConfig, FramePublicAPI, Suggestion } from '../../types';
+import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import {
   type State,
   type XYLayerConfig,
   type XYDataLayerConfig,
   type SeriesType,
-  type XYSuggestion,
   type PersistedState,
   visualizationTypes,
 } from './types';
@@ -156,6 +156,10 @@ export const getXyVisualization = ({
   },
 
   appendLayer(state, layerId, layerType, indexPatternId) {
+    if (layerType === 'metricTrendline') {
+      return state;
+    }
+
     const firstUsedSeriesType = getDataLayers(state.layers)?.[0]?.seriesType;
     return {
       ...state,
@@ -809,24 +813,25 @@ export const getXyVisualization = ({
   },
 
   getSuggestionFromConvertToLensContext({ suggestions, context }) {
-    const allSuggestions = suggestions as XYSuggestion[];
-    return {
+    const allSuggestions = suggestions as Array<Suggestion<XYState, FormBasedPersistedState>>;
+    const suggestion: Suggestion<XYState, FormBasedPersistedState> = {
       ...allSuggestions[0],
       datasourceState: {
         ...allSuggestions[0].datasourceState,
         layers: allSuggestions.reduce(
           (acc, s) => ({
             ...acc,
-            ...s.datasourceState.layers,
+            ...s.datasourceState?.layers,
           }),
           {}
         ),
       },
       visualizationState: {
         ...allSuggestions[0].visualizationState,
-        ...context.configuration,
+        ...(context.configuration as XYState),
       },
     };
+    return suggestion;
   },
 });
 

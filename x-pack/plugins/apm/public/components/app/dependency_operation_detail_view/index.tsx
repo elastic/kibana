@@ -179,8 +179,9 @@ export function DependencyOperationDetailView() {
           <ResettingHeightRetainer reset={!isWaterfallLoading}>
             <WaterfallWithSummary
               environment={environment}
-              isLoading={isWaterfallLoading}
+              waterfallFetchResult={waterfallFetch}
               traceSamples={samples}
+              traceSamplesFetchStatus={spanFetch.status}
               onSampleClick={(sample) => {
                 push(history, { query: { spanId: sample.spanId } });
               }}
@@ -191,7 +192,6 @@ export function DependencyOperationDetailView() {
                   },
                 });
               }}
-              waterfall={waterfallFetch.waterfall}
               waterfallItemId={waterfallItemId}
               detailTab={detailTab}
               selectedSample={selectedSample || null}

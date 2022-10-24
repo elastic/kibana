@@ -7,7 +7,7 @@
 
 import { Actions, ActionTypes } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import { UserActionParameters, BuilderReturnValue } from '../types';
+import type { UserActionParameters, BuilderReturnValue } from '../types';
 
 export class DeleteCaseUserActionBuilder extends UserActionBuilder {
   build(args: UserActionParameters<'delete_case'>): BuilderReturnValue {

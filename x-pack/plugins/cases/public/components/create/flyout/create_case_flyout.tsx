@@ -11,10 +11,10 @@ import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eu
 
 import { QueryClientProvider } from '@tanstack/react-query';
 import * as i18n from '../translations';
-import { Case } from '../../../../common/ui/types';
+import type { Case } from '../../../../common/ui/types';
 import { CreateCaseForm } from '../form';
-import { UseCreateAttachments } from '../../../containers/use_create_attachments';
-import { CaseAttachmentsWithoutOwner } from '../../../types';
+import type { UseCreateAttachments } from '../../../containers/use_create_attachments';
+import type { CaseAttachmentsWithoutOwner } from '../../../types';
 import { casesQueryClient } from '../../cases_context/query_client';
 
 export interface CreateCaseFlyoutProps {

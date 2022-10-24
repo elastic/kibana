@@ -27,7 +27,7 @@ import { isApiIndex } from '../../../utils/indices';
 
 import { InferenceErrors } from './inference_errors';
 import { InferenceHistory } from './inference_history';
-import { IngestPipelinesCard } from './ingest_pipelines_card';
+import { IngestPipelinesCard } from './ingest_pipelines/ingest_pipelines_card';
 import { AddMLInferencePipelineButton } from './ml_inference/add_ml_inference_button';
 import { AddMLInferencePipelineModal } from './ml_inference/add_ml_inference_pipeline_modal';
 import { MlInferencePipelineProcessorsCard } from './ml_inference_pipeline_processors_card';
@@ -120,7 +120,7 @@ export const SearchIndexPipelines: React.FC = () => {
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.docLink',
                   {
-                    defaultMessage: 'Learn more about deploying ML models in Elastic',
+                    defaultMessage: 'Learn more about deploying Machine Learning models in Elastic',
                   }
                 )}
               </EuiLink>
@@ -130,7 +130,7 @@ export const SearchIndexPipelines: React.FC = () => {
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.title',
                   {
-                    defaultMessage: 'ML Inference pipelines',
+                    defaultMessage: 'Machine Learning Inference Pipelines',
                   }
                 )}
               </h2>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Indicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
+import { Indicator, RawIndicatorFieldId } from '../types';
 
 /**
  * Unpacks field value from raw indicator fields. Will return null if fields are missing entirely

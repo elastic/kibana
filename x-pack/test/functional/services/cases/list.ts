@@ -144,7 +144,7 @@ export function CasesTableServiceProvider(
     },
 
     async filterByAssignee(assignee: string) {
-      await common.clickAndValidate('options-filter-popover-button-assignees', 'euiSelectableList');
+      await this.openAssigneesPopover();
 
       await casesCommon.setSearchTextInAssigneesPopover(assignee);
       await casesCommon.selectFirstRowInAssigneesPopover();
@@ -174,6 +174,10 @@ export function CasesTableServiceProvider(
       const row = rows[index];
       await row.click();
       await find.existsByCssSelector('[data-test-subj*="case-action-popover-"');
+    },
+
+    async openAssigneesPopover() {
+      await common.clickAndValidate('options-filter-popover-button-assignees', 'euiSelectableList');
     },
 
     async selectAllCasesAndOpenBulkActions() {
@@ -245,6 +249,14 @@ export function CasesTableServiceProvider(
       await header.waitUntilLoadingHasFinished();
       await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
       await this.bulkChangeSeverity(severity);
+    },
+
+    async getCaseTitle(index: number) {
+      const titleElement = await (
+        await this.getCaseFromTable(index)
+      ).findByTestSubject('case-details-link');
+
+      return await titleElement.getVisibleText();
     },
   };
 }
