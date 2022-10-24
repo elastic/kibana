@@ -20,7 +20,10 @@ import { DEFAULT_THREAT_MATCH_QUERY, RULES_PATH } from '../../../../../common/co
 import type { AboutStepRule, DefineStepRule, RuleStepsOrder, ScheduleStepRule } from './types';
 import { DataSourceType, RuleStep } from './types';
 import type { GetSecuritySolutionUrl } from '../../../../common/components/link_to';
-import { RuleDetailTabs, RULE_DETAILS_TAB_NAME } from './details';
+import {
+  RuleDetailTabs,
+  RULE_DETAILS_TAB_NAME,
+} from '../../../../detection_engine/rule_details_ui/pages/rule_details';
 import { fillEmptySeverityMappings } from './helpers';
 
 export const ruleStepsOrder: RuleStepsOrder = [
