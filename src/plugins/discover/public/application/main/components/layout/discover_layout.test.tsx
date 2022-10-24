@@ -7,19 +7,17 @@
  */
 
 import React from 'react';
-import { Subject, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { dataViewMock } from '../../../../__mocks__/data_view';
-import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -39,6 +37,7 @@ import {
   RecordRawType,
 } from '../../services/discover_data_state_container';
 import { DiscoverMainProvider } from '../../services/discover_state_react';
+import { DiscoverLayoutProps } from './types';
 
 jest.mock('@kbn/unified-histogram-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/unified-histogram-plugin/public');
@@ -95,15 +94,6 @@ jest.mock('@kbn/unified-histogram-plugin/public', () => {
   };
 });
 
-function getStateContainer() {
-  const stateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
-  stateContainer.set({
-    query: { query: '', language: 'lucene' },
-    filters: [],
-  });
-  return stateContainer;
-}
-
 setHeaderActionMenuMounter(jest.fn());
 
 async function mountComponent(
@@ -124,6 +114,7 @@ async function mountComponent(
   };
 
   const dataViewList = [dataView];
+  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 
   const main$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
@@ -151,7 +142,7 @@ async function mountComponent(
     response: {} as unknown as SearchResponse,
   }) as DataCharts$;
 
-  const savedSearchData$ = {
+  stateContainer.dataState.data$ = {
     main$,
     documents$,
     totalHits$,
@@ -159,21 +150,12 @@ async function mountComponent(
     availableFields$,
   };
 
-  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.setAppState({ interval: 'auto' });
+  stateContainer.internalState.transitions.setDataView(dataView);
+  stateContainer.internalState.transitions.setDataViews(dataViewList as DataViewListItem[]);
 
-  const props = {
-    dataView,
-    dataViewList,
-    inspectorAdapters: { requests: new RequestAdapter() },
+  const props: DiscoverLayoutProps = {
     navigateTo: jest.fn(),
-    onChangeDataView: jest.fn(),
-    onUpdateQuery: jest.fn(),
-    resetSavedSearch: jest.fn(),
-    savedSearch: savedSearchMock,
-    savedSearchData$,
-    savedSearchRefetch$: new Subject(),
-    state: { columns: [], query },
     stateContainer,
     setExpandedDoc: jest.fn(),
     persistDataView: jest.fn(),
@@ -183,7 +165,7 @@ async function mountComponent(
 
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>
-      <DiscoverMainProvider value={getStateContainer()}>
+      <DiscoverMainProvider value={stateContainer}>
         <DiscoverLayout {...props} />
       </DiscoverMainProvider>
     </KibanaContextProvider>,
