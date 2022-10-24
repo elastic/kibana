@@ -89,7 +89,7 @@ export function visWithSplits(WrappedComponent) {
       ? findIndex(model.series, (s) => s.id === nonSplitSeries.id)
       : null;
 
-    const rows = Object.keys(splitsVisData).map((key) => {
+    const rows = Object.keys(splitsVisData).map((key, index, arrayRef) => {
       const splitData = splitsVisData[key];
       const { series, label } = splitData;
       const additionalLabel = label;
@@ -115,7 +115,7 @@ export function visWithSplits(WrappedComponent) {
             backgroundColor={props.backgroundColor}
             getConfig={props.getConfig}
             fieldFormatMap={props.fieldFormatMap}
-            initialRender={props.initialRender}
+            initialRender={arrayRef.length - 1 === index ? props.initialRender : undefined}
           />
         </div>
       );
