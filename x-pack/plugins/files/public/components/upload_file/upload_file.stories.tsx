@@ -5,14 +5,10 @@
  * 2.0.
  */
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
-import {
-  FileKindsRegistryImpl,
-  setFileKindsRegistry,
-  getFileKindsRegistry,
-} from '../../../common/file_kinds_registry';
+import { register } from '../stories_shared';
 import { FilesClient } from '../../types';
 import { FilesContext } from '../context';
 import { UploadFile, Props } from './upload_file';
@@ -24,28 +20,36 @@ const defaultArgs: Props = {
   kind,
   onDone: action('onDone'),
   onError: action('onError'),
-  client: {
-    create: async () => ({ file: { id: 'test' } }),
-    upload: () => sleep(1000),
-  } as unknown as FilesClient,
 };
 
 export default {
   title: 'stateful/UploadFile',
   component: UploadFile,
   args: defaultArgs,
-};
+  decorators: [
+    (Story) => (
+      <FilesContext
+        client={
+          {
+            create: async () => ({ file: { id: 'test' } }),
+            upload: () => sleep(1000),
+          } as unknown as FilesClient
+        }
+      >
+        <Story />
+      </FilesContext>
+    ),
+  ],
+} as ComponentMeta<typeof UploadFile>;
 
-setFileKindsRegistry(new FileKindsRegistryImpl());
-
-getFileKindsRegistry().register({
+register({
   id: kind,
   http: {},
   allowedMimeTypes: ['*'],
 });
 
 const miniFile = 'miniFile';
-getFileKindsRegistry().register({
+register({
   id: miniFile,
   http: {},
   maxSizeBytes: 1,
@@ -53,17 +57,13 @@ getFileKindsRegistry().register({
 });
 
 const zipOnly = 'zipOnly';
-getFileKindsRegistry().register({
+register({
   id: zipOnly,
   http: {},
   allowedMimeTypes: ['application/zip'],
 });
 
-const Template: ComponentStory<typeof UploadFile> = (props: Props) => (
-  <FilesContext>
-    <UploadFile {...props} />
-  </FilesContext>
-);
+const Template: ComponentStory<typeof UploadFile> = (props: Props) => <UploadFile {...props} />;
 
 export const Basic = Template.bind({});
 
@@ -73,27 +73,43 @@ AllowRepeatedUploads.args = {
 };
 
 export const LongErrorUX = Template.bind({});
-LongErrorUX.args = {
-  client: {
-    create: async () => ({ file: { id: 'test' } }),
-    upload: async () => {
-      await sleep(1000);
-      throw new Error('Something went wrong while uploading! '.repeat(10).trim());
-    },
-    delete: async () => {},
-  } as unknown as FilesClient,
-};
+LongErrorUX.decorators = [
+  (Story) => (
+    <FilesContext
+      client={
+        {
+          create: async () => ({ file: { id: 'test' } }),
+          upload: async () => {
+            await sleep(1000);
+            throw new Error('Something went wrong while uploading! '.repeat(10).trim());
+          },
+          delete: async () => {},
+        } as unknown as FilesClient
+      }
+    >
+      <Story />
+    </FilesContext>
+  ),
+];
 
 export const Abort = Template.bind({});
-Abort.args = {
-  client: {
-    create: async () => ({ file: { id: 'test' } }),
-    upload: async () => {
-      await sleep(60000);
-    },
-    delete: async () => {},
-  } as unknown as FilesClient,
-};
+Abort.decorators = [
+  (Story) => (
+    <FilesContext
+      client={
+        {
+          create: async () => ({ file: { id: 'test' } }),
+          upload: async () => {
+            await sleep(60000);
+          },
+          delete: async () => {},
+        } as unknown as FilesClient
+      }
+    >
+      <Story />
+    </FilesContext>
+  ),
+];
 
 export const MaxSize = Template.bind({});
 MaxSize.args = {
@@ -118,24 +134,44 @@ ImmediateUpload.args = {
 export const ImmediateUploadError = Template.bind({});
 ImmediateUploadError.args = {
   immediate: true,
-  client: {
-    create: async () => ({ file: { id: 'test' } }),
-    upload: async () => {
-      await sleep(1000);
-      throw new Error('Something went wrong while uploading!');
-    },
-    delete: async () => {},
-  } as unknown as FilesClient,
 };
+ImmediateUploadError.decorators = [
+  (Story) => (
+    <FilesContext
+      client={
+        {
+          create: async () => ({ file: { id: 'test' } }),
+          upload: async () => {
+            await sleep(1000);
+            throw new Error('Something went wrong while uploading!');
+          },
+          delete: async () => {},
+        } as unknown as FilesClient
+      }
+    >
+      <Story />
+    </FilesContext>
+  ),
+];
 
 export const ImmediateUploadAbort = Template.bind({});
+ImmediateUploadAbort.decorators = [
+  (Story) => (
+    <FilesContext
+      client={
+        {
+          create: async () => ({ file: { id: 'test' } }),
+          upload: async () => {
+            await sleep(60000);
+          },
+          delete: async () => {},
+        } as unknown as FilesClient
+      }
+    >
+      <Story />
+    </FilesContext>
+  ),
+];
 ImmediateUploadAbort.args = {
   immediate: true,
-  client: {
-    create: async () => ({ file: { id: 'test' } }),
-    upload: async () => {
-      await sleep(60000);
-    },
-    delete: async () => {},
-  } as unknown as FilesClient,
 };
