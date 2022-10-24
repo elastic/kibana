@@ -18366,7 +18366,6 @@
     "xpack.maps.fileUpload.trimmedResultsMsg": "结果仅限于 {numFeatures} 个特征、{previewCoverage}% 的文件。",
     "xpack.maps.filterByMapExtentMenuItem.displayName": "按地图边界筛选 {containerLabel}",
     "xpack.maps.filterByMapExtentMenuItem.displayNameTooltip": "当您缩放和平移地图时，{containerLabel} 会进行更新以仅显示在地图边界中可见的数据。",
-    "xpack.maps.hexbin.geoShape.disabledReason": "{hexLabel} 需要“geo_point”集群字段。",
     "xpack.maps.hexbin.license.disabledReason": "{hexLabel} 是一项订阅功能。",
     "xpack.maps.initialLayers.unableToParseMessage": "无法解析“initialLayers”参数的内容。错误：{errorMsg}",
     "xpack.maps.inspector.vectorTileRequest.errorTitle": "无法将磁贴请求“{tileUrl}”转换为 Elasticesarch 矢量磁贴搜索请求，错误：{error}",

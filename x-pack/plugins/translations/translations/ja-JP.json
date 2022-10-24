@@ -18341,7 +18341,6 @@
     "xpack.maps.fileUpload.trimmedResultsMsg": "結果は{numFeatures}個の特徴量に制限されます。これはファイルの{previewCoverage}%です。",
     "xpack.maps.filterByMapExtentMenuItem.displayName": "マップ境界で{containerLabel}をフィルター",
     "xpack.maps.filterByMapExtentMenuItem.displayNameTooltip": "マップをズームおよびパンすると、{containerLabel}が更新され、マップ境界に表示されるデータのみが表示されます。",
-    "xpack.maps.hexbin.geoShape.disabledReason": "{hexLabel}には'geo_point'クラスターフィールドが必要です。",
     "xpack.maps.hexbin.license.disabledReason": "{hexLabel}はサブスクリプション機能です。",
     "xpack.maps.initialLayers.unableToParseMessage": "「initialLayers」パラメーターのコンテンツをパースできません。エラー：{errorMsg}",
     "xpack.maps.inspector.vectorTileRequest.errorTitle": "タイル要求'{tileUrl}'をElasticesarchベクトルタイル検索要求に変換できませんでした。エラー：{error}",

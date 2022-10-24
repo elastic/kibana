@@ -18358,7 +18358,6 @@
     "xpack.maps.fileUpload.trimmedResultsMsg": "Résultats limités à {numFeatures} fonctionnalités, {previewCoverage} % du fichier.",
     "xpack.maps.filterByMapExtentMenuItem.displayName": "Filtrer {containerLabel} selon les limites de la carte",
     "xpack.maps.filterByMapExtentMenuItem.displayNameTooltip": "Quand vous vous déplacez sur la carte ou que vous zoomez, le {containerLabel} se met à jour pour afficher uniquement les données visibles dans les limites de la carte.",
-    "xpack.maps.hexbin.geoShape.disabledReason": "{hexLabel} requiert un champ de cluster \"geo_point\".",
     "xpack.maps.hexbin.license.disabledReason": "{hexLabel} est une fonctionnalité soumise à abonnement.",
     "xpack.maps.initialLayers.unableToParseMessage": "Impossible d'analyser le contenu du paramètre \"initialLayers\". Erreur : {errorMsg}",
     "xpack.maps.inspector.vectorTileRequest.errorTitle": "Impossible de convertir la requête de tuiles \"{tileUrl}\" en requête de recherche de tuiles vectorielles Elasticsearch, erreur : {error}",
