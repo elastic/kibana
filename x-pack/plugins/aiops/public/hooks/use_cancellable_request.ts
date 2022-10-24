@@ -19,7 +19,7 @@ export function useCancellableRequest<RequestBody, ResponseType extends IKibanaS
 ) {
   const { data } = useAiopsAppContext();
   const abortController = useRef(new AbortController());
-  const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [isLoading, setIsFetching] = useState<boolean>(false);
 
   const runRequest = useCallback((): Promise<ResponseType> => {
     return new Promise((resolve, reject) => {
@@ -60,5 +60,5 @@ export function useCancellableRequest<RequestBody, ResponseType extends IKibanaS
     abortController.current = new AbortController();
   }, []);
 
-  return { runRequest, cancelRequest, isFetching };
+  return { runRequest, cancelRequest, isLoading };
 }

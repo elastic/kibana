@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { TimeRange } from '@kbn/data-plugin/common';
-import { useChangePontDetectionContext } from './change_point_detection_context';
-import { useTimefilter, useTimeRangeUpdates } from '../../hooks/use_time_filter';
+import { ChangePointDetectionRequestParams } from './change_point_detection_context';
+import { TimeBuckets } from '../../../common/time_buckets';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useCancellableRequest } from '../../hooks/use_cancellable_request';
 
 interface RequestOptions {
   index: string;
-  fn: 'min' | 'max' | 'avg';
+  fn: string;
   metricField: string;
   timeField: string;
   timeInterval: string;
@@ -26,8 +26,7 @@ function getChangePointDetectionRequestBody({
   fn,
   metricField,
   timeField = '@timestamp',
-  // TODO remove default
-  timeInterval = '5m',
+  timeInterval,
   timeRange,
 }: RequestOptions) {
   return {
@@ -74,27 +73,24 @@ function getChangePointDetectionRequestBody({
   };
 }
 
-export function useChangePointRequest() {
+export function useChangePointRequest(
+  timeBuckets: TimeBuckets,
+  requestParams: ChangePointDetectionRequestParams,
+  timeRange: TimeRange
+) {
   const { dataView } = useDataSource();
-  const timeRange = useTimeRangeUpdates();
-  const timefilter = useTimefilter();
-
-  const { timeBuckets, requestParams } = useChangePontDetectionContext();
-
-  useEffect(() => {
-    timeBuckets.setInterval('auto');
-    timeBuckets.setBounds(timefilter.getActiveBounds());
-  }, [timeRange, timeBuckets, timefilter]);
 
   const requestBoby = useMemo(() => {
-    return getChangePointDetectionRequestBody({
+    const params = {
       index: dataView.getIndexPattern(),
       fn: requestParams.fn,
       timeRange,
       timeInterval: timeBuckets.getInterval().expression,
       metricField: requestParams.metricField,
       timeField: dataView.timeFieldName!,
-    });
+    };
+
+    return getChangePointDetectionRequestBody(params);
   }, [timeRange, dataView, requestParams, timeBuckets]);
 
   return useCancellableRequest<typeof requestBoby, { rawResponse: ChangePointAggResponse }>(

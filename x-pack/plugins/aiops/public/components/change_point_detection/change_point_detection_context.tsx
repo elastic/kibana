@@ -5,9 +5,21 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useMemo } from 'react';
-import { createContext } from 'react';
+import React, {
+  createContext,
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/public';
+import moment from 'moment';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { useTimefilter, useTimeRangeUpdates } from '../../hooks/use_time_filter';
+import { ChartComponentProps } from './chart_component';
+import { useChangePointRequest } from './use_change_point_agg_request';
 import { type TimeBuckets } from '../../../common/time_buckets';
 import { useDataSource } from '../../hooks/use_data_source';
 import { usePageUrlState } from '../../hooks/use_url_state';
@@ -24,16 +36,34 @@ export const ChangePointDetectionContext = createContext<{
   requestParams: ChangePointDetectionRequestParams;
   metricFieldOptions: DataViewField[];
   splitFieldsOptions: DataViewField[];
+  updateRequestParams: (update: Partial<ChangePointDetectionRequestParams>) => void;
+  isLoading: boolean;
+  annotation: ChartComponentProps['annotation'] | undefined;
 }>({
+  isLoading: false,
   splitFieldsOptions: [],
   metricFieldOptions: [],
   requestParams: {} as ChangePointDetectionRequestParams,
   timeBuckets: {} as TimeBuckets,
+  updateRequestParams: () => {},
+  annotation: undefined,
 });
 
 export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   const { dataView } = useDataSource();
+  const {
+    notifications: { toasts },
+  } = useAiopsAppContext();
+  const timefilter = useTimefilter();
   const timeBuckets = useTimeBuckets();
+  const [annotation, setAnnotation] = useState<ChartComponentProps['annotation']>();
+
+  const timeRange = useTimeRangeUpdates();
+
+  useEffect(() => {
+    timeBuckets.setBounds(timefilter.getActiveBounds()!);
+    timeBuckets.setInterval('auto');
+  }, [timeBuckets, timefilter, timeRange]);
 
   const metricFieldOptions = useMemo<DataViewField[]>(() => {
     return dataView.fields.filter(({ aggregatable, type }) => aggregatable && type === 'number');
@@ -54,21 +84,63 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
 
   const requestParams = useMemo(() => {
     const params = { ...requestParamsFromUrl };
-    if (!params.metricField && metricFieldOptions.length === 1) {
+    if (!params.fn) {
+      params.fn = 'min';
+    }
+    if (!params.metricField && metricFieldOptions.length > 0) {
       params.metricField = metricFieldOptions[0].name;
     }
-    if (!params.splitField && splitFieldsOptions.length === 1) {
+    if (!params.splitField && splitFieldsOptions.length > 0) {
       params.splitField = splitFieldsOptions[0].name;
     }
     return params;
   }, [requestParamsFromUrl, metricFieldOptions, splitFieldsOptions]);
 
+  const { runRequest, isLoading } = useChangePointRequest(timeBuckets, requestParams, timeRange);
+
+  const fetchChangePoints = useCallback(async () => {
+    const result = await runRequest();
+    if (!result.rawResponse.aggregations) {
+      toasts.addDanger('No agg results');
+      return;
+    }
+
+    const changePointType = Object.keys(
+      result.rawResponse.aggregations.change_point_request.type
+    )[0] as string;
+
+    if (changePointType === 'indeterminable') {
+      toasts.addWarning(
+        // @ts-ignore
+        result.rawResponse.aggregations.change_point_request.type[changePointType].reason
+      );
+      return;
+    }
+
+    const timeAsString = result.rawResponse.aggregations.change_point_request.bucket.key;
+    setAnnotation({
+      timestamp: timeAsString,
+      // @ts-ignore
+      endTimestamp: moment(timeAsString).add(timeBuckets.getInterval()).toISOString(),
+      label: changePointType,
+    });
+  }, [timeBuckets, runRequest, setAnnotation, toasts]);
+
+  useEffect(
+    function fetchAggResults() {
+      fetchChangePoints();
+    },
+    [fetchChangePoints, runRequest, requestParams]
+  );
+
   const value = {
+    isLoading,
     timeBuckets,
     requestParams,
     updateRequestParams,
     metricFieldOptions,
     splitFieldsOptions,
+    annotation,
   };
 
   return (

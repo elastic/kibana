@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { map } from 'rxjs/operators';
 import { useAiopsAppContext } from './use_aiops_app_context';
@@ -56,9 +56,11 @@ export const useRefreshIntervalUpdates = () => {
 export const useTimeRangeUpdates = (absolute = false) => {
   const timefilter = useTimefilter();
 
-  const getTimeCallback = absolute
-    ? timefilter.getAbsoluteTime.bind(timefilter)
-    : timefilter.getTime.bind(timefilter);
+  const getTimeCallback = useMemo(() => {
+    return absolute
+      ? timefilter.getAbsoluteTime.bind(timefilter)
+      : timefilter.getTime.bind(timefilter);
+  }, [absolute, timefilter]);
 
   return useObservable(timefilter.getTimeUpdate$().pipe(map(getTimeCallback)), getTimeCallback());
 };

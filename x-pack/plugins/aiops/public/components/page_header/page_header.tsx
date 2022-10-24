@@ -14,15 +14,20 @@ import {
   EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
 } from '@elastic/eui';
+import { useUrlState } from '../../hooks/use_url_state';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useTimefilter } from '../../hooks/use_time_filter';
 import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DatePickerWrapper } from '../date_picker_wrapper';
 
 export const PageHeader: FC = () => {
-  const timefilter = useTimefilter({ timeRangeSelector: true });
-
+  const [setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
+
+  const timefilter = useTimefilter({
+    timeRangeSelector: dataView.timeFieldName !== undefined,
+    autoRefreshSelector: true,
+  });
 
   return (
     <>
@@ -50,6 +55,7 @@ export const PageHeader: FC = () => {
                     query={undefined}
                     disabled={false}
                     timefilter={timefilter}
+                    callback={setGlobalState}
                   />
                 </EuiFlexItem>
               )}

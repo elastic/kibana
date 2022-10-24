@@ -13,11 +13,13 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useTimeRangeUpdates } from '../../hooks/use_time_filter';
 
 export interface ChartComponentProps {
-  annotation: {
-    label: string;
-    timestamp: string;
-    endTimestamp: string;
-  };
+  annotation:
+    | {
+        label: string;
+        timestamp: string;
+        endTimestamp: string;
+      }
+    | undefined;
 }
 
 export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation }) => {
@@ -29,6 +31,7 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
   const { dataView } = useDataSource();
   const requestParams = useRequestParams();
 
+  // @ts-ignore
   const attributes = useMemo<TypedLensByValueInput['attributes']>(() => {
     return {
       title: 'change_point_test',
@@ -43,14 +46,14 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
         },
         {
           type: 'index-pattern',
-          id: 'a65621a2-d2b9-45fa-a816-c57622139e2a',
+          id: dataView.id!,
           name: 'xy-visualization-layer-8d26ab67-b841-4877-9d02-55bf270f9caf',
         },
       ],
       state: {
         visualization: {
           legend: {
-            isVisible: true,
+            isVisible: false,
             position: 'right',
           },
           valueLabels: 'hide',
@@ -117,17 +120,39 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
           query: '',
           language: 'kuery',
         },
-        filters: [],
+        // filters: [
+        //   {
+        //     meta: {
+        //       index: dataView.id!,
+        //       alias: null,
+        //       negate: false,
+        //       disabled: false,
+        //       type: 'phrase',
+        //       key: requestParams.splitField,
+        //       params: {
+        //         query: 'instance-0000000005',
+        //       },
+        //     },
+        //     query: {
+        //       match_phrase: {
+        //         [requestParams.splitField]: 'instance-0000000005',
+        //       },
+        //     },
+        //     $state: {
+        //       store: 'appState',
+        //     },
+        //   },
+        // ],
         datasourceStates: {
           formBased: {
             layers: {
               '2d61a885-abb0-4d4e-a5f9-c488caec3c22': {
                 columns: {
                   '877e6638-bfaa-43ec-afb9-2241dc8e1c86': {
-                    label: '@timestamp',
+                    label: dataView.timeFieldName,
                     dataType: 'date',
                     operationType: 'date_histogram',
-                    sourceField: '@timestamp',
+                    sourceField: dataView.timeFieldName,
                     isBucketed: true,
                     scale: 'interval',
                     params: {
@@ -164,7 +189,7 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
         adHocDataViews: {},
       },
     };
-  }, [dataView.id, annotation, requestParams]);
+  }, [dataView.id, dataView.timeFieldName, annotation, requestParams]);
 
   return (
     <EmbeddableComponent
@@ -172,6 +197,7 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
       style={{ height: 500 }}
       timeRange={timeRange}
       attributes={attributes}
+      renderMode={'view'}
     />
   );
 });
