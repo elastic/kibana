@@ -86,6 +86,7 @@ export type ApmFields = Fields &
     'service.framework.name': string;
     'service.target.name': string;
     'service.target.type': string;
+    'service.language.name': string;
     'span.action': string;
     'span.id': string;
     'span.name': string;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { random } from 'lodash';
+import { flatten, random } from 'lodash';
 
 import { apm, timerange } from '../..';
 import { Instance } from '../lib/apm/instance';
@@ -22,8 +22,16 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   const logger = getLogger(runOptions);
 
   const numServices = 500;
+  const maxInstancesPerService = 5;
+  const minInstancesPerService = 1;
   const languages = ['go', 'dotnet', 'java', 'python'];
   const services = ['web', 'order-processing', 'api-backend', 'proxy'];
+  const agentVersions: Record<string, string[]> = {
+    go: ['2.1.0', '2.0.0', '1.15.0', '1.14.0', '1.13.1'],
+    dotnet: ['1.18.0', '1.17.0', '1.16.1', '1.16.0', '1.15.0'],
+    java: ['1.34.1', '1.34.0', '1.33.0', '1.32.0', '1.32.0'],
+    python: ['6.12.0', '6.11.0', '6.10.2', '6.10.1', '6.10.0'],
+  };
 
   return {
     generate: ({ from, to }) => {
@@ -31,17 +39,25 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
 
       const successfulTimestamps = range.ratePerMinute(180);
 
-      const instances = [...Array(numServices).keys()].map((index) =>
-        apm
-          .service({
-            name: `${services[index % services.length]}-${
-              languages[index % languages.length]
-            }-${index}`,
-            environment: ENVIRONMENT,
-            agentName: languages[index % languages.length],
-          })
-          .instance(`instance-${index}`)
-      );
+      const instances = flatten([...Array(numServices).keys()].map((index) => {
+        const language = languages[index % languages.length];
+        const agentLanguageVersions =  agentVersions[language];
+
+        const numOfInstances = Math.floor(Math.random() * (maxInstancesPerService - minInstancesPerService + 1) + minInstancesPerService);
+
+        return [...Array(numOfInstances).keys()].map((instanceIndex) =>
+          apm
+            .service({
+              name: `${services[index % services.length]}-${
+                language
+              }-${index}`,
+              environment: ENVIRONMENT,
+              agentName: language,
+              agentVersion: agentLanguageVersions[Math.floor(Math.random() * agentLanguageVersions.length)],
+            })
+            .instance(`instance-${index}-${instanceIndex}`),
+        );
+      }));
 
       const urls = ['GET /order/{id}', 'POST /basket/{id}', 'DELETE /basket', 'GET /products'];
 
