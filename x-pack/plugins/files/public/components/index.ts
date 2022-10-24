@@ -7,4 +7,5 @@
 
 export { Image, type ImageProps } from './image';
 export { UploadFile, type UploadFileProps } from './upload_file';
+export { FilePicker, type FilePickerProps } from './file_picker';
 export { FilesContext } from './context';
