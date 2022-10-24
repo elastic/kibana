@@ -77,6 +77,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'previewTelemetryUrlEnabled',
           ])}`,
+          '--xpack.task_manager.poll_interval=1000',
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

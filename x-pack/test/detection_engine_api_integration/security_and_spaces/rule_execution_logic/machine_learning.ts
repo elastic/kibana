@@ -33,9 +33,14 @@ import {
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
-  createRuleWithExceptionEntries,
   deleteAllAlerts,
+  deleteSignalsIndex,
+  executeSetupModuleRequest,
+  forceStartDatafeeds,
   getOpenSignals,
+  getPreviewAlerts,
+  previewRule,
+  previewRuleWithExceptionEntries,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -47,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const siemModule = 'security_linux_v3';
   const mlJobId = 'v3_linux_anomalous_network_activity';
-  const testRule: MachineLearningRuleCreateProps = {
+  const rule: MachineLearningRuleCreateProps = {
     name: 'Test ML rule',
     description: 'Test ML rule description',
     risk_score: 50,
@@ -56,63 +61,32 @@ export default ({ getService }: FtrProviderContext) => {
     anomaly_threshold: 30,
     machine_learning_job_id: mlJobId,
     from: '1900-01-01T00:00:00.000Z',
+    rule_id: 'ml-rule-id',
   };
 
-  async function executeSetupModuleRequest(module: string, rspCode: number) {
-    const { body } = await supertest
-      .post(`/api/ml/modules/setup/${module}`)
-      .set('kbn-xsrf', 'true')
-      .send({
-        prefix: '',
-        groups: ['auditbeat'],
-        indexPatternName: 'auditbeat-*',
-        startDatafeed: false,
-        useDedicatedIndex: true,
-        applyToAllSpaces: true,
-      })
-      .expect(rspCode);
-
-    return body;
-  }
-
-  async function forceStartDatafeeds(jobId: string, rspCode: number) {
-    const { body } = await supertest
-      .post(`/api/ml/jobs/force_start_datafeeds`)
-      .set('kbn-xsrf', 'true')
-      .send({
-        datafeedIds: [`datafeed-${jobId}`],
-        start: new Date().getUTCMilliseconds(),
-      })
-      .expect(rspCode);
-
-    return body;
-  }
-
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125033
   // FLAKY: https://github.com/elastic/kibana/issues/142993
-  describe.skip('Generating signals from ml anomalies', () => {
+  describe.skip('Machine learning type rules', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-      await executeSetupModuleRequest(siemModule, 200);
-      await forceStartDatafeeds(mlJobId, 200);
+      await executeSetupModuleRequest({ module: siemModule, rspCode: 200, supertest });
+      await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/anomalies');
-    });
-
-    afterEach(async () => {
+      await deleteSignalsIndex(supertest, log);
       await deleteAllAlerts(supertest, log);
     });
 
+    // First test creates a real rule - remaining tests use preview API
     it('should create 1 alert from ML rule when record meets anomaly_threshold', async () => {
-      const createdRule = await createRule(supertest, log, testRule);
-      const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
-      expect(signalsOpen.hits.hits.length).toBe(1);
-      const signal = signalsOpen.hits.hits[0];
+      const createdRule = await createRule(supertest, log, rule);
+      const alerts = await getOpenSignals(supertest, log, es, createdRule);
+      expect(alerts.hits.hits.length).toBe(1);
+      const signal = alerts.hits.hits[0];
 
       expect(signal._source).toEqual(
         expect.objectContaining({
@@ -162,7 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
             required_fields: [],
             risk_score: 50,
             risk_score_mapping: [],
-            rule_id: createdRule.rule_id,
+            rule_id: 'ml-rule-id',
             setup: '',
             severity: 'critical',
             severity_mapping: [],
@@ -185,13 +159,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should create 7 alerts from ML rule when records meet anomaly_threshold', async () => {
-      const rule: MachineLearningRuleCreateProps = {
-        ...testRule,
-        anomaly_threshold: 20,
-      };
-      const createdRule = await createRule(supertest, log, rule);
-      const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
-      expect(signalsOpen.hits.hits.length).toBe(7);
+      const { previewId } = await previewRule({
+        supertest,
+        rule: { ...rule, anomaly_threshold: 20 },
+      });
+      const previewAlerts = await getPreviewAlerts({ es, previewId });
+      expect(previewAlerts.length).toBe(7);
     });
 
     describe('with non-value list exception', () => {
@@ -199,18 +172,23 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllExceptions(supertest, log);
       });
       it('generates no signals when an exception is added for an ML rule', async () => {
-        const createdRule = await createRuleWithExceptionEntries(supertest, log, testRule, [
-          [
-            {
-              field: 'host.name',
-              operator: 'included',
-              type: 'match',
-              value: 'mothra',
-            },
+        const { previewId } = await previewRuleWithExceptionEntries({
+          supertest,
+          log,
+          rule,
+          entries: [
+            [
+              {
+                field: 'host.name',
+                operator: 'included',
+                type: 'match',
+                value: 'mothra',
+              },
+            ],
           ],
-        ]);
-        const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
-        expect(signalsOpen.hits.hits.length).toBe(0);
+        });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).toBe(0);
       });
     });
 
@@ -227,21 +205,26 @@ export default ({ getService }: FtrProviderContext) => {
       it('generates no signals when a value list exception is added for an ML rule', async () => {
         const valueListId = 'value-list-id';
         await importFile(supertest, log, 'keyword', ['mothra'], valueListId);
-        const createdRule = await createRuleWithExceptionEntries(supertest, log, testRule, [
-          [
-            {
-              field: 'host.name',
-              operator: 'included',
-              type: 'list',
-              list: {
-                id: valueListId,
-                type: 'keyword',
+        const { previewId } = await previewRuleWithExceptionEntries({
+          supertest,
+          log,
+          rule,
+          entries: [
+            [
+              {
+                field: 'host.name',
+                operator: 'included',
+                type: 'list',
+                list: {
+                  id: valueListId,
+                  type: 'keyword',
+                },
               },
-            },
+            ],
           ],
-        ]);
-        const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
-        expect(signalsOpen.hits.hits.length).toBe(0);
+        });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).toBe(0);
       });
     });
 
@@ -255,10 +238,10 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should be enriched with host risk score', async () => {
-        const createdRule = await createRule(supertest, log, testRule);
-        const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
-        expect(signalsOpen.hits.hits.length).toBe(1);
-        const fullSignal = signalsOpen.hits.hits[0]._source;
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).toBe(1);
+        const fullSignal = previewAlerts[0]._source;
 
         expect(fullSignal?.host?.risk?.calculated_level).toBe('Low');
         expect(fullSignal?.host?.risk?.calculated_score_norm).toBe(1);
