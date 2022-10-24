@@ -12,6 +12,7 @@ export interface InferencePipeline {
   modelState: TrainedModelState;
   modelStateReason?: string;
   pipelineName: string;
+  pipelineReferences: string[];
   types: string[];
 }
 
