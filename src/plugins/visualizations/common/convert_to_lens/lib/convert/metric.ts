@@ -23,6 +23,7 @@ import {
 } from './types';
 import { getFieldNameFromField } from '../utils';
 import { isFieldValid } from '../../utils';
+import { Operation } from '../../types';
 
 type MetricAggregationWithoutParams =
   | typeof Operations.AVERAGE
@@ -97,12 +98,19 @@ export const convertMetricAggregationColumnWithoutSpecialParams = (
     return null;
   }
 
+  const column = createColumn(agg, field, {
+    reducedTimeRange,
+  });
+
   return {
     operationType: aggregation.name,
     sourceField,
-    ...createColumn(agg, field, {
-      reducedTimeRange,
-    }),
+    ...column,
+    dataType: ([Operations.COUNT, Operations.UNIQUE_COUNT] as Operation[]).includes(
+      aggregation.name
+    )
+      ? 'number'
+      : column.dataType,
     params: { ...getFormat() },
     timeShift: agg.aggParams?.timeShift,
   };

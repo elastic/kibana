@@ -9,11 +9,10 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { IntegrationsGuard } from '.';
 import { TestProvidersComponent } from '../../common/mocks/test_providers';
-import { useTIDocumentationLink } from '../../hooks/use_documentation_link';
-import { useIntegrationsPageLink } from '../../hooks/use_integrations_page_link';
-import { useIndicatorsTotalCount } from '../../modules/indicators/hooks/use_indicators_total_count';
+import { useIntegrationsPageLink, useTIDocumentationLink } from '../../hooks';
+import { useIndicatorsTotalCount } from '../../modules/indicators';
 
-jest.mock('../../modules/indicators/hooks/use_indicators_total_count');
+jest.mock('../../modules/indicators/hooks/use_total_count');
 jest.mock('../../hooks/use_integrations_page_link');
 jest.mock('../../hooks/use_documentation_link');
 

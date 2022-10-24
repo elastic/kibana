@@ -46,8 +46,7 @@ export const createActionResponsesEsSearchResultsMock = (
   const fleetActionGenerator = new FleetActionGenerator('seed');
 
   let hitSource: Array<
-    | estypes.SearchHit<EndpointActionResponse>
-    | estypes.SearchHit<LogsEndpointActionResponse<object>>
+    estypes.SearchHit<EndpointActionResponse> | estypes.SearchHit<LogsEndpointActionResponse>
   > = [
     fleetActionGenerator.generateResponseEsHit({
       action_id: '123',

@@ -126,8 +126,6 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       connectorsMongoDB: `${ENTERPRISE_SEARCH_DOCS}connectors-mongodb.html`,
       connectorsMySQL: `${ENTERPRISE_SEARCH_DOCS}connectors-mysql.html`,
       connectorsWorkplaceSearch: `${ENTERPRISE_SEARCH_DOCS}connectors.html#connectors-workplace-search`,
-      contentExtraction: `${ENTERPRISE_SEARCH_DOCS}content-extraction.html`,
-      crawlerGettingStarted: `${ENTERPRISE_SEARCH_DOCS}crawler-getting-started.html`,
       crawlerManaging: `${ENTERPRISE_SEARCH_DOCS}crawler-managing.html`,
       crawlerOverview: `${ENTERPRISE_SEARCH_DOCS}crawler.html`,
       deployTrainedModels: `${MACHINE_LEARNING_DOCS}ml-nlp-deploy-models.html`,
@@ -375,6 +373,10 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
         es_connection: '',
       },
       responseActions: `${SECURITY_SOLUTION_DOCS}response-actions.html`,
+      configureEndpointIntegrationPolicy: `${SECURITY_SOLUTION_DOCS}configure-endpoint-integration-policy.html`,
+      exceptions: {
+        value_lists: `${SECURITY_SOLUTION_DOCS}detections-ui-exceptions.html#manage-value-lists`,
+      },
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -458,6 +460,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       userExperience: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/user-experience.html`,
       createAlerts: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/create-alerts.html`,
       syntheticsCommandReference: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-configuration.html#synthetics-configuration-playwright-options`,
+      syntheticsProjectMonitors: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetic-run-tests.html#synthetic-monitor-choose-project`,
     },
     alerting: {
       guide: `${KIBANA_DOCS}create-and-manage-rules.html`,

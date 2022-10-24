@@ -57,29 +57,14 @@ Object {
           "field": "@timestamp",
         },
       },
-      "slo.context.service.environment": Object {
-        "terms": Object {
-          "field": "service.environment",
-        },
-      },
-      "slo.context.service.name": Object {
-        "terms": Object {
-          "field": "service.name",
-        },
-      },
-      "slo.context.transaction.name": Object {
-        "terms": Object {
-          "field": "transaction.name",
-        },
-      },
-      "slo.context.transaction.type": Object {
-        "terms": Object {
-          "field": "transaction.type",
-        },
-      },
       "slo.id": Object {
         "terms": Object {
           "field": "slo.id",
+        },
+      },
+      "slo.revision": Object {
+        "terms": Object {
+          "field": "slo.revision",
         },
       },
     },
@@ -126,6 +111,12 @@ Object {
           "source": Any<String>,
         },
         "type": "keyword",
+      },
+      "slo.revision": Object {
+        "script": Object {
+          "source": "emit(1)",
+        },
+        "type": "long",
       },
     },
   },

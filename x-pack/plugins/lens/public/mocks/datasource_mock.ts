@@ -21,6 +21,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     getFilters: jest.fn(),
     getMaxPossibleNumValues: jest.fn(),
     isTextBasedLanguage: jest.fn(() => false),
+    hasDefaultTimeField: jest.fn(() => true),
   };
 
   return {
@@ -53,6 +54,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     getDropProps: jest.fn(),
     onDrop: jest.fn(),
     createEmptyLayer: jest.fn(),
+    syncColumns: jest.fn(),
 
     // this is an additional property which doesn't exist on real datasources
     // but can be used to validate whether specific API mock functions are called
@@ -62,7 +64,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     isTimeBased: jest.fn(),
     isValidColumn: jest.fn(),
     isEqual: jest.fn(),
-    getUsedDataView: jest.fn(),
+    getUsedDataView: jest.fn((state, layer) => 'mockip'),
     getUsedDataViews: jest.fn(),
     onRefreshIndexPattern: jest.fn(),
   };

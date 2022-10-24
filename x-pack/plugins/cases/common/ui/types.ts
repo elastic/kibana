@@ -6,13 +6,13 @@
  */
 
 import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
-import {
+import type {
   CREATE_CASES_CAPABILITY,
   DELETE_CASES_CAPABILITY,
   READ_CASES_CAPABILITY,
   UPDATE_CASES_CAPABILITY,
 } from '..';
-import {
+import type {
   CasePatchRequest,
   CaseStatuses,
   User,
@@ -30,8 +30,8 @@ import {
   CommentResponseExternalReferenceType,
   CommentResponseTypePersistableState,
 } from '../api';
-import { PUSH_CASES_CAPABILITY } from '../constants';
-import { SnakeToCamelCase } from '../types';
+import type { PUSH_CASES_CAPABILITY } from '../constants';
+import type { SnakeToCamelCase } from '../types';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
@@ -104,7 +104,7 @@ export interface FilterOptions {
   severity: CaseSeverityWithAll;
   status: CaseStatusWithAllStatus;
   tags: string[];
-  assignees: string[];
+  assignees: Array<string | null> | null;
   reporters: User[];
   owner: string[];
 }
@@ -127,7 +127,7 @@ export type ElasticUser = SnakeToCamelCase<User>;
 
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
-  filterOptions?: FilterOptions & { owner: string[] };
+  filterOptions?: FilterOptions;
 }
 
 export interface ApiProps {
