@@ -81,7 +81,8 @@ const HostsComponent = () => {
   );
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
-  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+
   const getHostRiskScoreFilterQuerySelector = useMemo(
     () => hostsSelectors.hostRiskScoreSeverityFilterSelector(),
     []
@@ -97,16 +98,17 @@ const HostsComponent = () => {
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
     if (tabName === HostsTableType.events) {
-      return filters.length > 0 ? [...filters, ...hostNameExistsFilter] : hostNameExistsFilter;
+      return [...globalFilters, ...hostNameExistsFilter];
     }
 
     if (tabName === HostsTableType.risk) {
       const severityFilter = generateSeverityFilter(severitySelection, RiskScoreEntity.host);
-
-      return [...severityFilter, ...hostNameExistsFilter, ...filters];
+      return [...globalFilters, ...hostNameExistsFilter, ...severityFilter];
     }
-    return filters;
-  }, [severitySelection, tabName, filters]);
+
+    return globalFilters;
+  }, [globalFilters, severitySelection, tabName]);
+
   const updateDateRange = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
@@ -124,15 +126,15 @@ const HostsComponent = () => {
     [dispatch]
   );
   const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
-  const [filterQuery, kqlError] = useMemo(
+  const [globalFilterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
-        filters,
+        filters: globalFilters,
       }),
-    [filters, indexPattern, uiSettings, query]
+    [globalFilters, indexPattern, uiSettings, query]
   );
   const [tabsFilterQuery] = useMemo(
     () =>
@@ -145,7 +147,14 @@ const HostsComponent = () => {
     [indexPattern, query, tabsFilters, uiSettings]
   );
 
-  useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
+  useInvalidFilterQuery({
+    id: ID,
+    filterQuery: globalFilterQuery,
+    kqlError,
+    query,
+    startDate: from,
+    endDate: to,
+  });
 
   const isEnterprisePlus = useLicense().isEnterprise();
 
@@ -193,12 +202,12 @@ const HostsComponent = () => {
               />
 
               <HostsKpiComponent
-                filterQuery={filterQuery}
+                filterQuery={globalFilterQuery}
                 indexNames={selectedPatterns}
                 from={from}
                 setQuery={setQuery}
                 to={to}
-                skip={isInitializing || !filterQuery}
+                skip={isInitializing || !!kqlError}
                 updateDateRange={updateDateRange}
               />
 
@@ -218,13 +227,12 @@ const HostsComponent = () => {
             <HostsTabs
               deleteQuery={deleteQuery}
               to={to}
-              filterQuery={tabsFilterQuery || ''}
+              filterQuery={tabsFilterQuery}
               isInitializing={isInitializing}
               indexNames={selectedPatterns}
               setQuery={setQuery}
               from={from}
               type={hostsModel.HostsType.page}
-              pageFilters={tabsFilters}
             />
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
