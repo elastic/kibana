@@ -42,7 +42,7 @@ import { useJourneySteps } from '../hooks/use_journey_steps';
 
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
 
-export const LastTenTestRuns = () => {
+export const TestRunsTable = () => {
   const { basePath } = useSyntheticsSettingsContext();
 
   const [sortField, setSortField] = useState<SortableField>('timestamp');
