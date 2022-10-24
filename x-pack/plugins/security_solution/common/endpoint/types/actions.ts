@@ -362,4 +362,11 @@ export interface ActionListApiResponse {
   total: number;
 }
 
-export type UploadedFileInfo = Pick<FileJSON, 'name' | 'id' | 'mimeType' | 'size' | 'status'>;
+export type UploadedFileInfo = Pick<
+  FileJSON,
+  'name' | 'id' | 'mimeType' | 'size' | 'status' | 'created'
+>;
+
+export interface ActionFileInfoApiResponse {
+  data: UploadedFileInfo;
+}

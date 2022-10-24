@@ -86,11 +86,15 @@ export const getFileInfo = async (
   try {
     const fileClient = getFileClient(esClient, logger);
     const file = await fileClient.get({ id: fileId });
-    const { name, id, mimeType, size, status } = file.data;
+    const { name, id, mimeType, size, status, created } = file.data;
     let fileHasChunks: boolean = true;
 
     if (status === 'READY') {
       fileHasChunks = await doesFileHaveChunks(esClient, fileId);
+
+      if (!fileHasChunks) {
+        logger.debug(`File has no data chunks. Status will be adjusted to DELETED`);
+      }
     }
 
     return {
@@ -98,6 +102,7 @@ export const getFileInfo = async (
       id,
       mimeType,
       size,
+      created,
       status: fileHasChunks ? status : 'DELETED',
     };
   } catch (error) {
@@ -117,6 +122,7 @@ const doesFileHaveChunks = async (
           'bid.keyword': fileId,
         },
       },
+      // Setting `_source` to false - we don't need the actual document to be returned
       _source: false,
     },
   });
