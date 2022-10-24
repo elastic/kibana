@@ -8,7 +8,7 @@
 import { EuiText } from '@elastic/eui';
 import React from 'react';
 import { getName } from './display_name';
-import { UserInfoWithAvatar } from './types';
+import type { UserInfoWithAvatar } from './types';
 
 export interface UsernameProps {
   userInfo?: UserInfoWithAvatar;

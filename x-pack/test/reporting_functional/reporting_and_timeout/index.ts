@@ -19,7 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const config = getService('config');
   const screenshotDir = config.get('screenshots.directory');
 
-  describe('Reporting Functional Tests with forced timeout', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/135309
+  describe.skip('Reporting Functional Tests with forced timeout', function () {
     const dashboardTitle = 'Ecom Dashboard Hidden Panel Titles';
     const baselineAPng = path.resolve(__dirname, 'fixtures/baseline/warnings_capture_a.png');
     const sessionPng = 'warnings_capture_session_a';

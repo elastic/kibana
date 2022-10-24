@@ -80,8 +80,14 @@ jest.mock('../../../../common/get_experimental_features', () => ({
 
 const ruleTags = ['a', 'b', 'c', 'd'];
 
-const { loadRuleTypes, updateAPIKey, loadRuleTags, bulkSnoozeRules, bulkUpdateAPIKey } =
-  jest.requireMock('../../../lib/rule_api');
+const {
+  loadRuleTypes,
+  updateAPIKey,
+  loadRuleTags,
+  bulkSnoozeRules,
+  bulkUnsnoozeRules,
+  bulkUpdateAPIKey,
+} = jest.requireMock('../../../lib/rule_api');
 const { loadRuleAggregationsWithKueryFilter } = jest.requireMock(
   '../../../lib/rule_api/aggregate_kuery_filter'
 );
@@ -1994,6 +2000,33 @@ describe.skip('Rules list bulk actions', () => {
     );
   });
 
+  it('can bulk unsnooze', async () => {
+    await setup();
+    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
+    wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
+    wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
+
+    // Unselect something to test filtering
+    wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
+
+    wrapper.find('[data-test-subj="bulkUnsnooze"]').first().simulate('click');
+
+    expect(wrapper.find('[data-test-subj="bulkUnsnoozeConfirmationModal"]').exists()).toBeTruthy();
+    wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(bulkUnsnoozeRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ids: [],
+        filter: 'NOT (alert.id: "alert:2")',
+      })
+    );
+  });
+
   it('can bulk add snooze schedule', async () => {
     await setup();
     wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
@@ -2016,6 +2049,36 @@ describe.skip('Rules list bulk actions', () => {
       expect.objectContaining({
         ids: [],
         filter: 'NOT (alert.id: "alert:2")',
+      })
+    );
+  });
+
+  it('can bulk remove snooze schedule', async () => {
+    await setup();
+    wrapper.find('[data-test-subj="checkboxSelectRow-1"]').at(1).simulate('change');
+    wrapper.find('[data-test-subj="selectAllRulesButton"]').at(1).simulate('click');
+    wrapper.find('[data-test-subj="showBulkActionButton"]').first().simulate('click');
+
+    // Unselect something to test filtering
+    wrapper.find('[data-test-subj="checkboxSelectRow-2"]').at(1).simulate('change');
+
+    wrapper.find('[data-test-subj="bulkRemoveSnoozeSchedule"]').first().simulate('click');
+
+    expect(
+      wrapper.find('[data-test-subj="bulkRemoveScheduleConfirmationModal"]').exists()
+    ).toBeTruthy();
+    wrapper.find('[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(bulkUnsnoozeRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ids: [],
+        filter: 'NOT (alert.id: "alert:2")',
+        scheduleIds: [],
       })
     );
   });

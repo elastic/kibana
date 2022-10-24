@@ -11,14 +11,14 @@ import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { GROUP_ID } from './constants';
 import type { DatasourceLayers, OperationDescriptor } from '../../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { layerTypes } from '../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { GaugeVisualizationState } from './constants';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
 function exampleState(): GaugeVisualizationState {
   return {
     layerId: 'test-layer',
-    layerType: layerTypes.DATA,
+    layerType: LayerTypes.DATA,
     labelMajorMode: 'auto',
     ticksPosition: 'auto',
     shape: 'horizontalBullet',
@@ -39,7 +39,7 @@ describe('gauge', () => {
     test('returns a default state', () => {
       expect(getGaugeVisualization({ paletteService, theme }).initialize(() => 'l1')).toEqual({
         layerId: 'l1',
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
         shape: 'horizontalBullet',
         labelMajorMode: 'auto',
         ticksPosition: 'auto',
@@ -105,7 +105,7 @@ describe('gauge', () => {
             accessors: [{ columnId: 'metric-accessor', triggerIcon: 'none' }],
             filterOperations: isNumericDynamicMetric,
             supportsMoreColumns: false,
-            required: true,
+            requiredMinDimensionCount: 1,
             dataTestSubj: 'lnsGauge_metricDimensionPanel',
             enableDimensionEditor: true,
             enableFormatSelector: true,
@@ -155,7 +155,7 @@ describe('gauge', () => {
             accessors: [{ columnId: 'goal-accessor' }],
             filterOperations: isNumericMetric,
             supportsMoreColumns: false,
-            required: false,
+            requiredMinDimensionCount: 0,
             dataTestSubj: 'lnsGauge_goalDimensionPanel',
             enableFormatSelector: false,
             supportStaticValue: true,
@@ -187,7 +187,7 @@ describe('gauge', () => {
             accessors: [],
             filterOperations: isNumericDynamicMetric,
             supportsMoreColumns: true,
-            required: true,
+            requiredMinDimensionCount: 1,
             dataTestSubj: 'lnsGauge_metricDimensionPanel',
             enableDimensionEditor: true,
             enableFormatSelector: true,
@@ -237,7 +237,7 @@ describe('gauge', () => {
             accessors: [],
             filterOperations: isNumericMetric,
             supportsMoreColumns: true,
-            required: false,
+            requiredMinDimensionCount: 0,
             dataTestSubj: 'lnsGauge_goalDimensionPanel',
             enableFormatSelector: false,
             supportStaticValue: true,
@@ -275,7 +275,7 @@ describe('gauge', () => {
             accessors: [{ columnId: 'metric-accessor', triggerIcon: 'none' }],
             filterOperations: isNumericDynamicMetric,
             supportsMoreColumns: false,
-            required: true,
+            requiredMinDimensionCount: 1,
             dataTestSubj: 'lnsGauge_metricDimensionPanel',
             enableDimensionEditor: true,
             enableFormatSelector: true,
@@ -325,7 +325,7 @@ describe('gauge', () => {
             accessors: [{ columnId: 'goal-accessor' }],
             filterOperations: isNumericMetric,
             supportsMoreColumns: false,
-            required: false,
+            requiredMinDimensionCount: 0,
             dataTestSubj: 'lnsGauge_goalDimensionPanel',
             enableFormatSelector: false,
             supportStaticValue: true,
@@ -368,7 +368,7 @@ describe('gauge', () => {
             accessors: [{ columnId: 'metric-accessor', triggerIcon: 'none' }],
             filterOperations: isNumericDynamicMetric,
             supportsMoreColumns: false,
-            required: true,
+            requiredMinDimensionCount: 1,
             dataTestSubj: 'lnsGauge_metricDimensionPanel',
             enableDimensionEditor: true,
             enableFormatSelector: true,
@@ -422,7 +422,7 @@ describe('gauge', () => {
             accessors: [{ columnId: 'goal-accessor' }],
             filterOperations: isNumericMetric,
             supportsMoreColumns: false,
-            required: false,
+            requiredMinDimensionCount: 0,
             dataTestSubj: 'lnsGauge_goalDimensionPanel',
             enableFormatSelector: false,
             supportStaticValue: true,
@@ -523,7 +523,7 @@ describe('gauge', () => {
         paletteService,
         theme,
       });
-      expect(instance.getLayerType('test-layer', state)).toEqual(layerTypes.DATA);
+      expect(instance.getLayerType('test-layer', state)).toEqual(LayerTypes.DATA);
       expect(instance.getLayerType('foo', state)).toBeUndefined();
     });
   });

@@ -208,7 +208,9 @@
               "Observable",
               "<",
               "SessionMeta",
-              ">; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => () => void; getSessionId: () => string | undefined; getSession$: () => ",
+              ">; readonly disableSaveAfterSearchesExpire$: ",
+              "Observable",
+              "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
               "Observable",
               "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; clear: () => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
               {
@@ -251,8 +253,14 @@
               ">; find: (options: Omit<",
               "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
-              "SavedObjectsFindResponse",
-              "<unknown, unknown>>; update: (sessionId: string, attributes: unknown) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionsFindResponse",
+                "text": "SearchSessionsFindResponse"
+              },
+              ">; update: (sessionId: string, attributes: unknown) => Promise<",
               "SavedObjectsUpdateResponse",
               "<",
               {
@@ -638,7 +646,9 @@
               "Observable",
               "<",
               "SessionMeta",
-              ">; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => () => void; getSessionId: () => string | undefined; getSession$: () => ",
+              ">; readonly disableSaveAfterSearchesExpire$: ",
+              "Observable",
+              "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
               "Observable",
               "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; clear: () => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
               {
@@ -681,8 +691,14 @@
               ">; find: (options: Omit<",
               "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
-              "SavedObjectsFindResponse",
-              "<unknown, unknown>>; update: (sessionId: string, attributes: unknown) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionsFindResponse",
+                "text": "SearchSessionsFindResponse"
+              },
+              ">; update: (sessionId: string, attributes: unknown) => Promise<",
               "SavedObjectsUpdateResponse",
               "<",
               {
@@ -1228,8 +1244,14 @@
           ">; find: (options: Omit<",
           "SavedObjectsFindOptions",
           ", \"type\">) => Promise<",
-          "SavedObjectsFindResponse",
-          "<unknown, unknown>>; update: (sessionId: string, attributes: unknown) => Promise<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSessionsFindResponse",
+            "text": "SearchSessionsFindResponse"
+          },
+          ">; update: (sessionId: string, attributes: unknown) => Promise<",
           "SavedObjectsUpdateResponse",
           "<",
           {
@@ -1288,7 +1310,9 @@
           "Observable",
           "<",
           "SessionMeta",
-          ">; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => () => void; getSessionId: () => string | undefined; getSession$: () => ",
+          ">; readonly disableSaveAfterSearchesExpire$: ",
+          "Observable",
+          "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
           "Observable",
           "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; clear: () => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
           {
@@ -1461,7 +1485,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; pageSize: number; trackingInterval: moment.Duration; cleanupInterval: moment.Duration; expireInterval: moment.Duration; monitoringTaskTimeout: moment.Duration; notTouchedTimeout: moment.Duration; notTouchedInProgressTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>"
+                  "Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
                 "deprecated": false,
@@ -1564,7 +1588,7 @@
                 "section": "def-server.CoreStart",
                 "text": "CoreStart"
               },
-              ", deps: StartDependencies) => Promise<void>"
+              ", deps: StartDependencies) => void"
             ],
             "path": "src/plugins/data/server/search/session/session_service.ts",
             "deprecated": false,
@@ -1661,7 +1685,7 @@
                 "section": "def-common.SearchSessionSavedObjectAttributes",
                 "text": "SearchSessionSavedObjectAttributes"
               },
-              "> | undefined>"
+              ">>"
             ],
             "path": "src/plugins/data/server/search/session/session_service.ts",
             "deprecated": false,
@@ -1842,8 +1866,8 @@
             "label": "find",
             "description": [],
             "signature": [
-              "({ savedObjectsClient }: ",
-              "SearchSessionDependencies",
+              "({ savedObjectsClient, internalElasticsearchClient }: ",
+              "SearchSessionStatusDependencies",
               ", user: ",
               {
                 "pluginId": "security",
@@ -1855,16 +1879,14 @@
               " | null, options: Omit<",
               "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
-              "SavedObjectsFindResponse",
-              "<",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSessionSavedObjectAttributes",
-                "text": "SearchSessionSavedObjectAttributes"
+                "section": "def-common.SearchSessionsFindResponse",
+                "text": "SearchSessionsFindResponse"
               },
-              ", unknown>>"
+              ">"
             ],
             "path": "src/plugins/data/server/search/session/session_service.ts",
             "deprecated": false,
@@ -1875,10 +1897,10 @@
                 "id": "def-server.SearchSessionService.find.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ savedObjectsClient }",
+                "label": "{ savedObjectsClient, internalElasticsearchClient }",
                 "description": [],
                 "signature": [
-                  "SearchSessionDependencies"
+                  "SearchSessionStatusDependencies"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
                 "deprecated": false,
@@ -2400,13 +2422,100 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.SearchSessionService.status",
+            "type": "Function",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "(deps: ",
+              "SearchSessionStatusDependencies",
+              ", user: ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              " | null, sessionId: string) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionStatusResponse",
+                "text": "SearchSessionStatusResponse"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data/server/search/session/session_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.status.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "SearchSessionStatusDependencies"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.status.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "user",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "security",
+                    "scope": "common",
+                    "docId": "kibSecurityPluginApi",
+                    "section": "def-common.AuthenticatedUser",
+                    "text": "AuthenticatedUser"
+                  },
+                  " | null"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.status.$3",
+                "type": "string",
+                "tags": [],
+                "label": "sessionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.SearchSessionService.asScopedProvider",
             "type": "Function",
             "tags": [],
             "label": "asScopedProvider",
             "description": [],
             "signature": [
-              "({ savedObjects }: ",
+              "({ savedObjects, elasticsearch }: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -2432,7 +2541,7 @@
                 "section": "def-common.ISearchOptions",
                 "text": "ISearchOptions"
               },
-              ") => Promise<string>; trackId: (args_0: ",
+              ") => Promise<string>; trackId: (searchRequest: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -2440,7 +2549,7 @@
                 "section": "def-common.IKibanaSearchRequest",
                 "text": "IKibanaSearchRequest"
               },
-              "<any>, args_1: string, args_2: ",
+              "<any>, searchId: string, options: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -2466,7 +2575,7 @@
                 "section": "def-common.SearchSessionSavedObjectAttributes",
                 "text": "SearchSessionSavedObjectAttributes"
               },
-              "> | undefined>; get: (sessionId: string) => Promise<",
+              ">>; get: (sessionId: string) => Promise<",
               "SavedObject",
               "<",
               {
@@ -2479,16 +2588,14 @@
               ">>; find: (options: Omit<",
               "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
-              "SavedObjectsFindResponse",
-              "<",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSessionSavedObjectAttributes",
-                "text": "SearchSessionSavedObjectAttributes"
+                "section": "def-common.SearchSessionsFindResponse",
+                "text": "SearchSessionsFindResponse"
               },
-              ", unknown>>; update: (sessionId: string, attributes: Partial<",
+              ">; update: (sessionId: string, attributes: Partial<",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -2526,7 +2633,15 @@
                 "section": "def-common.SearchSessionSavedObjectAttributes",
                 "text": "SearchSessionSavedObjectAttributes"
               },
-              ">>; delete: (sessionId: string) => Promise<{}>; getConfig: () => Readonly<{} & { enabled: boolean; pageSize: number; trackingInterval: moment.Duration; cleanupInterval: moment.Duration; expireInterval: moment.Duration; monitoringTaskTimeout: moment.Duration; notTouchedTimeout: moment.Duration; notTouchedInProgressTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }"
+              ">>; delete: (sessionId: string) => Promise<{}>; status: (sessionId: string) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionStatusResponse",
+                "text": "SearchSessionStatusResponse"
+              },
+              ">; getConfig: () => Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }"
             ],
             "path": "src/plugins/data/server/search/session/session_service.ts",
             "deprecated": false,
@@ -2537,7 +2652,7 @@
                 "id": "def-server.SearchSessionService.asScopedProvider.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ savedObjects }",
+                "label": "{ savedObjects, elasticsearch }",
                 "description": [],
                 "signature": [
                   {
@@ -2693,15 +2808,7 @@
                 "label": "attributes",
                 "description": [],
                 "signature": [
-                  "{ sessionId?: string | undefined; name?: string | undefined; appId?: string | undefined; created?: string | undefined; touched?: string | undefined; expires?: string | undefined; completed?: string | null | undefined; status?: ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.SearchSessionStatus",
-                    "text": "SearchSessionStatus"
-                  },
-                  " | undefined; locatorId?: string | undefined; initialState?: ",
+                  "{ sessionId?: string | undefined; name?: string | undefined; appId?: string | undefined; created?: string | undefined; expires?: string | undefined; locatorId?: string | undefined; initialState?: ",
                   "SerializableRecord",
                   " | undefined; restoreState?: ",
                   "SerializableRecord",
@@ -2713,7 +2820,7 @@
                     "section": "def-common.SearchSessionRequestInfo",
                     "text": "SearchSessionRequestInfo"
                   },
-                  "> | undefined; persisted?: boolean | undefined; realmType?: string | undefined; realmName?: string | undefined; username?: string | undefined; version?: string | undefined; }"
+                  "> | undefined; realmType?: string | undefined; realmName?: string | undefined; username?: string | undefined; version?: string | undefined; isCanceled?: boolean | undefined; }"
                 ],
                 "path": "src/plugins/data/server/search/session/types.ts",
                 "deprecated": false,
@@ -2770,16 +2877,14 @@
               "(options: Omit<",
               "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
-              "SavedObjectsFindResponse",
-              "<",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSessionSavedObjectAttributes",
-                "text": "SearchSessionSavedObjectAttributes"
+                "section": "def-common.SearchSessionsFindResponse",
+                "text": "SearchSessionsFindResponse"
               },
-              ", unknown>>"
+              ">"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -2794,15 +2899,19 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ filter?: any; search?: string | undefined; aggs?: Record<string, ",
+                  "{ filter?: any; search?: string | undefined; fields?: string[] | undefined; aggs?: Record<string, ",
                   "AggregationsAggregationContainer",
-                  "> | undefined; fields?: string[] | undefined; searchAfter?: string[] | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
+                  "> | undefined; searchAfter?: string[] | undefined; page?: number | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
                   "SortOrder",
                   " | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
                   "SavedObjectsFindOptionsReference",
                   " | ",
                   "SavedObjectsFindOptionsReference",
-                  "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; pit?: ",
+                  "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+                  "SavedObjectsFindOptionsReference",
+                  " | ",
+                  "SavedObjectsFindOptionsReference",
+                  "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; pit?: ",
                   "SavedObjectsPitParams",
                   " | undefined; }"
                 ],
@@ -2864,15 +2973,7 @@
                 "label": "attributes",
                 "description": [],
                 "signature": [
-                  "{ sessionId?: string | undefined; name?: string | undefined; appId?: string | undefined; created?: string | undefined; touched?: string | undefined; expires?: string | undefined; completed?: string | null | undefined; status?: ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.SearchSessionStatus",
-                    "text": "SearchSessionStatus"
-                  },
-                  " | undefined; locatorId?: string | undefined; initialState?: ",
+                  "{ sessionId?: string | undefined; name?: string | undefined; appId?: string | undefined; created?: string | undefined; expires?: string | undefined; locatorId?: string | undefined; initialState?: ",
                   "SerializableRecord",
                   " | undefined; restoreState?: ",
                   "SerializableRecord",
@@ -2884,7 +2985,7 @@
                     "section": "def-common.SearchSessionRequestInfo",
                     "text": "SearchSessionRequestInfo"
                   },
-                  "> | undefined; persisted?: boolean | undefined; realmType?: string | undefined; realmName?: string | undefined; username?: string | undefined; version?: string | undefined; }"
+                  "> | undefined; realmType?: string | undefined; realmName?: string | undefined; username?: string | undefined; version?: string | undefined; isCanceled?: boolean | undefined; }"
                 ],
                 "path": "src/plugins/data/server/search/session/types.ts",
                 "deprecated": false,
@@ -2994,6 +3095,42 @@
                 "signature": [
                   "Date"
                 ],
+                "path": "src/plugins/data/server/search/session/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.IScopedSearchClient.getSessionStatus",
+            "type": "Function",
+            "tags": [],
+            "label": "getSessionStatus",
+            "description": [],
+            "signature": [
+              "(sessionId: string) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionStatusResponse",
+                "text": "SearchSessionStatusResponse"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data/server/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.IScopedSearchClient.getSessionStatus.$1",
+                "type": "string",
+                "tags": [],
+                "label": "sessionId",
+                "description": [],
                 "path": "src/plugins/data/server/search/session/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3475,13 +3612,7 @@
         "label": "DataRequestHandlerContext",
         "description": [],
         "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.RequestHandlerContext",
-            "text": "RequestHandlerContext"
-          },
+          "RequestHandlerContext",
           " & { search: Promise<",
           {
             "pluginId": "data",
@@ -6599,7 +6730,7 @@
                 "section": "def-common.RequestAdapter",
                 "text": "RequestAdapter"
               },
-              " | undefined, abortSignal?: AbortSignal | undefined, searchSessionId?: string | undefined) => Promise<",
+              " | undefined, abortSignal?: AbortSignal | undefined, searchSessionId?: string | undefined, disableShardFailureWarning?: boolean | undefined) => Promise<",
               "SearchResponse",
               "<any, Record<string, ",
               "AggregationsAggregate",
@@ -6951,6 +7082,20 @@
                 ],
                 "signature": [
                   "string | undefined"
+                ],
+                "path": "src/plugins/data/common/search/aggs/agg_type.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggType.postFlightRequest.$8",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "disableShardFailureWarning",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
                 ],
                 "path": "src/plugins/data/common/search/aggs/agg_type.ts",
                 "deprecated": false,
@@ -9736,7 +9881,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.ts"
               }
             ],
             "children": [],
@@ -10050,19 +10195,19 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.test.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.test.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.test.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.test.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "inputControlVis",
@@ -16000,7 +16145,7 @@
             "id": "def-common.pollSearch.$3",
             "type": "Object",
             "tags": [],
-            "label": "{ pollInterval = 1000, abortSignal }",
+            "label": "{ pollInterval, abortSignal }",
             "description": [],
             "signature": [
               {
@@ -18687,6 +18832,79 @@
             "label": "customMetric",
             "description": [],
             "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfig",
+                "text": "AggConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/bucket_avg.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsBucketAvg.customBucket",
+            "type": "Object",
+            "tags": [],
+            "label": "customBucket",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfig",
+                "text": "AggConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/bucket_avg.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsBucketAvgSerialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsBucketAvgSerialized",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsBucketAvgSerialized",
+            "text": "AggParamsBucketAvgSerialized"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/bucket_avg.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsBucketAvgSerialized.customMetric",
+            "type": "Object",
+            "tags": [],
+            "label": "customMetric",
+            "description": [],
+            "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
               "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
@@ -18697,7 +18915,7 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsBucketAvg.customBucket",
+            "id": "def-common.AggParamsBucketAvgSerialized.customBucket",
             "type": "Object",
             "tags": [],
             "label": "customBucket",
@@ -18750,6 +18968,79 @@
             "label": "customMetric",
             "description": [],
             "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfig",
+                "text": "AggConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/bucket_max.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsBucketMax.customBucket",
+            "type": "Object",
+            "tags": [],
+            "label": "customBucket",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfig",
+                "text": "AggConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/bucket_max.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsBucketMaxSerialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsBucketMaxSerialized",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsBucketMaxSerialized",
+            "text": "AggParamsBucketMaxSerialized"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/bucket_max.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsBucketMaxSerialized.customMetric",
+            "type": "Object",
+            "tags": [],
+            "label": "customMetric",
+            "description": [],
+            "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
               "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
@@ -18760,7 +19051,7 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsBucketMax.customBucket",
+            "id": "def-common.AggParamsBucketMaxSerialized.customBucket",
             "type": "Object",
             "tags": [],
             "label": "customBucket",
@@ -18813,6 +19104,79 @@
             "label": "customMetric",
             "description": [],
             "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfig",
+                "text": "AggConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/bucket_min.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsBucketMin.customBucket",
+            "type": "Object",
+            "tags": [],
+            "label": "customBucket",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfig",
+                "text": "AggConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/bucket_min.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsBucketMinSerialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsBucketMinSerialized",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsBucketMinSerialized",
+            "text": "AggParamsBucketMinSerialized"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/bucket_min.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsBucketMinSerialized.customMetric",
+            "type": "Object",
+            "tags": [],
+            "label": "customMetric",
+            "description": [],
+            "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
               "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
@@ -18823,7 +19187,7 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsBucketMin.customBucket",
+            "id": "def-common.AggParamsBucketMinSerialized.customBucket",
             "type": "Object",
             "tags": [],
             "label": "customBucket",
@@ -18876,6 +19240,79 @@
             "label": "customMetric",
             "description": [],
             "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfig",
+                "text": "AggConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/bucket_sum.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsBucketSum.customBucket",
+            "type": "Object",
+            "tags": [],
+            "label": "customBucket",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfig",
+                "text": "AggConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/bucket_sum.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsBucketSumSerialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsBucketSumSerialized",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsBucketSumSerialized",
+            "text": "AggParamsBucketSumSerialized"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/bucket_sum.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsBucketSumSerialized.customMetric",
+            "type": "Object",
+            "tags": [],
+            "label": "customMetric",
+            "description": [],
+            "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
               "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
@@ -18886,7 +19323,7 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsBucketSum.customBucket",
+            "id": "def-common.AggParamsBucketSumSerialized.customBucket",
             "type": "Object",
             "tags": [],
             "label": "customBucket",
@@ -19024,8 +19461,8 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.BaseAggParams",
-            "text": "BaseAggParams"
+            "section": "def-common.CommonAggParamsCumulativeSum",
+            "text": "CommonAggParamsCumulativeSum"
           }
         ],
         "path": "src/plugins/data/common/search/aggs/metrics/cumulative_sum.ts",
@@ -19034,21 +19471,59 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsCumulativeSum.buckets_path",
-            "type": "string",
+            "id": "def-common.AggParamsCumulativeSum.customMetric",
+            "type": "Object",
             "tags": [],
-            "label": "buckets_path",
+            "label": "customMetric",
             "description": [],
             "signature": [
-              "string | undefined"
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfig",
+                "text": "AggConfig"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/cumulative_sum.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsCumulativeSumSerialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsCumulativeSumSerialized",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsCumulativeSumSerialized",
+            "text": "AggParamsCumulativeSumSerialized"
           },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.CommonAggParamsCumulativeSum",
+            "text": "CommonAggParamsCumulativeSum"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/cumulative_sum.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsCumulativeSum.customMetric",
+            "id": "def-common.AggParamsCumulativeSumSerialized.customMetric",
             "type": "Object",
             "tags": [],
             "label": "customMetric",
@@ -19057,20 +19532,6 @@
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
               "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/metrics/cumulative_sum.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsCumulativeSum.metricAgg",
-            "type": "string",
-            "tags": [],
-            "label": "metricAgg",
-            "description": [],
-            "signature": [
-              "string | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/cumulative_sum.ts",
             "deprecated": false,
@@ -19402,8 +19863,8 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.BaseAggParams",
-            "text": "BaseAggParams"
+            "section": "def-common.CommonAggParamsDerivative",
+            "text": "CommonAggParamsDerivative"
           }
         ],
         "path": "src/plugins/data/common/search/aggs/metrics/derivative.ts",
@@ -19412,21 +19873,59 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsDerivative.buckets_path",
-            "type": "string",
+            "id": "def-common.AggParamsDerivative.customMetric",
+            "type": "Object",
             "tags": [],
-            "label": "buckets_path",
+            "label": "customMetric",
             "description": [],
             "signature": [
-              "string | undefined"
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfig",
+                "text": "AggConfig"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/derivative.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsDerivativeSerialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsDerivativeSerialized",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsDerivativeSerialized",
+            "text": "AggParamsDerivativeSerialized"
           },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.CommonAggParamsDerivative",
+            "text": "CommonAggParamsDerivative"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/derivative.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsDerivative.customMetric",
+            "id": "def-common.AggParamsDerivativeSerialized.customMetric",
             "type": "Object",
             "tags": [],
             "label": "customMetric",
@@ -19435,20 +19934,6 @@
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
               "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/metrics/derivative.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsDerivative.metricAgg",
-            "type": "string",
-            "tags": [],
-            "label": "metricAgg",
-            "description": [],
-            "signature": [
-              "string | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/derivative.ts",
             "deprecated": false,
@@ -19656,6 +20141,79 @@
             "label": "customMetric",
             "description": [],
             "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfig",
+                "text": "AggConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsFilteredMetric.customBucket",
+            "type": "Object",
+            "tags": [],
+            "label": "customBucket",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfig",
+                "text": "AggConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsFilteredMetricSerialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsFilteredMetricSerialized",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsFilteredMetricSerialized",
+            "text": "AggParamsFilteredMetricSerialized"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/filtered_metric.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsFilteredMetricSerialized.customMetric",
+            "type": "Object",
+            "tags": [],
+            "label": "customMetric",
+            "description": [],
+            "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
               "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
@@ -19666,7 +20224,7 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsFilteredMetric.customBucket",
+            "id": "def-common.AggParamsFilteredMetricSerialized.customBucket",
             "type": "Object",
             "tags": [],
             "label": "customBucket",
@@ -20265,6 +20823,860 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.AggParamsMapping",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsMapping",
+        "description": [],
+        "path": "src/plugins/data/common/search/aggs/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.BUCKET_TYPES.RANGE",
+            "type": "Object",
+            "tags": [],
+            "label": "[BUCKET_TYPES.RANGE]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsRange",
+                "text": "AggParamsRange"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.BUCKET_TYPES.IP_RANGE",
+            "type": "Object",
+            "tags": [],
+            "label": "[BUCKET_TYPES.IP_RANGE]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsIpRange",
+                "text": "AggParamsIpRange"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.BUCKET_TYPES.DATE_RANGE",
+            "type": "Object",
+            "tags": [],
+            "label": "[BUCKET_TYPES.DATE_RANGE]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsDateRange",
+                "text": "AggParamsDateRange"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.BUCKET_TYPES.FILTER",
+            "type": "Object",
+            "tags": [],
+            "label": "[BUCKET_TYPES.FILTER]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsFilter",
+                "text": "AggParamsFilter"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.BUCKET_TYPES.FILTERS",
+            "type": "Object",
+            "tags": [],
+            "label": "[BUCKET_TYPES.FILTERS]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsFilters",
+                "text": "AggParamsFilters"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.BUCKET_TYPES.SIGNIFICANT_TERMS",
+            "type": "Object",
+            "tags": [],
+            "label": "[BUCKET_TYPES.SIGNIFICANT_TERMS]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsSignificantTerms",
+                "text": "AggParamsSignificantTerms"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.BUCKET_TYPES.SIGNIFICANT_TEXT",
+            "type": "Object",
+            "tags": [],
+            "label": "[BUCKET_TYPES.SIGNIFICANT_TEXT]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsSignificantText",
+                "text": "AggParamsSignificantText"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.BUCKET_TYPES.GEOTILE_GRID",
+            "type": "Object",
+            "tags": [],
+            "label": "[BUCKET_TYPES.GEOTILE_GRID]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsGeoTile",
+                "text": "AggParamsGeoTile"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.BUCKET_TYPES.GEOHASH_GRID",
+            "type": "Object",
+            "tags": [],
+            "label": "[BUCKET_TYPES.GEOHASH_GRID]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsGeoHash",
+                "text": "AggParamsGeoHash"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.BUCKET_TYPES.HISTOGRAM",
+            "type": "Object",
+            "tags": [],
+            "label": "[BUCKET_TYPES.HISTOGRAM]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsHistogram",
+                "text": "AggParamsHistogram"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.BUCKET_TYPES.DATE_HISTOGRAM",
+            "type": "Object",
+            "tags": [],
+            "label": "[BUCKET_TYPES.DATE_HISTOGRAM]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsDateHistogram",
+                "text": "AggParamsDateHistogram"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.BUCKET_TYPES.TERMS",
+            "type": "Object",
+            "tags": [],
+            "label": "[BUCKET_TYPES.TERMS]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsTerms",
+                "text": "AggParamsTerms"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.BUCKET_TYPES.MULTI_TERMS",
+            "type": "Object",
+            "tags": [],
+            "label": "[BUCKET_TYPES.MULTI_TERMS]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsMultiTerms",
+                "text": "AggParamsMultiTerms"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.BUCKET_TYPES.RARE_TERMS",
+            "type": "Object",
+            "tags": [],
+            "label": "[BUCKET_TYPES.RARE_TERMS]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsRareTerms",
+                "text": "AggParamsRareTerms"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.BUCKET_TYPES.SAMPLER",
+            "type": "Object",
+            "tags": [],
+            "label": "[BUCKET_TYPES.SAMPLER]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsSampler",
+                "text": "AggParamsSampler"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.BUCKET_TYPES.DIVERSIFIED_SAMPLER",
+            "type": "Object",
+            "tags": [],
+            "label": "[BUCKET_TYPES.DIVERSIFIED_SAMPLER]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsDiversifiedSampler",
+                "text": "AggParamsDiversifiedSampler"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.AVG",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.AVG]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsAvg",
+                "text": "AggParamsAvg"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.CARDINALITY",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.CARDINALITY]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsCardinality",
+                "text": "AggParamsCardinality"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.COUNT",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.COUNT]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsCount",
+                "text": "AggParamsCount"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.VALUE_COUNT",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.VALUE_COUNT]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsValueCount",
+                "text": "AggParamsValueCount"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.GEO_BOUNDS",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.GEO_BOUNDS]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsGeoBounds",
+                "text": "AggParamsGeoBounds"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.GEO_CENTROID",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.GEO_CENTROID]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsGeoCentroid",
+                "text": "AggParamsGeoCentroid"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.MAX",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.MAX]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsMax",
+                "text": "AggParamsMax"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.MEDIAN",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.MEDIAN]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsMedian",
+                "text": "AggParamsMedian"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.SINGLE_PERCENTILE",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.SINGLE_PERCENTILE]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsSinglePercentile",
+                "text": "AggParamsSinglePercentile"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.SINGLE_PERCENTILE_RANK",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.SINGLE_PERCENTILE_RANK]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsSinglePercentileRank",
+                "text": "AggParamsSinglePercentileRank"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.MIN",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.MIN]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsMin",
+                "text": "AggParamsMin"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.STD_DEV",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.STD_DEV]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsStdDeviation",
+                "text": "AggParamsStdDeviation"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.SUM",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.SUM]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsSum",
+                "text": "AggParamsSum"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.AVG_BUCKET",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.AVG_BUCKET]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsBucketAvg",
+                "text": "AggParamsBucketAvg"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.MAX_BUCKET",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.MAX_BUCKET]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsBucketMax",
+                "text": "AggParamsBucketMax"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.MIN_BUCKET",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.MIN_BUCKET]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsBucketMin",
+                "text": "AggParamsBucketMin"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.SUM_BUCKET",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.SUM_BUCKET]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsBucketSum",
+                "text": "AggParamsBucketSum"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.FILTERED_METRIC",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.FILTERED_METRIC]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsFilteredMetric",
+                "text": "AggParamsFilteredMetric"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.CUMULATIVE_SUM",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.CUMULATIVE_SUM]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsCumulativeSum",
+                "text": "AggParamsCumulativeSum"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.DERIVATIVE",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.DERIVATIVE]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsDerivative",
+                "text": "AggParamsDerivative"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.MOVING_FN",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.MOVING_FN]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsMovingAvg",
+                "text": "AggParamsMovingAvg"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.PERCENTILE_RANKS",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.PERCENTILE_RANKS]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsPercentileRanks",
+                "text": "AggParamsPercentileRanks"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.PERCENTILES",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.PERCENTILES]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsPercentiles",
+                "text": "AggParamsPercentiles"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.SERIAL_DIFF",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.SERIAL_DIFF]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsSerialDiff",
+                "text": "AggParamsSerialDiff"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.TOP_HITS",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.TOP_HITS]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsTopHit",
+                "text": "AggParamsTopHit"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.METRIC_TYPES.TOP_METRICS",
+            "type": "Object",
+            "tags": [],
+            "label": "[METRIC_TYPES.TOP_METRICS]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsTopMetrics",
+                "text": "AggParamsTopMetrics"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.AggParamsMax",
         "type": "Interface",
         "tags": [],
@@ -20409,8 +21821,8 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.BaseAggParams",
-            "text": "BaseAggParams"
+            "section": "def-common.CommonAggParamsMovingAvg",
+            "text": "CommonAggParamsMovingAvg"
           }
         ],
         "path": "src/plugins/data/common/search/aggs/metrics/moving_avg.ts",
@@ -20419,49 +21831,59 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsMovingAvg.buckets_path",
-            "type": "string",
-            "tags": [],
-            "label": "buckets_path",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/metrics/moving_avg.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsMovingAvg.window",
-            "type": "number",
-            "tags": [],
-            "label": "window",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/metrics/moving_avg.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsMovingAvg.script",
-            "type": "string",
-            "tags": [],
-            "label": "script",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/metrics/moving_avg.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-common.AggParamsMovingAvg.customMetric",
+            "type": "Object",
+            "tags": [],
+            "label": "customMetric",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfig",
+                "text": "AggConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/moving_avg.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsMovingAvgSerialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsMovingAvgSerialized",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsMovingAvgSerialized",
+            "text": "AggParamsMovingAvgSerialized"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.CommonAggParamsMovingAvg",
+            "text": "CommonAggParamsMovingAvg"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/moving_avg.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMovingAvgSerialized.customMetric",
             "type": "Object",
             "tags": [],
             "label": "customMetric",
@@ -20470,20 +21892,6 @@
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
               "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/metrics/moving_avg.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsMovingAvg.metricAgg",
-            "type": "string",
-            "tags": [],
-            "label": "metricAgg",
-            "description": [],
-            "signature": [
-              "string | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/moving_avg.ts",
             "deprecated": false,
@@ -20507,44 +21915,12 @@
             "section": "def-common.AggParamsMultiTerms",
             "text": "AggParamsMultiTerms"
           },
-          " extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.BaseAggParams",
-            "text": "BaseAggParams"
-          }
+          " extends CommonAggParamsMultiTerms"
         ],
         "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsMultiTerms.fields",
-            "type": "Array",
-            "tags": [],
-            "label": "fields",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsMultiTerms.orderBy",
-            "type": "string",
-            "tags": [],
-            "label": "orderBy",
-            "description": [],
-            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
           {
             "parentPluginId": "data",
             "id": "def-common.AggParamsMultiTerms.orderAgg",
@@ -20553,93 +21929,54 @@
             "label": "orderAgg",
             "description": [],
             "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfig",
+                "text": "AggConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsMultiTermsSerialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsMultiTermsSerialized",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsMultiTermsSerialized",
+            "text": "AggParamsMultiTermsSerialized"
+          },
+          " extends CommonAggParamsMultiTerms"
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMultiTermsSerialized.orderAgg",
+            "type": "Object",
+            "tags": [],
+            "label": "orderAgg",
+            "description": [],
+            "signature": [
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
               "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsMultiTerms.order",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "order",
-            "description": [],
-            "signature": [
-              "\"asc\" | \"desc\" | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsMultiTerms.size",
-            "type": "number",
-            "tags": [],
-            "label": "size",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsMultiTerms.shardSize",
-            "type": "number",
-            "tags": [],
-            "label": "shardSize",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsMultiTerms.otherBucket",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "otherBucket",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsMultiTerms.otherBucketLabel",
-            "type": "string",
-            "tags": [],
-            "label": "otherBucketLabel",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsMultiTerms.separatorLabel",
-            "type": "string",
-            "tags": [],
-            "label": "separatorLabel",
-            "description": [],
-            "signature": [
-              "string | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.ts",
             "deprecated": false,
@@ -20946,8 +22283,8 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.BaseAggParams",
-            "text": "BaseAggParams"
+            "section": "def-common.CommonAggParamsSerialDiff",
+            "text": "CommonAggParamsSerialDiff"
           }
         ],
         "path": "src/plugins/data/common/search/aggs/metrics/serial_diff.ts",
@@ -20956,21 +22293,59 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsSerialDiff.buckets_path",
-            "type": "string",
+            "id": "def-common.AggParamsSerialDiff.customMetric",
+            "type": "Object",
             "tags": [],
-            "label": "buckets_path",
+            "label": "customMetric",
             "description": [],
             "signature": [
-              "string | undefined"
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfig",
+                "text": "AggConfig"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/serial_diff.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsSerialDiffSerialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsSerialDiffSerialized",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsSerialDiffSerialized",
+            "text": "AggParamsSerialDiffSerialized"
           },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.CommonAggParamsSerialDiff",
+            "text": "CommonAggParamsSerialDiff"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/serial_diff.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsSerialDiff.customMetric",
+            "id": "def-common.AggParamsSerialDiffSerialized.customMetric",
             "type": "Object",
             "tags": [],
             "label": "customMetric",
@@ -20979,20 +22354,6 @@
               "{ type: string; enabled?: boolean | undefined; id?: string | undefined; params?: {} | ",
               "SerializableRecord",
               " | undefined; schema?: string | undefined; } | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/metrics/serial_diff.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsSerialDiff.metricAgg",
-            "type": "string",
-            "tags": [],
-            "label": "metricAgg",
-            "description": [],
-            "signature": [
-              "string | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/serial_diff.ts",
             "deprecated": false,
@@ -21435,8 +22796,8 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.BaseAggParams",
-            "text": "BaseAggParams"
+            "section": "def-common.CommonAggParamsTerms",
+            "text": "CommonAggParamsTerms"
           }
         ],
         "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
@@ -21445,29 +22806,73 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsTerms.field",
-            "type": "string",
-            "tags": [],
-            "label": "field",
-            "description": [],
-            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsTerms.orderBy",
-            "type": "string",
-            "tags": [],
-            "label": "orderBy",
-            "description": [],
-            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-common.AggParamsTerms.orderAgg",
+            "type": "Object",
+            "tags": [],
+            "label": "orderAgg",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggConfig",
+                "text": "AggConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTerms.order",
+            "type": "Object",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "{ value: \"asc\" | \"desc\"; text: string; } | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsTermsSerialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsTermsSerialized",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsTermsSerialized",
+            "text": "AggParamsTermsSerialized"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.CommonAggParamsTerms",
+            "text": "CommonAggParamsTerms"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTermsSerialized.orderAgg",
             "type": "Object",
             "tags": [],
             "label": "orderAgg",
@@ -21483,153 +22888,13 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsTerms.order",
+            "id": "def-common.AggParamsTermsSerialized.order",
             "type": "CompoundType",
             "tags": [],
             "label": "order",
             "description": [],
             "signature": [
               "\"asc\" | \"desc\" | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsTerms.size",
-            "type": "number",
-            "tags": [],
-            "label": "size",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsTerms.shardSize",
-            "type": "number",
-            "tags": [],
-            "label": "shardSize",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsTerms.missingBucket",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "missingBucket",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsTerms.missingBucketLabel",
-            "type": "string",
-            "tags": [],
-            "label": "missingBucketLabel",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsTerms.otherBucket",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "otherBucket",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsTerms.otherBucketLabel",
-            "type": "string",
-            "tags": [],
-            "label": "otherBucketLabel",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsTerms.exclude",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "exclude",
-            "description": [],
-            "signature": [
-              "string[] | number[] | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsTerms.include",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "include",
-            "description": [],
-            "signature": [
-              "string[] | number[] | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsTerms.includeIsRegex",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "includeIsRegex",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsTerms.excludeIsRegex",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "excludeIsRegex",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
             "deprecated": false,
@@ -21658,8 +22923,8 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.BaseAggParams",
-            "text": "BaseAggParams"
+            "section": "def-common.BaseAggParamsTopHit",
+            "text": "BaseAggParamsTopHit"
           }
         ],
         "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
@@ -21668,24 +22933,13 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsTopHit.field",
-            "type": "string",
+            "id": "def-common.AggParamsTopHit.sortOrder",
+            "type": "Object",
             "tags": [],
-            "label": "field",
-            "description": [],
-            "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsTopHit.aggregate",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "aggregate",
+            "label": "sortOrder",
             "description": [],
             "signature": [
-              "\"min\" | \"max\" | \"sum\" | \"average\" | \"concat\""
+              "{ value: \"asc\" | \"desc\"; text: string; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
             "deprecated": false,
@@ -21694,40 +22948,78 @@
           {
             "parentPluginId": "data",
             "id": "def-common.AggParamsTopHit.sortField",
-            "type": "string",
+            "type": "Object",
             "tags": [],
             "label": "sortField",
             "description": [],
             "signature": [
-              "string | undefined"
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsTopHitSerialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsTopHitSerialized",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsTopHitSerialized",
+            "text": "AggParamsTopHitSerialized"
           },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParamsTopHit",
+            "text": "BaseAggParamsTopHit"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsTopHit.size",
-            "type": "number",
-            "tags": [],
-            "label": "size",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsTopHit.sortOrder",
+            "id": "def-common.AggParamsTopHitSerialized.sortOrder",
             "type": "CompoundType",
             "tags": [],
             "label": "sortOrder",
             "description": [],
             "signature": [
               "\"asc\" | \"desc\" | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTopHitSerialized.sortField",
+            "type": "string",
+            "tags": [],
+            "label": "sortField",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
             "deprecated": false,
@@ -21756,8 +23048,8 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.BaseAggParams",
-            "text": "BaseAggParams"
+            "section": "def-common.BaseAggParamsTopMetrics",
+            "text": "BaseAggParamsTopMetrics"
           }
         ],
         "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
@@ -21766,24 +23058,13 @@
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsTopMetrics.field",
-            "type": "string",
+            "id": "def-common.AggParamsTopMetrics.sortOrder",
+            "type": "Object",
             "tags": [],
-            "label": "field",
-            "description": [],
-            "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.AggParamsTopMetrics.sortField",
-            "type": "string",
-            "tags": [],
-            "label": "sortField",
+            "label": "sortOrder",
             "description": [],
             "signature": [
-              "string | undefined"
+              "{ value: \"asc\" | \"desc\"; text: string; } | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
             "deprecated": false,
@@ -21791,7 +23072,59 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsTopMetrics.sortOrder",
+            "id": "def-common.AggParamsTopMetrics.sortField",
+            "type": "Object",
+            "tags": [],
+            "label": "sortField",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.AggParamsTopMetricsSerialized",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsTopMetricsSerialized",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsTopMetricsSerialized",
+            "text": "AggParamsTopMetricsSerialized"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParamsTopMetrics",
+            "text": "BaseAggParamsTopMetrics"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsTopMetricsSerialized.sortOrder",
             "type": "CompoundType",
             "tags": [],
             "label": "sortOrder",
@@ -21805,13 +23138,13 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.AggParamsTopMetrics.size",
-            "type": "number",
+            "id": "def-common.AggParamsTopMetricsSerialized.sortField",
+            "type": "string",
             "tags": [],
-            "label": "size",
+            "label": "sortField",
             "description": [],
             "signature": [
-              "number | undefined"
+              "string | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
             "deprecated": false,
@@ -23284,6 +24617,132 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.BaseAggParamsTopHit",
+        "type": "Interface",
+        "tags": [],
+        "label": "BaseAggParamsTopHit",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParamsTopHit",
+            "text": "BaseAggParamsTopHit"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.BaseAggParamsTopHit.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.BaseAggParamsTopHit.aggregate",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "aggregate",
+            "description": [],
+            "signature": [
+              "\"min\" | \"max\" | \"sum\" | \"average\" | \"concat\""
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.BaseAggParamsTopHit.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/top_hit.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.BaseAggParamsTopMetrics",
+        "type": "Interface",
+        "tags": [],
+        "label": "BaseAggParamsTopMetrics",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParamsTopMetrics",
+            "text": "BaseAggParamsTopMetrics"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.BaseAggParamsTopMetrics.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.BaseAggParamsTopMetrics.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/top_metrics.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.BaseHit",
         "type": "Interface",
         "tags": [],
@@ -23526,6 +24985,463 @@
             "label": "mask",
             "description": [],
             "path": "src/plugins/data/common/search/aggs/buckets/lib/ip_range.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.CommonAggParamsCumulativeSum",
+        "type": "Interface",
+        "tags": [],
+        "label": "CommonAggParamsCumulativeSum",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.CommonAggParamsCumulativeSum",
+            "text": "CommonAggParamsCumulativeSum"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/cumulative_sum.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsCumulativeSum.buckets_path",
+            "type": "string",
+            "tags": [],
+            "label": "buckets_path",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/cumulative_sum.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsCumulativeSum.metricAgg",
+            "type": "string",
+            "tags": [],
+            "label": "metricAgg",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/cumulative_sum.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.CommonAggParamsDerivative",
+        "type": "Interface",
+        "tags": [],
+        "label": "CommonAggParamsDerivative",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.CommonAggParamsDerivative",
+            "text": "CommonAggParamsDerivative"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/derivative.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsDerivative.buckets_path",
+            "type": "string",
+            "tags": [],
+            "label": "buckets_path",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/derivative.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsDerivative.metricAgg",
+            "type": "string",
+            "tags": [],
+            "label": "metricAgg",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/derivative.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.CommonAggParamsMovingAvg",
+        "type": "Interface",
+        "tags": [],
+        "label": "CommonAggParamsMovingAvg",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.CommonAggParamsMovingAvg",
+            "text": "CommonAggParamsMovingAvg"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/moving_avg.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsMovingAvg.buckets_path",
+            "type": "string",
+            "tags": [],
+            "label": "buckets_path",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/moving_avg.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsMovingAvg.window",
+            "type": "number",
+            "tags": [],
+            "label": "window",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/moving_avg.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsMovingAvg.script",
+            "type": "string",
+            "tags": [],
+            "label": "script",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/moving_avg.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsMovingAvg.metricAgg",
+            "type": "string",
+            "tags": [],
+            "label": "metricAgg",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/moving_avg.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.CommonAggParamsSerialDiff",
+        "type": "Interface",
+        "tags": [],
+        "label": "CommonAggParamsSerialDiff",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.CommonAggParamsSerialDiff",
+            "text": "CommonAggParamsSerialDiff"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/metrics/serial_diff.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsSerialDiff.buckets_path",
+            "type": "string",
+            "tags": [],
+            "label": "buckets_path",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/serial_diff.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsSerialDiff.metricAgg",
+            "type": "string",
+            "tags": [],
+            "label": "metricAgg",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/metrics/serial_diff.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.CommonAggParamsTerms",
+        "type": "Interface",
+        "tags": [],
+        "label": "CommonAggParamsTerms",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.CommonAggParamsTerms",
+            "text": "CommonAggParamsTerms"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsTerms.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsTerms.orderBy",
+            "type": "string",
+            "tags": [],
+            "label": "orderBy",
+            "description": [],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsTerms.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsTerms.shardSize",
+            "type": "number",
+            "tags": [],
+            "label": "shardSize",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsTerms.missingBucket",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "missingBucket",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsTerms.missingBucketLabel",
+            "type": "string",
+            "tags": [],
+            "label": "missingBucketLabel",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsTerms.otherBucket",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "otherBucket",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsTerms.otherBucketLabel",
+            "type": "string",
+            "tags": [],
+            "label": "otherBucketLabel",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsTerms.exclude",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "exclude",
+            "description": [],
+            "signature": [
+              "string | string[] | number[] | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsTerms.include",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "include",
+            "description": [],
+            "signature": [
+              "string | string[] | number[] | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsTerms.includeIsRegex",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeIsRegex",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.CommonAggParamsTerms.excludeIsRegex",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "excludeIsRegex",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/terms.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -24298,7 +26214,7 @@
             "tags": [],
             "label": "pollInterval",
             "description": [
-              "\nThe number of milliseconds to wait between receiving a response and sending another request"
+              "\nThe number of milliseconds to wait between receiving a response and sending another request\nIf not provided, then a default 1 second interval with back-off up to 5 seconds interval is used"
             ],
             "signature": [
               "number | undefined"
@@ -24822,6 +26738,22 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.IKibanaSearchResponse.isStored",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isStored",
+            "description": [
+              "\nIndicates whether the search has been saved to a search-session object and long keepAlive was set"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.IKibanaSearchResponse.warning",
             "type": "string",
             "tags": [],
@@ -25271,6 +27203,22 @@
             "label": "isStored",
             "description": [
               "\nWhether the session is already saved (i.e. sent to background)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.ISearchOptions.isSearchStored",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSearchStored",
+            "description": [
+              "\nWhether the search was successfully polled after session was saved. Search was added to a session saved object and keepAlive extended."
             ],
             "signature": [
               "boolean | undefined"
@@ -26446,90 +28394,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.SearchSessionFindOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "SearchSessionFindOptions",
-        "description": [],
-        "path": "src/plugins/data/common/search/session/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SearchSessionFindOptions.page",
-            "type": "number",
-            "tags": [],
-            "label": "page",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data/common/search/session/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SearchSessionFindOptions.perPage",
-            "type": "number",
-            "tags": [],
-            "label": "perPage",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data/common/search/session/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SearchSessionFindOptions.sortField",
-            "type": "string",
-            "tags": [],
-            "label": "sortField",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/session/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SearchSessionFindOptions.sortOrder",
-            "type": "string",
-            "tags": [],
-            "label": "sortOrder",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/session/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SearchSessionFindOptions.filter",
-            "type": "string",
-            "tags": [],
-            "label": "filter",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/session/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.SearchSessionRequestInfo",
         "type": "Interface",
         "tags": [],
@@ -26564,15 +28428,36 @@
             "path": "src/plugins/data/common/search/session/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SearchSessionRequestStatus",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchSessionRequestStatus",
+        "description": [],
+        "path": "src/plugins/data/common/search/session/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.SearchSessionRequestInfo.status",
-            "type": "string",
+            "id": "def-common.SearchSessionRequestStatus.status",
+            "type": "Enum",
             "tags": [],
             "label": "status",
-            "description": [
-              "\nstatus"
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchStatus",
+                "text": "SearchStatus"
+              }
             ],
             "path": "src/plugins/data/common/search/session/types.ts",
             "deprecated": false,
@@ -26580,7 +28465,7 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.SearchSessionRequestInfo.error",
+            "id": "def-common.SearchSessionRequestStatus.error",
             "type": "string",
             "tags": [],
             "label": "error",
@@ -26666,63 +28551,12 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.SearchSessionSavedObjectAttributes.touched",
-            "type": "string",
-            "tags": [],
-            "label": "touched",
-            "description": [
-              "\nLast touch time of the session"
-            ],
-            "path": "src/plugins/data/common/search/session/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-common.SearchSessionSavedObjectAttributes.expires",
             "type": "string",
             "tags": [],
             "label": "expires",
             "description": [
               "\nExpiration time of the session. Expiration itself is managed by Elasticsearch."
-            ],
-            "path": "src/plugins/data/common/search/session/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SearchSessionSavedObjectAttributes.completed",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "completed",
-            "description": [
-              "\nTime of transition into completed state,\n\nCan be \"null\" in case already completed session\ntransitioned into in-progress session"
-            ],
-            "signature": [
-              "string | null | undefined"
-            ],
-            "path": "src/plugins/data/common/search/session/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SearchSessionSavedObjectAttributes.status",
-            "type": "Enum",
-            "tags": [],
-            "label": "status",
-            "description": [
-              "\nstatus"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSessionStatus",
-                "text": "SearchSessionStatus"
-              }
             ],
             "path": "src/plugins/data/common/search/session/types.ts",
             "deprecated": false,
@@ -26804,19 +28638,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.SearchSessionSavedObjectAttributes.persisted",
-            "type": "boolean",
-            "tags": [],
-            "label": "persisted",
-            "description": [
-              "\nThis value is true if the session was actively stored by the user. If it is false, the session may be purged by the system."
-            ],
-            "path": "src/plugins/data/common/search/session/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-common.SearchSessionSavedObjectAttributes.realmType",
             "type": "string",
             "tags": [],
@@ -26867,6 +28688,132 @@
             "label": "version",
             "description": [
               "\nVersion information to display warnings when trying to restore a session from a different version"
+            ],
+            "path": "src/plugins/data/common/search/session/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSessionSavedObjectAttributes.isCanceled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isCanceled",
+            "description": [
+              "\n`true` if session was cancelled"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/session/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SearchSessionsFindResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchSessionsFindResponse",
+        "description": [
+          "\nList of search session objects with on-the-fly calculated search session statuses"
+        ],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSessionsFindResponse",
+            "text": "SearchSessionsFindResponse"
+          },
+          " extends ",
+          "SavedObjectsFindResponse",
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSessionSavedObjectAttributes",
+            "text": "SearchSessionSavedObjectAttributes"
+          },
+          ", unknown>"
+        ],
+        "path": "src/plugins/data/common/search/session/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSessionsFindResponse.statuses",
+            "type": "Object",
+            "tags": [],
+            "label": "statuses",
+            "description": [
+              "\nMap containing calculated statuses of search sessions from the find response"
+            ],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionStatusResponse",
+                "text": "SearchSessionStatusResponse"
+              },
+              "; }"
+            ],
+            "path": "src/plugins/data/common/search/session/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SearchSessionStatusResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchSessionStatusResponse",
+        "description": [
+          "\nOn-the-fly calculated search session status"
+        ],
+        "path": "src/plugins/data/common/search/session/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSessionStatusResponse.status",
+            "type": "Enum",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionStatus",
+                "text": "SearchSessionStatus"
+              }
+            ],
+            "path": "src/plugins/data/common/search/session/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSessionStatusResponse.errors",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "src/plugins/data/common/search/session/types.ts",
             "deprecated": false,
@@ -27861,6 +29808,18 @@
         "type": "Enum",
         "tags": [],
         "label": "SearchSessionStatus",
+        "description": [],
+        "path": "src/plugins/data/common/search/session/status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SearchStatus",
+        "type": "Enum",
+        "tags": [],
+        "label": "SearchStatus",
         "description": [],
         "path": "src/plugins/data/common/search/session/status.ts",
         "deprecated": false,
@@ -31046,7 +33005,7 @@
         "signature": [
           "{ executionContext?: ",
           "KibanaExecutionContext",
-          " | undefined; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; }"
+          " | undefined; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; isSearchStored?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/types.ts",
         "deprecated": false,
@@ -31649,6 +33608,21 @@
           " | undefined; }"
         ],
         "path": "src/plugins/data/common/search/search_source/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SHARD_DELAY_AGG_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "SHARD_DELAY_AGG_NAME",
+        "description": [],
+        "signature": [
+          "\"shard_delay\""
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/shard_delay.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

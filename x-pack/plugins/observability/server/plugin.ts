@@ -144,7 +144,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     const start = () => core.getStartServices().then(([coreStart]) => coreStart);
 
-    const { spacesService } = plugins.spaces;
     const { ruleDataService } = plugins.ruleRegistry;
 
     registerRoutes({
@@ -155,7 +154,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       logger: this.initContext.logger.get(),
       repository: getGlobalObservabilityServerRouteRepository(config),
       ruleDataService,
-      spacesService,
     });
 
     return {

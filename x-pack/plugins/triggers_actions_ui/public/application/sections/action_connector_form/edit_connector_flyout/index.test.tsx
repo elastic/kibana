@@ -11,10 +11,7 @@ import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/dom';
 import { act } from '@testing-library/react';
-import {
-  AppMockRenderer,
-  createAppMockRenderer,
-} from '../../../components/builtin_action_types/test_utils';
+import { AppMockRenderer, createAppMockRenderer } from '../../../components/test_utils';
 import EditConnectorFlyout from '.';
 import { ActionConnector, EditConnectorTabs, GenericValidationResult } from '../../../../types';
 import { betaBadgeProps } from '../beta_badge_props';

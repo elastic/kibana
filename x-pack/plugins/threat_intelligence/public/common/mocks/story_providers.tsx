@@ -11,15 +11,18 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { mockIndicatorsFiltersContext } from './mock_indicators_filters_context';
 import { SecuritySolutionContext } from '../../containers/security_solution_context';
 import { getSecuritySolutionContextMock } from './mock_security_context';
-import { IndicatorsFiltersContext } from '../../modules/indicators/context';
+import { IndicatorsFiltersContext } from '../../modules/indicators';
 import { FieldTypesContext } from '../../containers/field_types_provider';
 import { generateFieldTypeMap } from './mock_field_type_map';
 import { mockUiSettingsService } from './mock_kibana_ui_settings_service';
 import { mockKibanaTimelinesService } from './mock_kibana_timelines_service';
 import { mockTriggersActionsUiService } from './mock_kibana_triggers_actions_ui_service';
+import { InspectorContext } from '../../containers/inspector';
 
 export interface KibanaContextMock {
   /**
@@ -81,13 +84,17 @@ export const StoryProvidersComponent: VFC<StoryProvidersComponentProps> = ({
 
   return (
     <EuiThemeProvider>
-      <FieldTypesContext.Provider value={generateFieldTypeMap()}>
-        <SecuritySolutionContext.Provider value={securitySolutionContextMock}>
-          <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
-            <KibanaReactContext.Provider>{children}</KibanaReactContext.Provider>
-          </IndicatorsFiltersContext.Provider>
-        </SecuritySolutionContext.Provider>
-      </FieldTypesContext.Provider>
+      <QueryClientProvider client={new QueryClient()}>
+        <InspectorContext.Provider value={{ requests: new RequestAdapter() }}>
+          <FieldTypesContext.Provider value={generateFieldTypeMap()}>
+            <SecuritySolutionContext.Provider value={securitySolutionContextMock}>
+              <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+                <KibanaReactContext.Provider>{children}</KibanaReactContext.Provider>
+              </IndicatorsFiltersContext.Provider>
+            </SecuritySolutionContext.Provider>
+          </FieldTypesContext.Provider>
+        </InspectorContext.Provider>
+      </QueryClientProvider>
     </EuiThemeProvider>
   );
 };

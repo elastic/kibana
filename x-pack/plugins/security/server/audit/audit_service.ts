@@ -166,6 +166,7 @@ export class AuditService {
           ...event,
           user:
             (user && {
+              id: user.profile_uid,
               name: user.username,
               roles: user.roles as string[],
             }) ||

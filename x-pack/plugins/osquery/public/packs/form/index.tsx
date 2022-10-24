@@ -155,7 +155,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
         <EuiFlexGroup>
           <EuiFlexItem>
-            <PolicyIdComboBoxField euiFieldProps={euiFieldProps} />
+            <PolicyIdComboBoxField />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule />

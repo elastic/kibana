@@ -484,10 +484,17 @@ export const EDIT_RULE_SETTINGS = i18n.translate(
   }
 );
 
-export const EDIT_RULE_SETTINGS_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.actions.editRuleSettingsToolTip',
+export const LACK_OF_KIBANA_ACTIONS_FEATURE_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaActionsFeaturePrivileges',
   {
     defaultMessage: 'You do not have Kibana Actions privileges',
+  }
+);
+
+export const LACK_OF_KIBANA_SECURITY_PRIVILEGES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.lackOfKibanaSecurityPrivileges',
+  {
+    defaultMessage: 'You do not have Kibana Security privileges',
   }
 );
 
@@ -1084,20 +1091,6 @@ export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (rulesCount: number) =>
     }
   );
 
-export const NEW_TERMS_TOUR_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.tour.newTermsTitle',
-  {
-    defaultMessage: 'A new Security Rule type is available!',
-  }
-);
-
-export const NEW_TERMS_TOUR_CONTENT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.tour.newTermsContent',
-  {
-    defaultMessage: '"New Terms" rules alert on values that have not previously been seen',
-  }
-);
-
 export const RULE_PREVIEW_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.rulePreviewTitle',
   {
@@ -1117,5 +1110,12 @@ export const CANCEL_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel',
   {
     defaultMessage: 'Cancel',
+  }
+);
+
+export const SAVED_QUERY_LOAD_ERROR_TOAST = i18n.translate(
+  'xpack.securitySolution.hooks.useGetSavedQuery.errorToastMessage',
+  {
+    defaultMessage: 'Failed to load the saved query',
   }
 );

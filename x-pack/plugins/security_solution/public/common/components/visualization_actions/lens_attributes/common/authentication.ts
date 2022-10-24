@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import {
+  AUTHENCICATION_FAILURE_CHART_LABEL,
+  AUTHENCICATION_SUCCESS_CHART_LABEL,
+} from '../../translations';
 import type { LensAttributes } from '../../types';
 
 export const authenticationLensAttributes: LensAttributes = {
@@ -94,7 +98,7 @@ export const authenticationLensAttributes: LensAttributes = {
       },
     ],
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           '3fd0c5d5-f762-4a27-8c56-14eee0223e13': {
             columns: {
@@ -110,7 +114,7 @@ export const authenticationLensAttributes: LensAttributes = {
                 },
               },
               '5417777d-d9d9-4268-9cdc-eb29b873bd65': {
-                label: 'Success',
+                label: AUTHENCICATION_SUCCESS_CHART_LABEL,
                 dataType: 'number',
                 operationType: 'count',
                 isBucketed: false,
@@ -143,7 +147,7 @@ export const authenticationLensAttributes: LensAttributes = {
                 },
               },
               'a3bf9dc1-c8d2-42d6-9e60-31892a4c509e': {
-                label: 'Failure',
+                label: AUTHENCICATION_FAILURE_CHART_LABEL,
                 dataType: 'number',
                 operationType: 'count',
                 isBucketed: false,

@@ -19,6 +19,8 @@ import React, { useCallback, useMemo } from 'react';
 import type { ShapeTreeNode } from '@elastic/charts';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
+
+import type { ESBoolQuery } from '../../../../../common/typed_json';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import { SecurityPageName } from '../../../../../common/constants';
@@ -31,7 +33,8 @@ import { useAlertsByStatus } from './use_alerts_by_status';
 import {
   ALERTS,
   ALERTS_TEXT,
-  ALERTS_BY_STATUS_TEXT,
+  ALERTS_BY_SEVERITY_TEXT,
+  INVESTIGATE_IN_TIMELINE,
   STATUS_ACKNOWLEDGED,
   STATUS_CLOSED,
   STATUS_CRITICAL_LABEL,
@@ -63,6 +66,7 @@ const StyledLegendFlexItem = styled(EuiFlexItem)`
 interface AlertsByStatusProps {
   signalIndexName: string | null;
   entityFilter?: EntityFilter;
+  additionalFilters?: ESBoolQuery[];
 }
 
 const legendField = 'kibana.alert.severity';
@@ -79,9 +83,13 @@ const eventKindSignalFilter: EntityFilter = {
   value: 'signal',
 };
 
-export const AlertsByStatus = ({ signalIndexName, entityFilter }: AlertsByStatusProps) => {
+export const AlertsByStatus = ({
+  additionalFilters,
+  signalIndexName,
+  entityFilter,
+}: AlertsByStatusProps) => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_ALERTS_BY_STATUS_ID);
-  const { openEntityInTimeline } = useNavigateToTimeline();
+  const { openTimelineWithFilters } = useNavigateToTimeline();
   const { onClick: goToAlerts, href } = useGetSecuritySolutionLinkProps()({
     deepLinkId: SecurityPageName.alerts,
   });
@@ -92,13 +100,13 @@ export const AlertsByStatus = ({ signalIndexName, entityFilter }: AlertsByStatus
 
   const detailsButtonOptions = useMemo(
     () => ({
-      name: VIEW_ALERTS,
+      name: entityFilter ? INVESTIGATE_IN_TIMELINE : VIEW_ALERTS,
       href: entityFilter ? undefined : href,
       onClick: entityFilter
-        ? () => openEntityInTimeline([entityFilter, eventKindSignalFilter])
+        ? () => openTimelineWithFilters([[entityFilter, eventKindSignalFilter]])
         : goToAlerts,
     }),
-    [entityFilter, href, goToAlerts, openEntityInTimeline]
+    [entityFilter, href, goToAlerts, openTimelineWithFilters]
   );
 
   const {
@@ -106,6 +114,7 @@ export const AlertsByStatus = ({ signalIndexName, entityFilter }: AlertsByStatus
     isLoading: loading,
     updatedAt,
   } = useAlertsByStatus({
+    additionalFilters,
     entityFilter,
     signalIndexName,
     skip: !toggleStatus,
@@ -146,8 +155,8 @@ export const AlertsByStatus = ({ signalIndexName, entityFilter }: AlertsByStatus
           )}
           <HeaderSection
             id={DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}
-            title={entityFilter ? ALERTS_BY_STATUS_TEXT : ALERTS_TEXT}
-            titleSize="s"
+            title={entityFilter ? ALERTS_BY_SEVERITY_TEXT : ALERTS_TEXT}
+            titleSize="m"
             subtitle={<LastUpdatedAt isUpdating={loading} updatedAt={updatedAt} />}
             inspectMultiple
             toggleStatus={toggleStatus}

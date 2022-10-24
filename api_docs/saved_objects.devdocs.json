@@ -1559,18 +1559,6 @@
           },
           {
             "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/services/saved_object_loader.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/services/saved_object_loader.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/services/saved_object_loader.ts"
-          },
-          {
-            "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
           },
           {
@@ -1580,22 +1568,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/dashboard_tagging.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/dashboard_tagging.ts"
           }
         ],
         "children": [
@@ -3121,12 +3093,7 @@
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
-          "references": [
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts"
-            }
-          ]
+          "references": []
         },
         {
           "parentPluginId": "savedObjects",

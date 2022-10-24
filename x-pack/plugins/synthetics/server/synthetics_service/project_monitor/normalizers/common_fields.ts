@@ -20,7 +20,27 @@ import {
 } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { DEFAULT_COMMON_FIELDS } from '../../../../common/constants/monitor_defaults';
-import { NormalizedProjectProps } from '.';
+
+export interface NormalizedProjectProps {
+  locations: Locations;
+  privateLocations: PrivateLocation[];
+  monitor: ProjectMonitor;
+  projectId: string;
+  namespace: string;
+  version: string;
+}
+
+export interface Error {
+  id: string;
+  reason: string;
+  details: string;
+}
+
+export interface NormalizerResult<MonitorTypeFields> {
+  normalizedFields: MonitorTypeFields;
+  unsupportedKeys: string[];
+  errors: Error[];
+}
 
 export const getNormalizeCommonFields = ({
   locations = [],
@@ -28,7 +48,7 @@ export const getNormalizeCommonFields = ({
   monitor,
   projectId,
   namespace,
-}: NormalizedProjectProps): CommonFields => {
+}: NormalizedProjectProps): Partial<CommonFields> => {
   const defaultFields = DEFAULT_COMMON_FIELDS;
 
   const normalizedFields = {
@@ -45,18 +65,17 @@ export const getNormalizeCommonFields = ({
       privateLocations,
       publicLocations: locations,
     }),
-    [ConfigKey.APM_SERVICE_NAME]:
-      monitor.apmServiceName || defaultFields[ConfigKey.APM_SERVICE_NAME],
     [ConfigKey.TAGS]: getOptionalListField(monitor.tags) || defaultFields[ConfigKey.TAGS],
     [ConfigKey.NAMESPACE]: formatKibanaNamespace(namespace) || defaultFields[ConfigKey.NAMESPACE],
     [ConfigKey.ORIGINAL_SPACE]: namespace || defaultFields[ConfigKey.NAMESPACE],
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: getCustomHeartbeatId(monitor, projectId, namespace),
     [ConfigKey.ENABLED]: monitor.enabled ?? defaultFields[ConfigKey.ENABLED],
+    [ConfigKey.TIMEOUT]: monitor.timeout
+      ? getValueInSeconds(monitor.timeout)
+      : defaultFields[ConfigKey.TIMEOUT],
+    [ConfigKey.CONFIG_HASH]: monitor.hash || defaultFields[ConfigKey.CONFIG_HASH],
   };
-  return {
-    ...defaultFields,
-    ...normalizedFields,
-  };
+  return normalizedFields;
 };
 
 export const getCustomHeartbeatId = (
@@ -93,6 +112,35 @@ export const getMonitorLocations = ({
     (location) => location !== undefined
   ) as BrowserFields[ConfigKey.LOCATIONS];
 };
+
+export const getUnsupportedKeysError = (
+  monitor: ProjectMonitor,
+  unsupportedKeys: string[],
+  version: string
+) => ({
+  id: monitor.id,
+  reason: 'Unsupported Heartbeat option',
+  details: `The following Heartbeat options are not supported for ${
+    monitor.type
+  } project monitors in ${version}: ${unsupportedKeys.join(
+    '|'
+  )}. You monitor was not created or updated.`,
+});
+
+export const getMultipleUrlsOrHostsError = (
+  monitor: ProjectMonitor,
+  key: 'hosts' | 'urls',
+  version: string
+) => ({
+  id: monitor.id,
+  reason: 'Unsupported Heartbeat option',
+  details: `Multiple ${key} are not supported for ${
+    monitor.type
+  } project monitors in ${version}. Please set only 1 ${key.slice(
+    0,
+    -1
+  )} per monitor. You monitor was not created or updated.`,
+});
 
 export const getValueInSeconds = (value: string) => {
   const keyMap = {
@@ -136,7 +184,7 @@ export const getOptionalArrayField = (value: string[] | string = '') => {
  * @param {Object} [monitor]
  * @returns {Object} Returns an object containing synthetics-compatible configuration keys
  */
-const flattenAndFormatObject = (obj: Record<string, unknown>, prefix = '', keys: string[]) =>
+export const flattenAndFormatObject = (obj: Record<string, unknown>, prefix = '', keys: string[]) =>
   Object.keys(obj).reduce<Record<string, unknown>>((acc, k) => {
     const pre = prefix.length ? prefix + '.' : '';
     const key = pre + k;

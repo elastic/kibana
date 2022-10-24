@@ -27,7 +27,7 @@ interface Props {
   browserFields: BrowserFields;
   eventId: string;
   data: TimelineEventsDetailsItem[];
-  timelineId: string;
+  scopeId: string;
   isReadOnly?: boolean;
 }
 
@@ -35,12 +35,11 @@ interface Props {
  * Displays several key insights for the associated alert.
  */
 export const Insights = React.memo<Props>(
-  ({ browserFields, eventId, data, isReadOnly, timelineId }) => {
+  ({ browserFields, eventId, data, isReadOnly, scopeId }) => {
     const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
       'insightsRelatedAlertsByProcessAncestry'
     );
     const hasAtLeastPlatinum = useLicense().isPlatinumPlus();
-    const processEntityField = find({ category: 'process', field: 'process.entity_id' }, data);
     const originalDocumentId = find(
       { category: 'kibana', field: 'kibana.alert.ancestors.id' },
       data
@@ -49,7 +48,12 @@ export const Insights = React.memo<Props>(
       { category: 'kibana', field: 'kibana.alert.rule.parameters.index' },
       data
     );
-    const hasProcessEntityInfo = hasData(processEntityField);
+    const agentTypeField = find({ category: 'agent', field: 'agent.type' }, data);
+    const eventModuleField = find({ category: 'event', field: 'event.module' }, data);
+    const processEntityField = find({ category: 'process', field: 'process.entity_id' }, data);
+    const hasProcessEntityInfo =
+      hasData(processEntityField) &&
+      hasCorrectAgentTypeAndEventModule(agentTypeField, eventModuleField);
 
     const processSessionField = find(
       { category: 'process', field: 'process.entry_leader.entity_id' },
@@ -109,7 +113,7 @@ export const Insights = React.memo<Props>(
                 browserFields={browserFields}
                 data={sourceEventField}
                 eventId={eventId}
-                timelineId={timelineId}
+                scopeId={scopeId}
               />
             </EuiFlexItem>
           )}
@@ -120,7 +124,7 @@ export const Insights = React.memo<Props>(
                 browserFields={browserFields}
                 data={processSessionField}
                 eventId={eventId}
-                timelineId={timelineId}
+                scopeId={scopeId}
               />
             </EuiFlexItem>
           )}
@@ -133,7 +137,7 @@ export const Insights = React.memo<Props>(
                   originalDocumentId={originalDocumentId}
                   index={originalDocumentIndex}
                   eventId={eventId}
-                  timelineId={timelineId}
+                  scopeId={scopeId}
                 />
               </EuiFlexItem>
             ) : (
@@ -146,5 +150,18 @@ export const Insights = React.memo<Props>(
     );
   }
 );
+
+function hasCorrectAgentTypeAndEventModule(
+  agentTypeField?: TimelineEventsDetailsItem,
+  eventModuleField?: TimelineEventsDetailsItem
+): boolean {
+  return (
+    hasData(agentTypeField) &&
+    (agentTypeField.values[0] === 'endpoint' ||
+      (agentTypeField.values[0] === 'winlogbeat' &&
+        hasData(eventModuleField) &&
+        eventModuleField.values[0] === 'sysmon'))
+  );
+}
 
 Insights.displayName = 'Insights';

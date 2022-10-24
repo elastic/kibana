@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -150,15 +150,15 @@ export default ({ getService }: FtrProviderContext) => {
         const updatedRule1 = getSimpleRuleUpdate('rule-1');
         updatedRule1.name = 'some other name';
         updatedRule1.actions = [action1];
-        updatedRule1.throttle = '1m';
+        updatedRule1.throttle = '1d';
 
         const updatedRule2 = getSimpleRuleUpdate('rule-2');
         updatedRule2.name = 'some other name';
         updatedRule2.actions = [action1];
-        updatedRule2.throttle = '1m';
+        updatedRule2.throttle = '1d';
 
         // update both rule names
-        const { body }: { body: FullResponseSchema[] } = await supertest
+        const { body }: { body: RuleResponse[] } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([updatedRule1, updatedRule2])
@@ -179,7 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           ];
-          outputRule.throttle = '1m';
+          outputRule.throttle = '1d';
           const bodyToCompare = removeServerGeneratedProperties(response);
           expect(bodyToCompare).to.eql(outputRule);
         });
@@ -220,7 +220,7 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule2.name = 'some other name';
 
         // update both rule names
-        const { body }: { body: FullResponseSchema[] } = await supertest
+        const { body }: { body: RuleResponse[] } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([updatedRule1, updatedRule2])

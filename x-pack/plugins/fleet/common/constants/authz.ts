@@ -23,4 +23,4 @@ export const ENDPOINT_PRIVILEGES = [
   'writeHostIsolation',
   'writeProcessOperations',
   'writeFileOperations',
-];
+] as const;

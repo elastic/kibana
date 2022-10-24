@@ -155,10 +155,6 @@ export const SelectEngineType: React.FC = () => {
                   `,
                 }
               )}
-              betaBadgeProps={{
-                label: 'Beta',
-                tooltipContent: 'This module is not GA. Please help us by reporting any bugs.',
-              }}
               selectable={{
                 isSelected: engineType === 'elasticsearch',
                 onClick: () => setEngineType('elasticsearch'),

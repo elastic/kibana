@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { useConsoleActionSubmitter } from './hooks/use_console_action_submitter';
 import type {
-  ActionDetails,
   GetProcessesActionOutputContent,
+  ProcessesRequestBody,
 } from '../../../../common/endpoint/types';
-import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
-import type { EndpointCommandDefinitionMeta } from './types';
-import type { CommandExecutionComponentProps } from '../console/types';
 import { useSendGetEndpointProcessesRequest } from '../../hooks/endpoint/use_send_get_endpoint_processes_request';
-import { ActionError } from './action_error';
+import type { ActionRequestComponentProps } from './types';
 
 // @ts-expect-error TS2769
 const StyledEuiBasicTable = styled(EuiBasicTable)`
@@ -43,181 +39,90 @@ const StyledEuiBasicTable = styled(EuiBasicTable)`
   }
 `;
 
-export const GetProcessesActionResult = memo<
-  CommandExecutionComponentProps<
-    { comment?: string },
-    {
-      actionId?: string;
-      actionRequestSent?: boolean;
-      completedActionDetails?: ActionDetails<GetProcessesActionOutputContent>;
-      apiError?: IHttpFetchError;
-    },
-    EndpointCommandDefinitionMeta
-  >
->(({ command, setStore, store, status, setStatus, ResultComponent }) => {
-  const endpointId = command.commandDefinition?.meta?.endpointId;
-  const { actionId, completedActionDetails, apiError } = store;
+export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
+  ({ command, setStore, store, status, setStatus, ResultComponent }) => {
+    const endpointId = command.commandDefinition?.meta?.endpointId;
+    const actionCreator = useSendGetEndpointProcessesRequest();
 
-  const isPending = status === 'pending';
-  const isError = status === 'error';
-  const actionRequestSent = Boolean(store.actionRequestSent);
+    const actionRequestBody = useMemo(() => {
+      return endpointId
+        ? {
+            endpoint_ids: [endpointId],
+            comment: command.args.args?.comment?.[0],
+          }
+        : undefined;
+    }, [command.args.args?.comment, endpointId]);
 
-  const {
-    mutate: getProcesses,
-    data: getProcessesData,
-    isSuccess: isGetProcessesSuccess,
-    error: processesActionRequestError,
-  } = useSendGetEndpointProcessesRequest();
+    const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
+      ProcessesRequestBody,
+      GetProcessesActionOutputContent
+    >({
+      ResultComponent,
+      setStore,
+      store,
+      status,
+      setStatus,
+      actionCreator,
+      actionRequestBody,
+      dataTestSubj: 'getProcesses',
+    });
 
-  const { data: actionDetails } = useGetActionDetails<GetProcessesActionOutputContent>(
-    actionId ?? '-',
-    {
-      enabled: Boolean(actionId) && isPending,
-      refetchInterval: isPending ? 3000 : false,
-    }
-  );
+    const columns = useMemo(
+      () => [
+        {
+          field: 'user',
+          name: i18n.translate(
+            'xpack.securitySolution.endpointResponseActions.getProcesses.table.header.user',
+            { defaultMessage: 'USER' }
+          ),
+          width: '10%',
+        },
+        {
+          field: 'pid',
+          name: i18n.translate(
+            'xpack.securitySolution.endpointResponseActions.getProcesses.table.header.pid',
+            { defaultMessage: 'PID' }
+          ),
+          width: '5%',
+        },
+        {
+          field: 'entity_id',
+          name: i18n.translate(
+            'xpack.securitySolution.endpointResponseActions.getProcesses.table.header.enityId',
+            { defaultMessage: 'ENTITY ID' }
+          ),
+          width: '30%',
+        },
 
-  // Send get processes request if not yet done
-  useEffect(() => {
-    if (!actionRequestSent && endpointId) {
-      getProcesses({
-        endpoint_ids: [endpointId],
-        comment: command.args.args?.comment?.[0],
-      });
+        {
+          field: 'command',
+          name: i18n.translate(
+            'xpack.securitySolution.endpointResponseActions.getProcesses.table.header.command',
+            { defaultMessage: 'COMMAND' }
+          ),
+          width: '55%',
+        },
+      ],
+      []
+    );
 
-      setStore((prevState) => {
-        return { ...prevState, actionRequestSent: true };
-      });
-    }
-  }, [actionRequestSent, command.args.args?.comment, endpointId, getProcesses, setStore]);
-
-  // If get processes request was created, store the action id if necessary
-  useEffect(() => {
-    if (isPending) {
-      if (isGetProcessesSuccess && actionId !== getProcessesData?.data.id) {
-        setStore((prevState) => {
-          return { ...prevState, actionId: getProcessesData?.data.id };
-        });
-      } else if (processesActionRequestError) {
-        setStatus('error');
-        setStore((prevState) => {
-          return { ...prevState, apiError: processesActionRequestError };
-        });
+    const tableEntries = useMemo(() => {
+      if (endpointId) {
+        return completedActionDetails?.outputs?.[endpointId]?.content.entries ?? [];
       }
+      return [];
+    }, [completedActionDetails?.outputs, endpointId]);
+
+    if (!completedActionDetails || !completedActionDetails.wasSuccessful) {
+      return result;
     }
-  }, [
-    actionId,
-    getProcessesData?.data.id,
-    processesActionRequestError,
-    isGetProcessesSuccess,
-    setStatus,
-    setStore,
-    isPending,
-  ]);
 
-  useEffect(() => {
-    if (actionDetails?.data.isCompleted && isPending) {
-      setStatus('success');
-      setStore((prevState) => {
-        return {
-          ...prevState,
-          completedActionDetails: actionDetails?.data,
-        };
-      });
-    }
-  }, [actionDetails?.data, setStatus, setStore, isPending]);
-
-  const columns = useMemo(
-    () => [
-      {
-        field: 'user',
-        name: i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.getProcesses.table.header.user',
-          { defaultMessage: 'USER' }
-        ),
-        width: '10%',
-      },
-      {
-        field: 'pid',
-        name: i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.getProcesses.table.header.pid',
-          { defaultMessage: 'PID' }
-        ),
-        width: '5%',
-      },
-      {
-        field: 'entity_id',
-        name: i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.getProcesses.table.header.enityId',
-          { defaultMessage: 'ENTITY ID' }
-        ),
-        width: '30%',
-      },
-
-      {
-        field: 'command',
-        name: i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.getProcesses.table.header.command',
-          { defaultMessage: 'COMMAND' }
-        ),
-        width: '55%',
-      },
-    ],
-    []
-  );
-
-  const tableEntries = useMemo(() => {
-    if (endpointId) {
-      return completedActionDetails?.outputs?.[endpointId]?.content.entries ?? [];
-    }
-    return [];
-  }, [completedActionDetails?.outputs, endpointId]);
-
-  // Show nothing if still pending
-  if (isPending) {
-    return <ResultComponent showAs="pending" showTitle={false} />;
-  }
-
-  // Show errors if perform action fails
-  if (isError && apiError) {
+    // Show results
     return (
-      <ResultComponent
-        showAs="failure"
-        title={i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.getProcesses.performApiErrorMessageTitle',
-          { defaultMessage: 'Perform get processes action failed' }
-        )}
-        data-test-subj="performGetProcessesErrorCallout"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.endpointResponseActions.getProcesses.performApiErrorMessage"
-          defaultMessage="The following error was encountered: {error}"
-          values={{ error: apiError.message }}
-        />
+      <ResultComponent data-test-subj="getProcessesSuccessCallout" showTitle={false}>
+        <StyledEuiBasicTable items={[...tableEntries]} columns={columns} />
       </ResultComponent>
     );
   }
-
-  // Show errors
-  if (completedActionDetails?.errors) {
-    return (
-      <ActionError
-        title={i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.getProcesses.errorMessageTitle',
-          { defaultMessage: 'Get processes action failed' }
-        )}
-        dataTestSubj={'getProcessesErrorCallout'}
-        action={completedActionDetails}
-        ResultComponent={ResultComponent}
-      />
-    );
-  }
-
-  // Show results
-  return (
-    <ResultComponent data-test-subj="getProcessesSuccessCallout" showTitle={false}>
-      <StyledEuiBasicTable items={[...tableEntries]} columns={columns} />
-    </ResultComponent>
-  );
-});
+);
 GetProcessesActionResult.displayName = 'GetProcessesActionResult';

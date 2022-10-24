@@ -39,7 +39,7 @@ import type { UserProfileGrant } from '../user_profile';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
 import { AuthenticationResult } from './authentication_result';
 import type { AuthenticatorOptions } from './authenticator';
-import { Authenticator } from './authenticator';
+import { Authenticator, enrichWithUserProfileId } from './authenticator';
 import { DeauthenticationResult } from './deauthentication_result';
 import type { BasicAuthenticationProvider, SAMLAuthenticationProvider } from './providers';
 
@@ -377,6 +377,29 @@ describe('Authenticator', () => {
         })
       );
       expectAuditEvents({ action: 'user_login', outcome: 'success' });
+    });
+
+    it('returns user enriched with user profile id.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const user = mockAuthenticatedUser({ profile_uid: undefined });
+      mockOptions.session.create.mockResolvedValue(
+        sessionMock.createValue({
+          userProfileId: 'PROFILE_ID',
+        })
+      );
+
+      mockBasicAuthenticationProvider.login.mockResolvedValue(
+        AuthenticationResult.succeeded(user, {
+          state: {}, // to ensure a new session is created
+        })
+      );
+
+      const result = await authenticator.login(request, { provider: { type: 'basic' }, value: {} });
+      expect(result.user).toEqual(
+        expect.objectContaining({
+          profile_uid: 'PROFILE_ID',
+        })
+      );
     });
 
     describe('user_login audit events', () => {
@@ -2558,5 +2581,67 @@ describe('Authenticator', () => {
         )
       ).toBe('/mock-server-basepath/path?some-param=some-value&auth_provider_hint=oidc1');
     });
+  });
+});
+
+describe('enrichWithUserProfileId', () => {
+  it('should enrich succeeded authentication results with user profile id', () => {
+    const authenticationResult = AuthenticationResult.succeeded(
+      mockAuthenticatedUser({ profile_uid: undefined })
+    );
+    const sessionValue = sessionMock.createValue({ userProfileId: 'uid' });
+    expect(enrichWithUserProfileId(authenticationResult, sessionValue)).toEqual(
+      expect.objectContaining({
+        user: expect.objectContaining({
+          profile_uid: 'uid',
+        }),
+      })
+    );
+  });
+
+  it('should enrich redirected authentication results with user profile id', () => {
+    const authenticationResult = AuthenticationResult.redirectTo('/redirect/to', {
+      user: mockAuthenticatedUser({ profile_uid: undefined }),
+    });
+    const sessionValue = sessionMock.createValue({ userProfileId: 'uid' });
+    expect(enrichWithUserProfileId(authenticationResult, sessionValue)).toEqual(
+      expect.objectContaining({
+        user: expect.objectContaining({
+          profile_uid: 'uid',
+        }),
+      })
+    );
+  });
+
+  it('should not change unhandled authentication results', () => {
+    const authenticationResult = AuthenticationResult.notHandled();
+    const sessionValue = sessionMock.createValue();
+    expect(enrichWithUserProfileId(authenticationResult, sessionValue)).toBe(authenticationResult);
+  });
+
+  it('should not change failed authentication results', () => {
+    const authenticationResult = AuthenticationResult.failed(new Error('Authentication error'));
+    const sessionValue = sessionMock.createValue();
+    expect(enrichWithUserProfileId(authenticationResult, sessionValue)).toBe(authenticationResult);
+  });
+
+  it('should not change redirected authentication results without user', () => {
+    const authenticationResult = AuthenticationResult.redirectTo('/redirect/to');
+    const sessionValue = sessionMock.createValue();
+    expect(enrichWithUserProfileId(authenticationResult, sessionValue)).toBe(authenticationResult);
+  });
+
+  it('should not change succeeded authentication result if session has no user profile id', () => {
+    const authenticationResult = AuthenticationResult.succeeded(mockAuthenticatedUser());
+    const sessionValue = sessionMock.createValue({ userProfileId: undefined });
+    expect(enrichWithUserProfileId(authenticationResult, sessionValue)).toBe(authenticationResult);
+  });
+
+  it('should not change succeeded authentication result if user profile ids already match', () => {
+    const authenticationResult = AuthenticationResult.succeeded(
+      mockAuthenticatedUser({ profile_uid: 'uid' })
+    );
+    const sessionValue = sessionMock.createValue({ userProfileId: 'uid' });
+    expect(enrichWithUserProfileId(authenticationResult, sessionValue)).toBe(authenticationResult);
   });
 });

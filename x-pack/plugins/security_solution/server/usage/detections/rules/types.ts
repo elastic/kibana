@@ -85,6 +85,7 @@ export interface SingleEventMetric {
   succeeded: number;
   index_duration: MaxAvgMin;
   search_duration: MaxAvgMin;
+  enrichment_duration: MaxAvgMin;
   gap_duration: MaxAvgMin;
   gap_count: number;
 }

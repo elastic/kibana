@@ -251,13 +251,13 @@ Object {
           "onClick": [Function],
         },
         Object {
-          "data-href": "securitySolutionUI/action_history",
-          "data-test-subj": "navigation-action_history",
+          "data-href": "securitySolutionUI/response_actions_history",
+          "data-test-subj": "navigation-response_actions_history",
           "disabled": false,
-          "href": "securitySolutionUI/action_history",
-          "id": "action_history",
+          "href": "securitySolutionUI/response_actions_history",
+          "id": "response_actions_history",
           "isSelected": false,
-          "name": "Action history",
+          "name": "Response actions history",
           "onClick": [Function],
         },
         Object {

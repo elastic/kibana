@@ -86,7 +86,9 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel
       return null;
     }
     // handle multiple metrics
-    const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum);
+    const metricsColumns = getMetricsColumns(series, indexPattern!, seriesNum, {
+      isStaticValueColumnSupported: true,
+    });
     if (metricsColumns === null) {
       return null;
     }
@@ -96,11 +98,21 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model: Panel
       return null;
     }
 
+    const isReferenceLine =
+      metricsColumns.length === 1 && metricsColumns[0].operationType === 'static_value';
+
+    // only static value without split is supported
+    if (isReferenceLine && bucketsColumns.length) {
+      return null;
+    }
+
     const layerId = uuid();
     extendedLayers[layerIdx] = {
       indexPatternId,
       layerId,
-      columns: [...metricsColumns, dateHistogramColumn, ...bucketsColumns],
+      columns: isReferenceLine
+        ? [...metricsColumns]
+        : [...metricsColumns, dateHistogramColumn, ...bucketsColumns],
       columnOrder: [],
     };
   }

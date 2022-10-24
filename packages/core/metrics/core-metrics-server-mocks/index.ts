@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { metricsServiceMock } from './src/metrics_service.mock';
+export { metricsServiceMock, sampleEsClientMetrics } from './src/metrics_service.mock';

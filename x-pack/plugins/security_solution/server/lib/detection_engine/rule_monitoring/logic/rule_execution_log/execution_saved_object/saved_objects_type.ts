@@ -58,6 +58,9 @@ const ruleExecutionMappings: SavedObjectsType['mappings'] = {
             total_indexing_duration_ms: {
               type: 'long',
             },
+            total_enrichment_duration_ms: {
+              type: 'long',
+            },
             execution_gap_duration_s: {
               type: 'long',
             },

@@ -6,126 +6,90 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { CaseStatuses } from '../../common/api';
-import { useUpdateCases, UseUpdateCases } from './use_bulk_update_case';
-import { basicCase } from './mock';
+import { useUpdateCases } from './use_bulk_update_case';
+import { allCases } from './mock';
+import { useToasts } from '../common/lib/kibana';
 import * as api from './api';
+import type { AppMockRenderer } from '../common/mock';
+import { createAppMockRenderer } from '../common/mock';
+import { casesQueriesKeys } from './constants';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 describe('useUpdateCases', () => {
   const abortCtrl = new AbortController();
+  const addSuccess = jest.fn();
+  const addError = jest.fn();
+
+  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+
+  let appMockRender: AppMockRenderer;
+
   beforeEach(() => {
+    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
-  it('init', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateCases>(() =>
-        useUpdateCases()
-      );
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isLoading: false,
-        isError: false,
-        isUpdated: false,
-        updateBulkStatus: result.current.updateBulkStatus,
-        dispatchResetIsUpdated: result.current.dispatchResetIsUpdated,
-      });
+  it('calls the api when invoked with the correct parameters', async () => {
+    const spy = jest.spyOn(api, 'updateCases');
+    const { waitForNextUpdate, result } = renderHook(() => useUpdateCases(), {
+      wrapper: appMockRender.AppWrapper,
     });
+
+    act(() => {
+      result.current.mutate({ cases: allCases.cases, successToasterTitle: 'Success title' });
+    });
+
+    await waitForNextUpdate();
+
+    expect(spy).toHaveBeenCalledWith(allCases.cases, abortCtrl.signal);
   });
 
-  it('calls patchCase with correct arguments', async () => {
-    const spyOnPatchCases = jest.spyOn(api, 'patchCasesStatus');
-
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateCases>(() =>
-        useUpdateCases()
-      );
-      await waitForNextUpdate();
-
-      result.current.updateBulkStatus([basicCase], CaseStatuses.closed);
-      await waitForNextUpdate();
-      expect(spyOnPatchCases).toBeCalledWith(
-        [
-          {
-            status: CaseStatuses.closed,
-            id: basicCase.id,
-            version: basicCase.version,
-          },
-        ],
-        abortCtrl.signal
-      );
+  it('invalidates the queries correctly', async () => {
+    const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
+    const { waitForNextUpdate, result } = renderHook(() => useUpdateCases(), {
+      wrapper: appMockRender.AppWrapper,
     });
+
+    act(() => {
+      result.current.mutate({ cases: allCases.cases, successToasterTitle: 'Success title' });
+    });
+
+    await waitForNextUpdate();
+
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.casesList());
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.userProfiles());
   });
 
-  it('patch cases', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateCases>(() =>
-        useUpdateCases()
-      );
-      await waitForNextUpdate();
-      result.current.updateBulkStatus([basicCase], CaseStatuses.closed);
-      await waitForNextUpdate();
-      expect(result.current).toEqual({
-        isUpdated: true,
-        isLoading: false,
-        isError: false,
-        updateBulkStatus: result.current.updateBulkStatus,
-        dispatchResetIsUpdated: result.current.dispatchResetIsUpdated,
-      });
+  it('shows a success toaster', async () => {
+    const { waitForNextUpdate, result } = renderHook(() => useUpdateCases(), {
+      wrapper: appMockRender.AppWrapper,
     });
+
+    act(() => {
+      result.current.mutate({ cases: allCases.cases, successToasterTitle: 'Success title' });
+    });
+
+    await waitForNextUpdate();
+
+    expect(addSuccess).toHaveBeenCalledWith('Success title');
   });
 
-  it('set isLoading to true when posting case', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateCases>(() =>
-        useUpdateCases()
-      );
-      await waitForNextUpdate();
-      result.current.updateBulkStatus([basicCase], CaseStatuses.closed);
+  it('shows a toast error when the api return an error', async () => {
+    jest.spyOn(api, 'updateCases').mockRejectedValue(new Error('useUpdateCases: Test error'));
 
-      expect(result.current.isLoading).toBe(true);
-    });
-  });
-
-  it('dispatchResetIsUpdated resets is updated', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateCases>(() =>
-        useUpdateCases()
-      );
-
-      await waitForNextUpdate();
-      result.current.updateBulkStatus([basicCase], CaseStatuses.closed);
-      await waitForNextUpdate();
-      expect(result.current.isUpdated).toBeTruthy();
-      result.current.dispatchResetIsUpdated();
-      expect(result.current.isUpdated).toBeFalsy();
-    });
-  });
-
-  it('unhappy path', async () => {
-    const spyOnPatchCases = jest.spyOn(api, 'patchCasesStatus');
-    spyOnPatchCases.mockImplementation(() => {
-      throw new Error('Something went wrong');
+    const { waitForNextUpdate, result } = renderHook(() => useUpdateCases(), {
+      wrapper: appMockRender.AppWrapper,
     });
 
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateCases>(() =>
-        useUpdateCases()
-      );
-      await waitForNextUpdate();
-      result.current.updateBulkStatus([basicCase], CaseStatuses.closed);
-
-      expect(result.current).toEqual({
-        isUpdated: false,
-        isLoading: false,
-        isError: true,
-        updateBulkStatus: result.current.updateBulkStatus,
-        dispatchResetIsUpdated: result.current.dispatchResetIsUpdated,
-      });
+    act(() => {
+      result.current.mutate({ cases: allCases.cases, successToasterTitle: 'Success title' });
     });
+
+    await waitForNextUpdate();
+
+    expect(addError).toHaveBeenCalled();
   });
 });

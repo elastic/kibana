@@ -9,15 +9,11 @@ import type { Map as MbMap, RasterTileSource } from '@kbn/mapbox-gl';
 import _ from 'lodash';
 import { AbstractLayer } from '../layer';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
-import { LayerDescriptor, Timeslice } from '../../../../common/descriptor_types';
+import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { TileStyle } from '../../styles/tile/tile_style';
-import { ITMSSource } from '../../sources/tms_source';
 import { DataRequestContext } from '../../../actions';
-import { canSkipSourceUpdate } from '../../util/can_skip_fetch';
 
-interface RasterTileSourceData {
-  url: string;
-}
+import { IRasterSource, RasterTileSourceData } from '../../sources/raster_source';
 
 export class RasterTileLayer extends AbstractLayer {
   static createDescriptor(options: Partial<LayerDescriptor>) {
@@ -34,15 +30,15 @@ export class RasterTileLayer extends AbstractLayer {
     source,
     layerDescriptor,
   }: {
-    source: ITMSSource;
+    source: IRasterSource;
     layerDescriptor: LayerDescriptor;
   }) {
     super({ source, layerDescriptor });
     this._style = new TileStyle();
   }
 
-  getSource(): ITMSSource {
-    return super.getSource() as ITMSSource;
+  getSource(): IRasterSource {
+    return super.getSource() as IRasterSource;
   }
 
   getStyleForEditing() {
@@ -65,17 +61,7 @@ export class RasterTileLayer extends AbstractLayer {
     };
     const prevDataRequest = this.getSourceDataRequest();
     if (prevDataRequest) {
-      const prevMeta = prevDataRequest?.getMeta();
-      const canSkip = await canSkipSourceUpdate({
-        extentAware: false,
-        source,
-        prevDataRequest,
-        nextRequestMeta: nextMeta,
-        getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
-          if (!prevMeta) return true;
-          return source.getUpdateDueToTimeslice(prevMeta, timeslice);
-        },
-      });
+      const canSkip = await source.canSkipSourceUpdate(prevDataRequest, nextMeta);
       if (canSkip) return;
     }
     const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
@@ -107,21 +93,20 @@ export class RasterTileLayer extends AbstractLayer {
   }
 
   _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
+    const source = this.getSource();
     const mbSource = mbMap.getSource(this.getMbSourceId()) as RasterTileSource;
     if (!mbSource) {
       return false;
     }
 
     const sourceDataRequest = this.getSourceDataRequest();
-    if (!sourceDataRequest) {
-      return false;
+    if (sourceDataRequest) {
+      const data = sourceDataRequest.getData();
+      if (data) {
+        return source.isSourceStale(mbSource, data as RasterTileSourceData);
+      }
     }
-    const sourceData = sourceDataRequest.getData() as RasterTileSourceData | undefined;
-    if (!sourceData) {
-      return false;
-    }
-
-    return mbSource.tiles?.[0] !== sourceData.url;
+    return false;
   }
 
   syncLayerWithMB(mbMap: MbMap) {
@@ -138,7 +123,7 @@ export class RasterTileLayer extends AbstractLayer {
         return;
       }
 
-      const tmsSourceData = sourceDataRequest.getData() as { url?: string };
+      const tmsSourceData = sourceDataRequest.getData() as RasterTileSourceData;
       if (!tmsSourceData || !tmsSourceData.url) {
         return;
       }

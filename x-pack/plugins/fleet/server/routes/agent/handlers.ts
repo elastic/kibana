@@ -25,8 +25,6 @@ import type {
   GetOneAgentResponse,
   GetAgentStatusResponse,
   PutAgentReassignResponse,
-  PostBulkAgentReassignResponse,
-  PostBulkUpdateAgentTagsResponse,
   GetAgentTagsResponse,
   GetAvailableVersionsResponse,
   GetActionStatusResponse,
@@ -151,15 +149,7 @@ export const bulkUpdateAgentTagsHandler: RequestHandler<
       request.body.tagsToRemove ?? []
     );
 
-    const body = results.items.reduce<PostBulkUpdateAgentTagsResponse>((acc: any, so: any) => {
-      acc[so.id] = {
-        success: !so.error,
-        error: so.error?.message,
-      };
-      return acc;
-    }, {});
-
-    return response.ok({ body: { ...body, actionId: results.actionId } });
+    return response.ok({ body: { actionId: results.actionId } });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }
@@ -267,15 +257,7 @@ export const postBulkAgentsReassignHandler: RequestHandler<
       request.body.policy_id
     );
 
-    const body = results.items.reduce<PostBulkAgentReassignResponse>((acc, so) => {
-      acc[so.id] = {
-        success: !so.error,
-        error: so.error?.message,
-      };
-      return acc;
-    }, {});
-
-    return response.ok({ body: { ...body, actionId: results.actionId } });
+    return response.ok({ body: { actionId: results.actionId } });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }

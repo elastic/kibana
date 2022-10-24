@@ -52,7 +52,7 @@ export const journey = new Journey({
     await page.click(subj('launchSampleDataSetflights'));
     await page.click(subj('viewSampleDataSetflights-dashboard'));
 
-    await waitForVisualizations(page, 15);
+    await waitForVisualizations(page, 14);
   })
 
   .step('Go to Airport Connections Visualizations Edit', async ({ page }) => {

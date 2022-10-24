@@ -20,7 +20,7 @@
 [
   {
     "name": "apm",
-    "version": "8.4.0",
+    "version": "8.6.0-preview-1663775281",
     "forceAlignStackVersion": true
   },
   {
@@ -29,7 +29,7 @@
   },
   {
     "name": "endpoint",
-    "version": "8.4.1"
+    "version": "8.5.0"
   },
   {
     "name": "fleet_server",
@@ -37,6 +37,6 @@
   },
   {
     "name": "synthetics",
-    "version": "0.10.2"
+    "version": "0.10.3"
   }
 ]

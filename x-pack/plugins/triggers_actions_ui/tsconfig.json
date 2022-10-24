@@ -7,6 +7,7 @@
     "declarationMap": true
   },
   "include": [
+    ".storybook/**/*",
     "server/**/*",
     "public/**/*",
     "common/**/*",
@@ -16,7 +17,6 @@
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },
-    { "path": "../stack_connectors/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../rule_registry/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },

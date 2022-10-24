@@ -11,16 +11,6 @@ post:
               properties:
                 actionId: 
                   type: string
-                  description: action id when running in async mode (>10k agents)
-              additionalProperties:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  error:
-                    type: string
-                required:
-                  - success
     '400':
       description: BAD REQUEST
       content:

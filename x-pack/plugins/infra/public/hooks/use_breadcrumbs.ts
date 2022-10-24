@@ -22,7 +22,7 @@ export const useBreadcrumbs = (app: AppId, appTitle: string, extraCrumbs: Chrome
   const appLinkProps = useLinkProps({ app });
 
   useEffect(() => {
-    chrome?.setBreadcrumbs?.([
+    const breadcrumbs = [
       {
         ...observabilityLinkProps,
         text: observabilityTitle,
@@ -32,6 +32,11 @@ export const useBreadcrumbs = (app: AppId, appTitle: string, extraCrumbs: Chrome
         text: appTitle,
       },
       ...extraCrumbs,
-    ]);
+    ];
+
+    const docTitle = [...breadcrumbs].reverse().map((breadcrumb) => breadcrumb.text as string);
+
+    chrome.docTitle.change(docTitle);
+    chrome.setBreadcrumbs(breadcrumbs);
   }, [appLinkProps, appTitle, chrome, extraCrumbs, observabilityLinkProps]);
 };

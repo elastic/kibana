@@ -109,6 +109,11 @@ describe('createInitialState', () => {
               },
               Object {
                 "term": Object {
+                  "type": "guided-setup-state",
+                },
+              },
+              Object {
+                "term": Object {
                   "type": "ml-telemetry",
                 },
               },

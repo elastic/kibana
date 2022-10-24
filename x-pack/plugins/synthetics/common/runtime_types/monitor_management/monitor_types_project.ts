@@ -30,7 +30,6 @@ export const ProjectMonitorCodec = t.intersection([
     screenshot: ScreenshotOptionCodec,
     tags: t.union([t.string, t.array(t.string)]),
     ignoreHTTPSErrors: t.boolean,
-    apmServiceName: t.string,
     playwrightOptions: t.record(t.string, t.unknown),
     filter: t.interface({
       match: t.string,
@@ -41,6 +40,7 @@ export const ProjectMonitorCodec = t.intersection([
     hosts: t.union([t.string, t.array(t.string)]),
     max_redirects: t.string,
     wait: t.string,
+    hash: t.string,
   }),
 ]);
 
@@ -50,8 +50,27 @@ export const ProjectMonitorsRequestCodec = t.interface({
   monitors: t.array(ProjectMonitorCodec),
 });
 
+export const ProjectMonitorMetaDataCodec = t.interface({
+  hash: t.string,
+  journey_id: t.string,
+});
+
+export const ProjectMonitorsResponseCodec = t.intersection([
+  t.interface({
+    total: t.number,
+    monitors: t.array(ProjectMonitorMetaDataCodec),
+  }),
+  t.partial({
+    after_key: t.string,
+  }),
+]);
+
 export type ProjectMonitorThrottlingConfig = t.TypeOf<typeof ProjectMonitorThrottlingConfigCodec>;
 
 export type ProjectMonitor = t.TypeOf<typeof ProjectMonitorCodec>;
 
 export type ProjectMonitorsRequest = t.TypeOf<typeof ProjectMonitorsRequestCodec>;
+
+export type ProjectMonitorsResponse = t.TypeOf<typeof ProjectMonitorsResponseCodec>;
+
+export type ProjectMonitorMetaData = t.TypeOf<typeof ProjectMonitorMetaDataCodec>;

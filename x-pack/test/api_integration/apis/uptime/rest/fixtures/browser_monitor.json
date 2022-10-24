@@ -47,5 +47,7 @@
   "origin": "ui",
   "form_monitor_type": "multistep",
   "urls": "",
-  "url.port": null
+  "url.port": null,
+  "id": "",
+  "hash": ""
 }

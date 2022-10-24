@@ -9,6 +9,8 @@ import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import {
   MonitorOverviewResult,
   MonitorOverviewResultCodec,
+  OverviewStatus,
+  OverviewStatusType,
 } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 
@@ -23,3 +25,6 @@ export const fetchMonitorOverview = async (
     MonitorOverviewResultCodec
   );
 };
+
+export const fetchOverviewStatus = async (): Promise<OverviewStatus> =>
+  apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, {}, OverviewStatusType);

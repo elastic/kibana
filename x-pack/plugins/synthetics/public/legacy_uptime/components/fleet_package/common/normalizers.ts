@@ -93,4 +93,11 @@ export const commonNormalizers: CommonNormalizerMap = {
   [ConfigKey.MONITOR_SOURCE_TYPE]: getCommonNormalizer(ConfigKey.MONITOR_SOURCE_TYPE),
   [ConfigKey.FORM_MONITOR_TYPE]: getCommonNormalizer(ConfigKey.FORM_MONITOR_TYPE),
   [ConfigKey.JOURNEY_ID]: getCommonNormalizer(ConfigKey.JOURNEY_ID),
+  [ConfigKey.PROJECT_ID]: getCommonNormalizer(ConfigKey.PROJECT_ID),
+  [ConfigKey.CUSTOM_HEARTBEAT_ID]: getCommonNormalizer(ConfigKey.CUSTOM_HEARTBEAT_ID),
+  [ConfigKey.ORIGINAL_SPACE]: getCommonNormalizer(ConfigKey.ORIGINAL_SPACE),
+  [ConfigKey.CONFIG_HASH]: getCommonNormalizer(ConfigKey.CONFIG_HASH),
+
+  // Deprecated, slated to be removed in a future release
+  [ConfigKey.ID]: getCommonNormalizer(ConfigKey.ID),
 };

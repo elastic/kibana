@@ -27,7 +27,7 @@ import type {
   EqlSequence,
 } from '../../../../common/detection_engine/types';
 import type { ITelemetryEventsSender } from '../../telemetry/sender';
-import type { RuleParams, UnifiedQueryRuleParams } from '../schemas/rule_schemas';
+import type { RuleParams, UnifiedQueryRuleParams } from '../rule_schema';
 import type { GenericBulkCreateResponse } from '../rule_types/factories';
 import type { BuildReasonMessage } from './reason_formatters';
 import type {
@@ -37,7 +37,7 @@ import type {
 } from '../../../../common/detection_engine/schemas/alerts';
 import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
 import type { buildGroupByFieldAggregation } from './alert_grouping/build_group_by_field_aggregation';
-import type { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
+import type { RuleResponse } from '../../../../common/detection_engine/rule_schema';
 import type { EnrichEvents } from './enrichments/types';
 import type { BucketHistory } from './alert_grouping/group_and_bulk_create';
 import type { RunOpts } from '../rule_types/types';
@@ -191,7 +191,7 @@ export interface Signal {
   _meta?: {
     version: number;
   };
-  rule: FullResponseSchema;
+  rule: RuleResponse;
   /**
    * @deprecated Use "parents" instead of "parent"
    */
@@ -300,6 +300,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   success: boolean;
   warning: boolean;
   searchAfterTimes: string[];
+  enrichmentTimes: string[];
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;

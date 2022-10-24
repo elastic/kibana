@@ -25,8 +25,8 @@ import {
 import { IEmbeddable, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { dashboardCopyToDashboardAction } from '../../dashboard_strings';
-import { createDashboardEditUrl, DashboardConstants, DashboardContainer } from '../..';
-import { DashboardPanelState } from '..';
+import { createDashboardEditUrl, DashboardConstants } from '../..';
+import { type DashboardContainer, DashboardPanelState } from '..';
 import { pluginServices } from '../../services/plugin_services';
 
 interface CopyToDashboardModalProps {

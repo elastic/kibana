@@ -18,7 +18,7 @@ import type { BucketHistory } from '../alert_grouping/group_and_bulk_create';
 import { groupAndBulkCreate } from '../alert_grouping/group_and_bulk_create';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
-import type { UnifiedQueryRuleParams } from '../../schemas/rule_schemas';
+import type { UnifiedQueryRuleParams } from '../../rule_schema';
 import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { buildReasonMessageForQueryAlert } from '../reason_formatters';
 import { withSecuritySpan } from '../../../../utils/with_security_span';

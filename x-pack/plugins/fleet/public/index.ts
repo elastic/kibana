@@ -35,6 +35,8 @@ export type {
   PackagePolicyCreateExtension,
   PackagePolicyCreateExtensionComponent,
   PackagePolicyCreateExtensionComponentProps,
+  PackagePolicyCreateMultiStepExtension,
+  PackagePolicyCreateMultiStepExtensionComponent,
   PackagePolicyEditExtension,
   PackagePolicyEditExtensionComponent,
   PackagePolicyEditExtensionComponentProps,

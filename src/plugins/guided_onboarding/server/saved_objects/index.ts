@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-export {
-  guidedSetupSavedObjects,
-  guidedSetupSavedObjectsType,
-  guidedSetupSavedObjectsId,
-  guidedSetupDefaultState,
-} from './guided_setup';
+export { guidedSetupSavedObjects, guidedSetupSavedObjectsType } from './guided_setup';

@@ -11,10 +11,10 @@ import type { TimeRange } from '../utils';
 import { resolverFields } from '../utils';
 
 export interface ResolverQueryParams {
-  readonly schema: ResolverSchema;
+  readonly schema?: ResolverSchema;
   readonly indexPatterns: string | string[];
   readonly timeRange: TimeRange | undefined;
-  readonly isInternalRequest: boolean;
+  readonly isInternalRequest?: boolean;
   readonly resolverFields?: JsonValue[];
   getRangeFilter?: () => Array<{
     range: { '@timestamp': { gte: string; lte: string; format: string } };
@@ -25,12 +25,18 @@ export class BaseResolverQuery implements ResolverQueryParams {
   readonly schema: ResolverSchema;
   readonly indexPatterns: string | string[];
   readonly timeRange: TimeRange | undefined;
-  readonly isInternalRequest: boolean;
+  readonly isInternalRequest?: boolean;
   readonly resolverFields?: JsonValue[];
 
   constructor({ schema, indexPatterns, timeRange, isInternalRequest }: ResolverQueryParams) {
-    this.resolverFields = resolverFields(schema);
-    this.schema = schema;
+    const schemaOrDefault = schema
+      ? schema
+      : {
+          id: 'process.entity_id',
+          parent: 'process.parent.entity_id',
+        };
+    this.resolverFields = resolverFields(schemaOrDefault);
+    this.schema = schemaOrDefault;
     this.indexPatterns = indexPatterns;
     this.timeRange = timeRange;
     this.isInternalRequest = isInternalRequest;

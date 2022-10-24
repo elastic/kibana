@@ -51,6 +51,7 @@ export const CubeForProcess = memo(function ({
       viewBox="0 0 34 34"
       data-test-subj={dataTestSubj}
       isOrigin={isOrigin}
+      style={{ verticalAlign: 'middle' }}
     >
       <desc>
         {i18n.translate('xpack.securitySolution.resolver.node_icon', {

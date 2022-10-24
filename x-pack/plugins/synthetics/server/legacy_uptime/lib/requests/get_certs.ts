@@ -12,7 +12,7 @@ import {
   getCertsRequestBody,
   processCertsResult,
 } from '../../../../common/requests/get_certs_request_body';
-import { UptimeESClient } from '../lib';
+import { UptimeEsClient } from '../lib';
 
 export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = async (
   requestParams
@@ -25,7 +25,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
 export type CertificatesResults = PromiseType<ReturnType<typeof getCertsResults>>;
 
 const getCertsResults = async (
-  requestParams: GetCertsParams & { uptimeEsClient: UptimeESClient }
+  requestParams: GetCertsParams & { uptimeEsClient: UptimeEsClient }
 ) => {
   const { uptimeEsClient } = requestParams;
 

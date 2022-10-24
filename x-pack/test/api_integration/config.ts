@@ -28,10 +28,6 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
         '--xpack.security.session.idleTimeout=3600000', // 1 hour
         '--telemetry.optIn=true',
         '--xpack.fleet.agents.pollingRequestTimeout=5000', // 5 seconds
-        '--xpack.data_enhanced.search.sessions.enabled=true', // enable WIP send to background UI
-        '--xpack.data_enhanced.search.sessions.notTouchedTimeout=15s', // shorten notTouchedTimeout for quicker testing
-        '--xpack.data_enhanced.search.sessions.trackingInterval=5s', // shorten trackingInterval for quicker testing
-        '--xpack.data_enhanced.search.sessions.cleanupInterval=5s', // shorten cleanupInterval for quicker testing
         '--xpack.ruleRegistry.write.enabled=true',
         '--xpack.ruleRegistry.write.enabled=true',
         '--xpack.ruleRegistry.write.cache.enabled=false',
