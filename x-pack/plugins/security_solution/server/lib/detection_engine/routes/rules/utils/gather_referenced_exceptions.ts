@@ -24,9 +24,13 @@ export const getReferencedExceptionLists = async ({
   rules: Array<ImportRulesSchema | Error>;
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<Record<string, ExceptionListSchema>> => {
-  const [lists] = rules.reduce<ListArray[]>((acc, rule) => {
-    if (!(rule instanceof Error) && rule.exceptions_list != null) {
-      return [...acc, rule.exceptions_list];
+  const lists = rules.reduce<ListArray>((acc, rule) => {
+    if (
+      !(rule instanceof Error) &&
+      rule.exceptions_list != null &&
+      rule.exceptions_list.length > 0
+    ) {
+      return [...acc, ...rule.exceptions_list];
     } else {
       return acc;
     }
