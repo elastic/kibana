@@ -10,7 +10,6 @@ import type { Client } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import * as cborx from 'cbor-x';
 import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
-import type { UploadedFile } from '../../../../common/endpoint/types/file_storage';
 import { checkInFleetAgent } from '../../common/fleet_services';
 import { sendEndpointMetadataUpdate } from '../../common/endpoint_metadata_services';
 import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
@@ -182,7 +181,7 @@ export const sendEndpointActionResponse = async (
   // For `get-file`, upload a file to ES
   if (action.command === 'get-file' && !endpointResponse.error) {
     // Index the file's metadata
-    const fileMeta = await esClient.index<UploadedFile>({
+    const fileMeta = await esClient.index({
       index: FILE_STORAGE_METADATA_INDEX,
       id: getFileDownloadId(action, action.agents[0]),
       body: {
