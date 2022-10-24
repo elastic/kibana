@@ -8,11 +8,11 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import type { GuideState } from '@kbn/guided-onboarding';
 import { firstValueFrom, Subscription } from 'rxjs';
 
 import { API_BASE_PATH } from '../../common/constants';
 import { guidesConfig } from '../constants/guides_config';
-import type { GuideState } from '../../common/types';
 import { ApiService } from './api';
 import {
   noGuideActiveState,
@@ -57,7 +57,7 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it('broadcasts the updated state', async () => {
-      await apiService.activateGuide(searchGuide);
+      await apiService.activateGuide(searchGuide, searchAddDataActiveState);
 
       const state = await firstValueFrom(apiService.fetchActiveGuideState$());
       expect(state).toEqual(searchAddDataActiveState);
@@ -150,7 +150,7 @@ describe('GuidedOnboarding ApiService', () => {
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
         body: JSON.stringify({
           isActive: true,
-          status: 'in_progress',
+          status: 'not_started',
           steps: [
             {
               id: 'add_data',

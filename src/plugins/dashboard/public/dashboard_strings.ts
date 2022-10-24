@@ -278,6 +278,11 @@ export const shareModalStrings = {
     i18n.translate('dashboard.embedUrlParamExtension.include', {
       defaultMessage: 'Include',
     }),
+  getSnapshotShareWarning: () =>
+    i18n.translate('dashboard.snapshotShare.longUrlWarning', {
+      defaultMessage:
+        'One or more panels on this dashboard have changed. Before you generate a snapshot, save the dashboard.',
+    }),
 };
 
 export const leaveConfirmStrings = {

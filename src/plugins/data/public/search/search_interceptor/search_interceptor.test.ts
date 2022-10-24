@@ -34,6 +34,7 @@ jest.mock('../errors/search_session_incomplete_warning', () => ({
 }));
 
 import { SearchSessionIncompleteWarning } from '../errors/search_session_incomplete_warning';
+import { getMockSearchConfig } from '../../../config.mock';
 
 let searchInterceptor: SearchInterceptor;
 let mockCoreSetup: MockedKeys<CoreSetup>;
@@ -124,6 +125,7 @@ describe('SearchInterceptor', () => {
       executionContext: mockCoreSetup.executionContext,
       session: sessionService,
       theme: themeServiceMock.createSetupContract(),
+      searchConfig: getMockSearchConfig({}),
     });
   });
 

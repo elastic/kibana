@@ -31,6 +31,11 @@ export const slo: SavedObjectsType = {
         properties: {
           duration: { type: 'keyword' },
           is_rolling: { type: 'boolean' },
+          calendar: {
+            properties: {
+              start_time: { type: 'date' },
+            },
+          },
         },
       },
       budgeting_method: { type: 'keyword' },
