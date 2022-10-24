@@ -10,7 +10,9 @@ exports[`AddData render 1`] = `
   <EuiFlexGroup
     alignItems="flexEnd"
   >
-    <EuiFlexItem>
+    <EuiFlexItem
+      grow={true}
+    >
       <EuiTitle
         size="s"
       >
@@ -37,8 +39,6 @@ exports[`AddData render 1`] = `
       <EuiSpacer />
       <EuiFlexGroup
         gutterSize="m"
-        responsive={false}
-        wrap={true}
       >
         <EuiFlexItem
           grow={false}
@@ -57,6 +57,7 @@ exports[`AddData render 1`] = `
             <EuiButton
               data-test-subj="homeAddData"
               fill={true}
+              fullWidth={true}
               href="/app/integrations/browse"
               iconType="plusInCircle"
               onClick={[Function]}
