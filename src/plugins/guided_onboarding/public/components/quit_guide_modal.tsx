@@ -43,7 +43,7 @@ export const QuitGuideModal = ({ closeModal, currentGuide }: QuitGuideModalProps
       aria-label="quitGuideModal"
       buttonColor="warning"
       isLoading={isDeleting}
-      data-test-subj="quitGuideModal"
+      data-test-subj="onboarding--quitGuideModal"
     >
       <EuiText>
         <p>

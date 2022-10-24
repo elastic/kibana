@@ -56,7 +56,7 @@ describe('getting started', () => {
 
   test('skip button should disable home welcome screen', async () => {
     const component = mountWithIntl(<GettingStarted />);
-    const skipButton = findTestSubject(component, 'onboarding--skipUseCaseTourLink');
+    const skipButton = findTestSubject(component, 'onboarding--skipGuideLink');
     skipButton.simulate('click');
 
     expect(localStorage.getItem(KEY_ENABLE_WELCOME)).toBe('false');

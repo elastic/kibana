@@ -266,6 +266,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                       stepNumber={index + 1}
                       handleButtonClick={() => handleStepButtonClick(stepState, step)}
                       key={accordionId}
+                      guideId={guideState.guideId}
                     />
                   );
                 }
@@ -277,7 +278,8 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                     <EuiButton
                       onClick={() => completeGuide(guideConfig.completedGuideRedirectLocation)}
                       fill
-                      data-test-subj="useElasticButton"
+                      // data-test-subj used for FS tracking and testing
+                      data-test-subj={`onboarding--completeGuideButton--${guideState.guideId}`}
                     >
                       {i18n.translate('guidedOnboarding.dropdownPanel.elasticButtonLabel', {
                         defaultMessage: 'Continue using Elastic',
