@@ -9,23 +9,22 @@
 import React, { useEffect, useReducer, useCallback, useState, useMemo } from 'react';
 import { EuiDragDropContext, DragDropContextProps, useEuiPaddingSize } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import { type Filter, BooleanRelation } from '@kbn/es-query';
 import { css } from '@emotion/css';
 import { FiltersBuilderContextType } from './filters_builder_context';
-import { ConditionTypes } from '../utils';
 import { FilterGroup } from './filters_builder_filter_group';
 import { FiltersBuilderReducer } from './filters_builder_reducer';
 
 export interface FiltersBuilderProps {
   filters: Filter[];
-  dataView: DataView;
+  dataView?: DataView;
   onChange: (filters: Filter[]) => void;
   timeRangeForSuggestionsOverride?: boolean;
   maxDepth?: number;
   hideOr?: boolean;
 }
 
-const rootLevelConditionType = ConditionTypes.AND;
+const rootLevelConditionType = BooleanRelation.AND;
 const DEFAULT_MAX_DEPTH = 10;
 
 function FiltersBuilder({
@@ -64,7 +63,7 @@ function FiltersBuilder({
   }, [filters, onChange, state.filters]);
 
   const handleMoveFilter = useCallback(
-    (pathFrom: string, pathTo: string, conditionalType: ConditionTypes) => {
+    (pathFrom: string, pathTo: string, conditionalType: BooleanRelation) => {
       if (pathFrom === pathTo) {
         return null;
       }
@@ -83,11 +82,11 @@ function FiltersBuilder({
 
   const onDragEnd: DragDropContextProps['onDragEnd'] = ({ combine, source, destination }) => {
     if (source && destination) {
-      handleMoveFilter(source.droppableId, destination.droppableId, ConditionTypes.AND);
+      handleMoveFilter(source.droppableId, destination.droppableId, BooleanRelation.AND);
     }
 
     if (source && combine) {
-      handleMoveFilter(source.droppableId, combine.droppableId, ConditionTypes.OR);
+      handleMoveFilter(source.droppableId, combine.droppableId, BooleanRelation.OR);
     }
     setDropTarget('');
   };

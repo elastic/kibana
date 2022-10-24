@@ -47,7 +47,11 @@ export function isCombinedFilter(filter: Filter): filter is CombinedFilter {
  * @param filters An array of sub-filters
  * @public
  */
-export function buildCombinedFilter(relation: BooleanRelation, filters: Filter[]): CombinedFilter {
+export function buildCombinedFilter(
+  relation: BooleanRelation,
+  filters: Filter[],
+  alias?: string | null
+): CombinedFilter {
   const filter = buildEmptyFilter(false);
   return {
     ...filter,
@@ -55,6 +59,7 @@ export function buildCombinedFilter(relation: BooleanRelation, filters: Filter[]
       ...filter.meta,
       type: FILTERS.COMBINED,
       relation,
+      alias,
       params: filters,
     },
   };

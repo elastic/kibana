@@ -7,10 +7,9 @@
  */
 
 import type { Reducer } from 'react';
-import type { Filter } from '@kbn/es-query';
+import { type Filter, BooleanRelation } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { Path } from './filters_builder_types';
-import type { ConditionTypes } from '../utils';
 import { addFilter, moveFilter, removeFilter, updateFilter } from './filters_builder_utils';
 import type { Operator } from '../filter_bar/filter_editor';
 
@@ -23,7 +22,7 @@ export interface FiltersBuilderState {
 export interface AddFilterPayload {
   path: Path;
   filter: Filter;
-  conditionalType: ConditionTypes;
+  conditionalType: BooleanRelation;
 }
 
 /** @internal **/
@@ -43,7 +42,7 @@ export interface RemoveFilterPayload {
 export interface MoveFilterPayload {
   pathFrom: Path;
   pathTo: Path;
-  conditionalType: ConditionTypes;
+  conditionalType: BooleanRelation;
 }
 
 /** @internal **/

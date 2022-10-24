@@ -17,17 +17,17 @@ import {
   useEuiBackgroundColor,
   useEuiPaddingSize,
 } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
+import { type Filter, BooleanRelation } from '@kbn/es-query';
 import { css, cx } from '@emotion/css';
 import type { Path } from './filters_builder_types';
-import { ConditionTypes, getConditionalOperationType } from '../utils';
+import { getConditionalOperationType } from '../utils';
 import { FilterItem } from './filters_builder_filter_item';
 import { FiltersBuilderContextType } from './filters_builder_context';
 import { getPathInArray } from './filters_builder_utils';
 
 export interface FilterGroupProps {
   filters: Filter[];
-  conditionType: ConditionTypes;
+  conditionType: BooleanRelation;
   path: Path;
 
   /** @internal used for recursive rendering **/
@@ -41,7 +41,7 @@ const Delimiter = ({
   conditionType,
 }: {
   color: 'subdued' | 'plain';
-  conditionType: ConditionTypes;
+  conditionType: BooleanRelation;
 }) => {
   const xsPadding = useEuiPaddingSize('xs');
   const mPadding = useEuiPaddingSize('m');
@@ -91,8 +91,9 @@ export const FilterGroup = ({
 
   const pathInArray = getPathInArray(path);
   const isDepthReached = maxDepth <= pathInArray.length;
-  const orDisabled = hideOr || (isDepthReached && conditionType === ConditionTypes.AND);
-  const andDisabled = isDepthReached && conditionType === ConditionTypes.OR;
+  const orDisabled = hideOr || (isDepthReached && conditionType === BooleanRelation.AND);
+  const andDisabled = isDepthReached && conditionType === BooleanRelation.OR;
+
   const removeDisabled = pathInArray.length <= 1 && filters.length === 1;
   const shouldNormalizeFirstLevel =
     !path && filters.length === 1 && getConditionalOperationType(filters[0]);
@@ -122,7 +123,7 @@ export const FilterGroup = ({
 
       {conditionType && index + 1 < acc.length ? (
         <EuiFlexItem>
-          {conditionType === ConditionTypes.OR && (
+          {conditionType === BooleanRelation.OR && (
             <Delimiter color={color} conditionType={conditionType} />
           )}
         </EuiFlexItem>
@@ -136,7 +137,7 @@ export const FilterGroup = ({
     <EuiPanel
       color={color}
       hasShadow={false}
-      paddingSize="none"
+      paddingSize={renderedLevel > 0 ? 'none' : 'xs'}
       hasBorder
       className={cx({
         'filter-builder__panel': true,
