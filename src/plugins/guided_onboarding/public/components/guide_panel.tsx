@@ -27,7 +27,6 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ApplicationStart } from '@kbn/core/public';
 import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboarding';
