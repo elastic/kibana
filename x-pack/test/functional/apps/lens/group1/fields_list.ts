@@ -61,6 +61,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.exists('lnsFieldListPanel-title');
           // check for top values chart
           await testSubjects.existOrFail('lnsFieldListPanel-topValues');
+          const topValuesRows = await testSubjects.findAll('lnsFieldListPanel-topValues-bucket');
+          expect(topValuesRows.length).to.eql(11);
+          // check for the Other entry
+          expect(await topValuesRows[10].getVisibleText()).to.eql('Other\n96.7%');
           // switch to date histogram
           await testSubjects.click('lnsFieldListPanel-distribution');
           // check for date histogram chart
@@ -78,6 +82,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.exists('lnsFieldListPanel-title');
           // check for top values chart
           await testSubjects.existOrFail('lnsFieldListPanel-topValues');
+          const topValuesRows = await testSubjects.findAll('lnsFieldListPanel-topValues-bucket');
+          expect(topValuesRows.length).to.eql(11);
+          // check for the Other entry
+          expect(await topValuesRows[10].getVisibleText()).to.eql('Other\n99.9%');
           // check no date histogram
           expect(
             await find.existsByCssSelector(
@@ -117,6 +125,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.exists('lnsFieldListPanel-title');
           // check for top values chart
           await testSubjects.existOrFail('lnsFieldListPanel-topValues');
+          // check values
+          const topValuesRows = await testSubjects.findAll('lnsFieldListPanel-topValues-bucket');
+          expect(topValuesRows.length).to.eql(11);
+          // check for the Other entry
+          expect(await topValuesRows[10].getVisibleText()).to.eql('Other\n96.7%');
           // switch to date histogram
           await testSubjects.click('lnsFieldListPanel-distribution');
           // check for date histogram chart
