@@ -8708,6 +8708,18 @@
             "description": "Non-default value of setting."
           }
         },
+        "observability:apmAWSLambdaPriceFactor": {
+          "type": "string",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "observability:apmAWSLambdaRequestCostPerMillion": {
+          "type": "integer",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "banners:placement": {
           "type": "keyword",
           "_meta": {
