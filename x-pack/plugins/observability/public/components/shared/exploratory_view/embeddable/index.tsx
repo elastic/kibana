@@ -54,7 +54,7 @@ export function getExploratoryViewEmbeddable(
 
         setLoading(true);
         try {
-          const obsvIndexP = new ObservabilityDataViews(dataViews);
+          const obsvIndexP = new ObservabilityDataViews(dataViews, true);
           const indPattern = await obsvIndexP.getDataView(
             dataType,
             dataTypesIndexPatterns?.[dataType]
