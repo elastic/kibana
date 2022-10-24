@@ -30,6 +30,7 @@ import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 
 import { RuleExecutionSummary } from '../../../../common/detection_engine/rule_monitoring';
 import {
+  AlertGrouping,
   AlertsIndex,
   BuildingBlockType,
   DataViewId,
@@ -75,7 +76,6 @@ import type {
   RuleUpdateProps,
 } from '../../../../common/detection_engine/rule_schema';
 import type { SortOrder } from '../../../../common/detection_engine/schemas/common';
-import { alertGrouping } from '../../../../common/detection_engine/schemas/common';
 
 /**
  * Params is an "record", since it is a type of RuleActionParams which is action templates.
@@ -192,7 +192,7 @@ export const RuleSchema = t.intersection([
     uuid: t.string,
     version: RuleVersion,
     execution_summary: RuleExecutionSummary,
-    alert_grouping: alertGrouping,
+    alert_grouping: AlertGrouping,
   }),
 ]);
 

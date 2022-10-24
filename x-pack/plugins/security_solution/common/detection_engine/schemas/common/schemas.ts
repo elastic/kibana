@@ -16,20 +16,6 @@ export type FileName = t.TypeOf<typeof file_name>;
 export const exclude_export_details = t.boolean;
 export type ExcludeExportDetails = t.TypeOf<typeof exclude_export_details>;
 
-// TODO: move to correct file
-export const groupBy = t.array(t.string);
-export type GroupBy = t.TypeOf<typeof alertGrouping>;
-
-export const alertGrouping = t.exact(
-  t.type({
-    groupBy,
-  })
-);
-export type AlertGrouping = t.TypeOf<typeof alertGrouping>;
-
-export const alertGroupingOrUndefined = t.union([t.undefined, alertGrouping]);
-export type AlertGroupingOrUndefined = t.TypeOf<typeof alertGroupingOrUndefined>;
-
 export const saved_id = t.string;
 
 export const savedIdOrUndefined = t.union([saved_id, t.undefined]);

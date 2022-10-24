@@ -37,6 +37,7 @@ import {
 
 import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import {
+  AlertGrouping,
   AlertsIndex,
   AlertsIndexNamespace,
   BuildingBlockType,
@@ -79,7 +80,6 @@ import {
   savedIdOrUndefined,
   saved_id,
   anomaly_threshold,
-  alertGroupingOrUndefined,
 } from '../../../../../common/detection_engine/schemas/common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { ResponseActionRuleParamsOrUndefined } from '../../../../../common/detection_engine/rule_response_actions/schemas';
@@ -169,7 +169,7 @@ const querySpecificRuleParams = t.exact(
     savedId: savedIdOrUndefined,
     dataViewId: t.union([DataViewId, t.undefined]),
     responseActions: ResponseActionRuleParamsOrUndefined,
-    alertGrouping: alertGroupingOrUndefined,
+    alertGrouping: t.union([AlertGrouping, t.undefined]),
   })
 );
 export const queryRuleParams = t.intersection([baseRuleParams, querySpecificRuleParams]);
@@ -187,7 +187,7 @@ const savedQuerySpecificRuleParams = t.type({
   filters: t.union([RuleFilterArray, t.undefined]),
   savedId: saved_id,
   responseActions: ResponseActionRuleParamsOrUndefined,
-  alertGrouping: alertGroupingOrUndefined,
+  alertGrouping: t.union([AlertGrouping, t.undefined]),
 });
 export const savedQueryRuleParams = t.intersection([baseRuleParams, savedQuerySpecificRuleParams]);
 export type SavedQuerySpecificRuleParams = t.TypeOf<typeof savedQuerySpecificRuleParams>;

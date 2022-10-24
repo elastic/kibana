@@ -36,7 +36,6 @@ import {
   updated_by,
   created_at,
   created_by,
-  alertGrouping,
 } from '../../schemas/common';
 
 import {
@@ -86,6 +85,7 @@ import {
 } from './specific_attributes/eql_attributes';
 import { Threshold } from './specific_attributes/threshold_attributes';
 import { HistoryWindowStart, NewTermsFields } from './specific_attributes/new_terms_attributes';
+import { AlertGrouping } from './specific_attributes/query_attributes';
 
 import { buildRuleSchemas } from './build_rule_schemas';
 
@@ -303,7 +303,7 @@ const querySchema = buildRuleSchemas({
     filters: RuleFilterArray,
     saved_id,
     response_actions: ResponseActionArray,
-    alert_grouping: alertGrouping,
+    alert_grouping: AlertGrouping,
   },
   defaultable: {
     query: RuleQuery,
@@ -342,7 +342,7 @@ const savedQuerySchema = buildRuleSchemas({
     query: RuleQuery,
     filters: RuleFilterArray,
     response_actions: ResponseActionArray,
-    alert_grouping: alertGrouping,
+    alert_grouping: AlertGrouping,
   },
   defaultable: {
     language: t.keyof({ kuery: null, lucene: null }),
