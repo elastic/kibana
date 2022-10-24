@@ -73,6 +73,7 @@ describe('SecurityTourStep', () => {
     });
     jest.clearAllMocks();
   });
+
   it('does not render if tour step does not exist', () => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: 99,
@@ -86,6 +87,7 @@ describe('SecurityTourStep', () => {
     );
     expect(mockTourStep).not.toHaveBeenCalled();
   });
+
   it('does not render if tour step does not equal active step', () => {
     render(
       <SecurityTourStep {...securityTourStepDefaultProps} step={4}>
@@ -94,6 +96,7 @@ describe('SecurityTourStep', () => {
     );
     expect(mockTourStep).not.toHaveBeenCalled();
   });
+
   it('does not render if security tour step is not shown', () => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: 1,
@@ -103,12 +106,14 @@ describe('SecurityTourStep', () => {
     render(<SecurityTourStep {...securityTourStepDefaultProps}>{mockChildren}</SecurityTourStep>);
     expect(mockTourStep).not.toHaveBeenCalled();
   });
+
   it('renders tour step with correct number of steppers', () => {
     render(<SecurityTourStep {...securityTourStepDefaultProps}>{mockChildren}</SecurityTourStep>);
     const mockCall = { ...mockTourStep.mock.calls[0][0] };
     expect(mockCall.step).toEqual(1);
     expect(mockCall.stepsTotal).toEqual(5);
   });
+
   it('forces the render for step 5 of the SecurityStepId.alertsCases tour step', () => {
     render(
       <SecurityTourStep {...securityTourStepDefaultProps} step={5}>
@@ -119,6 +124,7 @@ describe('SecurityTourStep', () => {
     expect(mockCall.step).toEqual(5);
     expect(mockCall.stepsTotal).toEqual(5);
   });
+
   it('does render next button if step hideNextButton=false ', () => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: 3,
@@ -146,6 +152,7 @@ describe('SecurityTourStep', () => {
      </EuiButton>
     `);
   });
+
   it('if a step has an anchor declared, the tour step should be a sibling of the mockChildren', () => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: 3,
@@ -166,6 +173,7 @@ describe('SecurityTourStep', () => {
     expect(selectSibling).toBeInTheDocument();
     expect(selectParent).not.toBeInTheDocument();
   });
+
   it('if a step does not an anchor declared, the tour step should be the parent of the mockChildren', () => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: 2,
@@ -186,6 +194,19 @@ describe('SecurityTourStep', () => {
     expect(selectParent).toBeInTheDocument();
     expect(selectSibling).not.toBeInTheDocument();
   });
+
+  it('if a tour step does not have children and has anchor, only render tour step', () => {
+    const { getByTestId } = render(<SecurityTourStep {...securityTourStepDefaultProps} step={5} />);
+    expect(getByTestId('tourStepMock')).toBeInTheDocument();
+  });
+
+  it('if a tour step does not have children and does not have anchor, render nothing', () => {
+    const { queryByTestId } = render(
+      <SecurityTourStep {...securityTourStepDefaultProps} step={1} />
+    );
+    expect(queryByTestId('tourStepMock')).not.toBeInTheDocument();
+  });
+
   it('does not render next button if step hideNextButton=true ', () => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: 4,

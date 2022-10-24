@@ -92,9 +92,7 @@ export const SecurityTourStep = ({ children, step, stepId }: SecurityTourStep) =
     </>
   ) : children != null ? (
     <EuiTourStep {...commonProps}>{children}</EuiTourStep>
-  ) : (
-    <>{/* we should never be here, see type EuiTourStepAnchorProps */ children}</>
-  );
+  ) : null;
 };
 
 interface GuidedOnboardingTourStep extends SecurityTourStep {
