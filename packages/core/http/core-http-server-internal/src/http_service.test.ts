@@ -26,7 +26,7 @@ import { externalUrlConfig, ExternalUrlConfig } from './external_url';
 const logger = loggingSystemMock.create();
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const coreId = Symbol();
-// @Tina: TODO: Use this as inspiration, it looks much less brute-forceish
+
 const createConfigService = (value: Partial<HttpConfigType> = {}) => {
   const configService = new ConfigService(
     {
