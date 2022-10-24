@@ -34,7 +34,7 @@ const ScreenshotThumbnail: React.FC<ScreenshotImageProps & { imageData?: string 
   imageData,
   isStepFailed,
   isLoading,
-  asThumbnail,
+  asThumbnail = true,
 }) => {
   return imageData ? (
     <EuiImage
@@ -112,7 +112,7 @@ const JourneyStepImage: React.FC<
   setImageData,
   isStepFailed,
   isLoading,
-  asThumbnail,
+  asThumbnail = true,
 }) => {
   if (imgSrc) {
     return (
@@ -149,7 +149,7 @@ export const JourneyStepImagePopover: React.FC<StepImagePopoverProps> = ({
   isImagePopoverOpen,
   isStepFailed,
   isLoading,
-  asThumbnail,
+  asThumbnail = true,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -212,11 +212,7 @@ export const JourneyStepImagePopover: React.FC<StepImagePopoverProps> = ({
           `}
         />
       ) : asThumbnail ? (
-        <EmptyThumbnail
-          isLoading={isLoading}
-          width={POPOVER_IMG_WIDTH}
-          height={POPOVER_IMG_HEIGHT}
-        />
+        <EmptyThumbnail isLoading={isLoading} />
       ) : (
         <EmptyImage isLoading={isLoading} />
       )}
