@@ -9,11 +9,10 @@ import * as t from 'io-ts';
 import {
   apmTransactionDurationIndicatorSchema,
   apmTransactionErrorRateIndicatorSchema,
+  indicatorDataSchema,
   indicatorSchema,
   indicatorTypesSchema,
 } from '../schema';
-
-const indicatorDataSchema = t.type({ good: t.number, total: t.number });
 
 type APMTransactionErrorRateIndicator = t.TypeOf<typeof apmTransactionErrorRateIndicatorSchema>;
 type APMTransactionDurationIndicator = t.TypeOf<typeof apmTransactionDurationIndicatorSchema>;
