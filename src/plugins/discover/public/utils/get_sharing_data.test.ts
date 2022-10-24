@@ -71,13 +71,19 @@ describe('getSharingData', () => {
     `);
   });
 
-  test('getSearchSource does not add fields to the searchSource', async () => {
+  test('getSearchSource adds "fields": "*" to the searchSource since no columns are selected', async () => {
     const index = { ...dataViewMock } as DataView;
     index.timeFieldName = 'cool-timefield';
     const searchSourceMock = createSearchSourceMock({ index });
     const { getSearchSource } = await getSharingData(searchSourceMock, {}, services);
     expect(getSearchSource()).toMatchInlineSnapshot(`
       Object {
+        "fields": Array [
+          Object {
+            "field": "*",
+            "include_unmapped": "true",
+          },
+        ],
         "index": "the-data-view-id",
         "sort": Array [
           Object {
@@ -194,10 +200,7 @@ describe('getSharingData', () => {
   test('fields conditionally do not have prepended timeField', async () => {
     services.uiSettings = {
       get: (key: string) => {
-        if (key === DOC_HIDE_TIME_COLUMN_SETTING) {
-          return true;
-        }
-        return false;
+        return key === DOC_HIDE_TIME_COLUMN_SETTING;
       },
     } as unknown as IUiSettingsClient;
 
