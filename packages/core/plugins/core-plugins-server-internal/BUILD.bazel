@@ -86,7 +86,6 @@ TYPES_DEPS = [
   "//packages/core/lifecycle/core-lifecycle-server:npm_module_types",
   "//packages/core/lifecycle/core-lifecycle-server-internal:npm_module_types",
   "//packages/core/plugins/core-plugins-server:npm_module_types",
-
   # test dependencies' mocks
   "@npm//mock-fs",
   "//packages/kbn-config-mocks:npm_module_types",
