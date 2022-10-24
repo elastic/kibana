@@ -22,7 +22,7 @@ export const renderApp = (
 ) => {
   ReactDOM.render(
     <QueryClientProvider client={queryClient}>
-      <FilesContext>
+      <FilesContext client={files.unscoped}>
         <FilesExampleApp files={files} notifications={notifications} />
       </FilesContext>
     </QueryClientProvider>,

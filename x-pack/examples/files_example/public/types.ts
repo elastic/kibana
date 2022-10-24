@@ -6,10 +6,17 @@
  */
 
 import { MyImageMetadata } from '../common';
-import type { FilesSetup, FilesStart, ScopedFilesClient, FilesClient } from './imports';
+import type {
+  FilesSetup,
+  FilesStart,
+  ScopedFilesClient,
+  FilesClient,
+  DeveloperExamplesSetup,
+} from './imports';
 
 export interface FilesExamplePluginsSetup {
   files: FilesSetup;
+  developerExamples: DeveloperExamplesSetup;
 }
 
 export interface FilesExamplePluginsStart {

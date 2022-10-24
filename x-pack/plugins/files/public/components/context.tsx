@@ -7,9 +7,14 @@
 
 import React, { createContext, useContext, type FunctionComponent } from 'react';
 import { FileKindsRegistry, getFileKindsRegistry } from '../../common/file_kinds_registry';
+import type { FilesClient } from '../types';
 
 export interface FilesContextValue {
   registry: FileKindsRegistry;
+  /**
+   * A files client that will be used process uploads.
+   */
+  client: FilesClient<any>;
 }
 
 const FilesContextObject = createContext<FilesContextValue>(null as unknown as FilesContextValue);
@@ -21,10 +26,18 @@ export const useFilesContext = () => {
   }
   return ctx;
 };
-export const FilesContext: FunctionComponent = ({ children }) => {
+
+interface ContextProps {
+  /**
+   * A files client that will be used process uploads.
+   */
+  client: FilesClient<any>;
+}
+export const FilesContext: FunctionComponent<ContextProps> = ({ client, children }) => {
   return (
     <FilesContextObject.Provider
       value={{
+        client,
         registry: getFileKindsRegistry(),
       }}
     >

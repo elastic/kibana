@@ -30,7 +30,7 @@ describe('UploadFile', () => {
 
   async function initTestBed(props?: Partial<Props>) {
     const createTestBed = registerTestBed((p: Props) => (
-      <FilesContext>
+      <FilesContext client={client}>
         <UploadFile {...p} />
       </FilesContext>
     ));
