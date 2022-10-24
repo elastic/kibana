@@ -91,6 +91,13 @@ export const NEW_TERMS_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const ML_RUN_JOB_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.mlRunJobLabel',
+  {
+    defaultMessage: 'Run job',
+  }
+);
+
 export const ML_JOB_STARTED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.mlJobStartedDescription',
   {
@@ -102,6 +109,30 @@ export const ML_JOB_STOPPED = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.mlJobStoppedDescription',
   {
     defaultMessage: 'Stopped',
+  }
+);
+
+export const JOB_FAILED_STATUS_POPOVER_TITLE = (jobName: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleDescription.mlFailedJobStatusPopoverTitle',
+    {
+      defaultMessage: '{jobName} failed to run',
+      values: { jobName },
+    }
+  );
+
+export const JOB_FAILED_STATUS_POPOVER_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.mlFailedJobStatusPopoverTitle',
+  {
+    defaultMessage:
+      'This ML job failed to run. Please go to Machine Learning to run this job before enabling this rule.',
+  }
+);
+
+export const GO_TO_ML_PAGE_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.goToMlPageButtonLabel',
+  {
+    defaultMessage: 'Go to Machine Learning page',
   }
 );
 

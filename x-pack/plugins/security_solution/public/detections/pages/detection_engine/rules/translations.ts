@@ -1119,3 +1119,17 @@ export const SAVED_QUERY_LOAD_ERROR_TOAST = i18n.translate(
     defaultMessage: 'Failed to load the saved query',
   }
 );
+
+export const FAILED_ML_RULE_POPEVER_TITLE = i18n.translate(
+  'xpack.securitySolution.hooks.useGetSavedQuery.failedMlRulePopoverTitle',
+  {
+    defaultMessage: 'Related ML jobs cannot be enabled',
+  }
+);
+
+export const GO_TO_ML_PAGE_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.hooks.useGetSavedQuery.goToMlPageButtonLabel',
+  {
+    defaultMessage: 'Go to Machine Learning page',
+  }
+);

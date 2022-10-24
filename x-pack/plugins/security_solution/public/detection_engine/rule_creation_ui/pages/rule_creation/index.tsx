@@ -18,7 +18,12 @@ import React, { useCallback, useRef, useState, useMemo, useEffect } from 'react'
 import styled from 'styled-components';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { isThreatMatchRule } from '../../../../../common/detection_engine/utils';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import { isJobStarted } from '../../../../../common/machine_learning/helpers';
+import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
+import { useEnableDataFeed } from '../../../../common/components/ml_popover/hooks/use_enable_data_feed';
+import { isMlRule, isThreatMatchRule } from '../../../../../common/detection_engine/utils';
 import { useCreateRule } from '../../../rule_management/logic';
 import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
@@ -114,6 +119,7 @@ const CreateRulePageComponent: React.FC = () => {
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
+  const { addError } = useAppToasts();
   const { navigateToApp } = useKibana().services.application;
   const { data: dataServices } = useKibana().services;
   const loading = userInfoLoading || listsConfigLoading;
@@ -206,6 +212,38 @@ const CreateRulePageComponent: React.FC = () => {
     [activeStep]
   );
 
+  const { enableDatafeed, isLoading: isLoadingEnableDataFeed } = useEnableDataFeed();
+  const { loading: isLoadingJobs, jobs: mlJobs } = useSecurityJobs();
+  const startMlJobsIfNeeded = useCallback(async () => {
+    if (!isMlRule(ruleType) || isLoadingJobs || isLoadingEnableDataFeed) {
+      return;
+    }
+
+    const jobIds = defineRuleData.machineLearningJobId;
+    if (!jobIds.length) {
+      return;
+    }
+
+    const ruleJobs = mlJobs.filter((job) => jobIds.includes(job.id));
+    await Promise.all(
+      ruleJobs.map(async (job) => {
+        if (isJobStarted(job.jobState, job.datafeedState)) {
+          return;
+        }
+
+        const latestTimestampMs = job.latestTimestampMs ?? 0;
+        await enableDatafeed(job, latestTimestampMs, true);
+      })
+    );
+  }, [
+    defineRuleData.machineLearningJobId,
+    enableDatafeed,
+    isLoadingEnableDataFeed,
+    isLoadingJobs,
+    mlJobs,
+    ruleType,
+  ]);
+
   useEffect(() => {
     const fetchDataViews = async () => {
       const dataViewsRefs = await dataServices.dataViews.getIdsWithTitle();
@@ -285,6 +323,9 @@ const CreateRulePageComponent: React.FC = () => {
             stepIsValid(scheduleStep) &&
             stepIsValid(actionsStep)
           ) {
+            if (actionsStep.data.enabled) {
+              await startMlJobsIfNeeded();
+            }
             const createdRule = await createRule(
               formatRule<RuleCreateProps>(
                 defineStep.data,
@@ -294,7 +335,23 @@ const CreateRulePageComponent: React.FC = () => {
               )
             );
 
-            displaySuccessToast(i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name), dispatchToaster);
+            const lastExecution = createdRule.execution_summary?.last_execution;
+            const lastExecutionStatus = lastExecution?.status;
+            const lastExecutionMessage = lastExecution?.message ?? '';
+            if (
+              lastExecutionStatus === RuleExecutionStatus.failed ||
+              lastExecutionStatus === RuleExecutionStatus['partial failure']
+            ) {
+              addError(lastExecutionMessage, {
+                title: i18n.FAILED_TO_RUN_RULES(createdRule.name),
+              });
+            } else {
+              displaySuccessToast(
+                i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name),
+                dispatchToaster
+              );
+            }
+
             navigateToApp(APP_UI_ID, {
               deepLinkId: SecurityPageName.rules,
               path: getRuleDetailsUrl(createdRule.id),
@@ -303,7 +360,15 @@ const CreateRulePageComponent: React.FC = () => {
         }
       }
     },
-    [updateCurrentDataState, goToStep, createRule, dispatchToaster, navigateToApp]
+    [
+      updateCurrentDataState,
+      goToStep,
+      createRule,
+      navigateToApp,
+      startMlJobsIfNeeded,
+      addError,
+      dispatchToaster,
+    ]
   );
 
   const getAccordionType = useCallback(

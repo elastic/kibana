@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { EuiBadge, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
-import { isJobStarted } from '../../../../../common/machine_learning/helpers';
+import { useEnableDataFeed } from '../../../../common/components/ml_popover/hooks/use_enable_data_feed';
+import type { SecurityJob } from '../../../../common/components/ml_popover/types';
+import { JobSwitch } from '../../../../common/components/ml_popover/jobs_table/job_switch';
 import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { ListItems } from './types';
-import { ML_JOB_STARTED, ML_JOB_STOPPED } from './translations';
+import * as i18n from './translations';
+import { JobStatusPopover } from './job_status_popover';
 
 enum MessageLevels {
   info = 'info',
@@ -50,20 +53,6 @@ const AuditIconComponent: React.FC<{
 
 export const AuditIcon = React.memo(AuditIconComponent);
 
-const JobStatusBadgeComponent: React.FC<{ job: MlSummaryJob }> = ({ job }) => {
-  const isStarted = isJobStarted(job.jobState, job.datafeedState);
-  const color = isStarted ? 'success' : 'danger';
-  const text = isStarted ? ML_JOB_STARTED : ML_JOB_STOPPED;
-
-  return (
-    <EuiBadge data-test-subj="machineLearningJobStatus" color={color}>
-      {text}
-    </EuiBadge>
-  );
-};
-
-export const JobStatusBadge = React.memo(JobStatusBadgeComponent);
-
 const JobLink = styled(EuiLink)`
   margin-right: ${({ theme }) => theme.eui.euiSizeS};
 `;
@@ -72,11 +61,16 @@ const Wrapper = styled.div`
   overflow: hidden;
 `;
 
-const MlJobDescriptionComponent: React.FC<{ jobId: string }> = ({ jobId }) => {
-  const { jobs } = useSecurityJobs();
+const MlJobDescriptionComponent: React.FC<{
+  job: SecurityJob;
+  loading: boolean;
+  refreshJob: (job: SecurityJob) => void;
+}> = ({ job, loading, refreshJob }) => {
   const {
     services: { http, ml },
   } = useKibana();
+  const { enableDatafeed, isLoading: isLoadingEnableDataFeed } = useEnableDataFeed();
+  const jobId = job.id;
   const jobUrl = useMlHref(ml, http.basePath.get(), {
     page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
     pageState: {
@@ -84,9 +78,15 @@ const MlJobDescriptionComponent: React.FC<{ jobId: string }> = ({ jobId }) => {
     },
   });
 
-  const job = jobs.find(({ id }) => id === jobId);
-
   const jobIdSpan = <span data-test-subj="machineLearningJobId">{jobId}</span>;
+
+  const handleJobStateChange = useCallback(
+    async (_, latestTimestampMs: number, enable: boolean) => {
+      await enableDatafeed(job, latestTimestampMs, enable);
+      refreshJob(job);
+    },
+    [enableDatafeed, job, refreshJob]
+  );
 
   return job != null ? (
     <Wrapper>
@@ -96,7 +96,21 @@ const MlJobDescriptionComponent: React.FC<{ jobId: string }> = ({ jobId }) => {
         </JobLink>
         <AuditIcon message={job.auditMessage} />
       </div>
-      <JobStatusBadge job={job} />
+      <EuiFlexGroup justifyContent="flexStart">
+        <EuiFlexItem grow={false} style={{ marginRight: '0' }}>
+          <JobStatusPopover job={job} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <JobSwitch
+            job={job}
+            isSecurityJobsLoading={loading || isLoadingEnableDataFeed}
+            onJobStateChange={handleJobStateChange}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ marginLeft: '0' }}>
+          {i18n.ML_RUN_JOB_LABEL}
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </Wrapper>
   ) : (
     jobIdSpan
@@ -105,13 +119,17 @@ const MlJobDescriptionComponent: React.FC<{ jobId: string }> = ({ jobId }) => {
 
 export const MlJobDescription = React.memo(MlJobDescriptionComponent);
 
-const MlJobsDescription: React.FC<{ jobIds: string[] }> = ({ jobIds }) => (
-  <>
-    {jobIds.map((jobId) => (
-      <MlJobDescription key={jobId} jobId={jobId} />
-    ))}
-  </>
-);
+const MlJobsDescription: React.FC<{ jobIds: string[] }> = ({ jobIds }) => {
+  const { loading, jobs, refetch: refreshJobs } = useSecurityJobs();
+  const relevantJobs = jobs.filter((job) => jobIds.includes(job.id));
+  return (
+    <>
+      {relevantJobs.map((job) => (
+        <MlJobDescription key={job.id} job={job} loading={loading} refreshJob={refreshJobs} />
+      ))}
+    </>
+  );
+};
 
 export const buildMlJobsDescription = (jobIds: string[], label: string): ListItems => ({
   title: label,
