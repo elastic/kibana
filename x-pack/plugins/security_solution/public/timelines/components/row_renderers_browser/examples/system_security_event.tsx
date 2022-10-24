@@ -21,7 +21,7 @@ const SystemSecurityEventExampleComponent: React.FC = () => {
       {systemSecurityEventRowRenderer.renderRow({
         data: demoEndgameUserLogon,
         isDraggable: false,
-        timelineId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
+        scopeId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>
   );

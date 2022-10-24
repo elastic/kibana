@@ -14,7 +14,7 @@ or a similar tool that can generate HTML output from OAS.
 . Generate HTML output. For example:
 
   ```
-  openapi-generator-cli generate -g html -i ~/kibana/x-pack/plugins/cases/docs/openapi/entrypoint.yaml -o ~/kibana/docs/api-generated/cases -t ~/kibana/docs/api-generated/template
+  openapi-generator-cli generate -g html -i ~/kibana/x-pack/plugins/cases/docs/openapi/bundled.yaml -o ~/kibana/docs/api-generated/cases -t ~/kibana/docs/api-generated/template
 
   openapi-generator-cli generate -g html -i ~/kibana/x-pack/plugins/ml/common/openapi/ml_apis_v3.yaml -o ~/kibana/docs/api-generated/machine-learning -t ~/kibana/docs/api-generated/template
   ```
