@@ -175,6 +175,20 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
+  describe('#getSelectedFields', () => {
+    it('should return the fields used per layer', async () => {
+      expect(TextBasedDatasource?.getSelectedFields?.(baseState)).toEqual(['Test 1']);
+    });
+
+    it('should return empty array for empty layers', async () => {
+      const state = {
+        ...baseState,
+        layers: {},
+      };
+      expect(TextBasedDatasource?.getSelectedFields?.(state)).toEqual([]);
+    });
+  });
+
   describe('#insertLayer', () => {
     it('should insert an empty layer into the previous state', () => {
       expect(TextBasedDatasource.insertLayer(baseState, 'newLayer')).toEqual({
@@ -714,6 +728,7 @@ describe('IndexPattern Data Source', () => {
           dataType: 'number',
           isBucketed: false,
           hasTimeShift: false,
+          hasReducedTimeRange: false,
         });
       });
 

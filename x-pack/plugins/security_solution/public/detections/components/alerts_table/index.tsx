@@ -11,8 +11,10 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { tableDefaults } from '../../../common/store/data_table/defaults';
+import { dataTableActions, dataTableSelectors } from '../../../common/store/data_table';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import type { RowRendererId, TimelineIdLiteral } from '../../../../common/types/timeline';
+import type { TableIdLiteral } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -26,9 +28,6 @@ import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { combineQueries } from '../../../common/lib/kuery';
-import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
-import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import type { TimelineModel } from '../../../timelines/store/timeline/model';
 import { getColumns, RenderCellValue } from '../../configurations/security_solution_detections';
 import { AdditionalFiltersAction } from './additional_filters_action';
 import {
@@ -51,7 +50,7 @@ interface OwnProps {
   onShowOnlyThreatIndicatorAlertsChanged: (showOnlyThreatIndicatorAlerts: boolean) => void;
   showBuildingBlockAlerts: boolean;
   showOnlyThreatIndicatorAlerts: boolean;
-  timelineId: TimelineIdLiteral;
+  tableId: TableIdLiteral;
   to: string;
   filterGroup?: Status;
 }
@@ -73,7 +72,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   onShowOnlyThreatIndicatorAlertsChanged,
   showBuildingBlockAlerts,
   showOnlyThreatIndicatorAlerts,
-  timelineId,
+  tableId,
   to,
   filterGroup = 'open',
 }) => {
@@ -112,7 +111,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   useInvalidFilterQuery({
-    id: timelineId,
+    id: tableId,
     filterQuery: getGlobalQuery([])?.filterQuery,
     kqlError: getGlobalQuery([])?.kqlError,
     query: globalQuery,
@@ -124,13 +123,13 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   useEffect(() => {
     if (isSelectAllChecked) {
       dispatch(
-        timelineActions.setTGridSelectAll({
-          id: timelineId,
+        dataTableActions.setTGridSelectAll({
+          id: tableId,
           selectAll: false,
         })
       );
     }
-  }, [dispatch, isSelectAllChecked, timelineId]);
+  }, [dispatch, isSelectAllChecked, tableId]);
 
   const additionalFiltersComponent = useMemo(
     () => (
@@ -166,7 +165,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 
   useEffect(() => {
     dispatch(
-      timelineActions.initializeTGridSettings({
+      dataTableActions.initializeTGridSettings({
         defaultColumns: getColumns(license).map((c) =>
           !tGridEnabled && c.initialWidth == null
             ? {
@@ -175,20 +174,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
               }
             : c
         ),
-        documentType: i18n.ALERTS_DOCUMENT_TYPE,
-        excludedRowRendererIds: getAlertsDefaultModel(license)
-          .excludedRowRendererIds as RowRendererId[],
-        filterManager,
-        footerText: i18n.TOTAL_COUNT_OF_ALERTS,
-        id: timelineId,
+        id: tableId,
         loadingText: i18n.LOADING_ALERTS,
-        selectAll: false,
         queryFields: requiredFieldsForActions,
-        title: '',
+        title: i18n.ALERTS_DOCUMENT_TYPE,
         showCheckboxes: true,
       })
     );
-  }, [dispatch, filterManager, tGridEnabled, timelineId, license]);
+  }, [dispatch, filterManager, tGridEnabled, tableId, license]);
 
   const leadingControlColumns = useMemo(
     () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
@@ -208,7 +201,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
       end={to}
       entityType="events"
       hasAlertsCrud={hasIndexWrite && hasIndexMaintenance}
-      id={timelineId}
+      tableId={tableId}
       leadingControlColumns={leadingControlColumns}
       onRuleChange={onRuleChange}
       pageFilters={defaultFiltersMemo}
@@ -221,22 +214,20 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
 };
 
 const makeMapStateToProps = () => {
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
+  const getDataTable = dataTableSelectors.getTableByIdSelector();
   const getGlobalInputs = inputsSelectors.globalSelector();
   const mapStateToProps = (state: State, ownProps: OwnProps) => {
-    const { timelineId } = ownProps;
-    const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
-    const { deletedEventIds, isSelectAllChecked, loadingEventIds, selectedEventIds } = timeline;
+    const { tableId } = ownProps;
+    const table = getDataTable(state, tableId) ?? tableDefaults;
+    const { isSelectAllChecked, loadingEventIds } = table;
 
     const globalInputs: inputsModel.InputsRange = getGlobalInputs(state);
     const { query, filters } = globalInputs;
     return {
       globalQuery: query,
       globalFilters: filters,
-      deletedEventIds,
       isSelectAllChecked,
       loadingEventIds,
-      selectedEventIds,
     };
   };
   return mapStateToProps;

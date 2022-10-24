@@ -33,8 +33,8 @@ export async function getSearchStatus(
       return {
         status: SearchStatus.ERROR,
         error: i18n.translate('data.search.statusError', {
-          defaultMessage: `Search completed with a {errorCode} status`,
-          values: { errorCode: response.completion_status },
+          defaultMessage: `Search {searchId} completed with a {errorCode} status`,
+          values: { searchId: asyncId, errorCode: response.completion_status },
         }),
       };
     } else if (!response.is_partial && !response.is_running) {
@@ -52,10 +52,11 @@ export async function getSearchStatus(
     return {
       status: SearchStatus.ERROR,
       error: i18n.translate('data.search.statusThrow', {
-        defaultMessage: `Search status threw an error {message} ({errorCode}) status`,
+        defaultMessage: `Search status for search with id {searchId} threw an error {message} (statusCode: {errorCode})`,
         values: {
           message: e.message,
           errorCode: e.statusCode || 500,
+          searchId: asyncId,
         },
       }),
     };

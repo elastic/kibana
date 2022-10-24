@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { EuiDataGridColumn } from '@elastic/eui';
+import { TableId } from '../../../../common/types';
 import type {
   BrowserFields,
   TimelineNonEcsData,
@@ -20,7 +21,7 @@ describe('default cell actions', () => {
   const browserFields: BrowserFields = {};
   const data: TimelineNonEcsData[][] = [[]];
   const ecsData: Ecs[] = [];
-  const timelineId = 'mockTimelineId';
+  const tableId = TableId.test;
   const pageSize = 10;
 
   test('columns without any link action (e.g.: signal.status) should return an empty component (not null or data grid would crash)', () => {
@@ -43,7 +44,7 @@ describe('default cell actions', () => {
           ecsData,
           header: columnHeaders.find((h) => h.id === header.id),
           pageSize,
-          timelineId,
+          scopeId: tableId,
         });
 
       return {
@@ -75,7 +76,7 @@ describe('default cell actions', () => {
             ecsData,
             header: [columnHeaders].find((h) => h.id === header.id),
             pageSize,
-            timelineId,
+            scopeId: tableId,
           });
 
         return {

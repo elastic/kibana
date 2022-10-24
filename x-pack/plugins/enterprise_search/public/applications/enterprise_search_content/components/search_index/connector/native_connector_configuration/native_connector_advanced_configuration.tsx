@@ -39,6 +39,7 @@ export const NativeConnectorAdvancedConfiguration: React.FC = () => {
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonTo
+              data-telemetry-id="entSearchContent-connector-configuration-setScheduleAndSync"
               to={`${generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
                 indexName,
                 tabId: SearchIndexTabId.SCHEDULING,

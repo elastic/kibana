@@ -310,7 +310,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         alignments,
         headerRowHeight,
         headerRowLines,
-        dataGridRef.current?.closeCellPopover
+        dataGridRef.current?.closeCellPopover,
+        props.columnFilterable
       ),
     [
       bucketColumns,
@@ -326,6 +327,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       alignments,
       headerRowHeight,
       headerRowLines,
+      props.columnFilterable,
     ]
   );
 

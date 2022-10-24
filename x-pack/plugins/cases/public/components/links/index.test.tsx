@@ -6,18 +6,15 @@
  */
 
 import React from 'react';
-import { ReactWrapper, mount } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiText } from '@elastic/eui';
 
 import '../../common/mock/match_media';
-import {
-  ConfigureCaseButton,
-  ConfigureCaseButtonProps,
-  CaseDetailsLink,
-  CaseDetailsLinkProps,
-} from '.';
+import type { ConfigureCaseButtonProps, CaseDetailsLinkProps } from '.';
+import { ConfigureCaseButton, CaseDetailsLink } from '.';
 import { TestProviders } from '../../common/mock';
 import { useCaseViewNavigation } from '../../common/navigation/hooks';
 

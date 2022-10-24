@@ -298,6 +298,20 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
+  describe('#getSelectedFields', () => {
+    it('should return the fields used per layer', async () => {
+      expect(FormBasedDatasource?.getSelectedFields?.(baseState)).toEqual(['op']);
+    });
+
+    it('should return empty array for empty layers', async () => {
+      const state = {
+        ...baseState,
+        layers: {},
+      };
+      expect(FormBasedDatasource?.getSelectedFields?.(state)).toEqual([]);
+    });
+  });
+
   describe('#toExpression', () => {
     it('should generate an empty expression when no columns are selected', async () => {
       const state = FormBasedDatasource.initialize();
@@ -1618,7 +1632,7 @@ describe('IndexPattern Data Source', () => {
         },
         currentIndexPatternId: '1',
       };
-      expect(FormBasedDatasource.insertLayer(state, 'newLayer')).toEqual({
+      expect(FormBasedDatasource.insertLayer(state, 'newLayer', ['link-to-id'])).toEqual({
         ...state,
         layers: {
           ...state.layers,
@@ -1626,6 +1640,7 @@ describe('IndexPattern Data Source', () => {
             indexPatternId: '1',
             columnOrder: [],
             columns: {},
+            linkToLayers: ['link-to-id'],
           },
         },
       });
@@ -1658,6 +1673,29 @@ describe('IndexPattern Data Source', () => {
             columns: {},
           },
         },
+      });
+    });
+
+    it('should remove linked layers', () => {
+      const state = {
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+          second: {
+            indexPatternId: '2',
+            columnOrder: [],
+            columns: {},
+            linkToLayers: ['first'],
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(FormBasedDatasource.removeLayer(state, 'first')).toEqual({
+        ...state,
+        layers: {},
       });
     });
   });
@@ -1853,6 +1891,7 @@ describe('IndexPattern Data Source', () => {
           isBucketed: true,
           isStaticValue: false,
           hasTimeShift: false,
+          hasReducedTimeRange: false,
         } as OperationDescriptor);
       });
 
@@ -2708,6 +2747,43 @@ describe('IndexPattern Data Source', () => {
         expect(publicAPI.getMaxPossibleNumValues('non-existant')).toEqual(null);
       });
     });
+
+    test('hasDefaultTimeField', () => {
+      const indexPatternWithDefaultTimeField = {
+        id: '1',
+        title: 'my-fake-index-pattern',
+        timeFieldName: 'timestamp',
+        hasRestrictions: false,
+        fields: fieldsOne,
+        getFieldByName: getFieldByNameFactory(fieldsOne),
+        spec: {},
+        isPersisted: true,
+      };
+
+      const indexPatternWithoutDefaultTimeField = {
+        ...indexPatternWithDefaultTimeField,
+        timeFieldName: '',
+      };
+
+      expect(
+        FormBasedDatasource.getPublicAPI({
+          state: baseState,
+          layerId: 'first',
+          indexPatterns: {
+            1: indexPatternWithDefaultTimeField,
+          },
+        }).hasDefaultTimeField()
+      ).toBe(true);
+      expect(
+        FormBasedDatasource.getPublicAPI({
+          state: baseState,
+          layerId: 'first',
+          indexPatterns: {
+            1: indexPatternWithoutDefaultTimeField,
+          },
+        }).hasDefaultTimeField()
+      ).toBe(false);
+    });
   });
 
   describe('#getErrorMessages', () => {
@@ -3204,6 +3280,7 @@ describe('IndexPattern Data Source', () => {
         FormBasedDatasource.initializeDimension!(state, 'first', indexPatterns, {
           columnId: 'newStatic',
           groupId: 'a',
+          visualizationGroups: [],
         })
       ).toBe(state);
     });
@@ -3232,6 +3309,7 @@ describe('IndexPattern Data Source', () => {
           columnId: 'newStatic',
           groupId: 'a',
           staticValue: 0, // use a falsy value to check also this corner case
+          visualizationGroups: [],
         })
       ).toEqual({
         ...state,
@@ -3256,6 +3334,272 @@ describe('IndexPattern Data Source', () => {
             },
           },
         },
+      });
+    });
+
+    it('should add a new date histogram column if autoTimeField is passed', () => {
+      const state = {
+        currentIndexPatternId: '1',
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['metric'],
+            columns: {
+              metric: {
+                label: 'Count of records',
+                dataType: 'number',
+                isBucketed: false,
+                sourceField: '___records___',
+                operationType: 'count',
+              },
+            },
+          },
+        },
+      } as FormBasedPrivateState;
+      expect(
+        FormBasedDatasource.initializeDimension!(state, 'first', indexPatterns, {
+          columnId: 'newTime',
+          groupId: 'a',
+          autoTimeField: true,
+          visualizationGroups: [],
+        })
+      ).toEqual({
+        ...state,
+        layers: {
+          ...state.layers,
+          first: {
+            ...state.layers.first,
+            incompleteColumns: {},
+            columnOrder: ['newTime', 'metric'],
+            columns: {
+              ...state.layers.first.columns,
+              newTime: {
+                dataType: 'date',
+                isBucketed: true,
+                label: 'timestampLabel',
+                operationType: 'date_histogram',
+                params: { dropPartials: false, includeEmptyRows: true, interval: 'auto' },
+                scale: 'interval',
+                sourceField: 'timestamp',
+              },
+            },
+          },
+        },
+      });
+    });
+  });
+
+  describe('#syncColumns', () => {
+    it('copies linked columns', () => {
+      const links: Parameters<Datasource['syncColumns']>[0]['links'] = [
+        {
+          from: {
+            columnId: 'col1',
+            layerId: 'first',
+            groupId: 'foo',
+          },
+          to: {
+            columnId: 'col1',
+            layerId: 'second',
+            groupId: 'foo',
+          },
+        },
+        {
+          from: {
+            columnId: 'col2',
+            layerId: 'first',
+            groupId: 'foo',
+          },
+          to: {
+            columnId: 'new-col',
+            layerId: 'second',
+            groupId: 'foo',
+          },
+        },
+      ];
+
+      const newState = FormBasedDatasource.syncColumns({
+        state: {
+          currentIndexPatternId: 'foo',
+          layers: {
+            first: {
+              indexPatternId: 'foo',
+              columnOrder: [],
+              columns: {
+                col1: {
+                  operationType: 'sum',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'field1',
+                  customLabel: false,
+                  timeScale: 'd',
+                } as SumIndexPatternColumn,
+                col2: {
+                  sourceField: 'field2',
+                  operationType: 'count',
+                  customLabel: false,
+                  timeScale: 'h',
+                } as CountIndexPatternColumn,
+              },
+            },
+            second: {
+              indexPatternId: 'foo',
+              columnOrder: [],
+              columns: {
+                col1: {
+                  sourceField: 'field1',
+                  operationType: 'count',
+                  customLabel: false,
+                  timeScale: 'd',
+                } as CountIndexPatternColumn,
+              },
+            },
+          },
+        },
+        links,
+        indexPatterns,
+        getDimensionGroups: () => [],
+      });
+
+      expect(newState).toMatchInlineSnapshot(`
+        Object {
+          "currentIndexPatternId": "foo",
+          "layers": Object {
+            "first": Object {
+              "columnOrder": Array [],
+              "columns": Object {
+                "col1": Object {
+                  "customLabel": false,
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "",
+                  "operationType": "sum",
+                  "sourceField": "field1",
+                  "timeScale": "d",
+                },
+                "col2": Object {
+                  "customLabel": false,
+                  "operationType": "count",
+                  "sourceField": "field2",
+                  "timeScale": "h",
+                },
+              },
+              "indexPatternId": "foo",
+            },
+            "second": Object {
+              "columnOrder": Array [
+                "col1",
+                "new-col",
+              ],
+              "columns": Object {
+                "col1": Object {
+                  "customLabel": false,
+                  "dataType": "number",
+                  "isBucketed": false,
+                  "label": "",
+                  "operationType": "sum",
+                  "sourceField": "field1",
+                  "timeScale": "d",
+                },
+                "new-col": Object {
+                  "customLabel": false,
+                  "operationType": "count",
+                  "sourceField": "field2",
+                  "timeScale": "h",
+                },
+              },
+              "indexPatternId": "foo",
+            },
+          },
+        }
+      `);
+    });
+
+    it('updates terms order by references', () => {
+      const links: Parameters<Datasource['syncColumns']>[0]['links'] = [
+        {
+          from: {
+            columnId: 'col1FirstLayer',
+            layerId: 'first',
+            groupId: 'foo',
+          },
+          to: {
+            columnId: 'col1SecondLayer',
+            layerId: 'second',
+            groupId: 'foo',
+          },
+        },
+        {
+          from: {
+            columnId: 'col2',
+            layerId: 'first',
+            groupId: 'foo',
+          },
+          to: {
+            columnId: 'new-col',
+            layerId: 'second',
+            groupId: 'foo',
+          },
+        },
+      ];
+
+      const newState = FormBasedDatasource.syncColumns({
+        state: {
+          currentIndexPatternId: 'foo',
+          layers: {
+            first: {
+              indexPatternId: 'foo',
+              columnOrder: [],
+              columns: {
+                col1FirstLayer: {
+                  operationType: 'sum',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  sourceField: 'field1',
+                  customLabel: false,
+                  timeScale: 'd',
+                } as SumIndexPatternColumn,
+                col2: {
+                  operationType: 'terms',
+                  sourceField: 'field2',
+                  label: '',
+                  dataType: 'number',
+                  isBucketed: false,
+                  params: {
+                    orderBy: {
+                      columnId: 'col1FirstLayer',
+                      type: 'column',
+                    },
+                  },
+                } as TermsIndexPatternColumn,
+              },
+            },
+            second: {
+              indexPatternId: 'foo',
+              columnOrder: [],
+              columns: {
+                col1SecondLayer: {
+                  sourceField: 'field1',
+                  operationType: 'count',
+                  customLabel: false,
+                  timeScale: 'd',
+                } as CountIndexPatternColumn,
+              },
+            },
+          },
+        },
+        links,
+        indexPatterns,
+        getDimensionGroups: () => [],
+      });
+
+      expect(
+        (newState.layers.second.columns['new-col'] as TermsIndexPatternColumn).params.orderBy
+      ).toEqual({
+        type: 'column',
+        columnId: 'col1SecondLayer',
       });
     });
   });

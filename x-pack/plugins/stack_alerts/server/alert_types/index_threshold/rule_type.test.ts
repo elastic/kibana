@@ -26,7 +26,7 @@ describe('ruleType', () => {
   };
   const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-  const ruleType = getRuleType(logger, Promise.resolve(data));
+  const ruleType = getRuleType(Promise.resolve(data));
 
   beforeAll(() => {
     fakeTimer = sinon.useFakeTimers();
@@ -103,6 +103,10 @@ describe('ruleType', () => {
           Object {
             "description": "termField",
             "name": "termField",
+          },
+          Object {
+            "description": "filterKuery",
+            "name": "filterKuery",
           },
           Object {
             "description": "termSize",
@@ -216,6 +220,7 @@ describe('ruleType', () => {
         throttle: null,
         notifyWhen: null,
       },
+      logger,
     });
 
     expect(alertServices.alertFactory.create).toHaveBeenCalledWith('all documents');
@@ -282,6 +287,7 @@ describe('ruleType', () => {
         throttle: null,
         notifyWhen: null,
       },
+      logger,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -348,6 +354,7 @@ describe('ruleType', () => {
         throttle: null,
         notifyWhen: null,
       },
+      logger,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -413,6 +420,7 @@ describe('ruleType', () => {
         throttle: null,
         notifyWhen: null,
       },
+      logger,
     });
 
     expect(data.timeSeriesQuery).toHaveBeenCalledWith(

@@ -173,10 +173,10 @@ export const RuleEventLogListKPI = (props: RuleEventLogListKPIProps) => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiStat
-                data-test-subj="ruleEventLogKpi-unknownOutcome"
-                description={getStatDescription(<RuleEventLogListStatus status="unknown" />)}
+                data-test-subj="ruleEventLogKpi-warningOutcome"
+                description={getStatDescription(<RuleEventLogListStatus status="warning" />)}
                 titleSize="s"
-                title={kpi?.unknown ?? 0}
+                title={kpi?.warning ?? 0}
                 isLoading={isLoadingData}
               />
             </EuiFlexItem>

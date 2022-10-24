@@ -12,9 +12,9 @@ import React from 'react';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { HttpSetup } from '@kbn/core/public';
+import type { GuideState } from '@kbn/guided-onboarding';
 
 import { guidesConfig } from '../constants/guides_config';
-import type { GuideState } from '../../common/types';
 import { apiService } from '../services/api';
 import { GuidePanel } from './guide_panel';
 import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
@@ -39,6 +39,45 @@ const mockActiveSearchGuideState: GuideState = {
       status: 'inactive',
     },
   ],
+};
+
+const mockInProgressSearchGuideState: GuideState = {
+  ...mockActiveSearchGuideState,
+  steps: [
+    {
+      id: mockActiveSearchGuideState.steps[0].id,
+      status: 'in_progress',
+    },
+    mockActiveSearchGuideState.steps[1],
+    mockActiveSearchGuideState.steps[2],
+  ],
+};
+
+const mockReadyToCompleteSearchGuideState: GuideState = {
+  ...mockActiveSearchGuideState,
+  steps: [
+    {
+      id: mockActiveSearchGuideState.steps[0].id,
+      status: 'complete',
+    },
+    {
+      id: mockActiveSearchGuideState.steps[1].id,
+      status: 'ready_to_complete',
+    },
+    mockActiveSearchGuideState.steps[2],
+  ],
+};
+
+const updateComponentWithState = async (
+  component: TestBed['component'],
+  guideState: GuideState,
+  isPanelOpen: boolean
+) => {
+  await act(async () => {
+    await apiService.updateGuideState(guideState, isPanelOpen);
+  });
+
+  component.update();
 };
 
 const getGuidePanel = () => () => {
@@ -70,7 +109,8 @@ describe('Guided setup', () => {
   });
 
   describe('Button component', () => {
-    test('should be disabled in there is no active guide', async () => {
+    // TODO check for the correct button behavior once https://github.com/elastic/kibana/issues/141129 is implemented
+    test.skip('should be disabled in there is no active guide', async () => {
       const { exists } = testBed;
       expect(exists('disabledGuideButton')).toBe(true);
       expect(exists('guideButton')).toBe(false);
@@ -80,12 +120,8 @@ describe('Guided setup', () => {
     test('should be enabled if there is an active guide', async () => {
       const { exists, component, find } = testBed;
 
-      await act(async () => {
-        // Enable the "search" guide
-        await apiService.updateGuideState(mockActiveSearchGuideState, true);
-      });
-
-      component.update();
+      // Enable the "search" guide
+      await updateComponentWithState(component, mockActiveSearchGuideState, true);
 
       expect(exists('disabledGuideButton')).toBe(false);
       expect(exists('guideButton')).toBe(true);
@@ -95,25 +131,33 @@ describe('Guided setup', () => {
     test('should show the step number in the button label if a step is active', async () => {
       const { component, find } = testBed;
 
-      const mockInProgressSearchGuideState: GuideState = {
-        ...mockActiveSearchGuideState,
-        steps: [
-          {
-            id: mockActiveSearchGuideState.steps[0].id,
-            status: 'in_progress',
-          },
-          mockActiveSearchGuideState.steps[1],
-          mockActiveSearchGuideState.steps[2],
-        ],
-      };
-
-      await act(async () => {
-        await apiService.updateGuideState(mockInProgressSearchGuideState, true);
-      });
-
-      component.update();
+      await updateComponentWithState(component, mockInProgressSearchGuideState, true);
 
       expect(find('guideButton').text()).toEqual('Setup guide: step 1');
+    });
+
+    test('shows the step number in the button label if a step is ready to complete', async () => {
+      const { component, find } = testBed;
+
+      await updateComponentWithState(component, mockReadyToCompleteSearchGuideState, true);
+
+      expect(find('guideButton').text()).toEqual('Setup guide: step 2');
+    });
+
+    test('shows the manual completion popover if a step is ready to complete', async () => {
+      const { component, exists } = testBed;
+
+      await updateComponentWithState(component, mockReadyToCompleteSearchGuideState, false);
+
+      expect(exists('manualCompletionPopover')).toBe(true);
+    });
+
+    test('shows no manual completion popover if a step is in progress', async () => {
+      const { component, exists } = testBed;
+
+      await updateComponentWithState(component, mockInProgressSearchGuideState, false);
+
+      expect(exists('manualCompletionPopoverPanel')).toBe(false);
     });
   });
 
@@ -121,12 +165,7 @@ describe('Guided setup', () => {
     test('should be enabled if a guide is activated', async () => {
       const { exists, component, find } = testBed;
 
-      await act(async () => {
-        // Enable the "search" guide
-        await apiService.updateGuideState(mockActiveSearchGuideState, true);
-      });
-
-      component.update();
+      await updateComponentWithState(component, mockActiveSearchGuideState, true);
 
       expect(exists('guidePanel')).toBe(true);
       expect(exists('guideProgress')).toBe(false);
@@ -136,7 +175,7 @@ describe('Guided setup', () => {
     test('should show the progress bar if the first step has been completed', async () => {
       const { component, exists } = testBed;
 
-      const mockInProgressSearchGuideState: GuideState = {
+      const mockCompleteSearchGuideState: GuideState = {
         ...mockActiveSearchGuideState,
         steps: [
           {
@@ -148,18 +187,14 @@ describe('Guided setup', () => {
         ],
       };
 
-      await act(async () => {
-        await apiService.updateGuideState(mockInProgressSearchGuideState, true);
-      });
-
-      component.update();
+      await updateComponentWithState(component, mockCompleteSearchGuideState, true);
 
       expect(exists('guidePanel')).toBe(true);
       expect(exists('guideProgress')).toBe(true);
     });
 
-    test('should show the "Continue using Elastic" button when all steps has been completed', async () => {
-      const { component, exists } = testBed;
+    test('should show the completed state when all steps has been completed', async () => {
+      const { component, exists, find } = testBed;
 
       const readyToCompleteGuideState: GuideState = {
         guideId: 'search',
@@ -181,51 +216,63 @@ describe('Guided setup', () => {
         ],
       };
 
-      await act(async () => {
-        await apiService.updateGuideState(readyToCompleteGuideState, true);
-      });
+      await updateComponentWithState(component, readyToCompleteGuideState, true);
 
-      component.update();
-
+      expect(find('guideTitle').text()).toContain('Well done');
+      expect(find('guideDescription').text()).toContain(
+        `You've completed the Elastic Enterprise Search guide`
+      );
       expect(exists('useElasticButton')).toBe(true);
     });
 
     describe('Steps', () => {
-      test('should show "Start" button label if step has not been started', async () => {
+      const clickActiveStepButton = async () => {
         const { component, find } = testBed;
 
         await act(async () => {
-          // Enable the "search" guide
-          await apiService.updateGuideState(mockActiveSearchGuideState, true);
+          find('activeStepButton').simulate('click');
         });
 
         component.update();
+      };
 
-        expect(find('activeStepButtonLabel').text()).toEqual('Start');
+      test('can start a step if step has not been started', async () => {
+        const { component, find, exists } = testBed;
+
+        await updateComponentWithState(component, mockActiveSearchGuideState, true);
+
+        expect(find('activeStepButton').text()).toEqual('Start');
+
+        await clickActiveStepButton();
+
+        expect(exists('guidePanel')).toBe(false);
       });
 
-      test('should show "Continue" button label if step is in progress', async () => {
-        const { component, find } = testBed;
+      test('can continue a step if step is in progress', async () => {
+        const { component, find, exists } = testBed;
 
-        const mockInProgressSearchGuideState: GuideState = {
-          ...mockActiveSearchGuideState,
-          steps: [
-            {
-              id: mockActiveSearchGuideState.steps[0].id,
-              status: 'in_progress',
-            },
-            mockActiveSearchGuideState.steps[1],
-            mockActiveSearchGuideState.steps[2],
-          ],
-        };
+        await updateComponentWithState(component, mockInProgressSearchGuideState, true);
 
-        await act(async () => {
-          await apiService.updateGuideState(mockInProgressSearchGuideState, true);
-        });
+        expect(find('activeStepButton').text()).toEqual('Continue');
 
-        component.update();
+        await clickActiveStepButton();
 
-        expect(find('activeStepButtonLabel').text()).toEqual('Continue');
+        expect(exists('guidePanel')).toBe(false);
+      });
+
+      test('can mark a step "done" if step is ready to complete', async () => {
+        const { component, find, exists } = testBed;
+
+        await updateComponentWithState(component, mockReadyToCompleteSearchGuideState, true);
+
+        expect(find('activeStepButton').text()).toEqual('Mark done');
+
+        await clickActiveStepButton();
+
+        // The guide panel should remain open after marking a step done
+        expect(exists('guidePanel')).toBe(true);
+        // Dependent on the Search guide config, which expects another step to start
+        expect(find('activeStepButton').text()).toEqual('Start');
       });
     });
 
@@ -259,9 +306,8 @@ describe('Guided setup', () => {
         component.update();
 
         expect(exists('quitGuideModal')).toBe(false);
-        // For now, the guide button is disabled once a user quits a guide
-        // This behavior will change once https://github.com/elastic/kibana/issues/141129 is implemented
-        expect(exists('disabledGuideButton')).toBe(true);
+
+        // TODO check for the correct button behavior once https://github.com/elastic/kibana/issues/141129 is implemented
       });
 
       test('cancels out of the quit guide confirmation modal', async () => {

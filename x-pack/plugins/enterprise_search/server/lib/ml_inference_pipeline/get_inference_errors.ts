@@ -12,11 +12,7 @@ import {
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-export interface MlInferenceError {
-  message: string;
-  doc_count: number;
-  timestamp: string | undefined; // Date string
-}
+import { MlInferenceError } from '../../../common/types/pipelines';
 
 export interface ErrorAggregationBucket extends AggregationsStringRareTermsBucketKeys {
   max_error_timestamp: {
