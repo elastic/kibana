@@ -25,7 +25,10 @@ export class ViewportObserver {
       opts: IntersectionObserverInit
     ) => IntersectionObserver
   ) {
-    this.intersectionObserver = getIntersectionObserver(this.handleChange, { root: null });
+    this.intersectionObserver = getIntersectionObserver(this.handleChange, {
+      rootMargin: '0px',
+      root: null,
+    });
   }
 
   /**
