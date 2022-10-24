@@ -15,7 +15,7 @@ import { isErrorResponse, isPartialResponse } from '..';
 export const pollSearch = <Response extends IKibanaSearchResponse>(
   search: () => Promise<Response>,
   cancel?: () => void,
-  { pollInterval = 1, abortSignal }: IAsyncSearchOptions = {}
+  { pollInterval, abortSignal }: IAsyncSearchOptions = {}
 ): Observable<Response> => {
   const getPollInterval = (elapsedTime: number): number => {
     if (typeof pollInterval === 'number') return pollInterval;
