@@ -35,16 +35,25 @@ export const ControlPanelDiffSystems: {
       const {
         exclude: excludeA,
         selectedOptions: selectedA,
+        singleSelect: singleSelectA,
+        allowExclude: allowExcludeA,
+        runPastTimeout: runPastTimeoutA,
         ...inputA
       }: Partial<OptionsListEmbeddableInput> = initialInput.explicitInput;
       const {
         exclude: excludeB,
         selectedOptions: selectedB,
+        singleSelect: singleSelectB,
+        allowExclude: allowExcludeB,
+        runPastTimeout: runPastTimeoutB,
         ...inputB
       }: Partial<OptionsListEmbeddableInput> = newInput.explicitInput;
 
       return (
         Boolean(excludeA) === Boolean(excludeB) &&
+        Boolean(singleSelectA) === Boolean(singleSelectB) &&
+        Boolean(allowExcludeA) === Boolean(allowExcludeB) &&
+        Boolean(runPastTimeoutA) === Boolean(runPastTimeoutB) &&
         isEqual(selectedA ?? [], selectedB ?? []) &&
         deepEqual(inputA, inputB)
       );
