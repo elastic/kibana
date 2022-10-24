@@ -335,7 +335,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             })}
           >
             {i18n.translate('indexPatternEditor.goToManagementPage', {
-              defaultMessage: 'View on data view management page',
+              defaultMessage: 'Manage settings and view field details',
             })}
           </EuiLink>
         )}
