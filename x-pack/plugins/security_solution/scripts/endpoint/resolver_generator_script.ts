@@ -141,7 +141,6 @@ async function addRole(
 interface UserInfo {
   username: string;
   password: string;
-  roles: string[];
 }
 
 async function addUser(
@@ -153,6 +152,7 @@ async function addUser(
     return;
   }
 
+  const superuserRole = ['superuser', 'kibana_system'];
   const path = `_security/user/${user.username}`;
   // add user if doesn't exist already
   try {
@@ -162,7 +162,7 @@ async function addUser(
       path,
       body: {
         password: user.password,
-        roles: ['superuser', 'kibana_system'],
+        roles: roles ?? superuserRole,
         full_name: user.username,
       },
     });
@@ -441,11 +441,19 @@ async function main() {
     const role = await addRole(kbnClient, newRoleData ? { roleName: newRoleData } : undefined);
     if (role) {
       console.log(`Successfully added role: ${newRoleData}`);
-      const basicUser = await addUser(client, {
-        username: 'withHostIsolation',
-        password: 'changeme',
-        roles: [newRoleData],
-      });
+      const basicUser = await addUser(
+        client,
+        {
+          username: 'withHostIsolation',
+          password: 'changeme',
+        },
+        [newRoleData]
+      );
+      if (basicUser) {
+        console.log('Successfully created basic user');
+      } else {
+        console.log(`Failed to create user `);
+      }
     } else {
       console.log(`Failed to add role, ${newRoleData}`);
     }
