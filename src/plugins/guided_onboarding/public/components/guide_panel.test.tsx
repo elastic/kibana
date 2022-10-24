@@ -226,28 +226,53 @@ describe('Guided setup', () => {
     });
 
     describe('Steps', () => {
-      test('should show "Start" button label if step has not been started', async () => {
+      const clickActiveStepButton = async () => {
         const { component, find } = testBed;
+
+        await act(async () => {
+          find('activeStepButton').simulate('click');
+        });
+
+        component.update();
+      };
+
+      test('can start a step if step has not been started', async () => {
+        const { component, find, exists } = testBed;
 
         await updateComponentWithState(component, mockActiveSearchGuideState, true);
 
-        expect(find('activeStepButtonLabel').text()).toEqual('Start');
+        expect(find('activeStepButton').text()).toEqual('Start');
+
+        await clickActiveStepButton();
+
+        expect(exists('guidePanel')).toBe(false);
       });
 
-      test('should show "Continue" button label if step is in progress', async () => {
-        const { component, find } = testBed;
+      test('can continue a step if step is in progress', async () => {
+        const { component, find, exists } = testBed;
 
         await updateComponentWithState(component, mockInProgressSearchGuideState, true);
 
-        expect(find('activeStepButtonLabel').text()).toEqual('Continue');
+        expect(find('activeStepButton').text()).toEqual('Continue');
+
+        await clickActiveStepButton();
+
+        expect(exists('guidePanel')).toBe(false);
       });
 
-      test('shows "Mark done" button label if step is ready to complete', async () => {
-        const { component, find } = testBed;
+      test('can mark a step "done" if step is ready to complete', async () => {
+        const { component, find, exists } = testBed;
 
         await updateComponentWithState(component, mockReadyToCompleteSearchGuideState, true);
 
-        expect(find('activeStepButtonLabel').text()).toEqual('Mark done');
+        expect(find('activeStepButton').text()).toEqual('Mark done');
+
+        await clickActiveStepButton();
+
+        // The guide panel should remain open after marking a step done
+        expect(exists('guidePanel')).toBe(true);
+        // Dependent on the Search guide config, which expects another step to start
+        expect(find('activeStepButton').text()).toEqual('Start');
       });
     });
 
