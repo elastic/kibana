@@ -35,7 +35,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
 import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
 import { QueryBarWrapper } from '../../query_bar_wrapper';
-import { DATA_FORMATTERS } from '../../../../../common/enums';
+import { DATA_FORMATTERS, BUCKET_TYPES } from '../../../../../common/enums';
 import { isConfigurationFeatureEnabled } from '../../../../../common/check_ui_restrictions';
 import { filterCannotBeAppliedErrorMessage } from '../../../../../common/errors';
 import { tsvbEditorRowStyles } from '../../../styles/common.styles';
