@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { useBehaviorSubject } from '../../use_behavior_subject';
@@ -20,7 +20,7 @@ export const RetryButton: FunctionComponent<Props> = ({ onClick }) => {
   const uploading = useBehaviorSubject(uploadState.uploading$);
 
   return (
-    <EuiButtonEmpty
+    <EuiButton
       key="retryButton"
       size="s"
       data-test-subj="retryButton"
@@ -28,6 +28,6 @@ export const RetryButton: FunctionComponent<Props> = ({ onClick }) => {
       onClick={onClick}
     >
       {i18nTexts.retry}
-    </EuiButtonEmpty>
+    </EuiButton>
   );
 };

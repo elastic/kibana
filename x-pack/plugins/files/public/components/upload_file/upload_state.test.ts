@@ -206,4 +206,14 @@ describe('UploadState', () => {
       expectObservable(uploadState.clear$, '^').toBe('  ---0-', [undefined]);
     });
   });
+
+  it('correctly detects when files are ready for upload', () => {
+    const file1 = { name: 'test' } as File;
+    const file2 = { name: 'test 2.png' } as File;
+    expect(uploadState.hasFiles()).toBe(false);
+    uploadState.setFiles([file1, file2]);
+    expect(uploadState.hasFiles()).toBe(true);
+    uploadState.setFiles([]);
+    expect(uploadState.hasFiles()).toBe(false);
+  });
 });

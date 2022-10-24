@@ -77,7 +77,18 @@ export interface Props<Kind extends string = string> {
   onError?: (e: Error) => void;
 
   /**
+   * Whether to display the component in it's compact form.
+   *
+   * @default false
+   *
+   * @note passing "true" here implies true for allowRepeatedUplods and immediate.
+   */
+  compressed?: boolean;
+
+  /**
    * Allow upload more than one file at a time
+   *
+   * @default false
    */
   multiple?: boolean;
 }
@@ -94,6 +105,7 @@ export const UploadFile = <Kind extends string = string>({
   onError,
   fullWidth,
   allowClear,
+  compressed = false,
   kind: kindId,
   multiple = false,
   initialPromptText,
@@ -103,14 +115,15 @@ export const UploadFile = <Kind extends string = string>({
   const { registry, client } = useFilesContext();
   const ref = useRef<null | EuiFilePicker>(null);
   const fileKind = registry.get(kindId);
+  const repeatedUploads = compressed || allowRepeatedUploads;
   const uploadState = useMemo(
     () =>
       createUploadState({
         client,
         fileKind,
-        allowRepeatedUploads,
+        allowRepeatedUploads: repeatedUploads,
       }),
-    [client, allowRepeatedUploads, fileKind]
+    [client, repeatedUploads, fileKind]
   );
 
   /**
@@ -132,10 +145,11 @@ export const UploadFile = <Kind extends string = string>({
   return (
     <context.Provider value={uploadState}>
       <Component
+        compressed={compressed}
         ref={ref}
         accept={fileKind.allowedMimeTypes?.join(',')}
         meta={meta}
-        immediate={immediate}
+        immediate={compressed || immediate}
         allowClear={allowClear}
         fullWidth={fullWidth}
         initialFilePromptText={initialPromptText}

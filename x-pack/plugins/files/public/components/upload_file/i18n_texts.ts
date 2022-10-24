@@ -17,6 +17,9 @@ export const i18nTexts = {
   uploading: i18n.translate('xpack.files.uploadFile.uploadingButtonLabel', {
     defaultMessage: 'Uploading',
   }),
+  uploadComplete: i18n.translate('xpack.files.uploadFile.uploadCompleteButtonLabel', {
+    defaultMessage: 'Upload complete',
+  }),
   retry: i18n.translate('xpack.files.uploadFile.retryButtonLabel', {
     defaultMessage: 'Retry',
   }),

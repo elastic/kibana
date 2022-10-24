@@ -50,8 +50,8 @@ describe('UploadFile', () => {
       uploadButton: `${baseTestSubj}.uploadButton`,
       retryButton: `${baseTestSubj}.retryButton`,
       cancelButton: `${baseTestSubj}.cancelButton`,
+      cancelButtonIcon: `${baseTestSubj}.cancelButtonIcon`,
       errorMessage: `${baseTestSubj}.error`,
-      successIcon: `${baseTestSubj}.uploadSuccessIcon`,
     };
 
     return {
@@ -110,12 +110,12 @@ describe('UploadFile', () => {
     client.create.mockResolvedValue({ file: { id: 'test', size: 1 } as FileJSON });
     client.upload.mockResolvedValue({ size: 1, ok: true });
 
-    const { actions, exists, testSubjects } = await initTestBed();
+    const { actions, find, exists, testSubjects } = await initTestBed();
     await actions.addFiles([{ name: 'test', size: 1 } as File]);
     await actions.upload();
     await sleep(1000);
     expect(exists(testSubjects.errorMessage)).toBe(false);
-    expect(exists(testSubjects.successIcon)).toBe(true);
+    expect(find(testSubjects.uploadButton).text()).toMatch(/upload complete/i);
     expect(onDone).toHaveBeenCalledTimes(1);
   });
 
@@ -199,5 +199,21 @@ describe('UploadFile', () => {
     expect(find(testSubjects.errorMessage).text()).toMatch(/File is too large/);
 
     expect(onDone).not.toHaveBeenCalled();
+  });
+
+  it('only shows the cancel control in compressed mode', async () => {
+    const { actions, testSubjects, exists } = await initTestBed({ compressed: true });
+    const assertButtons = () => {
+      expect(exists(testSubjects.cancelButtonIcon)).toBe(true);
+      expect(exists(testSubjects.cancelButton)).toBe(false);
+      expect(exists(testSubjects.retryButton)).toBe(false);
+      expect(exists(testSubjects.uploadButton)).toBe(false);
+    };
+
+    assertButtons();
+    await actions.addFiles([{ name: 'test', size: 1 } as File]);
+    assertButtons();
+    await actions.wait(1000);
+    assertButtons();
   });
 });

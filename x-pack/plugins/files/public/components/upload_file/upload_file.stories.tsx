@@ -175,3 +175,31 @@ ImmediateUploadAbort.decorators = [
 ImmediateUploadAbort.args = {
   immediate: true,
 };
+
+export const Compressed = Template.bind({});
+Compressed.args = {
+  compressed: true,
+};
+
+export const CompressedError = Template.bind({});
+CompressedError.args = {
+  compressed: true,
+};
+CompressedError.decorators = [
+  (Story) => (
+    <FilesContext
+      client={
+        {
+          create: async () => ({ file: { id: 'test' } }),
+          upload: async () => {
+            await sleep(1000);
+            throw new Error('Something went wrong while uploading! '.repeat(10).trim());
+          },
+          delete: async () => {},
+        } as unknown as FilesClient
+      }
+    >
+      <Story />
+    </FilesContext>
+  ),
+];
