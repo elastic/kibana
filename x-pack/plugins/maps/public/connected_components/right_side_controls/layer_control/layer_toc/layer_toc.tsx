@@ -244,6 +244,7 @@ export class LayerTOC extends Component<Props> {
                       dragHandleProps={draggableProvided.dragHandleProps}
                       isDragging={draggableSnapshot.isDragging}
                       isDraggingOver={droppableSnapshot.isDraggingOver}
+                      isCombineLayer={this.state.combineLayer && this.state.combineLayer.getId() === layer.getId()}
                     />
                   );
                 }}
