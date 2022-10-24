@@ -70,6 +70,7 @@ export function getAgentsColumns({
     },
     {
       field: AgentExplorerFieldName.AgentName,
+      width: `${unit * 10}px`,
       name: i18n.translate(
         'xpack.apm.agentExplorerTable.agentNameColumnLabel',
         { defaultMessage: 'Agent Name' }
@@ -82,6 +83,7 @@ export function getAgentsColumns({
         'xpack.apm.agentExplorerTable.agentVersionColumnLabel',
         { defaultMessage: 'Agent Version' }
       ),
+      width: `${unit * 10}px`,
       render: (_, { agentVersion }) => (
         <ItemsBadge
           items={agentVersion ?? []}
