@@ -16,18 +16,16 @@ import { securityTourConfig, SecurityStepId } from './tour_config';
 
 export interface TourContextValue {
   activeStep: number;
-  isTourShown: (stepId: SecurityStepId) => boolean;
   endTourStep: (stepId: SecurityStepId) => void;
-  // Calling this in components with tour anchor tags alleviates a race condition
-  // where the active step attempts to mount before the tour anchor is mounted
   incrementStep: (stepId: SecurityStepId, step?: number) => void;
+  isTourShown: (stepId: SecurityStepId) => boolean;
 }
 
 const initialState: TourContextValue = {
   activeStep: 0,
-  isTourShown: () => false,
   endTourStep: () => {},
   incrementStep: () => {},
+  isTourShown: () => false,
 };
 
 const TourContext = createContext<TourContextValue>(initialState);
@@ -80,6 +78,7 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tourStatus]);
 
+  // TODO: @Steph figure out if we're allowing user to skip tour or not, implement this if so
   // const onSkipTour = useCallback((stepId: SecurityStepId) => {
   //   // active state means the user is on this step but has not yet begun. so when the user hits skip,
   //   // the tour will go back to this step until they "re-start it"
@@ -95,10 +94,10 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
   );
 
   const context = {
-    isTourShown,
+    activeStep,
     endTourStep,
     incrementStep,
-    activeStep,
+    isTourShown,
   };
 
   return <TourContext.Provider value={context}>{children}</TourContext.Provider>;

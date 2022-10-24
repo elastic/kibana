@@ -74,6 +74,7 @@ export const useAddToCaseActions = ({
     onClose: onMenuItemClick,
     onRowClick: onSuccess,
   });
+
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();

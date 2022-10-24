@@ -395,13 +395,11 @@ const EventDetailsComponent: React.FC<Props> = ({
     rawEventData: rawEventData as AlertRawEventData,
   });
 
-  const tabs = useMemo(
-    () =>
-      [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab].filter(
-        (tab: EventViewTab | undefined): tab is EventViewTab => !!tab
-      ),
-    [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab]
-  );
+  const tabs = useMemo(() => {
+    return [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab].filter(
+      (tab: EventViewTab | undefined): tab is EventViewTab => !!tab
+    );
+  }, [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab]);
 
   const selectedTab = useMemo(
     () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],
