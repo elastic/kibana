@@ -31,6 +31,7 @@ import { ReactWrapper, mount } from 'enzyme';
 import { getFoundListsBySizeSchemaMock } from '../../../../common/schemas/response/found_lists_by_size_schema.mock';
 
 import { BuilderEntryItem } from './entry_renderer';
+import * as i18n from './translations';
 
 jest.mock('@kbn/securitysolution-list-hooks');
 jest.mock('@kbn/securitysolution-utils');
@@ -81,11 +82,78 @@ describe('BuilderEntryItem', () => {
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
-        showLabel={true}
+        showLabel
       />
     );
 
     expect(wrapper.find('[data-test-subj="exceptionBuilderEntryFieldFormRow"]')).not.toEqual(0);
+    expect(wrapper.find('.euiFormHelpText.euiFormRow__text').exists()).toBeFalsy();
+  });
+
+  test('it renders custom option text if "allowCustomOptions" is "true" and it is not a nested entry', () => {
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('ip'),
+          id: '123',
+          nested: undefined,
+          operator: isOperator,
+          parent: undefined,
+          value: '1234',
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        listType="detection"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
+        showLabel
+        allowCustomOptions
+      />
+    );
+
+    expect(wrapper.find('.euiFormHelpText.euiFormRow__text').at(0).text()).toEqual(
+      i18n.CUSTOM_COMBOBOX_OPTION_TEXT
+    );
+  });
+
+  test('it does not render custom option text when "allowCustomOptions" is "true" and it is a nested entry', () => {
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('nestedField.child'),
+          id: '64ce5d11-2076-4369-859a-297832a426d0',
+          nested: 'parent',
+          operator: isOperator,
+          parent: undefined,
+          value: undefined,
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logstash-*',
+        }}
+        listType="detection"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
+        showLabel
+        allowCustomOptions
+      />
+    );
+
+    expect(wrapper.find('.euiFormHelpText.euiFormRow__text').exists()).toBeFalsy();
   });
 
   test('it renders field values correctly when operator is "isOperator"', () => {
@@ -259,7 +327,7 @@ describe('BuilderEntryItem', () => {
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
-        showLabel={true}
+        showLabel
       />
     );
 
@@ -297,7 +365,7 @@ describe('BuilderEntryItem', () => {
         onChange={jest.fn()}
         setErrorsExist={jest.fn()}
         setWarningsExist={jest.fn()}
-        showLabel={true}
+        showLabel
       />
     );
 
