@@ -76,6 +76,7 @@ export interface FieldStatsProps {
   overrideMissingContent?: (params: {
     element: JSX.Element;
     noDataFound?: boolean;
+    supported?: boolean;
   }) => JSX.Element | null;
   overrideFooter?: (params: {
     element: JSX.Element;
@@ -304,6 +305,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     return overrideMissingContent
       ? overrideMissingContent({
+          supported: false,
           noDataFound: false,
           element: messageNoAnalysis,
         })
