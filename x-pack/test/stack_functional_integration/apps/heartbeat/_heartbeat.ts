@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
 
       await retry.try(async function () {
-        const upCount = parseInt((await PageObjects.uptime.getSnapshotCount()).up, 10);
+        const hitCount = await PageObjects.discover.getHitCountInt();
         expect(upCount).to.eql(1);
       });
     });
