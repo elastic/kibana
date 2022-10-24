@@ -11,13 +11,14 @@ import { EuiButtonEmpty, EuiLoadingContent, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { FormattedError } from '../formatted_error';
 import { useGetFileInfo } from '../../hooks/endpoint/use_get_file_info';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { MaybeImmutable } from '../../../../common/endpoint/types';
-import { getHostActionFileDownloadUrl } from '../../services/response_actions/get_host_action_file_download_url';
 import type { ActionDetails } from '../../../../common/endpoint/types/actions';
+import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 
 const STYLE_INHERIT_FONT_FAMILY = Object.freeze<CSSProperties>({
   fontFamily: 'inherit',
@@ -35,6 +36,8 @@ const FILE_NO_LONGER_AVAILABLE_MESSAGE = i18n.translate(
 
 export interface ResponseActionFileDownloadLinkProps {
   action: MaybeImmutable<ActionDetails>;
+  /** If left undefined, the first agent that the action was sent to will be used */
+  agentId?: string;
   buttonTitle?: string;
   'data-test-subj'?: string;
 }
@@ -46,7 +49,7 @@ export interface ResponseActionFileDownloadLinkProps {
  * NOTE: Currently displays only the link for the first host in the Action
  */
 export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLinkProps>(
-  ({ action, buttonTitle = DEFAULT_BUTTON_TITLE, 'data-test-subj': dataTestSubj }) => {
+  ({ action, agentId, buttonTitle = DEFAULT_BUTTON_TITLE, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { canWriteFileOperations } = useUserPrivileges().endpointPrivileges;
 
@@ -57,11 +60,18 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
       return action.isCompleted && moment().diff(action.completedAt, 'days') > 2;
     }, [action.completedAt, action.isCompleted]);
 
+    const downloadUrl = useMemo(() => {
+      return resolvePathVariables(ACTION_AGENT_FILE_DOWNLOAD_ROUTE, {
+        action_id: action.id,
+        agent_id: agentId ?? action.agents[0],
+      });
+    }, [action.agents, action.id, agentId]);
+
     const {
       isFetching,
       data: fileInfo,
       error,
-    } = useGetFileInfo(action, {
+    } = useGetFileInfo(action, undefined, {
       enabled: canWriteFileOperations && checkIfStillAvailable,
     });
 
@@ -89,7 +99,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     return (
       <>
         <EuiButtonEmpty
-          href={getHostActionFileDownloadUrl(action)}
+          href={downloadUrl}
           iconType="download"
           data-test-subj={getTestId('downloadButton')}
           flush="left"
