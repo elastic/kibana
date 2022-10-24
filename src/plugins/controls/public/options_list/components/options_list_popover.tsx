@@ -67,6 +67,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   const field = select((state) => state.componentState.field);
 
   const selectedOptions = select((state) => state.explicitInput.selectedOptions);
+  const allowExclude = select((state) => state.explicitInput.allowExclude);
   const singleSelect = select((state) => state.explicitInput.singleSelect);
   const title = select((state) => state.explicitInput.title);
   const exclude = select((state) => state.explicitInput.exclude);
@@ -81,6 +82,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   );
 
   const [showOnlySelected, setShowOnlySelected] = useState(false);
+  const euiBackgroundColor = useEuiBackgroundColor('subdued');
 
   return (
     <>
@@ -265,22 +267,25 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
           </>
         )}
       </div>
-
-      <EuiPopoverFooter
-        paddingSize="s"
-        css={css`
-          background-color: ${useEuiBackgroundColor('subdued')};
-        `}
-      >
-        <EuiButtonGroup
-          legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
-          options={aggregationToggleButtons}
-          idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
-          onChange={(optionId) => dispatch(setExclude(optionId === 'optionsList__excludeResults'))}
-          buttonSize="compressed"
-          data-test-subj="optionsList__includeExcludeButtonGroup"
-        />
-      </EuiPopoverFooter>
+      {!allowExclude && (
+        <EuiPopoverFooter
+          paddingSize="s"
+          css={css`
+            background-color: ${euiBackgroundColor};
+          `}
+        >
+          <EuiButtonGroup
+            legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
+            options={aggregationToggleButtons}
+            idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
+            onChange={(optionId) =>
+              dispatch(setExclude(optionId === 'optionsList__excludeResults'))
+            }
+            buttonSize="compressed"
+            data-test-subj="optionsList__includeExcludeButtonGroup"
+          />
+        </EuiPopoverFooter>
+      )}
     </>
   );
 };

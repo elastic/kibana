@@ -30,7 +30,11 @@ export const OptionsListStrings = {
       }),
     getRunPastTimeoutTitle: () =>
       i18n.translate('controls.optionsList.editor.runPastTimeout', {
-        defaultMessage: 'Run past timeout',
+        defaultMessage: 'Ignore timeout for results',
+      }),
+    getAllowExclude: () =>
+      i18n.translate('controls.optionsList.editor.allowExclude', {
+        defaultMessage: 'Allow selections to be excluded',
       }),
   },
   popover: {

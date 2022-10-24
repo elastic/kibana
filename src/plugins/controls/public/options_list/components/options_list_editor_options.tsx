@@ -16,6 +16,7 @@ import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
 interface OptionsListEditorState {
   singleSelect?: boolean;
   runPastTimeout?: boolean;
+  allowExclude?: boolean;
 }
 
 export const OptionsListEditorOptions = ({
@@ -25,17 +26,28 @@ export const OptionsListEditorOptions = ({
   const [state, setState] = useState<OptionsListEditorState>({
     singleSelect: initialInput?.singleSelect,
     runPastTimeout: initialInput?.runPastTimeout,
+    allowExclude: initialInput?.allowExclude,
   });
 
   return (
     <>
-      <EuiFormRow>
+      <EuiFormRow display="columnCompressedSwitch">
         <EuiSwitch
           label={OptionsListStrings.editor.getAllowMultiselectTitle()}
           checked={!state.singleSelect}
           onChange={() => {
             onChange({ singleSelect: !state.singleSelect });
             setState((s) => ({ ...s, singleSelect: !s.singleSelect }));
+          }}
+        />
+      </EuiFormRow>
+      <EuiFormRow display="columnCompressedSwitch">
+        <EuiSwitch
+          label={OptionsListStrings.editor.getAllowExclude()}
+          checked={!state.allowExclude}
+          onChange={() => {
+            onChange({ allowExclude: !state.allowExclude });
+            setState((s) => ({ ...s, allowExclude: !s.allowExclude }));
           }}
         />
       </EuiFormRow>

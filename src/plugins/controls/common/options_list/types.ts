@@ -17,6 +17,7 @@ export interface OptionsListEmbeddableInput extends DataControlInput {
   selectedOptions?: string[];
   runPastTimeout?: boolean;
   singleSelect?: boolean;
+  allowExclude?: boolean;
   exclude?: boolean;
 }
 
