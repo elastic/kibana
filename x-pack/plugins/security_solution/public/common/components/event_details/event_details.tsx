@@ -285,11 +285,11 @@ const EventDetailsComponent: React.FC<Props> = ({
       indexName,
       isAlert,
       isDraggable,
+      scopeId,
       isEnrichmentsLoading,
+      showThreatSummary,
       isReadOnly,
       renderer,
-      scopeId,
-      showThreatSummary,
       userRisk,
     ]
   );
