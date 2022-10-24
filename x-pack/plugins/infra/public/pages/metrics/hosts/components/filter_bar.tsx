@@ -21,10 +21,15 @@ export const FilterBar = ({ dataView }: Props) => {
   const {
     services: { unifiedSearch },
   } = useKibana<InfraClientStartDeps>();
-  const { unifiedSearchDateRange, unifiedSearchQuery, submitFilterChange, saveQuery } =
-    useUnifiedSearchContext();
+  const {
+    unifiedSearchDateRange,
+    unifiedSearchQuery,
+    submitFilterChange,
+    saveQuery,
+    clearSavedQUery,
+  } = useUnifiedSearchContext();
 
-  const { AggregateQuerySearchBar } = unifiedSearch.ui;
+  const { SearchBar } = unifiedSearch.ui;
 
   const onFilterChange = (filters: Filter[]) => {
     onQueryChange({ filters });
@@ -32,6 +37,10 @@ export const FilterBar = ({ dataView }: Props) => {
 
   const onQuerySubmit = (payload: { dateRange: TimeRange; query?: Query }) => {
     onQueryChange({ payload });
+  };
+
+  const onClearSavedQuery = () => {
+    clearSavedQUery();
   };
 
   const onQuerySave = (savedQuery: SavedQuery) => {
@@ -49,24 +58,21 @@ export const FilterBar = ({ dataView }: Props) => {
   };
 
   return (
-    <AggregateQuerySearchBar<Query>
-      appName={'infra'}
-      data-test-subj="infraApp_searchBar"
-      screenTitle={'infra'}
-      showFilterBar={true}
-      showSaveQuery={true}
-      showDatePicker={true}
+    <SearchBar
+      appName={'infra_hosts'}
+      data-test-subj="infraApp_filterBar"
+      indexPatterns={[dataView]}
       query={unifiedSearchQuery}
       dateRangeFrom={unifiedSearchDateRange.from}
       dateRangeTo={unifiedSearchDateRange.to}
-      indexPatterns={[dataView]}
-      indicateNoData={true}
       onQuerySubmit={onQuerySubmit}
       onSaved={onQuerySave}
       onSavedQueryUpdated={onQuerySave}
+      onClearSavedQuery={onClearSavedQuery}
+      showSaveQuery
+      showQueryInput
       // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
       onFiltersUpdated={onFilterChange}
-      showSearchBar={true}
     />
   );
 };
