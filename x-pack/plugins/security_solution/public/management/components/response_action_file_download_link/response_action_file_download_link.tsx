@@ -6,10 +6,13 @@
  */
 
 import type { CSSProperties } from 'react';
-import React, { memo } from 'react';
-import { EuiButtonEmpty, EuiText } from '@elastic/eui';
+import React, { memo, useMemo } from 'react';
+import { EuiButtonEmpty, EuiLoadingContent, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import { FormattedError } from '../formatted_error';
+import { useGetFileInfo } from '../../hooks/endpoint/use_get_file_info';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { MaybeImmutable } from '../../../../common/endpoint/types';
@@ -23,6 +26,11 @@ const STYLE_INHERIT_FONT_FAMILY = Object.freeze<CSSProperties>({
 const DEFAULT_BUTTON_TITLE = i18n.translate(
   'xpack.securitySolution.responseActionFileDownloadLink.downloadButtonLabel',
   { defaultMessage: 'Click here to download' }
+);
+
+const FILE_NO_LONGER_AVAILABLE_MESSAGE = i18n.translate(
+  'xpack.securitySolution.responseActionFileDownloadLink.fileNoLongerAvailable',
+  { defaultMessage: 'File is no longer available for download.' }
 );
 
 export interface ResponseActionFileDownloadLinkProps {
@@ -42,7 +50,39 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { canWriteFileOperations } = useUserPrivileges().endpointPrivileges;
 
-    if (!canWriteFileOperations) {
+    // We don't need to call the file info API everytime, specially if this component is used from the
+    // console, where the link is displayed within a short time. So we only do the API call if the
+    // action was completed more than 2 days ago.
+    const checkIfStillAvailable = useMemo(() => {
+      return action.isCompleted && moment().diff(action.completedAt, 'days') > 2;
+    }, [action.completedAt, action.isCompleted]);
+
+    const {
+      isFetching,
+      data: fileInfo,
+      error,
+    } = useGetFileInfo(action, {
+      enabled: canWriteFileOperations && checkIfStillAvailable,
+    });
+
+    if (!canWriteFileOperations || !action.isCompleted || !action.wasSuccessful) {
+      return null;
+    }
+
+    if (isFetching) {
+      return <EuiLoadingContent lines={1} />;
+    }
+
+    // Check if file is no longer available
+    if (error || fileInfo?.data.status === 'DELETED') {
+      if ((error && error?.response?.status === 404) || fileInfo?.data.status === 'DELETED') {
+        return <EuiText size="s">{FILE_NO_LONGER_AVAILABLE_MESSAGE}</EuiText>;
+      }
+
+      if (error) {
+        return <FormattedError error={error} />;
+      }
+
       return null;
     }
 
