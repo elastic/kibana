@@ -5,17 +5,6 @@
  * 2.0.
  */
 
-import { AgentName } from "../typings/es_schemas/ui/fields/agent";
-
-export interface AgentExplorerListItem {
-  serviceName: string;
-  environments?: string[];
-  agentName?: AgentName;
-  agentVersion: string[];
-  agentLastVersion?: string;
-  agentRepoUrl?: string;
-}
-
 export enum AgentExplorerFieldName {
   ServiceName = 'serviceName',
   Environments = 'environments',

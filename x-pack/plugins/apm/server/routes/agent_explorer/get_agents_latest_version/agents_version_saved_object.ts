@@ -7,25 +7,21 @@
 
 import { APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_ID, APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_TYPE } from '@kbn/apm-plugin/common/apm_saved_object_constants';
 import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
-import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { ISavedObjectsRepository, SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
 
 const ONE_HOUR_IN_MS = 3_600_000;
 
 /**
- * check if Agents latest version savedObject exists
+ * Find agents latest version savedObject
  * returns Promise<true> when there is no savedObjects associated to the type
  */
-export async function checkAgentsVersionExists(
+export async function getSavedObjectAgentsVersion(
   savedObjectsClient: ISavedObjectsRepository
-): Promise<boolean> {
-  const response = await savedObjectsClient.find({
-    perPage: 1,
-    search: `"${APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_ID}"`,
+): Promise<SavedObjectsFindResponse> {
+  return await savedObjectsClient.find({
     type: APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_TYPE,
   });
-
-  return response.saved_objects.length > 0;
 }
 
 /**
@@ -58,18 +54,19 @@ export async function getSavedAgentsVersion({
   savedObjectsClient: ISavedObjectsRepository;
   logger: Logger;
 }) {
-  try {
-    const agentsLatestVersion = await savedObjectsClient.get(
-      APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_TYPE,
-      APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_ID
-    );
+  const savedObjectAgentsVersion = await getSavedObjectAgentsVersion(savedObjectsClient);
+  if (savedObjectAgentsVersion.saved_objects.length === 0) {
+    await saveAgentsVersion({savedObjectsClient, agentsVersion: {}});
+    return {};
+  }
 
-    const savedObjectDate = new Date(agentsLatestVersion.updated_at as string).getTime();
+  try {
+    const savedObjectDate = new Date(savedObjectAgentsVersion.saved_objects[0].updated_at as string).getTime();
     if (savedObjectDate < Date.now() - ONE_HOUR_IN_MS) {
       return {};
     }
 
-    return agentsLatestVersion.attributes;
+    return savedObjectAgentsVersion.saved_objects[0].attributes;
   } catch (err) {
     logger.warn('Failed to fetch saved agents version data.');
 

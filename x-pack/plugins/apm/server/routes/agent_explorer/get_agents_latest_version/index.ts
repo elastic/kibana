@@ -9,7 +9,7 @@ import { getInternalSavedObjectsClient } from '@kbn/apm-plugin/server/lib/helper
 import { CoreSetup, Logger } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { getAllAgentsName } from '../get_agent_url_repository';
-import { checkAgentsVersionExists, getSavedAgentsVersion, saveAgentsVersion } from './agents_version_saved_object';
+import { getSavedAgentsVersion, saveAgentsVersion } from './agents_version_saved_object';
 import { fetchAgentLatestReleaseVersion } from './fetch_agents_latest_version';
 
 const getAllAgentsLatestVersion = async () => {
@@ -31,14 +31,8 @@ export async function getAgentsLatestVersion({
   logger: Logger;
 }) {
   const savedObjectsClient = await getInternalSavedObjectsClient(core);
-  const agentsVersionExists = await checkAgentsVersionExists(savedObjectsClient);
-
-  if (!agentsVersionExists) {
-    await saveAgentsVersion({savedObjectsClient, agentsVersion: {}});
-  }
-
+  
   const savedAgentsVersion = await getSavedAgentsVersion({savedObjectsClient, logger});
-
   if (!isEmpty(savedAgentsVersion)) {
     return savedAgentsVersion;
   }

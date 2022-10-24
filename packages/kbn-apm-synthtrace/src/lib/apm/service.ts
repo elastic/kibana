@@ -25,19 +25,17 @@ export function service({
   environment,
   agentName,
   agentVersion,
-  serviceLanguageName,
 }: {
   name: string;
   environment: string;
   agentName: string;
   agentVersion?: string;
-  serviceLanguageName?: string;
 }) {
   return new Service({
     'service.name': name,
     'service.environment': environment,
     'agent.name': agentName,
     'agent.version': agentVersion,
-    'service.language.name': serviceLanguageName,
+    'service.language.name': agentName,
   });
 }

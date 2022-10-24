@@ -9,7 +9,7 @@ import { EuiIcon, EuiLink } from '@elastic/eui';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import React from 'react';
 import { AgentName } from "../../../../typings/es_schemas/ui/fields/agent";
-import { FormattedMessage } from 'react-intl';
+import { i18n } from '@kbn/i18n';
 
 interface AgentExplorerDocsLinkProps {
   agentName: AgentName;
@@ -36,12 +36,16 @@ export function AgentExplorerDocsLink({
       target="_blank"
       external
     >
-      <EuiIcon type='logoGithub' size='m' title='github logo' />
-      {' '}
-      <FormattedMessage
-        id="indexPatternFieldEditor.number.documentationLabel"
-        defaultMessage="github"
+      <EuiIcon type='logoGithub' size='m' title={
+        i18n.translate('xpack.apm.agentExplorer.docsLink.logo',
+        { defaultMessage: 'Github logo' }
+      )} 
       />
+      {' '}
+      {
+        i18n.translate('xpack.apm.agentExplorer.docsLink.message',
+        { defaultMessage: 'github' }
+      )}
     </EuiLink>
   );
 }

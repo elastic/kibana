@@ -128,47 +128,40 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(nodeAgent?.agentLastVersion).not.to.be.empty();
       });
 
-      it('returns only agents matching selected environment', async () => {
-        const { status, body } = await callApi({
-          query: {
-            environment: 'dev',
-          },
+      const matchingFilterTests = [
+        ['environment', 'dev', nodeServiceName],
+        ['serviceName', nodeServiceName, nodeServiceName],
+        ['kuery', `service.name : ${goServiceName}`, goServiceName]
+      ];
+
+      matchingFilterTests.forEach(([filterName, filterValue, expectedService]) => {
+        it(`returns only agents matching selected ${filterName}`, async () => {
+          const { status, body } = await callApi({
+            query: {
+              [filterName]: filterValue,
+            },
+          });
+          expect(status).to.be(200);
+          expect(body.items).to.have.length(1);
+          expect(body.items[0]?.serviceName).to.be(expectedService);
         });
-        expect(status).to.be(200);
-        expect(body.items).to.have.length(1);
-        expect(body.items[0]?.serviceName).to.be(nodeServiceName);
       });
 
-      it('returns only agents matching selected serviceName', async () => {
-        const { status, body } = await callApi({
-          query: {
-            serviceName: nodeServiceName,
-          },
-        });
-        expect(status).to.be(200);
-        expect(body.items).to.have.length(1);
-        expect(body.items[0]?.serviceName).to.be(nodeServiceName);
-      });
+      const notMatchingFilterTests = [
+        ['serviceName', 'my-service'],
+        ['agentLanguage', 'my-language'],
+      ];
 
-      it('returns empty agents when there is no matching agentLanguage', async () => {
-        const { status, body } = await callApi({
-          query: {
-            agentLanguage: 'my-language',
-          },
+      notMatchingFilterTests.forEach(([filterName, filterValue]) => {
+        it(`returns empty agents when there is no matching ${filterName}`, async () => {
+          const { status, body } = await callApi({
+            query: {
+              [filterName]: filterValue,
+            },
+          });
+          expect(status).to.be(200);
+          expect(body.items).to.be.empty();
         });
-        expect(status).to.be(200);
-        expect(body.items).to.be.empty();
-      });
-
-      it('returns only go agent when there is a matching kql filter', async () => {
-        const { status, body } = await callApi({
-          query: {
-            kuery: `service.name : ${goServiceName}`,
-          },
-        });
-        expect(status).to.be(200);
-        expect(body.items).to.have.length(1);
-        expect(body.items[0]?.serviceName).to.be(goServiceName);
       });
     });
   });

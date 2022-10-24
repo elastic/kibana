@@ -26,7 +26,7 @@ const agentsRepoName: Partial<Record<AgentName, string>> = {
 };
 
 export const getAllAgentsName = () =>
-  Object.entries(agentsRepoName).map(([agent, _]) => agent as AgentName);
+  Object.keys(agentsRepoName).map((agent) => agent as AgentName);
 
 export const getAgentRepositoryDetails = (
   agentName: AgentName,

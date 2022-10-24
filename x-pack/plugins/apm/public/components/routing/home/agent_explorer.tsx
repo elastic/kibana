@@ -5,29 +5,25 @@
  * 2.0.
  */
 
-import { Outlet } from '@kbn/typed-react-router-config';
+import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
 import React from 'react';
+import { page } from '.';
 import { AgentExplorerDetails } from "../../app/agent_explorer_details";
-import { AgentExplorerOverview } from "../../app/agent_explorer_overview";
 
 export const agentExplorer = {
-  '/agent-explorer': {
-    element: (
-      <AgentExplorerOverview>
-        <Outlet />
-      </AgentExplorerOverview>
+  ...page({
+    path: '/agent-explorer',
+    title: i18n.translate(
+      'xpack.apm.agentExplorer.title',
+      { defaultMessage: 'Agent Explorer' }
     ),
-    params: t.type({
+    element: <AgentExplorerDetails />,
+    params: t.partial({
       query: t.partial({
         agentLanguage: t.string,
         serviceName: t.string,
       }),
     }),
-    children: {
-      '/agent-explorer': {
-        element: <AgentExplorerDetails />,
-      },
-    },
-  },
+  }),
 };

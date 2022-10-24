@@ -5,34 +5,13 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from "@elastic/elasticsearch/lib/api/typesWithBodyKey";
 import { AGENT_NAME, AGENT_VERSION, SERVICE_ENVIRONMENT, SERVICE_LANGUAGE_NAME, SERVICE_NAME, SERVICE_NODE_NAME } from "@kbn/apm-plugin/common/elasticsearch_fieldnames";
 import { environmentQuery } from "@kbn/apm-plugin/common/utils/environment_query";
 import { AgentName } from "@kbn/apm-plugin/typings/es_schemas/ui/fields/agent";
 import { ProcessorEvent } from "@kbn/observability-plugin/common/processor_event";
-import { kqlQuery, rangeQuery } from "@kbn/observability-plugin/server/utils/queries";
+import { kqlQuery, rangeQuery, termQuery } from "@kbn/observability-plugin/server/utils/queries";
 import { RandomSampler } from "../../lib/helpers/get_random_sampler";
 import { AgenItemsSetup } from "./get_agents_items";
-
-export function serviceNameQuery(
-  serviceName?: string
-): QueryDslQueryContainer[] {
-  if (!serviceName) {
-    return [];
-  }
-
-  return [{ term: { [SERVICE_NAME]: serviceName } }];
-}
-
-export function agentLanguageQuery(
-  agentName?: string
-): QueryDslQueryContainer[] {
-  if (!agentName) {
-    return [];
-  }
-
-  return [{ term: { [SERVICE_LANGUAGE_NAME]: agentName } }];
-}
 
 interface AggregationParams {
   environment: string;
@@ -89,8 +68,8 @@ export async function getAgentsDetails({
               ...rangeQuery(start, end),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
-              ...serviceNameQuery(serviceName),
-              ...agentLanguageQuery(agentLanguage),
+              ...(serviceName ? termQuery(SERVICE_NAME, serviceName): []),
+              ...(agentLanguage ? termQuery(SERVICE_LANGUAGE_NAME, agentLanguage): []),
             ],
           },
         },
@@ -104,11 +83,6 @@ export async function getAgentsDetails({
                   size: maxNumServices,
                 },
                 aggs: {
-                  instances: {
-                    cardinality: {
-                      field: SERVICE_NODE_NAME,
-                    }
-                  },
                   serviceNodes: {
                     terms: {
                       field: SERVICE_NODE_NAME,

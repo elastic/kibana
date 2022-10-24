@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 
 interface Props {
   items: string[];
@@ -28,7 +28,7 @@ export function ItemsBadge({
       <>
         {items.map((item) => (
           <EuiBadge color="hollow" key={item}>
-            {items}
+            {item}
           </EuiBadge>
         ))}
       </>

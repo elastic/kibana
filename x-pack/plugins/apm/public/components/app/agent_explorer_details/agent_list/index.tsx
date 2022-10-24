@@ -6,16 +6,17 @@
  */
 
 import {
-  EuiBasicTableColumn, EuiFlexGroup,
-  EuiFlexItem, EuiInMemoryTable
+  EuiBasicTableColumn, EuiInMemoryTable
 } from '@elastic/eui';
-import { AgentExplorerFieldName, AgentExplorerListItem } from '@kbn/apm-plugin/common/agent_explorer';
+import { AgentExplorerFieldName } from '@kbn/apm-plugin/common/agent_explorer';
 import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React, { useMemo } from 'react';
+import { ValuesType } from "utility-types";
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { useApmParams } from '../../../../hooks/use_apm_params';
+import { APIReturnType } from "../../../../services/rest/create_call_apm_api";
 import { unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
@@ -23,6 +24,10 @@ import { ItemsBadge } from '../../../shared/item_badge';
 import { ServiceLink } from '../../../shared/service_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { AgentExplorerDocsLink } from '../../agent_explorer_docs_link';
+
+type AgentExplorerItem = ValuesType<
+  APIReturnType<'GET /internal/apm/agent_explorer'>['items']
+>;
 
 function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
@@ -32,7 +37,7 @@ export function getAgentsColumns({
   query,
 }: {
   query: TypeOf<ApmRoutes, '/agent-explorer'>['query'];
-}): Array<EuiBasicTableColumn<AgentExplorerListItem>> {
+}): Array<EuiBasicTableColumn<AgentExplorerItem>> {
   return [
     {
       field: AgentExplorerFieldName.ServiceName,
@@ -104,6 +109,9 @@ export function getAgentsColumns({
         { defaultMessage: 'Latest Version' }
       ),
       width: `${unit * 10}px`,
+      render: (_, { agentLastVersion }) => (
+        formatString(agentLastVersion)
+      ),
     },
     {
       field: AgentExplorerFieldName.AgentRepoUrl,
@@ -129,18 +137,10 @@ export function getAgentsColumns({
 }
 
 interface Props {
-  items: AgentExplorerListItem[];
+  items: AgentExplorerItem[];
   noItemsMessage?: React.ReactNode;
   isLoading: boolean;
   isFailure?: boolean;
-  initialSortField: string;
-  initialPageSize: number;
-  initialSortDirection: 'asc' | 'desc';
-  sortFn: (
-    sortItems: AgentExplorerListItem[],
-    sortField: string | undefined,
-    sortDirection: 'asc' | 'desc'
-  ) => AgentExplorerListItem[];
 }
 
 export function AgentList({
@@ -148,10 +148,6 @@ export function AgentList({
   noItemsMessage,
   isLoading,
   isFailure,
-  initialSortField,
-  initialSortDirection,
-  initialPageSize,
-  sortFn,
 }: Props) {
   const {
     // removes pagination and sort instructions from the query so it won't be passed down to next route
@@ -171,32 +167,29 @@ export function AgentList({
   );
 
   return (
-    <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
-      <EuiFlexItem>
-        <EuiInMemoryTable
-          tableCaption={i18n.translate('xpack.apm.agentExplorer.table.caption', {
-            defaultMessage: 'Agent Explorer',
-          })}
-          items={items}
-          columns={agentColumns}
-          pagination={{initialPageSize}}
-          sorting={{ sort: {
-              field: field ?? initialSortField,
-              direction: direction ?? initialSortDirection
-            }
-          }}
-          itemId="serviceName"
-          loading={isLoading}
-          data-test-subj="agentExplorerTable"
-          message={
-            isLoading
-              ? i18n.translate('xpack.apm.agentExplorer.table.loading', {
-                  defaultMessage: 'Loading...',
-                })
-              : noItemsMessage
-          }
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiInMemoryTable
+      tableCaption={i18n.translate('xpack.apm.agentExplorer.table.caption', {
+        defaultMessage: 'Agent Explorer',
+      })}
+      items={items}
+      columns={agentColumns}
+      pagination={{
+        pageSizeOptions: [25, 50, 100],
+      }}
+      sorting={{ sort: {
+          field: AgentExplorerFieldName.Environments,
+          direction: 'desc'
+        }
+      }}
+      loading={isLoading}
+      data-test-subj="agentExplorerTable"
+      message={
+        isLoading
+          ? i18n.translate('xpack.apm.agentExplorer.table.loading', {
+              defaultMessage: 'Loading...',
+            })
+          : noItemsMessage
+      }
+    />
   );
 }
