@@ -751,13 +751,15 @@ describe('Execution', () => {
         const a = 1;
         const b = 2;
         const c = 3;
-        const observable$ = cold('abc|', { a, b, c });
+        const d = 4;
+        const observable$ = cold('abcd|', { a, b, c, d });
         const flakyFn = jest
           .fn()
           .mockImplementationOnce((value) => value)
           .mockImplementationOnce(() => {
             throw new Error('Some error.');
           })
+          .mockReturnValueOnce({ type: 'something' })
           .mockImplementationOnce((value) => value);
         const spyFn = jest.fn((input, { arg }) => arg);
 
@@ -788,7 +790,7 @@ describe('Execution', () => {
 
         const result = executor.run('spy arg={observable | flaky}', null, {});
 
-        expectObservable(result).toBe('abc|', {
+        expectObservable(result).toBe('abcd|', {
           a: { partial: true, result: a },
           b: {
             partial: true,
@@ -797,14 +799,23 @@ describe('Execution', () => {
               error: expect.objectContaining({ message: '[spy] > [flaky] > Some error.' }),
             },
           },
-          c: { partial: false, result: c },
+          c: {
+            partial: true,
+            result: {
+              type: 'error',
+              error: expect.objectContaining({
+                message: `[spy] > Can not cast 'something' to any of 'number'`,
+              }),
+            },
+          },
+          d: { partial: false, result: d },
         });
 
         flush();
 
         expect(spyFn).toHaveBeenCalledTimes(2);
         expect(spyFn).toHaveBeenNthCalledWith(1, null, { arg: a });
-        expect(spyFn).toHaveBeenNthCalledWith(2, null, { arg: c });
+        expect(spyFn).toHaveBeenNthCalledWith(2, null, { arg: d });
       });
     });
   });

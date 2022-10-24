@@ -542,7 +542,8 @@ export class Execution<
 
                   return of(output).pipe(
                     map((value) => this.cast(value, argDefs[argName].types)),
-                    tap((value) => this.validate(value, argDefs[argName]))
+                    tap((value) => this.validate(value, argDefs[argName])),
+                    catchError((error) => of(error))
                   );
                 })
               )
