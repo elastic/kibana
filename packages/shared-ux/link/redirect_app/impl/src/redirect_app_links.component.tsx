@@ -43,6 +43,7 @@ export const RedirectAppLinks: FC<RedirectAppLinksComponentProps> = ({
   );
 
   return (
+    //jsx-a11y/click-events-have-key-events
     <div onClick={handleClick} ref={containerRef}>{children}</div>
   );
 };
