@@ -109,7 +109,8 @@ describe('Guided setup', () => {
   });
 
   describe('Button component', () => {
-    test('should be disabled in there is no active guide', async () => {
+    // TODO check for the correct button behavior once https://github.com/elastic/kibana/issues/141129 is implemented
+    test.skip('should be disabled in there is no active guide', async () => {
       const { exists } = testBed;
       expect(exists('disabledGuideButton')).toBe(true);
       expect(exists('guideButton')).toBe(false);
@@ -225,28 +226,53 @@ describe('Guided setup', () => {
     });
 
     describe('Steps', () => {
-      test('should show "Start" button label if step has not been started', async () => {
+      const clickActiveStepButton = async () => {
         const { component, find } = testBed;
+
+        await act(async () => {
+          find('activeStepButton').simulate('click');
+        });
+
+        component.update();
+      };
+
+      test('can start a step if step has not been started', async () => {
+        const { component, find, exists } = testBed;
 
         await updateComponentWithState(component, mockActiveSearchGuideState, true);
 
-        expect(find('activeStepButtonLabel').text()).toEqual('Start');
+        expect(find('activeStepButton').text()).toEqual('Start');
+
+        await clickActiveStepButton();
+
+        expect(exists('guidePanel')).toBe(false);
       });
 
-      test('should show "Continue" button label if step is in progress', async () => {
-        const { component, find } = testBed;
+      test('can continue a step if step is in progress', async () => {
+        const { component, find, exists } = testBed;
 
         await updateComponentWithState(component, mockInProgressSearchGuideState, true);
 
-        expect(find('activeStepButtonLabel').text()).toEqual('Continue');
+        expect(find('activeStepButton').text()).toEqual('Continue');
+
+        await clickActiveStepButton();
+
+        expect(exists('guidePanel')).toBe(false);
       });
 
-      test('shows "Mark done" button label if step is ready to complete', async () => {
-        const { component, find } = testBed;
+      test('can mark a step "done" if step is ready to complete', async () => {
+        const { component, find, exists } = testBed;
 
         await updateComponentWithState(component, mockReadyToCompleteSearchGuideState, true);
 
-        expect(find('activeStepButtonLabel').text()).toEqual('Mark done');
+        expect(find('activeStepButton').text()).toEqual('Mark done');
+
+        await clickActiveStepButton();
+
+        // The guide panel should remain open after marking a step done
+        expect(exists('guidePanel')).toBe(true);
+        // Dependent on the Search guide config, which expects another step to start
+        expect(find('activeStepButton').text()).toEqual('Start');
       });
     });
 
@@ -280,9 +306,8 @@ describe('Guided setup', () => {
         component.update();
 
         expect(exists('quitGuideModal')).toBe(false);
-        // For now, the guide button is disabled once a user quits a guide
-        // This behavior will change once https://github.com/elastic/kibana/issues/141129 is implemented
-        expect(exists('disabledGuideButton')).toBe(true);
+
+        // TODO check for the correct button behavior once https://github.com/elastic/kibana/issues/141129 is implemented
       });
 
       test('cancels out of the quit guide confirmation modal', async () => {

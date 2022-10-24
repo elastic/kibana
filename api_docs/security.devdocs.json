@@ -2586,6 +2586,10 @@
             },
             {
               "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
+            },
+            {
+              "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/create_signals_migration_route.ts"
             },
             {
@@ -2599,10 +2603,6 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/preview_rules_route.ts"
             },
             {
               "plugin": "cloudChat",
