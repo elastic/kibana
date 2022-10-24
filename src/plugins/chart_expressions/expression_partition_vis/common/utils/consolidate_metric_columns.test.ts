@@ -7,16 +7,9 @@
  */
 
 import { Datatable } from '@kbn/expressions-plugin/common';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { consolidateMetricColumns } from './consolidate_metric_columns';
 
 describe('consolidateMetricColumns', () => {
-  const formatServiceMock = {
-    deserialize: () => ({
-      getConverterFor: () => (str: string) => `<formatted>${str}</formatted>`,
-    }),
-  } as FieldFormatsStart;
-
   it('collapses multiple metrics into a single metric column', () => {
     const table: Datatable = {
       type: 'datatable',
@@ -58,7 +51,7 @@ describe('consolidateMetricColumns', () => {
       ],
     };
 
-    const result = consolidateMetricColumns(table, ['1', '2'], ['3', '4'], formatServiceMock);
+    const result = consolidateMetricColumns(table, ['1', '2'], ['3', '4']);
     expect(result.bucketAccessors).toEqual(['1', 'metric-name']);
     expect(result.metricAccessor).toEqual('value');
     expect(result.table).toMatchInlineSnapshot(`
@@ -173,12 +166,7 @@ describe('consolidateMetricColumns', () => {
 
     const bucketAccessors = ['1', '2'];
     const metricAccessors = ['3'];
-    const result = consolidateMetricColumns(
-      table,
-      bucketAccessors,
-      metricAccessors,
-      formatServiceMock
-    );
+    const result = consolidateMetricColumns(table, bucketAccessors, metricAccessors);
 
     expect(result.table).toEqual(table);
     expect(result.bucketAccessors).toEqual(bucketAccessors);
@@ -212,7 +200,7 @@ describe('consolidateMetricColumns', () => {
       ],
     };
 
-    const result = consolidateMetricColumns(table, undefined, ['3', '4'], formatServiceMock);
+    const result = consolidateMetricColumns(table, undefined, ['3', '4']);
     expect(result.bucketAccessors).toEqual(['metric-name']);
     expect(result.metricAccessor).toEqual('value');
     expect(result.table).toMatchInlineSnapshot(`
@@ -222,7 +210,6 @@ describe('consolidateMetricColumns', () => {
             "id": "metric-name",
             "meta": Object {
               "sourceParams": Object {
-                "combinedWithBucketColumn": false,
                 "consolidatedMetricsColumn": true,
               },
               "type": "string",
