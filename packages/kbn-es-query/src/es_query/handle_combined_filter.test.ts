@@ -177,7 +177,7 @@ describe('#handleCombinedFilter', function () {
             "store": "appState",
           },
           "meta": Object {
-            "alias": null,
+            "alias": undefined,
             "disabled": false,
             "index": undefined,
             "negate": false,
@@ -432,7 +432,7 @@ describe('#handleCombinedFilter', function () {
             "store": "appState",
           },
           "meta": Object {
-            "alias": null,
+            "alias": undefined,
             "disabled": false,
             "index": undefined,
             "negate": false,
@@ -497,112 +497,112 @@ describe('#handleCombinedFilter', function () {
       const filter = buildCombinedFilter(BooleanRelation.AND, filters);
       const result = handleCombinedFilter(filter);
       expect(result.query).toMatchInlineSnapshot(`
-      Object {
-        "filter": Array [
-          Object {
-            "bool": Object {
-              "minimum_should_match": 1,
-              "should": Array [
-                Object {
-                  "filter": Array [
-                    Object {
-                      "bool": Object {
-                        "minimum_should_match": 1,
-                        "should": Array [
-                          Object {
-                            "match_phrase": Object {
-                              "extension": "tar",
+              Object {
+                "filter": Array [
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
+                        Object {
+                          "filter": Array [
+                            Object {
+                              "bool": Object {
+                                "minimum_should_match": 1,
+                                "should": Array [
+                                  Object {
+                                    "match_phrase": Object {
+                                      "extension": "tar",
+                                    },
+                                  },
+                                  Object {
+                                    "match_phrase": Object {
+                                      "extension": "gz",
+                                    },
+                                  },
+                                ],
+                              },
                             },
-                          },
-                          Object {
-                            "match_phrase": Object {
-                              "extension": "gz",
+                          ],
+                          "must": Array [],
+                          "must_not": Array [],
+                          "should": Array [],
+                        },
+                        Object {
+                          "filter": Array [
+                            Object {
+                              "match_phrase": Object {
+                                "ssl": false,
+                              },
                             },
-                          },
-                        ],
-                      },
+                          ],
+                          "must": Array [],
+                          "must_not": Array [],
+                          "should": Array [],
+                        },
+                        Object {
+                          "filter": Array [
+                            Object {
+                              "filter": Array [
+                                Object {
+                                  "match_phrase": Object {
+                                    "extension": "value",
+                                  },
+                                },
+                                Object {
+                                  "range": Object {
+                                    "bytes": Object {
+                                      "gte": 10,
+                                    },
+                                  },
+                                },
+                              ],
+                              "must": Array [],
+                              "must_not": Array [],
+                              "should": Array [],
+                            },
+                          ],
+                          "must": Array [],
+                          "must_not": Array [],
+                          "should": Array [],
+                        },
+                        Object {
+                          "filter": Array [
+                            Object {
+                              "exists": Object {
+                                "field": "machine.os",
+                              },
+                            },
+                          ],
+                          "must": Array [],
+                          "must_not": Array [],
+                          "should": Array [],
+                        },
+                      ],
                     },
-                  ],
-                  "must": Array [],
-                  "must_not": Array [],
-                  "should": Array [],
-                },
-                Object {
-                  "filter": Array [
-                    Object {
-                      "match_phrase": Object {
-                        "ssl": false,
-                      },
-                    },
-                  ],
-                  "must": Array [],
-                  "must_not": Array [],
-                  "should": Array [],
-                },
-                Object {
-                  "filter": Array [
-                    Object {
-                      "filter": Array [
+                  },
+                  Object {
+                    "bool": Object {
+                      "minimum_should_match": 1,
+                      "should": Array [
                         Object {
                           "match_phrase": Object {
-                            "extension": "value",
+                            "machine.os.keyword": "foo",
                           },
                         },
                         Object {
-                          "range": Object {
-                            "bytes": Object {
-                              "gte": 10,
-                            },
+                          "match_phrase": Object {
+                            "machine.os.keyword": "bar",
                           },
                         },
                       ],
-                      "must": Array [],
-                      "must_not": Array [],
-                      "should": Array [],
                     },
-                  ],
-                  "must": Array [],
-                  "must_not": Array [],
-                  "should": Array [],
-                },
-                Object {
-                  "filter": Array [
-                    Object {
-                      "exists": Object {
-                        "field": "machine.os",
-                      },
-                    },
-                  ],
-                  "must": Array [],
-                  "must_not": Array [],
-                  "should": Array [],
-                },
-              ],
-            },
-          },
-          Object {
-            "bool": Object {
-              "minimum_should_match": 1,
-              "should": Array [
-                Object {
-                  "match_phrase": Object {
-                    "machine.os.keyword": "foo",
                   },
-                },
-                Object {
-                  "match_phrase": Object {
-                    "machine.os.keyword": "bar",
-                  },
-                },
-              ],
-            },
-          },
-        ],
-        "must": Array [],
-        "must_not": Array [],
-        "should": Array [],
-      }
-    `);
+                ],
+                "must": Array [],
+                "must_not": Array [],
+                "should": Array [],
+              }
+          `);
     });
   });
 });

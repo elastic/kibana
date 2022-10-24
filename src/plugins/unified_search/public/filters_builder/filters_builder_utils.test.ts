@@ -125,50 +125,56 @@ describe('filters_builder_utils', () => {
         }
       `);
       expect(getFilterByPath(filters, '1.1')).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "$state": Object {
-              "store": "appState",
-            },
-            "meta": Object {
-              "alias": null,
-              "disabled": false,
-              "index": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
-              "key": "category.keyword",
-              "negate": false,
-              "params": Object {
-                "query": "Men's Accessories 3",
+        Object {
+          "meta": Object {
+            "params": Array [
+              Object {
+                "$state": Object {
+                  "store": "appState",
+                },
+                "meta": Object {
+                  "alias": null,
+                  "disabled": false,
+                  "index": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                  "key": "category.keyword",
+                  "negate": false,
+                  "params": Object {
+                    "query": "Men's Accessories 3",
+                  },
+                  "type": "phrase",
+                },
+                "query": Object {
+                  "match_phrase": Object {
+                    "category.keyword": "Men's Accessories 3",
+                  },
+                },
               },
-              "type": "phrase",
-            },
-            "query": Object {
-              "match_phrase": Object {
-                "category.keyword": "Men's Accessories 3",
+              Object {
+                "$state": Object {
+                  "store": "appState",
+                },
+                "meta": Object {
+                  "alias": null,
+                  "disabled": false,
+                  "index": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                  "key": "category.keyword",
+                  "negate": false,
+                  "params": Object {
+                    "query": "Men's Accessories 4",
+                  },
+                  "type": "phrase",
+                },
+                "query": Object {
+                  "match_phrase": Object {
+                    "category.keyword": "Men's Accessories 4",
+                  },
+                },
               },
-            },
+            ],
+            "relation": "AND",
+            "type": "combined",
           },
-          Object {
-            "$state": Object {
-              "store": "appState",
-            },
-            "meta": Object {
-              "alias": null,
-              "disabled": false,
-              "index": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
-              "key": "category.keyword",
-              "negate": false,
-              "params": Object {
-                "query": "Men's Accessories 4",
-              },
-              "type": "phrase",
-            },
-            "query": Object {
-              "match_phrase": Object {
-                "category.keyword": "Men's Accessories 4",
-              },
-            },
-          },
-        ]
+        }
       `);
     });
   });
@@ -181,7 +187,7 @@ describe('filters_builder_utils', () => {
     beforeAll(() => {
       filter = filters[0];
       filtersWithOrRelationships = filters[1];
-      groupOfFilters = filters[1].meta.params;
+      groupOfFilters = filters[1].meta.params[1];
     });
 
     test('should return correct ConditionalOperationType', () => {

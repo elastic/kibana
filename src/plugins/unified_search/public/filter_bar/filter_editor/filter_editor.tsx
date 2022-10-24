@@ -259,7 +259,7 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       <div role="region" aria-label="" className={cx(filtersBuilderMaxHeight, 'eui-yScroll')}>
         <FiltersBuilder
           filters={filters}
-          dataView={selectedIndexPattern}
+          dataView={selectedIndexPattern!}
           onChange={(filtersBuilder: Filter[]) => {
             this.setState({ filters: filtersBuilder });
           }}

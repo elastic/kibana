@@ -147,13 +147,13 @@ export function FilterItem({
   }, [dispatch, path]);
 
   const onAddFilter = useCallback(
-    (conditionalType: BooleanRelation) => {
+    (booleanRelation: BooleanRelation) => {
       dispatch({
         type: 'addFilter',
         payload: {
           path,
           filter: buildEmptyFilter(false, dataView?.id),
-          conditionalType,
+          booleanRelation,
         },
       });
     },
