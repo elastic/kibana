@@ -69,13 +69,11 @@ TYPES_DEPS = [
   "@npm//semver",
   "@npm//type-detect",
   "@npm//lodash",
-
   "//packages/kbn-std:npm_module_types",
   "//packages/kbn-config:npm_module_types",
   "//packages/kbn-config-schema:npm_module_types",
   "//packages/kbn-logging:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
-
   "//packages/core/base/core-base-common:npm_module_types",
   "//packages/core/base/core-base-server-internal:npm_module_types",
   "//packages/core/elasticsearch/core-elasticsearch-server-internal:npm_module_types",
@@ -93,7 +91,6 @@ TYPES_DEPS = [
   "//packages/core/lifecycle/core-lifecycle-server-mocks:npm_module_types",
   "//packages/core/logging/core-logging-server-mocks:npm_module_types",
   "//packages/core/node/core-node-server-mocks:npm_module_types",
-
 ]
 
 jsts_transpiler(
