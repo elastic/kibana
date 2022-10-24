@@ -606,21 +606,21 @@ const impactTooltips = {
       'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.anomalyCharacteristicsTooltip.low',
       {
         defaultMessage:
-          'Moderate impact from the statistical properties of the detected anomaly compared to the previous anomalies.',
+          'Moderate impact from the duration and magnitude of the detected anomaly relative to the historical average.',
       }
     ),
     medium: i18n.translate(
       'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.anomalyCharacteristicsTooltip.medium',
       {
         defaultMessage:
-          'Medium impact from the statistical properties of the detected anomaly compared to the previous anomalies.',
+          'Medium impact from the duration and magnitude of the detected anomaly relative to the historical average.',
       }
     ),
     high: i18n.translate(
       'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.anomalyCharacteristicsTooltip.high',
       {
         defaultMessage:
-          'High impact from the statistical properties of the detected anomaly compared to the previous anomalies.',
+          'High impact from the duration and magnitude of the detected anomaly relative to the historical average.',
       }
     ),
   },
