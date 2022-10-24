@@ -26,8 +26,8 @@ import {
   isOperation,
 } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
-import { IndexPatternServiceAPI } from './data_views_service/service';
-import { DraggingIdentifier } from './drag_drop';
+import type { IndexPatternServiceAPI } from './data_views_service/service';
+import type { DraggingIdentifier } from './drag_drop';
 
 export function getVisualizeGeoFieldMessage(fieldType: string) {
   return i18n.translate('xpack.lens.visualizeGeoFieldMessage', {

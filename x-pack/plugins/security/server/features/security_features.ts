@@ -16,6 +16,10 @@ const userManagementFeature: ElasticsearchFeatureConfig = {
   privileges: [
     {
       requiredClusterPrivileges: ['manage_security'],
+      ui: ['save'],
+    },
+    {
+      requiredClusterPrivileges: ['read_security'],
       ui: [],
     },
   ],

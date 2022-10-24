@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { SupportedMetric } from './lib/convert/supported_metrics';
-import { Layer, XYAnnotationsLayerConfig, XYLayerConfig } from './types';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { CollapseFunctions } from './constants';
+import type { SupportedMetric } from './lib/convert/supported_metrics';
+import type { CollapseFunction, Layer, XYAnnotationsLayerConfig, XYLayerConfig } from './types';
 
 export const isAnnotationsLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>
@@ -31,3 +32,6 @@ export const isFieldValid = (
 
   return true;
 };
+
+export const isCollapseFunction = (candidate: string | undefined): candidate is CollapseFunction =>
+  Boolean(candidate && CollapseFunctions.includes(candidate as CollapseFunction));

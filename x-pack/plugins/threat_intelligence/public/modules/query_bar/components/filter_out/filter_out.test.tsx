@@ -8,8 +8,7 @@
 import React, { FunctionComponent } from 'react';
 import { render } from '@testing-library/react';
 import { EuiButtonIcon } from '@elastic/eui';
-import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
-import { useIndicatorsFiltersContext } from '../../../indicators/hooks/use_indicators_filters_context';
+import { generateMockIndicator, Indicator, useIndicatorsFiltersContext } from '../../../indicators';
 import { mockIndicatorsFiltersContext } from '../../../../common/mocks/mock_indicators_filters_context';
 import {
   FilterOutButtonEmpty,
@@ -18,7 +17,7 @@ import {
   FilterOutContextMenu,
 } from '.';
 
-jest.mock('../../../indicators/hooks/use_indicators_filters_context');
+jest.mock('../../../indicators/hooks/use_filters_context');
 
 const mockIndicator: Indicator = generateMockIndicator();
 

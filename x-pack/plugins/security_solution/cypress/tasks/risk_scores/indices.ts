@@ -13,14 +13,8 @@ export const getPivotTransformIndex = (riskScoreEntity: RiskScoreEntity, spaceId
 export const getLatestTransformIndex = (riskScoreEntity: RiskScoreEntity, spaceId = 'default') =>
   `ml_${riskScoreEntity}_risk_score_latest_${spaceId}`;
 
-export const getCreateLegacyRiskScoreIndicesOptions = ({
-  spaceId = 'default',
-  riskScoreEntity,
-}: {
-  spaceId?: string;
-  riskScoreEntity: RiskScoreEntity;
-}) => {
-  const mappings = {
+export const getLegacyRiskScoreMapping = (riskScoreEntity: RiskScoreEntity) => {
+  return {
     properties: {
       [`${riskScoreEntity}.name`]: {
         type: 'keyword',
@@ -47,50 +41,31 @@ export const getCreateLegacyRiskScoreIndicesOptions = ({
         },
       },
     },
-  };
-  return {
-    index: getPivotTransformIndex(riskScoreEntity, spaceId),
-    mappings,
   };
 };
 
-export const getCreateLegacyRiskScoreLatestIndicesOptions = ({
+export const getLegacyRiskScoreIndicesOptions = ({
   spaceId = 'default',
   riskScoreEntity,
 }: {
   spaceId?: string;
   riskScoreEntity: RiskScoreEntity;
 }) => {
-  const mappings = {
-    properties: {
-      [`${riskScoreEntity}.name`]: {
-        type: 'keyword',
-      },
-      '@timestamp': {
-        type: 'date',
-      },
-      ingest_timestamp: {
-        type: 'date',
-      },
-      risk: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-          },
-        },
-      },
-      risk_stats: {
-        properties: {
-          risk_score: {
-            type: 'float',
-          },
-        },
-      },
-    },
+  return {
+    index: getPivotTransformIndex(riskScoreEntity, spaceId),
+    mappings: getLegacyRiskScoreMapping(riskScoreEntity),
   };
+};
+
+export const getLegacyRiskScoreLatestIndicesOptions = ({
+  spaceId = 'default',
+  riskScoreEntity,
+}: {
+  spaceId?: string;
+  riskScoreEntity: RiskScoreEntity;
+}) => {
   return {
     index: getLatestTransformIndex(riskScoreEntity, spaceId),
-    mappings,
+    mappings: getLegacyRiskScoreMapping(riskScoreEntity),
   };
 };

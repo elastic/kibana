@@ -31,6 +31,7 @@ import { Result } from '../../../../../shared/result/result';
 import { resultMetaData } from '../../../../../shared/result/result_metadata';
 
 import { DocumentsLogic } from '../../documents_logic';
+import { IndexViewLogic } from '../../index_view_logic';
 
 export const DocumentList: React.FC = () => {
   const {
@@ -40,6 +41,7 @@ export const DocumentList: React.FC = () => {
     results,
     simplifiedMapping: mappings,
   } = useValues(DocumentsLogic);
+  const { ingestionMethod } = useValues(IndexViewLogic);
   const { onPaginate, setDocsPerPage } = useActions(DocumentsLogic);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -111,6 +113,7 @@ export const DocumentList: React.FC = () => {
             )}
             button={
               <EuiButtonEmpty
+                data-telemetry-id={`entSearchContent-${ingestionMethod}-documents-docsPerPage`}
                 size="s"
                 iconType="arrowDown"
                 iconSide="right"

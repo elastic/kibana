@@ -21,7 +21,7 @@ export const sampleMetricFormulaAttribute = {
   ],
   state: {
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           layer0: {
             columnOrder: [
@@ -34,6 +34,10 @@ export const sampleMetricFormulaAttribute = {
               'layer-0-column-1': {
                 customLabel: true,
                 dataType: 'number',
+                filter: {
+                  language: 'kuery',
+                  query: 'summary.up: *',
+                },
                 isBucketed: false,
                 label: 'Availability',
                 operationType: 'formula',
@@ -54,7 +58,7 @@ export const sampleMetricFormulaAttribute = {
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
-                  query: 'summary.down > 0',
+                  query: '(summary.up: *) AND (summary.down > 0)',
                 },
                 isBucketed: false,
                 label: 'Part of Availability',
@@ -68,6 +72,10 @@ export const sampleMetricFormulaAttribute = {
               'layer-0-column-1X1': {
                 customLabel: true,
                 dataType: 'number',
+                filter: {
+                  language: 'kuery',
+                  query: 'summary.up: *',
+                },
                 isBucketed: false,
                 label: 'Part of Availability',
                 operationType: 'count',

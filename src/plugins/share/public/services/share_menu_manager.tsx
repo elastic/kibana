@@ -74,6 +74,7 @@ export class ShareMenuManager {
     showPublicUrlSwitch,
     urlService,
     anonymousAccess,
+    snapshotShareWarning,
     onClose,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
@@ -114,6 +115,7 @@ export class ShareMenuManager {
               anonymousAccess={anonymousAccess}
               showPublicUrlSwitch={showPublicUrlSwitch}
               urlService={urlService}
+              snapshotShareWarning={snapshotShareWarning}
             />
           </EuiWrappingPopover>
         </KibanaThemeProvider>

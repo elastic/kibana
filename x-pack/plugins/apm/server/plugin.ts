@@ -21,7 +21,7 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
-import { registerApmAlerts } from './routes/alerts/register_apm_alerts';
+import { registerApmRuleTypes } from './routes/alerts/register_apm_rule_types';
 import { registerFleetPolicyCallbacks } from './routes/fleet/register_fleet_policy_callbacks';
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { APMEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
@@ -99,6 +99,7 @@ export class APMPlugin
         taskManager: plugins.taskManager,
         logger: this.logger,
         kibanaVersion: this.initContext.env.packageInfo.version,
+        isProd: this.initContext.env.mode.prod,
       });
     }
 
@@ -190,7 +191,7 @@ export class APMPlugin
     });
 
     if (plugins.alerting) {
-      registerApmAlerts({
+      registerApmRuleTypes({
         ruleDataClient,
         alerting: plugins.alerting,
         ml: plugins.ml,

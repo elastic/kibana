@@ -75,12 +75,20 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
     });
 
-    it('should return full data without streaming', async () => {
+    async function requestWithoutStreaming(body: ApiExplainLogRateSpikes['body']) {
       const resp = await supertest
         .post(`/internal/aiops/explain_log_rate_spikes`)
         .set('kbn-xsrf', 'kibana')
-        .send(requestBody)
+        .send(body)
         .expect(200);
+
+      // compression is on by default so if the request body is undefined
+      // the response header should include "gzip" and otherwise be "undefined"
+      if (body.compressResponse === undefined) {
+        expect(resp.header['content-encoding']).to.be('gzip');
+      } else if (body.compressResponse === false) {
+        expect(resp.header['content-encoding']).to.be(undefined);
+      }
 
       expect(Buffer.isBuffer(resp.body)).to.be(true);
 
@@ -131,34 +139,64 @@ export default ({ getService }: FtrProviderContext) => {
       histograms.forEach((h, index) => {
         expect(h.histogram.length).to.be(20);
       });
+    }
+
+    it('should return full data without streaming with compression with flushFix', async () => {
+      await requestWithoutStreaming(requestBody);
     });
 
-    it('should return data in chunks with streaming', async () => {
-      const response = await fetch(`${kibanaServerUrl}/internal/aiops/explain_log_rate_spikes`, {
+    it('should return full data without streaming with compression without flushFix', async () => {
+      await requestWithoutStreaming({ ...requestBody, flushFix: false });
+    });
+
+    it('should return full data without streaming without compression with flushFix', async () => {
+      await requestWithoutStreaming({ ...requestBody, compressResponse: false });
+    });
+
+    it('should return full data without streaming without compression without flushFix', async () => {
+      await requestWithoutStreaming({ ...requestBody, compressResponse: false, flushFix: false });
+    });
+
+    async function requestWithStreaming(body: ApiExplainLogRateSpikes['body']) {
+      const resp = await fetch(`${kibanaServerUrl}/internal/aiops/explain_log_rate_spikes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'kbn-xsrf': 'stream',
         },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify(body),
       });
 
-      expect(response.ok).to.be(true);
-      expect(response.status).to.be(200);
+      // compression is on by default so if the request body is undefined
+      // the response header should include "gzip" and otherwise be "null"
+      if (body.compressResponse === undefined) {
+        expect(resp.headers.get('content-encoding')).to.be('gzip');
+      } else if (body.compressResponse === false) {
+        expect(resp.headers.get('content-encoding')).to.be(null);
+      }
 
-      const stream = response.body;
+      expect(resp.ok).to.be(true);
+      expect(resp.status).to.be(200);
+
+      const stream = resp.body;
 
       expect(stream).not.to.be(null);
 
       if (stream !== null) {
         const data: any[] = [];
+        let chunkCounter = 0;
+        const parseStreamCallback = (c: number) => (chunkCounter = c);
 
-        for await (const action of parseStream(stream)) {
+        for await (const action of parseStream(stream, parseStreamCallback)) {
           expect(action.type).not.to.be('error');
           data.push(action);
         }
 
+        // If streaming works correctly we should receive more than one chunk.
+        expect(chunkCounter).to.be.greaterThan(1);
+
         expect(data.length).to.be(expected.actionsLength);
+
         const addChangePointsActions = data.filter((d) => d.type === expected.changePointFilter);
         expect(addChangePointsActions.length).to.greaterThan(0);
 
@@ -189,6 +227,22 @@ export default ({ getService }: FtrProviderContext) => {
           expect(h.histogram.length).to.be(20);
         });
       }
+    }
+
+    it('should return data in chunks with streaming with compression with flushFix', async () => {
+      await requestWithStreaming(requestBody);
+    });
+
+    it('should return data in chunks with streaming with compression without flushFix', async () => {
+      await requestWithStreaming({ ...requestBody, flushFix: false });
+    });
+
+    it('should return data in chunks with streaming without compression with flushFix', async () => {
+      await requestWithStreaming({ ...requestBody, compressResponse: false });
+    });
+
+    it('should return data in chunks with streaming without compression without flushFix', async () => {
+      await requestWithStreaming({ ...requestBody, compressResponse: false, flushFix: false });
     });
 
     it('should return an error for non existing index without streaming', async () => {

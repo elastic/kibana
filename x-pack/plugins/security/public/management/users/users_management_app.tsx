@@ -28,6 +28,7 @@ import {
 } from '../../components/breadcrumb';
 import { AuthenticationProvider } from '../../components/use_current_user';
 import type { PluginStartDependencies } from '../../plugin';
+import { ReadonlyBadge } from '../badges/readonly_badge';
 import { tryDecodeURIComponent } from '../url_utils';
 
 interface CreateParams {
@@ -72,6 +73,12 @@ export const usersManagementApp = Object.freeze({
             authc={authc}
             onChange={createBreadcrumbsChangeHandler(coreStart.chrome, setBreadcrumbs)}
           >
+            <ReadonlyBadge
+              featureId="users"
+              tooltip={i18n.translate('xpack.security.management.users.readonlyTooltip', {
+                defaultMessage: 'Unable to create or edit users',
+              })}
+            />
             <Breadcrumb
               text={i18n.translate('xpack.security.users.breadcrumb', {
                 defaultMessage: 'Users',
@@ -86,6 +93,7 @@ export const usersManagementApp = Object.freeze({
                     rolesAPIClient={new RolesAPIClient(coreStart.http)}
                     history={history}
                     navigateToApp={coreStart.application.navigateToApp}
+                    readOnly={!coreStart.application.capabilities.users.save}
                   />
                 </Route>
                 <Route path="/create">

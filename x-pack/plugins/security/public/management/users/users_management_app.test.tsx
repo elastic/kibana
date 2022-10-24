@@ -22,9 +22,14 @@ describe('usersManagementApp', () => {
     const coreStartMock = coreMock.createStart();
     getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
     const { authc } = securityMock.createSetup();
-
     const setBreadcrumbs = jest.fn();
     const history = scopedHistoryMock.create({ pathname: '/create' });
+    coreStartMock.application.capabilities = {
+      ...coreStartMock.application.capabilities,
+      users: {
+        save: true,
+      },
+    };
 
     let unmount: Unmount = noop;
     await act(async () => {
