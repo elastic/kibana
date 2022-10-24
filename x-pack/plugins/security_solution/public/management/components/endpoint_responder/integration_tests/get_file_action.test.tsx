@@ -23,7 +23,9 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint
 import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
 import { INSUFFICIENT_PRIVILEGES_FOR_COMMAND } from '../../../../common/translations';
 
-describe('When using get-file aciton from response actions console', () => {
+jest.mock('../../../../common/components/user_privileges');
+
+describe('When using get-file action from response actions console', () => {
   let render: (
     capabilities?: EndpointCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -122,6 +124,19 @@ describe('When using get-file aciton from response actions console', () => {
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument can only be used once: --comment'
+    );
+  });
+
+  it('should display download link once action completes', async () => {
+    await render();
+    enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
+    });
+
+    expect(renderResult.getByTestId('getFileSuccess').textContent).toEqual(
+      'File retrieved from the host.Click here to download(ZIP file passcode: elastic)'
     );
   });
 });

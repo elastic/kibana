@@ -10554,6 +10554,22 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-public.SavedObject.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [
+              "Timestamp of the time this document had been created."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-public.SavedObject.updated_at",
             "type": "string",
             "tags": [],
@@ -11160,19 +11176,19 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
             "plugin": "taskManager",
@@ -13858,6 +13874,20 @@
             "type": "string",
             "tags": [],
             "label": "updatedAt",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-api-browser/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.SimpleSavedObject.createdAt",
+            "type": "string",
+            "tags": [],
+            "label": "createdAt",
             "description": [],
             "signature": [
               "string | undefined"
@@ -40264,6 +40294,22 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-server.SavedObject.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [
+              "Timestamp of the time this document had been created."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-server.SavedObject.updated_at",
             "type": "string",
             "tags": [],
@@ -40870,19 +40916,19 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
             "plugin": "taskManager",
@@ -46333,6 +46379,20 @@
             "type": "string",
             "tags": [],
             "label": "updated_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-server/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsRawDocSource.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
             "description": [],
             "signature": [
               "string | undefined"
