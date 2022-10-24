@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
@@ -198,12 +199,19 @@ export const DiscoverTopNav = ({
     [dataView, navigateTo, savedSearch, services, stateContainer, updateAdHocDataViewId]
   );
   const badges = useMemo(() => {
-    if (hasChanged) {
-      return [{ badgeText: 'Unsaved changes', color: 'success' }];
+    if (hasChanged && savedSearch.id) {
+      return [
+        {
+          badgeText: i18n.translate('discover.unsavedChangesBadge', {
+            defaultMessage: 'Unsaved changes',
+          }),
+          color: 'success',
+        },
+      ];
     }
 
     return [];
-  }, [hasChanged]);
+  }, [hasChanged, savedSearch.id]);
 
   return (
     <AggregateQueryTopNavMenu
