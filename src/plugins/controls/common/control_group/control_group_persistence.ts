@@ -16,12 +16,11 @@ import {
   DEFAULT_CONTROL_STYLE,
   DEFAULT_CONTROL_WIDTH,
 } from './control_group_constants';
+import { PersistableControlGroupInput, RawControlGroupAttributes } from './types';
 import {
-  ControlGroupDiffSystem,
-  PersistableControlGroupInput,
-  RawControlGroupAttributes,
-} from './types';
-import { ControlPanelDiffSystems } from './control_group_panel_diff_system';
+  ControlPanelDiffSystems,
+  genericControlPanelDiffSystem,
+} from './control_group_panel_diff_system';
 
 const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
   if (!jsonString && typeof jsonString !== 'string') return;
@@ -81,11 +80,13 @@ const getPanelsAreEqual = (
   }
 
   for (const panelId of newPanelIds) {
-    const newPanelType = newPanels[panelId].type as ControlGroupDiffSystem;
-    const panelIsEqual = ControlPanelDiffSystems[newPanelType].getPanelIsEqual(
-      originalPanels[panelId],
-      newPanels[panelId]
-    );
+    const newPanelType = newPanels[panelId].type;
+    const panelIsEqual = ControlPanelDiffSystems[newPanelType]
+      ? ControlPanelDiffSystems[newPanelType].getPanelIsEqual(
+          originalPanels[panelId],
+          newPanels[panelId]
+        )
+      : genericControlPanelDiffSystem.getPanelIsEqual(originalPanels[panelId], newPanels[panelId]);
     if (!panelIsEqual) return false;
   }
   return true;

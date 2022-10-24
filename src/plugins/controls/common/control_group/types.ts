@@ -8,7 +8,6 @@
 
 import { EmbeddableInput, PanelState } from '@kbn/embeddable-plugin/common/types';
 import { SerializableRecord } from '@kbn/utility-types';
-import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL, TIME_SLIDER_CONTROL } from '..';
 import { ControlInput, ControlStyle, ControlWidth } from '../types';
 
 export const CONTROL_GROUP_TYPE = 'control_group';
@@ -21,11 +20,6 @@ export interface ControlPanelState<TEmbeddableInput extends ControlInput = Contr
 }
 
 export type ControlGroupChainingSystem = 'HIERARCHICAL' | 'NONE';
-
-export type ControlGroupDiffSystem =
-  | typeof OPTIONS_LIST_CONTROL
-  | typeof RANGE_SLIDER_CONTROL
-  | typeof TIME_SLIDER_CONTROL;
 
 export interface ControlsPanels {
   [panelId: string]: ControlPanelState;

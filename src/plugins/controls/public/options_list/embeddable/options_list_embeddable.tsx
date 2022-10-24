@@ -113,7 +113,6 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   private initialize = async () => {
     const { selectedOptions: initialSelectedOptions } = this.getInput();
-    // console.log('initial input', this.getInput());
     if (!initialSelectedOptions) this.setInitializationFinished();
     this.runOptionsListQuery().then(async () => {
       if (initialSelectedOptions) {

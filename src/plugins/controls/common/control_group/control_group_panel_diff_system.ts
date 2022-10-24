@@ -9,28 +9,27 @@
 import deepEqual from 'fast-deep-equal';
 import { omit, isEqual } from 'lodash';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from '../options_list/types';
-import { RANGE_SLIDER_CONTROL } from '../range_slider/types';
-import { TIME_SLIDER_CONTROL } from '../time_slider/types';
 
-import { ControlGroupDiffSystem, ControlPanelState } from './types';
+import { ControlPanelState } from './types';
 
 interface DiffSystem {
   getPanelIsEqual: (initialInput: ControlPanelState, newInput: ControlPanelState) => boolean;
 }
 
-const genericControlPanelDiffSystem: DiffSystem = {
+export const genericControlPanelDiffSystem: DiffSystem = {
   getPanelIsEqual: (initialInput, newInput) => {
     return deepEqual(initialInput, newInput);
   },
 };
 
 export const ControlPanelDiffSystems: {
-  [key in ControlGroupDiffSystem]: DiffSystem;
+  [key: string]: DiffSystem;
 } = {
   [OPTIONS_LIST_CONTROL]: {
     getPanelIsEqual: (initialInput, newInput) => {
-      if (!deepEqual(omit(initialInput, 'explicitInput'), omit(newInput, 'explicitInput')))
+      if (!deepEqual(omit(initialInput, 'explicitInput'), omit(newInput, 'explicitInput'))) {
         return false;
+      }
 
       const {
         exclude: excludeA,
@@ -59,6 +58,4 @@ export const ControlPanelDiffSystems: {
       );
     },
   },
-  [RANGE_SLIDER_CONTROL]: genericControlPanelDiffSystem,
-  [TIME_SLIDER_CONTROL]: genericControlPanelDiffSystem,
 };
