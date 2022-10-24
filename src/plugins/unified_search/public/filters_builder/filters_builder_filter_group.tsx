@@ -20,7 +20,7 @@ import {
 import { type Filter, BooleanRelation } from '@kbn/es-query';
 import { css, cx } from '@emotion/css';
 import type { Path } from './filters_builder_types';
-import { getConditionalOperationType } from '../utils';
+import { getBooleanRelationType } from '../utils';
 import { FilterItem } from './filters_builder_filter_item';
 import { FiltersBuilderContextType } from './filters_builder_context';
 import { getPathInArray } from './filters_builder_utils';
@@ -96,7 +96,7 @@ export const FilterGroup = ({
 
   const removeDisabled = pathInArray.length <= 1 && filters.length === 1;
   const shouldNormalizeFirstLevel =
-    !path && filters.length === 1 && getConditionalOperationType(filters[0]);
+    !path && filters.length === 1 && getBooleanRelationType(filters[0]);
 
   if (shouldNormalizeFirstLevel) {
     reverseBackground = true;

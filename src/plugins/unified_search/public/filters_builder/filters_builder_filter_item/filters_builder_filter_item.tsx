@@ -30,7 +30,7 @@ import or from '../assets/or.svg';
 import { FieldInput } from './filters_builder_filter_item_field_input';
 import { OperatorInput } from './filters_builder_filter_item_operator_input';
 import { ParamsEditor } from './filters_builder_filter_item_params_editor';
-import { getConditionalOperationType } from '../../utils';
+import { getBooleanRelationType } from '../../utils';
 import { FiltersBuilderContextType } from '../filters_builder_context';
 import { FilterGroup } from '../filters_builder_filter_group';
 import type { Path } from '../filters_builder_types';
@@ -77,7 +77,7 @@ export function FilterItem({
     globalParams: { hideOr },
     timeRangeForSuggestionsOverride,
   } = useContext(FiltersBuilderContextType);
-  const conditionalOperationType = getConditionalOperationType(filter);
+  const conditionalOperationType = getBooleanRelationType(filter);
   const { euiTheme } = useEuiTheme();
 
   const grabIconStyles = useMemo(

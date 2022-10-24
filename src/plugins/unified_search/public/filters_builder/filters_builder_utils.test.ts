@@ -15,7 +15,7 @@ import {
   moveFilter,
   normalizeFilters,
 } from './filters_builder_utils';
-import { getConditionalOperationType } from '../utils';
+import { getBooleanRelationType } from '../utils';
 
 import {
   getDataAfterNormalized,
@@ -179,7 +179,7 @@ describe('filters_builder_utils', () => {
     });
   });
 
-  describe('getConditionalOperationType', () => {
+  describe('getBooleanRelationType', () => {
     let filter: Filter;
     let filtersWithOrRelationships: Filter;
     let groupOfFilters: Filter;
@@ -191,9 +191,9 @@ describe('filters_builder_utils', () => {
     });
 
     test('should return correct ConditionalOperationType', () => {
-      expect(getConditionalOperationType(filter)).toBeUndefined();
-      expect(getConditionalOperationType(filtersWithOrRelationships)).toBe(BooleanRelation.OR);
-      expect(getConditionalOperationType(groupOfFilters)).toBe(BooleanRelation.AND);
+      expect(getBooleanRelationType(filter)).toBeUndefined();
+      expect(getBooleanRelationType(filtersWithOrRelationships)).toBe(BooleanRelation.OR);
+      expect(getBooleanRelationType(groupOfFilters)).toBe(BooleanRelation.AND);
     });
   });
 
