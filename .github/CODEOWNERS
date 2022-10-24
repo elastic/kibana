@@ -52,11 +52,8 @@
 
 # Application Services
 /examples/bfetch_explorer/ @elastic/kibana-app-services
-/examples/dashboard_embeddable_examples/ @elastic/kibana-app-services
 /examples/demo_search/ @elastic/kibana-app-services
 /examples/developer_examples/ @elastic/kibana-app-services
-/examples/embeddable_examples/ @elastic/kibana-app-services
-/examples/embeddable_explorer/ @elastic/kibana-app-services
 /examples/state_containers_examples/ @elastic/kibana-app-services
 /examples/ui_action_examples/ @elastic/kibana-app-services
 /examples/ui_actions_explorer/ @elastic/kibana-app-services
@@ -66,7 +63,6 @@
 /src/plugins/bfetch/ @elastic/kibana-app-services
 /src/plugins/data/ @elastic/kibana-app-services
 /src/plugins/data_views/ @elastic/kibana-app-services
-/src/plugins/embeddable/ @elastic/kibana-app-services
 /src/plugins/expressions/ @elastic/kibana-app-services
 /src/plugins/field_formats/ @elastic/kibana-app-services
 /src/plugins/data_view_editor/ @elastic/kibana-app-services
@@ -172,6 +168,10 @@ x-pack/examples/files_example @elastic/kibana-app-services
 ### END Observability Plugins
 
 # Presentation
+/examples/dashboard_embeddable_examples/ @elastic/kibana-presentation
+/examples/embeddable_examples/ @elastic/kibana-presentation
+/examples/embeddable_explorer/ @elastic/kibana-presentation
+/src/plugins/embeddable/ @elastic/kibana-presentation
 /src/plugins/dashboard/ @elastic/kibana-presentation
 /src/plugins/expression_error/ @elastic/kibana-presentation
 /src/plugins/expression_image/ @elastic/kibana-presentation
