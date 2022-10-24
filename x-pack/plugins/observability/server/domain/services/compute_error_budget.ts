@@ -9,10 +9,9 @@ import { ErrorBudget, IndicatorData, SLO } from '../../types/models';
 import { toHighPrecision } from '../../utils/number';
 
 export function computeErrorBudget(slo: SLO, sliData: IndicatorData): ErrorBudget {
-  const goodEvents = sliData.good;
-  const totalEvents = sliData.total;
+  const { good, total } = sliData;
   const initialErrorBudget = toHighPrecision(1 - slo.objective.target);
-  if (totalEvents === 0 || goodEvents >= totalEvents) {
+  if (total === 0 || good >= total) {
     return {
       initial: initialErrorBudget,
       consumed: 0,
@@ -20,10 +19,7 @@ export function computeErrorBudget(slo: SLO, sliData: IndicatorData): ErrorBudge
     };
   }
 
-  const consumedErrorBudget = toHighPrecision(
-    (totalEvents - goodEvents) / (totalEvents * initialErrorBudget)
-  );
-
+  const consumedErrorBudget = toHighPrecision((total - good) / (total * initialErrorBudget));
   const remainingErrorBudget = Math.max(toHighPrecision(1 - consumedErrorBudget), 0);
 
   return {
