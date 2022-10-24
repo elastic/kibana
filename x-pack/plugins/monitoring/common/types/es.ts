@@ -276,7 +276,7 @@ export interface ElasticsearchLegacySource {
         cgroup?: {
           memory: {
             id: string;
-	  }
+          }
           mem: {
             limit: {
               bytes: number;
