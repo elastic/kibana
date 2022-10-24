@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { sortBy, slice, get, cloneDeep } from 'lodash';
 import moment from 'moment';
 import Boom from '@hapi/boom';
@@ -225,8 +226,8 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       anomalies: [],
       interval: 'second',
     };
-    // @ts-expect-error incorrect search response type
-    if (body.hits.total.value > 0) {
+
+    if ((body.hits.total as estypes.SearchTotalHits).value > 0) {
       let records: AnomalyRecordDoc[] = [];
       body.hits.hits.forEach((hit: any) => {
         records.push(hit._source);

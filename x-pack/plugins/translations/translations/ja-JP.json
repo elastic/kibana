@@ -19608,7 +19608,6 @@
     "xpack.ml.anomaliesTable.anomalyDetails.initialRecordScoreTooltip": "0～100の正規化されたスコア。バケットが最初に処理されたときの異常レコード結果の相対的な有意性を示します。",
     "xpack.ml.anomaliesTable.anomalyDetails.interimResultLabel": "中間結果",
     "xpack.ml.anomaliesTable.anomalyDetails.jobIdTitle": "ジョブID",
-    "xpack.ml.anomaliesTable.anomalyDetails.multiBucketImpactTitle": "複数バケットの影響",
     "xpack.ml.anomaliesTable.anomalyDetails.probabilityTitle": "確率",
     "xpack.ml.anomaliesTable.anomalyDetails.recordScoreTitle": "レコードスコア",
     "xpack.ml.anomaliesTable.anomalyDetails.recordScoreTooltip": "0～100の正規化されたスコア。異常レコード結果の相対的な有意性を示します。新しいデータが分析されると、この値が変化する場合があります。",

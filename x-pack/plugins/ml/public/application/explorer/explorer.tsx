@@ -609,6 +609,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
             tableData={tableData}
             influencerFilter={applyFilter}
             sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+            selectedJobs={selectedJobs}
           />
         </EuiPanel>
       )}
