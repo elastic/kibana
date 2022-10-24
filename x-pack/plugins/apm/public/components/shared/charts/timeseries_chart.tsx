@@ -28,7 +28,7 @@ import {
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '@kbn/observability-plugin/public';
 import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
@@ -72,12 +72,37 @@ interface Props {
   anomalyTimeseries?: AnomalyTimeseries;
   customTheme?: Record<string, unknown>;
   anomalyTimeseriesColor?: string;
+  comparisonEnabled?: boolean;
+  offset?: string;
+  externalContext?: boolean;
+  timeZone?: string;
 }
 
 const END_ZONE_LABEL = i18n.translate('xpack.apm.timeseries.endzone', {
   defaultMessage:
     'The selected time range does not include this entire bucket. It might contain partial data.',
 });
+
+function UseAnyOfApmParamsWrapper({
+  setAnyOfApmParams,
+}: {
+  setAnyOfApmParams: Function;
+}) {
+  const {
+    query: { comparisonEnabled, offset },
+  } = useAnyOfApmParams(
+    '/services',
+    '/dependencies/*',
+    '/services/{serviceName}'
+  );
+  useEffect(() => {
+    setAnyOfApmParams({
+      comparisonEnabled,
+      offset,
+    });
+  }, [setAnyOfApmParams, comparisonEnabled, offset]);
+  return null;
+}
 
 export function TimeseriesChart({
   id,
@@ -91,6 +116,10 @@ export function TimeseriesChart({
   yDomain,
   anomalyTimeseries,
   customTheme = {},
+  comparisonEnabled,
+  offset,
+  externalContext,
+  timeZone,
 }: Props) {
   const history = useHistory();
   const { core } = useApmPluginContext();
@@ -98,13 +127,11 @@ export function TimeseriesChart({
   const { chartRef, updatePointerEvent } = useChartPointerEventContext();
   const theme = useTheme();
   const chartTheme = useChartTheme();
-  const {
-    query: { comparisonEnabled, offset },
-  } = useAnyOfApmParams(
-    '/services',
-    '/dependencies/*',
-    '/services/{serviceName}'
-  );
+
+  const [anyOfApmParams, setAnyOfApmParams] = useState({
+    comparisonEnabled,
+    offset,
+  });
 
   const anomalyChartTimeseries = getChartAnomalyTimeseries({
     anomalyTimeseries,
@@ -116,7 +143,8 @@ export function TimeseriesChart({
   const annotationColor = theme.eui.euiColorSuccess;
 
   const isComparingExpectedBounds =
-    comparisonEnabled && isExpectedBoundsComparison(offset);
+    anyOfApmParams.comparisonEnabled &&
+    isExpectedBoundsComparison(anyOfApmParams.offset);
   const allSeries = [
     ...timeseries,
     ...(isComparingExpectedBounds
@@ -139,8 +167,6 @@ export function TimeseriesChart({
     anomalyChartTimeseries?.boundaries?.flatMap(({ data }) =>
       data.map(({ x }) => x)
     ) ?? [];
-
-  const timeZone = getTimeZone(core.uiSettings);
 
   const min = Math.min(...xValues);
   const max = Math.max(...xValues, ...xValuesExpectedBounds);
@@ -190,6 +216,9 @@ export function TimeseriesChart({
       status={fetchStatus}
       id={id}
     >
+      {!externalContext && (
+        <UseAnyOfApmParamsWrapper setAnyOfApmParams={setAnyOfApmParams} />
+      )}
       <Chart ref={chartRef} id={id}>
         <Settings
           tooltip={{
@@ -297,7 +326,9 @@ export function TimeseriesChart({
 
           return (
             <Series
-              timeZone={timeZone}
+              timeZone={
+                externalContext ? timeZone : getTimeZone(core.uiSettings)
+              }
               key={serie.title}
               id={serie.id || serie.title}
               groupId={serie.groupId}

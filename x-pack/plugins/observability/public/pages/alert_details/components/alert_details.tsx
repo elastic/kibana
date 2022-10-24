@@ -10,8 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 
-import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_TYPE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { getTimeZone } from '../../../utils/get_time_zone';
+import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { useKibana } from '../../../utils/kibana_react';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
@@ -29,6 +31,7 @@ import { paths } from '../../../config/paths';
 
 export function AlertDetails() {
   const {
+    uiSettings,
     http,
     cases: {
       helpers: { canUseCases },
@@ -40,10 +43,13 @@ export function AlertDetails() {
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
   const [isLoading, alert] = useFetchAlertDetail(alertId);
+  const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
   const CasesContext = getCasesContext();
   const userCasesPermissions = canUseCases();
-  const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
-
+  const { isRuleLoading, rule, errorRule, reloadRule } = useFetchRule({
+    ruleId: alert?.fields[ALERT_RULE_UUID] || '',
+    http,
+  });
   useEffect(() => {
     if (alert) {
       setRuleTypeModel(ruleTypeRegistry.get(alert?.fields[ALERT_RULE_TYPE_ID]!));
@@ -90,7 +96,10 @@ export function AlertDetails() {
         />
       </EuiPanel>
     );
+
   const AlertDetailsAppSection = ruleTypeModel ? ruleTypeModel.alertDetailsAppSection : null;
+  const timeZone = getTimeZone(uiSettings);
+
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -109,7 +118,7 @@ export function AlertDetails() {
       data-test-subj="alertDetails"
     >
       <AlertSummary alert={alert} />
-      {AlertDetailsAppSection && <AlertDetailsAppSection alert={alert} />}
+      {AlertDetailsAppSection && rule && <AlertDetailsAppSection rule={rule} timeZone={timeZone} />}
     </ObservabilityPageTemplate>
   );
 }

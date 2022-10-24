@@ -38,7 +38,7 @@ const options: Array<{ value: LatencyAggregationType; text: string }> = [
   { value: LatencyAggregationType.p99, text: '99th percentile' },
 ];
 
-function filterNil<T>(value: T | null | undefined): value is T {
+export function filterNil<T>(value: T | null | undefined): value is T {
   return value != null;
 }
 
