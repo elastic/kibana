@@ -322,6 +322,44 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-resources-server",
+            "id": "def-server.HttpResourcesServiceToolkit.renderCss",
+            "type": "Function",
+            "tags": [],
+            "label": "renderCss",
+            "description": [
+              "To respond with a custom CSS script file."
+            ],
+            "signature": [
+              "(options: ",
+              "HttpResponseOptions",
+              ") => ",
+              "IKibanaResponse",
+              "<any>"
+            ],
+            "path": "packages/core/http/core-http-resources-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-resources-server",
+                "id": "def-server.HttpResourcesServiceToolkit.renderCss.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "HttpResponseOptions"
+                ],
+                "path": "packages/core/http/core-http-resources-server/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

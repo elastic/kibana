@@ -43,6 +43,7 @@
     "fieldFormats": "src/plugins/field_formats",
     "flot": "packages/kbn-flot-charts/lib",
     "guidedOnboarding": "src/plugins/guided_onboarding",
+    "guidedOnboardingPackage": "packages/kbn-guided-onboarding",
     "home": "src/plugins/home",
     "homePackages": "packages/home",
     "indexPatternEditor": "src/plugins/data_view_editor",
@@ -74,6 +75,7 @@
     "share": "src/plugins/share",
     "sharedUXPackages": "packages/shared-ux",
     "coloring": "packages/kbn-coloring/src",
+    "languageDocumentationPopover": "packages/kbn-language-documentation-popover/src",
     "statusPage": "src/legacy/core_plugins/status_page",
     "telemetry": ["src/plugins/telemetry", "src/plugins/telemetry_management_section"],
     "timelion": ["src/plugins/vis_types/timelion"],
@@ -97,7 +99,8 @@
     "visTypeXy": "src/plugins/vis_types/xy",
     "visualizations": "src/plugins/visualizations",
     "unifiedSearch": "src/plugins/unified_search",
-    "unifiedFieldList": "src/plugins/unified_field_list"
+    "unifiedFieldList": "src/plugins/unified_field_list",
+    "unifiedHistogram": "src/plugins/unified_histogram"
   },
   "translations": []
 }

@@ -21,7 +21,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import type { StepStatus } from '../../common/types';
+import type { StepStatus } from '@kbn/guided-onboarding';
 import type { StepConfig } from '../types';
 import { getGuidePanelStepStyles } from './guide_panel_step.styles';
 
@@ -109,7 +109,7 @@ export const GuideStep = ({
                   <EuiButton
                     onClick={() => handleButtonClick()}
                     fill
-                    data-test-subj="activeStepButtonLabel"
+                    data-test-subj="activeStepButton"
                   >
                     {getStepButtonLabel()}
                   </EuiButton>
