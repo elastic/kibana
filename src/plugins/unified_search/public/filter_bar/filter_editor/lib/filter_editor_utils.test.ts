@@ -194,9 +194,9 @@ describe('Filter editor utils', () => {
       expect(isValid).toBe(false);
     });
 
-    it('should return true for exists filter without params', () => {
+    it('should return false for exists filter without params', () => {
       const isValid = isFilterValid(stubIndexPattern, stubFields[0], existsOperator);
-      expect(isValid).toBe(true);
+      expect(isValid).toBe(false);
     });
   });
 });

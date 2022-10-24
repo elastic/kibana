@@ -11,7 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import { BooleanRelation } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
 import { buildCombinedFilter, isCombinedFilter } from '@kbn/es-query';
-import { getConditionalOperationType } from '../utils';
+import { getBooleanRelationType } from '../utils';
 import type { Operator } from '../filter_bar/filter_editor';
 
 const PATH_SEPARATOR = '.';
@@ -41,7 +41,7 @@ const getContainerMetaByPath = (filters: Filter[], pathInArray: number[]) => {
 
   if (pathInArray.length > 1) {
     parentFilter = getFilterByPath(filters, getParentFilterPath(pathInArray));
-    parentConditionType = getConditionalOperationType(parentFilter) ?? parentConditionType;
+    parentConditionType = getBooleanRelationType(parentFilter) ?? parentConditionType;
     targetArray = getGroupedFilters(parentFilter);
   }
 

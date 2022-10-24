@@ -16,7 +16,7 @@ import { FilterBadgeGroup } from './filter_badge_group';
 import type { LabelOptions } from './filter_badge_utils';
 import { FILTER_LABLE_STATUS, getValueLabel } from './filter_badge_utils';
 import { FilterContent } from './filter_badge_expression_filter_content';
-import { getConditionalOperationType } from '../utils';
+import { getBooleanRelationType } from '../utils';
 
 export interface FilterBadgeExpressionProps {
   filter: Filter;
@@ -30,7 +30,7 @@ export function FilterExpressionBadge({
   dataViews,
   isRootLevel,
 }: FilterBadgeExpressionProps) {
-  const conditionalOperationType = getConditionalOperationType(filter);
+  const conditionalOperationType = getBooleanRelationType(filter);
 
   const paddingLeft = useEuiPaddingCSS('left').xs;
   const paddingRight = useEuiPaddingCSS('right').xs;
