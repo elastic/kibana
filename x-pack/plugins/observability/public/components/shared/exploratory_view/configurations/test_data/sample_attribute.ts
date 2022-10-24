@@ -70,7 +70,7 @@ export const sampleAttribute = {
                     'transaction.type: page-load and processor.event: transaction and transaction.type : *',
                 },
                 isBucketed: false,
-                label: 'Pages loaded',
+                label: 'test-series',
                 operationType: 'formula',
                 params: {
                   format: {
@@ -325,6 +325,8 @@ export const sampleAttribute = {
         isVisible: true,
         position: 'right',
         showSingleSeries: true,
+        legendSize: 'large',
+        shouldTruncate: false,
       },
       preferredSeriesType: 'line',
       tickLabelsVisibilitySettings: {

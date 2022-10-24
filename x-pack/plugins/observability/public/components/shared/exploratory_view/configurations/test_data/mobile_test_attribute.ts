@@ -43,7 +43,7 @@ export const testMobileKPIAttr = {
               },
               'y-axis-column-layer0-0': {
                 isBucketed: false,
-                label: 'Median of System memory usage',
+                label: 'test-series',
                 operationType: 'median',
                 params: {},
                 scale: 'ratio',
@@ -62,7 +62,13 @@ export const testMobileKPIAttr = {
       },
     },
     visualization: {
-      legend: { isVisible: true, showSingleSeries: true, position: 'right' },
+      legend: {
+        isVisible: true,
+        showSingleSeries: true,
+        position: 'right',
+        legendSize: 'large',
+        shouldTruncate: false,
+      },
       valueLabels: 'hide',
       fittingFunction: 'Linear',
       curveType: 'CURVE_MONOTONE_X',
