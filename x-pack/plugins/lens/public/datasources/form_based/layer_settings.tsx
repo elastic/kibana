@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiToolTip, EuiRange, EuiBetaBadge } from '@elastic/eui';
+import { EuiFormRow, EuiRange, EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { DatasourceLayerSettingsProps } from '../../types';
@@ -29,27 +29,22 @@ export function LayerSettingsPanel({
         defaultMessage: 'Change the sampling probability to see how your chart is affected',
       })}
       label={
-        <span>
+        <>
           {i18n.translate('xpack.lens.xyChart.randomSampling.label', {
             defaultMessage: 'Sampling',
           })}{' '}
-          <EuiToolTip
-            content={i18n.translate('xpack.lens.randomSampling.experimentalLabel', {
+          <EuiBetaBadge
+            label={i18n.translate('xpack.lens.randomSampling.experimentalLabel', {
               defaultMessage: 'Technical preview',
             })}
-            delay="long"
-            position="top"
-          >
-            <EuiBetaBadge
-              label={i18n.translate('xpack.lens.randomSampling.experimentalLabel', {
-                defaultMessage: 'Technical preview',
-              })}
-              color="hollow"
-              iconType="beaker"
-              size="s"
-            />
-          </EuiToolTip>
-        </span>
+            color="hollow"
+            iconType="beaker"
+            size="s"
+            tooltipContent={i18n.translate('xpack.lens.randomSampling.experimentalLabel', {
+              defaultMessage: 'Technical preview',
+            })}
+          />
+        </>
       }
     >
       <EuiRange

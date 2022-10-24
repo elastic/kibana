@@ -110,14 +110,12 @@ export function FlyoutContainer({
                     id="lnsDimensionContainerTitle"
                     className="lnsDimensionContainer__headerTitle"
                   >
-                    <strong>
-                      {i18n.translate('xpack.lens.configure.configurePanelTitle', {
-                        defaultMessage: '{groupLabel}',
-                        values: {
-                          groupLabel,
-                        },
-                      })}
-                    </strong>
+                    {i18n.translate('xpack.lens.configure.configurePanelTitle', {
+                      defaultMessage: '{groupLabel}',
+                      values: {
+                        groupLabel,
+                      },
+                    })}
                   </h2>
                 </EuiTitle>
               </EuiFlexItem>
