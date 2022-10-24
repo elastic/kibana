@@ -1789,7 +1789,9 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
-  describe('#clearLayer', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/143908
+  // FLAKY: https://github.com/elastic/kibana/issues/143907
+  describe.skip('#clearLayer', () => {
     it('should clear a layer', () => {
       const state = {
         layers: {
