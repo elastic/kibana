@@ -17,7 +17,6 @@ import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter
 const DEFAULT_FROM_MINUTES_VALUE = 15;
 
 export const useUnifiedSearch = () => {
-  // const [savedQuery, setSavedQuery] = useState<SavedQuery>();
   const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
 
   const { metricsDataView } = useMetricsDataViewContext();
@@ -45,7 +44,9 @@ export const useUnifiedSearch = () => {
 
   const submitFilterChange = useCallback(
     (query?: Query, dateRange?: TimeRange, filters?: Filter[]) => {
-      filterManager.setFilters([...filterManager.getFilters(), ...(filters ?? [])]);
+      if (filters) {
+        filterManager.setFilters(filters);
+      }
 
       setTime({
         ...getTime(),
@@ -64,12 +65,22 @@ export const useUnifiedSearch = () => {
     (newSavedQuery: SavedQuery) => {
       const savedQueryFilters = newSavedQuery.attributes.filters || [];
       const globalFilters = filterManager.getGlobalFilters();
-      const allFilters = [...savedQueryFilters, ...globalFilters];
-      // setSavedQuery(newSavedQuery);
-      submitFilterChange(newSavedQuery.attributes.query, getTime(), allFilters);
+      filterManager.setFilters([...savedQueryFilters, ...globalFilters]);
+
+      // Unified search holds the all state, we need to force the hook to rerender so that it can return the most recent values
+      // This can be removed once we get the state from the URL
+      forceUpdate();
     },
-    [filterManager, getTime, submitFilterChange]
+    [filterManager]
   );
+
+  const clearSavedQUery = useCallback(() => {
+    filterManager.setFilters(filterManager.getGlobalFilters());
+
+    // Unified search holds the all state, we need to force the hook to rerender so that it can return the most recent values
+    // This can be removed once we get the state from the URL
+    forceUpdate();
+  }, [filterManager]);
 
   const buildQuery = useCallback(() => {
     if (!metricsDataView) {
@@ -83,6 +94,7 @@ export const useUnifiedSearch = () => {
     esQuery: buildQuery(),
     submitFilterChange,
     saveQuery,
+    clearSavedQUery,
     unifiedSearchQuery: queryString.getQuery() as Query,
     unifiedSearchDateRange: getTime(),
     unifiedSearchFilters: filterManager.getFilters(),

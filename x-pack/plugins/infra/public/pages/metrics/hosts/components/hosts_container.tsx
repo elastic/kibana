@@ -5,13 +5,14 @@
  * 2.0.
  */
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { useSnapshot } from '../../inventory_view/hooks/use_snaphot';
 import type { SnapshotMetricType } from '../../../../../common/inventory_models/types';
 import { useMetricsDataViewContext } from '../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import type { InfraTimerangeInput } from '../../../../../common/http_api';
-import { FilterBar } from './search_bar';
+import { FilterBar } from './filter_bar';
 import { HostsTable } from './hosts_table';
 
 export const HostContainer = () => {
@@ -62,6 +63,7 @@ export const HostContainer = () => {
       ) : (
         <>
           {metricsDataView && <FilterBar dataView={metricsDataView} />}
+          <EuiSpacer />
           <HostsTable loading={isLoading} nodes={nodes} reload={reload} />
         </>
       )}
