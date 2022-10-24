@@ -97,6 +97,8 @@ export const getFileInfo = async (
       }
     }
 
+    // TODO: add `ttl` to the return payload by retrieving the value from ILM?
+
     return {
       name,
       id,
