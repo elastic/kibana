@@ -9,9 +9,9 @@ import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types'
 import { ElasticsearchClient } from '@kbn/core/server';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import { getMlModelTypesForModelConfig } from '../../../common/ml_inference_pipeline';
-import { InferencePipeline, TrainedModelState } from '../../../common/types/pipelines';
-import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
+import { getMlModelTypesForModelConfig } from '../../../../../../common/ml_inference_pipeline';
+import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
+import { getInferencePipelineNameFromIndexName } from '../../../../../utils/ml_inference_pipeline_utils';
 
 export type InferencePipelineData = InferencePipeline & {
   trainedModelName: string;

@@ -8,9 +8,9 @@
 import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { DeleteMlInferencePipelineResponse } from '../../../../../common/types/pipelines';
+import { DeleteMlInferencePipelineResponse } from '../../../../../../common/types/pipelines';
 
-import { getInferencePipelineNameFromIndexName } from '../../../../utils/ml_inference_pipeline_utils';
+import { getInferencePipelineNameFromIndexName } from '../../../../../utils/ml_inference_pipeline_utils';
 
 export const detachMlInferencePipeline = async (
   indexName: string,

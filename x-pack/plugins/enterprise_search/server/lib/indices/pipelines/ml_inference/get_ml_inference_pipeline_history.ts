@@ -12,7 +12,7 @@ import {
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { MlInferenceHistoryResponse } from '../../../common/types/pipelines';
+import { MlInferenceHistoryResponse } from '../../../../../common/types/pipelines';
 
 export const fetchMlInferencePipelineHistory = async (
   client: ElasticsearchClient,

@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { DeleteMlInferencePipelineResponse } from '../../../../../common/types/pipelines';
+import { DeleteMlInferencePipelineResponse } from '../../../../../../common/types/pipelines';
 
 import { detachMlInferencePipeline } from './detach_ml_inference_pipeline';
 

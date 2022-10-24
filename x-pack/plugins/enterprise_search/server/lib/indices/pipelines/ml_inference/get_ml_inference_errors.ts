@@ -12,7 +12,7 @@ import {
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { MlInferenceError } from '../../../common/types/pipelines';
+import { MlInferenceError } from '../../../../../common/types/pipelines';
 
 export interface ErrorAggregationBucket extends AggregationsStringRareTermsBucketKeys {
   max_error_timestamp: {
