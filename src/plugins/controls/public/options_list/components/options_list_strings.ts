@@ -32,6 +32,11 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.editor.runPastTimeout', {
         defaultMessage: 'Ignore timeout for results',
       }),
+    getRunPastTimeoutTooltip: () =>
+      i18n.translate('controls.optionsList.editor.runPastTimeout.tooltip', {
+        defaultMessage:
+          'Wait to display results until the list is complete. This setting is useful for large data sets, but the results might take longer to populate.',
+      }),
     getAllowExclude: () =>
       i18n.translate('controls.optionsList.editor.allowExclude', {
         defaultMessage: 'Allow selections to be excluded',

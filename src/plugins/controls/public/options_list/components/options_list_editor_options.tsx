@@ -8,7 +8,8 @@
 
 import React, { useState } from 'react';
 
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiSwitch } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { OptionsListStrings } from './options_list_strings';
 import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
@@ -31,7 +32,7 @@ export const OptionsListEditorOptions = ({
 
   return (
     <>
-      <EuiFormRow display="columnCompressedSwitch">
+      <EuiFormRow>
         <EuiSwitch
           label={OptionsListStrings.editor.getAllowMultiselectTitle()}
           checked={!state.singleSelect}
@@ -41,7 +42,7 @@ export const OptionsListEditorOptions = ({
           }}
         />
       </EuiFormRow>
-      <EuiFormRow display="columnCompressedSwitch">
+      <EuiFormRow>
         <EuiSwitch
           label={OptionsListStrings.editor.getAllowExclude()}
           checked={!state.allowExclude}
@@ -52,14 +53,29 @@ export const OptionsListEditorOptions = ({
         />
       </EuiFormRow>
       <EuiFormRow>
-        <EuiSwitch
-          label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
-          checked={Boolean(state.runPastTimeout)}
-          onChange={() => {
-            onChange({ runPastTimeout: !state.runPastTimeout });
-            setState((s) => ({ ...s, runPastTimeout: !s.runPastTimeout }));
-          }}
-        />
+        <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
+              checked={Boolean(state.runPastTimeout)}
+              onChange={() => {
+                onChange({ runPastTimeout: !state.runPastTimeout });
+                setState((s) => ({ ...s, runPastTimeout: !s.runPastTimeout }));
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              margin-top: 0px !important;
+            `}
+          >
+            <EuiIconTip
+              content={OptionsListStrings.editor.getRunPastTimeoutTooltip()}
+              position="right"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFormRow>
     </>
   );
