@@ -37,7 +37,7 @@ export async function getHasTransactionsEvents({
       body: {
         track_total_hits: 1,
         terminate_after: 1,
-        size: 1,
+        size: 0,
         query: {
           bool: {
             filter: [
