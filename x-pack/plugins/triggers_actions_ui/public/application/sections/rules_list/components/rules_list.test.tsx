@@ -1143,10 +1143,12 @@ describe('rules_list component with items', () => {
     jest.runOnlyPendingTimers();
 
     wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').text()).toBe('Start time of the last run.');
+    expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
+      'Start time of the last run.'
+    );
 
     wrapper
-      .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"]')
+      .find('[data-test-subj="rulesTableCell-lastExecutionDateTooltip"] EuiToolTipAnchor')
       .first()
       .simulate('mouseOut');
 
@@ -1162,11 +1164,14 @@ describe('rules_list component with items', () => {
     jest.runOnlyPendingTimers();
 
     wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').text()).toBe(
+    expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
       'Below configured minimum intervalRule interval of 1 second is below the minimum configured interval of 1 minute. This may impact alerting performance.'
     );
 
-    wrapper.find('[data-test-subj="ruleInterval-config-tooltip-0"]').first().simulate('mouseOut');
+    wrapper
+      .find('[data-test-subj="ruleInterval-config-tooltip-0"] EuiToolTipAnchor')
+      .first()
+      .simulate('mouseOut');
 
     // Duration column
     expect(
@@ -1187,7 +1192,7 @@ describe('rules_list component with items', () => {
     jest.runOnlyPendingTimers();
 
     wrapper.update();
-    expect(wrapper.find('.euiToolTipPopover').text()).toBe(
+    expect(wrapper.find('.euiToolTipPopover').hostNodes().text()).toBe(
       'The length of time it took for the rule to run (mm:ss).'
     );
 
@@ -1392,7 +1397,7 @@ describe('rules_list component with items', () => {
     expect(wrapper.find('EuiButton[data-test-subj="confirmModalConfirmButton"]').text()).toEqual(
       'Manage license'
     );
-    wrapper.find('EuiButton[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+    wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
     expect(global.open).toHaveBeenCalled();
   });
 
