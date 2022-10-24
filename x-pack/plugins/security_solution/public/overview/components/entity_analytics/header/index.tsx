@@ -30,6 +30,7 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { ENTITY_ANALYTICS_ANOMALIES_PANEL } from '../anomalies';
+import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 
 const StyledEuiTitle = styled(EuiTitle)`
   color: ${({ theme: { eui } }) => eui.euiColorDanger};
@@ -69,6 +70,7 @@ export const EntityAnalyticsHeader = () => {
   });
 
   const { data } = useNotableAnomaliesSearch({ skip: false, from, to });
+
   const dispatch = useDispatch();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
@@ -138,8 +140,14 @@ export const EntityAnalyticsHeader = () => {
     inspect: inspectHostRiskScore,
   });
 
-  // Anomalies are enabled if at least one job is installed
-  const areJobsEnabled = useMemo(() => data.some(({ jobId }) => !!jobId), [data]);
+  // Anomaly jobs are enabled if at least one job is started or has data
+  const areJobsEnabled = useMemo(
+    () =>
+      data.some(
+        ({ job, count }) => count > 0 || (job && isJobStarted(job.jobState, job.datafeedState))
+      ),
+    [data]
+  );
 
   const totalAnomalies = useMemo(
     () => (areJobsEnabled ? sumBy('count', data) : '-'),
