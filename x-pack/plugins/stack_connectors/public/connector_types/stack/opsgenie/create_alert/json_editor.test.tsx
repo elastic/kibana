@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { screen, render, within, fireEvent, waitFor } from '@testing-library/react';
-import { JsonEditor } from './json_editor';
+import JsonEditor from './json_editor';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 
 const kibanaReactPath = '../../../../../../../../src/plugins/kibana_react/public';
@@ -113,7 +113,7 @@ describe('JsonEditor', () => {
     });
 
     expect(
-      screen.getByText('[tags]: could not parse array value from json input')
+      screen.getByText('Invalid value "tags should be an array not a string" supplied to "tags"')
     ).toBeInTheDocument();
     expect(editAction).not.toHaveBeenCalled();
   });

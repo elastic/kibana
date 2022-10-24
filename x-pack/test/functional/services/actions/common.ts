@@ -25,5 +25,15 @@ export function ActionsCommonServiceProvider({ getService, getPageObject }: FtrP
 
       await testSubjects.click(`.${name}-card`);
     },
+
+    async cancelConnectorForm() {
+      const flyOutCancelButton = await testSubjects.find('edit-connector-flyout-close-btn');
+      const isEnabled = await flyOutCancelButton.isEnabled();
+      const isDisplayed = await flyOutCancelButton.isDisplayed();
+
+      if (isEnabled && isDisplayed) {
+        await flyOutCancelButton.click();
+      }
+    },
   };
 }

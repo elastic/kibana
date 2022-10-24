@@ -12,7 +12,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 
-import * as i18n from '../translations';
+import * as i18n from './translations';
 import { CreateAlertProps } from '.';
 
 type AdditionalOptionsProps = Pick<

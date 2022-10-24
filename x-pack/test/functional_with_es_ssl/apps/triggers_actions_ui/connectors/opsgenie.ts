@@ -140,6 +140,41 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         expect(await (await testSubjects.find('executeActionButton')).isEnabled()).to.be(false);
       });
+
+      describe('test page', () => {
+        let connectorId = '';
+
+        before(async () => {
+          const connectorName = generateUniqueKey();
+          const createdAction = await createOpsgenieConnector(connectorName);
+          connectorId = createdAction.id;
+          objectRemover.add(createdAction.id, 'action', 'actions');
+        });
+
+        beforeEach(async () => {
+          browser.refresh();
+          await testSubjects.click(`edit${connectorId}`);
+          await testSubjects.click('testConnectorTab');
+        });
+
+        afterEach(async () => {
+          await actions.common.cancelConnectorForm();
+        });
+
+        it('should show the sub action selector when in test mode', async () => {
+          await testSubjects.existOrFail('opsgenie-subActionSelect');
+        });
+
+        it('should preserve the alias when switching between create and close alert actions', async () => {
+          await testSubjects.setValue('aliasInput', 'new alias');
+          await testSubjects.selectValue('opsgenie-subActionSelect', 'closeAlert');
+
+          expect(await testSubjects.getAttribute('opsgenie-subActionSelect', 'value')).to.be(
+            'closeAlert'
+          );
+          expect(await testSubjects.getAttribute('aliasInput', 'value')).to.be('new alias');
+        });
+      });
     });
 
     describe('alerts page', () => {

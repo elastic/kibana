@@ -10,7 +10,7 @@ import React, { useCallback } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import type { OpsgenieCreateAlertParams } from '../../../../../server/connector_types/stack';
-import * as i18n from '../translations';
+import * as i18n from './translations';
 import { EditActionCallback } from '../types';
 
 interface PriorityComponentProps {

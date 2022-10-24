@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 
-import * as i18n from '../translations';
+import * as i18n from './translations';
 import { EditActionCallback } from '../types';
 
 interface TagsProps {

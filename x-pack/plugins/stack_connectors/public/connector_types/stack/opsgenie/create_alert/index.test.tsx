@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, render, within, fireEvent } from '@testing-library/react';
+import { screen, render, within, fireEvent, waitFor } from '@testing-library/react';
 import { CreateAlert } from '.';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import userEvent from '@testing-library/user-event';
@@ -105,15 +105,17 @@ describe('CreateAlert', () => {
     }
   );
 
-  it('shows the json editor when clicking the editor toggle', () => {
+  it('shows the json editor when clicking the editor toggle', async () => {
     render(<CreateAlert {...options} />);
 
     userEvent.click(screen.getByTestId('opsgenie-show-json-editor-toggle'));
 
-    expect(screen.getByTestId('actionJsonEditor')).toBeInTheDocument();
-    expect(screen.queryByTestId('opsgenie-message-row')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('opsgenie-alias-row')).not.toBeInTheDocument();
-    expect(screen.queryByText('Description')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('actionJsonEditor')).toBeInTheDocument();
+      expect(screen.queryByTestId('opsgenie-message-row')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('opsgenie-alias-row')).not.toBeInTheDocument();
+      expect(screen.queryByText('Description')).not.toBeInTheDocument();
+    });
   });
 
   it('shows the additional options when clicking the more options button', () => {

@@ -6,14 +6,14 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { pick, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import { OpsgenieCreateAlertParamsSchema } from '../../../../../common';
 import type { OpsgenieCreateAlertParams } from '../../../../../server/connector_types/stack';
-import * as i18n from '../translations';
+import * as i18n from './translations';
 import { CreateAlertProps } from '.';
+import { decodeCreateAlert } from './json_editor_schema';
 
-type JsonEditorProps = Pick<
+export type JsonEditorProps = Pick<
   CreateAlertProps,
   'editAction' | 'index' | 'messageVariables' | 'subActionParams'
 >;
@@ -28,14 +28,14 @@ const JsonEditorComponent: React.FC<JsonEditorProps> = ({
 
   const jsonEditorValue = useMemo(() => getJsonEditorValue(subActionParams), [subActionParams]);
 
-  const validateJsonWithSchema = useCallback((jsonBlob: unknown) => {
+  const decodeJsonWithSchema = useCallback((jsonBlob: unknown) => {
     try {
-      OpsgenieCreateAlertParamsSchema.validate(jsonBlob);
+      const decodedValue = decodeCreateAlert(jsonBlob);
       setJsonEditorErrors([]);
-      return true;
+      return decodedValue;
     } catch (error) {
       setJsonEditorErrors([error.message]);
-      return false;
+      return;
     }
   }, []);
 
@@ -46,20 +46,20 @@ const JsonEditorComponent: React.FC<JsonEditorProps> = ({
         return;
       }
 
-      if (!validateJsonWithSchema(parsedJson)) {
+      const decodedValue = decodeJsonWithSchema(parsedJson);
+      if (!decodedValue) {
         return;
       }
 
-      const sanitizedSubActionParams = getSanitizedSubActionParams(parsedJson);
-      editAction('subActionParams', sanitizedSubActionParams, index);
+      editAction('subActionParams', decodedValue, index);
     },
-    [editAction, index, validateJsonWithSchema]
+    [editAction, index, decodeJsonWithSchema]
   );
 
   useEffect(() => {
     // show the initial error messages
-    validateJsonWithSchema(subActionParams);
-  }, [subActionParams, validateJsonWithSchema]);
+    decodeJsonWithSchema(subActionParams ?? {});
+  }, [subActionParams, decodeJsonWithSchema]);
 
   return (
     <JsonEditorWithMessageVariables
@@ -75,7 +75,10 @@ const JsonEditorComponent: React.FC<JsonEditorProps> = ({
 
 JsonEditorComponent.displayName = 'JsonEditor';
 
-export const JsonEditor = React.memo(JsonEditorComponent);
+const JsonEditor = React.memo(JsonEditorComponent);
+
+// eslint-disable-next-line import/no-default-export
+export { JsonEditor as default };
 
 const parseJson = (jsonValue: string): Record<string, unknown> | undefined => {
   try {
@@ -96,28 +99,4 @@ const getJsonEditorValue = (subActionParams?: Partial<OpsgenieCreateAlertParams>
   } catch (error) {
     return defaultValue;
   }
-};
-
-const getSchemaKeys = () => {
-  const structure = OpsgenieCreateAlertParamsSchema.getSchemaStructure();
-
-  const schemaKeys: string[] = [];
-
-  for (const entry of structure) {
-    if (entry.path.length > 0) {
-      schemaKeys.push(entry.path[0]);
-    }
-  }
-
-  return schemaKeys;
-};
-
-const getSanitizedSubActionParams = (
-  parsedJson: Record<string, unknown>
-): Partial<OpsgenieCreateAlertParams> => {
-  const validKeys = getSchemaKeys();
-  const sanitizedEditorFields = pick(parsedJson, validKeys);
-  return {
-    ...sanitizedEditorFields,
-  };
 };

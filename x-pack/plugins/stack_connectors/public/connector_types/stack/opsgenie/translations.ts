@@ -21,6 +21,13 @@ export const API_KEY_LABEL = i18n.translate(
   }
 );
 
+export const MESSAGE_IS_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.requiredMessageTextField',
+  {
+    defaultMessage: 'Message is required.',
+  }
+);
+
 export const ACTION_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.actionLabel',
   {
@@ -42,38 +49,10 @@ export const CLOSE_ALERT_ACTION = i18n.translate(
   }
 );
 
-export const MESSAGE_FIELD_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.messageLabel',
-  {
-    defaultMessage: 'Message (required)',
-  }
-);
-
 export const NOTE_FIELD_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.noteLabel',
   {
     defaultMessage: 'Note',
-  }
-);
-
-export const DESCRIPTION_FIELD_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.descriptionLabel',
-  {
-    defaultMessage: 'Description',
-  }
-);
-
-export const MESSAGE_IS_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.requiredMessageTextField',
-  {
-    defaultMessage: 'Message is required.',
-  }
-);
-
-export const MESSAGE_FIELD_IS_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.messageFieldRequired',
-  {
-    defaultMessage: '"message" field must be populated with a value other than just whitespace',
   }
 );
 
@@ -98,20 +77,6 @@ export const ALIAS_IS_REQUIRED = i18n.translate(
   }
 );
 
-export const USE_JSON_EDITOR_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.jsonEditorLabel',
-  {
-    defaultMessage: 'Use JSON editor',
-  }
-);
-
-export const JSON_EDITOR_ARIA = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.jsonEditorAriaLabel',
-  {
-    defaultMessage: 'JSON editor',
-  }
-);
-
 export const MORE_OPTIONS = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.moreOptions',
   {
@@ -126,60 +91,9 @@ export const HIDE_OPTIONS = i18n.translate(
   }
 );
 
-export const SOURCE_FIELD_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.sourceLabel',
-  {
-    defaultMessage: 'Source',
-  }
-);
-
 export const USER_FIELD_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.userLabel',
   {
     defaultMessage: 'User',
   }
 );
-
-export const ENTITY_FIELD_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.entityLabel',
-  {
-    defaultMessage: 'Entity',
-  }
-);
-
-export const TAGS_HELP = i18n.translate('xpack.stackConnectors.components.opsgenie.tagsHelp', {
-  defaultMessage:
-    'Type one or more custom identifying tags for this case. Press enter after each tag to begin a new one.',
-});
-
-export const TAGS_FIELD_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.tagsLabel',
-  { defaultMessage: 'Opsgenie Tags' }
-);
-
-export const PRIORITY_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.priorityLabel',
-  {
-    defaultMessage: 'Priority',
-  }
-);
-
-export const PRIORITY_1 = i18n.translate('xpack.stackConnectors.components.opsgenie.priority1', {
-  defaultMessage: 'P1',
-});
-
-export const PRIORITY_2 = i18n.translate('xpack.stackConnectors.components.opsgenie.priority2', {
-  defaultMessage: 'P2',
-});
-
-export const PRIORITY_3 = i18n.translate('xpack.stackConnectors.components.opsgenie.priority3', {
-  defaultMessage: 'P3',
-});
-
-export const PRIORITY_4 = i18n.translate('xpack.stackConnectors.components.opsgenie.priority4', {
-  defaultMessage: 'P4',
-});
-
-export const PRIORITY_5 = i18n.translate('xpack.stackConnectors.components.opsgenie.priority5', {
-  defaultMessage: 'P5',
-});

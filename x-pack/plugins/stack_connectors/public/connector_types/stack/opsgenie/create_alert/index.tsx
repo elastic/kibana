@@ -5,24 +5,34 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useState } from 'react';
 import {
   ActionParamsProps,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import {
+  EuiErrorBoundary,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  EuiSwitch,
+} from '@elastic/eui';
+import { SectionLoading } from '@kbn/triggers-actions-ui-plugin/public/application/components/section_loading';
 import type {
   OpsgenieActionParams,
   OpsgenieCreateAlertParams,
 } from '../../../../../server/connector_types/stack';
-import * as i18n from '../translations';
+import * as i18n from './translations';
 import { EditActionCallback } from '../types';
 import { DisplayMoreOptions } from '../display_more_options';
 import { AdditionalOptions } from './additional_options';
-import { JsonEditor } from './json_editor';
 import { Tags } from './tags';
 import { Priority } from './priority';
+import type { JsonEditorProps } from './json_editor';
+
+const JsonEditorLazy: React.FC<JsonEditorProps> = lazy(() => import('./json_editor'));
 
 type FormViewProps = Omit<CreateAlertProps, 'editAction'>;
 
@@ -127,12 +137,16 @@ const CreateAlertComponent: React.FC<CreateAlertProps> = ({
       />
       <EuiSpacer size={'m'} />
       {showJsonEditor ? (
-        <JsonEditor
-          editAction={editAction}
-          index={index}
-          messageVariables={messageVariables}
-          subActionParams={subActionParams}
-        />
+        <EuiErrorBoundary>
+          <Suspense fallback={<SectionLoading>{i18n.LOADING_JSON_EDITOR}</SectionLoading>}>
+            <JsonEditorLazy
+              editAction={editAction}
+              index={index}
+              messageVariables={messageVariables}
+              subActionParams={subActionParams}
+            />
+          </Suspense>
+        </EuiErrorBoundary>
       ) : (
         <>
           <FormView
