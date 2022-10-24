@@ -347,7 +347,7 @@ export const update = async (
       );
     }
 
-    const updateCases: UpdateRequestWithOriginalCase[] = query.cases.reduce(
+    const casesToUpdate: UpdateRequestWithOriginalCase[] = query.cases.reduce(
       (acc: UpdateRequestWithOriginalCase[], updateCase) => {
         const originalCase = casesMap.get(updateCase.id);
 
@@ -368,24 +368,24 @@ export const update = async (
       []
     );
 
-    if (updateCases.length <= 0) {
+    if (casesToUpdate.length <= 0) {
       throw Boom.notAcceptable('All update fields are identical to current version.');
     }
 
     const hasPlatinumLicense = await licensingService.isAtLeastPlatinum();
 
-    throwIfUpdateOwner(updateCases);
-    throwIfTitleIsInvalid(updateCases);
-    throwIfUpdateAssigneesWithoutValidLicense(updateCases, hasPlatinumLicense);
-    throwIfTotalAssigneesAreInvalid(updateCases);
+    throwIfUpdateOwner(casesToUpdate);
+    throwIfTitleIsInvalid(casesToUpdate);
+    throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
+    throwIfTotalAssigneesAreInvalid(casesToUpdate);
 
-    notifyPlatinumUsage(licensingService, updateCases);
+    notifyPlatinumUsage(licensingService, casesToUpdate);
 
-    const updatedCases = await patchCases({ caseService, user, casesToUpdate: updateCases });
+    const updatedCases = await patchCases({ caseService, user, casesToUpdate });
 
     // If a status update occurred and the case is synced then we need to update all alerts' status
     // attached to the case to the new status.
-    const casesWithStatusChangedAndSynced = updateCases.filter(({ updateReq, originalCase }) => {
+    const casesWithStatusChangedAndSynced = casesToUpdate.filter(({ updateReq, originalCase }) => {
       return (
         originalCase != null &&
         updateReq.status != null &&
@@ -396,7 +396,7 @@ export const update = async (
 
     // If syncAlerts setting turned on we need to update all alerts' status
     // attached to the case to the current status.
-    const casesWithSyncSettingChangedToOn = updateCases.filter(({ updateReq, originalCase }) => {
+    const casesWithSyncSettingChangedToOn = casesToUpdate.filter(({ updateReq, originalCase }) => {
       return (
         originalCase != null &&
         updateReq.settings?.syncAlerts != null &&

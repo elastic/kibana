@@ -33,6 +33,7 @@ export class NotificationsService {
     const subject = this.getTitle(theCase);
     const message = this.getMessage(theCase);
 
+    // TODO: add SenderContext to pass cases SO ids as references.
     await this.notifications.email?.sendPlainTextEmail({ to, subject, message });
   }
 }
