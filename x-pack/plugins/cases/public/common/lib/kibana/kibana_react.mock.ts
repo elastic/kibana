@@ -23,6 +23,7 @@ import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mo
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { registerConnectorsToMockActionRegistry } from '../../mock/register_connectors';
 import { connectorsMock } from '../../mock/connectors';
+import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 
 interface StartServiceArgs {
   license?: ILicense | null;
@@ -40,6 +41,7 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
     },
     security: securityMock.createStart(),
     triggersActionsUi: triggersActionsUiMock.createStart(),
+    guidedOnboarding: guidedOnboardingMock.createStart(),
     spaces: spacesPluginMock.createStartContract(),
     licensing:
       license != null

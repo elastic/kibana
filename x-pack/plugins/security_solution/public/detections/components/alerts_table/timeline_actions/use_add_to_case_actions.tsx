@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { CommentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { GuidedOnboardingTourStep } from '../../../../common/components/guided_onboarding/tour';
+import { GuidedOnboardingTourStep } from '../../../../common/components/guided_onboarding/tour_step';
 import { SecurityStepId } from '../../../../common/components/guided_onboarding/tour_config';
 import { useTourContext } from '../../../../common/components/guided_onboarding';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';

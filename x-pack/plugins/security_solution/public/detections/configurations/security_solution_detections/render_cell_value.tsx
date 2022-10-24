@@ -7,7 +7,7 @@
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding/tour';
+import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding/tour_step';
 import { isDetectionsAlertsTable } from '../../../common/components/top_n/helpers';
 import { SecurityStepId } from '../../../common/components/guided_onboarding/tour_config';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';

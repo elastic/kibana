@@ -6,123 +6,13 @@
  */
 
 import type { ReactChild } from 'react';
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-
-import type { EuiTourStepProps } from '@elastic/eui';
-import {
-  EuiButton,
-  EuiImage,
-  EuiSpacer,
-  EuiText,
-  EuiTourStep,
-  useIsWithinBreakpoints,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
+import { useIsWithinBreakpoints } from '@elastic/eui';
 import { useKibana } from '../../lib/kibana';
-import { securityTourConfig, SecurityStepId, getTourAnchor } from './tour_config';
-import { Delayed } from './helpers';
-
-interface SecurityTourStep {
-  step: number;
-  stepId: SecurityStepId;
-}
-
-export const SecurityTourStep = ({ step, stepId }: SecurityTourStep) => {
-  const { activeStep, incrementStep, isTourShown } = useTourContext();
-  const tourStep = useMemo(
-    () => securityTourConfig[stepId].find((config) => config.step === step),
-    [step, stepId]
-  );
-  // step === 5 && stepId === SecurityStepId.alertsCases is in Cases app and out of context.
-  // If we mount this step, we know we need to render it
-  // we are also managing the context on the siem end in the background
-  const overrideContext = step === 5 && stepId === SecurityStepId.alertsCases;
-  if (tourStep == null || ((step !== activeStep || !isTourShown(stepId)) && !overrideContext)) {
-    return null;
-  }
-
-  const { content, imageConfig, dataTestSubj, hideNextButton = false, ...rest } = tourStep;
-
-  const footerAction: EuiTourStepProps['footerAction'] = !hideNextButton ? (
-    <EuiButton
-      size="s"
-      onClick={() => incrementStep(stepId)}
-      color="success"
-      data-test-subj="onboarding--securityTourNextStepButton"
-    >
-      <FormattedMessage
-        id="xpack.securitySolution.guided_onboarding.nextStep.buttonLabel"
-        defaultMessage="Next"
-      />
-    </EuiButton>
-  ) : (
-    <>
-      {/* Passing empty element instead of undefined. If undefined "Skip tour" button is shown, we do not want that*/}
-    </>
-  );
-  return (
-    <EuiTourStep
-      {...rest}
-      content={
-        <>
-          <EuiText size="xs">
-            <p>{content}</p>
-          </EuiText>
-          {imageConfig && (
-            <>
-              <EuiSpacer size="m" />
-              <EuiImage alt={imageConfig.altText} src={imageConfig.src} size="fullWidth" />
-            </>
-          )}
-        </>
-      }
-      footerAction={footerAction}
-      // we wouldn't even mount if it was not open
-      isStepOpen
-      // guided onboarding does not allow skipping tour through the steps
-      onFinish={() => null}
-      stepsTotal={securityTourConfig[stepId].length}
-      // TODO: re-add panelProps
-      // EUI has a bug https://github.com/elastic/eui/issues/6297
-      // where any panelProps overwrite their panelProps,
-      // so we lose cool things like the EuiBeacon
-      // panelProps={{
-      //   'data-test-subj': dataTestSubj,
-      // }}
-    />
-  );
-};
-
-interface GuidedOnboardingTourStep extends SecurityTourStep {
-  // if true, this component renders the tour step only (not the anchor)
-  altAnchor?: boolean;
-  children: React.ReactNode;
-  isTourAnchor: boolean;
-}
-
-// wraps tour anchor component
-// and gives the tour step itself a place to mount once it is active
-// mounts the tour step with a delay to ensure the anchor will render first
-export const GuidedOnboardingTourStep = ({
-  altAnchor = false,
-  children,
-  isTourAnchor,
-  step,
-  stepId,
-}: GuidedOnboardingTourStep) =>
-  isTourAnchor ? (
-    <span tour-step={altAnchor ? '' : getTourAnchor(step, stepId)}>
-      <Delayed>
-        <SecurityTourStep step={step} stepId={stepId} />
-      </Delayed>
-      {children}
-    </span>
-  ) : (
-    <>{children}</>
-  );
+import { securityTourConfig, SecurityStepId } from './tour_config';
 
 export interface TourContextValue {
   activeStep: number;
@@ -175,13 +65,20 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
 
   const incrementStep = useCallback((stepId: SecurityStepId, step?: number) => {
     _setActiveStep((prevState) =>
-      step != null ? step : (prevState >= securityTourConfig[stepId].length ? 0 : prevState) + 1
+      step != null && step <= securityTourConfig[stepId].length
+        ? step
+        : (prevState >= securityTourConfig[stepId].length ? 0 : prevState) + 1
     );
   }, []);
 
   const resetStep = useCallback(() => {
     _setActiveStep(1);
   }, []);
+
+  useEffect(() => {
+    resetStep();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tourStatus]);
 
   // const onSkipTour = useCallback((stepId: SecurityStepId) => {
   //   // active state means the user is on this step but has not yet begun. so when the user hits skip,

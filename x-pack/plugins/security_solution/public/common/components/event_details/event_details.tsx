@@ -20,7 +20,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
-import { GuidedOnboardingTourStep } from '../guided_onboarding/tour';
+import { GuidedOnboardingTourStep } from '../guided_onboarding/tour_step';
 import { isDetectionsAlertsTable } from '../top_n/helpers';
 import { useTourContext } from '../guided_onboarding';
 import { getTourAnchor, SecurityStepId } from '../guided_onboarding/tour_config';

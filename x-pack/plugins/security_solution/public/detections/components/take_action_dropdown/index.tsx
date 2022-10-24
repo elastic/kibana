@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding/tour';
+import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding/tour_step';
 import { SecurityStepId } from '../../../common/components/guided_onboarding/tour_config';
 import { isActiveTimeline } from '../../../helpers';
 import { TableId } from '../../../../common/types';
