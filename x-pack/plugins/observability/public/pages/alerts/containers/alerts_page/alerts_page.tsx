@@ -158,7 +158,7 @@ function AlertsPage() {
         )
       );
     },
-    [timeFilterService, setRangeFrom, setRangeTo, setKuery, rangeTo, rangeFrom, status]
+    [rangeFrom, setRangeFrom, rangeTo, status, setRangeTo, setKuery, timeFilterService]
   );
 
   // If there is any data, set hasData to true otherwise we need to wait till all the data is loaded before setting hasData to true or false; undefined indicates the data is still loading.
