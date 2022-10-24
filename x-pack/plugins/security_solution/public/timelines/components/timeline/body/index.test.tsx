@@ -129,7 +129,8 @@ jest.mock('../../fields_browser/create_field_button', () => ({
   useCreateFieldButton: () => <></>,
 }));
 
-describe('Body', () => {
+// SKIP: https://github.com/elastic/kibana/issues/143718
+describe.skip('Body', () => {
   const mount = useMountAppended();
   const mockRefetch = jest.fn();
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;

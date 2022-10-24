@@ -7,7 +7,7 @@
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
-import type { RuleParams } from '../lib/detection_engine/schemas/rule_schemas';
+import type { RuleParams } from '../lib/detection_engine/rule_schema';
 import type { SetupPlugins } from '../plugin';
 
 export type CollectorDependencies = {
