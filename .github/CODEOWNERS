@@ -969,6 +969,7 @@ packages/kbn-spec-to-console @elastic/platform-deployment-management
 packages/kbn-std @elastic/kibana-core
 packages/kbn-stdio-dev-helpers @elastic/kibana-operations
 packages/kbn-storybook @elastic/kibana-operations
+packages/kbn-subscription-tracking @elastic/security-threat-hunting-investigations
 packages/kbn-synthetic-package-map @elastic/kibana-operations
 packages/kbn-telemetry-tools @elastic/kibana-core
 packages/kbn-test @elastic/kibana-operations
