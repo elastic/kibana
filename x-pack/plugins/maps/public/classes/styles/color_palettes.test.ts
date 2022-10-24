@@ -58,21 +58,21 @@ describe('getOrdinalMbColorRampStops', () => {
   test('Should create inverted color stops', () => {
     expect(getOrdinalMbColorRampStops('Blues', 0, 1000, true)).toEqual([
       0,
-      "#6092c0",
+      '#6092c0',
       125,
-      "#769fc8",
+      '#769fc8',
       250,
-      "#8bacd0",
+      '#8bacd0',
       375,
-      "#9eb9d8",
+      '#9eb9d8',
       500,
-      "#b2c7df",
+      '#b2c7df',
       625,
-      "#c5d5e7",
+      '#c5d5e7',
       750,
-      "#d9e3ef",
+      '#d9e3ef',
       875,
-      "#ecf1f7",
+      '#ecf1f7',
     ]);
   });
 
@@ -114,15 +114,15 @@ describe('getPercentilesMbColorRampStops', () => {
     ];
     expect(getPercentilesMbColorRampStops('Blues', percentiles, true)).toEqual([
       5567.83,
-      "#6092c0",
+      '#6092c0',
       8069,
-      "#82a7cd",
+      '#82a7cd',
       9581.13,
-      "#a2bcd9",
+      '#a2bcd9',
       11145.5,
-      "#c2d2e6",
+      '#c2d2e6',
       16958.18,
-      "#e0e8f2",
+      '#e0e8f2',
     ]);
   });
 });

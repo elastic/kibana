@@ -113,14 +113,17 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
         ? this._options.minSize / HALF_MAKI_ICON_SIZE
         : this._options.minSize;
     const invert = this._options.invert === undefined ? false : this._options.invert;
-    const stops =
-      rangeFieldMeta.min === rangeFieldMeta.max
-        ? invert
-          ? [maxValueStopInput, minRangeStopOutput]
-          : [maxValueStopInput, maxRangeStopOutput]
-        : invert
+    function getStopsWithoutRange() {
+      return invert
+        ? [maxValueStopInput, minRangeStopOutput]
+        : [maxValueStopInput, maxRangeStopOutput];
+    }
+    function getStops() {
+      return invert
         ? [minValueStopInput, maxRangeStopOutput, maxValueStopInput, minRangeStopOutput]
         : [minValueStopInput, minRangeStopOutput, maxValueStopInput, maxRangeStopOutput];
+    }
+    const stops = rangeFieldMeta.min === rangeFieldMeta.max ? getStopsWithoutRange() : getStops();
 
     const valueExpression = makeMbClampedNumberExpression({
       lookupFunction: this.getMbLookupFunction(),
