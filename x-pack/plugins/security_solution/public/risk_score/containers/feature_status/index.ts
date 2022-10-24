@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { REQUEST_NAMES, useFetch } from '../../../common/hooks/use_fetch';
-import { RiskQueries, RiskScoreEntity } from '../../../../common/search_strategy';
+import type { RiskScoreEntity } from '../../../../common/search_strategy';
 import { getRiskScoreIndexStatus } from './api';
 
 interface RiskScoresFeatureStatus {
@@ -24,15 +24,10 @@ interface RiskScoresFeatureStatus {
 }
 
 export const useRiskScoreFeatureStatus = (
-  factoryQueryType: RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore,
+  riskEntity: RiskScoreEntity.host | RiskScoreEntity.user,
   defaultIndex?: string
 ): RiskScoresFeatureStatus => {
   const { isPlatinumOrTrialLicense, capabilitiesFetched } = useMlCapabilities();
-  const entity = useMemo(
-    () =>
-      factoryQueryType === RiskQueries.hostsRiskScore ? RiskScoreEntity.host : RiskScoreEntity.user,
-    [factoryQueryType]
-  );
 
   const { fetch, data, isLoading, error } = useFetch(
     REQUEST_NAMES.GET_RISK_SCORE_DEPRECATED,
@@ -52,10 +47,10 @@ export const useRiskScoreFeatureStatus = (
   const searchIndexStatus = useCallback(
     (indexName: string) => {
       fetch({
-        query: { indexName, entity },
+        query: { indexName, entity: riskEntity },
       });
     },
-    [entity, fetch]
+    [riskEntity, fetch]
   );
 
   useEffect(() => {

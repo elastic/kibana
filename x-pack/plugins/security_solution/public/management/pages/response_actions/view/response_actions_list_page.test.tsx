@@ -112,7 +112,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 jest.mock('../../../hooks/endpoint/use_get_endpoints_list');
 const mockUseGetEndpointsList = useGetEndpointsList as jest.Mock;
 
-describe('Action history page', () => {
+describe('Response actions history page', () => {
   const testPrefix = 'response-actions-list';
 
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -164,7 +164,7 @@ describe('Action history page', () => {
   describe('Hide/Show header', () => {
     it('should show header when data is in', () => {
       reactTestingLibrary.act(() => {
-        history.push('/administration/action_history?page=3&pageSize=20');
+        history.push('/administration/response_actions_history?page=3&pageSize=20');
       });
       render();
       const { getByTestId } = renderResult;
@@ -173,7 +173,7 @@ describe('Action history page', () => {
 
     it('should not show header when there is no actions index', () => {
       reactTestingLibrary.act(() => {
-        history.push('/administration/action_history?page=3&pageSize=20');
+        history.push('/administration/response_actions_history?page=3&pageSize=20');
       });
       mockUseGetEndpointActionList = {
         ...baseMockedActionList,
@@ -190,7 +190,7 @@ describe('Action history page', () => {
   describe('Read from URL params', () => {
     it('should read and set paging values from URL params', () => {
       reactTestingLibrary.act(() => {
-        history.push('/administration/action_history?page=3&pageSize=20');
+        history.push('/administration/response_actions_history?page=3&pageSize=20');
       });
       render();
       const { getByTestId } = renderResult;
@@ -203,7 +203,7 @@ describe('Action history page', () => {
     it('should read and set command filter values from URL params', () => {
       const filterPrefix = 'actions-filter';
       reactTestingLibrary.act(() => {
-        history.push('/administration/action_history?commands=release,processes');
+        history.push('/administration/response_actions_history?commands=release,processes');
       });
 
       render();
@@ -240,7 +240,7 @@ describe('Action history page', () => {
       const filterPrefix = 'hosts-filter';
       reactTestingLibrary.act(() => {
         history.push(
-          '/administration/action_history?hosts=agent-id-1,agent-id-2,agent-id-4,agent-id-5'
+          '/administration/response_actions_history?hosts=agent-id-1,agent-id-2,agent-id-4,agent-id-5'
         );
       });
 
@@ -270,7 +270,7 @@ describe('Action history page', () => {
     it('should read and set status filter values from URL params', () => {
       const filterPrefix = 'statuses-filter';
       reactTestingLibrary.act(() => {
-        history.push('/administration/action_history?statuses=pending,failed');
+        history.push('/administration/response_actions_history?statuses=pending,failed');
       });
 
       render();
@@ -293,7 +293,7 @@ describe('Action history page', () => {
     it('should set selected users search input strings to URL params ', () => {
       const filterPrefix = 'users-filter';
       reactTestingLibrary.act(() => {
-        history.push('/administration/action_history?users=userX,userY');
+        history.push('/administration/response_actions_history?users=userX,userY');
       });
 
       render();
@@ -305,7 +305,7 @@ describe('Action history page', () => {
 
     it('should read and set relative date ranges filter values from URL params', () => {
       reactTestingLibrary.act(() => {
-        history.push('/administration/action_history?startDate=now-23m&endDate=now-1m');
+        history.push('/administration/response_actions_history?startDate=now-23m&endDate=now-1m');
       });
 
       render();
@@ -324,7 +324,9 @@ describe('Action history page', () => {
       const startDate = '2022-09-12T11:00:00.000Z';
       const endDate = '2022-09-12T11:30:33.000Z';
       reactTestingLibrary.act(() => {
-        history.push(`/administration/action_history?startDate=${startDate}&endDate=${endDate}`);
+        history.push(
+          `/administration/response_actions_history?startDate=${startDate}&endDate=${endDate}`
+        );
       });
 
       const { getByTestId } = render();
@@ -373,7 +375,7 @@ describe('Action history page', () => {
       });
 
       expect(history.location.search).toEqual(
-        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses'
+        '?commands=isolate%2Crelease%2Ckill-process%2Csuspend-process%2Cprocesses%2Cget-file'
       );
     });
 

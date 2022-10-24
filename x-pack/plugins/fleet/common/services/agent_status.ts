@@ -47,7 +47,7 @@ export function getAgentStatus(agent: Agent | FleetServerAgent): AgentStatus {
       ? agent.policy_revision_idx
       : undefined;
 
-  if (!policyRevision || (agent.upgrade_started_at && agent.upgrade_status !== 'completed')) {
+  if (!policyRevision || (agent.upgrade_started_at && !agent.upgraded_at)) {
     return 'updating';
   }
 
@@ -75,7 +75,7 @@ export function getPreviousAgentStatusForOfflineAgents(
       ? agent.policy_revision_idx
       : undefined;
 
-  if (!policyRevision || (agent.upgrade_started_at && agent.upgrade_status !== 'completed')) {
+  if (!policyRevision || (agent.upgrade_started_at && !agent.upgraded_at)) {
     return 'updating';
   }
 }
@@ -109,7 +109,7 @@ export function buildKueryForOfflineAgents(path: string = ''): string {
 }
 
 export function buildKueryForUpgradingAgents(path: string = ''): string {
-  return `(${path}upgrade_started_at:*) and not (${path}upgrade_status:completed)`;
+  return `(${path}upgrade_started_at:*) and not (${path}upgraded_at:*)`;
 }
 
 export function buildKueryForUpdatingAgents(path: string = ''): string {

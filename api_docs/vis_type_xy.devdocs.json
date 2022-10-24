@@ -825,12 +825,20 @@
           "Omit<",
           {
             "pluginId": "visualizations",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.SchemaConfig",
+            "section": "def-common.SchemaConfig",
             "text": "SchemaConfig"
           },
-          ", \"params\"> & { params: {} | ",
+          "<",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.SupportedAggregation",
+            "text": "SupportedAggregation"
+          },
+          ">, \"params\"> & { params: {} | ",
           {
             "pluginId": "visualizations",
             "scope": "common",

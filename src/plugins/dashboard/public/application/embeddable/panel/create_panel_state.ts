@@ -7,7 +7,7 @@
  */
 
 import { PanelState, EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
+import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../dashboard_constants';
 import { DashboardPanelState } from '../types';
 import {
   IPanelPlacementArgs,

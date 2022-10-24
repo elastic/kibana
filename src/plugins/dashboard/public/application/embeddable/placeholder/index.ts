@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * from './placeholder_embeddable';
-export * from './placeholder_embeddable_factory';
+export { PlaceholderEmbeddableFactory } from './placeholder_embeddable_factory';
+
+export const PLACEHOLDER_EMBEDDABLE = 'placeholder';

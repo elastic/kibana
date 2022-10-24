@@ -7,15 +7,19 @@
 
 import type { RenderHookResult, RenderResult } from '@testing-library/react-hooks';
 import { act, renderHook } from '@testing-library/react-hooks';
-import { useCurrentUser, useKibana } from '../../../lib/kibana';
-import { useEndpointPrivileges } from './use_endpoint_privileges';
+
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { licenseService } from '../../../hooks/use_license';
-import { getEndpointPrivilegesInitialStateMock } from './mocks';
+import { createFleetAuthzMock } from '@kbn/fleet-plugin/common';
+
 import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
+import { useCurrentUser, useKibana } from '../../../lib/kibana';
+import { licenseService } from '../../../hooks/use_license';
+import { useEndpointPrivileges } from './use_endpoint_privileges';
+import { getEndpointPrivilegesInitialStateMock } from './mocks';
 import { getEndpointPrivilegesInitialState } from './utils';
 
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../lib/kibana');
 jest.mock('../../../hooks/use_license', () => {
   const licenseServiceInstance = {
@@ -47,6 +51,16 @@ describe('When using useEndpointPrivileges hook', () => {
     });
 
     (useCurrentUser as jest.Mock).mockReturnValue(authenticatedUser);
+    useKibanaMock().services.fleet!.authz = createFleetAuthzMock();
+    useKibanaMock().services.application.capabilities = {
+      catalogue: {},
+      management: {},
+      navLinks: {},
+      siem: {
+        crud: true,
+        show: true,
+      },
+    };
 
     licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
 
@@ -58,6 +72,7 @@ describe('When using useEndpointPrivileges hook', () => {
   });
 
   afterEach(() => {
+    jest.resetAllMocks();
     unmount();
   });
 

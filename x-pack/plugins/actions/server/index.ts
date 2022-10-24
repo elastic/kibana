@@ -139,3 +139,5 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
     },
   ],
 };
+
+export { urlAllowListValidator } from './sub_action_framework/helpers';

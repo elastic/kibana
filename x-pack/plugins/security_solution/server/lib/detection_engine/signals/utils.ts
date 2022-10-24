@@ -31,10 +31,8 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
-import type {
-  TimestampOverride,
-  Privilege,
-} from '../../../../common/detection_engine/schemas/common';
+import type { TimestampOverride } from '../../../../common/detection_engine/rule_schema';
+import type { Privilege } from '../../../../common/detection_engine/schemas/common';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/rule_monitoring';
 import type {
   BulkResponseErrorAggregation,
@@ -57,7 +55,7 @@ import type {
   RuleParams,
   ThreatRuleParams,
   ThresholdRuleParams,
-} from '../schemas/rule_schemas';
+} from '../rule_schema';
 import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
 import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
 import { withSecuritySpan } from '../../../utils/with_security_span';
@@ -649,6 +647,7 @@ export const createSearchAfterReturnType = ({
   success,
   warning,
   searchAfterTimes,
+  enrichmentTimes,
   bulkCreateTimes,
   lastLookBackDate,
   createdSignalsCount,
@@ -659,6 +658,7 @@ export const createSearchAfterReturnType = ({
   success?: boolean | undefined;
   warning?: boolean;
   searchAfterTimes?: string[] | undefined;
+  enrichmentTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
   lastLookBackDate?: Date | undefined;
   createdSignalsCount?: number | undefined;
@@ -670,6 +670,7 @@ export const createSearchAfterReturnType = ({
     success: success ?? true,
     warning: warning ?? false,
     searchAfterTimes: searchAfterTimes ?? [],
+    enrichmentTimes: enrichmentTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
     lastLookBackDate: lastLookBackDate ?? null,
     createdSignalsCount: createdSignalsCount ?? 0,
@@ -715,6 +716,7 @@ export const addToSearchAfterReturn = ({
   current.createdSignalsCount += next.createdItemsCount;
   current.createdSignals.push(...next.createdItems);
   current.bulkCreateTimes.push(next.bulkCreateDuration);
+  current.enrichmentTimes.push(next.enrichmentDuration);
   current.errors = [...new Set([...current.errors, ...next.errors])];
 };
 
@@ -727,6 +729,7 @@ export const mergeReturns = (
       warning: existingWarning,
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
+      enrichmentTimes: existingEnrichmentTimes,
       lastLookBackDate: existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
@@ -738,6 +741,7 @@ export const mergeReturns = (
       success: newSuccess,
       warning: newWarning,
       searchAfterTimes: newSearchAfterTimes,
+      enrichmentTimes: newEnrichmentTimes,
       bulkCreateTimes: newBulkCreateTimes,
       lastLookBackDate: newLastLookBackDate,
       createdSignalsCount: newCreatedSignalsCount,
@@ -750,6 +754,7 @@ export const mergeReturns = (
       success: existingSuccess && newSuccess,
       warning: existingWarning || newWarning,
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
+      enrichmentTimes: [...existingEnrichmentTimes, ...newEnrichmentTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
       lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,

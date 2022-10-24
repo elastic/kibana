@@ -13,17 +13,24 @@ import { API_URLS } from '../../../common/constants';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
 import { ProjectMonitorFormatter } from '../../synthetics_service/project_monitor/project_monitor_formatter';
 
+const MAX_PAYLOAD_SIZE = 1048576 * 20; // 20MiB
+
 export const addSyntheticsProjectMonitorRoute: SyntheticsStreamingRouteFactory = (
   libs: UMServerLibs
 ) => ({
   method: 'PUT',
-  path: API_URLS.SYNTHETICS_MONITORS_PROJECT,
+  path: API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY,
   validate: {
     body: schema.object({
       project: schema.string(),
       keep_stale: schema.boolean(),
       monitors: schema.arrayOf(schema.any()),
     }),
+  },
+  options: {
+    body: {
+      maxBytes: MAX_PAYLOAD_SIZE,
+    },
   },
   handler: async ({
     request,

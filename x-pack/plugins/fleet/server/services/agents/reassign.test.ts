@@ -96,4 +96,29 @@ describe('reassignAgents (plural)', () => {
     });
     expect(calledWithActionResults.body?.[1] as any).toEqual(expectedObject);
   });
+
+  it('should report errors from ES agent update call', async () => {
+    const { soClient, esClient, agentInRegularDoc, regularAgentPolicySO2 } = createClientMock();
+    esClient.bulk.mockResponse({
+      items: [
+        {
+          update: {
+            _id: agentInRegularDoc._id,
+            error: new Error('version conflict'),
+          },
+        },
+      ],
+    } as any);
+    const idsToReassign = [agentInRegularDoc._id];
+    await reassignAgents(soClient, esClient, { agentIds: idsToReassign }, regularAgentPolicySO2.id);
+
+    const calledWithActionResults = esClient.bulk.mock.calls[1][0] as estypes.BulkRequest;
+    const expectedObject = expect.objectContaining({
+      '@timestamp': expect.anything(),
+      action_id: expect.anything(),
+      agent_id: agentInRegularDoc._id,
+      error: 'version conflict',
+    });
+    expect(calledWithActionResults.body?.[1] as any).toEqual(expectedObject);
+  });
 });

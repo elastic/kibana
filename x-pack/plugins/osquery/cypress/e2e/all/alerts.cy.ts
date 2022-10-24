@@ -8,7 +8,6 @@
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import {
-  checkResults,
   findAndClickButton,
   findFormFieldByRowsLabelAndType,
   inputQuery,
@@ -59,6 +58,28 @@ describe('Alert Event Details', () => {
     cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
   });
 
+  it('enables to add detection action with osquery', () => {
+    cy.visit('/app/security/rules');
+    cy.contains(RULE_NAME).click();
+    cy.contains('Edit rule settings').click();
+    cy.getBySel('edit-rule-actions-tab').wait(500).click();
+    cy.contains('Perform no actions').get('select').select('On each rule execution');
+    cy.contains('Response actions are run on each rule execution');
+    cy.getBySel('.osquery-ResponseActionTypeSelectOption').click();
+    cy.get(LIVE_QUERY_EDITOR);
+    cy.contains('Save changes').click();
+    cy.contains('Query is a required field');
+    inputQuery('select * from uptime');
+    cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
+
+    // getSavedQueriesDropdown().type(`users{downArrow}{enter}`);
+    cy.contains('Save changes').click();
+    cy.contains(`${RULE_NAME} was saved`).should('exist');
+    cy.contains('Edit rule settings').click();
+    cy.getBySel('edit-rule-actions-tab').wait(500).click();
+    cy.contains('select * from uptime');
+  });
+
   it('should be able to run live query and add to timeline (-depending on the previous test)', () => {
     const TIMELINE_NAME = 'Untitled timeline';
     cy.visit('/app/security/alerts');
@@ -94,38 +115,20 @@ describe('Alert Event Details', () => {
     cy.contains('Cancel').click();
     cy.contains(TIMELINE_NAME).click();
     cy.getBySel('draggableWrapperKeyboardHandler').contains('action_id: "');
-  });
-  it('enables to add detection action with osquery', () => {
-    cy.visit('/app/security/rules');
-    cy.contains(RULE_NAME).click();
-    cy.contains('Edit rule settings').click();
-    cy.getBySel('edit-rule-actions-tab').wait(500).click();
-    cy.contains('Perform no actions').get('select').select('On each rule execution');
-    cy.contains('Response actions are run on each rule execution');
-    cy.getBySel('.osquery-ResponseActionTypeSelectOption').click();
-    cy.get(LIVE_QUERY_EDITOR);
-    cy.contains('Save changes').click();
-    cy.contains('Query is a required field');
-    inputQuery('select * from uptime');
-    cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
-
-    // getSavedQueriesDropdown().type(`users{downArrow}{enter}`);
-    cy.contains('Save changes').click();
-    cy.contains(`${RULE_NAME} was saved`).should('exist');
-    cy.contains('Edit rule settings').click();
-    cy.getBySel('edit-rule-actions-tab').wait(500).click();
-    cy.contains('select * from uptime');
+    // timeline unsaved changes modal
+    cy.visit('/app/osquery');
+    closeModalIfVisible();
   });
   // TODO think on how to get these actions triggered faster (because now they are not triggered during the test).
-  it.skip('sees osquery results from last action', () => {
-    cy.visit('/app/security/alerts');
-    cy.getBySel('header-page-title').contains('Alerts').should('exist');
-    cy.getBySel('expand-event').first().click({ force: true });
-    cy.contains('Osquery Results').click();
-    cy.getBySel('osquery-results').should('exist');
-    cy.contains('select * from uptime');
-    cy.getBySel('osqueryResultsTable').within(() => {
-      checkResults();
-    });
-  });
+  // it.skip('sees osquery results from last action', () => {
+  //   cy.visit('/app/security/alerts');
+  //   cy.getBySel('header-page-title').contains('Alerts').should('exist');
+  //   cy.getBySel('expand-event').first().click({ force: true });
+  //   cy.contains('Osquery Results').click();
+  //   cy.getBySel('osquery-results').should('exist');
+  //   cy.contains('select * from uptime');
+  //   cy.getBySel('osqueryResultsTable').within(() => {
+  //     checkResults();
+  //   });
+  // });
 });

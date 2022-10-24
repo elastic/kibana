@@ -17,12 +17,11 @@ import {
 import { getQueryParams } from '@kbn/kibana-utils-plugin/public';
 
 import type { DashboardState } from '../../types';
-import type { DashboardSavedObject } from '../../saved_dashboards';
-import { DashboardAppLocatorParams, DashboardConstants } from '../..';
-import { getDashboardTitle } from '../../dashboard_strings';
-import { stateToRawDashboardState } from './convert_dashboard_state';
 import { DASHBOARD_APP_LOCATOR } from '../../locator';
+import { getDashboardTitle } from '../../dashboard_strings';
 import { pluginServices } from '../../services/plugin_services';
+import { DashboardAppLocatorParams, DashboardConstants } from '../..';
+import { stateToRawDashboardState } from './convert_dashboard_state';
 
 export const getSearchSessionIdFromURL = (history: History): string | undefined =>
   getQueryParams(history.location)[DashboardConstants.SEARCH_SESSION_ID] as string | undefined;
@@ -52,10 +51,8 @@ export function enableDashboardSearchSessions({
   canStoreSearchSession,
   initialDashboardState,
   getLatestDashboardState,
-  savedDashboard,
 }: {
   canStoreSearchSession: boolean;
-  savedDashboard: DashboardSavedObject;
   initialDashboardState: DashboardState;
   getLatestDashboardState: () => DashboardState;
 }) {
@@ -63,13 +60,13 @@ export function enableDashboardSearchSessions({
   const dashboardTitle = getDashboardTitle(
     initialDashboardState.title,
     initialDashboardState.viewMode,
-    !savedDashboard.id
+    !getLatestDashboardState().savedObjectId
   );
 
   data.search.session.enableStorage(
     createSessionRestorationDataProvider({
       getDashboardTitle: () => dashboardTitle,
-      getDashboardId: () => savedDashboard?.id || '',
+      getDashboardId: () => getLatestDashboardState().savedObjectId ?? '',
       getAppState: getLatestDashboardState,
     }),
     {
@@ -106,7 +103,7 @@ function getLocatorParams({
   return {
     timeRange: shouldRestoreSearchSession ? timefilter.getAbsoluteTime() : timefilter.getTime(),
     searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
-    panels: getDashboardId() ? undefined : appState.panels,
+    panels: getDashboardId() ? undefined : (appState.panels as DashboardAppLocatorParams['panels']),
     query: queryString.formatQuery(appState.query) as Query,
     filters: filterManager.getFilters(),
     savedQuery: appState.savedQuery,

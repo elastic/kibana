@@ -30,16 +30,6 @@ describe('ObservabilityStatusProgress', () => {
       forceUpdate: '',
     } as HasDataContextValue);
   });
-  it('should render the progress', () => {
-    render(
-      <I18nProvider>
-        <ObservabilityStatusProgress onViewDetailsClick={onViewDetailsClickFn} />
-      </I18nProvider>
-    );
-    const progressBar = screen.getByRole('progressbar') as HTMLProgressElement;
-    expect(progressBar).toBeInTheDocument();
-    expect(progressBar.value).toBe(50);
-  });
 
   it('should call the onViewDetailsCallback when view details button is clicked', () => {
     render(

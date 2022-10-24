@@ -303,3 +303,24 @@ export type VisState840 = VisState830;
 export type LensDocShape840<VisualizationState = unknown> = LensDocShape830<VisualizationState>;
 
 export type LensDocShape850<VisualizationState = unknown> = LensDocShape840<VisualizationState>;
+
+export type LensDocShape860<VisualizationState = unknown> = Omit<
+  LensDocShape850<VisualizationState>,
+  'state'
+> & {
+  state: Omit<LensDocShape850<VisualizationState>['state'], 'datasourceStates'> & {
+    datasourceStates: {
+      // This is hardcoded as our only datasource
+      formBased: {
+        currentIndexPatternId: string;
+        layers: Record<
+          string,
+          {
+            columnOrder: string[];
+            columns: Record<string, Record<string, unknown>>;
+          }
+        >;
+      };
+    };
+  };
+};

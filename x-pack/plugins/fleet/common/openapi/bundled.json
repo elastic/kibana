@@ -1187,7 +1187,7 @@
             "schema": {
               "type": "array"
             },
-            "name": "agentsId",
+            "name": "agentsIds",
             "in": "query",
             "required": true
           }
@@ -1254,23 +1254,8 @@
                   "type": "object",
                   "properties": {
                     "actionId": {
-                      "type": "string",
-                      "description": "action id when running in async mode (>10k agents)"
+                      "type": "string"
                     }
-                  },
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
                   }
                 }
               }
@@ -1849,23 +1834,8 @@
                   "type": "object",
                   "properties": {
                     "actionId": {
-                      "type": "string",
-                      "description": "action id when running in async mode (>10k agents)"
+                      "type": "string"
                     }
-                  },
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
                   }
                 }
               }
@@ -1931,23 +1901,8 @@
                   "type": "object",
                   "properties": {
                     "actionId": {
-                      "type": "string",
-                      "description": "action id when running in async mode (>10k agents)"
+                      "type": "string"
                     }
-                  },
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
                   }
                 }
               }
@@ -2020,23 +1975,8 @@
                   "type": "object",
                   "properties": {
                     "actionId": {
-                      "type": "string",
-                      "description": "action id when running in async mode (>10k agents)"
+                      "type": "string"
                     }
-                  },
-                  "additionalProperties": {
-                    "type": "object",
-                    "properties": {
-                      "success": {
-                        "type": "boolean"
-                      },
-                      "error": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "success"
-                    ]
                   }
                 }
               }
@@ -3766,6 +3706,230 @@
           }
         ]
       }
+    },
+    "/fleet_server_hosts": {
+      "get": {
+        "summary": "Fleet Server Hosts - List",
+        "description": "Return a list of Fleet server hosts",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/fleet_server_host"
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-fleet-server-hosts"
+      },
+      "post": {
+        "summary": "Fleet Server Hosts - Create",
+        "description": "Create a new Fleet Server Host",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/fleet_server_host"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "is_default": {
+                    "type": "boolean"
+                  },
+                  "host_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "host_urls"
+                ]
+              }
+            }
+          }
+        },
+        "operationId": "post-fleet-server-hosts"
+      }
+    },
+    "/fleet_server_hosts/{itemId}": {
+      "get": {
+        "summary": "Fleet Server Hosts - Info",
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/fleet_server_host"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "get-one-fleet-server-hosts"
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "itemId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "delete": {
+        "summary": "Fleet Server Hosts - Delete",
+        "operationId": "delete-fleet-server-hosts",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "itemId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      },
+      "put": {
+        "summary": "Fleet Server Hosts - Update",
+        "operationId": "update-fleet-server-hosts",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "is_default": {
+                    "type": "boolean"
+                  },
+                  "host_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "item": {
+                      "$ref": "#/components/schemas/fleet_server_host"
+                    }
+                  },
+                  "required": [
+                    "item"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "name": "itemId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -4035,9 +4199,6 @@
             "type": "string"
           },
           "has_seen_add_data_notice": {
-            "type": "boolean"
-          },
-          "has_seen_fleet_migration_notice": {
             "type": "boolean"
           },
           "fleet_server_hosts": {
@@ -5529,6 +5690,37 @@
           "is_default",
           "name",
           "host"
+        ]
+      },
+      "fleet_server_host": {
+        "title": "Fleet Server Host",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "is_preconfigured": {
+            "type": "boolean"
+          },
+          "host_urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "fleet_server_hosts",
+          "id",
+          "is_default",
+          "is_preconfigured",
+          "host_urls"
         ]
       }
     }

@@ -150,20 +150,20 @@ export const isStdDevAgg = (metric: SchemaConfig): metric is SchemaConfig<METRIC
   return metric.aggType === METRIC_TYPES.STD_DEV;
 };
 
-export const getCutomBucketsFromSiblingAggs = (metrics: SchemaConfig[]) => {
-  return metrics.reduce<IAggConfig[]>((acc, metric) => {
-    if (
-      isSiblingPipeline(metric) &&
-      metric.aggParams?.customBucket &&
-      acc.every(
-        (bucket) =>
-          !isEqual(
-            omit(metric.aggParams?.customBucket?.serialize(), ['id']),
-            omit(bucket.serialize(), ['id'])
-          )
-      )
-    ) {
-      acc.push(metric.aggParams.customBucket);
+export const getCustomBucketsFromSiblingAggs = (metrics: SchemaConfig[]) => {
+  return metrics.reduce<Array<{ customBucket: IAggConfig; metricIds: string[] }>>((acc, metric) => {
+    if (isSiblingPipeline(metric) && metric.aggParams?.customBucket && metric.aggId) {
+      const customBucket = acc.find((bucket) =>
+        isEqual(
+          omit(metric.aggParams?.customBucket?.serialize(), ['id']),
+          omit(bucket.customBucket.serialize(), ['id'])
+        )
+      );
+      if (customBucket) {
+        customBucket.metricIds.push(metric.aggId);
+      } else {
+        acc.push({ customBucket: metric.aggParams.customBucket, metricIds: [metric.aggId] });
+      }
     }
 
     return acc;

@@ -36,6 +36,20 @@
             "path": "packages/core/metrics/core-metrics-server-internal/src/metrics_service.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-server-internal",
+            "id": "def-server.MetricsServiceSetupDeps.elasticsearchService",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearchService",
+            "description": [],
+            "signature": [
+              "InternalElasticsearchServiceSetup"
+            ],
+            "path": "packages/core/metrics/core-metrics-server-internal/src/metrics_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

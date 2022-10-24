@@ -1856,14 +1856,6 @@
             "path": "src/plugins/discover/public/application/main/services/discover_state.ts"
           },
           {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_filter_state.ts"
-          },
-          {
-            "plugin": "dashboard",
-            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_filter_state.ts"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/routes/map_page/url_state/global_sync.ts"
           },
@@ -3785,10 +3777,10 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.queryStateToExpressionAst",
+        "id": "def-common.textBasedQueryStateToAstWithValidation",
         "type": "Function",
         "tags": [],
-        "label": "queryStateToExpressionAst",
+        "label": "textBasedQueryStateToAstWithValidation",
         "description": [
           "\nConverts QueryState to expression AST"
         ],
@@ -3801,15 +3793,15 @@
             "section": "def-common.ExpressionAstExpression",
             "text": "ExpressionAstExpression"
           },
-          ">"
+          " | undefined>"
         ],
-        "path": "src/plugins/data/common/query/to_expression_ast.ts",
+        "path": "src/plugins/data/common/query/text_based_query_state_to_ast_with_validation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.queryStateToExpressionAst.$1",
+            "id": "def-common.textBasedQueryStateToAstWithValidation.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  dataViewsService,\n}",
@@ -3817,7 +3809,49 @@
             "signature": [
               "Args"
             ],
-            "path": "src/plugins/data/common/query/to_expression_ast.ts",
+            "path": "src/plugins/data/common/query/text_based_query_state_to_ast_with_validation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.textBasedQueryStateToExpressionAst",
+        "type": "Function",
+        "tags": [],
+        "label": "textBasedQueryStateToExpressionAst",
+        "description": [
+          "\nConverts QueryState to expression AST"
+        ],
+        "signature": [
+          "({\n  filters,\n  query,\n  inputQuery,\n  time,\n  timeFieldName,\n}: Args) => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
+          }
+        ],
+        "path": "src/plugins/data/common/query/text_based_query_state_to_ast.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.textBasedQueryStateToExpressionAst.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  filters,\n  query,\n  inputQuery,\n  time,\n  timeFieldName,\n}",
+            "description": [],
+            "signature": [
+              "Args"
+            ],
+            "path": "src/plugins/data/common/query/text_based_query_state_to_ast.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

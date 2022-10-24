@@ -21,7 +21,8 @@ export {
   getTime,
   isQuery,
   isTimeRange,
-  queryStateToExpressionAst,
+  textBasedQueryStateToAstWithValidation,
+  textBasedQueryStateToExpressionAst,
 } from './query';
 export type { QueryState } from './query';
 export * from './search';

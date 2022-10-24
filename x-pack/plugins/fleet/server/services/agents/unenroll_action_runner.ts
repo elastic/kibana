@@ -11,7 +11,7 @@ import { intersection } from 'lodash';
 
 import { AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 
-import type { Agent, BulkActionResult } from '../../types';
+import type { Agent } from '../../types';
 
 import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
@@ -21,18 +21,19 @@ import { appContextService } from '../app_context';
 
 import { ActionRunner } from './action_runner';
 
-import { errorsToResults, bulkUpdateAgents } from './crud';
+import { bulkUpdateAgents } from './crud';
 import {
   bulkCreateAgentActionResults,
   createAgentAction,
+  createErrorActionResults,
   getUnenrollAgentActions,
 } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_actions_resolver';
 
 export class UnenrollActionRunner extends ActionRunner {
-  protected async processAgents(agents: Agent[]): Promise<{ items: BulkActionResult[] }> {
-    return await unenrollBatch(this.soClient, this.esClient, agents, this.actionParams!, true);
+  protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
+    return await unenrollBatch(this.soClient, this.esClient, agents, this.actionParams!);
   }
 
   protected getTaskType() {
@@ -60,9 +61,8 @@ export async function unenrollBatch(
     revoke?: boolean;
     actionId?: string;
     total?: number;
-  },
-  skipSuccess?: boolean
-): Promise<{ items: BulkActionResult[] }> {
+  }
+): Promise<{ actionId: string }> {
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
   const outgoingErrors: Record<Agent['id'], Error> = {};
 
@@ -82,13 +82,24 @@ export async function unenrollBatch(
         return agents;
       }, []);
 
+  const now = new Date().toISOString();
+
+  // Update the necessary agents
+  const updateData = options.revoke
+    ? { unenrolled_at: now, active: false }
+    : { unenrollment_started_at: now };
+
+  await bulkUpdateAgents(
+    esClient,
+    agentsToUpdate.map(({ id }) => ({ agentId: id, data: updateData })),
+    outgoingErrors
+  );
+
   const actionId = options.actionId ?? uuid();
-  const errorCount = Object.keys(outgoingErrors).length;
   const total = options.total ?? givenAgents.length;
 
   const agentIds = agentsToUpdate.map((agent) => agent.id);
 
-  const now = new Date().toISOString();
   if (options.revoke) {
     // Get all API keys that need to be invalidated
     await invalidateAPIKeysForAgents(agentsToUpdate);
@@ -105,36 +116,15 @@ export async function unenrollBatch(
     });
   }
 
-  if (errorCount > 0) {
-    appContextService
-      .getLogger()
-      .info(
-        `Skipping ${errorCount} agents, as failed validation (cannot unenroll from a hosted policy or already unenrolled)`
-      );
-
-    // writing out error result for those agents that failed validation, so the action is not going to stay in progress forever
-    await bulkCreateAgentActionResults(
-      esClient,
-      Object.keys(outgoingErrors).map((agentId) => ({
-        agentId,
-        actionId,
-        error: outgoingErrors[agentId].message,
-      }))
-    );
-  }
-
-  // Update the necessary agents
-  const updateData = options.revoke
-    ? { unenrolled_at: now, active: false }
-    : { unenrollment_started_at: now };
-
-  await bulkUpdateAgents(
+  await createErrorActionResults(
     esClient,
-    agentsToUpdate.map(({ id }) => ({ agentId: id, data: updateData }))
+    actionId,
+    outgoingErrors,
+    'cannot unenroll from a hosted policy or already unenrolled'
   );
 
   return {
-    items: errorsToResults(givenAgents, outgoingErrors, undefined, skipSuccess),
+    actionId,
   };
 }
 
@@ -224,6 +214,20 @@ export async function invalidateAPIKeysForAgents(agents: Agent[]) {
     }
     if (agent.default_api_key_history) {
       agent.default_api_key_history.forEach((apiKey) => keys.push(apiKey.id));
+    }
+    if (agent.outputs) {
+      Object.values(agent.outputs).forEach((output) => {
+        if (output.api_key_id) {
+          keys.push(output.api_key_id);
+        }
+        if (output.to_retire_api_key_ids) {
+          Object.values(output.to_retire_api_key_ids).forEach((apiKey) => {
+            if (apiKey?.id) {
+              keys.push(apiKey.id);
+            }
+          });
+        }
+      });
     }
     return keys;
   }, []);

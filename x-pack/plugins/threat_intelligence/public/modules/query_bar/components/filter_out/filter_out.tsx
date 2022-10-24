@@ -5,22 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, VFC } from 'react';
+import React, { VFC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
-import { ComponentType } from '../../../../../common/types/component_type';
-import { useIndicatorsFiltersContext } from '../../../indicators/hooks/use_indicators_filters_context';
-import {
-  fieldAndValueValid,
-  getIndicatorFieldAndValue,
-} from '../../../indicators/utils/field_value';
-import { FilterOut as FilterOutConst, updateFiltersArray } from '../../utils/filter';
-import { Indicator } from '../../../../../common/types/indicator';
+import { useFilterInOut } from '../../hooks';
+import { FilterOut } from '../../utils';
+import { Indicator } from '../../../indicators';
 import { useStyles } from './styles';
 
 const ICON_TYPE = 'minusInCircle';
-const ICON_TITLE = i18n.translate('xpack.threatIntelligence.queryBar.filterOutButton', {
+const TITLE = i18n.translate('xpack.threatIntelligence.queryBar.filterOut', {
   defaultMessage: 'Filter Out',
 });
 
@@ -34,80 +28,140 @@ export interface FilterOutProps {
    */
   field: string;
   /**
-   * Dictates the way the FilterOut component is rendered depending on the situation in which it's used
-   */
-  type?: ComponentType;
-  /**
-   * Display component for when the FilterIn component is used within a DataGrid
-   */
-  as?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  /**
    * Used for unit and e2e tests.
    */
   ['data-test-subj']?: string;
 }
 
+export interface FilterOutCellActionProps extends FilterOutProps {
+  /**
+   * Display component for when the FilterIn component is used within an {@link EuiDataGrid}.
+   */
+  Component: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+}
+
 /**
  * Retrieves the indicator's field and value, then creates a new {@link Filter} and adds it to the {@link FilterManager}.
  *
- * The component has 3 renders depending on where it's used: within a EuiContextMenu, a EuiDataGrid or not.
+ * This component renders an {@link EuiButtonIcon}.
  *
- * @returns filter out button
+ * @returns filter out button icon
  */
-export const FilterOut: VFC<FilterOutProps> = ({ data, field, type, as: Component, ...props }) => {
-  const styles = useStyles();
-
-  const { filterManager } = useIndicatorsFiltersContext();
-
-  const { key, value } =
-    typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
-
-  const filterOut = useCallback(() => {
-    const existingFilters: Filter[] = filterManager.getFilters();
-    const newFilters: Filter[] = updateFiltersArray(existingFilters, key, value, FilterOutConst);
-    filterManager.setFilters(newFilters);
-  }, [filterManager, key, value]);
-
-  if (!fieldAndValueValid(key, value)) {
+export const FilterOutButtonIcon: VFC<FilterOutProps> = ({
+  data,
+  field,
+  'data-test-subj': dataTestSub,
+}) => {
+  const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterOut });
+  if (!filterFn) {
     return <></>;
   }
 
-  if (type === ComponentType.EuiDataGrid) {
-    return (
-      <EuiToolTip content={ICON_TITLE}>
-        <div {...props} css={styles.button}>
-          {/* @ts-ignore*/}
-          <Component aria-label={ICON_TITLE} iconType={ICON_TYPE} onClick={filterOut} />
-        </div>
-      </EuiToolTip>
-    );
-  }
-
-  if (type === ComponentType.ContextMenu) {
-    return (
-      <EuiContextMenuItem
-        key="filterOut"
-        icon="minusInCircle"
-        size="s"
-        onClick={filterOut}
-        {...props}
-      >
-        Filter Out
-      </EuiContextMenuItem>
-    );
-  }
-
   return (
-    <EuiToolTip content={ICON_TITLE}>
+    <EuiToolTip content={TITLE}>
       <EuiButtonIcon
-        aria-label={ICON_TITLE}
+        aria-label={TITLE}
         iconType={ICON_TYPE}
         iconSize="s"
         size="xs"
         color="primary"
-        onClick={filterOut}
-        {...props}
+        onClick={filterFn}
+        data-test-subj={dataTestSub}
       />
+    </EuiToolTip>
+  );
+};
+
+/**
+ * Retrieves the indicator's field and value, then creates a new {@link Filter} and adds it to the {@link FilterManager}.
+ *
+ * This component renders an {@link EuiButtonEmpty}.
+ *
+ * @returns filter out button empty
+ */
+export const FilterOutButtonEmpty: VFC<FilterOutProps> = ({
+  data,
+  field,
+  'data-test-subj': dataTestSub,
+}) => {
+  const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterOut });
+  if (!filterFn) {
+    return <></>;
+  }
+
+  return (
+    <EuiToolTip content={TITLE}>
+      <EuiButtonEmpty
+        aria-label={TITLE}
+        iconType={ICON_TYPE}
+        iconSize="s"
+        color="primary"
+        onClick={filterFn}
+        data-test-subj={dataTestSub}
+      >
+        {TITLE}
+      </EuiButtonEmpty>
+    </EuiToolTip>
+  );
+};
+
+/**
+ * Retrieves the indicator's field and value, then creates a new {@link Filter} and adds it to the {@link FilterManager}.
+ *
+ * This component is to be used in an EuiContextMenu.
+ *
+ * @returns filter in {@link EuiContextMenuItem} for a context menu
+ */
+export const FilterOutContextMenu: VFC<FilterOutProps> = ({
+  data,
+  field,
+  'data-test-subj': dataTestSub,
+}) => {
+  const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterOut });
+  if (!filterFn) {
+    return <></>;
+  }
+
+  return (
+    <EuiContextMenuItem
+      key="filterOut"
+      icon="minusInCircle"
+      size="s"
+      onClick={filterFn}
+      data-test-subj={dataTestSub}
+    >
+      {TITLE}
+    </EuiContextMenuItem>
+  );
+};
+
+/**
+ * Retrieves the indicator's field and value, then creates a new {@link Filter} and adds it to the {@link FilterManager}.
+ *
+ * This component is to be used in an EuiDataGrid.
+ *
+ * @returns filter in button for data grid
+ */
+export const FilterOutCellAction: VFC<FilterOutCellActionProps> = ({
+  data,
+  field,
+  Component,
+  'data-test-subj': dataTestSub,
+}) => {
+  const styles = useStyles();
+
+  const { filterFn } = useFilterInOut({ indicator: data, field, filterType: FilterOut });
+  if (!filterFn) {
+    return <></>;
+  }
+
+  return (
+    <EuiToolTip content={TITLE}>
+      <div data-test-subj={dataTestSub} css={styles.button}>
+        <Component aria-label={TITLE} iconType={ICON_TYPE} onClick={filterFn}>
+          {TITLE}
+        </Component>
+      </div>
     </EuiToolTip>
   );
 };

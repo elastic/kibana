@@ -20,7 +20,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
-import { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 import { ENRICHMENT_TYPES } from '@kbn/security-solution-plugin/common/cti/constants';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     // First test creates a real rule - remaining tests use preview API
     it('should be able to execute and get 10 signals when doing a specific query', async () => {
-      const rule: CreateRulesSchema = {
+      const rule: ThreatMatchRuleCreateProps = {
         description: 'Detecting root and admin users',
         name: 'Query with a rule id',
         severity: 'high',
@@ -259,7 +259,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return 0 matches if the mapping does not match against anything in the mapping', async () => {
-      const rule: CreateRulesSchema = {
+      const rule: ThreatMatchRuleCreateProps = {
         description: 'Detecting root and admin users',
         name: 'Query with a rule id',
         severity: 'high',
@@ -293,7 +293,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return 0 signals when using an AND and one of the clauses does not have data', async () => {
-      const rule: CreateRulesSchema = {
+      const rule: ThreatMatchRuleCreateProps = {
         description: 'Detecting root and admin users',
         name: 'Query with a rule id',
         severity: 'high',
@@ -331,7 +331,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return 0 signals when using an AND and one of the clauses has a made up value that does not exist', async () => {
-      const rule: CreateRulesSchema = {
+      const rule: ThreatMatchRuleCreateProps = {
         description: 'Detecting root and admin users',
         name: 'Query with a rule id',
         severity: 'high',
@@ -371,7 +371,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('timeout behavior', () => {
       // TODO: unskip this and see if we can make it not flaky
       it.skip('will return an error if a rule execution exceeds the rule interval', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: ThreatMatchRuleCreateProps = {
           description: 'Detecting root and admin users',
           name: 'Query with a short interval',
           severity: 'high',
@@ -416,7 +416,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('enriches signals with the single indicator that matched', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: ThreatMatchRuleCreateProps = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
@@ -504,7 +504,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('enriches signals with multiple indicators if several matched', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: ThreatMatchRuleCreateProps = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
@@ -581,7 +581,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('adds a single indicator that matched multiple fields', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: ThreatMatchRuleCreateProps = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
@@ -690,7 +690,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('generates multiple signals with multiple matches', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: ThreatMatchRuleCreateProps = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
@@ -837,7 +837,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('enriches signals with the single indicator that matched', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: ThreatMatchRuleCreateProps = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
@@ -925,7 +925,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('enriches signals with multiple indicators if several matched', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: ThreatMatchRuleCreateProps = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
@@ -1002,7 +1002,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('adds a single indicator that matched multiple fields', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: ThreatMatchRuleCreateProps = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
@@ -1111,7 +1111,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('generates multiple signals with multiple matches', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: ThreatMatchRuleCreateProps = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
@@ -1258,7 +1258,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should be enriched with host risk score', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: ThreatMatchRuleCreateProps = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',

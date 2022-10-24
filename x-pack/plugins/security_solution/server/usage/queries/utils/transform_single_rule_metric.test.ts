@@ -85,6 +85,15 @@ describe('transform_single_rule_metric', () => {
         minTotalSearchDuration: {
           value: 12,
         },
+        minTotalEnrichmentDuration: {
+          value: 4,
+        },
+        maxTotalEnrichmentDuration: {
+          value: 2,
+        },
+        avgTotalEnrichmentDuration: {
+          value: 12,
+        },
       },
     });
 
@@ -130,6 +139,11 @@ describe('transform_single_rule_metric', () => {
         max: 8,
         avg: 2,
         min: 9,
+      },
+      enrichment_duration: {
+        max: 2,
+        avg: 12,
+        min: 4,
       },
       gap_count: 4,
     });

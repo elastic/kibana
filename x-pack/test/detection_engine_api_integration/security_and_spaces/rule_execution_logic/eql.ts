@@ -16,7 +16,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { get } from 'lodash';
 
-import { EqlCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { EqlRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
 import {
   ALERT_ANCESTORS,
@@ -63,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     // First test creates a real rule - remaining tests use preview API
     it('generates a correctly formatted signal from EQL non-sequence queries', async () => {
-      const rule: EqlCreateSchema = {
+      const rule: EqlRuleCreateProps = {
         ...getEqlRuleForSignalTesting(['auditbeat-*']),
         query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
       };
@@ -166,7 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('generates up to max_signals for non-sequence EQL queries', async () => {
       const maxSignals = 200;
-      const rule: EqlCreateSchema = {
+      const rule: EqlRuleCreateProps = {
         ...getEqlRuleForSignalTesting(['auditbeat-*']),
         max_signals: maxSignals,
       };
@@ -176,7 +176,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('uses the provided event_category_override', async () => {
-      const rule: EqlCreateSchema = {
+      const rule: EqlRuleCreateProps = {
         ...getEqlRuleForSignalTesting(['auditbeat-*']),
         query: 'config_change where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
         event_category_override: 'auditd.message_type',
@@ -247,7 +247,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('uses the provided timestamp_field', async () => {
-      const rule: EqlCreateSchema = {
+      const rule: EqlRuleCreateProps = {
         ...getEqlRuleForSignalTesting(['fake.index.1']),
         query: 'any where true',
         timestamp_field: 'created_at',
@@ -261,7 +261,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('uses the provided tiebreaker_field', async () => {
-      const rule: EqlCreateSchema = {
+      const rule: EqlRuleCreateProps = {
         ...getEqlRuleForSignalTesting(['fake.index.1']),
         query: 'any where true',
         tiebreaker_field: 'locale',
@@ -275,7 +275,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('generates building block signals from EQL sequences in the expected form', async () => {
-      const rule: EqlCreateSchema = {
+      const rule: EqlRuleCreateProps = {
         ...getEqlRuleForSignalTesting(['auditbeat-*']),
         query: 'sequence by host.name [anomoly where true] [any where true]', // TODO: spelling
       };
@@ -421,7 +421,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('generates shell signals from EQL sequences in the expected form', async () => {
-      const rule: EqlCreateSchema = {
+      const rule: EqlRuleCreateProps = {
         ...getEqlRuleForSignalTesting(['auditbeat-*']),
         query: 'sequence by host.name [anomoly where true] [any where true]',
       };
@@ -504,7 +504,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('generates up to max_signals with an EQL rule', async () => {
       const maxSignals = 200;
-      const rule: EqlCreateSchema = {
+      const rule: EqlRuleCreateProps = {
         ...getEqlRuleForSignalTesting(['auditbeat-*']),
         query: 'sequence by host.name [any where true] [any where true]',
         max_signals: maxSignals,
@@ -522,7 +522,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('generates signals when an index name contains special characters to encode', async () => {
-      const rule: EqlCreateSchema = {
+      const rule: EqlRuleCreateProps = {
         ...getEqlRuleForSignalTesting(['auditbeat-*', '<my-index-{now/d}*>']),
         query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
       };
@@ -532,7 +532,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('uses the provided filters', async () => {
-      const rule: EqlCreateSchema = {
+      const rule: EqlRuleCreateProps = {
         ...getEqlRuleForSignalTesting(['auditbeat-*']),
         query: 'any where true',
         filters: [
@@ -587,7 +587,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should be enriched with host risk score', async () => {
-        const rule: EqlCreateSchema = {
+        const rule: EqlRuleCreateProps = {
           ...getEqlRuleForSignalTesting(['auditbeat-*']),
           query: 'configuration where agent.id=="a1d7b39c-f898-4dbe-a761-efb61939302d"',
         };

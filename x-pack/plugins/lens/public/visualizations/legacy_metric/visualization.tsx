@@ -15,10 +15,10 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { getSuggestions } from './metric_suggestions';
 import { Visualization, OperationMetadata, DatasourceLayers } from '../../types';
 import type { LegacyMetricState } from '../../../common/types';
-import { layerTypes } from '../../../common';
 import { MetricDimensionEditor } from './dimension_editor';
 import { MetricToolbar } from './metric_config_panel';
 import { DEFAULT_TITLE_POSITION } from './metric_config_panel/title_position_option';
@@ -222,7 +222,7 @@ export const getLegacyMetricVisualization = ({
       state || {
         layerId: addNewLayer(),
         accessor: undefined,
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
       }
     );
   },
@@ -258,7 +258,7 @@ export const getLegacyMetricVisualization = ({
           filterOperations: (op: OperationMetadata) =>
             !op.isBucketed && legacyMetricSupportedTypes.has(op.dataType),
           enableDimensionEditor: true,
-          required: true,
+          requiredMinDimensionCount: 1,
         },
       ],
     };
@@ -267,7 +267,7 @@ export const getLegacyMetricVisualization = ({
   getSupportedLayers() {
     return [
       {
-        type: layerTypes.DATA,
+        type: LayerTypes.DATA,
         label: i18n.translate('xpack.lens.legacyMetric.addLayer', {
           defaultMessage: 'Visualization',
         }),

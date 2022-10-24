@@ -112,6 +112,19 @@ describe('convertToLens', () => {
     expect(mockGetBucketsColumns).toBeCalledTimes(1);
   });
 
+  test('should return null for static value with buckets', async () => {
+    mockGetBucketsColumns.mockReturnValue([{}]);
+    mockGetMetricsColumns.mockReturnValue([
+      {
+        operationType: 'static_value',
+      },
+    ]);
+    const result = await convertToLens(model);
+    expect(result).toBeNull();
+    expect(mockGetMetricsColumns).toBeCalledTimes(1);
+    expect(mockGetBucketsColumns).toBeCalledTimes(1);
+  });
+
   test('should return state for valid model', async () => {
     const result = await convertToLens(model);
     expect(result).toBeDefined();

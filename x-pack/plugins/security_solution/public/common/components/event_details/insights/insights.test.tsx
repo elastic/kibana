@@ -61,7 +61,7 @@ jest.mock('../../../hooks/use_experimental_features', () => ({
 }));
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
-const data: TimelineEventsDetailsItem[] = [
+const dataWithoutAgentType: TimelineEventsDetailsItem[] = [
   {
     category: 'process',
     field: 'process.entity_id',
@@ -82,6 +82,16 @@ const data: TimelineEventsDetailsItem[] = [
   },
 ];
 
+const data: TimelineEventsDetailsItem[] = [
+  ...dataWithoutAgentType,
+  {
+    category: 'agent',
+    field: 'agent.type',
+    isObjectArray: false,
+    values: ['endpoint'],
+  },
+];
+
 describe('Insights', () => {
   beforeEach(() => {
     mockUseGetUserCasesPermissions.mockReturnValue(noCasesPermissions());
@@ -90,7 +100,7 @@ describe('Insights', () => {
   it('does not render when there is no content to show', () => {
     render(
       <TestProviders>
-        <Insights browserFields={{}} eventId="test" data={[]} timelineId="" />
+        <Insights browserFields={{}} eventId="test" data={[]} scopeId="" />
       </TestProviders>
     );
 
@@ -110,7 +120,7 @@ describe('Insights', () => {
 
     render(
       <TestProviders>
-        <Insights browserFields={{}} eventId="test" data={[]} timelineId="" />
+        <Insights browserFields={{}} eventId="test" data={[]} scopeId="" />
       </TestProviders>
     );
 
@@ -123,19 +133,33 @@ describe('Insights', () => {
 
   describe('with feature flag enabled', () => {
     describe('with platinum license', () => {
-      it('should show insights for related alerts by process ancestry', () => {
+      beforeAll(() => {
         licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
+      });
 
+      it('should show insights for related alerts by process ancestry', () => {
         render(
           <TestProviders>
-            <Insights browserFields={{}} eventId="test" data={data} timelineId="" />
+            <Insights browserFields={{}} eventId="test" data={data} scopeId="" />
           </TestProviders>
         );
 
         expect(screen.getByTestId('related-alerts-by-ancestry')).toBeInTheDocument();
         expect(
-          screen.queryByRole('link', { name: new RegExp(i18n.ALERT_UPSELL) })
+          screen.queryByRole('button', { name: new RegExp(i18n.INSIGHTS_UPSELL) })
         ).not.toBeInTheDocument();
+      });
+
+      describe('without process ancestry info', () => {
+        it('should not show the related alerts by process ancestry insights module', () => {
+          render(
+            <TestProviders>
+              <Insights browserFields={{}} eventId="test" data={dataWithoutAgentType} scopeId="" />
+            </TestProviders>
+          );
+
+          expect(screen.queryByTestId('related-alerts-by-ancestry')).not.toBeInTheDocument();
+        });
       });
     });
 
@@ -145,12 +169,12 @@ describe('Insights', () => {
 
         render(
           <TestProviders>
-            <Insights browserFields={{}} eventId="test" data={data} timelineId="" />
+            <Insights browserFields={{}} eventId="test" data={data} scopeId="" />
           </TestProviders>
         );
 
         expect(
-          screen.getByRole('link', { name: new RegExp(i18n.ALERT_UPSELL) })
+          screen.getByRole('button', { name: new RegExp(i18n.INSIGHTS_UPSELL) })
         ).toBeInTheDocument();
         expect(screen.queryByTestId('related-alerts-by-ancestry')).not.toBeInTheDocument();
       });
@@ -163,13 +187,13 @@ describe('Insights', () => {
 
       render(
         <TestProviders>
-          <Insights browserFields={{}} eventId="test" data={data} timelineId="" />
+          <Insights browserFields={{}} eventId="test" data={data} scopeId="" />
         </TestProviders>
       );
 
       expect(screen.queryByTestId('related-alerts-by-ancestry')).not.toBeInTheDocument();
       expect(
-        screen.queryByRole('link', { name: new RegExp(i18n.ALERT_UPSELL) })
+        screen.queryByRole('button', { name: new RegExp(i18n.INSIGHTS_UPSELL) })
       ).not.toBeInTheDocument();
     });
   });

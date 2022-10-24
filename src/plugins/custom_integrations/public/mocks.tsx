@@ -24,7 +24,7 @@ function createCustomIntegrationsStart(): jest.Mocked<CustomIntegrationsStart> {
   const services = servicesFactory({ startPlugins: {}, coreStart: coreMock.createStart() });
 
   return {
-    languageClientsUiComponents: new Map(),
+    languageClientsUiComponents: {},
     ContextProvider: jest.fn(({ children }) => (
       <CustomIntegrationsServicesProvider {...services}>
         {children}

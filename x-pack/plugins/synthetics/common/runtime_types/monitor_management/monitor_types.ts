@@ -82,7 +82,12 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.REVISION]: t.number,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec,
     [ConfigKey.CONFIG_ID]: t.string,
+    [ConfigKey.CONFIG_HASH]: t.string,
     [ConfigKey.JOURNEY_ID]: t.string,
+    [ConfigKey.PROJECT_ID]: t.string,
+    [ConfigKey.ORIGINAL_SPACE]: t.string,
+    [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
+    [ConfigKey.ID]: t.string,
   }),
 ]);
 
@@ -93,6 +98,10 @@ export const TCPSimpleFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.METADATA]: MetadataCodec,
     [ConfigKey.HOSTS]: t.string,
+    [ConfigKey.PORT]: t.union([t.number, t.null]),
+  }),
+  t.partial({
+    [ConfigKey.URLS]: t.string,
   }),
   CommonFieldsCodec,
 ]);
@@ -150,6 +159,7 @@ export const HTTPSimpleFieldsCodec = t.intersection([
     [ConfigKey.METADATA]: MetadataCodec,
     [ConfigKey.MAX_REDIRECTS]: t.string,
     [ConfigKey.URLS]: t.string,
+    [ConfigKey.PORT]: t.union([t.number, t.null]),
   }),
   CommonFieldsCodec,
 ]);
@@ -216,9 +226,6 @@ export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
     }),
     t.partial({
       [ConfigKey.PLAYWRIGHT_OPTIONS]: t.string,
-      [ConfigKey.PROJECT_ID]: t.string,
-      [ConfigKey.ORIGINAL_SPACE]: t.string,
-      [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
       [ConfigKey.TEXT_ASSERTION]: t.string,
     }),
   ]),
@@ -241,7 +248,7 @@ export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
   CommonFieldsCodec,
 ]);
 
-export const BrowserAdvancedFieldsCodec = t.interface({
+export const EncryptedBrowserAdvancedFieldsCodec = t.interface({
   [ConfigKey.SCREENSHOTS]: t.string,
   [ConfigKey.JOURNEY_FILTERS_MATCH]: t.string,
   [ConfigKey.JOURNEY_FILTERS_TAGS]: t.array(t.string),
@@ -263,25 +270,26 @@ export const BrowserSensitiveAdvancedFieldsCodec = t.interface({
   [ConfigKey.SYNTHETICS_ARGS]: t.array(t.string),
 });
 
-export const BrowserAdvancedsCodec = t.intersection([
-  BrowserAdvancedFieldsCodec,
+export const BrowserAdvancedFieldsCodec = t.intersection([
+  EncryptedBrowserAdvancedFieldsCodec,
   BrowserSensitiveAdvancedFieldsCodec,
 ]);
 
 export const EncryptedBrowserFieldsCodec = t.intersection([
   EncryptedBrowserSimpleFieldsCodec,
-  BrowserAdvancedFieldsCodec,
+  EncryptedBrowserAdvancedFieldsCodec,
+  TLSFieldsCodec,
 ]);
 
 export const BrowserFieldsCodec = t.intersection([
   BrowserSimpleFieldsCodec,
   BrowserAdvancedFieldsCodec,
-  BrowserSensitiveAdvancedFieldsCodec,
+  TLSCodec,
 ]);
 
 export type BrowserFields = t.TypeOf<typeof BrowserFieldsCodec>;
 export type BrowserSimpleFields = t.TypeOf<typeof BrowserSimpleFieldsCodec>;
-export type BrowserAdvancedFields = t.TypeOf<typeof BrowserAdvancedsCodec>;
+export type BrowserAdvancedFields = t.TypeOf<typeof BrowserAdvancedFieldsCodec>;
 
 // MonitorFields, represents any possible monitor type
 export const MonitorFieldsCodec = t.intersection([

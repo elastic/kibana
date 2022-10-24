@@ -30,7 +30,7 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
   const tags = alert?.fields[ALERT_RULE_TAGS];
 
   return (
-    <>
+    <div data-test-subj="alert-summary-container">
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiTitle size="xxs">
@@ -161,6 +161,6 @@ export function AlertSummary({ alert }: AlertSummaryProps) {
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </div>
   );
 }

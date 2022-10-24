@@ -31,7 +31,7 @@ export enum AdministrationSubTab {
   eventFilters = 'event_filters',
   hostIsolationExceptions = 'host_isolation_exceptions',
   blocklist = 'blocklist',
-  actionHistory = 'action_history',
+  responseActionsHistory = 'response_actions_history',
 }
 
 /**

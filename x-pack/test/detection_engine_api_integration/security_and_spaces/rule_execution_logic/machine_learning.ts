@@ -17,7 +17,7 @@ import {
   SPACE_IDS,
   VERSION,
 } from '@kbn/rule-data-utils';
-import { MachineLearningCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { MachineLearningRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const siemModule = 'security_linux_v3';
   const mlJobId = 'v3_linux_anomalous_network_activity';
-  const rule: MachineLearningCreateSchema = {
+  const rule: MachineLearningRuleCreateProps = {
     name: 'Test ML rule',
     description: 'Test ML rule description',
     risk_score: 50,
@@ -64,7 +64,8 @@ export default ({ getService }: FtrProviderContext) => {
     rule_id: 'ml-rule-id',
   };
 
-  describe('Machine learning type rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/142993
+  describe.skip('Machine learning type rules', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start

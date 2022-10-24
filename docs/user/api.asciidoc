@@ -17,6 +17,8 @@ For example:
 `GET kbn:/api/index_management/indices`
 --------------------------------------------------
 
+Note: this will automatically prefix `s/{space_id}/` on the API request if ran from a non-default Kibana Space.
+
 [float]
 [[api-authentication]]
 === Authentication
@@ -100,8 +102,7 @@ include::{kib-repo-dir}/api/actions-and-connectors.asciidoc[]
 include::{kib-repo-dir}/api/cases.asciidoc[]
 include::{kib-repo-dir}/api/dashboard-api.asciidoc[]
 include::{kib-repo-dir}/api/logstash-configuration-management.asciidoc[]
-include::{kib-repo-dir}/api/machine-learning/ml_apis_v2_docs.asciidoc[]
-include::{kib-repo-dir}/api/machine-learning/ml_apis_v2_defs.asciidoc[leveloffset=+1]
+include::{kib-repo-dir}/api/machine-learning.asciidoc[]
 include::{kib-repo-dir}/api/osquery-manager.asciidoc[]
 include::{kib-repo-dir}/api/short-urls.asciidoc[]
 include::{kib-repo-dir}/api/task-manager/health.asciidoc[]

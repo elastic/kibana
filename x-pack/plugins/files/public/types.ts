@@ -25,7 +25,9 @@ import type {
 } from '../common/api_routes';
 
 type UnscopedClientMethodFrom<E extends HttpApiInterfaceEntryDefinition> = (
-  args: E['inputs']['body'] & E['inputs']['params'] & E['inputs']['query']
+  args: E['inputs']['body'] &
+    E['inputs']['params'] &
+    E['inputs']['query'] & { abortSignal?: AbortSignal }
 ) => Promise<E['output']>;
 
 /**
@@ -60,13 +62,13 @@ interface GlobalEndpoints {
 /**
  * A client that can be used to manage a specific {@link FileKind}.
  */
-export interface FilesClient extends GlobalEndpoints {
+export interface FilesClient<M = unknown> extends GlobalEndpoints {
   /**
    * Create a new file object with the provided metadata.
    *
    * @param args - create file args
    */
-  create: ClientMethodFrom<CreateFileKindHttpEndpoint>;
+  create: ClientMethodFrom<CreateFileKindHttpEndpoint<M>>;
   /**
    * Delete a file object and all associated share and content objects.
    *
@@ -78,19 +80,19 @@ export interface FilesClient extends GlobalEndpoints {
    *
    * @param args - get file by ID args
    */
-  getById: ClientMethodFrom<GetByIdFileKindHttpEndpoint>;
+  getById: ClientMethodFrom<GetByIdFileKindHttpEndpoint<M>>;
   /**
    * List all file objects, of a given {@link FileKind}.
    *
    * @param args - list files args
    */
-  list: ClientMethodFrom<ListFileKindHttpEndpoint>;
+  list: ClientMethodFrom<ListFileKindHttpEndpoint<M>>;
   /**
    * Update a set of of metadata values of the file object.
    *
    * @param args - update file args
    */
-  update: ClientMethodFrom<UpdateFileKindHttpEndpoint>;
+  update: ClientMethodFrom<UpdateFileKindHttpEndpoint<M>>;
   /**
    * Stream the contents of the file to Kibana server for storage.
    *
@@ -117,8 +119,10 @@ export interface FilesClient extends GlobalEndpoints {
   /**
    * Get a string for downloading a file that can be passed to a button element's
    * href for download.
+   *
+   * @param args - get download URL args
    */
-  getDownloadHref: (file: FileJSON) => string;
+  getDownloadHref: (args: Pick<FileJSON, 'id' | 'fileKind'>) => string;
   /**
    * Share a file by creating a new file share instance.
    *
@@ -149,8 +153,8 @@ export interface FilesClient extends GlobalEndpoints {
   listShares: ClientMethodFrom<FileListSharesHttpEndpoint>;
 }
 
-export type FilesClientResponses = {
-  [K in keyof FilesClient]: Awaited<ReturnType<FilesClient[K]>>;
+export type FilesClientResponses<M = unknown> = {
+  [K in keyof FilesClient]: Awaited<ReturnType<FilesClient<M>[K]>>;
 };
 
 /**
@@ -159,10 +163,10 @@ export type FilesClientResponses = {
  * More convenient if you want to re-use the same client for the same file kind
  * and not specify the kind every time.
  */
-export type ScopedFilesClient = {
+export type ScopedFilesClient<M = unknown> = {
   [K in keyof FilesClient]: K extends 'list'
-    ? (arg?: Omit<Parameters<FilesClient[K]>[0], 'kind'>) => ReturnType<FilesClient[K]>
-    : (arg: Omit<Parameters<FilesClient[K]>[0], 'kind'>) => ReturnType<FilesClient[K]>;
+    ? (arg?: Omit<Parameters<FilesClient<M>[K]>[0], 'kind'>) => ReturnType<FilesClient<M>[K]>
+    : (arg: Omit<Parameters<FilesClient<M>[K]>[0], 'kind'>) => ReturnType<FilesClient<M>[K]>;
 };
 
 /**
@@ -172,11 +176,11 @@ export interface FilesClientFactory {
   /**
    * Create a files client.
    */
-  asUnscoped(): FilesClient;
+  asUnscoped<M = unknown>(): FilesClient<M>;
   /**
    * Create a {@link ScopedFileClient} for a given {@link FileKind}.
    *
    * @param fileKind - The {@link FileKind} to create a client for.
    */
-  asScoped(fileKind: string): ScopedFilesClient;
+  asScoped<M = unknown>(fileKind: string): ScopedFilesClient<M>;
 }

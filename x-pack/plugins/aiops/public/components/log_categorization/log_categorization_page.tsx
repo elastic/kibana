@@ -40,6 +40,7 @@ import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { DocumentCountChart } from './document_count_chart';
+import { InformationText } from './information_text';
 
 export interface LogCategorizationPageProps {
   dataView: DataView;
@@ -160,6 +161,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
           docCount,
         }))
       );
+      setCategories(null);
       setTotalCount(documentStats.totalCount);
     }
   }, [documentStats, earliest, latest, searchQueryLanguage, searchString, searchQuery]);
@@ -210,6 +212,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
   ]);
 
   const onFieldChange = (value: EuiComboBoxOptionOption[] | undefined) => {
+    setCategories(null);
     setSelectedField(value && value.length ? value[0].label : undefined);
   };
 
@@ -313,8 +316,17 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({
           <EuiSpacer />
         </>
       ) : null}
+
       {loading === true ? <EuiLoadingContent lines={10} /> : null}
-      {categories !== null ? (
+
+      <InformationText
+        loading={loading}
+        categoriesLength={categories?.length ?? null}
+        eventRateLength={eventRate.length}
+        fieldSelected={selectedField !== null}
+      />
+
+      {selectedField !== undefined && categories !== null && categories.length > 0 ? (
         <CategoryTable
           categories={categories}
           aiopsListState={aiopsListState}

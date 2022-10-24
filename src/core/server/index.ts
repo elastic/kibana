@@ -42,7 +42,6 @@ import type {
   ExecutionContextStart,
 } from '@kbn/core-execution-context-server';
 import type {
-  RequestHandlerContextBase,
   IRouter,
   RequestHandler,
   KibanaResponseFactory,
@@ -69,12 +68,11 @@ import type { CoreUsageDataStart, CoreUsageDataSetup } from '@kbn/core-usage-dat
 import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import type { StatusServiceSetup } from '@kbn/core-status-server';
 import type { UiSettingsServiceSetup, UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { HttpResources } from '@kbn/core-http-resources-server';
+import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
-import { HttpResources } from './http_resources';
-import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
-import type { CoreRequestHandlerContext } from './core_route_handler_context';
-import type { PrebootCoreRequestHandlerContext } from './preboot_core_route_handler_context';
-
+export type { PluginOpaqueId } from '@kbn/core-base-common';
 export type {
   CoreUsageStats,
   CoreUsageData,
@@ -230,9 +228,8 @@ export type {
   HttpResourcesResponseOptions,
   HttpResourcesServiceToolkit,
   HttpResourcesRequestHandler,
-} from './http_resources';
+} from '@kbn/core-http-resources-server';
 
-export type { IRenderOptions } from './rendering';
 export type {
   LoggingServiceSetup,
   LoggerContextConfigInput,
@@ -462,33 +459,13 @@ export type {
   AnalyticsServicePreboot,
   AnalyticsServiceStart,
 } from '@kbn/core-analytics-server';
-
-export type { CoreRequestHandlerContext } from './core_route_handler_context';
-
-/**
- * Base context passed to a route handler, containing the `core` context part.
- *
- * @public
- */
-export interface RequestHandlerContext extends RequestHandlerContextBase {
-  core: Promise<CoreRequestHandlerContext>;
-}
-
-/**
- * @internal
- */
-export interface PrebootRequestHandlerContext extends RequestHandlerContextBase {
-  core: Promise<PrebootCoreRequestHandlerContext>;
-}
-
-/**
- * Mixin allowing plugins to define their own request handler contexts.
- *
- * @public
- */
-export type CustomRequestHandlerContext<T> = RequestHandlerContext & {
-  [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
-};
+export type {
+  RequestHandlerContext,
+  CoreRequestHandlerContext,
+  CustomRequestHandlerContext,
+  PrebootRequestHandlerContext,
+  PrebootCoreRequestHandlerContext,
+} from '@kbn/core-http-request-handler-context-server';
 
 /**
  * Context passed to the `setup` method of `preboot` plugins.
@@ -599,7 +576,6 @@ export type {
   HttpResources,
   PluginsServiceSetup,
   PluginsServiceStart,
-  PluginOpaqueId,
 };
 
 /**

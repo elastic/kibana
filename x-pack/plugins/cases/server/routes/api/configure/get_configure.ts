@@ -6,7 +6,7 @@
  */
 
 import { CASE_CONFIGURE_URL } from '../../../../common/constants';
-import { GetConfigureFindRequest } from '../../../../common/api';
+import type { GetConfigureFindRequest } from '../../../../common/api';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 

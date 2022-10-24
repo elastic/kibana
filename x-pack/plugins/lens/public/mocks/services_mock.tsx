@@ -104,9 +104,11 @@ export function makeDefaultServices(
 
   const navigationStartMock = navigationPluginMock.createStartContract();
 
-  jest.spyOn(navigationStartMock.ui.TopNavMenu.prototype, 'constructor').mockImplementation(() => {
-    return <div className="topNavMenu" />;
-  });
+  jest
+    .spyOn(navigationStartMock.ui.AggregateQueryTopNavMenu.prototype, 'constructor')
+    .mockImplementation(() => {
+      return <div className="topNavMenu" />;
+    });
 
   function makeAttributeService(): LensAttributeService {
     const attributeServiceMock = mockAttributeService<

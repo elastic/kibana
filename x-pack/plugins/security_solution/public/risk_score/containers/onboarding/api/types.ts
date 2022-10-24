@@ -5,6 +5,8 @@
  * 2.0.
  */
 import type { HttpSetup, NotificationsStart, ThemeServiceStart } from '@kbn/core/public';
+import type { OutputError } from '@kbn/securitysolution-es-utils';
+import type { RiskScoreEntity } from '../../../../../common/search_strategy/security_solution/risk_score/common';
 
 interface RiskyScoreApiBase {
   errorMessage?: string;
@@ -71,12 +73,21 @@ export interface StartTransforms extends RiskyScoreApiBase {
   transformIds: string[];
 }
 
+export interface RestartTransforms extends RiskyScoreApiBase {
+  riskScoreEntity: RiskScoreEntity;
+}
+
 interface TransformResult {
   success: boolean;
   error?: { root_cause?: unknown; type?: string; reason?: string };
 }
 
 export type StartTransformsResult = Record<string, TransformResult>;
+
+export type RestartTransformResult = Record<
+  string,
+  { success: boolean; error: OutputError | null }
+>;
 
 export interface StopTransforms extends RiskyScoreApiBase {
   transformIds: string[];

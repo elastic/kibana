@@ -186,7 +186,10 @@ export function StorageDetailsPerService({
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
             <EuiFlexItem>
-              <EuiPanel hasShadow={false}>
+              <EuiPanel
+                hasShadow={false}
+                data-test-subj="serviceStorageDetailsChart"
+              >
                 <Chart>
                   <Settings
                     theme={[
@@ -224,7 +227,11 @@ export function StorageDetailsPerService({
               </EuiPanel>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiPanel hasShadow={false} paddingSize="l">
+              <EuiPanel
+                hasShadow={false}
+                paddingSize="l"
+                data-test-subj="serviceStorageDetailsTable"
+              >
                 {processorEventStats.map(
                   ({ processorEventLabel, docs, size }) => (
                     <>

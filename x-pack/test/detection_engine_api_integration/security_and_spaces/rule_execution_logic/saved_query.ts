@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
-import { SavedQueryCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { SavedQueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     // First test creates a real rule - remaining tests use preview API
     it('should query and get back expected signal structure using a saved query rule', async () => {
-      const rule: SavedQueryCreateSchema = {
+      const rule: SavedQueryRuleCreateProps = {
         ...getRuleForSignalTesting(['auditbeat-*']),
         type: 'saved_query',
         query: `_id:${ID}`,

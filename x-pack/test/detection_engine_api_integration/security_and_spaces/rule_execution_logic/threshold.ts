@@ -13,7 +13,7 @@ import {
   EVENT_KIND,
 } from '@kbn/rule-data-utils';
 
-import { ThresholdCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
 import {
   ALERT_ANCESTORS,
@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     // First test creates a real rule - remaining tests use preview API
     it('generates 1 signal from Threshold rules when threshold is met', async () => {
-      const rule: ThresholdCreateSchema = {
+      const rule: ThresholdRuleCreateProps = {
         ...getThresholdRuleForSignalTesting(['auditbeat-*']),
         threshold: {
           field: ['host.id'],
@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('generates 2 signals from Threshold rules when threshold is met', async () => {
-      const rule: ThresholdCreateSchema = {
+      const rule: ThresholdRuleCreateProps = {
         ...getThresholdRuleForSignalTesting(['auditbeat-*']),
         threshold: {
           field: 'host.id',
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('applies the provided query before bucketing ', async () => {
-      const rule: ThresholdCreateSchema = {
+      const rule: ThresholdRuleCreateProps = {
         ...getThresholdRuleForSignalTesting(['auditbeat-*']),
         query: 'host.id:"2ab45fc1c41e4c84bbd02202a7e5761f"',
         threshold: {
@@ -121,7 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('generates no signals from Threshold rules when threshold is met and cardinality is not met', async () => {
-      const rule: ThresholdCreateSchema = {
+      const rule: ThresholdRuleCreateProps = {
         ...getThresholdRuleForSignalTesting(['auditbeat-*']),
         threshold: {
           field: 'host.id',
@@ -140,7 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('generates no signals from Threshold rules when cardinality is met and threshold is not met', async () => {
-      const rule: ThresholdCreateSchema = {
+      const rule: ThresholdRuleCreateProps = {
         ...getThresholdRuleForSignalTesting(['auditbeat-*']),
         threshold: {
           field: 'host.id',
@@ -159,7 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('generates signals from Threshold rules when threshold and cardinality are both met', async () => {
-      const rule: ThresholdCreateSchema = {
+      const rule: ThresholdRuleCreateProps = {
         ...getThresholdRuleForSignalTesting(['auditbeat-*']),
         threshold: {
           field: 'host.id',
@@ -217,7 +217,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should not generate signals if only one field meets the threshold requirement', async () => {
-      const rule: ThresholdCreateSchema = {
+      const rule: ThresholdRuleCreateProps = {
         ...getThresholdRuleForSignalTesting(['auditbeat-*']),
         threshold: {
           field: ['host.id', 'process.name'],
@@ -230,7 +230,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('generates signals from Threshold rules when bucketing by multiple fields', async () => {
-      const rule: ThresholdCreateSchema = {
+      const rule: ThresholdRuleCreateProps = {
         ...getThresholdRuleForSignalTesting(['auditbeat-*']),
         threshold: {
           field: ['host.id', 'process.name', 'event.module'],
@@ -299,7 +299,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('applies timestamp override when using single field', async () => {
-        const rule: ThresholdCreateSchema = {
+        const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForSignalTesting(['timestamp-fallback-test']),
           threshold: {
             field: 'host.name',
@@ -327,7 +327,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('applies timestamp override when using multiple fields', async () => {
-        const rule: ThresholdCreateSchema = {
+        const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForSignalTesting(['timestamp-fallback-test']),
           threshold: {
             field: ['host.name', 'source.ip'],
@@ -365,7 +365,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should be enriched with host risk score', async () => {
-        const rule: ThresholdCreateSchema = {
+        const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForSignalTesting(['auditbeat-*']),
           threshold: {
             field: 'host.name',

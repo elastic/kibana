@@ -120,9 +120,12 @@ export const BLOCKLIST = i18n.translate('xpack.securitySolution.navigation.block
   defaultMessage: 'Blocklist',
 });
 
-export const ACTION_HISTORY = i18n.translate('xpack.securitySolution.navigation.actionHistory', {
-  defaultMessage: 'Action history',
-});
+export const RESPONSE_ACTIONS_HISTORY = i18n.translate(
+  'xpack.securitySolution.navigation.responseActionsHistory',
+  {
+    defaultMessage: 'Response actions history',
+  }
+);
 
 export const CREATE_NEW_RULE = i18n.translate('xpack.securitySolution.navigation.newRuleTitle', {
   defaultMessage: 'Create new rule',

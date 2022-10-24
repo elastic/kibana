@@ -9,7 +9,7 @@ import type { LensAttributes } from '../../types';
 export const kpiTlsHandshakesLensAttributes: LensAttributes = {
   title: '[Network] TLS handshakes',
   description: '',
-  visualizationType: 'lnsMetric',
+  visualizationType: 'lnsLegacyMetric',
   state: {
     visualization: {
       layerId: '1f48a633-8eee-45ae-9471-861227e9ca03',
@@ -93,7 +93,7 @@ export const kpiTlsHandshakesLensAttributes: LensAttributes = {
       },
     ],
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           '1f48a633-8eee-45ae-9471-861227e9ca03': {
             columns: {

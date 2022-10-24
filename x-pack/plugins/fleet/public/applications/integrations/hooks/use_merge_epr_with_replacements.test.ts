@@ -8,6 +8,7 @@
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
 import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
+import { renderHook } from '@testing-library/react-hooks';
 
 import type { PackageListItem } from '../../../../common/types/models';
 
@@ -46,8 +47,11 @@ describe('useMergeEprWithReplacements', () => {
         categories: ['cloud', 'datastore'],
       },
     ]);
+    const { result } = renderHook(() =>
+      useMergeEprPackagesWithReplacements(eprPackages, replacements)
+    );
 
-    expect(useMergeEprPackagesWithReplacements(eprPackages, replacements)).toEqual([
+    expect(result.current).toEqual([
       {
         name: 'aws',
         release: 'ga',
@@ -81,7 +85,10 @@ describe('useMergeEprWithReplacements', () => {
       },
     ]);
 
-    expect(useMergeEprPackagesWithReplacements(eprPackages, replacements)).toEqual([
+    const { result } = renderHook(() =>
+      useMergeEprPackagesWithReplacements(eprPackages, replacements)
+    );
+    expect(result.current).toEqual([
       {
         eprOverlap: 'activemq',
         id: 'activemq-logs',
@@ -109,7 +116,10 @@ describe('useMergeEprWithReplacements', () => {
       },
     ]);
 
-    expect(useMergeEprPackagesWithReplacements(eprPackages, replacements)).toEqual([
+    const { result } = renderHook(() =>
+      useMergeEprPackagesWithReplacements(eprPackages, replacements)
+    );
+    expect(result.current).toEqual([
       {
         name: 'activemq',
         release: 'beta',
@@ -129,7 +139,9 @@ describe('useMergeEprWithReplacements', () => {
       },
     ]);
 
-    expect(useMergeEprPackagesWithReplacements(eprPackages, [])).toEqual([]);
+    const { result } = renderHook(() => useMergeEprPackagesWithReplacements(eprPackages, []));
+
+    expect(result.current).toEqual([]);
   });
 
   test('should consists of all 3 types (ga eprs, replacements for non-ga eprs, replacements without epr equivalent', () => {
@@ -180,7 +192,11 @@ describe('useMergeEprWithReplacements', () => {
       },
     ]);
 
-    expect(useMergeEprPackagesWithReplacements(eprPackages, replacements)).toEqual([
+    const { result } = renderHook(() =>
+      useMergeEprPackagesWithReplacements(eprPackages, replacements)
+    );
+
+    expect(result.current).toEqual([
       {
         name: 'aws',
         release: 'ga',

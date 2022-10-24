@@ -15,7 +15,7 @@ export interface CustomIntegrationsSetup {
 
 export interface CustomIntegrationsStart {
   ContextProvider: React.FC;
-  languageClientsUiComponents: Map<string, React.FC>;
+  languageClientsUiComponents: Record<string, React.FC>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

@@ -64,13 +64,13 @@ Object {
         ],
       },
     },
+    "size": 10000,
     "sort": Array [
       Object {
         "@timestamp": "desc",
       },
     ],
   },
-  "size": 10000,
 }
 `;
 
@@ -104,12 +104,12 @@ Object {
         ],
       },
     },
+    "size": 10000,
     "sort": Array [
       Object {
         "@timestamp": "desc",
       },
     ],
   },
-  "size": 10000,
 }
 `;

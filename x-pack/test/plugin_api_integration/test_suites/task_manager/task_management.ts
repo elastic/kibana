@@ -54,8 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const testHistoryIndex = '.kibana_task_manager_test_result';
 
-  // Failing: See https://github.com/elastic/kibana/issues/141002
-  describe.skip('scheduling and running tasks', () => {
+  describe('scheduling and running tasks', () => {
     beforeEach(async () => {
       // clean up before each test
       return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
@@ -646,36 +645,36 @@ export default function ({ getService }: FtrProviderContext) {
       const historyItem = random(1, 100);
       const scheduledTask = await scheduleTask({
         taskType: 'sampleTask',
-        schedule: { interval: '30m' },
+        schedule: { interval: '1h' },
         params: { historyItem },
       });
 
       await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
-        const tasks = (await currentTasks()).docs;
+        const task = await currentTask(scheduledTask.id);
 
-        expect(getTaskById(tasks, scheduledTask.id).enabled).to.eql(true);
+        expect(task.enabled).to.eql(true);
       });
 
       // disable the task
       await bulkDisable([scheduledTask.id]);
 
       await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
-
-        expect(getTaskById(tasks, scheduledTask.id).enabled).to.eql(false);
+        const task = await currentTask(scheduledTask.id);
+        expect(task.enabled).to.eql(false);
       });
 
       // re-enable the task
       await bulkEnable([scheduledTask.id], true);
 
       await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
+        const task = await currentTask(scheduledTask.id);
 
-        expect(getTaskById(tasks, scheduledTask.id).enabled).to.eql(true);
-
-        // should get a new document even tho original schedule interval was 30m
-        expect((await historyDocs()).length).to.eql(2);
+        expect(task.enabled).to.eql(true);
+        expect(Date.parse(task.scheduledAt)).to.be.greaterThan(
+          Date.parse(scheduledTask.scheduledAt)
+        );
+        expect(Date.parse(task.runAt)).to.be.greaterThan(Date.parse(scheduledTask.runAt));
       });
     });
 
@@ -683,40 +682,34 @@ export default function ({ getService }: FtrProviderContext) {
       const historyItem = random(1, 100);
       const scheduledTask = await scheduleTask({
         taskType: 'sampleTask',
-        schedule: { interval: '30m' },
+        schedule: { interval: '1h' },
         params: { historyItem },
       });
 
       await retry.try(async () => {
         expect((await historyDocs()).length).to.eql(1);
-        const tasks = (await currentTasks()).docs;
 
-        expect(getTaskById(tasks, scheduledTask.id).enabled).to.eql(true);
+        const task = await currentTask(scheduledTask.id);
+        expect(task.enabled).to.eql(true);
       });
 
       // disable the task
       await bulkDisable([scheduledTask.id]);
 
+      let disabledTask: SerializedConcreteTaskInstance;
       await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
-
-        expect(getTaskById(tasks, scheduledTask.id).enabled).to.eql(false);
+        disabledTask = await currentTask(scheduledTask.id);
+        expect(disabledTask.enabled).to.eql(false);
       });
 
       // re-enable the task
       await bulkEnable([scheduledTask.id], false);
 
       await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
-
-        const task = getTaskById(tasks, scheduledTask.id);
+        const task = await currentTask(scheduledTask.id);
 
         expect(task.enabled).to.eql(true);
-
-        // task runAt should be set in the future by greater than 20 minutes
-        // this assumes it takes less than 10 minutes to disable and renable the task
-        // since the schedule interval is 30 minutes
-        expect(Date.parse(task.runAt) - Date.now()).to.be.greaterThan(10 * 60 * 1000);
+        expect(Date.parse(task.scheduledAt)).to.eql(Date.parse(disabledTask.scheduledAt));
       });
     });
 

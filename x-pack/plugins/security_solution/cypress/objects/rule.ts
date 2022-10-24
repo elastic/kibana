@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules';
+import type { RuleActionThrottle } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import type { CompleteTimeline } from './timeline';
 import { getTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
-import type { FullResponseSchema } from '../../common/detection_engine/schemas/request';
-
-export const totalNumberOfPrebuiltRules = rawRules.length;
+import type { RuleResponse } from '../../common/detection_engine/rule_schema';
+import type { Connectors } from './connector';
 
 const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
 
@@ -36,6 +35,11 @@ interface Interval {
   type: string;
 }
 
+export interface Actions {
+  throttle: RuleActionThrottle;
+  connectors: Connectors[];
+}
+
 export type RuleDataSource =
   | { type: 'indexPatterns'; index: string[] }
   | { type: 'dataView'; dataView: string };
@@ -46,20 +50,21 @@ export interface CustomRule {
   description: string;
   dataSource: RuleDataSource;
   interval?: string;
-  severity: string;
-  riskScore: string;
-  tags: string[];
+  severity?: string;
+  riskScore?: string;
+  tags?: string[];
   timelineTemplate?: string;
-  referenceUrls: string[];
-  falsePositivesExamples: string[];
-  mitre: Mitre[];
-  note: string;
-  runsEvery: Interval;
-  lookBack: Interval;
-  timeline: CompleteTimeline;
-  maxSignals: number;
+  referenceUrls?: string[];
+  falsePositivesExamples?: string[];
+  mitre?: Mitre[];
+  note?: string;
+  runsEvery?: Interval;
+  lookBack?: Interval;
+  timeline?: CompleteTimeline;
+  maxSignals?: number;
   buildingBlockType?: string;
   exceptionLists?: Array<{ id: string; list_id: string; type: string; namespace_type: string }>;
+  actions?: Actions;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -229,6 +234,15 @@ export const getNewRule = (): CustomRule => ({
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,
+});
+
+export const getSimpleCustomQueryRule = (): CustomRule => ({
+  customQuery: 'host.name: *',
+  dataSource: { index: getIndexPatterns(), type: 'indexPatterns' },
+  name: 'New Rule Test',
+  description: 'The new rule description.',
+  runsEvery: getRunsEvery(),
+  lookBack: getLookBack(),
 });
 
 export const getBuildingBlockRule = (): CustomRule => ({
@@ -489,12 +503,10 @@ export const getEditedRule = (): CustomRule => ({
   ...getExistingRule(),
   severity: 'Medium',
   description: 'Edited Rule description',
-  tags: [...getExistingRule().tags, 'edited'],
+  tags: [...(getExistingRule().tags || []), 'edited'],
 });
 
-export const expectedExportedRule = (
-  ruleResponse: Cypress.Response<FullResponseSchema>
-): string => {
+export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse>): string => {
   const {
     id,
     updated_at: updatedAt,
@@ -517,7 +529,7 @@ export const expectedExportedRule = (
   // NOTE: Order of the properties in this object matters for the tests to work.
   // TODO: Follow up https://github.com/elastic/kibana/pull/137628 and add an explicit type to this object
   // without using Partial
-  const rule: Partial<FullResponseSchema> = {
+  const rule: Partial<RuleResponse> = {
     id,
     updated_at: updatedAt,
     updated_by: updatedBy,

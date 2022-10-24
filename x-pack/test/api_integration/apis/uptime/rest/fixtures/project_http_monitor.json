@@ -9,7 +9,8 @@
       "id": "my-monitor-2",
       "name": "My Monitor 2",
       "urls": [
-        "http://localhost:9200"
+        "http://localhost:9200",
+        "http://anotherurl:9200"
       ],
       "schedule": 60,
       "timeout": "80s",
@@ -32,10 +33,10 @@
           "saved"
         ]
       },
-      "content": "",
       "unsupportedKey": {
         "nestedUnsupportedKey": "unsupportedValue"
-      }
+      },
+      "hash": "ekrjelkjrelkjre"
     },
     {
       "locations": ["localhost"],
@@ -70,7 +71,7 @@
           ]
         }
       },
-      "content": ""
+      "hash": "ekrjelkjrelkjre"
     }
   ]
 }

@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import {
   calculateEndpointAuthz,
   getEndpointAuthzInitialState,
+  calculatePermissionsFromCapabilities,
 } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
@@ -20,7 +21,7 @@ import {
   HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGE_PATH,
   POLICIES_PATH,
-  ACTION_HISTORY_PATH,
+  RESPONSE_ACTIONS_HISTORY_PATH,
   RULES_CREATE_PATH,
   RULES_PATH,
   SecurityPageName,
@@ -36,7 +37,7 @@ import {
   HOST_ISOLATION_EXCEPTIONS,
   MANAGE,
   POLICIES,
-  ACTION_HISTORY,
+  RESPONSE_ACTIONS_HISTORY,
   RULES,
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
@@ -77,7 +78,7 @@ const categories = [
       SecurityPageName.eventFilters,
       SecurityPageName.hostIsolationExceptions,
       SecurityPageName.blocklist,
-      SecurityPageName.actionHistory,
+      SecurityPageName.responseActionsHistory,
     ],
   },
   ...cloudSecurityPostureCategories,
@@ -212,13 +213,13 @@ export const links: LinkItem = {
       hideTimeline: true,
     },
     {
-      id: SecurityPageName.actionHistory,
-      title: ACTION_HISTORY,
+      id: SecurityPageName.responseActionsHistory,
+      title: RESPONSE_ACTIONS_HISTORY,
       description: i18n.translate('xpack.securitySolution.appLinks.actionHistoryDescription', {
         defaultMessage: 'View the history of response actions performed on hosts.',
       }),
       landingIcon: IconActionHistory,
-      path: ACTION_HISTORY_PATH,
+      path: RESPONSE_ACTIONS_HISTORY_PATH,
       skipUrlState: true,
       hideTimeline: true,
     },
@@ -226,10 +227,17 @@ export const links: LinkItem = {
   ],
 };
 
-const getFilteredLinks = (linkIds: SecurityPageName[]) => ({
+const excludeLinks = (linkIds: SecurityPageName[]) => ({
   ...links,
   links: links.links?.filter((link) => !linkIds.includes(link.id)),
 });
+
+const getHostIsolationExceptionTotal = async (http: CoreStart['http']) => {
+  const hostIsolationExceptionsApiClientInstance =
+    HostIsolationExceptionsApiClient.getInstance(http);
+  const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
+  return summaryResponse.total;
+};
 
 export const getManagementFilteredLinks = async (
   core: CoreStart,
@@ -237,32 +245,43 @@ export const getManagementFilteredLinks = async (
 ): Promise<LinkItem> => {
   const fleetAuthz = plugins.fleet?.authz;
   const isEndpointRbacEnabled = ExperimentalFeaturesService.get().endpointRbacEnabled;
+  const endpointPermissions = calculatePermissionsFromCapabilities(core.application.capabilities);
+  const linksToExclude: SecurityPageName[] = [];
 
   try {
     const currentUserResponse = await plugins.security.authc.getCurrentUser();
-    const privileges = fleetAuthz
+    const { canReadActionsLogManagement, canIsolateHost, canUnIsolateHost } = fleetAuthz
       ? calculateEndpointAuthz(
           licenseService,
           fleetAuthz,
           currentUserResponse.roles,
-          isEndpointRbacEnabled
+          isEndpointRbacEnabled,
+          endpointPermissions
         )
       : getEndpointAuthzInitialState();
-    if (!privileges.canAccessEndpointManagement) {
-      return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+
+    if (!canReadActionsLogManagement) {
+      linksToExclude.push(SecurityPageName.responseActionsHistory);
     }
-    if (!privileges.canIsolateHost) {
-      const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
-        core.http
-      );
-      const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
-      if (!summaryResponse.total) {
-        return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+
+    if (!canIsolateHost && canUnIsolateHost) {
+      let shouldSeeHIEToBeAbleToDeleteEntries: boolean;
+      try {
+        const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
+        shouldSeeHIEToBeAbleToDeleteEntries = hostExceptionCount !== 0;
+      } catch {
+        shouldSeeHIEToBeAbleToDeleteEntries = false;
       }
+
+      if (!shouldSeeHIEToBeAbleToDeleteEntries) {
+        linksToExclude.push(SecurityPageName.hostIsolationExceptions);
+      }
+    } else if (!canIsolateHost) {
+      linksToExclude.push(SecurityPageName.hostIsolationExceptions);
     }
   } catch {
-    return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+    linksToExclude.push(SecurityPageName.hostIsolationExceptions);
   }
 
-  return links;
+  return excludeLinks(linksToExclude);
 };

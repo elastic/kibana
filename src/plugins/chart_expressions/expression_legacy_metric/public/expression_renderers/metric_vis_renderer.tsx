@@ -67,7 +67,7 @@ export const getMetricVisRenderer: (
   name: EXPRESSION_METRIC_NAME,
   displayName: 'metric visualization',
   reuseDomNode: true,
-  render: async (domNode, { visData, visConfig }, handlers) => {
+  render: async (domNode, { visData, visConfig, canNavigateToLens }, handlers) => {
     const { core, plugins } = getStartDeps();
 
     handlers.onDestroy(() => {
@@ -82,9 +82,12 @@ export const getMetricVisRenderer: (
       const visualizationType = extractVisualizationType(executionContext);
 
       if (containerType && visualizationType) {
-        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, [
+        const events = [
           `render_${visualizationType}_legacy_metric`,
-        ]);
+          canNavigateToLens ? `render_${visualizationType}_legacy_metric_convertable` : undefined,
+        ].filter<string>((event): event is string => Boolean(event));
+
+        plugins.usageCollection?.reportUiCounter(containerType, METRIC_TYPE.COUNT, events);
       }
 
       handlers.done();

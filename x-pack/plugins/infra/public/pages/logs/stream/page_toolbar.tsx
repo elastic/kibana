@@ -32,7 +32,7 @@ export const LogsToolbar = () => {
   const { filterQueryDraft, isFilterQueryDraftValid, applyLogFilterQuery, setLogFilterQueryDraft } =
     useLogFilterStateContext();
   const { setSurroundingLogsId } = useLogEntryFlyoutContext();
-  const { http, notifications, docLinks, uiSettings, data, storage, unifiedSearch } =
+  const { http, notifications, docLinks, uiSettings, data, dataViews, storage, unifiedSearch } =
     useKibanaContextForPlugin().services;
 
   const {
@@ -77,7 +77,16 @@ export const LogsToolbar = () => {
             appName={i18n.translate('xpack.infra.appName', {
               defaultMessage: 'Infra logs',
             })}
-            deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, storage }}
+            deps={{
+              unifiedSearch,
+              notifications,
+              http,
+              docLinks,
+              uiSettings,
+              data,
+              dataViews,
+              storage,
+            }}
           />
         </QueryBarFlexItem>
         <EuiFlexItem grow={false}>

@@ -17,7 +17,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { orderBy } from 'lodash';
 
-import { QueryCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
 import {
   ALERT_ANCESTORS,
@@ -74,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     // First test creates a real rule - remaining tests use preview API
     it('should have the specific audit record for _id or none of these tests below will pass', async () => {
-      const rule: QueryCreateSchema = {
+      const rule: QueryRuleCreateProps = {
         ...getRuleForSignalTesting(['auditbeat-*']),
         query: `_id:${ID}`,
       };
@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should abide by max_signals > 100', async () => {
       const maxSignals = 200;
-      const rule: QueryCreateSchema = {
+      const rule: QueryRuleCreateProps = {
         ...getRuleForSignalTesting(['auditbeat-*']),
         max_signals: maxSignals,
       };
@@ -97,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should have recorded the rule_id within the signal', async () => {
-      const rule: QueryCreateSchema = {
+      const rule: QueryRuleCreateProps = {
         ...getRuleForSignalTesting(['auditbeat-*']),
         query: `_id:${ID}`,
       };
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should query and get back expected signal structure using a basic KQL query', async () => {
-      const rule: QueryCreateSchema = {
+      const rule: QueryRuleCreateProps = {
         ...getRuleForSignalTesting(['auditbeat-*']),
         query: `_id:${ID}`,
       };
@@ -139,7 +139,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should query and get back expected signal structure when it is a signal on a signal', async () => {
       const alertId = '30a75fe46d3dbdfab55982036f77a8d60e2d1112e96f277c3b8c22f9bb57817a';
-      const rule: QueryCreateSchema = {
+      const rule: QueryRuleCreateProps = {
         ...getRuleForSignalTesting([`.alerts-security.alerts-default*`]),
         rule_id: 'signal-on-signal',
         query: `_id:${alertId}`,
@@ -185,7 +185,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should not have risk score fields without risk indices', async () => {
-      const rule: QueryCreateSchema = {
+      const rule: QueryRuleCreateProps = {
         ...getRuleForSignalTesting(['auditbeat-*']),
         query: `_id:${ID}`,
       };
@@ -205,7 +205,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should host have risk score field and do not have user risk score', async () => {
-        const rule: QueryCreateSchema = {
+        const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['auditbeat-*']),
           query: `_id:${ID} or _id:GBbXBmkBR346wHgn5_eR or _id:x10zJ2oE9v5HJNSHhyxi`,
         };
@@ -243,7 +243,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should have host and user risk score fields', async () => {
-        const rule: QueryCreateSchema = {
+        const rule: QueryRuleCreateProps = {
           ...getRuleForSignalTesting(['auditbeat-*']),
           query: `_id:${ID}`,
         };
@@ -262,7 +262,7 @@ export default ({ getService }: FtrProviderContext) => {
      * value of the signal will be taken from the mapped field of the source event.
      */
     it('should get default severity and risk score if there is no mapping', async () => {
-      const rule: QueryCreateSchema = {
+      const rule: QueryRuleCreateProps = {
         ...getRuleForSignalTesting(['signal_overrides']),
         severity: 'medium',
         risk_score: 75,
@@ -282,7 +282,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should get overridden severity if the rule has a mapping for it', async () => {
-      const rule: QueryCreateSchema = {
+      const rule: QueryRuleCreateProps = {
         ...getRuleForSignalTesting(['signal_overrides']),
         severity: 'medium',
         severity_mapping: [
@@ -319,7 +319,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should get overridden risk score if the rule has a mapping for it', async () => {
-      const rule: QueryCreateSchema = {
+      const rule: QueryRuleCreateProps = {
         ...getRuleForSignalTesting(['signal_overrides']),
         severity: 'medium',
         risk_score: 75,
@@ -354,7 +354,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should get overridden severity and risk score if the rule has both mappings', async () => {
-      const rule: QueryCreateSchema = {
+      const rule: QueryRuleCreateProps = {
         ...getRuleForSignalTesting(['signal_overrides']),
         severity: 'medium',
         severity_mapping: [
@@ -396,7 +396,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should generate signals with name_override field', async () => {
-      const rule: QueryCreateSchema = {
+      const rule: QueryRuleCreateProps = {
         ...getRuleForSignalTesting(['auditbeat-*']),
         query: `event.action:boot`,
         rule_name_override: 'event.action',
@@ -413,7 +413,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should not generate duplicate signals', async () => {
-      const rule: QueryCreateSchema = {
+      const rule: QueryRuleCreateProps = {
         ...getRuleForSignalTesting(['auditbeat-*']),
         query: `_id:${ID}`,
       };

@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should able to edit field', async () => {
       await PageObjects.lens.clickField('runtimefield');
-      await PageObjects.lens.editField();
+      await PageObjects.lens.editField('runtimefield');
       await fieldEditor.setName('runtimefield2', true, true);
       await fieldEditor.save();
       await fieldEditor.confirmSave();
@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should able to remove field', async () => {
       await PageObjects.lens.clickField('runtimefield2');
-      await PageObjects.lens.removeField();
+      await PageObjects.lens.removeField('runtimefield2');
       await fieldEditor.confirmDelete();
       await PageObjects.lens.waitForFieldMissing('runtimefield2');
     });

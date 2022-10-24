@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { Agent, BulkActionResult } from '../../types';
+import type { Agent } from '../../types';
 import { AgentReassignmentError } from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
@@ -28,7 +28,7 @@ export async function updateAgentTags(
   options: ({ agents: Agent[] } | GetAgentsOptions) & { batchSize?: number },
   tagsToAdd: string[],
   tagsToRemove: string[]
-): Promise<{ items: BulkActionResult[]; actionId?: string }> {
+): Promise<{ actionId: string }> {
   const outgoingErrors: Record<Agent['id'], Error> = {};
   let givenAgents: Agent[] = [];
 
@@ -69,12 +69,8 @@ export async function updateAgentTags(
     }
   }
 
-  return await updateTagsBatch(
-    soClient,
-    esClient,
-    givenAgents,
-    outgoingErrors,
-    { tagsToAdd, tagsToRemove },
-    'agentIds' in options ? options.agentIds : undefined
-  );
+  return await updateTagsBatch(soClient, esClient, givenAgents, outgoingErrors, {
+    tagsToAdd,
+    tagsToRemove,
+  });
 }

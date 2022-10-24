@@ -10,38 +10,22 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  CoreTheme,
-  ApplicationStart,
-  PluginInitializerContext,
-} from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin, CoreTheme, ApplicationStart } from '@kbn/core/public';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import {
-  ClientConfigType,
-  GuidedOnboardingPluginSetup,
-  GuidedOnboardingPluginStart,
-} from './types';
+import type { GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart } from './types';
 import { GuidePanel } from './components';
 import { ApiService, apiService } from './services/api';
 
 export class GuidedOnboardingPlugin
   implements Plugin<GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart>
 {
-  constructor(private ctx: PluginInitializerContext) {}
+  constructor() {}
   public setup(core: CoreSetup): GuidedOnboardingPluginSetup {
     return {};
   }
 
   public start(core: CoreStart): GuidedOnboardingPluginStart {
-    const { ui: isGuidedOnboardingUiEnabled } = this.ctx.config.get<ClientConfigType>();
-    if (!isGuidedOnboardingUiEnabled) {
-      return {};
-    }
-
     const { chrome, http, theme, application } = core;
 
     // Initialize services

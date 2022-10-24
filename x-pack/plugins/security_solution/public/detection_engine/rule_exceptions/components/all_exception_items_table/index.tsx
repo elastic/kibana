@@ -6,13 +6,16 @@
  */
 
 import React, { useCallback, useMemo, useEffect, useReducer } from 'react';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import styled from 'styled-components';
 
+import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   ExceptionListItemSchema,
   UseExceptionListItemsSuccess,
   Pagination,
-  ExceptionListTypeEnum,
+  ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { transformInput } from '@kbn/securitysolution-list-hooks';
 
@@ -20,7 +23,7 @@ import {
   deleteExceptionListItemById,
   fetchExceptionListsItemsByListIds,
 } from '@kbn/securitysolution-list-api';
-import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
+
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import { ExceptionsViewerSearchBar } from './search_bar';
@@ -35,7 +38,11 @@ import { EditExceptionFlyout } from '../edit_exception_flyout';
 import { AddExceptionFlyout } from '../add_exception_flyout';
 import * as i18n from './translations';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
-import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
+import type { Rule } from '../../../rule_management/logic/types';
+
+const StyledText = styled(EuiText)`
+  font-style: italic;
+`;
 
 const STATES_SEARCH_HIDDEN: ViewerState[] = ['error', 'empty'];
 const STATES_PAGINATION_UTILITY_HIDDEN: ViewerState[] = [
@@ -51,7 +58,7 @@ const initialState: State = {
     pageIndex: 0,
     pageSize: 25,
     totalItemCount: 0,
-    pageSizeOptions: [1, 5, 10, 25, 50, 100, 200, 300],
+    pageSizeOptions: [5, 10, 25, 50, 100, 200, 300],
   },
   exceptions: [],
   exceptionToEdit: null,
@@ -69,13 +76,16 @@ export interface GetExceptionItemProps {
 
 interface ExceptionsViewerProps {
   rule: Rule | null;
-  listType: ExceptionListTypeEnum;
+  listTypes: ExceptionListTypeEnum[];
+  /* Used for when displaying exceptions for a rule that has since been deleted, forcing read only view */
+  isViewReadOnly: boolean;
   onRuleChange?: () => void;
 }
 
 const ExceptionsViewerComponent = ({
   rule,
-  listType,
+  listTypes,
+  isViewReadOnly,
   onRuleChange,
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
@@ -84,9 +94,24 @@ const ExceptionsViewerComponent = ({
   const exceptionListsToQuery = useMemo(
     () =>
       rule != null && rule.exceptions_list != null
-        ? rule.exceptions_list.filter((list) => list.type === listType)
+        ? rule.exceptions_list.filter(({ type }) =>
+            listTypes.includes(type as ExceptionListTypeEnum)
+          )
         : [],
-    [listType, rule]
+    [listTypes, rule]
+  );
+  const exceptionListsFormattedForReferenceQuery = useMemo(
+    () =>
+      exceptionListsToQuery.map(({ id, list_id: listId, namespace_type: namespaceType }) => ({
+        id,
+        listId,
+        namespaceType,
+      })),
+    [exceptionListsToQuery]
+  );
+  const isEndpointSpecified = useMemo(
+    () => listTypes.length === 1 && listTypes[0] === ExceptionListTypeEnum.ENDPOINT,
+    [listTypes]
   );
 
   // Reducer state
@@ -154,7 +179,24 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const [_, allReferences] = useFindExceptionListReferences(exceptionListsToQuery);
+  const [isLoadingReferences, isFetchReferencesError, allReferences, fetchReferences] =
+    useFindExceptionListReferences();
+
+  useEffect(() => {
+    if (fetchReferences != null && exceptionListsFormattedForReferenceQuery.length) {
+      fetchReferences(exceptionListsFormattedForReferenceQuery);
+    }
+  }, [exceptionListsFormattedForReferenceQuery, fetchReferences]);
+
+  useEffect(() => {
+    if (isFetchReferencesError) {
+      setViewerState('error');
+    } else if (viewerState == null && isLoadingReferences) {
+      setViewerState('loading');
+    } else if (viewerState === 'loading' && !isLoadingReferences) {
+      setViewerState(null);
+    }
+  }, [isLoadingReferences, isFetchReferencesError, setViewerState, viewerState]);
 
   const handleFetchItems = useCallback(
     async (options?: GetExceptionItemProps) => {
@@ -212,10 +254,7 @@ const ExceptionsViewerComponent = ({
   const handleGetExceptionListItems = useCallback(
     async (options?: GetExceptionItemProps) => {
       try {
-        setViewerState('loading');
-
         const { pageIndex, itemsPerPage, total, data } = await handleFetchItems(options);
-
         setViewerState(total > 0 ? null : 'empty');
 
         setExceptions({
@@ -226,6 +265,8 @@ const ExceptionsViewerComponent = ({
             total,
           },
         });
+
+        setViewerState(total > 0 ? null : 'empty');
       } catch (e) {
         setViewerState('error');
 
@@ -280,15 +321,26 @@ const ExceptionsViewerComponent = ({
     [setFlyoutType]
   );
 
-  const handleCancelExceptionItemFlyout = useCallback((): void => {
-    setFlyoutType(null);
-    handleGetExceptionListItems();
-  }, [setFlyoutType, handleGetExceptionListItems]);
+  const handleCancelExceptionItemFlyout = useCallback(
+    (didRuleChange: boolean): void => {
+      setFlyoutType(null);
+      if (didRuleChange && onRuleChange != null) {
+        onRuleChange();
+      }
+    },
+    [onRuleChange, setFlyoutType]
+  );
 
-  const handleConfirmExceptionFlyout = useCallback((): void => {
-    setFlyoutType(null);
-    handleGetExceptionListItems();
-  }, [setFlyoutType, handleGetExceptionListItems]);
+  const handleConfirmExceptionFlyout = useCallback(
+    (didRuleChange: boolean): void => {
+      setFlyoutType(null);
+      if (didRuleChange && onRuleChange != null) {
+        onRuleChange();
+      }
+      handleGetExceptionListItems();
+    },
+    [setFlyoutType, handleGetExceptionListItems, onRuleChange]
+  );
 
   const handleDeleteException = useCallback(
     async ({ id: itemId, name, namespaceType }: ExceptionListItemIdentifiers) => {
@@ -323,8 +375,8 @@ const ExceptionsViewerComponent = ({
 
   // User privileges checks
   useEffect((): void => {
-    setReadOnly(!canUserCRUD || !hasIndexWrite);
-  }, [setReadOnly, canUserCRUD, hasIndexWrite]);
+    setReadOnly(isViewReadOnly || !canUserCRUD || !hasIndexWrite);
+  }, [setReadOnly, isViewReadOnly, canUserCRUD, hasIndexWrite]);
 
   useEffect(() => {
     if (exceptionListsToQuery.length > 0) {
@@ -334,43 +386,53 @@ const ExceptionsViewerComponent = ({
     }
   }, [exceptionListsToQuery.length, handleGetExceptionListItems, setViewerState]);
 
+  const exceptionToEditList = useMemo(
+    (): ExceptionListSchema | null =>
+      allReferences != null && exceptionToEdit != null
+        ? (allReferences[exceptionToEdit.list_id] as ExceptionListSchema)
+        : null,
+    [allReferences, exceptionToEdit]
+  );
+
   return (
     <>
-      {currenFlyout === 'editException' && exceptionToEdit != null && rule != null && (
-        <EditExceptionFlyout
-          ruleName={rule.name}
-          ruleId={rule.id}
-          ruleIndices={rule.index ?? DEFAULT_INDEX_PATTERN}
-          dataViewId={rule.data_view_id}
-          exceptionListType={listType}
-          exceptionItem={exceptionToEdit}
-          onCancel={handleCancelExceptionItemFlyout}
-          onConfirm={handleConfirmExceptionFlyout}
-          onRuleChange={onRuleChange}
-          data-test-subj="editExceptionItemFlyout"
-        />
-      )}
+      {currenFlyout === 'editException' &&
+        exceptionToEditList != null &&
+        exceptionToEdit != null &&
+        rule != null && (
+          <EditExceptionFlyout
+            rule={rule}
+            list={exceptionToEditList}
+            itemToEdit={exceptionToEdit}
+            showAlertCloseOptions
+            onCancel={handleCancelExceptionItemFlyout}
+            onConfirm={handleConfirmExceptionFlyout}
+            data-test-subj="editExceptionItemFlyout"
+          />
+        )}
 
       {currenFlyout === 'addException' && rule != null && (
         <AddExceptionFlyout
-          ruleName={rule.name}
-          ruleIndices={rule.index ?? DEFAULT_INDEX_PATTERN}
-          dataViewId={rule.data_view_id}
-          ruleId={rule.id}
-          exceptionListType={listType}
+          rules={[rule]}
+          isBulkAction={false}
+          isEndpointItem={isEndpointSpecified}
           onCancel={handleCancelExceptionItemFlyout}
           onConfirm={handleConfirmExceptionFlyout}
-          onRuleChange={onRuleChange}
           data-test-subj="addExceptionItemFlyout"
+          showAlertCloseOptions
         />
       )}
 
       <EuiPanel hasBorder={false} hasShadow={false}>
         <>
+          <StyledText size="s">
+            {isEndpointSpecified ? i18n.ENDPOINT_EXCEPTIONS_TAB_ABOUT : i18n.EXCEPTIONS_TAB_ABOUT}
+          </StyledText>
+          <EuiSpacer size="l" />
           {!STATES_SEARCH_HIDDEN.includes(viewerState) && (
             <ExceptionsViewerSearchBar
               canAddException={isReadOnly}
-              listType={listType}
+              isEndpoint={isEndpointSpecified}
               isSearching={viewerState === 'searching'}
               onSearch={handleSearch}
               onAddExceptionClick={handleAddException}
@@ -388,7 +450,7 @@ const ExceptionsViewerComponent = ({
             isReadOnly={isReadOnly}
             disableActions={isReadOnly || viewerState === 'deleting'}
             exceptions={exceptions}
-            listType={listType}
+            isEndpoint={isEndpointSpecified}
             ruleReferences={allReferences}
             viewerState={viewerState}
             onDeleteException={handleDeleteException}

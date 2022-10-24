@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import * as t from 'io-ts';
 
 import { isLeft } from 'fp-ts/lib/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
@@ -19,6 +20,7 @@ import {
   ICMPSimpleFieldsCodec,
   MonitorFields,
   TCPFieldsCodec,
+  SyntheticsMonitor,
 } from '../../../common/runtime_types';
 
 type MonitorCodecType =
@@ -39,6 +41,7 @@ export interface ValidationResult {
   reason: string;
   details: string;
   payload: object;
+  decodedMonitor?: SyntheticsMonitor;
 }
 
 /**
@@ -58,9 +61,10 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
     };
   }
 
-  const codec = monitorTypeToCodecMap[monitorType];
+  // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
+  const SyntheticsMonitorCodec = monitorTypeToCodecMap[monitorType] as typeof ICMPSimpleFieldsCodec;
 
-  if (!codec) {
+  if (!SyntheticsMonitorCodec) {
     return {
       valid: false,
       reason: `Payload is not a valid monitor object`,
@@ -69,8 +73,8 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
     };
   }
 
-  // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
-  const decodedMonitor = (codec as typeof ICMPSimpleFieldsCodec).decode(monitorFields);
+  const ExactSyntheticsMonitorCodec = t.exact(SyntheticsMonitorCodec);
+  const decodedMonitor = ExactSyntheticsMonitorCodec.decode(monitorFields);
 
   if (isLeft(decodedMonitor)) {
     return {
@@ -81,7 +85,13 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
     };
   }
 
-  return { valid: true, reason: '', details: '', payload: monitorFields };
+  return {
+    valid: true,
+    reason: '',
+    details: '',
+    payload: monitorFields,
+    decodedMonitor: decodedMonitor.right,
+  };
 }
 
 export function validateProjectMonitor(monitorFields: ProjectMonitor): ValidationResult {
