@@ -2,6 +2,7 @@
   "id": "visDefaultEditor",
   "version": "kibana",
   "ui": true,
+  "requiredPlugins": ["dataViews"],
   "optionalPlugins": ["visualizations"],
   "requiredBundles": [
     "unifiedSearch",

@@ -78,11 +78,7 @@ export const enhancedEsSearchStrategyProvider = (
 
       const response = shimHitsTotal(body.response, options);
 
-      return toAsyncKibanaSearchResponse(
-        // @ts-expect-error @elastic/elasticsearch start_time_in_millis expected to be number
-        { ...body, response },
-        headers?.warning
-      );
+      return toAsyncKibanaSearchResponse({ ...body, response }, headers?.warning);
     };
 
     const cancel = async () => {
@@ -91,7 +87,10 @@ export const enhancedEsSearchStrategyProvider = (
       }
     };
 
-    return pollSearch(search, cancel, options).pipe(
+    return pollSearch(search, cancel, {
+      pollInterval: searchConfig.asyncSearch.pollInterval,
+      ...options,
+    }).pipe(
       tap((response) => (id = response.id)),
       tap(searchUsageObserver(logger, usage)),
       catchError((e) => {
