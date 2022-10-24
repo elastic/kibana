@@ -7,6 +7,7 @@
 
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { partition, uniq } from 'lodash';
+import seedrandom from 'seedrandom';
 import {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
@@ -52,7 +53,8 @@ const updatePositionIndex = (currentId: string, newIndex: number) => {
 function getExpressionForLayer(
   layer: FormBasedLayer,
   indexPattern: IndexPattern,
-  uiSettings: IUiSettingsClient
+  uiSettings: IUiSettingsClient,
+  searchSessionId?: string
 ): ExpressionAstExpression | null {
   const { columnOrder } = layer;
   if (columnOrder.length === 0 || !indexPattern) {
@@ -392,6 +394,8 @@ function getExpressionForLayer(
           metricsAtAllLevels: false,
           partialRows: false,
           timeFields: allDateHistogramFields,
+          probability: layer.sampling || 1,
+          samplerSeed: seedrandom(searchSessionId).int32(),
         }).toAst(),
         {
           type: 'function',
@@ -441,13 +445,15 @@ export function toExpression(
   state: FormBasedPrivateState,
   layerId: string,
   indexPatterns: IndexPatternMap,
-  uiSettings: IUiSettingsClient
+  uiSettings: IUiSettingsClient,
+  searchSessionId?: string
 ) {
   if (state.layers[layerId]) {
     return getExpressionForLayer(
       state.layers[layerId],
       indexPatterns[state.layers[layerId].indexPatternId],
-      uiSettings
+      uiSettings,
+      searchSessionId
     );
   }
 
