@@ -10,8 +10,8 @@ import type { Readable } from 'stream';
 import type { FileClient } from '@kbn/files-plugin/server';
 import { createEsFileClient } from '@kbn/files-plugin/server';
 import { errors } from '@elastic/elasticsearch';
-import type { FileJSON } from '@kbn/files-plugin/common';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { UploadedFileInfo } from '../../../../common/endpoint/types';
 import { NotFoundError } from '../../errors';
 import {
   FILE_STORAGE_DATA_INDEX,
@@ -82,7 +82,7 @@ export const getFileInfo = async (
   esClient: ElasticsearchClient,
   logger: Logger,
   fileId: string
-): Promise<Pick<FileJSON, 'name' | 'id' | 'mimeType' | 'size' | 'status'>> => {
+): Promise<UploadedFileInfo> => {
   try {
     const fileClient = getFileClient(esClient, logger);
     const file = await fileClient.get({ id: fileId });

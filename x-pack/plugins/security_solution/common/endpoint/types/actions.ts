@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import type { FileJSON } from '@kbn/files-plugin/common';
 import type {
   ActionStatusRequestSchema,
   NoParametersRequestSchema,
@@ -360,3 +361,5 @@ export interface ActionListApiResponse {
   statuses: ResponseActionStatus[] | undefined;
   total: number;
 }
+
+export type UploadedFileInfo = Pick<FileJSON, 'name' | 'id' | 'mimeType' | 'size' | 'status'>;
