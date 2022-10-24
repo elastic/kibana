@@ -108,6 +108,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
               }
             : c
         ),
+        title: i18n.EVENTS_GRAPH_TITLE,
       })
     );
   }, [dispatch, showExternalAlerts, tGridEnabled, tableId]);
