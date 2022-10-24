@@ -89,8 +89,6 @@ export const GettingStarted = () => {
 
   const isDarkTheme = uiSettings.get<boolean>('theme:darkMode');
   const activateGuide = async (useCase: UseCase, guideState?: GuideState) => {
-    // disable welcome screen on the home page
-    localStorage.setItem(KEY_ENABLE_WELCOME, JSON.stringify(false));
     await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
     // TODO error handling https://github.com/elastic/kibana/issues/139798
   };

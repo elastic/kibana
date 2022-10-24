@@ -33,7 +33,6 @@ jest.mock('../../kibana_services', () => {
       },
       guidedOnboardingService: {
         fetchAllGuidesState: jest.fn(),
-        activateGuide: jest.fn(),
       },
     }),
   };
@@ -55,17 +54,11 @@ describe('getting started', () => {
     expect(component).toMatchSnapshot();
   });
 
-  [
-    { dataTestSubj: 'onboarding--skipUseCaseTourLink', buttonName: 'skip' },
-    { dataTestSubj: 'onboarding--guideCard--view--search', buttonName: 'use case' },
-  ].map(({ dataTestSubj, buttonName }) => {
-    test(`${buttonName} button should disable home welcome screen`, async () => {
-      localStorage.removeItem(KEY_ENABLE_WELCOME);
-      const component = mountWithIntl(<GettingStarted />);
-      const button = findTestSubject(component, dataTestSubj);
-      button.simulate('click');
+  test('skip button should disable home welcome screen', async () => {
+    const component = mountWithIntl(<GettingStarted />);
+    const skipButton = findTestSubject(component, 'onboarding--skipUseCaseTourLink');
+    skipButton.simulate('click');
 
-      expect(localStorage.getItem(KEY_ENABLE_WELCOME)).toBe('false');
-    });
+    expect(localStorage.getItem(KEY_ENABLE_WELCOME)).toBe('false');
   });
 });
