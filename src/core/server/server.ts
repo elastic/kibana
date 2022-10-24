@@ -135,6 +135,15 @@ export class Server {
   ) {
     const constructorStartUptime = performance.now();
 
+    // @ts-expect-error
+    global.initTime = constructorStartUptime;
+    // @ts-expect-error
+    global.serverStartupBreakdown = {
+      preboot: {},
+      setup: {},
+      start: {},
+    };
+
     this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('server');
     this.configService = new ConfigService(rawConfigProvider, env, this.logger);
@@ -180,20 +189,33 @@ export class Server {
     const environmentPreboot = await this.environment.preboot({ analytics: analyticsPreboot });
     const nodePreboot = await this.node.preboot({ loggingSystem: this.loggingSystem });
 
+    // @ts-expect-error
+    global.serverStartupBreakdown.preboot.env_node = performance.now() - global.initTime;
+
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     this.discoveredPlugins = await this.plugins.discover({
       environment: environmentPreboot,
       node: nodePreboot,
     });
 
+    // @ts-expect-error
+    global.serverStartupBreakdown.preboot.discover = performance.now() - global.initTime;
+
     // Immediately terminate in case of invalid configuration. This needs to be done after plugin discovery. We also
     // silent deprecation warnings until `setup` stage where we'll validate config once again.
     await ensureValidConfiguration(this.configService, { logDeprecations: false });
+
+    // @ts-expect-error
+    global.serverStartupBreakdown.preboot.validation = performance.now() - global.initTime;
 
     const { uiPlugins, pluginTree, pluginPaths } = this.discoveredPlugins.preboot;
     const contextServicePreboot = this.context.preboot({
       pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
     });
+
+    // @ts-expect-error
+    global.serverStartupBreakdown.preboot.context = performance.now() - global.initTime;
+
     const httpPreboot = await this.http.preboot({ context: contextServicePreboot });
 
     // setup i18n prior to any other service, to have translations ready
@@ -222,7 +244,13 @@ export class Server {
       preboot: this.prebootService.preboot(),
     };
 
+    // @ts-expect-error
+    global.serverStartupBreakdown.preboot['core-deps'] = performance.now() - global.initTime;
+
     await this.plugins.preboot(corePreboot);
+
+    // @ts-expect-error
+    global.serverStartupBreakdown.preboot.plugins = performance.now() - global.initTime;
 
     httpPreboot.registerRouteHandlerContext<PrebootRequestHandlerContext, 'core'>(
       coreId,
@@ -233,9 +261,12 @@ export class Server {
     );
 
     this.coreApp.preboot(corePreboot, uiPlugins);
+    // @ts-expect-error
+    global.serverStartupBreakdown.preboot['core-app'] = performance.now() - global.initTime;
 
     prebootTransaction?.end();
     this.uptimePerStep.preboot = { start: prebootStartUptime, end: performance.now() };
+
     return corePreboot;
   }
 
@@ -250,14 +281,24 @@ export class Server {
 
     const environmentSetup = this.environment.setup();
 
+    // @ts-expect-error
+    global.serverStartupBreakdown.setup.env = performance.now() - global.initTime;
+
     // Configuration could have changed after preboot.
     await ensureValidConfiguration(this.configService);
+
+    // @ts-expect-error
+    global.serverStartupBreakdown.setup.validate = performance.now() - global.initTime;
 
     const { uiPlugins, pluginPaths, pluginTree } = this.discoveredPlugins!.standard;
     const contextServiceSetup = this.context.setup({
       pluginDependencies: new Map([...pluginTree.asOpaqueIds]),
     });
     const executionContextSetup = this.executionContext.setup();
+
+    // @ts-expect-error
+    global.serverStartupBreakdown.setup.context = performance.now() - global.initTime;
+
     const docLinksSetup = this.docLinks.setup();
 
     const httpSetup = await this.http.setup({
@@ -350,14 +391,23 @@ export class Server {
       coreUsageData: coreUsageDataSetup,
     };
 
+    // @ts-expect-error
+    global.serverStartupBreakdown.setup['core-deps'] = performance.now() - global.initTime;
+
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;
+    // @ts-expect-error
+    global.serverStartupBreakdown.setup.plugins = performance.now() - global.initTime;
 
     this.registerCoreContext(coreSetup);
     this.coreApp.setup(coreSetup, uiPlugins);
 
+    // @ts-expect-error
+    global.serverStartupBreakdown.setup['core-app'] = performance.now() - global.initTime;
+
     setupTransaction?.end();
     this.uptimePerStep.setup = { start: setupStartUptime, end: performance.now() };
+
     return coreSetup;
   }
 
@@ -378,6 +428,10 @@ export class Server {
       docLinks: docLinkStart,
     });
     await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
+
+    // @ts-expect-error
+    global.serverStartupBreakdown.start['saved-object-start-promise'] =
+      performance.now() - global.initTime;
 
     soStartSpan?.end();
     const capabilitiesStart = this.capabilities.start();
@@ -405,16 +459,26 @@ export class Server {
       coreUsageData: coreUsageDataStart,
       deprecations: deprecationsStart,
     };
+    // @ts-expect-error
+    global.serverStartupBreakdown.start['core-deps'] = performance.now() - global.initTime;
 
     await this.plugins.start(this.coreStart);
+    // @ts-expect-error
+    global.serverStartupBreakdown.start.plugins = performance.now() - global.initTime;
 
     await this.http.start();
+    // @ts-expect-error
+    global.serverStartupBreakdown.start['http-start'] = performance.now() - global.initTime;
 
     startTransaction?.end();
 
     this.uptimePerStep.start = { start: startStartUptime, end: performance.now() };
     this.reportKibanaStartedEvents(analyticsStart);
 
+    // @ts-expect-error
+    global.serverStartupBreakdown.start['report-kibana'] = performance.now() - global.initTime;
+    // @ts-expect-error
+    this.log.info('SERVER STARTUP TIMING ' + JSON.stringify(global.serverStartupBreakdown, null, 2));
     return this.coreStart;
   }
 

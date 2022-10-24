@@ -243,8 +243,15 @@ export class SavedObjectsService
       // It may happen that the observable completes due to Kibana shutting down
       // and the promise above fulfils as undefined. We shouldn't trigger migrations at that point.
       if (compatibleNodes) {
+        // @ts-ignore
+        global.serverStartupBreakdown.start['pre-migrations'] = performance.now() - global.initTime;
+
         this.logger.info('Starting saved objects migrations');
         await migrator.runMigrations();
+
+        // @ts-ignore
+        global.serverStartupBreakdown.start['post-migrations'] =
+          performance.now() - global.initTime;
       }
     }
 

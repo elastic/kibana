@@ -104,8 +104,14 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
       },
     });
 
+    // @ts-expect-error
+    global.serverStartupBreakdown.preboot['discover-called'] = performance.now() - global.initTime;
     await this.handleDiscoveryErrors(error$);
+    // @ts-expect-error
+    global.serverStartupBreakdown.preboot['errors-handled'] = performance.now() - global.initTime;
     await this.handleDiscoveredPlugins(plugin$);
+    // @ts-expect-error
+    global.serverStartupBreakdown.preboot['plugins-handled'] = performance.now() - global.initTime;
 
     const prebootUiPlugins = this.prebootPluginsSystem.uiPlugins();
     const standardUiPlugins = this.standardPluginsSystem.uiPlugins();
@@ -254,6 +260,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     >();
     const plugins = await firstValueFrom(plugin$.pipe(toArray()));
 
+    // @ts-expect-error
+    global.serverStartupBreakdown.preboot['plugin-list'] = performance.now() - global.initTime;
+
     // Register config descriptors and deprecations
     for (const plugin of plugins) {
       const configDescriptor = plugin.getConfigDescriptor();
@@ -274,6 +283,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
       }
     }
+    // @ts-expect-error
+    global.serverStartupBreakdown.preboot['register-descriptors'] =
+      performance.now() - global.initTime;
 
     // Validate config and handle enabled statuses.
     // NOTE: We can't do both in the same previous loop because some plugins' deprecations may affect others.
@@ -300,6 +312,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
 
       pluginEnableStatuses.set(plugin.name, { plugin, isEnabled });
     }
+    // @ts-expect-error
+    global.serverStartupBreakdown.preboot['validate-config'] = performance.now() - global.initTime;
 
     // Add the plugins to the Plugin System if enabled and its dependencies are met
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
@@ -323,6 +337,9 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
         this.log.info(`Plugin "${pluginName}" is disabled.`);
       }
     }
+
+    // @ts-expect-error
+    global.serverStartupBreakdown.preboot['add-to-system'] = performance.now() - global.initTime;
 
     this.log.debug(`Discovered ${pluginEnableStatuses.size} plugins.`);
   }

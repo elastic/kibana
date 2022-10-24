@@ -94,9 +94,15 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
     }
 
     let completeSetup: (result: { shouldReloadConfig: boolean }) => void;
+
+    // @ts-ignore
+    global.serverStartupBreakdown.preboot['IS-going-to-hold'] = performance.now() - global.initTime;
+
     core.preboot.holdSetupUntilResolved(
       'Validating Elasticsearch connection configuration…',
       new Promise((resolve) => {
+        // @ts-ignore
+        global.serverStartupBreakdown.preboot['IS-resolved'] = performance.now() - global.initTime;
         completeSetup = resolve;
       })
     );

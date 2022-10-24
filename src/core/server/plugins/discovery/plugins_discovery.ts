@@ -7,7 +7,16 @@
  */
 
 import { from, merge } from 'rxjs';
-import { catchError, filter, map, mergeMap, concatMap, shareReplay, toArray } from 'rxjs/operators';
+import {
+  catchError,
+  filter,
+  map,
+  mergeMap,
+  concatMap,
+  shareReplay,
+  toArray,
+  tap,
+} from 'rxjs/operators';
 import { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { NodeInfo } from '@kbn/core-node-server';
@@ -53,6 +62,11 @@ export function discover({
     scanPluginSearchPaths(config.pluginSearchPaths, log)
   ).pipe(
     toArray(),
+    tap((x) => {
+      // @ts-expect-error
+      global.serverStartupBreakdown.preboot['discovered-paths'] =
+        performance.now() - global.initTime;
+    }),
     mergeMap((pathAndErrors) => {
       return pathAndErrors.sort((a, b) => {
         const pa = typeof a === 'string' ? a : a.path;
@@ -64,6 +78,11 @@ export function discover({
       return typeof pluginPathOrError === 'string'
         ? createPlugin$(pluginPathOrError, log, coreContext, instanceInfo, nodeInfo)
         : [pluginPathOrError];
+    }),
+    tap((x) => {
+      // @ts-expect-error
+      global.serverStartupBreakdown.preboot['created-plugins'] =
+        performance.now() - global.initTime;
     }),
     shareReplay()
   );
