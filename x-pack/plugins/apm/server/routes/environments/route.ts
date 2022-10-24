@@ -37,8 +37,10 @@ const environmentsRoute = createApmServerRoute({
         >
     >;
   }> => {
-    const setup = await setupRequest(resources);
-    const apmEventClient = await getApmEventClient(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
     const { context, params } = resources;
     const { serviceName, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchTransactionsEvents({

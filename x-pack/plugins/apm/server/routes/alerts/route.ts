@@ -41,13 +41,15 @@ const transactionErrorRateChartPreview = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{ errorRateChartPreview: Array<{ x: number; y: number }> }> => {
-    const { config } = await setupRequest(resources);
-    const apmEventClient = await getApmEventClient(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
     const { params } = resources;
     const { _inspect, ...alertParams } = params.query;
 
     const errorRateChartPreview = await getTransactionErrorRateChartPreview({
-      config,
+      config: setup.config,
       apmEventClient,
       alertParams,
     });
@@ -89,8 +91,10 @@ const transactionDurationChartPreview = createApmServerRoute({
       data: Array<{ x: number; y: number | null }>;
     }>;
   }> => {
-    const { config } = await setupRequest(resources);
-    const apmEventClient = await getApmEventClient(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
 
     const { params } = resources;
 
@@ -98,7 +102,7 @@ const transactionDurationChartPreview = createApmServerRoute({
 
     const latencyChartPreview = await getTransactionDurationChartPreview({
       alertParams,
-      config,
+      config: setup.config,
       apmEventClient,
     });
 

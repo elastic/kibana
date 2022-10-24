@@ -19,8 +19,10 @@ const fallbackToTransactionsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ fallbackToTransactions: boolean }> => {
-    const { config } = await setupRequest(resources);
-    const apmEventClient = await getApmEventClient(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
     const {
       params: {
         query: { kuery, start, end },
@@ -28,7 +30,7 @@ const fallbackToTransactionsRoute = createApmServerRoute({
     } = resources;
     return {
       fallbackToTransactions: await getIsUsingTransactionEvents({
-        config,
+        config: setup.config,
         apmEventClient,
         kuery,
         start,

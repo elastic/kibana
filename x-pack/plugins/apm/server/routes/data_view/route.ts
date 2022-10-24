@@ -20,8 +20,10 @@ const staticDataViewRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   handler: async (resources): CreateDataViewResponse => {
     const { context, plugins, request } = resources;
-    const setup = await setupRequest(resources);
-    const apmEventClient = await getApmEventClient(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
     const coreContext = await context.core;
 
     const dataViewStart = await plugins.dataViews.start();

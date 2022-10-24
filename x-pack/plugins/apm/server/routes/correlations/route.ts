@@ -335,8 +335,10 @@ const significantCorrelationsTransactionsRoute = createApmServerRoute({
     totalDocCount: number;
     fallbackResult?: import('./../../../common/correlations/latency_correlations/types').LatencyCorrelation;
   }> => {
-    const setup = await setupRequest(resources);
-    const apmEventClient = await getApmEventClient(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
     const {
       body: {
         serviceName,
@@ -404,8 +406,10 @@ const pValuesTransactionsRoute = createApmServerRoute({
     ccsWarning: boolean;
     fallbackResult?: import('./../../../common/correlations/failed_transactions_correlations/types').FailedTransactionsCorrelation;
   }> => {
-    const setup = await setupRequest(resources);
-    const apmEventClient = await getApmEventClient(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
 
     const {
       body: {

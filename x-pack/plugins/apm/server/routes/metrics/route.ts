@@ -40,8 +40,10 @@ const metricsChartsRoute = createApmServerRoute({
     charts: FetchAndTransformMetrics[];
   }> => {
     const { params } = resources;
-    const { config } = await setupRequest(resources);
-    const apmEventClient = await getApmEventClient(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
     const { serviceName } = params.path;
     const {
       agentName,
@@ -56,7 +58,7 @@ const metricsChartsRoute = createApmServerRoute({
     const charts = await getMetricsChartDataByAgent({
       environment,
       kuery,
-      config,
+      config: setup.config,
       apmEventClient,
       serviceName,
       agentName,

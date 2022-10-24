@@ -26,9 +26,11 @@ const observabilityOverviewHasDataRoute = createApmServerRoute({
     hasData: boolean;
     indices: import('./../../../../observability/common/typings').ApmIndicesConfig;
   }> => {
-    const { indices } = await setupRequest(resources);
-    const apmEventClient = await getApmEventClient(resources);
-    return await getHasData({ indices, apmEventClient });
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
+    return await getHasData({ indices: setup.indices, apmEventClient });
   },
 });
 
@@ -49,13 +51,15 @@ const observabilityOverviewRoute = createApmServerRoute({
       | { value: undefined; timeseries: never[] }
       | { value: number; timeseries: Array<{ x: number; y: number | null }> };
   }> => {
-    const { config } = await setupRequest(resources);
-    const apmEventClient = await getApmEventClient(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
     const { bucketSize, intervalString, start, end } = resources.params.query;
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
-      config,
+      config: setup.config,
       start,
       end,
       kuery: '',
