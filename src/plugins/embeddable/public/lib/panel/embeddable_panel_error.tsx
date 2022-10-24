@@ -6,17 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { isFunction } from 'lodash';
+import React, { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isPromise } from '@kbn/std';
+import type { MaybePromise } from '@kbn/utility-types';
 import { ErrorLike } from '@kbn/expressions-plugin/common';
 import { distinctUntilChanged, merge, of, switchMap } from 'rxjs';
 import { EditPanelAction } from '../actions';
-import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
+import { EmbeddableInput, EmbeddableOutput, ErrorEmbeddable, IEmbeddable } from '../embeddables';
 
 interface EmbeddablePanelErrorProps {
   editPanelAction?: EditPanelAction;
-  embeddable: IEmbeddable;
+  embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput, MaybePromise<ReactNode>>;
   error: ErrorLike;
 }
 
@@ -26,6 +29,7 @@ export function EmbeddablePanelError({
   error,
 }: EmbeddablePanelErrorProps) {
   const [isEditable, setEditable] = useState(false);
+  const [node, setNode] = useState<ReactNode>();
   const ref = useRef<HTMLDivElement>(null);
   const handleErrorClick = useMemo(
     () => (isEditable ? () => editPanelAction?.execute({ embeddable }) : undefined),
@@ -63,14 +67,22 @@ export function EmbeddablePanelError({
       return;
     }
 
-    if (embeddable.renderError) {
-      return embeddable.renderError(ref.current, error);
+    if (!embeddable.catchError) {
+      const errorEmbeddable = new ErrorEmbeddable(error, { id: embeddable.id });
+      setNode(errorEmbeddable.render());
+
+      return () => errorEmbeddable.destroy();
     }
 
-    const errorEmbeddable = new ErrorEmbeddable(error, { id: embeddable.id });
-    errorEmbeddable.render(ref.current);
-
-    return () => errorEmbeddable.destroy();
+    const renderedNode = embeddable.catchError(error, ref.current);
+    if (isFunction(renderedNode)) {
+      return renderedNode;
+    }
+    if (isPromise(renderedNode)) {
+      renderedNode.then(setNode);
+    } else {
+      setNode(renderedNode);
+    }
   }, [embeddable, error]);
 
   return (
@@ -84,6 +96,8 @@ export function EmbeddablePanelError({
       role={isEditable ? 'button' : undefined}
       aria-label={isEditable ? ariaLabel : undefined}
       onClick={handleErrorClick}
-    />
+    >
+      {node}
+    </EuiPanel>
   );
 }
