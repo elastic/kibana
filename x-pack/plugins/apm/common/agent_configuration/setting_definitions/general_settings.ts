@@ -404,6 +404,26 @@ export const generalSettings: RawSettingDefinition[] = [
       }
     ),
   },
+
+  // Sanitize field names
+  {
+    key: 'sanitize_field_names',
+    type: 'text',
+    defaultValue:
+      'password, passwd, pwd, secret, *key, *token*, *session*, *credit*, *card*, authorization, set-cookie',
+    label: i18n.translate('xpack.apm.agentConfig.sanitizeFiledNames.label', {
+      defaultMessage: 'Sanitize field names',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.sanitizeFiledNames.description',
+      {
+        defaultMessage:
+          'Sometimes it is necessary to sanitize, i.e., remove, sensitive data sent to Elastic APM. This config accepts a list of wildcard patterns of field names which should be sanitized. These apply to HTTP headers (including cookies) and `application/x-www-form-urlencoded` data (POST form fields). The query string and the captured request body (such as `application/json` data) will not get sanitized.',
+      }
+    ),
+    includeAgents: ['java', 'python', 'go', 'dotnet', 'nodejs', 'ruby'],
+  },
+
   // Ignore transactions based on URLs
   {
     key: 'transaction_ignore_urls',
@@ -493,24 +513,5 @@ export const generalSettings: RawSettingDefinition[] = [
       }
     ),
     includeAgents: ['java'],
-  },
-
-  // Sanitize field names
-  {
-    key: 'sanitize_field_names',
-    type: 'text',
-    defaultValue:
-      'password, passwd, pwd, secret, *key, *token*, *session*, *credit*, *card*, authorization, set-cookie',
-    label: i18n.translate('xpack.apm.agentConfig.sanitizeFiledNames.label', {
-      defaultMessage: 'Sanitize field names',
-    }),
-    description: i18n.translate(
-      'xpack.apm.agentConfig.sanitizeFiledNames.description',
-      {
-        defaultMessage:
-          'Sometimes it is necessary to sanitize, i.e., remove, sensitive data sent to Elastic APM. This config accepts a list of wildcard patterns of field names which should be sanitized. These apply to HTTP headers (including cookies) and `application/x-www-form-urlencoded` data (POST form fields). The query string and the captured request body (such as `application/json` data) will not get sanitized.',
-      }
-    ),
-    includeAgents: ['java', 'python', 'go', 'dotnet', 'nodejs', 'ruby'],
   },
 ];
