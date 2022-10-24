@@ -40,7 +40,7 @@ export const getGuidePanelStyles = (euiTheme: EuiThemeComputed) => ({
     `,
     flyoutFooter: css`
       border-radius: 0 0 6px 6px;
-      background: ${euiTheme.colors.ghost};
+      background: transparent;
       padding: 24px 30px;
     `,
     flyoutFooterLink: css`
