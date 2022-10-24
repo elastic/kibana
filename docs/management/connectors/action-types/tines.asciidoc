@@ -45,7 +45,7 @@ image::../images/tines-alerting.png[Tines rule alert]
 
 It will send a POST request to the Tines webhook action on every action execution that had at least one result.
 
-==== Format
+=== Format
 
 Tines connector will send the data in JSON format.
 
