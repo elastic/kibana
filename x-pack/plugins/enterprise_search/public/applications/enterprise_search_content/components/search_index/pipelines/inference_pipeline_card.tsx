@@ -160,15 +160,15 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                     </EuiToolTip>
                   </EuiFlexItem>
                 )}
-                {(modelType.length > 0 ? [modelType] : modelTypes).map((type) => (
-                  <EuiFlexItem grow={false} key={type}>
-                    <EuiFlexGroup gutterSize="xs">
-                      <EuiFlexItem>
-                        <EuiBadge color="hollow">{type}</EuiBadge>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                ))}
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="xs">
+                    <EuiFlexItem>
+                      <span>
+                        <EuiBadge color="hollow">{modelType}</EuiBadge>
+                      </span>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>

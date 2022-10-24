@@ -49,9 +49,7 @@ describe('ServiceNow', () => {
   describe('ServiceNow ITSM', () => {
     let connectorType: ServiceNowConnectorType<ServiceNowPublicConfigurationType, ExecutorParams>;
     beforeAll(() => {
-      connectorType = getServiceNowITSMConnectorType({
-        logger: mockedLogger,
-      });
+      connectorType = getServiceNowITSMConnectorType();
     });
 
     describe('execute()', () => {
@@ -67,6 +65,7 @@ describe('ServiceNow', () => {
           secrets,
           params,
           services,
+          logger: mockedLogger,
         } as unknown as ServiceNowConnectorTypeExecutorOptions<
           ServiceNowPublicConfigurationType,
           ExecutorParams

@@ -1253,7 +1253,7 @@
                 "section": "def-public.IEmbeddable",
                 "text": "IEmbeddable"
               },
-              "<EEI, EEO>>(type: string, explicitInput: Partial<EEI>) => Promise<",
+              "<EEI, EEO>>(type: string, explicitInput: Partial<EEI>) => Promise<E | ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -1261,7 +1261,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              " | E>"
+              ">"
             ],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
@@ -9750,7 +9750,7 @@
           },
           " | undefined; title?: string | undefined; id: string; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: ",
           "SerializableRecord",
-          " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; executionContext?: ",
+          " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; executionContext?: ",
           "KibanaExecutionContext",
           " | undefined; }"
         ],
@@ -11328,7 +11328,7 @@
           },
           " | undefined; title?: string | undefined; id: string; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: ",
           "SerializableRecord",
-          " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; executionContext?: ",
+          " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; executionContext?: ",
           "KibanaExecutionContext",
           " | undefined; }"
         ],

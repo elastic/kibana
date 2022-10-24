@@ -6,9 +6,9 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { FormProps } from './schema';
 import { schema } from './schema';
-import { Form, useForm } from '../../common/shared_imports';
 import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
 import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';

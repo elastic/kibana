@@ -73,6 +73,7 @@ export const getNormalizeCommonFields = ({
     [ConfigKey.TIMEOUT]: monitor.timeout
       ? getValueInSeconds(monitor.timeout)
       : defaultFields[ConfigKey.TIMEOUT],
+    [ConfigKey.CONFIG_HASH]: monitor.hash || defaultFields[ConfigKey.CONFIG_HASH],
   };
   return normalizedFields;
 };
