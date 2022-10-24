@@ -9,22 +9,20 @@
 import type { GuideConfig } from '../../types';
 
 export const securityConfig: GuideConfig = {
-  title: 'Get started with SIEM',
+  title: 'Elastic Security guided setup',
   guideName: 'Security',
   completedGuideRedirectLocation: {
     appID: 'security',
     path: '/app/security/dashboards',
   },
-  description:
-    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+  description: `We'll help you get set up quickly, using Elastic's out-of-the-box integrations.`,
   steps: [
     {
       id: 'add_data',
-      title: 'Add and view your data',
+      title: 'Add data with Elastic Defend',
       descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
+        'Select the Elastic Defend integration to add your data.',
+        'Make sure your data look good.',
       ],
       integration: 'endpoint',
       location: {
@@ -35,15 +33,10 @@ export const securityConfig: GuideConfig = {
     {
       id: 'rules',
       title: 'Turn on rules',
-      descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      ],
+      descriptionList: ['Load prebuilt rules.', 'Select the rules you want.'],
       manualCompletion: {
-        title: 'Manual completion step title',
-        description:
-          'Mark the step complete by opening the panel and clicking the button "Mark done"',
+        title: 'Continue with the tour',
+        description: 'When you’ve enabled the rules you want continue...',
       },
       location: {
         appID: 'securitySolutionUI',
@@ -53,11 +46,7 @@ export const securityConfig: GuideConfig = {
     {
       id: 'alertsCases',
       title: 'Alerts and cases',
-      descriptionList: [
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-        'Nullam ligula enim, malesuada a finibus vel, cursus sed risus.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
-      ],
+      descriptionList: ['View and triage alerts.', 'Create cases.'],
       location: {
         appID: 'securitySolutionUI',
         path: '/alerts',
