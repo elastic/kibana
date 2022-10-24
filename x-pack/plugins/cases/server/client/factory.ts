@@ -19,6 +19,7 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -37,6 +38,7 @@ import type { PersistableStateAttachmentTypeRegistry } from '../attachment_frame
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { CasesServices } from './types';
 import { LicensingService } from '../services/licensing';
+import { NotificationsService } from '../services/notifications';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
@@ -49,6 +51,7 @@ interface CasesClientFactoryArgs {
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
+  notifications: NotificationsPluginStart;
 }
 
 /**
@@ -164,6 +167,8 @@ export class CasesClientFactory {
       this.options.licensingPluginStart.featureUsage.notifyUsage
     );
 
+    const notificationsService = new NotificationsService(this.options.notifications);
+
     return {
       alertsService: new AlertService(esClient, this.logger),
       caseService,
@@ -175,6 +180,7 @@ export class CasesClientFactory {
       ),
       attachmentService,
       licensingService,
+      notificationsService,
     };
   }
 

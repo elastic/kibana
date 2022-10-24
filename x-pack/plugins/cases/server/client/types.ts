@@ -25,6 +25,7 @@ import type {
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { LicensingService } from '../services/licensing';
+import type { NotificationsService } from '../services/notifications';
 
 export interface CasesServices {
   alertsService: AlertService;
@@ -34,6 +35,7 @@ export interface CasesServices {
   userActionService: CaseUserActionService;
   attachmentService: AttachmentService;
   licensingService: LicensingService;
+  notificationsService: NotificationsService;
 }
 
 /**

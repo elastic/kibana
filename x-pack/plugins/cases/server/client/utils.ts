@@ -14,6 +14,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
@@ -24,6 +25,8 @@ import type {
   CommentRequest,
   CaseSeverity,
   CommentRequestExternalReferenceType,
+  CaseAssignees,
+  CaseResponse,
 } from '../../common/api';
 import {
   OWNER_FIELD,
@@ -47,6 +50,7 @@ import {
 } from '../common/utils';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 import type { CasesFindQueryParams } from './types';
+import type { NotificationsService } from '../services/notifications';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {
@@ -509,4 +513,23 @@ export const sortToSnake = (sortField: string | undefined): SortFieldCase => {
     default:
       return SortFieldCase.createdAt;
   }
+};
+
+export const notifyAssignees = async ({
+  assignees,
+  theCase,
+  bulkGetUserProfiles,
+  notificationsService,
+}: {
+  assignees: CaseAssignees;
+  theCase: CaseResponse;
+  bulkGetUserProfiles: SecurityPluginStart['userProfiles']['bulkGet'];
+  notificationsService: NotificationsService;
+}) => {
+  // TODO: Filter current user
+  const uids = new Set(assignees.map((assignee) => assignee.uid));
+  const userProfiles = await bulkGetUserProfiles({ uids });
+  const users = userProfiles.map((profile) => profile.user);
+
+  await notificationsService.notify({ users, theCase });
 };
