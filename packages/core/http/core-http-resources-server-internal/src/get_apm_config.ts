@@ -23,8 +23,9 @@ export const getApmConfig = (requestPath: string) => {
     return null;
   }
 
+  const { contextPropagationOnly, logUncaughtExceptions, ...restOfConfig } = baseConfig;
   const config: Record<string, any> = {
-    ...baseConfig,
+    ...restOfConfig,
     pageLoadTransactionName: requestPath,
   };
 
