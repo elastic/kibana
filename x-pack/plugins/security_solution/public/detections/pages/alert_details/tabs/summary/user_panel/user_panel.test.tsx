@@ -33,6 +33,7 @@ describe('AlertDetailsPage - SummaryTab - UserPanel', () => {
   const UserPanelWithDefaultProps = (propOverrides: Partial<UserPanelProps>) => (
     <TestProviders>
       <UserPanel
+        openUserDetailsPanel={jest.fn}
         data={mockAlertDetailsTimelineResponse}
         selectedPatterns={['random-pattern']}
         {...propOverrides}

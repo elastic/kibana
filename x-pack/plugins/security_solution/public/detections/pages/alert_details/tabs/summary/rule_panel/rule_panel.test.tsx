@@ -47,9 +47,9 @@ describe('AlertDetailsPage - SummaryTab - RulePanel', () => {
 
   describe('Rule name link', () => {
     it('should render the rule name as a link button', () => {
-      const { getByRole } = render(<RulePanelWithDefaultProps />);
+      const { getByTestId } = render(<RulePanelWithDefaultProps />);
       const ruleName = getTimelineEventData(ALERT_RULE_NAME, mockAlertDetailsTimelineResponse);
-      expect(getByRole('button')).toHaveTextContent(ruleName);
+      expect(getByTestId('ruleName')).toHaveTextContent(ruleName);
     });
   });
 });

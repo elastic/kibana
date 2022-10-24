@@ -29,16 +29,20 @@ import { getTimelineEventData } from '../../../utils/get_timeline_event_data';
 import {
   AGENT_STATUS_TITLE,
   HOST_NAME_TITLE,
+  HOST_PANEL_TITLE,
   HOST_RISK_CLASSIFICATION,
   HOST_RISK_SCORE,
   IP_ADDRESSES_TITLE,
   LAST_SEEN_TITLE,
   OPERATING_SYSTEM_TITLE,
 } from '../translation';
+import { SummaryPanel } from '../wrappers';
+import { HostPanelActions, HOST_PANEL_ACTIONS_CLASS } from './host_panel_actions';
 
 export interface HostPanelProps {
   data: TimelineEventsDetailsItem[];
   id: string;
+  openHostDetailsPanel: (hostName: string, onClose?: (() => void) | undefined) => void;
   selectedPatterns: SelectedDataView['selectedPatterns'];
   browserFields: SelectedDataView['browserFields'];
 }
@@ -62,7 +66,7 @@ const HostPanelSection: React.FC<{
   ) : null;
 
 export const HostPanel = React.memo(
-  ({ data, id, browserFields, selectedPatterns }: HostPanelProps) => {
+  ({ data, id, browserFields, openHostDetailsPanel, selectedPatterns }: HostPanelProps) => {
     const hostName = getTimelineEventData('host.name', data);
     const hostOs = getTimelineEventData('host.os.name', data);
 
@@ -112,8 +116,18 @@ export const HostPanel = React.memo(
       []
     );
 
+    const renderHostActions = useCallback(
+      () => <HostPanelActions openHostDetailsPanel={openHostDetailsPanel} hostName={hostName} />,
+      [hostName, openHostDetailsPanel]
+    );
+
     return (
-      <>
+      <SummaryPanel
+        actionsClassName={HOST_PANEL_ACTIONS_CLASS}
+        grow
+        renderActionsPopover={hostName ? renderHostActions : undefined}
+        title={HOST_PANEL_TITLE}
+      >
         <EuiFlexGroup data-test-subj="host-panel">
           <EuiFlexItem grow={2}>
             <EuiFlexGroup>
@@ -171,7 +185,7 @@ export const HostPanel = React.memo(
             <EuiSpacer />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </>
+      </SummaryPanel>
     );
   }
 );

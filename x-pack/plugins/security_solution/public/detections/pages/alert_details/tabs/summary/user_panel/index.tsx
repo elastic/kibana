@@ -26,14 +26,19 @@ import {
   IP_ADDRESSES_TITLE,
   LAST_SEEN_TITLE,
   USER_NAME_TITLE,
+  USER_PANEL_TITLE,
   USER_RISK_CLASSIFICATION,
   USER_RISK_SCORE,
 } from '../translation';
+import { SummaryPanel } from '../wrappers';
+import { UserPanelActions, USER_PANEL_ACTIONS_CLASS } from './user_panel_actions';
 
 export interface UserPanelProps {
   data: TimelineEventsDetailsItem[] | null;
   selectedPatterns: SelectedDataView['selectedPatterns'];
+  openUserDetailsPanel: (userName: string, onClose?: (() => void) | undefined) => void;
 }
+
 const UserPanelSection: React.FC<{
   title?: string | React.ReactElement;
   grow?: FlexItemGrowSize;
@@ -52,90 +57,102 @@ const UserPanelSection: React.FC<{
     </EuiFlexItem>
   ) : null;
 
-export const UserPanel = React.memo(({ data, selectedPatterns }: UserPanelProps) => {
-  const userName = useMemo(() => getTimelineEventData('user.name', data), [data]);
+export const UserPanel = React.memo(
+  ({ data, selectedPatterns, openUserDetailsPanel }: UserPanelProps) => {
+    const userName = useMemo(() => getTimelineEventData('user.name', data), [data]);
 
-  const { data: userRisk, isLicenseValid: isRiskLicenseValid } = useRiskScore({
-    riskEntity: RiskScoreEntity.user,
-    skip: userName == null,
-  });
+    const { data: userRisk, isLicenseValid: isRiskLicenseValid } = useRiskScore({
+      riskEntity: RiskScoreEntity.user,
+      skip: userName == null,
+    });
 
-  const [userRiskScore, userRiskLevel] = useMemo(() => {
-    const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
-    const userRiskValue = userRiskData
-      ? Math.round(userRiskData.user.risk.calculated_score_norm)
-      : getEmptyTagValue();
-    const userRiskSeverity = userRiskData ? (
-      <RiskScore severity={userRiskData.user.risk.calculated_level} hideBackgroundColor />
-    ) : (
-      getEmptyTagValue()
+    const renderUserActions = useCallback(
+      () => <UserPanelActions openUserDetailsPanel={openUserDetailsPanel} userName={userName} />,
+      [openUserDetailsPanel, userName]
     );
 
-    return [userRiskValue, userRiskSeverity];
-  }, [userRisk]);
+    const [userRiskScore, userRiskLevel] = useMemo(() => {
+      const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
+      const userRiskValue = userRiskData
+        ? Math.round(userRiskData.user.risk.calculated_score_norm)
+        : getEmptyTagValue();
+      const userRiskSeverity = userRiskData ? (
+        <RiskScore severity={userRiskData.user.risk.calculated_level} hideBackgroundColor />
+      ) : (
+        getEmptyTagValue()
+      );
 
-  const sourceIpFields = useMemo(
-    () => find({ field: 'source.ip', category: 'source' }, data)?.values ?? [],
-    [data]
-  );
+      return [userRiskValue, userRiskSeverity];
+    }, [userRisk]);
 
-  const renderSourceIp = useCallback(
-    (ip: string) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue()),
-    []
-  );
+    const sourceIpFields = useMemo(
+      () => find({ field: 'source.ip', category: 'source' }, data)?.values ?? [],
+      [data]
+    );
 
-  return (
-    <>
-      <EuiFlexGroup data-test-subj="user-panel">
-        <EuiFlexItem grow={2}>
-          <EuiFlexGroup>
-            <UserPanelSection grow={false}>
-              <EuiIcon type="userAvatar" size="xl" />
-            </UserPanelSection>
-            <UserPanelSection title={USER_NAME_TITLE}>{userName}</UserPanelSection>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          {isRiskLicenseValid && (
-            <>
-              <EuiFlexGroup data-test-subj="user-panel-risk">
-                {userRiskScore && (
-                  <UserPanelSection title={USER_RISK_SCORE}>{userRiskScore}</UserPanelSection>
-                )}
-                {userRiskLevel && (
-                  <UserPanelSection title={USER_RISK_CLASSIFICATION}>
-                    {userRiskLevel}
-                  </UserPanelSection>
-                )}
-              </EuiFlexGroup>
-              <EuiSpacer size="l" />
-            </>
-          )}
-          <EuiFlexGroup data-test-subj="user-panel-ip">
-            <UserPanelSection title={IP_ADDRESSES_TITLE} grow={2}>
-              <DefaultFieldRenderer
-                rowItems={sourceIpFields}
-                attrName={'source.ip'}
-                idPrefix="alert-details-page-user"
-                render={renderSourceIp}
-              />
-            </UserPanelSection>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup>
-            <UserPanelSection title={LAST_SEEN_TITLE} grow={2}>
-              <FirstLastSeen
-                indexPatterns={selectedPatterns}
-                field={'user.name'}
-                value={userName}
-                type={FirstLastSeenType.LAST_SEEN}
-              />
-            </UserPanelSection>
-          </EuiFlexGroup>
-          <EuiSpacer />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
-  );
-});
+    const renderSourceIp = useCallback(
+      (ip: string) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue()),
+      []
+    );
+
+    return (
+      <SummaryPanel
+        actionsClassName={USER_PANEL_ACTIONS_CLASS}
+        grow
+        renderActionsPopover={userName ? renderUserActions : undefined}
+        title={USER_PANEL_TITLE}
+      >
+        <EuiFlexGroup data-test-subj="user-panel">
+          <EuiFlexItem grow={2}>
+            <EuiFlexGroup>
+              <UserPanelSection grow={false}>
+                <EuiIcon type="userAvatar" size="xl" />
+              </UserPanelSection>
+              <UserPanelSection title={USER_NAME_TITLE}>{userName}</UserPanelSection>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+            {isRiskLicenseValid && (
+              <>
+                <EuiFlexGroup data-test-subj="user-panel-risk">
+                  {userRiskScore && (
+                    <UserPanelSection title={USER_RISK_SCORE}>{userRiskScore}</UserPanelSection>
+                  )}
+                  {userRiskLevel && (
+                    <UserPanelSection title={USER_RISK_CLASSIFICATION}>
+                      {userRiskLevel}
+                    </UserPanelSection>
+                  )}
+                </EuiFlexGroup>
+                <EuiSpacer size="l" />
+              </>
+            )}
+            <EuiFlexGroup data-test-subj="user-panel-ip">
+              <UserPanelSection title={IP_ADDRESSES_TITLE} grow={2}>
+                <DefaultFieldRenderer
+                  rowItems={sourceIpFields}
+                  attrName={'source.ip'}
+                  idPrefix="alert-details-page-user"
+                  render={renderSourceIp}
+                />
+              </UserPanelSection>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+            <EuiFlexGroup>
+              <UserPanelSection title={LAST_SEEN_TITLE} grow={2}>
+                <FirstLastSeen
+                  indexPatterns={selectedPatterns}
+                  field={'user.name'}
+                  value={userName}
+                  type={FirstLastSeenType.LAST_SEEN}
+                />
+              </UserPanelSection>
+            </EuiFlexGroup>
+            <EuiSpacer />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </SummaryPanel>
+    );
+  }
+);
 
 UserPanel.displayName = 'UserPanel';

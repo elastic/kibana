@@ -10,9 +10,11 @@ import styled from 'styled-components';
 import { defaultRowRenderers } from '../../../../../../timelines/components/timeline/body/renderers';
 import { getRowRenderer } from '../../../../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { TimelineId } from '../../../../../../../common/types';
+import { SummaryPanel } from '../wrappers';
+import { ALERT_REASON_PANEL_TITLE } from '../translation';
 import type { Ecs } from '../../../../../../../common/ecs';
 
-export interface AlertRendererProps {
+export interface AlertRendererPanelProps {
   dataAsNestedObject: Ecs | null;
 }
 
@@ -24,7 +26,7 @@ const RendererContainer = styled.div`
   }
 `;
 
-export const AlertRenderer = React.memo(({ dataAsNestedObject }: AlertRendererProps) => {
+export const AlertRendererPanel = React.memo(({ dataAsNestedObject }: AlertRendererPanelProps) => {
   const renderer = useMemo(
     () =>
       dataAsNestedObject != null
@@ -34,7 +36,7 @@ export const AlertRenderer = React.memo(({ dataAsNestedObject }: AlertRendererPr
   );
 
   return (
-    <>
+    <SummaryPanel title={ALERT_REASON_PANEL_TITLE}>
       {renderer != null && dataAsNestedObject != null && (
         <div>
           <RendererContainer data-test-subj="alert-renderer-panel">
@@ -46,8 +48,8 @@ export const AlertRenderer = React.memo(({ dataAsNestedObject }: AlertRendererPr
           </RendererContainer>
         </div>
       )}
-    </>
+    </SummaryPanel>
   );
 });
 
-AlertRenderer.displayName = 'AlertRenderer';
+AlertRendererPanel.displayName = 'AlertRendererPanel';

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { CasePanel } from '.';
+import { CasesPanel } from '.';
 import { TestProviders } from '../../../../../../common/mock';
 import {
   mockAlertDetailsTimelineResponse,
@@ -25,7 +25,7 @@ import { useGetUserCasesPermissions } from '../../../../../../common/lib/kibana'
 jest.mock('../../../../../../common/containers/cases/use_get_related_cases_by_event');
 jest.mock('../../../../../../common/lib/kibana');
 
-describe('AlertDetailsPage - SummaryTab - CasePanel', () => {
+describe('AlertDetailsPage - SummaryTab - CasesPanel', () => {
   describe('No data', () => {
     it('should render the loading panel', () => {
       (useGetRelatedCasesByEvent as jest.Mock).mockReturnValue({
@@ -33,7 +33,7 @@ describe('AlertDetailsPage - SummaryTab - CasePanel', () => {
       });
       render(
         <TestProviders>
-          <CasePanel
+          <CasesPanel
             eventId={mockAlertNestedDetailsTimelineResponse._id}
             dataAsNestedObject={mockAlertNestedDetailsTimelineResponse}
             detailsData={mockAlertDetailsTimelineResponse}
@@ -50,7 +50,7 @@ describe('AlertDetailsPage - SummaryTab - CasePanel', () => {
       });
       render(
         <TestProviders>
-          <CasePanel
+          <CasesPanel
             eventId={mockAlertNestedDetailsTimelineResponse._id}
             dataAsNestedObject={mockAlertNestedDetailsTimelineResponse}
             detailsData={mockAlertDetailsTimelineResponse}
@@ -69,7 +69,7 @@ describe('AlertDetailsPage - SummaryTab - CasePanel', () => {
       });
       render(
         <TestProviders>
-          <CasePanel
+          <CasesPanel
             eventId={mockAlertNestedDetailsTimelineResponse._id}
             dataAsNestedObject={mockAlertNestedDetailsTimelineResponse}
             detailsData={mockAlertDetailsTimelineResponse}
@@ -92,7 +92,7 @@ describe('AlertDetailsPage - SummaryTab - CasePanel', () => {
         });
         render(
           <TestProviders>
-            <CasePanel
+            <CasesPanel
               eventId={mockAlertNestedDetailsTimelineResponse._id}
               dataAsNestedObject={mockAlertNestedDetailsTimelineResponse}
               detailsData={mockAlertDetailsTimelineResponse}
@@ -100,8 +100,8 @@ describe('AlertDetailsPage - SummaryTab - CasePanel', () => {
           </TestProviders>
         );
 
-        expect(screen.getByText(ADD_TO_NEW_CASE_BUTTON)).toBeVisible();
-        expect(screen.queryByText(ADD_TO_EXISTING_CASE_BUTTON)).toBe(null);
+        expect(screen.queryByTestId('add-to-new-case-button')).toBeVisible();
+        expect(screen.queryByTestId('add-to-existing-case-button')).toBe(null);
       });
 
       it('should only render the add to existing case button', () => {
@@ -115,7 +115,7 @@ describe('AlertDetailsPage - SummaryTab - CasePanel', () => {
         });
         render(
           <TestProviders>
-            <CasePanel
+            <CasesPanel
               eventId={mockAlertNestedDetailsTimelineResponse._id}
               dataAsNestedObject={mockAlertNestedDetailsTimelineResponse}
               detailsData={mockAlertDetailsTimelineResponse}
@@ -123,8 +123,8 @@ describe('AlertDetailsPage - SummaryTab - CasePanel', () => {
           </TestProviders>
         );
 
-        expect(screen.getByText(ADD_TO_EXISTING_CASE_BUTTON)).toBeVisible();
-        expect(screen.queryByText(ADD_TO_NEW_CASE_BUTTON)).toBe(null);
+        expect(screen.queryByTestId('add-to-existing-case-button')).toBeVisible();
+        expect(screen.queryByTestId('add-to-new-case-button')).toBe(null);
       });
 
       it('should render both add to new case and add to existing case buttons', () => {
@@ -138,7 +138,7 @@ describe('AlertDetailsPage - SummaryTab - CasePanel', () => {
         });
         render(
           <TestProviders>
-            <CasePanel
+            <CasesPanel
               eventId={mockAlertNestedDetailsTimelineResponse._id}
               dataAsNestedObject={mockAlertNestedDetailsTimelineResponse}
               detailsData={mockAlertDetailsTimelineResponse}
@@ -171,7 +171,7 @@ describe('AlertDetailsPage - SummaryTab - CasePanel', () => {
     it('should show the related case', () => {
       render(
         <TestProviders>
-          <CasePanel
+          <CasesPanel
             eventId={mockAlertNestedDetailsTimelineResponse._id}
             dataAsNestedObject={mockAlertNestedDetailsTimelineResponse}
             detailsData={mockAlertDetailsTimelineResponse}

@@ -8,16 +8,16 @@
 import React from 'react';
 import { get } from 'lodash/fp';
 import { render } from '@testing-library/react';
-import { AlertRenderer } from '.';
+import { AlertRendererPanel } from '.';
 import { TestProviders } from '../../../../../../common/mock';
 import { mockAlertNestedDetailsTimelineResponse } from '../../../__mocks__';
 import { ALERT_RENDERER_FIELDS } from '../../../../../../timelines/components/timeline/body/renderers/alert_renderer';
 
-describe('AlertDetailsPage - SummaryTab - AlertRenderer', () => {
+describe('AlertDetailsPage - SummaryTab - AlertRendererPanel', () => {
   it('should render the reason renderer', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AlertRenderer dataAsNestedObject={mockAlertNestedDetailsTimelineResponse} />
+        <AlertRendererPanel dataAsNestedObject={mockAlertNestedDetailsTimelineResponse} />
       </TestProviders>
     );
 
@@ -27,10 +27,10 @@ describe('AlertDetailsPage - SummaryTab - AlertRenderer', () => {
   it('should render the render the expected values', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <AlertRenderer dataAsNestedObject={mockAlertNestedDetailsTimelineResponse} />
+        <AlertRendererPanel dataAsNestedObject={mockAlertNestedDetailsTimelineResponse} />
       </TestProviders>
     );
-    const alertRendererPanel = getByTestId('alert-renderer-panel');
+    const alertRendererPanelPanel = getByTestId('alert-renderer-panel');
 
     ALERT_RENDERER_FIELDS.forEach((rendererField) => {
       const fieldValues: string[] | null = get(
@@ -39,7 +39,7 @@ describe('AlertDetailsPage - SummaryTab - AlertRenderer', () => {
       );
       if (fieldValues && fieldValues.length > 0) {
         fieldValues.forEach((value) => {
-          expect(alertRendererPanel).toHaveTextContent(value);
+          expect(alertRendererPanelPanel).toHaveTextContent(value);
         });
       }
     });
@@ -48,7 +48,7 @@ describe('AlertDetailsPage - SummaryTab - AlertRenderer', () => {
   it('should not render the reason renderer if data is not provided', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <AlertRenderer dataAsNestedObject={null} />
+        <AlertRendererPanel dataAsNestedObject={null} />
       </TestProviders>
     );
 

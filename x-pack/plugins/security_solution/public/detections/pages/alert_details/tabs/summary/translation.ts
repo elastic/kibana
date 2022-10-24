@@ -7,6 +7,41 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const CASES_PANEL_TITLE = i18n.translate(
+  'xpack.securitySolution.alerts.alertDetails.summary.cases.title',
+  {
+    defaultMessage: 'Cases',
+  }
+);
+
+export const ALERT_REASON_PANEL_TITLE = i18n.translate(
+  'xpack.securitySolution.alerts.alertDetails.summary.alertReason.title',
+  {
+    defaultMessage: 'Alert reason',
+  }
+);
+
+export const RULE_PANEL_TITLE = i18n.translate(
+  'xpack.securitySolution.alerts.alertDetails.summary.rule.title',
+  {
+    defaultMessage: 'Rule',
+  }
+);
+
+export const HOST_PANEL_TITLE = i18n.translate(
+  'xpack.securitySolution.alerts.alertDetails.summary.host.title',
+  {
+    defaultMessage: 'Host',
+  }
+);
+
+export const USER_PANEL_TITLE = i18n.translate(
+  'xpack.securitySolution.alerts.alertDetails.summary.user.title',
+  {
+    defaultMessage: 'User',
+  }
+);
+
 export const RULE_NAME_TITLE = i18n.translate(
   'xpack.securitySolution.alerts.alertDetails.summary.rule.name',
   {

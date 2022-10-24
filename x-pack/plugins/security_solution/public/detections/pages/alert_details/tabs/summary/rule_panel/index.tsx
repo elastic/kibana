@@ -8,7 +8,7 @@
 import { EuiTitle, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { find } from 'lodash/fp';
 import type { FlexItemGrowSize } from '@elastic/eui/src/components/flex/flex_item';
@@ -29,10 +29,13 @@ import {
   RISK_SCORE_TITLE,
   RULE_DESCRIPTION_TITLE,
   RULE_NAME_TITLE,
+  RULE_PANEL_TITLE,
   SEVERITY_TITLE,
 } from '../translation';
 import { getMitreTitleAndDescription } from '../get_mitre_threat_component';
 import { getTimelineEventData } from '../../../utils/get_timeline_event_data';
+import { SummaryPanel } from '../wrappers';
+import { RulePanelActions, RULE_PANEL_ACTIONS_CLASS } from './rule_panel_actions';
 
 export interface RulePanelProps {
   data: TimelineEventsDetailsItem[];
@@ -68,6 +71,20 @@ const RuleSection: React.FC<RuleSectionProps> = ({
 );
 
 export const RulePanel = React.memo(({ data, id, browserFields }: RulePanelProps) => {
+  const ruleUuid = useMemo(() => getTimelineEventData(ALERT_RULE_UUID, data), [data]);
+  const threatDetails = useMemo(() => getMitreTitleAndDescription(data), [data]);
+  const alertRiskScore = useMemo(() => getTimelineEventData(ALERT_RISK_SCORE, data), [data]);
+  const alertSeverity = useMemo(
+    () => getTimelineEventData(ALERT_SEVERITY, data) as Severity,
+    [data]
+  );
+  const alertRuleDescription = useMemo(
+    () => getTimelineEventData(ALERT_RULE_DESCRIPTION, data),
+    [data]
+  );
+  const shouldShowThreatDetails = !!threatDetails && threatDetails?.length > 0;
+
+  const renderRuleActions = useCallback(() => <RulePanelActions ruleUuid={ruleUuid} />, [ruleUuid]);
   const ruleNameData = useMemo(() => {
     const item = find({ field: ALERT_RULE_NAME, category: KIBANA_NAMESPACE }, data);
     const linkValueField = find({ field: ALERT_RULE_UUID, category: KIBANA_NAMESPACE }, data);
@@ -84,19 +101,12 @@ export const RulePanel = React.memo(({ data, id, browserFields }: RulePanelProps
     );
   }, [browserFields, data, id]);
 
-  const threatDetails = useMemo(() => getMitreTitleAndDescription(data), [data]);
-  const alertRiskScore = useMemo(() => getTimelineEventData(ALERT_RISK_SCORE, data), [data]);
-  const alertSeverity = useMemo(
-    () => getTimelineEventData(ALERT_SEVERITY, data) as Severity,
-    [data]
-  );
-  const alertRuleDescription = useMemo(
-    () => getTimelineEventData(ALERT_RULE_DESCRIPTION, data),
-    [data]
-  );
-  const shouldShowThreatDetails = !!threatDetails && threatDetails?.length > 0;
   return (
-    <>
+    <SummaryPanel
+      actionsClassName={RULE_PANEL_ACTIONS_CLASS}
+      renderActionsPopover={renderRuleActions}
+      title={RULE_PANEL_TITLE}
+    >
       <EuiFlexGroup data-test-subj="rule-panel">
         <EuiFlexItem grow={2}>
           <EuiFlexGroup>
@@ -139,7 +149,7 @@ export const RulePanel = React.memo(({ data, id, browserFields }: RulePanelProps
           <EuiSpacer />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+    </SummaryPanel>
   );
 });
 

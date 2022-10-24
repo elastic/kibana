@@ -45,6 +45,7 @@ describe('AlertDetailsPage - SummaryTab - HostPanel', () => {
     <TestProviders>
       <HostPanel
         data={mockAlertDetailsTimelineResponse}
+        openHostDetailsPanel={jest.fn}
         id={mockAlertNestedDetailsTimelineResponse._id}
         browserFields={mockBrowserFields}
         selectedPatterns={['random-pattern']}
