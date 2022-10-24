@@ -6,7 +6,6 @@
  */
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   termQuery,
   kqlQuery,
@@ -150,7 +149,7 @@ export async function getMainSummaryStats({
                     indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
                   )
                 : []),
-            ] as QueryDslQueryContainer[],
+            ],
           },
         },
         aggs: {

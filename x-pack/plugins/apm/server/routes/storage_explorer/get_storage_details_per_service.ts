@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   termQuery,
   kqlQuery,
@@ -83,7 +82,7 @@ export async function getStorageDetailsPerProcessorEvent({
                     indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
                   )
                 : []),
-            ] as QueryDslQueryContainer[],
+            ],
           },
         },
         aggs: {
@@ -213,7 +212,7 @@ export async function getStorageDetailsPerIndex({
                     indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
                   )
                 : []),
-            ] as QueryDslQueryContainer[],
+            ],
           },
         },
         aggs: {
