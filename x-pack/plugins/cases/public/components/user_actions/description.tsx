@@ -17,6 +17,7 @@ import { UserActionMarkdown } from './markdown_form';
 import * as i18n from './translations';
 import { HoverableAvatarResolver } from '../user_profiles/hoverable_avatar_resolver';
 import { HoverableUsernameResolver } from '../user_profiles/hoverable_username_resolver';
+import { DescriptionPropertyActions } from './property_actions/description_property_actions';
 
 const DESCRIPTION_ID = 'description';
 
@@ -69,15 +70,13 @@ export const getDescriptionUserAction = ({
       isEdit: manageMarkdownEditIds.includes(DESCRIPTION_ID),
     }),
     actions: (
-      <UserActionContentToolbar
-        commentMarkdown={caseData.description}
-        id={DESCRIPTION_ID}
-        editLabel={i18n.EDIT_DESCRIPTION}
-        quoteLabel={i18n.QUOTE}
-        isLoading={isLoadingDescription}
-        onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
-        onQuote={handleManageQuote.bind(null, caseData.description)}
-      />
+      <UserActionContentToolbar id={DESCRIPTION_ID}>
+        <DescriptionPropertyActions
+          isLoading={isLoadingDescription}
+          onEdit={() => handleManageMarkdownEditId(DESCRIPTION_ID)}
+          onQuote={() => handleManageQuote(caseData.description)}
+        />
+      </UserActionContentToolbar>
     ),
   };
 };

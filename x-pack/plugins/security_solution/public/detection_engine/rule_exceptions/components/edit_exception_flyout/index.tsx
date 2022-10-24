@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
 import styled, { css } from 'styled-components';
 import {
@@ -30,28 +31,31 @@ import {
   exceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import { isEmpty } from 'lodash/fp';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
-import * as i18n from './translations';
-import { ExceptionsFlyoutMeta } from '../flyout_components/item_meta_form';
-import { createExceptionItemsReducer } from './reducer';
-import { ExceptionsLinkedToLists } from '../flyout_components/linked_to_list';
-import { ExceptionsLinkedToRule } from '../flyout_components/linked_to_rule';
-import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
-import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
-import { ExceptionsConditions } from '../flyout_components/item_conditions';
+
 import {
   isEqlRule,
   isNewTermsRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
-import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
+
+import type { Rule } from '../../../rule_management/logic/types';
+import { ExceptionsFlyoutMeta } from '../flyout_components/item_meta_form';
+import { ExceptionsLinkedToLists } from '../flyout_components/linked_to_list';
+import { ExceptionsLinkedToRule } from '../flyout_components/linked_to_rule';
+import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
+import { ExceptionsConditions } from '../flyout_components/item_conditions';
+
 import { filterIndexPatterns } from '../../utils/helpers';
-import { entrichExceptionItemsForUpdate } from '../flyout_components/utils';
-import { useEditExceptionItems } from './use_edit_exception';
+import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
+import { entrichExceptionItemsForUpdate } from '../flyout_components/utils';
 import { ExceptionItemComments } from '../item_comments';
+import { createExceptionItemsReducer } from './reducer';
+import { useEditExceptionItems } from './use_edit_exception';
+
+import * as i18n from './translations';
 
 interface EditExceptionFlyoutProps {
   list: ExceptionListSchema;
