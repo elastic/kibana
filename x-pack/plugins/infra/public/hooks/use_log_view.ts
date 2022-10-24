@@ -67,6 +67,7 @@ export const useLogView = ({
     () => ({
       fields: resolvedLogView?.fields ?? [],
       title: resolvedLogView?.indices ?? 'unknown',
+      type: 'title',
     }),
     [resolvedLogView]
   );

@@ -20,6 +20,7 @@ export const createUninitializedUseLogViewMock =
     derivedDataView: {
       fields: [],
       title: 'unknown',
+      type: 'title',
     },
     hasFailedLoading: false,
     hasFailedLoadingLogView: false,
