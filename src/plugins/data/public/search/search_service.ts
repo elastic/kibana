@@ -134,6 +134,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       usageCollector: this.usageCollector!,
       session: this.sessionService,
       theme,
+      searchConfig: this.initializerContext.config.get().search,
     });
 
     expressions.registerFunction(
@@ -240,7 +241,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       onResponse: (request, response, options) => {
         if (!options.disableShardFailureWarning) {
           const { rawResponse } = response;
-          handleWarnings(request.body, rawResponse, theme);
+          handleWarnings({
+            request: request.body,
+            response: rawResponse,
+            theme,
+            sessionId: options.sessionId,
+          });
         }
         return response;
       },
@@ -271,7 +277,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       showError: (e) => {
         this.searchInterceptor.showError(e);
       },
-      showWarnings: (adapter, cb) => {
+      showWarnings: (adapter, callback) => {
         adapter?.getRequests().forEach((request) => {
           const rawResponse = (
             request.response?.json as { rawResponse: estypes.SearchResponse | undefined }
@@ -281,7 +287,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             return;
           }
 
-          handleWarnings(request.json as SearchRequest, rawResponse, theme, cb);
+          handleWarnings({
+            request: request.json as SearchRequest,
+            response: rawResponse,
+            theme,
+            callback,
+          });
         });
       },
       session: this.sessionService,

@@ -25,6 +25,7 @@ import { optionsListServiceFactory } from './options_list/options_list_service';
 import { settingsServiceFactory } from './settings/settings_service';
 import { unifiedSearchServiceFactory } from './unified_search/unified_search_service';
 import { themeServiceFactory } from './theme/theme_service';
+import { embeddableServiceFactory } from './embeddable/embeddable_service';
 
 export const providers: PluginServiceProviders<
   ControlsServices,
@@ -38,6 +39,7 @@ export const providers: PluginServiceProviders<
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
   theme: new PluginServiceProvider(themeServiceFactory),
+  embeddable: new PluginServiceProvider(embeddableServiceFactory),
   unifiedSearch: new PluginServiceProvider(unifiedSearchServiceFactory),
 };
 

@@ -1391,6 +1391,20 @@
           },
           {
             "parentPluginId": "actions",
+            "id": "def-server.ActionTypeExecutorOptions.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              "Logger"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
             "id": "def-server.ActionTypeExecutorOptions.isEphemeral",
             "type": "CompoundType",
             "tags": [],

@@ -75,6 +75,7 @@ describe('getLayerMetaInfo', () => {
         isStaticValue: false,
         sortingHint: undefined,
         hasTimeShift: true,
+        hasReducedTimeRange: true,
       })),
       getTableSpec: jest.fn(),
       getVisualDefaults: jest.fn(),
@@ -82,6 +83,7 @@ describe('getLayerMetaInfo', () => {
       getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(),
       isTextBasedLanguage: jest.fn(() => false),
+      hasDefaultTimeField: jest.fn(() => true),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     expect(
@@ -101,6 +103,7 @@ describe('getLayerMetaInfo', () => {
       getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(() => ({ error: 'filters error' })),
       isTextBasedLanguage: jest.fn(() => false),
+      hasDefaultTimeField: jest.fn(() => true),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     expect(
@@ -128,6 +131,7 @@ describe('getLayerMetaInfo', () => {
       getMaxPossibleNumValues: jest.fn(),
       getFilters: jest.fn(() => ({ error: 'filters error' })),
       isTextBasedLanguage: jest.fn(() => false),
+      hasDefaultTimeField: jest.fn(() => true),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     // both capabilities should be enabled to enable discover
@@ -180,6 +184,7 @@ describe('getLayerMetaInfo', () => {
         },
         disabled: { kuery: [], lucene: [] },
       })),
+      hasDefaultTimeField: jest.fn(() => true),
     };
     mockDatasource.getPublicAPI.mockReturnValue(updatedPublicAPI);
     const { error, meta } = getLayerMetaInfo(

@@ -31,10 +31,11 @@ import type { Sort } from './sort';
 import { getDefaultControlColumn } from './control_columns';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
-import { TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
+import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/components/user_privileges', () => {
@@ -124,18 +125,12 @@ jest.mock(
       children({ isVisible: true })
 );
 
-jest.mock('../../../../common/lib/helpers/scheduler', () => ({
-  requestIdleCallbackViaScheduler: (callback: () => void, opts?: unknown) => {
-    callback();
-  },
-  maxDelay: () => 3000,
-}));
-
 jest.mock('../../fields_browser/create_field_button', () => ({
   useCreateFieldButton: () => <></>,
 }));
 
-describe('Body', () => {
+// SKIP: https://github.com/elastic/kibana/issues/143718
+describe.skip('Body', () => {
   const mount = useMountAppended();
   const mockRefetch = jest.fn();
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
@@ -245,7 +240,7 @@ describe('Body', () => {
       addaNoteToEvent(wrapper, 'hello world');
 
       expect(mockDispatch).toHaveBeenNthCalledWith(
-        2,
+        3,
         expect.objectContaining({
           payload: {
             eventId: '1',
@@ -260,7 +255,7 @@ describe('Body', () => {
         })
       );
       expect(mockDispatch).toHaveBeenNthCalledWith(
-        3,
+        4,
         timelineActions.pinEvent({
           eventId: '1',
           id: 'timeline-test',
@@ -276,8 +271,8 @@ describe('Body', () => {
           ...mockGlobalState.timeline,
           timelineById: {
             ...mockGlobalState.timeline.timelineById,
-            'timeline-test': {
-              ...mockGlobalState.timeline.timelineById.test,
+            [TimelineId.test]: {
+              ...mockGlobalState.timeline.timelineById[TimelineId.test],
               id: 'timeline-test',
               pinnedEventIds: { 1: true }, // we should NOT dispatch a pin event, because it's already pinned
             },
@@ -285,7 +280,13 @@ describe('Body', () => {
         },
       };
 
-      const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const store = createStore(
+        state,
+        SUB_PLUGINS_REDUCER,
+        { dataTable: tGridReducer },
+        kibanaObservable,
+        storage
+      );
 
       const Proxy = (proxyProps: Props) => (
         <TestProviders store={store}>
@@ -335,9 +336,10 @@ describe('Body', () => {
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
+      expect(mockDispatch).toBeCalledTimes(2);
+      expect(mockDispatch.mock.calls[1][0]).toEqual({
         payload: {
+          id: 'timeline-test',
           panelView: 'eventDetail',
           params: {
             eventId: '1',
@@ -345,9 +347,8 @@ describe('Body', () => {
             refetch: mockRefetch,
           },
           tabType: 'query',
-          timelineId: 'timeline-test',
         },
-        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
 
@@ -360,9 +361,10 @@ describe('Body', () => {
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
+      expect(mockDispatch).toBeCalledTimes(2);
+      expect(mockDispatch.mock.calls[1][0]).toEqual({
         payload: {
+          id: 'timeline-test',
           panelView: 'eventDetail',
           params: {
             eventId: '1',
@@ -370,9 +372,8 @@ describe('Body', () => {
             refetch: mockRefetch,
           },
           tabType: 'pinned',
-          timelineId: 'timeline-test',
         },
-        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
 
@@ -385,9 +386,10 @@ describe('Body', () => {
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
+      expect(mockDispatch).toBeCalledTimes(2);
+      expect(mockDispatch.mock.calls[1][0]).toEqual({
         payload: {
+          id: 'timeline-test',
           panelView: 'eventDetail',
           params: {
             eventId: '1',
@@ -395,9 +397,8 @@ describe('Body', () => {
             refetch: mockRefetch,
           },
           tabType: 'notes',
-          timelineId: 'timeline-test',
         },
-        type: 'x-pack/timelines/t-grid/TOGGLE_DETAIL_PANEL',
+        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
   });
