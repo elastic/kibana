@@ -51,7 +51,6 @@ RUNTIME_DEPS = [
   "//packages/core/elasticsearch/core-elasticsearch-server-internal",
   "//packages/core/node/core-node-server",
   "//packages/core/saved-objects/core-saved-objects-base-server-internal",
-
   # test dependencies
   "@npm//mock-fs",
   "//packages/kbn-config-mocks",
