@@ -27,7 +27,7 @@ import React, { useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { buildStateSubscribe } from '../hooks/utiles/build_state_subscribe';
 import { loadDataViewBySavedSearch } from '../load_data_view_by_saved_search';
-import { addLog } from '../../../utils/addLog';
+import { addLog } from '../../../utils/add_log';
 import {
   InternalStateContainer,
   getInternalStateContainer,

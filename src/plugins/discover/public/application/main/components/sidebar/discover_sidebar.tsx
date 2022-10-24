@@ -29,7 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import { triggerVisualizeActionsTextBasedLanguages } from '@kbn/unified-field-list-plugin/public';
-import { addLog } from '../../../../utils/addLog';
+import { addLog } from '../../../../utils/add_log';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { DiscoverStateContainer } from '../../services/discover_state';

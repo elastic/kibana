@@ -12,7 +12,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { differenceWith, isEqual, toPairs } from 'lodash';
 import { updateSavedSearch } from '../utils/update_saved_search';
-import { addLog } from '../../../utils/addLog';
+import { addLog } from '../../../utils/add_log';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { AppState, DiscoverAppStateContainer } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';

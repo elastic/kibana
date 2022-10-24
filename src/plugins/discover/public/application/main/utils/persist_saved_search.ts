@@ -9,7 +9,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { SavedSearch, saveSavedSearch } from '@kbn/saved-search-plugin/public';
 import { updateSavedSearch } from './update_saved_search';
-import { addLog } from '../../../utils/addLog';
+import { addLog } from '../../../utils/add_log';
 import { AppState } from '../services/discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 

@@ -9,7 +9,7 @@ import { differenceWith, isEqual, toPairs } from 'lodash';
 import { SavedSearchContainer } from '../../services/discover_saved_search_container';
 import { AppState, DiscoverAppStateContainer } from '../../services/discover_app_state_container';
 import { DiscoverServices } from '../../../../build_services';
-import { addLog } from '../../../../utils/addLog';
+import { addLog } from '../../../../utils/add_log';
 import { loadDataView, resolveDataView } from '../../utils/resolve_data_view';
 import { FetchStatus } from '../../../types';
 import { DataStateContainer } from '../../services/discover_data_state_container';

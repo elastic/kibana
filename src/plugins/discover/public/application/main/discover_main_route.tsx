@@ -14,7 +14,7 @@ import {
   AnalyticsNoDataPage,
   AnalyticsNoDataPageKibanaProvider,
 } from '@kbn/shared-ux-page-analytics-no-data';
-import { addLog } from '../../utils/addLog';
+import { addLog } from '../../utils/add_log';
 import { DiscoverMainProvider } from './services/discover_state_react';
 import { useSingleton } from './hooks/use_singleton';
 import { DiscoverStateContainer, getDiscoverStateContainer } from './services/discover_state';

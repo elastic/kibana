@@ -27,7 +27,7 @@ import { AppStateUrl, setState } from './discover_state';
 import { DiscoverServices } from '../../../build_services';
 import { VIEW_MODE } from '../../../components/view_mode_toggle';
 import { getValidFilters } from '../../../utils/get_valid_filters';
-import { addLog } from '../../../utils/addLog';
+import { addLog } from '../../../utils/add_log';
 
 export const APP_STATE_URL_KEY = '_a';
 

@@ -15,7 +15,7 @@ import type {
 } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
-import { addLog } from './addLog';
+import { addLog } from './add_log';
 import { AppState } from '../application/main/services/discover_app_state_container';
 import { getSortForSearchSource } from './sorting';
 import {

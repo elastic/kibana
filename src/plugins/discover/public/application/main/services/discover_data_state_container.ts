@@ -11,7 +11,7 @@ import { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { addLog } from '../../../utils/addLog';
+import { addLog } from '../../../utils/add_log';
 import { DataTableRecord } from '../../../types';
 import { AppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';

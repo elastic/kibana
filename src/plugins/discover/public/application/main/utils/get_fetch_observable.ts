@@ -9,7 +9,7 @@ import { merge } from 'rxjs';
 import { debounceTime, filter, tap } from 'rxjs/operators';
 import type { AutoRefreshDoneFn, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataMain$, DataRefetch$ } from '../services/discover_data_state_container';
-import { addLog } from '../../../utils/addLog';
+import { addLog } from '../../../utils/add_log';
 import { FetchStatus } from '../../types';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 
