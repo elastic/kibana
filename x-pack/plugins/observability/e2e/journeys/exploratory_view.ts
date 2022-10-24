@@ -49,7 +49,7 @@ journey('Exploratory view', async ({ page, params }) => {
     await page.click('[aria-label="Toggle series information"] >> text=Page views', TIMEOUT_60_SEC);
     await page.click('[aria-label="Edit series"]', TIMEOUT_60_SEC);
     await page.click('button:has-text("No breakdown")');
-    await page.click('button[role="option"]:has-text("Operating system")');
+    await page.click('button[role="option"]:has-text("Operating system")', TIMEOUT_60_SEC);
     await page.click('button:has-text("Apply changes")');
 
     await page.click('text=Chrome OS');
