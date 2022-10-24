@@ -12,10 +12,10 @@ import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
-import { GuidedOnboardingTourStep } from '../../../../../common/components/guided_onboarding/tour_step';
+import { GuidedOnboardingTourStep } from '../../../../../common/components/guided_onboarding_tour/tour_step';
 import { isDetectionsAlertsTable } from '../../../../../common/components/top_n/helpers';
-import { useTourContext } from '../../../../../common/components/guided_onboarding';
-import { SecurityStepId } from '../../../../../common/components/guided_onboarding/tour_config';
+import { useTourContext } from '../../../../../common/components/guided_onboarding_tour';
+import { SecurityStepId } from '../../../../../common/components/guided_onboarding_tour/tour_config';
 import { getScopedActions, isTimelineScope } from '../../../../../helpers';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { eventHasNotes, getEventType, getPinOnClick } from '../helpers';

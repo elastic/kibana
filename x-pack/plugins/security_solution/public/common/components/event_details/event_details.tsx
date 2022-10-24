@@ -20,9 +20,9 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
-import { GuidedOnboardingTourStep } from '../guided_onboarding/tour_step';
+import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
 import { isDetectionsAlertsTable } from '../top_n/helpers';
-import { getTourAnchor, SecurityStepId } from '../guided_onboarding/tour_config';
+import { getTourAnchor, SecurityStepId } from '../guided_onboarding_tour/tour_config';
 import type { AlertRawEventData } from './osquery_tab';
 import { useOsqueryTab } from './osquery_tab';
 import { EventFieldsBrowser } from './event_fields_browser';
