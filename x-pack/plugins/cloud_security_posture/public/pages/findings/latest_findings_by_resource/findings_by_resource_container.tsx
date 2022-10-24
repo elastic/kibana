@@ -31,7 +31,7 @@ import { findingsNavigation } from '../../../common/navigation/constants';
 import { ResourceFindings } from './resource_findings/resource_findings_container';
 import { ErrorCallout } from '../layout/error_callout';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
-import { LOCAL_STORAGE_PAGINATION_FINDINGS_BY_RESOURCE_KEY } from '../../../../common/constants';
+import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_BY_RESOURCE_KEY } from '../../../../common/constants';
 
 const getDefaultQuery = ({
   query,
@@ -62,7 +62,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
   const [pageSizes, setPageSize] = useLocalStorage(
-    LOCAL_STORAGE_PAGINATION_FINDINGS_BY_RESOURCE_KEY,
+    LOCAL_STORAGE_PAGE_SIZE_FINDINGS_BY_RESOURCE_KEY,
     urlQuery.pageSize
   );
 
@@ -79,7 +79,10 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
    * Page ES query result
    */
   const findingsGroupByResource = useFindingsByResource({
-    ...getPaginationQuery({ pageIndex: urlQuery.pageIndex, pageSize: pageSizes }),
+    ...getPaginationQuery({
+      pageIndex: urlQuery.pageIndex,
+      pageSize: pageSizes || urlQuery.pageSize,
+    }),
     sortDirection: urlQuery.sortDirection,
     query: baseEsQuery.query,
     enabled: !baseEsQuery.error,
@@ -154,7 +157,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
             loading={findingsGroupByResource.isFetching}
             items={findingsGroupByResource.data?.page || []}
             pagination={getPaginationTableParams({
-              pageSize: pageSizes,
+              pageSize: pageSizes || urlQuery.pageSize,
               pageIndex: urlQuery.pageIndex,
               totalItemCount: findingsGroupByResource.data?.total || 0,
             })}

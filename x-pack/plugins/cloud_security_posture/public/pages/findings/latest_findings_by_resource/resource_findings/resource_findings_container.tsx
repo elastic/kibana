@@ -38,7 +38,7 @@ import { ResourceFindingsTable } from './resource_findings_table';
 import { FindingsSearchBar } from '../../layout/findings_search_bar';
 import { ErrorCallout } from '../../layout/error_callout';
 import { FindingsDistributionBar } from '../../layout/findings_distribution_bar';
-import { LOCAL_STORAGE_PAGINATION_RESOURCE_FINDINGS_KEY } from '../../../../../common/constants';
+import { LOCAL_STORAGE_PAGE_SIZE_RESOURCE_FINDINGS_KEY } from '../../../../../common/constants';
 
 const getDefaultQuery = ({
   query,
@@ -93,7 +93,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
   const [pageSizes, setPageSize] = useLocalStorage(
-    LOCAL_STORAGE_PAGINATION_RESOURCE_FINDINGS_KEY,
+    LOCAL_STORAGE_PAGE_SIZE_RESOURCE_FINDINGS_KEY,
     urlQuery.pageSize
   );
 
@@ -111,7 +111,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
    */
   const resourceFindings = useResourceFindings({
     ...getPaginationQuery({
-      pageSize: pageSizes,
+      pageSize: pageSizes || urlQuery.pageSize,
       pageIndex: urlQuery.pageIndex,
     }),
     sort: urlQuery.sort,
@@ -201,7 +201,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
             loading={resourceFindings.isFetching}
             items={resourceFindings.data?.page || []}
             pagination={getPaginationTableParams({
-              pageSize: pageSizes,
+              pageSize: pageSizes || urlQuery.pageSize,
               pageIndex: urlQuery.pageIndex,
               totalItemCount: resourceFindings.data?.total || 0,
             })}

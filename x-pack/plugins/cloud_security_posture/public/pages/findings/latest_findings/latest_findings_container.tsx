@@ -32,7 +32,7 @@ import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import { ErrorCallout } from '../layout/error_callout';
 import { getLimitProperties } from '../utils/get_limit_properties';
-import { LOCAL_STORAGE_LATEST_FINDINGS_KEY } from '../../../../common/constants';
+import { LOCAL_STORAGE_PAGE_SIZE_LATEST_FINDINGS_KEY } from '../../../../common/constants';
 
 export const getDefaultQuery = ({
   query,
@@ -51,7 +51,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
   const [pageSizes, setPageSize] = useLocalStorage(
-    LOCAL_STORAGE_LATEST_FINDINGS_KEY,
+    LOCAL_STORAGE_PAGE_SIZE_LATEST_FINDINGS_KEY,
     urlQuery.pageSize
   );
   /**
@@ -67,7 +67,10 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
    * Page ES query result
    */
   const findingsGroupByNone = useLatestFindings({
-    ...getPaginationQuery({ pageIndex: urlQuery.pageIndex, pageSize: pageSizes }),
+    ...getPaginationQuery({
+      pageIndex: urlQuery.pageIndex,
+      pageSize: pageSizes || urlQuery.pageSize,
+    }),
     query: baseEsQuery.query,
     sort: urlQuery.sort,
     enabled: !baseEsQuery.error,
@@ -142,7 +145,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
             loading={findingsGroupByNone.isFetching}
             items={findingsGroupByNone.data?.page || []}
             pagination={getPaginationTableParams({
-              pageSize: pageSizes,
+              pageSize: pageSizes || urlQuery.pageSize,
               pageIndex: urlQuery.pageIndex,
               totalItemCount: limitedTotalItemCount,
             })}
