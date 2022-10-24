@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { memo, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useSendGetFileRequest } from '../../hooks/endpoint/use_send_get_file_request';
 import type { ResponseActionGetFileRequestBody } from '../../../../common/endpoint/schema/actions';
 import { useConsoleActionSubmitter } from './hooks/use_console_action_submitter';
 import type { ActionRequestComponentProps } from './types';
+import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
 
 export const GetFileActionResult = memo<
   ActionRequestComponentProps<{
@@ -33,7 +35,7 @@ export const GetFileActionResult = memo<
       : undefined;
   }, [command.args.args, command.commandDefinition?.meta?.endpointId]);
 
-  return useConsoleActionSubmitter<ResponseActionGetFileRequestBody>({
+  const { result, actionDetails } = useConsoleActionSubmitter<ResponseActionGetFileRequestBody>({
     ResultComponent,
     setStore,
     store,
@@ -42,8 +44,26 @@ export const GetFileActionResult = memo<
     actionCreator,
     actionRequestBody,
     dataTestSubj: 'getFile',
-  }).result;
+    pendingMessage: i18n.translate('xpack.securitySolution.getFileAction.pendingMessage', {
+      defaultMessage: 'Retrieving the file from host.',
+    }),
+  });
 
-  // FIXME:PT implement success UI output once we have download API
+  if (actionDetails?.isCompleted && actionDetails.wasSuccessful) {
+    return (
+      <ResultComponent
+        showAs="success"
+        data-test-subj="getFileSuccess"
+        title={i18n.translate(
+          'xpack.securitySolution.endpointResponseActions.getFileAction.successTitle',
+          { defaultMessage: 'File retrieved from the host.' }
+        )}
+      >
+        <ResponseActionFileDownloadLink action={actionDetails} />
+      </ResultComponent>
+    );
+  }
+
+  return result;
 });
 GetFileActionResult.displayName = 'GetFileActionResult';

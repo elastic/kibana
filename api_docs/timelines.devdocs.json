@@ -3222,7 +3222,7 @@
           },
           "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; readonly filters?: ",
+          " | undefined; type?: string | undefined; })[]; readonly title?: string | undefined; readonly filters?: ",
           "Filter",
           "[] | undefined; readonly dataViewId: string | null; readonly sort: ",
           "SortColumnTable",
