@@ -44,7 +44,7 @@ export function LayerSettingsPanel({
               label={i18n.translate('xpack.lens.randomSampling.experimentalLabel', {
                 defaultMessage: 'Technical preview',
               })}
-              color="subdued"
+              color="hollow"
               iconType="beaker"
               size="s"
             />
