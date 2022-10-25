@@ -27,6 +27,8 @@ const savedObjectsClient = savedObjectsRepositoryMock.create();
 const serializer = savedObjectsServiceMock.createSerializer();
 const createTaskCounter = new CreateTaskCounter();
 
+const randomId = () => `id-${_.random(1, 20)}`;
+
 beforeEach(() => jest.resetAllMocks());
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
@@ -553,6 +555,41 @@ describe('TaskStore', () => {
     });
   });
 
+  describe('bulkRemove', () => {
+    let store: TaskStore;
+
+    const tasksIdsToDelete = [randomId(), randomId()];
+
+    beforeAll(() => {
+      store = new TaskStore({
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+      });
+    });
+
+    test('removes the tasks with the specified ids', async () => {
+      const result = await store.bulkRemove(tasksIdsToDelete);
+      expect(result).toBeUndefined();
+      expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith([
+        { type: 'task', id: tasksIdsToDelete[0] },
+        { type: 'task', id: tasksIdsToDelete[1] },
+      ]);
+    });
+
+    test('pushes error from saved objects client to errors$', async () => {
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      savedObjectsClient.bulkDelete.mockRejectedValue(new Error('Failure'));
+      await expect(store.bulkRemove(tasksIdsToDelete)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Failure"`
+      );
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+  });
+
   describe('get', () => {
     let store: TaskStore;
 
@@ -847,5 +884,3 @@ describe('TaskStore', () => {
     });
   });
 });
-
-const randomId = () => `id-${_.random(1, 20)}`;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { useBehaviorSubject } from '../../use_behavior_subject';
@@ -13,22 +13,33 @@ import { useUploadState } from '../context';
 import { i18nTexts } from '../i18n_texts';
 
 interface Props {
+  compressed?: boolean;
   onClick: () => void;
 }
 
-export const CancelButton: FunctionComponent<Props> = ({ onClick }) => {
+export const CancelButton: FunctionComponent<Props> = ({ onClick, compressed }) => {
   const uploadState = useUploadState();
   const uploading = useBehaviorSubject(uploadState.uploading$);
-  return (
-    <EuiButtonEmpty
+  const disabled = !uploading;
+  return compressed ? (
+    <EuiButtonIcon
+      color="danger"
+      data-test-subj="cancelButtonIcon"
+      disabled={disabled}
+      iconType="cross"
+      aria-label={i18nTexts.cancel}
+      onClick={onClick}
+    />
+  ) : (
+    <EuiButton
       key="cancelButton"
       size="s"
       data-test-subj="cancelButton"
-      disabled={!uploading}
+      disabled={disabled}
       onClick={onClick}
       color="danger"
     >
       {i18nTexts.cancel}
-    </EuiButtonEmpty>
+    </EuiButton>
   );
 };
