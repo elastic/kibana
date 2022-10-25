@@ -53,6 +53,15 @@ describe('Indicators', () => {
     esArchiverUnload('threat_intelligence');
   });
 
+  describe('Indicators page loading', () => {
+    it('verify the fleet plugin integrations endpoint exists', () => {
+      cy.request({
+        method: 'GET',
+        url: '/api/fleet/epm/packages',
+      }).should((response) => expect(response.status).to.eq(200));
+    });
+  });
+
   describe('Indicators page basics', () => {
     before(() => {
       cy.visit(THREAT_INTELLIGENCE);

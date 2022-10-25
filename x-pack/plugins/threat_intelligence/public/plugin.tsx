@@ -8,9 +8,9 @@
 import { CoreStart, Plugin } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import React, { Suspense, VFC } from 'react';
+import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from './hooks';
+import { KibanaContextProvider } from './hooks/use_kibana';
 import {
   SecuritySolutionPluginContext,
   Services,
@@ -20,22 +20,12 @@ import {
 } from './types';
 import { SecuritySolutionContext } from './containers/security_solution_context';
 import { EnterpriseGuard } from './containers/enterprise_guard';
-import { SecuritySolutionPluginTemplateWrapper } from './containers/security_solution_plugin_template_wrapper';
-import { IntegrationsGuard } from './containers/integrations_guard';
 
 interface AppProps {
   securitySolutionContext: SecuritySolutionPluginContext;
 }
 
-const LazyIndicatorsPage = React.lazy(() => import('./modules/indicators/pages/indicators'));
-
-const IndicatorsPage: VFC = () => (
-  <SecuritySolutionPluginTemplateWrapper>
-    <Suspense fallback={<div />}>
-      <LazyIndicatorsPage />
-    </Suspense>
-  </SecuritySolutionPluginTemplateWrapper>
-);
+const LazyIndicatorsPageWrapper = React.lazy(() => import('./containers/indicators_page_wrapper'));
 
 /**
  * This is used here:
@@ -51,9 +41,7 @@ export const createApp =
           <SecuritySolutionContext.Provider value={securitySolutionContext}>
             <KibanaContextProvider services={services}>
               <EnterpriseGuard>
-                <IntegrationsGuard>
-                  <IndicatorsPage />
-                </IntegrationsGuard>
+                <LazyIndicatorsPageWrapper />
               </EnterpriseGuard>
             </KibanaContextProvider>
           </SecuritySolutionContext.Provider>
