@@ -183,6 +183,9 @@ export interface DiscoverGridProps {
    * Filters applied by saved search embeddable
    */
   filters?: Filter[];
+   /**
+    * Saved search id used for links to single doc and surrounding docs in the flyout
+    */
   savedSearchId?: string;
 }
 
