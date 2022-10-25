@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
-import { useFormContext } from '../../common/shared_imports';
+import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import { Title } from './title';
 import { Description, fieldName as descriptionFieldName } from './description';

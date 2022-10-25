@@ -49,6 +49,7 @@ describe('createLifecycleExecutor', () => {
       createDefaultAlertExecutorOptions({
         params: {},
         state: { wrapped: initialRuleState, trackedAlerts: {} },
+        logger,
       })
     );
 
@@ -83,6 +84,7 @@ describe('createLifecycleExecutor', () => {
       createDefaultAlertExecutorOptions({
         params: {},
         state: { wrapped: initialRuleState, trackedAlerts: {} },
+        logger,
       })
     );
 
@@ -198,6 +200,7 @@ describe('createLifecycleExecutor', () => {
             },
           },
         },
+        logger,
       })
     );
 
@@ -313,6 +316,7 @@ describe('createLifecycleExecutor', () => {
             },
           },
         },
+        logger,
       })
     );
 
@@ -372,6 +376,7 @@ describe('createLifecycleExecutor', () => {
         params: {},
         state: { wrapped: initialRuleState, trackedAlerts: {} },
         shouldWriteAlerts: false,
+        logger,
       })
     );
 
@@ -401,6 +406,7 @@ describe('createLifecycleExecutor', () => {
           params: {},
           state: { wrapped: initialRuleState, trackedAlerts: {} },
           shouldWriteAlerts: false,
+          logger,
         })
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"error initializing!"`);

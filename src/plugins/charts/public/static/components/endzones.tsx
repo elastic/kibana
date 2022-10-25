@@ -16,8 +16,9 @@ import {
   RectAnnotationStyle,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { euiLightVars as lightEuiTheme, euiDarkVars as darkEuiTheme } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 
 interface EndzonesProps {
   isDarkMode: boolean;
@@ -141,19 +142,22 @@ const partialDataText = i18n.translate('charts.partialData.bucketTooltipText', {
     'The selected time range does not include this entire bucket. It might contain partial data.',
 });
 
-const Prompt = () => (
-  <EuiFlexGroup
-    alignItems="center"
-    className="dscHistogram__header--partial"
-    responsive={false}
-    gutterSize="xs"
-  >
-    <EuiFlexItem grow={false}>
-      <EuiIcon type="iInCircle" />
-    </EuiFlexItem>
-    <EuiFlexItem>{partialDataText}</EuiFlexItem>
-  </EuiFlexGroup>
-);
+const Prompt = () => {
+  const { euiTheme } = useEuiTheme();
+  const headerPartialCss = css`
+    font-weight: ${euiTheme.font.weight.regular};
+    min-width: ${euiTheme.base * 12};
+  `;
+
+  return (
+    <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs" css={headerPartialCss}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="iInCircle" />
+      </EuiFlexItem>
+      <EuiFlexItem>{partialDataText}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export const renderEndzoneTooltip =
   (

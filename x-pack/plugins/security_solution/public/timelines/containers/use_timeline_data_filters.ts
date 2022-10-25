@@ -8,7 +8,6 @@
 import { useMemo } from 'react';
 
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
-import { TimelineId } from '../../../common/types/timeline';
 import {
   isLoadingSelector,
   startSelector,
@@ -18,12 +17,11 @@ import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { sourcererSelectors } from '../../common/store';
 
-export function useTimelineDataFilters(timelineId: string | undefined) {
+export function useTimelineDataFilters(isActiveTimelines: boolean) {
   const getStartSelector = useMemo(() => startSelector(), []);
   const getEndSelector = useMemo(() => endSelector(), []);
   const getIsLoadingSelector = useMemo(() => isLoadingSelector(), []);
-  const isActive = useMemo(() => timelineId === TimelineId.active, [timelineId]);
-  const isInTimeline = timelineId === TimelineId.active;
+  const isActive = useMemo(() => isActiveTimelines === true, [isActiveTimelines]);
 
   const shouldUpdate = useDeepEqualSelector((state) => {
     if (isActive) {
@@ -55,8 +53,8 @@ export function useTimelineDataFilters(timelineId: string | undefined) {
   const { selectedPatterns: timelinePatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
   const selectedPatterns = useMemo(
-    () => (isInTimeline ? timelinePatterns : defaultDataView.patternList),
-    [defaultDataView.patternList, isInTimeline, timelinePatterns]
+    () => (isActiveTimelines ? timelinePatterns : defaultDataView.patternList),
+    [defaultDataView.patternList, isActiveTimelines, timelinePatterns]
   );
 
   return {
