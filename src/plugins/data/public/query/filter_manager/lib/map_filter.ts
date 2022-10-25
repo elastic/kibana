@@ -9,6 +9,7 @@
 import { reduceRight } from 'lodash';
 
 import { Filter } from '@kbn/es-query';
+import { mapCombined } from './mappers/map_combined';
 import { mapSpatialFilter } from './mappers/map_spatial_filter';
 import { mapMatchAll } from './mappers/map_match_all';
 import { mapPhrase } from './mappers/map_phrase';
@@ -37,6 +38,7 @@ export function mapFilter(filter: Filter) {
   // that either handles the mapping operation or not
   // and add it here. ProTip: These are executed in order listed
   const mappers = [
+    mapCombined,
     mapSpatialFilter,
     mapMatchAll,
     mapRange,
