@@ -23,6 +23,7 @@ import {
   latencyDistributionChartTypeRt,
   LatencyDistributionChartType,
 } from '../../../common/latency_distribution_chart_types';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const latencyOverallTransactionDistributionRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/latency/overall_distribution/transactions',
@@ -54,7 +55,10 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<import('./types').OverallLatencyDistributionResponse> => {
-    const setup = await setupRequest(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
 
     const {
       environment,
@@ -75,7 +79,8 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
     const searchAggregatedTransactions =
       chartType === LatencyDistributionChartType.transactionLatency
         ? await getSearchTransactionsEvents({
-            ...setup,
+            config: setup.config,
+            apmEventClient,
             kuery,
             start,
             end,
@@ -83,7 +88,7 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
         : false;
 
     return getOverallLatencyDistribution({
-      setup,
+      apmEventClient,
       chartType,
       environment,
       kuery,
