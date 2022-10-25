@@ -101,7 +101,6 @@ export class ElasticV3BrowserShipper implements IShipper {
       );
     }
 
-
     events.forEach((event) => {
       this.internalQueue$.next(event);
     });
