@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// This file is skipped
+// @storybook/addon-storyshots is not supported in Jest 27+ https://github.com/storybookjs/storybook/issues/15916
+
 import fs from 'fs';
 import { ReactChildren, createElement } from 'react';
 import path from 'path';

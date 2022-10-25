@@ -62,12 +62,12 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
-  "@npm//jest-mock",
   "//packages/kbn-storybook:npm_module_types",
   "//packages/kbn-ambient-ui-types:npm_module_types",
   "//packages/kbn-ambient-storybook-types:npm_module_types",
   "@npm//@types/node",
   "@npm//@types/jest",
+  "@npm//jest-mock",
   "@npm//@storybook/react",
   "@npm//@storybook/addon-actions",
 ]

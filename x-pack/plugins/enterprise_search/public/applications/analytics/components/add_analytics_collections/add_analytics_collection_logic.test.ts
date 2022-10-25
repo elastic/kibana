@@ -97,7 +97,7 @@ describe('addAnalyticsCollectionLogic', () => {
   describe('listeners', () => {
     describe('onApiSuccess', () => {
       it('should flash a success toast and navigate to collection view', async () => {
-        jest.useFakeTimers();
+        jest.useFakeTimers('legacy');
 
         const { navigateToUrl } = mockKibanaValues;
 

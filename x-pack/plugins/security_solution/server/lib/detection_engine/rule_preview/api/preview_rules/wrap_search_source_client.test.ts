@@ -25,7 +25,7 @@ const createSearchSourceClientMock = () => {
 
 describe('wrapSearchSourceClient', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   afterAll(() => {

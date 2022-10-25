@@ -255,7 +255,7 @@ describe('EngineLogic', () => {
     });
 
     describe('pollEmptyEngine', () => {
-      beforeEach(() => jest.useFakeTimers());
+      beforeEach(() => jest.useFakeTimers('legacy'));
       afterEach(() => jest.clearAllTimers());
       afterAll(() => jest.useRealTimers());
 

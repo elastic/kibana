@@ -152,7 +152,7 @@ describe('Background Search Session Management Table', () => {
   // FLAKY: https://github.com/elastic/kibana/issues/88928
   describe.skip('fetching sessions data', () => {
     test('re-fetches data', async () => {
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
       sessionsClient.find = jest.fn();
       mockConfig = {
         ...mockConfig,

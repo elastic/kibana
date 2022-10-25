@@ -69,10 +69,10 @@ describe('Kibana deprecations - Deprecations table', () => {
     const { find } = testBed;
 
     expect(find('criticalDeprecationsCount').text()).toContain(
-      mockedCriticalKibanaDeprecations.length
+      String(mockedCriticalKibanaDeprecations.length)
     );
     expect(find('warningDeprecationsCount').text()).toContain(
-      mockedWarningKibanaDeprecations.length
+      String(mockedWarningKibanaDeprecations.length)
     );
   });
 

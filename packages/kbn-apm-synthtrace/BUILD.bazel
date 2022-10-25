@@ -61,6 +61,7 @@ TYPES_DEPS = [
   "@npm//p-limit",
   "@npm//@types/node-fetch",
   "@npm//@types/semver",
+  "@npm//@types/yargs",
 ]
 
 jsts_transpiler(
