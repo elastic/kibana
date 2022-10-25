@@ -19,12 +19,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const usageCollection = getService('usageCollection');
+  const renderable = getService('renderable');
   const queryBar = getService('queryBar');
   const retry = getService('retry');
 
   describe('smoke telemetry tests', function () {
-    let initialEvents: UiCounterEvent[] = [];
-    let afterRefreshEvents: UiCounterEvent[] = [];
+    let uiCounterEvents: UiCounterEvent[] = [];
 
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -39,15 +39,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.dashboard.waitForRenderComplete();
 
-        initialEvents = await usageCollection.getUICounterEvents();
+        uiCounterEvents = await usageCollection.getUICounterEvents();
 
-        await queryBar.clickQuerySubmitButton();
-        await PageObjects.dashboard.waitForRenderComplete();
-
-        afterRefreshEvents = await usageCollection.getUICounterEvents();
-
-        expect(initialEvents.length).to.be.greaterThan(0);
-        expect(afterRefreshEvents.length).to.be.greaterThan(0);
+        expect(uiCounterEvents.length).to.be.greaterThan(0);
       });
     });
 
@@ -59,27 +53,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     const checkTelemetry = (eventName: string) => {
-      const initialEvent = initialEvents.find((e) => e.eventName === eventName);
-      const afterRefreshEvent = afterRefreshEvents.find((e) => e.eventName === eventName);
+      const initialEvent = uiCounterEvents.find((e) => e.eventName === eventName);
 
       expect(initialEvent).to.be.ok();
-      expect(afterRefreshEvent).to.be.ok();
-      expect(afterRefreshEvent!.total).to.be(initialEvent!.total + 1);
     };
 
     ['legacy_metric', 'donut', 'timelion', 'area_stacked', 'table', 'heatmap'].forEach((vis) => {
-      it(`should trigger render event for "agg based" ${vis} visualization once`, async () =>
+      it(`should trigger render event for "agg based" ${vis} visualization`, async () =>
         checkTelemetry(`render_agg_based_${vis}`));
     });
 
     ['vega', 'tsvb_top_n', 'lens_vis_dashboard'].forEach((vis) => {
-      it(`should trigger render event for ${vis} visualization once`, async () =>
+      it(`should trigger render event for ${vis} visualization`, async () =>
         checkTelemetry(`render_${vis}`));
     });
 
     ['vertical_bar_stacked', 'dimension_date_histogram', 'dimension_count'].forEach((i) => {
       it(`should correctly trigger "render_lens${i}" lens event`, async () =>
         checkTelemetry(`render_lens_${i}`));
+    });
+
+    describe('should render visualization once', async () => {
+      let initialRenderCountMap: Record<string, number> = {};
+      let afterRefreshRenderCountMap: Record<string, number> = {};
+
+      before(async function () {
+        const sharedItemsCount = Number(await PageObjects.dashboard.getSharedItemsCount());
+        initialRenderCountMap = await renderable.getRenderCount(sharedItemsCount);
+
+        await queryBar.clickQuerySubmitButton();
+        await PageObjects.dashboard.waitForRenderComplete();
+
+        afterRefreshRenderCountMap = await renderable.getRenderCount(sharedItemsCount);
+      });
+
+      ['Lens', 'TSVB', 'Vega', 'Table', 'Timelion', 'Pie', 'Metric', 'Heatmap', 'Area'].forEach(
+        (key) => {
+          it(`should correctly render ${key} visualization once`, async () =>
+            expect(afterRefreshRenderCountMap[key]).to.be(initialRenderCountMap[key] + 1));
+        }
+      );
     });
   });
 }
