@@ -121,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           return {
             statusCode: response.status,
-            reason: response.headers.get('kbn-session-error-reason'), // TODO: Figure out how not to hardcode this header name
+            reason: response.headers.get('kbn-session-error-reason'),
           };
 
           async function getKibanaFetch() {

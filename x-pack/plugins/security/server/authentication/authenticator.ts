@@ -420,7 +420,6 @@ export class Authenticator {
 
         if (requestIsRedirectable) {
           if (
-            // TODO: Should this just be `instanceof SessionError`?
             existingSession.error instanceof SessionExpiredError &&
             authenticationResult.redirectURL?.startsWith(
               `${this.options.basePath.get(request)}/login?`
@@ -445,7 +444,6 @@ export class Authenticator {
             sessionUpdateResult ? sessionUpdateResult.value : null
           );
         } else {
-          // TODO: Should this just be `instanceof SessionError`?
           if (existingSession.error instanceof SessionExpiredError) {
             // TODO: Make this less verbose! Possible alternatives:
             // 1. Make authResponseHeaders editable
