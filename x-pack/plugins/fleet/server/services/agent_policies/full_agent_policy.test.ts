@@ -39,7 +39,7 @@ function mockAgentPolicy(data: Partial<AgentPolicy>) {
 
 jest.mock('../fleet_server_host', () => {
   return {
-    getFleetServerHostsForAgentPolicy: () => {
+    getFleetServerHostsForAgentPolicy: async () => {
       return {
         id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
         is_default: true,

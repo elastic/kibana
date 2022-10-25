@@ -20,6 +20,7 @@ import { getSourceUriForAgentPolicy } from '../../routes/agent/source_uri_utils'
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 import { getFleetServerHostsForAgentPolicy } from '../fleet_server_host';
+import { appContextService } from '../app_context';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -184,11 +185,19 @@ export async function getFullAgentPolicy(
 
   // only add fleet server hosts if not in standalone
   if (!standalone) {
-    const fleetServerHost = await getFleetServerHostsForAgentPolicy(soClient, agentPolicy);
+    const fleetServerHost = await getFleetServerHostsForAgentPolicy(soClient, agentPolicy).catch(
+      (err) => {
+        appContextService.getLogger()?.error(err);
 
-    fullAgentPolicy.fleet = {
-      hosts: fleetServerHost.host_urls,
-    };
+        return;
+      }
+    );
+
+    if (fleetServerHost) {
+      fullAgentPolicy.fleet = {
+        hosts: fleetServerHost.host_urls,
+      };
+    }
   }
   return fullAgentPolicy;
 }

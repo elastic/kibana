@@ -182,14 +182,16 @@ export async function getFleetServerHostsForAgentPolicy(
   soClient: SavedObjectsClientContract,
   agentPolicy: AgentPolicy
 ) {
+  if (agentPolicy.fleet_server_host_id) {
+    return getFleetServerHost(soClient, agentPolicy.fleet_server_host_id);
+  }
+
   const defaultFleetServerHost = await getDefaultFleetServerHost(soClient);
   if (!defaultFleetServerHost) {
     throw new Error('Default Fleet Server host is not setup');
   }
-  const fleetServerHostId = agentPolicy.fleet_server_host_id || defaultFleetServerHost.id;
-  const fleetServerHost = await getFleetServerHost(soClient, fleetServerHostId);
 
-  return fleetServerHost;
+  return defaultFleetServerHost;
 }
 
 /**
