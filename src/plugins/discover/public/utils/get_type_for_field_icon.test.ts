@@ -36,4 +36,13 @@ describe('getTypeForFieldIcon', () => {
       } as DataViewField)
     ).toBe('version');
   });
+
+  it('extracts type for meta fields', () => {
+    expect(
+      getTypeForFieldIcon({
+        type: 'string',
+        esTypes: ['_id'],
+      } as DataViewField)
+    ).toBe('string');
+  });
 });

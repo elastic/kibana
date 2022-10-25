@@ -30,11 +30,13 @@ export interface FieldListItem {
   name: DataViewField['name'];
   type?: DataViewField['type'];
   displayName?: DataViewField['displayName'];
+  count?: DataViewField['count'];
 }
 
 export enum FieldsGroupNames {
   SpecialFields = 'SpecialFields',
   SelectedFields = 'SelectedFields',
+  PopularFields = 'PopularFields',
   AvailableFields = 'AvailableFields',
   EmptyFields = 'EmptyFields',
   MetaFields = 'MetaFields',

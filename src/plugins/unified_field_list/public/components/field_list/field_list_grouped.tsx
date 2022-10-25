@@ -7,14 +7,14 @@
  */
 
 import { partition, throttle } from 'lodash';
-import React, { useState, Fragment, useCallback, useMemo } from 'react';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { NoFieldsCallout } from './no_fields_callout';
 import { FieldsAccordion, type FieldsAccordionProps } from './fields_accordion';
 import type { FieldListGroups, FieldListItem } from '../../types';
-import { ExistenceFetchStatus } from '../../types';
+import { ExistenceFetchStatus, FieldsGroupNames } from '../../types';
 import './field_list_grouped.scss';
 
 const PAGINATION_SIZE = 50;
@@ -138,6 +138,19 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                           },
                         }
                       ),
+                    fieldGroups.PopularFields &&
+                      (!fieldGroups.PopularFields?.hideIfEmpty ||
+                        fieldGroups.PopularFields?.fields?.length > 0) &&
+                      i18n.translate(
+                        'unifiedFieldList.fieldListGrouped.fieldSearchForPopularFieldsLiveRegion',
+                        {
+                          defaultMessage:
+                            '{popularFields} empty {popularFields, plural, one {field} other {fields}}.',
+                          values: {
+                            popularFields: fieldGroups.PopularFields?.fields?.length || 0,
+                          },
+                        }
+                      ),
                     fieldGroups.EmptyFields &&
                       (!fieldGroups.EmptyFields?.hideIfEmpty ||
                         fieldGroups.EmptyFields?.fields?.length > 0) &&
@@ -171,16 +184,26 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
             </div>
           </EuiScreenReaderOnly>
         )}
-        <ul>
-          {fieldGroupsToCollapse.flatMap(([, { fields }]) =>
-            fields.map((field, index) => (
-              <Fragment key={field.name}>
-                {renderFieldItem({ field, itemIndex: index, groupIndex: 0, hideDetails: true })}
-              </Fragment>
-            ))
-          )}
-        </ul>
-        <EuiSpacer size="s" />
+        {Boolean(fieldGroupsToCollapse[0]?.[1]?.fields.length) && (
+          <>
+            <ul>
+              {fieldGroupsToCollapse.flatMap(([key, { fields }]) =>
+                fields.map((field, index) => (
+                  <Fragment key={field.name}>
+                    {renderFieldItem({
+                      field,
+                      itemIndex: index,
+                      groupIndex: 0,
+                      groupName: key as FieldsGroupNames,
+                      hideDetails: true,
+                    })}
+                  </Fragment>
+                ))
+              )}
+            </ul>
+            <EuiSpacer size="s" />
+          </>
+        )}
         {fieldGroupsToShow.map(([key, fieldGroup], index) => {
           const hidden = Boolean(fieldGroup.hideIfEmpty) && !fieldGroup.fields.length;
           if (hidden) {
@@ -199,6 +222,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                 isFiltered={fieldGroup.fieldCount !== fieldGroup.fields.length}
                 paginatedFields={paginatedFields[key]}
                 groupIndex={index + 1}
+                groupName={key as FieldsGroupNames}
                 onToggle={(open) => {
                   setAccordionState((s) => ({
                     ...s,

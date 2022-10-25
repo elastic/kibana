@@ -6,90 +6,48 @@
  * Side Public License, v 1.
  */
 
+import { uniqBy } from 'lodash';
 import { DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
-import { FieldFilterState, isFieldFiltered } from './field_filter';
 
-interface GroupedFields {
-  selected: DataViewField[];
-  popular: DataViewField[];
-  unpopular: DataViewField[];
+export function shouldShowField(field: DataViewField, useNewFieldsApi: boolean): boolean {
+  if (field.type === '_source') {
+    return false;
+  }
+  const subTypeMulti = getFieldSubtypeMulti(field?.spec);
+  const isSubfield = useNewFieldsApi && subTypeMulti;
+  return !useNewFieldsApi || !isSubfield;
 }
 
-/**
- * group the fields into selected, popular and unpopular, filter by fieldFilterState
- */
-export function groupFields(
+export function getSelectedFields(
   fields: DataViewField[] | null,
-  columns: string[],
-  popularLimit: number,
-  fieldCounts: Record<string, number> | undefined,
-  fieldFilterState: FieldFilterState,
-  useNewFieldsApi: boolean
-): GroupedFields {
-  const showUnmappedFields = useNewFieldsApi;
-  const result: GroupedFields = {
-    selected: [],
-    popular: [],
-    unpopular: [],
-  };
-  if (!Array.isArray(fields) || !Array.isArray(columns) || typeof fieldCounts !== 'object') {
-    return result;
+  columns: string[]
+): DataViewField[] {
+  let selectedFields: DataViewField[] = [];
+  if (!Array.isArray(fields) || !Array.isArray(columns)) {
+    return [];
   }
 
-  const popular = fields
-    .filter((field) => !columns.includes(field.name) && field.count)
-    .sort((a: DataViewField, b: DataViewField) => (b.count || 0) - (a.count || 0))
-    .map((field) => field.name)
-    .slice(0, popularLimit);
-
-  const compareFn = (a: DataViewField, b: DataViewField) => {
-    if (!a.displayName) {
-      return 0;
-    }
-    return a.displayName.localeCompare(b.displayName || '');
-  };
-  const fieldsSorted = fields.sort(compareFn);
-
-  for (const field of fieldsSorted) {
-    if (!isFieldFiltered(field, fieldFilterState, fieldCounts)) {
-      continue;
-    }
-
-    const subTypeMulti = getFieldSubtypeMulti(field?.spec);
-    const isSubfield = useNewFieldsApi && subTypeMulti;
-    if (columns.includes(field.name)) {
-      result.selected.push(field);
-    } else if (popular.includes(field.name) && field.type !== '_source') {
-      if (!isSubfield) {
-        result.popular.push(field);
-      }
-    } else if (field.type !== '_source') {
-      // do not show unmapped fields unless explicitly specified
-      // do not add subfields to this list
-      if (useNewFieldsApi && (field.type !== 'unknown' || showUnmappedFields) && !isSubfield) {
-        result.unpopular.push(field);
-      } else if (!useNewFieldsApi) {
-        result.unpopular.push(field);
-      }
-    }
-  }
   // add selected columns, that are not part of the data view, to be removable
   for (const column of columns) {
-    const tmpField = {
-      name: column,
-      displayName: column,
-      type: 'unknown_selected',
-    } as DataViewField;
-    if (
-      !result.selected.find((field) => field.name === column) &&
-      isFieldFiltered(tmpField, fieldFilterState, fieldCounts)
-    ) {
-      result.selected.push(tmpField);
-    }
+    const selectedField =
+      fields.find((field) => field.name === column) ||
+      ({
+        name: column,
+        displayName: column,
+        type: 'unknown_selected',
+      } as DataViewField);
+    selectedFields.push(selectedField);
   }
-  result.selected.sort((a, b) => {
+
+  selectedFields = uniqBy(selectedFields, 'name');
+
+  if (selectedFields.length === 1 && selectedFields[0].name === '_source') {
+    return [];
+  }
+
+  selectedFields.sort((a, b) => {
     return columns.indexOf(a.name) - columns.indexOf(b.name);
   });
 
-  return result;
+  return selectedFields;
 }

@@ -59,6 +59,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     ).toStrictEqual([
       'SpecialFields-0',
       'SelectedFields-0',
+      'PopularFields-0',
       'AvailableFields-0',
       'EmptyFields-0',
       'MetaFields-0',
@@ -85,6 +86,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     ).toStrictEqual([
       'SpecialFields-0',
       'SelectedFields-0',
+      'PopularFields-0',
       'AvailableFields-25',
       'EmptyFields-0',
       'MetaFields-3',
@@ -112,6 +114,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     ).toStrictEqual([
       'SpecialFields-0',
       'SelectedFields-0',
+      'PopularFields-0',
       'AvailableFields-2',
       'EmptyFields-0',
       'MetaFields-0',
@@ -139,6 +142,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     ).toStrictEqual([
       'SpecialFields-0',
       'SelectedFields-0',
+      'PopularFields-0',
       'AvailableFields-23',
       'EmptyFields-0',
       'MetaFields-3',
@@ -167,6 +171,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     ).toStrictEqual([
       'SpecialFields-0',
       'SelectedFields-4',
+      'PopularFields-0',
       'AvailableFields-25',
       'EmptyFields-0',
       'MetaFields-3',
@@ -188,7 +193,13 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       Object.keys(fieldGroups!).map(
         (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
       )
-    ).toStrictEqual(['SpecialFields-0', 'SelectedFields-0', 'AvailableFields-28', 'MetaFields-0']);
+    ).toStrictEqual([
+      'SpecialFields-0',
+      'SelectedFields-0',
+      'PopularFields-0',
+      'AvailableFields-28',
+      'MetaFields-0',
+    ]);
   });
 
   it('should work correctly when details are overwritten', async () => {
@@ -248,6 +259,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     ).toStrictEqual([
       'SpecialFields-0',
       'SelectedFields-0',
+      'PopularFields-0',
       'AvailableFields-2',
       'EmptyFields-23',
       'MetaFields-3',
@@ -267,6 +279,14 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       Object.keys(fieldGroups!).map(
         (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
       )
-    ).toStrictEqual(['SpecialFields-0', 'SelectedFields-0', 'AvailableFields-8', 'MetaFields-0']);
+    ).toStrictEqual([
+      'SpecialFields-0',
+      'SelectedFields-0',
+      'PopularFields-0',
+      'AvailableFields-8',
+      'MetaFields-0',
+    ]);
   });
+
+  // TODO: add a test for popular fields
 });

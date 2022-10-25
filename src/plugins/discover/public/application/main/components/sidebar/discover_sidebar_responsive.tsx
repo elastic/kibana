@@ -19,10 +19,12 @@ import {
   EuiIcon,
   EuiLink,
   EuiPortal,
+  EuiProgress,
   EuiShowFor,
   EuiTitle,
 } from '@elastic/eui';
 import type { DataView, DataViewField, DataViewListItem } from '@kbn/data-views-plugin/public';
+import { useExistingFieldsFetcher } from '@kbn/unified-field-list-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
@@ -30,7 +32,7 @@ import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { FetchStatus } from '../../../types';
-import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
+// import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 
@@ -111,6 +113,7 @@ export interface DiscoverSidebarResponsiveProps {
  */
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
   const services = useDiscoverServices();
+  const { data, dataViews, core } = services;
   const isPlainRecord = useAppStateSelector(
     (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
   );
@@ -143,6 +146,28 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     // fields of the previous data view
     fieldCounts.current = {};
   }, [selectedDataView]);
+
+  const query = useAppStateSelector((state) => state.query);
+  const filters = useAppStateSelector((state) => state.filters);
+  const dateRange = data.query.timefilter.timefilter.getTime(); // TODO: is it correct to use the relative time range instead of absolute time range here? Currently, it helps to avoid unnecessary refetches.
+
+  const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
+    dataViews: selectedDataView ? [selectedDataView] : [],
+    query: query!,
+    filters: filters!,
+    fromDate: dateRange.from,
+    toDate: dateRange.to,
+    services: {
+      data,
+      dataViews,
+      core,
+    },
+  });
+
+  const onFieldEditedExtended = useCallback(async () => {
+    await onFieldEdited();
+    refetchFieldsExistenceInfo();
+  }, [onFieldEdited, refetchFieldsExistenceInfo]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
@@ -215,7 +240,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               },
               fieldName,
               onSave: async () => {
-                await onFieldEdited();
+                await onFieldEditedExtended();
               },
             });
             if (setFieldEditorRef) {
@@ -233,7 +258,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       selectedDataView,
       setFieldEditorRef,
       closeFlyout,
-      onFieldEdited,
+      onFieldEditedExtended,
     ]
   );
 
@@ -259,8 +284,10 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     <>
       {!props.isClosed && (
         <EuiHideFor sizes={['xs', 's']}>
+          {isProcessing && <EuiProgress size="xs" color="accent" position="absolute" />}
           <DiscoverSidebar
             {...props}
+            onFieldEdited={onFieldEditedExtended}
             documents={documentState.result!}
             fieldFilter={fieldFilter}
             fieldCounts={fieldCounts.current}
@@ -275,7 +302,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
           <EuiButton
             contentProps={{
               className: 'dscSidebar__mobileButton',
-              id: DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields,
+              // id: DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields, // TODO: fix tour step for mobiel view
             }}
             fullWidth
             onClick={() => setIsFlyoutVisible(true)}
@@ -324,6 +351,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               <div className="euiFlyoutBody">
                 <DiscoverSidebar
                   {...props}
+                  onFieldEdited={onFieldEditedExtended}
                   documents={documentState.result}
                   fieldCounts={fieldCounts.current}
                   fieldFilter={fieldFilter}

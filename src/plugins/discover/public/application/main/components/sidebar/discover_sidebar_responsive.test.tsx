@@ -24,12 +24,11 @@ import { AvailableFields$, DataDocuments$, RecordRawType } from '../../hooks/use
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
+import * as ExistingFieldsServiceApi from '@kbn/unified-field-list-plugin/public/services/field_existing/load_field_existing';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -67,55 +66,26 @@ jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   }),
 }));
 
-const dataServiceMock = dataPluginMock.createStartContract();
-
-const mockServices = {
-  history: () => ({
-    location: {
-      search: '',
-    },
-  }),
-  capabilities: {
-    visualize: {
-      show: true,
-    },
-    discover: {
-      save: false,
-    },
-  },
-  uiSettings: {
-    get: (key: string) => {
-      if (key === 'fields:popularLimit') {
-        return 5;
-      }
-    },
-  },
-  docLinks: { links: { discover: { fieldTypeHelp: '' } } },
-  dataViewEditor: {
-    userPermissions: {
-      editDataView: jest.fn(() => true),
-    },
-  },
-  data: {
-    ...dataServiceMock,
-    query: {
-      ...dataServiceMock.query,
-      timefilter: {
-        ...dataServiceMock.query.timefilter,
-        timefilter: {
-          ...dataServiceMock.query.timefilter.timefilter,
-          getAbsoluteTime: () => ({
-            from: '2021-08-31T22:00:00.000Z',
-            to: '2022-09-01T09:16:29.553Z',
-          }),
-        },
+function createMockServices() {
+  const mockServices = {
+    ...createDiscoverServicesMock(),
+    capabilities: {
+      visualize: {
+        show: true,
+      },
+      discover: {
+        save: false,
       },
     },
-  },
-  dataViews: dataViewPluginMocks.createStartContract(),
-  fieldFormats: fieldFormatsServiceMock.createStartContract(),
-  charts: chartPluginMock.createSetupContract(),
-} as unknown as DiscoverServices;
+    docLinks: { links: { discover: { fieldTypeHelp: '' } } },
+    dataViewEditor: {
+      userPermissions: {
+        editDataView: jest.fn(() => true),
+      },
+    },
+  } as unknown as DiscoverServices;
+  return mockServices;
+}
 
 const mockfieldCounts: Record<string, number> = {};
 const mockCalcFieldCounts = jest.fn(() => {
@@ -134,17 +104,16 @@ jest.mock('../../utils/calc_field_counts', () => ({
   calcFieldCounts: () => mockCalcFieldCounts(),
 }));
 
+jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockImplementation(async () => ({
+  indexPatternTitle: 'test',
+  existingFieldNames: Object.keys(mockfieldCounts),
+}));
+
 function getCompProps(): DiscoverSidebarResponsiveProps {
   const dataView = stubLogstashDataView;
   dataView.toSpec = jest.fn(() => ({}));
 
   const hits = getDataTableRecords(dataView);
-
-  const dataViewList = [
-    { id: '0', title: 'b' } as DataViewListItem,
-    { id: '1', title: 'a' } as DataViewListItem,
-    { id: '2', title: 'c' } as DataViewListItem,
-  ];
 
   for (const hit of hits) {
     for (const key of Object.keys(hit.flattened)) {
@@ -162,7 +131,7 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
       fetchStatus: FetchStatus.COMPLETE,
       fields: [] as string[],
     }) as AvailableFields$,
-    dataViewList,
+    dataViewList: [dataView as DataViewListItem],
     onChangeDataView: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
@@ -176,52 +145,82 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
   };
 }
 
+function getAppStateContainer({ query }: { query?: Query | AggregateQuery }) {
+  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
+  appStateContainer.set({
+    query: query ?? { query: '', language: 'lucene' },
+    filters: [],
+  });
+  return appStateContainer;
+}
+
+async function mountComponent(
+  props: DiscoverSidebarResponsiveProps,
+  appStateParams: { query?: Query | AggregateQuery } = {},
+  services?: DiscoverServices
+): Promise<ReactWrapper<DiscoverSidebarResponsiveProps>> {
+  let comp: ReactWrapper<DiscoverSidebarResponsiveProps>;
+  const mockedServices = services ?? createMockServices();
+  mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () => props.dataViewList);
+  mockedServices.data.dataViews.get = jest.fn().mockImplementation(async (id) => {
+    return [props.selectedDataView].find((d) => d!.id === id);
+  });
+
+  await act(async () => {
+    comp = await mountWithIntl(
+      <KibanaContextProvider services={mockedServices}>
+        <DiscoverAppStateProvider value={getAppStateContainer(appStateParams)}>
+          <DiscoverSidebarResponsive {...props} />
+        </DiscoverAppStateProvider>
+      </KibanaContextProvider>
+    );
+    // wait for lazy modules
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await comp.update();
+  });
+
+  await comp!.update();
+
+  return comp!;
+}
+
 describe('discover responsive sidebar', function () {
   let props: DiscoverSidebarResponsiveProps;
   let comp: ReactWrapper<DiscoverSidebarResponsiveProps>;
 
   beforeAll(async () => {
     props = getCompProps();
-    await act(async () => {
-      const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
-      appStateContainer.set({
-        query: { query: '', language: 'lucene' },
-        filters: [],
-      });
-
-      comp = await mountWithIntl(
-        <KibanaContextProvider services={mockServices}>
-          <DiscoverAppStateProvider value={appStateContainer}>
-            <DiscoverSidebarResponsive {...props} />
-          </DiscoverAppStateProvider>
-        </KibanaContextProvider>
-      );
-      // wait for lazy modules
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      await comp.update();
-    });
+    comp = await mountComponent(props);
   });
 
-  it('should have Selected Fields and Available Fields with Popular Fields sections', function () {
-    const popular = findTestSubject(comp, 'fieldList-popular');
-    const selected = findTestSubject(comp, 'fieldList-selected');
-    const unpopular = findTestSubject(comp, 'fieldList-unpopular');
-    expect(popular.children().length).toBe(1);
-    expect(unpopular.children().length).toBe(6);
-    expect(selected.children().length).toBe(1);
+  it('should have Selected Fields, Available Fields, and Popular Fields sections', async function () {
+    const popularFieldsCount = findTestSubject(comp, 'fieldListGroupedPopularFields-count');
+    const selectedFieldsCount = findTestSubject(comp, 'fieldListGroupedSelectedFields-count');
+    const availableFieldsCount = findTestSubject(comp, 'fieldListGroupedAvailableFields-count');
+    const emptyFieldsCount = findTestSubject(comp, 'fieldListGroupedEmptyFields-count');
+    const metaFieldsCount = findTestSubject(comp, 'fieldListGroupedMetaFields-count');
+
+    expect(selectedFieldsCount.text()).toBe('1');
+    expect(popularFieldsCount.text()).toBe('1');
+    expect(availableFieldsCount.text()).toBe('3');
+    expect(emptyFieldsCount.text()).toBe('20');
+    expect(metaFieldsCount.text()).toBe('2');
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
   it('should allow selecting fields', function () {
-    findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
+    const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
+    findTestSubject(availableFields, 'fieldToggle-bytes').simulate('click');
     expect(props.onAddField).toHaveBeenCalledWith('bytes');
   });
   it('should allow deselecting fields', function () {
-    findTestSubject(comp, 'fieldToggle-extension').simulate('click');
+    const selectedFields = findTestSubject(comp, 'fieldListGroupedSelectedFields');
+    findTestSubject(selectedFields, 'fieldToggle-extension').simulate('click');
     expect(props.onRemoveField).toHaveBeenCalledWith('extension');
   });
   it('should allow adding filters', async function () {
+    const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
     await act(async () => {
-      const button = findTestSubject(comp, 'field-extension-showDetails');
+      const button = findTestSubject(availableFields, 'field-extension-showDetails');
       await button.simulate('click');
       await comp.update();
     });
@@ -231,8 +230,9 @@ describe('discover responsive sidebar', function () {
     expect(props.onAddFilter).toHaveBeenCalled();
   });
   it('should allow adding "exist" filter', async function () {
+    const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
     await act(async () => {
-      const button = findTestSubject(comp, 'field-extension-showDetails');
+      const button = findTestSubject(availableFields, 'field-extension-showDetails');
       await button.simulate('click');
       await comp.update();
     });
@@ -241,24 +241,25 @@ describe('discover responsive sidebar', function () {
     findTestSubject(comp, 'discoverFieldListPanelAddExistFilter-extension').simulate('click');
     expect(props.onAddFilter).toHaveBeenCalledWith('_exists_', 'extension', '+');
   });
-  it('should allow filtering by string, and calcFieldCount should just be executed once', function () {
-    expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(6);
-    act(() => {
-      findTestSubject(comp, 'fieldFilterSearchInput').simulate('change', {
-        target: { value: 'abc' },
+  it('should allow filtering by string, and calcFieldCount should just be executed once', async function () {
+    expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('3');
+    await act(async () => {
+      await findTestSubject(comp, 'fieldFilterSearchInput').simulate('change', {
+        target: { value: 'bytes' },
       });
     });
-    comp.update();
-    expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(4);
+    expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('1');
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
 
-  it('should show "Add a field" button to create a runtime field', () => {
-    expect(mockServices.dataViewEditor.userPermissions.editDataView).toHaveBeenCalled();
+  it('should show "Add a field" button to create a runtime field', async () => {
+    const services = createMockServices();
+    comp = await mountComponent(props, {}, services);
+    expect(services.dataViewEditor.userPermissions.editDataView).toHaveBeenCalled();
     expect(findTestSubject(comp, 'dataView-add-field_btn').length).toBe(1);
   });
 
-  it('should not show "Add a field" button on the sql mode', () => {
+  it('should not show "Add a field" button on the sql mode', async () => {
     const initialProps = getCompProps();
     const propsWithTextBasedMode = {
       ...initialProps,
@@ -269,46 +270,17 @@ describe('discover responsive sidebar', function () {
         result: getDataTableRecords(stubLogstashDataView),
       }) as DataDocuments$,
     };
-    const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
-    appStateContainer.set({
+    const compInViewerMode = await mountComponent(propsWithTextBasedMode, {
       query: { sql: 'SELECT * FROM `index`' },
     });
-    const compInViewerMode = mountWithIntl(
-      <KibanaContextProvider services={mockServices}>
-        <DiscoverAppStateProvider value={appStateContainer}>
-          <DiscoverSidebarResponsive {...propsWithTextBasedMode} />
-        </DiscoverAppStateProvider>
-      </KibanaContextProvider>
-    );
     expect(findTestSubject(compInViewerMode, 'indexPattern-add-field_btn').length).toBe(0);
   });
 
-  it('should not show "Add a field" button in viewer mode', () => {
-    const mockedServicesInViewerMode = {
-      ...mockServices,
-      dataViewEditor: {
-        ...mockServices.dataViewEditor,
-        userPermissions: {
-          ...mockServices.dataViewEditor.userPermissions,
-          editDataView: jest.fn(() => false),
-        },
-      },
-    };
-    const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
-    appStateContainer.set({
-      query: { query: '', language: 'lucene' },
-      filters: [],
-    });
-    const compInViewerMode = mountWithIntl(
-      <KibanaContextProvider services={mockedServicesInViewerMode}>
-        <DiscoverAppStateProvider value={appStateContainer}>
-          <DiscoverSidebarResponsive {...props} />
-        </DiscoverAppStateProvider>
-      </KibanaContextProvider>
-    );
-    expect(
-      mockedServicesInViewerMode.dataViewEditor.userPermissions.editDataView
-    ).toHaveBeenCalled();
+  it('should not show "Add a field" button in viewer mode', async () => {
+    const services = createMockServices();
+    services.dataViewEditor.userPermissions.editDataView = jest.fn(() => false);
+    const compInViewerMode = await mountComponent(props, {}, services);
+    expect(services.dataViewEditor.userPermissions.editDataView).toHaveBeenCalled();
     expect(findTestSubject(compInViewerMode, 'dataView-add-field_btn').length).toBe(0);
   });
 });

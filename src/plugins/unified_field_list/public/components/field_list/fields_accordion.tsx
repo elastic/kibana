@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import type { FieldListItem } from '../../types';
+import { type FieldListItem, FieldsGroupNames } from '../../types';
 import './fields_accordion.scss';
 
 export interface FieldsAccordionProps<T extends FieldListItem> {
@@ -32,12 +32,14 @@ export interface FieldsAccordionProps<T extends FieldListItem> {
   hideDetails?: boolean;
   isFiltered: boolean;
   groupIndex: number;
+  groupName: FieldsGroupNames;
   paginatedFields: T[];
   renderFieldItem: (params: {
     field: T;
     hideDetails?: boolean;
     itemIndex: number;
     groupIndex: number;
+    groupName: FieldsGroupNames;
   }) => JSX.Element;
   renderCallout: () => JSX.Element;
   showExistenceFetchError?: boolean;
@@ -55,6 +57,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   hideDetails,
   isFiltered,
   groupIndex,
+  groupName,
   paginatedFields,
   renderFieldItem,
   renderCallout,
@@ -147,7 +150,7 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
             {paginatedFields &&
               paginatedFields.map((field, index) => (
                 <Fragment key={field.name}>
-                  {renderFieldItem({ field, itemIndex: index, groupIndex, hideDetails })}
+                  {renderFieldItem({ field, itemIndex: index, groupIndex, groupName, hideDetails })}
                 </Fragment>
               ))}
           </ul>

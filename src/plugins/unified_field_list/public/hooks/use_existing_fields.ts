@@ -15,7 +15,6 @@ import {
   DataPublicPluginStart,
   DataViewsContract,
   getEsQueryConfig,
-  UI_SETTINGS,
 } from '@kbn/data-plugin/public';
 import { type DataView } from '@kbn/data-plugin/common';
 import { loadFieldExisting } from '../services/field_existing';
@@ -89,7 +88,7 @@ export const useExistingFieldsFetcher = (
       dataViewId: string | undefined;
       fetchId: string;
     }): Promise<void> => {
-      if (!dataViewId) {
+      if (!dataViewId || !query || !filters) {
         return;
       }
 
@@ -137,11 +136,11 @@ export const useExistingFieldsFetcher = (
 
           const existingFieldNames = result?.existingFieldNames || [];
 
-          const metaFields = core.uiSettings.get(UI_SETTINGS.META_FIELDS) || [];
           if (
-            !existingFieldNames.filter((fieldName) => !metaFields.includes?.(fieldName)).length &&
+            onNoData &&
             numberOfFetches === 1 &&
-            onNoData
+            !existingFieldNames.filter((fieldName) => !dataView?.metaFields?.includes(fieldName))
+              .length
           ) {
             onNoData(dataViewId);
           }
@@ -169,8 +168,26 @@ export const useExistingFieldsFetcher = (
   );
 
   const dataViewsHash = getDataViewsHash(params.dataViews);
+  // const prevParamsRef = useRef<any[]>([]);
   const refetchFieldsExistenceInfo = useCallback(
     async (dataViewId?: string) => {
+      // const currentParams = [
+      //   fetchFieldsExistenceInfo,
+      //   dataViewsHash,
+      //   params.query,
+      //   params.filters,
+      //   params.fromDate,
+      //   params.toDate,
+      // ];
+      //
+      // currentParams.forEach((param, index) => {
+      //   if (param !== prevParamsRef.current[index]) {
+      //     console.log('different param', param, prevParamsRef.current[index]);
+      //   }
+      // });
+      //
+      // prevParamsRef.current = currentParams;
+      // console.log('refetch triggered', { dataViewId });
       const fetchId = generateId();
       lastFetchId = fetchId;
       // refetch only for the specified data view

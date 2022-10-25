@@ -7,49 +7,46 @@
  */
 
 import './discover_sidebar.scss';
-import { throttle } from 'lodash';
-import React, { useCallback, useEffect, useState, useMemo, useRef, memo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiAccordion,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiText,
-  EuiTitle,
-  EuiSpacer,
-  EuiNotificationBadge,
-  EuiPageSideBar_Deprecated as EuiPageSideBar,
-  useResizeObserver,
   EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageSideBar_Deprecated as EuiPageSideBar,
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
-import { isEqual } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
-import { DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
-import { triggerVisualizeActionsTextBasedLanguages } from '@kbn/unified-field-list-plugin/public';
+import { type DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
+import {
+  ExistenceFetchStatus,
+  FieldListGrouped,
+  FieldListGroupedProps,
+  FieldsGroupNames,
+  GroupedFieldsParams,
+  triggerVisualizeActionsTextBasedLanguages,
+  useExistingFieldsReader,
+  useGroupedFields,
+} from '@kbn/unified-field-list-plugin/public';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING, PLUGIN_ID } from '../../../../../common';
-import { groupFields } from './lib/group_fields';
-import { getDetails } from './lib/get_details';
-import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
+import { getSelectedFields, shouldShowField } from './lib/group_fields';
+import { doesFieldMatchFilters, FieldFilterState, setFieldFilterProp } from './lib/field_filter';
 import { getDataViewFieldList } from './lib/get_data_view_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
-import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import type { DataTableRecord } from '../../../../types';
 import { getUiActions } from '../../../../kibana_services';
+import { getRawRecordType } from '../../utils/get_raw_record_type';
+import { RecordRawType } from '../../hooks/use_saved_search';
 
-/**
- * Default number of available fields displayed and added on scroll
- */
-const FIELDS_PER_PAGE = 50;
+const EMPTY_FIELD_LIST: DataViewField[] = [];
 
-export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProps, 'documents$'> {
+export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   /**
    * Current state of the field filter, filtering fields by name, type, ...
    */
@@ -104,7 +101,8 @@ export function DiscoverSidebarComponent({
   columns,
   fieldCounts,
   fieldFilter,
-  documents,
+  documents$,
+  documents, // TODO: remove
   onAddField,
   onAddFilter,
   onRemoveField,
@@ -121,14 +119,13 @@ export function DiscoverSidebarComponent({
   createNewDataView,
   showDataViewPicker,
 }: DiscoverSidebarProps) {
-  const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
+  const { uiSettings, dataViewFieldEditor, dataViews } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);
-  const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
-  const [fieldsToRender, setFieldsToRender] = useState(FIELDS_PER_PAGE);
-  const [fieldsPerPage, setFieldsPerPage] = useState(FIELDS_PER_PAGE);
-  const availableFieldsContainer = useRef<HTMLUListElement | null>(null);
-  const isPlainRecord = !onAddFilter;
+  const isPlainRecord = useAppStateSelector(
+    (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
+  );
   const query = useAppStateSelector((state) => state.query);
+  const isGlobalFilterApplied = useAppStateSelector((state) => Boolean(state.filters?.length));
 
   useEffect(() => {
     if (documents) {
@@ -137,85 +134,17 @@ export function DiscoverSidebarComponent({
     }
   }, [selectedDataView, fieldCounts, documents]);
 
-  const scrollDimensions = useResizeObserver(scrollContainer);
-
   const onChangeFieldSearch = useCallback(
-    (field: string, value: string | boolean | undefined) => {
-      const newState = setFieldFilterProp(fieldFilter, field, value);
+    (filterName: string, value: string | boolean | undefined) => {
+      const newState = setFieldFilterProp(fieldFilter, filterName, value);
       setFieldFilter(newState);
-      setFieldsToRender(fieldsPerPage);
     },
-    [fieldFilter, setFieldFilter, setFieldsToRender, fieldsPerPage]
+    [fieldFilter, setFieldFilter]
   );
 
-  const getDetailsByField = useCallback(
-    (ipField: DataViewField) => getDetails(ipField, documents, selectedDataView),
-    [documents, selectedDataView]
-  );
-
-  const popularLimit = useMemo(() => uiSettings.get(FIELDS_LIMIT_SETTING), [uiSettings]);
-
-  const {
-    selected: selectedFields,
-    popular: popularFields,
-    unpopular: unpopularFields,
-  } = useMemo(
-    () => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi),
-    [fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi]
-  );
-
-  /**
-   * Popular fields are not displayed in text based lang mode
-   */
-  const restFields = useMemo(
-    () => (isPlainRecord ? [...popularFields, ...unpopularFields] : unpopularFields),
-    [isPlainRecord, popularFields, unpopularFields]
-  );
-
-  const paginate = useCallback(() => {
-    const newFieldsToRender = fieldsToRender + Math.round(fieldsPerPage * 0.5);
-    setFieldsToRender(Math.max(fieldsPerPage, Math.min(newFieldsToRender, restFields.length)));
-  }, [setFieldsToRender, fieldsToRender, restFields, fieldsPerPage]);
-
-  useEffect(() => {
-    if (scrollContainer && restFields.length && availableFieldsContainer.current) {
-      const { clientHeight, scrollHeight } = scrollContainer;
-      const isScrollable = scrollHeight > clientHeight; // there is no scrolling currently
-      const allFieldsRendered = fieldsToRender >= restFields.length;
-
-      if (!isScrollable && !allFieldsRendered) {
-        // Not all available fields were rendered with the given fieldsPerPage number
-        // and no scrolling is available due to the a high zoom out factor of the browser
-        // In this case the fieldsPerPage needs to be adapted
-        const fieldsRenderedHeight = availableFieldsContainer.current.clientHeight;
-        const avgHeightPerItem = Math.round(fieldsRenderedHeight / fieldsToRender);
-        const newFieldsPerPage =
-          (avgHeightPerItem > 0 ? Math.round(clientHeight / avgHeightPerItem) : 0) + 10;
-        if (newFieldsPerPage >= FIELDS_PER_PAGE && newFieldsPerPage !== fieldsPerPage) {
-          setFieldsPerPage(newFieldsPerPage);
-          setFieldsToRender(newFieldsPerPage);
-        }
-      }
-    }
-  }, [
-    fieldsPerPage,
-    scrollContainer,
-    restFields,
-    fieldsToRender,
-    setFieldsPerPage,
-    setFieldsToRender,
-    scrollDimensions,
-  ]);
-
-  const lazyScroll = useCallback(() => {
-    if (scrollContainer) {
-      const { scrollTop, clientHeight, scrollHeight } = scrollContainer;
-      const nearBottom = scrollTop + clientHeight > scrollHeight * 0.9;
-      if (nearBottom && restFields) {
-        paginate();
-      }
-    }
-  }, [paginate, scrollContainer, restFields]);
+  const selectedFields = useMemo(() => {
+    return getSelectedFields(fields, columns);
+  }, [fields, columns]);
 
   const { fieldTypes, presentFieldTypes } = useMemo(() => {
     const result = ['any'];
@@ -305,15 +234,6 @@ export function DiscoverSidebarComponent({
     ]
   );
 
-  const getPaginated = useCallback(
-    (list) => {
-      return list.slice(0, fieldsToRender);
-    },
-    [fieldsToRender]
-  );
-
-  const filterChanged = useMemo(() => isEqual(fieldFilter, getDefaultFieldFilter()), [fieldFilter]);
-
   const visualizeAggregateQuery = useCallback(() => {
     const aggregateQuery = query && isOfAggregateQueryType(query) ? query : undefined;
     triggerVisualizeActionsTextBasedLanguages(
@@ -324,6 +244,98 @@ export function DiscoverSidebarComponent({
       aggregateQuery
     );
   }, [columns, selectedDataView, query]);
+
+  const popularFieldsLimit = useMemo(() => uiSettings.get(FIELDS_LIMIT_SETTING), [uiSettings]);
+  const onFilterField: GroupedFieldsParams<DataViewField>['onFilterField'] = useCallback(
+    (field) => {
+      return doesFieldMatchFilters(field, fieldFilter);
+    },
+    [fieldFilter]
+  );
+  const onSupportedFieldFilter: GroupedFieldsParams<DataViewField>['onSupportedFieldFilter'] =
+    useCallback(
+      (field) => {
+        return shouldShowField(field, useNewFieldsApi);
+      },
+      [useNewFieldsApi]
+    );
+  const onOverrideFieldGroupDetails: GroupedFieldsParams<DataViewField>['onOverrideFieldGroupDetails'] =
+    useCallback((groupName) => {
+      if (groupName === FieldsGroupNames.AvailableFields) {
+        return {
+          helpText: i18n.translate('discover.fieldChooser.availableFieldsTooltip', {
+            defaultMessage:
+              'Your query returned values for these fields. Click + to add an available field to the data table.',
+          }),
+        };
+      }
+    }, []);
+  const fieldsExistenceReader = useExistingFieldsReader();
+  const { fieldGroups } = useGroupedFields({
+    dataViewId: isPlainRecord || !selectedDataView?.id ? null : selectedDataView.id, // TODO: check whether we need Empty fields for text-based query
+    fieldsExistenceReader,
+    allFields: fields || EMPTY_FIELD_LIST,
+    popularFieldsLimit: isPlainRecord ? 0 : popularFieldsLimit,
+    sortedSelectedFields: selectedFields,
+    isAffectedByGlobalFilter: isGlobalFilterApplied,
+    services: {
+      dataViews,
+    },
+    onFilterField,
+    onSupportedFieldFilter,
+    onOverrideFieldGroupDetails,
+  });
+
+  // TODO: hide meta fields on Discover for text-based queries
+
+  // console.log({
+  //   fields,
+  //   oldSelectedFields,
+  //   popularFields,
+  //   unpopularFields,
+  //   fieldGroups,
+  //   columns,
+  // });
+
+  const renderFieldItem: FieldListGroupedProps<DataViewField>['renderFieldItem'] = useCallback(
+    ({ field, groupName }) => (
+      <li key={`field${field.name}`} data-attr-field={field.name}>
+        <DiscoverField
+          alwaysShowActionButton={alwaysShowActionButtons}
+          field={field}
+          highlight={fieldFilter.name}
+          dataView={selectedDataView!}
+          onAddField={onAddField}
+          onRemoveField={onRemoveField}
+          onAddFilter={onAddFilter}
+          documents$={documents$}
+          trackUiMetric={trackUiMetric}
+          multiFields={multiFields?.get(field.name)}
+          onEditField={editField}
+          onDeleteField={deleteField}
+          showFieldStats={showFieldStats}
+          contextualFields={columns}
+          selected={groupName === FieldsGroupNames.SelectedFields || selectedFields.includes(field)}
+        />
+      </li>
+    ),
+    [
+      alwaysShowActionButtons,
+      selectedDataView,
+      onAddField,
+      onRemoveField,
+      onAddFilter,
+      documents$,
+      trackUiMetric,
+      multiFields,
+      editField,
+      deleteField,
+      showFieldStats,
+      columns,
+      selectedFields,
+      fieldFilter.name,
+    ]
+  );
 
   if (!selectedDataView) {
     return null;
@@ -370,166 +382,17 @@ export function DiscoverSidebarComponent({
             />
           </form>
         </EuiFlexItem>
-        <EuiFlexItem className="eui-yScroll">
-          <div
-            ref={(el) => {
-              if (documents && el && !el.dataset.dynamicScroll) {
-                el.dataset.dynamicScroll = 'true';
-                setScrollContainer(el);
-              }
-            }}
-            onScroll={throttle(lazyScroll, 100)}
-            className="eui-yScroll"
-          >
-            {Array.isArray(fields) && fields.length > 0 && (
-              <div>
-                {selectedFields &&
-                selectedFields.length > 0 &&
-                selectedFields[0].displayName !== '_source' ? (
-                  <>
-                    <EuiAccordion
-                      id="dscSelectedFields"
-                      initialIsOpen={true}
-                      buttonContent={
-                        <EuiText size="xs" id="selected_fields">
-                          <strong>
-                            <FormattedMessage
-                              id="discover.fieldChooser.filter.selectedFieldsTitle"
-                              defaultMessage="Selected fields"
-                            />
-                          </strong>
-                        </EuiText>
-                      }
-                      extraAction={
-                        <EuiNotificationBadge color={filterChanged ? 'subdued' : 'accent'} size="m">
-                          {selectedFields.length}
-                        </EuiNotificationBadge>
-                      }
-                    >
-                      <EuiSpacer size="m" />
-                      <ul
-                        className="dscFieldList"
-                        aria-labelledby="selected_fields"
-                        data-test-subj={`fieldList-selected`}
-                      >
-                        {selectedFields.map((field: DataViewField) => {
-                          return (
-                            <li key={`field${field.name}`} data-attr-field={field.name}>
-                              <DiscoverField
-                                alwaysShowActionButton={alwaysShowActionButtons}
-                                field={field}
-                                dataView={selectedDataView}
-                                onAddField={onAddField}
-                                onRemoveField={onRemoveField}
-                                onAddFilter={onAddFilter}
-                                getDetails={getDetailsByField}
-                                selected={true}
-                                trackUiMetric={trackUiMetric}
-                                multiFields={multiFields?.get(field.name)}
-                                onEditField={editField}
-                                onDeleteField={deleteField}
-                                showFieldStats={showFieldStats}
-                                contextualFields={columns}
-                              />
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </EuiAccordion>
-                    <EuiSpacer size="s" />{' '}
-                  </>
-                ) : null}
-                <EuiAccordion
-                  id="dscAvailableFields"
-                  initialIsOpen={true}
-                  buttonContent={
-                    <EuiText size="xs" id="available_fields">
-                      <strong id={DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields}>
-                        <FormattedMessage
-                          id="discover.fieldChooser.filter.availableFieldsTitle"
-                          defaultMessage="Available fields"
-                        />
-                      </strong>
-                    </EuiText>
-                  }
-                  extraAction={
-                    <EuiNotificationBadge size="m" color={filterChanged ? 'subdued' : 'accent'}>
-                      {restFields.length}
-                    </EuiNotificationBadge>
-                  }
-                >
-                  <EuiSpacer size="s" />
-                  {!isPlainRecord && popularFields.length > 0 && (
-                    <>
-                      <EuiTitle size="xxxs" className="dscFieldListHeader">
-                        <h4 id="available_fields_popular">
-                          <FormattedMessage
-                            id="discover.fieldChooser.filter.popularTitle"
-                            defaultMessage="Popular"
-                          />
-                        </h4>
-                      </EuiTitle>
-                      <ul
-                        className="dscFieldList dscFieldList--popular"
-                        aria-labelledby="available_fields available_fields_popular"
-                        data-test-subj={`fieldList-popular`}
-                      >
-                        {popularFields.map((field: DataViewField) => {
-                          return (
-                            <li key={`field${field.name}`} data-attr-field={field.name}>
-                              <DiscoverField
-                                alwaysShowActionButton={alwaysShowActionButtons}
-                                field={field}
-                                dataView={selectedDataView}
-                                onAddField={onAddField}
-                                onRemoveField={onRemoveField}
-                                onAddFilter={onAddFilter}
-                                getDetails={getDetailsByField}
-                                trackUiMetric={trackUiMetric}
-                                multiFields={multiFields?.get(field.name)}
-                                onEditField={editField}
-                                onDeleteField={deleteField}
-                                showFieldStats={showFieldStats}
-                                contextualFields={columns}
-                              />
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </>
-                  )}
-                  <ul
-                    className="dscFieldList dscFieldList--unpopular"
-                    aria-labelledby="available_fields"
-                    data-test-subj={`fieldList-unpopular`}
-                    ref={availableFieldsContainer}
-                  >
-                    {getPaginated(restFields).map((field: DataViewField) => {
-                      return (
-                        <li key={`field${field.name}`} data-attr-field={field.name}>
-                          <DiscoverField
-                            alwaysShowActionButton={alwaysShowActionButtons}
-                            field={field}
-                            dataView={selectedDataView}
-                            onAddField={onAddField}
-                            onRemoveField={onRemoveField}
-                            onAddFilter={onAddFilter}
-                            getDetails={getDetailsByField}
-                            trackUiMetric={trackUiMetric}
-                            multiFields={multiFields?.get(field.name)}
-                            onEditField={editField}
-                            onDeleteField={deleteField}
-                            showFieldStats={showFieldStats}
-                            contextualFields={columns}
-                          />
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </EuiAccordion>
-              </div>
-            )}
-          </div>
+        <EuiFlexItem>
+          <FieldListGrouped
+            fieldGroups={fieldGroups}
+            fieldsExistenceStatus={
+              fields && selectedDataView?.id
+                ? fieldsExistenceReader.getFieldsExistenceStatus(selectedDataView.id)
+                : ExistenceFetchStatus.unknown
+            }
+            renderFieldItem={renderFieldItem}
+            fieldsExistInIndex={Boolean(fields?.length)}
+          />
         </EuiFlexItem>
         {!!editField && (
           <EuiFlexItem grow={false}>

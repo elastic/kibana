@@ -326,7 +326,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     [localState]
   );
 
-  const hasFilters = Boolean(filters.length);
   const onOverrideFieldGroupDetails = useCallback(
     (groupName) => {
       if (groupName === FieldsGroupNames.AvailableFields) {
@@ -342,16 +341,10 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
                 defaultMessage:
                   'Drag and drop available fields to the workspace and create visualizations. To change the available fields, select a different data view, edit your queries, or use a different time range. Some field types cannot be visualized in Lens, including full text and geographic fields.',
               }),
-          isAffectedByGlobalFilter: hasFilters,
-        };
-      }
-      if (groupName === FieldsGroupNames.SelectedFields) {
-        return {
-          isAffectedByGlobalFilter: hasFilters,
         };
       }
     },
-    [core.uiSettings, hasFilters]
+    [core.uiSettings]
   );
 
   const { fieldGroups } = useGroupedFields<IndexPatternField>({
@@ -361,6 +354,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
       dataViews,
     },
     fieldsExistenceReader,
+    isAffectedByGlobalFilter: Boolean(filters.length),
     onFilterField,
     onSupportedFieldFilter,
     onSelectedFieldFilter,

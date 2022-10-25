@@ -28,7 +28,7 @@ import {
   DataTotalHits$,
   RecordRawType,
 } from '../../hooks/use_saved_search';
-import { discoverServiceMock } from '../../../../__mocks__/services';
+import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
@@ -118,14 +118,11 @@ async function mountComponent(
 ) {
   const searchSourceMock = createSearchSourceMock({});
   const services = {
-    ...discoverServiceMock,
+    ...createDiscoverServicesMock(),
     storage: new LocalStorageMock({
       [SIDEBAR_CLOSED_KEY]: prevSidebarClosed,
     }) as unknown as Storage,
   } as unknown as DiscoverServices;
-  services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
-    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-  };
 
   const dataViewList = [dataView];
 
