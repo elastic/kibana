@@ -111,7 +111,6 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
                 ? `${packAssetSavedObject.attributes.name}-elastic`
                 : packAssetSavedObject.attributes.name;
 
-            console.log('asset happening');
             await savedObjectsClient.create(
               packSavedObjectType,
               {

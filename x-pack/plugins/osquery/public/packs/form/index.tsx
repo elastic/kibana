@@ -15,12 +15,11 @@ import {
   EuiBottomBar,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { FormProvider, useForm as useHookForm } from 'react-hook-form';
 
-import { GlobalPackField } from './global_field';
 import { useRouterNavigate } from '../../common/lib/kibana';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
 import { QueriesField } from './queries_field';
@@ -33,6 +32,7 @@ import type { PackItem } from '../types';
 import { NameField } from './name_field';
 import { DescriptionField } from './description_field';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
+import { PackTypeSelectable } from './pack_type_selectable';
 
 type PackFormData = Omit<PackItem, 'id' | 'queries'> & { queries: PackQueryFormData[] };
 
@@ -47,6 +47,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   editMode = false,
   isReadOnly = false,
 }) => {
+  const [packType, setPackType] = useState('policy');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const handleHideConfirmationModal = useCallback(() => setShowConfirmationModal(false), []);
 
@@ -64,13 +65,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   const deserializer = (payload: PackItem) => ({
     ...payload,
     policy_ids: payload.policy_ids ?? [],
-    is_global: payload.is_global,
     queries: convertPackQueriesToSO(payload.queries),
-  });
-
-  const serializer = (payload: PackFormData) => ({
-    ...payload,
-    queries: convertSOQueriesToPack(payload.queries),
   });
 
   const hooksForm = useHookForm({
@@ -82,9 +77,14 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           policy_ids: [],
           enabled: true,
           queries: [],
-          is_global: false,
         },
   });
+
+  useEffect(() => {
+    if (defaultValue?.is_global) {
+      setPackType('global');
+    }
+  }, [defaultValue?.is_global]);
 
   const {
     handleSubmit,
@@ -94,6 +94,12 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const onSubmit = useCallback(
     async (values: PackFormData) => {
+      const serializer = (payload: PackFormData) => ({
+        ...payload,
+        is_global: packType === 'global',
+        queries: convertSOQueriesToPack(payload.queries),
+      });
+
       try {
         if (editMode && defaultValue?.id) {
           await updateAsync({ id: defaultValue?.id, ...serializer(values) });
@@ -103,12 +109,12 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         // eslint-disable-next-line no-empty
       } catch (e) {}
     },
-    [createAsync, defaultValue?.id, editMode, updateAsync]
+    [createAsync, defaultValue?.id, editMode, packType, updateAsync]
   );
 
   const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
 
-  const { policy_ids: policyIds, is_global: isGlobalEnabled, namespaces = [] } = watch();
+  const { policy_ids: policyIds, namespaces = [] } = watch();
 
   // TODO need to figure out how to verify namespace, because at the beginning the namespace is empty
   const isDefaultNamespace = namespaces.length === 0 || namespaces?.[0] === 'default';
@@ -143,7 +149,14 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   }, [handleSubmitForm]);
 
   const euiFieldProps = useMemo(() => ({ isDisabled: isReadOnly }), [isReadOnly]);
-  const policyIdsFieldProps = useMemo(() => ({ isDisabled: isGlobalEnabled }), [isGlobalEnabled]);
+  // const policyIdsFieldProps = useMemo(() => ({ isDisabled: isGlobalEnabled }), [isGlobalEnabled]);
+
+  const changePackType = useCallback(
+    (type: 'global' | 'policy') => {
+      setPackType(type);
+    },
+    [setPackType]
+  );
 
   return (
     <>
@@ -161,15 +174,28 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         </EuiFlexGroup>
 
         <EuiFlexGroup>
-          <EuiFlexItem>
-            <PolicyIdComboBoxField euiFieldProps={policyIdsFieldProps} />
-          </EuiFlexItem>
-          {isDefaultNamespace && (
-            <EuiFlexItem>
-              <GlobalPackField />
-            </EuiFlexItem>
-          )}
+          <PackTypeSelectable
+            packType={packType}
+            setPackType={changePackType}
+            isGlobalEnabled={isDefaultNamespace}
+          />
         </EuiFlexGroup>
+        {/* <EuiSpacer size="xxl" />*/}
+
+        {packType === 'policy' && (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <PolicyIdComboBoxField />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+        {/* {isDefaultNamespace && (*/}
+        {/*  <EuiFlexItem>*/}
+        {/*  <GlobalPackField />*/}
+        {/*  </EuiFlexItem>*/}
+        {/*  )}*/}
+        <EuiSpacer size="xxl" />
+
         <EuiHorizontalRule />
 
         <QueriesField euiFieldProps={euiFieldProps} />
