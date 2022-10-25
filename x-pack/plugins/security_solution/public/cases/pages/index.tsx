@@ -76,7 +76,7 @@ const CaseContainerComponent: React.FC = () => {
         selected_endpoint: endpointId,
       }),
     });
-
+  // TO-DO: onComponentInitialized not needed after removing the expandedEvent state from timeline
   const onComponentInitialized = useCallback(() => {
     dispatch(
       timelineActions.createTimeline({

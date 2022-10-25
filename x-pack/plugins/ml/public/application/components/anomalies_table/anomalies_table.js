@@ -94,6 +94,8 @@ export class AnomaliesTableInternal extends Component {
         }
       }
 
+      const job = this.props.selectedJobs.find(({ id }) => id === item.jobId);
+
       itemIdToExpandedRowMap[item.rowId] = (
         <AnomalyDetails
           tabIndex={tab}
@@ -104,6 +106,7 @@ export class AnomaliesTableInternal extends Component {
           filter={this.props.filter}
           influencerFilter={this.props.influencerFilter}
           influencersLimit={INFLUENCERS_LIMIT}
+          job={job}
         />
       );
     }
@@ -277,4 +280,5 @@ AnomaliesTableInternal.propTypes = {
   tableState: PropTypes.object.isRequired,
   updateTableState: PropTypes.func.isRequired,
   sourceIndicesWithGeoFields: PropTypes.object.isRequired,
+  selectedJobs: PropTypes.array.isRequired,
 };

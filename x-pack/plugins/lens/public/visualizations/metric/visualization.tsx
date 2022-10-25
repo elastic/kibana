@@ -30,7 +30,7 @@ import {
   Suggestion,
 } from '../../types';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
-import { DimensionEditor } from './dimension_editor';
+import { DimensionEditor, DimensionEditorAdditionalSection } from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 import { FormatSelectorOptions } from '../../datasources/form_based/dimension_panel/format_selector';
@@ -440,9 +440,10 @@ export const getMetricVisualization = ({
     return { ...state, trendlineLayerId: layerId, trendlineLayerType: layerType };
   },
 
-  removeLayer(state) {
+  removeLayer(state, layerId) {
     const newState: MetricVisualizationState = {
       ...state,
+      ...(state.layerId === layerId && { metricAccessor: undefined }),
       trendlineLayerId: undefined,
       trendlineLayerType: undefined,
       trendlineMetricAccessor: undefined,
@@ -451,6 +452,10 @@ export const getMetricVisualization = ({
     };
 
     return newState;
+  },
+
+  getRemoveOperation(state, layerId) {
+    return layerId === state.trendlineLayerId ? 'remove' : 'clear';
   },
 
   getLayersToLinkTo(state, newLayerId: string): string[] {
@@ -610,6 +615,17 @@ export const getMetricVisualization = ({
       <KibanaThemeProvider theme$={theme.theme$}>
         <I18nProvider>
           <DimensionEditor {...props} paletteService={paletteService} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
+  },
+
+  renderDimensionEditorAdditionalSection(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <DimensionEditorAdditionalSection {...props} />
         </I18nProvider>
       </KibanaThemeProvider>,
       domElement
