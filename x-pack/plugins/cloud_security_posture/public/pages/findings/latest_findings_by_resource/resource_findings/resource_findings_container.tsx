@@ -92,7 +92,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const params = useParams<{ resourceId: string }>();
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
-  const [pageSizes, setPageSize] = useLocalStorage(
+  const [pageSize, setPageSize] = useLocalStorage(
     LOCAL_STORAGE_PAGE_SIZE_RESOURCE_FINDINGS_KEY,
     urlQuery.pageSize
   );
@@ -111,7 +111,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
    */
   const resourceFindings = useResourceFindings({
     ...getPaginationQuery({
-      pageSize: pageSizes || urlQuery.pageSize,
+      pageSize: pageSize || urlQuery.pageSize,
       pageIndex: urlQuery.pageIndex,
     }),
     sort: urlQuery.sort,
@@ -201,7 +201,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
             loading={resourceFindings.isFetching}
             items={resourceFindings.data?.page || []}
             pagination={getPaginationTableParams({
-              pageSize: pageSizes || urlQuery.pageSize,
+              pageSize: pageSize || urlQuery.pageSize,
               pageIndex: urlQuery.pageIndex,
               totalItemCount: resourceFindings.data?.total || 0,
             })}

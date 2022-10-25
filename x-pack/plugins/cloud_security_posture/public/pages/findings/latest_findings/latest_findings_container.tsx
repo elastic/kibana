@@ -50,7 +50,7 @@ const MAX_ITEMS = 500;
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
-  const [pageSizes, setPageSize] = useLocalStorage(
+  const [pageSize, setPageSize] = useLocalStorage(
     LOCAL_STORAGE_PAGE_SIZE_LATEST_FINDINGS_KEY,
     urlQuery.pageSize
   );
@@ -69,7 +69,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   const findingsGroupByNone = useLatestFindings({
     ...getPaginationQuery({
       pageIndex: urlQuery.pageIndex,
-      pageSize: pageSizes || urlQuery.pageSize,
+      pageSize: pageSize || urlQuery.pageSize,
     }),
     query: baseEsQuery.query,
     sort: urlQuery.sort,
@@ -145,7 +145,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
             loading={findingsGroupByNone.isFetching}
             items={findingsGroupByNone.data?.page || []}
             pagination={getPaginationTableParams({
-              pageSize: pageSizes || urlQuery.pageSize,
+              pageSize: pageSize || urlQuery.pageSize,
               pageIndex: urlQuery.pageIndex,
               totalItemCount: limitedTotalItemCount,
             })}

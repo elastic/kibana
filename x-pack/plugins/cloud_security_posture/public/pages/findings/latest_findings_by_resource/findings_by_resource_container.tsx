@@ -61,7 +61,7 @@ export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => 
 const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
-  const [pageSizes, setPageSize] = useLocalStorage(
+  const [pageSize, setPageSize] = useLocalStorage(
     LOCAL_STORAGE_PAGE_SIZE_FINDINGS_BY_RESOURCE_KEY,
     urlQuery.pageSize
   );
@@ -81,7 +81,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   const findingsGroupByResource = useFindingsByResource({
     ...getPaginationQuery({
       pageIndex: urlQuery.pageIndex,
-      pageSize: pageSizes || urlQuery.pageSize,
+      pageSize: pageSize || urlQuery.pageSize,
     }),
     sortDirection: urlQuery.sortDirection,
     query: baseEsQuery.query,
@@ -157,7 +157,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
             loading={findingsGroupByResource.isFetching}
             items={findingsGroupByResource.data?.page || []}
             pagination={getPaginationTableParams({
-              pageSize: pageSizes || urlQuery.pageSize,
+              pageSize: pageSize || urlQuery.pageSize,
               pageIndex: urlQuery.pageIndex,
               totalItemCount: findingsGroupByResource.data?.total || 0,
             })}

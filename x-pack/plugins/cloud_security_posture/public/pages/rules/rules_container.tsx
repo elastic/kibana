@@ -70,7 +70,7 @@ export type PageUrlParams = Record<'policyId' | 'packagePolicyId', string>;
 export const RulesContainer = () => {
   const params = useParams<PageUrlParams>();
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
-  const [pageSizes, setPageSize] = useLocalStorage<number>(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY, 10);
+  const [pageSize, setPageSize] = useLocalStorage<number>(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY, 10);
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
     filter: createCspRuleSearchFilterByPackagePolicy({
       packagePolicyId: params.packagePolicyId,
@@ -78,7 +78,7 @@ export const RulesContainer = () => {
     }),
     search: '',
     page: 0,
-    perPage: pageSizes || 10,
+    perPage: pageSize || 10,
   });
 
   const { data, status, error } = useFindCspRules({
@@ -108,7 +108,7 @@ export const RulesContainer = () => {
           total={rulesPageData.total}
           error={rulesPageData.error}
           loading={rulesPageData.loading}
-          perPage={pageSizes || rulesQuery.perPage}
+          perPage={pageSize || rulesQuery.perPage}
           page={rulesQuery.page}
           setPagination={(paginationQuery) => {
             setPageSize(paginationQuery.perPage);
