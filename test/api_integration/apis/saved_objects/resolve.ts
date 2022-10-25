@@ -39,12 +39,14 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200)
           .then((resp) => {
             resp.body.saved_object.updated_at = '2015-01-01T00:00:00.000Z';
+            resp.body.saved_object.created_at = '2015-01-01T00:00:00.000Z';
 
             expect(resp.body).to.eql({
               saved_object: {
                 id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
                 type: 'visualization',
                 updated_at: '2015-01-01T00:00:00.000Z',
+                created_at: '2015-01-01T00:00:00.000Z',
                 version: resp.body.saved_object.version,
                 migrationVersion: resp.body.saved_object.migrationVersion,
                 coreMigrationVersion: KIBANA_VERSION,
