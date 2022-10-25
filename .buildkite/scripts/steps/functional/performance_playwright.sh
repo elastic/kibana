@@ -81,7 +81,7 @@ node scripts/functional_tests \
   --bail
 
 while read -r journey; do
-  if [ "$journey" == "" ] || [ "$journey" == "x-pack/performance/journeys/warmup" ] ; then
+  if [ "$journey" == "" ] || [ "$journey" == "x-pack/performance/journeys/warmup.ts" ] ; then
     continue;
   fi
 
