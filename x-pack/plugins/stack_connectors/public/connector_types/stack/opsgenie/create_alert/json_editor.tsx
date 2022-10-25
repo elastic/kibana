@@ -11,7 +11,7 @@ import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/
 import type { OpsgenieCreateAlertParams } from '../../../../../server/connector_types/stack';
 import * as i18n from './translations';
 import { CreateAlertProps } from '.';
-import { decodeCreateAlert } from './schema';
+import { decodeCreateAlert, isDecodeError } from './schema';
 
 export type JsonEditorProps = Pick<
   CreateAlertProps,
@@ -34,7 +34,11 @@ const JsonEditorComponent: React.FC<JsonEditorProps> = ({
       setJsonEditorErrors([]);
       return decodedValue;
     } catch (error) {
-      setJsonEditorErrors([error.message]);
+      if (isDecodeError(error)) {
+        setJsonEditorErrors(error.decodeErrors);
+      } else {
+        setJsonEditorErrors([error.message]);
+      }
       return;
     }
   }, []);

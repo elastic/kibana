@@ -8,9 +8,9 @@
 import { Either, fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
-import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
+import { exactCheck } from '@kbn/securitysolution-io-ts-utils';
 import { identity } from 'fp-ts/lib/function';
-import { isEmpty } from 'lodash';
+import { isEmpty, isObject } from 'lodash';
 import * as i18n from './translations';
 
 const MessageNonEmptyString = new rt.Type<string, string, unknown>(
@@ -88,11 +88,37 @@ const CreateAlertSchema = rt.intersection([
   ),
 ]);
 
+export const formatErrors = (errors: rt.Errors): string[] => {
+  const err = errors.map((error) => {
+    if (error.message != null) {
+      return error.message;
+    } else {
+      const keyContext = error.context
+        .filter(
+          (entry) => entry.key != null && !Number.isInteger(+entry.key) && entry.key.trim() !== ''
+        )
+        .map((entry) => entry.key)
+        .join('.');
+
+      const nameContext = error.context.find(
+        (entry) => entry.type != null && entry.type.name != null && entry.type.name.length > 0
+      );
+
+      const suppliedValue =
+        keyContext !== '' ? keyContext : nameContext != null ? nameContext.type.name : '';
+      const value = isObject(error.value) ? JSON.stringify(error.value) : error.value;
+      return `Invalid value "${value}" supplied to "${suppliedValue}"`;
+    }
+  });
+
+  return [...new Set(err)];
+};
+
 type CreateAlertSchemaType = rt.TypeOf<typeof CreateAlertSchema>;
 
 export const decodeCreateAlert = (data: unknown): CreateAlertSchemaType => {
   const onLeft = (errors: rt.Errors) => {
-    throw new Error(formatErrors(errors).join());
+    throw new DecodeError(formatErrors(errors));
   };
 
   const onRight = (a: CreateAlertSchemaType): CreateAlertSchemaType => identity(a);
@@ -103,3 +129,14 @@ export const decodeCreateAlert = (data: unknown): CreateAlertSchemaType => {
     fold(onLeft, onRight)
   );
 };
+
+export class DecodeError extends Error {
+  constructor(public readonly decodeErrors: string[]) {
+    super(decodeErrors.join());
+    this.name = this.constructor.name;
+  }
+}
+
+export function isDecodeError(error: unknown): error is DecodeError {
+  return error instanceof DecodeError;
+}
