@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-jest.mock('../../../containers/detection_engine/rules/api');
-jest.mock('../../../../common/lib/kibana');
-
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, cleanup } from '@testing-library/react-hooks';
 
 import { useInstalledIntegrations } from './use_installed_integrations';
 
-import * as api from '../../../containers/detection_engine/rules/api';
+import { fleetIntegrationsApi } from '../../../../detection_engine/fleet_integrations/api';
 import { useToasts } from '../../../../common/lib/kibana';
+
+jest.mock('../../../../detection_engine/fleet_integrations/api');
+jest.mock('../../../../common/lib/kibana');
 
 describe('useInstalledIntegrations', () => {
   beforeEach(() => {
@@ -53,7 +53,10 @@ describe('useInstalledIntegrations', () => {
     );
 
   it('calls the API via fetchInstalledIntegrations', async () => {
-    const fetchInstalledIntegrations = jest.spyOn(api, 'fetchInstalledIntegrations');
+    const fetchInstalledIntegrations = jest.spyOn(
+      fleetIntegrationsApi,
+      'fetchInstalledIntegrations'
+    );
 
     const { waitForNextUpdate } = render();
 
@@ -101,7 +104,7 @@ describe('useInstalledIntegrations', () => {
   // Skipping until we re-enable errors
   it.skip('handles exceptions from the API', async () => {
     const exception = new Error('Boom!');
-    jest.spyOn(api, 'fetchInstalledIntegrations').mockRejectedValue(exception);
+    jest.spyOn(fleetIntegrationsApi, 'fetchInstalledIntegrations').mockRejectedValue(exception);
 
     const { result, waitForNextUpdate } = render();
 
