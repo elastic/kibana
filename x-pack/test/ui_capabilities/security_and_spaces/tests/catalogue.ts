@@ -68,6 +68,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               'elasticsearch',
               'appSearch',
               'workplaceSearch',
+              'searchExperiences',
               'spaces',
               ...esFeatureExceptions,
             ];
