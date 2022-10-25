@@ -149,12 +149,12 @@ interface PluginsStart {
 
 export class Plugin
   implements
-  CorePlugin<
-  TriggersAndActionsUIPublicPluginSetup,
-  TriggersAndActionsUIPublicPluginStart,
-  PluginsSetup,
-  PluginsStart
-  >
+    CorePlugin<
+      TriggersAndActionsUIPublicPluginSetup,
+      TriggersAndActionsUIPublicPluginStart,
+      PluginsSetup,
+      PluginsStart
+    >
 {
   private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   private ruleTypeRegistry: TypeRegistry<RuleTypeModel>;

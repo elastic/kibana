@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { registrationServicesMock } from "@kbn/stack-connectors-plugin/public/mocks";
-import { registerConnectorTypes } from "../../";
-import { ActionTypeModel } from "@kbn/triggers-actions-ui-plugin/public";
-import { TypeRegistry } from "@kbn/triggers-actions-ui-plugin/public/application/type_registry";
+import { registrationServicesMock } from '@kbn/stack-connectors-plugin/public/mocks';
+import { registerConnectorTypes } from '../../';
+import { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 
 const ACTION_TYPE_ID = '.torq';
 let actionTypeModel: ActionTypeModel;

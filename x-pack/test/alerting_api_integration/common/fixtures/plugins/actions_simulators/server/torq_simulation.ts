@@ -22,9 +22,12 @@ export function initPlugin(router: IRouter, path: string) {
         authRequired: false,
       },
       validate: {
-        body: schema.object({
-          msg: schema.string(),
-        }, { unknowns: "allow" }),
+        body: schema.object(
+          {
+            msg: schema.string(),
+          },
+          { unknowns: 'allow' }
+        ),
       },
     },
     async function (
@@ -33,7 +36,7 @@ export function initPlugin(router: IRouter, path: string) {
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
       if (!validateTorqToken(req)) {
-        return jsonErrorResponse(res, 401, new Error("unauthorised"));
+        return jsonErrorResponse(res, 401, new Error('unauthorised'));
       }
       const { body } = req;
       const content = body?.msg;
@@ -55,7 +58,7 @@ export function initPlugin(router: IRouter, path: string) {
 }
 
 function validateTorqToken(req: KibanaRequest<any, any, any, any>): boolean {
-  return req.headers['x-torq-token'] === "someRandomToken";
+  return req.headers['x-torq-token'] === 'someRandomToken';
 }
 
 function jsonResponse(

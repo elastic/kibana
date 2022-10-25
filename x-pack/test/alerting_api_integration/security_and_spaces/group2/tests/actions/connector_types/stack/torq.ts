@@ -53,7 +53,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
             webhookIntegrationUrl: torqSimulatorURL,
           },
           secrets: {
-            token: "invalidToken",
+            token: 'invalidToken',
           },
         })
         .expect(200);
@@ -66,7 +66,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      expect(result.status).to.eql("error");
+      expect(result.status).to.eql('error');
       expect(result.message).to.match(/error triggering Torq workflow, unauthorised/);
     });
 
@@ -81,7 +81,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
             webhookIntegrationUrl: torqSimulatorURL,
           },
           secrets: {
-            token: "someRandomToken",
+            token: 'someRandomToken',
           },
         })
         .expect(200);
@@ -134,7 +134,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
             webhookIntegrationUrl: torqSimulatorURL,
           },
           secrets: {
-            token: "someRandomToken",
+            token: 'someRandomToken',
           },
         })
         .expect(200);
@@ -167,7 +167,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            body: `{"msg": "respond-with-400"}`
+            body: `{"msg": "respond-with-400"}`,
           },
         })
         .expect(200);
@@ -181,15 +181,13 @@ export default function torqTest({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
-            body: `{"msg": "respond-with-429"}`
+            body: `{"msg": "respond-with-429"}`,
           },
         })
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(
-        /error triggering Torq workflow, retry later/
-      );
+      expect(result.message).to.match(/error triggering Torq workflow, retry later/);
     });
 
     it('should handle a 500 Torq error', async () => {
@@ -204,9 +202,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(
-        /error triggering Torq workflow, retry later/
-      );
+      expect(result.message).to.match(/error triggering Torq workflow, retry later/);
       expect(result.retry).to.equal(true);
     });
 
@@ -222,9 +218,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(
-        /error triggering Torq workflow, method is not supported/
-      );
+      expect(result.message).to.match(/error triggering Torq workflow, method is not supported/);
     });
 
     after(() => {

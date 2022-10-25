@@ -13,14 +13,17 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import { Logger } from '@kbn/core/server';
 import { ActionType, ActionTypeExecutorOptions } from '@kbn/actions-plugin/server';
-import { AlertingConnectorFeatureId, UptimeConnectorFeatureId, SecurityConnectorFeatureId, ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import {
+  AlertingConnectorFeatureId,
+  UptimeConnectorFeatureId,
+  SecurityConnectorFeatureId,
+  ActionTypeExecutorResult,
+} from '@kbn/actions-plugin/common';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { getRetryAfterIntervalFromHeaders } from '../../lib/http_response_retry_header';
 import { promiseResult, isOk, Result } from '../../lib/result_type';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
-
-
 
 export type TorqActionType = ActionType<
   ActionTypeConfigType,
@@ -81,10 +84,10 @@ export function getActionType(): TorqActionType {
         customValidator: validateActionTypeConfig,
       },
       secrets: {
-        schema: SecretsSchema
+        schema: SecretsSchema,
       },
       params: {
-        schema: ParamsSchema
+        schema: ParamsSchema,
       },
     },
     renderParameterTemplates,
@@ -104,7 +107,7 @@ function renderParameterTemplates(
 
 function validateActionTypeConfig(
   configObject: ActionTypeConfigType,
-  validatorServices: ValidatorServices,
+  validatorServices: ValidatorServices
 ) {
   const configuredUrl = configObject.webhookIntegrationUrl;
   let configureUrlObj: URL;
@@ -117,25 +120,30 @@ function validateActionTypeConfig(
         values: {
           err,
         },
-      }));
+      })
+    );
   }
 
   try {
     validatorServices.configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
-    throw new Error(i18n.translate('xpack.actions.builtin.torq.torqConfigurationError', {
-      defaultMessage: 'error configuring send to Torq action: {message}',
-      values: {
-        message: allowListError.message,
-      },
-    }));
+    throw new Error(
+      i18n.translate('xpack.actions.builtin.torq.torqConfigurationError', {
+        defaultMessage: 'error configuring send to Torq action: {message}',
+        values: {
+          message: allowListError.message,
+        },
+      })
+    );
   }
 
   if (configureUrlObj.hostname !== 'hooks.torq.io' && configureUrlObj.hostname !== 'localhost') {
-    throw new Error(i18n.translate('xpack.actions.builtin.torq.torqConfigurationErrorInvalidHostname', {
-      defaultMessage:
-        'error configuring send to Torq action: url must begin with https://hooks.torq.io',
-    }));
+    throw new Error(
+      i18n.translate('xpack.actions.builtin.torq.torqConfigurationErrorInvalidHostname', {
+        defaultMessage:
+          'error configuring send to Torq action: url must begin with https://hooks.torq.io',
+      })
+    );
   }
 }
 
@@ -159,9 +167,9 @@ export async function executor(
       method: 'post',
       headers: {
         'X-Torq-Token': token || '',
-        'Content-Type': "application/json",
+        'Content-Type': 'application/json',
       },
-      data: JSON.parse(data || "null"),
+      data: JSON.parse(data || 'null'),
       configurationUtilities,
       logger: execOptions.logger,
       validateStatus: (status: number) => status >= 200 && status < 300,
@@ -172,14 +180,20 @@ export async function executor(
     const {
       value: { status, statusText },
     } = result;
-    execOptions.logger.debug(`response from Torq action "${actionId}": [HTTP ${status}] ${statusText}`);
+    execOptions.logger.debug(
+      `response from Torq action "${actionId}": [HTTP ${status}] ${statusText}`
+    );
     return successResult(actionId, data);
   }
   const { error } = result;
   return handleExecutionError(error, execOptions.logger, actionId);
 }
 
-async function handleExecutionError(error: AxiosError<{ message: string }>, logger: Logger, actionId: string): Promise<ActionTypeExecutorResult<unknown>> {
+async function handleExecutionError(
+  error: AxiosError<{ message: string }>,
+  logger: Logger,
+  actionId: string
+): Promise<ActionTypeExecutorResult<unknown>> {
   if (error.response) {
     const {
       status,

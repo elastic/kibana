@@ -6,13 +6,16 @@
  */
 
 import { lazy } from 'react';
-import { ActionTypeModel, GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
+import {
+  ActionTypeModel,
+  GenericValidationResult,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TorqActionParams, TorqConfig, TorqSecrets } from '../../types';
 import * as i18n from './translations';
 import { torqDefaultBody } from '../../lib/default_params';
 
 function replaceReferencesWithNumbers(body: string) {
-  return body.replace(/\{\{[.\w]+\}\}/gm, "42");
+  return body.replace(/\{\{[.\w]+\}\}/gm, '42');
 }
 
 export function getActionType(): ActionTypeModel<TorqConfig, TorqSecrets, TorqActionParams> {
@@ -29,7 +32,7 @@ export function getActionType(): ActionTypeModel<TorqConfig, TorqSecrets, TorqAc
       errors.body.push(translations.BODY_REQUIRED);
     } else {
       try {
-        JSON.parse(replaceReferencesWithNumbers(actionParams.body || ""));
+        JSON.parse(replaceReferencesWithNumbers(actionParams.body || ''));
       } catch (e) {
         errors.body.push(translations.INVALID_JSON);
       }
@@ -46,6 +49,6 @@ export function getActionType(): ActionTypeModel<TorqConfig, TorqSecrets, TorqAc
     actionParamsFields: lazy(() => import('./torq_params')),
     defaultActionParams: {
       body: torqDefaultBody,
-    }
+    },
   };
 }
