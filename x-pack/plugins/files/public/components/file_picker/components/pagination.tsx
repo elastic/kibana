@@ -18,7 +18,7 @@ export const Pagination: FunctionComponent = () => {
   const isUploading = useBehaviorSubject(state.isUploading$);
   return (
     <EuiPagination
-      onPageClick={isUploading ? state.setPage : () => {}}
+      onPageClick={isUploading ? () => {} : state.setPage}
       pageCount={pageCount}
       activePage={page}
     />
