@@ -151,7 +151,7 @@ jest.mock('react-beautiful-dnd', () => {
         },
         {}
       ),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Draggable: ({ children }: { children: any }) =>
       children(
         {
