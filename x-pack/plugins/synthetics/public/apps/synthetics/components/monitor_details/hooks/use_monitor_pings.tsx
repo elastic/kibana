@@ -14,6 +14,7 @@ import { getMonitorRecentPingsAction, selectMonitorPingsMetadata } from '../../.
 
 interface UseMonitorPingsProps {
   pageSize?: number;
+  pageIndex?: number;
 }
 
 export const useMonitorPings = (props?: UseMonitorPingsProps) => {
@@ -32,10 +33,11 @@ export const useMonitorPings = (props?: UseMonitorPingsProps) => {
           monitorId,
           locationId: locationLabel,
           size: props?.pageSize,
+          pageIndex: props?.pageIndex,
         })
       );
     }
-  }, [dispatch, monitorId, locationLabel, props?.pageSize]);
+  }, [dispatch, monitorId, locationLabel, props?.pageSize, props?.pageIndex]);
 
   const { total, data: pings } = useSelector(selectMonitorPingsMetadata);
 

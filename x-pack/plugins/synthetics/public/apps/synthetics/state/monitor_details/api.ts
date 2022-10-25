@@ -25,10 +25,12 @@ export const fetchMonitorRecentPings = async ({
   monitorId,
   locationId,
   size = 10,
+  pageIndex = 0,
 }: {
   monitorId: string;
   locationId: string;
   size?: number;
+  pageIndex?: number;
 }): Promise<PingsResponse> => {
   const from = new Date(0).toISOString();
   const to = new Date().toISOString();
@@ -37,7 +39,7 @@ export const fetchMonitorRecentPings = async ({
 
   return await apiService.get(
     SYNTHETICS_API_URLS.PINGS,
-    { monitorId, from, to, locations, sort, size },
+    { monitorId, from, to, locations, sort, size, pageIndex },
     PingsResponseType
   );
 };
