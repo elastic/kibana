@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiRange, EuiBetaBadge } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiRange,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  EuiText,
+  EuiLink,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { DatasourceLayerSettingsProps } from '../../types';
 import type { FormBasedPrivateState } from './types';
 
@@ -22,54 +31,85 @@ export function LayerSettingsPanel({
   const currentSamplingIndex = samplingIndex > -1 ? samplingIndex : samplingValue.length - 1;
   return (
     <EuiFormRow
-      display="columnCompressed"
+      display="rowCompressed"
       data-test-subj="lns-indexPattern-random-sampling-row"
       fullWidth
-      helpText={i18n.translate('xpack.lens.xyChart.randomSampling.help', {
-        defaultMessage: 'Change the sampling probability to see how your chart is affected',
-      })}
+      helpText={
+        <FormattedMessage
+          id="xpack.lens.xyChart.randomSampling.help"
+          defaultMessage="The sampling is accomplished by providing a random subset of the entire set of documents. The lower the value the higher the error and speed: consider the usage of lower values for big datasets. {link}"
+          values={{
+            link: (
+              <EuiLink
+                href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-random-sampler-aggregation.html"
+                target="_blank"
+                external
+              >
+                <FormattedMessage
+                  id="xpack.lens.xyChart.randomSampling.learnMore"
+                  defaultMessage="Learn more"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      }
       label={
         <>
           {i18n.translate('xpack.lens.xyChart.randomSampling.label', {
-            defaultMessage: 'Sampling',
+            defaultMessage: 'Random sampling',
           })}{' '}
-          <EuiBetaBadge
-            label={i18n.translate('xpack.lens.randomSampling.experimentalLabel', {
+          <EuiBadge color="hollow">
+            {i18n.translate('xpack.lens.randomSampling.experimentalLabel', {
               defaultMessage: 'Technical preview',
             })}
-            color="hollow"
-            iconType="beaker"
-            size="s"
-            tooltipContent={i18n.translate('xpack.lens.randomSampling.experimentalLabel', {
-              defaultMessage: 'Technical preview',
-            })}
-          />
+          </EuiBadge>
         </>
       }
     >
-      <EuiRange
-        data-test-subj="lns-indexPattern-random-sampling"
-        value={currentSamplingIndex}
-        onChange={(e) => {
-          setState({
-            ...state,
-            layers: {
-              ...state.layers,
-              [layerId]: {
-                ...state.layers[layerId],
-                sampling: samplingValue[Number(e.currentTarget.value)],
-              },
-            },
-          });
-        }}
-        showInput={false}
-        showRange={false}
-        showTicks
-        step={1}
-        min={0}
-        max={samplingValue.length - 1}
-        ticks={samplingValue.map((v, i) => ({ label: `${v}`, value: i }))}
-      />
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.lens.xyChart.randomSampling.speedLabel"
+              defaultMessage="Speed"
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiRange
+            data-test-subj="lns-indexPattern-random-sampling"
+            value={currentSamplingIndex}
+            onChange={(e) => {
+              setState({
+                ...state,
+                layers: {
+                  ...state.layers,
+                  [layerId]: {
+                    ...state.layers[layerId],
+                    sampling: samplingValue[Number(e.currentTarget.value)],
+                  },
+                },
+              });
+            }}
+            showInput={false}
+            showRange={false}
+            showTicks
+            step={1}
+            min={0}
+            max={samplingValue.length - 1}
+            ticks={samplingValue.map((v, i) => ({ label: `${v * 100}%`, value: i }))}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.lens.xyChart.randomSampling.accuracyLabel"
+              defaultMessage="Accuracy"
+            />
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFormRow>
   );
 }
