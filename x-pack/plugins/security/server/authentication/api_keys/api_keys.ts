@@ -6,8 +6,6 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import type { SecurityAuthenticateResponse } from '@elastic/elasticsearch/lib/api/types';
-
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { OneOf } from '@kbn/utility-types';
@@ -139,6 +137,31 @@ export interface InvalidateAPIKeyResult {
       reason?: string;
     };
   }>;
+}
+
+/**
+ * Represents the parameters for validating API Key credentials.
+ */
+export interface ValidateAPIKeyParams {
+  /**
+   * Unique id for this API key
+   */
+  id: string;
+
+  /**
+   * Generated API Key (secret)
+   */
+  api_key;
+}
+
+/**
+ * The return value for API Key Validation
+ */
+export interface ValidateAPIKeyResult {
+  /**
+   * Indicates if the provided API Key was successfully authenticated.
+   */
+  isValid: boolean;
 }
 
 /**
@@ -339,25 +362,23 @@ export class APIKeys {
 
   /**
    * Tries to validate an API key.
-   * @param apiKey ApiKey.
+   * @param apiKeyPrams ValidateAPIKeyParams.
    */
-  async validate(apiKey: Pick<CreateAPIKeyResult, 'id' | 'api_key'>) {
+  async validate(apiKeyPrams: ValidateAPIKeyParams): Promise<ValidateAPIKeyResult> {
     if (!this.license.isEnabled()) {
       return { isValid: false };
     }
 
-    const fakeRequest = getFakeKibanaRequest(apiKey);
+    const fakeRequest = getFakeKibanaRequest(apiKeyPrams);
 
-    this.logger.debug(`Trying to validate an API key as current user`);
-
-    let result: SecurityAuthenticateResponse;
+    this.logger.debug(`Trying to validate an API key`);
 
     try {
-      result = await this.clusterClient.asScoped(fakeRequest).asCurrentUser.security.authenticate();
+      await this.clusterClient.asScoped(fakeRequest).asCurrentUser.security.authenticate();
       this.logger.debug(`API key was validated successfully`);
-      return { isValid: true, result };
+      return { isValid: true };
     } catch (e) {
-      this.logger.info(`Failed to validate API key ${e.message}`);
+      this.logger.info(`Failed to validate API key: ${e.message}`);
     }
 
     return { isValid: false };
