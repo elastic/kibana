@@ -13,6 +13,7 @@ import {
   termQuery,
 } from '@kbn/observability-plugin/server';
 import { euiLightVars as theme } from '@kbn/ui-theme';
+import { APMConfig } from '../../../..';
 import {
   FAAS_BILLED_DURATION,
   METRICSET_NAME,
@@ -21,8 +22,8 @@ import {
 } from '../../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { isFiniteNumber } from '../../../../../common/utils/is_finite_number';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getMetricsDateHistogramParams } from '../../../../lib/helpers/metrics';
-import { Setup } from '../../../../lib/helpers/setup_request';
 import { GenericMetricsChart } from '../../fetch_and_transform_metrics';
 
 /**
@@ -50,20 +51,20 @@ function calculateComputeUsageGBSeconds({
 export async function getComputeUsage({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   start,
   end,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   start: number;
   end: number;
 }): Promise<GenericMetricsChart> {
-  const { apmEventClient, config } = setup;
-
   const aggs = {
     avgFaasBilledDuration: { avg: { field: FAAS_BILLED_DURATION } },
     avgTotalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },

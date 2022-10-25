@@ -54,12 +54,10 @@ export const Image = React.forwardRef<HTMLImageElement, Props>(
     const { isVisible, ref: observerRef } = useViewportObserver({ onFirstVisible });
 
     useEffect(() => {
-      let unmounted = false;
       const id = window.setTimeout(() => {
-        if (!unmounted) setBlurDelayExpired(true);
+        setBlurDelayExpired(true);
       }, 200);
       return () => {
-        unmounted = true;
         window.clearTimeout(id);
       };
     }, []);
@@ -90,7 +88,6 @@ export const Image = React.forwardRef<HTMLImageElement, Props>(
           observerRef={observerRef}
           ref={ref}
           size={size}
-          hidden={!isVisible}
           src={isVisible ? src : undefined}
           alt={alt}
           onLoad={(ev) => {
