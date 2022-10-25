@@ -146,7 +146,7 @@ export const useEnterpriseSearchNav = () => {
             ]
           : []),
       ],
-      name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.nav.searchTitle', {
         defaultMessage: 'Search',
       }),
     },
