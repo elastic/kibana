@@ -8,11 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { euiLightVars as theme } from '@kbn/ui-theme';
+import { APMConfig } from '../../../..';
 import {
   FAAS_COLDSTART,
   METRICSET_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../../lib/helpers/setup_request';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { fetchAndTransformMetrics } from '../../fetch_and_transform_metrics';
 import { ChartBase } from '../../types';
 
@@ -36,14 +37,16 @@ const chartBase: ChartBase = {
 export function getColdStartCount({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   start,
   end,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   start: number;
   end: number;
@@ -51,7 +54,8 @@ export function getColdStartCount({
   return fetchAndTransformMetrics({
     environment,
     kuery,
-    setup,
+    config,
+    apmEventClient,
     serviceName,
     start,
     end,
