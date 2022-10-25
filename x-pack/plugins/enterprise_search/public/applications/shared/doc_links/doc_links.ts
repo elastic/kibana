@@ -58,7 +58,6 @@ class DocLinks {
   public clientsRustOverview: string;
   public cloudIndexManagement: string;
   public connectors: string;
-  public crawlerGettingStarted: string;
   public crawlerManaging: string;
   public crawlerOverview: string;
   public elasticsearchCreateIndex: string;
@@ -164,7 +163,6 @@ class DocLinks {
     this.clientsRustOverview = '';
     this.cloudIndexManagement = '';
     this.connectors = '';
-    this.crawlerGettingStarted = '';
     this.crawlerManaging = '';
     this.crawlerOverview = '';
     this.elasticsearchCreateIndex = '';
@@ -272,7 +270,6 @@ class DocLinks {
     this.clientsRustOverview = docLinks.links.clients.rustOverview;
     this.cloudIndexManagement = docLinks.links.cloud.indexManagement;
     this.connectors = docLinks.links.enterpriseSearch.connectors;
-    this.crawlerGettingStarted = docLinks.links.enterpriseSearch.crawlerGettingStarted;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
     this.crawlerOverview = docLinks.links.enterpriseSearch.crawlerOverview;
     this.elasticsearchCreateIndex = docLinks.links.elasticsearch.createIndex;
