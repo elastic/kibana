@@ -8,35 +8,35 @@
 import { i18n } from '@kbn/i18n';
 
 export const URL_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.torqAction.urlTextFieldLabel',
+  'xpack.stackConnectors.torqAction.urlTextFieldLabel',
   {
     defaultMessage: 'Torq endpoint URL',
   }
 );
 
 export const URL_INVALID = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.torqAction.error.invalidUrlTextField',
+  'xpack.stackConnectors.torqAction.error.invalidUrlTextField',
   {
     defaultMessage: 'URL is invalid.',
   }
 );
 
 export const BODY_FIELD_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.torqAction.bodyFieldLabel',
+  'xpack.stackConnectors.torqAction.bodyFieldLabel',
   {
     defaultMessage: 'Body',
   }
 );
 
 export const BODY_FIELD_ARIA_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.torqAction.bodyCodeEditorAriaLabel',
+  'xpack.stackConnectors.torqAction.bodyCodeEditorAriaLabel',
   {
     defaultMessage: 'Code editor',
   }
 );
 
 export const URL_NOT_TORQ_WEBHOOK = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.torqAction.error.urlIsNotTorqWebhook',
+  'xpack.stackConnectors.torqAction.error.urlIsNotTorqWebhook',
   {
     defaultMessage: 'URL is not a Torq integration endpoint.',
   }
@@ -64,21 +64,21 @@ export const INVALID_JSON = i18n.translate(
 );
 
 export const TORQ_SELECT_MESSAGE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.torqAction.selectMessageText',
+  'xpack.stackConnectors.torqAction.selectMessageText',
   {
     defaultMessage: 'Trigger a Torq workflow.',
   }
 );
 
 export const TORQ_ACTION_TYPE_TITLE = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.torqAction.actionTypeTitle',
+  'xpack.stackConnectors.torqAction.actionTypeTitle',
   {
     defaultMessage: 'Alert data',
   }
 );
 
 export const TORQ_TOKEN_HELP_TEXT = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.torqAction.tokenHelpText',
+  'xpack.stackConnectors.torqAction.tokenHelpText',
   {
     defaultMessage:
       'Enter the webhook authentication header secret generated when you created the Elastic Security integration.',
@@ -86,7 +86,7 @@ export const TORQ_TOKEN_HELP_TEXT = i18n.translate(
 );
 
 export const URL_HELP_TEXT = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.torqAction.urlHelpText',
+  'xpack.stackConnectors.torqAction.urlHelpText',
   {
     defaultMessage:
       'Enter the endpoint URL generated when you created the Elastic Security integration on Torq.',
