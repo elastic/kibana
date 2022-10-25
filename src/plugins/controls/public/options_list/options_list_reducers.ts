@@ -64,6 +64,9 @@ export const optionsListReducers = {
   clearSelections: (state: WritableDraft<OptionsListReduxState>) => {
     if (state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
   },
+  setExclude: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
+    state.explicitInput.exclude = action.payload;
+  },
   clearValidAndInvalidSelections: (state: WritableDraft<OptionsListReduxState>) => {
     state.componentState.invalidSelections = [];
     state.componentState.validSelections = [];

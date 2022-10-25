@@ -11,7 +11,13 @@ import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
-import { EuiFilterButton, EuiFilterGroup, EuiPopover, useResizeObserver } from '@elastic/eui';
+import {
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiPopover,
+  EuiTextColor,
+  useResizeObserver,
+} from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import { OptionsListStrings } from './options_list_strings';
@@ -43,6 +49,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
   const controlStyle = select((state) => state.explicitInput.controlStyle);
   const singleSelect = select((state) => state.explicitInput.singleSelect);
   const id = select((state) => state.explicitInput.id);
+  const exclude = select((state) => state.explicitInput.exclude);
 
   const loading = select((state) => state.output.loading);
 
@@ -75,6 +82,11 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
       validSelectionsCount: validSelections?.length,
       selectionDisplayNode: (
         <>
+          {exclude && (
+            <EuiTextColor color="danger">
+              <b>{OptionsListStrings.control.getNegate()}</b>{' '}
+            </EuiTextColor>
+          )}
           {validSelections && (
             <span>{validSelections?.join(OptionsListStrings.control.getSeparator())}</span>
           )}
@@ -86,7 +98,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
         </>
       ),
     };
-  }, [validSelections, invalidSelections]);
+  }, [exclude, validSelections, invalidSelections]);
 
   const button = (
     <div className="optionsList--filterBtnWrapper" ref={resizeRef}>
