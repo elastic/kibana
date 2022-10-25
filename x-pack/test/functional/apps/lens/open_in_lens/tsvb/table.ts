@@ -34,6 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     beforeEach(async () => {
       await visualBuilder.resetPage();
       await visualBuilder.clickTable();
+      await header.waitUntilLoadingHasFinished();
       await visualBuilder.checkTableTabIsPresent();
       await visualBuilder.selectGroupByField('machine.os.raw');
     });
