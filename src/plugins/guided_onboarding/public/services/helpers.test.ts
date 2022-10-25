@@ -7,12 +7,16 @@
  */
 
 import { guidesConfig } from '../constants/guides_config';
-import { getNextStep, isLastStep } from './helpers';
+import { isIntegrationInGuideStep, isLastStep } from './helpers';
+import {
+  noGuideActiveState,
+  securityAddDataInProgressState,
+  securityRulesActiveState,
+} from './api.mocks';
 
 const searchGuide = 'search';
 const firstStep = guidesConfig[searchGuide].steps[0].id;
-const secondStep = guidesConfig[searchGuide].steps[1].id;
-const lastStep = guidesConfig[searchGuide].steps[2].id;
+const lastStep = guidesConfig[searchGuide].steps[guidesConfig[searchGuide].steps.length - 1].id;
 
 describe('GuidedOnboarding ApiService helpers', () => {
   // this test suite depends on the guides config
@@ -28,20 +32,26 @@ describe('GuidedOnboarding ApiService helpers', () => {
     });
   });
 
-  describe('getNextStep', () => {
-    it('returns id of the next step', () => {
-      const result = getNextStep(searchGuide, firstStep);
-      expect(result).toEqual(secondStep);
+  describe('isIntegrationInGuideStep', () => {
+    it('return true if the integration is defined in the guide step config', () => {
+      const result = isIntegrationInGuideStep(securityAddDataInProgressState, 'endpoint');
+      expect(result).toBe(true);
     });
-
-    it('returns undefined if the params are not part of the config', () => {
-      const result = getNextStep('some_guide', 'some_step');
-      expect(result).toBeUndefined();
+    it('returns false if a different integration is defined in the guide step', () => {
+      const result = isIntegrationInGuideStep(securityAddDataInProgressState, 'kubernetes');
+      expect(result).toBe(false);
     });
-
-    it(`returns undefined if it's the last step`, () => {
-      const result = getNextStep(searchGuide, lastStep);
-      expect(result).toBeUndefined();
+    it('returns false if no integration is defined in the guide step', () => {
+      const result = isIntegrationInGuideStep(securityRulesActiveState, 'endpoint');
+      expect(result).toBe(false);
+    });
+    it('returns false if no guide is active', () => {
+      const result = isIntegrationInGuideStep(noGuideActiveState, 'endpoint');
+      expect(result).toBe(false);
+    });
+    it('returns false if no integration passed', () => {
+      const result = isIntegrationInGuideStep(securityAddDataInProgressState);
+      expect(result).toBe(false);
     });
   });
 });

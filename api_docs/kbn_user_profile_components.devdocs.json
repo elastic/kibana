@@ -123,6 +123,57 @@
       },
       {
         "parentPluginId": "@kbn/user-profile-components",
+        "id": "def-common.UserAvatarTip",
+        "type": "Function",
+        "tags": [],
+        "label": "UserAvatarTip",
+        "description": [
+          "\nRenders a user avatar with tooltip"
+        ],
+        "signature": [
+          "({ user, avatar, ...rest }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserAvatarProps",
+            "text": "UserAvatarProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "packages/kbn-user-profile-components/src/user_avatar_tip.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserAvatarTip.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ user, avatar, ...rest }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/user-profile-components",
+                "scope": "common",
+                "docId": "kibKbnUserProfileComponentsPluginApi",
+                "section": "def-common.UserAvatarProps",
+                "text": "UserAvatarProps"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_avatar_tip.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/user-profile-components",
         "id": "def-common.UserProfilesPopover",
         "type": "Function",
         "tags": [],
@@ -229,6 +280,57 @@
               "<Option>"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_selectable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/user-profile-components",
+        "id": "def-common.UserToolTip",
+        "type": "Function",
+        "tags": [],
+        "label": "UserToolTip",
+        "description": [
+          "\nRenders a tooltip with user information"
+        ],
+        "signature": [
+          "({ user, avatar, ...rest }: React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserToolTipProps",
+            "text": "UserToolTipProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "packages/kbn-user-profile-components/src/user_tooltip.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserToolTip.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ user, avatar, ...rest }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/user-profile-components",
+                "scope": "common",
+                "docId": "kibKbnUserProfileComponentsPluginApi",
+                "section": "def-common.UserToolTipProps",
+                "text": "UserToolTipProps"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_tooltip.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -933,6 +1035,79 @@
               "string | undefined"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profile.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/user-profile-components",
+        "id": "def-common.UserToolTipProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserToolTipProps",
+        "description": [
+          "\nProps of {@link UserToolTip} component"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserToolTipProps",
+            "text": "UserToolTipProps"
+          },
+          " extends Omit<",
+          "EuiToolTipProps",
+          ", \"title\" | \"content\">"
+        ],
+        "path": "packages/kbn-user-profile-components/src/user_tooltip.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserToolTipProps.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [
+              "\nUser to be rendered"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/user-profile-components",
+                "scope": "common",
+                "docId": "kibKbnUserProfileComponentsPluginApi",
+                "section": "def-common.UserProfileUserInfo",
+                "text": "UserProfileUserInfo"
+              }
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_tooltip.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserToolTipProps.avatar",
+            "type": "Object",
+            "tags": [],
+            "label": "avatar",
+            "description": [
+              "\nAvatar data of user to be rendered"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/user-profile-components",
+                "scope": "common",
+                "docId": "kibKbnUserProfileComponentsPluginApi",
+                "section": "def-common.UserProfileAvatarData",
+                "text": "UserProfileAvatarData"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-user-profile-components/src/user_tooltip.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

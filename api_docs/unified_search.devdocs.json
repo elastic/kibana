@@ -11,7 +11,7 @@
         "label": "DataViewPicker",
         "description": [],
         "signature": [
-          "({ isMissingCurrent, currentDataViewId, adHocDataViews, onChangeDataView, onAddField, onDataViewCreated, trigger, selectableProps, textBasedLanguages, onSaveTextLanguageQuery, onTextLangQuerySubmit, textBasedLanguage, isDisabled, }: ",
+          "({ isMissingCurrent, currentDataViewId, adHocDataViews, onChangeDataView, onEditDataView, onAddField, onDataViewCreated, trigger, selectableProps, textBasedLanguages, onSaveTextLanguageQuery, onTextLangQuerySubmit, textBasedLanguage, onCreateDefaultAdHocDataView, isDisabled, }: ",
           "DataViewPickerPropsExtended",
           ") => JSX.Element"
         ],
@@ -24,7 +24,7 @@
             "id": "def-public.DataViewPicker.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  isMissingCurrent,\n  currentDataViewId,\n  adHocDataViews,\n  onChangeDataView,\n  onAddField,\n  onDataViewCreated,\n  trigger,\n  selectableProps,\n  textBasedLanguages,\n  onSaveTextLanguageQuery,\n  onTextLangQuerySubmit,\n  textBasedLanguage,\n  isDisabled,\n}",
+            "label": "{\n  isMissingCurrent,\n  currentDataViewId,\n  adHocDataViews,\n  onChangeDataView,\n  onEditDataView,\n  onAddField,\n  onDataViewCreated,\n  trigger,\n  selectableProps,\n  textBasedLanguages,\n  onSaveTextLanguageQuery,\n  onTextLangQuerySubmit,\n  textBasedLanguage,\n  onCreateDefaultAdHocDataView,\n  isDisabled,\n}",
             "description": [],
             "signature": [
               "DataViewPickerPropsExtended"
@@ -328,7 +328,7 @@
                 "section": "def-public.TimeHistoryContract",
                 "text": "TimeHistoryContract"
               },
-              " | undefined; customSubmitButton?: React.ReactNode; screenTitle?: string | undefined; showQueryBar?: boolean | undefined; showQueryInput?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; hiddenFilterPanelOptions?: ",
+              " | undefined; customSubmitButton?: React.ReactNode; screenTitle?: string | undefined; showQueryInput?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; hiddenFilterPanelOptions?: ",
               "FilterPanelOption",
               "[] | undefined; isRefreshPaused?: boolean | undefined; dateRangeFrom?: string | undefined; dateRangeTo?: string | undefined; showSaveQuery?: boolean | undefined; onQueryChange?: ((payload: { dateRange: ",
               "TimeRange",
@@ -452,7 +452,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              "> | undefined"
+              ", any> | undefined"
             ],
             "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
             "deprecated": false,
@@ -555,6 +555,54 @@
           },
           {
             "parentPluginId": "unifiedSearch",
+            "id": "def-public.DataViewPickerProps.onEditDataView",
+            "type": "Function",
+            "tags": [],
+            "label": "onEditDataView",
+            "description": [
+              "\nCallback that is called when the user edits the current data view via flyout.\nThe first parameter is the updated data view stub without fetched fields"
+            ],
+            "signature": [
+              "((updatedDataViewStub: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ") => void) | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedSearch",
+                "id": "def-public.DataViewPickerProps.onEditDataView.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "updatedDataViewStub",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  }
+                ],
+                "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedSearch",
             "id": "def-public.DataViewPickerProps.currentDataViewId",
             "type": "string",
             "tags": [],
@@ -643,6 +691,38 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.DataViewPickerProps.onCreateDefaultAdHocDataView",
+            "type": "Function",
+            "tags": [],
+            "label": "onCreateDefaultAdHocDataView",
+            "description": [],
+            "signature": [
+              "((pattern: string) => void) | undefined"
+            ],
+            "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedSearch",
+                "id": "def-public.DataViewPickerProps.onCreateDefaultAdHocDataView.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pattern",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/unified_search/public/dataview_picker/index.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -1060,6 +1140,46 @@
           },
           {
             "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.dataViewEditor",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViewEditor",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViewEditor",
+                "scope": "public",
+                "docId": "kibDataViewEditorPluginApi",
+                "section": "def-public.PluginStart",
+                "text": "PluginStart"
+              }
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
             "id": "def-public.IUnifiedSearchPluginServices.usageCollection",
             "type": "Object",
             "tags": [],
@@ -1109,6 +1229,8 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
+              " | ",
+              "DataViewByIdOrTitle",
               ")[]"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",

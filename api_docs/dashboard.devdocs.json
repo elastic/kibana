@@ -290,6 +290,20 @@
           },
           {
             "parentPluginId": "dashboard",
+            "id": "def-public.DashboardContainerInput.syncCursor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "syncCursor",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/dashboard/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
             "id": "def-public.DashboardContainerInput.viewMode",
             "type": "Enum",
             "tags": [],

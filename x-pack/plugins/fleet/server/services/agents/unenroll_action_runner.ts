@@ -25,6 +25,7 @@ import { bulkUpdateAgents } from './crud';
 import {
   bulkCreateAgentActionResults,
   createAgentAction,
+  createErrorActionResults,
   getUnenrollAgentActions,
 } from './actions';
 import { getHostedPolicies, isHostedAgent } from './hosted_agent';
@@ -81,13 +82,24 @@ export async function unenrollBatch(
         return agents;
       }, []);
 
+  const now = new Date().toISOString();
+
+  // Update the necessary agents
+  const updateData = options.revoke
+    ? { unenrolled_at: now, active: false }
+    : { unenrollment_started_at: now };
+
+  await bulkUpdateAgents(
+    esClient,
+    agentsToUpdate.map(({ id }) => ({ agentId: id, data: updateData })),
+    outgoingErrors
+  );
+
   const actionId = options.actionId ?? uuid();
-  const errorCount = Object.keys(outgoingErrors).length;
   const total = options.total ?? givenAgents.length;
 
   const agentIds = agentsToUpdate.map((agent) => agent.id);
 
-  const now = new Date().toISOString();
   if (options.revoke) {
     // Get all API keys that need to be invalidated
     await invalidateAPIKeysForAgents(agentsToUpdate);
@@ -104,32 +116,11 @@ export async function unenrollBatch(
     });
   }
 
-  if (errorCount > 0) {
-    appContextService
-      .getLogger()
-      .info(
-        `Skipping ${errorCount} agents, as failed validation (cannot unenroll from a hosted policy or already unenrolled)`
-      );
-
-    // writing out error result for those agents that failed validation, so the action is not going to stay in progress forever
-    await bulkCreateAgentActionResults(
-      esClient,
-      Object.keys(outgoingErrors).map((agentId) => ({
-        agentId,
-        actionId,
-        error: outgoingErrors[agentId].message,
-      }))
-    );
-  }
-
-  // Update the necessary agents
-  const updateData = options.revoke
-    ? { unenrolled_at: now, active: false }
-    : { unenrollment_started_at: now };
-
-  await bulkUpdateAgents(
+  await createErrorActionResults(
     esClient,
-    agentsToUpdate.map(({ id }) => ({ agentId: id, data: updateData }))
+    actionId,
+    outgoingErrors,
+    'cannot unenroll from a hosted policy or already unenrolled'
   );
 
   return {
@@ -223,6 +214,20 @@ export async function invalidateAPIKeysForAgents(agents: Agent[]) {
     }
     if (agent.default_api_key_history) {
       agent.default_api_key_history.forEach((apiKey) => keys.push(apiKey.id));
+    }
+    if (agent.outputs) {
+      Object.values(agent.outputs).forEach((output) => {
+        if (output.api_key_id) {
+          keys.push(output.api_key_id);
+        }
+        if (output.to_retire_api_key_ids) {
+          Object.values(output.to_retire_api_key_ids).forEach((apiKey) => {
+            if (apiKey?.id) {
+              keys.push(apiKey.id);
+            }
+          });
+        }
+      });
     }
     return keys;
   }, []);

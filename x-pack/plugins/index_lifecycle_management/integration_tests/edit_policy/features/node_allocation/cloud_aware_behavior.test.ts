@@ -11,13 +11,14 @@ import {
   CloudNodeAllocationTestBed,
   setupCloudNodeAllocation,
 } from './cloud_aware_behavior.helpers';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 
 describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
   let testBed: CloudNodeAllocationTestBed;
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   afterAll(() => {
@@ -28,7 +29,7 @@ describe('<EditPolicy /> node allocation cloud-aware behavior', () => {
     await act(async () => {
       if (Boolean(isOnCloud)) {
         testBed = await setupCloudNodeAllocation(httpSetup, {
-          appServicesContext: { cloud: { isCloudEnabled: true } },
+          appServicesContext: { cloud: { ...cloudMock.createSetup(), isCloudEnabled: true } },
         });
       } else {
         testBed = await setupCloudNodeAllocation(httpSetup);

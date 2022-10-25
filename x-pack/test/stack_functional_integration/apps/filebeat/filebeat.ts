@@ -16,9 +16,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('filebeat- should have hit count GT 0', async function () {
       await PageObjects.common.navigateToApp('discover', { insertTimestamp: false });
       await PageObjects.discover.selectIndexPattern('filebeat-*');
-      await PageObjects.timePicker.setCommonlyUsedTime('Last_30 days');
+      await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
       await retry.try(async () => {
-        const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
+        const hitCount = await PageObjects.discover.getHitCountInt();
         expect(hitCount).to.be.greaterThan(0);
       });
     });

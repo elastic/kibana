@@ -363,7 +363,7 @@
             "label": "invokeChain",
             "description": [],
             "signature": [
-              "<ChainOutput = unknown>(chainArr: ",
+              "<ChainOutput = unknown>([head, ...tail]: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -373,7 +373,15 @@
               },
               "[], input: unknown) => ",
               "Observable",
-              "<ChainOutput>"
+              "<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueError",
+                "text": "ExpressionValueError"
+              },
+              " | ChainOutput>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -384,7 +392,7 @@
                 "id": "def-public.Execution.invokeChain.$1",
                 "type": "Array",
                 "tags": [],
-                "label": "chainArr",
+                "label": "[head, ...tail]",
                 "description": [],
                 "signature": [
                   {
@@ -626,7 +634,15 @@
               },
               "[]>) => ",
               "Observable",
-              "<Record<string, unknown>>"
+              "<Record<string, unknown> | ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueError",
+                "text": "ExpressionValueError"
+              },
+              ">"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -3708,7 +3724,7 @@
                 "id": "def-public.ExpressionRenderHandler.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      syncTooltips,\n      interactive,\n      hasCompatibleActions = async () => false,\n      executionContext,\n    }",
+                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      syncTooltips,\n      syncCursor,\n      interactive,\n      hasCompatibleActions = async () => false,\n      executionContext,\n    }",
                 "description": [],
                 "signature": [
                   "ExpressionRenderHandlerParams"
@@ -7012,6 +7028,24 @@
             "label": "isSyncColorsEnabled",
             "description": [
               "\nReturns the state (true|false) of the sync colors across panels switch."
+            ],
+            "signature": [
+              "(() => boolean) | undefined"
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExecutionContext.isSyncCursorEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSyncCursorEnabled",
+            "description": [
+              "\nReturns the state (true|false) of the sync cursor across panels switch."
             ],
             "signature": [
               "(() => boolean) | undefined"
@@ -10542,6 +10576,20 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.IExpressionLoaderParams.syncCursor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "syncCursor",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/public/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.IExpressionLoaderParams.syncTooltips",
             "type": "CompoundType",
             "tags": [],
@@ -10891,6 +10939,22 @@
             "type": "Function",
             "tags": [],
             "label": "isSyncColorsEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.IInterpreterRenderHandlers.isSyncCursorEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSyncCursorEnabled",
             "description": [],
             "signature": [
               "() => boolean"
@@ -13369,7 +13433,7 @@
             "label": "invokeChain",
             "description": [],
             "signature": [
-              "<ChainOutput = unknown>(chainArr: ",
+              "<ChainOutput = unknown>([head, ...tail]: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -13379,7 +13443,15 @@
               },
               "[], input: unknown) => ",
               "Observable",
-              "<ChainOutput>"
+              "<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueError",
+                "text": "ExpressionValueError"
+              },
+              " | ChainOutput>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -13390,7 +13462,7 @@
                 "id": "def-server.Execution.invokeChain.$1",
                 "type": "Array",
                 "tags": [],
-                "label": "chainArr",
+                "label": "[head, ...tail]",
                 "description": [],
                 "signature": [
                   {
@@ -13632,7 +13704,15 @@
               },
               "[]>) => ",
               "Observable",
-              "<Record<string, unknown>>"
+              "<Record<string, unknown> | ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueError",
+                "text": "ExpressionValueError"
+              },
+              ">"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -17995,6 +18075,24 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-server.ExecutionContext.isSyncCursorEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSyncCursorEnabled",
+            "description": [
+              "\nReturns the state (true|false) of the sync cursor across panels switch."
+            ],
+            "signature": [
+              "(() => boolean) | undefined"
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-server.ExecutionContext.isSyncTooltipsEnabled",
             "type": "Function",
             "tags": [],
@@ -20569,6 +20667,22 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-server.IInterpreterRenderHandlers.isSyncCursorEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSyncCursorEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-server.IInterpreterRenderHandlers.isSyncTooltipsEnabled",
             "type": "Function",
             "tags": [],
@@ -22158,7 +22272,7 @@
             "label": "invokeChain",
             "description": [],
             "signature": [
-              "<ChainOutput = unknown>(chainArr: ",
+              "<ChainOutput = unknown>([head, ...tail]: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -22168,7 +22282,15 @@
               },
               "[], input: unknown) => ",
               "Observable",
-              "<ChainOutput>"
+              "<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueError",
+                "text": "ExpressionValueError"
+              },
+              " | ChainOutput>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -22179,7 +22301,7 @@
                 "id": "def-common.Execution.invokeChain.$1",
                 "type": "Array",
                 "tags": [],
-                "label": "chainArr",
+                "label": "[head, ...tail]",
                 "description": [],
                 "signature": [
                   {
@@ -22421,7 +22543,15 @@
               },
               "[]>) => ",
               "Observable",
-              "<Record<string, unknown>>"
+              "<Record<string, unknown> | ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueError",
+                "text": "ExpressionValueError"
+              },
+              ">"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -29636,6 +29766,24 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-common.ExecutionContext.isSyncCursorEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSyncCursorEnabled",
+            "description": [
+              "\nReturns the state (true|false) of the sync cursor across panels switch."
+            ],
+            "signature": [
+              "(() => boolean) | undefined"
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.ExecutionContext.isSyncTooltipsEnabled",
             "type": "Function",
             "tags": [],
@@ -31246,6 +31394,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "syncColors",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionExecutionParams.syncCursor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "syncCursor",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -34331,6 +34493,22 @@
             "type": "Function",
             "tags": [],
             "label": "isSyncColorsEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.IInterpreterRenderHandlers.isSyncCursorEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSyncCursorEnabled",
             "description": [],
             "signature": [
               "() => boolean"

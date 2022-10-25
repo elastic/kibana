@@ -6,7 +6,6 @@
  */
 
 import _ from 'lodash';
-import { Logger } from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { executeEsQueryFactory, getShapesFilters, OTHER_CATEGORY } from './es_query_builder';
@@ -138,7 +137,7 @@ export function getEntitiesAndGenerateAlerts(
   return { activeEntities, inactiveEntities };
 }
 
-export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType['executor'] =>
+export const getGeoContainmentExecutor = (): GeoContainmentAlertType['executor'] =>
   async function ({
     previousStartedAt: windowStart,
     startedAt: windowEnd,
@@ -146,6 +145,7 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
     params,
     alertId,
     state,
+    logger,
   }): Promise<GeoContainmentState> {
     const { shapesFilters, shapesIdsNamesMap } = state.shapesFilters
       ? state
@@ -154,7 +154,7 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
           params.boundaryGeoField,
           params.geoField,
           services.scopedClusterClient.asCurrentUser,
-          log,
+          logger,
           alertId,
           params.boundaryNameField,
           params.boundaryIndexQuery
@@ -163,14 +163,14 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
     const executeEsQuery = await executeEsQueryFactory(
       params,
       services.scopedClusterClient.asCurrentUser,
-      log,
+      logger,
       shapesFilters
     );
 
     // Start collecting data only on the first cycle
     let currentIntervalResults: estypes.SearchResponse<unknown> | undefined;
     if (!windowStart) {
-      log.debug(`alert ${GEO_CONTAINMENT_ID}:${alertId} alert initialized. Collecting data`);
+      logger.debug(`alert ${GEO_CONTAINMENT_ID}:${alertId} alert initialized. Collecting data`);
       // Consider making first time window configurable?
       const START_TIME_WINDOW = 1;
       const tempPreviousEndTime = new Date(windowEnd);
@@ -213,7 +213,7 @@ export const getGeoContainmentExecutor = (log: Logger): GeoContainmentAlertType[
           recoveredAlert.setContext(context);
         }
       } catch (e) {
-        log.warn(`Unable to set alert context for recovered alert, error: ${e.message}`);
+        logger.warn(`Unable to set alert context for recovered alert, error: ${e.message}`);
       }
     }
 

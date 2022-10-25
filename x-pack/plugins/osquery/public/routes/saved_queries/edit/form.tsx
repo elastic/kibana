@@ -49,10 +49,10 @@ const EditSavedQueryFormComponent: React.FC<EditSavedQueryFormProps> = ({
     formState: { isSubmitting },
   } = hooksForm;
 
-  const onSubmit = (payload: SavedQueryFormData) => {
+  const onSubmit = async (payload: SavedQueryFormData) => {
     const serializedData = serializer(payload);
     try {
-      handleSubmit(serializedData);
+      await handleSubmit(serializedData);
       // eslint-disable-next-line no-empty
     } catch (e) {}
   };

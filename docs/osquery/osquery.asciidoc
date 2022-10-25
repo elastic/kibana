@@ -61,12 +61,11 @@ TIP: To save a single query for future use, click *Save for later* and define th
 [[osquery-view-history]]
 == View or rerun previous live queries
 
-The *Live queries history* section on the *Live queries* tab shows a log of queries run over the last 30 days.
-Each query has the following options:
+The *Live queries history* section on the *Live queries* tab shows a log of queries run over the last 30 days. From the Live queries table, you can:
 
-* Click image:images/play-icon.png[Right-pointing triangle] to rerun a query.
+* Click the run icon (image:images/play-icon.png[Right-pointing triangle]) to rerun a single query or a query pack.
 
-* Click image:images/table-icon.png[Table icon] to view the query <<osquery-results,results>> and <<osquery-status,status>>.
+* Click the table icon (image:images/table-icon.png[Table icon]) to examine the <<osquery-results,results>> for a single query or a query pack. From the results table, you can also find the query <<osquery-status,status>>.
 +
 [role="screenshot"]
 image::images/live-query-check-results.png[Results of OSquery]

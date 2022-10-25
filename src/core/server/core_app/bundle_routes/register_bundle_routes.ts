@@ -12,7 +12,7 @@ import { fromRoot } from '@kbn/utils';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import type { IRouter } from '@kbn/core-http-server';
-import { UiPlugins } from '../../plugins';
+import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { FileHashCache } from './file_hash_cache';
 import { registerRouteForBundle } from './bundles_route';
 

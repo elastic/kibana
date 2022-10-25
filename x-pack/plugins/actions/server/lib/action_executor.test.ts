@@ -35,7 +35,9 @@ const executeParams = {
 };
 
 const spacesMock = spacesServiceMock.createStartContract();
-const loggerMock = loggingSystemMock.create().get();
+const loggerMock: ReturnType<typeof loggingSystemMock.createLogger> =
+  loggingSystemMock.createLogger();
+
 const getActionsClientWithRequest = jest.fn();
 actionExecutor.initialize({
   logger: loggerMock,
@@ -52,6 +54,7 @@ beforeEach(() => {
   jest.resetAllMocks();
   spacesMock.getSpaceId.mockReturnValue('some-namespace');
   getActionsClientWithRequest.mockResolvedValue(actionsClient);
+  loggerMock.get.mockImplementation(() => loggerMock);
 });
 
 test('successfully executes', async () => {
@@ -109,6 +112,7 @@ test('successfully executes', async () => {
       baz: true,
     },
     params: { foo: true },
+    logger: loggerMock,
   });
 
   expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
@@ -482,6 +486,7 @@ test('should not throws an error if actionType is preconfigured', async () => {
       baz: true,
     },
     params: { foo: true },
+    logger: loggerMock,
   });
 });
 
@@ -535,7 +540,7 @@ test('logs a warning and error when alert executor throws an error', async () =>
   executorMock.mockRejectedValue(err);
   await actionExecutor.execute(executeParams);
   expect(loggerMock.warn).toBeCalledWith(
-    'action execution failure: test:1: action-1: an error occurred while running the action: this action execution is intended to fail'
+    'action execution failure: test:1: action-1: an error occurred while running the action: this action execution is intended to fail; retry: true'
   );
   expect(loggerMock.error).toBeCalledWith(err, {
     error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },

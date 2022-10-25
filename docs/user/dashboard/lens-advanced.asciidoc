@@ -57,13 +57,15 @@ image::images/lens_clickAndDragZoom_7.16.gif[Cursor clicking and dragging across
 
 . In the layer pane, click *Count of Records*.
 
-.. In the *Name* field, enter `Number of orders`.
-
-.. Click *Add advanced options > Normalize by unit*. 
+.. Click *Advanced*. 
 
 .. From the *Normalize by unit* dropdown, select *per hour*, then click *Close*.
 +
-*Normalize unit* converts *Average sales per 12 hours* into *Average sales per 12 hours (per hour)* by dividing the number of hours.
+*Normalize by unit* converts `Count of Records` into `Count of records per hour` by dividing by 24.
+
+.. In the *Name* field, enter `Number of orders`.
+
+.. Click *Close*.
 
 . To hide the *Horizontal axis* label, open the *Bottom Axis* menu, then select *None* from the *Axis title* dropdown.
 
@@ -73,13 +75,13 @@ To identify the 75th percentile of orders, add a reference line:
 
 . Click *Static value*.
 
-.. Click *Quick functions*, then click *Percentile*.
+.. Click *Quick function*, then click *Percentile*.
 
 .. From the *Field* dropdown, select *total_quantity*.
 
-.. In the *Percentile* field, enter `75`.
+.. In the *Reference line value* field, enter `75`.
 
-. Configure the display options.
+. Configure the *Appearance* options.
 
 .. In the *Name* field, enter `75th`.
 
@@ -168,9 +170,11 @@ Add a layer to display the customer traffic:
 
 .. In the *Name* field, enter `Number of customers`.
 
-.. In the *Series color* field, enter *#D36086*.
+.. In the *Series color* field, enter `#D36086`.
 
 .. Click *Right* for the *Axis side*, then click *Close*.
++
+image::images/lens_advancedTutorial_numberOfCustomers_8.5.0.png[Number of customers area chart in Lens]
 
 . From the *Available fields* list, drag *order_date* to the *Horizontal Axis* field in the second layer.
 
@@ -202,7 +206,7 @@ To view change over time as a percentage, create an *Area percentage* chart that
 
 For each order category, create a filter: 
 
-. In the layer pane, click *Add or drag-and-drop a field* for *Break down by*.
+. In the layer pane, click *Add or drag-and-drop a field* for *Breakdown*.
 
 . Click the *Filters* function.
 
@@ -255,7 +259,7 @@ Configure the cumulative sum of store orders:
 
 Filter the results to display the data for only Saturday and Sunday:
 
-. In the layer pane, click *Add or drag-and-drop a field* for *Break down by*. 
+. In the layer pane, click *Add or drag-and-drop a field* for *Breakdown*. 
 
 . Click the *Filters* function.
 
@@ -294,7 +298,7 @@ To create a week-over-week comparison, shift *Count of Records [1]* by one week:
 
 . In the layer pane, click *Count of Records [1]*.
 
-. Click *Add advanced options > Time shift*, select *1 week ago*, then click *Close*.
+. Click *Advanced*, select *1 week ago* from the *Time shift* dropdown, then click *Close*.
 +
 To use custom time shifts, enter the time value and increment, then press Enter. For example, enter *1w* to use the *1 week ago* time shift.
 +
@@ -322,9 +326,11 @@ To compare time range changes as a percent, create a bar chart that compares the
 
 . Click *Formula*, then enter `count() / count(shift='1w') - 1`.
 
-. Open the *Value format* dropdown, select *Percent*, then enter `0` in the *Decimals* field.
+. In the *Name* field, enter `Percent of change`.
 
-. In the *Name* field, enter `Percent of change`, then click *Close*.
+. From the *Value format* dropdown, select *Percent*, then enter `0` in the *Decimals* field.
+
+. Click *Close*.
 +
 [role="screenshot"]
 image::images/lens_percent_chage.png[Bar chart with percent change in sales between the current time and the previous week]
@@ -359,7 +365,7 @@ Create a date histogram table and group the customer count metric by category, s
 
 To split the metric, add columns for each continent using the *Columns* field:
 
-. From the *Available fields* list, drag *geoip.continent_name* to the *Columns* field in the layer pane.
+. From the *Available fields* list, drag *geoip.continent_name* to the *Split metrics by* field in the layer pane.
 +
 [role="screenshot"]
 image::images/lens_table_over_time.png[Date histogram table with groups for the customer count metric]

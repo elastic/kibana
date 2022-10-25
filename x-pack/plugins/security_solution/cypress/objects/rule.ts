@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import type { Throttle } from '@kbn/securitysolution-io-ts-alerting-types';
-import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules';
+import type { RuleActionThrottle } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import type { CompleteTimeline } from './timeline';
 import { getTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
-import type { FullResponseSchema } from '../../common/detection_engine/schemas/request';
+import type { RuleResponse } from '../../common/detection_engine/rule_schema';
 import type { Connectors } from './connector';
-
-export const totalNumberOfPrebuiltRules = rawRules.length;
 
 const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
 
@@ -39,7 +36,7 @@ interface Interval {
 }
 
 export interface Actions {
-  throttle: Throttle;
+  throttle: RuleActionThrottle;
   connectors: Connectors[];
 }
 
@@ -509,9 +506,7 @@ export const getEditedRule = (): CustomRule => ({
   tags: [...(getExistingRule().tags || []), 'edited'],
 });
 
-export const expectedExportedRule = (
-  ruleResponse: Cypress.Response<FullResponseSchema>
-): string => {
+export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse>): string => {
   const {
     id,
     updated_at: updatedAt,
@@ -534,7 +529,7 @@ export const expectedExportedRule = (
   // NOTE: Order of the properties in this object matters for the tests to work.
   // TODO: Follow up https://github.com/elastic/kibana/pull/137628 and add an explicit type to this object
   // without using Partial
-  const rule: Partial<FullResponseSchema> = {
+  const rule: Partial<RuleResponse> = {
     id,
     updated_at: updatedAt,
     updated_by: updatedBy,

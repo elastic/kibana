@@ -21,17 +21,22 @@ import {
 } from '../../../../common/endpoint/constants';
 
 export const createActionRequestsEsSearchResultsMock = (
-  agentIds?: string[]
+  agentIds?: string[],
+  isMultipleActions: boolean = false
 ): estypes.SearchResponse<LogsEndpointAction> => {
   const endpointActionGenerator = new EndpointActionGenerator('seed');
 
-  return endpointActionGenerator.toEsSearchResponse<LogsEndpointAction>([
-    endpointActionGenerator.generateActionEsHit({
-      EndpointActions: { action_id: '123' },
-      agent: { id: agentIds ? agentIds : 'agent-a' },
-      '@timestamp': '2022-04-27T16:08:47.449Z',
-    }),
-  ]);
+  return isMultipleActions
+    ? endpointActionGenerator.toEsSearchResponse<LogsEndpointAction>(
+        Array.from({ length: 23 }).map(() => endpointActionGenerator.generateActionEsHit())
+      )
+    : endpointActionGenerator.toEsSearchResponse<LogsEndpointAction>([
+        endpointActionGenerator.generateActionEsHit({
+          EndpointActions: { action_id: '123' },
+          agent: { id: agentIds ? agentIds : 'agent-a' },
+          '@timestamp': '2022-04-27T16:08:47.449Z',
+        }),
+      ]);
 };
 
 export const createActionResponsesEsSearchResultsMock = (
@@ -41,8 +46,7 @@ export const createActionResponsesEsSearchResultsMock = (
   const fleetActionGenerator = new FleetActionGenerator('seed');
 
   let hitSource: Array<
-    | estypes.SearchHit<EndpointActionResponse>
-    | estypes.SearchHit<LogsEndpointActionResponse<object>>
+    estypes.SearchHit<EndpointActionResponse> | estypes.SearchHit<LogsEndpointActionResponse>
   > = [
     fleetActionGenerator.generateResponseEsHit({
       action_id: '123',

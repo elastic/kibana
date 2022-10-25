@@ -8,6 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
+import type { TypeOf } from '@kbn/config-schema';
 import fs from 'fs';
 import { Calendar } from '@kbn/ml-plugin/server/models/calendar';
 import { Annotation } from '@kbn/ml-plugin/common/types/annotations';
@@ -17,6 +18,7 @@ import { DataFrameTaskStateType } from '@kbn/ml-plugin/common/types/data_frame_a
 import { DATA_FRAME_TASK_STATE } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
+import { setupModuleBodySchema } from '@kbn/ml-plugin/server/routes/schemas/modules';
 import {
   ML_ANNOTATIONS_INDEX_ALIAS_READ,
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
@@ -1006,6 +1008,19 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug('> Filter deleted.');
     },
 
+    async assertModelMemoryLimitForJob(jobId: string, expectedMml: string) {
+      const {
+        body: {
+          jobs: [job],
+        },
+      } = await this.getAnomalyDetectionJob(jobId);
+      const mml = job.analysis_limits.model_memory_limit;
+      expect(mml).to.eql(
+        expectedMml,
+        `Expected model memory limit to be  ${expectedMml}, got  ${mml}`
+      );
+    },
+
     async waitForFilterToExist(filterId: string, errorMsg?: string) {
       await retry.waitForWithTimeout(`'${filterId}' to exist`, 5 * 1000, async () => {
         if (await this.getFilter(filterId, 200)) {
@@ -1444,6 +1459,22 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       this.assertResponseStatusCode(200, status, body);
 
       log.debug('> Ingest pipeline deleted');
+    },
+
+    async setupModule(
+      moduleId: string,
+      body: TypeOf<typeof setupModuleBodySchema>,
+      space?: string
+    ) {
+      log.debug(`Setting up module with ID: "${moduleId}"`);
+      const { body: module, status } = await kbnSupertest
+        .post(`${space ? `/s/${space}` : ''}/api/ml/modules/setup/${moduleId}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .send(body);
+      this.assertResponseStatusCode(200, status, module);
+
+      log.debug('Module set up');
+      return module;
     },
   };
 }

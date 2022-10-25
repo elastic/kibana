@@ -27,27 +27,25 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
-import { Setup } from '../../helpers/setup_request';
 import { NodeType } from '../../../../common/connections';
 import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
+import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 
 export const getStats = async ({
-  setup,
+  apmEventClient,
   start,
   end,
   filter,
   numBuckets,
   offset,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   filter: QueryDslQueryContainer[];
   numBuckets: number;
   offset?: string;
 }) => {
-  const { apmEventClient } = setup;
-
   const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,

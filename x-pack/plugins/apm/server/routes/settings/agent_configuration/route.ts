@@ -23,8 +23,9 @@ import {
   serviceRt,
   agentConfigurationIntakeRt,
 } from '../../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
-import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
+import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
 import { syncAgentConfigsToApmPackagePolicies } from '../../fleet/sync_agent_configs_to_apm_package_policies';
+import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 
 // get list of configurations
 const agentConfigurationRoute = createApmServerRoute({
@@ -269,13 +270,16 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
   ): Promise<{
     environments: Array<{ name: string; alreadyConfigured: boolean }>;
   }> => {
-    const setup = await setupRequest(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
     const { context, params } = resources;
     const coreContext = await context.core;
 
     const { serviceName, start, end } = params.query;
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      apmEventClient: setup.apmEventClient,
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      apmEventClient,
       config: setup.config,
       kuery: '',
       start,
@@ -287,6 +291,7 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
     const environments = await getEnvironments({
       serviceName,
       setup,
+      apmEventClient,
       searchAggregatedTransactions,
       size,
     });
@@ -303,10 +308,13 @@ const agentConfigurationAgentNameRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ agentName: string | undefined }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.query;
-    const agentName = await getAgentNameByService({ serviceName, setup });
+    const agentName = await getAgentNameByService({
+      serviceName,
+      apmEventClient,
+    });
     return { agentName };
   },
 });

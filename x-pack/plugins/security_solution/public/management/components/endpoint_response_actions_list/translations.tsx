@@ -65,6 +65,12 @@ export const OUTPUT_MESSAGES = Object.freeze({
         defaultMessage: 'Execution completed',
       }
     ),
+    comment: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.expandSection.comment',
+      {
+        defaultMessage: 'Comment',
+      }
+    ),
   },
 });
 
@@ -171,6 +177,6 @@ export const FILTER_NAMES = Object.freeze({
     defaultMessage: 'Statuses',
   }),
   users: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.users', {
-    defaultMessage: 'Filter by user or comma separated list of users',
+    defaultMessage: 'Filter by username',
   }),
 });

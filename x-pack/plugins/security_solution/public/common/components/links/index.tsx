@@ -48,6 +48,9 @@ export const DEFAULT_NUMBER_OF_LINK = 5;
 /** The default max-height of the Reputation Links popover used to show "+n More" items (e.g. `+9 More`) */
 export const DEFAULT_MORE_MAX_HEIGHT = '200px';
 
+const isModified = (event: MouseEvent) =>
+  event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
+
 // Internal Links
 const UserDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
@@ -543,6 +546,10 @@ export const useGetSecuritySolutionLinkProps = (): GetSecuritySolutionProps => {
       return {
         href: url,
         onClick: (ev: MouseEvent) => {
+          if (isModified(ev)) {
+            return;
+          }
+
           ev.preventDefault();
           navigateTo({ url });
           if (onClickProps) {

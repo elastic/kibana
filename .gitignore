@@ -25,6 +25,7 @@ __tmp__
 
 # Ignore example plugin builds
 /examples/*/build
+/x-pack/examples/*/build
 
 # Ignore certain functional test runner artifacts
 /test/*/failure_debug
@@ -77,6 +78,12 @@ npm-debug.log*
 
 ## @cypress/snapshot from apm plugin
 /snapshots.js
+
+# transpiled cypress config
+x-pack/plugins/fleet/cypress.config.d.ts
+x-pack/plugins/fleet/cypress.config.js
+x-pack/plugins/osquery/cypress.config.d.ts
+x-pack/plugins/osquery/cypress.config.js
 
 # release notes script output
 report.csv

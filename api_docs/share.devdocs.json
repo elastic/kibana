@@ -1196,6 +1196,20 @@
           },
           {
             "parentPluginId": "share",
+            "id": "def-public.ShowShareMenuOptions.snapshotShareWarning",
+            "type": "string",
+            "tags": [],
+            "label": "snapshotShareWarning",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/share/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "share",
             "id": "def-public.ShowShareMenuOptions.onClose",
             "type": "Function",
             "tags": [],

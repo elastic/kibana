@@ -22,7 +22,6 @@ import { NavigateToLensContext } from '../../common';
 
 export interface VisTypeOptions {
   showTimePicker: boolean;
-  showQueryBar: boolean;
   showFilterBar: boolean;
   showIndexSelection: boolean;
   showQueryInput: boolean;
