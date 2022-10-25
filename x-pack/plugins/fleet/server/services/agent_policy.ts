@@ -79,7 +79,6 @@ import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
 import { getFullAgentPolicy } from './agent_policies';
 import { validateOutputForPolicy } from './agent_policies';
-import { getDefaultFleetServerHost } from './fleet_server_host';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
