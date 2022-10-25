@@ -58,11 +58,6 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
               `}
               meta={file.meta as FileImageMetadata}
               src={client.getDownloadHref({ id: file.id, fileKind: kind })}
-              // There is an issue where the intersection observer does not fire reliably.
-              // I'm not sure if this is becuause of the image being in a modal
-              // The result is that the image does not always get loaded.
-              // TODO: Investigate this behaviour further
-              lazy={false}
             />
           ) : (
             <div

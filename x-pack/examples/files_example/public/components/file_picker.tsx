@@ -18,5 +18,5 @@ interface Props {
 }
 
 export const MyFilePicker: FunctionComponent<Props> = ({ onClose, onDone }) => {
-  return <FilePicker kind={exampleFileKind.id} onClose={onClose} onDone={onDone} />;
+  return <FilePicker kind={exampleFileKind.id} onClose={onClose} onDone={onDone} pageSize={50} />;
 };
