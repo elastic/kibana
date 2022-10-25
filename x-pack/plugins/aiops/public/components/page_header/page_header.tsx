@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,6 +14,7 @@ import {
   EuiPageContentHeader_Deprecated as EuiPageContentHeader,
   EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
 } from '@elastic/eui';
+import { FullTimeRangeSelectorProps } from '../full_time_range_selector/full_time_range_selector';
 import { useUrlState } from '../../hooks/use_url_state';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useTimefilter } from '../../hooks/use_time_filter';
@@ -28,6 +29,13 @@ export const PageHeader: FC = () => {
     timeRangeSelector: dataView.timeFieldName !== undefined,
     autoRefreshSelector: true,
   });
+
+  const updateTimeState: FullTimeRangeSelectorProps['callback'] = useCallback(
+    (update) => {
+      setGlobalState({ time: { from: update.start.string, to: update.end.string } });
+    },
+    [setGlobalState]
+  );
 
   return (
     <>
@@ -55,7 +63,7 @@ export const PageHeader: FC = () => {
                     query={undefined}
                     disabled={false}
                     timefilter={timefilter}
-                    callback={setGlobalState}
+                    callback={updateTimeState}
                   />
                 </EuiFlexItem>
               )}
