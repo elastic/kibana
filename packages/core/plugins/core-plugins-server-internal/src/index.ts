@@ -15,5 +15,5 @@ export type {
 export { config } from './plugins_config';
 /** @internal */
 export { isNewPlatformPlugin } from './discovery';
-export { PluginDependencies } from './types';
+export type { PluginDependencies } from './types';
 export { PluginWrapper } from './plugin';
