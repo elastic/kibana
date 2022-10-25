@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { AggregationsTopHitsAggregation } from '@elastic/elasticsearch/lib/api/types';
 import { SERVICE_GROUP_SUPPORTED_FIELDS } from '../../../common/service_groups';
 
 export interface SourceDoc {
   [key: string]: string | SourceDoc;
 }
 
-export function getSourceFieldsAgg() {
+export function getSourceFieldsAgg(
+  topHitsOpts: AggregationsTopHitsAggregation = {}
+) {
   return {
     source_fields: {
       top_hits: {
@@ -19,6 +22,7 @@ export function getSourceFieldsAgg() {
         _source: {
           includes: SERVICE_GROUP_SUPPORTED_FIELDS,
         },
+        ...topHitsOpts,
       },
     },
   };

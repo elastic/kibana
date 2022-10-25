@@ -46,6 +46,9 @@ import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import { getMLJobs } from '../../../service_map/get_service_anomalies';
 import { apmActionVariables } from '../../action_variables';
 import { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import { getAnomalousEventSourceFields } from './get_anomalous_event_source_fields';
+import { firstValueFrom } from 'rxjs';
+import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 
 const paramsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
@@ -66,6 +69,7 @@ const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 export function registerAnomalyRuleType({
   logger,
   ruleDataClient,
+  config$,
   alerting,
   ml,
   basePath,
@@ -102,6 +106,14 @@ export function registerAnomalyRuleType({
         if (!ml) {
           return {};
         }
+
+        const config = await firstValueFrom(config$);
+        const indices = await getApmIndices({
+          config,
+          savedObjectsClient: services.savedObjectsClient,
+        });
+        const { transaction: transactionsIndex } = indices;
+
         const ruleParams = params;
         const request = {} as KibanaRequest;
         const { mlAnomalySearch } = ml.mlSystemProvider(
@@ -161,8 +173,14 @@ export function registerAnomalyRuleType({
                       },
                     },
                   },
-                  ...termQuery('partition_field_value', ruleParams.serviceName),
-                  ...termQuery('by_field_value', ruleParams.transactionType),
+                  ...termQuery(
+                    'partition_field_value',
+                    ruleParams.serviceName || null
+                  ),
+                  ...termQuery(
+                    'by_field_value',
+                    ruleParams.transactionType || null
+                  ),
                   ...termQuery(
                     'detector_index',
                     getApmMlDetectorIndex(ApmMlDetectorType.txLatency)
@@ -188,6 +206,8 @@ export function registerAnomalyRuleType({
                         { field: 'partition_field_value' },
                         { field: 'by_field_value' },
                         { field: 'job_id' },
+                        { field: 'timestamp' },
+                        { field: 'bucket_span' },
                       ] as const),
                       sort: {
                         timestamp: 'desc' as const,
@@ -222,14 +242,34 @@ export function registerAnomalyRuleType({
                 transactionType: latest.by_field_value as string,
                 environment: job.environment,
                 score: latest.record_score as number,
+                timestamp: Date.parse(latest.timestamp as string),
+                bucketSpan: latest.bucket_span as number,
               };
             })
             .filter((anomaly) =>
               anomaly ? anomaly.score >= threshold : false
             ) ?? [];
 
-        compact(anomalies).forEach((anomaly) => {
-          const { serviceName, environment, transactionType, score } = anomaly;
+        for (const anomaly of compact(anomalies)) {
+          const {
+            serviceName,
+            environment,
+            transactionType,
+            score,
+            timestamp,
+            bucketSpan,
+          } = anomaly;
+
+          const eventSourceFields = await getAnomalousEventSourceFields({
+            scopedClusterClient: services.scopedClusterClient,
+            index: transactionsIndex,
+            serviceName,
+            environment,
+            transactionType,
+            timestamp,
+            bucketSpan,
+          });
+
           const severityLevel = getSeverity(score);
           const reasonMessage = formatAnomalyReason({
             measured: score,
@@ -270,6 +310,7 @@ export function registerAnomalyRuleType({
                 [ALERT_EVALUATION_VALUE]: score,
                 [ALERT_EVALUATION_THRESHOLD]: threshold,
                 [ALERT_REASON]: reasonMessage,
+                ...eventSourceFields,
               },
             })
             .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
@@ -281,7 +322,7 @@ export function registerAnomalyRuleType({
               reason: reasonMessage,
               viewInAppUrl,
             });
-        });
+        }
 
         return {};
       },

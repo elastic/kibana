@@ -1,0 +1,72 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+  TRANSACTION_DURATION,
+} from '../../../../../common/elasticsearch_fieldnames';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { alertingEsClient } from '../../alerting_es_client';
+import { getSourceFields, getSourceFieldsAgg } from '../../get_source_fields';
+
+export async function getAnomalousEventSourceFields({
+  scopedClusterClient,
+  index,
+  serviceName,
+  environment,
+  transactionType,
+  timestamp,
+  bucketSpan,
+}: {
+  scopedClusterClient: IScopedClusterClient;
+  index: string;
+  serviceName: string;
+  environment: string;
+  transactionType: string;
+  timestamp: number;
+  bucketSpan: number;
+}) {
+  const params = {
+    index,
+    body: {
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { term: { [SERVICE_NAME]: serviceName } },
+            { term: { [TRANSACTION_TYPE]: transactionType } },
+            { term: { [SERVICE_ENVIRONMENT]: environment } },
+            {
+              range: {
+                '@timestamp': {
+                  gte: timestamp,
+                  lte: timestamp + bucketSpan * 1000,
+                  format: 'epoch_millis',
+                },
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        ...getSourceFieldsAgg({
+          sort: [{ [TRANSACTION_DURATION]: { order: 'desc' as const } }],
+        }),
+      },
+    },
+  };
+
+  const response = await alertingEsClient({
+    scopedClusterClient,
+    params,
+  });
+  if (!response.aggregations) {
+    return {};
+  }
+  return getSourceFields(response.aggregations);
+}
