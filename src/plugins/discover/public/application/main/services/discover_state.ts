@@ -42,7 +42,6 @@ import { getSavedSearchContainer, SavedSearchContainer } from './discover_saved_
 import { DiscoverServices } from '../../../build_services';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import { loadSavedSearch } from '../utils/load_saved_search';
 
 export interface AppStateUrl extends Omit<AppState, 'sort'> {
   /**
@@ -123,7 +122,7 @@ export interface DiscoverStateContainer {
       id: string,
       dataViewSpec: DataViewSpec | undefined,
       onError: (e: Error) => void
-    ) => void;
+    ) => Promise<SavedSearch | undefined>;
     loadNewSavedSearch: (
       dataViewSpec: DataViewSpec | undefined,
       onError: (e: Error) => void
@@ -267,9 +266,7 @@ export function getDiscoverStateContainer({
         if (appStateContainer.isEmptyURL()) {
           appStateContainer.set({});
         }
-        const currentSavedSearch = await loadSavedSearch(id, {
-          services,
-          appStateContainer,
+        const currentSavedSearch = await savedSearchContainer.load(id, {
           internalStateContainer,
           setError: onError,
           dataViewSpec,

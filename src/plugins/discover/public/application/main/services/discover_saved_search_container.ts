@@ -11,6 +11,9 @@ import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { differenceWith, isEqual, toPairs } from 'lodash';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { loadSavedSearch } from '../utils/load_saved_search';
+import { InternalStateContainer } from './discover_internal_state_container';
 import { updateSavedSearch } from '../utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
@@ -31,6 +34,18 @@ export interface SavedSearchContainer {
   savedSearchPersisted$: BehaviorSubject<SavedSearch>;
   hasChanged$: BehaviorSubject<boolean>;
   set: (savedSearch: SavedSearch) => SavedSearch;
+  load: (
+    id: string,
+    {
+      internalStateContainer,
+      setError,
+      dataViewSpec,
+    }: {
+      internalStateContainer: InternalStateContainer;
+      setError: (e: Error) => void;
+      dataViewSpec?: DataViewSpec;
+    }
+  ) => Promise<SavedSearch | undefined>;
   get: () => SavedSearch;
   update: (
     nextDataView: DataView | undefined,
@@ -218,10 +233,32 @@ export function getSavedSearchContainer({
     return resetUrl(get().id || '');
   };
 
+  const load = (
+    id: string,
+    {
+      internalStateContainer,
+      setError,
+      dataViewSpec,
+    }: {
+      internalStateContainer: InternalStateContainer;
+      setError: (e: Error) => void;
+      dataViewSpec?: DataViewSpec;
+    }
+  ) => {
+    return loadSavedSearch(id, {
+      services,
+      appStateContainer,
+      dataViewSpec,
+      internalStateContainer,
+      setError,
+    });
+  };
+
   return {
     savedSearch$,
     savedSearchPersisted$,
     hasChanged$,
+    load,
     set,
     reset,
     resetUrl,

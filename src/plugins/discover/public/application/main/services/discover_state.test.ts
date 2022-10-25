@@ -86,16 +86,22 @@ describe('Test discover state', () => {
 describe('Test discover initial state sort handling', () => {
   test('Non-empty sort in URL should not be overwritten by saved search sort', async () => {
     history = createBrowserHistory();
-    history.push('/#?_a=(sort:!(!(order_date,desc)))');
+    history.push('/#?_a=(sort:!(!(timestamp,desc)))');
+    const savedSearch = {
+      ...savedSearchMockWithTimeField,
+      ...{ sort: [['bytes', 'desc']] },
+    } as SavedSearch;
 
     state = getDiscoverStateContainer({
-      savedSearch: { ...savedSearchMock, ...{ sort: [['bytes', 'desc']] } },
+      savedSearch: undefined,
       services: discoverServiceMock,
       history,
     });
-    // await state.setAppState({}, true);
+    state.savedSearchState.load = jest.fn(() => Promise.resolve(savedSearch));
+    await state.actions.loadSavedSearch(savedSearch.id!, undefined, jest.fn());
+    // await state.setAppState({});
     const stopSync = state.appState.syncState().stop;
-    expect(state.appState.getState().sort).toEqual([['order_date', 'desc']]);
+    expect(state.appState.getState().sort).toEqual([['timestamp', 'desc']]);
     stopSync();
   });
   test('Empty sort in URL should use saved search sort for state', async () => {
