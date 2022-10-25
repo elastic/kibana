@@ -6,23 +6,34 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { GuideConfig } from '../../types';
 
 export const securityConfig: GuideConfig = {
-  title: 'Elastic Security guided setup',
+  title: i18n.translate('guidedOnboarding.securityGuide.title', {
+    defaultMessage: 'Elastic Security guided setup',
+  }),
   guideName: 'Security',
   completedGuideRedirectLocation: {
     appID: 'security',
     path: '/app/security/dashboards',
   },
-  description: `We'll help you get set up quickly, using Elastic's out-of-the-box integrations.`,
+  description: i18n.translate('guidedOnboarding.securityGuide.description', {
+    defaultMessage: `We'll help you get set up quickly, using Elastic's out-of-the-box integrations.`,
+  }),
   steps: [
     {
       id: 'add_data',
-      title: 'Add data with Elastic Defend',
+      title: i18n.translate('guidedOnboarding.securityGuide.addDataStep.title', {
+        defaultMessage: 'Add data with Elastic Defend',
+      }),
       descriptionList: [
-        'Select the Elastic Defend integration to add your data.',
-        'Make sure your data looks good.',
+        i18n.translate('guidedOnboarding.securityGuide.addDataStep.description1', {
+          defaultMessage: 'Select the Elastic Defend integration to add your data.',
+        }),
+        i18n.translate('guidedOnboarding.securityGuide.addDataStep.description2', {
+          defaultMessage: 'Make sure your data looks good.',
+        }),
       ],
       integration: 'endpoint',
       location: {
@@ -32,11 +43,27 @@ export const securityConfig: GuideConfig = {
     },
     {
       id: 'rules',
-      title: 'Turn on rules',
-      descriptionList: ['Load the prebuilt rules.', 'Select the rules that you want.'],
+      title: i18n.translate('guidedOnboarding.securityGuide.rulesStep.title', {
+        defaultMessage: 'Turn on rules',
+      }),
+      descriptionList: [
+        i18n.translate('guidedOnboarding.securityGuide.rulesStep.description1', {
+          defaultMessage: 'Load the prebuilt rules.',
+        }),
+        i18n.translate('guidedOnboarding.securityGuide.rulesStep.description2', {
+          defaultMessage: 'Select the rules that you want..',
+        }),
+      ],
       manualCompletion: {
-        title: 'Continue with the tour',
-        description: 'When you’ve enabled the rules you want continue...',
+        title: i18n.translate('guidedOnboarding.securityGuide.rulesStep.manualCompletion.title', {
+          defaultMessage: 'Continue with the tour',
+        }),
+        description: i18n.translate(
+          'guidedOnboarding.securityGuide.rulesStep.manualCompletion.description',
+          {
+            defaultMessage: 'When you’ve enabled the rules you want continue...',
+          }
+        ),
       },
       location: {
         appID: 'securitySolutionUI',
@@ -45,8 +72,17 @@ export const securityConfig: GuideConfig = {
     },
     {
       id: 'alertsCases',
-      title: 'Alerts and cases',
-      descriptionList: ['View and triage alerts.', 'Create a case.'],
+      title: i18n.translate('guidedOnboarding.securityGuide.alertsStep.title', {
+        defaultMessage: 'Alerts and cases',
+      }),
+      descriptionList: [
+        i18n.translate('guidedOnboarding.securityGuide.alertsStep.description1', {
+          defaultMessage: 'View and triage alerts.',
+        }),
+        i18n.translate('guidedOnboarding.securityGuide.alertsStep.description2', {
+          defaultMessage: 'Create a case.',
+        }),
+      ],
       location: {
         appID: 'securitySolutionUI',
         path: '/alerts',
