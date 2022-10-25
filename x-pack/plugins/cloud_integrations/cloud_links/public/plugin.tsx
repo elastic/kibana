@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
@@ -26,12 +28,18 @@ export class CloudLinksPlugin
   public setup() {}
 
   public start(core: CoreStart, { cloud, security }: CloudLinksDepsStart) {
-    if (
-      cloud?.isCloudEnabled &&
-      security &&
-      !core.http.anonymousPaths.isAnonymous(window.location.pathname)
-    ) {
-      maybeAddCloudLinks({ security, chrome: core.chrome, cloud });
+    if (cloud?.isCloudEnabled && !core.http.anonymousPaths.isAnonymous(window.location.pathname)) {
+      core.chrome.registerGlobalHelpExtensionMenuLink({
+        linkType: 'custom',
+        href: core.http.basePath.prepend('/app/home#/getting_started'),
+        content: <FormattedMessage id="xpack.cloudLinks.setupGuide" defaultMessage="Setup guide" />,
+        'data-test-subj': 'cloudOnboardingSetupGuideLink',
+        priority: 1000, // We want this link to be at the very top.
+      });
+
+      if (security) {
+        maybeAddCloudLinks({ security, chrome: core.chrome, cloud });
+      }
     }
   }
 
