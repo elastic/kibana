@@ -91,28 +91,6 @@
   }
 
   .ml-anomalies-table-details {
-    padding: $euiSizeXS $euiSizeXL;
-    max-height: 1000px;
-    overflow-y: auto;
-
-    .anomaly-description-list {
-
-      .euiDescriptionList__title {
-        margin-top: 0;
-        flex-basis: 15%;
-        font-size: inherit;
-        line-height: 1.5rem;
-        @include euiTextTruncate;
-      }
-
-      .euiDescriptionList__description {
-        margin-top: 0;
-        flex-basis: 85%;
-        font-size: inherit;
-        line-height: 1.5rem;
-      }
-
-    }
+    padding: $euiSizeM;
   }
-
 }
