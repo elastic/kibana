@@ -6,6 +6,7 @@
  */
 
 /* eslint-disable max-classes-per-file */
+
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { OneOf } from '@kbn/utility-types';
