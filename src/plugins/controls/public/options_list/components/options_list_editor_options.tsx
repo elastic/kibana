@@ -49,6 +49,7 @@ export const OptionsListEditorOptions = ({
           onChange={() => {
             onChange({ hideExclude: !state.hideExclude });
             setState((s) => ({ ...s, hideExclude: !s.hideExclude }));
+            if (initialInput?.exclude) onChange({ exclude: false });
           }}
         />
       </EuiFormRow>
