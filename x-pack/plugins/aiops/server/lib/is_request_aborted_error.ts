@@ -7,6 +7,10 @@
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-export function isRequestAbortedError(e: unknown): boolean {
-  return isPopulatedObject(e, ['name']) && e.name === 'RequestAbortedError';
+interface RequestAbortedError extends Error {
+  name: 'RequestAbortedError';
+}
+
+export function isRequestAbortedError(arg: unknown): arg is RequestAbortedError {
+  return isPopulatedObject(arg, ['name']) && arg.name === 'RequestAbortedError';
 }
