@@ -121,7 +121,7 @@
                     "section": "def-public.IEmbeddable",
                     "text": "IEmbeddable"
                   },
-                  "<I, O> = ",
+                  "<I, O, any> = ",
                   {
                     "pluginId": "embeddable",
                     "scope": "public",
@@ -129,7 +129,7 @@
                     "section": "def-public.IEmbeddable",
                     "text": "IEmbeddable"
                   },
-                  "<I, O>>(embeddableFactoryId: string) => ",
+                  "<I, O, any>>(embeddableFactoryId: string) => ",
                   {
                     "pluginId": "embeddable",
                     "scope": "public",
@@ -200,7 +200,7 @@
                     "section": "def-public.EmbeddableOutput",
                     "text": "EmbeddableOutput"
                   },
-                  ">, unknown>>"
+                  ", any>, unknown>>"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/add_panel_action.ts",
                 "deprecated": false,
@@ -581,7 +581,7 @@
                     "section": "def-public.EmbeddableOutput",
                     "text": "EmbeddableOutput"
                   },
-                  ">, unknown>) | undefined"
+                  ", any>, unknown>) | undefined"
                 ],
                 "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx",
                 "deprecated": false,
@@ -824,7 +824,7 @@
             "section": "def-public.Embeddable",
             "text": "Embeddable"
           },
-          "<TContainerInput, TContainerOutput> implements ",
+          "<TContainerInput, TContainerOutput, any> implements ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -953,7 +953,7 @@
                     "section": "def-public.IEmbeddable",
                     "text": "IEmbeddable"
                   },
-                  "<I, O> = ",
+                  "<I, O, any> = ",
                   {
                     "pluginId": "embeddable",
                     "scope": "public",
@@ -961,7 +961,7 @@
                     "section": "def-public.IEmbeddable",
                     "text": "IEmbeddable"
                   },
-                  "<I, O>>(embeddableFactoryId: string) => ",
+                  "<I, O, any>>(embeddableFactoryId: string) => ",
                   {
                     "pluginId": "embeddable",
                     "scope": "public",
@@ -1071,7 +1071,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              ">) => void"
+              ", any>) => void"
             ],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
@@ -1108,7 +1108,7 @@
                     "section": "def-public.EmbeddableOutput",
                     "text": "EmbeddableOutput"
                   },
-                  ">"
+                  ", any>"
                 ],
                 "path": "src/plugins/embeddable/public/lib/containers/container.ts",
                 "deprecated": false,
@@ -1245,7 +1245,7 @@
                 "section": "def-public.IEmbeddable",
                 "text": "IEmbeddable"
               },
-              "<EEI, EEO> = ",
+              "<EEI, EEO, any> = ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -1253,7 +1253,7 @@
                 "section": "def-public.IEmbeddable",
                 "text": "IEmbeddable"
               },
-              "<EEI, EEO>>(type: string, explicitInput: Partial<EEI>) => Promise<E | ",
+              "<EEI, EEO, any>>(type: string, explicitInput: Partial<EEI>) => Promise<E | ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -1348,7 +1348,7 @@
                 "section": "def-public.IEmbeddable",
                 "text": "IEmbeddable"
               },
-              "<EEI, EEO> = ",
+              "<EEI, EEO, any> = ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -1356,7 +1356,7 @@
                 "section": "def-public.IEmbeddable",
                 "text": "IEmbeddable"
               },
-              "<EEI, EEO>>(id: string, newExplicitInput: Partial<EEI>, newType?: string | undefined) => Promise<void>"
+              "<EEI, EEO, any>>(id: string, newExplicitInput: Partial<EEI>, newType?: string | undefined) => Promise<void>"
             ],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
@@ -1540,7 +1540,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              ">>(id: string) => E"
+              ", any>>(id: string) => E"
             ],
             "path": "src/plugins/embeddable/public/lib/containers/container.ts",
             "deprecated": false,
@@ -1678,7 +1678,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              ">>(id: string) => Promise<",
+              ", any>>(id: string) => Promise<",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -1766,7 +1766,7 @@
                 "section": "def-public.IEmbeddable",
                 "text": "IEmbeddable"
               },
-              "<TEmbeddableInput, any>>(factory: ",
+              "<TEmbeddableInput, any, any>>(factory: ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -2065,7 +2065,7 @@
                     "section": "def-public.IEmbeddable",
                     "text": "IEmbeddable"
                   },
-                  "<I, O> = ",
+                  "<I, O, any> = ",
                   {
                     "pluginId": "embeddable",
                     "scope": "public",
@@ -2073,7 +2073,7 @@
                     "section": "def-public.IEmbeddable",
                     "text": "IEmbeddable"
                   },
-                  "<I, O>>(embeddableFactoryId: string) => ",
+                  "<I, O, any>>(embeddableFactoryId: string) => ",
                   {
                     "pluginId": "embeddable",
                     "scope": "public",
@@ -2337,7 +2337,7 @@
             "section": "def-public.Embeddable",
             "text": "Embeddable"
           },
-          "<TEmbeddableInput, TEmbeddableOutput> implements ",
+          "<TEmbeddableInput, TEmbeddableOutput, TNode> implements ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -2345,7 +2345,7 @@
             "section": "def-public.IEmbeddable",
             "text": "IEmbeddable"
           },
-          "<TEmbeddableInput, TEmbeddableOutput>"
+          "<TEmbeddableInput, TEmbeddableOutput, TNode>"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
         "deprecated": false,
@@ -2904,7 +2904,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              "> | ",
+              ", any> | ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -2976,7 +2976,7 @@
             "label": "render",
             "description": [],
             "signature": [
-              "(el: HTMLElement) => void"
+              "(el: HTMLElement) => void | TNode"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
             "deprecated": false,
@@ -3222,7 +3222,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              "> | ",
+              ", any> | ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -3606,7 +3606,7 @@
             "section": "def-public.EmbeddableRoot",
             "text": "EmbeddableRoot"
           },
-          " extends React.Component<Props, {}, any>"
+          " extends React.Component<Props, State, any>"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_root.tsx",
         "deprecated": false,
@@ -3700,7 +3700,7 @@
             "label": "shouldComponentUpdate",
             "description": [],
             "signature": [
-              "(newProps: Props) => boolean"
+              "({ embeddable, error, input, loading }: Props, { node }: State) => boolean"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_root.tsx",
             "deprecated": false,
@@ -3711,10 +3711,25 @@
                 "id": "def-public.EmbeddableRoot.shouldComponentUpdate.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "newProps",
+                "label": "{ embeddable, error, input, loading }",
                 "description": [],
                 "signature": [
                   "Props"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_root.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.EmbeddableRoot.shouldComponentUpdate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ node }",
+                "description": [],
+                "signature": [
+                  "State"
                 ],
                 "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_root.tsx",
                 "deprecated": false,
@@ -4298,7 +4313,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">"
+          ", React.ReactNode>"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
         "deprecated": false,
@@ -4419,21 +4434,6 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.ErrorEmbeddable.Unnamed.$4",
-                "type": "boolean",
-                "tags": [],
-                "label": "compact",
-                "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
               }
             ],
             "returnComment": []
@@ -4462,39 +4462,7 @@
             "label": "render",
             "description": [],
             "signature": [
-              "(dom: HTMLElement) => void"
-            ],
-            "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.ErrorEmbeddable.render.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "dom",
-                "description": [],
-                "signature": [
-                  "HTMLElement"
-                ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.ErrorEmbeddable.destroy",
-            "type": "Function",
-            "tags": [],
-            "label": "destroy",
-            "description": [],
-            "signature": [
-              "() => void"
+              "() => JSX.Element"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/error_embeddable.tsx",
             "deprecated": false,
@@ -4606,7 +4574,7 @@
             "section": "def-public.IEmbeddable",
             "text": "IEmbeddable"
           },
-          "<I, O> = ",
+          "<I, O, any> = ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -4614,7 +4582,7 @@
             "section": "def-public.IEmbeddable",
             "text": "IEmbeddable"
           },
-          "<I, O>, T = ",
+          "<I, O, any>, T = ",
           "SavedObjectAttributes",
           ">(def: ",
           {
@@ -4844,7 +4812,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">>"
+          ", any>>"
         ],
         "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
@@ -4901,7 +4869,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">"
+          ", any>"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/is_embeddable.ts",
         "deprecated": false,
@@ -5053,7 +5021,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">>) => context is ",
+          ", any>>) => context is ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -5085,7 +5053,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">>"
+          ", any>>"
         ],
         "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
@@ -5130,7 +5098,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              ">>"
+              ", any>>"
             ],
             "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
@@ -5214,7 +5182,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">>) => context is ",
+          ", any>>) => context is ",
           {
             "pluginId": "uiActions",
             "scope": "public",
@@ -5266,7 +5234,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              ">>"
+              ", any>>"
             ],
             "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
@@ -5380,7 +5348,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">>) => context is ",
+          ", any>>) => context is ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -5412,7 +5380,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">>"
+          ", any>>"
         ],
         "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
@@ -5457,7 +5425,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              ">>"
+              ", any>>"
             ],
             "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
@@ -5597,7 +5565,7 @@
             "section": "def-public.IEmbeddable",
             "text": "IEmbeddable"
           },
-          "<I, O> = ",
+          "<I, O, any> = ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -5605,7 +5573,7 @@
             "section": "def-public.IEmbeddable",
             "text": "IEmbeddable"
           },
-          "<I, O>>(embeddableFactoryId: string) => ",
+          "<I, O, any>>(embeddableFactoryId: string) => ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -5661,7 +5629,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">, unknown>>; overlays: ",
+          ", any>, unknown>>; overlays: ",
           "OverlayStart",
           "; notifications: ",
           "NotificationsStart",
@@ -5770,7 +5738,7 @@
                     "section": "def-public.IEmbeddable",
                     "text": "IEmbeddable"
                   },
-                  "<I, O> = ",
+                  "<I, O, any> = ",
                   {
                     "pluginId": "embeddable",
                     "scope": "public",
@@ -5778,7 +5746,7 @@
                     "section": "def-public.IEmbeddable",
                     "text": "IEmbeddable"
                   },
-                  "<I, O>>(embeddableFactoryId: string) => ",
+                  "<I, O, any>>(embeddableFactoryId: string) => ",
                   {
                     "pluginId": "embeddable",
                     "scope": "public",
@@ -5862,7 +5830,7 @@
                     "section": "def-public.EmbeddableOutput",
                     "text": "EmbeddableOutput"
                   },
-                  ">, unknown>>"
+                  ", any>, unknown>>"
                 ],
                 "path": "src/plugins/embeddable/public/lib/panel/panel_header/panel_actions/add_panel/open_add_panel_flyout.tsx",
                 "deprecated": false,
@@ -5992,7 +5960,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          "> | undefined, boolean, string | undefined]"
+          ", any> | undefined, boolean, string | undefined]"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
         "deprecated": false,
@@ -6049,7 +6017,7 @@
             "section": "def-public.IEmbeddable",
             "text": "IEmbeddable"
           },
-          "<I, O> = ",
+          "<I, O, any> = ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -6057,7 +6025,7 @@
             "section": "def-public.IEmbeddable",
             "text": "IEmbeddable"
           },
-          "<I, O>, ExtraProps = {}>(WrappedComponent: React.ComponentType<{ input: I; output: O; embeddable: E; } & ExtraProps>) => React.ComponentType<{ embeddable: E; } & ExtraProps>"
+          "<I, O, any>, ExtraProps = {}>(WrappedComponent: React.ComponentType<{ input: I; output: O; embeddable: E; } & ExtraProps>) => React.ComponentType<{ embeddable: E; } & ExtraProps>"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/with_subscription.tsx",
         "deprecated": false,
@@ -6374,7 +6342,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              ">; hideHeader?: boolean | undefined; containerContext?: ",
+              ", any>; hideHeader?: boolean | undefined; containerContext?: ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -7828,7 +7796,7 @@
             "section": "def-public.IEmbeddable",
             "text": "IEmbeddable"
           },
-          "<I, O>"
+          "<I, O, any>"
         ],
         "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
         "deprecated": false,
@@ -7868,7 +7836,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              ">>(id: string) => Promise<",
+              ", any>>(id: string) => Promise<",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -8033,7 +8001,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              "> = ",
+              ", any> = ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -8057,7 +8025,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              ">>(id: string) => E"
+              ", any>>(id: string) => E"
             ],
             "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
             "deprecated": false,
@@ -8115,7 +8083,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              "> = ",
+              ", any> = ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -8139,7 +8107,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              ">>(embeddable: E) => void"
+              ", any>>(embeddable: E) => void"
             ],
             "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
             "deprecated": false,
@@ -8249,7 +8217,7 @@
                 "section": "def-public.Embeddable",
                 "text": "Embeddable"
               },
-              "<EEI, EEO> = ",
+              "<EEI, EEO, any> = ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -8257,7 +8225,7 @@
                 "section": "def-public.Embeddable",
                 "text": "Embeddable"
               },
-              "<EEI, EEO>>(type: string, explicitInput: Partial<EEI>) => Promise<",
+              "<EEI, EEO, any>>(type: string, explicitInput: Partial<EEI>) => Promise<",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -8352,7 +8320,7 @@
                 "section": "def-public.Embeddable",
                 "text": "Embeddable"
               },
-              "<EEI, EEO> = ",
+              "<EEI, EEO, any> = ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -8360,7 +8328,7 @@
                 "section": "def-public.Embeddable",
                 "text": "Embeddable"
               },
-              "<EEI, EEO>>(id: string, newExplicitInput: Partial<EEI>, newType?: string | undefined) => void"
+              "<EEI, EEO, any>>(id: string, newExplicitInput: Partial<EEI>, newType?: string | undefined) => void"
             ],
             "path": "src/plugins/embeddable/public/lib/containers/i_container.ts",
             "deprecated": false,
@@ -8432,7 +8400,7 @@
             "section": "def-public.IEmbeddable",
             "text": "IEmbeddable"
           },
-          "<I, O>"
+          "<I, O, N>"
         ],
         "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
         "deprecated": false,
@@ -8869,7 +8837,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              "> | ",
+              ", any> | ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -8911,7 +8879,7 @@
               "\nRenders the embeddable at the given node."
             ],
             "signature": [
-              "(domNode: Element | HTMLElement) => void"
+              "(domNode: Element | HTMLElement) => void | N"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
@@ -8933,19 +8901,21 @@
                 "isRequired": true
               }
             ],
-            "returnComment": []
+            "returnComment": [
+              "A React node to mount or void in the case when rendering is done without React."
+            ]
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.IEmbeddable.renderError",
+            "id": "def-public.IEmbeddable.catchError",
             "type": "Function",
             "tags": [],
-            "label": "renderError",
+            "label": "catchError",
             "description": [
               "\nRenders a custom embeddable error at the given node."
             ],
             "signature": [
-              "((domNode: Element | HTMLElement, error: ",
+              "((error: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -8953,7 +8923,7 @@
                 "section": "def-common.ErrorLike",
                 "text": "ErrorLike"
               },
-              ") => () => void) | undefined"
+              ", domNode: Element | HTMLElement) => N | (() => void)) | undefined"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
@@ -8961,22 +8931,7 @@
             "children": [
               {
                 "parentPluginId": "embeddable",
-                "id": "def-public.IEmbeddable.renderError.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "domNode",
-                "description": [],
-                "signature": [
-                  "Element | HTMLElement"
-                ],
-                "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.IEmbeddable.renderError.$2",
+                "id": "def-public.IEmbeddable.catchError.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
@@ -8994,10 +8949,25 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.IEmbeddable.catchError.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "domNode",
+                "description": [],
+                "signature": [
+                  "Element | HTMLElement"
+                ],
+                "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": [
-              "A callback that will be called on error destroy."
+              "A React node or callback that will be called on error destroy."
             ]
           },
           {
@@ -9791,7 +9761,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">; hideHeader?: boolean | undefined; containerContext?: ",
+          ", any>; hideHeader?: boolean | undefined; containerContext?: ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -10116,7 +10086,7 @@
               "section": "def-public.IEmbeddable",
               "text": "IEmbeddable"
             },
-            "<I, O> = ",
+            "<I, O, any> = ",
             {
               "pluginId": "embeddable",
               "scope": "public",
@@ -10124,7 +10094,7 @@
               "section": "def-public.IEmbeddable",
               "text": "IEmbeddable"
             },
-            "<I, O>>(id: string, factory: ",
+            "<I, O, any>>(id: string, factory: ",
             {
               "pluginId": "embeddable",
               "scope": "public",
@@ -10360,7 +10330,7 @@
               "section": "def-public.IEmbeddable",
               "text": "IEmbeddable"
             },
-            "<I, O> = ",
+            "<I, O, any> = ",
             {
               "pluginId": "embeddable",
               "scope": "public",
@@ -10368,7 +10338,7 @@
               "section": "def-public.IEmbeddable",
               "text": "IEmbeddable"
             },
-            "<I, O>>(embeddableFactoryId: string) => ",
+            "<I, O, any>>(embeddableFactoryId: string) => ",
             {
               "pluginId": "embeddable",
               "scope": "public",
@@ -10456,7 +10426,7 @@
               "section": "def-public.EmbeddableOutput",
               "text": "EmbeddableOutput"
             },
-            ">, unknown>>"
+            ", any>, unknown>>"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
           "deprecated": false,
@@ -10496,7 +10466,7 @@
               "section": "def-public.EmbeddableOutput",
               "text": "EmbeddableOutput"
             },
-            ">; hideHeader?: boolean | undefined; containerContext?: ",
+            ", any>; hideHeader?: boolean | undefined; containerContext?: ",
             {
               "pluginId": "embeddable",
               "scope": "public",
