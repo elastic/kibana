@@ -7,12 +7,12 @@
 
 import { useMemo } from 'react';
 import { SnapshotNode } from '../../../../../common/http_api';
-import { HostMetics, HostNodeRow } from '../components/hosts_table_columns';
+import { HostMetics } from '../components/hosts_table_columns';
 
 export type MappedMetrics = Record<keyof HostMetics, number | null | undefined>;
 
 export const useHostTable = (nodes: SnapshotNode[]) => {
-  const items: HostNodeRow[] = useMemo(() => {
+  const items = useMemo(() => {
     const valuesMapping: Record<keyof HostMetics, 'value' | 'avg' | 'max'> = {
       cpuCores: 'value',
       rx: 'avg',
@@ -27,7 +27,7 @@ export const useHostTable = (nodes: SnapshotNode[]) => {
         const metricName = metric.name as keyof HostMetics;
         data[metricName] = metric[valuesMapping[metricName]];
         return data;
-      }, {} as HostMetics),
+      }, {} as MappedMetrics),
     }));
   }, [nodes]);
 

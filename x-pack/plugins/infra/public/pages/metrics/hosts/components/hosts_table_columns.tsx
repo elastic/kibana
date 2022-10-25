@@ -13,8 +13,8 @@ import { scaleUpPercentage } from '../../../../components/infrastructure_node_me
 import { NumberCell } from '../../../../components/infrastructure_node_metrics_tables/shared/components';
 
 export interface HostNodeRow extends HostMetics {
-  os?: string | null | undefined;
-  servicesOnHost?: number | null | undefined;
+  os?: string | null;
+  servicesOnHost?: number | null;
   name: string;
 }
 
