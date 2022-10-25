@@ -15,6 +15,8 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   Visualization,
   OperationMetadata,
@@ -24,23 +26,18 @@ import type {
   VisualizeEditorContext,
 } from '../../types';
 import { getSortedGroups, toExpression, toPreviewExpression } from './to_expression';
-import { CategoryDisplay, layerTypes, LegendDisplay, NumberDisplay } from '../../../common';
+import {
+  CategoryDisplay,
+  LegendDisplay,
+  NumberDisplay,
+  PieChartTypes,
+  PieLayerState,
+  PieVisualizationState,
+} from '../../../common';
 import { suggestions } from './suggestions';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { DimensionEditor, PieToolbar } from './toolbar';
 import { checkTableForContainsSmallValues } from './render_helpers';
-import { PieChartTypes, PieLayerState, PieVisualizationState } from '../../../common';
-import { IndexPatternLayer } from '../..';
-
-interface DatatableDatasourceState {
-  [prop: string]: unknown;
-  layers: IndexPatternLayer[];
-}
-
-export interface PartitionSuggestion extends Suggestion {
-  datasourceState: DatatableDatasourceState;
-  visualizationState: PieVisualizationState;
-}
 
 function newLayerState(layerId: string): PieLayerState {
   return {
@@ -52,7 +49,7 @@ function newLayerState(layerId: string): PieLayerState {
     categoryDisplay: CategoryDisplay.DEFAULT,
     legendDisplay: LegendDisplay.DEFAULT,
     nestedLegend: false,
-    layerType: layerTypes.DATA,
+    layerType: LayerTypes.DATA,
   };
 }
 
@@ -211,6 +208,7 @@ export const getPieVisualization = ({
             supportsMoreColumns: totalNonCollapsedAccessors < PartitionChartsMeta.pie.maxBuckets,
             dimensionsTooMany: totalNonCollapsedAccessors - PartitionChartsMeta.pie.maxBuckets,
             dataTestSubj: 'lnsPie_sliceByDimensionPanel',
+            hideGrouping: true,
           };
         case 'mosaic':
           return {
@@ -240,6 +238,7 @@ export const getPieVisualization = ({
             dimensionsTooMany:
               totalNonCollapsedAccessors - PartitionChartsMeta[state.shape].maxBuckets,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
+            hideGrouping: state.shape === 'treemap',
           };
       }
     };
@@ -378,7 +377,7 @@ export const getPieVisualization = ({
   getSupportedLayers() {
     return [
       {
-        type: layerTypes.DATA,
+        type: LayerTypes.DATA,
         label: i18n.translate('xpack.lens.pie.addLayer', {
           defaultMessage: 'Visualization',
         }),
@@ -475,19 +474,20 @@ export const getPieVisualization = ({
     if (!props.suggestions.length) {
       return;
     }
-    const suggestionByShape = (props.suggestions as PartitionSuggestion[]).find(
-      (suggestion) => suggestion.visualizationState.shape === context.configuration.shape
-    );
+    const suggestionByShape = (
+      props.suggestions as Array<Suggestion<PieVisualizationState, FormBasedPersistedState>>
+    ).find((suggestion) => suggestion.visualizationState.shape === context.configuration.shape);
     if (!suggestionByShape) {
       return;
     }
-    return {
+    const suggestion: Suggestion<PieVisualizationState, FormBasedPersistedState> = {
       ...suggestionByShape,
       visualizationState: {
         ...suggestionByShape.visualizationState,
         ...context.configuration,
       },
     };
+    return suggestion;
   },
 
   getErrorMessages(state) {

@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 import { BaseHandler } from './base_handler';
-import { AggregationBuilder, AggregationResponse, BaseHandlerCommonOptions } from './types';
+import type { AggregationBuilder, AggregationResponse, BaseHandlerCommonOptions } from './types';
 
 export abstract class AggregationHandler<R> extends BaseHandler<R> {
   protected aggregationBuilders: Array<AggregationBuilder<R>> = [];

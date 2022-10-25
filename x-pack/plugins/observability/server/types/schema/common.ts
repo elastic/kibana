@@ -13,7 +13,7 @@ const ALL_VALUE = '*';
 const allOrAnyString = t.union([t.literal(ALL_VALUE), t.string]);
 
 const dateType = new t.Type<Date, string, unknown>(
-  'DateTime',
+  'DateType',
   (input: unknown): input is Date => input instanceof Date,
   (input: unknown, context: t.Context) =>
     either.chain(t.string.validate(input, context), (value: string) => {
@@ -23,4 +23,10 @@ const dateType = new t.Type<Date, string, unknown>(
   (date: Date): string => date.toISOString()
 );
 
-export { allOrAnyString, ALL_VALUE, dateType };
+const errorBudgetSchema = t.type({
+  initial: t.number,
+  consumed: t.number,
+  remaining: t.number,
+});
+
+export { allOrAnyString, ALL_VALUE, dateType, errorBudgetSchema };

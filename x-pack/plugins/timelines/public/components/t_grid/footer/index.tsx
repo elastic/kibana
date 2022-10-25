@@ -92,8 +92,6 @@ export const footerHeight = 40; // px
 /** Displays the server-side count of events */
 export const EventsCountComponent = ({
   closePopover,
-  documentType,
-  footerText,
   isOpen,
   items,
   itemsCount,
@@ -102,14 +100,12 @@ export const EventsCountComponent = ({
   serverSideEventCount,
 }: {
   closePopover: () => void;
-  documentType: string;
   isOpen: boolean;
   items: React.ReactElement[];
   itemsCount: number;
   itemsPerPage: number;
   onClick: () => void;
   serverSideEventCount: number;
-  footerText: string | React.ReactNode;
 }) => {
   const button = useMemo(
     () => (
@@ -227,10 +223,8 @@ export const FooterComponent = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [paginationLoading, setPaginationLoading] = useState(false);
 
-  const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
-  const { documentType, loadingText, footerText } = useDeepEqualSelector((state) =>
-    getManageTimeline(state, id)
-  );
+  const getManageDataTable = useMemo(() => tGridSelectors.getManageDataTableById(), []);
+  const { loadingText } = useDeepEqualSelector((state) => getManageDataTable(state, id));
 
   const handleChangePageClick = useCallback(
     (nextPage: number) => {
@@ -321,8 +315,6 @@ export const FooterComponent = ({
           >
             <EventsCount
               closePopover={closePopover}
-              documentType={documentType}
-              footerText={footerText}
               isOpen={isPopoverOpen}
               items={rowItems}
               itemsCount={itemsCount}

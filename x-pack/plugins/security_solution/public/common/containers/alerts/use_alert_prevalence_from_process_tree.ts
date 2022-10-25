@@ -30,7 +30,7 @@ interface EntityResponse {
 interface UseAlertPrevalenceFromProcessTree {
   processEntityId: string;
   documentId: string;
-  timelineId: string;
+  isActiveTimeline: boolean;
   indices: string[];
 }
 
@@ -94,12 +94,12 @@ function useAlertDocumentAnalyzerSchema({ documentId, indices }: UseAlertDocumen
 export function useAlertPrevalenceFromProcessTree({
   processEntityId,
   documentId,
-  timelineId,
+  isActiveTimeline,
   indices,
 }: UseAlertPrevalenceFromProcessTree): UserAlertPrevalenceFromProcessTreeResult {
   const http = useHttp();
 
-  const { selectedPatterns, to, from } = useTimelineDataFilters(timelineId);
+  const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline);
   const alertAndOriginalIndices = [...new Set(selectedPatterns.concat(indices))];
   const { loading, id, schema } = useAlertDocumentAnalyzerSchema({
     documentId,
@@ -115,7 +115,6 @@ export function useAlertPrevalenceFromProcessTree({
           descendants: 500,
           indexPatterns: alertAndOriginalIndices,
           nodes: [id],
-          timeRange: { from, to },
           includeHits: true,
         }),
       });

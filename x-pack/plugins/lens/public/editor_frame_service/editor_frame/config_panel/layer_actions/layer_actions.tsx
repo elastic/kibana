@@ -106,6 +106,9 @@ const InContextMenuActions = (props: LayerActionsProps) => {
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        panelProps={{
+          'data-test-subj': 'lnsLayerActionsMenu',
+        }}
       >
         <EuiContextMenuPanel
           size="s"

@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import { Locations, LocationStatus, PrivateLocation } from '../../../../common/runtime_types';
+import {
+  DataStream,
+  Locations,
+  LocationStatus,
+  PrivateLocation,
+} from '../../../../common/runtime_types';
+import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
 
 describe('tcp normalizers', () => {
   describe('normalize push monitors', () => {
+    const testHash = 'lleklrkelkj';
     const projectId = 'test-project-id';
     const locations: Locations = [
       {
@@ -50,6 +57,7 @@ describe('tcp normalizers', () => {
         privateLocations: ['BEEP'],
         'service.name': 'test service',
         'ssl.supported_protocols': ['TLSv1.2', 'TLSv1.3'],
+        hash: testHash,
       },
       {
         locations: ['us_central'],
@@ -66,6 +74,7 @@ describe('tcp normalizers', () => {
         ssl: {
           supported_protocols: 'TLSv1.2,TLSv1.3',
         },
+        hash: testHash,
       },
       {
         locations: ['us_central'],
@@ -80,6 +89,7 @@ describe('tcp normalizers', () => {
         unsupportedKey: {
           nestedUnsupportedKey: 'unnsuportedValue',
         },
+        hash: testHash,
       },
     ];
 
@@ -96,6 +106,7 @@ describe('tcp normalizers', () => {
         {
           errors: [],
           normalizedFields: {
+            ...DEFAULT_FIELDS[DataStream.TCP],
             __ui: {
               is_tls_enabled: false,
             },
@@ -144,12 +155,14 @@ describe('tcp normalizers', () => {
             type: 'tcp',
             id: '',
             urls: '',
+            hash: testHash,
           },
           unsupportedKeys: [],
         },
         {
           errors: [],
           normalizedFields: {
+            ...DEFAULT_FIELDS[DataStream.TCP],
             __ui: {
               is_tls_enabled: false,
             },
@@ -198,6 +211,7 @@ describe('tcp normalizers', () => {
             type: 'tcp',
             id: '',
             urls: '',
+            hash: testHash,
           },
           unsupportedKeys: [],
         },
@@ -217,6 +231,7 @@ describe('tcp normalizers', () => {
             },
           ],
           normalizedFields: {
+            ...DEFAULT_FIELDS[DataStream.TCP],
             __ui: {
               is_tls_enabled: false,
             },
@@ -265,6 +280,7 @@ describe('tcp normalizers', () => {
             type: 'tcp',
             id: '',
             urls: '',
+            hash: testHash,
           },
           unsupportedKeys: ['ports', 'unsupportedKey.nestedUnsupportedKey'],
         },

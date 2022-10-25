@@ -6,19 +6,15 @@
  */
 
 import type { Filter, FilterMeta } from '@kbn/es-query';
-import { Position } from '@elastic/charts';
-import { $Values } from '@kbn/utility-types';
+import type { Position } from '@elastic/charts';
+import type { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { ColorMode } from '@kbn/charts-plugin/common';
-import { LegendSize } from '@kbn/visualizations-plugin/common';
-import {
-  CategoryDisplay,
-  layerTypes,
-  LegendDisplay,
-  NumberDisplay,
-  PieChartTypes,
-} from './constants';
+import type { LegendSize } from '@kbn/visualizations-plugin/common';
+import { CategoryDisplay, LegendDisplay, NumberDisplay, PieChartTypes } from './constants';
+import { layerTypes } from './layer_types';
+import { CollapseFunction } from './expressions';
 
 export type { OriginalColumn } from './expressions/map_to_columns';
 
@@ -44,10 +40,6 @@ export interface PersistableFilter extends Filter {
 
 export type SortingHint = 'version';
 
-export type CustomPaletteParamsConfig = CustomPaletteParams & {
-  maxSteps?: number;
-};
-
 export type LayerType = typeof layerTypes[keyof typeof layerTypes];
 
 export type ValueLabelConfig = 'hide' | 'show';
@@ -69,7 +61,8 @@ export interface SharedPieLayerState {
   primaryGroups: string[];
   secondaryGroups?: string[];
   allowMultipleMetrics?: boolean;
-  collapseFns?: Record<string, string>;
+  metrics?: string[];
+  collapseFns?: Record<string, CollapseFunction>;
   numberDisplay: NumberDisplayType;
   categoryDisplay: CategoryDisplayType;
   legendDisplay: LegendDisplayType;

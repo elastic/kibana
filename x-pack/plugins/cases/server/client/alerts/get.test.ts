@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { AlertService } from '../../services';
-import { CasesClientArgs } from '../types';
+import type { CasesClientArgs } from '../types';
 import { getAlerts } from './get';
 
 describe('getAlerts', () => {

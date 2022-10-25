@@ -7,6 +7,7 @@
 
 import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { SavedObject } from '@kbn/core-saved-objects-common';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunctionsObject,
@@ -32,6 +33,7 @@ import {
   commonMigrateMetricIds,
   commonMigratePartitionChartGroups,
   commonMigratePartitionMetrics,
+  commonMigrateIndexPatternDatasource,
 } from '../migrations/common_migrations';
 import {
   CustomVisualizationMigrations,
@@ -158,12 +160,10 @@ export const makeLensEmbeddableFactory =
                 } as unknown as SerializableRecord;
               },
               '8.6.0': (state) => {
-                const lensState = state as unknown as {
-                  attributes: LensDocShape850<VisState850>;
-                };
+                const lensState = state as unknown as SavedObject<LensDocShape850<VisState850>>;
 
-                const migratedLensState = commonMigrateMetricIds(lensState.attributes);
-
+                let migratedLensState = commonMigrateIndexPatternDatasource(lensState.attributes);
+                migratedLensState = commonMigratePartitionMetrics(lensState.attributes);
                 return {
                   ...lensState,
                   attributes: migratedLensState,

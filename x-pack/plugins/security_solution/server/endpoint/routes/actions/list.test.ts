@@ -9,6 +9,7 @@ import type { SecuritySolutionRequestHandlerContextMock } from '../../../lib/det
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
+import type { License } from '@kbn/licensing-plugin/common/license';
 import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
@@ -31,13 +32,16 @@ import { Subject } from 'rxjs';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { registerActionListRoutes } from './list';
+import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
 
 interface CallApiRouteInterface {
   query?: EndpointActionListRequestQuery;
+  license?: License;
   authz?: Partial<EndpointAuthz>;
 }
 
 const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
+const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
 
 describe('Action List Route', () => {
   const superUser = {
@@ -82,7 +86,7 @@ describe('Action List Route', () => {
 
     callApiRoute = async (
       routePrefix: string,
-      { query, authz = {} }: CallApiRouteInterface
+      { query, license, authz = {} }: CallApiRouteInterface
     ): Promise<AwaitedProperties<SecuritySolutionRequestHandlerContextMock>> => {
       (startContract.security.authc.getCurrentUser as jest.Mock).mockImplementationOnce(
         () => superUser
@@ -90,12 +94,21 @@ describe('Action List Route', () => {
 
       const ctx = createRouteHandlerContext(mockScopedClient, mockSavedObjectClient);
 
+      const withLicense = license ? license : Platinum;
+      licenseEmitter.next(withLicense);
+
       ctx.securitySolution.endpointAuthz = {
-        ...ctx.securitySolution.endpointAuthz,
+        ...getEndpointAuthzInitialStateMock({
+          canReadActionsLogManagement:
+            // mimicking the behavior of the EndpointAuthz class
+            // just so we can test the license check here
+            // since getEndpointAuthzInitialStateMock sets all keys to true
+            ctx.securitySolution.endpointAuthz.canAccessEndpointManagement &&
+            licenseService.isPlatinumPlus(),
+        }),
         ...authz,
       };
 
-      licenseEmitter.next(Platinum);
       const mockRequest = httpServerMock.createKibanaRequest({ query });
       const [, routeHandler]: [
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -117,14 +130,23 @@ describe('Action List Route', () => {
   });
 
   describe('User auth level', () => {
-    it('allows user with canAccessEndpointManagement access to allow requests to API', async () => {
-      await callApiRoute(ENDPOINTS_ACTION_LIST_ROUTE, {});
+    it('allows user with `canReadActionsLogManagement` access for API requests', async () => {
+      await callApiRoute(ENDPOINTS_ACTION_LIST_ROUTE, {
+        authz: { canReadActionsLogManagement: true },
+      });
       expect(mockResponse.ok).toBeCalled();
     });
 
-    it('does not allow user with canAccessEndpointManagement access to allow requests to API', async () => {
+    it('does not allow user without `canReadActionsLogManagement` access for API requests', async () => {
       await callApiRoute(ENDPOINTS_ACTION_LIST_ROUTE, {
-        authz: { canAccessEndpointManagement: false },
+        authz: { canReadActionsLogManagement: false },
+      });
+      expect(mockResponse.forbidden).toBeCalled();
+    });
+
+    it('does not allow user access to API requests if license is below platinum', async () => {
+      await callApiRoute(ENDPOINTS_ACTION_LIST_ROUTE, {
+        license: Gold,
       });
       expect(mockResponse.forbidden).toBeCalled();
     });

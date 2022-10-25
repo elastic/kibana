@@ -112,6 +112,7 @@ describe('SavedObjectsRepository', () => {
 
   const mockTimestamp = '2017-08-14T15:49:14.886Z';
   const mockTimestampFields = { updated_at: mockTimestamp };
+  const mockTimestampFieldsWithCreated = { updated_at: mockTimestamp, created_at: mockTimestamp };
   const mockVersionProps = { _seq_no: 1, _primary_term: 1 };
   const mockVersion = encodeHitVersion(mockVersionProps);
 
@@ -454,7 +455,7 @@ describe('SavedObjectsRepository', () => {
               namespace,
               ...(originId && { originId }),
               references,
-              ...mockTimestampFields,
+              ...mockTimestampFieldsWithCreated,
               migrationVersion: migrationVersion || { [type]: '1.1.1' },
             },
             ...mockVersionProps,
@@ -528,7 +529,7 @@ describe('SavedObjectsRepository', () => {
       coreMigrationVersion: KIBANA_VERSION,
       version: mockVersion,
       namespaces: obj.namespaces ?? [obj.namespace ?? 'default'],
-      ...mockTimestampFields,
+      ...mockTimestampFieldsWithCreated,
     });
 
     describe('client calls', () => {
@@ -1089,7 +1090,7 @@ describe('SavedObjectsRepository', () => {
         migrator.migrateDocument.mockImplementation(mockMigrateDocument);
         const modifiedObj1 = { ...obj1, coreMigrationVersion: '8.0.0' };
         await bulkCreateSuccess([modifiedObj1, obj2]);
-        const docs = [modifiedObj1, obj2].map((x) => ({ ...x, ...mockTimestampFields }));
+        const docs = [modifiedObj1, obj2].map((x) => ({ ...x, ...mockTimestampFieldsWithCreated }));
         expectMigrationArgs(docs[0], true, 1);
         expectMigrationArgs(docs[1], true, 2);
 
@@ -1440,6 +1441,7 @@ describe('SavedObjectsRepository', () => {
         namespaces: doc._source!.namespaces ?? ['default'],
         ...(doc._source!.originId && { originId: doc._source!.originId }),
         ...(doc._source!.updated_at && { updated_at: doc._source!.updated_at }),
+        ...(doc._source!.created_at && { created_at: doc._source!.created_at }),
         version: encodeHitVersion(doc),
         attributes: doc._source![type],
         references: doc._source!.references || [],
@@ -3233,7 +3235,7 @@ describe('SavedObjectsRepository', () => {
           references,
           migrationVersion,
           coreMigrationVersion,
-          ...mockTimestampFields,
+          ...mockTimestampFieldsWithCreated,
         };
         expectMigrationArgs(doc);
 
@@ -3290,7 +3292,7 @@ describe('SavedObjectsRepository', () => {
         expect(result).toEqual({
           type: MULTI_NAMESPACE_TYPE,
           id,
-          ...mockTimestampFields,
+          ...mockTimestampFieldsWithCreated,
           version: mockVersion,
           attributes,
           references,
@@ -3969,6 +3971,7 @@ describe('SavedObjectsRepository', () => {
                 'migrationVersion',
                 'coreMigrationVersion',
                 'updated_at',
+                'created_at',
                 'originId',
                 'title',
               ],
@@ -4219,6 +4222,7 @@ describe('SavedObjectsRepository', () => {
 
         await findSuccess(relevantOpts, namespace);
         const esOptions = client.search.mock.calls[0][0];
+        // @ts-expect-error _source not a top property for typesWithBodyKey
         expect(esOptions?._source ?? []).toContain('index-pattern.title');
       });
 

@@ -29,6 +29,7 @@ import {
 } from 'rxjs';
 import type { FileKind, FileJSON } from '../../../common/types';
 import type { FilesClient } from '../../types';
+import { ImageMetadataFactory, getImageMetadata, isImage } from '../util';
 import { i18nTexts } from './i18n_texts';
 
 import { createStateSubject, type SimpleStateSubject, parseFileName } from './util';
@@ -68,7 +69,8 @@ export class UploadState {
   constructor(
     private readonly fileKind: FileKind,
     private readonly client: FilesClient,
-    private readonly opts: UploadOptions = { allowRepeatedUploads: false }
+    private readonly opts: UploadOptions = { allowRepeatedUploads: false },
+    private readonly loadImageMetadata: ImageMetadataFactory = getImageMetadata
   ) {
     const latestFiles$ = this.files$$.pipe(switchMap((files$) => combineLatest(files$)));
     this.subscriptions = [
@@ -171,15 +173,17 @@ export class UploadState {
 
     const { name } = parseFileName(file.name);
     const mime = file.type || undefined;
+    const _meta = meta as Record<string, unknown>;
 
-    return from(
-      this.client.create({
-        kind: this.fileKind.id,
-        name,
-        mimeType: mime,
-        meta: meta as Record<string, unknown>,
-      })
-    ).pipe(
+    return from(isImage(file) ? this.loadImageMetadata(file) : of(undefined)).pipe(
+      mergeMap((imageMetadata) =>
+        this.client.create({
+          kind: this.fileKind.id,
+          name,
+          mimeType: mime,
+          meta: imageMetadata ? { ...imageMetadata, ..._meta } : _meta,
+        })
+      ),
       mergeMap((result) => {
         uploadTarget = result.file;
         return race(
@@ -235,15 +239,21 @@ export class UploadState {
   public dispose = (): void => {
     for (const sub of this.subscriptions) sub.unsubscribe();
   };
+
+  public hasFiles(): boolean {
+    return this.files$$.getValue().length > 0;
+  }
 }
 
 export const createUploadState = ({
   fileKind,
   client,
+  imageMetadataFactory,
   ...options
 }: {
   fileKind: FileKind;
   client: FilesClient;
+  imageMetadataFactory?: ImageMetadataFactory;
 } & UploadOptions) => {
-  return new UploadState(fileKind, client, options);
+  return new UploadState(fileKind, client, options, imageMetadataFactory);
 };

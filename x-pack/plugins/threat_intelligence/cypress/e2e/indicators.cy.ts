@@ -6,30 +6,31 @@
  */
 
 import {
+  ADD_INTEGRATIONS_BUTTON,
+  BREADCRUMBS,
   DEFAULT_LAYOUT_TITLE,
+  EMPTY_STATE,
+  ENDING_BREADCRUMB,
+  FIELD_BROWSER,
+  FIELD_BROWSER_MODAL,
+  FIELD_SELECTOR,
+  FIELD_SELECTOR_INPUT,
+  FIELD_SELECTOR_LIST,
+  FIELD_SELECTOR_TOGGLE_BUTTON,
+  FILTERS_GLOBAL_CONTAINER,
   FLYOUT_JSON,
   FLYOUT_TABLE,
   FLYOUT_TABS,
   FLYOUT_TITLE,
-  INDICATORS_TABLE,
-  TOGGLE_FLYOUT_BUTTON,
-  FILTERS_GLOBAL_CONTAINER,
-  TIME_RANGE_PICKER,
-  QUERY_INPUT,
-  TABLE_CONTROLS,
   INDICATOR_TYPE_CELL,
-  EMPTY_STATE,
-  FIELD_SELECTOR,
-  BREADCRUMBS,
-  LEADING_BREADCRUMB,
-  ENDING_BREADCRUMB,
-  FIELD_BROWSER,
-  FIELD_BROWSER_MODAL,
-  FIELD_SELECTOR_TOGGLE_BUTTON,
-  FIELD_SELECTOR_INPUT,
-  FIELD_SELECTOR_LIST,
+  INDICATORS_TABLE,
   INSPECTOR_BUTTON,
   INSPECTOR_PANEL,
+  LEADING_BREADCRUMB,
+  QUERY_INPUT,
+  TABLE_CONTROLS,
+  TIME_RANGE_PICKER,
+  TOGGLE_FLYOUT_BUTTON,
 } from '../screens/indicators';
 import { login } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
@@ -50,6 +51,15 @@ describe('Indicators', () => {
   });
   after(() => {
     esArchiverUnload('threat_intelligence');
+  });
+
+  describe('Indicators page loading', () => {
+    it('verify the fleet plugin integrations endpoint exists', () => {
+      cy.request({
+        method: 'GET',
+        url: '/api/fleet/epm/packages',
+      }).should((response) => expect(response.status).to.eq(200));
+    });
   });
 
   describe('Indicators page basics', () => {
@@ -186,6 +196,22 @@ describe('Indicators', () => {
         cy.get(INSPECTOR_BUTTON).last().click({ force: true });
 
         cy.get(INSPECTOR_PANEL).contains('Indicators search requests');
+      });
+    });
+  });
+
+  describe('Add integrations', () => {
+    before(() => {
+      cy.visit(THREAT_INTELLIGENCE);
+
+      selectRange();
+    });
+
+    describe('when the global header add integrations button is clicked', () => {
+      it('should navigate to the Integrations page with Threat Intelligence category selected', () => {
+        cy.get(ADD_INTEGRATIONS_BUTTON).click();
+
+        cy.url().should('include', 'threat_intel');
       });
     });
   });

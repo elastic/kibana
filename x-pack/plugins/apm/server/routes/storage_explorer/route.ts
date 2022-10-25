@@ -10,7 +10,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { indexLifecyclePhaseRt } from '../../../common/storage_explorer_types';
 import { getServiceStatistics } from './get_service_statistics';
@@ -29,6 +29,7 @@ import {
   getMainSummaryStats,
   getTracesPerMinute,
 } from './get_summary_statistics';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
@@ -71,19 +72,21 @@ const storageExplorerRoute = createApmServerRoute({
       },
     } = params;
 
-    const [setup, randomSampler] = await Promise.all([
+    const [setup, apmEventClient, randomSampler] = await Promise.all([
       setupRequest(resources),
+      getApmEventClient(resources),
       getRandomSampler({ security, request, probability }),
     ]);
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      apmEventClient: setup.apmEventClient,
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      apmEventClient,
       config: setup.config,
       kuery,
     });
 
     const serviceStatistics = await getServiceStatistics({
       setup,
+      apmEventClient,
       context,
       indexLifecyclePhase,
       randomSampler,
@@ -147,13 +150,15 @@ const storageExplorerServiceDetailsRoute = createApmServerRoute({
       },
     } = params;
 
-    const [setup, randomSampler] = await Promise.all([
+    const [setup, apmEventClient, randomSampler] = await Promise.all([
       setupRequest(resources),
+      getApmEventClient(resources),
       getRandomSampler({ security, request, probability }),
     ]);
 
     const processorEventStats = await getStorageDetailsPerProcessorEvent({
       setup,
+      apmEventClient,
       context,
       indexLifecyclePhase,
       randomSampler,
@@ -206,13 +211,14 @@ const storageChartRoute = createApmServerRoute({
       },
     } = params;
 
-    const [setup, randomSampler] = await Promise.all([
+    const [setup, apmEventClient, randomSampler] = await Promise.all([
       setupRequest(resources),
+      getApmEventClient(resources),
       getRandomSampler({ security, request, probability }),
     ]);
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      apmEventClient: setup.apmEventClient,
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      apmEventClient,
       config: setup.config,
       kuery,
     });
@@ -226,6 +232,7 @@ const storageChartRoute = createApmServerRoute({
       start,
       end,
       setup,
+      apmEventClient,
       context,
     });
 
@@ -295,13 +302,14 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
       },
     } = params;
 
-    const [setup, randomSampler] = await Promise.all([
+    const [setup, apmEventClient, randomSampler] = await Promise.all([
       setupRequest(resources),
+      getApmEventClient(resources),
       getRandomSampler({ security, request, probability }),
     ]);
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      apmEventClient: setup.apmEventClient,
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      apmEventClient,
       config: setup.config,
       kuery,
     });
@@ -309,6 +317,7 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
     const [mainSummaryStats, tracesPerMinute] = await Promise.all([
       getMainSummaryStats({
         setup,
+        apmEventClient,
         context,
         indexLifecyclePhase,
         randomSampler,
@@ -318,7 +327,7 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
         kuery,
       }),
       getTracesPerMinute({
-        setup,
+        apmEventClient,
         indexLifecyclePhase,
         start,
         end,

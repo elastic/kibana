@@ -13,12 +13,13 @@ import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -30,18 +31,17 @@ import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
 import { LayerHeader, LayerHeaderContent } from './xy_config_panel/layer_header';
-import { Visualization, AccessorConfig, FramePublicAPI } from '../../types';
+import type { Visualization, AccessorConfig, FramePublicAPI, Suggestion } from '../../types';
+import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import {
   type State,
   type XYLayerConfig,
   type XYDataLayerConfig,
   type SeriesType,
-  type XYSuggestion,
   type PersistedState,
   type XYAnnotationLayerConfig,
   visualizationTypes,
 } from './types';
-import { layerTypes } from '../../../common';
 import {
   extractReferences,
   injectReferences,
@@ -131,7 +131,7 @@ export const getXyVisualization = ({
   },
 
   getRemoveOperation(state, layerId) {
-    const dataLayers = getLayersByType(state, layerTypes.DATA).map((l) => l.layerId);
+    const dataLayers = getLayersByType(state, LayerTypes.DATA).map((l) => l.layerId);
     return dataLayers.includes(layerId) && dataLayers.length === 1 ? 'clear' : 'remove';
   },
 
@@ -161,6 +161,10 @@ export const getXyVisualization = ({
   },
 
   appendLayer(state, layerId, layerType, indexPatternId) {
+    if (layerType === 'metricTrendline') {
+      return state;
+    }
+
     const firstUsedSeriesType = getDataLayers(state.layers)?.[0]?.seriesType;
     return {
       ...state,
@@ -227,7 +231,7 @@ export const getXyVisualization = ({
             position: Position.Top,
             seriesType: defaultSeriesType,
             showGridlines: false,
-            layerType: layerTypes.DATA,
+            layerType: LayerTypes.DATA,
           },
         ],
       }
@@ -832,24 +836,25 @@ export const getXyVisualization = ({
   },
 
   getSuggestionFromConvertToLensContext({ suggestions, context }) {
-    const allSuggestions = suggestions as XYSuggestion[];
-    return {
+    const allSuggestions = suggestions as Array<Suggestion<XYState, FormBasedPersistedState>>;
+    const suggestion: Suggestion<XYState, FormBasedPersistedState> = {
       ...allSuggestions[0],
       datasourceState: {
         ...allSuggestions[0].datasourceState,
         layers: allSuggestions.reduce(
           (acc, s) => ({
             ...acc,
-            ...s.datasourceState.layers,
+            ...s.datasourceState?.layers,
           }),
           {}
         ),
       },
       visualizationState: {
         ...allSuggestions[0].visualizationState,
-        ...context.configuration,
+        ...(context.configuration as XYState),
       },
     };
+    return suggestion;
   },
 });
 

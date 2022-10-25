@@ -173,6 +173,7 @@ export interface APMUsage {
   };
   service_groups: {
     kuery_fields: string[];
+    total: number;
   };
   per_service: APMPerService[];
   tasks: Record<
