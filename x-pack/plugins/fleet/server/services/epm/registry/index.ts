@@ -25,6 +25,7 @@ import type {
   GetCategoriesRequest,
   PackageVerificationResult,
   ArchivePackage,
+  BundledPackage,
 } from '../../../types';
 import {
   getArchiveFilelist,
@@ -88,7 +89,7 @@ export interface FetchFindLatestPackageOptions {
 async function _fetchFindLatestPackage(
   packageName: string,
   options?: FetchFindLatestPackageOptions
-) {
+): Promise<RegistryPackage | BundledPackage> {
   return withPackageSpan(`Find latest package ${packageName}`, async () => {
     const logger = appContextService.getLogger();
     const { ignoreConstraints = false, prerelease = false } = options ?? {};
@@ -146,7 +147,7 @@ async function _fetchFindLatestPackage(
           conditions: { kibana: { version: '^7.13.0' } },
           owner: { github: 'elastic/security-onboarding-and-lifecycle-mgt' },
           categories: ['security'],
-        };
+        } as any;
         return dummyBeta;
       }
 

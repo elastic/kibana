@@ -123,7 +123,7 @@ class PackageClientImpl implements PackageClient {
   public async fetchFindLatestPackage(
     packageName: string,
     options?: FetchFindLatestPackageOptions
-  ) {
+  ): Promise<RegistryPackage | BundledPackage> {
     await this.#runPreflight();
     return fetchFindLatestPackageOrThrow(packageName, options);
   }
