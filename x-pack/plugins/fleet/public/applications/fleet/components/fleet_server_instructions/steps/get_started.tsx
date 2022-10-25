@@ -85,7 +85,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
     <>
       <EuiText>
         <FormattedMessage
-          id="xpack.fleet.fleetServerFlyout.getStartedInstructions"
+          id="xpack.fleet.fleetServerSetup.getStartedInstructions"
           defaultMessage="First, set the public IP or host name and port that agents will use to reach Fleet Server. It uses port {port} by default. We'll then generate a policy for you automatically."
           values={{ port: <EuiCode>8220</EuiCode> }}
         />
@@ -98,39 +98,33 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
           fullWidth
           label={
             <FormattedMessage
-              id="xpack.fleet.settings.fleetServerFlyout.nameInputLabel"
+              id="xpack.fleet.fleetServerSetup.nameInputLabel"
               defaultMessage="Name"
             />
           }
           {...inputs.nameInput.formRowProps}
         >
           <EuiFieldText
-            data-test-subj="fleetServerHostsFlyout.nameInput"
+            data-test-subj="fleetServerHosts.getStarted.nameInput"
             fullWidth
-            placeholder={i18n.translate(
-              'xpack.fleet.settings.fleetServerFlyout.nameInputPlaceholder',
-              {
-                defaultMessage: 'Specify name',
-              }
-            )}
+            placeholder={i18n.translate('xpack.fleet.fleetServerSetup.nameInputPlaceholder', {
+              defaultMessage: 'Specify name',
+            })}
             {...inputs.nameInput.props}
           />
         </EuiFormRow>
         <EuiFormRow
           fullWidth
           label={
-            <FormattedMessage
-              id="xpack.fleet.settings.fleetServerFlyout.hostUrlLabel"
-              defaultMessage="URL"
-            />
+            <FormattedMessage id="xpack.fleet.fleetServerSetup.hostUrlLabel" defaultMessage="URL" />
           }
         >
           <>
             <MultiRowInput
-              data-test-subj="fleetServerHostsFlyout.multiRowInput"
+              data-test-subj="fleetServerHosts.getStarted.multiRowInput"
               {...inputs.hostUrlsInput.props}
               placeholder={i18n.translate(
-                'xpack.fleet.settings.fleetServerHostsFlyout.fleetServerHostsInputPlaceholder',
+                'xpack.fleet.fleetServerSetup.fleetServerHostsInputPlaceholder',
                 {
                   defaultMessage: 'Specify host URL',
                 }

@@ -92,39 +92,33 @@ export const AddFleetServerHostStepContent = ({
         fullWidth
         label={
           <FormattedMessage
-            id="xpack.fleet.settings.fleetServerFlyout.nameInputLabel"
+            id="xpack.fleet.fleetServerSetup.nameInputLabel"
             defaultMessage="Name"
           />
         }
         {...inputs.nameInput.formRowProps}
       >
         <EuiFieldText
-          data-test-subj="fleetServerHostsFlyout.nameInput"
+          data-test-subj="fleetServerSetup.nameInput"
           fullWidth
-          placeholder={i18n.translate(
-            'xpack.fleet.settings.fleetServerFlyout.nameInputPlaceholder',
-            {
-              defaultMessage: 'Specify name',
-            }
-          )}
+          placeholder={i18n.translate('xpack.fleet.fleetServerSetup.nameInputPlaceholder', {
+            defaultMessage: 'Specify name',
+          })}
           {...inputs.nameInput.props}
         />
       </EuiFormRow>
       <EuiFormRow
         fullWidth
         label={
-          <FormattedMessage
-            id="xpack.fleet.settings.fleetServerFlyout.hostUrlLabel"
-            defaultMessage="URL"
-          />
+          <FormattedMessage id="xpack.fleet.fleetServerSetup.hostUrlLabel" defaultMessage="URL" />
         }
       >
         <>
           <MultiRowInput
-            data-test-subj="fleetServerHostsFlyout.multiRowInput"
+            data-test-subj="fleetServerSetup.multiRowInput"
             {...inputs.hostUrlsInput.props}
             placeholder={i18n.translate(
-              'xpack.fleet.settings.fleetServerHostsFlyout.fleetServerHostsInputPlaceholder',
+              'xpack.fleet.fleetServerSetup.fleetServerHostsInputPlaceholder',
               {
                 defaultMessage: 'Specify host URL',
               }
