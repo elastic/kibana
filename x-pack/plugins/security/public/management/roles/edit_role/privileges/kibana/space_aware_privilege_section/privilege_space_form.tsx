@@ -474,12 +474,12 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         ?.getPrimaryFeaturePrivileges({ includeMinimalFeaturePrivileges: true })
         .find((pfp) => privileges.includes(pfp.id)) ?? { disabled: false, requireAllSpaces: false };
 
-      const allSpacesSelected = selectedSpaceIds.includes(ALL_SPACES_ID);
+      const areAllSpacesSelected = selectedSpaceIds.includes(ALL_SPACES_ID);
       if (securedFeature) {
         securedFeature.getSubFeatures().forEach((subFeature) => {
           subFeature.privileges.forEach((currentPrivilege) => {
             if (privileges.includes(currentPrivilege.id)) {
-              if (subFeature.requireAllSpaces && !allSpacesSelected) {
+              if (subFeature.requireAllSpaces && !areAllSpacesSelected) {
                 remove(privileges, (privilege) => privilege === currentPrivilege.id);
               }
             }
@@ -488,7 +488,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
       }
       const newFeaturePrivileges =
         primaryFeaturePrivilege?.disabled ||
-        (primaryFeaturePrivilege?.requireAllSpaces && !allSpacesSelected)
+        (primaryFeaturePrivilege?.requireAllSpaces && !areAllSpacesSelected)
           ? [] // The primary feature privilege cannot be selected; remove that and any selected sub-feature privileges, too
           : privileges;
       return {

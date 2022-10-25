@@ -41,24 +41,24 @@ export const SubFeatureForm = (props: Props) => {
     .filter((group) => group.privileges.length > 0);
 
   const tooltip = useMemo(() => {
-    if (props.subFeature.privilegesTooltip) {
-      const tooltipContent = (
-        <EuiText>
-          <p>{props.subFeature.privilegesTooltip}</p>
-        </EuiText>
-      );
-      return (
-        <EuiIconTip
-          iconProps={{
-            className: 'eui-alignTop',
-          }}
-          type={'iInCircle'}
-          color={'subdued'}
-          content={tooltipContent}
-        />
-      );
+    if (!props.subFeature.privilegesTooltip) {
+      return null;
     }
-    return null;
+    const tooltipContent = (
+      <EuiText>
+        <p>{props.subFeature.privilegesTooltip}</p>
+      </EuiText>
+    );
+    return (
+      <EuiIconTip
+        iconProps={{
+          className: 'eui-alignTop',
+        }}
+        type="iInCircle"
+        color="subdued"
+        content={tooltipContent}
+      />
+    );
   }, [props.subFeature.privilegesTooltip]);
 
   if (groupsWithPrivileges.length === 0) {

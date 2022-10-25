@@ -112,7 +112,7 @@ export const FeatureTableExpandedRow = ({
         </div>
       </EuiFlexItem>
       {feature.getSubFeatures().map((subFeature) => {
-        const disabledDueToSpaceSelection = subFeature.requireAllSpaces && !allSpacesSelected;
+        const isDisabledDueToSpaceSelection = subFeature.requireAllSpaces && !allSpacesSelected;
 
         return (
           <EuiFlexItem key={subFeature.name}>
@@ -123,7 +123,7 @@ export const FeatureTableExpandedRow = ({
               subFeature={subFeature}
               onChange={(updatedPrivileges) => onChange(feature.id, updatedPrivileges)}
               selectedFeaturePrivileges={selectedFeaturePrivileges}
-              disabled={disabled || !isCustomizing || disabledDueToSpaceSelection}
+              disabled={disabled || !isCustomizing || isDisabledDueToSpaceSelection}
             />
           </EuiFlexItem>
         );
