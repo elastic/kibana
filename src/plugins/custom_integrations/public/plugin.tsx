@@ -48,8 +48,8 @@ export class CustomIntegrationsPlugin
     const services = servicesFactory({ coreStart, startPlugins });
 
     const languageClientsUiComponents = {
-        sample: SampleClientReadme,
-        javascript: ElasticsearchJsClientReadme,
+      sample: SampleClientReadme,
+      javascript: ElasticsearchJsClientReadme,
     };
 
     const ContextProvider: React.FC = ({ children }) => (
