@@ -1,5 +1,5 @@
 [[setup]]
-= Set up
+= Set up and upgrade {kib}
 
 [partintro]
 --

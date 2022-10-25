@@ -1,8 +1,8 @@
 [role="xpack"]
 [[monitor-troubleshooting]]
-= Troubleshooting monitoring in {kib}
+= Common Stack Monitoring errors
 ++++
-<titleabbrev>Troubleshooting</titleabbrev>
+<titleabbrev>Common errors</titleabbrev>
 ++++
 
 Use the information in this section to troubleshoot common problems and find 

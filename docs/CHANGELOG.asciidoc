@@ -685,7 +685,7 @@ To use index patterns and {es} indices in *TSVB* visualizations:
 The deprecated `xpack.infra.sources.default.logAlias` and `xpack.infra.sources.default.logAlias` settings have been removed. For more information, refer to {kibana-pull}115974[#115974].
 
 *Impact* +
-Before you upgrade, remove the settings from kibana.yml, then configure the settings in <<logs-app,Logs>>.
+Before you upgrade, remove the settings from kibana.yml, then configure the settings in {observability-guide}/ingest-logs.html[Ingest logs].
 ====
 
 [discrete]

@@ -1,8 +1,6 @@
 [[osquery]]
 = Osquery
 
-[partintro]
---
 https://osquery.io[Osquery] is an open source tool that lets you query operating systems like a database, providing you with visibility into your infrastructure and operating systems.
 Using basic SQL commands, you can ask questions about devices, such as servers,
 Docker containers, and computers running Linux, macOS, or Windows.
@@ -319,8 +317,6 @@ https://osquery.readthedocs.io/en/stable/deployment/logging/#differential-logs[d
 
 * Osquery data is stored in the `logs-osquery_manager.result-<namespace>` datastream, and the result row data is under the `osquery` property in the document.
 
-
---
 
 include::manage-integration.asciidoc[]
 

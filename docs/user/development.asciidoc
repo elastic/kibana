@@ -1,0 +1,16 @@
+= APIs and development
+
+{kib} offers a variety of development tools and APIs.
+
+- <<devtools-kibana,Dev tools directly integrated into {kib}>>
+- <<api,REST APIs>>
+
+:leveloffset: +1
+include::dev-tools.asciidoc[]
+
+include::api.asciidoc[]
+
+include::{kib-repo-dir}/developer/index.asciidoc[]
+
+include::{kib-repo-dir}/apis.asciidoc[]
+:leveloffset: 0

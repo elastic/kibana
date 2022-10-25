@@ -23,13 +23,9 @@ include::{docs-root}/shared/attributes.asciidoc[]
 
 include::user/index.asciidoc[]
 
-include::accessibility.asciidoc[]
+include::user/development.asciidoc[]
 
 include::CHANGELOG.asciidoc[]
-
-include::developer/index.asciidoc[]
-
-include::apis.asciidoc[]
 
 include::redirects.asciidoc[]
 

@@ -2,8 +2,6 @@
 [[devtools-kibana]]
 = Dev Tools
 
-[partintro]
---
 *Dev Tools* contains tools that you can use to interact
 with your data.
 
@@ -28,7 +26,6 @@ a| <<painlesslab, Painless&nbsp;Lab>>
 | beta:[] Test and debug Painless scripts in real-time.
 |===
 
---
 
 include::{kib-repo-dir}/dev-tools/console/console.asciidoc[]
 

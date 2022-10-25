@@ -1,5 +1,5 @@
 [[management]]
-= Stack Management
+= Manage and monitor your Elastic Stack from {kib}
 
 [partintro]
 --
@@ -191,6 +191,10 @@ include::{kib-repo-dir}/management/rollups/create_and_manage_rollups.asciidoc[]
 include::{kib-repo-dir}/management/managing-saved-objects.asciidoc[]
 
 include::security/index.asciidoc[]
+
+:leveloffset: +1
+include::monitoring/index.asciidoc[]
+:leveloffset: 0
 
 include::{kib-repo-dir}/spaces/index.asciidoc[]
 

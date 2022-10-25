@@ -2,8 +2,6 @@
 [[xpack-monitoring]]
 = Stack Monitoring
 
-[partintro]
---
 
 The {kib} {monitor-features} serve two separate purposes:
 
@@ -19,5 +17,3 @@ or instance starts.
 
 For more information, see <<configuring-monitoring>> and 
 {ref}/monitor-elasticsearch-cluster.html[Monitor a cluster].  
-
---

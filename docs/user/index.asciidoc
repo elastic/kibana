@@ -2,6 +2,9 @@ include::introduction.asciidoc[]
 :leveloffset: +1
 include::{kib-repo-dir}/concepts/index.asciidoc[]
 :leveloffset: 0
+:leveloffset: +2
+include::{kib-repo-dir}/accessibility.asciidoc[]
+:leveloffset: 0
 
 include::whats-new.asciidoc[]
 
@@ -9,29 +12,28 @@ include::whats-new.asciidoc[]
 // Since 8.4, the product no longer encourages adding sample data, and the docs now have other entry points for starting to use Elastic.
 //include::{kib-repo-dir}/getting-started/quick-start-guide.asciidoc[]
 
-include::setup.asciidoc[]
-
 include::discover-visualize-share.asciidoc[]
 
-include::{kib-repo-dir}/observability/index.asciidoc[]
+include::setup.asciidoc[]
 
-include::{kib-repo-dir}/apm/index.asciidoc[]
-
-include::{kib-repo-dir}/siem/index.asciidoc[]
-
-include::dev-tools.asciidoc[]
-
-include::{kib-repo-dir}/fleet/fleet.asciidoc[]
-
+:leveloffset: +1
+include::plugins.asciidoc[]
 include::{kib-repo-dir}/osquery/osquery.asciidoc[]
+:leveloffset: 0
 
-include::monitoring/index.asciidoc[]
+//include::{kib-repo-dir}/observability/index.asciidoc[]
+
+//include::{kib-repo-dir}/apm/index.asciidoc[]
+
+//include::{kib-repo-dir}/siem/index.asciidoc[]
+
+//include::{kib-repo-dir}/fleet/fleet.asciidoc[]
 
 include::management.asciidoc[]
 
-include::api.asciidoc[]
-
-include::plugins.asciidoc[]
-
 include::troubleshooting/index.asciidoc[]
+
+
+
+
 

@@ -1,10 +1,10 @@
 [[kibana-troubleshooting]]
 == Troubleshooting
 
-{kib} provides the following tools for debugging issues:
-
+* <<monitor-troubleshooting,Common Stack Monitoring errors>>
 * <<kibana-troubleshooting-kibana-server-logs, Using {kib} server logs>>
 * <<kibana-troubleshooting-trace-query, Trace {es} query to the origin in {kib}>>
 
+include::../monitoring/monitoring-troubleshooting.asciidoc[leveloffset=+2]
 include::using-server-logs.asciidoc[]
 include::trace-query.asciidoc[]
