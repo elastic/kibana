@@ -35,7 +35,8 @@ import {
   getRuntimeMappings as getRuntimeMappingsForNewTerms,
   getAggregationField,
   decodeMatchedBucketKey,
-} from './utils-base-64';
+} from './utils';
+// } from './utils_base_64';
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
