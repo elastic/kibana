@@ -129,6 +129,46 @@ jest.mock('../../fields_browser/create_field_button', () => ({
   useCreateFieldButton: () => <></>,
 }));
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    EuiScreenReaderOnly: () => <></>,
+  };
+});
+jest.mock('react-beautiful-dnd', () => {
+  const original = jest.requireActual('react-beautiful-dnd');
+  return {
+    ...original,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Droppable: ({ children }: { children: any }) =>
+      children(
+        {
+          draggableProps: {
+            style: {},
+          },
+          innerRef: jest.fn(),
+        },
+        {}
+      ),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Draggable: ({ children }: { children: any }) =>
+      children(
+        {
+          draggableProps: {
+            style: {},
+          },
+          innerRef: jest.fn(),
+        },
+        {}
+      ),
+    DraggableProvided: () => <></>,
+    DraggableStateSnapshot: () => <></>,
+    DraggingStyle: () => <></>,
+    NotDraggingStyle: () => <></>,
+  };
+});
+
 describe('Body', () => {
   // const mount = useMountAppended();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
