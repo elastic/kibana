@@ -19,6 +19,7 @@ import { HeaderComponent } from '.';
 import { getNewSortDirectionOnClick, getNextSortDirection, getSortDirection } from './helpers';
 import { Direction } from '../../../../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../../../../common/hooks/use_selector';
+import { TimelineId } from '../../../../../../../common/types';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -48,7 +49,7 @@ describe('Header', () => {
       sortDirection: Direction.desc,
     },
   ];
-  const timelineId = 'test';
+  const timelineId = TimelineId.test;
 
   beforeEach(() => {
     (useDeepEqualSelector as jest.Mock).mockReturnValue({ isLoading: false });
