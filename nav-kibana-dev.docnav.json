@@ -106,6 +106,10 @@
         },
         {
           "id": "kibDevDocsEmbeddables"
+        },
+        {
+          "id": "kibCloudExperimentsPlugin",
+          "label": "A/B testing on Elastic Cloud"
         }
       ]
     },
