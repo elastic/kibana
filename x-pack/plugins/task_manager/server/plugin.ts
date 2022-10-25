@@ -18,6 +18,7 @@ import {
   ServiceStatusLevels,
   CoreStatus,
 } from '@kbn/core/server';
+import type { SavedObjectsBulkDeleteResponse } from '@kbn/core/server';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskManagerConfig } from './config';
 import { createInitialMiddleware, addMiddlewareToChain, Middleware } from './lib/middleware';
@@ -34,6 +35,7 @@ import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTask, ConcreteTaskInstance } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
+
 export interface TaskManagerSetupContract {
   /**
    * @deprecated
@@ -60,7 +62,11 @@ export type TaskManagerStartContract = Pick<
 > &
   Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'remove'> & {
     removeIfExists: TaskStore['remove'];
-  } & { bulkRemoveIfExist: TaskStore['bulkRemove'] } & { supportsEphemeralTasks: () => boolean };
+  } & {
+    bulkRemoveIfExist: (ids: string[]) => Promise<SavedObjectsBulkDeleteResponse | undefined>;
+  } & {
+    supportsEphemeralTasks: () => boolean;
+  };
 
 export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract>
