@@ -16,21 +16,24 @@ import type { UnifiedHistogramHitsContext } from '../types';
 
 export interface HitsCounterProps {
   hits: UnifiedHistogramHitsContext;
+  totalHits?: number;
   append?: ReactElement;
 }
 
-export function HitsCounter({ hits, append }: HitsCounterProps) {
-  if (!hits.total && hits.status === 'loading') {
+export function HitsCounter({ hits, totalHits, append }: HitsCounterProps) {
+  if (!hits.total && hits.status === 'loading' && !totalHits) {
     return null;
   }
 
   const formattedHits = (
     <strong
       data-test-subj={
-        hits.status === 'partial' ? 'unifiedHistogramQueryHitsPartial' : 'unifiedHistogramQueryHits'
+        hits.status === 'partial' && !totalHits
+          ? 'unifiedHistogramQueryHitsPartial'
+          : 'unifiedHistogramQueryHits'
       }
     >
-      <FormattedNumber value={hits.total ?? 0} />
+      <FormattedNumber value={totalHits ?? hits.total ?? 0} />
     </strong>
   );
 
@@ -48,23 +51,23 @@ export function HitsCounter({ hits, append }: HitsCounterProps) {
     >
       <EuiFlexItem grow={false} aria-live="polite">
         <EuiText>
-          {hits.status === 'partial' && (
+          {hits.status === 'partial' && !totalHits && (
             <FormattedMessage
               id="unifiedHistogram.partialHits"
               defaultMessage="≥{formattedHits} {hits, plural, one {hit} other {hits}}"
               values={{ hits: hits.total, formattedHits }}
             />
           )}
-          {hits.status !== 'partial' && (
+          {(hits.status !== 'partial' || totalHits) && (
             <FormattedMessage
               id="unifiedHistogram.hitsPluralTitle"
               defaultMessage="{formattedHits} {hits, plural, one {hit} other {hits}}"
-              values={{ hits: hits.total, formattedHits }}
+              values={{ hits: totalHits ?? hits.total, formattedHits }}
             />
           )}
         </EuiText>
       </EuiFlexItem>
-      {hits.status === 'partial' && (
+      {hits.status === 'partial' && !totalHits && (
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner
             size="m"

@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
@@ -25,6 +26,7 @@ export interface HistogramProps {
   dataView: DataView;
   chart: UnifiedHistogramChartContext;
   breakdown?: UnifiedHistogramBreakdownContext;
+  onTotalHitsChange: (totalHits: number) => void;
 }
 
 export function Histogram({
@@ -32,6 +34,7 @@ export function Histogram({
   dataView,
   chart: { timeInterval, bucketInterval, data: chartData },
   breakdown: { field: breakdownField } = {},
+  onTotalHitsChange,
 }: HistogramProps) {
   const filters = data.query.filterManager.getFilters();
   const query = data.query.queryString.getQuery();
@@ -76,6 +79,17 @@ export function Histogram({
     });
     return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`;
   }, [from, to, timeInterval, bucketInterval?.description, toMoment]);
+
+  const onLoad = useCallback(
+    (_, adapters: Partial<DefaultInspectorAdapters> | undefined) => {
+      const totalHits = adapters?.tables?.tables?.unifiedHistogram?.meta?.statistics?.totalCount;
+
+      if (totalHits) {
+        onTotalHitsChange(totalHits);
+      }
+    },
+    [onTotalHitsChange]
+  );
 
   const { euiTheme } = useEuiTheme();
   const chartCss = css`
@@ -164,6 +178,7 @@ export function Histogram({
           timeRange={{ from, to }}
           attributes={attributes}
           noPadding
+          onLoad={onLoad}
         />
       </div>
       {timeRange}

@@ -100,6 +100,12 @@ export function Chart({
     onResetChartHeight,
   });
 
+  const [totalHits, setTotalHits] = useState<number>();
+
+  const onTotalHitsChange = useCallback((newTotalHits: number) => {
+    setTotalHits(newTotalHits);
+  }, []);
+
   const chartVisible = chart && !chart.hidden;
 
   const { euiTheme } = useEuiTheme();
@@ -158,7 +164,7 @@ export function Chart({
             className="eui-textTruncate eui-textNoWrap"
             css={resultCountTitleCss}
           >
-            {hits && <HitsCounter hits={hits} append={appendHitsCounter} />}
+            {hits && <HitsCounter hits={hits} totalHits={totalHits} append={appendHitsCounter} />}
           </EuiFlexItem>
           {chart && (
             <EuiFlexItem css={resultCountToggleCss}>
@@ -245,6 +251,7 @@ export function Chart({
               dataView={dataView}
               chart={chart}
               breakdown={breakdown}
+              onTotalHitsChange={onTotalHitsChange}
             />
           </section>
           {appendHistogram}

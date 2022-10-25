@@ -164,12 +164,6 @@ export function fetchAll(
 
     charts
       ?.then((chart) => {
-        dataSubjects.totalHits$.next({
-          fetchStatus: FetchStatus.COMPLETE,
-          result: chart.totalHits,
-          recordRawType,
-        });
-
         dataSubjects.charts$.next({
           fetchStatus: FetchStatus.COMPLETE,
           response: chart.response,

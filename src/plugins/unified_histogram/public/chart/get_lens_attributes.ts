@@ -96,7 +96,7 @@ export const getLensAttributes = ({
       },
       {
         id: dataView.id ?? '',
-        name: 'indexpattern-datasource-layer-layer1',
+        name: 'indexpattern-datasource-layer-unifiedHistogram',
         type: 'index-pattern',
       },
     ],
@@ -104,7 +104,7 @@ export const getLensAttributes = ({
       datasourceStates: {
         formBased: {
           layers: {
-            layer1: { columnOrder, columns },
+            unifiedHistogram: { columnOrder, columns },
           },
         },
       },
@@ -114,7 +114,7 @@ export const getLensAttributes = ({
         layers: [
           {
             accessors: ['count_column'],
-            layerId: 'layer1',
+            layerId: 'unifiedHistogram',
             layerType: 'data',
             seriesType: 'bar_stacked',
             xAccessor: 'date_column',

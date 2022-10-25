@@ -78,8 +78,6 @@ export interface DataDocumentsMsg extends DataMsg {
 }
 
 export interface DataTotalHitsMsg extends DataMsg {
-  fetchStatus: FetchStatus;
-  error?: Error;
   result?: number;
 }
 
