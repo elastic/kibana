@@ -264,8 +264,8 @@ export interface Datasource<T = unknown, P = unknown> {
 
   insertLayer: (state: T, newLayerId: string, linkToLayers?: string[]) => T;
   createEmptyLayer: (indexPatternId: string) => T;
-  removeLayer: (state: T, layerId: string) => T;
-  clearLayer: (state: T, layerId: string) => T;
+  removeLayer: (state: T, layerId: string) => { newState: T; removedLayerIds: string[] };
+  clearLayer: (state: T, layerId: string) => { newState: T; removedLayerIds: string[] };
   cloneLayer: (
     state: T,
     layerId: string,
@@ -300,6 +300,10 @@ export interface Datasource<T = unknown, P = unknown> {
   }) => T;
   getSelectedFields?: (state: T) => string[];
 
+  renderLayerSettings?: (
+    domElement: Element,
+    props: DatasourceLayerSettingsProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
   renderDataPanel: (
     domElement: Element,
     props: DatasourceDataPanelProps<T>
@@ -359,7 +363,8 @@ export interface Datasource<T = unknown, P = unknown> {
   toExpression: (
     state: T,
     layerId: string,
-    indexPatterns: IndexPatternMap
+    indexPatterns: IndexPatternMap,
+    searchSessionId?: string
   ) => ExpressionAstExpression | string | null;
 
   getDatasourceSuggestionsForField: (
@@ -457,6 +462,13 @@ export interface Datasource<T = unknown, P = unknown> {
    * Get all the used DataViews from state
    */
   getUsedDataViews: (state: T) => string[];
+
+  getSupportedActionsForLayer?: (
+    layerId: string,
+    state: T,
+    setState: StateSetter<T>,
+    openLayerSettings?: () => void
+  ) => LayerAction[];
 }
 
 export interface DatasourceFixAction<T> {
@@ -506,6 +518,12 @@ export interface DatasourcePublicAPI {
    */
   getMaxPossibleNumValues: (columnId: string) => number | null;
   hasDefaultTimeField: () => boolean;
+}
+
+export interface DatasourceLayerSettingsProps<T = unknown> {
+  layerId: string;
+  state: T;
+  setState: StateSetter<T>;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
@@ -712,6 +730,11 @@ export interface VisualizationToolbarProps<T = unknown> {
   frame: FramePublicAPI;
   state: T;
 }
+
+export type VisualizationLayerSettingsProps<T = unknown> = VisualizationConfigProps<T> & {
+  setState(newState: T | ((currState: T) => T)): void;
+  panelRef: MutableRefObject<HTMLDivElement | null>;
+};
 
 export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfigProps<T> & {
   groupId: string;
@@ -1008,7 +1031,8 @@ export interface Visualization<T = unknown, P = unknown> {
   getSupportedActionsForLayer?: (
     layerId: string,
     state: T,
-    setState: StateSetter<T>
+    setState: StateSetter<T>,
+    openLayerSettings?: () => void
   ) => LayerAction[];
   /** returns the type string of the given layer */
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;
@@ -1087,6 +1111,11 @@ export interface Visualization<T = unknown, P = unknown> {
   getDropProps?: (
     dropProps: GetDropPropsArgs
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
+
+  renderLayerSettings?: (
+    domElement: Element,
+    props: VisualizationLayerSettingsProps<T>
+  ) => ((cleanupElement: Element) => void) | void;
 
   /**
    * Additional editor that gets rendered inside the dimension popover.

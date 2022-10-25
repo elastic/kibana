@@ -361,6 +361,23 @@ describe('kuery functions', () => {
 
         expect(result).toEqual(expected);
       });
+
+      test('should use a term query for keyword fields', () => {
+        const node = nodeTypes.function.buildNode('is', 'machine.os.keyword', 'Win 7');
+        const result = is.toElasticsearchQuery(node, indexPattern);
+        expect(result).toEqual({
+          bool: {
+            should: [
+              {
+                term: {
+                  'machine.os.keyword': 'Win 7',
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        });
+      });
     });
   });
 });
