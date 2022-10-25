@@ -82,7 +82,7 @@ export async function getServerlessFunctionsOverview({
   );
 
   const serverlessFunctionsOverview =
-    response.aggregations?.serverlessFunctions.buckets.map((bucket) => {
+    response.aggregations?.serverlessFunctions?.buckets?.map((bucket) => {
       const serverlessId = bucket.key as string;
       return {
         serverlessId,

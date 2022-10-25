@@ -88,7 +88,7 @@ export async function getActiveInstancesTimeseries({
   );
 
   return (
-    aggregations?.timeseriesData.buckets.map((timeseriesBucket) => ({
+    aggregations?.timeseriesData?.buckets?.map((timeseriesBucket) => ({
       x: timeseriesBucket.key,
       y: timeseriesBucket.activeInstances.value,
     })) || []

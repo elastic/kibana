@@ -135,7 +135,7 @@ export async function getServerlessActiveInstancesOverview({
   );
 
   return (
-    response.aggregations?.activeInstances.buckets.flatMap((bucket) => {
+    response.aggregations?.activeInstances?.buckets?.flatMap((bucket) => {
       const activeInstanceName = bucket.key as string;
       const serverlessFunctionsDetails =
         bucket.serverlessFunctions.buckets.reduce<ActiveInstanceOverview[]>(
