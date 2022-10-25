@@ -31,13 +31,14 @@ import {
 import { useSyntheticsSettingsContext } from '../../../contexts/synthetics_settings_context';
 
 import { sortPings } from '../../../utils/monitor_test_result/sort_pings';
-import { selectPingsLoading, selectMonitorRecentPings, selectPingsError } from '../../../state';
+import { selectPingsLoading, selectPingsError } from '../../../state';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
 import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
 import { JourneyStepScreenshotContainer } from '../../common/monitor_test_result/journey_step_screenshot_container';
 
 import { useKibanaDateFormat } from '../../../../../hooks/use_kibana_date_format';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
+import { useMonitorPings } from '../hooks/use_monitor_pings';
 import { useJourneySteps } from '../hooks/use_journey_steps';
 
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
@@ -52,7 +53,8 @@ export const TestRunsTable = ({ paginable = true }: TestRunsTableProps) => {
 
   const [sortField, setSortField] = useState<SortableField>('timestamp');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const pings = useSelector(selectMonitorRecentPings);
+  const { pings, total } = useMonitorPings();
+  // const pings = useSelector(selectMonitorRecentPings);
   const sortedPings = useMemo(() => {
     return sortPings(pings, sortField, sortDirection);
   }, [pings, sortField, sortDirection]);
@@ -175,7 +177,7 @@ export const TestRunsTable = ({ paginable = true }: TestRunsTableProps) => {
             ? {
                 pageIndex: page.index,
                 pageSize: page.size,
-                totalItemCount: 20, // FIXME
+                totalItemCount: total,
                 pageSizeOptions: [10, 20, 50], // TODO Confirm with Henry,
               }
             : undefined
