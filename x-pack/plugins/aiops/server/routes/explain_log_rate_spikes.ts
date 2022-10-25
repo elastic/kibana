@@ -226,10 +226,10 @@ export const defineExplainLogRateSpikesRoute = (
 
           // Don't use more than 10 here otherwise Kibana will emit an error
           // regarding a limit of abort signal listeners of more than 10.
-          const chunkSize = 10;
+          const CHUNK_SIZE = 10;
           let chunkCount = 0;
 
-          const fieldCandidatesChunks = chunk(fieldCandidates, chunkSize);
+          const fieldCandidatesChunks = chunk(fieldCandidates, CHUNK_SIZE);
 
           logDebugMessage('Fetch p-values.');
 
@@ -554,7 +554,7 @@ export const defineExplainLogRateSpikesRoute = (
 
                 logDebugMessage(`Fetch ${changePointGroups.length} group histograms.`);
 
-                const changePointGroupsChunks = chunk(changePointGroups, chunkSize);
+                const changePointGroupsChunks = chunk(changePointGroups, CHUNK_SIZE);
 
                 for (const changePointGroupsChunk of changePointGroupsChunks) {
                   if (shouldStop) {
@@ -650,7 +650,7 @@ export const defineExplainLogRateSpikesRoute = (
 
           // time series filtered by fields
           if (changePoints.length > 0 && overallTimeSeries !== undefined) {
-            const changePointsChunks = chunk(changePoints, chunkSize);
+            const changePointsChunks = chunk(changePoints, CHUNK_SIZE);
 
             for (const changePointsChunk of changePointsChunks) {
               if (shouldStop) {
