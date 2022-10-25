@@ -41,29 +41,31 @@ export function TipsAndResources() {
       title: i18n.translate(
         'xpack.apm.storageExplorer.resources.errorMessages.title',
         {
-          defaultMessage: 'How to reduce the number of errors?',
+          defaultMessage: 'Reduce transactions',
         }
       ),
       description: i18n.translate(
         'xpack.apm.storageExplorer.resources.errorMessages.description',
         {
-          defaultMessage: 'Error messages',
+          defaultMessage:
+            'Configure a more aggressive transaction sampling policy. Transaction sampling lowers the amount of data ingested without negatively impacting the usefulness of that data.',
         }
       ),
-      href: docLinks.links.apm.dataModelErrors,
+      href: docLinks.links.apm.transactionSampling,
     },
     {
       icon: 'visLine',
       title: i18n.translate(
         'xpack.apm.storageExplorer.resources.compressedSpans.title',
         {
-          defaultMessage: 'Transaction and spans spikes?',
+          defaultMessage: 'Reduce spans',
         }
       ),
       description: i18n.translate(
         'xpack.apm.storageExplorer.resources.compressedSpans.description',
         {
-          defaultMessage: 'Compressed spans',
+          defaultMessage:
+            'Enable span compression. Span compression saves on data and transfer costs by compressing multiple similar spans into a single span.',
         }
       ),
       href: docLinks.links.apm.spanCompression,
@@ -73,16 +75,17 @@ export function TipsAndResources() {
       title: i18n.translate(
         'xpack.apm.storageExplorer.resources.samplingRate.title',
         {
-          defaultMessage: 'How to manage your indices?',
+          defaultMessage: 'Manage the index lifecycle',
         }
       ),
       description: i18n.translate(
         'xpack.apm.storageExplorer.resources.samplingRate.description',
         {
-          defaultMessage: 'Sampling rate and management',
+          defaultMessage:
+            'Customize your index lifecycle policies. Index lifecycle policies allow you to manage indices according to your performance, resiliency, and retention requirements.',
         }
       ),
-      href: docLinks.links.apm.transactionSampling,
+      href: docLinks.links.apm.indexLifecycleManagement,
     },
   ];
 

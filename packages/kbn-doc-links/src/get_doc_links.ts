@@ -53,7 +53,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       storageExplorer: `${KIBANA_DOCS}storage-explorer.html`,
       spanCompression: `${APM_DOCS}guide/${DOC_LINK_VERSION}/span-compression.html`,
       transactionSampling: `${APM_DOCS}guide/${DOC_LINK_VERSION}/sampling.html`,
-      dataModelErrors: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-errors.html`,
+      indexLifecycleManagement: `${APM_DOCS}guide/${DOC_LINK_VERSION}/ilm-how-to.html`,
     },
     canvas: {
       guide: `${KIBANA_DOCS}canvas.html`,

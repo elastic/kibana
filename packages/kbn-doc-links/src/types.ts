@@ -38,7 +38,7 @@ export interface DocLinks {
     readonly storageExplorer: string;
     readonly spanCompression: string;
     readonly transactionSampling: string;
-    readonly dataModelErrors: string;
+    readonly indexLifecycleManagement: string;
   };
   readonly canvas: {
     readonly guide: string;
