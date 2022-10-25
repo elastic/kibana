@@ -31,7 +31,12 @@ import { getUpgradeStep } from './upgrade_step';
 import { getMigrateSystemIndicesStep } from './migrate_system_indices';
 import { getLogsStep } from './logs_step';
 
-type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'logs' | 'upgrade_readiness';
+type OverviewStep =
+  | 'backup'
+  | 'migrate_system_indices'
+  | 'fix_issues'
+  | 'logs'
+  | 'upgrade_readiness';
 
 export const Overview = withRouter(({ history }: RouteComponentProps) => {
   const {
@@ -77,7 +82,6 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
           description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
             defaultMessage: 'Get ready for the next version of Elastic!',
           })}
-          
           rightSideItems={[
             <EuiButtonEmpty
               href={docLinks.links.upgradeAssistant.overview}
@@ -94,9 +98,9 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
         >
           <EuiText>
             <FormattedMessage
-                id="xpack.upgradeAssistant.overview.checkUpcomingVersion"
-                defaultMessage={`If you are not on the latest version of the Elastic stack, use the Upgrade Assistant to prepare for the next upgrade.`}
-              />
+              id="xpack.upgradeAssistant.overview.checkUpcomingVersion"
+              defaultMessage={`If you are not on the latest version of the Elastic stack, use the Upgrade Assistant to prepare for the next upgrade.`}
+            />
           </EuiText>
           <EuiText data-test-subj="whatsNewLink">
             <EuiLink href={docLinks.links.elasticsearch.latestReleaseHighlights} target="_blank">
