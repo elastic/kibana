@@ -16,6 +16,8 @@ export const ALERT_ORIGINAL_TIME = `${ALERT_NAMESPACE}.original_time` as const;
 export const ALERT_THRESHOLD_RESULT = `${ALERT_NAMESPACE}.threshold_result` as const;
 export const ALERT_THRESHOLD_RESULT_COUNT = `${ALERT_THRESHOLD_RESULT}.count` as const;
 export const ALERT_NEW_TERMS = `${ALERT_NAMESPACE}.new_terms` as const;
+export const ALERT_NEW_TERMS_FIELDS =
+  `${ALERT_RULE_NAMESPACE}.parameters.new_terms_fields` as const;
 
 export const ALERT_ORIGINAL_EVENT = `${ALERT_NAMESPACE}.original_event` as const;
 export const ALERT_ORIGINAL_EVENT_ACTION = `${ALERT_ORIGINAL_EVENT}.action` as const;

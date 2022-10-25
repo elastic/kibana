@@ -601,11 +601,11 @@ export const schema: FormSchema<DefineStepRule> = {
             return;
           }
           return fieldValidators.maxLengthField({
-            length: 1,
+            length: 3,
             message: i18n.translate(
               'xpack.securitySolution.detectionEngine.validations.stepDefineRule.newTermsFieldsMax',
               {
-                defaultMessage: 'Number of fields must be 1.',
+                defaultMessage: 'Number of fields must not be greater than 3.',
               }
             ),
           })(...args);

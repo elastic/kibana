@@ -16,7 +16,7 @@ describe('aggregations', () => {
   describe('buildRecentTermsAgg', () => {
     test('builds a correct composite agg without `after`', () => {
       const aggregation = buildRecentTermsAgg({
-        field: 'host.name',
+        fields: ['host.name'],
         after: undefined,
       });
 
@@ -25,8 +25,17 @@ describe('aggregations', () => {
 
     test('builds a correct composite aggregation with `after`', () => {
       const aggregation = buildRecentTermsAgg({
-        field: 'host.name',
+        fields: ['host.name'],
         after: { 'host.name': 'myHost' },
+      });
+
+      expect(aggregation).toMatchSnapshot();
+    });
+
+    test('builds a correct composite aggregation with multiple fields', () => {
+      const aggregation = buildRecentTermsAgg({
+        fields: ['host.name', 'host.port', 'host.url'],
+        after: undefined,
       });
 
       expect(aggregation).toMatchSnapshot();

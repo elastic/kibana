@@ -10,7 +10,7 @@ import moment from 'moment';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 const AGGR_FIELD = 'new_terms_values';
-const DELIMITER = '_______';
+const DELIMITER = '_';
 
 export const parseDateString = ({
   date,
@@ -62,7 +62,14 @@ export const retrieveValuesFromBuckets = (
       .filter((value): value is string | number => value != null);
   }
 
-  return buckets.map((bucket) => Object.values(bucket.key).join(DELIMITER));
+  return buckets.map((bucket) =>
+    Object.values(bucket.key)
+      .filter((value): value is string | number => value != null)
+      .map((value) =>
+        Buffer.from(typeof value !== 'string' ? value.toString() : value).toString('base64')
+      )
+      .join(DELIMITER)
+  );
 };
 
 export const getRuntimeMappings = (
@@ -79,10 +86,10 @@ export const getRuntimeMappings = (
       type: 'keyword',
       script: `
       String[] fields = new String[] {${fields}};
-      String acc = doc[fields[0]].value;
+      String acc = doc[fields[0]].value.encodeBase64();
 
       for (int i = 1; i < fields.length; i++) {
-        acc = acc + '${DELIMITER}' + doc[fields[i]].value
+        acc = acc + '${DELIMITER}' + doc[fields[i]].value.encodeBase64();
       }
       
       String[] arr = new String[1];
@@ -113,5 +120,7 @@ export const decodeMatchedBucketKey = (
   }
 
   // if newTermsFields has length greater than 1, bucketKey can't be umber, so casting is safe here
-  return (bucketKey as string).split(DELIMITER);
+  return (bucketKey as string)
+    .split(DELIMITER)
+    .map((encodedValue) => Buffer.from(encodedValue, 'base64').toString());
 };

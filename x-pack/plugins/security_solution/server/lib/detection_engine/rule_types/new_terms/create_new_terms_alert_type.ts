@@ -28,7 +28,14 @@ import {
 } from './build_new_terms_aggregation';
 import type { SignalSource } from '../../signals/types';
 import { validateIndexPatterns } from '../utils';
-import { parseDateString, validateHistoryWindowStart } from './utils';
+import {
+  parseDateString,
+  validateHistoryWindowStart,
+  retrieveValuesFromBuckets,
+  getRuntimeMappings as getRuntimeMappingsForNewTerms,
+  getAggregationField,
+  decodeMatchedBucketKey,
+} from './utils-base-64';
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
@@ -152,7 +159,7 @@ export const createNewTermsAlertType = (
         // ones are new.
         const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
           aggregations: buildRecentTermsAgg({
-            field: params.newTermsFields[0],
+            fields: params.newTermsFields,
             after: afterKey,
           }),
           searchAfterSortIds: undefined,
@@ -185,10 +192,7 @@ export const createNewTermsAlertType = (
           break;
         }
         const bucketsForField = searchResultWithAggs.aggregations.new_terms.buckets;
-        const includeValues = bucketsForField
-          .map((bucket) => Object.values(bucket.key)[0])
-          .filter((value): value is string | number => value != null);
-
+        const includeValues = retrieveValuesFromBuckets(params.newTermsFields, bucketsForField);
         // PHASE 2: Take the page of results from Phase 1 and determine if each term exists in the history window.
         // The aggregation filters out buckets for terms that exist prior to `tuple.from`, so the buckets in the
         // response correspond to each new term.
@@ -200,10 +204,13 @@ export const createNewTermsAlertType = (
           aggregations: buildNewTermsAgg({
             newValueWindowStart: tuple.from,
             timestampField: aggregatableTimestampField,
-            field: params.newTermsFields[0],
+            field: getAggregationField(params.newTermsFields),
             include: includeValues,
           }),
-          runtimeMappings,
+          runtimeMappings: {
+            ...runtimeMappings,
+            ...getRuntimeMappingsForNewTerms(params.newTermsFields),
+          },
           searchAfterSortIds: undefined,
           index: inputIndex,
           // For Phase 2, we expand the time range to aggregate over the history window
@@ -243,10 +250,13 @@ export const createNewTermsAlertType = (
           } = await singleSearchAfter({
             aggregations: buildDocFetchAgg({
               timestampField: aggregatableTimestampField,
-              field: params.newTermsFields[0],
+              field: getAggregationField(params.newTermsFields),
               include: actualNewTerms,
             }),
-            runtimeMappings,
+            runtimeMappings: {
+              ...runtimeMappings,
+              ...getRuntimeMappingsForNewTerms(params.newTermsFields),
+            },
             searchAfterSortIds: undefined,
             index: inputIndex,
             // For phase 3, we go back to aggregating only over the rule interval - excluding the history window
@@ -273,7 +283,7 @@ export const createNewTermsAlertType = (
             newTerms: Array<string | number | null>;
           }> = docFetchResultWithAggs.aggregations.new_terms.buckets.map((bucket) => ({
             event: bucket.docs.hits.hits[0],
-            newTerms: [bucket.key],
+            newTerms: decodeMatchedBucketKey(params.newTermsFields, bucket.key),
           }));
 
           const wrappedAlerts = wrapNewTermsAlerts({

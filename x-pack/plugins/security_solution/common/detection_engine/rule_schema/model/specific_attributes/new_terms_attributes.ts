@@ -14,7 +14,7 @@ import { LimitedSizeArray, NonEmptyString } from '@kbn/securitysolution-io-ts-ty
  * New terms rule type currently only supports a single term, but should support more in the future
  */
 export type NewTermsFields = t.TypeOf<typeof NewTermsFields>;
-export const NewTermsFields = LimitedSizeArray({ codec: t.string, minSize: 1, maxSize: 1 });
+export const NewTermsFields = LimitedSizeArray({ codec: t.string, minSize: 1, maxSize: 3 });
 
 export type HistoryWindowStart = t.TypeOf<typeof HistoryWindowStart>;
 export const HistoryWindowStart = NonEmptyString;
