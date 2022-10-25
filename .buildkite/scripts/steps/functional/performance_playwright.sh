@@ -52,7 +52,7 @@ fi
 # track failed journeys here which might get written to metadata
 failedJourneys=()
 
-echo "🔎 Start es"
+echo "--- 🔎 Start es"
 
 node scripts/es snapshot&
 export esPid=$!
@@ -72,7 +72,7 @@ echo "✅ ES is ready and will run in the background"
 curl -I -XGET "${TEST_ES_URL}/_cat/indices"
 curl -I -XGET "${TEST_ES_URL}/_cat/count?v=true"
 
-echo "Run warmup journey"
+echo "--- Warmup journey with APM disabled"
 
 node scripts/functional_tests \
    --config "x-pack/performance/journeys/warmup" \
@@ -80,10 +80,8 @@ node scripts/functional_tests \
   --debug \
   --bail
 
-echo "Run journeys"
-
 while read -r journey; do
-  if [ "$journey" == "" ]; then
+  if [ "$journey" == "" ] || [ $journey == "warmup" ] ; then
     continue;
   fi
 
@@ -116,7 +114,7 @@ done <<< "$journeys"
 # remove trap, we're manually shutting down
 trap - EXIT;
 
-echo "--- $journey - 🔎 Shutdown ES"
+echo "--- 🔎 Shutdown ES"
 killall node
 echo "waiting for $esPid to exit gracefully";
 
