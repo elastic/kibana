@@ -296,6 +296,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                   href="https://cloud.elastic.co/support "
                   target="_blank"
                   css={styles.flyoutOverrides.flyoutFooterLink}
+                  iconSize="m"
                 >
                   {i18n.translate('guidedOnboarding.dropdownPanel.footer.support', {
                     defaultMessage: 'Need help?',
@@ -314,6 +315,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                   href="https://www.elastic.co/kibana/feedback"
                   target="_blank"
                   css={styles.flyoutOverrides.flyoutFooterLink}
+                  iconSize="s"
                 >
                   {i18n.translate('guidedOnboarding.dropdownPanel.footer.feedback', {
                     defaultMessage: 'Give feedback',
@@ -332,6 +334,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                   onClick={openQuitGuideModal}
                   data-test-subj="quitGuideButton"
                   css={styles.flyoutOverrides.flyoutFooterLink}
+                  iconSize="s"
                 >
                   {i18n.translate('guidedOnboarding.dropdownPanel.footer.exitGuideButtonLabel', {
                     defaultMessage: 'Quit guide',
