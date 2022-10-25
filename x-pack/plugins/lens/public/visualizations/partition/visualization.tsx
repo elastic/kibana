@@ -66,25 +66,33 @@ const numberMetricOperations = (op: OperationMetadata) =>
 export const isCollapsed = (columnId: string, layer: PieLayerState) =>
   Boolean(layer.collapseFns?.[columnId]);
 
-const applyPaletteToColumnConfig = (
+export const shouldShowPaletteOnDimension = (columnId: string, currentLayer: PieLayerState) => {
+  const firstNonCollapsedColumnId = currentLayer.primaryGroups.find(
+    (id) => !isCollapsed(id, currentLayer)
+  );
+
+  return (
+    columnId === firstNonCollapsedColumnId ||
+    (!firstNonCollapsedColumnId &&
+      currentLayer.metrics.includes(columnId) &&
+      currentLayer.allowMultipleMetrics)
+  );
+};
+
+const applyPaletteToAccessorConfigs = (
   columns: AccessorConfig[],
   layer: PieLayerState,
   palette: PieVisualizationState['palette'],
   paletteService: PaletteRegistry
 ) => {
-  const firstNonCollapsedColumnIdx = columns.findIndex(
-    (column) => !isCollapsed(column.columnId, layer)
-  );
-
-  if (firstNonCollapsedColumnIdx > -1) {
-    columns[firstNonCollapsedColumnIdx] = {
-      columnId: columns[firstNonCollapsedColumnIdx].columnId,
-      triggerIcon: 'colorBy',
-      palette: paletteService
+  columns.forEach((accessorConfig) => {
+    if (shouldShowPaletteOnDimension(accessorConfig.columnId, layer)) {
+      accessorConfig.triggerIcon = 'colorBy';
+      accessorConfig.palette = paletteService
         .get(palette?.name || 'default')
-        .getCategoricalColors(10, palette?.params),
-    };
-  }
+        .getCategoricalColors(10, palette?.params);
+    }
+  });
 };
 
 const ENABLE_MULTIPLE_METRICS_ACTION_ID = 'enableMultipleMetricsAction';
@@ -164,7 +172,7 @@ export const getPieVisualization = ({
       }));
 
       if (accessors.length) {
-        applyPaletteToColumnConfig(accessors, layer, state.palette, paletteService);
+        applyPaletteToAccessorConfigs(accessors, layer, state.palette, paletteService);
       }
 
       const primaryGroupConfigBaseProps = {
@@ -285,25 +293,31 @@ export const getPieVisualization = ({
       }
     };
 
-    const getMetricGroupConfig = (): VisualizationDimensionGroupConfig => ({
-      groupId: 'metric',
-      groupLabel: i18n.translate('xpack.lens.pie.groupMetricLabel', {
-        defaultMessage: 'Metrics',
-      }),
-      dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.groupMetricLabel', {
-        defaultMessage: 'Metrics',
-      }),
-      paramEditorCustomProps: {
-        headingLabel: i18n.translate('xpack.lens.pie.headingLabel', {
-          defaultMessage: 'Value',
+    const getMetricGroupConfig = (): VisualizationDimensionGroupConfig => {
+      const accessors = layer.metrics.map((columnId) => ({ columnId }));
+      applyPaletteToAccessorConfigs(accessors, layer, state.palette, paletteService);
+
+      return {
+        groupId: 'metric',
+        groupLabel: i18n.translate('xpack.lens.pie.groupMetricLabel', {
+          defaultMessage: 'Metrics',
         }),
-      },
-      accessors: layer.metrics.map((columnId) => ({ columnId })),
-      supportsMoreColumns: layer.metrics.length === 0 || Boolean(layer.allowMultipleMetrics),
-      filterOperations: numberMetricOperations,
-      requiredMinDimensionCount: 1,
-      dataTestSubj: 'lnsPie_sizeByDimensionPanel',
-    });
+        dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.groupMetricLabel', {
+          defaultMessage: 'Metrics',
+        }),
+        paramEditorCustomProps: {
+          headingLabel: i18n.translate('xpack.lens.pie.headingLabel', {
+            defaultMessage: 'Value',
+          }),
+        },
+        accessors,
+        supportsMoreColumns: layer.metrics.length === 0 || Boolean(layer.allowMultipleMetrics),
+        filterOperations: numberMetricOperations,
+        requiredMinDimensionCount: 1,
+        dataTestSubj: 'lnsPie_sizeByDimensionPanel',
+        enableDimensionEditor: true,
+      };
+    };
 
     return {
       groups: [getPrimaryGroupConfig(), getSecondaryGroupConfig(), getMetricGroupConfig()].filter(
