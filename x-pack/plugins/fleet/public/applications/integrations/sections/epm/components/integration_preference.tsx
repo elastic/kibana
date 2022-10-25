@@ -92,18 +92,23 @@ export const IntegrationPreference = ({
 
   const { docLinks } = useStartServices();
 
-  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] =
-    React.useState<boolean>(false);
+  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
+    boolean | undefined
+  >(undefined);
 
   const { data: settings } = useGetSettings();
 
   useEffect(() => {
     const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
-    setPrereleaseIntegrationsEnabled(isEnabled);
-  }, [settings?.item.prerelease_integrations_enabled]);
+    if (settings?.item) {
+      setPrereleaseIntegrationsEnabled(isEnabled);
+    }
+  }, [settings?.item]);
 
   useEffect(() => {
-    onPrereleaseEnabledChange(prereleaseIntegrationsEnabled);
+    if (prereleaseIntegrationsEnabled !== undefined) {
+      onPrereleaseEnabledChange(prereleaseIntegrationsEnabled);
+    }
   }, [onPrereleaseEnabledChange, prereleaseIntegrationsEnabled]);
 
   const updateSettings = useCallback(async (prerelease: boolean) => {
@@ -148,7 +153,6 @@ export const IntegrationPreference = ({
   ) => {
     const isChecked = event.target.checked;
     setPrereleaseIntegrationsEnabled(isChecked);
-    onPrereleaseEnabledChange(isChecked);
     updateSettings(isChecked);
   };
 
@@ -156,7 +160,7 @@ export const IntegrationPreference = ({
     <EuiPanel hasShadow={false} paddingSize="none">
       <EuiSwitchNoWrap
         label="Display beta integrations"
-        checked={prereleaseIntegrationsEnabled}
+        checked={!!prereleaseIntegrationsEnabled}
         onChange={onPrereleaseSwitchChange}
       />
       <EuiSpacer size="l" />

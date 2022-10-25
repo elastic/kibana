@@ -49,7 +49,13 @@ export async function getPackages(
     excludeInstallStatus?: boolean;
   } & Registry.SearchParams
 ) {
-  const { savedObjectsClient, prerelease, category, excludeInstallStatus = false } = options;
+  const {
+    savedObjectsClient,
+    category,
+    excludeInstallStatus = false,
+    prerelease = false,
+  } = options;
+
   const registryItems = await Registry.fetchList({ category, prerelease }).then((items) => {
     return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }, { id: item.name })

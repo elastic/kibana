@@ -185,8 +185,9 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
 // or `location` to load data.  Ideally, we'll split this into "connected" and "pure" components.
 export const AvailablePackages: React.FC<{}> = ({}) => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
-  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] =
-    React.useState<boolean>(false);
+  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
+    boolean | undefined
+  >(undefined);
 
   useBreadcrumbs('integrations_all');
 
