@@ -16,7 +16,7 @@ describe('trackViewportSize', () => {
 
   afterEach(() => {
     subscription?.unsubscribe();
-    jest.restoreAllMocks();
+    jest.resetAllMocks();
   });
 
   test('registers the analytics event type, the context provider, and a listener to the "resize" events', () => {

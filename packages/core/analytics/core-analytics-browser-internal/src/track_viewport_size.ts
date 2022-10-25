@@ -25,14 +25,6 @@ const schema: RootSchema<ViewportSize> = {
   },
 };
 
-// window or document?
-// According to MDN, it only emits on `window`: https://developer.mozilla.org/en-US/docs/Web/API/Window/resize_event
-const resize$ = fromEvent(window, 'resize').pipe(
-  debounceTime(200), // I Googled around to figure out the most commonly used debounce and it was between 200-250 ms.
-  map(() => getViewportSize()),
-  shareReplay(1)
-);
-
 /**
  * Get the @media (width) and @media (height) in the format of {@link ViewportSize}
  */
@@ -50,6 +42,14 @@ function getViewportSize(): ViewportSize {
  * @param analytics
  */
 export function trackViewportSize(analytics: AnalyticsClient) {
+  // window or document?
+  // According to MDN, it only emits on `window`: https://developer.mozilla.org/en-US/docs/Web/API/Window/resize_event
+  const resize$ = fromEvent(window, 'resize').pipe(
+    debounceTime(200),
+    map(() => getViewportSize()),
+    shareReplay(1)
+  );
+
   analytics.registerEventType<ViewportSize>({
     eventType: 'viewport_resize',
     schema,
