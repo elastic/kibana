@@ -16,9 +16,12 @@ import type { OverviewStepProps } from '../../types';
 import { ClusterDeprecationIssuesPanel } from './components';
 
 const i18nTexts = {
-  upgradeReadinessStepTitle: i18n.translate('xpack.upgradeAssistant.overview.upgradeReadinessStepTitle', {
-    defaultMessage: 'Resolve unhealthy cluster issues',
-  }),
+  upgradeReadinessStepTitle: i18n.translate(
+    'xpack.upgradeAssistant.overview.upgradeReadinessStepTitle',
+    {
+      defaultMessage: 'Resolve unhealthy cluster issues',
+    }
+  ),
 };
 
 interface Props {
@@ -36,7 +39,7 @@ const UpgradeReadinessStep: FunctionComponent<Props> = ({ setIsComplete }) => {
   }, [isClusterFixed]);
 
   return (
-    <EuiFlexGroup >
+    <EuiFlexGroup>
       <EuiFlexItem grow={1}>
         <ClusterDeprecationIssuesPanel setIsFixed={setIsClusterFixed} />
       </EuiFlexItem>
