@@ -116,7 +116,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
               setIsComplete: setCompletedStep.bind(null, 'backup'),
             }),
             getUpgradeReadinessStep({
-              isComplete: isStepComplete('backup'),
+              isComplete: isStepComplete('upgrade_readiness'),
               setIsComplete: setCompletedStep.bind(null, 'upgrade_readiness'),
             }),
             getMigrateSystemIndicesStep({

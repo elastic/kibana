@@ -15,7 +15,7 @@ interface Props {
   setIsFixed: (isFixed: boolean) => void;
 }
 
-export const EsDeprecationIssuesPanel: FunctionComponent<Props> = ({ setIsFixed }) => {
+export const ClusterDeprecationIssuesPanel: FunctionComponent<Props> = ({ setIsFixed }) => {
   const {
     services: { api },
   } = useAppContext();
@@ -33,9 +33,9 @@ export const EsDeprecationIssuesPanel: FunctionComponent<Props> = ({ setIsFixed 
 
   return (
     <DeprecationIssuesPanel
-      data-test-subj="esStatsPanel"
-      deprecationSource="Elasticsearch"
-      linkUrl="/es_deprecations"
+      data-test-subj="clusterStatsPanel"
+      deprecationSource="Cluster"
+      linkUrl="/cluster_deprecations"
       criticalDeprecationsCount={criticalDeprecationsCount}
       warningDeprecationsCount={warningDeprecationsCount}
       isLoading={isLoading}

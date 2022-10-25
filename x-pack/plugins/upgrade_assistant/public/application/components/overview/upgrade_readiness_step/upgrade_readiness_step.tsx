@@ -13,11 +13,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
 import type { OverviewStepProps } from '../../types';
-import { EsDeprecationIssuesPanel, KibanaDeprecationIssuesPanel } from './components';
+import { ClusterDeprecationIssuesPanel } from './components';
 
 const i18nTexts = {
-  reviewStepTitle: i18n.translate('xpack.upgradeAssistant.overview.fixIssuesStepTitle', {
-    defaultMessage: 'Review deprecated settings and resolve issues',
+  upgradeReadinessStepTitle: i18n.translate('xpack.upgradeAssistant.overview.upgradeReadinessStepTitle', {
+    defaultMessage: 'Resolve unhealthy cluster issues',
   }),
 };
 
@@ -25,26 +25,22 @@ interface Props {
   setIsComplete: OverviewStepProps['setIsComplete'];
 }
 
-const FixIssuesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
+const UpgradeReadinessStep: FunctionComponent<Props> = ({ setIsComplete }) => {
   // We consider ES and Kibana issues to be fixed when there are 0 critical issues.
-  const [isEsFixed, setIsEsFixed] = useState(false);
-  const [isKibanaFixed, setIsKibanaFixed] = useState(false);
+  const [isClusterFixed, setIsClusterFixed] = useState(false);
 
   useEffect(() => {
-    setIsComplete(isEsFixed && isKibanaFixed);
+    setIsComplete(isClusterFixed);
     // Depending upon setIsComplete would create an infinite loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEsFixed, isKibanaFixed]);
+  }, [isClusterFixed]);
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EsDeprecationIssuesPanel setIsFixed={setIsEsFixed} />
+    <EuiFlexGroup >
+      <EuiFlexItem grow={1}>
+        <ClusterDeprecationIssuesPanel setIsFixed={setIsClusterFixed} />
       </EuiFlexItem>
-
-      <EuiFlexItem>
-        <KibanaDeprecationIssuesPanel setIsFixed={setIsKibanaFixed} />
-      </EuiFlexItem>
+      <EuiFlexItem grow={1} />
     </EuiFlexGroup>
   );
 };
@@ -56,23 +52,23 @@ export const getUpgradeReadinessStep = ({
   const status = isComplete ? 'complete' : 'incomplete';
 
   return {
-    title: i18nTexts.reviewStepTitle,
+    title: i18nTexts.upgradeReadinessStepTitle,
     status,
-    'data-test-subj': `fixIssuesStep-${status}`,
+    'data-test-subj': `upgradeReadinessStep-${status}`,
     children: (
       <>
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.upgradeAssistant.overview.fixIssuesStepDescription"
-              defaultMessage="You must resolve any critical Elasticsearch and Kibana configuration issues before upgrading to Elastic 8.x. Ignoring warnings might result in differences in behavior after you upgrade."
+              id="xpack.upgradeAssistant.overview.upgradeReadinessStepDescription"
+              defaultMessage="Update your Elasticsearch and Kibana deployments to be compatible with the next version of the Elastic Stack. Critical issues must be resolved before you upgrade."
             />
           </p>
         </EuiText>
 
         <EuiSpacer size="m" />
 
-        <FixIssuesStep setIsComplete={setIsComplete} />
+        <UpgradeReadinessStep setIsComplete={setIsComplete} />
       </>
     ),
   };

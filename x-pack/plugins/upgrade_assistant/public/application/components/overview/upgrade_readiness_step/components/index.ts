@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { EsDeprecationIssuesPanel } from './es_deprecation_issues_panel';
-export { KibanaDeprecationIssuesPanel } from './kibana_deprecation_issues_panel';
+export { ClusterDeprecationIssuesPanel } from './cluster_deprecation_issues_panel';

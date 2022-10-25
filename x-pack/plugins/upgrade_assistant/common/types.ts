@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SavedObject } from '@kbn/core/types';
 
-export type DeprecationSource = 'Kibana' | 'Elasticsearch';
+export type DeprecationSource = 'Kibana' | 'Elasticsearch' | 'Cluster';
 
 export type ClusterUpgradeState = 'isPreparingForUpgrade' | 'isUpgrading' | 'isUpgradeComplete';
 
