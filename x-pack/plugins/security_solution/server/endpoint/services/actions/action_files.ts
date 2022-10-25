@@ -93,7 +93,9 @@ export const getFileInfo = async (
       fileHasChunks = await doesFileHaveChunks(esClient, fileId);
 
       if (!fileHasChunks) {
-        logger.debug(`File has no data chunks. Status will be adjusted to DELETED`);
+        logger.debug(
+          `File with id [${fileId}] has no data chunks. Status will be adjusted to DELETED`
+        );
       }
     }
 
