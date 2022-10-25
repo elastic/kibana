@@ -6,8 +6,6 @@
  */
 
 import { Store, Unsubscribe } from 'redux';
-import { throttle } from 'lodash';
-
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
 import type { LastUpdatedAtProps, LoadingPanelProps } from './components';
@@ -17,6 +15,7 @@ import { tGridReducer } from './store/t_grid/reducer';
 import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
 import { getHoverActions, HoverActionsConfig } from './components/hover_actions';
+import { timelineReducer } from './store/timeline/reducer';
 
 export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
   private _store: Store | undefined;
@@ -39,20 +38,6 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
         }
       },
       getTGrid: (props: TGridProps) => {
-        if (props.type === 'standalone' && this._store) {
-          const { getState } = this._store;
-          const state = getState();
-          if (state && state.app) {
-            this._store = undefined;
-          } else {
-            if (props.onStateChange) {
-              this._storeUnsubscribe = this._store.subscribe(
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                throttle(() => props.onStateChange!(getState()), 500)
-              );
-            }
-          }
-        }
         return getTGridLazy(props, {
           store: this._store,
           storage: this._storage,
@@ -62,6 +47,9 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       },
       getTGridReducer: () => {
         return tGridReducer;
+      },
+      getTimelineReducer: () => {
+        return timelineReducer;
       },
       getLoadingPanel: (props: LoadingPanelProps) => {
         return getLoadingPanelLazy(props);

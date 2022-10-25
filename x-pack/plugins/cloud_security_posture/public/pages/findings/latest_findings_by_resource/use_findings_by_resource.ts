@@ -18,8 +18,8 @@ import type { FindingsBaseEsQuery, Sort } from '../types';
 import { getAggregationCount, getFindingsCountAggQuery } from '../utils/utils';
 
 interface UseFindingsByResourceOptions extends FindingsBaseEsQuery {
-  from: NonNullable<estypes.SearchRequest['from']>;
-  size: NonNullable<estypes.SearchRequest['size']>;
+  from: NonNullable<NonNullable<estypes.SearchRequest['body']>['from']>;
+  size: NonNullable<NonNullable<estypes.SearchRequest['body']>['size']>;
   enabled: boolean;
   sortDirection: Sort<unknown>['direction'];
 }

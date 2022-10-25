@@ -17,6 +17,8 @@ For example:
 `GET kbn:/api/index_management/indices`
 --------------------------------------------------
 
+Note: this will automatically prefix `s/{space_id}/` on the API request if ran from a non-default Kibana Space.
+
 [float]
 [[api-authentication]]
 === Authentication

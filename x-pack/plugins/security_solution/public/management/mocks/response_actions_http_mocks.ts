@@ -16,6 +16,7 @@ import {
   UNISOLATE_HOST_ROUTE,
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
+  GET_FILE_ROUTE,
 } from '../../../common/endpoint/constants';
 import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
 import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_mock_factory';
@@ -26,6 +27,8 @@ import type {
   PendingActionsResponse,
   ActionDetails,
   GetProcessesActionOutputContent,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
 } from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
@@ -44,6 +47,8 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
   agentPendingActionsSummary: (options: HttpFetchOptionsWithPath) => PendingActionsResponse;
 
   processes: () => ActionDetailsApiResponse<GetProcessesActionOutputContent>;
+
+  getFile: () => ActionDetailsApiResponse<ResponseActionGetFileOutputContent>;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
@@ -147,6 +152,25 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
           },
         },
       }) as ActionDetails<GetProcessesActionOutputContent>;
+
+      return { data: response };
+    },
+  },
+  {
+    id: 'getFile',
+    path: GET_FILE_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse<
+      ResponseActionGetFileOutputContent,
+      ResponseActionGetFileParameters
+    > => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails<
+        ResponseActionGetFileOutputContent,
+        ResponseActionGetFileParameters
+      >({
+        command: 'get-file',
+      });
 
       return { data: response };
     },
