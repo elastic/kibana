@@ -6,26 +6,18 @@
  */
 
 import { useMemo } from 'react';
-import { SnapshotNode } from '../../../../../common/http_api';
+import type { SnapshotNode, SnapshotNodeMetric } from '../../../../../common/http_api';
 import { HostMetics } from '../components/hosts_table_columns';
 
-type MappedMetrics = Record<keyof HostMetics, number | null | undefined>;
+type MappedMetrics = Record<keyof HostMetics, SnapshotNodeMetric>;
 
 export const useHostTable = (nodes: SnapshotNode[]) => {
   const items = useMemo(() => {
-    const valuesMapping: Record<keyof HostMetics, 'value' | 'avg' | 'max'> = {
-      cpuCores: 'value',
-      rx: 'avg',
-      tx: 'avg',
-      memory: 'avg',
-      memoryTotal: 'avg',
-    };
     return nodes.map(({ metrics, path, name }) => ({
       name,
       os: path.at(-1)?.os ?? '-',
       ...metrics.reduce((data, metric) => {
-        const metricName = metric.name as keyof HostMetics;
-        data[metricName] = metric[valuesMapping[metricName]];
+        data[metric.name as keyof HostMetics] = metric;
         return data;
       }, {} as MappedMetrics),
     }));

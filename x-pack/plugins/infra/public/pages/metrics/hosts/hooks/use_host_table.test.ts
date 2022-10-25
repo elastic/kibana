@@ -70,22 +70,53 @@ describe('useHostTable hook', () => {
 
     const items = [
       {
-        cpuCores: 10,
-        memory: 0.94525,
-        memoryTotal: 34359.738368,
-        os: '-',
-        rx: 252456.92916666667,
-        tx: 252758.425,
         name: 'host-0',
+        os: '-',
+        rx: {
+          name: 'rx',
+          avg: 252456.92916666667,
+        },
+        tx: {
+          name: 'tx',
+          avg: 252758.425,
+        },
+        memory: {
+          name: 'memory',
+          avg: 0.94525,
+        },
+        cpuCores: {
+          name: 'cpuCores',
+          value: 10,
+        },
+        memoryTotal: {
+          name: 'memoryTotal',
+
+          avg: 34359.738368,
+        },
       },
       {
-        cpuCores: 8,
-        memory: 0.5400000214576721,
-        memoryTotal: 9.194304,
-        os: 'macOS',
-        rx: 95.86339715321859,
-        tx: 110.38566859563191,
         name: 'host-1',
+        os: 'macOS',
+        rx: {
+          name: 'rx',
+          avg: 95.86339715321859,
+        },
+        tx: {
+          name: 'tx',
+          avg: 110.38566859563191,
+        },
+        memory: {
+          name: 'memory',
+          avg: 0.5400000214576721,
+        },
+        cpuCores: {
+          name: 'cpuCores',
+          value: 8,
+        },
+        memoryTotal: {
+          name: 'memoryTotal',
+          avg: 9.194304,
+        },
       },
     ];
     const result = renderHook(() => useHostTable(nodes));
