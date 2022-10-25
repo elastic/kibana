@@ -59,8 +59,18 @@ export async function fetchFrequentItems(
   emitError: (m: string) => void,
   abortSignal?: AbortSignal
 ) {
-  // get unique fields from change points
-  const fields = [...new Set(changePoints.map((t) => t.fieldName))];
+  // Sort change points by ascending p-value, necessary to apply the field limit correctly.
+  const sortedChangePoints = changePoints.slice().sort((a, b) => {
+    return (a.pValue ?? 0) - (b.pValue ?? 0);
+  });
+
+  // Get up to 15 unique fields from change points with retained order
+  const fields = sortedChangePoints.reduce<string[]>((p, c) => {
+    if (p.length < 15 && !p.some((d) => d === c.fieldName)) {
+      p.push(c.fieldName);
+    }
+    return p;
+  }, []);
 
   // TODO add query params
   const query = {
@@ -77,7 +87,7 @@ export async function fetchFrequentItems(
           },
         },
       ],
-      should: changePoints.map((t) => {
+      should: sortedChangePoints.map((t) => {
         return { term: { [t.fieldName]: t.fieldValue } };
       }),
     },
@@ -117,16 +127,18 @@ export async function fetchFrequentItems(
     },
   };
 
+  const esBody = {
+    query,
+    aggs,
+    size: 0,
+    track_total_hits: true,
+  };
+
   const body = await client.search<unknown, { sample: FrequentItemsAggregation }>(
     {
       index,
       size: 0,
-      body: {
-        query,
-        aggs,
-        size: 0,
-        track_total_hits: true,
-      },
+      body: esBody,
     },
     { signal: abortSignal, maxRetries: 0 }
   );
@@ -167,7 +179,7 @@ export async function fetchFrequentItems(
     Object.entries(fis.key).forEach(([key, value]) => {
       result.set[key] = value[0];
 
-      const pValue = changePoints.find(
+      const pValue = sortedChangePoints.find(
         (t) => t.fieldName === key && t.fieldValue === value[0]
       )?.pValue;
 
