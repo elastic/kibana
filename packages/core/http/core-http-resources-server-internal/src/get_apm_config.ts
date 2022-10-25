@@ -23,6 +23,7 @@ export const getApmConfig = (requestPath: string) => {
     return null;
   }
 
+  // Cleanup RUM unsupported attrbiutes from base apm config.
   const { contextPropagationOnly, logUncaughtExceptions, ...restOfConfig } = baseConfig;
   const config: Record<string, any> = {
     ...restOfConfig,
