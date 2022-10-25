@@ -17,25 +17,28 @@ import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
 } from '../../../../lib/helpers/transactions';
-import { Setup } from '../../../../lib/helpers/setup_request';
 import {
   calculateFailedTransactionRate,
   getOutcomeAggregation,
 } from '../../../../lib/helpers/transaction_error_rate';
+import { APMConfig } from '../../../..';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getTransactionErrorRateChartPreview({
-  setup,
+  config,
+  apmEventClient,
   alertParams,
 }: {
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   alertParams: AlertParams;
 }) {
-  const { apmEventClient } = setup;
   const { serviceName, environment, transactionType, interval, start, end } =
     alertParams;
 
   const searchAggregatedTransactions = await getSearchTransactionsEvents({
-    ...setup,
+    config,
+    apmEventClient,
     kuery: '',
     start,
     end,
