@@ -45,7 +45,7 @@ export const SingleDocRoute = () => {
   useEffect(() => {
     timefilter.disableAutoRefreshSelector();
     timefilter.disableTimeRangeSelector();
-  });
+  },[timefilter]);
 
   const { dataView, error } = useDataView({
     dataViewId: decodeURIComponent(dataViewId),
