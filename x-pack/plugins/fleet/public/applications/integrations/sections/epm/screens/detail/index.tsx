@@ -40,7 +40,7 @@ import {
   useGetSettings,
 } from '../../../../hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
-import { ExperimentalFeaturesService } from '../../../../services';
+import { ExperimentalFeaturesService, isPackagePrerelease } from '../../../../services';
 import {
   useGetPackageInfoByKey,
   useLink,
@@ -185,8 +185,12 @@ export function Detail() {
   });
 
   useEffect(() => {
-    setLatestGAVersion(packageInfoLatestGAData?.item.version);
-  }, [packageInfoLatestGAData?.item.version]);
+    const pkg = packageInfoLatestGAData?.item;
+    const isGAVersion = pkg && !isPackagePrerelease(pkg);
+    if (isGAVersion) {
+      setLatestGAVersion(pkg.version);
+    }
+  }, [packageInfoLatestGAData?.item]);
 
   // fetch latest Prerelease version (prerelease=true)
   const { data: packageInfoLatestPrereleaseData } = useGetPackageInfoByKey(pkgName, '', {
@@ -363,6 +367,8 @@ export function Detail() {
   const showVersionSelect = useMemo(
     () =>
       prereleaseIntegrationsEnabled &&
+      latestGAVersion &&
+      latestPrereleaseVersion &&
       latestGAVersion !== latestPrereleaseVersion &&
       (!packageInfo?.version ||
         packageInfo.version === latestGAVersion ||

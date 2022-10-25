@@ -123,6 +123,7 @@ export function createDefaultSettings(): BaseSettings {
 
   return {
     fleet_server_hosts: fleetServerHosts,
+    prerelease_integrations_enabled: false,
   };
 }
 

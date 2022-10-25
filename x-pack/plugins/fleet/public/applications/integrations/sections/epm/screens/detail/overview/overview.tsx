@@ -69,7 +69,7 @@ const UnverifiedCallout: React.FC = () => {
 
 const PrereleaseCallout: React.FC<{
   packageName: string;
-  latestGAVersion: string;
+  latestGAVersion?: string;
   packageTitle: string;
 }> = ({ packageName, packageTitle, latestGAVersion }) => {
   const { getHref } = useLink();
@@ -89,14 +89,16 @@ const PrereleaseCallout: React.FC<{
         iconType="iInCircle"
         color="warning"
       >
-        <p>
-          <EuiButton href={overviewPathLatestGA} color="warning">
-            <FormattedMessage
-              id="xpack.fleet.epm.prereleaseWarningCalloutSwitchToGAButton"
-              defaultMessage="Switch to latest GA version"
-            />
-          </EuiButton>
-        </p>
+        {latestGAVersion && (
+          <p>
+            <EuiButton href={overviewPathLatestGA} color="warning">
+              <FormattedMessage
+                id="xpack.fleet.epm.prereleaseWarningCalloutSwitchToGAButton"
+                defaultMessage="Switch to latest GA version"
+              />
+            </EuiButton>
+          </p>
+        )}
       </EuiCallOut>
       <EuiSpacer size="l" />
     </>
@@ -121,7 +123,7 @@ export const OverviewPage: React.FC<Props> = memo(
             <PrereleaseCallout
               packageName={packageInfo.name}
               packageTitle={packageInfo.title}
-              latestGAVersion={latestGAVersion!}
+              latestGAVersion={latestGAVersion}
             />
           )}
           {packageInfo.readme ? (
