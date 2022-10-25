@@ -310,7 +310,6 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
   };
 
   public onQueryBarChange = (queryAndDateRange: { dateRange: TimeRange; query?: QT | Query }) => {
-    console.log('{ onQueryBarChange }', this.props.onQueryChange);
     this.setState({
       query: queryAndDateRange.query,
       dateRangeFrom: queryAndDateRange.dateRange.from,

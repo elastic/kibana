@@ -18,7 +18,6 @@ import { DiscoverServices } from '../../../../build_services';
 import { i18nServiceMock } from '@kbn/core/public/mocks';
 import { ReactElement } from 'react';
 import { discoverServiceMock } from '../../../../__mocks__/services';
-import * as persistSavedSearchUtils from '../../utils/persist_saved_search';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
@@ -70,6 +69,7 @@ describe('onSaveSearch', () => {
     const serviceMock = discoverServiceMock;
     const stateMock = getDiscoverStateMock({ isTimeBased: true });
     stateMock.setAppState({ rowsPerPage: 250 });
+    stateMock.internalState.transitions.setDataView(dataViewMock);
     let saveModal: ReactElement | undefined;
     jest.spyOn(savedObjectsPlugin, 'showSaveModal').mockImplementationOnce((modal) => {
       saveModal = modal;
@@ -78,6 +78,7 @@ describe('onSaveSearch', () => {
       ...savedSearchMock,
       tags: ['tag1', 'tag2'],
     };
+
     await onSaveSearch({
       dataView: dataViewMock,
       navigateTo: jest.fn(),
@@ -86,13 +87,12 @@ describe('onSaveSearch', () => {
       stateContainer: stateMock,
       updateAdHocDataViewId: jest.fn(),
     });
+
     expect(savedSearch.tags).toEqual(['tag1', 'tag2']);
-    jest
-      .spyOn(persistSavedSearchUtils, 'persistSavedSearch')
-      .mockImplementationOnce((newSavedSearch, _) => {
-        savedSearch = newSavedSearch;
-        return Promise.resolve(newSavedSearch.id);
-      });
+    stateMock.savedSearchState.persist = jest.fn((newSavedSearch: SavedSearch) => {
+      savedSearch = newSavedSearch;
+      return Promise.resolve({ id: newSavedSearch.id });
+    });
     saveModal?.props.onSave({
       newTitle: savedSearch.title,
       newCopyOnSave: false,
@@ -128,12 +128,10 @@ describe('onSaveSearch', () => {
       updateAdHocDataViewId: jest.fn(),
     });
     expect(savedSearch.tags).toEqual(['tag1', 'tag2']);
-    jest
-      .spyOn(persistSavedSearchUtils, 'persistSavedSearch')
-      .mockImplementationOnce((newSavedSearch, _) => {
-        savedSearch = newSavedSearch;
-        return Promise.resolve(newSavedSearch.id);
-      });
+    stateMock.savedSearchState.persist = jest.fn((newSavedSearch: SavedSearch) => {
+      savedSearch = newSavedSearch;
+      return Promise.resolve({ id: newSavedSearch.id });
+    });
     saveModal?.props.onSave({
       newTitle: savedSearch.title,
       newCopyOnSave: false,

@@ -234,7 +234,7 @@ function getInitialState(
     services,
   });
   return handleSourceColumnState(
-    savedSearch.id
+    savedSearch.id && (!appStateFromUrl || !Object.keys(appStateFromUrl).length)
       ? { ...defaultAppState }
       : {
           ...defaultAppState,

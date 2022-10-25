@@ -236,6 +236,7 @@ export const DiscoverTopNav = ({
         textBasedLanguageModeErrors ? [textBasedLanguageModeErrors] : undefined
       }
       onTextBasedSavedAndExit={onTextBasedSavedAndExit}
+      data-test-subj="dsc_topNav"
     />
   );
 };

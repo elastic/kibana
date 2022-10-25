@@ -7,31 +7,21 @@
  */
 import { Subject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
-import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { savedSearchMock, savedSearchMockWithSQL } from '../../../__mocks__/saved_search';
+import { savedSearchMockWithSQL } from '../../../__mocks__/saved_search';
 import { getDiscoverStateContainer } from './discover_state';
 import { FetchStatus } from '../../types';
 import { setUrlTracker } from '../../../kibana_services';
 import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';
-import { getDataStateContainer, RecordRawType } from './discover_data_state_container';
+import { RecordRawType } from './discover_data_state_container';
+import { createBrowserHistory } from 'history';
+import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 
 setUrlTracker(urlTrackerMock);
 describe('test getDataStateContainer', () => {
   test('return is valid', async () => {
-    const { history, searchSessionManager } = createSearchSessionMock();
-    const stateContainer = getDiscoverStateContainer({
-      savedSearch: savedSearchMock,
-      services: discoverServiceMock,
-      history,
-    });
-
-    const dataState = getDataStateContainer({
-      getSavedSearch: () => savedSearchMock,
-      searchSessionManager,
-      services: discoverServiceMock,
-      getAppState: () => stateContainer.appState.getState(),
-    });
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const dataState = stateContainer.dataState;
 
     expect(dataState.refetch$).toBeInstanceOf(Subject);
     expect(dataState.data$.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
@@ -40,23 +30,13 @@ describe('test getDataStateContainer', () => {
     expect(dataState.data$.charts$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
   });
   test('refetch$ triggers a search', async () => {
-    const { history, searchSessionManager } = createSearchSessionMock();
-    const stateContainer = getDiscoverStateContainer({
-      savedSearch: savedSearchMock,
-      services: discoverServiceMock,
-      history,
-    });
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 
     discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
       return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
     });
+    const dataState = stateContainer.dataState;
 
-    const dataState = getDataStateContainer({
-      getSavedSearch: () => savedSearchMock,
-      searchSessionManager,
-      services: discoverServiceMock,
-      getAppState: () => stateContainer.appState.getState(),
-    });
     const unsubscribe = dataState.subscribe();
 
     dataState.refetch$.next(undefined);
@@ -70,40 +50,34 @@ describe('test getDataStateContainer', () => {
   });
 
   test('reset sets back to initial state', async () => {
-    const { history, searchSessionManager } = createSearchSessionMock();
-    const stateContainer = getDiscoverStateContainer({
-      savedSearch: savedSearchMock,
-      services: discoverServiceMock,
-      history,
-    });
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 
     discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
       return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
     });
 
-    const dataState = getDataStateContainer({
-      getSavedSearch: () => savedSearchMock,
-      searchSessionManager,
-      services: discoverServiceMock,
-      getAppState: () => stateContainer.appState.getState(),
-    });
+    const dataState = stateContainer.dataState;
     const unsubscribe = dataState.subscribe();
+
+    await waitFor(() => {
+      expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
+    });
 
     dataState.refetch$.next(undefined);
 
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
-    dataState.refetch$.next('reset');
-
+    dataState.reset();
     await waitFor(() => {
-      expect(dataState.data$.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
+      expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
     });
+
     unsubscribe();
   });
 
   test('useSavedSearch returns plain record raw type', async () => {
-    const { history } = createSearchSessionMock();
+    const history = createBrowserHistory();
     const stateContainer = getDiscoverStateContainer({
       savedSearch: savedSearchMockWithSQL,
       services: discoverServiceMock,

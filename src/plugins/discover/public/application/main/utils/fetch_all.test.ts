@@ -50,7 +50,7 @@ const mockFetchTotalHits = fetchTotalHits as unknown as jest.MockedFunction<type
 const mockFetchChart = fetchChart as unknown as jest.MockedFunction<typeof fetchChart>;
 const mockFetchSQL = fetchSql as unknown as jest.MockedFunction<typeof fetchSql>;
 
-function subjectCollector<T>(subject: Subject<T>): () => Promise<T[]> {
+export function subjectCollector<T>(subject: Subject<T>): () => Promise<T[]> {
   const promise = firstValueFrom(
     subject.pipe(reduce((history, value) => history.concat([value]), [] as T[]))
   );
@@ -230,7 +230,9 @@ describe('test fetchAll', () => {
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
     mockFetchSQL.mockResolvedValue(documents);
+
     const query = { sql: 'SELECT * from foo' };
+    savedSearchMock.searchSource.setField('query', query);
     deps = {
       abortController: new AbortController(),
       data: discoverServiceMock.data,

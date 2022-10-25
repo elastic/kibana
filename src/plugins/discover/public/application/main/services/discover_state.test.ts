@@ -93,7 +93,7 @@ describe('Test discover initial state sort handling', () => {
       services: discoverServiceMock,
       history,
     });
-    await state.setAppState({}, true);
+    // await state.setAppState({}, true);
     const stopSync = state.appState.syncState().stop;
     expect(state.appState.getState().sort).toEqual([['order_date', 'desc']]);
     stopSync();

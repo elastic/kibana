@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { act, renderHook } from '@testing-library/react-hooks';
 import {
@@ -67,12 +68,20 @@ const mockDataView = {
   toSpec: () => ({}),
 } as DataView;
 
+const savedSearchMock = {
+  id: 'some-id',
+  searchSource: createSearchSourceMock({ index: mockDataView }),
+};
+
 describe('useAdHocDataViews', () => {
   it('should save data view with new id and update saved search', async () => {
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    stateContainer.savedSearchState.set(savedSearchMock);
+
     const hook = renderHook((d: DataView) =>
       useAdHocDataViews({
         dataView: mockDataView,
-        stateContainer: getDiscoverStateMock({ isTimeBased: true }),
+        stateContainer,
         services: discoverServiceMock,
       })
     );
