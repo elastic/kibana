@@ -28,6 +28,9 @@ describe('createGetSummarizedAlertsFn', () => {
     ruleDataClientMock = createRuleDataClientMock();
     ruleDataClientMock.getReader().search.mockResolvedValue({
       hits: {
+        total: {
+          value: 0,
+        },
         hits: [],
       },
     } as any);
@@ -56,8 +59,11 @@ describe('createGetSummarizedAlertsFn', () => {
   });
 
   it('creates function that correctly returns lifecycle alerts using execution Uuid', async () => {
-    ruleDataClientMock.getReader().search.mockResolvedValue({
+    ruleDataClientMock.getReader().search.mockResolvedValueOnce({
       hits: {
+        total: {
+          value: 2,
+        },
         hits: [
           {
             _source: {
@@ -79,6 +85,15 @@ describe('createGetSummarizedAlertsFn', () => {
               [ALERT_UUID]: 'uuid2',
             },
           },
+        ],
+      },
+    } as any);
+    ruleDataClientMock.getReader().search.mockResolvedValueOnce({
+      hits: {
+        total: {
+          value: 3,
+        },
+        hits: [
           {
             _source: {
               '@timestamp': '2020-01-01T12:00:00.000Z',
@@ -109,6 +124,15 @@ describe('createGetSummarizedAlertsFn', () => {
               [ALERT_UUID]: 'uuid5',
             },
           },
+        ],
+      },
+    } as any);
+    ruleDataClientMock.getReader().search.mockResolvedValueOnce({
+      hits: {
+        total: {
+          value: 1,
+        },
+        hits: [
           {
             _source: {
               '@timestamp': '2020-01-01T12:00:00.000Z',
@@ -134,9 +158,11 @@ describe('createGetSummarizedAlertsFn', () => {
       spaceId: 'space-id',
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith();
-    expect(ruleDataClientMock.getReader().search).toHaveBeenCalledWith({
+    expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(3);
+    expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(1, {
       body: {
-        size: 10000,
+        size: 1000,
+        track_total_hits: true,
         query: {
           bool: {
             filter: [
@@ -150,15 +176,74 @@ describe('createGetSummarizedAlertsFn', () => {
                   [ALERT_RULE_UUID]: 'rule-id',
                 },
               },
+              {
+                term: {
+                  [EVENT_ACTION]: 'open',
+                },
+              },
             ],
           },
         },
       },
     });
-    expect(summarizedAlerts.new.length).toEqual(2);
-    expect(summarizedAlerts.ongoing.length).toEqual(3);
-    expect(summarizedAlerts.recovered.length).toEqual(1);
-    expect(summarizedAlerts.new).toEqual([
+    expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(2, {
+      body: {
+        size: 1000,
+        track_total_hits: true,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  [ALERT_RULE_EXECUTION_UUID]: 'abc',
+                },
+              },
+              {
+                term: {
+                  [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                term: {
+                  [EVENT_ACTION]: 'active',
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+    expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(3, {
+      body: {
+        size: 1000,
+        track_total_hits: true,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  [ALERT_RULE_EXECUTION_UUID]: 'abc',
+                },
+              },
+              {
+                term: {
+                  [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                term: {
+                  [EVENT_ACTION]: 'close',
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+    expect(summarizedAlerts.new.count).toEqual(2);
+    expect(summarizedAlerts.ongoing.count).toEqual(3);
+    expect(summarizedAlerts.recovered.count).toEqual(1);
+    expect(summarizedAlerts.new.alerts).toEqual([
       {
         _source: {
           '@timestamp': '2020-01-01T12:00:00.000Z',
@@ -180,7 +265,7 @@ describe('createGetSummarizedAlertsFn', () => {
         },
       },
     ]);
-    expect(summarizedAlerts.ongoing).toEqual([
+    expect(summarizedAlerts.ongoing.alerts).toEqual([
       {
         _source: {
           '@timestamp': '2020-01-01T12:00:00.000Z',
@@ -212,7 +297,7 @@ describe('createGetSummarizedAlertsFn', () => {
         },
       },
     ]);
-    expect(summarizedAlerts.recovered).toEqual([
+    expect(summarizedAlerts.recovered.alerts).toEqual([
       {
         _source: {
           '@timestamp': '2020-01-01T12:00:00.000Z',
@@ -227,8 +312,11 @@ describe('createGetSummarizedAlertsFn', () => {
   });
 
   it('creates function that correctly returns lifecycle alerts using time range', async () => {
-    ruleDataClientMock.getReader().search.mockResolvedValue({
+    ruleDataClientMock.getReader().search.mockResolvedValueOnce({
       hits: {
+        total: {
+          value: 3,
+        },
         hits: [
           {
             _source: {
@@ -238,6 +326,7 @@ describe('createGetSummarizedAlertsFn', () => {
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
               [ALERT_UUID]: 'uuid1',
               [ALERT_START]: '2020-01-01T12:00:00.000Z',
+              alert_type: 'new',
             },
           },
           {
@@ -248,6 +337,7 @@ describe('createGetSummarizedAlertsFn', () => {
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_4',
               [ALERT_UUID]: 'uuid2',
               [ALERT_START]: '2020-01-01T12:00:00.000Z',
+              alert_type: 'new',
             },
           },
           {
@@ -258,8 +348,18 @@ describe('createGetSummarizedAlertsFn', () => {
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
               [ALERT_UUID]: 'uuid3',
               [ALERT_START]: '2020-01-01T12:10:00.000Z',
+              alert_type: 'new',
             },
           },
+        ],
+      },
+    } as any);
+    ruleDataClientMock.getReader().search.mockResolvedValueOnce({
+      hits: {
+        total: {
+          value: 2,
+        },
+        hits: [
           {
             _source: {
               [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
@@ -268,6 +368,7 @@ describe('createGetSummarizedAlertsFn', () => {
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
               [ALERT_UUID]: 'uuid4',
               [ALERT_START]: '2020-01-01T12:00:00.000Z',
+              alert_type: 'ongoing',
             },
           },
           {
@@ -278,8 +379,18 @@ describe('createGetSummarizedAlertsFn', () => {
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_5',
               [ALERT_UUID]: 'uuid5',
               [ALERT_START]: '2020-01-01T11:00:00.000Z',
+              alert_type: 'ongoing',
             },
           },
+        ],
+      },
+    } as any);
+    ruleDataClientMock.getReader().search.mockResolvedValueOnce({
+      hits: {
+        total: {
+          value: 1,
+        },
+        hits: [
           {
             _source: {
               [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
@@ -289,6 +400,7 @@ describe('createGetSummarizedAlertsFn', () => {
               [ALERT_UUID]: 'uuid6',
               [ALERT_START]: '2020-01-01T11:00:00.000Z',
               [ALERT_END]: '2020-01-01T12:20:00.000Z',
+              alert_type: 'recovered',
             },
           },
         ],
@@ -307,9 +419,33 @@ describe('createGetSummarizedAlertsFn', () => {
       spaceId: 'space-id',
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith();
-    expect(ruleDataClientMock.getReader().search).toHaveBeenCalledWith({
+    expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(3);
+    expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(1, {
       body: {
-        size: 10000,
+        size: 1000,
+        track_total_hits: true,
+        runtime_mappings: {
+          alert_type: {
+            type: 'keyword',
+            script: {
+              source: `
+          def start = doc['kibana.alert.start'];
+          def timestamp = doc['@timestamp'];
+          def end = doc['kibana.alert.end'];
+
+          if (start === timestamp) {
+            emit('new');
+          } else if (start.value.getMillis() < timestamp.value.getMillis() && end.empty) {
+            emit('ongoing');
+          } else if (!end.empty && end === timestamp) {
+            emit('recovered');
+          } else {
+            emit('unknown');
+          }
+        `,
+            },
+          },
+        },
         query: {
           bool: {
             filter: [
@@ -326,15 +462,124 @@ describe('createGetSummarizedAlertsFn', () => {
                   [ALERT_RULE_UUID]: 'rule-id',
                 },
               },
+              {
+                term: {
+                  alert_type: 'new',
+                },
+              },
             ],
           },
         },
       },
     });
-    expect(summarizedAlerts.new.length).toEqual(3);
-    expect(summarizedAlerts.ongoing.length).toEqual(2);
-    expect(summarizedAlerts.recovered.length).toEqual(1);
-    expect(summarizedAlerts.new).toEqual([
+    expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(2, {
+      body: {
+        size: 1000,
+        track_total_hits: true,
+        runtime_mappings: {
+          alert_type: {
+            type: 'keyword',
+            script: {
+              source: `
+          def start = doc['kibana.alert.start'];
+          def timestamp = doc['@timestamp'];
+          def end = doc['kibana.alert.end'];
+
+          if (start === timestamp) {
+            emit('new');
+          } else if (start.value.getMillis() < timestamp.value.getMillis() && end.empty) {
+            emit('ongoing');
+          } else if (!end.empty && end === timestamp) {
+            emit('recovered');
+          } else {
+            emit('unknown');
+          }
+        `,
+            },
+          },
+        },
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  [TIMESTAMP]: {
+                    gte: '2020-01-01T11:00:00.000Z',
+                    lte: '2020-01-01T12:25:00.000Z',
+                  },
+                },
+              },
+              {
+                term: {
+                  [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                term: {
+                  alert_type: 'ongoing',
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+    expect(ruleDataClientMock.getReader().search).toHaveBeenNthCalledWith(3, {
+      body: {
+        size: 1000,
+        track_total_hits: true,
+        runtime_mappings: {
+          alert_type: {
+            type: 'keyword',
+            script: {
+              source: `
+          def start = doc['kibana.alert.start'];
+          def timestamp = doc['@timestamp'];
+          def end = doc['kibana.alert.end'];
+
+          if (start === timestamp) {
+            emit('new');
+          } else if (start.value.getMillis() < timestamp.value.getMillis() && end.empty) {
+            emit('ongoing');
+          } else if (!end.empty && end === timestamp) {
+            emit('recovered');
+          } else {
+            emit('unknown');
+          }
+        `,
+            },
+          },
+        },
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  [TIMESTAMP]: {
+                    gte: '2020-01-01T11:00:00.000Z',
+                    lte: '2020-01-01T12:25:00.000Z',
+                  },
+                },
+              },
+              {
+                term: {
+                  [ALERT_RULE_UUID]: 'rule-id',
+                },
+              },
+              {
+                term: {
+                  alert_type: 'recovered',
+                },
+              },
+            ],
+          },
+        },
+      },
+    });
+    expect(summarizedAlerts.new.count).toEqual(3);
+    expect(summarizedAlerts.ongoing.count).toEqual(2);
+    expect(summarizedAlerts.recovered.count).toEqual(1);
+    expect(summarizedAlerts.new.alerts).toEqual([
       {
         _source: {
           [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
@@ -343,6 +588,7 @@ describe('createGetSummarizedAlertsFn', () => {
           [ALERT_INSTANCE_ID]: 'TEST_ALERT_3',
           [ALERT_UUID]: 'uuid1',
           [ALERT_START]: '2020-01-01T12:00:00.000Z',
+          alert_type: 'new',
         },
       },
       {
@@ -353,6 +599,7 @@ describe('createGetSummarizedAlertsFn', () => {
           [ALERT_INSTANCE_ID]: 'TEST_ALERT_4',
           [ALERT_UUID]: 'uuid2',
           [ALERT_START]: '2020-01-01T12:00:00.000Z',
+          alert_type: 'new',
         },
       },
       {
@@ -363,10 +610,11 @@ describe('createGetSummarizedAlertsFn', () => {
           [ALERT_INSTANCE_ID]: 'TEST_ALERT_1',
           [ALERT_UUID]: 'uuid3',
           [ALERT_START]: '2020-01-01T12:10:00.000Z',
+          alert_type: 'new',
         },
       },
     ]);
-    expect(summarizedAlerts.ongoing).toEqual([
+    expect(summarizedAlerts.ongoing.alerts).toEqual([
       {
         _source: {
           [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
@@ -375,6 +623,7 @@ describe('createGetSummarizedAlertsFn', () => {
           [ALERT_INSTANCE_ID]: 'TEST_ALERT_2',
           [ALERT_UUID]: 'uuid4',
           [ALERT_START]: '2020-01-01T12:00:00.000Z',
+          alert_type: 'ongoing',
         },
       },
       {
@@ -385,10 +634,11 @@ describe('createGetSummarizedAlertsFn', () => {
           [ALERT_INSTANCE_ID]: 'TEST_ALERT_5',
           [ALERT_UUID]: 'uuid5',
           [ALERT_START]: '2020-01-01T11:00:00.000Z',
+          alert_type: 'ongoing',
         },
       },
     ]);
-    expect(summarizedAlerts.recovered).toEqual([
+    expect(summarizedAlerts.recovered.alerts).toEqual([
       {
         _source: {
           [TIMESTAMP]: '2020-01-01T12:20:00.000Z',
@@ -398,14 +648,18 @@ describe('createGetSummarizedAlertsFn', () => {
           [ALERT_UUID]: 'uuid6',
           [ALERT_START]: '2020-01-01T11:00:00.000Z',
           [ALERT_END]: '2020-01-01T12:20:00.000Z',
+          alert_type: 'recovered',
         },
       },
     ]);
   });
 
   it('creates function that correctly returns non-lifecycle alerts using execution Uuid', async () => {
-    ruleDataClientMock.getReader().search.mockResolvedValue({
+    ruleDataClientMock.getReader().search.mockResolvedValueOnce({
       hits: {
+        total: {
+          value: 6,
+        },
         hits: [
           {
             _source: {
@@ -477,9 +731,11 @@ describe('createGetSummarizedAlertsFn', () => {
       spaceId: 'space-id',
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith({ namespace: 'space-id' });
+    expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(1);
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledWith({
       body: {
-        size: 10000,
+        size: 1000,
+        track_total_hits: true,
         query: {
           bool: {
             filter: [
@@ -498,10 +754,10 @@ describe('createGetSummarizedAlertsFn', () => {
         },
       },
     });
-    expect(summarizedAlerts.new.length).toEqual(6);
-    expect(summarizedAlerts.ongoing.length).toEqual(0);
-    expect(summarizedAlerts.recovered.length).toEqual(0);
-    expect(summarizedAlerts.new).toEqual([
+    expect(summarizedAlerts.new.count).toEqual(6);
+    expect(summarizedAlerts.ongoing.count).toEqual(0);
+    expect(summarizedAlerts.recovered.count).toEqual(0);
+    expect(summarizedAlerts.new.alerts).toEqual([
       {
         _source: {
           '@timestamp': '2020-01-01T12:00:00.000Z',
@@ -558,13 +814,16 @@ describe('createGetSummarizedAlertsFn', () => {
         },
       },
     ]);
-    expect(summarizedAlerts.ongoing).toEqual([]);
-    expect(summarizedAlerts.recovered).toEqual([]);
+    expect(summarizedAlerts.ongoing.alerts).toEqual([]);
+    expect(summarizedAlerts.recovered.alerts).toEqual([]);
   });
 
   it('creates function that correctly returns non-lifecycle alerts using time range', async () => {
-    ruleDataClientMock.getReader().search.mockResolvedValue({
+    ruleDataClientMock.getReader().search.mockResolvedValueOnce({
       hits: {
+        total: {
+          value: 6,
+        },
         hits: [
           {
             _source: {
@@ -636,9 +895,33 @@ describe('createGetSummarizedAlertsFn', () => {
       spaceId: 'space-id',
     });
     expect(ruleDataClientMock.getReader).toHaveBeenCalledWith({ namespace: 'space-id' });
+    expect(ruleDataClientMock.getReader().search).toHaveBeenCalledTimes(1);
     expect(ruleDataClientMock.getReader().search).toHaveBeenCalledWith({
       body: {
-        size: 10000,
+        size: 1000,
+        track_total_hits: true,
+        runtime_mappings: {
+          alert_type: {
+            type: 'keyword',
+            script: {
+              source: `
+          def start = doc['kibana.alert.start'];
+          def timestamp = doc['@timestamp'];
+          def end = doc['kibana.alert.end'];
+
+          if (start === timestamp) {
+            emit('new');
+          } else if (start.value.getMillis() < timestamp.value.getMillis() && end.empty) {
+            emit('ongoing');
+          } else if (!end.empty && end === timestamp) {
+            emit('recovered');
+          } else {
+            emit('unknown');
+          }
+        `,
+            },
+          },
+        },
         query: {
           bool: {
             filter: [
@@ -660,10 +943,10 @@ describe('createGetSummarizedAlertsFn', () => {
         },
       },
     });
-    expect(summarizedAlerts.new.length).toEqual(6);
-    expect(summarizedAlerts.ongoing.length).toEqual(0);
-    expect(summarizedAlerts.recovered.length).toEqual(0);
-    expect(summarizedAlerts.new).toEqual([
+    expect(summarizedAlerts.new.count).toEqual(6);
+    expect(summarizedAlerts.ongoing.count).toEqual(0);
+    expect(summarizedAlerts.recovered.count).toEqual(0);
+    expect(summarizedAlerts.new.alerts).toEqual([
       {
         _source: {
           [TIMESTAMP]: '2020-01-01T12:00:00.000Z',
@@ -719,8 +1002,8 @@ describe('createGetSummarizedAlertsFn', () => {
         },
       },
     ]);
-    expect(summarizedAlerts.ongoing).toEqual([]);
-    expect(summarizedAlerts.recovered).toEqual([]);
+    expect(summarizedAlerts.ongoing.alerts).toEqual([]);
+    expect(summarizedAlerts.recovered.alerts).toEqual([]);
   });
 
   it('throws error if search throws error', async () => {

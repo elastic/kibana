@@ -11,15 +11,19 @@ import type { GetSummarizedAlertsFnOpts } from '@kbn/alerting-plugin/server';
 import {
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
-  ALERT_END,
-  ALERT_START,
   EVENT_ACTION,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import {
+  MappingRuntimeFields,
+  QueryDslQueryContainer,
+  SearchTotalHits,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ParsedTechnicalFields } from '../../common';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { IRuleDataClient, IRuleDataReader } from '../rule_data_client';
 
+const MAX_ALERT_DOCS_TO_RETURN = 1000;
 type AlertDocument = Partial<ParsedTechnicalFields & ParsedExperimentalFields>;
 
 interface CreateGetSummarizedAlertsFnOpts {
@@ -78,54 +82,117 @@ interface GetAlertsByExecutionUuidOpts {
   isLifecycleAlert: boolean;
 }
 
-const getAlertsByExecutionUuid = async <TSearchRequest extends ESSearchRequest>({
+const getAlertsByExecutionUuid = async ({
   executionUuid,
   ruleId,
   ruleDataClientReader,
   isLifecycleAlert,
 }: GetAlertsByExecutionUuidOpts) => {
-  const request = {
-    body: {
-      size: 10000,
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                [ALERT_RULE_EXECUTION_UUID]: executionUuid,
-              },
-            },
-            {
-              term: {
-                [ALERT_RULE_UUID]: ruleId,
-              },
-            },
-          ],
-        },
-      },
-    },
-  };
+  if (isLifecycleAlert) {
+    return getLifecycleAlertsByExecutionUuid({ executionUuid, ruleId, ruleDataClientReader });
+  }
 
+  return getPersistentAlertsByExecutionUuid({ executionUuid, ruleId, ruleDataClientReader });
+};
+
+interface GetAlertsByExecutionUuidHelperOpts {
+  executionUuid: string;
+  ruleId: string;
+  ruleDataClientReader: IRuleDataReader;
+}
+
+const getPersistentAlertsByExecutionUuid = async <TSearchRequest extends ESSearchRequest>({
+  executionUuid,
+  ruleId,
+  ruleDataClientReader,
+}: GetAlertsByExecutionUuidHelperOpts) => {
+  // persistent alerts only create new alerts so query by execution UUID to
+  // get all alerts created during an execution
+  const request = getQueryByExecutionUuid(executionUuid, ruleId);
   const response = (await ruleDataClientReader.search(request)) as ESSearchResponse<
     AlertDocument,
     TSearchRequest
   >;
-  const alertHits = response.hits.hits;
 
-  // For lifecycle alerts, new/ongoing/recovered statuses can be read
-  // from the alert documents from a single execution
-  // For non-lifecycle alerts (persistent), all alerts from an execution are
-  // new, no alerts are ongoing or recovered
   return {
-    new: isLifecycleAlert
-      ? alertHits.filter((hit) => hit._source[EVENT_ACTION] === 'open')
-      : alertHits,
-    ongoing: isLifecycleAlert
-      ? alertHits.filter((hit) => hit._source[EVENT_ACTION] === 'active')
-      : [],
-    recovered: isLifecycleAlert
-      ? alertHits.filter((hit) => hit._source[EVENT_ACTION] === 'close')
-      : [],
+    new: getHitsWithCount(response),
+    ongoing: {
+      count: 0,
+      alerts: [],
+    },
+    recovered: {
+      count: 0,
+      alerts: [],
+    },
+  };
+};
+
+const getLifecycleAlertsByExecutionUuid = async ({
+  executionUuid,
+  ruleId,
+  ruleDataClientReader,
+}: GetAlertsByExecutionUuidHelperOpts) => {
+  // lifecycle alerts assign a different action to an alert depending
+  // on whether it is new/ongoing/recovered. query for each action in order
+  // to get the count of each action type as well as up to the maximum number
+  // of each type of alert.
+  const requests = [
+    getQueryByExecutionUuid(executionUuid, ruleId, 'open'),
+    getQueryByExecutionUuid(executionUuid, ruleId, 'active'),
+    getQueryByExecutionUuid(executionUuid, ruleId, 'close'),
+  ];
+
+  const responses = await Promise.all(
+    requests.map((request) => ruleDataClientReader.search(request))
+  );
+
+  return {
+    new: getHitsWithCount(responses[0]),
+    ongoing: getHitsWithCount(responses[1]),
+    recovered: getHitsWithCount(responses[2]),
+  };
+};
+
+const getHitsWithCount = <TSearchRequest extends ESSearchRequest>(
+  response: ESSearchResponse<AlertDocument, TSearchRequest>
+) => {
+  return {
+    count: (response.hits.total as SearchTotalHits).value,
+    alerts: response.hits.hits,
+  };
+};
+
+const getQueryByExecutionUuid = (executionUuid: string, ruleId: string, action?: string) => {
+  const filter: QueryDslQueryContainer[] = [
+    {
+      term: {
+        [ALERT_RULE_EXECUTION_UUID]: executionUuid,
+      },
+    },
+    {
+      term: {
+        [ALERT_RULE_UUID]: ruleId,
+      },
+    },
+  ];
+  if (action) {
+    filter.push({
+      term: {
+        [EVENT_ACTION]: action,
+      },
+    });
+  }
+
+  return {
+    body: {
+      size: MAX_ALERT_DOCS_TO_RETURN,
+      track_total_hits: true,
+      query: {
+        bool: {
+          filter,
+        },
+      },
+    },
   };
 };
 
@@ -144,56 +211,127 @@ const getAlertsByTimeRange = async <TSearchRequest extends ESSearchRequest>({
   ruleDataClientReader,
   isLifecycleAlert,
 }: GetAlertsByTimeRangeOpts) => {
-  const request = {
-    body: {
-      size: 10000,
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                [TIMESTAMP]: {
-                  gte: start?.toISOString(),
-                  lte: end?.toISOString(),
-                },
-              },
-            },
-            {
-              term: {
-                [ALERT_RULE_UUID]: ruleId,
-              },
-            },
-          ],
-        },
-      },
-    },
-  };
+  if (isLifecycleAlert) {
+    return getLifecycleAlertsByTimeRange({ start, end, ruleId, ruleDataClientReader });
+  }
+
+  return getPersistentAlertsByTimeRange({ start, end, ruleId, ruleDataClientReader });
+};
+
+interface GetAlertsByTimeRangeHelperOpts {
+  start: Date;
+  end: Date;
+  ruleId: string;
+  ruleDataClientReader: IRuleDataReader;
+}
+
+const getPersistentAlertsByTimeRange = async <TSearchRequest extends ESSearchRequest>({
+  start,
+  end,
+  ruleId,
+  ruleDataClientReader,
+}: GetAlertsByTimeRangeHelperOpts) => {
+  // persistent alerts only create new alerts so query by execution UUID to
+  // get all alerts created during an execution
+  const request = getQueryByTimeRange(start, end, ruleId);
   const response = (await ruleDataClientReader.search(request)) as ESSearchResponse<
     AlertDocument,
     TSearchRequest
   >;
-  const alertHits = response.hits.hits;
 
-  // For lifecycle alerts, new/ongoing/recovered statuses can be inferred
-  // from the alert document timestamps
-  // For non-lifecycle alerts (persistent), all alerts from an execution are
-  // new, no alerts are ongoing or recovered
   return {
-    // new lifecycle alerts have start time same as timestamp
-    new: isLifecycleAlert
-      ? alertHits.filter((hit) => hit._source[ALERT_START] === hit._source[TIMESTAMP])
-      : alertHits,
-    // ongoing lifecycle alerts have start time less than timestamp
-    ongoing: isLifecycleAlert
-      ? alertHits.filter((hit) => {
-          const alertStart = new Date(hit._source[ALERT_START]!);
-          const alertTimestamp = new Date(hit._source[TIMESTAMP]!);
-          return alertStart < alertTimestamp && !hit._source[ALERT_END];
-        })
-      : [],
-    // recovered lifecycle alerts have end time same as timestamp
-    recovered: isLifecycleAlert
-      ? alertHits.filter((hit) => hit._source[ALERT_END] === hit._source[TIMESTAMP])
-      : [],
+    new: getHitsWithCount(response),
+    ongoing: {
+      count: 0,
+      alerts: [],
+    },
+    recovered: {
+      count: 0,
+      alerts: [],
+    },
+  };
+};
+
+const getLifecycleAlertsByTimeRange = async ({
+  start,
+  end,
+  ruleId,
+  ruleDataClientReader,
+}: GetAlertsByTimeRangeHelperOpts) => {
+  const requests = [
+    getQueryByTimeRange(start, end, ruleId, 'new'),
+    getQueryByTimeRange(start, end, ruleId, 'ongoing'),
+    getQueryByTimeRange(start, end, ruleId, 'recovered'),
+  ];
+
+  const responses = await Promise.all(
+    requests.map((request) => ruleDataClientReader.search(request))
+  );
+
+  return {
+    new: getHitsWithCount(responses[0]),
+    ongoing: getHitsWithCount(responses[1]),
+    recovered: getHitsWithCount(responses[2]),
+  };
+};
+
+const getQueryByTimeRange = (start: Date, end: Date, ruleId: string, type?: string) => {
+  const filter: QueryDslQueryContainer[] = [
+    {
+      range: {
+        [TIMESTAMP]: {
+          gte: start?.toISOString(),
+          lte: end?.toISOString(),
+        },
+      },
+    },
+    {
+      term: {
+        [ALERT_RULE_UUID]: ruleId,
+      },
+    },
+  ];
+  if (type) {
+    filter.push({
+      term: {
+        alert_type: type,
+      },
+    });
+  }
+
+  const runtimeMapping: MappingRuntimeFields = {
+    alert_type: {
+      type: 'keyword',
+      script: {
+        source: `
+          def start = doc['kibana.alert.start'];
+          def timestamp = doc['@timestamp'];
+          def end = doc['kibana.alert.end'];
+
+          if (start === timestamp) {
+            emit('new');
+          } else if (start.value.getMillis() < timestamp.value.getMillis() && end.empty) {
+            emit('ongoing');
+          } else if (!end.empty && end === timestamp) {
+            emit('recovered');
+          } else {
+            emit('unknown');
+          }
+        `,
+      },
+    },
+  };
+
+  return {
+    body: {
+      size: MAX_ALERT_DOCS_TO_RETURN,
+      track_total_hits: true,
+      runtime_mappings: runtimeMapping,
+      query: {
+        bool: {
+          filter,
+        },
+      },
+    },
   };
 };

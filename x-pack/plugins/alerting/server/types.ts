@@ -135,10 +135,21 @@ export interface GetSummarizedAlertsFnOpts {
   spaceId: string;
 }
 
+// TODO - add type for these alerts when we determine which alerts-as-data
+// fields will be made available in https://github.com/elastic/kibana/issues/143741
 export interface SummarizedAlerts {
-  new: unknown[];
-  ongoing: unknown[];
-  recovered: unknown[];
+  new: {
+    count: number;
+    alerts: unknown[];
+  };
+  ongoing: {
+    count: number;
+    alerts: unknown[];
+  };
+  recovered: {
+    count: number;
+    alerts: unknown[];
+  };
 }
 export type GetSummarizedAlertsFn = (opts: GetSummarizedAlertsFnOpts) => Promise<SummarizedAlerts>;
 
