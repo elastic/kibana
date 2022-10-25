@@ -17,6 +17,7 @@ import type {
 import { FleetServerAgentComponentStatuses, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import moment from 'moment';
 import { BaseDataGenerator } from './base_data_generator';
+import { ENDPOINT_ERROR_CODES } from '../constants';
 
 // List of computed (as in, done in code is kibana via
 // https://github.com/elastic/kibana/blob/main/x-pack/plugins/fleet/common/services/agent_status.ts#L13-L44
@@ -91,7 +92,7 @@ export class FleetAgentGenerator extends BaseDataGenerator<Agent> {
       componentStatus === 'failed'
         ? {
             error: {
-              code: 123,
+              code: ENDPOINT_ERROR_CODES.ES_CONNECTION_ERROR,
               message: 'Unable to connect to Elasticsearch',
             },
           }
