@@ -21,7 +21,7 @@ import { FullTimeRangeSelector } from '../full_time_range_selector';
 import { DatePickerWrapper } from '../date_picker_wrapper';
 
 export const PageHeader: FC = () => {
-  const [setGlobalState] = useUrlState('_g');
+  const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
 
   const timefilter = useTimefilter({

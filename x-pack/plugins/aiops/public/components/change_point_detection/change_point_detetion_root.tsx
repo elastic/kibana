@@ -8,6 +8,7 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import React, { FC } from 'react';
+import { PageHeader } from '../page_header';
 import { ChangePointDetectionContextProvider } from './change_point_detection_context';
 import { DataSourceContext } from '../../hooks/use_data_source';
 import { UrlStateProvider } from '../../hooks/use_url_state';
@@ -30,6 +31,7 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
     <AiopsAppContext.Provider value={appDependencies}>
       <UrlStateProvider>
         <DataSourceContext.Provider value={{ dataView, savedSearch }}>
+          <PageHeader />
           <ChangePointDetectionContextProvider>
             <ChangePointDetectionPage />
           </ChangePointDetectionContextProvider>
