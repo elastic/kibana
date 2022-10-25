@@ -76,6 +76,7 @@ export const OptionsListEditorOptions = ({
               onChange={() => {
                 onChange({ hideExists: !state.hideExists });
                 setState((s) => ({ ...s, hideExists: !s.hideExists }));
+                if (initialInput?.existsSelected) onChange({ existsSelected: false });
               }}
             />
           </EuiFlexItem>
