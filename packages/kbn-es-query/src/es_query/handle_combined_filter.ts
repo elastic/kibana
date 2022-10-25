@@ -21,13 +21,13 @@ export const handleCombinedFilter = (
   const { params } = filter.meta;
 
   if (filter.meta.relation === BooleanRelation.AND) {
-    const query = buildQueryFromFilters(filter.meta.params, inputDataViews, options);
-    return { ...filter, query };
+    const bool = buildQueryFromFilters(filter.meta.params, inputDataViews, options);
+    return { ...filter, query: { bool } };
   }
 
-  const should = params.map((subFilter) =>
-    buildQueryFromFilters([subFilter], inputDataViews, options)
-  );
+  const should = params.map((subFilter) => ({
+    bool: buildQueryFromFilters([subFilter], inputDataViews, options),
+  }));
   const bool = { should, minimum_should_match: 1 };
   return { ...filter, query: { bool } };
 };
