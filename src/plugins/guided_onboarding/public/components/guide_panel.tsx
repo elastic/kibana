@@ -304,7 +304,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="xs" style={{ color: euiTheme.colors.disabled }}>
+                <EuiText size="xs" color={euiTheme.colors.disabled}>
                   |
                 </EuiText>
               </EuiFlexItem>
@@ -323,7 +323,7 @@ export const GuidePanel = ({ api, application }: GuidePanelProps) => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="xs" style={{ color: euiTheme.colors.disabled }}>
+                <EuiText size="xs" color={euiTheme.colors.disabled}>
                   |
                 </EuiText>
               </EuiFlexItem>
