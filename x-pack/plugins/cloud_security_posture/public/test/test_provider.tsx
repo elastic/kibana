@@ -13,6 +13,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { MockSubscriptionTrackingProvider } from '@kbn/subscription-tracking';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
@@ -45,9 +46,11 @@ export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
       <QueryClientProvider client={queryClient}>
         <Router history={params.history}>
           <I18nProvider>
-            <Switch>
-              <Route path="*" render={() => <>{children}</>} />
-            </Switch>
+            <MockSubscriptionTrackingProvider>
+              <Switch>
+                <Route path="*" render={() => <>{children}</>} />
+              </Switch>
+            </MockSubscriptionTrackingProvider>
           </I18nProvider>
         </Router>
       </QueryClientProvider>

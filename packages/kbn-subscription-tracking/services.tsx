@@ -7,6 +7,7 @@
  */
 
 import React, { FC, useContext } from 'react';
+import { Subject } from 'rxjs';
 import type { AnalyticsClient, EventTypeOpts } from '@kbn/analytics-client';
 import { EVENT_NAMES, Services, SubscriptionContext } from './types';
 
@@ -20,6 +21,29 @@ export const SubscriptionTrackingProvider: FC<Services> = ({ children, ...servic
     <SubscriptionTrackingContext.Provider value={services}>
       {children}
     </SubscriptionTrackingContext.Provider>
+  );
+};
+
+const analyticsClientMock: jest.Mocked<AnalyticsClient> = {
+  optIn: jest.fn(),
+  reportEvent: jest.fn(),
+  isEventTypeRegistered: jest.fn(),
+  registerEventType: jest.fn(),
+  registerContextProvider: jest.fn(),
+  removeContextProvider: jest.fn(),
+  registerShipper: jest.fn(),
+  telemetryCounter$: new Subject(),
+  shutdown: jest.fn(),
+};
+
+/**
+ * Mock for the external services provider. Only use in tests!
+ */
+export const MockSubscriptionTrackingProvider: FC = ({ children }) => {
+  return (
+    <SubscriptionTrackingProvider navigateToApp={() => {}} analyticsClient={analyticsClientMock}>
+      {children}
+    </SubscriptionTrackingProvider>
   );
 };
 

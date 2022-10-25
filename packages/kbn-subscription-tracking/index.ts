@@ -12,4 +12,5 @@ export {
   SubscriptionTrackingContext,
   SubscriptionTrackingProvider,
   registerEvents,
+  MockSubscriptionTrackingProvider,
 } from './services';

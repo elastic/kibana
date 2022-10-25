@@ -19,6 +19,7 @@ import type { Capabilities } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { MockSubscriptionTrackingProvider } from '@kbn/subscription-tracking';
 import { ConsoleManager } from '../../management/components/console';
 import type { State } from '../store';
 import { createStore } from '../store';
@@ -66,15 +67,17 @@ export const TestProvidersComponent: React.FC<Props> = ({
   return (
     <I18nProvider>
       <MockKibanaContextProvider>
-        <ReduxStoreProvider store={store}>
-          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-            <QueryClientProvider client={queryClient}>
-              <ConsoleManager>
-                <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-              </ConsoleManager>
-            </QueryClientProvider>
-          </ThemeProvider>
-        </ReduxStoreProvider>
+        <MockSubscriptionTrackingProvider>
+          <ReduxStoreProvider store={store}>
+            <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+              <QueryClientProvider client={queryClient}>
+                <ConsoleManager>
+                  <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                </ConsoleManager>
+              </QueryClientProvider>
+            </ThemeProvider>
+          </ReduxStoreProvider>
+        </MockSubscriptionTrackingProvider>
       </MockKibanaContextProvider>
     </I18nProvider>
   );
@@ -97,20 +100,22 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
 }) => (
   <I18nProvider>
     <MockKibanaContextProvider>
-      <ReduxStoreProvider store={store}>
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <UserPrivilegesProvider
-            kibanaCapabilities={
-              {
-                siem: { show: true, crud: true },
-                [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
-              } as unknown as Capabilities
-            }
-          >
-            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-          </UserPrivilegesProvider>
-        </ThemeProvider>
-      </ReduxStoreProvider>
+      <MockSubscriptionTrackingProvider>
+        <ReduxStoreProvider store={store}>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <UserPrivilegesProvider
+              kibanaCapabilities={
+                {
+                  siem: { show: true, crud: true },
+                  [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+                } as unknown as Capabilities
+              }
+            >
+              <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+            </UserPrivilegesProvider>
+          </ThemeProvider>
+        </ReduxStoreProvider>
+      </MockSubscriptionTrackingProvider>
     </MockKibanaContextProvider>
   </I18nProvider>
 );
