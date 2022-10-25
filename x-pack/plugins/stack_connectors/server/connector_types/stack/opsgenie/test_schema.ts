@@ -16,6 +16,38 @@ export const ValidCreateAlertSchema: CreateAlertParams = {
     { name: 'name for user', type: 'user' },
     { name: 'name for escalation', type: 'escalation' },
     { name: 'name for schedule', type: 'schedule' },
+    {
+      id: '4513b7ea-3b91-438f-b7e4-e3e54af9147c',
+      type: 'team',
+    },
+    {
+      name: 'NOC',
+      type: 'team',
+    },
+    {
+      id: 'bb4d9938-c3c2-455d-aaab-727aa701c0d8',
+      type: 'user',
+    },
+    {
+      username: 'trinity@opsgenie.com',
+      type: 'user',
+    },
+    {
+      id: 'aee8a0de-c80f-4515-a232-501c0bc9d715',
+      type: 'escalation',
+    },
+    {
+      name: 'Nightwatch Escalation',
+      type: 'escalation',
+    },
+    {
+      id: '80564037-1984-4f38-b98e-8a1f662df552',
+      type: 'schedule',
+    },
+    {
+      name: 'First Responders Schedule',
+      type: 'schedule',
+    },
   ],
   visibleTo: [
     { name: 'name for team', type: 'team' },

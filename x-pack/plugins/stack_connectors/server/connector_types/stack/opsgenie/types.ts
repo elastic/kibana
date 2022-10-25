@@ -10,6 +10,7 @@ import {
   CloseAlertParamsSchema,
   ConfigSchema,
   SecretsSchema,
+  FailureResponse,
 } from './schema';
 import { OpsgenieSubActions } from '../../../../common';
 
@@ -30,3 +31,5 @@ export interface CloseAlertSubActionParams {
 }
 
 export type Params = CreateAlertSubActionParams | CloseAlertSubActionParams;
+
+export type FailureResponseType = TypeOf<typeof FailureResponse>;

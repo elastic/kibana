@@ -8,17 +8,11 @@
 import crypto from 'crypto';
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { AxiosError } from 'axios';
+import { isEmpty } from 'lodash';
 import { OpsgenieSubActions } from '../../../../common';
 import { CreateAlertParamsSchema, CloseAlertParamsSchema, Response } from './schema';
-import { CloseAlertParams, Config, CreateAlertParams, Secrets } from './types';
+import { CloseAlertParams, Config, CreateAlertParams, FailureResponseType, Secrets } from './types';
 import * as i18n from './translations';
-
-interface ErrorSchema {
-  message?: string;
-  errors?: {
-    message?: string;
-  };
-}
 
 export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
   constructor(params: ServiceParams<Config, Secrets>) {
@@ -37,13 +31,25 @@ export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {
     });
   }
 
-  public getResponseErrorMessage(error: AxiosError<ErrorSchema>) {
-    return `Message: ${
-      error.response?.data.errors?.message ??
-      error.response?.data.message ??
-      error.message ??
-      i18n.UNKNOWN_ERROR
-    }`;
+  public getResponseErrorMessage(error: AxiosError<FailureResponseType>) {
+    const mainMessage = error.response?.data.message ?? error.message ?? i18n.UNKNOWN_ERROR;
+
+    if (error.response?.data?.errors != null) {
+      const message = this.getDetailedErrorMessage(error.response?.data?.errors);
+      if (!isEmpty(message)) {
+        return `${mainMessage}: ${message}`;
+      }
+    }
+
+    return mainMessage;
+  }
+
+  private getDetailedErrorMessage(errorField: unknown) {
+    try {
+      return JSON.stringify(errorField);
+    } catch (error) {
+      return;
+    }
   }
 
   public async createAlert(params: CreateAlertParams) {

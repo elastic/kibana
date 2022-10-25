@@ -26,13 +26,26 @@ const SuccessfulResponse = schema.object(
   { unknowns: 'allow' }
 );
 
-const FailureResponse = schema.object(
+export const FailureResponse = schema.object(
   {
     took: schema.number(),
     requestId: schema.string(),
     message: schema.maybe(schema.string()),
     result: schema.maybe(schema.string()),
-    errors: schema.maybe(schema.object({ message: schema.string() })),
+    /**
+     * When testing invalid requests with Opsgenie the response seems to take the form:
+     * {
+     *   ['field that is invalid']: 'message about what the issue is'
+     * }
+     *
+     * e.g.
+     *
+     * {
+     *   "message": "Message can not be empty.",
+     *   "username": "must be a well-formed email address"
+     * }
+     */
+    errors: schema.maybe(schema.any()),
   },
   { unknowns: 'allow' }
 );
@@ -53,6 +66,9 @@ const responderTypes = schema.oneOf([
   schema.literal('schedule'),
 ]);
 
+/**
+ * For more information on the Opsgenie create alert schema see: https://docs.opsgenie.com/docs/alert-api#create-alert
+ */
 export const CreateAlertParamsSchema = schema.object({
   message: schema.string({
     maxLength: 130,
@@ -73,6 +89,12 @@ export const CreateAlertParamsSchema = schema.object({
           type: responderTypes,
         }),
         schema.object({ id: schema.string(), type: responderTypes }),
+        /**
+         * This field is not explicitly called out in the description of responders within Opsgenie's API docs but it is
+         * shown in an example and when I tested it, it seems to work as they throw an error if you try to specify a username
+         * without a valid email
+         */
+        schema.object({ username: schema.string(), type: schema.literal('user') }),
       ]),
       { maxSize: 50 }
     )

@@ -46,6 +46,8 @@ const ResponderTypes = rt.union([
  * Ideally we could use io-ts in the backend as well but the server requires kbn-schema to be used.
  *
  * Issue: https://github.com/elastic/kibana/issues/143891
+ *
+ * For more information on the Opsgenie create alert schema see: https://docs.opsgenie.com/docs/alert-api#create-alert
  */
 const CreateAlertSchema = rt.intersection([
   rt.strict({ message: MessageNonEmptyString }),
@@ -57,6 +59,7 @@ const CreateAlertSchema = rt.intersection([
         rt.union([
           rt.strict({ name: rt.string, type: ResponderTypes }),
           rt.strict({ id: rt.string, type: ResponderTypes }),
+          rt.strict({ username: rt.string, type: rt.literal('user') }),
         ])
       ),
       visibleTo: rt.array(
