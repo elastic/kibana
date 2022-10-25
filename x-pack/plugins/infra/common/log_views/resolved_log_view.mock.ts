@@ -54,6 +54,7 @@ export const createResolvedLogViewMock = (
 
 export const createResolvedLogViewMockFromAttributes = (logViewAttributes: LogViewAttributes) =>
   resolveLogView(
+    'log-view-id',
     logViewAttributes,
     {
       get: async () => createStubDataView({ spec: {} }),

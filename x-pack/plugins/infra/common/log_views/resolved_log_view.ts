@@ -27,18 +27,20 @@ export interface ResolvedLogView {
 }
 
 export const resolveLogView = async (
+  logViewId: string,
   logViewAttributes: LogViewAttributes,
   dataViewsService: DataViewsContract,
   config: LogViewsStaticConfig
 ): Promise<ResolvedLogView> => {
   if (logViewAttributes.logIndices.type === 'index_name') {
-    return await resolveLegacyReference(logViewAttributes, dataViewsService, config);
+    return await resolveLegacyReference(logViewId, logViewAttributes, dataViewsService, config);
   } else {
     return await resolveDataViewReference(logViewAttributes, dataViewsService);
   }
 };
 
 const resolveLegacyReference = async (
+  logViewId: string,
   logViewAttributes: LogViewAttributes,
   dataViewsService: DataViewsContract,
   config: LogViewsStaticConfig
@@ -49,30 +51,27 @@ const resolveLegacyReference = async (
 
   const indices = logViewAttributes.logIndices.indexName;
 
-  const fields = await dataViewsService
-    .getFieldsForWildcard({
-      pattern: indices,
-      allowNoIndex: true,
-    })
+  const dataViewReference = await dataViewsService
+    .create(
+      {
+        id: `log-view-${logViewId}`,
+        title: indices,
+        timeFieldName: TIMESTAMP_FIELD,
+        allowNoIndex: true,
+      },
+      false,
+      false
+    )
     .catch((error) => {
-      throw new ResolveLogViewError(
-        `Failed to fetch fields for indices "${indices}": ${error}`,
-        error
-      );
+      throw new ResolveLogViewError(`Failed to create Data View reference: ${error}`, error);
     });
 
-  const dataViewReference = await dataViewsService.create({
-    id: '___InfraLogsLegacyLogViewReference___',
-    title: logViewAttributes.logIndices.indexName,
-    timeFieldName: TIMESTAMP_FIELD,
-  });
-
   return {
-    indices: logViewAttributes.logIndices.indexName,
+    indices,
     timestampField: TIMESTAMP_FIELD,
     tiebreakerField: TIEBREAKER_FIELD,
     messageField: config.messageFields,
-    fields,
+    fields: dataViewReference.fields,
     runtimeMappings: {},
     columns: logViewAttributes.logColumns,
     name: logViewAttributes.name,

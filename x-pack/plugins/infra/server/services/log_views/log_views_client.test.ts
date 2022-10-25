@@ -239,7 +239,7 @@ describe('LogViewsClient class', () => {
       })
     );
 
-    const resolvedLogView = await logViewsClient.resolveLogView({
+    const resolvedLogView = await logViewsClient.resolveLogView('log-view-id', {
       name: 'LOG VIEW',
       description: 'LOG VIEW DESCRIPTION',
       logIndices: {
