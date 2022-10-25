@@ -5,9 +5,17 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { MLJobsAwaitingNodeWarning, ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
@@ -43,7 +51,7 @@ export const ENTITY_ANALYTICS_ANOMALIES_PANEL = 'entity_analytics_anomalies';
 
 export const EntityAnalyticsAnomalies = () => {
   const {
-    services: { ml, http },
+    services: { ml, http, docLinks },
   } = useKibana();
 
   const jobsUrl = useMlHref(ml, http.basePath.get(), {
@@ -112,6 +120,8 @@ export const EntityAnalyticsAnomalies = () => {
     [data]
   );
 
+  const incompatibleJobCount = data.filter(({ job }) => job && !job.isCompatible).length;
+
   return (
     <EuiPanel hasBorder data-test-subj={ENTITY_ANALYTICS_ANOMALIES_PANEL}>
       <HeaderSection
@@ -149,6 +159,34 @@ export const EntityAnalyticsAnomalies = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </HeaderSection>
+
+      {incompatibleJobCount > 0 && (
+        <>
+          <EuiCallOut
+            title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
+            data-test-subj="incompatible_jobs_warnings"
+            color="warning"
+            iconType="alert"
+            size="s"
+          >
+            <p>
+              <FormattedMessage
+                defaultMessage="We could not find any data, see {mlDocs} for more information on Machine Learning job requirements."
+                id="xpack.securitySolution.components.mlPopup.moduleNotCompatibleDescription"
+                values={{
+                  mlDocs: (
+                    <a href={`${docLinks.links.siem.ml}`} rel="noopener noreferrer" target="_blank">
+                      {'Anomaly Detection with Machine Learning'}
+                    </a>
+                  ),
+                }}
+              />
+            </p>
+          </EuiCallOut>
+
+          <EuiSpacer size="m" />
+        </>
+      )}
       <MLJobsAwaitingNodeWarning jobIds={installedJobsIds} />
       {toggleStatus && (
         <EuiInMemoryTable

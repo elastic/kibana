@@ -76,3 +76,10 @@ export const JOB_STATUS_FAILED = i18n.translate(
     defaultMessage: 'failed',
   }
 );
+
+export const MODULE_NOT_COMPATIBLE_TITLE = (incompatibleJobCount: number) =>
+  i18n.translate('xpack.securitySolution.entityAnalytics.anomalies.moduleNotCompatibleTitle', {
+    values: { incompatibleJobCount },
+    defaultMessage:
+      '{incompatibleJobCount} {incompatibleJobCount, plural, =1 {job is} other {jobs are}} currently unavailable',
+  });
