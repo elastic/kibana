@@ -89,7 +89,7 @@ export interface FetchFindLatestPackageOptions {
 async function _fetchFindLatestPackage(
   packageName: string,
   options?: FetchFindLatestPackageOptions
-): Promise<RegistryPackage | BundledPackage> {
+): Promise<RegistryPackage | BundledPackage | null> {
   return withPackageSpan(`Find latest package ${packageName}`, async () => {
     const logger = appContextService.getLogger();
     const { ignoreConstraints = false, prerelease = false } = options ?? {};
@@ -116,40 +116,6 @@ async function _fetchFindLatestPackage(
       const searchResults: RegistryPackage[] = JSON.parse(res);
 
       const latestPackageFromRegistry = searchResults[0] ?? null;
-
-      // TODO remove, for local testing
-      if (packageName === 'endpoint' && prerelease === true) {
-        const dummyBeta = {
-          name: 'endpoint',
-          title: 'Elastic Defend',
-          version: '0.19.1',
-          release: 'beta',
-          description:
-            'Protect your hosts and cloud workloads with threat prevention, detection, and deep security data visibility.',
-          type: 'integration',
-          download: '/epr/endpoint/endpoint-0.19.1.zip',
-          path: '/package/endpoint/0.19.1',
-          icons: [
-            {
-              src: '/img/security-logo-color-64px.svg',
-              path: '/package/endpoint/0.19.1/img/security-logo-color-64px.svg',
-              size: '16x16',
-              type: 'image/svg+xml',
-            },
-          ],
-          policy_templates: [
-            {
-              name: 'endpoint',
-              title: 'Endpoint Security Integration',
-              description: 'Interact with the endpoint.',
-            },
-          ],
-          conditions: { kibana: { version: '^7.13.0' } },
-          owner: { github: 'elastic/security-onboarding-and-lifecycle-mgt' },
-          categories: ['security'],
-        } as any;
-        return dummyBeta;
-      }
 
       if (bundledPackage && semverGte(bundledPackage.version, latestPackageFromRegistry.version)) {
         return bundledPackage;
