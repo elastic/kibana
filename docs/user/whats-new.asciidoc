@@ -1,5 +1,6 @@
+[chapter]
 [[whats-new]]
-== What's new in {minor-version}
+= What's new in {minor-version}
 
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
@@ -14,3 +15,4 @@ Previous versions: {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8
 // tag::notable-highlights[]
 
 // end::notable-highlights[]
+
