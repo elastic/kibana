@@ -35,7 +35,7 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
   data: PluginStart,
   endpointContext: EndpointAppContext,
   getSpaceId?: (request: KibanaRequest) => string,
-  ruleDataClient: IRuleDataClient | null
+  ruleDataClient?: IRuleDataClient | null
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 

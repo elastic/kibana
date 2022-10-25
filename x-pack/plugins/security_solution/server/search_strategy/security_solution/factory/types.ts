@@ -30,7 +30,7 @@ export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
       endpointContext: EndpointAppContext;
       request: KibanaRequest;
       spaceId?: string;
-      ruleDataClient?: IRuleDataClient;
+      ruleDataClient?: IRuleDataClient | null;
     }
   ) => Promise<StrategyResponseType<T>>;
 }

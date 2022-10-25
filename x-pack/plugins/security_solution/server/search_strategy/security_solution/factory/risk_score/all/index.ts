@@ -38,7 +38,7 @@ export const riskScore: SecuritySolutionFactory<
     response: IEsSearchResponse,
     deps?: {
       spaceId?: string;
-      ruleDataClient?: IRuleDataClient;
+      ruleDataClient?: IRuleDataClient | null;
     }
   ) => {
     const inspect = {
@@ -69,7 +69,7 @@ async function enhanceData(
   data: Array<HostRiskScore | UserRiskScore>,
   names: string[],
   nameField: string,
-  ruleDataClient?: IRuleDataClient,
+  ruleDataClient?: IRuleDataClient | null,
   spaceId?: string
 ): Promise<Array<HostRiskScore | UserRiskScore>> {
   const ruleDataReader = ruleDataClient?.getReader({ namespace: spaceId });
