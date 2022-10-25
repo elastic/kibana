@@ -8,11 +8,7 @@
 import { Logger } from '@kbn/core/server';
 
 import axios from 'axios';
-import {
-  ActionTypeConfigType,
-  getActionType,
-  TorqActionType,
-} from '.';
+import { ActionTypeConfigType, getActionType, TorqActionType } from '.';
 
 import * as utils from '../../../../../actions/server/lib/axios_utils';
 import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
@@ -172,7 +168,7 @@ describe('execute Torq action', () => {
       services,
       config,
       secrets: { token: '1234' },
-      params: { body: 'some data' },
+      params: { body: '{"msg": "some data"}' },
       configurationUtilities: configurationUtilities,
       logger: mockedLogger,
     });
@@ -181,8 +177,11 @@ describe('execute Torq action', () => {
     expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
       Object {
         "axios": [MockFunction],
-        "data": "some data",
+        "data": Object {
+          "msg": "some data",
+        },
         "headers": Object {
+          "Content-Type": "application/json",
           "X-Torq-Token": "1234",
         },
         "logger": Object {
@@ -209,8 +208,8 @@ describe('execute Torq action', () => {
           "warn": [MockFunction],
         },
         "method": "post",
-        "params": Object {},
         "url": "https://hooks.torq.io/v1/test",
+        "validateStatus": [Function],
       }
     `);
   });
