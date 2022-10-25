@@ -43,7 +43,7 @@ export const RedirectAppLinks: FC<RedirectAppLinksComponentProps> = ({
   );
 
   return (
-    //jsx-a11y/click-events-have-key-events
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <div onClick={handleClick} ref={containerRef}>{children}</div>
   );
 };
