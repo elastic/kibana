@@ -58,12 +58,8 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
-              },
-              {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -71,7 +67,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -80,10 +76,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -218,38 +210,6 @@
                 "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
               },
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/hooks/use_es_doc_search.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/utils/resolve_data_view.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/utils/resolve_data_view.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/top_nav/discover_topnav.tsx"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/hooks/use_data.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/full_time_range_selector/full_time_range_selector_service.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes_analysis.tsx"
-              },
-              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
@@ -292,50 +252,6 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/scaling_form.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/top_hits_form.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/trigger_actions/visualize_geo_field_action.ts"
               },
               {
                 "plugin": "dataVisualizer",
@@ -570,6 +486,14 @@
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/services/kibana/data_views.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/services/kibana/data_views.ts"
+              },
+              {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
               },
@@ -595,7 +519,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/details/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -770,6 +694,38 @@
                 "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/remove_nested_field_children.test.ts"
               },
               {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_kpi.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/mobile_test_attribute.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
+              },
+              {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/common.test.ts"
               },
@@ -912,10 +868,6 @@
               {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
               },
               {
                 "plugin": "lens",
@@ -8017,12 +7969,8 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
-              },
-              {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -8030,7 +7978,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -8039,10 +7987,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -8177,38 +8121,6 @@
                 "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
               },
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/hooks/use_es_doc_search.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/utils/resolve_data_view.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/utils/resolve_data_view.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/top_nav/discover_topnav.tsx"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/hooks/use_data.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/full_time_range_selector/full_time_range_selector_service.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes_analysis.tsx"
-              },
-              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
@@ -8251,50 +8163,6 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/scaling_form.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/top_hits_form.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/trigger_actions/visualize_geo_field_action.ts"
               },
               {
                 "plugin": "dataVisualizer",
@@ -8529,6 +8397,14 @@
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/services/kibana/data_views.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/services/kibana/data_views.ts"
+              },
+              {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
               },
@@ -8554,7 +8430,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/details/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -8729,6 +8605,38 @@
                 "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/remove_nested_field_children.test.ts"
               },
               {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_kpi.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/mobile_test_attribute.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
+              },
+              {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/common.test.ts"
               },
@@ -8871,10 +8779,6 @@
               {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
               },
               {
                 "plugin": "lens",
@@ -13993,15 +13897,13 @@
                 "UpdateResponse",
                 "<TDocumentR>>; }; asyncSearch: ",
                 "default",
-                "; [kInternal]: symbol | null; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                 "default",
                 "; helpers: ",
                 "default",
                 "; child: (opts: ",
                 "ClientOptions",
                 ") => ",
-                "default",
-                "; Internal: ",
                 "default",
                 "; autoscaling: ",
                 "default",
@@ -15125,12 +15027,8 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
-              },
-              {
-                "plugin": "timelines",
-                "path": "x-pack/plugins/timelines/public/container/source/index.tsx"
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -15138,7 +15036,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -15147,10 +15045,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/utils.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -15285,38 +15179,6 @@
                 "path": "src/plugins/unified_field_list/common/utils/field_existing_utils.ts"
               },
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/hooks/use_es_doc_search.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/utils/resolve_data_view.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/utils/resolve_data_view.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/top_nav/discover_topnav.tsx"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/hooks/use_data.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/full_time_range_selector/full_time_range_selector_service.ts"
-              },
-              {
-                "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/public/components/explain_log_rate_spikes/explain_log_rate_spikes_analysis.tsx"
-              },
-              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
@@ -15359,50 +15221,6 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/scaling_form.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/top_hits_form.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/trigger_actions/visualize_geo_field_action.ts"
               },
               {
                 "plugin": "dataVisualizer",
@@ -15637,6 +15455,14 @@
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/services/kibana/data_views.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/services/kibana/data_views.ts"
+              },
+              {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
               },
@@ -15662,7 +15488,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules/details/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detection_engine/rule_details_ui/pages/rule_details/index.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -15837,6 +15663,38 @@
                 "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/remove_nested_field_children.test.ts"
               },
               {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_kpi.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/mobile_test_attribute.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
+              },
+              {
                 "plugin": "transform",
                 "path": "x-pack/plugins/transform/public/app/sections/create_transform/components/step_define/common/common.test.ts"
               },
@@ -15979,10 +15837,6 @@
               {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
               },
               {
                 "plugin": "lens",
@@ -23303,6 +23157,22 @@
             "label": "version",
             "description": [
               "An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__core-saved-objects-common/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.SavedObject.created_at",
+            "type": "string",
+            "tags": [],
+            "label": "created_at",
+            "description": [
+              "Timestamp of the time this document had been created."
             ],
             "signature": [
               "string | undefined"
