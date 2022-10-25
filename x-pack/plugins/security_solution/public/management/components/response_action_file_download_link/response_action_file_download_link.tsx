@@ -29,7 +29,7 @@ const DEFAULT_BUTTON_TITLE = i18n.translate(
   { defaultMessage: 'Click here to download' }
 );
 
-const FILE_NO_LONGER_AVAILABLE_MESSAGE = i18n.translate(
+export const FILE_NO_LONGER_AVAILABLE_MESSAGE = i18n.translate(
   'xpack.securitySolution.responseActionFileDownloadLink.fileNoLongerAvailable',
   { defaultMessage: 'File is no longer available for download.' }
 );
@@ -57,8 +57,10 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     // console, where the link is displayed within a short time. So we only do the API call if the
     // action was completed more than 2 days ago.
     const checkIfStillAvailable = useMemo(() => {
-      return action.isCompleted && moment().diff(action.completedAt, 'days') > 2;
-    }, [action.completedAt, action.isCompleted]);
+      return (
+        action.isCompleted && action.wasSuccessful && moment().diff(action.completedAt, 'days') > 2
+      );
+    }, [action.completedAt, action.isCompleted, action.wasSuccessful]);
 
     const downloadUrl = useMemo(() => {
       return resolvePathVariables(ACTION_AGENT_FILE_DOWNLOAD_ROUTE, {
@@ -80,17 +82,21 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     }
 
     if (isFetching) {
-      return <EuiLoadingContent lines={1} />;
+      return <EuiLoadingContent lines={1} data-test-subj={getTestId('loading')} />;
     }
 
     // Check if file is no longer available
     if (error || fileInfo?.data.status === 'DELETED') {
       if ((error && error?.response?.status === 404) || fileInfo?.data.status === 'DELETED') {
-        return <EuiText size="s">{FILE_NO_LONGER_AVAILABLE_MESSAGE}</EuiText>;
+        return (
+          <EuiText size="s" data-test-subj={getTestId('fileNoLongerAvailable')}>
+            {FILE_NO_LONGER_AVAILABLE_MESSAGE}
+          </EuiText>
+        );
       }
 
       if (error) {
-        return <FormattedError error={error} />;
+        return <FormattedError error={error} data-test-subj={getTestId('apiError')} />;
       }
 
       return null;
