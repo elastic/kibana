@@ -48,7 +48,11 @@ import { AuthenticationResult } from './authentication_result';
 import type { AuthenticatorOptions } from './authenticator';
 import { Authenticator, enrichWithUserProfileId } from './authenticator';
 import { DeauthenticationResult } from './deauthentication_result';
-import type { BasicAuthenticationProvider, SAMLAuthenticationProvider } from './providers';
+import type {
+  BasicAuthenticationProvider,
+  HTTPAuthenticationProvider,
+  SAMLAuthenticationProvider,
+} from './providers';
 
 let auditLogger: AuditLogger;
 function getMockOptions({
@@ -114,8 +118,16 @@ function expectAuditEvents(...events: ExpectedAuditEvent[]) {
 }
 
 describe('Authenticator', () => {
+  let mockHTTPAuthenticationProvider: jest.Mocked<PublicMethodsOf<HTTPAuthenticationProvider>>;
   let mockBasicAuthenticationProvider: jest.Mocked<PublicMethodsOf<BasicAuthenticationProvider>>;
   beforeEach(() => {
+    mockHTTPAuthenticationProvider = {
+      login: jest.fn(),
+      authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
+      logout: jest.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
+      getHTTPAuthenticationScheme: jest.fn(),
+    };
+
     mockBasicAuthenticationProvider = {
       login: jest.fn(),
       authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
@@ -125,8 +137,7 @@ describe('Authenticator', () => {
 
     jest.requireMock('./providers/http').HTTPAuthenticationProvider.mockImplementation(() => ({
       type: 'http',
-      authenticate: jest.fn().mockResolvedValue(AuthenticationResult.notHandled()),
-      logout: jest.fn().mockResolvedValue(DeauthenticationResult.notHandled()),
+      ...mockHTTPAuthenticationProvider,
     }));
 
     jest.requireMock('./providers/basic').BasicAuthenticationProvider.mockImplementation(() => ({
@@ -1377,6 +1388,54 @@ describe('Authenticator', () => {
                 })
           );
           expect(auditLogger.log).not.toHaveBeenCalled();
+        });
+
+        it('should get expected reponse headers for non-redirectable requests where the authentication succeeds', async () => {
+          const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
+          const failureReason = new FailureClass();
+
+          mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
+
+          const user = mockAuthenticatedUser();
+          mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+            AuthenticationResult.succeeded(user)
+          );
+
+          const authenticationResult = await authenticator.authenticate(request);
+          const expectedResult =
+            failureReason instanceof SessionExpiredError
+              ? AuthenticationResult.succeeded(user, {
+                  authResponseHeaders: {
+                    [SESSION_ERROR_REASON_HEADER]: (failureReason as SessionError).code,
+                  },
+                })
+              : AuthenticationResult.succeeded(user);
+          expect(authenticationResult).toEqual(expectedResult);
+          expect(auditLogger.log).not.toHaveBeenCalled();
+        });
+
+        it('should get expected reponse headers for non-redirectable requests where the authentication fails', async () => {
+          const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
+          const failureReason = new FailureClass();
+
+          mockOptions.session.get.mockResolvedValue({ error: failureReason, value: null });
+
+          const authError = new Error('foo');
+          mockHTTPAuthenticationProvider.authenticate.mockResolvedValue(
+            AuthenticationResult.failed(authError)
+          );
+
+          const authenticationResult = await authenticator.authenticate(request);
+          const expectedResult =
+            failureReason instanceof SessionExpiredError
+              ? AuthenticationResult.failed(authError, {
+                  authResponseHeaders: {
+                    [SESSION_ERROR_REASON_HEADER]: (failureReason as SessionError).code,
+                  },
+                })
+              : AuthenticationResult.failed(authError);
+          expect(authenticationResult).toEqual(expectedResult);
+          expectAuditEvents({ action: 'user_login', outcome: 'failure' }); // TODO: Do we really expect these audit events here?
         });
 
         it('expected message is attached to the URL when authentication provider redirects to login page', async () => {

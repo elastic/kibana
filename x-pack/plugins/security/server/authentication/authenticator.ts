@@ -426,11 +426,18 @@ export class Authenticator {
               `${this.options.basePath.get(request)}/login?`
             )
           ) {
+            // TODO: Make this less verbose!
             authenticationResult = AuthenticationResult.redirectTo(
               authenticationResult.redirectURL +
                 `&${LOGOUT_REASON_QUERY_STRING_PARAMETER}=${encodeURIComponent(
                   existingSession.error.code
-                )}`
+                )}`,
+              {
+                user: authenticationResult.user,
+                userProfileGrant: authenticationResult.userProfileGrant,
+                authResponseHeaders: authenticationResult.authResponseHeaders,
+                state: authenticationResult.state,
+              }
             );
           }
           return enrichWithUserProfileId(
@@ -438,6 +445,35 @@ export class Authenticator {
             sessionUpdateResult ? sessionUpdateResult.value : null
           );
         } else {
+          // TODO: Should this just be `instanceof SessionError`?
+          if (existingSession.error instanceof SessionExpiredError) {
+            // TODO: Make this less verbose! Possible alternatives:
+            // 1. Make authResponseHeaders editable
+            // 2. Create utility function outside of the AuthenticationResult class to create clones of AuthenticationResult objects with certain properties augmented
+            // 3. Create utility function inside of the AuthenticationResult class to create clones of AuthenticationResult objects with certain properties augmented
+            // Whatever we choose, we probably want to consider doing the same for editing the `redirectURL` and the `user`, both of which we need to edit in this file
+            if (authenticationResult.succeeded()) {
+              authenticationResult = AuthenticationResult.succeeded(authenticationResult.user!, {
+                userProfileGrant: authenticationResult.userProfileGrant,
+                authHeaders: authenticationResult.authHeaders,
+                state: authenticationResult.state,
+                authResponseHeaders: {
+                  ...authenticationResult.authResponseHeaders,
+                  [SESSION_ERROR_REASON_HEADER]: existingSession.error.code,
+                },
+              });
+            } else if (authenticationResult.failed()) {
+              authenticationResult = AuthenticationResult.failed(authenticationResult.error!, {
+                authResponseHeaders: {
+                  ...authenticationResult.authResponseHeaders,
+                  [SESSION_ERROR_REASON_HEADER]: existingSession.error.code,
+                },
+              });
+            } else {
+              // Currently we can only get to here if the request is 1) not redirectable, and 2) handled. This leaves only the states `succeeded` and `failed` that we have to handle
+              throw new Error(`Unexpected state: ${(authenticationResult as any).status}`);
+            }
+          }
           return enrichWithUserProfileId(
             authenticationResult,
             sessionUpdateResult ? sessionUpdateResult.value : null
@@ -964,6 +1000,7 @@ export class Authenticator {
           state: authenticationResult.state,
           user: authenticationResult.user,
           authResponseHeaders: authenticationResult.authResponseHeaders,
+          userProfileGrant: authenticationResult.userProfileGrant,
         })
       : authenticationResult;
   }
