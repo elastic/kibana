@@ -13,8 +13,8 @@ import { identity } from 'fp-ts/lib/function';
 import { isEmpty } from 'lodash';
 import * as i18n from './translations';
 
-const NonEmptyString = new rt.Type<string, string, unknown>(
-  'NonEmptyString',
+const MessageNonEmptyString = new rt.Type<string, string, unknown>(
+  'MessageNonEmptyString',
   rt.string.is,
   (input, context): Either<rt.Errors, string> => {
     if (input === undefined) {
@@ -38,15 +38,17 @@ const ResponderTypes = rt.union([
 ]);
 
 /**
- * Issue: https://github.com/elastic/kibana/issues/143891
+ * This schema is duplicated from the server. The only difference is that it is using io-ts vs kbn-schema.
  * NOTE: This schema must be the same as defined here: x-pack/plugins/stack_connectors/server/connector_types/stack/opsgenie/schema.ts
  *
  * The reason it is duplicated here is because the server uses kbn-schema which uses Joi under the hood. If we import
  * Joi on the frontend it will cause ~500KB of data to be loaded on page loads. To avoid this we'll use io-ts in the frontend.
  * Ideally we could use io-ts in the backend as well but the server requires kbn-schema to be used.
+ *
+ * Issue: https://github.com/elastic/kibana/issues/143891
  */
 const CreateAlertSchema = rt.intersection([
-  rt.strict({ message: NonEmptyString }),
+  rt.strict({ message: MessageNonEmptyString }),
   rt.exact(
     rt.partial({
       alias: rt.string,

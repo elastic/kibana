@@ -58,13 +58,6 @@ export const JSON_EDITOR_ARIA = i18n.translate(
   }
 );
 
-export const SOURCE_FIELD_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.sourceLabel',
-  {
-    defaultMessage: 'Source',
-  }
-);
-
 export const ENTITY_FIELD_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.entityLabel',
   {

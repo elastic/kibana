@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { decodeCreateAlert } from './json_editor_schema';
+import { decodeCreateAlert } from './schema';
 import { ValidCreateAlertSchema } from '../../../../../server/connector_types/stack/opsgenie/test_schema';
 
 describe('decodeCreateAlert', () => {
@@ -17,6 +17,12 @@ describe('decodeCreateAlert', () => {
 
   it('throws an error when the message field is only spaces', () => {
     expect(() => decodeCreateAlert({ message: '  ' })).toThrowErrorMatchingInlineSnapshot(
+      `"[message]: must be populated with a value other than just whitespace"`
+    );
+  });
+
+  it('throws an error when the message field is an empty string', () => {
+    expect(() => decodeCreateAlert({ message: '' })).toThrowErrorMatchingInlineSnapshot(
       `"[message]: must be populated with a value other than just whitespace"`
     );
   });

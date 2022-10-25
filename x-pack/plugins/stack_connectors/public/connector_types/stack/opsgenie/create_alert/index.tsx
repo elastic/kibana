@@ -10,6 +10,7 @@ import {
   ActionParamsProps,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
+  SectionLoading,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   EuiErrorBoundary,
@@ -19,7 +20,6 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import { SectionLoading } from '@kbn/triggers-actions-ui-plugin/public/application/components/section_loading';
 import type {
   OpsgenieActionParams,
   OpsgenieCreateAlertParams,

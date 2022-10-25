@@ -97,3 +97,10 @@ export const USER_FIELD_LABEL = i18n.translate(
     defaultMessage: 'User',
   }
 );
+
+export const SOURCE_FIELD_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.sourceLabel',
+  {
+    defaultMessage: 'Source',
+  }
+);

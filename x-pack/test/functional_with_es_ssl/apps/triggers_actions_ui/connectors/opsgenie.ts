@@ -152,7 +152,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         beforeEach(async () => {
-          browser.refresh();
           await testSubjects.click(`edit${connectorId}`);
           await testSubjects.click('testConnectorTab');
         });
@@ -173,6 +172,105 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             'closeAlert'
           );
           expect(await testSubjects.getAttribute('aliasInput', 'value')).to.be('new alias');
+        });
+
+        it('should not preserve the message when switching to close alert and back to create alert', async () => {
+          await testSubjects.setValue('messageInput', 'a message');
+          await testSubjects.selectValue('opsgenie-subActionSelect', 'closeAlert');
+
+          await testSubjects.missingOrFail('messageInput');
+          await retry.waitFor('message input to be displayed', async () => {
+            await testSubjects.selectValue('opsgenie-subActionSelect', 'createAlert');
+            return await testSubjects.exists('messageInput');
+          });
+
+          expect(await testSubjects.getAttribute('messageInput', 'value')).to.be('');
+        });
+
+        describe('createAlert', () => {
+          it('should show the additional options for creating an alert when clicking more options', async () => {
+            await testSubjects.click('opsgenie-display-more-options');
+
+            await testSubjects.existOrFail('entityInput');
+            await testSubjects.existOrFail('sourceInput');
+            await testSubjects.existOrFail('userInput');
+            await testSubjects.existOrFail('noteTextArea');
+          });
+
+          it('should show and then hide the additional form options for creating an alert when clicking the button twice', async () => {
+            await testSubjects.click('opsgenie-display-more-options');
+
+            await testSubjects.existOrFail('entityInput');
+
+            await testSubjects.click('opsgenie-display-more-options');
+            await testSubjects.missingOrFail('entityInput');
+          });
+
+          it('should populate the json editor with the message, description, and alias', async () => {
+            await testSubjects.setValue('messageInput', 'a message');
+            await testSubjects.setValue('descriptionTextArea', 'a description');
+            await testSubjects.setValue('aliasInput', 'an alias');
+            await testSubjects.setValue('opsgenie-prioritySelect', 'P5');
+            await testSubjects.setValue('opsgenie-tags', 'a tag');
+
+            await testSubjects.click('opsgenie-show-json-editor-toggle');
+
+            const parsedValue = await actions.opsgenie.getObjFromJsonEditor();
+            expect(parsedValue).to.eql({
+              message: 'a message',
+              description: 'a description',
+              alias: 'an alias',
+              priority: 'P5',
+              tags: ['a tag'],
+            });
+          });
+
+          it('should populate the form with the values from the json editor', async () => {
+            await testSubjects.click('opsgenie-show-json-editor-toggle');
+
+            await actions.opsgenie.setJsonEditor({
+              message: 'a message',
+              description: 'a description',
+              alias: 'an alias',
+              priority: 'P3',
+              tags: ['tag1'],
+            });
+            await testSubjects.click('opsgenie-show-json-editor-toggle');
+
+            expect(await testSubjects.getAttribute('messageInput', 'value')).to.be('a message');
+            expect(await testSubjects.getAttribute('descriptionTextArea', 'value')).to.be(
+              'a description'
+            );
+            expect(await testSubjects.getAttribute('aliasInput', 'value')).to.be('an alias');
+            expect(await testSubjects.getAttribute('opsgenie-prioritySelect', 'value')).to.eql(
+              'P3'
+            );
+            expect(await (await testSubjects.find('opsgenie-tags')).getVisibleText()).to.eql(
+              'tag1'
+            );
+          });
+        });
+
+        describe('closeAlert', () => {
+          it('should show the additional options for closing an alert when clicking more options', async () => {
+            await testSubjects.selectValue('opsgenie-subActionSelect', 'closeAlert');
+
+            await testSubjects.click('opsgenie-display-more-options');
+
+            await testSubjects.existOrFail('sourceInput');
+            await testSubjects.existOrFail('userInput');
+          });
+
+          it('should show and then hide the additional form options for closing an alert when clicking the button twice', async () => {
+            await testSubjects.selectValue('opsgenie-subActionSelect', 'closeAlert');
+
+            await testSubjects.click('opsgenie-display-more-options');
+
+            await testSubjects.existOrFail('sourceInput');
+
+            await testSubjects.click('opsgenie-display-more-options');
+            await testSubjects.missingOrFail('sourceInput');
+          });
         });
       });
     });

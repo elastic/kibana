@@ -80,6 +80,7 @@ export {
   SimpleConnectorForm,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
+  SectionLoading,
 } from './application/components';
 
 export {
