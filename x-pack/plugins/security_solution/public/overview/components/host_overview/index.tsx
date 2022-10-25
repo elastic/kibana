@@ -263,7 +263,6 @@ export const HostOverview = React.memo<HostSummaryProps>(
       ],
       [contextID, data, firstColumn, getDefaultRenderer, isDraggable]
     );
-
     return (
       <>
         <InspectButtonContainer>
@@ -304,6 +303,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             </EuiFlexItem>
           </HostRiskOverviewWrapper>
         )}
+        
         {data && data.endpoint != null ? (
           <>
             <EuiHorizontalRule />
