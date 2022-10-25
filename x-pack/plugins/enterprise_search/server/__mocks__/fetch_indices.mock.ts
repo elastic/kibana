@@ -67,6 +67,20 @@ export const mockMultiIndexResponse = {
       'search-alias-search-prefixed-regular-index': {},
     },
   },
+  '.ent-search-engine-documents-12345': {
+    aliases: {
+      'alias-.ent-search-engine-documents-12345': {},
+      'search-alias-.ent-search-engine-documents-12345': {},
+    },
+    settings: { index: { hidden: 'true' } },
+  },
+  'search-prefixed-.ent-search-engine-documents-12345': {
+    aliases: {
+      'alias-search-prefixed-.ent-search-engine-documents-12345': {},
+      'search-alias-search-prefixed-.ent-search-engine-documents-12345': {},
+    },
+    settings: { index: { hidden: 'true' } },
+  },
 };
 
 export const mockMultiStatsResponse: {
@@ -109,6 +123,24 @@ export const mockMultiStatsResponse: {
     'search-prefixed-regular-index': {
       ...mockSingleIndexStatsResponse.indices['search-regular-index'],
     },
+    '.ent-search-engine-documents-12345': {
+      ...mockSingleIndexStatsResponse.indices['search-regular-index'],
+    },
+    'alias-.ent-search-engine-documents-12345': {
+      ...mockSingleIndexStatsResponse.indices['search-regular-index'],
+    },
+    'search-alias-.ent-search-engine-documents-12345': {
+      ...mockSingleIndexStatsResponse.indices['search-regular-index'],
+    },
+    'search-prefixed-.ent-search-engine-documents-12345': {
+      ...mockSingleIndexStatsResponse.indices['search-regular-index'],
+    },
+    'alias-search-prefixed-.ent-search-engine-documents-12345': {
+      ...mockSingleIndexStatsResponse.indices['search-regular-index'],
+    },
+    'search-alias-search-prefixed-.ent-search-engine-documents-12345': {
+      ...mockSingleIndexStatsResponse.indices['search-regular-index'],
+    },
   },
 };
 
@@ -125,7 +157,7 @@ export const getIndexReturnValue = (indexName: string) => {
     alias: indexName.startsWith('alias') || indexName.startsWith('search-alias'),
     count: 100,
     name: indexName,
-    hidden: indexName.includes('hidden'),
+    hidden: indexName.includes('hidden') || indexName.includes('.ent-search-engine-documents'),
     privileges: { manage: true, read: true },
     total: {
       ...mockMultiStatsResponse.indices[indexName].total,

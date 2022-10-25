@@ -116,12 +116,16 @@ describe('getIndexData util function', () => {
         'regular-index',
         'search-prefixed-hidden-index',
         'search-prefixed-regular-index',
+        '.ent-search-engine-documents-12345',
+        'search-prefixed-.ent-search-engine-documents-12345',
       ],
       indicesNames: [
         'hidden-index',
         'regular-index',
         'search-prefixed-hidden-index',
         'search-prefixed-regular-index',
+        '.ent-search-engine-documents-12345',
+        'search-prefixed-.ent-search-engine-documents-12345',
       ],
     });
   });
@@ -164,21 +168,29 @@ describe('getIndexData util function', () => {
         'search-prefixed-regular-index',
         'alias-search-prefixed-regular-index',
         'search-alias-search-prefixed-regular-index',
+        '.ent-search-engine-documents-12345',
+        'alias-.ent-search-engine-documents-12345',
+        'search-alias-.ent-search-engine-documents-12345',
+        'search-prefixed-.ent-search-engine-documents-12345',
+        'alias-search-prefixed-.ent-search-engine-documents-12345',
+        'search-alias-search-prefixed-.ent-search-engine-documents-12345',
       ],
       indicesNames: [
         'hidden-index',
         'regular-index',
         'search-prefixed-hidden-index',
         'search-prefixed-regular-index',
+        '.ent-search-engine-documents-12345',
+        'search-prefixed-.ent-search-engine-documents-12345',
       ],
     });
   });
 
   // This is a happy path tests for a case where we set all parameter on route
   // There are other possible cases where if you set includeAliases to false and still
-  // pass a search- pattern. you will get some weird results back. It won't be false but
+  //  pass a 'search-' pattern and '.ent-search-engine-documents'. you will get some weird results back. It won't be false but
   // useless. These will go away on the next iterations we have.
-  it('returns non-hidden and alwaysShowSearchPattern matching indices', async () => {
+  it('returns non-hidden and alwaysShowPattern matching indices ', async () => {
     mockClient.asCurrentUser.indices.get.mockImplementationOnce(() => {
       return mockMultiIndexResponse;
     });
@@ -189,7 +201,7 @@ describe('getIndexData util function', () => {
       ['hidden', 'all'],
       false,
       true,
-      'search-'
+      { alias_pattern: 'search-', index_pattern: '.ent-search-engine-documents' }
     );
 
     expect(mockClient.asCurrentUser.indices.get).toHaveBeenCalledWith({
@@ -206,6 +218,8 @@ describe('getIndexData util function', () => {
         'regular-index',
         'search-prefixed-hidden-index',
         'search-prefixed-regular-index',
+        '.ent-search-engine-documents-12345',
+        'search-prefixed-.ent-search-engine-documents-12345',
       ],
       expandWildcards: ['hidden', 'all'],
       indexAndAliasNames: [
@@ -221,8 +235,19 @@ describe('getIndexData util function', () => {
         'search-prefixed-regular-index',
         'alias-search-prefixed-regular-index',
         'search-alias-search-prefixed-regular-index',
+        '.ent-search-engine-documents-12345',
+        'alias-.ent-search-engine-documents-12345',
+        'search-alias-.ent-search-engine-documents-12345',
+        'search-prefixed-.ent-search-engine-documents-12345',
+        'alias-search-prefixed-.ent-search-engine-documents-12345',
+        'search-alias-search-prefixed-.ent-search-engine-documents-12345',
       ],
-      indicesNames: ['regular-index', 'search-prefixed-regular-index'],
+      indicesNames: [
+        'regular-index',
+        'search-prefixed-regular-index',
+        '.ent-search-engine-documents-12345',
+        'search-prefixed-.ent-search-engine-documents-12345',
+      ],
     });
   });
 });

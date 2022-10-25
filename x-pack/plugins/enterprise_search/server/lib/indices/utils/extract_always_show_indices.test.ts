@@ -87,13 +87,13 @@ describe('expandAliases util function', () => {
     ]);
   });
 
-  it('expands only aliases that starts with alwaysShowSearchPattern', () => {
+  it('expands only aliases that starts with alwaysShowPattern', () => {
     const expandedAliasList = expandAliases(
       mockIndexName,
       mockAliases,
       mockIndex,
       mockIndicesData,
-      'search-'
+      { alias_pattern: 'search-' }
     );
 
     expect(expandedAliasList).toEqual([

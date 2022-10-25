@@ -15,6 +15,10 @@ import {
 import { Connector } from './connectors';
 import { Crawler } from './crawler';
 
+export interface AlwaysShowPattern {
+  alias_pattern?: 'search-';
+  index_pattern?: '.ent-search-engine-documents';
+}
 export interface ElasticsearchIndex {
   count: number; // Elasticsearch _count
   health?: HealthStatus;
