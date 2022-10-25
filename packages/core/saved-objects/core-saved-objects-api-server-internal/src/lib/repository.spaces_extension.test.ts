@@ -14,6 +14,7 @@ import {
   mockGetSearchDsl,
   mockCollectMultiNamespaceReferences,
   mockInternalBulkResolve,
+  mockDeleteLegacyUrlAliases,
 } from './repository.test.mock';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -54,6 +55,7 @@ import {
   findSuccess,
   setupCheckUnauthorized,
   generateIndexPatternSearchResults,
+  bulkDeleteSuccess,
 } from './repository.common.test';
 import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 
@@ -795,6 +797,77 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           await findSuccess(client, repository, { type });
           expect(mockSpacesExt.getSearchableNamespaces).toBeCalledTimes(1);
           expect(mockSpacesExt.getSearchableNamespaces).toBeCalledWith(undefined); // will resolve current space
+        });
+      });
+
+      describe('#bulkDelete', () => {
+        beforeEach(() => {
+          mockDeleteLegacyUrlAliases.mockClear();
+          mockDeleteLegacyUrlAliases.mockResolvedValue();
+        });
+
+        const obj1: SavedObjectsBulkUpdateObject = {
+          type: 'config',
+          id: '6.0.0-alpha1',
+          attributes: { title: 'Test One' },
+        };
+        const obj2: SavedObjectsBulkUpdateObject = {
+          type: MULTI_NAMESPACE_TYPE,
+          id: 'logstash-*',
+          attributes: { title: 'Test Two' },
+        };
+        const testObjs = [obj1, obj2];
+        const options = {
+          force: true,
+        };
+        const internalOptions = {
+          mockMGetResponseObjects: [
+            {
+              ...obj1,
+              initialNamespaces: undefined,
+            },
+            {
+              ...obj2,
+              initialNamespaces: [currentSpace.id, 'NS-1', 'NS-2'],
+            },
+          ],
+        };
+
+        test(`throws error if options.namespace is specified`, async () => {
+          await expect(
+            bulkDeleteSuccess(client, repository, registry, testObjs, { namespace: 'foo-bar' })
+          ).rejects.toThrowError(
+            SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
+          );
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledWith('foo-bar');
+        });
+
+        test(`supplements internal parameters with the current namespace`, async () => {
+          await bulkDeleteSuccess(client, repository, registry, testObjs, options, internalOptions);
+          expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
+          expect(mockSpacesExt.getSearchableNamespaces).not.toHaveBeenCalled();
+          expect(client.bulk).toHaveBeenCalledTimes(1);
+          expect(client.bulk).toHaveBeenCalledWith(
+            expect.objectContaining({
+              body: expect.arrayContaining([
+                expect.objectContaining({
+                  delete: expect.objectContaining({
+                    _id: `${
+                      currentSpace.expectedNamespace ? `${currentSpace.expectedNamespace}:` : ''
+                    }${obj1.type}:${obj1.id}`,
+                  }),
+                }),
+                expect.objectContaining({
+                  delete: expect.objectContaining({
+                    _id: `${obj2.type}:${obj2.id}`,
+                  }),
+                }),
+              ]),
+            }),
+            { maxRetries: 0 }
+          );
         });
       });
     });

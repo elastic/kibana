@@ -31,7 +31,7 @@ import { AuditAction, ISavedObjectsSecurityExtension } from '@kbn/core-saved-obj
 import {
   authMap,
   enforceError,
-  mapsAreEqual,
+  typeMapsAreEqual,
   setsAreEqual,
   setupCheckAuthorized,
   setupCheckUnauthorized,
@@ -544,7 +544,7 @@ describe('collectMultiNamespaceReferences', () => {
         const { typesAndSpaces: actualTypesAndSpaces } =
           mockSecurityExt.enforceAuthorization.mock.calls[0][0];
 
-        expect(mapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
+        expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
       });
 
       test(`in a non-default state`, async () => {
@@ -563,7 +563,7 @@ describe('collectMultiNamespaceReferences', () => {
         const { typesAndSpaces: actualTypesAndSpaces } =
           mockSecurityExt.enforceAuthorization.mock.calls[0][0];
 
-        expect(mapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
+        expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
       });
 
       test(`with purpose 'collectMultiNamespaceReferences'`, async () => {
@@ -629,7 +629,7 @@ describe('collectMultiNamespaceReferences', () => {
         const expectedTypesAndSpaces = new Map([[objects[0].type, new Set(['default'])]]);
         const { typesAndSpaces: actualTypesAndSpaces } =
           mockSecurityExt.enforceAuthorization.mock.calls[0][0];
-        expect(mapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
+        expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
 
         // Redact is called once per object, but an additional time for object 1 because it has legacy URL aliases in another set of spaces
         expect(mockSecurityExt.redactNamespaces).toBeCalledTimes(resultObjects.length + 1);

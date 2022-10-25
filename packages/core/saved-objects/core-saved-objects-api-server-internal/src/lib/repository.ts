@@ -1097,7 +1097,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
                 type,
                 error: errorContent(
                   SavedObjectsErrorHelpers.createBadRequestError(
-                    `Unable to delete saved object that exists in multiple namespaces, use the "force" option to delete it anyway`
+                    'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
                   )
                 ),
               },
@@ -1126,7 +1126,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     options: SavedObjectsBulkDeleteOptions = {}
   ): Promise<SavedObjectsBulkDeleteResponse> {
     const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
-    const namespace = normalizeNamespace(options.namespace);
+    const namespace = this.getCurrentNamespace(options.namespace);
     const expectedBulkGetResults = this.presortObjectsByNamespaceType(objects);
     const multiNamespaceDocsResponse = await this.preflightCheckForBulkDelete({
       expectedBulkGetResults,
@@ -1134,6 +1134,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     });
     const bulkDeleteParams: BulkDeleteParams[] = [];
 
+    // First round of filtering (Left: object doesn't exist/doesn't exist in namespace, Right: good to proceed)
     const expectedBulkDeleteMultiNamespaceDocsResults =
       this.getExpectedBulkDeleteMultiNamespaceDocsResults({
         expectedBulkGetResults,
@@ -1141,21 +1142,83 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         namespace,
         force,
       });
-    // bulk up the bulkDeleteParams
-    expectedBulkDeleteMultiNamespaceDocsResults.map((expectedResult) => {
-      if (isRight(expectedResult)) {
-        bulkDeleteParams.push({
-          delete: {
-            _id: this._serializer.generateRawId(
-              namespace,
-              expectedResult.value.type,
-              expectedResult.value.id
-            ),
-            _index: this.getIndexForType(expectedResult.value.type),
-            ...getExpectedVersionProperties(undefined),
-          },
+
+    const validObjects = expectedBulkDeleteMultiNamespaceDocsResults.filter(isRight);
+    if (validObjects.length === 0) {
+      // We only have error results; return early to avoid potentially trying authZ checks for 0 types which would result in an exception.
+      const savedObjects = expectedBulkDeleteMultiNamespaceDocsResults
+        .filter(isLeft)
+        .map((expectedResult) => {
+          return { ...expectedResult.value, success: false };
         });
+      return { statuses: [...savedObjects] };
+    }
+
+    // check auth
+    const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
+    // const getNamespaceString = (objectNamespace?: string) => objectNamespace ?? namespaceString;
+    const typesAndSpaces = new Map<string, Set<string>>();
+    const spacesToAuthorize = new Set<string>([namespaceString]); // Always check authZ for the active space
+    if (this._securityExtension) {
+      for (const { value } of validObjects) {
+        const { type, esRequestIndex: index } = value;
+        const preflightResult =
+          index !== undefined ? multiNamespaceDocsResponse?.body.docs[index] : undefined;
+
+        const spacesToEnforce = typesAndSpaces.get(type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
+        // objectNamespaces?.forEach((objectSpace) => {
+        //   const objectNamespaceString = getNamespaceString(objectSpace);
+        //   spacesToEnforce.add(objectNamespaceString);
+        //   // spacesToAuthorize.add(objectNamespaceString);
+        // });
+        // typesAndSpaces.set(type, spacesToEnforce);
+        // spacesToAuthorize.add(namespaceString);
+
+        // @ts-expect-error MultiGetHit._source is optional
+        for (const space of preflightResult?._source?.namespaces ?? []) {
+          spacesToEnforce.add(space);
+          spacesToAuthorize.add(space); // existing namespaces are included
+        }
+        typesAndSpaces.set(type, spacesToEnforce);
       }
+    }
+
+    const authorizationResult = await this._securityExtension?.checkAuthorization({
+      types: new Set(typesAndSpaces.keys()),
+      spaces: spacesToAuthorize,
+      actions: ['bulk_delete'],
+    });
+    if (authorizationResult) {
+      this._securityExtension!.enforceAuthorization({
+        typesAndSpaces,
+        action: 'bulk_delete',
+        typeMap: authorizationResult.typeMap,
+        auditCallback: (error) => {
+          for (const { value } of validObjects) {
+            this._securityExtension!.addAuditEvent({
+              action: AuditAction.DELETE,
+              savedObject: { type: value.type, id: value.id },
+              error,
+              ...(!error && { outcome: 'unknown' }), // If authorization was a success, the outcome is unknown because the delete operation has not occurred yet
+            });
+          }
+        },
+      });
+    }
+
+    // bulk up the bulkDeleteParams
+    validObjects.map((expectedResult) => {
+      bulkDeleteParams.push({
+        delete: {
+          _id: this._serializer.generateRawId(
+            namespace,
+            expectedResult.value.type,
+            expectedResult.value.id
+          ),
+          _index: this.getIndexForType(expectedResult.value.type),
+          ...getExpectedVersionProperties(undefined),
+        },
+      });
     });
 
     const bulkDeleteResponse = bulkDeleteParams.length
@@ -1226,7 +1289,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
     });
 
     // Delete aliases if necessary, ensuring we don't have too many concurrent operations running.
-    const mapper = async ({ type, id, namespaces, deleteBehavior }: ObjectToDeleteAliasesFor) =>
+    const mapper = async ({ type, id, namespaces, deleteBehavior }: ObjectToDeleteAliasesFor) => {
       await deleteLegacyUrlAliases({
         mappings: this._mappings,
         registry: this._registry,
@@ -1239,6 +1302,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       }).catch((err) => {
         this._logger.error(`Unable to delete aliases when deleting an object: ${err.message}`);
       });
+    };
     await pMap(objectsToDeleteAliasesFor, mapper, { concurrency: MAX_CONCURRENT_ALIAS_DELETIONS });
 
     return { statuses: [...savedObjects] };
@@ -1435,9 +1499,13 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           // This ensures that the query DSL can filter only for object types that the user is authorized to access for a given space
           const { authorizedSpaces, isGloballyAuthorized } = entry.find;
           typeToNamespacesMap.set(objType, isGloballyAuthorized ? namespaces : authorizedSpaces);
+          // TODO: REMOVE console.log(`AUTHZd: ${authorizedSpaces}`);
+          // TODO: REMOVE console.log(`REPO MAP: ${JSON.stringify(typeToNamespacesMap.get(objType))}`);
         }
       }
     }
+
+    // TODO: REMOVE console.log(`getSearchDsl Mock Check: ${getSearchDsl.mock}`);
 
     const esOptions = {
       // If `pit` is provided, we drop the `index`, otherwise ES returns 400.

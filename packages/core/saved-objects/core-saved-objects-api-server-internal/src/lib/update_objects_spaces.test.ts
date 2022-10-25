@@ -30,7 +30,7 @@ import {
   authMap,
   checkAuthError,
   enforceError,
-  mapsAreEqual,
+  typeMapsAreEqual,
   setsAreEqual,
   setupCheckAuthorized,
   setupCheckUnauthorized,
@@ -804,7 +804,7 @@ describe('#updateObjectsSpaces', () => {
         const { typesAndSpaces: actualTypesAndSpaces, typeMap: actualTypeMap } =
           mockSecurityExt.enforceAuthorization.mock.calls[0][0];
 
-        expect(mapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
+        expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
         expect(actualTypeMap).toBe(authMap);
       });
 

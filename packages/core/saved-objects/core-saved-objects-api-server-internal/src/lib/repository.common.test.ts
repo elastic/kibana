@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { mockGetSearchDsl } from './repository.test.mock';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -24,6 +25,8 @@ import { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-commo
 import {
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
@@ -45,7 +48,6 @@ import {
 } from '@kbn/core-elasticsearch-client-server-mocks';
 import { DocumentMigrator } from '@kbn/core-saved-objects-migration-server-internal';
 import { SavedObjectsRepository } from './repository';
-import { mockGetSearchDsl } from './repository.test.mock';
 
 export const DEFAULT_SPACE = 'default';
 
@@ -852,9 +854,77 @@ export function setsAreEqual<T>(setA: Set<T>, setB: Set<T>) {
   return isEqual(Array(setA).sort(), Array(setB).sort());
 }
 
-export function mapsAreEqual(mapA: Map<string, Set<string>>, mapB: Map<string, Set<string>>) {
+export function typeMapsAreEqual(mapA: Map<string, Set<string>>, mapB: Map<string, Set<string>>) {
   return (
     mapA.size === mapB.size &&
     Array.from(mapA.keys()).every((key) => setsAreEqual(mapA.get(key)!, mapB.get(key)!))
   );
 }
+
+export function namespaceMapsAreEqual(
+  mapA: Map<string, string[] | undefined>,
+  mapB: Map<string, string[] | undefined>
+) {
+  return (
+    mapA.size === mapB.size &&
+    Array.from(mapA.keys()).every((key) => isEqual(mapA.get(key)?.sort(), mapB.get(key)?.sort()))
+  );
+}
+
+export const getMockEsBulkDeleteResponse = (
+  registry: SavedObjectTypeRegistry,
+  objects: TypeIdTuple[],
+  options?: SavedObjectsBulkDeleteOptions
+) =>
+  ({
+    items: objects.map(({ type, id }) => ({
+      // es response returns more fields than what we're interested in.
+      delete: {
+        _id: `${
+          registry.isSingleNamespace(type) && options?.namespace ? `${options?.namespace}:` : ''
+        }${type}:${id}`,
+        ...mockVersionProps,
+        result: 'deleted',
+      },
+    })),
+  } as estypes.BulkResponse);
+
+export const bulkDeleteSuccess = async (
+  client: ElasticsearchClientMock,
+  repository: SavedObjectsRepository,
+  registry: SavedObjectTypeRegistry,
+  objects: SavedObjectsBulkDeleteObject[] = [],
+  options?: SavedObjectsBulkDeleteOptions,
+  internalOptions: {
+    mockMGetResponseObjects?: Array<{
+      initialNamespaces: string[] | undefined;
+      type: string;
+      id: string;
+    }>;
+  } = {}
+) => {
+  const multiNamespaceObjects = objects.filter(({ type }) => {
+    return registry.isMultiNamespace(type);
+  });
+
+  const { mockMGetResponseObjects } = internalOptions;
+  if (multiNamespaceObjects.length > 0) {
+    const mockedMGetResponse = mockMGetResponseObjects
+      ? getMockMgetResponse(registry, mockMGetResponseObjects, options?.namespace)
+      : getMockMgetResponse(registry, multiNamespaceObjects, options?.namespace);
+    client.mget.mockResponseOnce(mockedMGetResponse);
+  }
+  const mockedEsBulkDeleteResponse = getMockEsBulkDeleteResponse(registry, objects, options);
+
+  client.bulk.mockResponseOnce(mockedEsBulkDeleteResponse);
+  const result = await repository.bulkDelete(objects, options);
+
+  expect(client.mget).toHaveBeenCalledTimes(multiNamespaceObjects?.length ? 1 : 0);
+  return result;
+};
+
+export const createBulkDeleteSuccessStatus = ({ type, id }: { type: string; id: string }) => ({
+  type,
+  id,
+  success: true,
+});
