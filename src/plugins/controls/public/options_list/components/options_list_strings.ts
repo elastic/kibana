@@ -41,6 +41,10 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.editor.hideExclude', {
         defaultMessage: 'Allow selections to be excluded',
       }),
+    getHideExistsQueryTitle: () =>
+      i18n.translate('controls.optionsList.editor.hideExistsQuery', {
+        defaultMessage: 'Allow exists query',
+      }),
   },
   popover: {
     getLoadingMessage: () =>

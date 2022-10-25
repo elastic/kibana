@@ -384,6 +384,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
+      exists: `${ELASTICSEARCH_DOCS}query-dsl-exists-query.html`,
       kueryQuerySyntax: `${KIBANA_DOCS}kuery-query.html`,
       luceneQuery: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html`,
       luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,

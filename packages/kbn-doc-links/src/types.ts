@@ -286,6 +286,7 @@ export interface DocLinks {
   };
   readonly query: {
     readonly eql: string;
+    readonly exists: string;
     readonly kueryQuerySyntax: string;
     readonly luceneQuery: string;
     readonly luceneQuerySyntax: string;

@@ -77,6 +77,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   const hideExclude = select((state) => state.explicitInput.hideExclude);
   const existsSelected = select((state) => state.explicitInput.existsSelected);
   const singleSelect = select((state) => state.explicitInput.singleSelect);
+  const hideExists = select((state) => state.explicitInput.hideExists);
   const title = select((state) => state.explicitInput.title);
   const exclude = select((state) => state.explicitInput.exclude);
 
@@ -182,21 +183,23 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
       >
         {!showOnlySelected && (
           <>
-            <EuiFilterSelectItem
-              data-test-subj={`optionsList-control-selection-test`}
-              checked={existsSelected ? 'on' : undefined}
-              key={'exists-option'}
-              onClick={() => {
-                dispatch(selectExists(!Boolean(existsSelected)));
-                // console.log(existsSelected);
-              }}
-            >
-              <span className="optionsList__existsFilter">
-                {exclude
-                  ? OptionsListStrings.controlAndPopover.getNegateExists()
-                  : OptionsListStrings.controlAndPopover.getExists()}
-              </span>
-            </EuiFilterSelectItem>
+            {!hideExists && (
+              <EuiFilterSelectItem
+                data-test-subj={`optionsList-control-selection-test`}
+                checked={existsSelected ? 'on' : undefined}
+                key={'exists-option'}
+                onClick={() => {
+                  dispatch(selectExists(!Boolean(existsSelected)));
+                  // console.log(existsSelected);
+                }}
+              >
+                <span className="optionsList__existsFilter">
+                  {exclude
+                    ? OptionsListStrings.controlAndPopover.getNegateExists()
+                    : OptionsListStrings.controlAndPopover.getExists()}
+                </span>
+              </EuiFilterSelectItem>
+            )}
             {availableOptions?.map((availableOption, index) => (
               <EuiFilterSelectItem
                 data-test-subj={`optionsList-control-selection-${availableOption}`}

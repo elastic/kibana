@@ -8,16 +8,25 @@
 
 import React, { useState } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiSwitch } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+  EuiSwitch,
+  EuiButtonIcon,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { OptionsListStrings } from './options_list_strings';
 import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
+import { pluginServices } from '../../services';
 
 interface OptionsListEditorState {
   singleSelect?: boolean;
   runPastTimeout?: boolean;
   hideExclude?: boolean;
+  hideExists?: boolean;
 }
 
 export const OptionsListEditorOptions = ({
@@ -28,7 +37,12 @@ export const OptionsListEditorOptions = ({
     singleSelect: initialInput?.singleSelect,
     runPastTimeout: initialInput?.runPastTimeout,
     hideExclude: initialInput?.hideExclude,
+    hideExists: initialInput?.hideExists,
   });
+
+  const {
+    documentationLinks: { existsQueryDocLink },
+  } = pluginServices.getServices();
 
   return (
     <>
@@ -52,6 +66,28 @@ export const OptionsListEditorOptions = ({
             if (initialInput?.exclude) onChange({ exclude: false });
           }}
         />
+      </EuiFormRow>
+      <EuiFormRow>
+        <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label={OptionsListStrings.editor.getHideExistsQueryTitle()}
+              checked={!state.hideExists}
+              onChange={() => {
+                onChange({ hideExists: !state.hideExists });
+                setState((s) => ({ ...s, hideExists: !s.hideExists }));
+              }}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              href={existsQueryDocLink}
+              iconType="documentation"
+              aria-label="Link to exists query documentation"
+              target="_blank"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFormRow>
       <EuiFormRow>
         <EuiFlexGroup alignItems="center" gutterSize="xs">
