@@ -47,8 +47,6 @@
 /x-pack/test/functional/apps/lens @elastic/kibana-vis-editors
 /x-pack/test/api_integration/apis/lens/ @elastic/kibana-vis-editors
 /test/functional/apps/visualize/ @elastic/kibana-vis-editors
-/src/plugins/unified_field_list/ @elastic/kibana-vis-editors
-/test/api_integration/apis/unified_field_list/ @elastic/kibana-vis-editors
 
 # Application Services
 /examples/bfetch_explorer/ @elastic/kibana-app-services
