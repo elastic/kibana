@@ -6,8 +6,6 @@ include::{kib-repo-dir}/concepts/index.asciidoc[]
 include::{kib-repo-dir}/accessibility.asciidoc[]
 :leveloffset: 0
 
-include::whats-new.asciidoc[]
-
 
 // Since 8.4, the product no longer encourages adding sample data, and the docs now have other entry points for starting to use Elastic.
 //include::{kib-repo-dir}/getting-started/quick-start-guide.asciidoc[]

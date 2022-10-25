@@ -25,6 +25,8 @@ include::user/index.asciidoc[]
 
 include::user/development.asciidoc[]
 
+include::user/whats-new.asciidoc[]
+
 include::CHANGELOG.asciidoc[]
 
 include::redirects.asciidoc[]

@@ -1,4 +1,4 @@
-= Discover, visualize, analyze
+= Explore, visualize, and analyze data
 
 *Explore.* With <<discover,*Discover*>>, you can search your data for hidden
 insights and relationships. Ask your questions, and then filter the results to just the data you want.
