@@ -71,13 +71,19 @@ export interface DiscoverStateContainer {
    * App state, the _a part of the URL
    */
   appState: DiscoverAppStateContainer;
-
+  /**
+   * Internal state that's used at several places in the UI
+   */
   internalState: InternalStateContainer;
-
+  /**
+   * State of saved search, the saved object of Discover
+   */
   savedSearchState: SavedSearchContainer;
 
   searchSessionManager: DiscoverSearchSessionManager;
-
+  /**
+   * Data fetching related state
+   **/
   dataState: DataStateContainer;
   /**
    * Set app state to with a partial new app state
@@ -87,7 +93,9 @@ export interface DiscoverStateContainer {
    * Sync state to URL, used for testing
    */
   flushToUrl: () => void;
-
+  /**
+   * functions executed by UI
+   */
   actions: {
     onOpenSavedSearch: (newSavedSearchId: string) => void;
     onUpdateQuery: (
@@ -130,8 +138,7 @@ export interface DiscoverStateContainer {
 const GLOBAL_STATE_URL_KEY = '_g';
 
 /**
- * Builds and returns appState and globalState containers and helper functions
- * Used to sync URL with UI state
+ * The central state container of Discover main, keeping appState, globalState, internalState, dataState, savedSearchState
  */
 export function getDiscoverStateContainer({
   history,
