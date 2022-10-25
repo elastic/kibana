@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,9 +21,10 @@ export interface ContextUrlParams {
 }
 
 export function ContextAppRoute() {
-  const locationState = React.useRef(
-    getScopedHistory().location.state as HistoryLocationState | undefined
-  ).current;
+  const locationState = useMemo(
+    () => getScopedHistory().location.state as HistoryLocationState | undefined,
+    []
+  );
 
   const { dataViewId: encodedDataViewId, id } = useParams<ContextUrlParams>();
   const dataViewId = decodeURIComponent(encodedDataViewId);

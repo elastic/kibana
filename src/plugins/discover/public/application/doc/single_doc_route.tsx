@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,9 +32,10 @@ export const SingleDocRoute = () => {
   const query = useMemo(() => new URLSearchParams(search), [search]);
   const id = query.get('id');
 
-  const locationState = useRef(getScopedHistory().location.state).current as
-    | HistoryLocationState
-    | undefined;
+  const locationState = useMemo(
+    () => getScopedHistory().location.state as HistoryLocationState | undefined,
+    []
+  );
 
   useExecutionContext(core.executionContext, {
     type: 'application',
@@ -45,7 +46,7 @@ export const SingleDocRoute = () => {
   useEffect(() => {
     timefilter.disableAutoRefreshSelector();
     timefilter.disableTimeRangeSelector();
-  },[timefilter]);
+  }, [timefilter]);
 
   const { dataView, error } = useDataView({
     dataViewId: decodeURIComponent(dataViewId),
