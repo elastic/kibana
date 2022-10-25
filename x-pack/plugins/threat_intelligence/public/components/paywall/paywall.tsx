@@ -52,7 +52,7 @@ export const Paywall: VFC = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <div>
-              <SubscriptionButtonEmpty subscriptionContext={subscriptionContext} fill>
+              <SubscriptionButtonEmpty subscriptionContext={subscriptionContext}>
                 <FormattedMessage
                   id="xpack.threatIntelligence.paywall.trial"
                   defaultMessage="Start a free trial"
