@@ -46,7 +46,7 @@ export const securityConfig: GuideConfig = {
     {
       id: 'alertsCases',
       title: 'Alerts and cases',
-      descriptionList: ['View and triage alerts.', 'Create cases.'],
+      descriptionList: ['View and triage alerts.', 'Create a case.'],
       location: {
         appID: 'securitySolutionUI',
         path: '/alerts',
