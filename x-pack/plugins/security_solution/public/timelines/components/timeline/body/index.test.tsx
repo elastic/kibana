@@ -29,13 +29,13 @@ import type { Props } from '.';
 import { StatefulBody } from '.';
 import type { Sort } from './sort';
 import { getDefaultControlColumn } from './control_columns';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
 import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { mount } from 'enzyme';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/components/user_privileges', () => {
@@ -130,9 +130,13 @@ jest.mock('../../fields_browser/create_field_button', () => ({
 }));
 
 describe('Body', () => {
-  const mount = useMountAppended();
-  const getWrapper = async (childrenComponent: JSX.Element) => {
-    const wrapper = mount(childrenComponent);
+  // const mount = useMountAppended();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getWrapper = async (childrenComponent: JSX.Element, store?: any) => {
+    const wrapper = mount(childrenComponent, {
+      wrappingComponent: TestProviders,
+      wrappingComponentProps: store ?? {},
+    });
     await waitFor(() => wrapper.find('[data-test-subj="suricataRefs"]').exists());
     return wrapper;
   };
@@ -167,29 +171,17 @@ describe('Body', () => {
     });
 
     test('it renders the column headers', async () => {
-      const wrapper = await getWrapper(
-        <TestProviders>
-          <StatefulBody {...props} />
-        </TestProviders>
-      );
+      const wrapper = await getWrapper(<StatefulBody {...props} />);
       expect(wrapper.find('[data-test-subj="column-headers"]').first().exists()).toEqual(true);
     });
 
     test('it renders the scroll container', async () => {
-      const wrapper = await getWrapper(
-        <TestProviders>
-          <StatefulBody {...props} />
-        </TestProviders>
-      );
+      const wrapper = await getWrapper(<StatefulBody {...props} />);
       expect(wrapper.find('[data-test-subj="timeline-body"]').first().exists()).toEqual(true);
     });
 
     test('it renders events', async () => {
-      const wrapper = await getWrapper(
-        <TestProviders>
-          <StatefulBody {...props} />
-        </TestProviders>
-      );
+      const wrapper = await getWrapper(<StatefulBody {...props} />);
       expect(wrapper.find('[data-test-subj="events"]').first().exists()).toEqual(true);
     });
 
@@ -218,12 +210,7 @@ describe('Body', () => {
         kibanaObservable,
         storage
       );
-
-      const wrapper = await getWrapper(
-        <TestProviders store={store}>
-          <StatefulBody {...props} />
-        </TestProviders>
-      );
+      const wrapper = await getWrapper(<StatefulBody {...props} />, { store });
 
       headersJustTimestamp.forEach(() => {
         expect(
@@ -253,11 +240,7 @@ describe('Body', () => {
     });
 
     test('Add a note to an event', async () => {
-      const wrapper = await getWrapper(
-        <TestProviders>
-          <StatefulBody {...props} />
-        </TestProviders>
-      );
+      const wrapper = await getWrapper(<StatefulBody {...props} />);
 
       addaNoteToEvent(wrapper, 'hello world');
       wrapper.update();
@@ -310,13 +293,9 @@ describe('Body', () => {
         storage
       );
 
-      const Proxy = (proxyProps: Props) => (
-        <TestProviders store={store}>
-          <StatefulBody {...proxyProps} />
-        </TestProviders>
-      );
+      const Proxy = (proxyProps: Props) => <StatefulBody {...proxyProps} />;
 
-      const wrapper = await getWrapper(<Proxy {...props} />);
+      const wrapper = await getWrapper(<Proxy {...props} />, { store });
 
       addaNoteToEvent(wrapper, 'hello world');
       mockDispatch.mockClear();
@@ -351,11 +330,7 @@ describe('Body', () => {
       mockDispatch.mockReset();
     });
     test('call the right reduce action to show event details for query tab', async () => {
-      const wrapper = await getWrapper(
-        <TestProviders>
-          <StatefulBody {...props} />
-        </TestProviders>
-      );
+      const wrapper = await getWrapper(<StatefulBody {...props} />);
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
@@ -376,11 +351,7 @@ describe('Body', () => {
     });
 
     test('call the right reduce action to show event details for pinned tab', async () => {
-      const wrapper = await getWrapper(
-        <TestProviders>
-          <StatefulBody {...props} tabType={TimelineTabs.pinned} />
-        </TestProviders>
-      );
+      const wrapper = await getWrapper(<StatefulBody {...props} tabType={TimelineTabs.pinned} />);
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
@@ -401,11 +372,7 @@ describe('Body', () => {
     });
 
     test('call the right reduce action to show event details for notes tab', async () => {
-      const wrapper = await getWrapper(
-        <TestProviders>
-          <StatefulBody {...props} tabType={TimelineTabs.notes} />
-        </TestProviders>
-      );
+      const wrapper = await getWrapper(<StatefulBody {...props} tabType={TimelineTabs.notes} />);
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
