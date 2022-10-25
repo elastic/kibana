@@ -1748,12 +1748,15 @@ describe('IndexPattern Data Source', () => {
         currentIndexPatternId: '1',
       };
       expect(FormBasedDatasource.removeLayer(state, 'first')).toEqual({
-        ...state,
-        layers: {
-          second: {
-            indexPatternId: '2',
-            columnOrder: [],
-            columns: {},
+        removedLayerIds: ['first'],
+        newState: {
+          ...state,
+          layers: {
+            second: {
+              indexPatternId: '2',
+              columnOrder: [],
+              columns: {},
+            },
           },
         },
       });
@@ -1777,8 +1780,74 @@ describe('IndexPattern Data Source', () => {
         currentIndexPatternId: '1',
       };
       expect(FormBasedDatasource.removeLayer(state, 'first')).toEqual({
-        ...state,
-        layers: {},
+        removedLayerIds: ['first', 'second'],
+        newState: {
+          ...state,
+          layers: {},
+        },
+      });
+    });
+  });
+
+  // FLAKY: https://github.com/elastic/kibana/issues/143908
+  // FLAKY: https://github.com/elastic/kibana/issues/143907
+  describe.skip('#clearLayer', () => {
+    it('should clear a layer', () => {
+      const state = {
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['some', 'order'],
+            columns: {
+              some: {} as GenericIndexPatternColumn,
+              columns: {} as GenericIndexPatternColumn,
+            },
+            linkToLayers: ['some-layer'],
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(FormBasedDatasource.clearLayer(state, 'first')).toEqual({
+        removedLayerIds: [],
+        newState: {
+          ...state,
+          layers: {
+            first: {
+              indexPatternId: '1',
+              columnOrder: [],
+              columns: {},
+              linkToLayers: ['some-layer'],
+            },
+          },
+        },
+      });
+    });
+
+    it('should remove linked layers', () => {
+      const state = {
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+          second: {
+            indexPatternId: '2',
+            columnOrder: [],
+            columns: {},
+            linkToLayers: ['first'],
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(FormBasedDatasource.clearLayer(state, 'first')).toEqual({
+        removedLayerIds: ['second'],
+        newState: {
+          ...state,
+          layers: {
+            first: state.layers.first,
+          },
+        },
       });
     });
   });
