@@ -153,7 +153,6 @@ export const makeLensEmbeddableFactory =
                     layers: Array<{ groups?: string[] }>;
                   }>
                 );
-                migratedLensState = commonMigratePartitionMetrics(migratedLensState);
                 return {
                   ...lensState,
                   attributes: migratedLensState,
@@ -163,7 +162,7 @@ export const makeLensEmbeddableFactory =
                 const lensState = state as unknown as SavedObject<LensDocShape850<VisState850>>;
 
                 let migratedLensState = commonMigrateIndexPatternDatasource(lensState.attributes);
-                migratedLensState = commonMigratePartitionMetrics(lensState.attributes);
+                migratedLensState = commonMigratePartitionMetrics(migratedLensState);
                 return {
                   ...lensState,
                   attributes: migratedLensState,

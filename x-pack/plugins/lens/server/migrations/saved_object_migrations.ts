@@ -555,7 +555,7 @@ const migratePartitionChartGroups: SavedObjectMigrationFn<LensDocShape840, LensD
   ),
 });
 
-const migratePartitionMetrics: SavedObjectMigrationFn<LensDocShape850, LensDocShape850> = (
+const migratePartitionMetrics: SavedObjectMigrationFn<LensDocShape860, LensDocShape860> = (
   doc
 ) => ({
   ...doc,

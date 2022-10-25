@@ -623,6 +623,7 @@ export function getFormBasedDatasource({
       }
       return [
         {
+          id: 'openLayerSettings',
           displayName: i18n.translate('xpack.lens.indexPattern.layerSettingsAction', {
             defaultMessage: 'Layer settings',
           }),

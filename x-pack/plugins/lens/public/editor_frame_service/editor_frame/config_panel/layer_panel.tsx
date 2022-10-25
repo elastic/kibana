@@ -329,7 +329,7 @@ export function LayerPanel(
               );
 
               if (action.clearLayer) {
-                onRemoveLayer();
+                onRemoveLayer(layerId);
               }
             },
           })) || []),
