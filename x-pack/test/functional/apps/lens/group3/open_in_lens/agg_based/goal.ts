@@ -79,6 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: '131.04M%',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: true,
+          showingTrendline: false,
         },
       ]);
     });
@@ -108,6 +109,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: '14.37%',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: true,
+          showingTrendline: false,
         },
       ]);
     });
@@ -149,6 +151,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: '65.05M%',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: true,
+          showingTrendline: false,
         },
         {
           title: 'osx',
@@ -157,6 +160,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: '66.14M%',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: true,
+          showingTrendline: false,
         },
         {
           title: 'win 7',
@@ -165,6 +169,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: '65.93M%',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: true,
+          showingTrendline: false,
         },
         {
           title: 'win 8',
@@ -173,6 +178,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: '65.16M%',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: true,
+          showingTrendline: false,
         },
         {
           title: 'win xp',
@@ -181,6 +187,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: '65.37M%',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: true,
+          showingTrendline: false,
         },
         {
           title: undefined,
@@ -189,6 +196,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: undefined,
           color: 'rgba(0, 0, 0, 0)',
           showingBar: true,
+          showingTrendline: false,
         },
       ]);
 

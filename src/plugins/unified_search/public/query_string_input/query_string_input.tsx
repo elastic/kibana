@@ -27,11 +27,11 @@ import {
   toSentenceCase,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { compact, debounce, isEmpty, isEqual, isFunction } from 'lodash';
+import { compact, debounce, isEmpty, isEqual, isFunction, partition } from 'lodash';
 import { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import { DataPublicPluginStart, getQueryLog } from '@kbn/data-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { type DataView, DataView as KibanaDataView } from '@kbn/data-views-plugin/public';
 import type { PersistedLog } from '@kbn/data-plugin/public';
 import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '@kbn/data-plugin/common';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -40,7 +40,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { matchPairs } from './match_pairs';
 import { toUser } from './to_user';
 import { fromUser } from './from_user';
-import { fetchIndexPatterns } from './fetch_index_patterns';
+import { type DataViewByIdOrTitle, fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '../typeahead';
@@ -64,7 +64,7 @@ export interface QueryStringInputDependencies {
 }
 
 export interface QueryStringInputProps {
-  indexPatterns: Array<DataView | string>;
+  indexPatterns: Array<DataView | string | DataViewByIdOrTitle>;
   query: Query;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -179,12 +179,15 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
   };
 
   private fetchIndexPatterns = debounce(async () => {
-    const stringPatterns = this.props.indexPatterns.filter(
-      (indexPattern) => typeof indexPattern === 'string'
-    ) as string[];
-    const objectPatterns = this.props.indexPatterns.filter(
-      (indexPattern) => typeof indexPattern !== 'string'
-    ) as DataView[];
+    const [objectPatterns = [], stringPatterns = []] = partition<
+      QueryStringInputProps['indexPatterns'][number],
+      DataView
+    >(this.props.indexPatterns || [], (indexPattern): indexPattern is DataView => {
+      return indexPattern instanceof KibanaDataView;
+    });
+    const idOrTitlePatterns = stringPatterns.map((sp) =>
+      typeof sp === 'string' ? { type: 'title', value: sp } : sp
+    ) as DataViewByIdOrTitle[];
 
     // abort the previous fetch to avoid overriding with outdated data
     // issue https://github.com/elastic/kibana/issues/80831
@@ -192,10 +195,10 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
     this.fetchIndexPatternsAbortController = new AbortController();
     const currentAbortController = this.fetchIndexPatternsAbortController;
 
-    const objectPatternsFromStrings = (await fetchIndexPatterns(
+    const objectPatternsFromStrings = await fetchIndexPatterns(
       this.props.deps.data.indexPatterns,
-      stringPatterns
-    )) as DataView[];
+      idOrTitlePatterns
+    );
 
     if (!currentAbortController.signal.aborted) {
       this.setState({

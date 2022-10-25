@@ -47,7 +47,7 @@ interface Props {
   basePath: IBasePath;
   canReadAlerts: boolean;
   canSaveAlerts: boolean;
-  canReadAnomalies: boolean;
+  canReadMlJobs: boolean;
   includeTransactionDuration: boolean;
 }
 
@@ -55,7 +55,7 @@ export function AlertingPopoverAndFlyout({
   basePath,
   canSaveAlerts,
   canReadAlerts,
-  canReadAnomalies,
+  canReadMlJobs,
   includeTransactionDuration,
 }: Props) {
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -87,7 +87,7 @@ export function AlertingPopoverAndFlyout({
                 panel: CREATE_THRESHOLD_PANEL_ID,
                 'data-test-subj': 'apmAlertsMenuItemCreateThreshold',
               },
-              ...(canReadAnomalies
+              ...(canReadMlJobs
                 ? [
                     {
                       name: createAnomalyAlertAlertLabel,

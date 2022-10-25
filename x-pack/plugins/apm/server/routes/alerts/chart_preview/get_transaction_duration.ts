@@ -7,8 +7,10 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { AggregationType } from '../../../../common/alert_types';
 import {
   SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
   TRANSACTION_TYPE,
 } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
@@ -20,6 +22,11 @@ import {
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
 import { Setup } from '../../../lib/helpers/setup_request';
+import {
+  ENVIRONMENT_NOT_DEFINED,
+  getEnvironmentLabel,
+} from '../../../../common/environment_filter_values';
+import { averageOrPercentileAgg } from '../average_or_percentile_agg';
 
 export async function getTransactionDurationChartPreview({
   alertParams,
@@ -30,7 +37,7 @@ export async function getTransactionDurationChartPreview({
 }) {
   const { apmEventClient } = setup;
   const {
-    aggregationType,
+    aggregationType = AggregationType.Avg,
     environment,
     serviceName,
     transactionType,
@@ -71,15 +78,24 @@ export async function getTransactionDurationChartPreview({
         },
       },
       aggs: {
-        agg:
-          aggregationType === 'avg'
-            ? { avg: { field: transactionDurationField } }
-            : {
-                percentiles: {
-                  field: transactionDurationField,
-                  percents: [aggregationType === '95th' ? 95 : 99],
-                },
-              },
+        environment: {
+          terms: {
+            field: SERVICE_ENVIRONMENT,
+            missing: ENVIRONMENT_NOT_DEFINED.value,
+            size: 10,
+            order: {
+              [aggregationType === AggregationType.Avg
+                ? 'avgLatency'
+                : `pctLatency.${
+                    aggregationType === AggregationType.P95 ? 95 : 99
+                  }`]: 'desc',
+            } as Record<string, 'desc'>,
+          },
+          aggs: averageOrPercentileAgg({
+            aggregationType,
+            transactionDurationField,
+          }),
+        },
       },
     },
   };
@@ -98,16 +114,29 @@ export async function getTransactionDurationChartPreview({
     return [];
   }
 
-  return resp.aggregations.timeseries.buckets.map((bucket) => {
-    const percentilesKey = aggregationType === '95th' ? '95.0' : '99.0';
-    const x = bucket.key;
-    const y =
-      aggregationType === 'avg'
-        ? (bucket.agg as { value: number | null }).value
-        : (bucket.agg as { values: Record<string, number | null> }).values[
-            percentilesKey
-          ];
+  const environmentDataMap = resp.aggregations.timeseries.buckets.reduce(
+    (acc, bucket) => {
+      const x = bucket.key;
+      bucket.environment.buckets.forEach((environmentBucket) => {
+        const env = environmentBucket.key as string;
+        const y =
+          'avgLatency' in environmentBucket
+            ? environmentBucket.avgLatency.value
+            : environmentBucket.pctLatency.values[0].value;
+        if (acc[env]) {
+          acc[env].push({ x, y });
+        } else {
+          acc[env] = [{ x, y }];
+        }
+      });
 
-    return { x, y };
-  });
+      return acc;
+    },
+    {} as Record<string, Array<{ x: number; y: number | null }>>
+  );
+
+  return Object.keys(environmentDataMap).map((env) => ({
+    name: getEnvironmentLabel(env),
+    data: environmentDataMap[env],
+  }));
 }

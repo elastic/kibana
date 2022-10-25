@@ -28,27 +28,23 @@ import { getTimeZone } from '../../shared/charts/helper/timezone';
 
 interface ChartPreviewProps {
   yTickFormat?: TickFormatter;
-  data?: Coordinate[];
   threshold: number;
   uiSettings?: IUiSettingsClient;
+  series: Array<{ name?: string; data: Coordinate[] }>;
 }
 
 export function ChartPreview({
-  data = [],
   yTickFormat,
   threshold,
   uiSettings,
+  series,
 }: ChartPreviewProps) {
   const theme = useTheme();
   const thresholdOpacity = 0.3;
-  const timestamps = data.map((d) => d.x);
+  const timestamps = series.flatMap(({ data }) => data.map(({ x }) => x));
   const xMin = Math.min(...timestamps);
   const xMax = Math.max(...timestamps);
   const xFormatter = niceTimeFormatter([xMin, xMax]);
-
-  // Make the maximum Y value either the actual max or 20% more than the threshold
-  const values = data.map((d) => d.y ?? 0);
-  const yMax = Math.max(...values, threshold * 1.2);
 
   const style = {
     fill: theme.eui.euiColorVis2,
@@ -72,12 +68,24 @@ export function ChartPreview({
   ];
 
   const timeZone = getTimeZone(uiSettings);
+  const legendSize = Math.ceil(series.length / 2) * 30;
+  const chartSize = 150;
 
   return (
     <>
       <EuiSpacer size="m" />
-      <Chart size={{ height: 150 }} data-test-subj="ChartPreview">
-        <Settings tooltip="none" />
+      <Chart
+        size={{
+          height: series.length > 1 ? chartSize + legendSize : chartSize,
+        }}
+        data-test-subj="ChartPreview"
+      >
+        <Settings
+          tooltip="none"
+          showLegend={series.length > 1}
+          legendPosition={'bottom'}
+          legendSize={legendSize}
+        />
         <LineAnnotation
           dataValues={[{ dataValue: threshold }]}
           domainType={AnnotationDomainType.YDomain}
@@ -102,18 +110,20 @@ export function ChartPreview({
           position={Position.Left}
           tickFormat={yTickFormat}
           ticks={5}
-          domain={{ max: yMax, min: NaN }}
         />
-        <BarSeries
-          timeZone={timeZone}
-          color={theme.eui.euiColorVis1}
-          data={data}
-          id="chart_preview_bar_series"
-          xAccessor="x"
-          xScaleType={ScaleType.Time}
-          yAccessors={['y']}
-          yScaleType={ScaleType.Linear}
-        />
+        {series.map(({ name, data }, index) => (
+          <BarSeries
+            key={index}
+            timeZone={timeZone}
+            data={data}
+            id={`chart_preview_bar_series_${name || index}`}
+            name={name}
+            xAccessor="x"
+            xScaleType={ScaleType.Time}
+            yAccessors={['y']}
+            yScaleType={ScaleType.Linear}
+          />
+        ))}
       </Chart>
     </>
   );

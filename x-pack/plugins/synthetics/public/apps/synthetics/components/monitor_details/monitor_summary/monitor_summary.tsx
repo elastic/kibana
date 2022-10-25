@@ -38,9 +38,9 @@ export const MonitorSummary = () => {
 
   return (
     <>
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={1}>
-          <EuiPanel>
+          <EuiPanel hasShadow={false} hasBorder>
             <EuiTitle size="xs">
               <h3>{MONITOR_DETAILS_LABEL}</h3>
             </EuiTitle>
@@ -48,7 +48,7 @@ export const MonitorSummary = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <EuiPanel css={{ padding: euiTheme.size.s, height: 158 }}>
+          <EuiPanel hasShadow={false} hasBorder paddingSize="s" css={{ height: 158 }}>
             <EuiTitle size="xs">
               <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{LAST_30DAYS_LABEL}</h3>
             </EuiTitle>
@@ -73,10 +73,10 @@ export const MonitorSummary = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="m">
             <EuiFlexItem>
-              <EuiPanel>
+              <EuiPanel hasShadow={false} hasBorder>
                 <EuiFlexGroup alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xs">
@@ -95,10 +95,10 @@ export const MonitorSummary = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="l" />
-      {/* <EuiPanel style={{ height: 100 }}>/!* TODO: Add status panel*!/</EuiPanel> */}
       {/* <EuiSpacer size="l" /> */}
-      <EuiFlexGroup>
+      {/* <EuiPanel style={{ height: 100 }}>/!* TODO: Add status panel*!/</EuiPanel> */}
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="m">
         <EuiFlexItem>
           <LastTestRun />
         </EuiFlexItem>
@@ -106,7 +106,7 @@ export const MonitorSummary = () => {
           <StepDurationPanel />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       <LastTenTestRuns />
     </>
   );
