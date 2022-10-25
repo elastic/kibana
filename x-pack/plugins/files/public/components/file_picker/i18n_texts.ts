@@ -34,6 +34,9 @@ export const i18nTexts = {
   searchFieldPlaceholder: i18n.translate('xpack.files.filePicker.searchFieldPlaceholder', {
     defaultMessage: 'my-file-*',
   }),
+  searchFieldLabel: i18n.translate('xpack.files.filePicker.searchFieldLabel', {
+    defaultMessage: 'Search for a file by name',
+  }),
   emptyFileGridPrompt: i18n.translate('xpack.files.filePicker.emptyGridPrompt', {
     defaultMessage: 'No files matched filter',
   }),

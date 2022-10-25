@@ -15,5 +15,12 @@ export const Pagination: FunctionComponent = () => {
   const { state } = useFilePickerContext();
   const page = useBehaviorSubject(state.currentPage$);
   const pageCount = useBehaviorSubject(state.totalPages$);
-  return <EuiPagination onPageClick={state.setPage} pageCount={pageCount} activePage={page} />;
+  const isUploading = useBehaviorSubject(state.isUploading$);
+  return (
+    <EuiPagination
+      onPageClick={isUploading ? state.setPage : () => {}}
+      pageCount={pageCount}
+      activePage={page}
+    />
+  );
 };
