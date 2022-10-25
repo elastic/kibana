@@ -478,8 +478,8 @@ export class Server {
 
     // @ts-expect-error
     global.serverStartupBreakdown.start['report-kibana'] = performance.now() - global.initTime;
-    // @ts-expect-error
     this.log.info(
+      // @ts-expect-error
       'SERVER STARTUP TIMING ' + JSON.stringify(global.serverStartupBreakdown, null, 2)
     );
     return this.coreStart;
