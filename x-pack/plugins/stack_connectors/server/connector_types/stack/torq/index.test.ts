@@ -9,9 +9,7 @@ import { Logger } from '@kbn/core/server';
 
 import axios from 'axios';
 import {
-  ActionParamsType,
   ActionTypeConfigType,
-  ActionTypeSecretsType,
   getActionType,
   TorqActionType,
 } from '.';
@@ -23,8 +21,6 @@ import { Services } from '@kbn/actions-plugin/server/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-
-const ACTION_TYPE_ID = '.torq';
 
 jest.mock('axios');
 jest.mock('../../../../../actions/server/lib/axios_utils', () => {
@@ -47,7 +43,7 @@ const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
 beforeAll(() => {
-  actionType = getActionType({ logger: mockedLogger });
+  actionType = getActionType();
   configurationUtilities = actionsConfigMock.create();
 });
 
@@ -117,9 +113,7 @@ describe('config validation', () => {
   });
 
   test("config validation returns an error if the specified URL isn't added to allowedHosts", () => {
-    actionType = getActionType({
-      logger: mockedLogger,
-    });
+    actionType = getActionType();
 
     const configUtils = {
       ...actionsConfigMock.create(),
@@ -155,9 +149,7 @@ describe('params validation', () => {
 describe('execute Torq action', () => {
   beforeAll(() => {
     requestMock.mockReset();
-    actionType = getActionType({
-      logger: mockedLogger,
-    });
+    actionType = getActionType();
   });
 
   beforeEach(() => {
@@ -182,6 +174,7 @@ describe('execute Torq action', () => {
       secrets: { token: '1234' },
       params: { body: 'some data' },
       configurationUtilities: configurationUtilities,
+      logger: mockedLogger,
     });
 
     delete requestMock.mock.calls[0][0].configurationUtilities;

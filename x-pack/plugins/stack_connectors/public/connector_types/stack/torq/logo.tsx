@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { LogoProps } from '../types';
+import { LogoProps } from '../../types';
 
 const Logo = (props: LogoProps) => {
   return (
