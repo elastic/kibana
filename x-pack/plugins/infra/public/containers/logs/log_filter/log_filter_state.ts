@@ -63,9 +63,7 @@ export const useLogFilterState = ({ dataView }: { dataView: DataViewBase }) => {
 
   const kibanaQuerySettings = useKibanaQuerySettings();
 
-  const [logFilterState, setLogFilterState] = useState<ILogFilterState>(() => {
-    return INITIAL_LOG_FILTER_STATE;
-  });
+  const [logFilterState, setLogFilterState] = useState<ILogFilterState>(INITIAL_LOG_FILTER_STATE);
 
   useEffect(() => {
     const handleValidationError = (error: Error) => {
