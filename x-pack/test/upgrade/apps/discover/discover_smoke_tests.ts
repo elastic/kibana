@@ -34,41 +34,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await PageObjects.discover.selectIndexPattern(name);
             await PageObjects.discover.waitUntilSearchingHasFinished();
             if (timefield) {
-              await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
+              await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
               await PageObjects.discover.waitUntilSearchingHasFinished();
             }
           });
           it('shows hit count greater than zero', async () => {
-            const hitCount = await PageObjects.discover.getHitCountInt();
-            if (hits === '') {
-              expect(hitCount).to.be.greaterThan(0);
-            } else {
-              expect(hitCount).to.be.equal(hits);
-            }
-          });
-          it('shows table rows not empty', async () => {
-            const tableRows = await PageObjects.discover.getDocTableRows();
-            expect(tableRows.length).to.be.greaterThan(0);
-          });
-        });
-      });
-
-      discoverTests.forEach(({ name, timefield, hits }) => {
-        describe('space: ' + space + ', name: ' + name, () => {
-          before(async () => {
-            await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
-              basePath,
-            });
-            await PageObjects.header.waitUntilLoadingHasFinished();
-            await PageObjects.home.launchSampleDiscover(name);
-            await PageObjects.header.waitUntilLoadingHasFinished();
-            if (timefield) {
-              await PageObjects.timePicker.setCommonlyUsedTime('Last_1 year');
-              await PageObjects.discover.waitUntilSearchingHasFinished();
-            }
-          });
-          it('shows hit count greater than zero', async () => {
-            const hitCount = await PageObjects.discover.getHitCountInt();
+            const hitCount = await PageObjects.discover.getHitCount();
             if (hits === '') {
               expect(hitCount).to.be.greaterThan(0);
             } else {
