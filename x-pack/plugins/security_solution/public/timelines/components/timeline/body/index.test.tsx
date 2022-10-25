@@ -18,7 +18,6 @@ import {
   kibanaObservable,
   mockGlobalState,
   mockTimelineData,
-  mockTimelineModel,
   SUB_PLUGINS_REDUCER,
 } from '../../../../common/mock';
 import { TestProviders } from '../../../../common/mock/test_providers';
@@ -36,6 +35,7 @@ import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
 import { tGridReducer } from '@kbn/timelines-plugin/public';
 import { mount } from 'enzyme';
+import type { UseFieldBrowserOptionsProps } from '../../fields_browser';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/components/user_privileges', () => {
@@ -48,6 +48,11 @@ jest.mock('../../../../common/components/user_privileges', () => {
     }),
   };
 });
+
+const mockUseFieldBrowserOptions = jest.fn();
+jest.mock('../../fields_browser', () => ({
+  useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
+}));
 
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
@@ -67,6 +72,7 @@ jest.mock('../../../../common/lib/kibana', () => {
         data: {
           search: jest.fn(),
           query: jest.fn(),
+          dataViews: jest.fn(),
         },
         uiSettings: {
           get: jest.fn(),
@@ -107,11 +113,6 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-
-jest.mock('../../../../common/hooks/use_selector', () => ({
-  useShallowEqualSelector: () => mockTimelineModel,
-  useDeepEqualSelector: () => mockTimelineModel,
-}));
 
 jest.mock('../../../../common/components/link_to');
 
@@ -197,7 +198,7 @@ describe('Body', () => {
   const props: Props = {
     activePage: 0,
     browserFields: mockBrowserFields,
-    data: mockTimelineData,
+    data: [mockTimelineData[0]],
     id: TimelineId.test,
     refetch: mockRefetch,
     renderCellValue: DefaultCellRenderer,
