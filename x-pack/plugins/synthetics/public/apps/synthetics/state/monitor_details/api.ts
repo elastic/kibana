@@ -24,15 +24,16 @@ export interface QueryParams {
 export const fetchMonitorRecentPings = async ({
   monitorId,
   locationId,
+  size = 10,
 }: {
   monitorId: string;
   locationId: string;
+  size?: number;
 }): Promise<PingsResponse> => {
   const from = new Date(0).toISOString();
   const to = new Date().toISOString();
   const locations = JSON.stringify([locationId]);
   const sort = 'desc';
-  const size = 10;
 
   return await apiService.get(
     SYNTHETICS_API_URLS.PINGS,

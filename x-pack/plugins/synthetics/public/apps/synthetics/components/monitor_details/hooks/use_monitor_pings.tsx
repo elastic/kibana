@@ -12,7 +12,11 @@ import { useSelectedMonitor } from './use_selected_monitor';
 import { useSelectedLocation } from './use_selected_location';
 import { getMonitorRecentPingsAction, selectMonitorPingsMetadata } from '../../../state';
 
-export const useMonitorPings = () => {
+interface UseMonitorPingsProps {
+  pageSize?: number;
+}
+
+export const useMonitorPings = (props?: UseMonitorPingsProps) => {
   const dispatch = useDispatch();
 
   const { monitor } = useSelectedMonitor();
@@ -23,9 +27,15 @@ export const useMonitorPings = () => {
 
   useEffect(() => {
     if (monitorId && locationLabel) {
-      dispatch(getMonitorRecentPingsAction.get({ monitorId, locationId: locationLabel }));
+      dispatch(
+        getMonitorRecentPingsAction.get({
+          monitorId,
+          locationId: locationLabel,
+          size: props?.pageSize,
+        })
+      );
     }
-  }, [dispatch, monitorId, locationLabel]);
+  }, [dispatch, monitorId, locationLabel, props?.pageSize]);
 
   const { total, data: pings } = useSelector(selectMonitorPingsMetadata);
 

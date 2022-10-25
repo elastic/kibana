@@ -53,7 +53,7 @@ export const TestRunsTable = ({ paginable = true }: TestRunsTableProps) => {
 
   const [sortField, setSortField] = useState<SortableField>('timestamp');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const { pings, total } = useMonitorPings();
+  const { pings, total } = useMonitorPings({ pageSize: page.size });
   // const pings = useSelector(selectMonitorRecentPings);
   const sortedPings = useMemo(() => {
     return sortPings(pings, sortField, sortDirection);
