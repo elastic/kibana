@@ -221,6 +221,10 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.getVisibleText('discoverQueryHits');
   }
 
+  public async getHitCountInt() {
+    return parseInt(await this.getHitCount(), 10);
+  }
+
   public async getDocHeader() {
     const table = await this.getDocTable();
     const docHeader = await table.getHeaders();
