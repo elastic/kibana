@@ -8,21 +8,54 @@
 import React from 'react';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SnapshotNode } from '../../../../../common/http_api';
 import { HostsTableColumns } from './hosts_table_columns';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
 import { useHostTable } from '../hooks/use_host_table';
+import { useSnapshot } from '../../inventory_view/hooks/use_snaphot';
+import type { SnapshotMetricType } from '../../../../../common/inventory_models/types';
+import type { InfraTimerangeInput } from '../../../../../common/http_api';
+import { useUnifiedSearchContext } from '../hooks/use_unified_search';
+import { useSourceContext } from '../../../../containers/metrics_source';
 
-interface Props {
-  loading: boolean;
-  nodes: SnapshotNode[];
-  reload: () => Promise<unknown>;
-}
+export const HostsTable = () => {
+  const { sourceId } = useSourceContext();
+  const { esQuery, dateRangeTimestamp } = useUnifiedSearchContext();
 
-export const HostsTable = ({ nodes, loading, reload }: Props) => {
-  const noData = nodes.length === 0;
+  const hostMetrics: Array<{ type: SnapshotMetricType }> = [
+    { type: 'rx' },
+    { type: 'tx' },
+    { type: 'memory' },
+    { type: 'cpuCores' },
+    { type: 'memoryTotal' },
+  ];
+
+  const timeRange: InfraTimerangeInput = {
+    from: dateRangeTimestamp.from,
+    to: dateRangeTimestamp.to,
+    interval: '1m',
+    ignoreLookback: true,
+  };
+
+  // Snapshot endpoint uses internally the indices stored in source.configuration.metricAlias.
+  // For the Unified Search, we create a data view, which for now will be built off source.configuration.metricAlias too
+  // if we introduce data view selection, we'll have to change this hook and the endpoint
+  const { loading, nodes, reload } = useSnapshot(
+    esQuery && JSON.stringify(esQuery),
+    hostMetrics,
+    [],
+    'host',
+    sourceId,
+    dateRangeTimestamp.to,
+    '',
+    '',
+    true,
+    timeRange
+  );
+
   const items = useHostTable(nodes);
+  const noData = items.length === 0;
+
   return (
     <>
       {loading ? (
