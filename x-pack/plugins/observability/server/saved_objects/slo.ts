@@ -42,8 +42,11 @@ export const slo: SavedObjectsType = {
       objective: {
         properties: {
           target: { type: 'float' },
+          timeslice_target: { type: 'float' },
+          timeslice_window: { type: 'keyword' },
         },
       },
+      revision: { type: 'short' },
       created_at: { type: 'date' },
       updated_at: { type: 'date' },
     },
