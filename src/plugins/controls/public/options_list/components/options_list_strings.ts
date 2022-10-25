@@ -45,6 +45,11 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.editor.hideExistsQuery', {
         defaultMessage: 'Allow exists query',
       }),
+    getHideExistsQueryTooltip: () =>
+      i18n.translate('controls.optionsList.editor.hideExistsQueryTooltip', {
+        defaultMessage:
+          'The exists query will only return documents that contain an indexed value for the given field.',
+      }),
   },
   popover: {
     getLoadingMessage: () =>

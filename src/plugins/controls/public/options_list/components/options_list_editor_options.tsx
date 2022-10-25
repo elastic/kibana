@@ -14,19 +14,22 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiSwitch,
-  EuiButtonIcon,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { OptionsListStrings } from './options_list_strings';
 import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
-import { pluginServices } from '../../services';
-
 interface OptionsListEditorState {
   singleSelect?: boolean;
   runPastTimeout?: boolean;
   hideExclude?: boolean;
   hideExists?: boolean;
+}
+
+interface SwitchProps {
+  checked: boolean;
+  onChange: (event: EuiSwitchEvent) => void;
 }
 
 export const OptionsListEditorOptions = ({
@@ -40,9 +43,29 @@ export const OptionsListEditorOptions = ({
     hideExists: initialInput?.hideExists,
   });
 
-  const {
-    documentationLinks: { existsQueryDocLink },
-  } = pluginServices.getServices();
+  const SwitchWithTooltip = ({
+    switchProps,
+    label,
+    tooltip,
+  }: {
+    switchProps: SwitchProps;
+    label: string;
+    tooltip: string;
+  }) => (
+    <EuiFlexGroup alignItems="center" gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <EuiSwitch label={label} {...switchProps} />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          margin-top: 0px !important;
+        `}
+      >
+        <EuiIconTip content={tooltip} position="right" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 
   return (
     <>
@@ -68,52 +91,31 @@ export const OptionsListEditorOptions = ({
         />
       </EuiFormRow>
       <EuiFormRow>
-        <EuiFlexGroup alignItems="center" gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              label={OptionsListStrings.editor.getHideExistsQueryTitle()}
-              checked={!state.hideExists}
-              onChange={() => {
-                onChange({ hideExists: !state.hideExists });
-                setState((s) => ({ ...s, hideExists: !s.hideExists }));
-                if (initialInput?.existsSelected) onChange({ existsSelected: false });
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              href={existsQueryDocLink}
-              iconType="documentation"
-              aria-label="Link to exists query documentation"
-              target="_blank"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <SwitchWithTooltip
+          label={OptionsListStrings.editor.getHideExistsQueryTitle()}
+          tooltip={OptionsListStrings.editor.getHideExistsQueryTooltip()}
+          switchProps={{
+            checked: !state.hideExists,
+            onChange: () => {
+              onChange({ hideExists: !state.hideExists });
+              setState((s) => ({ ...s, hideExists: !s.hideExists }));
+              if (initialInput?.existsSelected) onChange({ existsSelected: false });
+            },
+          }}
+        />
       </EuiFormRow>
       <EuiFormRow>
-        <EuiFlexGroup alignItems="center" gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
-              checked={Boolean(state.runPastTimeout)}
-              onChange={() => {
-                onChange({ runPastTimeout: !state.runPastTimeout });
-                setState((s) => ({ ...s, runPastTimeout: !s.runPastTimeout }));
-              }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              margin-top: 0px !important;
-            `}
-          >
-            <EuiIconTip
-              content={OptionsListStrings.editor.getRunPastTimeoutTooltip()}
-              position="right"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <SwitchWithTooltip
+          label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
+          tooltip={OptionsListStrings.editor.getRunPastTimeoutTooltip()}
+          switchProps={{
+            checked: Boolean(state.runPastTimeout),
+            onChange: () => {
+              onChange({ runPastTimeout: !state.runPastTimeout });
+              setState((s) => ({ ...s, runPastTimeout: !s.runPastTimeout }));
+            },
+          }}
+        />
       </EuiFormRow>
     </>
   );

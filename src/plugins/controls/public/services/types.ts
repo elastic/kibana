@@ -9,7 +9,6 @@
 import { ControlsDataViewsService } from './data_views/types';
 import { ControlsOverlaysService } from './overlays/types';
 import { ControlsDataService } from './data/types';
-import { ControlsDocumentationLinksService } from './documentation_links/types';
 import { ControlsUnifiedSearchService } from './unified_search/types';
 import { ControlsServiceType } from './controls/types';
 import { ControlsHTTPService } from './http/types';
@@ -24,7 +23,6 @@ export interface ControlsServices {
   overlays: ControlsOverlaysService;
   embeddable: ControlsEmbeddableService;
   data: ControlsDataService;
-  documentationLinks: ControlsDocumentationLinksService;
   unifiedSearch: ControlsUnifiedSearchService;
   http: ControlsHTTPService;
   settings: ControlsSettingsService;
