@@ -14,13 +14,13 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutSize,
   EuiPanel,
   EuiPopover,
   EuiTabbedContent,
   EuiEmptyPrompt,
   EuiSuperSelectOption,
   EuiButton,
+  EuiFlyoutSize,
 } from '@elastic/eui';
 
 import {
@@ -32,9 +32,12 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 // TODO: use a Delete modal from triggersActionUI when it's sharable
 import { ALERTS_FEATURE_ID, RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
+import { AnyQuery, BoolQuery } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RuleDefinitionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { alertsPageStateContainer, Provider } from '../alerts';
+import { ObservabilityAlertSearchBar } from '../../components/shared/alert_search_bar/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 import {
@@ -55,7 +58,7 @@ import { observabilityFeatureId } from '../../../common';
 import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';
 import { ObservabilityAppServices } from '../../application/types';
 
-export function RuleDetailsPage() {
+function InternalRuleDetailsPage() {
   const {
     http,
     triggersActionsUi: {
@@ -63,7 +66,7 @@ export function RuleDetailsPage() {
       ruleTypeRegistry,
       getEditAlertFlyout,
       getRuleEventLogList,
-      getAlertsStateTable,
+      getAlertsStateTable: AlertsStateTable,
       getRuleAlertsSummary,
       getRuleStatusPanel,
       getRuleDefinition,
@@ -90,6 +93,10 @@ export function RuleDetailsPage() {
   const [isPageLoading, setIsPageLoading] = useState(false);
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
+  const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
+  const ruleQuery = useRef([
+    { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
+  ] as AnyQuery[]);
 
   const NOTIFY_WHEN_OPTIONS = useRef<Array<EuiSuperSelectOption<unknown>>>([]);
   useEffect(() => {
@@ -157,26 +164,6 @@ export function RuleDetailsPage() {
       ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
       : false);
 
-  const alertStateProps = {
-    alertsTableConfigurationRegistry,
-    configurationId: observabilityFeatureId,
-    id: RULE_DETAILS_PAGE_ID,
-    flyoutSize: 's' as EuiFlyoutSize,
-    featureIds: [features] as AlertConsumers[],
-    query: {
-      bool: {
-        filter: [
-          {
-            term: {
-              'kibana.alert.rule.uuid': ruleId,
-            },
-          },
-        ],
-      },
-    },
-    showExpandToDetails: false,
-  };
-
   const tabs = [
     {
       id: EVENT_LOG_LIST_TAB,
@@ -184,10 +171,16 @@ export function RuleDetailsPage() {
         defaultMessage: 'Execution history',
       }),
       'data-test-subj': 'eventLogListTab',
-      content: getRuleEventLogList<'default'>({
-        ruleId: rule?.id,
-        ruleType,
-      } as RuleEventLogListProps),
+      content: (
+        <EuiFlexGroup style={{ minHeight: 600 }} direction={'column'}>
+          <EuiFlexItem>
+            {getRuleEventLogList<'default'>({
+              ruleId: rule?.id,
+              ruleType,
+            } as RuleEventLogListProps)}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
     },
     {
       id: ALERT_LIST_TAB,
@@ -198,7 +191,23 @@ export function RuleDetailsPage() {
       content: (
         <>
           <EuiSpacer size="m" />
-          {getAlertsStateTable(alertStateProps)}
+          <ObservabilityAlertSearchBar setEsQuery={setEsQuery} queries={ruleQuery.current} />
+          <EuiSpacer size="s" />
+          <EuiFlexGroup style={{ minHeight: 450 }} direction={'column'}>
+            <EuiFlexItem>
+              {esQuery && (
+                <AlertsStateTable
+                  alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+                  configurationId={observabilityFeatureId}
+                  id={RULE_DETAILS_PAGE_ID}
+                  flyoutSize={'s' as EuiFlyoutSize}
+                  featureIds={[features] as AlertConsumers[]}
+                  query={esQuery}
+                  showExpandToDetails={false}
+                />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </>
       ),
     },
@@ -351,5 +360,13 @@ export function RuleDetailsPage() {
       />
       {errorRule && toasts.addDanger({ title: errorRule })}
     </ObservabilityPageTemplate>
+  );
+}
+
+export function RuleDetailsPage() {
+  return (
+    <Provider value={alertsPageStateContainer}>
+      <InternalRuleDetailsPage />
+    </Provider>
   );
 }
