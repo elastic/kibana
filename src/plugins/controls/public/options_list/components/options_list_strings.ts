@@ -112,4 +112,14 @@ export const OptionsListStrings = {
         defaultMessage: 'Include or exclude selections',
       }),
   },
+  controlAndPopover: {
+    getExists: () =>
+      i18n.translate('controls.optionsList.controlAndPopover.exists', {
+        defaultMessage: 'Exists (*)',
+      }),
+    getNegateExists: () =>
+      i18n.translate('controls.optionsList.controlAndPopover.negateExists', {
+        defaultMessage: 'Does not exist (!)',
+      }),
+  },
 };

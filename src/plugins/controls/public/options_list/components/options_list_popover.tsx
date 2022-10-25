@@ -191,7 +191,11 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
                 // console.log(existsSelected);
               }}
             >
-              <span className="optionsList__existsFilter">{`Exists (*)`}</span>
+              <span className="optionsList__existsFilter">
+                {exclude
+                  ? OptionsListStrings.controlAndPopover.getNegateExists()
+                  : OptionsListStrings.controlAndPopover.getExists()}
+              </span>
             </EuiFilterSelectItem>
             {availableOptions?.map((availableOption, index) => (
               <EuiFilterSelectItem

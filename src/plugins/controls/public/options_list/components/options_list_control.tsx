@@ -83,15 +83,19 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
       validSelectionsCount: validSelections?.length,
       selectionDisplayNode: (
         <>
-          {exclude && (
-            <EuiTextColor color="danger">
-              <b>{OptionsListStrings.control.getNegate()}</b>{' '}
-            </EuiTextColor>
-          )}
           {existsSelected ? (
-            <span className="optionsList__existsFilter">{'Exists (*)'}</span>
+            <span className="optionsList__existsFilter">
+              {exclude
+                ? OptionsListStrings.controlAndPopover.getNegateExists()
+                : OptionsListStrings.controlAndPopover.getExists()}
+            </span>
           ) : (
             <>
+              {exclude && (
+                <EuiTextColor color="danger">
+                  <b>{OptionsListStrings.control.getNegate()}</b>{' '}
+                </EuiTextColor>
+              )}
               {validSelections && (
                 <span>{validSelections?.join(OptionsListStrings.control.getSeparator())}</span>
               )}
