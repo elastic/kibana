@@ -13,11 +13,12 @@ import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import { setupServer } from './test_utils';
+
 import {
   registerBulkCreateRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 

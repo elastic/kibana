@@ -10,6 +10,7 @@ import {
   MappingRuntimeFieldType,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import { InvalidTransformError } from '../../../errors';
 import { ALL_VALUE, apmTransactionErrorRateIndicatorSchema } from '../../../types/schema';
 import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo_transform_template';
 import { TransformGenerator } from '.';
@@ -27,7 +28,7 @@ const DEFAULT_GOOD_STATUS_CODES = ['2xx', '3xx', '4xx'];
 export class ApmTransactionErrorRateTransformGenerator implements TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
     if (!apmTransactionErrorRateIndicatorSchema.is(slo.indicator)) {
-      throw new Error(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
+      throw new InvalidTransformError(`Cannot handle SLO of indicator type: ${slo.indicator.type}`);
     }
 
     return getSLOTransformTemplate(
@@ -131,26 +132,6 @@ export class ApmTransactionErrorRateTransformGenerator implements TransformGener
         date_histogram: {
           field: '@timestamp',
           calendar_interval: '1m' as AggregationsCalendarInterval,
-        },
-      },
-      'slo.context.transaction.name': {
-        terms: {
-          field: 'transaction.name',
-        },
-      },
-      'slo.context.transaction.type': {
-        terms: {
-          field: 'transaction.type',
-        },
-      },
-      'slo.context.service.name': {
-        terms: {
-          field: 'service.name',
-        },
-      },
-      'slo.context.service.environment': {
-        terms: {
-          field: 'service.environment',
         },
       },
     };

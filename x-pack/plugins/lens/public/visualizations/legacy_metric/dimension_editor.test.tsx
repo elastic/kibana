@@ -24,6 +24,7 @@ import { act } from 'react-dom/test-utils';
 import { PalettePanelContainer } from '../../shared_components';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { LegacyMetricState } from '../../../common/types';
+import { DatasourcePublicAPI } from '../..';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -93,6 +94,9 @@ describe('metric dimension editor', () => {
       setState,
       paletteService: chartPluginMock.createPaletteRegistry(),
       panelRef: React.createRef(),
+      addLayer: jest.fn(),
+      removeLayer: jest.fn(),
+      datasource: {} as DatasourcePublicAPI,
     };
     // add a div to the ref
     props.panelRef.current = document.createElement('div');

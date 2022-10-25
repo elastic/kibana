@@ -19,8 +19,8 @@ import {
 import styled from 'styled-components';
 import { isEmpty, noop } from 'lodash/fp';
 
-import type { FieldConfig } from '../../common/shared_imports';
-import { Form, UseField, useForm } from '../../common/shared_imports';
+import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Form, UseField, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { Case } from '../../../common/ui/types';
 import type { ActionConnector, ConnectorTypeFields } from '../../../common/api';
 import { NONE_CONNECTOR_ID } from '../../../common/api';

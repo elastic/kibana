@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover test', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/142222
+  describe.skip('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -347,9 +348,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('resizable layout panels', () => {
       it('should allow resizing the layout panels', async () => {
         const resizeDistance = 100;
-        const topPanel = await testSubjects.find('dscResizablePanelTop');
-        const mainPanel = await testSubjects.find('dscResizablePanelMain');
-        const resizeButton = await testSubjects.find('dsc-resizable-button');
+        const topPanel = await testSubjects.find('unifiedHistogramResizablePanelTop');
+        const mainPanel = await testSubjects.find('unifiedHistogramResizablePanelMain');
+        const resizeButton = await testSubjects.find('unifiedHistogramResizableButton');
         const topPanelSize = (await topPanel.getPosition()).height;
         const mainPanelSize = (await mainPanel.getPosition()).height;
         await browser.dragAndDrop(
