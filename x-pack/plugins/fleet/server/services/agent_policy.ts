@@ -683,9 +683,8 @@ class AgentPolicyService {
     // Use internal ES client so we have permissions to write to .fleet* indices
     const esClient = appContextService.getInternalUserESClient();
     const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);
-    const defaultFleetServerHost = await getDefaultFleetServerHost(soClient);
 
-    if (!defaultOutputId || !defaultFleetServerHost) {
+    if (!defaultOutputId) {
       return;
     }
 
