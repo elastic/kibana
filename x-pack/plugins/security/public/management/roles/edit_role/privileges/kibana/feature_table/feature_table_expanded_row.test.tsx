@@ -280,8 +280,7 @@ describe('FeatureTableExpandedRow', () => {
     expect(onChange).toHaveBeenCalledWith('with_sub_features', ['read']);
   });
 
-  // Pending to be fixed as it does not work as expected
-  it.skip('require all spaces enabled and allSpacesSelected is false: option is disabled', () => {
+  it('require all spaces enabled and allSpacesSelected is false: option is disabled', () => {
     const role = createRole([
       {
         base: [],
@@ -302,7 +301,7 @@ describe('FeatureTableExpandedRow', () => {
         feature={feature}
         privilegeIndex={0}
         privilegeCalculator={calculator}
-        selectedFeaturePrivileges={['cool_toggle_1']}
+        selectedFeaturePrivileges={['minimal_all']}
         onChange={onChange}
         licenseAllowsSubFeatPrivCustomization={true}
         allSpacesSelected={false}
@@ -313,13 +312,11 @@ describe('FeatureTableExpandedRow', () => {
       findTestSubject(wrapper, 'customizeSubFeaturePrivileges').simulate('click');
     });
 
-    const object = findTestSubject(wrapper, 'mutexSubFeaturePrivilegeControl');
-
-    expect(object.hasClass('euiButtonGroup--isDisabled')).toBeTruthy();
+    const object = wrapper.find('SubFeatureForm');
+    expect(object.props()).toMatchObject({ disabled: true });
   });
 
-  // Pending to be fixed as it does not work as expected
-  it.skip('require all spaces enabled and allSpacesSelected is true: option is enabled', () => {
+  it('require all spaces enabled and allSpacesSelected is true: option is enabled', () => {
     const role = createRole([
       {
         base: [],
@@ -340,7 +337,7 @@ describe('FeatureTableExpandedRow', () => {
         feature={feature}
         privilegeIndex={0}
         privilegeCalculator={calculator}
-        selectedFeaturePrivileges={['cool_toggle_1']}
+        selectedFeaturePrivileges={['minimal_all']}
         onChange={onChange}
         licenseAllowsSubFeatPrivCustomization={true}
         allSpacesSelected={true}
@@ -351,8 +348,7 @@ describe('FeatureTableExpandedRow', () => {
       findTestSubject(wrapper, 'customizeSubFeaturePrivileges').simulate('click');
     });
 
-    const object = findTestSubject(wrapper, 'cool_toggle_1');
-
-    expect(object.hasClass('euiButtonGroup--isDisabled')).toBeFalsy();
+    const object = wrapper.find('SubFeatureForm');
+    expect(object.props()).toMatchObject({ disabled: false });
   });
 });
