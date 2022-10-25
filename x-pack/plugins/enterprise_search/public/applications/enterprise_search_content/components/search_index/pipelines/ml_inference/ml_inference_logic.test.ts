@@ -10,17 +10,18 @@ import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 import { HttpError, Status } from '../../../../../../../common/types/api';
 
 import { MappingsApiLogic } from '../../../../api/mappings/mappings_logic';
-import { CreateMlInferencePipelineApiLogic } from '../../../../api/ml_models/create_ml_inference_pipeline';
 import { MLModelsApiLogic } from '../../../../api/ml_models/ml_models_logic';
+import { CreateMlInferencePipelineApiLogic } from '../../../../api/pipelines/create_ml_inference_pipeline';
 import { SimulateMlInterfacePipelineApiLogic } from '../../../../api/pipelines/simulate_ml_inference_pipeline_processors';
 
 import {
   MLInferenceLogic,
   EMPTY_PIPELINE_CONFIGURATION,
   AddInferencePipelineSteps,
+  MLInferenceProcessorsValues,
 } from './ml_inference_logic';
 
-const DEFAULT_VALUES = {
+const DEFAULT_VALUES: MLInferenceProcessorsValues = {
   addInferencePipelineModal: {
     configuration: {
       ...EMPTY_PIPELINE_CONFIGURATION,
@@ -46,6 +47,7 @@ const DEFAULT_VALUES = {
     step: AddInferencePipelineSteps.Configuration,
   },
   createErrors: [],
+  existingInferencePipelines: [],
   formErrors: {
     modelID: 'Field is required.',
     pipelineName: 'Field is required.',
@@ -57,6 +59,8 @@ const DEFAULT_VALUES = {
   mappingData: undefined,
   mappingStatus: 0,
   mlInferencePipeline: undefined,
+  mlInferencePipelineProcessors: undefined,
+  mlInferencePipelinesData: undefined,
   mlModelsData: undefined,
   mlModelsStatus: 0,
   simulatePipelineData: undefined,
@@ -64,7 +68,7 @@ const DEFAULT_VALUES = {
   simulatePipelineResult: undefined,
   simulatePipelineStatus: 0,
   sourceFields: undefined,
-  supportedMLModels: undefined,
+  supportedMLModels: [],
 };
 
 describe('MlInferenceLogic', () => {

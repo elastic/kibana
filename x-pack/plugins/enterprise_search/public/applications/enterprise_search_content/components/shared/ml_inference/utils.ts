@@ -10,7 +10,7 @@ import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_
 
 import { SUPPORTED_PYTORCH_TASKS } from '../../../../../../common/ml_inference_pipeline';
 
-export const NLP_CONFIG_KEYS = Object.values(SUPPORTED_PYTORCH_TASKS);
+export const NLP_CONFIG_KEYS: string[] = Object.values(SUPPORTED_PYTORCH_TASKS);
 export const RECOMMENDED_FIELDS = ['body', 'body_content', 'title'];
 
 export const NLP_DISPLAY_TITLES: Record<string, string | undefined> = {
