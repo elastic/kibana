@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SubscriptionContext } from './types';
+import type { SubscriptionContext } from './types';
 
 const sourceStringRegEx = /[\w-_]+__[\w-_]+/;
 export function isValidContext(context: SubscriptionContext): boolean {

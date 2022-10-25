@@ -7,7 +7,7 @@
  */
 
 import React, { FC, useContext } from 'react';
-import { AnalyticsClient, EventTypeOpts } from '@kbn/analytics-client';
+import type { AnalyticsClient, EventTypeOpts } from '@kbn/analytics-client';
 import { EVENT_NAMES, Services, SubscriptionContext } from './types';
 
 export const SubscriptionTrackingContext = React.createContext<Services | null>(null);

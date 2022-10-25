@@ -7,17 +7,11 @@
  */
 
 import React from 'react';
-import {
-  EuiLink,
-  EuiLinkProps,
-  EuiButton,
-  EuiButtonProps,
-  EuiButtonEmpty,
-  EuiButtonEmptyProps,
-} from '@elastic/eui';
+import { EuiLink, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import type { EuiLinkProps, EuiButtonEmptyProps, EuiButtonProps } from '@elastic/eui';
 import { useGoToSubscription } from './use_go_to_subscription';
 import { useImpression } from './use_impression';
-import { SubscriptionContext } from './types';
+import type { SubscriptionContext } from './types';
 
 interface CommonProps {
   subscriptionContext: SubscriptionContext;
