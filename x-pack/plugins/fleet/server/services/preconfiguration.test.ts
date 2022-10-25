@@ -31,11 +31,13 @@ import {
 import { packagePolicyService } from './package_policy';
 import { getBundledPackages } from './epm/packages/bundled_packages';
 import type { InstallPackageParams } from './epm/packages/install';
+import { getSettings } from './settings';
 
 jest.mock('./agent_policy_update');
 jest.mock('./output');
 jest.mock('./epm/packages/bundled_packages');
 jest.mock('./epm/archive');
+jest.mock('./settings');
 
 const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
 const mockedGetBundledPackages = getBundledPackages as jest.MockedFunction<
@@ -61,6 +63,9 @@ const mockDefaultDownloadService: DownloadSource = {
   name: 'default download source host',
   host: 'http://127.0.0.1:9201',
 };
+
+const mockGetSettings = getSettings as jest.Mock;
+mockGetSettings.mockResolvedValue({ prerelease_integrations_enabled: false });
 
 function getPutPreconfiguredPackagesMock() {
   const soClient = savedObjectsClientMock.create();

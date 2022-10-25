@@ -35,6 +35,7 @@ export const SettingsSection = ({ width, fleetServerHosts }: Args) => {
           id: 'default-settings',
           fleet_server_hosts: fleetServerHosts,
           preconfigured_fields: [],
+          prerelease_integrations_enabled: false,
         }}
       />
     </div>

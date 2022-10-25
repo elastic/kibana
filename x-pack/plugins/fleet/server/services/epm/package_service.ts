@@ -46,7 +46,10 @@ export interface PackageClient {
     spaceId?: string;
   }): Promise<Installation | undefined>;
 
-  fetchFindLatestPackage(packageName: string): Promise<RegistryPackage | BundledPackage>;
+  fetchFindLatestPackage(
+    packageName: string,
+    options?: FetchFindLatestPackageOptions
+  ): Promise<RegistryPackage | BundledPackage>;
 
   getPackage(
     packageName: string,
