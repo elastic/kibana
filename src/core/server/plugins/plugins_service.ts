@@ -255,25 +255,27 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     const plugins = await firstValueFrom(plugin$.pipe(toArray()));
 
     // Register config descriptors and deprecations
-    for (const plugin of plugins) {
-      const configDescriptor = plugin.getConfigDescriptor();
-      if (configDescriptor) {
-        this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
-        if (configDescriptor.deprecations) {
-          this.coreContext.configService.addDeprecationProvider(
-            plugin.configPath,
-            configDescriptor.deprecations
-          );
+    await Promise.all(
+      plugins.map(async (plugin) => {
+        const configDescriptor = await plugin.getConfigDescriptor();
+        if (configDescriptor) {
+          this.pluginConfigDescriptors.set(plugin.name, configDescriptor);
+          if (configDescriptor.deprecations) {
+            this.coreContext.configService.addDeprecationProvider(
+              plugin.configPath,
+              configDescriptor.deprecations
+            );
+          }
+          if (configDescriptor.exposeToUsage) {
+            this.pluginConfigUsageDescriptors.set(
+              Array.isArray(plugin.configPath) ? plugin.configPath.join('.') : plugin.configPath,
+              getFlattenedObject(configDescriptor.exposeToUsage)
+            );
+          }
+          this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
         }
-        if (configDescriptor.exposeToUsage) {
-          this.pluginConfigUsageDescriptors.set(
-            Array.isArray(plugin.configPath) ? plugin.configPath.join('.') : plugin.configPath,
-            getFlattenedObject(configDescriptor.exposeToUsage)
-          );
-        }
-        this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
-      }
-    }
+      })
+    );
 
     // Validate config and handle enabled statuses.
     // NOTE: We can't do both in the same previous loop because some plugins' deprecations may affect others.

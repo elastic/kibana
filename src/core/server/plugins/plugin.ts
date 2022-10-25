@@ -149,13 +149,12 @@ export class PluginWrapper<
     this.instance = undefined;
   }
 
-  public getConfigDescriptor(): PluginConfigDescriptor | null {
+  public async getConfigDescriptor(): Promise<PluginConfigDescriptor | null> {
     if (!this.manifest.server) {
       return null;
     }
     const pluginPathServer = join(this.path, 'server');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const pluginDefinition = require(pluginPathServer);
+    const pluginDefinition = await import(pluginPathServer);
 
     if (!('config' in pluginDefinition)) {
       this.log.debug(`"${pluginPathServer}" does not export "config".`);
