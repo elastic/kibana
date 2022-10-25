@@ -13,18 +13,19 @@ import {
   termQuery,
 } from '@kbn/observability-plugin/server';
 import { euiLightVars as theme } from '@kbn/ui-theme';
-import { APMConfig } from '../../../..';
+import { APMConfig } from '../../..';
 import {
   FAAS_BILLED_DURATION,
+  FAAS_ID,
   METRICSET_NAME,
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
-import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { isFiniteNumber } from '../../../../../common/utils/is_finite_number';
-import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
-import { getMetricsDateHistogramParams } from '../../../../lib/helpers/metrics';
-import { GenericMetricsChart } from '../../fetch_and_transform_metrics';
+} from '../../../../common/elasticsearch_fieldnames';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
+import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
+import { GenericMetricsChart } from '../fetch_and_transform_metrics';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 /**
  * To calculate the compute usage we need to multiply the "system.memory.total" by "faas.billed_duration".
@@ -48,7 +49,7 @@ function calculateComputeUsageGBSeconds({
   return totalMemoryGB * faasBilledDurationSec;
 }
 
-export async function getComputeUsage({
+export async function getComputeUsageChart({
   environment,
   kuery,
   config,
@@ -56,6 +57,7 @@ export async function getComputeUsage({
   serviceName,
   start,
   end,
+  serverlessId,
 }: {
   environment: string;
   kuery: string;
@@ -64,6 +66,7 @@ export async function getComputeUsage({
   serviceName: string;
   start: number;
   end: number;
+  serverlessId?: string;
 }): Promise<GenericMetricsChart> {
   const aggs = {
     avgFaasBilledDuration: { avg: { field: FAAS_BILLED_DURATION } },
@@ -86,6 +89,7 @@ export async function getComputeUsage({
             ...kqlQuery(kuery),
             { exists: { field: FAAS_BILLED_DURATION } },
             ...termQuery(METRICSET_NAME, 'app'),
+            ...termQuery(FAAS_ID, serverlessId),
           ],
         },
       },
