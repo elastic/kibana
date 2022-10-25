@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'home', 'dashboard', 'share']);
   const testSubjects = getService('testSubjects');
   const log = getService('log');
+  const retry = getService('retry');
 
   const spaces = [
     { space: 'default', basePath: '' },
@@ -70,39 +71,51 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             if (type === 'pdf_optimize') {
               await testSubjects.click('usePrintLayout');
             }
-            const advOpt = await find.byXPath(`//button[descendant::*[text()='Advanced options']]`);
-            await advOpt.click();
-            // Workaround for: https://github.com/elastic/kibana/issues/126540
-            const isUrlTooLong = await testSubjects.exists('urlTooLongErrorMessage');
-            if (isUrlTooLong) {
-              // Save dashboard
-              await PageObjects.dashboard.switchToEditMode();
-              await PageObjects.dashboard.clickQuickSave();
-              await PageObjects.share.openShareMenuItem(link);
-              if (type === 'pdf_optimize') {
-                await testSubjects.click('usePrintLayout');
-              }
-              const advOpt2 = await find.byXPath(
+            const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
+            // if we can read the clipboard (not Chrome headless) then get the reporting URL and post it
+            // else click the reporting button and wait for the count of completed reports to increment
+            if (canReadClipboard) {
+              const advOpt = await find.byXPath(
                 `//button[descendant::*[text()='Advanced options']]`
               );
-              await advOpt2.click();
+              await advOpt.click();
+              // Workaround for: https://github.com/elastic/kibana/issues/126540
+              const isUrlTooLong = await testSubjects.exists('urlTooLongErrorMessage');
+              if (isUrlTooLong) {
+                // Save dashboard
+                await PageObjects.dashboard.switchToEditMode();
+                await PageObjects.dashboard.clickQuickSave();
+                await PageObjects.share.openShareMenuItem(link);
+                if (type === 'pdf_optimize') {
+                  await testSubjects.click('usePrintLayout');
+                }
+                const advOpt2 = await find.byXPath(
+                  `//button[descendant::*[text()='Advanced options']]`
+                );
+                await advOpt2.click();
+              }
+              const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);
+              await postUrl.click();
+              const url = await browser.getClipboardValue();
+              // Add try/catch for https://github.com/elastic/elastic-stack-testing/issues/1199
+              // Waiting for job to finish sometimes gets socket hang up error, from what I
+              // observed during debug testing the command does complete.
+              // Checking expected report count will still fail if the job did not finish.
+              try {
+                await reportingAPI.expectAllJobsToFinishSuccessfully([
+                  await reportingAPI.postJob(parse(url).pathname + '?' + parse(url).query),
+                ]);
+              } catch (e) {
+                log.debug(`Error waiting for job to finish: ${e}`);
+              }
+            } else {
+              await testSubjects.click('generateReportButton');
             }
-            const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);
-            await postUrl.click();
-            const url = await browser.getClipboardValue();
-            // Add try/catch for https://github.com/elastic/elastic-stack-testing/issues/1199
-            // Waiting for job to finish sometimes gets socket hang up error, from what I
-            // observed during debug testing the command does complete.
-            // Checking expected report count will still fail if the job did not finish.
-            try {
-              await reportingAPI.expectAllJobsToFinishSuccessfully([
-                await reportingAPI.postJob(parse(url).pathname + '?' + parse(url).query),
-              ]);
-            } catch (e) {
-              log.debug(`Error waiting for job to finish: ${e}`);
-            }
-            usage = (await usageAPI.getUsageStats()) as UsageStats;
-            reportingAPI.expectCompletedReportCount(usage, completedReportCount + 1);
+
+            await retry.tryForTime(50000, async () => {
+              usage = (await usageAPI.getUsageStats()) as UsageStats;
+              reportingAPI.expectCompletedReportCount(usage, completedReportCount + 1);
+            });
           });
         });
       });
