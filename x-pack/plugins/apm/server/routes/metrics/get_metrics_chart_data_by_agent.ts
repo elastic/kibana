@@ -5,41 +5,44 @@
  * 2.0.
  */
 
-import { isJavaAgentName } from '../../../common/agent_name';
-import { Setup } from '../../lib/helpers/setup_request';
-import { getDefaultMetricsCharts } from './by_agent/default';
 import { getJavaMetricsCharts } from './by_agent/java';
+import { getDefaultMetricsCharts } from './by_agent/default';
+import { isJavaAgentName } from '../../../common/agent_name';
 import { GenericMetricsChart } from './fetch_and_transform_metrics';
+import { APMConfig } from '../..';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getMetricsChartDataByAgent({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   serviceNodeName,
   agentName,
   start,
   end,
-  serviceRuntimeName,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   serviceNodeName?: string;
   agentName: string;
   start: number;
   end: number;
-  serviceRuntimeName?: string;
 }): Promise<GenericMetricsChart[]> {
   const options = {
     environment,
     kuery,
-    setup,
+    config,
+    apmEventClient,
     serviceName,
     start,
     end,
   };
+
   if (isJavaAgentName(agentName)) {
     return getJavaMetricsCharts({
       ...options,
