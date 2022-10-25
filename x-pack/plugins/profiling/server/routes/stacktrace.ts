@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { chunk } from 'lodash';
 import LRUCache from 'lru-cache';
 import { INDEX_EXECUTABLES, INDEX_FRAMES, INDEX_TRACES } from '../../common';
 import {
@@ -22,17 +21,18 @@ import {
   emptyStackFrame,
   Executable,
   FileID,
+  getAddressFromStackFrameID,
+  getFileIDFromStackFrameID,
   StackFrame,
   StackFrameID,
   StackTrace,
   StackTraceID,
 } from '../../common/profiling';
+import { runLengthDecodeBase64Url } from '../../common/run_length_encoding';
 import { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { DownsampledEventsIndex } from './downsampling';
 import { ProjectTimeQuery } from './query';
-
-const traceLRU = new LRUCache<StackTraceID, StackTrace>({ max: 20000 });
 
 const BASE64_FRAME_ID_LENGTH = 32;
 
@@ -55,87 +55,6 @@ export type EncodedStackTrace = DedotObject<{
   [ProfilingESField.StacktraceFrameTypes]: string;
 }>;
 
-// runLengthEncode run-length encodes the input array.
-//
-// The input is a list of uint8s. The output is a binary stream of
-// 2-byte pairs (first byte is the length and the second byte is the
-// binary representation of the object) in reverse order.
-//
-// E.g. uint8 array [0, 0, 0, 0, 0, 2, 2, 2] is converted into the byte
-// array [5, 0, 3, 2].
-export function runLengthEncode(input: number[]): Buffer {
-  const output: number[] = [];
-
-  if (input.length === 0) {
-    return Buffer.from(output);
-  }
-
-  let count = 1;
-  let current = input[0];
-
-  for (let i = 1; i < input.length; i++) {
-    const next = input[i];
-
-    if (next === current && count < 255) {
-      count++;
-      continue;
-    }
-
-    output.push(count, current);
-
-    count = 1;
-    current = next;
-  }
-
-  output.push(count, current);
-
-  return Buffer.from(output);
-}
-
-// runLengthDecode decodes a run-length encoding for the input array.
-//
-// The input is a binary stream of 2-byte pairs (first byte is the length and the
-// second byte is the binary representation of the object). The output is a list of
-// uint8s.
-//
-// E.g. byte array [5, 0, 3, 2] is converted into an uint8 array like
-// [0, 0, 0, 0, 0, 2, 2, 2].
-export function runLengthDecode(input: Buffer, outputSize?: number): number[] {
-  let size;
-
-  if (typeof outputSize === 'undefined') {
-    size = 0;
-    for (let i = 0; i < input.length; i += 2) {
-      size += input[i];
-    }
-  } else {
-    size = outputSize;
-  }
-
-  const output: number[] = new Array(size);
-
-  let idx = 0;
-  for (let i = 0; i < input.length; i += 2) {
-    for (let j = 0; j < input[i]; j++) {
-      output[idx] = input[i + 1];
-      idx++;
-    }
-  }
-
-  // Due to truncation of the frame types for stacktraces longer than 255,
-  // the expected output size and the actual decoded size can be different.
-  // Ordinarily, these two values should be the same.
-  //
-  // We have decided to fill in the remainder of the output array with zeroes
-  // as a reasonable default. Without this step, the output array would have
-  // undefined values.
-  for (let i = idx; i < size; i++) {
-    output[i] = 0;
-  }
-
-  return output;
-}
-
 // decodeStackTrace unpacks an encoded stack trace from Elasticsearch
 export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
   const inputFrameIDs = input.Stacktrace.frame.ids;
@@ -155,19 +74,15 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
   // However, since the file ID is base64-encoded using 21.33 bytes
   // (16 * 4 / 3), then the 22 bytes have an extra 4 bits from the
   // address (see diagram in definition of EncodedStackTrace).
-  for (let i = 0; i < countsFrameIDs; i++) {
-    const pos = i * BASE64_FRAME_ID_LENGTH;
+  for (let i = 0, pos = 0; i < countsFrameIDs; i++, pos += BASE64_FRAME_ID_LENGTH) {
     const frameID = inputFrameIDs.slice(pos, pos + BASE64_FRAME_ID_LENGTH);
-    const buf = Buffer.from(frameID, 'base64url');
-
-    fileIDs[i] = buf.toString('base64url', 0, 16);
-    addressOrLines[i] = Number(buf.readBigUInt64BE(16));
     frameIDs[i] = frameID;
+    fileIDs[i] = getFileIDFromStackFrameID(frameID);
+    addressOrLines[i] = getAddressFromStackFrameID(frameID);
   }
 
   // Step 2: Convert the run-length byte encoding into a list of uint8s.
-  const types = Buffer.from(inputFrameTypes, 'base64url');
-  const typeIDs = runLengthDecode(types, countsFrameIDs);
+  const typeIDs = runLengthDecodeBase64Url(inputFrameTypes, inputFrameTypes.length, countsFrameIDs);
 
   return {
     AddressOrLines: addressOrLines,
@@ -236,80 +151,102 @@ export async function searchEventsGroupByStackTrace({
   return { totalCount, stackTraceEvents };
 }
 
+function summarizeCacheAndQuery(
+  logger: Logger,
+  name: string,
+  cacheHits: number,
+  cacheTotal: number,
+  queryHits: number,
+  queryTotal: number
+) {
+  logger.info(`found ${cacheHits} out of ${cacheTotal} ${name} in the cache`);
+  if (cacheHits === cacheTotal) {
+    return;
+  }
+  logger.info(`found ${queryHits} out of ${queryTotal} ${name}`);
+  if (queryHits < queryTotal) {
+    logger.info(`failed to find ${queryTotal - queryHits} ${name}`);
+  }
+}
+
+const traceLRU = new LRUCache<StackTraceID, StackTrace>({ max: 20000 });
+
 export async function mgetStackTraces({
   logger,
   client,
   events,
-  concurrency = 1,
 }: {
   logger: Logger;
   client: ProfilingESClient;
   events: Map<StackTraceID, number>;
-  concurrency?: number;
 }) {
-  const stackTraceIDs = [...events.keys()];
-  const chunkSize = Math.floor(events.size / concurrency);
-  let chunks = chunk(stackTraceIDs, chunkSize);
-
-  if (chunks.length !== concurrency) {
-    // The last array element contains the remainder, just drop it as irrelevant.
-    chunks = chunks.slice(0, concurrency);
-  }
-
-  const stackResponses = await withProfilingSpan('mget_stacktraces', () =>
-    Promise.all(
-      chunks.map((ids) => {
-        return client.mget<
-          PickFlattened<
-            ProfilingStackTrace,
-            ProfilingESField.StacktraceFrameIDs | ProfilingESField.StacktraceFrameTypes
-          >
-        >('mget_stacktraces_chunk', {
-          index: INDEX_TRACES,
-          ids,
-          realtime: true,
-          _source_includes: [
-            ProfilingESField.StacktraceFrameIDs,
-            ProfilingESField.StacktraceFrameTypes,
-          ],
-        });
-      })
-    )
-  );
-
-  let totalFrames = 0;
+  const stackTraceIDs = new Set([...events.keys()]);
   const stackTraces = new Map<StackTraceID, StackTrace>();
+
+  let cacheHits = 0;
+  let totalFrames = 0;
   const stackFrameDocIDs = new Set<string>();
   const executableDocIDs = new Set<string>();
 
+  for (const stackTraceID of stackTraceIDs) {
+    const stackTrace = traceLRU.get(stackTraceID);
+    if (stackTrace) {
+      cacheHits++;
+      stackTraceIDs.delete(stackTraceID);
+      stackTraces.set(stackTraceID, stackTrace);
+
+      totalFrames += stackTrace.FrameIDs.length;
+      for (const frameID of stackTrace.FrameIDs) {
+        stackFrameDocIDs.add(frameID);
+      }
+      for (const fileID of stackTrace.FileIDs) {
+        executableDocIDs.add(fileID);
+      }
+    }
+  }
+
+  if (stackTraceIDs.size === 0) {
+    summarizeCacheAndQuery(logger, 'stacktraces', cacheHits, events.size, 0, 0);
+    return { stackTraces, totalFrames, stackFrameDocIDs, executableDocIDs };
+  }
+
+  const stackResponses = await client.mget<
+    PickFlattened<
+      ProfilingStackTrace,
+      ProfilingESField.StacktraceFrameIDs | ProfilingESField.StacktraceFrameTypes
+    >
+  >('mget_stacktraces', {
+    index: INDEX_TRACES,
+    ids: [...stackTraceIDs],
+    realtime: true,
+    _source_includes: [ProfilingESField.StacktraceFrameIDs, ProfilingESField.StacktraceFrameTypes],
+  });
+
+  let queryHits = 0;
   const t0 = Date.now();
 
   await withProfilingSpan('decode_stacktraces', async () => {
-    // flatMap() is significantly slower than an explicit for loop
-    for (const res of stackResponses) {
-      for (const trace of res.docs) {
-        if ('error' in trace) {
-          continue;
-        }
-        // Sometimes we don't find the trace.
-        // This is due to ES delays writing (data is not immediately seen after write).
-        // Also, ES doesn't know about transactions.
-        if (trace.found) {
-          const traceid = trace._id as StackTraceID;
-          let stackTrace = traceLRU.get(traceid) as StackTrace;
-          if (!stackTrace) {
-            stackTrace = decodeStackTrace(trace._source as EncodedStackTrace);
-            traceLRU.set(traceid, stackTrace);
-          }
+    for (const trace of stackResponses.docs) {
+      if ('error' in trace) {
+        continue;
+      }
+      // Sometimes we don't find the trace.
+      // This is due to ES delays writing (data is not immediately seen after write).
+      // Also, ES doesn't know about transactions.
+      if (trace.found) {
+        queryHits++;
+        const traceid = trace._id as StackTraceID;
+        const stackTrace = decodeStackTrace(trace._source as EncodedStackTrace);
 
-          totalFrames += stackTrace.FrameIDs.length;
-          stackTraces.set(traceid, stackTrace);
-          for (const frameID of stackTrace.FrameIDs) {
-            stackFrameDocIDs.add(frameID);
-          }
-          for (const fileID of stackTrace.FileIDs) {
-            executableDocIDs.add(fileID);
-          }
+        stackTraces.set(traceid, stackTrace);
+        traceLRU.set(traceid, stackTrace);
+
+        totalFrames += stackTrace.FrameIDs.length;
+        for (const frameID of stackTrace.FrameIDs) {
+          stackFrameDocIDs.add(frameID);
+        }
+        for (const fileID of stackTrace.FileIDs) {
+          executableDocIDs.add(fileID);
         }
       }
     }
@@ -321,14 +258,19 @@ export async function mgetStackTraces({
     logger.info('Average size of stacktrace: ' + totalFrames / stackTraces.size);
   }
 
-  if (stackTraces.size < events.size) {
-    logger.info(
-      'failed to find ' + (events.size - stackTraces.size) + ' stacktraces (todo: find out why)'
-    );
-  }
+  summarizeCacheAndQuery(
+    logger,
+    'stacktraces',
+    cacheHits,
+    events.size,
+    queryHits,
+    stackTraceIDs.size
+  );
 
   return { stackTraces, totalFrames, stackFrameDocIDs, executableDocIDs };
 }
+
+const frameLRU = new LRUCache<StackFrameID, StackFrame>({ max: 100000 });
 
 export async function mgetStackFrames({
   logger,
@@ -341,7 +283,20 @@ export async function mgetStackFrames({
 }): Promise<Map<StackFrameID, StackFrame>> {
   const stackFrames = new Map<StackFrameID, StackFrame>();
 
+  let cacheHits = 0;
+  const cacheTotal = stackFrameIDs.size;
+
+  for (const stackFrameID of stackFrameIDs) {
+    const stackFrame = frameLRU.get(stackFrameID);
+    if (stackFrame) {
+      cacheHits++;
+      stackFrames.set(stackFrameID, stackFrame);
+      stackFrameIDs.delete(stackFrameID);
+    }
+  }
+
   if (stackFrameIDs.size === 0) {
+    summarizeCacheAndQuery(logger, 'frames', cacheHits, cacheTotal, 0, 0);
     return stackFrames;
   }
 
@@ -352,7 +307,7 @@ export async function mgetStackFrames({
   });
 
   // Create a lookup map StackFrameID -> StackFrame.
-  let framesFound = 0;
+  let queryHits = 0;
   const t0 = Date.now();
   const docs = resStackFrames.docs;
   for (const frame of docs) {
@@ -360,24 +315,31 @@ export async function mgetStackFrames({
       continue;
     }
     if (frame.found) {
-      stackFrames.set(frame._id, {
+      queryHits++;
+      const stackFrame = {
         FileName: frame._source!.Stackframe.file?.name,
         FunctionName: frame._source!.Stackframe.function?.name,
         FunctionOffset: frame._source!.Stackframe.function?.offset,
         LineNumber: frame._source!.Stackframe.line?.number,
         SourceType: frame._source!.Stackframe.source?.type,
-      });
-      framesFound++;
-    } else {
-      stackFrames.set(frame._id, emptyStackFrame);
+      };
+      stackFrames.set(frame._id, stackFrame);
+      frameLRU.set(frame._id, stackFrame);
+      continue;
     }
+
+    stackFrames.set(frame._id, emptyStackFrame);
+    frameLRU.set(frame._id, emptyStackFrame);
   }
+
   logger.info(`processing data took ${Date.now() - t0} ms`);
 
-  logger.info('found ' + framesFound + ' / ' + stackFrameIDs.size + ' frames');
+  summarizeCacheAndQuery(logger, 'frames', cacheHits, cacheTotal, queryHits, stackFrameIDs.size);
 
   return stackFrames;
 }
+
+const executableLRU = new LRUCache<FileID, Executable>({ max: 100000 });
 
 export async function mgetExecutables({
   logger,
@@ -390,7 +352,20 @@ export async function mgetExecutables({
 }): Promise<Map<FileID, Executable>> {
   const executables = new Map<FileID, Executable>();
 
+  let cacheHits = 0;
+  const cacheTotal = executableIDs.size;
+
+  for (const fileID of executableIDs) {
+    const executable = executableLRU.get(fileID);
+    if (executable) {
+      cacheHits++;
+      executables.set(fileID, executable);
+      executableIDs.delete(fileID);
+    }
+  }
+
   if (executableIDs.size === 0) {
+    summarizeCacheAndQuery(logger, 'frames', cacheHits, cacheTotal, 0, 0);
     return executables;
   }
 
@@ -400,8 +375,8 @@ export async function mgetExecutables({
     _source_includes: [ProfilingESField.ExecutableFileName],
   });
 
-  // Create a lookup map StackFrameID -> StackFrame.
-  let exeFound = 0;
+  // Create a lookup map FileID -> Executable.
+  let queryHits = 0;
   const t0 = Date.now();
   const docs = resExecutables.docs;
   for (const exe of docs) {
@@ -409,17 +384,29 @@ export async function mgetExecutables({
       continue;
     }
     if (exe.found) {
-      executables.set(exe._id, {
+      queryHits++;
+      const executable = {
         FileName: exe._source!.Executable.file.name,
-      });
-      exeFound++;
-    } else {
-      executables.set(exe._id, emptyExecutable);
+      };
+      executables.set(exe._id, executable);
+      executableLRU.set(exe._id, executable);
+      continue;
     }
+
+    executables.set(exe._id, emptyExecutable);
+    executableLRU.set(exe._id, emptyExecutable);
   }
+
   logger.info(`processing data took ${Date.now() - t0} ms`);
 
-  logger.info('found ' + exeFound + ' / ' + executableIDs.size + ' executables');
+  summarizeCacheAndQuery(
+    logger,
+    'executables',
+    cacheHits,
+    cacheTotal,
+    queryHits,
+    executableIDs.size
+  );
 
   return executables;
 }

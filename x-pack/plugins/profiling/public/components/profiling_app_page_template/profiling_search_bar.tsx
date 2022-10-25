@@ -64,7 +64,6 @@ export function ProfilingSearchBar({
 
         onQuerySubmit({ dateRange, query });
       }}
-      showQueryBar
       showQueryInput
       showDatePicker
       showFilterBar={false}

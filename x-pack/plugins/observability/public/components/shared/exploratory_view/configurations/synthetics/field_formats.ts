@@ -14,6 +14,14 @@ import {
   SYNTHETICS_STEP_DURATION,
 } from '../constants/field_names/synthetics';
 
+export const MS_TO_HUMANIZE_PRECISE = {
+  inputFormat: 'milliseconds' as const,
+  outputFormat: 'humanizePrecise' as const,
+  outputPrecision: 1,
+  showSuffix: true,
+  useShortSuffix: true,
+};
+
 export const syntheticsFieldFormats: FieldFormat[] = [
   {
     field: 'monitor.duration.us',

@@ -9,8 +9,6 @@ import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useGetEndpointDetails, useWithShowEndpointResponder } from '../../../management/hooks';
 import { HostStatus } from '../../../../common/endpoint/types';
-import { useDoesEndpointSupportResponder } from '../../../common/hooks/endpoint/use_does_endpoint_support_responder';
-import { UPGRADE_ENDPOINT_FOR_RESPONDER } from '../../../common/translations';
 
 export const NOT_FROM_ENDPOINT_HOST_TOOLTIP = i18n.translate(
   'xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.notSupportedTooltip',
@@ -51,10 +49,6 @@ export const useResponderActionData = ({
     error,
   } = useGetEndpointDetails(endpointId, { enabled: Boolean(endpointId) });
 
-  const isResponderCapabilitiesEnabled = useDoesEndpointSupportResponder(
-    endpointHostInfo?.metadata
-  );
-
   const [isDisabled, tooltip]: [disabled: boolean, tooltip: ReactNode] = useMemo(() => {
     if (!endpointId) {
       return [true, NOT_FROM_ENDPOINT_HOST_TOOLTIP];
@@ -63,10 +57,6 @@ export const useResponderActionData = ({
     // Still loading Endpoint host info
     if (isFetching) {
       return [true, LOADING_ENDPOINT_DATA_TOOLTIP];
-    }
-
-    if (endpointHostInfo && !isResponderCapabilitiesEnabled) {
-      return [true, UPGRADE_ENDPOINT_FOR_RESPONDER];
     }
 
     // if we got an error and it's a 400 with unenrolled in the error message (alerts can exist for endpoint that are no longer around)
@@ -85,7 +75,7 @@ export const useResponderActionData = ({
     }
 
     return [false, undefined];
-  }, [endpointHostInfo, endpointId, error, isFetching, isResponderCapabilitiesEnabled]);
+  }, [endpointHostInfo, endpointId, error, isFetching]);
 
   const handleResponseActionsClick = useCallback(() => {
     if (endpointHostInfo) showEndpointResponseActionsConsole(endpointHostInfo.metadata);
