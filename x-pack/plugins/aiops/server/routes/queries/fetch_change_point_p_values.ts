@@ -99,19 +99,39 @@ export const fetchChangePointPValues = async (
 ): Promise<ChangePoint[]> => {
   const result: ChangePoint[] = [];
 
-  for (const fieldName of fieldNames) {
-    const request = getChangePointRequest(params, fieldName);
-    const resp = await esClient.search<unknown, { change_point_p_value: Aggs }>(request);
+  const settledPromises = await Promise.allSettled(
+    fieldNames.map((fieldName) =>
+      esClient.search<unknown, { change_point_p_value: Aggs }>(
+        getChangePointRequest(params, fieldName)
+      )
+    )
+  );
+
+  function reportError(fieldName: string, error: unknown) {
+    logger.error(
+      `Failed to fetch p-value aggregation for fieldName "${fieldName}", got: \n${JSON.stringify(
+        error,
+        null,
+        2
+      )}`
+    );
+    emitError(`Failed to fetch p-value aggregation for fieldName "${fieldName}".`);
+    // Still continue the analysis even if individual p-value queries fail.
+  }
+
+  for (const [index, settledPromise] of settledPromises.entries()) {
+    const fieldName = fieldNames[index];
+
+    if (settledPromise.status === 'rejected') {
+      reportError(fieldName, settledPromise.reason);
+      // Still continue the analysis even if individual p-value queries fail.
+      continue;
+    }
+
+    const resp = settledPromise.value;
 
     if (resp.aggregations === undefined) {
-      logger.error(
-        `Failed to fetch p-value aggregation for fieldName "${fieldName}", got: \n${JSON.stringify(
-          resp,
-          null,
-          2
-        )}`
-      );
-      emitError(`Failed to fetch p-value aggregation for fieldName "${fieldName}".`);
+      reportError(fieldName, resp);
       // Still continue the analysis even if individual p-value queries fail.
       continue;
     }

@@ -9,7 +9,6 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { setupRequest } from './setup_request';
 import { APMConfig } from '../..';
 import { APMRouteHandlerResources } from '../../routes/typings';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
 
 jest.mock('../../routes/settings/apm_indices/get_apm_indices', () => ({
@@ -97,38 +96,6 @@ function getMockResources() {
 
 describe('setupRequest', () => {
   describe('with default args', () => {
-    it('calls callWithRequest', async () => {
-      const mockResources = getMockResources();
-      const { apmEventClient } = await setupRequest(mockResources);
-      await apmEventClient.search('foo', {
-        apm: { events: [ProcessorEvent.transaction] },
-        body: { track_total_hits: 10_000, size: 10 },
-      });
-
-      expect(
-        mockResources.context.core.elasticsearch.client.asCurrentUser.search
-      ).toHaveBeenCalledWith(
-        {
-          index: ['apm-*'],
-          body: {
-            track_total_hits: 10000,
-            size: 10,
-            query: {
-              bool: {
-                filter: [{ terms: { 'processor.event': ['transaction'] } }],
-              },
-            },
-          },
-          ignore_unavailable: true,
-          preference: 'any',
-        },
-        {
-          signal: expect.any(Object),
-          meta: true,
-        }
-      );
-    });
-
     it('calls callWithInternalUser', async () => {
       const mockResources = getMockResources();
       const { internalClient } = await setupRequest(mockResources);
@@ -151,51 +118,5 @@ describe('setupRequest', () => {
         }
       );
     });
-  });
-});
-
-describe('with includeFrozen=false', () => {
-  it('should NOT send "ignore_throttled:true" in the request', async () => {
-    const mockResources = getMockResources();
-
-    // mock includeFrozen to return false
-    mockResources.context.core.uiSettings.client.get.mockResolvedValue(false);
-
-    const { apmEventClient } = await setupRequest(mockResources);
-
-    await apmEventClient.search('foo', {
-      apm: {
-        events: [],
-      },
-      body: { track_total_hits: 10_000, size: 10 },
-    });
-
-    const params =
-      mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock
-        .calls[0][0];
-    // @ts-expect-error missing body definition
-    expect(params.ignore_throttled).toBe(undefined);
-  });
-});
-
-describe('with includeFrozen=true', () => {
-  it('sets `ignore_throttled=false`', async () => {
-    const mockResources = getMockResources();
-
-    // mock includeFrozen to return true
-    mockResources.context.core.uiSettings.client.get.mockResolvedValue(true);
-
-    const { apmEventClient } = await setupRequest(mockResources);
-
-    await apmEventClient.search('foo', {
-      apm: { events: [] },
-      body: { track_total_hits: 10_000, size: 10 },
-    });
-
-    const params =
-      mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock
-        .calls[0][0];
-    // @ts-expect-error missing body definition
-    expect(params.ignore_throttled).toBe(false);
   });
 });
