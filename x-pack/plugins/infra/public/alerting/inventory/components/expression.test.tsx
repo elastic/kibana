@@ -55,7 +55,6 @@ describe('Expression', () => {
         setRuleProperty={() => {}}
         metadata={currentOptions}
         dataViews={dataViewMock}
-        onChangeMetaData={() => {}}
       />
     );
 

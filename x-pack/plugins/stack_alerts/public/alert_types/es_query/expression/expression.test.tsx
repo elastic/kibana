@@ -43,17 +43,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
-jest.mock('@kbn/discover-plugin/public', () => {
-  const original = jest.requireActual('@kbn/discover-plugin/public');
-  return {
-    ...original,
-    useDiscoverAlertContext: jest.fn(() => ({
-      initialAdHocDataViewList: [],
-      isManagementPage: true,
-    })),
-  };
-});
-
 const defaultEsQueryRuleParams: EsQueryAlertParams<SearchType.esQuery> = {
   size: 100,
   thresholdComparator: '>',

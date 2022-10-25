@@ -55,10 +55,13 @@ export const DataViewSelector = ({
         setIndexMatches(matches.length);
       }
     }
-    if (pendingIndexMatch.current) {
-      clearTimeout(pendingIndexMatch.current);
-    }
+
     pendingIndexMatch.current = setTimeout(checkIndices, 250);
+    return () => {
+      if (pendingIndexMatch.current) {
+        clearTimeout(pendingIndexMatch.current);
+      }
+    };
   }, [dataViewSearchString, dataViews, noDataViewMatches]);
 
   return (

@@ -10,6 +10,7 @@ import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
+import type { Filter } from '@kbn/es-query';
 import { SecuritySolutionContext } from '../../../application/security_solution_context';
 import * as TEST_SUBJECTS from '../test_subjects';
 import type { FindingsBaseURLQuery } from '../types';
