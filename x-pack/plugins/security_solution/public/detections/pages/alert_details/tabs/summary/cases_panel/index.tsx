@@ -16,9 +16,8 @@ import {
 import type { Ecs } from '@kbn/cases-plugin/common';
 import { CommentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { useGetUserCasesPermissions } from '@kbn/observability-plugin/public/hooks/use_get_user_cases_permissions';
 import type { TimelineEventsDetailsItem } from '../../../../../../../common/search_strategy';
-import { useKibana } from '../../../../../../common/lib/kibana';
+import { useGetUserCasesPermissions, useKibana } from '../../../../../../common/lib/kibana';
 import { CaseDetailsLink } from '../../../../../../common/components/links';
 import { useGetRelatedCasesByEvent } from '../../../../../../common/containers/cases/use_get_related_cases_by_event';
 import {
@@ -53,10 +52,9 @@ export const CasesPanelNoReadPermissions = () => <EuiEmptyPrompt body={CASE_NO_R
 
 export const CasesPanel = React.memo<CasesPanelProps>(
   ({ eventId, dataAsNestedObject, detailsData }) => {
+    const { cases: casesUi } = useKibana().services;
     const { loading, error, relatedCases, refetchRelatedCases } =
       useGetRelatedCasesByEvent(eventId);
-
-    const { cases: casesUi } = useKibana().services;
     const userCasesPermissions = useGetUserCasesPermissions();
 
     const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {

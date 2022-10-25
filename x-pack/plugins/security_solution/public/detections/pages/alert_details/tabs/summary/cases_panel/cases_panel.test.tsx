@@ -6,41 +6,44 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { CasesPanel } from '.';
 import { TestProviders } from '../../../../../../common/mock';
 import {
   mockAlertDetailsTimelineResponse,
   mockAlertNestedDetailsTimelineResponse,
 } from '../../../__mocks__';
-import {
-  ADD_TO_EXISTING_CASE_BUTTON,
-  ADD_TO_NEW_CASE_BUTTON,
-  ERROR_LOADING_CASES,
-  LOADING_CASES,
-} from '../translation';
+import { ERROR_LOADING_CASES, LOADING_CASES } from '../translation';
 import { useGetRelatedCasesByEvent } from '../../../../../../common/containers/cases/use_get_related_cases_by_event';
 import { useGetUserCasesPermissions } from '../../../../../../common/lib/kibana';
 
 jest.mock('../../../../../../common/containers/cases/use_get_related_cases_by_event');
 jest.mock('../../../../../../common/lib/kibana');
 
+const defaultPanelProps = {
+  eventId: mockAlertNestedDetailsTimelineResponse._id,
+  dataAsNestedObject: mockAlertNestedDetailsTimelineResponse,
+  detailsData: mockAlertDetailsTimelineResponse,
+};
+
 describe('AlertDetailsPage - SummaryTab - CasesPanel', () => {
   describe('No data', () => {
+    beforeEach(() => {
+      (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
+        create: true,
+        update: true,
+      });
+    });
     it('should render the loading panel', () => {
       (useGetRelatedCasesByEvent as jest.Mock).mockReturnValue({
         loading: true,
       });
-      render(
+      const { getByText } = render(
         <TestProviders>
-          <CasesPanel
-            eventId={mockAlertNestedDetailsTimelineResponse._id}
-            dataAsNestedObject={mockAlertNestedDetailsTimelineResponse}
-            detailsData={mockAlertDetailsTimelineResponse}
-          />
+          <CasesPanel {...defaultPanelProps} />
         </TestProviders>
       );
-      expect(screen.getByText(LOADING_CASES)).toBeVisible();
+      expect(getByText(LOADING_CASES)).toBeVisible();
     });
 
     it('should render the error panel if an error is returned', () => {
@@ -48,17 +51,13 @@ describe('AlertDetailsPage - SummaryTab - CasesPanel', () => {
         loading: false,
         error: true,
       });
-      render(
+      const { getByText } = render(
         <TestProviders>
-          <CasesPanel
-            eventId={mockAlertNestedDetailsTimelineResponse._id}
-            dataAsNestedObject={mockAlertNestedDetailsTimelineResponse}
-            detailsData={mockAlertDetailsTimelineResponse}
-          />
+          <CasesPanel {...defaultPanelProps} />
         </TestProviders>
       );
 
-      expect(screen.getByText(ERROR_LOADING_CASES)).toBeVisible();
+      expect(getByText(ERROR_LOADING_CASES)).toBeVisible();
     });
 
     it('should render the error panel if data is undefined', () => {
@@ -67,17 +66,13 @@ describe('AlertDetailsPage - SummaryTab - CasesPanel', () => {
         error: false,
         relatedCases: undefined,
       });
-      render(
+      const { getByText } = render(
         <TestProviders>
-          <CasesPanel
-            eventId={mockAlertNestedDetailsTimelineResponse._id}
-            dataAsNestedObject={mockAlertNestedDetailsTimelineResponse}
-            detailsData={mockAlertDetailsTimelineResponse}
-          />
+          <CasesPanel {...defaultPanelProps} />
         </TestProviders>
       );
 
-      expect(screen.getByText(ERROR_LOADING_CASES)).toBeVisible();
+      expect(getByText(ERROR_LOADING_CASES)).toBeVisible();
     });
 
     describe('Partial permissions', () => {
@@ -90,18 +85,14 @@ describe('AlertDetailsPage - SummaryTab - CasesPanel', () => {
           create: true,
           update: false,
         });
-        render(
+        const { getByTestId, queryByTestId } = render(
           <TestProviders>
-            <CasesPanel
-              eventId={mockAlertNestedDetailsTimelineResponse._id}
-              dataAsNestedObject={mockAlertNestedDetailsTimelineResponse}
-              detailsData={mockAlertDetailsTimelineResponse}
-            />
+            <CasesPanel {...defaultPanelProps} />
           </TestProviders>
         );
 
-        expect(screen.queryByTestId('add-to-new-case-button')).toBeVisible();
-        expect(screen.queryByTestId('add-to-existing-case-button')).toBe(null);
+        expect(getByTestId('add-to-new-case-button')).toBeVisible();
+        expect(queryByTestId('add-to-existing-case-button')).toBe(null);
       });
 
       it('should only render the add to existing case button', () => {
@@ -113,18 +104,14 @@ describe('AlertDetailsPage - SummaryTab - CasesPanel', () => {
           create: false,
           update: true,
         });
-        render(
+        const { getByTestId, queryByTestId } = render(
           <TestProviders>
-            <CasesPanel
-              eventId={mockAlertNestedDetailsTimelineResponse._id}
-              dataAsNestedObject={mockAlertNestedDetailsTimelineResponse}
-              detailsData={mockAlertDetailsTimelineResponse}
-            />
+            <CasesPanel {...defaultPanelProps} />
           </TestProviders>
         );
 
-        expect(screen.queryByTestId('add-to-existing-case-button')).toBeVisible();
-        expect(screen.queryByTestId('add-to-new-case-button')).toBe(null);
+        expect(getByTestId('add-to-existing-case-button')).toBeVisible();
+        expect(queryByTestId('add-to-new-case-button')).toBe(null);
       });
 
       it('should render both add to new case and add to existing case buttons', () => {
@@ -136,18 +123,14 @@ describe('AlertDetailsPage - SummaryTab - CasesPanel', () => {
           create: true,
           update: true,
         });
-        render(
+        const { getByTestId, queryByTestId } = render(
           <TestProviders>
-            <CasesPanel
-              eventId={mockAlertNestedDetailsTimelineResponse._id}
-              dataAsNestedObject={mockAlertNestedDetailsTimelineResponse}
-              detailsData={mockAlertDetailsTimelineResponse}
-            />
+            <CasesPanel {...defaultPanelProps} />
           </TestProviders>
         );
 
-        expect(screen.queryByText(ADD_TO_NEW_CASE_BUTTON)).toBeVisible();
-        expect(screen.queryByText(ADD_TO_EXISTING_CASE_BUTTON)).toBeVisible();
+        expect(getByTestId('add-to-new-case-button')).toBeVisible();
+        expect(queryByTestId('add-to-existing-case-button')).toBeVisible();
       });
     });
   });
@@ -169,17 +152,13 @@ describe('AlertDetailsPage - SummaryTab - CasesPanel', () => {
     });
 
     it('should show the related case', () => {
-      render(
+      const { getByTestId } = render(
         <TestProviders>
-          <CasesPanel
-            eventId={mockAlertNestedDetailsTimelineResponse._id}
-            dataAsNestedObject={mockAlertNestedDetailsTimelineResponse}
-            detailsData={mockAlertDetailsTimelineResponse}
-          />
+          <CasesPanel {...defaultPanelProps} />
         </TestProviders>
       );
 
-      expect(screen.getByTestId('case-panel')).toHaveTextContent(mockRelatedCase.title);
+      expect(getByTestId('case-panel')).toHaveTextContent(mockRelatedCase.title);
     });
   });
 });
