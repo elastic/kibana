@@ -146,7 +146,8 @@ export const fetchHistogramsForFields = async (
   query: any,
   fields: FieldsForHistograms,
   samplerShardSize: number,
-  runtimeMappings?: estypes.MappingRuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields,
+  abortSignal?: AbortSignal
 ) => {
   const aggIntervals = {
     ...(await fetchAggIntervals(
@@ -155,7 +156,8 @@ export const fetchHistogramsForFields = async (
       query,
       fields.filter((f) => !isNumericHistogramFieldWithColumnStats(f)),
       samplerShardSize,
-      runtimeMappings
+      runtimeMappings,
+      abortSignal
     )),
     ...fields.filter(isNumericHistogramFieldWithColumnStats).reduce((p, field) => {
       const { interval, min, max, fieldName } = field;
@@ -209,7 +211,7 @@ export const fetchHistogramsForFields = async (
         ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
       },
     },
-    { maxRetries: 0 }
+    { signal: abortSignal, maxRetries: 0 }
   );
 
   const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
