@@ -63,11 +63,44 @@ describe('fetchIndexShardSize', () => {
                           _source: {
                             index_stats: {
                               shards: {
+                                primaries: 2,
+                              },
+                              primaries: {
+                                store: {
+                                  size_in_bytes: 2171105970,
+                                },
+                              },
+                            },
+                          },
+                          sort: [1643314607570],
+                        },
+                      ],
+                    },
+                  },
+                },
+                {
+                  key: '.monitoring-es-7-2022.01.28',
+                  doc_count: 30,
+                  hits: {
+                    hits: {
+                      total: {
+                        value: 30,
+                        relation: 'eq',
+                      },
+                      max_score: null,
+                      hits: [
+                        {
+                          _index: '.monitoring-es-7-2022.01.27',
+                          _id: 'JVkunX4BfK-FILsH9Wr_',
+                          _score: null,
+                          _source: {
+                            index_stats: {
+                              shards: {
                                 primaries: 1,
                               },
                               primaries: {
                                 store: {
-                                  size_in_bytes: 3537949,
+                                  size_in_bytes: 1073741824,
                                 },
                               },
                             },
@@ -135,13 +168,42 @@ describe('fetchIndexShardSize', () => {
       {
         ccs: undefined,
         shardIndex: '.monitoring-es-7-2022.01.27',
-        shardSize: 0,
+        shardSize: 1.01,
+        clusterUuid: 'NG2d5jHiSBGPE6HLlUN2Bg',
+      },
+      {
+        ccs: undefined,
+        shardIndex: '.monitoring-es-7-2022.01.28',
+        shardSize: 1,
         clusterUuid: 'NG2d5jHiSBGPE6HLlUN2Bg',
       },
       {
         ccs: undefined,
         shardIndex: '.monitoring-kibana-7-2022.01.27',
         shardSize: 0,
+        clusterUuid: 'NG2d5jHiSBGPE6HLlUN2Bg',
+      },
+    ]);
+  });
+  it('higher alert threshold', async () => {
+    esClient.search.mockResponse(
+      // @ts-expect-error not full response interface
+      esRes
+    );
+
+    const oneGBThreshold = 1
+    const result = await fetchIndexShardSize(
+      esClient,
+      clusters,
+      oneGBThreshold,
+      shardIndexPatterns,
+      size
+    );
+    expect(result).toEqual([
+      {
+        ccs: undefined,
+        shardIndex: '.monitoring-es-7-2022.01.27',
+        shardSize: 1.01,
         clusterUuid: 'NG2d5jHiSBGPE6HLlUN2Bg',
       },
     ]);
