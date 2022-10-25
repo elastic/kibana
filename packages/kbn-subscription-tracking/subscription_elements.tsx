@@ -14,11 +14,15 @@ import { useImpression } from './use_impression';
 import type { SubscriptionContext } from './types';
 
 interface CommonProps {
+  /** The context information for this subscription element */
   subscriptionContext: SubscriptionContext;
 }
 
 export type SubscriptionLinkProps = EuiLinkProps & CommonProps;
 
+/**
+ * Wrapper around `EuiLink` that provides scubscription events
+ */
 export function SubscriptionLink({
   subscriptionContext,
   children,
@@ -36,6 +40,9 @@ export function SubscriptionLink({
 
 export type SubscriptionButtonProps = EuiButtonProps & CommonProps;
 
+/**
+ * Wrapper around `EuiButton` that provides scubscription events
+ */
 export function SubscriptionButton({
   subscriptionContext,
   children,
@@ -53,6 +60,9 @@ export function SubscriptionButton({
 
 export type SubscriptionButtonEmptyProps = EuiButtonEmptyProps & CommonProps;
 
+/**
+ * Wrapper around `EuiButtonEmpty` that provides scubscription events
+ */
 export function SubscriptionButtonEmpty({
   subscriptionContext,
   children,
