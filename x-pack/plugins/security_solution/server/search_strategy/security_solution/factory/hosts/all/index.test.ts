@@ -8,6 +8,7 @@
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
 import type { HostsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
+import { RiskScoreEntity } from '../../../../../../common/search_strategy/security_solution';
 import * as buildQuery from './query.all_hosts.dsl';
 import * as buildRiskQuery from '../../risk_score/all/query.risk_score.dsl';
 import { allHosts } from '.';
@@ -128,6 +129,7 @@ describe('allHosts search strategy', () => {
       expect(buildHostsRiskQuery).toHaveBeenCalledWith({
         defaultIndex: ['ml_host_risk_score_latest_test-space'],
         filterQuery: { terms: { 'host.name': [hostName] } },
+        riskScoreEntity: RiskScoreEntity.host,
       });
     });
 

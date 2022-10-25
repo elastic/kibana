@@ -9,6 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { EntityAnalyticsRiskScores } from '.';
+import type { UserRiskScore } from '../../../../../common/search_strategy';
 import { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
 import type { SeverityCount } from '../../../../common/components/severity/types';
 import { useRiskScore, useRiskScoreKpi } from '../../../../risk_score/containers';
@@ -115,6 +116,39 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       );
 
       expect(queryByTestId('entity_analytics_content')).not.toBeInTheDocument();
+    });
+
+    it('renders alerts count', () => {
+      mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
+      mockUseRiskScoreKpi.mockReturnValue({
+        severityCount: mockSeverityCount,
+        loading: false,
+      });
+      const alertsCount = 999;
+      const data: UserRiskScore[] = [
+        {
+          '@timestamp': '1234567899',
+          user: {
+            name: 'testUsermame',
+            risk: {
+              rule_risks: [],
+              calculated_level: RiskSeverity.high,
+              calculated_score_norm: 75,
+              multipliers: [],
+            },
+          },
+          alertsCount,
+        },
+      ];
+      mockUseRiskScore.mockReturnValue({ ...defaultProps, data });
+
+      const { queryByTestId } = render(
+        <TestProviders>
+          <EntityAnalyticsRiskScores riskEntity={riskEntity} />
+        </TestProviders>
+      );
+
+      expect(queryByTestId('risk-score-alerts')).toHaveTextContent(alertsCount.toString());
     });
   }
 );
