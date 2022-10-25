@@ -162,11 +162,6 @@ export interface BulkEditResponse {
   total: number;
 }
 
-export interface BulkDeleteResponse {
-  errors: BulkEditError[];
-  total: number;
-}
-
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
   index: number;

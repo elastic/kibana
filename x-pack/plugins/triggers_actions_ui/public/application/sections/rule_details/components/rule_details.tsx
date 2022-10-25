@@ -22,7 +22,6 @@ import {
   EuiIcon,
   EuiLink,
 } from '@elastic/eui';
-import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { RuleExecutionStatusErrorReasons, parseDuration } from '@kbn/alerting-plugin/common';
@@ -101,8 +100,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   };
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
-  const [rulesToDeleteFilter, setRulesToDeleteFilter] = useState<KueryNode | null | undefined>();
-  const [isDeletingRules, setIsDeletingRules] = useState<boolean>(false);
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
 
   const [hasActionsWithBrokenConnector, setHasActionsWithBrokenConnector] =
