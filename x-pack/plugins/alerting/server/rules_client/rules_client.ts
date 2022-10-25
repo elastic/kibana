@@ -1828,7 +1828,7 @@ export class RulesClient {
     if (taskIdsToDelete.length > 0) {
       try {
         const resultFromDeletingTasks = await this.taskManager.bulkRemoveIfExist(taskIdsToDelete);
-        resultFromDeletingTasks.statuses.forEach((status) => {
+        resultFromDeletingTasks?.statuses.forEach((status) => {
           if (!status.success) {
             taskIdsFailedToBeDeleted.push(status.id);
           }
