@@ -1161,7 +1161,6 @@
     "data.advancedSettings.timepicker.refreshIntervalDefaultsText": "時間フィルターのデフォルト更新間隔「値」はミリ秒で指定する必要があります。",
     "data.advancedSettings.timepicker.refreshIntervalDefaultsTitle": "タイムピッカーの更新間隔",
     "data.advancedSettings.timepicker.thisWeek": "今週",
-    "data.advancedSettings.timepicker.timeDefaultsText": "時間フィルターが選択されずにKibanaが起動した際に使用される時間フィルターです",
     "data.advancedSettings.timepicker.timeDefaultsTitle": "デフォルトのタイムピッカー",
     "data.advancedSettings.timepicker.today": "今日",
     "data.errors.fetchError": "ネットワークとプロキシ構成を確認してください。問題が解決しない場合は、ネットワーク管理者に問い合わせてください。",

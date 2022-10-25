@@ -1163,7 +1163,6 @@
     "data.advancedSettings.timepicker.refreshIntervalDefaultsText": "L'intervalle d'actualisation par défaut du filtre temporel. La valeur doit être spécifiée en millisecondes.",
     "data.advancedSettings.timepicker.refreshIntervalDefaultsTitle": "Intervalle d'actualisation du filtre temporel",
     "data.advancedSettings.timepicker.thisWeek": "Cette semaine",
-    "data.advancedSettings.timepicker.timeDefaultsText": "L’option de filtre temporel à utiliser lorsque Kibana est démarré sans filtre",
     "data.advancedSettings.timepicker.timeDefaultsTitle": "Filtre temporel par défaut",
     "data.advancedSettings.timepicker.today": "Aujourd'hui",
     "data.errors.fetchError": "Vérifiez votre réseau et la configuration de votre proxy. Si le problème persiste, contactez votre administrateur réseau.",
