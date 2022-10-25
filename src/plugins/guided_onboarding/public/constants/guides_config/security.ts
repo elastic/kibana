@@ -22,7 +22,7 @@ export const securityConfig: GuideConfig = {
       title: 'Add data with Elastic Defend',
       descriptionList: [
         'Select the Elastic Defend integration to add your data.',
-        'Make sure your data look good.',
+        'Make sure your data looks good.',
       ],
       integration: 'endpoint',
       location: {
