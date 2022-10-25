@@ -199,7 +199,7 @@ export const DiscoverTopNav = ({
     [dataView, navigateTo, savedSearch, services, stateContainer, updateAdHocDataViewId]
   );
   const badges = useMemo(() => {
-    if (hasChanged && savedSearch.id) {
+    if (hasChanged) {
       return [
         {
           badgeText: i18n.translate('discover.unsavedChangesBadge', {
@@ -211,7 +211,7 @@ export const DiscoverTopNav = ({
     }
 
     return [];
-  }, [hasChanged, savedSearch.id]);
+  }, [hasChanged]);
 
   return (
     <AggregateQueryTopNavMenu
