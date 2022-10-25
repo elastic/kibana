@@ -173,7 +173,7 @@ describe('Body', () => {
         </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="column-headers"]').first().exists()).toEqual(true);
-    }, 20000);
+    });
 
     test('it renders the scroll container', async () => {
       const wrapper = await getWrapper(
@@ -182,7 +182,7 @@ describe('Body', () => {
         </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="timeline-body"]').first().exists()).toEqual(true);
-    }, 20000);
+    });
 
     test('it renders events', async () => {
       const wrapper = await getWrapper(
@@ -191,7 +191,7 @@ describe('Body', () => {
         </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="events"]').first().exists()).toEqual(true);
-    }, 20000);
+    });
 
     test('it renders a tooltip for timestamp', async () => {
       const { storage } = createSecuritySolutionStorageMock();
@@ -234,7 +234,7 @@ describe('Body', () => {
             .exists()
         ).toEqual(true);
       });
-    }, 20000);
+    });
   });
   describe('action on event', () => {
     const addaNoteToEvent = (wrapper: ReturnType<typeof mount>, note: string) => {
@@ -283,7 +283,7 @@ describe('Body', () => {
           id: 'timeline-test',
         })
       );
-    }, 20000);
+    });
 
     test('Add two notes to an event', async () => {
       const { storage } = createSecuritySolutionStorageMock();
@@ -343,7 +343,7 @@ describe('Body', () => {
           id: 'timeline-test',
         })
       );
-    }, 20000);
+    });
   });
 
   describe('event details', () => {
@@ -373,7 +373,7 @@ describe('Body', () => {
         },
         type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
-    }, 20000);
+    });
 
     test('call the right reduce action to show event details for pinned tab', async () => {
       const wrapper = await getWrapper(
@@ -398,7 +398,7 @@ describe('Body', () => {
         },
         type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
-    }, 20000);
+    });
 
     test('call the right reduce action to show event details for notes tab', async () => {
       const wrapper = await getWrapper(
@@ -423,6 +423,6 @@ describe('Body', () => {
         },
         type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
-    }, 20000);
+    });
   });
 });

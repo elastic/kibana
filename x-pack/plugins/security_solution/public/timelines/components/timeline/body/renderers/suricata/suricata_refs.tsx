@@ -39,8 +39,7 @@ export const SuricataRefs = React.memo<{ signatureId: number }>(({ signatureId }
     return () => {
       isSubscribed = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [signatureId]);
 
   return (
     <EuiFlexGroup data-test-subj="suricataRefs" gutterSize="none" justifyContent="center" wrap>
