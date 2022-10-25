@@ -6,7 +6,7 @@
  */
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty, keyBy } from 'lodash';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -17,6 +17,11 @@ interface Props {
   serverlessId?: string;
 }
 
+const INITIAL_STATE = {
+  firstLineCharts: [],
+  secondLineCharts: [],
+};
+
 export function ServerlessMetricsCharts({ serverlessId }: Props) {
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
@@ -24,7 +29,7 @@ export function ServerlessMetricsCharts({ serverlessId }: Props) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { serviceName } = useApmServiceContext();
 
-  const { data = { charts: [] }, status } = useFetcher(
+  const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
         return undefined;
@@ -45,35 +50,33 @@ export function ServerlessMetricsCharts({ serverlessId }: Props) {
             },
           },
         }
-      );
+      ).then((resp) => {
+        const chartsByKey = keyBy(resp.charts, 'key');
+        if (isEmpty(chartsByKey)) {
+          return { firstLineCharts: [], secondLineCharts: [] };
+        }
+
+        return {
+          firstLineCharts: [
+            chartsByKey.avg_duration,
+            chartsByKey.cold_start_duration,
+            chartsByKey.cold_start_count,
+          ],
+          secondLineCharts: [
+            chartsByKey.compute_usage,
+            chartsByKey.memory_usage_chart,
+          ],
+        };
+      });
     },
     [kuery, environment, serviceName, start, end, serverlessId]
   );
-
-  const { firstLineCharts, secondLineCharts } = useMemo(() => {
-    const chartsByKey = keyBy(data.charts, 'key');
-    if (isEmpty(chartsByKey)) {
-      return { firstLineCharts: [], secondLineCharts: [] };
-    }
-
-    return {
-      firstLineCharts: [
-        chartsByKey.avg_duration,
-        chartsByKey.cold_start_duration,
-        chartsByKey.cold_start_count,
-      ],
-      secondLineCharts: [
-        chartsByKey.compute_usage,
-        chartsByKey.memory_usage_chart,
-      ],
-    };
-  }, [data]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
         <EuiFlexGrid columns={3} gutterSize="m">
-          {firstLineCharts.map((chart) => (
+          {data.firstLineCharts.map((chart) => (
             <EuiFlexItem key={chart.key}>
               <EuiPanel hasBorder={true}>
                 <MetricsChart
@@ -89,7 +92,7 @@ export function ServerlessMetricsCharts({ serverlessId }: Props) {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGrid columns={2} gutterSize="m">
-          {secondLineCharts.map((chart) => (
+          {data.secondLineCharts.map((chart) => (
             <EuiFlexItem key={chart.key}>
               <EuiPanel hasBorder={true}>
                 <MetricsChart

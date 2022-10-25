@@ -81,8 +81,7 @@ export async function generateData({
   };
 
   const transactionsEvents = timerange(start, end)
-    .interval('1m')
-    .rate(1)
+    .ratePerMinute(1)
     .generator((timestamp) => [
       instanceLambdaPython
         .invocation()
