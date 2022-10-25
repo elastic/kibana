@@ -38,6 +38,7 @@ export class FilePickerState {
   public readonly queryDebounced$ = this.query$.pipe(debounceTime(100));
   public readonly currentPage$ = new BehaviorSubject<number>(0);
   public readonly totalPages$ = new BehaviorSubject<undefined | number>(undefined);
+  public readonly isUploading$ = new BehaviorSubject<boolean>(false);
 
   /**
    * This is how we keep a deduplicated list of file ids representing files a user
@@ -111,6 +112,7 @@ export class FilePickerState {
     page: number,
     query: undefined | string
   ): Observable<{ files: FileJSON[]; total: number }> => {
+    if (this.isUploading$.getValue()) throw new Error('Cannot fetch files while uploading');
     if (this.abort) this.abort();
     this.setIsLoading(true);
     this.loadingError$.next(undefined);
@@ -156,6 +158,12 @@ export class FilePickerState {
     this.retry$.next();
   };
 
+  public resetFilters = (): void => {
+    this.setQuery(undefined);
+    this.setPage(0);
+    this.retry();
+  };
+
   public hasFilesSelected = (): boolean => {
     return this.fileSet.size > 0;
   };
@@ -180,6 +188,10 @@ export class FilePickerState {
 
   public setPage = (page: number): void => {
     this.currentPage$.next(page);
+  };
+
+  public setIsUploading = (value: boolean): void => {
+    this.isUploading$.next(value);
   };
 
   public dispose = (): void => {
