@@ -120,7 +120,10 @@ export const EntityAnalyticsAnomalies = () => {
     [data]
   );
 
-  const incompatibleJobCount = data.filter(({ job }) => job && !job.isCompatible).length;
+  const incompatibleJobCount = useMemo(
+    () => data.filter(({ job }) => job && !job.isCompatible).length,
+    [data]
+  );
 
   return (
     <EuiPanel hasBorder data-test-subj={ENTITY_ANALYTICS_ANOMALIES_PANEL}>
@@ -176,7 +179,7 @@ export const EntityAnalyticsAnomalies = () => {
                 values={{
                   mlDocs: (
                     <a href={`${docLinks.links.siem.ml}`} rel="noopener noreferrer" target="_blank">
-                      {'Anomaly Detection with Machine Learning'}
+                      {i18n.ANOMALY_DETECTION_DOCS}
                     </a>
                   ),
                 }}
