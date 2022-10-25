@@ -7,7 +7,7 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiFieldSearch, EuiFormRow } from '@elastic/eui';
+import { EuiFieldSearch } from '@elastic/eui';
 import { i18nTexts } from '../i18n_texts';
 import { useFilePickerContext } from '../context';
 import { useBehaviorSubject } from '../../use_behavior_subject';
@@ -19,15 +19,13 @@ export const SearchField: FunctionComponent = () => {
   const hasFiles = useBehaviorSubject(state.hasFiles$);
   const isUploading = useBehaviorSubject(state.isUploading$);
   return (
-    <EuiFormRow fullWidth aria-label={i18nTexts.searchFieldLabel}>
-      <EuiFieldSearch
-        data-test-subj="searchField"
-        disabled={isUploading || (!query && !hasFiles)}
-        isLoading={isLoading}
-        value={query ?? ''}
-        placeholder={i18nTexts.searchFieldPlaceholder}
-        onChange={(ev) => state.setQuery(ev.target.value)}
-      />
-    </EuiFormRow>
+    <EuiFieldSearch
+      data-test-subj="searchField"
+      disabled={isUploading || (!query && !hasFiles)}
+      isLoading={isLoading}
+      value={query ?? ''}
+      placeholder={i18nTexts.searchFieldPlaceholder}
+      onChange={(ev) => state.setQuery(ev.target.value)}
+    />
   );
 };
