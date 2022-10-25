@@ -27,7 +27,7 @@ import {
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type {
   ChromeHelpExtension,
-  ChromeHelpExtensionMenuCustomLink,
+  ChromeGlobalHelpExtensionMenuLink,
 } from '@kbn/core-chrome-browser';
 import { GITHUB_CREATE_ISSUE_LINK, KIBANA_FEEDBACK_LINK } from '../../constants';
 import { HeaderExtension } from './header_extension';
@@ -35,7 +35,7 @@ import { isModifiedOrPrevented } from './nav_link';
 
 interface Props {
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
-  globalHelpExtensionMenuLinks: ChromeHelpExtensionMenuCustomLink[];
+  globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
   kibanaVersion: string;
@@ -46,6 +46,7 @@ interface State {
   isOpen: boolean;
   helpExtension?: ChromeHelpExtension;
   helpSupportUrl: string;
+  globalHelpExtensionMenuLinks: ChromeGlobalHelpExtensionMenuLink[];
 }
 
 export class HeaderHelpMenu extends Component<Props, State> {
@@ -58,17 +59,20 @@ export class HeaderHelpMenu extends Component<Props, State> {
       isOpen: false,
       helpExtension: undefined,
       helpSupportUrl: '',
+      globalHelpExtensionMenuLinks: [],
     };
   }
 
   public componentDidMount() {
     this.subscription = combineLatest(
       this.props.helpExtension$,
-      this.props.helpSupportUrl$
-    ).subscribe(([helpExtension, helpSupportUrl]) => {
+      this.props.helpSupportUrl$,
+      this.props.globalHelpExtensionMenuLinks$
+    ).subscribe(([helpExtension, helpSupportUrl, globalHelpExtensionMenuLinks]) => {
       this.setState({
         helpExtension,
         helpSupportUrl,
+        globalHelpExtensionMenuLinks,
       });
     });
   }
@@ -133,7 +137,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
         <div style={{ maxWidth: 240 }}>
           {globalCustomContent}
           {defaultContent}
-          {defaultContent && customContent && <EuiHorizontalRule margin="m" />}
+          {(defaultContent || customContent) && <EuiHorizontalRule margin="m" />}
           {customContent}
         </div>
       </EuiPopover>
@@ -190,16 +194,19 @@ export class HeaderHelpMenu extends Component<Props, State> {
   }
 
   private renderGlobalCustomContent() {
-    const { globalHelpExtensionMenuLinks, navigateToUrl } = this.props;
+    const { navigateToUrl } = this.props;
+    const { globalHelpExtensionMenuLinks } = this.state;
 
-    return globalHelpExtensionMenuLinks.map((link, index) => {
-      const { linkType, content: text, href, ...rest } = link;
-      return createCustomLink(index, text, true, {
-        href,
-        onClick: this.createOnClickHandler(href, navigateToUrl),
-        ...rest,
+    return globalHelpExtensionMenuLinks
+      .sort((a, b) => b.priority - a.priority)
+      .map((link, index) => {
+        const { linkType, content: text, href, ...rest } = link;
+        return createCustomLink(index, text, true, {
+          href,
+          onClick: this.createOnClickHandler(href, navigateToUrl),
+          ...rest,
+        });
       });
-    });
   }
 
   private renderCustomContent() {

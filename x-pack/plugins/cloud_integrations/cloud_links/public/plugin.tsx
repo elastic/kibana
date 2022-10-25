@@ -33,7 +33,8 @@ export class CloudLinksPlugin
         linkType: 'custom',
         href: core.http.basePath.prepend('/app/home#/getting_started'),
         content: <FormattedMessage id="xpack.cloudLinks.setupGuide" defaultMessage="Setup guide" />,
-        'data-test-subj': 'cloudOnboardingSetupGuide',
+        'data-test-subj': 'cloudOnboardingSetupGuideLink',
+        priority: 1000, // We want this link to be at the very top.
       });
 
       if (security) {

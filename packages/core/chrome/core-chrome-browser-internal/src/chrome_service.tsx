@@ -23,7 +23,7 @@ import type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
-  ChromeHelpExtensionMenuCustomLink,
+  ChromeGlobalHelpExtensionMenuLink,
   ChromeHelpExtension,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
@@ -104,7 +104,9 @@ export class ChromeService {
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
-    const globalHelpExtensionMenuLinks: ChromeHelpExtensionMenuCustomLink[] = [];
+    const globalHelpExtensionMenuLinks$ = new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>(
+      []
+    );
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
     const breadcrumbsAppendExtension$ = new BehaviorSubject<
@@ -215,7 +217,7 @@ export class ChromeService {
           customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
           kibanaDocLink={docLinks.links.kibana.guide}
           forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
-          globalHelpExtensionMenuLinks={globalHelpExtensionMenuLinks}
+          globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
           helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
           helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
           homeHref={http.basePath.prepend('/app/home')}
@@ -256,12 +258,15 @@ export class ChromeService {
         breadcrumbsAppendExtension$.next(breadcrumbsAppendExtension);
       },
 
-      getGlobalHelpExtensionMenuLinks: () => globalHelpExtensionMenuLinks,
+      getGlobalHelpExtensionMenuLinks$: () => globalHelpExtensionMenuLinks$.asObservable(),
 
       registerGlobalHelpExtensionMenuLink: (
-        globalHelpExtensionMenuLink: ChromeHelpExtensionMenuCustomLink
+        globalHelpExtensionMenuLink: ChromeGlobalHelpExtensionMenuLink
       ) => {
-        globalHelpExtensionMenuLinks.push(globalHelpExtensionMenuLink);
+        globalHelpExtensionMenuLinks$.next([
+          ...globalHelpExtensionMenuLinks$.value,
+          globalHelpExtensionMenuLink,
+        ]);
       },
 
       getHelpExtension$: () => helpExtension$.pipe(takeUntil(this.stop$)),

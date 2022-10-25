@@ -14,7 +14,7 @@ import type { ChromeNavControls } from './nav_controls';
 import type { ChromeHelpExtension } from './help_extension';
 import type { ChromeBreadcrumb, ChromeBreadcrumbsAppendExtension } from './breadcrumb';
 import type { ChromeBadge, ChromeUserBanner } from './types';
-import type { ChromeHelpExtensionMenuCustomLink } from './help_extension';
+import { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
 
 /**
  * ChromeStart allows plugins to customize the global chrome header UI and
@@ -109,13 +109,13 @@ export interface ChromeStart {
   /**
    * Get the list of the registered global help extension menu links
    */
-  getGlobalHelpExtensionMenuLinks(): ChromeHelpExtensionMenuCustomLink[];
+  getGlobalHelpExtensionMenuLinks$(): Observable<ChromeGlobalHelpExtensionMenuLink[]>;
 
   /**
    * Append a global help extension menu link
    */
   registerGlobalHelpExtensionMenuLink(
-    globalHelpExtensionMenuLink: ChromeHelpExtensionMenuCustomLink
+    globalHelpExtensionMenuLink: ChromeGlobalHelpExtensionMenuLink
   ): void;
 
   /**

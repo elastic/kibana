@@ -32,7 +32,7 @@ import type {
   ChromeRecentlyAccessedHistoryItem,
   ChromeBreadcrumbsAppendExtension,
   ChromeHelpExtension,
-  ChromeHelpExtensionMenuCustomLink,
+  ChromeGlobalHelpExtensionMenuLink,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
 import { LoadingIndicator } from '../loading_indicator';
@@ -61,7 +61,7 @@ export interface HeaderProps {
   navLinks$: Observable<ChromeNavLink[]>;
   recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
   forceAppSwitcherNavigation$: Observable<boolean>;
-  globalHelpExtensionMenuLinks: ChromeHelpExtensionMenuCustomLink[];
+  globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
   navControlsLeft$: Observable<readonly ChromeNavControl[]>;
@@ -82,7 +82,7 @@ export function Header({
   onIsLockedUpdate,
   homeHref,
   breadcrumbsAppendExtension$,
-  globalHelpExtensionMenuLinks,
+  globalHelpExtensionMenuLinks$,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -148,7 +148,7 @@ export function Header({
                     <HeaderNavControls navControls$={observables.navControlsExtension$} />
                   </EuiHideFor>,
                   <HeaderHelpMenu
-                    globalHelpExtensionMenuLinks={globalHelpExtensionMenuLinks}
+                    globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
                     helpExtension$={observables.helpExtension$}
                     helpSupportUrl$={observables.helpSupportUrl$}
                     kibanaDocLink={kibanaDocLink}

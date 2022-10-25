@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { HeaderHelpMenu } from './header_help_menu';
@@ -21,7 +21,7 @@ describe('HeaderHelpMenu', () => {
     const component = mountWithIntl(
       <HeaderHelpMenu
         navigateToUrl={application.navigateToUrl}
-        globalHelpExtensionMenuLinks={[]}
+        globalHelpExtensionMenuLinks$={of([])}
         helpExtension$={helpExtension$}
         helpSupportUrl$={helpSupportUrl$}
         kibanaVersion={'version'}
@@ -44,19 +44,21 @@ describe('HeaderHelpMenu', () => {
     const component = mountWithIntl(
       <HeaderHelpMenu
         navigateToUrl={application.navigateToUrl}
-        globalHelpExtensionMenuLinks={[
+        globalHelpExtensionMenuLinks$={of([
+          {
+            linkType: 'custom',
+            href: 'my-link-2',
+            content: 'Some other text for the link',
+            priority: 10,
+          },
           {
             linkType: 'custom',
             href: 'my-link',
             content: 'Some text for the link',
             'data-test-subj': 'my-test-custom-link',
+            priority: 100,
           },
-          {
-            linkType: 'custom',
-            href: 'my-link-2',
-            content: 'Some other text for the link',
-          },
-        ]}
+        ])}
         helpExtension$={helpExtension$}
         helpSupportUrl$={helpSupportUrl$}
         kibanaVersion={'version'}
