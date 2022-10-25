@@ -52,7 +52,7 @@ fi
 # track failed journeys here which might get written to metadata
 failedJourneys=()
 
-echo "--- $journey - 🔎 Start es"
+echo "🔎 Start es"
 
 node scripts/es snapshot&
 export esPid=$!
