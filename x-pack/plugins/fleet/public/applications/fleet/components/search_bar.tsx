@@ -45,6 +45,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
 }) => {
   const {
     data,
+    dataViews,
     unifiedSearch,
     storage,
     notifications,
@@ -131,6 +132,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
         docLinks,
         uiSettings,
         data,
+        dataViews,
         storage,
         usageCollection,
       }}
