@@ -8,13 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { euiLightVars as theme } from '@kbn/ui-theme';
+import { APMConfig } from '../../../..';
 import {
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getMetricsDateHistogramParams } from '../../../../lib/helpers/metrics';
-import { Setup } from '../../../../lib/helpers/setup_request';
 import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
@@ -24,7 +25,8 @@ import { GenericMetricsChart } from '../../fetch_and_transform_metrics';
 export async function getActiveInstances({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   start,
   end,
@@ -32,14 +34,13 @@ export async function getActiveInstances({
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   start: number;
   end: number;
   searchAggregatedTransactions: boolean;
 }): Promise<GenericMetricsChart> {
-  const { apmEventClient, config } = setup;
-
   const aggs = {
     activeInstances: {
       cardinality: {
