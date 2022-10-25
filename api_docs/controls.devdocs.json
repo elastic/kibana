@@ -258,7 +258,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              ">>"
+              ", any>>"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
@@ -939,7 +939,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">, unknown>"
+          ", any>, unknown>"
         ],
         "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
         "deprecated": false,
@@ -1337,7 +1337,7 @@
             "section": "def-public.ControlOutput",
             "text": "ControlOutput"
           },
-          ">"
+          ", any>"
         ],
         "path": "src/plugins/controls/public/options_list/embeddable/options_list_embeddable.tsx",
         "deprecated": false,
@@ -1632,7 +1632,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">, unknown>,",
+          ", any>, unknown>,",
           {
             "pluginId": "controls",
             "scope": "public",
@@ -2245,7 +2245,7 @@
             "section": "def-public.ControlOutput",
             "text": "ControlOutput"
           },
-          ">"
+          ", any>"
         ],
         "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable.tsx",
         "deprecated": false,
@@ -2540,7 +2540,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ">, unknown>,",
+          ", any>, unknown>,",
           {
             "pluginId": "controls",
             "scope": "public",
@@ -3885,7 +3885,7 @@
             "section": "def-public.IEmbeddable",
             "text": "IEmbeddable"
           },
-          "<TControlEmbeddableInput, TControlEmbeddableOutput> & { isChained?: (() => boolean) | undefined; renderPrepend?: (() => React.ReactNode) | undefined; }"
+          "<TControlEmbeddableInput, TControlEmbeddableOutput, any> & { isChained?: (() => boolean) | undefined; renderPrepend?: (() => React.ReactNode) | undefined; }"
         ],
         "path": "src/plugins/controls/public/types.ts",
         "deprecated": false,

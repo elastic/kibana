@@ -1320,7 +1320,7 @@
           },
           ", ",
           "VisualizeOutput",
-          "> implements ",
+          ", any> implements ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -1815,13 +1815,13 @@
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-public.VisualizeEmbeddable.renderError",
+            "id": "def-public.VisualizeEmbeddable.catchError",
             "type": "Function",
             "tags": [],
-            "label": "renderError",
+            "label": "catchError",
             "description": [],
             "signature": [
-              "(domNode: HTMLElement, error: string | ",
+              "(error: string | ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -1829,7 +1829,7 @@
                 "section": "def-common.ErrorLike",
                 "text": "ErrorLike"
               },
-              ") => () => boolean"
+              ") => JSX.Element"
             ],
             "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
             "deprecated": false,
@@ -1837,22 +1837,7 @@
             "children": [
               {
                 "parentPluginId": "visualizations",
-                "id": "def-public.VisualizeEmbeddable.renderError.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "domNode",
-                "description": [],
-                "signature": [
-                  "HTMLElement"
-                ],
-                "path": "src/plugins/visualizations/public/embeddable/visualize_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "visualizations",
-                "id": "def-public.VisualizeEmbeddable.renderError.$2",
+                "id": "def-public.VisualizeEmbeddable.catchError.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "error",
@@ -6198,7 +6183,7 @@
             "section": "def-public.ExpressionRenderError",
             "text": "ExpressionRenderError"
           },
-          ") => void; renderError: (domNode: HTMLElement, error: string | ",
+          ") => void; catchError: (error: string | ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -6206,7 +6191,7 @@
             "section": "def-common.ErrorLike",
             "text": "ErrorLike"
           },
-          ") => () => boolean; reload: () => Promise<void>; supportedTriggers: () => string[]; inputIsRefType: (input: ",
+          ") => JSX.Element; reload: () => Promise<void>; supportedTriggers: () => string[]; inputIsRefType: (input: ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -6320,7 +6305,7 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          "> | ",
+          ", any> | ",
           {
             "pluginId": "embeddable",
             "scope": "public",
