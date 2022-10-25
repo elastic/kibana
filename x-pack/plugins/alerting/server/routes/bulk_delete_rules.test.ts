@@ -26,7 +26,7 @@ beforeEach(() => {
 
 describe('bulkDeleteRulesRoute', () => {
   const bulkDeleteRequest = { filter: '' };
-  const bulkDeleteResult = { errors: [], total: 1 };
+  const bulkDeleteResult = { errors: [], total: 1, taskIdsFailedToBeDeleted: [] };
 
   it('should delete rules with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
@@ -49,10 +49,7 @@ describe('bulkDeleteRulesRoute', () => {
     );
 
     expect(await handler(context, req, res)).toEqual({
-      body: {
-        total: 1,
-        errors: [],
-      },
+      body: bulkDeleteResult,
     });
 
     expect(rulesClient.bulkDeleteRules).toHaveBeenCalledTimes(1);

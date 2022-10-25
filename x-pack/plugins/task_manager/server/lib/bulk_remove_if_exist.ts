@@ -17,7 +17,7 @@ import { TaskStore } from '../task_store';
  */
 export async function bulkRemoveIfExist(taskStore: TaskStore, taskIds: string[]) {
   try {
-    await taskStore.bulkRemove(taskIds);
+    return await taskStore.bulkRemove(taskIds);
   } catch (err) {
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
       throw err;

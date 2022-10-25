@@ -6,7 +6,7 @@
  */
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
@@ -18,6 +18,7 @@ import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { loggerMock } from '@kbn/logging-mocks';
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -30,6 +31,7 @@ const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
 const authorization = alertingAuthorizationMock.create();
 const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
+const logger = loggerMock.create();
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
@@ -43,7 +45,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: createAPIKeyMock,
-  logger: loggingSystemMock.create().get(),
+  logger,
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
   getEventLogClient: jest.fn(),
@@ -169,6 +171,7 @@ describe('bulkDelete', () => {
     expect(result).toStrictEqual({
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'n/a' }, status: 500 }],
       total: 2,
+      taskIdsFailedToBeDeleted: [],
     });
   });
 
@@ -253,6 +256,7 @@ describe('bulkDelete', () => {
     expect(result).toStrictEqual({
       errors: [{ message: 'UPS', rule: { id: 'id2', name: 'n/a' }, status: 409 }],
       total: 2,
+      taskIdsFailedToBeDeleted: [],
     });
   });
 
@@ -318,6 +322,7 @@ describe('bulkDelete', () => {
     expect(result).toStrictEqual({
       errors: [],
       total: 2,
+      taskIdsFailedToBeDeleted: [],
     });
   });
 
@@ -354,6 +359,74 @@ describe('bulkDelete', () => {
     await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrow(
       'No rules found for bulk delete'
     );
+  });
+
+  describe('taskManager', () => {
+    test('should return task id if deleting task failed', async () => {
+      mockCreatePointInTimeFinderAsInternalUser();
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: 'id1', type: 'alert', success: true },
+          { id: 'id2', type: 'alert', success: true },
+        ],
+      });
+      taskManager.bulkRemoveIfExist.mockImplementation(async () => ({
+        statuses: [
+          {
+            id: 'taskId1',
+            type: 'alert',
+            success: true,
+          },
+          {
+            id: 'taskId2',
+            type: 'alert',
+            success: false,
+            error: {
+              error: '',
+              message: 'UPS',
+              statusCode: 500,
+            },
+          },
+        ],
+      }));
+
+      const result = await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(logger.debug).toBeCalledTimes(1);
+      expect(logger.debug).toBeCalledWith(
+        'Successfully deleted schedules for underlying tasks: taskId2'
+      );
+      expect(result).toStrictEqual({
+        errors: [],
+        total: 2,
+        taskIdsFailedToBeDeleted: ['taskId2'],
+      });
+    });
+
+    test('should not throw an error if taskManager throw an error', async () => {
+      mockCreatePointInTimeFinderAsInternalUser();
+      unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: 'id1', type: 'alert', success: true },
+          { id: 'id2', type: 'alert', success: true },
+        ],
+      });
+      taskManager.bulkRemoveIfExist.mockImplementation(() => {
+        throw new Error('UPS');
+      });
+
+      const result = await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
+
+      expect(logger.error).toBeCalledTimes(1);
+      expect(logger.error).toBeCalledWith(
+        'Failure to delete schedules for underlying tasks: taskId1, taskId2. TaskManager bulkRemoveIfExist failed with Error: UPS'
+      );
+      expect(result).toStrictEqual({
+        errors: [],
+        taskIdsFailedToBeDeleted: [],
+        total: 2,
+      });
+    });
   });
 
   describe('auditLogger', () => {

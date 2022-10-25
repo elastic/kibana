@@ -1824,8 +1824,27 @@ export class RulesClient {
       kueryNodeFilterWithAuth
     );
 
+    const taskIdsFailedToBeDeleted: string[] = [];
     if (taskIdsToDelete.length > 0) {
-      this.taskManager.bulkRemoveIfExist(taskIdsToDelete);
+      try {
+        const resultFromDeletingTasks = await this.taskManager.bulkRemoveIfExist(taskIdsToDelete);
+        resultFromDeletingTasks.statuses.forEach((status) => {
+          if (!status.success) {
+            taskIdsFailedToBeDeleted.push(status.id);
+          }
+        });
+        this.logger.debug(
+          `Successfully deleted schedules for underlying tasks: ${taskIdsToDelete
+            .filter((id) => taskIdsFailedToBeDeleted.includes(id))
+            .join(', ')}`
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failure to delete schedules for underlying tasks: ${taskIdsToDelete.join(
+            ', '
+          )}. TaskManager bulkRemoveIfExist failed with Error: ${error.message}`
+        );
+      }
     }
 
     await bulkMarkApiKeysForInvalidation(
@@ -1834,7 +1853,7 @@ export class RulesClient {
       this.unsecuredSavedObjectsClient
     );
 
-    return { errors, total };
+    return { errors, total, taskIdsFailedToBeDeleted };
   };
 
   private bulkDeleteWithOCC = async ({ filter }: { filter: KueryNode | null }) => {

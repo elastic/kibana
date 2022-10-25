@@ -10,6 +10,8 @@ import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 
+const defaultSuccessfulResponse = { errors: [], total: 1, taskIdsFailedToBeDeleted: [] };
+
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -74,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql({ errors: [], total: 1 });
+              expect(response.body).to.eql(defaultSuccessfulResponse);
               expect(response.statusCode).to.eql(200);
               try {
                 await getScheduledTask(createdRule1.scheduled_task_id);
@@ -145,7 +147,7 @@ export default ({ getService }: FtrProviderContext) => {
               break;
             case 'superuser at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql({ errors: [], total: 1 });
+              expect(response.body).to.eql(defaultSuccessfulResponse);
               expect(response.statusCode).to.eql(200);
               try {
                 await getScheduledTask(createdRule1.scheduled_task_id);
@@ -205,7 +207,7 @@ export default ({ getService }: FtrProviderContext) => {
               await getScheduledTask(createdRule1.scheduled_task_id);
               break;
             case 'superuser at space1':
-              expect(response.body).to.eql({ errors: [], total: 1 });
+              expect(response.body).to.eql(defaultSuccessfulResponse);
               expect(response.statusCode).to.eql(200);
               try {
                 await getScheduledTask(createdRule1.scheduled_task_id);
@@ -265,7 +267,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql({ errors: [], total: 1 });
+              expect(response.body).to.eql(defaultSuccessfulResponse);
               expect(response.statusCode).to.eql(200);
               try {
                 await getScheduledTask(createdRule1.scheduled_task_id);
@@ -330,7 +332,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql({ errors: [], total: 3 });
+              expect(response.body).to.eql({ ...defaultSuccessfulResponse, total: 3 });
               expect(response.statusCode).to.eql(200);
               for (const rule of rules) {
                 try {
@@ -397,7 +399,7 @@ export default ({ getService }: FtrProviderContext) => {
             case 'superuser at space1':
             case 'space_1_all at space1':
             case 'space_1_all_with_restricted_fixture at space1':
-              expect(response.body).to.eql({ errors: [], total: 3 });
+              expect(response.body).to.eql({ ...defaultSuccessfulResponse, total: 3 });
               expect(response.statusCode).to.eql(200);
               for (const rule of rules) {
                 try {
@@ -429,7 +431,7 @@ export default ({ getService }: FtrProviderContext) => {
           switch (scenario.id) {
             // This superuser has more privileges that we think
             case 'superuser at space1':
-              expect(response.body).to.eql({ errors: [], total: 1 });
+              expect(response.body).to.eql(defaultSuccessfulResponse);
               expect(response.statusCode).to.eql(200);
               try {
                 await getScheduledTask(createdRule.scheduled_task_id);
