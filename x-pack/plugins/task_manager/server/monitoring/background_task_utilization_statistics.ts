@@ -7,13 +7,12 @@
 
 import { JsonObject } from '@kbn/utility-types';
 import { combineLatest, filter, map, Observable, startWith } from 'rxjs';
-import uuid from 'uuid';
 import { parseIntervalAsMinute } from '../lib/intervals';
 import { unwrap } from '../lib/result_type';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
 import { ConcreteTaskInstance } from '../task';
 import { isTaskRunEvent, TaskPersistence, TaskRun, TaskTiming } from '../task_events';
-import { HealthStatus } from './monitoring_stats_stream';
+import { HealthStatus, MonitoredStat } from './monitoring_stats_stream';
 import { AggregatedStat, AggregatedStatProvider } from './runtime_statistics_aggregator';
 import {
   AveragedStat,
@@ -47,7 +46,6 @@ interface RecurringTaskStat extends TaskStat {
 }
 
 export interface SummarizedBackgroundTaskUtilizationStat extends JsonObject {
-  process_uuid: string; // unique identifier of the process that created these metrics
   adhoc: {
     created: {
       counter: number;
@@ -163,7 +161,6 @@ export function summarizeUtilizationStat({ adhoc, recurring }: BackgroundTaskUti
 } {
   return {
     value: {
-      process_uuid: uuid.v4(),
       adhoc: {
         created: {
           counter: calculateSum(adhoc.created.counter),
@@ -188,6 +185,28 @@ export function summarizeUtilizationStat({ adhoc, recurring }: BackgroundTaskUti
       },
     },
     status: HealthStatus.OK,
+  };
+}
+
+export function summarizeUtilizationStats({
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  last_update,
+  stats,
+}: {
+  last_update: string;
+  stats: MonitoredStat<BackgroundTaskUtilizationStat> | undefined;
+}): {
+  last_update: string;
+  stats: MonitoredStat<SummarizedBackgroundTaskUtilizationStat> | {};
+} {
+  return {
+    last_update,
+    stats: stats
+      ? {
+          timestamp: stats.timestamp,
+          ...summarizeUtilizationStat(stats.value),
+        }
+      : {},
   };
 }
 

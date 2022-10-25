@@ -27,7 +27,7 @@ import { TaskDefinitionRegistry, TaskTypeDictionary, REMOVED_TYPES } from './tas
 import { AggregationOpts, FetchResult, SearchOpts, TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';
-import { healthRoute } from './routes';
+import { backgroundTaskUtilizationRoute, healthRoute } from './routes';
 import { createMonitoringStats, MonitoringStats } from './monitoring';
 import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTask, ConcreteTaskInstance } from './task';
@@ -124,6 +124,18 @@ export class TaskManagerPlugin
       getClusterClient: () =>
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
       shouldRunTasks: this.shouldRunBackgroundTasks,
+    });
+    backgroundTaskUtilizationRoute({
+      router,
+      monitoringStats$: this.monitoringStats$,
+      logger: this.logger,
+      taskManagerId: this.taskManagerId,
+      config: this.config!,
+      usageCounter: this.usageCounter!,
+      kibanaVersion: this.kibanaVersion,
+      kibanaIndexName: core.savedObjects.getKibanaIndex(),
+      getClusterClient: () =>
+        startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
     });
 
     core.status.derivedStatus$.subscribe((status) =>

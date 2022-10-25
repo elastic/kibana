@@ -32,7 +32,6 @@ import {
 } from './task_run_statistics';
 import {
   BackgroundTaskUtilizationStat,
-  summarizeUtilizationStat,
   createBackgroundTaskUtilizationAggregator,
 } from './background_task_utilization_statistics';
 
@@ -62,7 +61,7 @@ export enum HealthStatus {
   Error = 'error',
 }
 
-interface MonitoredStat<T> {
+export interface MonitoredStat<T> {
   timestamp: string;
   value: T;
 }
@@ -190,14 +189,6 @@ export function summarizeMonitoringStats(
           ephemeral: {
             timestamp: ephemeral.timestamp,
             ...summarizeEphemeralStat(ephemeral.value),
-          },
-        }
-      : {}),
-    ...(utilization
-      ? {
-          utilization: {
-            timestamp: utilization.timestamp,
-            ...summarizeUtilizationStat(utilization.value),
           },
         }
       : {}),
