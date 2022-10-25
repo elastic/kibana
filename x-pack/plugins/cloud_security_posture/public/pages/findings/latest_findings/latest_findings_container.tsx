@@ -8,6 +8,7 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { Evaluation } from '../../../../common/types';
 import { CloudPosturePageTitle } from '../../../components/cloud_posture_page_title';
 import type { FindingsBaseProps } from '../types';
@@ -31,6 +32,7 @@ import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import { ErrorCallout } from '../layout/error_callout';
 import { getLimitProperties } from '../utils/get_limit_properties';
+import { LOCAL_STORAGE_PAGE_SIZE_LATEST_FINDINGS_KEY } from '../../../../common/constants';
 
 export const getDefaultQuery = ({
   query,
@@ -48,7 +50,10 @@ const MAX_ITEMS = 500;
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
-
+  const [pageSize, setPageSize] = useLocalStorage(
+    LOCAL_STORAGE_PAGE_SIZE_LATEST_FINDINGS_KEY,
+    urlQuery.pageSize
+  );
   /**
    * Page URL query to ES query
    */
@@ -62,7 +67,10 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
    * Page ES query result
    */
   const findingsGroupByNone = useLatestFindings({
-    ...getPaginationQuery({ pageIndex: urlQuery.pageIndex, pageSize: urlQuery.pageSize }),
+    ...getPaginationQuery({
+      pageIndex: urlQuery.pageIndex,
+      pageSize: pageSize || urlQuery.pageSize,
+    }),
     query: baseEsQuery.query,
     sort: urlQuery.sort,
     enabled: !baseEsQuery.error,
@@ -137,20 +145,21 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
             loading={findingsGroupByNone.isFetching}
             items={findingsGroupByNone.data?.page || []}
             pagination={getPaginationTableParams({
-              pageSize: urlQuery.pageSize,
+              pageSize: pageSize || urlQuery.pageSize,
               pageIndex: urlQuery.pageIndex,
               totalItemCount: limitedTotalItemCount,
             })}
             sorting={{
               sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
             }}
-            setTableOptions={({ page, sort }) =>
+            setTableOptions={({ page, sort }) => {
+              setPageSize(page.size);
               setUrlQuery({
                 sort,
                 pageIndex: page.index,
                 pageSize: page.size,
-              })
-            }
+              });
+            }}
             onAddFilter={(field, value, negate) =>
               setUrlQuery({
                 pageIndex: 0,
