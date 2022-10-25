@@ -145,7 +145,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           query: { query: '', language: 'kuery' },
           filters: [],
           datasourceStates: {
-            indexpattern: {
+            formBased: {
               layers: {
                 '85863a23-73a0-4e11-9774-70f77b9a5898': {
                   columns: {

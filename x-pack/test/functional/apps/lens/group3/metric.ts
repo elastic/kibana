@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const retry = getService('retry');
+  const inspector = getService('inspector');
 
   const clickMetric = async (title: string) => {
     const tiles = await PageObjects.lens.getMetricTiles();
@@ -62,6 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           extraText: 'Average of bytes 19.76K',
           value: '19.76K',
           color: 'rgba(245, 247, 250, 1)',
+          showingTrendline: false,
           showingBar: false,
         },
         {
@@ -70,6 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           extraText: 'Average of bytes 18.99K',
           value: '18.99K',
           color: 'rgba(245, 247, 250, 1)',
+          showingTrendline: false,
           showingBar: false,
         },
         {
@@ -78,6 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           extraText: 'Average of bytes 17.25K',
           value: '17.25K',
           color: 'rgba(245, 247, 250, 1)',
+          showingTrendline: false,
           showingBar: false,
         },
         {
@@ -86,6 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           extraText: 'Average of bytes 15.69K',
           value: '15.69K',
           color: 'rgba(245, 247, 250, 1)',
+          showingTrendline: false,
           showingBar: false,
         },
         {
@@ -94,6 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           extraText: 'Average of bytes 15.61K',
           value: '15.61K',
           color: 'rgba(245, 247, 250, 1)',
+          showingTrendline: false,
           showingBar: false,
         },
         {
@@ -102,6 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           extraText: 'Average of bytes 5.72K',
           value: '5.72K',
           color: 'rgba(245, 247, 250, 1)',
+          showingTrendline: false,
           showingBar: false,
         },
       ]);
@@ -116,6 +123,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.lens.closeDimensionEditor();
       await PageObjects.lens.removeDimension('lnsMetric_maxDimensionPanel');
+    });
+
+    it('should enable trendlines', async () => {
+      await PageObjects.lens.openDimensionEditor(
+        'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
+      );
+
+      await testSubjects.click('lnsMetric_supporting_visualization_trendline');
+
+      await PageObjects.lens.waitForVisualization('mtrVis');
+
+      expect(
+        (await PageObjects.lens.getMetricVisualizationData()).some(
+          (datum) => datum.showingTrendline
+        )
+      ).to.be(true);
+
+      await inspector.open('lnsApp_inspectButton');
+
+      expect(await inspector.getNumberOfTables()).to.equal(2);
+
+      await inspector.close();
+
+      await PageObjects.lens.openDimensionEditor(
+        'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger'
+      );
+
+      await testSubjects.click('lnsMetric_supporting_visualization_none');
+
+      await PageObjects.lens.waitForVisualization('mtrVis');
+
+      expect(
+        (await PageObjects.lens.getMetricVisualizationData()).some(
+          (datum) => datum.showingTrendline
+        )
+      ).to.be(false);
+
+      await PageObjects.lens.closeDimensionEditor();
     });
 
     it('should filter by click', async () => {

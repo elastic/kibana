@@ -95,7 +95,7 @@ export interface StackFrameMetadata {
   // StackTrace.Type
   FrameType: FrameType;
 
-  // StackFrame.LineNumber?
+  // StackTrace.AddressOrLine
   AddressOrLine: number;
   // StackFrame.FunctionName
   FunctionName: string;

@@ -1111,7 +1111,10 @@ module.exports = {
       },
       overrides: [
         {
-          files: ['x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
+          files: [
+            'x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+            'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
+          ],
           rules: {
             '@typescript-eslint/consistent-type-imports': 'error',
           },
@@ -1403,6 +1406,30 @@ module.exports = {
         '@typescript-eslint/no-unused-vars': [
           'error',
           { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
+        ],
+      },
+    },
+    /**
+     * Allows snake_case variables in the server, because that's how we return API properties
+     */
+    {
+      files: ['x-pack/plugins/enterprise_search/server/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/naming-convention': [
+          'error',
+          {
+            selector: 'variable',
+            modifiers: ['destructured'],
+            format: null,
+            leadingUnderscore: 'allow',
+            trailingUnderscore: 'allow',
+          },
+          {
+            selector: 'variable',
+            format: ['camelCase', 'UPPER_CASE'],
+            leadingUnderscore: 'allow',
+            trailingUnderscore: 'allow',
+          },
         ],
       },
     },

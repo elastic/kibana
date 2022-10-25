@@ -223,6 +223,12 @@ describe('AlertingEventLogger', () => {
           ...event.rule,
           name: 'my-super-cool-rule',
         },
+        kibana: {
+          ...event.kibana,
+          alerting: {
+            outcome: 'success',
+          },
+        },
         message: 'success!',
       });
     });
@@ -259,6 +265,12 @@ describe('AlertingEventLogger', () => {
         },
         error: {
           message: 'something went wrong!',
+        },
+        kibana: {
+          ...event.kibana,
+          alerting: {
+            outcome: 'failure',
+          },
         },
         message: 'rule failed!',
       });
@@ -446,6 +458,7 @@ describe('AlertingEventLogger', () => {
           ...event?.kibana,
           alerting: {
             status: 'error',
+            outcome: 'failure',
           },
         },
         message: 'test:123: execution failed',
@@ -484,6 +497,7 @@ describe('AlertingEventLogger', () => {
           ...event?.kibana,
           alerting: {
             status: 'error',
+            outcome: 'failure',
           },
         },
         message: 'test:123: execution failed',
@@ -526,6 +540,7 @@ describe('AlertingEventLogger', () => {
           ...event?.kibana,
           alerting: {
             status: 'error',
+            outcome: 'failure',
           },
         },
         message: 'i am an existing error message',
@@ -560,6 +575,7 @@ describe('AlertingEventLogger', () => {
           ...event?.kibana,
           alerting: {
             status: 'warning',
+            outcome: 'warning',
           },
         },
         message: 'something funky happened',
@@ -594,6 +610,7 @@ describe('AlertingEventLogger', () => {
           ...event?.kibana,
           alerting: {
             status: 'warning',
+            outcome: 'warning',
           },
         },
         message: 'something funky happened',
@@ -630,6 +647,7 @@ describe('AlertingEventLogger', () => {
           ...event?.kibana,
           alerting: {
             status: 'warning',
+            outcome: 'success',
           },
         },
         message: 'success!',

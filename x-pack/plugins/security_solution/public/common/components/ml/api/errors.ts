@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ErrorResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { has } from 'lodash/fp';
 
 import type { MlError } from '../types';
@@ -19,3 +20,6 @@ export interface MlStartJobError {
 // Otherwise for now, has will work ok even though it casts 'unknown' to 'any'
 export const isMlStartJobError = (value: unknown): value is MlStartJobError =>
   has('error.msg', value) && has('error.response', value) && has('error.statusCode', value);
+
+export const isUnknownError = (value: unknown): value is ErrorResponseBase =>
+  has('error.error.reason', value);

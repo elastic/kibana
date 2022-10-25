@@ -37,6 +37,7 @@ interface TimeseriesVisualizationProps {
   visData: TimeseriesVisData;
   uiState: PersistedState;
   syncColors: boolean;
+  syncCursor: boolean;
   syncTooltips: boolean;
   initialRender: () => void;
 }
@@ -48,6 +49,7 @@ function TimeseriesVisualization({
   uiState,
   getConfig,
   syncColors,
+  syncCursor,
   syncTooltips,
   initialRender,
 }: TimeseriesVisualizationProps) {
@@ -194,6 +196,7 @@ function TimeseriesVisualization({
             onUiState={handleUiState}
             syncColors={syncColors}
             syncTooltips={syncTooltips}
+            syncCursor={syncCursor}
             palettesService={palettesService}
             indexPattern={indexPattern}
             fieldFormatMap={indexPattern?.fieldFormatMap}

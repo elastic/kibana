@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { sortBy } from 'lodash';
-import { CurrentUserProfile } from '../types';
+import { NO_ASSIGNEES_VALUE } from '../all_cases/assignees_filter';
+import type { CurrentUserProfile } from '../types';
+import type { AssigneesFilteringSelection } from './types';
 
 export const getSortField = (profile: UserProfileWithAvatar) =>
   profile.user.full_name?.toLowerCase() ??
@@ -51,3 +53,26 @@ export const sortProfiles = (profiles?: UserProfileWithAvatar[]) => {
 
   return sortBy(profiles, getSortField);
 };
+
+export const orderAssigneesIncludingNone = (
+  currentUserProfile: CurrentUserProfile,
+  assignees: AssigneesFilteringSelection[]
+) => {
+  const usersWithNoAssigneeSelection = removeNoAssigneesSelection(assignees);
+  const sortedUsers =
+    bringCurrentUserToFrontAndSort(currentUserProfile, usersWithNoAssigneeSelection) ?? [];
+
+  const hasNoAssigneesSelection = assignees.find((assignee) => assignee === NO_ASSIGNEES_VALUE);
+
+  const sortedUsersWithNoAssigneeIfExisted =
+    hasNoAssigneesSelection !== undefined ? [NO_ASSIGNEES_VALUE, ...sortedUsers] : sortedUsers;
+
+  return sortedUsersWithNoAssigneeIfExisted;
+};
+
+const removeNoAssigneesSelection = (
+  assignees: AssigneesFilteringSelection[]
+): UserProfileWithAvatar[] =>
+  assignees.filter<UserProfileWithAvatar>(
+    (assignee): assignee is UserProfileWithAvatar => assignee !== NO_ASSIGNEES_VALUE
+  );

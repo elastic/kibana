@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
-import { act, RenderResult, waitFor, within } from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
+import { act, waitFor, within } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { CaseSeverity, CommentType, ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
-import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
@@ -32,13 +34,14 @@ import {
   useGetChoicesResponse,
 } from './mock';
 import { FormContext } from './form_context';
-import { CreateCaseFormFields, CreateCaseFormFieldsProps } from './form';
+import type { CreateCaseFormFieldsProps } from './form';
+import { CreateCaseFormFields } from './form';
 import { SubmitCaseButton } from './submit_button';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import { Choice } from '../connectors/servicenow/types';
+import type { Choice } from '../connectors/servicenow/types';
 import userEvent from '@testing-library/user-event';
 import { connectorsMock } from '../../common/mock/connectors';
-import { CaseAttachments } from '../../types';
+import type { CaseAttachments } from '../../types';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 import { waitForComponentToUpdate } from '../../common/test_utils';
@@ -118,7 +121,8 @@ const fillFormReactTestingLib = async (renderResult: RenderResult) => {
   }
 };
 
-describe('Create case', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/142283
+describe.skip('Create case', () => {
   const refetch = jest.fn();
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();

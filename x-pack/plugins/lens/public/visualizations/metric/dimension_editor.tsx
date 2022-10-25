@@ -29,9 +29,8 @@ import {
   DEFAULT_MIN_STOP,
 } from '@kbn/coloring';
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
-import { css } from '@emotion/react';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { isNumericFieldForDatatable } from '../../../common/expressions';
+import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import {
   applyPaletteParams,
   PalettePanelContainer,
@@ -39,9 +38,16 @@ import {
 } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
-import { DEFAULT_MAX_COLUMNS, getDefaultColor, MetricVisualizationState } from './visualization';
+import {
+  DEFAULT_MAX_COLUMNS,
+  getDefaultColor,
+  MetricVisualizationState,
+  showingBar,
+} from './visualization';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { DebouncedInput } from '../../shared_components/debounced_input';
+
+export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
 type Props = VisualizationDimensionEditorProps<MetricVisualizationState> & {
   paletteService: PaletteRegistry;
@@ -117,7 +123,7 @@ function BreakdownByEditor({ setState, state }: SubProps) {
       </EuiFormRow>
       <CollapseSetting
         value={state.collapseFn || ''}
-        onChange={(collapseFn: string) => {
+        onChange={(collapseFn) => {
           setState({
             ...state,
             collapseFn,
@@ -129,49 +135,7 @@ function BreakdownByEditor({ setState, state }: SubProps) {
 }
 
 function MaximumEditor({ setState, state, idPrefix }: SubProps) {
-  return (
-    <EuiFormRow
-      label={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
-        defaultMessage: 'Bar direction',
-      })}
-      fullWidth
-      display="columnCompressed"
-    >
-      <EuiButtonGroup
-        isFullWidth
-        buttonSize="compressed"
-        legend={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
-          defaultMessage: 'Bar direction',
-        })}
-        data-test-subj="lnsMetric_progress_direction_buttons"
-        name="alignment"
-        options={[
-          {
-            id: `${idPrefix}vertical`,
-            label: i18n.translate('xpack.lens.metric.progressDirection.vertical', {
-              defaultMessage: 'Vertical',
-            }),
-            'data-test-subj': 'lnsMetric_progress_bar_vertical',
-          },
-          {
-            id: `${idPrefix}horizontal`,
-            label: i18n.translate('xpack.lens.metric.progressDirection.horizontal', {
-              defaultMessage: 'Horizontal',
-            }),
-            'data-test-subj': 'lnsMetric_progress_bar_horizontal',
-          },
-        ]}
-        idSelected={`${idPrefix}${state.progressDirection ?? 'vertical'}`}
-        onChange={(id) => {
-          const newDirection = id.replace(idPrefix, '') as LayoutDirection;
-          setState({
-            ...state,
-            progressDirection: newDirection,
-          });
-        }}
-      />
-    </EuiFormRow>
-  );
+  return null;
 }
 
 function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, state }: SubProps) {
@@ -299,17 +263,176 @@ function PrimaryMetricEditor(props: SubProps) {
 
   const togglePalette = () => setIsPaletteOpen(!isPaletteOpen);
 
+  const supportingVisLabel = i18n.translate('xpack.lens.metric.supportingVis.label', {
+    defaultMessage: 'Supporting visualization',
+  });
+
+  const hasDefaultTimeField = props.datasource?.hasDefaultTimeField();
+  const metricHasReducedTimeRange = Boolean(
+    state.metricAccessor &&
+      props.datasource?.getOperationForColumnId(state.metricAccessor)?.hasReducedTimeRange
+  );
+  const secondaryMetricHasReducedTimeRange = Boolean(
+    state.secondaryMetricAccessor &&
+      props.datasource?.getOperationForColumnId(state.secondaryMetricAccessor)?.hasReducedTimeRange
+  );
+
+  const supportingVisHelpTexts: string[] = [];
+
+  const supportsTrendline =
+    hasDefaultTimeField && !metricHasReducedTimeRange && !secondaryMetricHasReducedTimeRange;
+
+  if (!supportsTrendline) {
+    supportingVisHelpTexts.push(
+      !hasDefaultTimeField
+        ? i18n.translate('xpack.lens.metric.supportingVis.needDefaultTimeField', {
+            defaultMessage: 'Use a data view with a default time field to enable trend lines.',
+          })
+        : metricHasReducedTimeRange
+        ? i18n.translate('xpack.lens.metric.supportingVis.metricHasReducedTimeRange', {
+            defaultMessage:
+              'Remove the reduced time range on this dimension to enable trend lines.',
+          })
+        : secondaryMetricHasReducedTimeRange
+        ? i18n.translate('xpack.lens.metric.supportingVis.secondaryMetricHasReducedTimeRange', {
+            defaultMessage:
+              'Remove the reduced time range on the secondary metric dimension to enable trend lines.',
+          })
+        : ''
+    );
+  }
+
+  if (!state.maxAccessor) {
+    supportingVisHelpTexts.push(
+      i18n.translate('xpack.lens.metric.summportingVis.needMaxDimension', {
+        defaultMessage: 'Add a maximum dimension to enable the progress bar.',
+      })
+    );
+  }
+
+  const buttonIdPrefix = `${idPrefix}--`;
+
   return (
     <>
+      <EuiFormRow
+        display="columnCompressed"
+        fullWidth
+        label={supportingVisLabel}
+        helpText={supportingVisHelpTexts.map((text) => (
+          <div>{text}</div>
+        ))}
+      >
+        <EuiButtonGroup
+          isFullWidth
+          buttonSize="compressed"
+          legend={supportingVisLabel}
+          data-test-subj="lnsMetric_supporting_visualization_buttons"
+          options={[
+            {
+              id: `${buttonIdPrefix}none`,
+              label: i18n.translate('xpack.lens.metric.supportingVisualization.none', {
+                defaultMessage: 'None',
+              }),
+              'data-test-subj': 'lnsMetric_supporting_visualization_none',
+            },
+            {
+              id: `${buttonIdPrefix}trendline`,
+              label: i18n.translate('xpack.lens.metric.supportingVisualization.trendline', {
+                defaultMessage: 'Trend line',
+              }),
+              isDisabled: !supportsTrendline,
+              'data-test-subj': 'lnsMetric_supporting_visualization_trendline',
+            },
+            {
+              id: `${buttonIdPrefix}bar`,
+              label: i18n.translate('xpack.lens.metric.supportingVisualization.bar', {
+                defaultMessage: 'Bar',
+              }),
+              isDisabled: !state.maxAccessor,
+              'data-test-subj': 'lnsMetric_supporting_visualization_bar',
+            },
+          ]}
+          idSelected={`${buttonIdPrefix}${
+            state.trendlineLayerId ? 'trendline' : showingBar(state) ? 'bar' : 'none'
+          }`}
+          onChange={(id) => {
+            const supportingVisualizationType = id.split('--')[1] as SupportingVisType;
+
+            switch (supportingVisualizationType) {
+              case 'trendline':
+                setState({
+                  ...state,
+                  showBar: false,
+                });
+                props.addLayer('metricTrendline');
+                break;
+              case 'bar':
+                setState({
+                  ...state,
+                  showBar: true,
+                });
+                if (state.trendlineLayerId) props.removeLayer(state.trendlineLayerId);
+                break;
+              case 'none':
+                setState({
+                  ...state,
+                  showBar: false,
+                });
+                if (state.trendlineLayerId) props.removeLayer(state.trendlineLayerId);
+                break;
+            }
+          }}
+        />
+      </EuiFormRow>
+      {showingBar(state) && (
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
+            defaultMessage: 'Bar direction',
+          })}
+          fullWidth
+          display="columnCompressed"
+        >
+          <EuiButtonGroup
+            isFullWidth
+            buttonSize="compressed"
+            legend={i18n.translate('xpack.lens.metric.progressDirectionLabel', {
+              defaultMessage: 'Bar direction',
+            })}
+            data-test-subj="lnsMetric_progress_direction_buttons"
+            name="alignment"
+            options={[
+              {
+                id: `${idPrefix}vertical`,
+                label: i18n.translate('xpack.lens.metric.progressDirection.vertical', {
+                  defaultMessage: 'Vertical',
+                }),
+                'data-test-subj': 'lnsMetric_progress_bar_vertical',
+              },
+              {
+                id: `${idPrefix}horizontal`,
+                label: i18n.translate('xpack.lens.metric.progressDirection.horizontal', {
+                  defaultMessage: 'Horizontal',
+                }),
+                'data-test-subj': 'lnsMetric_progress_bar_horizontal',
+              },
+            ]}
+            idSelected={`${idPrefix}${state.progressDirection ?? 'vertical'}`}
+            onChange={(id) => {
+              const newDirection = id.replace(idPrefix, '') as LayoutDirection;
+              setState({
+                ...state,
+                progressDirection: newDirection,
+              });
+            }}
+          />
+        </EuiFormRow>
+      )}
       <EuiFormRow
         display="columnCompressed"
         fullWidth
         label={i18n.translate('xpack.lens.metric.dynamicColoring.label', {
           defaultMessage: 'Color mode',
         })}
-        css={css`
-          align-items: center;
-        `}
       >
         <EuiButtonGroup
           isFullWidth
@@ -362,62 +485,60 @@ function PrimaryMetricEditor(props: SubProps) {
       </EuiFormRow>
       {!hasDynamicColoring && <StaticColorControls {...props} />}
       {hasDynamicColoring && (
-        <>
-          <EuiFormRow
-            display="columnCompressed"
-            fullWidth
-            label={i18n.translate('xpack.lens.paletteMetricGradient.label', {
-              defaultMessage: 'Color',
-            })}
+        <EuiFormRow
+          display="columnCompressed"
+          fullWidth
+          label={i18n.translate('xpack.lens.paletteMetricGradient.label', {
+            defaultMessage: 'Color',
+          })}
+        >
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+            className="lnsDynamicColoringClickable"
           >
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="s"
-              responsive={false}
-              className="lnsDynamicColoringClickable"
-            >
-              <EuiFlexItem>
-                <EuiColorPaletteDisplay
-                  data-test-subj="lnsMetric_dynamicColoring_palette"
-                  palette={displayStops.map(({ color }) => color)}
-                  type={FIXED_PROGRESSION}
-                  onClick={togglePalette}
+            <EuiFlexItem>
+              <EuiColorPaletteDisplay
+                data-test-subj="lnsMetric_dynamicColoring_palette"
+                palette={displayStops.map(({ color }) => color)}
+                type={FIXED_PROGRESSION}
+                onClick={togglePalette}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="lnsMetric_dynamicColoring_trigger"
+                iconType="controlsHorizontal"
+                onClick={togglePalette}
+                size="xs"
+                flush="both"
+              >
+                {i18n.translate('xpack.lens.paletteTableGradient.customize', {
+                  defaultMessage: 'Edit',
+                })}
+              </EuiButtonEmpty>
+              <PalettePanelContainer
+                siblingRef={props.panelRef}
+                isOpen={isPaletteOpen}
+                handleClose={togglePalette}
+              >
+                <CustomizablePalette
+                  palettes={props.paletteService}
+                  activePalette={activePalette}
+                  dataBounds={currentMinMax}
+                  showRangeTypeSelector={supportsPercentPalette}
+                  setPalette={(newPalette) => {
+                    setState({
+                      ...state,
+                      palette: newPalette,
+                    });
+                  }}
                 />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="lnsMetric_dynamicColoring_trigger"
-                  iconType="controlsHorizontal"
-                  onClick={togglePalette}
-                  size="xs"
-                  flush="both"
-                >
-                  {i18n.translate('xpack.lens.paletteTableGradient.customize', {
-                    defaultMessage: 'Edit',
-                  })}
-                </EuiButtonEmpty>
-                <PalettePanelContainer
-                  siblingRef={props.panelRef}
-                  isOpen={isPaletteOpen}
-                  handleClose={togglePalette}
-                >
-                  <CustomizablePalette
-                    palettes={props.paletteService}
-                    activePalette={activePalette}
-                    dataBounds={currentMinMax}
-                    showRangeTypeSelector={supportsPercentPalette}
-                    setPalette={(newPalette) => {
-                      setState({
-                        ...state,
-                        palette: newPalette,
-                      });
-                    }}
-                  />
-                </PalettePanelContainer>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-        </>
+              </PalettePanelContainer>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFormRow>
       )}
     </>
   );
@@ -439,7 +560,7 @@ function StaticColorControls({ state, setState }: Pick<Props, 'state' | 'setStat
     useDebouncedValue<string>(
       {
         onChange: setColor,
-        value: state.color || getDefaultColor(!!state.maxAccessor),
+        value: state.color || getDefaultColor(state),
       },
       { allowFalsyValue: true }
     );

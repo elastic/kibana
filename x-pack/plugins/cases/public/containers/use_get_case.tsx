@@ -6,11 +6,11 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { ResolvedCase } from './types';
+import type { ResolvedCase } from './types';
 import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';
 import { resolveCase } from './api';
-import { ServerError } from '../types';
+import type { ServerError } from '../types';
 import { casesQueriesKeys } from './constants';
 
 export const useGetCase = (caseId: string) => {

@@ -21,8 +21,12 @@ import {
   getLatestDataOrBucketTimestamp,
   getEarliestDatafeedStartTime,
   resolveMaxTimeInterval,
+  getFiltersForDSLQuery,
+  isKnownEmptyQuery,
 } from './job_utils';
 import { CombinedJob, Job } from '../types/anomaly_detection_jobs';
+import { FilterStateStore } from '@kbn/es-query';
+
 import moment from 'moment';
 
 describe('ML - job utils', () => {
@@ -610,6 +614,181 @@ describe('ML - job utils', () => {
     });
     test('returns undefined for an empty array', () => {
       expect(resolveMaxTimeInterval([])).toBe(undefined);
+    });
+  });
+});
+
+describe('getFiltersForDSLQuery', () => {
+  describe('when DSL query contains match_all', () => {
+    test('returns empty array when query contains a must clause that contains match_all', () => {
+      const actual = getFiltersForDSLQuery(
+        { bool: { must: [{ match_all: {} }] } },
+        'dataview-id',
+        'test-alias'
+      );
+      expect(actual).toEqual([]);
+    });
+  });
+
+  describe('when DSL query is valid', () => {
+    const query = {
+      bool: {
+        must: [],
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: '2007-09-29T15:05:14.509Z',
+                lte: '2022-09-29T15:05:14.509Z',
+              },
+            },
+          },
+          {
+            match_phrase: {
+              response_code: '200',
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
+    };
+
+    test('returns filters with alias', () => {
+      const actual = getFiltersForDSLQuery(query, 'dataview-id', 'test-alias');
+      expect(actual).toEqual([
+        {
+          $state: { store: 'appState' },
+          meta: {
+            alias: 'test-alias',
+            disabled: false,
+            index: 'dataview-id',
+            negate: false,
+            type: 'custom',
+            value:
+              '{"bool":{"must":[],"filter":[{"range":{"@timestamp":{"format":"strict_date_optional_time","gte":"2007-09-29T15:05:14.509Z","lte":"2022-09-29T15:05:14.509Z"}}},{"match_phrase":{"response_code":"200"}}],"should":[],"must_not":[]}}',
+          },
+          query,
+        },
+      ]);
+    });
+
+    test('returns filter with no alias if alias is not provided', () => {
+      const actual = getFiltersForDSLQuery(query, 'dataview-id');
+      expect(actual).toEqual([
+        {
+          $state: { store: 'appState' },
+          meta: {
+            disabled: false,
+            index: 'dataview-id',
+            negate: false,
+            type: 'custom',
+            value:
+              '{"bool":{"must":[],"filter":[{"range":{"@timestamp":{"format":"strict_date_optional_time","gte":"2007-09-29T15:05:14.509Z","lte":"2022-09-29T15:05:14.509Z"}}},{"match_phrase":{"response_code":"200"}}],"should":[],"must_not":[]}}',
+          },
+          query,
+        },
+      ]);
+    });
+
+    test('returns global state filter when GLOBAL_STATE is specified', () => {
+      const actual = getFiltersForDSLQuery(
+        query,
+        'dataview-id',
+        undefined,
+        FilterStateStore.GLOBAL_STATE
+      );
+      expect(actual).toEqual([
+        {
+          $state: { store: 'globalState' },
+          meta: {
+            disabled: false,
+            index: 'dataview-id',
+            negate: false,
+            type: 'custom',
+            value:
+              '{"bool":{"must":[],"filter":[{"range":{"@timestamp":{"format":"strict_date_optional_time","gte":"2007-09-29T15:05:14.509Z","lte":"2022-09-29T15:05:14.509Z"}}},{"match_phrase":{"response_code":"200"}}],"should":[],"must_not":[]}}',
+          },
+          query,
+        },
+      ]);
+    });
+  });
+
+  describe('isKnownEmptyQuery', () => {
+    test('returns true for default lens created query', () => {
+      const result = isKnownEmptyQuery({
+        bool: {
+          filter: [],
+          must: [
+            {
+              match_all: {},
+            },
+          ],
+          must_not: [],
+        },
+      });
+      expect(result).toBe(true);
+    });
+
+    test('returns true for default lens created query variation 1', () => {
+      const result = isKnownEmptyQuery({
+        bool: {
+          must: [
+            {
+              match_all: {},
+            },
+          ],
+          must_not: [],
+        },
+      });
+      expect(result).toBe(true);
+    });
+
+    test('returns true for default lens created query variation 2', () => {
+      const result = isKnownEmptyQuery({
+        bool: {
+          must: [
+            {
+              match_all: {},
+            },
+          ],
+        },
+      });
+      expect(result).toBe(true);
+    });
+
+    test('returns true for QA framework created query4', () => {
+      const result = isKnownEmptyQuery({
+        match_all: {},
+      });
+      expect(result).toBe(true);
+    });
+
+    test('returns false for query with match_phrase', () => {
+      const result = isKnownEmptyQuery({
+        match_phrase: {
+          region: 'us-east-1',
+        },
+      });
+      expect(result).toBe(false);
+    });
+
+    test('returns false for query with match_phrase in should', () => {
+      const result = isKnownEmptyQuery({
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                region: 'us-east-1',
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+      expect(result).toBe(false);
     });
   });
 });

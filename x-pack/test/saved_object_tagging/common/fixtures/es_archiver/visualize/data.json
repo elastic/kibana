@@ -1,4 +1,4 @@
-{
+[{
   "id": "tag-1",
   "type": "tag",
   "attributes": {
@@ -8,8 +8,7 @@
   },
   "references": [],
   "updated_at": "2021-06-17T18:57:58.076Z"
-}
-
+},
 {
   "id": "tag-2",
   "type": "tag",
@@ -20,8 +19,7 @@
   },
   "references": [],
   "updated_at": "2021-06-17T18:57:58.076Z"
-}
-
+},
 {
   "id": "tag-3",
   "type": "tag",
@@ -32,8 +30,18 @@
   },
   "references": [],
   "updated_at": "2021-06-17T18:57:58.076Z"
-}
-
+},
+{
+  "id": "myextratag",
+  "type": "tag",
+  "attributes": {
+    "name": "myextratag",
+    "description": "We need one more",
+    "color": "#000000"
+  },
+  "references": [],
+  "updated_at": "2021-06-17T18:57:58.076Z"
+},
 {
   "id": "logstash-*",
   "type": "index-pattern",
@@ -45,8 +53,7 @@
   },
   "references": [],
   "updated_at": "2021-06-17T18:57:58.076Z"
-}
-
+},
 {
   "id": "vis-area-1",
   "type": "visualization",
@@ -67,8 +74,7 @@
     }
   ],
   "updated_at": "2021-06-17T18:57:58.076Z"
-}
-
+},
 {
   "id": "vis-area-2",
   "type": "visualization",
@@ -89,8 +95,7 @@
     }
   ],
   "updated_at": "2021-06-17T18:57:58.076Z"
-}
-
+},
 {
   "id": "vis-area-3",
   "type": "visualization",
@@ -115,4 +120,4 @@
     }
   ],
   "updated_at": "2021-06-17T18:57:58.076Z"
-}
+}]
