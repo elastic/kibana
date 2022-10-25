@@ -17,11 +17,7 @@ const defaultLogViewId = 'default';
 export const createUninitializedUseLogViewMock =
   (logViewId: string = defaultLogViewId) =>
   (): IUseLogView => ({
-    derivedDataView: {
-      fields: [],
-      title: 'unknown',
-      type: 'title',
-    },
+    derivedDataView: undefined,
     hasFailedLoading: false,
     hasFailedLoadingLogView: false,
     hasFailedLoadingLogViewStatus: false,

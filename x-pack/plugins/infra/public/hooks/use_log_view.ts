@@ -63,14 +63,9 @@ export const useLogView = ({
     [logViews]
   );
 
-  const derivedDataView = useMemo(
-    () => ({
-      fields: resolvedLogView?.fields ?? [],
-      title: resolvedLogView?.indices ?? 'unknown',
-      type: 'title',
-    }),
-    [resolvedLogView]
-  );
+  const derivedDataView = useMemo(() => {
+    return resolvedLogView?.dataViewReference;
+  }, [resolvedLogView]);
 
   const isLoadingLogView = loadLogViewRequest.state === 'pending';
   const isResolvingLogView = resolveLogViewRequest.state === 'pending';

@@ -23,6 +23,7 @@ export interface ResolvedLogView {
   fields: ResolvedLogViewField[];
   runtimeMappings: estypes.MappingRuntimeFields;
   columns: LogViewColumnConfiguration[];
+  dataViewReference: DataView;
 }
 
 export const resolveLogView = async (
@@ -60,6 +61,12 @@ const resolveLegacyReference = async (
       );
     });
 
+  const dataViewReference = await dataViewsService.create({
+    id: '___InfraLogsLegacyLogViewReference___',
+    title: logViewAttributes.logIndices.indexName,
+    timeFieldName: TIMESTAMP_FIELD,
+  });
+
   return {
     indices: logViewAttributes.logIndices.indexName,
     timestampField: TIMESTAMP_FIELD,
@@ -70,6 +77,7 @@ const resolveLegacyReference = async (
     columns: logViewAttributes.logColumns,
     name: logViewAttributes.name,
     description: logViewAttributes.description,
+    dataViewReference,
   };
 };
 
@@ -97,6 +105,7 @@ const resolveDataViewReference = async (
     columns: logViewAttributes.logColumns,
     name: logViewAttributes.name,
     description: logViewAttributes.description,
+    dataViewReference: dataView,
   };
 };
 
