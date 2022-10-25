@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment-timezone';
-import { has, mapKeys, set, unset, find, some } from 'lodash';
+import { has, mapKeys, set, unset, find, some, filter, uniq, map } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -15,6 +15,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
+import { satisfies } from 'semver';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
@@ -34,6 +35,8 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             description: schema.maybe(schema.string()),
             enabled: schema.maybe(schema.boolean()),
             policy_ids: schema.maybe(schema.arrayOf(schema.string())),
+            is_global: schema.boolean(),
+            // is_global: schema.maybe(schema.recordOf(schema.string(), schema.number())),
             queries: schema.recordOf(
               schema.string(),
               schema.object({
@@ -75,7 +78,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { name, description, queries, enabled, policy_ids } = request.body;
+      const { name, description, queries, enabled, policy_ids, is_global } = request.body;
 
       const conflictingEntries = await savedObjectsClient.find({
         type: packSavedObjectType,
@@ -98,12 +101,34 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         }
       )) ?? { items: [] };
 
-      const agentPolicies = policy_ids
-        ? mapKeys(await agentPolicyService?.getByIds(internalSavedObjectsClient, policy_ids), 'id')
+      const getPolicies = async () => {
+        if (is_global) {
+          const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
+            satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
+          );
+          const globalPoliciesIds = uniq(map(supportedPackagePolicyIds, 'policy_id'));
+          const agentPoliciesResult = await agentPolicyService?.getByIds(
+            internalSavedObjectsClient,
+            globalPoliciesIds
+          );
+
+          return map(agentPoliciesResult, 'id');
+        }
+
+        return policy_ids;
+      };
+
+      const policiesList = await getPolicies();
+
+      const agentPolicies = policiesList
+        ? mapKeys(
+            await agentPolicyService?.getByIds(internalSavedObjectsClient, policiesList),
+            'id'
+          )
         : {};
 
-      const references = policy_ids
-        ? policy_ids.map((policyId: string) => ({
+      const references = policiesList
+        ? policiesList.map((policyId: string) => ({
             id: policyId,
             name: agentPolicies[policyId].name,
             type: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -121,6 +146,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           created_by: currentUser,
           updated_at: moment().toISOString(),
           updated_by: currentUser,
+          is_global,
         },
         {
           references,

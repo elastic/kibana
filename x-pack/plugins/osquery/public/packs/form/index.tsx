@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { FormProvider, useForm as useHookForm } from 'react-hook-form';
 
+import { GlobalPackField } from './global_field';
 import { useRouterNavigate } from '../../common/lib/kibana';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
 import { QueriesField } from './queries_field';
@@ -63,6 +64,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   const deserializer = (payload: PackItem) => ({
     ...payload,
     policy_ids: payload.policy_ids ?? [],
+    is_global: payload.is_global,
     queries: convertPackQueriesToSO(payload.queries),
   });
 
@@ -80,6 +82,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           policy_ids: [],
           enabled: true,
           queries: [],
+          is_global: false,
         },
   });
 
@@ -105,7 +108,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
 
-  const { policy_ids: policyIds } = watch();
+  const { policy_ids: policyIds, is_global: isGlobalEnabled, namespaces = [] } = watch();
+
+  // TODO need to figure out how to verify namespace, because at the beginning the namespace is empty
+  const isDefaultNamespace = namespaces.length === 0 || namespaces?.[0] === 'default';
 
   const agentCount = useMemo(
     () =>
@@ -137,6 +143,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   }, [handleSubmitForm]);
 
   const euiFieldProps = useMemo(() => ({ isDisabled: isReadOnly }), [isReadOnly]);
+  const policyIdsFieldProps = useMemo(() => ({ isDisabled: isGlobalEnabled }), [isGlobalEnabled]);
 
   return (
     <>
@@ -155,8 +162,13 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
         <EuiFlexGroup>
           <EuiFlexItem>
-            <PolicyIdComboBoxField />
+            <PolicyIdComboBoxField euiFieldProps={policyIdsFieldProps} />
           </EuiFlexItem>
+          {isDefaultNamespace && (
+            <EuiFlexItem>
+              <GlobalPackField />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiHorizontalRule />
 

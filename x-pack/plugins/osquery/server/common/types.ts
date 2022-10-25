@@ -17,6 +17,8 @@ export interface IQueryPayload {
 export interface PackSavedObjectAttributes {
   name: string;
   description: string | undefined;
+  // is_global: Record<string, number>;
+  is_global: boolean;
   queries: Array<{
     id: string;
     name: string;

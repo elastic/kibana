@@ -16,6 +16,7 @@ import {
 } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
 
+import { satisfies } from 'semver';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -41,6 +42,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             description: schema.maybe(schema.string()),
             enabled: schema.maybe(schema.boolean()),
             policy_ids: schema.maybe(schema.arrayOf(schema.string())),
+            is_global: schema.maybe(schema.boolean()),
+            // is_global: schema.maybe(schema.recordOf(schema.string(), schema.number())),
             queries: schema.maybe(
               schema.recordOf(
                 schema.string(),
@@ -83,7 +86,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { name, description, queries, enabled, policy_ids } = request.body;
+      const { name, description, queries, enabled, policy_ids, is_global } = request.body;
 
       const currentPackSO = await savedObjectsClient.get<{ name: string; enabled: boolean }>(
         packSavedObjectType,
@@ -117,8 +120,31 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       const currentPackagePolicies = filter(packagePolicies, (packagePolicy) =>
         has(packagePolicy, `inputs[0].config.osquery.value.packs.${currentPackSO.attributes.name}`)
       );
-      const agentPolicies = policy_ids
-        ? mapKeys(await agentPolicyService?.getByIds(internalSavedObjectsClient, policy_ids), 'id')
+
+      const getPolicies = async () => {
+        if (is_global) {
+          const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
+            satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
+          );
+          const globalPoliciesIds = uniq(map(supportedPackagePolicyIds, 'policy_id'));
+          const agentPoliciesResult = await agentPolicyService?.getByIds(
+            internalSavedObjectsClient,
+            globalPoliciesIds
+          );
+
+          return map(agentPoliciesResult, 'id');
+        }
+
+        return policy_ids;
+      };
+
+      const policiesList = await getPolicies();
+
+      const agentPolicies = policiesList
+        ? mapKeys(
+            await agentPolicyService?.getByIds(internalSavedObjectsClient, policiesList),
+            'id'
+          )
         : {};
       const agentPolicyIds = Object.keys(agentPolicies);
 
@@ -128,10 +154,10 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       );
 
       const getUpdatedReferences = () => {
-        if (policy_ids) {
+        if (policiesList) {
           return [
             ...nonAgentPolicyReferences,
-            ...policy_ids.map((id) => ({
+            ...policiesList.map((id) => ({
               id,
               name: agentPolicies[id].name,
               type: AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -142,7 +168,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         return currentPackSO.references;
       };
 
-      await savedObjectsClient.update(
+      await savedObjectsClient.update<PackSavedObjectAttributes>(
         packSavedObjectType,
         request.params.id,
         {
@@ -152,12 +178,14 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           queries: queries && convertPackQueriesToSO(queries),
           updated_at: moment().toISOString(),
           updated_by: currentUser,
+          is_global,
         },
         {
           refresh: 'wait_for',
           references: getUpdatedReferences(),
         }
       );
+      console.log('poszlo dalej');
 
       const currentAgentPolicyIds = map(
         filter(currentPackSO.references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]),
