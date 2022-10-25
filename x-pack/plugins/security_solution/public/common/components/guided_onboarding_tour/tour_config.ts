@@ -70,7 +70,6 @@ const alertsCasesConfig: StepConfig[] = [
       }
     ),
     anchorPosition: 'rightUp',
-    initialFocus: `[tour-step="${getTourAnchor(2, SecurityStepId.alertsCases)}"]`,
     dataTestSubj: getTourAnchor(2, SecurityStepId.alertsCases),
     hideNextButton: true,
   },

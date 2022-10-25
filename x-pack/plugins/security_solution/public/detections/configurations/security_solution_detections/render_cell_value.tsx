@@ -23,28 +23,10 @@ import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
-export const RenderCellValue: React.FC<
-  EuiDataGridCellValueElementProps & CellValueElementProps
-> = ({
-  browserFields,
-  columnId,
-  data,
-  ecsData,
-  eventId,
-  globalFilters,
-  header,
-  isDetails,
-  isDraggable,
-  isExpandable,
-  isExpanded,
-  linkValues,
-  rowIndex,
-  colIndex,
-  rowRenderers,
-  setCellProps,
-  scopeId,
-  truncate,
-}) => {
+export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellValueElementProps> = (
+  props
+) => {
+  const { columnId, rowIndex, scopeId } = props;
   const isTourAnchor = useMemo(
     () =>
       columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
@@ -54,34 +36,13 @@ export const RenderCellValue: React.FC<
   );
 
   return (
-    <>
-      <GuidedOnboardingTourStep
-        isTourAnchor={isTourAnchor}
-        step={1}
-        stepId={SecurityStepId.alertsCases}
-      >
-        <DefaultCellRenderer
-          browserFields={browserFields}
-          columnId={columnId}
-          data={data}
-          ecsData={ecsData}
-          eventId={eventId}
-          globalFilters={globalFilters}
-          header={header}
-          isDetails={isDetails}
-          isDraggable={isDraggable}
-          isExpandable={isExpandable}
-          isExpanded={isExpanded}
-          linkValues={linkValues}
-          rowIndex={rowIndex}
-          colIndex={colIndex}
-          rowRenderers={rowRenderers}
-          setCellProps={setCellProps}
-          scopeId={scopeId}
-          truncate={truncate}
-        />
-      </GuidedOnboardingTourStep>
-    </>
+    <GuidedOnboardingTourStep
+      isTourAnchor={isTourAnchor}
+      step={1}
+      stepId={SecurityStepId.alertsCases}
+    >
+      <DefaultCellRenderer {...props} />
+    </GuidedOnboardingTourStep>
   );
 };
 
