@@ -208,6 +208,7 @@ describe('AnalyticsService', () => {
       registerShipper: expect.any(Function),
       registerContextProvider: expect.any(Function),
       removeContextProvider: expect.any(Function),
+      isEventTypeRegistered: expect.any(Function),
       registerEventType: expect.any(Function),
       reportEvent: expect.any(Function),
       optIn: expect.any(Function),
