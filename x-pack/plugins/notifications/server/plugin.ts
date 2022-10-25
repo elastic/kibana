@@ -31,7 +31,7 @@ export class NotificationsPlugin implements Plugin<void, NotificationsPluginStar
     this.emailServiceSetupSuccessful = false;
   }
 
-  public setup(core: CoreSetup, plugins: NotificationsPluginSetupDeps) {
+  public setup(_core: CoreSetup, plugins: NotificationsPluginSetupDeps) {
     try {
       checkEmailServiceConfiguration({
         config: this.initialConfig,
@@ -43,11 +43,15 @@ export class NotificationsPlugin implements Plugin<void, NotificationsPluginStar
     }
   }
 
-  public start(core: CoreStart, plugins: NotificationsPluginStartDeps) {
+  public start(_core: CoreStart, plugins: NotificationsPluginStartDeps) {
     let email: EmailService | undefined;
     try {
       if (this.emailServiceSetupSuccessful) {
-        email = getEmailService({ config: this.initialConfig, plugins });
+        email = getEmailService({
+          config: this.initialConfig,
+          plugins,
+          logger: this.logger,
+        });
       }
     } catch (err) {
       this.logger.warn(`Error starting email service: ${err}`);

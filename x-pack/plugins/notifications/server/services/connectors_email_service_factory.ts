@@ -5,18 +5,23 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/logging';
 import type { PluginSetupContract, PluginStartContract } from '@kbn/actions-plugin/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { ConnectorsEmailService } from './connectors_email_service';
 import type { EmailService } from './types';
 import { PLUGIN_ID } from '../../common';
 import type { ConnectorsEmailConfigType } from '../config/connectors_email_config';
+import { LicensedEmailService } from './licensed_email_service';
 
 export interface EmailServiceSetupDeps {
   actions?: PluginSetupContract;
+  licensing?: LicensingPluginSetup;
 }
 
 export interface EmailServiceStartDeps {
   actions?: PluginStartContract;
+  licensing?: LicensingPluginStart;
 }
 
 export interface CheckEmailServiceParams {
@@ -27,16 +32,17 @@ export interface CheckEmailServiceParams {
 export interface EmailServiceFactoryParams {
   config: ConnectorsEmailConfigType;
   plugins: EmailServiceStartDeps;
+  logger: Logger;
 }
 
 export function checkEmailServiceConfiguration(params: CheckEmailServiceParams) {
   const {
     config,
-    plugins: { actions },
+    plugins: { actions, licensing },
   } = params;
 
-  if (!actions) {
-    throw new Error(`'actions' plugin not available.`);
+  if (!actions || !licensing) {
+    throw new Error(`'actions' and 'licensing' plugins are required.`);
   }
 
   const emailConnector = config.connectors?.default?.email;
@@ -52,13 +58,19 @@ export function checkEmailServiceConfiguration(params: CheckEmailServiceParams) 
 export function getEmailService(params: EmailServiceFactoryParams): EmailService | undefined {
   const {
     config,
-    plugins: { actions },
+    plugins: { actions, licensing },
+    logger,
   } = params;
 
-  const emailConnector = config.connectors?.default?.email;
   const unsecuredActionsClient = actions?.getUnsecuredActionsClient();
+  const emailConnector = config.connectors?.default?.email;
 
-  if (emailConnector && unsecuredActionsClient) {
-    return new ConnectorsEmailService(PLUGIN_ID, emailConnector, unsecuredActionsClient);
+  if (licensing && unsecuredActionsClient && emailConnector) {
+    return new LicensedEmailService(
+      new ConnectorsEmailService(PLUGIN_ID, emailConnector, unsecuredActionsClient),
+      licensing.license$,
+      'platinum',
+      logger
+    );
   }
 }

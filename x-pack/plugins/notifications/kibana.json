@@ -7,6 +7,6 @@
   "version": "kibana",
   "server": true,
   "ui": false,
-  "requiredPlugins": ["actions"],
+  "requiredPlugins": ["actions", "licensing"],
   "optionalPlugins": []
 }

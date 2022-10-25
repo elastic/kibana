@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { ConnectorsEmailService } from './connectors_email_service';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import {
   checkEmailServiceConfiguration,
   CheckEmailServiceParams,
   EmailServiceFactoryParams,
   getEmailService,
 } from './connectors_email_service_factory';
+import { LicensedEmailService } from './licensed_email_service';
 
 const missingConnectorConfig = {
   connectors: {
@@ -37,14 +39,16 @@ const validConnectorConfig = {
 };
 
 describe('checkEmailServiceConfiguration()', () => {
-  it('should throw an Error if Actions plugin is not available', () => {
+  it('should throw an Error if Actions or Licensing plugins are not available', () => {
     expect(() => {
       const params: CheckEmailServiceParams = {
         config: validConnectorConfig,
-        plugins: {},
+        plugins: {
+          actions: actionsMock.createSetup(),
+        },
       };
       checkEmailServiceConfiguration(params);
-    }).toThrowErrorMatchingInlineSnapshot(`"'actions' plugin not available."`);
+    }).toThrowErrorMatchingInlineSnapshot(`"'actions' and 'licensing' plugins are required."`);
   });
 
   it('should throw an Error if no default email connector has been defined', () => {
@@ -56,7 +60,7 @@ describe('checkEmailServiceConfiguration()', () => {
         },
       };
       checkEmailServiceConfiguration(params);
-    }).toThrowErrorMatchingInlineSnapshot(`"Email connector not specified."`);
+    }).toThrowErrorMatchingInlineSnapshot(`"'actions' and 'licensing' plugins are required."`);
   });
 
   it('should throw an Error if the specified email connector is not a preconfigured connector', () => {
@@ -72,12 +76,10 @@ describe('checkEmailServiceConfiguration()', () => {
         },
       };
       checkEmailServiceConfiguration(params);
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"Unexisting email connector 'someUnexistingConnectorId' specified."`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`"'actions' and 'licensing' plugins are required."`);
   });
 
-  it('should not throw an Error if actions plugin is defined and the specified email connector is valid', () => {
+  it('should not throw an Error if required plugins are present and the specified email connector is valid', () => {
     expect(() => {
       const actions = actionsMock.createSetup();
       actions.isPreconfiguredConnector.mockImplementationOnce(
@@ -87,6 +89,7 @@ describe('checkEmailServiceConfiguration()', () => {
         config: validConnectorConfig,
         plugins: {
           actions,
+          licensing: licensingMock.createSetup(),
         },
       };
       checkEmailServiceConfiguration(params);
@@ -95,10 +98,13 @@ describe('checkEmailServiceConfiguration()', () => {
 });
 
 describe('getEmailService()', () => {
-  it('returns undefined if Actions plugin start contract is not available', () => {
+  it('returns undefined if Actions or Licensing plugins are not available', () => {
     const params: EmailServiceFactoryParams = {
       config: validConnectorConfig,
-      plugins: {},
+      plugins: {
+        licensing: licensingMock.createStart(),
+      },
+      logger: loggerMock.create(),
     };
     const email = getEmailService(params);
     expect(email).toBeUndefined();
@@ -109,7 +115,9 @@ describe('getEmailService()', () => {
       config: missingConnectorConfig,
       plugins: {
         actions: actionsMock.createStart(),
+        licensing: licensingMock.createStart(),
       },
+      logger: loggerMock.create(),
     };
     const email = getEmailService(params);
     expect(email).toBeUndefined();
@@ -120,9 +128,11 @@ describe('getEmailService()', () => {
       config: invalidConnectorConfig, // note that the factory does not check for connector validity
       plugins: {
         actions: actionsMock.createStart(),
+        licensing: licensingMock.createStart(),
       },
+      logger: loggerMock.create(),
     };
     const email = getEmailService(params);
-    expect(email).toBeInstanceOf(ConnectorsEmailService);
+    expect(email).toBeInstanceOf(LicensedEmailService);
   });
 });

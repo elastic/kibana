@@ -9,12 +9,15 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { NotificationsConfigType } from './config';
 import { NotificationsPlugin } from './plugin';
+import * as emailServiceFactory from './services/connectors_email_service_factory';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
-const missingConnectorConfig = {
-  connectors: {
-    default: {},
-  },
-};
+const checkEmailServiceConfigurationSpy = jest.spyOn(
+  emailServiceFactory,
+  'checkEmailServiceConfiguration'
+);
+
+const getEmailServiceSpy = jest.spyOn(emailServiceFactory, 'getEmailService');
 
 const invalidConnectorConfig = {
   connectors: {
@@ -44,11 +47,13 @@ const createNotificationsPlugin = (config: NotificationsConfigType) => {
   );
   const pluginSetup = {
     actions: actionsSetup,
+    licensing: licensingMock.createSetup(),
   };
 
   const actionsStart = actionsMock.createStart();
   const pluginStart = {
     actions: actionsStart,
+    licensing: licensingMock.createStart(),
   };
 
   return {
@@ -66,71 +71,74 @@ const createNotificationsPlugin = (config: NotificationsConfigType) => {
 
 describe('Notifications Plugin', () => {
   describe('setup()', () => {
-    it('should log warning if Actions plugin is not available', () => {
-      const { plugin, logger, coreSetup } = createNotificationsPlugin({});
-      plugin.setup(coreSetup, {});
-      expect(logger.get().warn).toHaveBeenCalledWith(
-        `Email Service Setup Error: 'actions' plugin not available.`
-      );
-    });
+    beforeEach(() => checkEmailServiceConfigurationSpy.mockClear());
 
-    it('should log warning if no default email connector has been defined', () => {
-      const { plugin, logger, coreSetup } = createNotificationsPlugin(missingConnectorConfig);
-      plugin.setup(coreSetup, {
+    it('should call checkEmailServiceConfiguration(), catch Exceptions and log a warn', () => {
+      const { plugin, logger, coreSetup } = createNotificationsPlugin(validConnectorConfig);
+      const pluginSetup = {
         actions: actionsMock.createSetup(),
-      });
-
-      expect(logger.get().warn).toHaveBeenCalledWith(
-        `Email Service Setup Error: Email connector not specified.`
-      );
-    });
-
-    it('should log warning if the specified email connector is not a preconfigured connector', () => {
-      const { plugin, logger, coreSetup, pluginSetup } =
-        createNotificationsPlugin(invalidConnectorConfig);
+      };
       plugin.setup(coreSetup, pluginSetup);
+      expect(checkEmailServiceConfigurationSpy).toHaveBeenCalledTimes(1);
+      expect(checkEmailServiceConfigurationSpy).toHaveBeenCalledWith({
+        config: validConnectorConfig,
+        plugins: pluginSetup,
+      });
       expect(logger.get().warn).toHaveBeenCalledWith(
-        `Email Service Setup Error: Unexisting email connector 'someUnexistingConnectorId' specified.`
+        `Email Service Setup Error: 'actions' and 'licensing' plugins are required.`
       );
+
+      // eslint-disable-next-line dot-notation
+      expect(plugin['emailServiceSetupSuccessful']).toEqual(false);
     });
 
-    it('should not log warning if actions plugin is defined and the specified email connector is valid', () => {
+    it('should pass the setup checks successfully and not log any warning if the configuration is correct', () => {
       const { plugin, logger, coreSetup, pluginSetup } =
         createNotificationsPlugin(validConnectorConfig);
       plugin.setup(coreSetup, pluginSetup);
+      expect(checkEmailServiceConfigurationSpy).toHaveBeenCalledTimes(1);
+      expect(checkEmailServiceConfigurationSpy).toHaveBeenCalledWith({
+        config: validConnectorConfig,
+        plugins: pluginSetup,
+      });
       expect(logger.get().warn).not.toHaveBeenCalled();
+
+      // eslint-disable-next-line dot-notation
+      expect(plugin['emailServiceSetupSuccessful']).toEqual(true);
     });
   });
 
   describe('start()', () => {
-    it('should not return an Email service if Actions plugin is not available', () => {
-      const { plugin, coreSetup, coreStart } = createNotificationsPlugin(validConnectorConfig);
-      plugin.setup(coreSetup, {});
-      const { email } = plugin.start(coreStart, {});
-      expect(email).toBe(undefined);
-    });
+    beforeEach(() => getEmailServiceSpy.mockClear());
 
-    it('should not return an Email service if no default email connector has been defined', () => {
-      const { plugin, coreSetup, pluginSetup, coreStart, pluginStart } =
-        createNotificationsPlugin(missingConnectorConfig);
-      plugin.setup(coreSetup, pluginSetup);
+    it('should not call getEmailService() if the setup() has not been run', () => {
+      const { plugin, coreStart, pluginStart } = createNotificationsPlugin(validConnectorConfig);
       const { email } = plugin.start(coreStart, pluginStart);
-      expect(email).toBe(undefined);
+      expect(getEmailServiceSpy).not.toHaveBeenCalled();
+      expect(email).toBeUndefined();
     });
 
-    it('should not return an Email service if the specified email connector is not a preconfigured connector', () => {
+    it('should not call getEmailService() if setup() has failed', () => {
       const { plugin, coreSetup, pluginSetup, coreStart, pluginStart } =
         createNotificationsPlugin(invalidConnectorConfig);
       plugin.setup(coreSetup, pluginSetup);
       const { email } = plugin.start(coreStart, pluginStart);
-      expect(email).toBe(undefined);
+      expect(getEmailServiceSpy).not.toHaveBeenCalled();
+      expect(email).toBeUndefined();
     });
 
-    it('should return an Email service if actions plugin is defined and the specified email connector is valid', () => {
+    it('should call getEmailService() if setup() was successful', () => {
       const { plugin, coreSetup, pluginSetup, coreStart, pluginStart } =
         createNotificationsPlugin(validConnectorConfig);
       plugin.setup(coreSetup, pluginSetup);
       const { email } = plugin.start(coreStart, pluginStart);
+      expect(getEmailServiceSpy).toHaveBeenCalledTimes(1);
+      expect(getEmailServiceSpy).toHaveBeenCalledWith({
+        config: validConnectorConfig,
+        plugins: pluginStart,
+        logger: expect.any(Object),
+      });
+      expect(email).toEqual(getEmailServiceSpy.mock.results[0].value);
       expect(email?.sendPlainTextEmail).toBeInstanceOf(Function);
     });
   });
