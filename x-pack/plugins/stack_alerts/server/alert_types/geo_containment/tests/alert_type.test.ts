@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   getAlertType,
   injectEntityAndBoundaryIds,
@@ -14,9 +13,7 @@ import {
 } from '../alert_type';
 
 describe('alertType', () => {
-  const logger = loggingSystemMock.create().get();
-
-  const alertType = getAlertType(logger);
+  const alertType = getAlertType();
 
   it('alert type creation structure is the expected value', async () => {
     expect(alertType.id).toBe('.geo-containment');

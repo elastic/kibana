@@ -136,7 +136,8 @@ export class TaskRunner<
     inMemoryMetrics: InMemoryMetrics
   ) {
     this.context = context;
-    this.logger = context.logger;
+    const loggerId = ruleType.id.startsWith('.') ? ruleType.id.substring(1) : ruleType.id;
+    this.logger = context.logger.get(loggerId);
     this.usageCounter = context.usageCounter;
     this.ruleType = ruleType;
     this.ruleConsumer = null;
@@ -399,6 +400,7 @@ export class TaskRunner<
                 throttle,
                 notifyWhen,
               },
+              logger: this.logger,
             })
           );
 

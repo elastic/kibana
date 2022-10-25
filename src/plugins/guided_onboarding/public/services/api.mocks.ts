@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { GuideState } from '../../common/types';
+import type { GuideState } from '@kbn/guided-onboarding';
 
 export const searchAddDataActiveState: GuideState = {
   guideId: 'search',

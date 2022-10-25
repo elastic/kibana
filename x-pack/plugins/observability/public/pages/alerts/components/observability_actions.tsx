@@ -24,10 +24,7 @@ import { useKibana } from '../../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
 import { parseAlert } from './parse_alert';
 import { translations, paths } from '../../../config';
-import {
-  ADD_TO_EXISTING_CASE,
-  ADD_TO_NEW_CASE,
-} from '../containers/alerts_table_t_grid/translations';
+import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../containers/alerts_table/translations';
 import { ObservabilityAppServices } from '../../../application/types';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/types';
 import type { TopAlert } from '../containers/alerts_page/types';

@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { CoreStart } from '@kbn/core/public';
+import { MyFilePicker } from './file_picker';
 import type { MyImageMetadata } from '../../common';
 import type { FileClients } from '../types';
 import { DetailsFlyout } from './details_flyout';
@@ -35,15 +36,25 @@ interface FilesExampleAppDeps {
 type ListResponse = FilesClientResponses<MyImageMetadata>['list'];
 
 export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) => {
-  const { data, isLoading, error, refetch } = useQuery<ListResponse>(['files'], () =>
-    files.example.list()
+  const { data, isLoading, error, refetch } = useQuery<ListResponse>(
+    ['files'],
+    () => files.example.list(),
+    { refetchOnWindowFocus: false }
   );
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showFilePickerModal, setShowFilePickerModal] = useState(false);
   const [isDeletingFile, setIsDeletingFile] = useState(false);
   const [selectedItem, setSelectedItem] = useState<undefined | FileJSON<MyImageMetadata>>();
 
   const renderToolsRight = () => {
     return [
+      <EuiButton
+        onClick={() => setShowFilePickerModal(true)}
+        isDisabled={isLoading || isDeletingFile}
+        iconType="eye"
+      >
+        Select a file
+      </EuiButton>,
       <EuiButton
         onClick={() => setShowUploadModal(true)}
         isDisabled={isLoading || isDeletingFile}
@@ -152,6 +163,18 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
             notifications.toasts.addSuccess('Uploaded file!');
             refetch();
             setShowUploadModal(false);
+          }}
+        />
+      )}
+      {showFilePickerModal && (
+        <MyFilePicker
+          onClose={() => setShowFilePickerModal(false)}
+          onDone={(ids) => {
+            notifications.toasts.addSuccess({
+              title: 'Selected files!',
+              text: 'IDS:' + JSON.stringify(ids, null, 2),
+            });
+            setShowFilePickerModal(false);
           }}
         />
       )}
