@@ -183,14 +183,16 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
     id: 'fileInfo',
     path: ACTION_AGENT_FILE_INFO_ROUTE,
     method: 'get',
-    handler: () => {
+    handler: (): ActionFileInfoApiResponse => {
       return {
-        created: '2022-10-10T14:57:30.682Z',
-        id: '123',
-        mimeType: 'text/plain',
-        name: 'test.txt',
-        size: 1234,
-        status: 'READY',
+        data: {
+          created: '2022-10-10T14:57:30.682Z',
+          id: '123',
+          mimeType: 'text/plain',
+          name: 'test.txt',
+          size: 1234,
+          status: 'READY',
+        },
       };
     },
   },
