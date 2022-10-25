@@ -29,6 +29,7 @@ export const testGuideConfig: GuideConfig = {
         appID: 'guidedOnboardingExample',
         path: 'stepOne',
       },
+      integration: 'testIntegration',
     },
     {
       id: 'step2',
