@@ -23,13 +23,13 @@ import {
   FieldPopoverVisualize,
 } from '@kbn/unified-field-list-plugin/public';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
-import { DiscoverFieldDetails } from './discover_field_details';
-import { FieldDetails } from './types';
+import { DiscoverFieldDetails } from './deprecated_stats/discover_field_details';
 import { getFieldTypeName } from '../../../../utils/get_field_type_name';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { SHOW_LEGACY_FIELD_TOP_VALUES, PLUGIN_ID } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
+import { type DataDocuments$ } from '../../hooks/use_saved_search';
 
 function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows
@@ -204,6 +204,10 @@ const MultiFields: React.FC<MultiFieldsProps> = memo(
 
 export interface DiscoverFieldProps {
   /**
+   * hits fetched from ES, displayed in the doc table
+   */
+  documents$: DataDocuments$;
+  /**
    * Determines whether add/remove button is displayed not only when focused
    */
   alwaysShowActionButton?: boolean;
@@ -228,10 +232,6 @@ export interface DiscoverFieldProps {
    * @param fieldName
    */
   onRemoveField: (fieldName: string) => void;
-  /**
-   * Retrieve details data for the field
-   */
-  getDetails: (field: DataViewField) => FieldDetails;
   /**
    * Determines whether the field is selected
    */
@@ -268,13 +268,13 @@ export interface DiscoverFieldProps {
 }
 
 function DiscoverFieldComponent({
+  documents$,
   alwaysShowActionButton = false,
   field,
   dataView,
   onAddField,
   onRemoveField,
   onAddFilter,
-  getDetails,
   selected,
   trackUiMetric,
   multiFields,
@@ -399,24 +399,15 @@ function DiscoverFieldComponent({
 
     return (
       <>
-        {showLegacyFieldStats ? (
+        {showLegacyFieldStats ? ( // TODO: Deprecate and remove after ~v8.7
           <>
             {showFieldStats && (
-              <>
-                <EuiTitle size="xxxs">
-                  <h5>
-                    {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
-                      defaultMessage: 'Top 5 values',
-                    })}
-                  </h5>
-                </EuiTitle>
-                <DiscoverFieldDetails
-                  dataView={dataView}
-                  field={field}
-                  details={getDetails(field)}
-                  onAddFilter={onAddFilter}
-                />
-              </>
+              <DiscoverFieldDetails
+                documents$={documents$}
+                dataView={dataView}
+                field={field}
+                onAddFilter={onAddFilter}
+              />
             )}
           </>
         ) : (

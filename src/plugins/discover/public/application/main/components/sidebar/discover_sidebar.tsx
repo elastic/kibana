@@ -35,7 +35,6 @@ import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING, PLUGIN_ID } from '../../../../../common';
 import { groupFields } from './lib/group_fields';
-import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getDataViewFieldList } from './lib/get_data_view_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
@@ -49,7 +48,7 @@ import { getUiActions } from '../../../../kibana_services';
  */
 const FIELDS_PER_PAGE = 50;
 
-export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProps, 'documents$'> {
+export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   /**
    * Current state of the field filter, filtering fields by name, type, ...
    */
@@ -104,7 +103,8 @@ export function DiscoverSidebarComponent({
   columns,
   fieldCounts,
   fieldFilter,
-  documents,
+  documents$,
+  documents, // TODO: remove
   onAddField,
   onAddFilter,
   onRemoveField,
@@ -146,11 +146,6 @@ export function DiscoverSidebarComponent({
       setFieldsToRender(fieldsPerPage);
     },
     [fieldFilter, setFieldFilter, setFieldsToRender, fieldsPerPage]
-  );
-
-  const getDetailsByField = useCallback(
-    (ipField: DataViewField) => getDetails(ipField, documents, selectedDataView),
-    [documents, selectedDataView]
   );
 
   const popularLimit = useMemo(() => uiSettings.get(FIELDS_LIMIT_SETTING), [uiSettings]);
@@ -422,7 +417,7 @@ export function DiscoverSidebarComponent({
                                 onAddField={onAddField}
                                 onRemoveField={onRemoveField}
                                 onAddFilter={onAddFilter}
-                                getDetails={getDetailsByField}
+                                documents$={documents$}
                                 selected={true}
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
@@ -484,7 +479,7 @@ export function DiscoverSidebarComponent({
                                 onAddField={onAddField}
                                 onRemoveField={onRemoveField}
                                 onAddFilter={onAddFilter}
-                                getDetails={getDetailsByField}
+                                documents$={documents$}
                                 trackUiMetric={trackUiMetric}
                                 multiFields={multiFields?.get(field.name)}
                                 onEditField={editField}
@@ -514,7 +509,7 @@ export function DiscoverSidebarComponent({
                             onAddField={onAddField}
                             onRemoveField={onRemoveField}
                             onAddFilter={onAddFilter}
-                            getDetails={getDetailsByField}
+                            documents$={documents$}
                             trackUiMetric={trackUiMetric}
                             multiFields={multiFields?.get(field.name)}
                             onEditField={editField}

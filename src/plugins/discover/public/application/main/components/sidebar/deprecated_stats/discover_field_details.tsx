@@ -6,28 +6,52 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiText, EuiSpacer, EuiLink, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { Bucket, FieldDetails } from './types';
+import { getDetails } from './get_details';
+import { DataDocuments$ } from '../../../hooks/use_saved_search';
+import { FetchStatus } from '../../../../types';
 
 interface DiscoverFieldDetailsProps {
+  /**
+   * hits fetched from ES, displayed in the doc table
+   */
+  documents$: DataDocuments$;
   field: DataViewField;
   dataView: DataView;
-  details: FieldDetails;
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }
 
 export function DiscoverFieldDetails({
+  documents$,
   field,
   dataView,
-  details,
   onAddFilter,
 }: DiscoverFieldDetailsProps) {
+  const details: FieldDetails = useMemo(() => {
+    const data = documents$.getValue();
+    const documents = data.fetchStatus === FetchStatus.COMPLETE ? data.result : undefined;
+    return getDetails(field, documents, dataView);
+  }, [field, documents$, dataView]);
+
+  if (!details?.error && !details?.buckets) {
+    return null;
+  }
+
   return (
-    <>
+    <div data-test-subj={`discoverFieldDetails-${field.name}`}>
+      <EuiTitle size="xxxs">
+        <h5>
+          {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
+            defaultMessage: 'Top 5 values',
+          })}
+        </h5>
+      </EuiTitle>
       {details.error && <EuiText size="xs">{details.error}</EuiText>}
       {!details.error && (
         <>
@@ -70,6 +94,6 @@ export function DiscoverFieldDetails({
           </EuiText>
         </>
       )}
-    </>
+    </div>
   );
 }

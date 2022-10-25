@@ -22,7 +22,7 @@ import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
-import { AvailableFields$ } from '../../hooks/use_saved_search';
+import { AvailableFields$, DataDocuments$ } from '../../hooks/use_saved_search';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
 
@@ -59,10 +59,14 @@ function getCompProps(): DiscoverSidebarProps {
     fields: [] as string[],
   }) as AvailableFields$;
 
+  const documents$ = new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    result: hits,
+  }) as DataDocuments$;
+
   return {
     columns: ['extension'],
     fieldCounts,
-    documents: hits,
     dataViewList,
     onChangeDataView: jest.fn(),
     onAddFilter: jest.fn(),
@@ -77,6 +81,7 @@ function getCompProps(): DiscoverSidebarProps {
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     createNewDataView: jest.fn(),
     onDataViewCreated: jest.fn(),
+    documents$,
     availableFields$,
     useNewFieldsApi: true,
   };
