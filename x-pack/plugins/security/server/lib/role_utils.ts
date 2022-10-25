@@ -103,11 +103,11 @@ export const validateKibanaPrivileges = (
 
       kibanaFeature.subFeatures.forEach((subFeature) => {
         if (
+          subFeature.requireAllSpaces &&
+          !forAllSpaces &&
           subFeature.privilegeGroups.some((group) =>
             group.privileges.some((privilege) => feature.includes(privilege.id))
-          ) &&
-          subFeature.requireAllSpaces &&
-          !forAllSpaces
+          )
         ) {
           errors.push(
             `Sub-feature privilege [${kibanaFeature.name} - ${
