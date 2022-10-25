@@ -109,12 +109,13 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           reason,
           timestamp: startedAt.toISOString(),
           value: null,
-          viewInAppUrl: getViewInInventoryAppUrl(
+          viewInAppUrl: getViewInInventoryAppUrl({
+            basePath: libs.basePath,
             criteria,
             nodeType,
-            indexedStartedDate,
-            libs.basePath
-          ),
+            timestamp: indexedStartedDate,
+            spaceId,
+          }),
         });
 
         return {};
@@ -230,12 +231,13 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           value: mapToConditionsLookup(results, (result) =>
             formatMetric(result[instanceId].metric, result[instanceId].currentValue)
           ),
-          viewInAppUrl: getViewInInventoryAppUrl(
+          viewInAppUrl: getViewInInventoryAppUrl({
+            basePath: libs.basePath,
             criteria,
             nodeType,
-            indexedStartedDate,
-            libs.basePath
-          ),
+            timestamp: indexedStartedDate,
+            spaceId,
+          }),
           ...additionalContext,
         };
         alert.scheduleActions(actionGroupId, context);
@@ -251,21 +253,21 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         getAlertStartedDate(recoveredAlertInstanceId) ?? startedAt.toISOString();
       const alertUuid = getAlertUuid(recoveredAlertInstanceId);
 
-      const context = {
+      alert.setContext({
         alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertInstanceId,
         metric: mapToConditionsLookup(criteria, (c) => c.metric),
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         timestamp: startedAt.toISOString(),
-        viewInAppUrl: getViewInInventoryAppUrl(
+        viewInAppUrl: getViewInInventoryAppUrl({
+          basePath: libs.basePath,
           criteria,
           nodeType,
-          indexedStartedDate,
-          libs.basePath
-        ),
-      };
-      alert.setContext(context);
+          timestamp: indexedStartedDate,
+          spaceId,
+        }),
+      });
     }
 
     const stopTime = Date.now();
