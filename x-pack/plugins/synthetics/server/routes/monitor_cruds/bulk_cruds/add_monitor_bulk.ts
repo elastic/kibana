@@ -35,6 +35,8 @@ export const createNewSavedObjectMonitorBulk = async ({
     type: syntheticsMonitorType,
     attributes: formatSecrets({
       ...monitor,
+      [ConfigKey.ID]: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
+      [ConfigKey.CONFIG_ID]: id,
       revision: 1,
     }),
   }));
