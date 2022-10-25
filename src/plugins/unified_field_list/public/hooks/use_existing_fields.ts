@@ -102,17 +102,17 @@ export const useExistingFieldsFetcher = (
 
       setActiveRequests((value) => value + 1);
 
-      const hasRestrictions = Boolean(dataView?.getAggregationRestrictions?.());
+      const hasRestrictions = Boolean(dataView.getAggregationRestrictions?.());
       const info: ExistingFieldsInfo = {
         ...unknownInfo,
         numberOfFetches,
       };
 
-      try {
-        if (hasRestrictions) {
-          info.fetchStatus = ExistenceFetchStatus.succeeded;
-          info.hasDataViewRestrictions = true;
-        } else {
+      if (hasRestrictions) {
+        info.fetchStatus = ExistenceFetchStatus.succeeded;
+        info.hasDataViewRestrictions = true;
+      } else {
+        try {
           const result = await loadFieldExisting({
             dslQuery: await buildSafeEsQuery(
               dataView,
@@ -135,18 +135,18 @@ export const useExistingFieldsFetcher = (
           if (
             !existingFieldNames.filter((fieldName) => !metaFields.includes?.(fieldName)).length &&
             numberOfFetches === 1 &&
-            typeof onNoData === 'function'
+            onNoData
           ) {
             onNoData(dataViewId);
           }
 
           info.existingFieldsByFieldNameMap = booleanMap(existingFieldNames);
           info.fetchStatus = ExistenceFetchStatus.succeeded;
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error(error);
+          info.fetchStatus = ExistenceFetchStatus.failed;
         }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error);
-        info.fetchStatus = ExistenceFetchStatus.failed;
       }
 
       // skip redundant results
@@ -201,7 +201,6 @@ export const useExistingFieldsFetcher = (
 
   useEffect(() => {
     return () => {
-      // console.log('resetting the cache');
       mountedRef.current = false;
       globalMap$.next({}); // reset the cache (readers will continue using their own data slice until they are unmounted too)
     };
@@ -241,12 +240,12 @@ export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
       const info = existingFieldsByDataViewMap[dataViewId];
 
       if (info?.fetchStatus === ExistenceFetchStatus.succeeded) {
-        return info?.hasDataViewRestrictions
-          ? true
-          : Boolean(info?.existingFieldsByFieldNameMap[fieldName]);
+        return (
+          info?.hasDataViewRestrictions || Boolean(info?.existingFieldsByFieldNameMap[fieldName])
+        );
       }
 
-      return true; // TODO: double check `true` returns when existence info is unknown
+      return true;
     },
     [existingFieldsByDataViewMap]
   );
