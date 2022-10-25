@@ -34,6 +34,8 @@ import {
 import { setTimeout } from 'timers/promises';
 import { calculateBounds } from '@kbn/data-plugin/public';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import React, { ReactElement } from 'react';
+import { DiscoverMainProvider } from '../../services/discover_state_react';
 
 const mockData = dataPluginMock.createStartContract();
 
@@ -64,18 +66,14 @@ jest.mock('@kbn/unified-field-list-plugin/public', () => {
 });
 
 describe('useDiscoverHistogram', () => {
+  const state = getDiscoverStateMock({ isTimeBased: true });
+  state.setAppState({ interval: 'auto', hideChart: false });
   const renderUseDiscoverHistogram = async ({
     isPlainRecord = false,
     isTimeBased = true,
     canVisualize = true,
     storage = new LocalStorageMock({}) as unknown as Storage,
-    stateContainer = {
-      appState: {
-        getState: () => {
-          return { interval: 'auto', hideChart: false };
-        },
-      },
-    },
+    stateContainer = state,
   }: {
     isPlainRecord?: boolean;
     isTimeBased?: boolean;
@@ -165,16 +163,23 @@ describe('useDiscoverHistogram', () => {
       availableFields$,
     };
 
-    const hook = renderHook(() => {
-      return useDiscoverHistogram({
-        stateContainer: stateContainer as DiscoverStateContainer,
-        savedSearchData$,
-        dataView: dataViewWithTimefieldMock,
-        savedSearch: savedSearchMock,
-        isTimeBased,
-        isPlainRecord,
-      });
-    });
+    const hook = renderHook(
+      () => {
+        return useDiscoverHistogram({
+          stateContainer: stateContainer as DiscoverStateContainer,
+          savedSearchData$,
+          dataView: dataViewWithTimefieldMock,
+          savedSearch: savedSearchMock,
+          isTimeBased,
+          isPlainRecord,
+        });
+      },
+      {
+        wrapper: ({ children }: { children: ReactElement }) => (
+          <DiscoverMainProvider value={state}>{children}</DiscoverMainProvider>
+        ),
+      }
+    );
 
     await act(() => setTimeout(0));
 

@@ -48,7 +48,7 @@ describe('updateSearchSource', () => {
       dataView: dataViewMock,
       services: discoverServiceMock,
     });
-    expect(searchSource.getField('fields')).toEqual(undefined);
+    expect(searchSource.getField('fields')).toEqual([{ field: '*', include_unmapped: 'true' }]);
     expect(searchSource.getField('fieldsFromSource')).toBe(undefined);
   });
 });

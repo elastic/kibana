@@ -97,7 +97,7 @@ describe('test getDataStateContainer', () => {
     dataState.refetch$.next('reset');
 
     await waitFor(() => {
-      expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
+      expect(dataState.data$.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     });
     unsubscribe();
   });

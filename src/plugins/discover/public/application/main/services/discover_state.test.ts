@@ -153,6 +153,10 @@ describe('Test discover state with legacy migration', () => {
 });
 
 describe('createSearchSessionRestorationDataProvider', () => {
+  history = createBrowserHistory();
+  history.push(
+    "/#?_a=(query:(query_string:(analyze_wildcard:!t,query:'type:nice%20name:%22yeah%22')))"
+  );
   let mockSavedSearch: SavedSearch = {} as unknown as SavedSearch;
   const mockDataPlugin = dataPluginMock.createStartContract();
   const searchSessionInfoProvider = createSearchSessionRestorationDataProvider({

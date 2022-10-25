@@ -150,7 +150,7 @@ async function mountComponent(
     availableFields$,
   };
 
-  stateContainer.setAppState({ interval: 'auto' });
+  stateContainer.setAppState({ interval: 'auto', query });
   stateContainer.internalState.transitions.setDataView(dataView);
   stateContainer.internalState.transitions.setDataViews(dataViewList as DataViewListItem[]);
 
