@@ -51,7 +51,6 @@ export const getChangePointRequest = (
     ];
   }
 
-  // frequent items can be slow, so use the random sampler
   const aggs: Record<string, estypes.AggregationsAggregationContainer> = {
     sample: {
       random_sampler: {
