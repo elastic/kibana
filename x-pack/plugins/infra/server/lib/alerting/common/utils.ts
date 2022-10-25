@@ -26,8 +26,6 @@ export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
       arrayOfLiterals.includes(value) ? undefined : `must be one of ${arrayOfLiterals.join(' | ')}`,
   });
 
-export const isNotNull = <T>(argument: T | null): argument is T => argument !== null;
-
 export const validateIsStringElasticsearchJSONFilter = (value: string) => {
   if (value === '') {
     // Allow clearing the filter.

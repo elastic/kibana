@@ -273,7 +273,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       const recoveredAlertInstanceId = alert.getId();
       const alertUuid = getAlertUuid(recoveredAlertInstanceId);
 
-      const context = {
+      alert.setContext({
         alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertInstanceId,
@@ -281,8 +281,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         timestamp: startedAt.toISOString(),
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         viewInAppUrl: getViewInMetricsAppUrl(libs.basePath, spaceId),
-      };
-      alert.setContext(context);
+      });
     }
 
     const stopTime = Date.now();

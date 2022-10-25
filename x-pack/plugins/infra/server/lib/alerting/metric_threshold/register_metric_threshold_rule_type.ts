@@ -25,7 +25,6 @@ import {
 } from '../common/messages';
 import {
   getAlertDetailsPageEnabledForApp,
-  isNotNull,
   oneOfLiterals,
   validateIsStringElasticsearchJSONFilter,
 } from '../common/utils';
@@ -101,9 +100,9 @@ export async function registerMetricThresholdRuleType(
     actionVariables: {
       context: [
         { name: 'group', description: groupActionVariableDescription },
-        getAlertDetailsPageEnabledForApp(config, 'metrics')
-          ? { name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription }
-          : null,
+        ...(getAlertDetailsPageEnabledForApp(config, 'metrics')
+          ? [{ name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription }]
+          : []),
         { name: 'alertState', description: alertStateActionVariableDescription },
         { name: 'reason', description: reasonActionVariableDescription },
         { name: 'timestamp', description: timestampActionVariableDescription },
@@ -111,7 +110,7 @@ export async function registerMetricThresholdRuleType(
         { name: 'metric', description: metricActionVariableDescription },
         { name: 'threshold', description: thresholdActionVariableDescription },
         { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
-      ].filter(isNotNull),
+      ],
     },
     producer: 'infrastructure',
   });
