@@ -13,6 +13,8 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
 
+const FREQUENT_ITEMS_FIELDS_LIMIT = 15;
+
 interface FrequentItemsAggregation extends estypes.AggregationsSamplerAggregation {
   fi: {
     buckets: Array<{ key: Record<string, string[]>; doc_count: number; support: number }>;
@@ -66,7 +68,7 @@ export async function fetchFrequentItems(
 
   // Get up to 15 unique fields from change points with retained order
   const fields = sortedChangePoints.reduce<string[]>((p, c) => {
-    if (p.length < 15 && !p.some((d) => d === c.fieldName)) {
+    if (p.length < FREQUENT_ITEMS_FIELDS_LIMIT && !p.some((d) => d === c.fieldName)) {
       p.push(c.fieldName);
     }
     return p;
