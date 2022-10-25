@@ -11,10 +11,7 @@ import h2o2 from '@hapi/h2o2';
 import { URL } from 'url';
 import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import type {
-  InternalCoreSetup,
-  InternalCoreStart,
-} from '@kbn/core-lifecycle-server-internal';;
+import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '../../../../root';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
 import {
