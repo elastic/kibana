@@ -136,6 +136,11 @@ jest.mock('@elastic/eui', () => {
     EuiScreenReaderOnly: () => <></>,
   };
 });
+jest.mock('suricata-sid-db', () => {
+  return {
+    db: [],
+  };
+});
 jest.mock('react-beautiful-dnd', () => {
   const original = jest.requireActual('react-beautiful-dnd');
   return {
@@ -170,7 +175,6 @@ jest.mock('react-beautiful-dnd', () => {
 });
 
 describe('Body', () => {
-  // const mount = useMountAppended();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getWrapper = async (childrenComponent: JSX.Element, store?: any) => {
     const wrapper = mount(childrenComponent, {
