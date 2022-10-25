@@ -263,11 +263,7 @@ export class JourneyFtrHarness {
     }
     return await this.withSpan('Browser creation', 'setup', async () => {
       const headless = !!(process.env.TEST_BROWSER_HEADLESS || process.env.CI);
-      this.browser = await playwright.chromium.launch({
-        headless,
-        timeout: 60_000,
-        args: ['--disable-3d-apis'],
-      });
+      this.browser = await playwright.chromium.launch({ headless, timeout: 60_000 });
       return this.browser;
     });
   }
