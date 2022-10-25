@@ -22,6 +22,7 @@ import { autoScaleWrapperStyle } from './with_auto_scale.styles';
 interface AutoScaleParams {
   minScale?: number;
   containerStyles: CSSProperties;
+  alignment?: 'left';
 }
 
 interface AutoScaleProps {
@@ -83,7 +84,6 @@ export function withAutoScale<T>(WrappedComponent: ComponentType<T>) {
     const parentRef = useRef<HTMLDivElement>(null);
     const childrenRef = useRef<HTMLDivElement>(null);
     const parentDimensions = useResizeObserver(parentRef.current);
-
     const scaleFn = useMemo(
       () =>
         throttle(() => {
@@ -115,11 +115,23 @@ export function withAutoScale<T>(WrappedComponent: ComponentType<T>) {
     }, [renderComplete, resized]);
 
     return (
-      <div ref={parentRef} style={autoScaleParams?.containerStyles} css={autoScaleWrapperStyle}>
+      <div
+        className="auto-scale-parent"
+        ref={parentRef}
+        style={autoScaleParams?.containerStyles}
+        css={autoScaleWrapperStyle}
+      >
         <div
+          className="auto-scale-child"
           ref={childrenRef}
           style={{
             transform: `scale(${scale || 0})`,
+            ...(parentDimensions.width && scale && autoScaleParams.alignment === 'left'
+              ? {
+                  position: 'relative',
+                  left: (1 - scale) * parentDimensions.width * scale * -1,
+                }
+              : {}),
           }}
         >
           <WrappedComponent {...(restProps as T)} />
