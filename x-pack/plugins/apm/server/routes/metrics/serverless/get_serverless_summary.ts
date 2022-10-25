@@ -20,28 +20,26 @@ import {
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { calcMemoryUsedRate } from './helper';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getServerlessSummary({
   end,
   environment,
   kuery,
   serviceName,
-  setup,
   start,
   serverlessId,
+  apmEventClient,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
   serviceName: string;
   start: number;
   end: number;
   serverlessId?: string;
+  apmEventClient: APMEventClient;
 }) {
-  const { apmEventClient } = setup;
-
   const params = {
     apm: {
       events: [ProcessorEvent.metric],

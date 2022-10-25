@@ -14,6 +14,7 @@ import { getServerlessActiveInstancesOverview } from './get_active_instances_ove
 import { getServerlessFunctionsOverview } from './get_serverless_functions_overview';
 import { getServerlessSummary } from './get_serverless_summary';
 import { getActiveInstancesTimeseries } from './get_active_instances_timeseries';
+import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 
 const serverlessMetricsChartsRoute = createApmServerRoute({
   endpoint:
@@ -36,7 +37,10 @@ const serverlessMetricsChartsRoute = createApmServerRoute({
     charts: Awaited<ReturnType<typeof getServerlessAgentMetricsCharts>>;
   }> => {
     const { params } = resources;
-    const setup = await setupRequest(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
 
     const { serviceName } = params.path;
     const { environment, kuery, start, end, serverlessId } = params.query;
@@ -46,7 +50,8 @@ const serverlessMetricsChartsRoute = createApmServerRoute({
       start,
       end,
       kuery,
-      setup,
+      config: setup.config,
+      apmEventClient,
       serviceName,
       serverlessId,
     });
@@ -78,7 +83,10 @@ const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
     timeseries: Awaited<ReturnType<typeof getActiveInstancesTimeseries>>;
   }> => {
     const { params } = resources;
-    const setup = await setupRequest(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
 
     const { serviceName } = params.path;
     const { environment, kuery, start, end, serverlessId } = params.query;
@@ -91,11 +99,12 @@ const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
       setup,
       serviceName,
       serverlessId,
+      apmEventClient,
     };
 
     const [activeInstances, timeseries] = await Promise.all([
       getServerlessActiveInstancesOverview(options),
-      getActiveInstancesTimeseries(options),
+      getActiveInstancesTimeseries({ ...options, config: setup.config }),
     ]);
     return { activeInstances, timeseries };
   },
@@ -119,7 +128,7 @@ const serverlessMetricsFunctionsOverviewRoute = createApmServerRoute({
     >;
   }> => {
     const { params } = resources;
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const { serviceName } = params.path;
     const { environment, kuery, start, end } = params.query;
@@ -129,7 +138,7 @@ const serverlessMetricsFunctionsOverviewRoute = createApmServerRoute({
       start,
       end,
       kuery,
-      setup,
+      apmEventClient,
       serviceName,
     });
     return { serverlessFunctionsOverview };
@@ -155,7 +164,7 @@ const serverlessMetricsSummaryRoute = createApmServerRoute({
     resources
   ): Promise<Awaited<ReturnType<typeof getServerlessSummary>>> => {
     const { params } = resources;
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const { serviceName } = params.path;
     const { environment, kuery, start, end, serverlessId } = params.query;
@@ -165,7 +174,7 @@ const serverlessMetricsSummaryRoute = createApmServerRoute({
       start,
       end,
       kuery,
-      setup,
+      apmEventClient,
       serviceName,
       serverlessId,
     });

@@ -24,8 +24,8 @@ import { getServerlessFunctionNameFromId } from '../../../../common/serverless';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { Coordinate } from '../../../../typings/timeseries';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { calcMemoryUsed } from './helper';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface ActiveInstanceTimeseries {
   serverlessDuration: Coordinate[];
@@ -48,20 +48,18 @@ export async function getServerlessActiveInstancesOverview({
   environment,
   kuery,
   serviceName,
-  setup,
   start,
   serverlessId,
+  apmEventClient,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
   serviceName: string;
   start: number;
   end: number;
   serverlessId?: string;
+  apmEventClient: APMEventClient;
 }) {
-  const { apmEventClient } = setup;
-
   const { intervalString } = getBucketSize({
     start,
     end,
