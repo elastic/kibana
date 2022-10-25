@@ -70,7 +70,7 @@ describe('register()', () => {
           "actions:my-action-type": Object {
             "createTaskRunner": [Function],
             "getRetry": [Function],
-            "maxAttempts": 1,
+            "maxAttempts": 3,
             "title": "My action type",
           },
         },

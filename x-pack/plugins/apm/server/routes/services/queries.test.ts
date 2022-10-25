@@ -23,10 +23,10 @@ describe('services queries', () => {
   });
 
   it('fetches the service agent name', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams((setup, apmEventClient) =>
       getServiceAgent({
         serviceName: 'foo',
-        setup,
+        apmEventClient,
         start: 0,
         end: 50000,
       })
@@ -36,10 +36,10 @@ describe('services queries', () => {
   });
 
   it('fetches the service transaction types', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams((setup, apmEventClient) =>
       getServiceTransactionTypes({
         serviceName: 'foo',
-        setup,
+        apmEventClient,
         searchAggregatedTransactions: false,
         start: 0,
         end: 50000,
@@ -50,9 +50,10 @@ describe('services queries', () => {
   });
 
   it('fetches the service items', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams((setup, apmEventClient) =>
       getServicesItems({
         setup,
+        apmEventClient,
         searchAggregatedTransactions: false,
         searchAggregatedServiceMetrics: false,
         logger: {} as any,
@@ -74,7 +75,9 @@ describe('services queries', () => {
   });
 
   it('fetches the agent status', async () => {
-    mock = await inspectSearchParams((setup) => hasHistoricalAgentData(setup));
+    mock = await inspectSearchParams((setup, apmEventClient) =>
+      hasHistoricalAgentData(apmEventClient)
+    );
 
     expect(mock.params).toMatchSnapshot();
   });

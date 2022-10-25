@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
-import { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
@@ -161,7 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should create a single rule without an input index', async () => {
-          const rule: CreateRulesSchema = {
+          const rule: RuleCreateProps = {
             name: 'Simple Rule Query',
             description: 'Simple Rule Query',
             enabled: true,
@@ -273,7 +273,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not create a rule if trying to add more than one default rule exception list', async () => {
-        const rule: CreateRulesSchema = {
+        const rule: RuleCreateProps = {
           name: 'Simple Rule Query',
           description: 'Simple Rule Query',
           enabled: true,
