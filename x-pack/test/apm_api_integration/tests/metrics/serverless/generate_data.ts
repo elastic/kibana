@@ -23,7 +23,6 @@ export const config = {
 export const expectedValues = {
   expectedMemoryUsedRate: (config.memoryTotal - config.memoryFree) / config.memoryTotal,
   expectedMemoryUsed: config.memoryTotal - config.memoryFree,
-  numberOfTransactionsCreated: 15,
 };
 
 export async function generateData({

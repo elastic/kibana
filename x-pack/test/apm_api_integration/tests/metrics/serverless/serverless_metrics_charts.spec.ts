@@ -10,7 +10,7 @@ import { meanBy, sumBy } from 'lodash';
 import { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { generateData, config, expectedValues } from './generate_data';
+import { generateData, config } from './generate_data';
 
 function isNotNullOrZeroCoordinate(coordinate: Coordinate) {
   return coordinate.y !== null && coordinate.y !== 0;
@@ -23,6 +23,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
+  const numberOfTransactionsCreated = 15;
 
   async function callApi(serviceName: string, serverlessId?: string) {
     return await apmApiClient.readUser({
@@ -68,8 +69,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       pythonServerlessFunctionNames,
       serverlessId,
     } = config;
-
-    const { numberOfTransactionsCreated } = expectedValues;
 
     before(async () => {
       await generateData({ start, end, synthtraceEsClient });

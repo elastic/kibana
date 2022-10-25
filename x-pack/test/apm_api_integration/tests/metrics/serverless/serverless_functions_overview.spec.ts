@@ -17,6 +17,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
+  const numberOfTransactionsCreated = 15;
+
   async function callApi(serviceName: string) {
     return await apmApiClient.readUser({
       endpoint: `GET /internal/apm/services/{serviceName}/metrics/serverless/functions_overview`,
@@ -40,7 +42,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       faasDuration,
       serverlessId,
     } = config;
-    const { expectedMemoryUsed, numberOfTransactionsCreated } = expectedValues;
+    const { expectedMemoryUsed } = expectedValues;
 
     before(async () => {
       await generateData({ start, end, synthtraceEsClient });
