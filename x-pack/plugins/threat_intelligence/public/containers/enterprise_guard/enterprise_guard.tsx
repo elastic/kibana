@@ -7,15 +7,11 @@
 
 import React, { FC } from 'react';
 import { Paywall } from '../../components/paywall';
-import { useKibana } from '../../hooks/use_kibana';
 import { useSecurityContext } from '../../hooks/use_security_context';
 import { SecuritySolutionPluginTemplateWrapper } from '../security_solution_plugin_template_wrapper';
 
 export const EnterpriseGuard: FC = ({ children }) => {
   const { licenseService } = useSecurityContext();
-  const {
-    services: { http },
-  } = useKibana();
 
   if (licenseService.isEnterprise()) {
     return <>{children}</>;
@@ -23,9 +19,7 @@ export const EnterpriseGuard: FC = ({ children }) => {
 
   return (
     <SecuritySolutionPluginTemplateWrapper isEmptyState>
-      <Paywall
-        licenseManagementHref={http.basePath.prepend('/app/management/stack/license_management')}
-      />
+      <Paywall />
     </SecuritySolutionPluginTemplateWrapper>
   );
 };
