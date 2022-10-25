@@ -23,6 +23,7 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getTraceSamples } from './trace_samples';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   endpoint:
@@ -57,7 +58,10 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
     bucketSize: number;
   }> => {
     const { params } = resources;
-    const setup = await setupRequest(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
     const {
       path: { serviceName },
       query: {
@@ -69,9 +73,10 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
         end,
       },
     } = params;
-
+    const { config } = setup;
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      ...setup,
+      apmEventClient,
+      config,
       kuery,
       start,
       end,
@@ -80,7 +85,8 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
     return getServiceTransactionGroups({
       environment,
       kuery,
-      setup,
+      config,
+      apmEventClient,
       serviceName,
       searchAggregatedTransactions,
       transactionType,
@@ -139,7 +145,10 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
       impact: number;
     }>;
   }> => {
-    const setup = await setupRequest(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
     const { params } = resources;
 
     const {
@@ -158,7 +167,8 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
     } = params;
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      ...setup,
+      config: setup.config,
+      apmEventClient,
       kuery,
       start,
       end,
@@ -167,7 +177,7 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
     return await getServiceTransactionGroupDetailedStatisticsPeriods({
       environment,
       kuery,
-      setup,
+      apmEventClient,
       serviceName,
       transactionNames,
       searchAggregatedTransactions,
@@ -221,7 +231,10 @@ const transactionLatencyChartsRoute = createApmServerRoute({
           overallAvgDuration: null;
         };
   }> => {
-    const setup = await setupRequest(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
     const { params, logger } = resources;
 
     const { serviceName } = params.path;
@@ -237,7 +250,8 @@ const transactionLatencyChartsRoute = createApmServerRoute({
     } = params.query;
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      ...setup,
+      config: setup.config,
+      apmEventClient,
       kuery,
       start,
       end,
@@ -249,7 +263,7 @@ const transactionLatencyChartsRoute = createApmServerRoute({
       serviceName,
       transactionType,
       transactionName,
-      setup,
+      apmEventClient,
       searchAggregatedTransactions,
       logger,
       start,
@@ -298,7 +312,7 @@ const transactionTraceSamplesRoute = createApmServerRoute({
   ): Promise<{
     traceSamples: Array<{ transactionId: string; traceId: string }>;
   }> => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
     const {
@@ -324,7 +338,7 @@ const transactionTraceSamplesRoute = createApmServerRoute({
       traceId,
       sampleRangeFrom,
       sampleRangeTo,
-      setup,
+      apmEventClient,
       start,
       end,
     });
@@ -359,7 +373,10 @@ const transactionChartsBreakdownRoute = createApmServerRoute({
       legendValue: string;
     }>;
   }> => {
-    const setup = await setupRequest(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
     const { params } = resources;
 
     const { serviceName } = params.path;
@@ -372,7 +389,8 @@ const transactionChartsBreakdownRoute = createApmServerRoute({
       serviceName,
       transactionName,
       transactionType,
-      setup,
+      config: setup.config,
+      apmEventClient,
       start,
       end,
     });
@@ -416,7 +434,10 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
           average: null;
         };
   }> => {
-    const setup = await setupRequest(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
 
     const { params } = resources;
     const { serviceName } = params.path;
@@ -431,7 +452,8 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
     } = params.query;
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      ...setup,
+      config: setup.config,
+      apmEventClient,
       kuery,
       start,
       end,
@@ -443,7 +465,7 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       serviceName,
       transactionType,
       transactionName,
-      setup,
+      apmEventClient,
       searchAggregatedTransactions,
       start,
       end,
@@ -490,7 +512,10 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
           average: null;
         };
   }> => {
-    const setup = await setupRequest(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
 
     const { params } = resources;
     const { serviceName } = params.path;
@@ -498,7 +523,8 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
       params.query;
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      ...setup,
+      config: setup.config,
+      apmEventClient,
       kuery,
       start,
       end,
@@ -509,7 +535,7 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
       kuery,
       serviceName,
       transactionType,
-      setup,
+      apmEventClient,
       searchAggregatedTransactions,
       start,
       end,
@@ -557,7 +583,10 @@ const transactionChartsColdstartRateByTransactionNameRoute =
             average: null;
           };
     }> => {
-      const setup = await setupRequest(resources);
+      const [setup, apmEventClient] = await Promise.all([
+        setupRequest(resources),
+        getApmEventClient(resources),
+      ]);
 
       const { params } = resources;
       const { serviceName } = params.path;
@@ -572,7 +601,8 @@ const transactionChartsColdstartRateByTransactionNameRoute =
       } = params.query;
 
       const searchAggregatedTransactions = await getSearchTransactionsEvents({
-        ...setup,
+        config: setup.config,
+        apmEventClient,
         kuery,
         start,
         end,
@@ -584,7 +614,7 @@ const transactionChartsColdstartRateByTransactionNameRoute =
         serviceName,
         transactionType,
         transactionName,
-        setup,
+        apmEventClient,
         searchAggregatedTransactions,
         start,
         end,
