@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { useTourContext } from '../../../common/components/guided_onboarding_tour';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import { SecurityStepId } from '../../../common/components/guided_onboarding_tour/tour_config';
 import { isActiveTimeline } from '../../../helpers';
@@ -254,10 +253,9 @@ export const TakeActionDropdown = React.memo(
         investigateInTimelineActionItems,
       ]
     );
-    const { activeStep, isTourShown } = useTourContext();
 
-    const takeActionButton = useMemo(() => {
-      return (
+    const takeActionButton = useMemo(
+      () => (
         <GuidedOnboardingTourStep step={4} stepId={SecurityStepId.alertsCases}>
           <EuiButton
             data-test-subj="take-action-dropdown-btn"
@@ -269,8 +267,11 @@ export const TakeActionDropdown = React.memo(
             {TAKE_ACTION}
           </EuiButton>
         </GuidedOnboardingTourStep>
-      );
-    }, [activeStep, isTourShown, togglePopoverHandler]);
+      ),
+
+      [togglePopoverHandler]
+    );
+
     return items.length && !loadingEventDetails && ecsData ? (
       <EuiPopover
         id="AlertTakeActionPanel"
