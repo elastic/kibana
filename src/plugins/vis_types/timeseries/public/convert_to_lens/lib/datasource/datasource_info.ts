@@ -23,6 +23,72 @@ const getIndexPattern = async (
   return fetchedIndexPattern.indexPattern;
 };
 
+const getOverwrittenIndexPattern = async (
+  overwrittenIndexPattern: IndexPatternValue,
+  overwrittenTimeField: string | undefined,
+  dataViews: DataViewsPublicPluginStart,
+  adHocDataViewsService: AdHocDataViewsService
+) => {
+  if (isStringTypeIndexPattern(overwrittenIndexPattern)) {
+    const fetchedIndexPattern = await getIndexPattern(overwrittenIndexPattern, dataViews, {
+      fetchKibanaIndexForStringIndexes: true,
+    });
+    if (!fetchedIndexPattern) {
+      const indexPattern = await adHocDataViewsService.create({
+        title: overwrittenIndexPattern,
+        timeFieldName: overwrittenTimeField,
+      });
+      const indexPatternId = indexPattern.id ?? '';
+      const timeField = indexPattern.timeFieldName;
+      return { indexPattern, indexPatternId, timeField };
+    }
+    const indexPattern = fetchedIndexPattern;
+    const indexPatternId = indexPattern.id ?? '';
+    const timeField = overwrittenTimeField ?? indexPattern.timeFieldName;
+    return { indexPattern, indexPatternId, timeField };
+  }
+  const indexPattern = await getIndexPattern(overwrittenIndexPattern, dataViews);
+  if (indexPattern) {
+    const indexPatternId = indexPattern.id ?? '';
+    const timeField = overwrittenTimeField ?? indexPattern.timeFieldName;
+    return { indexPattern, indexPatternId, timeField };
+  }
+  return null;
+};
+
+const getSelectedIndexPattern = async (
+  selectedIndexPattern: IndexPatternValue,
+  selectedTimeField: string | undefined,
+  dataViews: DataViewsPublicPluginStart,
+  adHocDataViewsService: AdHocDataViewsService
+) => {
+  if (isStringTypeIndexPattern(selectedIndexPattern)) {
+    const fetchedIndexPattern = await getIndexPattern(selectedIndexPattern, dataViews, {
+      fetchKibanaIndexForStringIndexes: true,
+    });
+    if (!fetchedIndexPattern) {
+      if (!selectedTimeField) {
+        throw new Error('Time field is empty');
+      }
+      const indexPattern = await adHocDataViewsService.create({
+        title: selectedIndexPattern,
+        timeFieldName: selectedTimeField,
+      });
+      const indexPatternId = indexPattern.id ?? '';
+      return { indexPattern, indexPatternId, timeField: selectedTimeField };
+    }
+    return {
+      indexPattern: fetchedIndexPattern,
+      indexPatternId: fetchedIndexPattern.id ?? '',
+      timeField: fetchedIndexPattern.timeFieldName,
+    };
+  }
+  const indexPattern = await dataViews.getDefault();
+  const indexPatternId = indexPattern?.id ?? '';
+  const timeField = indexPattern?.timeFieldName;
+  return { indexPattern, indexPatternId, timeField };
+};
+
 export const extractOrGenerateDatasourceInfo = async (
   currentIndexPattern: IndexPatternValue,
   currentTimeField: string | undefined,
@@ -42,68 +108,41 @@ export const extractOrGenerateDatasourceInfo = async (
     let indexPattern: DataView | null | undefined;
     // handle override index pattern
     if (isOverwritten) {
-      if (isStringTypeIndexPattern(overwrittenIndexPattern)) {
-        const fetchedIndexPattern = await getIndexPattern(overwrittenIndexPattern, dataViews, {
-          fetchKibanaIndexForStringIndexes: true,
-        });
-        if (!fetchedIndexPattern) {
-          indexPattern = await adHocDataViewsService.create({
-            title: overwrittenIndexPattern,
-            timeFieldName: overwrittenTimeField,
-          });
-          indexPatternId = indexPattern.id ?? '';
-          timeField = indexPattern.timeFieldName;
-        } else {
-          indexPattern = fetchedIndexPattern;
-          indexPatternId = indexPattern.id ?? '';
-          timeField = overwrittenTimeField ?? indexPattern.timeFieldName;
-        }
-      } else {
-        indexPattern = await getIndexPattern(overwrittenIndexPattern, dataViews);
-        if (indexPattern) {
-          indexPatternId = indexPattern.id ?? '';
-          timeField = overwrittenTimeField ?? indexPattern.timeFieldName;
-        }
+      const result = await getOverwrittenIndexPattern(
+        overwrittenIndexPattern,
+        overwrittenTimeField,
+        dataViews,
+        adHocDataViewsService
+      );
+      if (result) {
+        [indexPattern, indexPatternId, timeField] = [
+          result.indexPattern,
+          result.indexPatternId,
+          result.timeField,
+        ];
       }
     }
 
     if (!indexPatternId) {
-      if (isStringTypeIndexPattern(currentIndexPattern)) {
-        const fetchedIndexPattern = await getIndexPattern(currentIndexPattern, dataViews, {
-          fetchKibanaIndexForStringIndexes: true,
-        });
-        if (!fetchedIndexPattern) {
-          if (!timeField) {
-            throw new Error('Time field is empty');
-          }
-          indexPattern = await adHocDataViewsService.create({
-            title: currentIndexPattern,
-            timeFieldName: timeField,
-          });
-          indexPatternId = indexPattern.id ?? '';
-        } else {
-          indexPattern = fetchedIndexPattern;
-          indexPatternId = indexPattern.id ?? '';
-          timeField = indexPattern.timeFieldName;
-        }
-      } else {
-        indexPattern = await dataViews.getDefault();
-        indexPatternId = indexPattern?.id ?? '';
-        timeField = indexPattern?.timeFieldName;
-      }
+      const result = await getSelectedIndexPattern(
+        currentIndexPattern,
+        currentTimeField,
+        dataViews,
+        adHocDataViewsService
+      );
+      [indexPattern, indexPatternId, timeField] = [
+        result.indexPattern,
+        result.indexPatternId,
+        result.timeField,
+      ];
     } else {
       indexPattern = await dataViews.get(indexPatternId);
-
       if (!timeField) {
         timeField = indexPattern.timeFieldName;
       }
     }
 
-    return {
-      indexPatternId,
-      timeField,
-      indexPattern,
-    };
+    return { indexPatternId, timeField, indexPattern };
   } catch (e) {
     adHocDataViewsService.clearAll();
     return null;
