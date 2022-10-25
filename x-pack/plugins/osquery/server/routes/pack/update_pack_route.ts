@@ -185,7 +185,6 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           references: getUpdatedReferences(),
         }
       );
-      console.log('poszlo dalej');
 
       const currentAgentPolicyIds = map(
         filter(currentPackSO.references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]),

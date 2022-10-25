@@ -11,12 +11,14 @@ import type {
   CoreStart,
   Plugin,
   Logger,
+  SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 
+import type { PackSavedObjectAttributes } from './common/types';
 import { updateGlobalPacksCreateCallback } from './lib/update_global_packs';
 import { packSavedObjectType } from '../common/types';
 import type { CreateLiveQueryRequestBodySchema } from '../common/schemas/routes/live_query';
@@ -140,11 +142,11 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
             if (packagePolicy.package?.name === OSQUERY_INTEGRATION_NAME) {
               await this.initialize(core, dataViewsService);
 
-              const foundPacks = await client.find({
-                type: packSavedObjectType,
-                filter: `${packSavedObjectType}.attributes.is_global: true`,
-                perPage: 1000,
-              });
+              const foundPacks: SavedObjectsFindResponse<PackSavedObjectAttributes> =
+                await client.find({
+                  type: packSavedObjectType,
+                  filter: `${packSavedObjectType}.attributes.is_global: true`,
+                });
 
               if (foundPacks.saved_objects) {
                 await updateGlobalPacksCreateCallback(
