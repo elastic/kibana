@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { SnapshotNode } from '../../../../../common/http_api';
 import { HostMetics } from '../components/hosts_table_columns';
 
-export type MappedMetrics = Record<keyof HostMetics, number | null | undefined>;
+type MappedMetrics = Record<keyof HostMetics, number | null | undefined>;
 
 export const useHostTable = (nodes: SnapshotNode[]) => {
   const items = useMemo(() => {
