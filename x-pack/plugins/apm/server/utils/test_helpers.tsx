@@ -7,6 +7,7 @@
 
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { APMConfig } from '..';
+import { APMEventClient } from '../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmIndicesConfig } from '../routes/settings/apm_indices/get_apm_indices';
 
 interface Options {
@@ -17,14 +18,16 @@ interface Options {
 }
 
 interface MockSetup {
-  apmEventClient: any;
   internalClient: any;
   config: APMConfig;
   indices: ApmIndicesConfig;
 }
 
 export async function inspectSearchParams(
-  fn: (mockSetup: MockSetup) => Promise<any>,
+  fn: (
+    mockSetup: MockSetup,
+    mockApmEventClient: APMEventClient
+  ) => Promise<any>,
   options: Options = {}
 ) {
   const spy = jest.fn().mockImplementation(async (request) => {
@@ -43,7 +46,7 @@ export async function inspectSearchParams(
 
   let response;
   let error;
-
+  const mockApmEventClient = { search: spy } as any;
   const mockApmIndices: {
     [Property in keyof APMConfig['indices']]: string;
   } = {
@@ -55,7 +58,6 @@ export async function inspectSearchParams(
     metric: 'myIndex',
   };
   const mockSetup = {
-    apmEventClient: { search: spy } as any,
     internalClient: { search: spy } as any,
     config: new Proxy(
       {},
@@ -90,7 +92,7 @@ export async function inspectSearchParams(
     },
   };
   try {
-    response = await fn(mockSetup);
+    response = await fn(mockSetup, mockApmEventClient);
   } catch (err) {
     error = err;
     // we're only extracting the search params

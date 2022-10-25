@@ -24,11 +24,11 @@ describe('agent configuration queries', () => {
 
   describe('getAllEnvironments', () => {
     it('fetches all environments', async () => {
-      mock = await inspectSearchParams((setup) =>
+      mock = await inspectSearchParams((setup, apmEventClient) =>
         getAllEnvironments({
           searchAggregatedTransactions: false,
           serviceName: 'foo',
-          setup,
+          apmEventClient,
           size: 50,
         })
       );

@@ -15,10 +15,10 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
-import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getLinkedParentsOfSpan({
-  setup,
+  apmEventClient,
   traceId,
   spanId,
   start,
@@ -27,13 +27,11 @@ export async function getLinkedParentsOfSpan({
 }: {
   traceId: string;
   spanId: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   processorEvent: ProcessorEvent;
 }) {
-  const { apmEventClient } = setup;
-
   const response = await apmEventClient.search('get_linked_parents_of_span', {
     apm: {
       events: [processorEvent],

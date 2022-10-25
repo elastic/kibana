@@ -11,24 +11,22 @@ import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getTransaction({
   transactionId,
   traceId,
-  setup,
+  apmEventClient,
   start,
   end,
 }: {
   transactionId: string;
   traceId?: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start?: number;
   end?: number;
 }) {
-  const { apmEventClient } = setup;
-
   const resp = await apmEventClient.search('get_transaction', {
     apm: {
       events: [ProcessorEvent.transaction],

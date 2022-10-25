@@ -34,9 +34,11 @@ import {
   getEstimatedSizeForDocumentsInIndex,
 } from './indices_stats_helpers';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 async function getMainServiceStatistics({
   setup,
+  apmEventClient,
   context,
   indexLifecyclePhase,
   randomSampler,
@@ -46,6 +48,7 @@ async function getMainServiceStatistics({
   kuery,
 }: {
   setup: Setup;
+  apmEventClient: APMEventClient;
   context: ApmPluginRequestHandlerContext;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   randomSampler: RandomSampler;
@@ -54,8 +57,6 @@ async function getMainServiceStatistics({
   environment: string;
   kuery: string;
 }) {
-  const { apmEventClient } = setup;
-
   const [{ indices: allIndicesStats }, response] = await Promise.all([
     getTotalIndicesStats({ context, setup }),
     apmEventClient.search('get_main_service_statistics', {
@@ -177,6 +178,7 @@ async function getMainServiceStatistics({
 
 export async function getServiceStatistics({
   setup,
+  apmEventClient,
   context,
   indexLifecyclePhase,
   randomSampler,
@@ -187,6 +189,7 @@ export async function getServiceStatistics({
   searchAggregatedTransactions,
 }: {
   setup: Setup;
+  apmEventClient: APMEventClient;
   context: ApmPluginRequestHandlerContext;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   randomSampler: RandomSampler;
@@ -200,6 +203,7 @@ export async function getServiceStatistics({
     await Promise.all([
       getMainServiceStatistics({
         setup,
+        apmEventClient,
         context,
         indexLifecyclePhase,
         randomSampler,
@@ -209,7 +213,7 @@ export async function getServiceStatistics({
         end,
       }),
       getTotalTransactionsPerService({
-        setup,
+        apmEventClient,
         searchAggregatedTransactions,
         indexLifecyclePhase,
         randomSampler,

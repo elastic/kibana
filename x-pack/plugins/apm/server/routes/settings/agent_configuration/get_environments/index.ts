@@ -10,15 +10,18 @@ import { getAllEnvironments } from '../../../environments/get_all_environments';
 import { Setup } from '../../../../lib/helpers/setup_request';
 import { getExistingEnvironmentsForService } from './get_existing_environments_for_service';
 import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getEnvironments({
   serviceName,
   setup,
+  apmEventClient,
   searchAggregatedTransactions,
   size,
 }: {
   serviceName: string | undefined;
   setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   size: number;
 }) {
@@ -27,7 +30,7 @@ export async function getEnvironments({
       getAllEnvironments({
         searchAggregatedTransactions,
         serviceName,
-        setup,
+        apmEventClient,
         size,
       }),
       getExistingEnvironmentsForService({ serviceName, setup, size }),

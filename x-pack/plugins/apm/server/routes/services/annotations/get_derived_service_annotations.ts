@@ -18,10 +18,10 @@ import {
   getDocumentTypeFilterForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getDerivedServiceAnnotations({
-  setup,
+  apmEventClient,
   serviceName,
   environment,
   searchAggregatedTransactions,
@@ -30,13 +30,11 @@ export async function getDerivedServiceAnnotations({
 }: {
   serviceName: string;
   environment: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
 }) {
-  const { apmEventClient } = setup;
-
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),

@@ -13,6 +13,7 @@ import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { rangeRt } from '../default_api_types';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const suggestionsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/suggestions',
@@ -28,11 +29,14 @@ const suggestionsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ terms: string[] }> => {
-    const setup = await setupRequest(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
     const { context, params } = resources;
     const { fieldName, fieldValue, serviceName, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient: setup.apmEventClient,
+      apmEventClient,
       config: setup.config,
       kuery: '',
     });
@@ -46,7 +50,7 @@ const suggestionsRoute = createApmServerRoute({
         fieldName,
         fieldValue,
         searchAggregatedTransactions,
-        setup,
+        apmEventClient,
         size,
         start,
         end,
@@ -65,7 +69,7 @@ const suggestionsRoute = createApmServerRoute({
       fieldValue,
       searchAggregatedTransactions,
       serviceName,
-      setup,
+      apmEventClient,
       size,
       start,
       end,

@@ -10,7 +10,6 @@ import { euiLightVars as theme } from '@kbn/ui-theme';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isFiniteNumber } from '../../../../../../common/utils/is_finite_number';
-import { Setup } from '../../../../../lib/helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../../lib/helpers/metrics';
 import { ChartBase } from '../../../types';
 
@@ -28,11 +27,14 @@ import {
   environmentQuery,
   serviceNodeNameQuery,
 } from '../../../../../../common/utils/environment_query';
+import { APMConfig } from '../../../../..';
+import { APMEventClient } from '../../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function fetchAndTransformGcMetrics({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   serviceNodeName,
   chartBase,
@@ -43,7 +45,8 @@ export async function fetchAndTransformGcMetrics({
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   serviceNodeName?: string;
   start: number;
@@ -52,8 +55,6 @@ export async function fetchAndTransformGcMetrics({
   fieldName: typeof METRIC_JAVA_GC_COUNT | typeof METRIC_JAVA_GC_TIME;
   operationName: string;
 }) {
-  const { apmEventClient, config } = setup;
-
   const { bucketSize } = getBucketSize({ start, end });
 
   // GC rate and time are reported by the agents as monotonically

@@ -11,15 +11,15 @@ import { Coordinate } from '../../../../typings/timeseries';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { getServiceInstancesSystemMetricStatistics } from './get_service_instances_system_metric_statistics';
 import { getServiceInstancesTransactionStatistics } from './get_service_instances_transaction_statistics';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface ServiceInstanceDetailedStatisticsParams {
   environment: string;
   kuery: string;
   latencyAggregationType: LatencyAggregationType;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   serviceName: string;
   transactionType: string;
   searchAggregatedTransactions: boolean;
@@ -67,7 +67,7 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
   environment,
   kuery,
   latencyAggregationType,
-  setup,
+  apmEventClient,
   serviceName,
   transactionType,
   searchAggregatedTransactions,
@@ -80,7 +80,7 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
   environment: string;
   kuery: string;
   latencyAggregationType: LatencyAggregationType;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   serviceName: string;
   transactionType: string;
   searchAggregatedTransactions: boolean;
@@ -97,7 +97,7 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
         environment,
         kuery,
         latencyAggregationType,
-        setup,
+        apmEventClient,
         serviceName,
         transactionType,
         searchAggregatedTransactions,

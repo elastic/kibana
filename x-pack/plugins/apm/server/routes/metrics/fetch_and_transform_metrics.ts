@@ -12,9 +12,11 @@ import type { AggregationOptionsByType } from '@kbn/es-types';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getVizColorForIndex } from '../../../common/viz_colors';
-import { APMEventESSearchRequest } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import {
+  APMEventClient,
+  APMEventESSearchRequest,
+} from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
-import { Setup } from '../../lib/helpers/setup_request';
 import { ChartBase } from './types';
 import {
   environmentQuery,
@@ -22,6 +24,7 @@ import {
 } from '../../../common/utils/environment_query';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { ChartType, Coordinate, YUnit } from '../../../typings/timeseries';
+import { APMConfig } from '../..';
 
 type MetricsAggregationMap = Unionize<{
   min: AggregationOptionsByType['min'];
@@ -63,7 +66,8 @@ export interface FetchAndTransformMetrics {
 export async function fetchAndTransformMetrics<T extends MetricAggs>({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   serviceNodeName,
   start,
@@ -75,7 +79,8 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   serviceNodeName?: string;
   start: number;
@@ -85,8 +90,6 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   additionalFilters?: QueryDslQueryContainer[];
   operationName: string;
 }): Promise<FetchAndTransformMetrics> {
-  const { apmEventClient, config } = setup;
-
   const params: GenericMetricsRequest = {
     apm: {
       events: [ProcessorEvent.metric],

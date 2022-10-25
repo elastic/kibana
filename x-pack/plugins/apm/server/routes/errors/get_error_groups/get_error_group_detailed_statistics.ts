@@ -20,13 +20,13 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getErrorGroupDetailedStatistics({
   kuery,
   serviceName,
-  setup,
+  apmEventClient,
   numBuckets,
   groupIds,
   environment,
@@ -36,7 +36,7 @@ export async function getErrorGroupDetailedStatistics({
 }: {
   kuery: string;
   serviceName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   numBuckets: number;
   groupIds: string[];
   environment: string;
@@ -44,8 +44,6 @@ export async function getErrorGroupDetailedStatistics({
   end: number;
   offset?: string;
 }): Promise<Array<{ groupId: string; timeseries: Coordinate[] }>> {
-  const { apmEventClient } = setup;
-
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
@@ -124,7 +122,7 @@ export async function getErrorGroupDetailedStatistics({
 export async function getErrorGroupPeriods({
   kuery,
   serviceName,
-  setup,
+  apmEventClient,
   numBuckets,
   groupIds,
   environment,
@@ -134,7 +132,7 @@ export async function getErrorGroupPeriods({
 }: {
   kuery: string;
   serviceName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   numBuckets: number;
   groupIds: string[];
   environment: string;
@@ -146,7 +144,7 @@ export async function getErrorGroupPeriods({
     environment,
     kuery,
     serviceName,
-    setup,
+    apmEventClient,
     numBuckets,
     groupIds,
   };

@@ -7,11 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiLightVars as theme } from '@kbn/ui-theme';
+import { APMConfig } from '../../../..';
 import { FAAS_BILLED_DURATION } from '../../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { isFiniteNumber } from '../../../../../common/utils/is_finite_number';
 import { getVizColorForIndex } from '../../../../../common/viz_colors';
-import { Setup } from '../../../../lib/helpers/setup_request';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyTimeseries } from '../../../transactions/get_latency_charts';
 import {
   fetchAndTransformMetrics,
@@ -45,7 +46,7 @@ const chartBase: ChartBase = {
 async function getServerlessLantecySeries({
   environment,
   kuery,
-  setup,
+  apmEventClient,
   serviceName,
   start,
   end,
@@ -53,7 +54,7 @@ async function getServerlessLantecySeries({
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   serviceName: string;
   start: number;
   end: number;
@@ -63,7 +64,7 @@ async function getServerlessLantecySeries({
     environment,
     kuery,
     serviceName,
-    setup,
+    apmEventClient,
     searchAggregatedTransactions,
     latencyAggregationType: LatencyAggregationType.avg,
     start,
@@ -88,7 +89,8 @@ async function getServerlessLantecySeries({
 export async function getServerlessFunctionLatency({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   start,
   end,
@@ -96,7 +98,8 @@ export async function getServerlessFunctionLatency({
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   start: number;
   end: number;
@@ -105,7 +108,8 @@ export async function getServerlessFunctionLatency({
   const options = {
     environment,
     kuery,
-    setup,
+    config,
+    apmEventClient,
     serviceName,
     start,
     end,

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Setup } from '../../../lib/helpers/setup_request';
+import { APMConfig } from '../../..';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getCPUChartData } from './shared/cpu';
 import { getMemoryChartData } from './shared/memory';
 
@@ -13,19 +14,37 @@ export function getDefaultMetricsCharts({
   environment,
   kuery,
   serviceName,
-  setup,
+  config,
+  apmEventClient,
   start,
   end,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
 }) {
   return Promise.all([
-    getCPUChartData({ environment, kuery, setup, serviceName, start, end }),
-    getMemoryChartData({ environment, kuery, setup, serviceName, start, end }),
+    getCPUChartData({
+      environment,
+      kuery,
+      config,
+      apmEventClient,
+      serviceName,
+      start,
+      end,
+    }),
+    getMemoryChartData({
+      environment,
+      kuery,
+      config,
+      apmEventClient,
+      serviceName,
+      start,
+      end,
+    }),
   ]);
 }

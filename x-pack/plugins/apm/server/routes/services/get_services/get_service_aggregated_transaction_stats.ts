@@ -24,15 +24,15 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_throughput';
 import { calculateFailedTransactionRateFromServiceMetrics } from '../../../lib/helpers/transaction_error_rate';
-import { ServicesItemsSetup } from './get_services_items';
 import { serviceGroupQuery } from '../../../lib/service_group_query';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { getDocumentTypeFilterForServiceMetrics } from '../../../lib/helpers/service_metrics';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 interface AggregationParams {
   environment: string;
   kuery: string;
-  setup: ServicesItemsSetup;
+  apmEventClient: APMEventClient;
   maxNumServices: number;
   start: number;
   end: number;
@@ -43,15 +43,13 @@ interface AggregationParams {
 export async function getServiceAggregatedTransactionStats({
   environment,
   kuery,
-  setup,
+  apmEventClient,
   maxNumServices,
   start,
   end,
   serviceGroup,
   randomSampler,
 }: AggregationParams) {
-  const { apmEventClient } = setup;
-
   const response = await apmEventClient.search(
     'get_service_aggregated_transaction_stats',
     {

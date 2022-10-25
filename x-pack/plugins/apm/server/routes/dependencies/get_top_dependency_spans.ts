@@ -30,7 +30,7 @@ import { Environment } from '../../../common/environment_rt';
 import { EventOutcome } from '../../../common/event_outcome';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 const MAX_NUM_SPANS = 1000;
 
@@ -48,7 +48,7 @@ export interface DependencySpan {
 }
 
 export async function getTopDependencySpans({
-  setup,
+  apmEventClient,
   dependencyName,
   spanName,
   start,
@@ -58,7 +58,7 @@ export async function getTopDependencySpans({
   sampleRangeFrom,
   sampleRangeTo,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   dependencyName: string;
   spanName: string;
   start: number;
@@ -68,8 +68,6 @@ export async function getTopDependencySpans({
   sampleRangeFrom?: number;
   sampleRangeTo?: number;
 }): Promise<DependencySpan[]> {
-  const { apmEventClient } = setup;
-
   const spans = (
     await apmEventClient.search('get_top_dependency_spans', {
       apm: {

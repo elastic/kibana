@@ -10,6 +10,7 @@ import type { FailedTransactionsCorrelation } from '../../../../common/correlati
 
 import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { splitAllSettledPromises, getEventType } from '../utils';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
@@ -17,6 +18,7 @@ import { fetchFailedEventsCorrelationPValues } from './fetch_failed_events_corre
 
 export const fetchPValues = async ({
   setup,
+  apmEventClient,
   start,
   end,
   environment,
@@ -27,6 +29,7 @@ export const fetchPValues = async ({
   fieldCandidates,
 }: CommonCorrelationsQueryParams & {
   setup: Setup;
+  apmEventClient: APMEventClient;
   durationMin?: number;
   durationMax?: number;
   fieldCandidates: string[];
@@ -36,7 +39,7 @@ export const fetchPValues = async ({
   const eventType = getEventType(chartType, searchMetrics);
 
   const { rangeSteps } = await fetchDurationHistogramRangeSteps({
-    setup,
+    apmEventClient,
     chartType,
     start,
     end,
@@ -52,7 +55,7 @@ export const fetchPValues = async ({
     await Promise.allSettled(
       fieldCandidates.map((fieldName) =>
         fetchFailedEventsCorrelationPValues({
-          setup,
+          apmEventClient,
           start,
           end,
           environment,

@@ -23,13 +23,13 @@ import {
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { getBucketSizeForAggregatedTransactions } from '../../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../../lib/helpers/latency_aggregation_type';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export type LatencyChartsSearchResponse = Awaited<
   ReturnType<typeof searchLatency>
@@ -41,7 +41,7 @@ function searchLatency({
   serviceName,
   transactionType,
   transactionName,
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   latencyAggregationType,
   start,
@@ -53,15 +53,13 @@ function searchLatency({
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   latencyAggregationType: LatencyAggregationType;
   start: number;
   end: number;
   offset?: string;
 }) {
-  const { apmEventClient } = setup;
-
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
@@ -127,7 +125,7 @@ export async function getLatencyTimeseries({
   serviceName,
   transactionType,
   transactionName,
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   latencyAggregationType,
   start,
@@ -139,7 +137,7 @@ export async function getLatencyTimeseries({
   serviceName: string;
   transactionType?: string;
   transactionName?: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   latencyAggregationType: LatencyAggregationType;
   start: number;
@@ -152,7 +150,7 @@ export async function getLatencyTimeseries({
     serviceName,
     transactionType,
     transactionName,
-    setup,
+    apmEventClient,
     searchAggregatedTransactions,
     latencyAggregationType,
     start,
@@ -185,7 +183,7 @@ export async function getLatencyPeriods({
   serviceName,
   transactionType,
   transactionName,
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   latencyAggregationType,
   kuery,
@@ -197,7 +195,7 @@ export async function getLatencyPeriods({
   serviceName: string;
   transactionType: string | undefined;
   transactionName: string | undefined;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   latencyAggregationType: LatencyAggregationType;
   kuery: string;
@@ -210,7 +208,7 @@ export async function getLatencyPeriods({
     serviceName,
     transactionType,
     transactionName,
-    setup,
+    apmEventClient,
     searchAggregatedTransactions,
     kuery,
     environment,

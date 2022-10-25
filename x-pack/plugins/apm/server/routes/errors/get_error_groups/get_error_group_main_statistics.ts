@@ -25,12 +25,12 @@ import {
 } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getErrorName } from '../../../lib/helpers/get_error_name';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getErrorGroupMainStatistics({
   kuery,
   serviceName,
-  setup,
+  apmEventClient,
   environment,
   sortField,
   sortDirection = 'desc',
@@ -42,7 +42,7 @@ export async function getErrorGroupMainStatistics({
 }: {
   kuery: string;
   serviceName: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   environment: string;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
@@ -52,8 +52,6 @@ export async function getErrorGroupMainStatistics({
   transactionName?: string;
   transactionType?: string;
 }) {
-  const { apmEventClient } = setup;
-
   // sort buckets by last occurrence of error
   const sortByLatestOccurrence = sortField === 'lastSeen';
 

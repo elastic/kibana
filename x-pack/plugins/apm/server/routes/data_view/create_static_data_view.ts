@@ -19,6 +19,7 @@ import { getApmDataViewTitle } from './get_apm_data_view_title';
 
 import { APMRouteHandlerResources } from '../typings';
 import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export type CreateDataViewResponse = Promise<
   | { created: boolean; dataView: DataView }
@@ -29,10 +30,12 @@ export async function createStaticDataView({
   dataViewService,
   resources,
   setup,
+  apmEventClient,
 }: {
   dataViewService: DataViewsService;
   resources: APMRouteHandlerResources;
   setup: Setup;
+  apmEventClient: APMEventClient;
 }): CreateDataViewResponse {
   const { config } = resources;
 
@@ -50,7 +53,7 @@ export async function createStaticDataView({
 
     // Discover and other apps will throw errors if an data view exists without having matching indices.
     // The following ensures the data view is only created if APM data is found
-    const hasData = await hasHistoricalAgentData(setup);
+    const hasData = await hasHistoricalAgentData(apmEventClient);
 
     if (!hasData) {
       return {

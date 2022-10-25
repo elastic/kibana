@@ -11,6 +11,7 @@ import * as HistoricalAgentData from '../historical_data/has_historical_agent_da
 import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { APMRouteHandlerResources, APMCore } from '../typings';
 import { APMConfig } from '../..';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 function getMockedDataViewService(existingDataViewTitle: string) {
   return {
@@ -44,11 +45,14 @@ const coreMock = {
   },
 } as unknown as APMCore;
 
+const apmEventClientMock = { search: jest.fn() } as unknown as APMEventClient;
+
 describe('createStaticDataView', () => {
   it(`should not create data view if 'xpack.apm.autocreateApmIndexPattern=false'`, async () => {
     const dataViewService = getMockedDataViewService('apm-*');
     await createStaticDataView({
       setup: setupMock,
+      apmEventClient: apmEventClientMock,
       resources: {
         config: { autoCreateApmDataView: false },
       } as APMRouteHandlerResources,
@@ -67,6 +71,7 @@ describe('createStaticDataView', () => {
 
     await createStaticDataView({
       setup: setupMock,
+      apmEventClient: apmEventClientMock,
       resources: {
         config: { autoCreateApmDataView: false },
       } as APMRouteHandlerResources,
@@ -85,6 +90,7 @@ describe('createStaticDataView', () => {
 
     await createStaticDataView({
       setup: setupMock,
+      apmEventClient: apmEventClientMock,
       resources: {
         core: coreMock,
         config: { autoCreateApmDataView: true },
@@ -107,6 +113,7 @@ describe('createStaticDataView', () => {
 
     await createStaticDataView({
       setup: setupMock,
+      apmEventClient: apmEventClientMock,
       resources: {
         core: coreMock,
         config: { autoCreateApmDataView: true },
@@ -136,6 +143,7 @@ describe('createStaticDataView', () => {
 
     await createStaticDataView({
       setup: setupMock,
+      apmEventClient: apmEventClientMock,
       resources: {
         core: coreMock,
         config: { autoCreateApmDataView: true },

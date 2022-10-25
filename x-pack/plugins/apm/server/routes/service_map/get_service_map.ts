@@ -28,9 +28,11 @@ import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { ServiceGroup } from '../../../common/service_groups';
 import { serviceGroupQuery } from '../../lib/service_group_query';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export interface IEnvOptions {
   setup: Setup;
+  apmEventClient: APMEventClient;
   serviceNames?: string[];
   environment: string;
   searchAggregatedTransactions: boolean;
@@ -42,6 +44,7 @@ export interface IEnvOptions {
 
 async function getConnectionData({
   setup,
+  apmEventClient,
   serviceNames,
   environment,
   start,
@@ -50,7 +53,8 @@ async function getConnectionData({
 }: IEnvOptions) {
   return withApmSpan('get_service_map_connections', async () => {
     const { traceIds } = await getTraceSampleIds({
-      setup,
+      config: setup.config,
+      apmEventClient,
       serviceNames,
       environment,
       start,
@@ -75,7 +79,7 @@ async function getConnectionData({
         Promise.all(
           chunks.map((traceIdsChunk) =>
             getServiceMapFromTraceIds({
-              setup,
+              apmEventClient,
               traceIds: traceIdsChunk,
               start,
               end,
@@ -100,7 +104,7 @@ async function getServicesData(
 ) {
   const {
     environment,
-    setup,
+    apmEventClient,
     searchAggregatedTransactions,
     start,
     end,
@@ -145,8 +149,6 @@ async function getServicesData(
       },
     },
   };
-
-  const { apmEventClient } = setup;
 
   const response = await apmEventClient.search(
     'get_service_stats_for_service_map',

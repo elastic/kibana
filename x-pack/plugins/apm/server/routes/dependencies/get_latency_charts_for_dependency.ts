@@ -15,7 +15,6 @@ import {
   SPAN_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { Setup } from '../../lib/helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import {
@@ -24,12 +23,13 @@ import {
   getLatencyFieldForServiceDestinationStatistics,
   getProcessorEventForServiceDestinationStatistics,
 } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getLatencyChartsForDependency({
   dependencyName,
   spanName,
   searchServiceDestinationMetrics,
-  setup,
+  apmEventClient,
   start,
   end,
   environment,
@@ -39,15 +39,13 @@ export async function getLatencyChartsForDependency({
   dependencyName: string;
   spanName: string;
   searchServiceDestinationMetrics: boolean;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   environment: string;
   kuery: string;
   offset?: string;
 }) {
-  const { apmEventClient } = setup;
-
   const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,

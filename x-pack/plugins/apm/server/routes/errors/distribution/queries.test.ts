@@ -20,10 +20,10 @@ describe('error distribution queries', () => {
   });
 
   it('fetches an error distribution', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams((setup, apmEventClient) =>
       getErrorDistribution({
         serviceName: 'serviceName',
-        setup,
+        apmEventClient,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
         start: 0,
@@ -35,11 +35,11 @@ describe('error distribution queries', () => {
   });
 
   it('fetches an error distribution with a group id', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams((setup, apmEventClient) =>
       getErrorDistribution({
         serviceName: 'serviceName',
         groupId: 'foo',
-        setup,
+        apmEventClient,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
         start: 0,

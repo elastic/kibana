@@ -29,11 +29,13 @@ import {
   getTotalIndicesStats,
   getEstimatedSizeForDocumentsInIndex,
 } from './indices_stats_helpers';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getSizeTimeseries({
   environment,
   kuery,
   setup,
+  apmEventClient,
   searchAggregatedTransactions,
   start,
   end,
@@ -44,6 +46,7 @@ export async function getSizeTimeseries({
   environment: string;
   kuery: string;
   setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   start: number;
   end: number;
@@ -51,8 +54,6 @@ export async function getSizeTimeseries({
   randomSampler: RandomSampler;
   context: ApmPluginRequestHandlerContext;
 }) {
-  const { apmEventClient } = setup;
-
   const { intervalString } = getBucketSizeForAggregatedTransactions({
     start,
     end,

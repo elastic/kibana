@@ -7,7 +7,6 @@
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Setup } from '../../lib/helpers/setup_request';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   SERVICE_NAME,
@@ -15,24 +14,23 @@ import {
   HOST_HOSTNAME,
   KUBERNETES_POD_NAME,
 } from '../../../common/elasticsearch_fieldnames';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const getInfrastructureData = async ({
   kuery,
   serviceName,
   environment,
-  setup,
+  apmEventClient,
   start,
   end,
 }: {
   kuery: string;
   serviceName: string;
   environment: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
 }) => {
-  const { apmEventClient } = setup;
-
   const response = await apmEventClient.search('get_service_infrastructure', {
     apm: {
       events: [ProcessorEvent.metric],

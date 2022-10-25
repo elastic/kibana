@@ -25,8 +25,9 @@ import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../lib/helpers/latency_aggregation_type';
-import { Setup } from '../../lib/helpers/setup_request';
 import { calculateFailedTransactionRate } from '../../lib/helpers/transaction_error_rate';
+import { APMConfig } from '../..';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export type ServiceOverviewTransactionGroupSortField =
   | 'name'
@@ -39,7 +40,8 @@ export async function getServiceTransactionGroups({
   environment,
   kuery,
   serviceName,
-  setup,
+  config,
+  apmEventClient,
   searchAggregatedTransactions,
   transactionType,
   latencyAggregationType,
@@ -49,14 +51,14 @@ export async function getServiceTransactionGroups({
   environment: string;
   kuery: string;
   serviceName: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   transactionType: string;
   latencyAggregationType: LatencyAggregationType;
   start: number;
   end: number;
 }) {
-  const { apmEventClient, config } = setup;
   const bucketSize = config.ui.transactionGroupBucketSize;
 
   const field = getDurationFieldForTransactions(searchAggregatedTransactions);

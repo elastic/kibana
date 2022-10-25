@@ -15,6 +15,7 @@ import { getServiceAggregatedTransactionStats } from './get_service_aggregated_t
 import { mergeServiceStats } from './merge_service_stats';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export type ServicesItemsSetup = Setup;
 
@@ -24,6 +25,7 @@ export async function getServicesItems({
   environment,
   kuery,
   setup,
+  apmEventClient,
   searchAggregatedTransactions,
   searchAggregatedServiceMetrics,
   logger,
@@ -35,6 +37,7 @@ export async function getServicesItems({
   environment: string;
   kuery: string;
   setup: ServicesItemsSetup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   searchAggregatedServiceMetrics: boolean;
   logger: Logger;
@@ -44,10 +47,9 @@ export async function getServicesItems({
   randomSampler: RandomSampler;
 }) {
   return withApmSpan('get_services_items', async () => {
-    const params = {
+    const commonParams = {
       environment,
       kuery,
-      setup,
       searchAggregatedTransactions,
       searchAggregatedServiceMetrics,
       maxNumServices: MAX_NUMBER_OF_SERVICES,
@@ -63,10 +65,19 @@ export async function getServicesItems({
       healthStatuses,
     ] = await Promise.all([
       searchAggregatedServiceMetrics
-        ? getServiceAggregatedTransactionStats(params)
-        : getServiceTransactionStats(params),
-      getServicesFromErrorAndMetricDocuments(params),
-      getHealthStatuses(params).catch((err) => {
+        ? getServiceAggregatedTransactionStats({
+            ...commonParams,
+            apmEventClient,
+          })
+        : getServiceTransactionStats({
+            ...commonParams,
+            apmEventClient,
+          }),
+      getServicesFromErrorAndMetricDocuments({
+        ...commonParams,
+        apmEventClient,
+      }),
+      getHealthStatuses({ ...commonParams, setup }).catch((err) => {
         logger.error(err);
         return [];
       }),

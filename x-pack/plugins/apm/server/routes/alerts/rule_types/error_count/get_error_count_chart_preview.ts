@@ -10,16 +10,15 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import { AlertParams } from '../../route';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { Setup } from '../../../../lib/helpers/setup_request';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getTransactionErrorCountChartPreview({
-  setup,
+  apmEventClient,
   alertParams,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   alertParams: AlertParams;
 }) {
-  const { apmEventClient } = setup;
   const { serviceName, environment, interval, start, end } = alertParams;
 
   const query = {

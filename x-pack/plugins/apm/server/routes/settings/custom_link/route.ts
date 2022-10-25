@@ -19,6 +19,7 @@ import { deleteCustomLink } from './delete_custom_link';
 import { getTransaction } from './get_transaction';
 import { listCustomLinks } from './list_custom_links';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
+import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 
 const customLinkTransactionRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/custom_links/transaction',
@@ -31,12 +32,12 @@ const customLinkTransactionRoute = createApmServerRoute({
   ): Promise<
     import('./../../../../typings/es_schemas/ui/transaction').Transaction
   > => {
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { query } = params;
     // picks only the items listed in FILTER_OPTIONS
     const filters = pick(query, FILTER_OPTIONS);
-    return await getTransaction({ setup, filters });
+    return await getTransaction({ apmEventClient, filters });
   },
 });
 

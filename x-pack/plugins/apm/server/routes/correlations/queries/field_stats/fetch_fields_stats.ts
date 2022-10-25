@@ -16,10 +16,10 @@ import { FieldStats } from '../../../../../common/correlations/field_stats_types
 import { fetchKeywordFieldStats } from './fetch_keyword_field_stats';
 import { fetchNumericFieldStats } from './fetch_numeric_field_stats';
 import { fetchBooleanFieldStats } from './fetch_boolean_field_stats';
-import { Setup } from '../../../../lib/helpers/setup_request';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const fetchFieldsStats = async ({
-  setup,
+  apmEventClient,
   eventType,
   start,
   end,
@@ -29,13 +29,12 @@ export const fetchFieldsStats = async ({
   fieldsToSample,
 }: CommonCorrelationsQueryParams & {
   eventType: ProcessorEvent;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   fieldsToSample: string[];
 }): Promise<{
   stats: FieldStats[];
   errors: any[];
 }> => {
-  const { apmEventClient } = setup;
   const stats: FieldStats[] = [];
   const errors: any[] = [];
 
@@ -68,7 +67,7 @@ export const fetchFieldsStats = async ({
           case ES_FIELD_TYPES.KEYWORD:
           case ES_FIELD_TYPES.IP:
             return fetchKeywordFieldStats({
-              setup,
+              apmEventClient,
               eventType,
               start,
               end,
@@ -91,7 +90,7 @@ export const fetchFieldsStats = async ({
           case ES_FIELD_TYPES.UNSIGNED_LONG:
           case ES_FIELD_TYPES.BYTE:
             return fetchNumericFieldStats({
-              setup,
+              apmEventClient,
               eventType,
               start,
               end,
@@ -104,7 +103,7 @@ export const fetchFieldsStats = async ({
             break;
           case ES_FIELD_TYPES.BOOLEAN:
             return fetchBooleanFieldStats({
-              setup,
+              apmEventClient,
               eventType,
               start,
               end,

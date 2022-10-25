@@ -15,11 +15,11 @@ import {
   CommonCorrelationsQueryParams,
   FieldValuePair,
 } from '../../../../../common/correlations/types';
-import { Setup } from '../../../../lib/helpers/setup_request';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getCommonCorrelationsQuery } from '../get_common_correlations_query';
 
 export const fetchNumericFieldStats = async ({
-  setup,
+  apmEventClient,
   eventType,
   start,
   end,
@@ -28,12 +28,10 @@ export const fetchNumericFieldStats = async ({
   query,
   field,
 }: CommonCorrelationsQueryParams & {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   eventType: ProcessorEvent;
   field: FieldValuePair;
 }): Promise<NumericFieldStats> => {
-  const { apmEventClient } = setup;
-
   const { fieldName } = field;
 
   const { aggregations } = await apmEventClient.search(

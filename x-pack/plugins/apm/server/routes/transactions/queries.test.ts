@@ -22,11 +22,12 @@ describe('transaction queries', () => {
   });
 
   it('fetches breakdown data for transactions', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams((setup, apmEventClient) =>
       getTransactionBreakdown({
         serviceName: 'foo',
         transactionType: 'bar',
-        setup,
+        config: setup.config,
+        apmEventClient,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
         start: 0,
@@ -38,12 +39,13 @@ describe('transaction queries', () => {
   });
 
   it('fetches breakdown data for transactions for a transaction name', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams((setup, apmEventClient) =>
       getTransactionBreakdown({
         serviceName: 'foo',
         transactionType: 'bar',
         transactionName: 'baz',
-        setup,
+        config: setup.config,
+        apmEventClient,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
         start: 0,
@@ -55,14 +57,14 @@ describe('transaction queries', () => {
   });
 
   it('fetches transaction trace samples', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams((setup, apmEventClient) =>
       getTraceSamples({
         serviceName: 'foo',
         transactionName: 'bar',
         transactionType: 'baz',
         traceId: 'qux',
         transactionId: 'quz',
-        setup,
+        apmEventClient,
         environment: ENVIRONMENT_ALL.value,
         kuery: '',
         start: 0,
@@ -74,11 +76,11 @@ describe('transaction queries', () => {
   });
 
   it('fetches a transaction', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams((setup, apmEventClient) =>
       getTransaction({
         transactionId: 'foo',
         traceId: 'bar',
-        setup,
+        apmEventClient,
         start: 0,
         end: 50000,
       })
