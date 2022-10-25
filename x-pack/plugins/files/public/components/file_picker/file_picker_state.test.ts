@@ -168,4 +168,20 @@ describe('FilePickerState', () => {
       expectObservable(filePickerState.loadingError$).toBe('a-b---c-', {});
     });
   });
+  it('does not allow fetching files while an upload is in progress', () => {
+    getTestScheduler().run(({ expectObservable, cold }) => {
+      const files = [] as FileJSON[];
+      filesClient.list.mockImplementation(() => of({ files }) as any);
+      const uploadInput = '---a|';
+      const queryInput = ' -----a|';
+      const upload$ = cold(uploadInput).pipe(tap(() => filePickerState.setIsUploading(true)));
+      const query$ = cold(queryInput).pipe(tap((q) => filePickerState.setQuery(q)));
+      expectObservable(merge(upload$, query$)).toBe('---a-a|');
+      expectObservable(filePickerState.files$).toBe(
+        'a----#-',
+        { a: [] },
+        new Error('Cannot fetch files while uploading')
+      );
+    });
+  });
 });
