@@ -76,7 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should not allow converting not valid aggregation function', async () => {
       await visualBuilder.clickSeriesOption();
-      await visualBuilder.setFieldForAggregateBy('timestamp');
+      await visualBuilder.setFieldForAggregateBy('clientip');
       await visualBuilder.setFunctionForAggregateFunction('Cumulative Sum');
       await header.waitUntilLoadingHasFinished();
       expect(await visualize.hasNavigateToLensButton()).to.be(false);
