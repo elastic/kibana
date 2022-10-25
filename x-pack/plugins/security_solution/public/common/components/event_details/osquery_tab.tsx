@@ -22,7 +22,6 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 import { useKibana } from '../../lib/kibana';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
-import { useHandleAddToTimeline } from './add_to_timeline_button';
 
 const TabContentWrapper = styled.div`
   height: 100%;
@@ -64,7 +63,6 @@ export const useOsqueryTab = ({ rawEventData }: { rawEventData?: AlertRawEventDa
   const {
     services: { osquery, application },
   } = useKibana();
-  const handleAddToTimeline = useHandleAddToTimeline();
   const responseActionsEnabled = useIsExperimentalFeatureEnabled('responseActionsEnabled');
 
   const emptyPrompt = useMemo(
@@ -139,12 +137,7 @@ export const useOsqueryTab = ({ rawEventData }: { rawEventData?: AlertRawEventDa
           {!application?.capabilities?.osquery?.read ? (
             emptyPrompt
           ) : (
-            <OsqueryResults
-              agentIds={agentIds}
-              ruleName={ruleName}
-              alertId={alertId}
-              addToTimeline={handleAddToTimeline}
-            />
+            <OsqueryResults agentIds={agentIds} ruleName={ruleName} alertId={alertId} />
           )}
         </TabContentWrapper>
       </>

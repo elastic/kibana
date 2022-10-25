@@ -82,10 +82,6 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
     setShouldShowComments(isOpen);
   }, []);
 
-  const exceptionItemsExist: boolean = useMemo(() => {
-    return exceptionItemComments != null && exceptionItemComments.length > 0;
-  }, [exceptionItemComments]);
-
   const commentsAccordionTitle = useMemo(() => {
     if (exceptionItemComments && exceptionItemComments.length > 0) {
       return (
@@ -110,32 +106,30 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
 
   return (
     <div>
-      {exceptionItemsExist && (
-        <CommentAccordion
-          id={'add-exception-comments-accordion'}
-          buttonClassName={COMMENT_ACCORDION_BUTTON_CLASS_NAME}
-          buttonContent={accordionTitle ?? commentsAccordionTitle}
-          data-test-subj="exceptionItemCommentsAccordion"
-          onToggle={(isOpen) => handleTriggerOnClick(isOpen)}
-        >
-          <EuiCommentList comments={formattedComments} />
-        </CommentAccordion>
-      )}
-      <EuiFlexGroup gutterSize={'none'}>
-        <EuiFlexItem grow={false}>
-          <MyAvatar name={avatarName} size="l" data-test-subj="exceptionItemCommentAvatar" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <EuiTextArea
-            placeholder={i18n.ADD_COMMENT_PLACEHOLDER}
-            aria-label="Comment Input"
-            value={newCommentValue}
-            onChange={handleOnChange}
-            fullWidth={true}
-            data-test-subj="newExceptionItemCommentTextArea"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <CommentAccordion
+        id={'add-exception-comments-accordion'}
+        buttonClassName={COMMENT_ACCORDION_BUTTON_CLASS_NAME}
+        buttonContent={accordionTitle ?? commentsAccordionTitle}
+        data-test-subj="exceptionItemCommentsAccordion"
+        onToggle={(isOpen) => handleTriggerOnClick(isOpen)}
+      >
+        <EuiCommentList comments={formattedComments} />
+        <EuiFlexGroup gutterSize={'none'}>
+          <EuiFlexItem grow={false}>
+            <MyAvatar name={avatarName} size="l" data-test-subj="exceptionItemCommentAvatar" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <EuiTextArea
+              placeholder={i18n.ADD_COMMENT_PLACEHOLDER}
+              aria-label="Comment Input"
+              value={newCommentValue}
+              onChange={handleOnChange}
+              fullWidth={true}
+              data-test-subj="newExceptionItemCommentTextArea"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </CommentAccordion>
     </div>
   );
 });
