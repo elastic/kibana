@@ -51,7 +51,7 @@ export const securityConfig: GuideConfig = {
           defaultMessage: 'Load the prebuilt rules.',
         }),
         i18n.translate('guidedOnboarding.securityGuide.rulesStep.description2', {
-          defaultMessage: 'Select the rules that you want..',
+          defaultMessage: 'Select the rules that you want.',
         }),
       ],
       manualCompletion: {
