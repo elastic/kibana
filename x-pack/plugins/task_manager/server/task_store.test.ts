@@ -21,9 +21,11 @@ import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { SavedObjectAttributes, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
+import { CreateTaskCounter } from './lib/create_task_counter';
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
 const serializer = savedObjectsServiceMock.createSerializer();
+const createTaskCounter = new CreateTaskCounter();
 
 beforeEach(() => jest.resetAllMocks());
 
@@ -67,7 +69,12 @@ describe('TaskStore', () => {
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        createTaskCounter,
       });
+    });
+
+    afterEach(() => {
+      createTaskCounter.reset();
     });
 
     async function testSchedule(task: unknown) {
@@ -187,6 +194,18 @@ describe('TaskStore', () => {
       await expect(store.schedule(task)).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
+
+    test('increments createTaskCounter', async () => {
+      const task: TaskInstance = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+
+      await testSchedule(task);
+      expect(createTaskCounter.count).toEqual(1);
+    });
   });
 
   describe('fetch', () => {
@@ -202,6 +221,7 @@ describe('TaskStore', () => {
         esClient,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        createTaskCounter,
       });
     });
 
@@ -270,6 +290,7 @@ describe('TaskStore', () => {
         esClient,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        createTaskCounter,
       });
     });
 
@@ -367,6 +388,7 @@ describe('TaskStore', () => {
         esClient,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        createTaskCounter,
       });
     });
 
@@ -469,6 +491,7 @@ describe('TaskStore', () => {
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        createTaskCounter,
       });
     });
 
@@ -509,6 +532,7 @@ describe('TaskStore', () => {
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        createTaskCounter,
       });
     });
 
@@ -540,6 +564,7 @@ describe('TaskStore', () => {
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        createTaskCounter,
       });
     });
 
@@ -624,6 +649,7 @@ describe('TaskStore', () => {
             esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
             definitions: taskDefinitions,
             savedObjectsRepository: savedObjectsClient,
+            createTaskCounter,
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -643,6 +669,7 @@ describe('TaskStore', () => {
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        createTaskCounter,
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -660,6 +687,7 @@ describe('TaskStore', () => {
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        createTaskCounter,
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -677,7 +705,12 @@ describe('TaskStore', () => {
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        createTaskCounter,
       });
+    });
+
+    afterEach(() => {
+      createTaskCounter.reset();
     });
 
     async function testBulkSchedule(task: unknown) {
@@ -799,6 +832,18 @@ describe('TaskStore', () => {
         `"Failure"`
       );
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+
+    test('increments createTaskCounter', async () => {
+      const task: TaskInstance = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+
+      const result = await testBulkSchedule([task]);
+      expect(createTaskCounter.count).toEqual(result.length);
     });
   });
 });

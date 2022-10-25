@@ -23,6 +23,8 @@ import {
   summarizeUtilizationStat,
 } from './background_task_utilization_statistics';
 import { parseIntervalAsMinute } from '../lib/intervals';
+import { CreateTaskCounter } from '../lib/create_task_counter';
+import { sum } from 'lodash';
 
 describe('Task Run Statistics', () => {
   beforeAll(() => {
@@ -35,11 +37,13 @@ describe('Task Run Statistics', () => {
     const taskPollingLifecycle = taskPollingLifecycleMock.create({
       events$: events$ as Observable<TaskLifecycleEvent>,
     });
+    const createTaskCounter = new CreateTaskCounter();
 
     const runningAverageWindowSize = 5;
     const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
       taskPollingLifecycle,
-      runningAverageWindowSize
+      runningAverageWindowSize,
+      createTaskCounter
     );
 
     function expectWindowEqualsUpdate(
@@ -96,11 +100,13 @@ describe('Task Run Statistics', () => {
     const taskPollingLifecycle = taskPollingLifecycleMock.create({
       events$: events$ as Observable<TaskLifecycleEvent>,
     });
+    const createTaskCounter = new CreateTaskCounter();
 
     const runningAverageWindowSize = 5;
     const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
       taskPollingLifecycle,
-      runningAverageWindowSize
+      runningAverageWindowSize,
+      createTaskCounter
     );
 
     function expectWindowEqualsUpdate(
@@ -157,11 +163,13 @@ describe('Task Run Statistics', () => {
     const taskPollingLifecycle = taskPollingLifecycleMock.create({
       events$: events$ as Observable<TaskLifecycleEvent>,
     });
+    const createTaskCounter = new CreateTaskCounter();
 
     const runningAverageWindowSize = 5;
     const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
       taskPollingLifecycle,
-      runningAverageWindowSize
+      runningAverageWindowSize,
+      createTaskCounter
     );
 
     function expectWindowEqualsUpdate(
@@ -202,17 +210,73 @@ describe('Task Run Statistics', () => {
     });
   });
 
+  test('returns a running count of adhoc created counter', async () => {
+    const tasks = [1000, 2000, 500, 300, 400, 15000, 20000, 200];
+    const events$ = new Subject<TaskLifecycleEvent>();
+    const taskPollingLifecycle = taskPollingLifecycleMock.create({
+      events$: events$ as Observable<TaskLifecycleEvent>,
+    });
+    const createTaskCounter = new CreateTaskCounter();
+
+    const runningAverageWindowSize = 5;
+    const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
+      taskPollingLifecycle,
+      runningAverageWindowSize,
+      createTaskCounter
+    );
+
+    function expectWindowEqualsUpdate(
+      taskStat: AggregatedStat<SummarizedBackgroundTaskUtilizationStat>,
+      window: number[]
+    ) {
+      expect(taskStat.value.adhoc.created.counter).toEqual(sum(window));
+    }
+
+    return new Promise<void>((resolve) => {
+      BackgroundTaskUtilizationAggregator.pipe(
+        // skip initial stat which is just initialized data which
+        // ensures we don't stall on combineLatest
+        skip(1),
+        // Use 'summarizeUtilizationStat' to receive summarize stats
+        map(({ key, value }: AggregatedStat<BackgroundTaskUtilizationStat>) => ({
+          key,
+          value: summarizeUtilizationStat(value).value,
+        })),
+        take(tasks.length),
+        bufferCount(tasks.length)
+      ).subscribe((taskStats: Array<AggregatedStat<SummarizedBackgroundTaskUtilizationStat>>) => {
+        expectWindowEqualsUpdate(taskStats[0], tasks.slice(0, 1));
+        expectWindowEqualsUpdate(taskStats[1], tasks.slice(0, 2));
+        expectWindowEqualsUpdate(taskStats[2], tasks.slice(0, 3));
+        expectWindowEqualsUpdate(taskStats[3], tasks.slice(0, 4));
+        expectWindowEqualsUpdate(taskStats[4], tasks.slice(0, 5));
+        // from the 6th value, begin to drop old values as out window is 5
+        expectWindowEqualsUpdate(taskStats[5], tasks.slice(1, 6));
+        expectWindowEqualsUpdate(taskStats[6], tasks.slice(2, 7));
+        expectWindowEqualsUpdate(taskStats[7], tasks.slice(3, 8));
+        resolve();
+      });
+
+      for (const task of tasks) {
+        createTaskCounter.increment(task);
+        events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }));
+      }
+    });
+  });
+
   test('returns a running average of recurring actual service_time', async () => {
     const serviceTimes = [1000, 2000, 500, 300, 400, 15000, 20000, 200];
     const events$ = new Subject<TaskLifecycleEvent>();
     const taskPollingLifecycle = taskPollingLifecycleMock.create({
       events$: events$ as Observable<TaskLifecycleEvent>,
     });
+    const createTaskCounter = new CreateTaskCounter();
 
     const runningAverageWindowSize = 5;
     const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
       taskPollingLifecycle,
-      runningAverageWindowSize
+      runningAverageWindowSize,
+      createTaskCounter
     );
 
     function expectWindowEqualsUpdate(
@@ -269,11 +333,13 @@ describe('Task Run Statistics', () => {
     const taskPollingLifecycle = taskPollingLifecycleMock.create({
       events$: events$ as Observable<TaskLifecycleEvent>,
     });
+    const createTaskCounter = new CreateTaskCounter();
 
     const runningAverageWindowSize = 5;
     const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
       taskPollingLifecycle,
-      runningAverageWindowSize
+      runningAverageWindowSize,
+      createTaskCounter
     );
 
     function expectWindowEqualsUpdate(
@@ -330,11 +396,13 @@ describe('Task Run Statistics', () => {
     const taskPollingLifecycle = taskPollingLifecycleMock.create({
       events$: events$ as Observable<TaskLifecycleEvent>,
     });
+    const createTaskCounter = new CreateTaskCounter();
 
     const runningAverageWindowSize = 5;
     const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
       taskPollingLifecycle,
-      runningAverageWindowSize
+      runningAverageWindowSize,
+      createTaskCounter
     );
 
     function expectWindowEqualsUpdate(
@@ -383,11 +451,13 @@ describe('Task Run Statistics', () => {
     const taskPollingLifecycle = taskPollingLifecycleMock.create({
       events$: events$ as Observable<TaskLifecycleEvent>,
     });
+    const createTaskCounter = new CreateTaskCounter();
 
     const runningAverageWindowSize = 5;
     const BackgroundTaskUtilizationAggregator = createBackgroundTaskUtilizationAggregator(
       taskPollingLifecycle,
-      runningAverageWindowSize
+      runningAverageWindowSize,
+      createTaskCounter
     );
 
     function expectWindowEqualsUpdate(

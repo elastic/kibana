@@ -33,6 +33,7 @@ import { EphemeralTaskLifecycle } from './ephemeral_task_lifecycle';
 import { EphemeralTask, ConcreteTaskInstance } from './task';
 import { registerTaskManagerUsageCollector } from './usage';
 import { TASK_MANAGER_INDEX } from './constants';
+import { CreateTaskCounter } from './lib/create_task_counter';
 export interface TaskManagerSetupContract {
   /**
    * @deprecated
@@ -76,6 +77,7 @@ export class TaskManagerPlugin
   private monitoringStats$ = new Subject<MonitoringStats>();
   private shouldRunBackgroundTasks: boolean;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  private createTaskCounter: CreateTaskCounter;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -84,6 +86,7 @@ export class TaskManagerPlugin
     this.definitions = new TaskTypeDictionary(this.logger);
     this.kibanaVersion = initContext.env.packageInfo.version;
     this.shouldRunBackgroundTasks = initContext.node.roles.backgroundTasks;
+    this.createTaskCounter = new CreateTaskCounter();
   }
 
   public setup(
@@ -199,6 +202,7 @@ export class TaskManagerPlugin
       index: TASK_MANAGER_INDEX,
       definitions: this.definitions,
       taskManagerId: `kibana:${this.taskManagerId!}`,
+      createTaskCounter: this.createTaskCounter,
     });
 
     const managedConfiguration = createManagedConfiguration({
@@ -241,6 +245,7 @@ export class TaskManagerPlugin
       this.config!,
       managedConfiguration,
       this.logger,
+      this.createTaskCounter,
       this.taskPollingLifecycle,
       this.ephemeralTaskLifecycle
     ).subscribe((stat) => this.monitoringStats$.next(stat));

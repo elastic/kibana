@@ -7,12 +7,13 @@
 
 import { JsonObject } from '@kbn/utility-types';
 import { combineLatest, filter, map, Observable, startWith } from 'rxjs';
+import { CreateTaskCounter } from '../lib/create_task_counter';
 import { parseIntervalAsMinute } from '../lib/intervals';
 import { unwrap } from '../lib/result_type';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
 import { ConcreteTaskInstance } from '../task';
 import { isTaskRunEvent, TaskPersistence, TaskRun, TaskTiming } from '../task_events';
-import { HealthStatus, MonitoredStat } from './monitoring_stats_stream';
+import { MonitoredStat } from './monitoring_stats_stream';
 import { AggregatedStat, AggregatedStatProvider } from './runtime_statistics_aggregator';
 import {
   AveragedStat,
@@ -72,7 +73,8 @@ export interface SummarizedBackgroundTaskUtilizationStat extends JsonObject {
 
 export function createBackgroundTaskUtilizationAggregator(
   taskPollingLifecycle: TaskPollingLifecycle,
-  runningAverageWindowSize: number
+  runningAverageWindowSize: number,
+  createTaskCounter: CreateTaskCounter
 ): AggregatedStatProvider<BackgroundTaskUtilizationStat> {
   const taskRunEventToAdhocStat = createTaskRunEventToAdhocStat(runningAverageWindowSize);
   const taskRunAdhocEvents$: Observable<Pick<BackgroundTaskUtilizationStat, 'adhoc'>> =
@@ -84,7 +86,7 @@ export function createBackgroundTaskUtilizationAggregator(
       })),
       filter(({ persistence }) => persistence === TaskPersistence.NonRecurring),
       map(({ taskEvent }) => {
-        return taskRunEventToAdhocStat(taskEvent.timing!);
+        return taskRunEventToAdhocStat(taskEvent.timing!, createTaskCounter);
       })
     );
 
@@ -157,7 +159,6 @@ function hasTiming(taskEvent: TaskLifecycleEvent) {
 
 export function summarizeUtilizationStat({ adhoc, recurring }: BackgroundTaskUtilizationStat): {
   value: SummarizedBackgroundTaskUtilizationStat;
-  status: HealthStatus;
 } {
   return {
     value: {
@@ -184,7 +185,6 @@ export function summarizeUtilizationStat({ adhoc, recurring }: BackgroundTaskUti
         },
       },
     },
-    status: HealthStatus.OK,
   };
 }
 
@@ -215,12 +215,17 @@ function createTaskRunEventToAdhocStat(runningAverageWindowSize: number) {
   const actualQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const adjustedQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
   const taskCounterQueue = createRunningAveragedStat<number>(runningAverageWindowSize);
-  return (timing: TaskTiming): Pick<BackgroundTaskUtilizationStat, 'adhoc'> => {
+  return (
+    timing: TaskTiming,
+    createTaskCounter: CreateTaskCounter
+  ): Pick<BackgroundTaskUtilizationStat, 'adhoc'> => {
     const { duration, adjusted } = getServiceTimeStats(timing);
+    const created = createTaskCounter.count;
+    createTaskCounter.reset();
     return {
       adhoc: {
         created: {
-          counter: createdCounterQueue(),
+          counter: createdCounterQueue(created),
         },
         ran: {
           service_time: {

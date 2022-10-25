@@ -33,6 +33,7 @@ import {
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
+import { CreateTaskCounter } from './lib/create_task_counter';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -41,6 +42,7 @@ export interface StoreOpts {
   definitions: TaskTypeDictionary;
   savedObjectsRepository: ISavedObjectsRepository;
   serializer: ISavedObjectsSerializer;
+  createTaskCounter: CreateTaskCounter;
 }
 
 export interface SearchOpts {
@@ -94,6 +96,7 @@ export class TaskStore {
   private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: ISavedObjectsSerializer;
+  private createTaskCounter: CreateTaskCounter;
 
   /**
    * Constructs a new TaskStore.
@@ -111,6 +114,7 @@ export class TaskStore {
     this.definitions = opts.definitions;
     this.serializer = opts.serializer;
     this.savedObjectsRepository = opts.savedObjectsRepository;
+    this.createTaskCounter = opts.createTaskCounter;
   }
 
   /**
@@ -139,6 +143,9 @@ export class TaskStore {
         taskInstanceToAttributes(taskInstance),
         { id: taskInstance.id, refresh: false }
       );
+      if (!taskInstance.schedule) {
+        this.createTaskCounter.increment();
+      }
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -167,6 +174,11 @@ export class TaskStore {
       savedObjects = await this.savedObjectsRepository.bulkCreate<SerializedConcreteTaskInstance>(
         objects,
         { refresh: false }
+      );
+      this.createTaskCounter.increment(
+        savedObjects.saved_objects.filter((so) => {
+          return !so.attributes.schedule;
+        }).length
       );
     } catch (e) {
       this.errors$.next(e);
