@@ -72,19 +72,20 @@ echo "✅ ES is ready and will run in the background"
 curl -I -XGET "${TEST_ES_URL}/_cat/indices"
 curl -I -XGET "${TEST_ES_URL}/_cat/count?v=true"
 
+echo "Run warmup journey"
+
+node scripts/functional_tests \
+   --config "x-pack/performance/journeys/warmup" \
+  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
+  --debug \
+  --bail
+
+echo "Run journeys"
+
 while read -r journey; do
   if [ "$journey" == "" ]; then
     continue;
   fi
-
-  # curl \
-  #   --fail \
-  #   --silent \
-  #   --retry 120 \
-  #   --retry-delay 1 \
-  #   --retry-connrefused \
-  #   -XGET "${TEST_ES_URL}/_cluster/health?wait_for_nodes=>=1&wait_for_status=yellow" \
-  #   > /dev/null
 
   phases=("TEST")
   status=0
