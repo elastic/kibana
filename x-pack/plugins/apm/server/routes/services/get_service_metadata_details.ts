@@ -59,6 +59,7 @@ export interface ServiceMetadataDetails {
     type?: string;
     functionNames?: string[];
     faasTriggerTypes?: string[];
+    hostArchitecture?: string;
   };
   cloud?: {
     provider?: string;
@@ -212,6 +213,7 @@ export async function getServiceMetadataDetails({
           faasTriggerTypes: response.aggregations?.faasTriggerTypes.buckets.map(
             (bucket) => bucket.key as string
           ),
+          hostArchitecture: host?.architecture,
         }
       : undefined;
 
