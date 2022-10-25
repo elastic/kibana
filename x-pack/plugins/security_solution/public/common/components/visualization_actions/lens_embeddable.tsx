@@ -20,6 +20,7 @@ import { useActions } from './use_actions';
 import { inputsSelectors } from '../../store';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ModalInspectQuery } from '../inspect/modal';
+import { InputsModelId } from '../../store/inputs/constants';
 
 const LensComponentWrapper = styled.div<{ height?: string }>`
   height: ${({ height }) => height ?? 'auto'};
@@ -75,8 +76,9 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   getLensAttributes,
   height,
   id,
-  inputsModelId = 'global',
+  inputsModelId = InputsModelId.global,
   lensAttributes,
+  metricAlignment,
   stackByField,
   timerange,
   inspectTitle,
@@ -176,6 +178,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             extraActions={actions}
             searchSessionId={searchSessionId}
             showInspector={false}
+            metricAlignment={metricAlignment}
           />
         </LensComponentWrapper>
       ) : null}
