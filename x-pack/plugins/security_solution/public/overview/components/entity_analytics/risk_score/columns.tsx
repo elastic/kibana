@@ -27,7 +27,7 @@ type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore & UserRiskSc
 
 export const getRiskScoreColumns = (
   riskEntity: RiskScoreEntity,
-  openEntityInTimeline: (hostName: string) => void
+  openEntityInTimeline: (entityName: string) => void
 ): HostRiskScoreColumns => [
   {
     field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',

@@ -78,7 +78,7 @@ async function enhanceData(
   const response = await ruleDataReader?.search(query);
   const buckets: BucketItem[] = getOr([], 'aggregations.alertsByEntity.buckets', response);
 
-  const alertsCountByEntityName: Record<string, number> | undefined = buckets.reduce(
+  const alertsCountByEntityName: Record<string, number> = buckets.reduce(
     (acc, { key, doc_count: count }) => ({
       ...acc,
       [key]: count,
@@ -86,12 +86,10 @@ async function enhanceData(
     {}
   );
 
-  return alertsCountByEntityName
-    ? data.map((risk) => ({
-        ...risk,
-        alertsCount: alertsCountByEntityName[get(nameField, risk)] ?? 0,
-      }))
-    : data;
+  return data.map((risk) => ({
+    ...risk,
+    alertsCount: alertsCountByEntityName[get(nameField, risk)] ?? 0,
+  }));
 }
 
 const getAlertsQueryForEntity = (names: string[], nameField: string): SearchRequest => ({
