@@ -226,28 +226,109 @@ describe('Guided setup', () => {
     });
 
     describe('Steps', () => {
-      test('should show "Start" button label if step has not been started', async () => {
+      const clickActiveStepButton = async () => {
+        const { component, find } = testBed;
+
+        await act(async () => {
+          find('activeStepButton').simulate('click');
+        });
+
+        component.update();
+      };
+
+      test('can start a step if step has not been started', async () => {
+        const { component, find, exists } = testBed;
+
+        await updateComponentWithState(component, mockActiveSearchGuideState, true);
+
+        expect(find('activeStepButton').text()).toEqual('Start');
+
+        await clickActiveStepButton();
+
+        expect(exists('guidePanel')).toBe(false);
+      });
+
+      test('can continue a step if step is in progress', async () => {
+        const { component, find, exists } = testBed;
+
+        await updateComponentWithState(component, mockInProgressSearchGuideState, true);
+
+        expect(find('activeStepButton').text()).toEqual('Continue');
+
+        await clickActiveStepButton();
+
+        expect(exists('guidePanel')).toBe(false);
+      });
+
+      test('can mark a step "done" if step is ready to complete', async () => {
+        const { component, find, exists } = testBed;
+
+        await updateComponentWithState(component, mockReadyToCompleteSearchGuideState, true);
+
+        expect(find('activeStepButton').text()).toEqual('Mark done');
+
+        await clickActiveStepButton();
+
+        // The guide panel should remain open after marking a step done
+        expect(exists('guidePanel')).toBe(true);
+        // Dependent on the Search guide config, which expects another step to start
+        expect(find('activeStepButton').text()).toEqual('Start');
+      });
+
+      test('should render the step description as a paragraph if it is only one sentence', async () => {
+        const { component, find } = testBed;
+
+        const mockSingleSentenceStepDescriptionGuideState: GuideState = {
+          guideId: 'observability',
+          isActive: true,
+          status: 'in_progress',
+          steps: [
+            {
+              id: 'add_data',
+              status: 'complete',
+            },
+            {
+              id: 'view_dashboard',
+              status: 'complete',
+            },
+            {
+              id: 'tour_observability',
+              status: 'in_progress',
+            },
+          ],
+        };
+
+        await updateComponentWithState(
+          component,
+          mockSingleSentenceStepDescriptionGuideState,
+          true
+        );
+
+        expect(
+          find('guidePanelStepDescription')
+            .last()
+            .containsMatchingElement(
+              <p>{guidesConfig.observability.steps[2].descriptionList[0]}</p>
+            )
+        ).toBe(true);
+      });
+
+      test('should render the step description as an unordered list if it is more than one sentence', async () => {
         const { component, find } = testBed;
 
         await updateComponentWithState(component, mockActiveSearchGuideState, true);
 
-        expect(find('activeStepButtonLabel').text()).toEqual('Start');
-      });
-
-      test('should show "Continue" button label if step is in progress', async () => {
-        const { component, find } = testBed;
-
-        await updateComponentWithState(component, mockInProgressSearchGuideState, true);
-
-        expect(find('activeStepButtonLabel').text()).toEqual('Continue');
-      });
-
-      test('shows "Mark done" button label if step is ready to complete', async () => {
-        const { component, find } = testBed;
-
-        await updateComponentWithState(component, mockReadyToCompleteSearchGuideState, true);
-
-        expect(find('activeStepButtonLabel').text()).toEqual('Mark done');
+        expect(
+          find('guidePanelStepDescription')
+            .first()
+            .containsMatchingElement(
+              <ul>
+                {guidesConfig.search.steps[0].descriptionList.map((description, i) => (
+                  <li key={i}>{description}</li>
+                ))}
+              </ul>
+            )
+        ).toBe(true);
       });
     });
 

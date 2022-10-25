@@ -39,6 +39,7 @@ describe('lensSlice', () => {
   let store: EnhancedStore<{ lens: LensAppState }>;
   beforeEach(() => {
     store = makeLensStore({}).store;
+    jest.clearAllMocks();
   });
   const customQuery = { query: 'custom' } as Query;
 
@@ -275,17 +276,21 @@ describe('lensSlice', () => {
         return {
           id: datasourceId,
           getPublicAPI: () => ({
-            datasourceId: 'testDatasource',
+            datasourceId,
             getOperationForColumnId: jest.fn(),
             getTableSpec: jest.fn(),
           }),
           getLayers: () => ['layer1'],
-          clearLayer: (layerIds: unknown, layerId: string) =>
-            (layerIds as string[]).map((id: string) =>
+          clearLayer: (layerIds: unknown, layerId: string) => ({
+            removedLayerIds: [],
+            newState: (layerIds as string[]).map((id: string) =>
               id === layerId ? `${datasourceId}_clear_${layerId}` : id
             ),
-          removeLayer: (layerIds: unknown, layerId: string) =>
-            (layerIds as string[]).filter((id: string) => id !== layerId),
+          }),
+          removeLayer: (layerIds: unknown, layerId: string) => ({
+            newState: (layerIds as string[]).filter((id: string) => id !== layerId),
+            removedLayerIds: [layerId],
+          }),
           insertLayer: (layerIds: unknown, layerId: string, layersToLinkTo: string[]) => [
             ...(layerIds as string[]),
             layerId,
@@ -317,8 +322,9 @@ describe('lensSlice', () => {
             (layerIds as string[]).map((id: string) =>
               id === layerId ? `vis_clear_${layerId}` : id
             ),
-          removeLayer: (layerIds: unknown, layerId: string) =>
-            (layerIds as string[]).filter((id: string) => id !== layerId),
+          removeLayer: jest.fn((layerIds: unknown, layerId: string) =>
+            (layerIds as string[]).filter((id: string) => id !== layerId)
+          ),
           getLayerIds: (layerIds: unknown) => layerIds as string[],
           getLayersToLinkTo: (state, newLayerId) => ['linked-layer-id'],
           appendLayer: (layerIds: unknown, layerId: string) => [...(layerIds as string[]), layerId],
@@ -482,6 +488,54 @@ describe('lensSlice', () => {
         expect(state.datasourceStates.testDatasource2.state).toEqual(['layer2']);
         expect(state.stagedPreview).not.toBeDefined();
       });
+
+      it('removeLayer: should remove all layers from visualization that were removed by datasource', () => {
+        const removedLayerId = 'other-removed-layer';
+
+        const testDatasource3 = testDatasource('testDatasource3');
+        testDatasource3.removeLayer = (layerIds: unknown, layerId: string) => ({
+          newState: (layerIds as string[]).filter((id: string) => id !== layerId),
+          removedLayerIds: [layerId, removedLayerId],
+        });
+
+        const localStore = makeLensStore({
+          preloadedState: {
+            activeDatasourceId: 'testDatasource',
+            datasourceStates: {
+              ...datasourceStates,
+              testDatasource3: {
+                isLoading: false,
+                state: [],
+              },
+            },
+            visualization: {
+              activeId: activeVisId,
+              state: ['layer1', 'layer2'],
+            },
+            stagedPreview: {
+              visualization: {
+                activeId: activeVisId,
+                state: ['layer1', 'layer2'],
+              },
+              datasourceStates,
+            },
+          },
+          storeDeps: mockStoreDeps({
+            visualizationMap: visualizationMap as unknown as VisualizationMap,
+            datasourceMap: { ...datasourceMap, testDatasource3 } as unknown as DatasourceMap,
+          }),
+        }).store;
+
+        localStore.dispatch(
+          removeOrClearLayer({
+            visualizationId: 'testVis',
+            layerId: 'layer1',
+            layerIds: ['layer1', 'layer2'],
+          })
+        );
+
+        expect(visualizationMap[activeVisId].removeLayer).toHaveBeenCalledTimes(2);
+      });
     });
 
     describe('removing a dimension', () => {
@@ -546,8 +600,6 @@ describe('lensSlice', () => {
             datasourceMap: datasourceMap as unknown as DatasourceMap,
           }),
         }).store;
-
-        jest.clearAllMocks();
       });
 
       it('removes a dimension', () => {
