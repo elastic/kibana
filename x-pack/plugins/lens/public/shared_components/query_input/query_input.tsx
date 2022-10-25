@@ -36,7 +36,7 @@ export const QueryInput = ({
   const { inputValue, handleInputChange } = useDebouncedValue({ value, onChange });
   const lensAppServices = useKibana<LensAppServices>().services;
 
-  const { data, uiSettings, http, notifications, docLinks, storage, unifiedSearch } =
+  const { data, uiSettings, http, notifications, docLinks, storage, unifiedSearch, dataViews } =
     lensAppServices;
 
   return (
@@ -74,7 +74,7 @@ export const QueryInput = ({
       appName={i18n.translate('xpack.lens.queryInput.appName', {
         defaultMessage: 'Lens',
       })}
-      deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, storage }}
+      deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, storage, dataViews }}
     />
   );
 };

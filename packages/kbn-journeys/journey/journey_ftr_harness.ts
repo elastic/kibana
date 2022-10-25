@@ -362,6 +362,7 @@ export class JourneyFtrHarness {
           })
         )
       ),
+      kibanaServer: this.kibanaServer,
     });
 
     return this.#_ctx;
