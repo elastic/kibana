@@ -74,6 +74,7 @@ export const CrawlCustomSettingsFlyoutDomainsPanel: React.FC = () => {
         }
       >
         <SimplifiedSelectable
+          data-telemetry-id="entSearchContent-crawler-customCrawlSettings-selectDomainUrls"
           options={domainUrls}
           selectedOptions={selectedDomainUrls}
           onChange={onSelectDomainUrls}

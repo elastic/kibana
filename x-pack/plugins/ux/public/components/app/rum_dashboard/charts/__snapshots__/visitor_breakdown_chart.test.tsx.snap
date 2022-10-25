@@ -2,21 +2,15 @@
 
 exports[`VisitorBreakdownChart getVisitorBreakdownLensAttributes generates expected lens attributes 1`] = `
 Object {
-  "references": Array [
-    Object {
-      "id": "Required",
-      "name": "indexpattern-datasource-current-indexpattern",
-      "type": "index-pattern",
-    },
-    Object {
-      "id": "Required",
-      "name": "indexpattern-datasource-layer-layer1",
-      "type": "index-pattern",
-    },
-  ],
+  "references": Array [],
   "state": Object {
+    "adHocDataViews": Object {
+      "xxxx-xxxxxxxxxxx-xxxx": Object {
+        "id": "xxxx-xxxxxxxxxxx-xxxx",
+      },
+    },
     "datasourceStates": Object {
-      "indexpattern": Object {
+      "formBased": Object {
         "layers": Object {
           "layer1": Object {
             "columnOrder": Array [
@@ -93,6 +87,18 @@ Object {
             "must_not": Array [],
           },
         },
+      },
+    ],
+    "internalReferences": Array [
+      Object {
+        "id": "xxxx-xxxxxxxxxxx-xxxx",
+        "name": "indexpattern-datasource-current-indexpattern",
+        "type": "index-pattern",
+      },
+      Object {
+        "id": "xxxx-xxxxxxxxxxx-xxxx",
+        "name": "indexpattern-datasource-layer-layer1",
+        "type": "index-pattern",
       },
     ],
     "query": Object {

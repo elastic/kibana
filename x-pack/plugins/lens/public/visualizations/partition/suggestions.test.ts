@@ -16,7 +16,7 @@ import {
   PieLayerState,
   PieVisualizationState,
 } from '../../../common';
-import { layerTypes } from '../../../common';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 
 describe('suggestions', () => {
   describe('pie', () => {
@@ -64,7 +64,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 primaryGroups: [],
                 metric: 'a',
                 numberDisplay: NumberDisplay.HIDDEN,
@@ -566,7 +566,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 primaryGroups: ['a'],
                 metric: 'b',
 
@@ -590,7 +590,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 primaryGroups: ['a'],
                 metric: 'b',
                 numberDisplay: NumberDisplay.HIDDEN,
@@ -623,7 +623,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 primaryGroups: [],
                 metric: 'a',
 
@@ -673,7 +673,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 primaryGroups: ['a', 'b'],
                 metric: 'e',
                 numberDisplay: NumberDisplay.VALUE,
@@ -722,7 +722,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 primaryGroups: ['a', 'b'],
                 metric: 'e',
                 numberDisplay: NumberDisplay.PERCENT,
@@ -759,7 +759,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 primaryGroups: ['a'],
                 metric: 'b',
 
@@ -782,7 +782,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 primaryGroups: ['a'],
                 metric: 'b',
 
@@ -816,7 +816,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 primaryGroups: [],
                 metric: 'a',
 
@@ -858,7 +858,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 primaryGroups: ['a', 'b'],
                 metric: 'c',
 
@@ -893,7 +893,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 primaryGroups: [],
                 metric: 'a',
 
@@ -931,7 +931,7 @@ describe('suggestions', () => {
             layers: [
               {
                 layerId: 'first',
-                layerType: layerTypes.DATA,
+                layerType: LayerTypes.DATA,
                 primaryGroups: ['a', 'b'],
                 metric: 'c',
                 numberDisplay: NumberDisplay.HIDDEN,

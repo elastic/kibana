@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { CaseSeverityWithAll } from '@kbn/cases-plugin/common/ui';
+import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { CasesCommon } from './common';
@@ -22,6 +23,12 @@ export function CasesTableServiceProvider(
   const header = getPageObject('header');
   const retry = getService('retry');
   const config = getService('config');
+
+  const assertCaseExists = (index: number, totalCases: number) => {
+    if (index > totalCases - 1) {
+      throw new Error('Cannot get case from table. Index is greater than the length of all rows');
+    }
+  };
 
   return {
     /**
@@ -40,11 +47,10 @@ export function CasesTableServiceProvider(
       });
     },
 
-    async deleteFirstListedCase() {
-      await testSubjects.existOrFail('action-delete', {
-        timeout: config.get('timeouts.waitFor'),
-      });
-      await testSubjects.click('action-delete');
+    async deleteCase(index: number = 0) {
+      this.openRowActions(index);
+      await testSubjects.existOrFail('cases-bulk-action-delete');
+      await testSubjects.click('cases-bulk-action-delete');
       await testSubjects.existOrFail('confirmModalConfirmButton', {
         timeout: config.get('timeouts.waitFor'),
       });
@@ -55,10 +61,13 @@ export function CasesTableServiceProvider(
     },
 
     async bulkDeleteAllCases() {
-      await testSubjects.setCheckbox('checkboxSelectAll', 'check');
-      const button = await find.byCssSelector('[aria-label="Bulk actions"]');
-      await button.click();
-      await testSubjects.click('cases-bulk-delete-button');
+      await this.selectAllCasesAndOpenBulkActions();
+
+      await testSubjects.existOrFail('cases-bulk-action-delete');
+      await testSubjects.click('cases-bulk-action-delete');
+      await testSubjects.existOrFail('confirmModalConfirmButton', {
+        timeout: config.get('timeouts.waitFor'),
+      });
       await testSubjects.click('confirmModalConfirmButton');
     },
 
@@ -109,9 +118,7 @@ export function CasesTableServiceProvider(
     async getCaseFromTable(index: number) {
       const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
 
-      if (index > rows.length) {
-        throw new Error('Cannot get case from table. Index is greater than the length of all rows');
-      }
+      assertCaseExists(index, rows.length);
 
       return rows[index] ?? null;
     },
@@ -137,7 +144,7 @@ export function CasesTableServiceProvider(
     },
 
     async filterByAssignee(assignee: string) {
-      await common.clickAndValidate('options-filter-popover-button-assignees', 'euiSelectableList');
+      await this.openAssigneesPopover();
 
       await casesCommon.setSearchTextInAssigneesPopover(assignee);
       await casesCommon.selectFirstRowInAssigneesPopover();
@@ -153,7 +160,103 @@ export function CasesTableServiceProvider(
     },
 
     async refreshTable() {
-      await testSubjects.click('all-cases-refresh');
+      await testSubjects.click('all-cases-refresh-link-icon');
+    },
+
+    async openRowActions(index: number) {
+      const rows = await find.allByCssSelector(
+        '[data-test-subj*="case-action-popover-button-"',
+        100
+      );
+
+      assertCaseExists(index, rows.length);
+
+      const row = rows[index];
+      await row.click();
+      await find.existsByCssSelector('[data-test-subj*="case-action-popover-"');
+    },
+
+    async openAssigneesPopover() {
+      await common.clickAndValidate('options-filter-popover-button-assignees', 'euiSelectableList');
+    },
+
+    async selectAllCasesAndOpenBulkActions() {
+      await testSubjects.setCheckbox('checkboxSelectAll', 'check');
+      await testSubjects.existOrFail('case-table-bulk-actions-link-icon');
+      const button = await testSubjects.find('case-table-bulk-actions-link-icon');
+      await button.click();
+    },
+
+    async changeStatus(status: CaseStatuses, index: number) {
+      await this.openRowActions(index);
+
+      await testSubjects.existOrFail('cases-bulk-action-delete');
+
+      await find.existsByCssSelector('[data-test-subj*="case-action-status-panel-"');
+      const statusButton = await find.byCssSelector('[data-test-subj*="case-action-status-panel-"');
+
+      statusButton.click();
+
+      await testSubjects.existOrFail(`cases-bulk-action-status-${status}`);
+      await testSubjects.click(`cases-bulk-action-status-${status}`);
+    },
+
+    async changeSeverity(severity: CaseSeverity, index: number) {
+      await this.openRowActions(index);
+
+      await testSubjects.existOrFail('cases-bulk-action-delete');
+
+      await find.existsByCssSelector('[data-test-subj*="case-action-severity-panel-"');
+      const statusButton = await find.byCssSelector(
+        '[data-test-subj*="case-action-severity-panel-"'
+      );
+
+      statusButton.click();
+
+      await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
+      await testSubjects.click(`cases-bulk-action-severity-${severity}`);
+    },
+
+    async bulkChangeStatusCases(status: CaseStatuses) {
+      await this.selectAllCasesAndOpenBulkActions();
+
+      await testSubjects.existOrFail('case-bulk-action-status');
+      await testSubjects.click('case-bulk-action-status');
+      await testSubjects.existOrFail(`cases-bulk-action-status-${status}`);
+      await testSubjects.click(`cases-bulk-action-status-${status}`);
+    },
+
+    async bulkChangeSeverity(severity: CaseSeverity) {
+      await this.selectAllCasesAndOpenBulkActions();
+
+      await testSubjects.existOrFail('case-bulk-action-severity');
+      await testSubjects.click('case-bulk-action-severity');
+      await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
+      await testSubjects.click(`cases-bulk-action-severity-${severity}`);
+    },
+
+    async selectAndChangeStatusOfAllCases(status: CaseStatuses) {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('cases-table', { timeout: 20 * 1000 });
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+      await this.bulkChangeStatusCases(status);
+    },
+
+    async selectAndChangeSeverityOfAllCases(severity: CaseSeverity) {
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('cases-table', { timeout: 20 * 1000 });
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+      await this.bulkChangeSeverity(severity);
+    },
+
+    async getCaseTitle(index: number) {
+      const titleElement = await (
+        await this.getCaseFromTable(index)
+      ).findByTestSubject('case-details-link');
+
+      return await titleElement.getVisibleText();
     },
   };
 }

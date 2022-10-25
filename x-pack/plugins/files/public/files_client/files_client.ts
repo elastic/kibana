@@ -102,9 +102,12 @@ export function createFilesClient({
     getById: ({ kind, ...args }) => {
       return http.get(apiRoutes.getByIdRoute(scopedFileKind ?? kind, args.id));
     },
-    list({ kind, page, perPage } = { kind: '' }) {
-      return http.get(apiRoutes.getListRoute(scopedFileKind ?? kind), {
+    list: ({ kind, page, perPage, abortSignal, ...body } = { kind: '' }) => {
+      return http.post(apiRoutes.getListRoute(scopedFileKind ?? kind), {
+        headers: commonBodyHeaders,
         query: { page, perPage },
+        body: JSON.stringify(body),
+        signal: abortSignal,
       });
     },
     update: ({ kind, id, ...body }) => {

@@ -8,8 +8,10 @@
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { createMetricVisTypeDefinition } from './metric_vis_type';
 import { ConfigSchema } from '../config';
+import { setDataViewsStart } from './services';
 
 /** @internal */
 export interface MetricVisPluginSetupDependencies {
@@ -17,7 +19,14 @@ export interface MetricVisPluginSetupDependencies {
 }
 
 /** @internal */
-export class MetricVisPlugin implements Plugin<void, void> {
+export interface MetricVisPluginStartDependencies {
+  dataViews: DataViewsPublicPluginStart;
+}
+
+/** @internal */
+export class MetricVisPlugin
+  implements Plugin<void, void, MetricVisPluginSetupDependencies, MetricVisPluginStartDependencies>
+{
   initializerContext: PluginInitializerContext<ConfigSchema>;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -28,5 +37,7 @@ export class MetricVisPlugin implements Plugin<void, void> {
     visualizations.createBaseVisualization(createMetricVisTypeDefinition());
   }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart, { dataViews }: MetricVisPluginStartDependencies) {
+    setDataViewsStart(dataViews);
+  }
 }

@@ -52,6 +52,7 @@ interface XyChartRendererDeps {
 const extractCounterEvents = (
   originatingApp: string,
   { layers, yAxisConfigs }: XYChartProps['args'],
+  canNavigateToLens: boolean,
   services: {
     getDataLayers: typeof getDataLayers;
   }
@@ -149,6 +150,7 @@ const extractCounterEvents = (
       (aggregateLayers.length === 1 && dataLayer.splitAccessors?.length)
         ? 'aggregate_bucket'
         : undefined,
+      canNavigateToLens ? `render_${byTypes.mixedXY ? 'mixed_xy' : type}_convertable` : undefined,
     ]
       .filter(Boolean)
       .map((item) => `render_${originatingApp}_${item}`);
@@ -188,9 +190,14 @@ export const getXyChartRenderer = ({
       const visualizationType = extractVisualizationType(executionContext);
 
       if (deps.usageCollection && containerType && visualizationType) {
-        const uiEvents = extractCounterEvents(visualizationType, config.args, {
-          getDataLayers,
-        });
+        const uiEvents = extractCounterEvents(
+          visualizationType,
+          config.args,
+          Boolean(config.canNavigateToLens),
+          {
+            getDataLayers,
+          }
+        );
 
         if (uiEvents) {
           deps.usageCollection.reportUiCounter(containerType, METRIC_TYPE.COUNT, uiEvents);
@@ -226,8 +233,9 @@ export const getXyChartRenderer = ({
               onClickValue={onClickValue}
               onSelectRange={onSelectRange}
               renderMode={handlers.getRenderMode()}
-              syncColors={handlers.isSyncColorsEnabled()}
-              syncTooltips={handlers.isSyncTooltipsEnabled()}
+              syncColors={config.syncColors}
+              syncTooltips={config.syncTooltips}
+              syncCursor={config.syncCursor}
               uiState={handlers.uiState as PersistedState}
               renderComplete={renderComplete}
             />

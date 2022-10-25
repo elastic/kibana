@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { totalNumberOfPrebuiltRules } from '../../objects/rule';
 import {
   SELECTED_RULES_NUMBER_LABEL,
   SELECT_ALL_RULES_BTN,
@@ -16,6 +15,7 @@ import {
   unselectNumberOfRules,
   waitForPrebuiltDetectionRulesToBeLoaded,
 } from '../../tasks/alerts_detection_rules';
+import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
@@ -46,7 +46,9 @@ describe('Rules selection', () => {
 
     cy.get(SELECT_ALL_RULES_BTN).click();
 
-    cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', totalNumberOfPrebuiltRules);
+    getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+      cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', availablePrebuiltRulesCount);
+    });
 
     const bulkSelectButton = cy.get(SELECT_ALL_RULES_BTN);
 
@@ -56,7 +58,9 @@ describe('Rules selection', () => {
     // Current selection should be 0 rules
     cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', '0');
     // Bulk selection button should be back to displaying all rules
-    cy.get(SELECT_ALL_RULES_BTN).should('contain.text', totalNumberOfPrebuiltRules);
+    getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+      cy.get(SELECT_ALL_RULES_BTN).should('contain.text', availablePrebuiltRulesCount);
+    });
   });
 
   it('should correctly update the selection label when rules are bulk selected and then unselected via the table select all checkbox', () => {
@@ -65,7 +69,9 @@ describe('Rules selection', () => {
 
     cy.get(SELECT_ALL_RULES_BTN).click();
 
-    cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', totalNumberOfPrebuiltRules);
+    getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+      cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', availablePrebuiltRulesCount);
+    });
 
     // Un-select all rules via the Un-select All checkbox from the table
     cy.get(SELECT_ALL_RULES_ON_PAGE_CHECKBOX).click();
@@ -73,6 +79,8 @@ describe('Rules selection', () => {
     // Current selection should be 0 rules
     cy.get(SELECTED_RULES_NUMBER_LABEL).should('contain.text', '0');
     // Bulk selection button should be back to displaying all rules
-    cy.get(SELECT_ALL_RULES_BTN).should('contain.text', totalNumberOfPrebuiltRules);
+    getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+      cy.get(SELECT_ALL_RULES_BTN).should('contain.text', availablePrebuiltRulesCount);
+    });
   });
 });
