@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../../common/runtime_types';
+import { Ping } from '../../../../../common/runtime_types';
 
 /**
  * Checks if the loaded/cached pings are of the current selected monitors
  */
-export function checkIsStalePing(
-  monitor: EncryptedSyntheticsSavedMonitor | null,
-  ping: Ping | undefined
-) {
-  if (!monitor?.id || !ping?.monitor?.id) {
+export function checkIsStalePing(monitorOrConfigId: string | undefined, ping: Ping | undefined) {
+  if (!monitorOrConfigId || !ping?.monitor?.id) {
     return true;
   }
 
-  return monitor.id !== ping.monitor.id && monitor.id !== ping.config_id;
+  return monitorOrConfigId !== ping.monitor.id && monitorOrConfigId !== ping.config_id;
 }

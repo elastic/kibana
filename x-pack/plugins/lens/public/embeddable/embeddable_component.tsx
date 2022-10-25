@@ -22,7 +22,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import type { LensByReferenceInput, LensByValueInput } from './embeddable';
 import type { Document } from '../persistence';
-import type { IndexPatternPersistedState } from '../indexpattern_datasource/types';
+import type { FormBasedPersistedState } from '../datasources/form_based/types';
 import type { XYState } from '../visualizations/xy/types';
 import type { PieVisualizationState, LegacyMetricState } from '../../common';
 import type { DatatableVisualizationState } from '../visualizations/datatable/visualization';
@@ -37,7 +37,7 @@ type LensAttributes<TVisType, TVisState> = Omit<
   visualizationType: TVisType;
   state: Omit<Document['state'], 'datasourceStates' | 'visualization'> & {
     datasourceStates: {
-      indexpattern: IndexPatternPersistedState;
+      formBased: FormBasedPersistedState;
     };
     visualization: TVisState;
   };

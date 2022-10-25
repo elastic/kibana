@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
@@ -23,66 +23,25 @@ import {
 } from '../../hooks/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
-import { Chart } from '../chart/point_series';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
-import {
-  DiscoverMainContent,
-  DiscoverMainContentProps,
-  HISTOGRAM_HEIGHT_KEY,
-} from './discover_main_content';
-import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { DiscoverPanels, DISCOVER_PANELS_MODE } from './discover_panels';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { DiscoverMainContent, DiscoverMainContentProps } from './discover_main_content';
+import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { CoreTheme } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
 import { setTimeout } from 'timers/promises';
-import { DiscoverChart } from '../chart';
-import { ReactWrapper } from 'enzyme';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
+import {
+  UnifiedHistogramChartData,
+  UnifiedHistogramLayout,
+} from '@kbn/unified-histogram-plugin/public';
+import { HISTOGRAM_HEIGHT_KEY } from './use_discover_histogram';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
-const mountComponent = async ({
-  isPlainRecord = false,
-  hideChart = false,
-  isTimeBased = true,
-  storage,
-}: {
-  isPlainRecord?: boolean;
-  hideChart?: boolean;
-  isTimeBased?: boolean;
-  storage?: Storage;
-} = {}) => {
-  let services = discoverServiceMock;
-  services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
-    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-  };
-
-  if (storage) {
-    services = { ...services, storage };
-  }
-
-  const main$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    recordRawType: isPlainRecord ? RecordRawType.PLAIN : RecordRawType.DOCUMENT,
-    foundDocuments: true,
-  }) as DataMain$;
-
-  const documents$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    result: esHits.map((esHit) => buildDataTableRecord(esHit, dataViewMock)),
-  }) as DataDocuments$;
-
-  const availableFields$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    fields: [] as string[],
-  }) as AvailableFields$;
-
-  const totalHits$ = new BehaviorSubject({
-    fetchStatus: FetchStatus.COMPLETE,
-    result: Number(esHits.length),
-  }) as DataTotalHits$;
+jest.mock('@kbn/unified-histogram-plugin/public', () => {
+  const originalModule = jest.requireActual('@kbn/unified-histogram-plugin/public');
 
   const chartData = {
     xAxisOrderedValues: [
@@ -121,16 +80,69 @@ const mountComponent = async ({
       { x: 1625004000000, y: 137 },
       { x: 1625090400000, y: 66 },
     ],
-  } as unknown as Chart;
+  } as unknown as UnifiedHistogramChartData;
+
+  return {
+    ...originalModule,
+    buildChartData: jest.fn().mockImplementation(() => ({
+      chartData,
+      bucketInterval: {
+        scaled: true,
+        description: 'test',
+        scale: 2,
+      },
+    })),
+  };
+});
+
+const mountComponent = async ({
+  isPlainRecord = false,
+  hideChart = false,
+  isTimeBased = true,
+  storage,
+  savedSearch = savedSearchMock,
+  resetSavedSearch = jest.fn(),
+}: {
+  isPlainRecord?: boolean;
+  hideChart?: boolean;
+  isTimeBased?: boolean;
+  storage?: Storage;
+  savedSearch?: SavedSearch;
+  resetSavedSearch?: () => void;
+} = {}) => {
+  let services = discoverServiceMock;
+  services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
+    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
+  };
+
+  if (storage) {
+    services = { ...services, storage };
+  }
+
+  const main$ = new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    recordRawType: isPlainRecord ? RecordRawType.PLAIN : RecordRawType.DOCUMENT,
+    foundDocuments: true,
+  }) as DataMain$;
+
+  const documents$ = new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    result: esHits.map((esHit) => buildDataTableRecord(esHit, dataViewMock)),
+  }) as DataDocuments$;
+
+  const availableFields$ = new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    fields: [] as string[],
+  }) as AvailableFields$;
+
+  const totalHits$ = new BehaviorSubject({
+    fetchStatus: FetchStatus.COMPLETE,
+    result: Number(esHits.length),
+  }) as DataTotalHits$;
 
   const charts$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    chartData,
-    bucketInterval: {
-      scaled: true,
-      description: 'test',
-      scale: 2,
-    },
+    response: {} as unknown as SearchResponse,
   }) as DataCharts$;
 
   const savedSearchData$ = {
@@ -145,9 +157,9 @@ const mountComponent = async ({
     isPlainRecord,
     dataView: dataViewMock,
     navigateTo: jest.fn(),
-    resetSavedSearch: jest.fn(),
+    resetSavedSearch,
     setExpandedDoc: jest.fn(),
-    savedSearch: savedSearchMock,
+    savedSearch,
     savedSearchData$,
     savedSearchRefetch$: new Subject(),
     state: { columns: [], hideChart },
@@ -177,106 +189,30 @@ const mountComponent = async ({
     </KibanaContextProvider>
   );
 
-  // useIsWithinBreakpoints triggers state updates which cause act
-  // issues and prevent our resize events from being fired correctly
-  // https://github.com/enzymejs/enzyme/issues/2073
+  // DiscoverMainContent uses UnifiedHistogramLayout which
+  // is lazy loaded, so we need to wait for it to be loaded
   await act(() => setTimeout(0));
 
   return component;
 };
 
-const setWindowWidth = (component: ReactWrapper, width: string) => {
-  window.innerWidth = parseInt(width, 10);
-  act(() => {
-    window.dispatchEvent(new Event('resize'));
-  });
-  component.update();
-};
-
 describe('Discover main content component', () => {
-  const windowWidth = window.innerWidth;
-
-  beforeEach(() => {
-    window.innerWidth = windowWidth;
-  });
-
-  describe('DISCOVER_PANELS_MODE', () => {
-    it('should set the panels mode to DISCOVER_PANELS_MODE.RESIZABLE when viewing on medium screens and above', async () => {
-      const component = await mountComponent();
-      setWindowWidth(component, euiThemeVars.euiBreakpoints.m);
-      expect(component.find(DiscoverPanels).prop('mode')).toBe(DISCOVER_PANELS_MODE.RESIZABLE);
-    });
-
-    it('should set the panels mode to DISCOVER_PANELS_MODE.FIXED when viewing on small screens and below', async () => {
-      const component = await mountComponent();
-      setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
-      expect(component.find(DiscoverPanels).prop('mode')).toBe(DISCOVER_PANELS_MODE.FIXED);
-    });
-
-    it('should set the panels mode to DISCOVER_PANELS_MODE.FIXED if hideChart is true', async () => {
-      const component = await mountComponent({ hideChart: true });
-      expect(component.find(DiscoverPanels).prop('mode')).toBe(DISCOVER_PANELS_MODE.FIXED);
-    });
-
-    it('should set the panels mode to DISCOVER_PANELS_MODE.FIXED if isTimeBased is false', async () => {
-      const component = await mountComponent({ isTimeBased: false });
-      expect(component.find(DiscoverPanels).prop('mode')).toBe(DISCOVER_PANELS_MODE.FIXED);
-    });
-
-    it('should set the panels mode to DISCOVER_PANELS_MODE.SINGLE if isPlainRecord is true', async () => {
-      const component = await mountComponent({ isPlainRecord: true });
-      expect(component.find(DiscoverPanels).prop('mode')).toBe(DISCOVER_PANELS_MODE.SINGLE);
-    });
-
-    it('should set a fixed height for DiscoverChart when panels mode is DISCOVER_PANELS_MODE.FIXED and hideChart is false', async () => {
-      const component = await mountComponent();
-      setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
-      const expectedHeight = component.find(DiscoverPanels).prop('topPanelHeight');
-      expect(component.find(DiscoverChart).childAt(0).getDOMNode()).toHaveStyle({
-        height: `${expectedHeight}px`,
-      });
-    });
-
-    it('should not set a fixed height for DiscoverChart when panels mode is DISCOVER_PANELS_MODE.FIXED and hideChart is true', async () => {
-      const component = await mountComponent({ hideChart: true });
-      setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
-      const expectedHeight = component.find(DiscoverPanels).prop('topPanelHeight');
-      expect(component.find(DiscoverChart).childAt(0).getDOMNode()).not.toHaveStyle({
-        height: `${expectedHeight}px`,
-      });
-    });
-
-    it('should not set a fixed height for DiscoverChart when panels mode is DISCOVER_PANELS_MODE.FIXED and isTimeBased is false', async () => {
-      const component = await mountComponent({ isTimeBased: false });
-      setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
-      const expectedHeight = component.find(DiscoverPanels).prop('topPanelHeight');
-      expect(component.find(DiscoverChart).childAt(0).getDOMNode()).not.toHaveStyle({
-        height: `${expectedHeight}px`,
-      });
-    });
-
-    it('should pass undefined for onResetChartHeight to DiscoverChart when panels mode is DISCOVER_PANELS_MODE.FIXED', async () => {
-      const component = await mountComponent();
-      expect(component.find(DiscoverChart).prop('onResetChartHeight')).toBeDefined();
-      setWindowWidth(component, euiThemeVars.euiBreakpoints.s);
-      expect(component.find(DiscoverChart).prop('onResetChartHeight')).toBeUndefined();
-    });
-  });
-
   describe('DocumentViewModeToggle', () => {
     it('should show DocumentViewModeToggle when isPlainRecord is false', async () => {
       const component = await mountComponent();
+      component.update();
       expect(component.find(DocumentViewModeToggle).exists()).toBe(true);
     });
 
     it('should not show DocumentViewModeToggle when isPlainRecord is true', async () => {
       const component = await mountComponent({ isPlainRecord: true });
+      component.update();
       expect(component.find(DocumentViewModeToggle).exists()).toBe(false);
     });
   });
 
   describe('topPanelHeight persistence', () => {
-    it('should try to get the initial topPanelHeight for DiscoverPanels from storage', async () => {
+    it('should try to get the initial topPanelHeight for UnifiedHistogramLayout from storage', async () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       const originalGet = storage.get;
       storage.get = jest.fn().mockImplementation(originalGet);
@@ -284,61 +220,62 @@ describe('Discover main content component', () => {
       expect(storage.get).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY);
     });
 
-    it('should pass a default topPanelHeight to DiscoverPanels if no value is found in storage', async () => {
+    it('should pass undefined to UnifiedHistogramLayout if no value is found in storage', async () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       const originalGet = storage.get;
       storage.get = jest.fn().mockImplementation(originalGet);
       const component = await mountComponent({ storage });
       expect(storage.get).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY);
       expect(storage.get).toHaveReturnedWith(null);
-      expect(component.find(DiscoverPanels).prop('topPanelHeight')).toBeGreaterThan(0);
+      expect(component.find(UnifiedHistogramLayout).prop('topPanelHeight')).toBe(undefined);
     });
 
-    it('should pass the stored topPanelHeight to DiscoverPanels if a value is found in storage', async () => {
+    it('should pass the stored topPanelHeight to UnifiedHistogramLayout if a value is found in storage', async () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       const topPanelHeight = 123;
       storage.get = jest.fn().mockImplementation(() => topPanelHeight);
       const component = await mountComponent({ storage });
       expect(storage.get).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY);
       expect(storage.get).toHaveReturnedWith(topPanelHeight);
-      expect(component.find(DiscoverPanels).prop('topPanelHeight')).toBe(topPanelHeight);
+      expect(component.find(UnifiedHistogramLayout).prop('topPanelHeight')).toBe(topPanelHeight);
     });
 
-    it('should update the topPanelHeight in storage and pass the new value to DiscoverPanels when the topPanelHeight changes', async () => {
+    it('should update the topPanelHeight in storage and pass the new value to UnifiedHistogramLayout when the topPanelHeight changes', async () => {
       const storage = new LocalStorageMock({}) as unknown as Storage;
       const originalSet = storage.set;
       storage.set = jest.fn().mockImplementation(originalSet);
       const component = await mountComponent({ storage });
       const newTopPanelHeight = 123;
-      expect(component.find(DiscoverPanels).prop('topPanelHeight')).not.toBe(newTopPanelHeight);
+      expect(component.find(UnifiedHistogramLayout).prop('topPanelHeight')).not.toBe(
+        newTopPanelHeight
+      );
       act(() => {
-        component.find(DiscoverPanels).prop('onTopPanelHeightChange')(newTopPanelHeight);
+        component.find(UnifiedHistogramLayout).prop('onTopPanelHeightChange')!(newTopPanelHeight);
       });
       component.update();
       expect(storage.set).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY, newTopPanelHeight);
-      expect(component.find(DiscoverPanels).prop('topPanelHeight')).toBe(newTopPanelHeight);
+      expect(component.find(UnifiedHistogramLayout).prop('topPanelHeight')).toBe(newTopPanelHeight);
+    });
+  });
+
+  describe('reset search button', () => {
+    it('renders the button when there is a saved search', async () => {
+      const component = await mountComponent();
+      expect(findTestSubject(component, 'resetSavedSearch').length).toBe(1);
     });
 
-    it('should reset the topPanelHeight to the default when onResetChartHeight is called on DiscoverChart', async () => {
-      const storage = new LocalStorageMock({}) as unknown as Storage;
-      const originalSet = storage.set;
-      storage.set = jest.fn().mockImplementation(originalSet);
-      const component = await mountComponent({ storage });
-      const defaultTopPanelHeight = component.find(DiscoverPanels).prop('topPanelHeight');
-      const newTopPanelHeight = 123;
-      expect(component.find(DiscoverPanels).prop('topPanelHeight')).not.toBe(newTopPanelHeight);
-      act(() => {
-        component.find(DiscoverPanels).prop('onTopPanelHeightChange')(newTopPanelHeight);
+    it('does not render the button when there is no saved search', async () => {
+      const component = await mountComponent({
+        savedSearch: { ...savedSearchMock, id: undefined },
       });
-      component.update();
-      expect(storage.set).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY, newTopPanelHeight);
-      expect(component.find(DiscoverPanels).prop('topPanelHeight')).toBe(newTopPanelHeight);
-      act(() => {
-        component.find(DiscoverChart).prop('onResetChartHeight')!();
-      });
-      component.update();
-      expect(storage.set).toHaveBeenCalledWith(HISTOGRAM_HEIGHT_KEY, defaultTopPanelHeight);
-      expect(component.find(DiscoverPanels).prop('topPanelHeight')).toBe(defaultTopPanelHeight);
+      expect(findTestSubject(component, 'resetSavedSearch').length).toBe(0);
+    });
+
+    it('should call resetSavedSearch when clicked', async () => {
+      const resetSavedSearch = jest.fn();
+      const component = await mountComponent({ resetSavedSearch });
+      findTestSubject(component, 'resetSavedSearch').simulate('click');
+      expect(resetSavedSearch).toHaveBeenCalled();
     });
   });
 });

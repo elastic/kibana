@@ -31,9 +31,7 @@ let configurationUtilities: ActionsConfigurationUtilities;
 beforeEach(() => {
   jest.resetAllMocks();
   configurationUtilities = actionsConfigMock.create();
-  connectorType = getConnectorType({
-    logger: mockedLogger,
-  });
+  connectorType = getConnectorType();
 });
 
 describe('connector registration', () => {
@@ -186,6 +184,7 @@ describe('execute()', () => {
       params,
       services,
       configurationUtilities,
+      logger: mockedLogger,
     };
     const scopedClusterClient = elasticsearchClientMock
       .createClusterClient()
@@ -223,7 +222,15 @@ describe('execute()', () => {
       indexOverride: null,
     };
 
-    executorOptions = { actionId, config, secrets, params, services, configurationUtilities };
+    executorOptions = {
+      actionId,
+      config,
+      secrets,
+      params,
+      services,
+      configurationUtilities,
+      logger: mockedLogger,
+    };
     scopedClusterClient.bulk.mockClear();
     await connectorType.executor({
       ...executorOptions,
@@ -265,7 +272,15 @@ describe('execute()', () => {
       indexOverride: null,
     };
 
-    executorOptions = { actionId, config, secrets, params, services, configurationUtilities };
+    executorOptions = {
+      actionId,
+      config,
+      secrets,
+      params,
+      services,
+      configurationUtilities,
+      logger: mockedLogger,
+    };
 
     scopedClusterClient.bulk.mockClear();
     await connectorType.executor({
@@ -301,7 +316,15 @@ describe('execute()', () => {
       indexOverride: null,
     };
 
-    executorOptions = { actionId, config, secrets, params, services, configurationUtilities };
+    executorOptions = {
+      actionId,
+      config,
+      secrets,
+      params,
+      services,
+      configurationUtilities,
+      logger: mockedLogger,
+    };
     scopedClusterClient.bulk.mockClear();
     await connectorType.executor({
       ...executorOptions,
@@ -612,6 +635,7 @@ describe('execute()', () => {
         params,
         services,
         configurationUtilities,
+        logger: mockedLogger,
       })
     ).toMatchInlineSnapshot(`
       Object {

@@ -446,6 +446,72 @@ export default function (providerContext: FtrProviderContext) {
       expect(policy.name).to.equal(nameWithWhitespace.trim());
     });
 
+    describe('input only packages', () => {
+      it('should return 400 if dataset not provided for input only pkg', async function () {
+        await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            policy_id: agentPolicyId,
+            package: {
+              name: 'integration_to_input',
+              version: '0.9.1',
+            },
+            name: 'integration_to_input-1',
+            description: '',
+            namespace: 'default',
+            inputs: {
+              'logs-logfile': {
+                enabled: true,
+                streams: {
+                  'integration_to_input.logs': {
+                    enabled: true,
+                    vars: {
+                      paths: ['/tmp/test.log'],
+                      tags: ['tag1'],
+                      ignore_older: '72h',
+                    },
+                  },
+                },
+              },
+            },
+          })
+          .expect(400);
+      });
+      it('should successfully create an input only package policy with all required vars', async function () {
+        await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            policy_id: agentPolicyId,
+            package: {
+              name: 'integration_to_input',
+              version: '0.9.1',
+            },
+            name: 'integration_to_input-2',
+            description: '',
+            namespace: 'default',
+            inputs: {
+              'logs-logfile': {
+                enabled: true,
+                streams: {
+                  'integration_to_input.logs': {
+                    enabled: true,
+                    vars: {
+                      paths: ['/tmp/test.log'],
+                      tags: ['tag1'],
+                      ignore_older: '72h',
+                      'data_stream.dataset': 'generic',
+                    },
+                  },
+                },
+              },
+            },
+          })
+          .expect(200);
+      });
+    });
+
     describe('Simplified package policy', () => {
       it('should work with valid values', async () => {
         await supertest

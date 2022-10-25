@@ -8,7 +8,7 @@
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { SchemaConfig } from '../../..';
+import { PercentageModeConfig, SchemaConfig } from '../../..';
 import {
   convertMetricAggregationColumnWithoutSpecialParams,
   convertToOtherParentPipelineAggColumns,
@@ -19,18 +19,27 @@ import {
   convertToLastValueColumn,
   convertToCumulativeSumAggColumn,
   AggBasedColumn,
+  convertToColumnInPercentageMode,
 } from '../convert';
 import { SUPPORTED_METRICS } from '../convert/supported_metrics';
 import { getValidColumns } from '../utils';
 
 export const convertMetricToColumns = (
-  agg: SchemaConfig,
+  agg: SchemaConfig<METRIC_TYPES>,
   dataView: DataView,
-  aggs: Array<SchemaConfig<METRIC_TYPES>>
+  aggs: Array<SchemaConfig<METRIC_TYPES>>,
+  percentageModeConfig: PercentageModeConfig = { isPercentageMode: false }
 ): AggBasedColumn[] | null => {
   const supportedAgg = SUPPORTED_METRICS[agg.aggType];
   if (!supportedAgg) {
     return null;
+  }
+
+  if (percentageModeConfig.isPercentageMode) {
+    const { isPercentageMode, ...minMax } = percentageModeConfig;
+
+    const formulaColumn = convertToColumnInPercentageMode({ agg, dataView, aggs }, minMax);
+    return getValidColumns(formulaColumn);
   }
 
   switch (agg.aggType) {
@@ -119,8 +128,6 @@ export const convertMetricToColumns = (
       });
       return getValidColumns(columns);
     }
-    case METRIC_TYPES.SERIAL_DIFF:
-      return null;
     default:
       return null;
   }

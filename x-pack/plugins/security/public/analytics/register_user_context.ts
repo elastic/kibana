@@ -12,6 +12,11 @@ import { Sha256 } from '@kbn/crypto-browser';
 
 import type { AuthenticationServiceSetup } from '..';
 
+interface UserIdContext {
+  userId?: string;
+  isElasticCloudUser: boolean;
+}
+
 /**
  * Set up the Analytics context provider for the User information.
  * @param analytics Core's Analytics service. The Setup contract.
@@ -24,7 +29,7 @@ export function registerUserContext(
   authc: AuthenticationServiceSetup,
   cloudId?: string
 ) {
-  analytics.registerContextProvider({
+  analytics.registerContextProvider<UserIdContext>({
     name: 'user_id',
     context$: from(authc.getCurrentUser()).pipe(
       map((user) => {
@@ -50,7 +55,7 @@ export function registerUserContext(
     schema: {
       userId: {
         type: 'keyword',
-        _meta: { description: 'The user id scoped as seen by Cloud (hashed)' },
+        _meta: { description: 'The user id scoped as seen by Cloud (hashed)', optional: true },
       },
       isElasticCloudUser: {
         type: 'boolean',

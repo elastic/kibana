@@ -26,9 +26,7 @@ export function useAutotuneTimerange() {
 
   const successMessage = useMemo(() => {
     return i18n.translate('xpack.securitySolution.resolver.unboundedRequest.toast', {
-      defaultMessage: `No process events were found with your selected time range, however they were
-      found using a start date of {from} and an end date of {to}. Select a different time range in
-       the date picker to use a different range.`,
+      defaultMessage: `No results found in the selected time, expanded to {from} - {to}.`,
       values: {
         from: detectedFormattedFrom,
         to: detectedFormattedTo,

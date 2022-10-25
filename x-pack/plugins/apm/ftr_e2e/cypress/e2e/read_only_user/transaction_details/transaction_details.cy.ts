@@ -42,15 +42,15 @@ describe('Transaction details', () => {
 
   it('shows transaction name and transaction charts', () => {
     cy.contains('h2', 'GET /api/product');
-    cy.get('[data-test-subj="latencyChart"]');
-    cy.get('[data-test-subj="throughput"]');
-    cy.get('[data-test-subj="transactionBreakdownChart"]');
-    cy.get('[data-test-subj="errorRate"]');
+    cy.getByTestSubj('latencyChart');
+    cy.getByTestSubj('throughput');
+    cy.getByTestSubj('transactionBreakdownChart');
+    cy.getByTestSubj('errorRate');
   });
 
   it('shows top errors table', () => {
     cy.contains('Top 5 errors');
-    cy.get('[data-test-subj="topErrorsForTransactionTable"]')
+    cy.getByTestSubj('topErrorsForTransactionTable')
       .contains('a', '[MockError] Foo')
       .click();
     cy.url().should('include', 'opbeans-java/errors');
@@ -58,7 +58,7 @@ describe('Transaction details', () => {
 
   describe('when navigating to a trace sample', () => {
     it('keeps the same trace sample after reloading the page', () => {
-      cy.get('[data-test-subj="pagination-button-last"]').click();
+      cy.getByTestSubj('pagination-button-last').click();
       cy.url().then((url) => {
         cy.reload();
         cy.url().should('eq', url);

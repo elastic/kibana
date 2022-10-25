@@ -113,12 +113,9 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
   return { normalTypes, crossNamespace, hiddenType, allTypes };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-
+export default function (context: FtrProviderContext) {
   const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
-    bulkCreateTestSuiteFactory(esArchiver, supertest);
+    bulkCreateTestSuiteFactory(context);
   const createTests = (overwrite: boolean, spaceId: string, user: TestUser) => {
     const { normalTypes, crossNamespace, hiddenType, allTypes } = createTestCases(
       overwrite,
@@ -167,7 +164,7 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/122827
-  describe.skip('_bulk_create', () => {
+  describe('_bulk_create', () => {
     getTestScenarios([false, true]).securityAndSpaces.forEach(
       ({ spaceId, users, modifier: overwrite }) => {
         const suffix = ` within the ${spaceId} space${overwrite ? ' with overwrite enabled' : ''}`;

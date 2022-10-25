@@ -12,6 +12,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_UUID,
+  ALERT_TIME_RANGE,
 } from '@kbn/rule-data-utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import { castArray, omit } from 'lodash';
@@ -130,6 +131,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         updatedBy: 'updatedBy',
         namespace: 'namespace',
         executionId: 'b33f65d7-6e8b-4aae-8d20-c93613dec9f9',
+        logger: loggerMock.create(),
       })) ?? {}) as Record<string, any>;
 
       previousStartedAt = startedAt;
@@ -245,6 +247,9 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.alert.status": "active",
+              "kibana.alert.time_range": Object {
+                "gte": "2021-06-16T09:01:00.000Z",
+              },
               "kibana.alert.workflow_status": "open",
               "kibana.space_ids": Array [
                 "spaceId",
@@ -273,6 +278,9 @@ describe('createLifecycleRuleTypeFactory', () => {
               "kibana.alert.rule.uuid": "alertId",
               "kibana.alert.start": "2021-06-16T09:01:00.000Z",
               "kibana.alert.status": "active",
+              "kibana.alert.time_range": Object {
+                "gte": "2021-06-16T09:01:00.000Z",
+              },
               "kibana.alert.workflow_status": "open",
               "kibana.space_ids": Array [
                 "spaceId",
@@ -443,6 +451,10 @@ describe('createLifecycleRuleTypeFactory', () => {
 
         expect(opbeansNodeAlertDoc['event.action']).toBe('close');
         expect(opbeansNodeAlertDoc[ALERT_STATUS]).toBe(ALERT_STATUS_RECOVERED);
+        expect(opbeansNodeAlertDoc[ALERT_TIME_RANGE]).toEqual({
+          gte: '2021-06-16T09:01:00.000Z',
+          lte: '2021-06-16T09:02:00.000Z',
+        });
       });
     });
   });

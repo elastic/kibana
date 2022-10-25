@@ -6,33 +6,37 @@
  */
 
 import { withApmSpan } from '../../../../utils/with_apm_span';
-import { Setup } from '../../../../lib/helpers/setup_request';
 import { getServerlessFunctionLatency } from './serverless_function_latency';
 import { getColdStartDuration } from './cold_start_duration';
 import { getMemoryChartData } from '../shared/memory';
 import { getComputeUsage } from './compute_usage';
 import { getActiveInstances } from './active_instances';
 import { getColdStartCount } from './cold_start_count';
-import { getSearchAggregatedTransactions } from '../../../../lib/helpers/transactions';
+import { getSearchTransactionsEvents } from '../../../../lib/helpers/transactions';
+import { APMConfig } from '../../../..';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export function getServerlessAgentMetricCharts({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   start,
   end,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   start: number;
   end: number;
 }) {
   return withApmSpan('get_serverless_agent_metric_charts', async () => {
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      ...setup,
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      config,
+      apmEventClient,
       kuery,
       start,
       end,
@@ -41,7 +45,8 @@ export function getServerlessAgentMetricCharts({
     const options = {
       environment,
       kuery,
-      setup,
+      apmEventClient,
+      config,
       serviceName,
       start,
       end,
