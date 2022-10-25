@@ -28,6 +28,8 @@ const mockOptionsListEmbeddableInput = {
   selectedOptions: [],
   runPastTimeout: false,
   singleSelect: false,
+  allowExclude: false,
+  exclude: false,
 } as OptionsListEmbeddableInput;
 
 const mockOptionsListOutput = {

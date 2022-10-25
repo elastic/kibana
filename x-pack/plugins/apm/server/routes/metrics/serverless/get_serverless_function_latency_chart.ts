@@ -7,17 +7,24 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiLightVars as theme } from '@kbn/ui-theme';
-import { FAAS_BILLED_DURATION } from '../../../../../common/elasticsearch_fieldnames';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { isFiniteNumber } from '../../../../../common/utils/is_finite_number';
-import { getVizColorForIndex } from '../../../../../common/viz_colors';
-import { Setup } from '../../../../lib/helpers/setup_request';
-import { getLatencyTimeseries } from '../../../transactions/get_latency_charts';
+import { termQuery } from '@kbn/observability-plugin/server';
+import { isEmpty } from 'lodash';
+import {
+  FAAS_BILLED_DURATION,
+  FAAS_ID,
+  METRICSET_NAME,
+} from '../../../../common/elasticsearch_fieldnames';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
+import { getVizColorForIndex } from '../../../../common/viz_colors';
+import { getLatencyTimeseries } from '../../transactions/get_latency_charts';
+import { APMConfig } from '../../..';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import {
   fetchAndTransformMetrics,
   GenericMetricsChart,
-} from '../../fetch_and_transform_metrics';
-import { ChartBase } from '../../types';
+} from '../fetch_and_transform_metrics';
+import { ChartBase } from '../types';
 
 const billedDurationAvg = {
   title: i18n.translate('xpack.apm.agentMetrics.serverless.billedDurationAvg', {
@@ -27,7 +34,7 @@ const billedDurationAvg = {
 
 const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.serverless.avgDuration', {
-    defaultMessage: 'Avg. Duration',
+    defaultMessage: 'Lambda Duration',
   }),
   key: 'avg_duration',
   type: 'linemark',
@@ -45,29 +52,32 @@ const chartBase: ChartBase = {
 async function getServerlessLantecySeries({
   environment,
   kuery,
-  setup,
+  apmEventClient,
   serviceName,
   start,
   end,
+  serverlessId,
   searchAggregatedTransactions,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   serviceName: string;
   start: number;
   end: number;
+  serverlessId?: string;
   searchAggregatedTransactions: boolean;
 }): Promise<GenericMetricsChart['series']> {
   const transactionLatency = await getLatencyTimeseries({
     environment,
     kuery,
     serviceName,
-    setup,
+    apmEventClient,
     searchAggregatedTransactions,
     latencyAggregationType: LatencyAggregationType.avg,
     start,
     end,
+    serverlessId,
   });
 
   return [
@@ -85,27 +95,32 @@ async function getServerlessLantecySeries({
   ];
 }
 
-export async function getServerlessFunctionLatency({
+export async function getServerlessFunctionLatencyChart({
   environment,
   kuery,
-  setup,
+  config,
+  apmEventClient,
   serviceName,
   start,
   end,
+  serverlessId,
   searchAggregatedTransactions,
 }: {
   environment: string;
   kuery: string;
-  setup: Setup;
+  config: APMConfig;
+  apmEventClient: APMEventClient;
   serviceName: string;
   start: number;
   end: number;
+  serverlessId?: string;
   searchAggregatedTransactions: boolean;
 }): Promise<GenericMetricsChart> {
   const options = {
     environment,
     kuery,
-    setup,
+    config,
+    apmEventClient,
     serviceName,
     start,
     end,
@@ -118,29 +133,43 @@ export async function getServerlessFunctionLatency({
       aggs: {
         billedDurationAvg: { avg: { field: FAAS_BILLED_DURATION } },
       },
-      additionalFilters: [{ exists: { field: FAAS_BILLED_DURATION } }],
+      additionalFilters: [
+        { exists: { field: FAAS_BILLED_DURATION } },
+        ...termQuery(FAAS_ID, serverlessId),
+        ...termQuery(METRICSET_NAME, 'app'),
+      ],
       operationName: 'get_billed_duration',
     }),
-    getServerlessLantecySeries({ ...options, searchAggregatedTransactions }),
+    getServerlessLantecySeries({
+      ...options,
+      serverlessId,
+      searchAggregatedTransactions,
+    }),
   ]);
 
-  const [series] = billedDurationMetrics.series;
-  const data = series.data.map(({ x, y }) => ({
-    x,
-    // Billed duration is stored in ms, convert it to microseconds so it uses the same unit as the other chart
-    y: isFiniteNumber(y) ? y * 1000 : y,
-  }));
+  const series = [];
+
+  const [billedDurationSeries] = billedDurationMetrics.series;
+  if (billedDurationSeries) {
+    const data = billedDurationSeries.data?.map(({ x, y }) => ({
+      x,
+      // Billed duration is stored in ms, convert it to microseconds so it uses the same unit as the other chart
+      y: isFiniteNumber(y) ? y * 1000 : y,
+    }));
+    series.push({
+      ...billedDurationSeries,
+      // Billed duration is stored in ms, convert it to microseconds
+      overallValue: billedDurationSeries.overallValue * 1000,
+      data: data || [],
+    });
+  }
+
+  if (!isEmpty(serverlessDurationSeries[0].data)) {
+    series.push(...serverlessDurationSeries);
+  }
 
   return {
     ...billedDurationMetrics,
-    series: [
-      {
-        ...series,
-        // Billed duration is stored in ms, convert it to microseconds
-        overallValue: series.overallValue * 1000,
-        data,
-      },
-      ...serverlessDurationSeries,
-    ],
+    series,
   };
 }

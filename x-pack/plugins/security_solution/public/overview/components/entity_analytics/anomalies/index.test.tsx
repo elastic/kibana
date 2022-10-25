@@ -204,4 +204,32 @@ describe('EntityAnalyticsAnomalies', () => {
 
     expect(getByTestId('anomalies-table-column-count').textContent).toEqual('Count'); // 'Count' is always rendered by only displayed on mobile
   });
+
+  it('renders a warning message when jobs are incompatible', () => {
+    const jobCount: AnomaliesCount = {
+      job: {
+        isInstalled: true,
+        datafeedState: 'started',
+        jobState: 'opened',
+        isCompatible: false,
+      } as SecurityJob,
+      name: 'v3_windows_anomalous_script',
+      count: 0,
+      entity: AnomalyEntity.User,
+    };
+
+    mockUseNotableAnomaliesSearch.mockReturnValue({
+      isLoading: false,
+      data: [jobCount],
+      refetch: jest.fn(),
+    });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <EntityAnalyticsAnomalies />
+      </TestProviders>
+    );
+
+    expect(getByTestId('incompatible_jobs_warnings')).toBeInTheDocument();
+  });
 });
