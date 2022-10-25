@@ -23,6 +23,7 @@ import {
   FieldFormatParams as BaseFieldFormatParams,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
+import { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
 import { FORMULA_COLUMN } from './configurations/constants';
 
 export const ReportViewTypes = {
@@ -91,7 +92,10 @@ export interface SeriesConfig {
       }
   >;
   textDefinitionFields?: string[];
-  metricOptions?: MetricOption[];
+  metricOptions?: Array<
+    | MetricOption
+    | { id: string; field?: string; label: string; items: MetricOption[]; columnType?: string }
+  >;
   labels: Record<string, string>;
   hasOperationType: boolean;
   palette?: PaletteOutput;
@@ -124,8 +128,8 @@ export interface SeriesUrl {
 
 export interface UrlFilter {
   field: string;
-  values?: string[];
-  notValues?: string[];
+  values?: Array<string | number>;
+  notValues?: Array<string | number>;
   wildcards?: string[];
   notWildcards?: string[];
 }
@@ -164,3 +168,7 @@ export interface BuilderItem {
 }
 
 export type SupportedOperations = 'average' | 'median' | 'sum' | 'unique_count' | 'min' | 'max';
+
+type TermColumnParams = TermsIndexPatternColumn['params'];
+
+export type TermColumnParamsOrderBy = TermColumnParams['orderBy'];

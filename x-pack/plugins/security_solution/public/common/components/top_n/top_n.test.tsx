@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 
-import { TimelineId } from '../../../../common/types';
+import { TableId, TimelineId } from '../../../../common/types';
 import '../../mock/match_media';
 import { TestProviders, mockIndexPattern } from '../../mock';
 
@@ -137,21 +137,18 @@ describe('TopN', () => {
   });
 
   describe('view selection', () => {
-    const detectionAlertsTimelines = [
-      TimelineId.detectionsPage,
-      TimelineId.detectionsRulesDetailsPage,
-    ];
+    const detectionAlertsTimelines = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
 
     const nonDetectionAlertTables = [
-      TimelineId.hostsPageEvents,
-      TimelineId.networkPageEvents,
+      TableId.hostsPageEvents,
+      TableId.networkPageEvents,
       TimelineId.casePage,
     ];
 
-    test('it disables view selection when timelineId is undefined', () => {
+    test('it disables view selection when scopeId is undefined', () => {
       const wrapper = mount(
         <TestProviders>
-          <TopN {...testProps} timelineId={undefined} />
+          <TopN {...testProps} scopeId={undefined} />
         </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="view-select"]').first().props().disabled).toBe(true);
@@ -160,28 +157,28 @@ describe('TopN', () => {
     test('it disables view selection when timelineId is `active`', () => {
       const wrapper = mount(
         <TestProviders>
-          <TopN {...testProps} timelineId={TimelineId.active} />
+          <TopN {...testProps} scopeId={TimelineId.active} />
         </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="view-select"]').first().props().disabled).toBe(true);
     });
 
-    detectionAlertsTimelines.forEach((timelineId) => {
-      test(`it enables view selection for detection alert table '${timelineId}'`, () => {
+    detectionAlertsTimelines.forEach((tableId) => {
+      test(`it enables view selection for detection alert table '${tableId}'`, () => {
         const wrapper = mount(
           <TestProviders>
-            <TopN {...testProps} timelineId={timelineId} />
+            <TopN {...testProps} scopeId={tableId} />
           </TestProviders>
         );
         expect(wrapper.find('[data-test-subj="view-select"]').first().props().disabled).toBe(false);
       });
     });
 
-    nonDetectionAlertTables.forEach((timelineId) => {
-      test(`it disables view selection for NON detection alert table '${timelineId}'`, () => {
+    nonDetectionAlertTables.forEach((tableId) => {
+      test(`it disables view selection for NON detection alert table '${tableId}'`, () => {
         const wrapper = mount(
           <TestProviders>
-            <TopN {...testProps} timelineId={timelineId} />
+            <TopN {...testProps} scopeId={tableId} />
           </TestProviders>
         );
         expect(wrapper.find('[data-test-subj="view-select"]').first().props().disabled).toBe(true);

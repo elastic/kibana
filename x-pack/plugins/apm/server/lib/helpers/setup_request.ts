@@ -14,7 +14,6 @@ import {
   ApmIndicesConfig,
   getApmIndices,
 } from '../../routes/settings/apm_indices/get_apm_indices';
-import { APMEventClient } from './create_es_client/create_apm_event_client';
 import {
   APMInternalClient,
   createInternalESClient,
@@ -25,7 +24,6 @@ import { withApmSpan } from '../../utils/with_apm_span';
 // https://github.com/microsoft/TypeScript/issues/34933
 
 export interface Setup {
-  apmEventClient: APMEventClient;
   internalClient: APMInternalClient;
   ml?: ReturnType<typeof getMlSetup>;
   config: APMConfig;
@@ -45,7 +43,7 @@ export async function setupRequest({
     const coreContext = await context.core;
     const licensingContext = await context.licensing;
 
-    const [indices, includeFrozen] = await Promise.all([
+    const [indices] = await Promise.all([
       getApmIndices({
         savedObjectsClient: coreContext.savedObjects.client,
         config,
@@ -59,13 +57,6 @@ export async function setupRequest({
 
     return {
       indices,
-      apmEventClient: new APMEventClient({
-        esClient: coreContext.elasticsearch.client.asCurrentUser,
-        debug: query._inspect,
-        request,
-        indices,
-        options: { includeFrozen },
-      }),
       internalClient: await createInternalESClient({
         context,
         request,

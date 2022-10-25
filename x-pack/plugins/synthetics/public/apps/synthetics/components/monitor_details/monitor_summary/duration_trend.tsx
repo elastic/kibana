@@ -10,7 +10,12 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 
-export const MonitorDurationTrend = () => {
+interface MonitorDurationTrendProps {
+  from: string;
+  to: string;
+}
+
+export const MonitorDurationTrend = (props: MonitorDurationTrendProps) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
@@ -25,10 +30,7 @@ export const MonitorDurationTrend = () => {
       reportType="kpi-over-time"
       attributes={metricsToShow.map((metric) => ({
         dataType: 'synthetics',
-        time: {
-          from: 'now-30d/d',
-          to: 'now',
-        },
+        time: props,
         name: metric + ' Series',
         selectedMetricField: 'monitor.duration.us',
         reportDefinitions: { 'monitor.id': [monitorId] },
