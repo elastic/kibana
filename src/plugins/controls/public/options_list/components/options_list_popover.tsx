@@ -93,225 +93,225 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   const [showOnlySelected, setShowOnlySelected] = useState(false);
   const euiBackgroundColor = useEuiBackgroundColor('subdued');
 
+  const TopActionBar = () => (
+    <div className="optionsList__actions">
+      <EuiFormRow fullWidth>
+        <EuiFlexGroup
+          gutterSize="xs"
+          direction="row"
+          justifyContent="spaceBetween"
+          alignItems="center"
+          responsive={false}
+        >
+          <EuiFlexItem>
+            <EuiFieldSearch
+              isInvalid={!searchString.valid}
+              compressed
+              disabled={showOnlySelected}
+              fullWidth
+              onChange={(event) => updateSearchString(event.target.value)}
+              value={searchString.value}
+              data-test-subj="optionsList-control-search-input"
+              placeholder={
+                totalCardinality
+                  ? OptionsListStrings.popover.getTotalCardinalityPlaceholder(totalCardinality)
+                  : undefined
+              }
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {(invalidSelections?.length ?? 0) > 0 && (
+              <EuiToolTip
+                content={OptionsListStrings.popover.getInvalidSelectionsTooltip(
+                  invalidSelections?.length ?? 0
+                )}
+              >
+                <EuiBadge className="optionsList__ignoredBadge" color="warning">
+                  {invalidSelections?.length}
+                </EuiBadge>
+              </EuiToolTip>
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              position="top"
+              content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+            >
+              <EuiButtonIcon
+                size="s"
+                color="danger"
+                iconType="eraser"
+                data-test-subj="optionsList-control-clear-all-selections"
+                aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+                onClick={() => dispatch(clearSelections({}))}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              position="top"
+              content={
+                showOnlySelected
+                  ? OptionsListStrings.popover.getAllOptionsButtonTitle()
+                  : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
+              }
+            >
+              <EuiButtonIcon
+                size="s"
+                iconType="list"
+                aria-pressed={showOnlySelected}
+                color={showOnlySelected ? 'primary' : 'text'}
+                display={showOnlySelected ? 'base' : 'empty'}
+                aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
+                data-test-subj="optionsList-control-show-only-selected"
+                onClick={() => setShowOnlySelected(!showOnlySelected)}
+              />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFormRow>
+    </div>
+  );
+
+  const BottomActionBar = () => (
+    <EuiPopoverFooter
+      paddingSize="s"
+      css={css`
+        background-color: ${euiBackgroundColor};
+      `}
+    >
+      <EuiButtonGroup
+        legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
+        options={aggregationToggleButtons}
+        idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
+        onChange={(optionId) => dispatch(setExclude(optionId === 'optionsList__excludeResults'))}
+        buttonSize="compressed"
+        data-test-subj="optionsList__includeExcludeButtonGroup"
+      />
+    </EuiPopoverFooter>
+  );
+
+  const SuggestionList = ({
+    showOnlySelectedSuggestions,
+  }: {
+    showOnlySelectedSuggestions: boolean;
+  }) => {
+    const suggestions = showOnlySelected ? selectedOptions : availableOptions;
+
+    if (!loading && (!suggestions || suggestions.length === 0) && !existsSelected) {
+      return (
+        <div
+          className="euiFilterSelect__note"
+          data-test-subj={`optionsList-control-${
+            showOnlySelectedSuggestions ? 'noSelectionsMessage' : 'selectionsEmptyMessage'
+          }`}
+        >
+          <div className="euiFilterSelect__noteContent">
+            <EuiIcon type="minusInCircle" />
+            <EuiSpacer size="xs" />
+            <p>
+              {showOnlySelectedSuggestions
+                ? OptionsListStrings.popover.getSelectionsEmptyMessage()
+                : OptionsListStrings.popover.getEmptyMessage()}
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        {!hideExists && !(showOnlySelectedSuggestions && !existsSelected) && (
+          <EuiFilterSelectItem
+            data-test-subj={`optionsList-control-selection-test`}
+            checked={existsSelected ? 'on' : undefined}
+            key={'exists-option'}
+            onClick={() => {
+              dispatch(selectExists(!Boolean(existsSelected)));
+            }}
+          >
+            <span className="optionsList__existsFilter">
+              {exclude
+                ? OptionsListStrings.controlAndPopover.getNegateExists()
+                : OptionsListStrings.controlAndPopover.getExists()}
+            </span>
+          </EuiFilterSelectItem>
+        )}
+        {suggestions?.map((suggestion, index) => (
+          <EuiFilterSelectItem
+            data-test-subj={`optionsList-control-selection-${suggestion}`}
+            checked={selectedOptionsSet?.has(suggestion) ? 'on' : undefined}
+            key={index}
+            onClick={() => {
+              if (showOnlySelected) {
+                dispatch(deselectOption(suggestion));
+                return;
+              }
+              if (singleSelect) {
+                dispatch(replaceSelection(suggestion));
+                return;
+              }
+              if (selectedOptionsSet.has(suggestion)) {
+                dispatch(deselectOption(suggestion));
+                return;
+              }
+              dispatch(selectOption(suggestion));
+            }}
+            className={
+              showOnlySelectedSuggestions && invalidSelectionsSet.has(suggestion)
+                ? 'optionsList__selectionInvalid'
+                : undefined
+            }
+          >
+            {`${suggestion}`}
+          </EuiFilterSelectItem>
+        ))}
+      </>
+    );
+  };
+
+  const InvalidSelections = () => (
+    <>
+      <EuiSpacer size="s" />
+      <EuiTitle size="xxs" className="optionsList-control-ignored-selection-title">
+        <label>
+          {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(
+            invalidSelections?.length ?? 0
+          )}
+        </label>
+      </EuiTitle>
+      <>
+        {invalidSelections?.map((ignoredSelection, index) => (
+          <EuiFilterSelectItem
+            data-test-subj={`optionsList-control-ignored-selection-${ignoredSelection}`}
+            checked={'on'}
+            className="optionsList__selectionInvalid"
+            key={index}
+            onClick={() => dispatch(deselectOption(ignoredSelection))}
+          >
+            {`${ignoredSelection}`}
+          </EuiFilterSelectItem>
+        ))}
+      </>
+    </>
+  );
+
   return (
     <>
       <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>
-      {field?.type !== 'boolean' && (
-        <div className="optionsList__actions">
-          <EuiFormRow fullWidth>
-            <EuiFlexGroup
-              gutterSize="xs"
-              direction="row"
-              justifyContent="spaceBetween"
-              alignItems="center"
-              responsive={false}
-            >
-              <EuiFlexItem>
-                <EuiFieldSearch
-                  isInvalid={!searchString.valid}
-                  compressed
-                  disabled={showOnlySelected}
-                  fullWidth
-                  onChange={(event) => updateSearchString(event.target.value)}
-                  value={searchString.value}
-                  data-test-subj="optionsList-control-search-input"
-                  placeholder={
-                    totalCardinality
-                      ? OptionsListStrings.popover.getTotalCardinalityPlaceholder(totalCardinality)
-                      : undefined
-                  }
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {(invalidSelections?.length ?? 0) > 0 && (
-                  <EuiToolTip
-                    content={OptionsListStrings.popover.getInvalidSelectionsTooltip(
-                      invalidSelections?.length ?? 0
-                    )}
-                  >
-                    <EuiBadge className="optionsList__ignoredBadge" color="warning">
-                      {invalidSelections?.length}
-                    </EuiBadge>
-                  </EuiToolTip>
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                >
-                  <EuiButtonIcon
-                    size="s"
-                    color="danger"
-                    iconType="eraser"
-                    data-test-subj="optionsList-control-clear-all-selections"
-                    aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                    onClick={() => dispatch(clearSelections({}))}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={
-                    showOnlySelected
-                      ? OptionsListStrings.popover.getAllOptionsButtonTitle()
-                      : OptionsListStrings.popover.getSelectedOptionsButtonTitle()
-                  }
-                >
-                  <EuiButtonIcon
-                    size="s"
-                    iconType="list"
-                    aria-pressed={showOnlySelected}
-                    color={showOnlySelected ? 'primary' : 'text'}
-                    display={showOnlySelected ? 'base' : 'empty'}
-                    aria-label={OptionsListStrings.popover.getClearAllSelectionsButtonTitle()}
-                    data-test-subj="optionsList-control-show-only-selected"
-                    onClick={() => setShowOnlySelected(!showOnlySelected)}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-        </div>
-      )}
+      {field?.type !== 'boolean' && <TopActionBar />}
       <div
         style={{ width: width > 300 ? width : undefined }}
         className="optionsList__items"
         data-option-count={availableOptions?.length ?? 0}
         data-test-subj={`optionsList-control-available-options`}
       >
-        {!showOnlySelected && (
-          <>
-            {!hideExists && (
-              <EuiFilterSelectItem
-                data-test-subj={`optionsList-control-selection-test`}
-                checked={existsSelected ? 'on' : undefined}
-                key={'exists-option'}
-                onClick={() => {
-                  dispatch(selectExists(!Boolean(existsSelected)));
-                  // console.log(existsSelected);
-                }}
-              >
-                <span className="optionsList__existsFilter">
-                  {exclude
-                    ? OptionsListStrings.controlAndPopover.getNegateExists()
-                    : OptionsListStrings.controlAndPopover.getExists()}
-                </span>
-              </EuiFilterSelectItem>
-            )}
-            {availableOptions?.map((availableOption, index) => (
-              <EuiFilterSelectItem
-                data-test-subj={`optionsList-control-selection-${availableOption}`}
-                checked={selectedOptionsSet?.has(availableOption) ? 'on' : undefined}
-                key={index}
-                onClick={() => {
-                  if (singleSelect) {
-                    dispatch(replaceSelection(availableOption));
-                    return;
-                  }
-                  if (selectedOptionsSet.has(availableOption)) {
-                    dispatch(deselectOption(availableOption));
-                    return;
-                  }
-                  dispatch(selectOption(availableOption));
-                }}
-              >
-                {`${availableOption}`}
-              </EuiFilterSelectItem>
-            ))}
-
-            {!loading && (!availableOptions || availableOptions.length === 0) && (
-              <div
-                className="euiFilterSelect__note"
-                data-test-subj="optionsList-control-noSelectionsMessage"
-              >
-                <div className="euiFilterSelect__noteContent">
-                  <EuiIcon type="minusInCircle" />
-                  <EuiSpacer size="xs" />
-                  <p>{OptionsListStrings.popover.getEmptyMessage()}</p>
-                </div>
-              </div>
-            )}
-
-            {invalidSelections && !isEmpty(invalidSelections) && (
-              <>
-                <EuiSpacer size="s" />
-                <EuiTitle size="xxs" className="optionsList-control-ignored-selection-title">
-                  <label>
-                    {OptionsListStrings.popover.getInvalidSelectionsSectionTitle(
-                      invalidSelections?.length ?? 0
-                    )}
-                  </label>
-                </EuiTitle>
-                <>
-                  {invalidSelections?.map((ignoredSelection, index) => (
-                    <EuiFilterSelectItem
-                      data-test-subj={`optionsList-control-ignored-selection-${ignoredSelection}`}
-                      checked={'on'}
-                      className="optionsList__selectionInvalid"
-                      key={index}
-                      onClick={() => dispatch(deselectOption(ignoredSelection))}
-                    >
-                      {`${ignoredSelection}`}
-                    </EuiFilterSelectItem>
-                  ))}
-                </>
-              </>
-            )}
-          </>
-        )}
-        {showOnlySelected && (
-          <>
-            {selectedOptions &&
-              selectedOptions.map((availableOption, index) => (
-                <EuiFilterSelectItem
-                  checked={'on'}
-                  key={index}
-                  onClick={() => dispatch(deselectOption(availableOption))}
-                  className={
-                    invalidSelectionsSet.has(availableOption)
-                      ? 'optionsList__selectionInvalid'
-                      : undefined
-                  }
-                >
-                  {`${availableOption}`}
-                </EuiFilterSelectItem>
-              ))}
-            {(!selectedOptions || selectedOptions.length === 0) && (
-              <div
-                className="euiFilterSelect__note"
-                data-test-subj="optionsList-control-selectionsEmptyMessage"
-              >
-                <div className="euiFilterSelect__noteContent">
-                  <EuiIcon type="minusInCircle" />
-                  <EuiSpacer size="xs" />
-                  <p>{OptionsListStrings.popover.getSelectionsEmptyMessage()}</p>
-                </div>
-              </div>
-            )}
-          </>
+        <SuggestionList showOnlySelectedSuggestions={showOnlySelected} />
+        {!showOnlySelected && invalidSelections && !isEmpty(invalidSelections) && (
+          <InvalidSelections />
         )}
       </div>
-      {!hideExclude && (
-        <EuiPopoverFooter
-          paddingSize="s"
-          css={css`
-            background-color: ${euiBackgroundColor};
-          `}
-        >
-          <EuiButtonGroup
-            legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
-            options={aggregationToggleButtons}
-            idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
-            onChange={(optionId) =>
-              dispatch(setExclude(optionId === 'optionsList__excludeResults'))
-            }
-            buttonSize="compressed"
-            data-test-subj="optionsList__includeExcludeButtonGroup"
-          />
-        </EuiPopoverFooter>
-      )}
+      {!hideExclude && <BottomActionBar />}
     </>
   );
 };
