@@ -24,16 +24,16 @@ export const SubscriptionTrackingProvider: FC<Services> = ({ children, ...servic
   );
 };
 
-const analyticsClientMock: jest.Mocked<AnalyticsClient> = {
-  optIn: jest.fn(),
-  reportEvent: jest.fn(),
-  isEventTypeRegistered: jest.fn(),
-  registerEventType: jest.fn(),
-  registerContextProvider: jest.fn(),
-  removeContextProvider: jest.fn(),
-  registerShipper: jest.fn(),
+const analyticsClientMock: AnalyticsClient = {
+  optIn: () => {},
+  reportEvent: () => {},
+  isEventTypeRegistered: () => false,
+  registerEventType: () => {},
+  registerContextProvider: () => {},
+  removeContextProvider: () => {},
+  registerShipper: () => {},
   telemetryCounter$: new Subject(),
-  shutdown: jest.fn(),
+  shutdown: () => {},
 };
 
 /**
