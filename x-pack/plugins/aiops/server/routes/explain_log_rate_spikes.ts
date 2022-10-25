@@ -34,6 +34,7 @@ import {
 } from '../../common/api/explain_log_rate_spikes';
 import { API_ENDPOINT } from '../../common/api';
 
+import { isRequestAbortedError } from '../lib/is_request_aborted_error';
 import type { AiopsLicense } from '../types';
 
 import { fetchChangePointPValues } from './queries/fetch_change_point_p_values';
@@ -185,8 +186,10 @@ export const defineExplainLogRateSpikesRoute = (
           try {
             fieldCandidates = await fetchFieldCandidates(client, request.body, abortSignal);
           } catch (e) {
-            logger.error(`Failed to fetch field candidates, got: \n${e.toString()}`);
-            pushError(`Failed to fetch field candidates.`);
+            if (!isRequestAbortedError(e)) {
+              logger.error(`Failed to fetch field candidates, got: \n${e.toString()}`);
+              pushError(`Failed to fetch field candidates.`);
+            }
             end();
             return;
           }
@@ -246,13 +249,14 @@ export const defineExplainLogRateSpikesRoute = (
                 abortSignal
               );
             } catch (e) {
-              logger.error(
-                `Failed to fetch p-values for ${JSON.stringify(
-                  fieldCandidatesChunk
-                )}, got: \n${e.toString()}`
-              );
-              pushError(`Failed to fetch p-values for ${JSON.stringify(fieldCandidatesChunk)}.`);
-              // Still continue the analysis even if chunks of p-value queries fail.
+              if (!isRequestAbortedError(e)) {
+                logger.error(
+                  `Failed to fetch p-values for ${JSON.stringify(
+                    fieldCandidatesChunk
+                  )}, got: \n${e.toString()}`
+                );
+                pushError(`Failed to fetch p-values for ${JSON.stringify(fieldCandidatesChunk)}.`);
+              } // Still continue the analysis even if chunks of p-value queries fail.
               continue;
             }
 
@@ -319,8 +323,10 @@ export const defineExplainLogRateSpikesRoute = (
               )) as [NumericChartData]
             )[0];
           } catch (e) {
-            logger.error(`Failed to fetch the overall histogram data, got: \n${e.toString()}`);
-            pushError(`Failed to fetch overall histogram data.`);
+            if (!isRequestAbortedError(e)) {
+              logger.error(`Failed to fetch the overall histogram data, got: \n${e.toString()}`);
+              pushError(`Failed to fetch overall histogram data.`);
+            }
             // Still continue the analysis even if loading the overall histogram fails.
           }
 
@@ -591,12 +597,14 @@ export const defineExplainLogRateSpikesRoute = (
                           )) as [NumericChartData]
                         )[0];
                       } catch (e) {
-                        logger.error(
-                          `Failed to fetch the histogram data for group #${
-                            cpg.id
-                          }, got: \n${e.toString()}`
-                        );
-                        pushError(`Failed to fetch the histogram data for group #${cpg.id}.`);
+                        if (!isRequestAbortedError(e)) {
+                          logger.error(
+                            `Failed to fetch the histogram data for group #${
+                              cpg.id
+                            }, got: \n${e.toString()}`
+                          );
+                          pushError(`Failed to fetch the histogram data for group #${cpg.id}.`);
+                        }
                         return;
                       }
                       const histogram =
@@ -627,10 +635,12 @@ export const defineExplainLogRateSpikesRoute = (
                 }
               }
             } catch (e) {
-              logger.error(
-                `Failed to transform field/value pairs into groups, got: \n${e.toString()}`
-              );
-              pushError(`Failed to transform field/value pairs into groups.`);
+              if (!isRequestAbortedError(e)) {
+                logger.error(
+                  `Failed to transform field/value pairs into groups, got: \n${e.toString()}`
+                );
+                pushError(`Failed to transform field/value pairs into groups.`);
+              }
             }
           }
 
@@ -732,8 +742,12 @@ export const defineExplainLogRateSpikesRoute = (
 
           endWithUpdatedLoadingState();
         } catch (e) {
-          logger.error(`Explain log rate spikes analysis failed to finish, got: \n${e.toString()}`);
-          pushError(`Explain log rate spikes analysis failed to finish.`);
+          if (!isRequestAbortedError(e)) {
+            logger.error(
+              `Explain log rate spikes analysis failed to finish, got: \n${e.toString()}`
+            );
+            pushError(`Explain log rate spikes analysis failed to finish.`);
+          }
           end();
         }
       }
