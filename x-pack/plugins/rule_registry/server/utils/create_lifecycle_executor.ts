@@ -37,6 +37,7 @@ import {
   TAGS,
   TIMESTAMP,
   VERSION,
+  // ALERT_FLAPPING,
 } from '../../common/technical_rule_data_field_names';
 import { CommonAlertFieldNameLatest, CommonAlertIdFieldNameLatest } from '../../common/schemas';
 import { IRuleDataClient } from '../rule_data_client';
@@ -251,6 +252,7 @@ export const createLifecycleExecutor =
           [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
           [VERSION]: ruleDataClient.kibanaVersion,
           [TAGS]: options.tags,
+          // [ALERT_FLAPPING]: false, // this is for testing
           ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
         };
 

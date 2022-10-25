@@ -58,6 +58,9 @@ exports.EcsCustomPropertyMappings = {
       },
       alert: {
         properties: {
+          flapping: {
+            type: 'boolean',
+          },
           rule: {
             properties: {
               consumer: {
