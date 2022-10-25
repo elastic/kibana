@@ -27,8 +27,8 @@ const Logo = (props: LogoProps) => (
         x2="272.73"
         y2="1564.343"
       >
-        <stop offset="0" stop-color="#0052cc" />
-        <stop offset="0.923" stop-color="#2684ff" />
+        <stop offset="0" stopColor="#0052cc" />
+        <stop offset="0.923" stopColor="#2684ff" />
       </linearGradient>
     </defs>
     <g id="Layer_2">
