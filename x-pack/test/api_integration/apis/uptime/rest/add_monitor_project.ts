@@ -1449,7 +1449,8 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             }-${testPolicyId}`
         );
         expect(packagePolicy.name).eql(
@@ -1507,7 +1508,8 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             }-${testPolicyId}`
         );
 
@@ -1528,7 +1530,8 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             }-${testPolicyId}`
         );
 
@@ -1565,7 +1568,8 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             }-${testPolicyId}`
         );
 
@@ -1599,7 +1603,8 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             }-${testPolicyId}`
         );
 
@@ -1643,8 +1648,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-            '-' +
-            testPolicyId
+              '-' +
+              testPolicyId
         );
 
         expect(packagePolicy.policy_id).eql(testPolicyId);
@@ -1693,8 +1698,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-            '-' +
-            testPolicyId
+              '-' +
+              testPolicyId
         );
 
         expect(packagePolicy2).eql(undefined);
@@ -1736,7 +1741,8 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             }-${testPolicyId}`
         );
 
@@ -1864,7 +1870,8 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             } - ${testPolicyId}`
         );
 
