@@ -45,9 +45,16 @@ export const MESSAGE_FIELD_IS_REQUIRED = i18n.translate(
 );
 
 export const USE_JSON_EDITOR_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.jsonEditorLabel',
+  'xpack.stackConnectors.components.opsgenie.useJsonEditorLabel',
   {
     defaultMessage: 'Use JSON editor',
+  }
+);
+
+export const ALERT_FIELDS_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.alertFieldsLabel',
+  {
+    defaultMessage: 'Alert fields',
   }
 );
 

@@ -69,6 +69,7 @@ const JsonEditorComponent: React.FC<JsonEditorProps> = ({
       aria-label={i18n.JSON_EDITOR_ARIA}
       onDocumentsChange={onAdvancedEditorChange}
       errors={jsonEditorErrors}
+      label={i18n.ALERT_FIELDS_LABEL}
     />
   );
 };

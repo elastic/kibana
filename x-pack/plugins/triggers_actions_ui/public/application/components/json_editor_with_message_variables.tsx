@@ -38,7 +38,7 @@ interface Props {
   messageVariables?: ActionVariable[];
   paramsProperty: string;
   inputTargetValue?: string;
-  label?: string;
+  label: string;
   errors?: string[];
   areaLabel?: string;
   onDocumentsChange: (data: string) => void;

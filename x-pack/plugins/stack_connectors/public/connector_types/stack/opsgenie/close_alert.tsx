@@ -131,6 +131,7 @@ const CloseAlertComponent: React.FC<CloseAlertProps> = ({
           editOptionalSubAction={editOptionalSubAction}
         />
       ) : null}
+      <EuiSpacer size={'m'} />
       <DisplayMoreOptions
         showingMoreOptions={showingMoreOptions}
         toggleShowingMoreOptions={toggleShowingMoreOptions}

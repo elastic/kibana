@@ -76,6 +76,7 @@ const FormView: React.FC<FormViewProps> = ({
           <Priority priority={subActionParams?.priority} onChange={editOptionalSubAction} />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size={'m'} />
       <TextAreaWithMessageVariables
         index={index}
         editAction={editOptionalSubAction}
