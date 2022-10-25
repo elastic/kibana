@@ -43,7 +43,7 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     }),
     field: 'os',
     sortable: true,
-    render: (os: string) => <EuiText size="s">{os ?? '-'}</EuiText>,
+    render: (os: string) => <EuiText size="s">{os}</EuiText>,
   },
   {
     name: i18n.translate('xpack.infra.hostsTable.numberOfCpusColumnHeader', {

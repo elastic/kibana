@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { last } from 'lodash';
 import { useMemo } from 'react';
 import { SnapshotNode } from '../../../../../common/http_api';
 import { HostMetics, HostNodeRow } from '../components/hosts_table_columns';
@@ -23,7 +22,7 @@ export const useHostTable = (nodes: SnapshotNode[]) => {
     };
     return nodes.map(({ metrics, path, name }) => ({
       name,
-      os: last(path)?.os ?? '-',
+      os: path.at(-1)?.os ?? '-',
       ...metrics.reduce((data, metric) => {
         const metricName = metric.name as keyof HostMetics;
         data[metricName] = metric[valuesMapping[metricName]];
