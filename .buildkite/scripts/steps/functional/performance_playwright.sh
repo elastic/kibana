@@ -52,35 +52,38 @@ fi
 # track failed journeys here which might get written to metadata
 failedJourneys=()
 
+echo "--- 🔎 Start es"
+
+node scripts/es snapshot&
+export esPid=$!
+
+# Pings the es server every second for up to 2 minutes until it is green
+curl --retry 120 \
+--retry-delay 1 \
+--retry-connrefused \
+-I -XGET "${TEST_ES_URL}/_cluster/health?wait_for_nodes=>=1&wait_for_status=yellow" \
+> /dev/null
+
+echo "Wait 30 sec for ES"
+sleep 30
+
+echo "✅ ES is ready and will run in the background"
+
+curl -I -XGET "${TEST_ES_URL}/_cat/indices"
+curl -I -XGET "${TEST_ES_URL}/_cat/count?v=true"
+
+echo "--- Warmup journey with APM disabled"
+
+node scripts/functional_tests \
+   --config "x-pack/performance/journeys/warmup" \
+  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
+  --debug \
+  --bail
+
 while read -r journey; do
-  if [ "$journey" == "" ]; then
+  if [ "$journey" == "" ] || [ $journey == "warmup" ] ; then
     continue;
   fi
-
-  echo "--- $journey - 🔎 Start es"
-
-  node scripts/es snapshot&
-  export esPid=$!
-
-  # Pings the es server every second for up to 2 minutes until it is green
-  curl --retry 120 \
-  --retry-delay 1 \
-  --retry-connrefused \
-  -I -XGET "${TEST_ES_URL}/_cluster/health?wait_for_nodes=>=1&wait_for_status=yellow" \
-  > /dev/null
-
-  curl -I -XGET "${TEST_ES_URL}/_cat/indices"
-  curl -I -XGET "${TEST_ES_URL}/_cat/count?v=true"
-  # curl \
-  #   --fail \
-  #   --silent \
-  #   --retry 120 \
-  #   --retry-delay 1 \
-  #   --retry-connrefused \
-  #   -XGET "${TEST_ES_URL}/_cluster/health?wait_for_nodes=>=1&wait_for_status=yellow" \
-  #   > /dev/null
-
-  echo "✅ ES is ready and will run in the background"
 
   phases=("TEST")
   status=0
@@ -106,26 +109,27 @@ while read -r journey; do
     fi
   done
 
-  # remove trap, we're manually shutting down
-  trap - EXIT;
-
-  echo "--- $journey - 🔎 Shutdown ES"
-  killall node
-  echo "waiting for $esPid to exit gracefully";
-
-  timeout=30 #seconds
-  dur=0
-  while is_running $esPid; do
-    sleep 1;
-    ((dur=dur+1))
-    if [ $dur -ge $timeout ]; then
-      echo "es still running after $dur seconds, killing ES and node forcefully";
-      killall -SIGKILL java
-      killall -SIGKILL node
-      sleep 5;
-    fi
-  done
 done <<< "$journeys"
+
+# remove trap, we're manually shutting down
+trap - EXIT;
+
+echo "--- 🔎 Shutdown ES"
+killall node
+echo "waiting for $esPid to exit gracefully";
+
+timeout=30 #seconds
+dur=0
+while is_running $esPid; do
+  sleep 1;
+  ((dur=dur+1))
+  if [ $dur -ge $timeout ]; then
+    echo "es still running after $dur seconds, killing ES and node forcefully";
+    killall -SIGKILL java
+    killall -SIGKILL node
+    sleep 5;
+  fi
+done
 
 echo "--- report/record failed journeys"
 if [ "${failedJourneys[*]}" != "" ]; then
