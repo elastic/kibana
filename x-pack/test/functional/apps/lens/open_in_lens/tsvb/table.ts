@@ -88,10 +88,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setStaticValue(10);
       await visualBuilder.clickSeriesOption();
       await visualBuilder.setFieldForAggregateBy('bytes');
-      await visualBuilder.setFunctionForAggregateFunction('sum');
+      await visualBuilder.setFunctionForAggregateFunction('Sum');
       await visualBuilder.clickSeriesOption(1);
       await visualBuilder.setFieldForAggregateBy('bytes');
-      await visualBuilder.setFunctionForAggregateFunction('min');
+      await visualBuilder.setFunctionForAggregateFunction('Min');
       await header.waitUntilLoadingHasFinished();
       expect(await visualize.hasNavigateToLensButton()).to.be(false);
     });
@@ -143,7 +143,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should convert aggregate by to split row dimension', async () => {
       await visualBuilder.clickSeriesOption();
       await visualBuilder.setFieldForAggregateBy('clientip');
-      await visualBuilder.setFunctionForAggregateFunction('sum');
+      await visualBuilder.setFunctionForAggregateFunction('Sum');
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();

@@ -662,13 +662,23 @@ export class VisualBuilderPageObject extends FtrService {
   public async setFieldForAggregateBy(field: string): Promise<void> {
     const aggregateBy = await this.testSubjects.find('aggregateBy');
 
-    await this.comboBox.setElement(aggregateBy, field);
+    await this.retry.try(async () => {
+      await this.comboBox.setElement(aggregateBy, field);
+      if (!(await this.comboBox.isOptionSelected(aggregateBy, field))) {
+        throw new Error('aggregate by field is not selected');
+      }
+    });
   }
 
   public async setFunctionForAggregateFunction(func: string): Promise<void> {
     const aggregateFunction = await this.testSubjects.find('aggregateFunction');
 
-    await this.comboBox.setElement(aggregateFunction, func);
+    await this.retry.try(async () => {
+      await this.comboBox.setElement(aggregateFunction, func);
+      if (!(await this.comboBox.isOptionSelected(aggregateFunction, func))) {
+        throw new Error('aggregate function is not selected');
+      }
+    });
   }
 
   public async checkFieldForAggregationValidity(aggNth: number = 0): Promise<boolean> {
