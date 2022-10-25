@@ -7,6 +7,8 @@
 
 export const ADD_EXCEPTION_BTN = '[data-test-subj="add-exception-menu-item"]';
 
+export const ADD_ENDPOINT_EXCEPTION_BTN = '[data-test-subj="add-endpoint-exception-menu-item"]';
+
 export const ALERT_COUNT_TABLE_FIRST_ROW_COUNT =
   '[data-test-subj="alertsCountTable"] tr:nth-child(1) td:nth-child(2) .euiTableCellContent__text';
 
@@ -21,6 +23,8 @@ export const ALERT_RISK_SCORE = '[data-test-subj="formatted-field-kibana.alert.r
 export const ALERT_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.severity"]';
 
 export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
+
+export const ALERTS = '[data-test-subj="events-viewer-panel"][data-test-subj="event"]';
 
 export const ALERTS_COUNT =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="server-side-event-count"]';
@@ -41,6 +45,10 @@ export const DESTINATION_IP = '[data-test-subj^=formatted-field][data-test-subj$
 export const EMPTY_ALERT_TABLE = '[data-test-subj="tGridEmptyState"]';
 
 export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
+
+export const TAKE_ACTION_BTN = '[data-test-subj="take-action-dropdown-btn"]';
+
+export const TAKE_ACTION_MENU = '[data-test-subj="takeActionPanelMenu"]';
 
 export const CLOSE_FLYOUT = '[data-test-subj="euiFlyoutCloseButton"]';
 

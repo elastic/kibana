@@ -38,7 +38,7 @@ export const createFormulaColumn = (
   return {
     operationType: 'formula',
     references: [],
-    ...createColumn(series, metric),
+    ...createColumn(series, metric, undefined, { isAssignTimeScale: false }),
     params: { ...params, ...getFormat(series) },
   };
 };
