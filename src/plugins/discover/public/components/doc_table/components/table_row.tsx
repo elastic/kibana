@@ -103,14 +103,15 @@ export const TableRow = ({
     [filter, dataView.fields, row.flattened]
   );
 
-  const { onOpenSingleDoc, onOpenSurrDocs } = useNavigationProps({
-    dataView,
-    rowIndex: row.raw._index,
-    rowId: row.raw._id,
-    columns,
-    filters,
-    savedSearchId,
-  });
+  const { singleDocHref, contextViewHref, singleDocButtonRef, contextViewButtonRef } =
+    useNavigationProps({
+      dataView,
+      rowIndex: row.raw._index,
+      rowId: row.raw._id,
+      columns,
+      filters,
+      savedSearchId,
+    });
 
   const rowCells = [
     <td className="kbnDocTableCell__toggleDetails" key="toggleDetailsCell">
@@ -212,8 +213,10 @@ export const TableRow = ({
           open={open}
           colLength={(columns.length || 1) + 2}
           isTimeBased={dataView.isTimeBased()}
-          onOpenSingleDoc={onOpenSingleDoc}
-          onOpenSurrDocs={onOpenSurrDocs}
+          singleDocHref={singleDocHref}
+          contextViewHref={contextViewHref}
+          singleDocButtonRef={singleDocButtonRef}
+          contextViewButtonRef={contextViewButtonRef}
         >
           <DocViewer
             columns={columns}

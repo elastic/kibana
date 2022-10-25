@@ -5,26 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useCallback, useEffect, useState } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { useEffect, useState } from 'react';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
 
-export const useDataView = ({ dataViewId }: { dataViewId: string }) => {
+export const useDataView = ({ index }: { index: string | DataViewSpec }) => {
   const { dataViews } = useDiscoverServices();
   const [dataView, setDataView] = useState<DataView>();
   const [error, setError] = useState<Error>();
 
-  const resolveDataView = useCallback(async () => {
-    try {
-      setDataView(await dataViews.get(dataViewId));
-    } catch (e) {
-      setError(e);
-    }
-  }, [dataViewId, dataViews]);
-
   useEffect(() => {
-    resolveDataView();
-  }, [resolveDataView]);
+    const promise = typeof index === 'object' ? dataViews.create(index) : dataViews.get(index);
+    promise.then(setDataView).catch(setError);
+  }, [dataViews, index]);
 
   return { dataView, error };
 };

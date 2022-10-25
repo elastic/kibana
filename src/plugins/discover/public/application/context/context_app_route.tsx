@@ -13,7 +13,7 @@ import { ContextApp } from './context_app';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { getScopedHistory } from '../../kibana_services';
 import { useDataView } from '../../hooks/use_data_view';
-import type { HistoryLocationState } from '../../build_services';
+import { ContextHistoryLocationState } from './services/locator';
 
 export interface ContextUrlParams {
   dataViewId: string;
@@ -22,7 +22,7 @@ export interface ContextUrlParams {
 
 export function ContextAppRoute() {
   const locationState = useMemo(
-    () => getScopedHistory().location.state as HistoryLocationState | undefined,
+    () => getScopedHistory().location.state as ContextHistoryLocationState | undefined,
     []
   );
 
@@ -30,7 +30,7 @@ export function ContextAppRoute() {
   const dataViewId = decodeURIComponent(encodedDataViewId);
   const anchorId = decodeURIComponent(id);
 
-  const { dataView, error } = useDataView({ dataViewId });
+  const { dataView, error } = useDataView({ index: locationState?.dataViewSpec || dataViewId });
 
   if (error) {
     return (

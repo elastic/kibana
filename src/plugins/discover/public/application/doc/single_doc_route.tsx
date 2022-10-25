@@ -17,7 +17,7 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getScopedHistory } from '../../kibana_services';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDataView } from '../../hooks/use_data_view';
-import type { HistoryLocationState } from '../../build_services';
+import { DocHistoryLocationState } from './locator';
 
 export interface DocUrlParams {
   dataViewId: string;
@@ -33,7 +33,7 @@ export const SingleDocRoute = () => {
   const id = query.get('id');
 
   const locationState = useMemo(
-    () => getScopedHistory().location.state as HistoryLocationState | undefined,
+    () => getScopedHistory().location.state as DocHistoryLocationState | undefined,
     []
   );
 
@@ -49,7 +49,7 @@ export const SingleDocRoute = () => {
   }, [timefilter]);
 
   const { dataView, error } = useDataView({
-    dataViewId: decodeURIComponent(dataViewId),
+    index: locationState?.dataViewSpec || decodeURIComponent(dataViewId),
   });
 
   if (error) {

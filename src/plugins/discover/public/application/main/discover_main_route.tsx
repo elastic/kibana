@@ -29,7 +29,7 @@ import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { restoreStateFromSavedSearch } from '../../services/saved_searches/restore_from_saved_search';
-import { ScopedHistoryLocationState } from '../../locator';
+import { MainHistoryLocationState } from '../../locator';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -67,7 +67,7 @@ export function DiscoverMainRoute(props: Props) {
    * Get location state of scoped history only on initial load
    */
   const historyLocationState = useMemo(
-    () => getScopedHistory().location.state as ScopedHistoryLocationState | undefined,
+    () => getScopedHistory().location.state as MainHistoryLocationState | undefined,
     []
   );
 

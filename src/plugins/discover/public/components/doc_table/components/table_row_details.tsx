@@ -6,25 +6,29 @@
  * Side Public License, v 1.
  */
 
-import React, { MouseEventHandler } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiTitle } from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiButtonEmpty, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface TableRowDetailsProps {
   open: boolean;
   colLength: number;
   isTimeBased: boolean;
-  onOpenSingleDoc: MouseEventHandler;
-  onOpenSurrDocs: MouseEventHandler;
+  singleDocHref: string;
+  contextViewHref: string;
+  singleDocButtonRef: (buttonElement: HTMLButtonElement | HTMLAnchorElement | null) => void;
+  contextViewButtonRef: (buttonElement: HTMLButtonElement | HTMLAnchorElement | null) => void;
   children: JSX.Element;
 }
 
 export const TableRowDetails = ({
+  singleDocHref,
+  contextViewHref,
+  singleDocButtonRef,
+  contextViewButtonRef,
   open,
   colLength,
   isTimeBased,
-  onOpenSingleDoc,
-  onOpenSurrDocs,
   children,
 }: TableRowDetailsProps) => {
   if (!open) {
@@ -55,21 +59,37 @@ export const TableRowDetails = ({
           <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               {isTimeBased && (
-                <EuiLink data-test-subj="docTableRowAction" onClick={onOpenSurrDocs}>
+                <EuiButtonEmpty
+                  size="s"
+                  iconSize="s"
+                  iconType="document"
+                  flush="left"
+                  data-test-subj="docTableRowAction"
+                  href={contextViewHref}
+                  buttonRef={contextViewButtonRef}
+                >
                   <FormattedMessage
                     id="discover.docTable.tableRow.viewSurroundingDocumentsLinkText"
                     defaultMessage="View surrounding documents"
                   />
-                </EuiLink>
+                </EuiButtonEmpty>
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiLink data-test-subj="docTableRowAction" onClick={onOpenSingleDoc}>
+              <EuiButtonEmpty
+                size="s"
+                iconSize="s"
+                iconType="document"
+                flush="left"
+                data-test-subj="docTableRowAction"
+                href={singleDocHref}
+                buttonRef={singleDocButtonRef}
+              >
                 <FormattedMessage
                   id="discover.docTable.tableRow.viewSingleDocumentLinkText"
                   defaultMessage="View single document"
                 />
-              </EuiLink>
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

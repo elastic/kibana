@@ -100,14 +100,15 @@ export function DiscoverGridFlyout({
     [activePage, setPage]
   );
 
-  const { onOpenSingleDoc, onOpenSurrDocs } = useNavigationProps({
-    dataView,
-    rowIndex: hit.raw._index,
-    rowId: hit.raw._id,
-    columns,
-    filters,
-    savedSearchId,
-  });
+  const { singleDocHref, contextViewHref, singleDocButtonRef, contextViewButtonRef } =
+    useNavigationProps({
+      dataView,
+      rowIndex: hit.raw._index,
+      rowId: hit.raw._id,
+      columns,
+      filters,
+      savedSearchId,
+    });
 
   return (
     <EuiPortal>
@@ -151,7 +152,8 @@ export function DiscoverGridFlyout({
                 iconType="document"
                 flush="left"
                 data-test-subj="docTableRowAction"
-                onClick={onOpenSingleDoc}
+                buttonRef={singleDocButtonRef}
+                href={singleDocHref}
               >
                 {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {
                   defaultMessage: 'Single document',
@@ -166,7 +168,8 @@ export function DiscoverGridFlyout({
                     iconSize="s"
                     iconType="documents"
                     flush="left"
-                    onClick={onOpenSurrDocs}
+                    buttonRef={contextViewButtonRef}
+                    href={contextViewHref}
                     data-test-subj="docTableRowAction"
                   >
                     {i18n.translate(
