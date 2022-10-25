@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGrid, EuiHealth, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiHealth } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
@@ -18,8 +18,6 @@ import type { EndpointFields } from '../../../../../common/search_strategy/secur
 import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy/security_solution/hosts';
 import { AgentStatus } from '../../../../common/components/endpoint/agent_status';
 import { EndpointHostIsolationStatus } from '../../../../common/components/endpoint/host_isolation';
-import { ResponderContextMenuItem } from '../../../../detections/components/endpoint_responder/responder_context_menu_item';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 interface Props {
   contextID?: string;
@@ -27,7 +25,6 @@ interface Props {
 }
 
 export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
-  console.log('data in Host details', data);
   const getDefaultRenderer = useCallback(
     (fieldName: string, fieldData: EndpointFields, attrName: string) => (
       <DefaultFieldRenderer
@@ -38,7 +35,6 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
     ),
     [contextID]
   );
-  const endpointPrivileges = useUserPrivileges().endpointPrivileges;
   const descriptionLists: Readonly<DescriptionList[][]> = useMemo(
     () => [
       [
@@ -113,13 +109,6 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
           key={index}
         />
       ))}
-      { data && data.fleetAgentId && endpointPrivileges.canAccessResponseConsole &&
-       <EuiFlexGroup justifyContent='center' gutterSize='xs'>
-          <EuiFlexItem grow={false}>
-            <ResponderContextMenuItem endpointId={data.fleetAgentId} /> 
-          </EuiFlexItem>
-       </EuiFlexGroup>
-      }
     </>
   );
 });

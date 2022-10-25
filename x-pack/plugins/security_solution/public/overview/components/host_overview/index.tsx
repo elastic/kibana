@@ -153,7 +153,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     const column: DescriptionList[] = useMemo(
       () => [
         {
-          title: 'i18n.HOST_ID',
+          title: i18n.HOST_ID,
           description:
             data && data.host
               ? hostIdRenderer({ host: data.host, isDraggable, noLink: true })
@@ -264,7 +264,6 @@ export const HostOverview = React.memo<HostSummaryProps>(
       [contextID, data, firstColumn, getDefaultRenderer, isDraggable]
     );
 
-    console.log('id in host details', id);
     return (
       <>
         <InspectButtonContainer>
