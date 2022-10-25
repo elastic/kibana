@@ -33,6 +33,7 @@ export const ControlPanelDiffSystems: {
 
       const {
         exclude: excludeA,
+        existsSelected: existsSelectedA,
         selectedOptions: selectedA,
         singleSelect: singleSelectA,
         hideExclude: hideExcludeA,
@@ -41,6 +42,7 @@ export const ControlPanelDiffSystems: {
       }: Partial<OptionsListEmbeddableInput> = initialInput.explicitInput;
       const {
         exclude: excludeB,
+        existsSelected: existsSelectedB,
         selectedOptions: selectedB,
         singleSelect: singleSelectB,
         hideExclude: hideExcludeB,
@@ -50,6 +52,7 @@ export const ControlPanelDiffSystems: {
 
       return (
         Boolean(excludeA) === Boolean(excludeB) &&
+        Boolean(existsSelectedA) === Boolean(existsSelectedB) &&
         Boolean(singleSelectA) === Boolean(singleSelectB) &&
         Boolean(hideExcludeA) === Boolean(hideExcludeB) &&
         Boolean(runPastTimeoutA) === Boolean(runPastTimeoutB) &&
