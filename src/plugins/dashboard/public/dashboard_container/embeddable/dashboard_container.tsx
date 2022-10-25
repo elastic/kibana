@@ -74,6 +74,7 @@ export interface InheritedChildInput {
   id: string;
   searchSessionId?: string;
   syncColors?: boolean;
+  syncCursor?: boolean;
   syncTooltips?: boolean;
   executionContext?: KibanaExecutionContext;
 }
@@ -128,39 +129,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     } = pluginServices.getServices());
 
     this.initializeDashboard(overrideInput);
-
-    // TODO CONTROL GROUP
-    // if (
-    //   controlGroup &&
-    //   !isErrorEmbeddable(controlGroup) &&
-    //   isProjectEnabledInLabs('labs:dashboard:dashboardControls')
-    // ) {
-    //   this.controlGroup = controlGroup;
-    //   syncDashboardControlGroup({ dashboardContainer: this, controlGroup: this.controlGroup }).then(
-    //     (result) => {
-    //       if (!result) return;
-    //       const { onDestroyControlGroup } = result;
-    //       this.onDestroyControlGroup = onDestroyControlGroup;
-    //     }
-    //   );
-    // }
-
-    // this.subscriptions.add(
-    //   this.getAnyChildOutputChange$().subscribe(() => {
-    //     if (!this.controlGroup) {
-    //       return;
-    //     }
-
-    //     for (const child of Object.values(this.children)) {
-    //       const isLoading = child.getOutput().loading;
-    //       if (isLoading) {
-    //         this.controlGroup.anyControlOutputConsumerLoading$.next(true);
-    //         return;
-    //       }
-    //     }
-    //     this.controlGroup.anyControlOutputConsumerLoading$.next(false);
-    //   })
-    // );
   }
 
   public getInputAsValueType = () => {

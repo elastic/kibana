@@ -13,6 +13,7 @@ import { pageObjects } from './page_objects';
 
 // .server-log is specifically not enabled
 const enabledActionTypes = [
+  '.opsgenie',
   '.email',
   '.index',
   '.pagerduty',
@@ -60,6 +61,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('apps'),
       triggersActions: {
         pathname: '/app/management/insightsAndAlerting/triggersActions',
+      },
+      triggersActionsConnectors: {
+        pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors',
       },
     },
     esTestCluster: {

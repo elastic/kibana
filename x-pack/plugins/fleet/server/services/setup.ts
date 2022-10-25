@@ -32,7 +32,7 @@ import {
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
 
-import { generateEnrollmentAPIKey, hasEnrollementAPIKeysForPolicy } from './api_keys';
+import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 import { getRegistryUrl, settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
@@ -44,6 +44,11 @@ import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { getBundledPackages } from './epm/packages';
 import { upgradePackageInstallVersion } from './setup/upgrade_package_install_version';
 import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
+import { migrateSettingsToFleetServerHost } from './fleet_server_host';
+import {
+  ensurePreconfiguredFleetServerHosts,
+  getPreconfiguredFleetServerHostFromConfig,
+} from './preconfiguration/fleet_server_host';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -70,24 +75,31 @@ async function createSetupSideEffects(
 
   const { agentPolicies: policiesOrUndefined, packages: packagesOrUndefined } =
     appContextService.getConfig() ?? {};
-
   const policies = policiesOrUndefined ?? [];
   let packages = packagesOrUndefined ?? [];
 
+  logger.debug('Setting Fleet server config');
+  await migrateSettingsToFleetServerHost(soClient);
+  logger.debug('Setting up Fleet download source');
+  const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient);
+
   logger.debug('Setting up Fleet outputs');
 
+  await ensurePreconfiguredFleetServerHosts(
+    soClient,
+    getPreconfiguredFleetServerHostFromConfig(appContextService.getConfig())
+  );
   await Promise.all([
     ensurePreconfiguredOutputs(
       soClient,
       esClient,
       getPreconfiguredOutputFromConfig(appContextService.getConfig())
     ),
+
     settingsService.settingsSetup(soClient),
   ]);
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient);
-
-  const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient);
 
   if (appContextService.getConfig()?.agentIdVerificationEnabled) {
     logger.debug('Setting up Fleet Elasticsearch assets');
@@ -205,7 +217,7 @@ export async function ensureFleetGlobalEsAssets(
   }
 }
 
-export async function ensureDefaultEnrollmentAPIKeysExists(
+async function ensureDefaultEnrollmentAPIKeysExists(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   options?: { forceRecreate?: boolean }
@@ -223,20 +235,13 @@ export async function ensureDefaultEnrollmentAPIKeysExists(
     perPage: SO_SEARCH_LIMIT,
   });
 
-  await Promise.all(
-    agentPolicies.map(async (agentPolicy) => {
-      const hasKey = await hasEnrollementAPIKeysForPolicy(esClient, agentPolicy.id);
-
-      if (hasKey) {
-        return;
-      }
-
-      return generateEnrollmentAPIKey(soClient, esClient, {
-        name: `Default`,
-        agentPolicyId: agentPolicy.id,
-        forceRecreate: true, // Always generate a new enrollment key when Fleet is being set up
-      });
-    })
+  await pMap(
+    agentPolicies,
+    (agentPolicy) =>
+      ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id),
+    {
+      concurrency: 20,
+    }
   );
 }
 

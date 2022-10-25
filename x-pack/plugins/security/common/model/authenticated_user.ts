@@ -57,6 +57,11 @@ export interface AuthenticatedUser extends User {
    * Indicates whether user is authenticated via Elastic Cloud built-in SAML realm.
    */
   elastic_cloud_user: boolean;
+
+  /**
+   * User profile ID of this user.
+   */
+  profile_uid?: string;
 }
 
 export function isUserAnonymous(user: Pick<AuthenticatedUser, 'authentication_provider'>) {

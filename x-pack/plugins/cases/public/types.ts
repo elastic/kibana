@@ -7,7 +7,8 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import type React from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -20,7 +21,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DistributiveOmit } from '@elastic/eui';
 import type { ApmBase } from '@elastic/apm-rum';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type {
   CasesByAlertId,
   CasesByAlertIDRequest,
@@ -34,19 +35,19 @@ import type {
 } from '../common/api';
 import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
-import { canUseCases } from './client/helpers/can_use_cases';
-import { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
+import type { canUseCases } from './client/helpers/can_use_cases';
+import type { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
 import type { GetCasesContextProps } from './client/ui/get_cases_context';
 import type { GetCasesProps } from './client/ui/get_cases';
 import type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
 import type { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyout';
 import type { GetRecentCasesProps } from './client/ui/get_recent_cases';
 import type { Cases, CasesStatus, CasesMetrics } from '../common/ui';
-import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
-import { getUICapabilities } from './client/helpers/capabilities';
+import type { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
+import type { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
-import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
+import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 
 export interface CasesPluginSetup {
   security: SecurityPluginSetup;

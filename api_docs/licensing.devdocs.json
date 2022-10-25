@@ -576,7 +576,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -585,6 +589,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1841,7 +1853,11 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_default_policy.test.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1850,6 +1866,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/lib/policy/license_watch.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/list.test.ts"
               },
               {
                 "plugin": "securitySolution",

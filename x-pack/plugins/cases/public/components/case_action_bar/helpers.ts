@@ -6,7 +6,7 @@
  */
 
 import { CaseStatuses } from '../../../common/api';
-import { Case } from '../../containers/types';
+import type { Case } from '../../containers/types';
 import { statuses } from '../status';
 
 export const getStatusDate = (theCase: Case): string | null => {

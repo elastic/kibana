@@ -12,9 +12,9 @@ export interface Crawler {
 }
 
 export const enum IngestionMethod {
-  CONNECTOR,
-  CRAWLER,
-  API,
+  CONNECTOR = 'connector',
+  CRAWLER = 'crawler',
+  API = 'api',
 }
 
 export const enum IngestionStatus {

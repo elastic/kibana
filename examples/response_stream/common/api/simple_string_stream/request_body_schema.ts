@@ -11,6 +11,8 @@ import { schema, TypeOf } from '@kbn/config-schema';
 export const simpleStringStreamRequestBodySchema = schema.object({
   /** Maximum timeout between streaming messages. */
   timeout: schema.number(),
+  /** Setting to override headers derived compression */
+  compressResponse: schema.maybe(schema.boolean()),
 });
 export type SimpleStringStreamRequestBodySchema = TypeOf<
   typeof simpleStringStreamRequestBodySchema

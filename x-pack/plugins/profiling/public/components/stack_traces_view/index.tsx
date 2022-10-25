@@ -50,29 +50,33 @@ export function StackTracesView() {
     rangeTo,
   });
 
-  const state = useTimeRangeAsync(() => {
-    if (!topNType) {
-      return Promise.resolve({ charts: [], metadata: {} });
-    }
-    return fetchTopN({
-      type: topNType,
-      timeFrom: new Date(timeRange.start).getTime() / 1000,
-      timeTo: new Date(timeRange.end).getTime() / 1000,
-      kuery,
-    }).then((response: TopNResponse) => {
-      const totalCount = response.TotalCount;
-      const samples = response.TopN;
-      const charts = groupSamplesByCategory({
-        samples,
-        totalCount,
-        metadata: response.Metadata,
-        labels: response.Labels,
+  const state = useTimeRangeAsync(
+    ({ http }) => {
+      if (!topNType) {
+        return Promise.resolve({ charts: [], metadata: {} });
+      }
+      return fetchTopN({
+        http,
+        type: topNType,
+        timeFrom: new Date(timeRange.start).getTime() / 1000,
+        timeTo: new Date(timeRange.end).getTime() / 1000,
+        kuery,
+      }).then((response: TopNResponse) => {
+        const totalCount = response.TotalCount;
+        const samples = response.TopN;
+        const charts = groupSamplesByCategory({
+          samples,
+          totalCount,
+          metadata: response.Metadata,
+          labels: response.Labels,
+        });
+        return {
+          charts,
+        };
       });
-      return {
-        charts,
-      };
-    });
-  }, [topNType, timeRange.start, timeRange.end, fetchTopN, kuery]);
+    },
+    [topNType, timeRange.start, timeRange.end, fetchTopN, kuery]
+  );
 
   const [highlightedSubchart, setHighlightedSubchart] = useState<TopNSubchart | undefined>(
     undefined

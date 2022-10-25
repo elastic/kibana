@@ -7,18 +7,32 @@
 
 // TODO Consolidate with duplicate component `DatePickerWrapper` in
 // `x-pack/plugins/data_visualizer/public/application/common/components/date_picker_wrapper/date_picker_wrapper.tsx`
-
+// `x-pack/plugins/ml/public/application/components/navigation_menu/date_picker_wrapper/date_picker_wrapper.tsx`
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 import { debounce } from 'lodash';
 
-import { EuiSuperDatePicker, OnRefreshProps } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperDatePicker,
+  OnRefreshProps,
+  OnTimeChangeProps,
+} from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
-import { TimeHistoryContract, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { TimefilterContract, TimeHistoryContract, UI_SETTINGS } from '@kbn/data-plugin/public';
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import useObservable from 'react-use/lib/useObservable';
+import { map } from 'rxjs/operators';
+import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { useUrlState } from '../../hooks/use_url_state';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { aiopsRefresh$ } from '../../application/services/timefilter_refresh_service';
+
+const DEFAULT_REFRESH_INTERVAL_MS = 5000;
 
 interface TimePickerQuickRange {
   from: string;
@@ -49,19 +63,64 @@ function getRecentlyUsedRangesFactory(timeHistory: TimeHistoryContract) {
   };
 }
 
-function updateLastRefresh(timeRange: OnRefreshProps) {
+function updateLastRefresh(timeRange?: OnRefreshProps) {
   aiopsRefresh$.next({ lastRefresh: Date.now(), timeRange });
 }
 
+export const useRefreshIntervalUpdates = (timefilter: TimefilterContract) => {
+  return useObservable(
+    timefilter.getRefreshIntervalUpdate$().pipe(map(timefilter.getRefreshInterval)),
+    timefilter.getRefreshInterval()
+  );
+};
+
+export const useTimeRangeUpdates = (timefilter: TimefilterContract, absolute = false) => {
+  const getTimeCallback = absolute
+    ? timefilter.getAbsoluteTime.bind(timefilter)
+    : timefilter.getTime.bind(timefilter);
+
+  return useObservable(timefilter.getTimeUpdate$().pipe(map(getTimeCallback)), getTimeCallback());
+};
+
 export const DatePickerWrapper: FC = () => {
-  const { uiSettings, data } = useAiopsAppContext();
-  const { timefilter, history } = data.query.timefilter;
+  const services = useAiopsAppContext();
+  const { toasts } = services.notifications;
+  const config = services.uiSettings;
+
+  const { timefilter, history } = services.data.query.timefilter;
+  const theme$ = services.theme.theme$;
 
   const [globalState, setGlobalState] = useUrlState('_g');
   const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(history);
 
-  const refreshInterval: RefreshInterval =
-    globalState?.refreshInterval ?? timefilter.getRefreshInterval();
+  const timeFilterRefreshInterval = useRefreshIntervalUpdates(timefilter);
+  const time = useTimeRangeUpdates(timefilter);
+
+  useEffect(
+    function syncTimRangeFromUrlState() {
+      if (globalState?.time !== undefined) {
+        timefilter.setTime({
+          from: globalState.time.from,
+          to: globalState.time.to,
+        });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [globalState?.time?.from, globalState?.time?.to, globalState?.time?.ts]
+  );
+
+  useEffect(
+    function syncRefreshIntervalFromUrlState() {
+      if (globalState?.refreshInterval !== undefined) {
+        timefilter.setRefreshInterval({
+          pause: !!globalState?.refreshInterval?.pause,
+          value: globalState?.refreshInterval?.value,
+        });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [globalState?.refreshInterval]
+  );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const setRefreshInterval = useCallback(
@@ -71,7 +130,6 @@ export const DatePickerWrapper: FC = () => {
     [setGlobalState]
   );
 
-  const [time, setTime] = useState(timefilter.getTime());
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges());
   const [isAutoRefreshSelectorEnabled, setIsAutoRefreshSelectorEnabled] = useState(
     timefilter.isAutoRefreshSelectorEnabled()
@@ -80,8 +138,69 @@ export const DatePickerWrapper: FC = () => {
     timefilter.isTimeRangeSelectorEnabled()
   );
 
-  const dateFormat = uiSettings.get('dateFormat');
-  const timePickerQuickRanges = uiSettings.get<TimePickerQuickRange[]>(
+  const refreshInterval = useMemo(
+    (): RefreshInterval => globalState?.refreshInterval ?? timeFilterRefreshInterval,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(globalState?.refreshInterval), timeFilterRefreshInterval]
+  );
+
+  useEffect(
+    function warnAboutShortRefreshInterval() {
+      const isResolvedFromUrlState = !!globalState?.refreshInterval;
+      const isTooShort = refreshInterval.value < DEFAULT_REFRESH_INTERVAL_MS;
+
+      // Only warn about short interval with enabled auto-refresh.
+      if (!isTooShort || refreshInterval.pause) return;
+
+      toasts.addWarning(
+        {
+          title: isResolvedFromUrlState
+            ? i18n.translate('xpack.aiops.datePicker.shortRefreshIntervalURLWarningMessage', {
+                defaultMessage:
+                  'The refresh interval in the URL is shorter than the minimum supported by Machine Learning.',
+              })
+            : i18n.translate(
+                'xpack.aiops.datePicker.shortRefreshIntervalTimeFilterWarningMessage',
+                {
+                  defaultMessage:
+                    'The refresh interval in Advanced Settings is shorter than the minimum supported by Machine Learning.',
+                }
+              ),
+          text: toMountPoint(
+            wrapWithTheme(
+              <EuiButton
+                onClick={setRefreshInterval.bind(null, {
+                  pause: refreshInterval.pause,
+                  value: DEFAULT_REFRESH_INTERVAL_MS,
+                })}
+              >
+                <FormattedMessage
+                  id="xpack.aiops.index.pageRefreshResetButton"
+                  defaultMessage="Set to {defaultInterval}"
+                  values={{
+                    defaultInterval: `${DEFAULT_REFRESH_INTERVAL_MS / 1000}s`,
+                  }}
+                />
+              </EuiButton>,
+              theme$
+            )
+          ),
+        },
+        { toastLifeTimeMs: 30000 }
+      );
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify(refreshInterval),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify(globalState?.refreshInterval),
+      setRefreshInterval,
+    ]
+  );
+
+  const dateFormat = config.get('dateFormat');
+  const timePickerQuickRanges = config.get<TimePickerQuickRange[]>(
     UI_SETTINGS.TIMEPICKER_QUICK_RANGES
   );
 
@@ -97,22 +216,7 @@ export const DatePickerWrapper: FC = () => {
 
   useEffect(() => {
     const subscriptions = new Subscription();
-    const refreshIntervalUpdate$ = timefilter.getRefreshIntervalUpdate$();
-    if (refreshIntervalUpdate$ !== undefined) {
-      subscriptions.add(
-        refreshIntervalUpdate$.subscribe((r) => {
-          setRefreshInterval(timefilter.getRefreshInterval());
-        })
-      );
-    }
-    const timeUpdate$ = timefilter.getTimeUpdate$();
-    if (timeUpdate$ !== undefined) {
-      subscriptions.add(
-        timeUpdate$.subscribe((v) => {
-          setTime(timefilter.getTime());
-        })
-      );
-    }
+
     const enabledUpdated$ = timefilter.getEnabledUpdated$();
     if (enabledUpdated$ !== undefined) {
       subscriptions.add(
@@ -126,15 +230,21 @@ export const DatePickerWrapper: FC = () => {
     return function cleanup() {
       subscriptions.unsubscribe();
     };
-  }, [setRefreshInterval, timefilter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  function updateFilter({ start, end }: Duration) {
-    const newTime = { from: start, to: end };
-    // Update timefilter for controllers listening for changes
-    timefilter.setTime(newTime);
-    setTime(newTime);
-    setRecentlyUsedRanges(getRecentlyUsedRanges());
-  }
+  const updateTimeFilter = useCallback(
+    ({ start, end }: OnTimeChangeProps) => {
+      setRecentlyUsedRanges(getRecentlyUsedRanges());
+      setGlobalState('time', {
+        from: start,
+        to: end,
+        ...(start === 'now' || end === 'now' ? { ts: Date.now() } : {}),
+      });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [setGlobalState]
+  );
 
   function updateInterval({
     isPaused: pause,
@@ -146,26 +256,41 @@ export const DatePickerWrapper: FC = () => {
     setRefreshInterval({ pause, value });
   }
 
-  /**
-   * Enforce pause when it's set to false with 0 refresh interval.
-   */
-  const isPaused = refreshInterval.pause || (!refreshInterval.pause && !refreshInterval.value);
-
   return isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled ? (
-    <div className="mlNavigationMenu__datePickerWrapper">
-      <EuiSuperDatePicker
-        start={time.from}
-        end={time.to}
-        isPaused={isPaused}
-        isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
-        refreshInterval={refreshInterval.value}
-        onTimeChange={updateFilter}
-        onRefresh={updateLastRefresh}
-        onRefreshChange={updateInterval}
-        recentlyUsedRanges={recentlyUsedRanges}
-        dateFormat={dateFormat}
-        commonlyUsedRanges={commonlyUsedRanges}
-      />
-    </div>
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      className="mlNavigationMenu__datePickerWrapper"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiSuperDatePicker
+          start={time.from}
+          end={time.to}
+          isPaused={refreshInterval.pause}
+          isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
+          refreshInterval={refreshInterval.value || DEFAULT_REFRESH_INTERVAL_MS}
+          onTimeChange={updateTimeFilter}
+          onRefresh={updateLastRefresh}
+          onRefreshChange={updateInterval}
+          recentlyUsedRanges={recentlyUsedRanges}
+          dateFormat={dateFormat}
+          commonlyUsedRanges={commonlyUsedRanges}
+        />
+      </EuiFlexItem>
+
+      {isTimeRangeSelectorEnabled ? null : (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            color="primary"
+            iconType={'refresh'}
+            onClick={() => updateLastRefresh()}
+            data-test-subj="aiOpsRefreshPageButton"
+          >
+            <FormattedMessage id="xpack.aiops.pageRefreshButton" defaultMessage="Refresh" />
+          </EuiButton>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   ) : null;
 };

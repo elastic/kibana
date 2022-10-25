@@ -6,25 +6,48 @@
  * Side Public License, v 1.
  */
 
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { ApiService } from './services/api';
+import { Observable } from 'rxjs';
+import { HttpSetup } from '@kbn/core/public';
+import type { GuideState, GuideId, GuideStepIds, StepStatus } from '@kbn/guided-onboarding';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GuidedOnboardingPluginSetup {}
 
 export interface GuidedOnboardingPluginStart {
-  guidedOnboardingApi?: ApiService;
+  guidedOnboardingApi?: GuidedOnboardingApi;
 }
 
-export interface AppPluginStartDependencies {
-  navigation: NavigationPublicPluginStart;
+export interface GuidedOnboardingApi {
+  setup: (httpClient: HttpSetup) => void;
+  fetchActiveGuideState$: () => Observable<GuideState | undefined>;
+  fetchAllGuidesState: () => Promise<{ state: GuideState[] } | undefined>;
+  updateGuideState: (
+    newState: GuideState,
+    panelState: boolean
+  ) => Promise<{ state: GuideState } | undefined>;
+  activateGuide: (
+    guideId: GuideId,
+    guide?: GuideState
+  ) => Promise<{ state: GuideState } | undefined>;
+  completeGuide: (guideId: GuideId) => Promise<{ state: GuideState } | undefined>;
+  isGuideStepActive$: (guideId: GuideId, stepId: GuideStepIds) => Observable<boolean>;
+  startGuideStep: (
+    guideId: GuideId,
+    stepId: GuideStepIds
+  ) => Promise<{ state: GuideState } | undefined>;
+  completeGuideStep: (
+    guideId: GuideId,
+    stepId: GuideStepIds
+  ) => Promise<{ state: GuideState } | undefined>;
+  isGuidedOnboardingActiveForIntegration$: (integration?: string) => Observable<boolean>;
+  completeGuidedOnboardingForIntegration: (
+    integration?: string
+  ) => Promise<{ state: GuideState } | undefined>;
+  isGuidePanelOpen$: Observable<boolean>;
 }
-
-export type UseCase = 'observability' | 'security' | 'search';
-export type StepStatus = 'incomplete' | 'complete' | 'in_progress';
 
 export interface StepConfig {
-  id: string;
+  id: GuideStepIds;
   title: string;
   descriptionList: string[];
   location?: {
@@ -32,27 +55,28 @@ export interface StepConfig {
     path: string;
   };
   status?: StepStatus;
+  integration?: string;
+  manualCompletion?: {
+    title: string;
+    description: string;
+    readyToCompleteOnNavigation?: boolean;
+  };
 }
-
 export interface GuideConfig {
   title: string;
   description: string;
+  guideName: string;
   docs?: {
     text: string;
     url: string;
+  };
+  completedGuideRedirectLocation?: {
+    appID: string;
+    path: string;
   };
   steps: StepConfig[];
 }
 
 export type GuidesConfig = {
-  [key in UseCase]: GuideConfig;
+  [key in GuideId]: GuideConfig;
 };
-
-export interface GuidedOnboardingState {
-  activeGuide: UseCase | 'unset';
-  activeStep: string | 'unset' | 'completed';
-}
-
-export interface ClientConfigType {
-  ui: boolean;
-}

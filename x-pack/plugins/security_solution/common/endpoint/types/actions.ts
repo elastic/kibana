@@ -12,7 +12,10 @@ import type {
   ResponseActionBodySchema,
   KillOrSuspendProcessRequestSchema,
 } from '../schema/actions';
-import type { ResponseActionStatus, ResponseActions } from '../service/response_actions/constants';
+import type {
+  ResponseActionStatus,
+  ResponseActionsApiCommandNames,
+} from '../service/response_actions/constants';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
@@ -47,6 +50,13 @@ export interface KillProcessActionOutputContent {
   entity_id?: string;
 }
 
+export interface ResponseActionGetFileOutputContent {
+  code: string;
+  path: string;
+  size: number;
+  zip_size: number;
+}
+
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
   RESPONSE: 'response' as const,
@@ -62,9 +72,12 @@ interface EcsError {
   type?: string;
 }
 
-interface EndpointActionFields<TOutputContent extends object = object> {
+interface EndpointActionFields<
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+  TOutputContent extends object = object
+> {
   action_id: string;
-  data: EndpointActionData<undefined, TOutputContent>;
+  data: EndpointActionData<TParameters, TOutputContent>;
 }
 
 interface ActionRequestFields {
@@ -103,7 +116,11 @@ export interface LogsEndpointActionResponse<TOutputContent extends object = obje
   agent: {
     id: string | string[];
   };
-  EndpointActions: EndpointActionFields<TOutputContent> & ActionResponseFields;
+  EndpointActions: ActionResponseFields & {
+    action_id: string;
+    // Endpoint Response documents do not have `parameters` in the `data`
+    data: Pick<EndpointActionData<never, TOutputContent>, 'comment' | 'command' | 'output'>;
+  };
   error?: EcsError;
 }
 
@@ -121,17 +138,22 @@ export type ResponseActionParametersWithPidOrEntityId =
   | ResponseActionParametersWithPid
   | ResponseActionParametersWithEntityId;
 
+export interface ResponseActionGetFileParameters {
+  path: string;
+}
+
 export type EndpointActionDataParameterTypes =
   | undefined
-  | ResponseActionParametersWithPidOrEntityId;
+  | ResponseActionParametersWithPidOrEntityId
+  | ResponseActionGetFileParameters;
 
 export interface EndpointActionData<
-  T extends EndpointActionDataParameterTypes = never,
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   TOutputContent extends object = object
 > {
-  command: ResponseActions;
+  command: ResponseActionsApiCommandNames;
   comment?: string;
-  parameters?: T;
+  parameters?: TParameters;
   output?: ActionResponseOutput<TOutputContent>;
 }
 
@@ -254,7 +276,10 @@ export interface PendingActionsResponse {
 
 export type PendingActionsRequestQuery = TypeOf<typeof ActionStatusRequestSchema.query>;
 
-export interface ActionDetails<TOutputContent extends object = object> {
+export interface ActionDetails<
+  TOutputContent extends object = object,
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+> {
   /** The action id */
   id: string;
   /**
@@ -271,7 +296,7 @@ export interface ActionDetails<TOutputContent extends object = object> {
    * The Endpoint type of action (ex. `isolate`, `release`) that is being requested to be
    * performed on the endpoint
    */
-  command: ResponseActions;
+  command: ResponseActionsApiCommandNames;
   /**
    * Will be set to true only if action is not yet completed and elapsed time has exceeded
    * the request's expiration date
@@ -309,11 +334,14 @@ export interface ActionDetails<TOutputContent extends object = object> {
   /** comment submitted with action */
   comment?: string;
   /** parameters submitted with action */
-  parameters?: EndpointActionDataParameterTypes;
+  parameters?: TParameters;
 }
 
-export interface ActionDetailsApiResponse<TOutputType extends object = object> {
-  data: ActionDetails<TOutputType>;
+export interface ActionDetailsApiResponse<
+  TOutputType extends object = object,
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+> {
+  data: ActionDetails<TOutputType, TParameters>;
 }
 export interface ActionListApiResponse {
   page: number | undefined;

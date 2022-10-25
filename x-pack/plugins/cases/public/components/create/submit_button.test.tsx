@@ -9,9 +9,10 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { useForm, Form } from '../../common/shared_imports';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SubmitCaseButton } from './submit_button';
-import { schema, FormProps } from './schema';
+import type { FormProps } from './schema';
+import { schema } from './schema';
 
 describe('SubmitCaseButton', () => {
   const onSubmit = jest.fn();

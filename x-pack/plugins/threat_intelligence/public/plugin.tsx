@@ -10,13 +10,13 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import React, { Suspense, VFC } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from './hooks/use_kibana';
+import { KibanaContextProvider } from './hooks';
 import {
+  SecuritySolutionPluginContext,
   Services,
   ThreatIntelligencePluginSetup,
   ThreatIntelligencePluginStart,
   ThreatIntelligencePluginStartDeps,
-  SecuritySolutionPluginContext,
 } from './types';
 import { SecuritySolutionContext } from './containers/security_solution_context';
 import { EnterpriseGuard } from './containers/enterprise_guard';
@@ -27,7 +27,7 @@ interface AppProps {
   securitySolutionContext: SecuritySolutionPluginContext;
 }
 
-const LazyIndicatorsPage = React.lazy(() => import('./modules/indicators/indicators_page'));
+const LazyIndicatorsPage = React.lazy(() => import('./modules/indicators/pages/indicators'));
 
 const IndicatorsPage: VFC = () => (
   <SecuritySolutionPluginTemplateWrapper>

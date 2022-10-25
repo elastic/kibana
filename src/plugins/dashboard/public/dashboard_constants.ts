@@ -78,6 +78,7 @@ export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerByValueInput, 'id'>
   options: {
     useMargins: true,
     syncColors: false,
+    syncCursor: true,
     syncTooltips: false,
     hidePanelTitles: false,
   },

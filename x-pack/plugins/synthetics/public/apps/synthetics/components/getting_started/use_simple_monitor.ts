@@ -62,7 +62,7 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
         title: MONITOR_SUCCESS_LABEL,
         toastLifeTimeMs: 3000,
       });
-      application?.navigateToApp('uptime', { path: `/monitor/${btoa(newMonitor.id)}` });
+      application?.navigateToApp('synthetics', { path: `` });
     }
   }, [application, data, loading, serviceLocations]);
 

@@ -7365,6 +7365,105 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.getStopsWithColorsFromRanges",
+        "type": "Function",
+        "tags": [],
+        "label": "getStopsWithColorsFromRanges",
+        "description": [],
+        "signature": [
+          "(ranges: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Range",
+            "text": "Range"
+          },
+          "[], colorSchema: ",
+          {
+            "pluginId": "charts",
+            "scope": "common",
+            "docId": "kibChartsPluginApi",
+            "section": "def-common.ColorSchemas",
+            "text": "ColorSchemas"
+          },
+          ", invertColors?: boolean) => ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.PaletteConfig",
+            "text": "PaletteConfig"
+          }
+        ],
+        "path": "src/plugins/visualizations/common/utils/palette.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.getStopsWithColorsFromRanges.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "ranges",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.Range",
+                "text": "Range"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/visualizations/common/utils/palette.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.getStopsWithColorsFromRanges.$2",
+            "type": "Enum",
+            "tags": [],
+            "label": "colorSchema",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "charts",
+                "scope": "common",
+                "docId": "kibChartsPluginApi",
+                "section": "def-common.ColorSchemas",
+                "text": "ColorSchemas"
+              }
+            ],
+            "path": "src/plugins/visualizations/common/utils/palette.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.getStopsWithColorsFromRanges.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "invertColors",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/plugins/visualizations/common/utils/palette.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.isAnnotationsLayer",
         "type": "Function",
         "tags": [],
@@ -7414,6 +7513,39 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.isCollapseFunction",
+        "type": "Function",
+        "tags": [],
+        "label": "isCollapseFunction",
+        "description": [],
+        "signature": [
+          "(candidate: string | undefined) => candidate is \"min\" | \"max\" | \"sum\" | \"avg\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.isCollapseFunction.$1",
+            "type": "string",
+            "tags": [],
+            "label": "candidate",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -8241,6 +8373,59 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.BasicFullPercentageModeConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "BasicFullPercentageModeConfig",
+        "description": [],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.BasicFullPercentageModeConfig.isPercentageMode",
+            "type": "boolean",
+            "tags": [],
+            "label": "isPercentageMode",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.BasicPercentageModeConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "BasicPercentageModeConfig",
+        "description": [],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.BasicPercentageModeConfig.isPercentageMode",
+            "type": "boolean",
+            "tags": [],
+            "label": "isPercentageMode",
+            "description": [],
+            "signature": [
+              "false"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.ColumnState",
         "type": "Interface",
         "tags": [],
@@ -8292,12 +8477,12 @@
           {
             "parentPluginId": "visualizations",
             "id": "def-common.ColumnState.collapseFn",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "collapseFn",
             "description": [],
             "signature": [
-              "string | undefined"
+              "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -9379,12 +9564,12 @@
           {
             "parentPluginId": "visualizations",
             "id": "def-common.MetricVisConfiguration.collapseFn",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "collapseFn",
             "description": [],
             "signature": [
-              "string | undefined"
+              "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -9435,6 +9620,20 @@
           },
           {
             "parentPluginId": "visualizations",
+            "id": "def-common.MetricVisConfiguration.showBar",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showBar",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
             "id": "def-common.MetricVisConfiguration.color",
             "type": "string",
             "tags": [],
@@ -9475,6 +9674,42 @@
               "number | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.MinMax",
+        "type": "Interface",
+        "tags": [],
+        "label": "MinMax",
+        "description": [],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.MinMax.min",
+            "type": "number",
+            "tags": [],
+            "label": "min",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.MinMax.max",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9658,6 +9893,369 @@
             "tags": [],
             "label": "enabled",
             "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.PaletteConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "PaletteConfig",
+        "description": [],
+        "path": "src/plugins/visualizations/common/utils/palette.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PaletteConfig.color",
+            "type": "Array",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "(string | undefined)[]"
+            ],
+            "path": "src/plugins/visualizations/common/utils/palette.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PaletteConfig.stop",
+            "type": "Array",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "number[]"
+            ],
+            "path": "src/plugins/visualizations/common/utils/palette.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.PartitionLayerState",
+        "type": "Interface",
+        "tags": [],
+        "label": "PartitionLayerState",
+        "description": [],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.layerId",
+            "type": "string",
+            "tags": [],
+            "label": "layerId",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.layerType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layerType",
+            "description": [],
+            "signature": [
+              "\"data\" | \"referenceLine\" | \"annotations\""
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.primaryGroups",
+            "type": "Array",
+            "tags": [],
+            "label": "primaryGroups",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.secondaryGroups",
+            "type": "Array",
+            "tags": [],
+            "label": "secondaryGroups",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.metric",
+            "type": "string",
+            "tags": [],
+            "label": "metric",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.collapseFns",
+            "type": "Object",
+            "tags": [],
+            "label": "collapseFns",
+            "description": [],
+            "signature": [
+              "Record<string, \"min\" | \"max\" | \"sum\" | \"avg\"> | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.numberDisplay",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "numberDisplay",
+            "description": [],
+            "signature": [
+              "\"value\" | \"percent\" | \"hidden\""
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.categoryDisplay",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "categoryDisplay",
+            "description": [],
+            "signature": [
+              "\"default\" | \"hide\" | \"inside\""
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.legendDisplay",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "legendDisplay",
+            "description": [],
+            "signature": [
+              "\"default\" | \"hide\" | \"show\""
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.legendPosition",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "legendPosition",
+            "description": [],
+            "signature": [
+              "Position",
+              " | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.showValuesInLegend",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showValuesInLegend",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.nestedLegend",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "nestedLegend",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.percentDecimals",
+            "type": "number",
+            "tags": [],
+            "label": "percentDecimals",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.emptySizeRatio",
+            "type": "number",
+            "tags": [],
+            "label": "emptySizeRatio",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.legendMaxLines",
+            "type": "number",
+            "tags": [],
+            "label": "legendMaxLines",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.legendSize",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "legendSize",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.LegendSize",
+                "text": "LegendSize"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionLayerState.truncateLegend",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "truncateLegend",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.PartitionVisConfiguration",
+        "type": "Interface",
+        "tags": [],
+        "label": "PartitionVisConfiguration",
+        "description": [],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionVisConfiguration.shape",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "shape",
+            "description": [],
+            "signature": [
+              "\"pie\" | \"donut\" | \"treemap\" | \"mosaic\" | \"waffle\""
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionVisConfiguration.layers",
+            "type": "Array",
+            "tags": [],
+            "label": "layers",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.PartitionLayerState",
+                "text": "PartitionLayerState"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.PartitionVisConfiguration.palette",
+            "type": "Object",
+            "tags": [],
+            "label": "palette",
+            "description": [],
+            "signature": [
+              "PaletteOutput",
+              "<{ [key: string]: unknown; }> | undefined"
+            ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -11240,6 +11838,20 @@
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.XYConfiguration.showCurrentTimeMarker",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showCurrentTimeMarker",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -11389,12 +12001,12 @@
           {
             "parentPluginId": "visualizations",
             "id": "def-common.XYDataLayerConfig.collapseFn",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "collapseFn",
             "description": [],
             "signature": [
-              "string | undefined"
+              "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -11591,7 +12203,7 @@
             "label": "lineStyle",
             "description": [],
             "signature": [
-              "\"solid\" | \"dashed\" | \"dotted\" | \"dot-dashed\" | undefined"
+              "\"solid\" | \"dashed\" | \"dotted\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -12009,6 +12621,36 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.CategoryDisplayType",
+        "type": "Type",
+        "tags": [],
+        "label": "CategoryDisplayType",
+        "description": [],
+        "signature": [
+          "\"default\" | \"hide\" | \"inside\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.CollapseFunction",
+        "type": "Type",
+        "tags": [],
+        "label": "CollapseFunction",
+        "description": [],
+        "signature": [
+          "\"min\" | \"max\" | \"sum\" | \"avg\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.Column",
         "type": "Type",
         "tags": [],
@@ -12094,8 +12736,24 @@
             "pluginId": "visualizations",
             "scope": "common",
             "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.PartitionVisConfiguration",
+            "text": "PartitionVisConfiguration"
+          },
+          " | ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
             "section": "def-common.MetricVisConfiguration",
             "text": "MetricVisConfiguration"
+          },
+          " | ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.GaugeVisConfiguration",
+            "text": "GaugeVisConfiguration"
           }
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
@@ -12489,6 +13147,96 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.GaugeCentralMajorMode",
+        "type": "Type",
+        "tags": [],
+        "label": "GaugeCentralMajorMode",
+        "description": [],
+        "signature": [
+          "\"none\" | \"auto\" | \"custom\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeColorMode",
+        "type": "Type",
+        "tags": [],
+        "label": "GaugeColorMode",
+        "description": [],
+        "signature": [
+          "\"none\" | \"palette\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeLabelMajorMode",
+        "type": "Type",
+        "tags": [],
+        "label": "GaugeLabelMajorMode",
+        "description": [],
+        "signature": [
+          "\"none\" | \"auto\" | \"custom\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeShape",
+        "type": "Type",
+        "tags": [],
+        "label": "GaugeShape",
+        "description": [],
+        "signature": [
+          "\"horizontalBullet\" | \"verticalBullet\" | \"arc\" | \"circle\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeTicksPosition",
+        "type": "Type",
+        "tags": [],
+        "label": "GaugeTicksPosition",
+        "description": [],
+        "signature": [
+          "\"auto\" | \"hidden\" | \"bands\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeVisConfiguration",
+        "type": "Type",
+        "tags": [],
+        "label": "GaugeVisConfiguration",
+        "description": [],
+        "signature": [
+          "GaugeState & { layerId: string; layerType: \"data\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.GenericColumnWithMeta",
         "type": "Type",
         "tags": [],
@@ -12528,6 +13276,51 @@
           ">"
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/columns.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.LayerType",
+        "type": "Type",
+        "tags": [],
+        "label": "LayerType",
+        "description": [],
+        "signature": [
+          "\"data\" | \"referenceLine\" | \"annotations\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.LegendDisplayType",
+        "type": "Type",
+        "tags": [],
+        "label": "LegendDisplayType",
+        "description": [],
+        "signature": [
+          "\"default\" | \"hide\" | \"show\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.LENS_GAUGE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LENS_GAUGE_ID",
+        "description": [],
+        "signature": [
+          "\"lnsGauge\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12717,6 +13510,21 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.NumberDisplayType",
+        "type": "Type",
+        "tags": [],
+        "label": "NumberDisplayType",
+        "description": [],
+        "signature": [
+          "\"value\" | \"percent\" | \"hidden\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.Operation",
         "type": "Type",
         "tags": [],
@@ -12756,6 +13564,79 @@
           "\"range\" | \"min\" | \"max\" | \"filters\" | \"count\" | \"date_histogram\" | \"percentile\" | \"sum\" | \"average\" | \"terms\" | \"median\" | \"standard_deviation\" | \"unique_count\" | \"percentile_rank\" | \"last_value\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/operations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.PartitionChartType",
+        "type": "Type",
+        "tags": [],
+        "label": "PartitionChartType",
+        "description": [],
+        "signature": [
+          "\"pie\" | \"donut\" | \"treemap\" | \"mosaic\" | \"waffle\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.PercentageModeConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "PercentageModeConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.BasicPercentageModeConfig",
+            "text": "BasicPercentageModeConfig"
+          },
+          " | ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.PercentageModeConfigWithMinMax",
+            "text": "PercentageModeConfigWithMinMax"
+          }
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.PercentageModeConfigWithMinMax",
+        "type": "Type",
+        "tags": [],
+        "label": "PercentageModeConfigWithMinMax",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.BasicFullPercentageModeConfig",
+            "text": "BasicFullPercentageModeConfig"
+          },
+          " & ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.MinMax",
+            "text": "MinMax"
+          }
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13212,6 +14093,36 @@
     "objects": [
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.CategoryDisplayTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "CategoryDisplayTypes",
+        "description": [],
+        "signature": [
+          "{ readonly DEFAULT: \"default\"; readonly INSIDE: \"inside\"; readonly HIDE: \"hide\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.CollapseFunctions",
+        "type": "Object",
+        "tags": [],
+        "label": "CollapseFunctions",
+        "description": [],
+        "signature": [
+          "readonly [\"sum\", \"avg\", \"min\", \"max\"]"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.FillTypes",
         "type": "Object",
         "tags": [],
@@ -13220,7 +14131,127 @@
         "signature": [
           "{ readonly NONE: \"none\"; readonly ABOVE: \"above\"; readonly BELOW: \"below\"; }"
         ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeCentralMajorModes",
+        "type": "Object",
+        "tags": [],
+        "label": "GaugeCentralMajorModes",
+        "description": [],
+        "signature": [
+          "{ readonly AUTO: \"auto\"; readonly CUSTOM: \"custom\"; readonly NONE: \"none\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeColorModes",
+        "type": "Object",
+        "tags": [],
+        "label": "GaugeColorModes",
+        "description": [],
+        "signature": [
+          "{ readonly PALETTE: \"palette\"; readonly NONE: \"none\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeLabelMajorModes",
+        "type": "Object",
+        "tags": [],
+        "label": "GaugeLabelMajorModes",
+        "description": [],
+        "signature": [
+          "{ readonly AUTO: \"auto\"; readonly CUSTOM: \"custom\"; readonly NONE: \"none\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeShapes",
+        "type": "Object",
+        "tags": [],
+        "label": "GaugeShapes",
+        "description": [],
+        "signature": [
+          "{ readonly HORIZONTAL_BULLET: \"horizontalBullet\"; readonly VERTICAL_BULLET: \"verticalBullet\"; readonly ARC: \"arc\"; readonly CIRCLE: \"circle\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GaugeTicksPositions",
+        "type": "Object",
+        "tags": [],
+        "label": "GaugeTicksPositions",
+        "description": [],
+        "signature": [
+          "{ readonly HIDDEN: \"hidden\"; readonly AUTO: \"auto\"; readonly BANDS: \"bands\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.GROUP_ID",
+        "type": "Object",
+        "tags": [],
+        "label": "GROUP_ID",
+        "description": [],
+        "signature": [
+          "{ readonly METRIC: \"metric\"; readonly MIN: \"min\"; readonly MAX: \"max\"; readonly GOAL: \"goal\"; }"
+        ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.LayerTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "LayerTypes",
+        "description": [],
+        "signature": [
+          "{ readonly DATA: \"data\"; readonly REFERENCELINE: \"referenceLine\"; readonly ANNOTATIONS: \"annotations\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.LegendDisplayTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "LegendDisplayTypes",
+        "description": [],
+        "signature": [
+          "{ readonly DEFAULT: \"default\"; readonly SHOW: \"show\"; readonly HIDE: \"hide\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13236,6 +14267,21 @@
           "{ readonly auto: undefined; readonly small: 80; readonly medium: 130; readonly large: 180; readonly xlarge: 230; }"
         ],
         "path": "src/plugins/visualizations/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.NumberDisplayTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "NumberDisplayTypes",
+        "description": [],
+        "signature": [
+          "{ readonly HIDDEN: \"hidden\"; readonly PERCENT: \"percent\"; readonly VALUE: \"value\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13287,6 +14333,21 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.PartitionChartTypes",
+        "type": "Object",
+        "tags": [],
+        "label": "PartitionChartTypes",
+        "description": [],
+        "signature": [
+          "{ readonly PIE: \"pie\"; readonly DONUT: \"donut\"; readonly TREEMAP: \"treemap\"; readonly MOSAIC: \"mosaic\"; readonly WAFFLE: \"waffle\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.RANGE_MODES",
         "type": "Object",
         "tags": [],
@@ -13310,7 +14371,7 @@
         "signature": [
           "{ readonly BAR: \"bar\"; readonly LINE: \"line\"; readonly AREA: \"area\"; readonly BAR_STACKED: \"bar_stacked\"; readonly AREA_STACKED: \"area_stacked\"; readonly BAR_HORIZONTAL: \"bar_horizontal\"; readonly BAR_PERCENTAGE_STACKED: \"bar_percentage_stacked\"; readonly BAR_HORIZONTAL_STACKED: \"bar_horizontal_stacked\"; readonly AREA_PERCENTAGE_STACKED: \"area_percentage_stacked\"; readonly BAR_HORIZONTAL_PERCENTAGE_STACKED: \"bar_horizontal_percentage_stacked\"; }"
         ],
-        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13325,7 +14386,7 @@
         "signature": [
           "{ readonly LINEAR: \"LINEAR\"; readonly CURVE_MONOTONE_X: \"CURVE_MONOTONE_X\"; readonly CURVE_STEP_AFTER: \"CURVE_STEP_AFTER\"; }"
         ],
-        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -13340,7 +14401,7 @@
         "signature": [
           "{ readonly AUTO: \"auto\"; readonly LEFT: \"left\"; readonly RIGHT: \"right\"; readonly BOTTOM: \"bottom\"; }"
         ],
-        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "path": "src/plugins/visualizations/common/convert_to_lens/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

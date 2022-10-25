@@ -8,6 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { DocLinks } from '@kbn/doc-links';
 
+import { ENDPOINT_ERROR_CODES } from '../../../../common/endpoint/constants';
+
 type PackageActions = 'es_connection' | 'policy_failure';
 
 export const titles = Object.freeze(
@@ -93,7 +95,7 @@ export class PackageActionFormatter {
   }
 
   private getKeyFromErrorCode(code: number): PackageActions {
-    if (code === 123) {
+    if (code === ENDPOINT_ERROR_CODES.ES_CONNECTION_ERROR) {
       return 'es_connection';
     } else if (code === 124) {
       return 'policy_failure';

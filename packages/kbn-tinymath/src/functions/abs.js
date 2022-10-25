@@ -17,11 +17,11 @@
  * abs([-1 , -2, 3, -4]) // returns [1, 2, 3, 4]
  */
 
-module.exports = { abs };
-
 function abs(a) {
   if (Array.isArray(a)) {
     return a.map((a) => Math.abs(a));
   }
   return Math.abs(a);
 }
+
+module.exports = { abs };

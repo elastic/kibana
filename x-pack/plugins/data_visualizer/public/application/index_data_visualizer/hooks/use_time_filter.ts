@@ -6,6 +6,8 @@
  */
 
 import { useEffect } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { map } from 'rxjs/operators';
 import { useDataVisualizerKibana } from '../../kibana_context';
 
 interface UseTimefilterOptions {
@@ -35,4 +37,23 @@ export const useTimefilter = ({
   }, [timeRangeSelector, autoRefreshSelector, timefilter]);
 
   return timefilter;
+};
+
+export const useRefreshIntervalUpdates = () => {
+  const timefilter = useTimefilter();
+
+  return useObservable(
+    timefilter.getRefreshIntervalUpdate$().pipe(map(timefilter.getRefreshInterval)),
+    timefilter.getRefreshInterval()
+  );
+};
+
+export const useTimeRangeUpdates = (absolute = false) => {
+  const timefilter = useTimefilter();
+
+  const getTimeCallback = absolute
+    ? timefilter.getAbsoluteTime.bind(timefilter)
+    : timefilter.getTime.bind(timefilter);
+
+  return useObservable(timefilter.getTimeUpdate$().pipe(map(getTimeCallback)), getTimeCallback());
 };

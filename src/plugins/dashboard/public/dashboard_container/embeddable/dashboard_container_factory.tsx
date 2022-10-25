@@ -62,33 +62,9 @@ export class DashboardContainerFactoryDefinition
     initialInput: DashboardContainerInput,
     parent?: Container
   ): Promise<DashboardContainer | ErrorEmbeddable> => {
-    // TODO: Control GROUP
-
-    // const { pluginServices } = await import('../../services/plugin_services');
-    // const {
-    //   embeddable: { getEmbeddableFactory },
-    // } = pluginServices.getServices();
-
-    // const controlsGroupFactory = getEmbeddableFactory<
-    //   ControlGroupInput,
-    //   ControlGroupOutput,
-    //   ControlGroupContainer
-    // >(CONTROL_GROUP_TYPE);
-    // const { filters, query, timeRange, viewMode, controlGroupInput, id } = initialInput;
-    // const controlGroup = await controlsGroupFactory?.create({
-    //   id: `control_group_${id ?? 'new_dashboard'}`,
-    //   ...getDefaultControlGroupInput(),
-    //   ...pickBy(controlGroupInput, identity), // undefined keys in initialInput should not overwrite defaults
-    //   timeRange,
-    //   viewMode,
-    //   filters,
-    //   query,
-    // });
-
     const { DashboardContainer: DashboardContainerEmbeddable } = await import(
       './dashboard_container'
     );
-
     return Promise.resolve(new DashboardContainerEmbeddable(initialInput, parent));
   };
 }

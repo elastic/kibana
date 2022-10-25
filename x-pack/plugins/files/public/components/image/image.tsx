@@ -4,17 +4,43 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { MutableRefObject } from 'react';
-import type { ImgHTMLAttributes } from 'react';
+import React, { HTMLAttributes } from 'react';
+import { type ImgHTMLAttributes, useState, useEffect } from 'react';
+import { css } from '@emotion/react';
+import type { FileImageMetadata } from '../../../common';
 import { useViewportObserver } from './use_viewport_observer';
+import { Img, type ImgProps, Blurhash } from './components';
+import { sizes } from './styles';
 
 export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
   src: string;
   alt: string;
   /**
+   * Image metadata
+   */
+  meta?: FileImageMetadata;
+
+  /**
+   * @default original
+   */
+  size?: ImgProps['size'];
+  /**
+   * Props to pass to the wrapper element
+   */
+  wrapperProps?: HTMLAttributes<HTMLDivElement>;
+  /**
    * Emits when the image first becomes visible
    */
   onFirstVisible?: () => void;
+
+  /**
+   * As an optimisation images are only loaded when they are visible.
+   * This setting overrides this behavior and loads an image as soon as the
+   * component mounts.
+   *
+   * @default true
+   */
+  lazy?: boolean;
 }
 
 /**
@@ -28,22 +54,78 @@ export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
  * ```
  */
 export const Image = React.forwardRef<HTMLImageElement, Props>(
-  ({ src, alt, onFirstVisible, ...rest }, ref) => {
+  (
+    {
+      src,
+      alt,
+      onFirstVisible,
+      onLoad,
+      onError,
+      meta,
+      wrapperProps,
+      size = 'original',
+      lazy = true,
+      ...rest
+    },
+    ref
+  ) => {
+    const [isLoaded, setIsLoaded] = useState<boolean>(false);
+    const [blurDelayExpired, setBlurDelayExpired] = useState(false);
     const { isVisible, ref: observerRef } = useViewportObserver({ onFirstVisible });
+
+    const loadImage = lazy ? isVisible : true;
+
+    useEffect(() => {
+      let unmounted = false;
+      const id = window.setTimeout(() => {
+        if (!unmounted) setBlurDelayExpired(true);
+      }, 200);
+      return () => {
+        unmounted = true;
+        window.clearTimeout(id);
+      };
+    }, []);
+
+    const knownSize = size ? sizes[size] : undefined;
+
     return (
-      <img
-        {...rest}
-        ref={(element) => {
-          observerRef(element);
-          if (ref) {
-            if (typeof ref === 'function') ref(element);
-            else (ref as MutableRefObject<HTMLImageElement | null>).current = element;
-          }
-        }}
-        // TODO: We should have a lower resolution alternative to display
-        src={isVisible ? src : undefined}
-        alt={alt}
-      />
+      <div
+        css={[
+          css`
+            position: relative;
+            display: inline-block;
+          `,
+          knownSize,
+        ]}
+        {...wrapperProps}
+      >
+        {blurDelayExpired && meta?.blurhash && (
+          <Blurhash
+            visible={!isLoaded}
+            hash={meta.blurhash}
+            isContainerWidth={size !== 'original' && size !== undefined}
+            width={meta.width}
+            height={meta.height}
+          />
+        )}
+        <Img
+          observerRef={observerRef}
+          ref={ref}
+          size={size}
+          hidden={!loadImage}
+          src={loadImage ? src : undefined}
+          alt={alt}
+          onLoad={(ev) => {
+            setIsLoaded(true);
+            onLoad?.(ev);
+          }}
+          onError={(ev) => {
+            setIsLoaded(true);
+            onError?.(ev);
+          }}
+          {...rest}
+        />
+      </div>
     );
   }
 );

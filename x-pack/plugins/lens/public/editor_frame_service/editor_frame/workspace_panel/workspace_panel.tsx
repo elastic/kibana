@@ -18,7 +18,6 @@ import {
   EuiText,
   EuiButtonEmpty,
   EuiLink,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiButton,
   EuiSpacer,
   EuiTextColor,
@@ -163,6 +162,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const changesApplied = useLensSelector(selectChangesApplied);
   const triggerApply = useLensSelector(selectTriggerApplyChanges);
   const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
+  const searchSessionId = useLensSelector(selectSearchSessionId);
 
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
@@ -318,6 +318,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           datasourceStates,
           datasourceLayers,
           indexPatterns: dataViews.indexPatterns,
+          searchSessionId,
         });
 
         if (ast) {
@@ -350,16 +351,17 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       }));
     }
   }, [
-    activeVisualization,
-    visualization.state,
-    datasourceMap,
-    datasourceStates,
-    datasourceLayers,
     configurationValidationError?.length,
     missingRefsErrors.length,
     unknownVisError,
+    activeVisualization,
+    visualization.state,
     visualization.activeId,
+    datasourceMap,
+    datasourceStates,
+    datasourceLayers,
     dataViews.indexPatterns,
+    searchSessionId,
   ]);
 
   useEffect(() => {
@@ -618,9 +620,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         value={dropProps.value}
         order={dropProps.order}
       >
-        <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
-          {renderWorkspaceContents()}
-        </EuiPageContentBody>
+        <div className="lnsWorkspacePanelWrapper__pageContentBody">{renderWorkspaceContents()}</div>
       </DragDrop>
     );
   };

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
-import {
+import type { HttpStart } from '@kbn/core/public';
+import type {
   CasesByAlertId,
   CasesByAlertIDRequest,
   CasesFindRequest,
-  getCasesFromAlertsUrl,
   CasesStatusRequest,
   CasesMetricsRequest,
 } from '../../../common/api';
-import { Cases, CasesStatus, CasesMetrics } from '../../../common/ui';
+import { getCasesFromAlertsUrl } from '../../../common/api';
+import type { Cases, CasesStatus, CasesMetrics } from '../../../common/ui';
 import { getCases, getCasesMetrics, getCasesStatus } from '../../api';
-import { CasesUiStart } from '../../types';
+import type { CasesUiStart } from '../../types';
 
 export const createClientAPI = ({ http }: { http: HttpStart }): CasesUiStart['api'] => {
   return {

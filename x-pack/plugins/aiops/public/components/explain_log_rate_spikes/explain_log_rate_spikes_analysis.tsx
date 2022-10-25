@@ -93,8 +93,9 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
       searchQuery: JSON.stringify(searchQuery),
       // TODO Handle data view without time fields.
       timeFieldName: dataView.timeFieldName ?? '',
-      index: dataView.title,
+      index: dataView.getIndexPattern(),
       grouping: true,
+      flushFix: true,
       ...windowParameters,
     },
     { reducer: streamReducer, initialState }
@@ -172,6 +173,33 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         onCancel={cancel}
         shouldRerunAnalysis={shouldRerunAnalysis}
       />
+      {errors.length > 0 ? (
+        <>
+          <EuiCallOut
+            title={i18n.translate('xpack.aiops.analysis.errorCallOutTitle', {
+              defaultMessage:
+                'The following {errorCount, plural, one {error} other {errors}} occurred running the analysis.',
+              values: { errorCount: errors.length },
+            })}
+            color="warning"
+            iconType="alert"
+            size="s"
+          >
+            <EuiText size="s">
+              {errors.length === 1 ? (
+                <p>{errors[0]}</p>
+              ) : (
+                <ul>
+                  {errors.map((e, i) => (
+                    <li key={i}>{e}</li>
+                  ))}
+                </ul>
+              )}
+            </EuiText>
+          </EuiCallOut>
+          <EuiSpacer size="xs" />
+        </>
+      ) : null}
       {showSpikeAnalysisTable && foundGroups && (
         <EuiFormRow display="columnCompressedSwitch" label={groupResultsMessage}>
           <EuiSwitch
@@ -206,33 +234,6 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
             </p>
           }
         />
-      )}
-      {errors.length > 0 && (
-        <>
-          <EuiCallOut
-            title={i18n.translate('xpack.aiops.analysis.errorCallOutTitle', {
-              defaultMessage:
-                'The following {errorCount, plural, one {error} other {errors}} occurred running the analysis.',
-              values: { errorCount: errors.length },
-            })}
-            color="warning"
-            iconType="alert"
-            size="s"
-          >
-            <EuiText size="s">
-              {errors.length === 1 ? (
-                <p>{errors[0]}</p>
-              ) : (
-                <ul>
-                  {errors.map((e, i) => (
-                    <li key={i}>{e}</li>
-                  ))}
-                </ul>
-              )}
-            </EuiText>
-          </EuiCallOut>
-          <EuiSpacer size="xs" />
-        </>
       )}
       {showSpikeAnalysisTable && groupResults && foundGroups ? (
         <SpikeAnalysisGroupsTable
