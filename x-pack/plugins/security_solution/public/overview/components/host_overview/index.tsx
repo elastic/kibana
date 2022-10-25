@@ -303,7 +303,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             </EuiFlexItem>
           </HostRiskOverviewWrapper>
         )}
-        
+
         {data && data.endpoint != null ? (
           <>
             <EuiHorizontalRule />
