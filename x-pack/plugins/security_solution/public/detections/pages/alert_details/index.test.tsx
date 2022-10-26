@@ -34,10 +34,6 @@ jest.mock('react-redux', () => ({
 
 // Internal Mocks
 jest.mock('../../../timelines/containers/details');
-jest.mock('../../../common/hooks/use_space_id', () => ({
-  useSpaceId: jest.fn().mockReturnValue('default'),
-}));
-
 jest.mock('../../../timelines/store/timeline', () => ({
   ...jest.requireActual('../../../timelines/store/timeline'),
   timelineActions: {

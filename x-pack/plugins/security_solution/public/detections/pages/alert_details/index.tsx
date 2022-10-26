@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import React, { memo, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { Switch, useParams } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 import { ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
 import { EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
+import { useKibana } from '../../../common/lib/kibana';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { TimelineId } from '../../../../common/types';
 import { useGetFieldsData } from '../../../common/hooks/use_get_fields_data';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { getAlertDetailsTabUrl } from '../../../common/components/link_to';
 import { AlertDetailRouteType } from './types';
 import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
 import { getAlertDetailsNavTabs } from './utils/navigation';
-import { DEFAULT_ALERTS_INDEX, SecurityPageName } from '../../../../common/constants';
+import { SecurityPageName } from '../../../../common/constants';
 import { eventID } from '../../../../common/endpoint/models/event';
 import { useTimelineEventsDetails } from '../../../timelines/containers/details';
 import { AlertDetailsLoadingPage } from './components/loading_page';
@@ -33,11 +33,14 @@ import { DetailsSummaryTab } from './tabs/summary';
 export const AlertDetailsPage = memo(() => {
   const { detailName: eventId } = useParams<{ detailName: string }>();
   const dispatch = useDispatch();
-  const currentSpaceId = useSpaceId();
   const sourcererDataView = useSourcererDataView(SourcererScopeName.detections);
-  const spaceAlertsIndexAlias = `${DEFAULT_ALERTS_INDEX}-${currentSpaceId}`;
+  const indexName = useMemo(
+    () => sourcererDataView.selectedPatterns.join(','),
+    [sourcererDataView.selectedPatterns]
+  );
+
   const [loading, detailsData, searchHit, dataAsNestedObject] = useTimelineEventsDetails({
-    indexName: spaceAlertsIndexAlias,
+    indexName,
     eventId,
     runtimeMappings: sourcererDataView.runtimeMappings,
     skip: !eventID,

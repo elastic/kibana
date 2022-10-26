@@ -29,7 +29,7 @@ export const ACTION_OPEN_ALERT_DETAILS_PAGE = i18n.translate(
 export const useOpenAlertDetailsAction = ({ ruleId, closePopover, alertId }: Props) => {
   const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
   const alertDetailsActionItems = [];
-  const { href } = useGetSecuritySolutionLinkProps()({
+  const { onClick } = useGetSecuritySolutionLinkProps()({
     deepLinkId: SecurityPageName.alerts,
     path: alertId ? getAlertDetailsUrl(alertId) : '',
   });
@@ -41,9 +41,7 @@ export const useOpenAlertDetailsAction = ({ ruleId, closePopover, alertId }: Pro
         key="open-alert-details-item"
         icon="popout"
         data-test-subj="open-alert-details-page-menu-item"
-        href={href}
-        onClick={closePopover}
-        target="_blank"
+        onClick={onClick}
       >
         {ACTION_OPEN_ALERT_DETAILS_PAGE}
       </EuiContextMenuItem>

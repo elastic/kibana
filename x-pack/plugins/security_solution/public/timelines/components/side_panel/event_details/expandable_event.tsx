@@ -20,7 +20,10 @@ import styled from 'styled-components';
 
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAlertDetailsUrl } from '../../../../common/components/link_to';
-import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
+import {
+  SecuritySolutionLinkAnchor,
+  useGetSecuritySolutionLinkProps,
+} from '../../../../common/components/links';
 import type { Ecs } from '../../../../../common/ecs';
 import type { TimelineTabs } from '../../../../../common/types/timeline';
 import type { BrowserFields } from '../../../../common/containers/source';
@@ -75,6 +78,10 @@ const StyledEuiFlexItem = styled(EuiFlexItem)`
 export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
   ({ eventId, isAlert, loading, handleOnEventClosed, ruleName, timestamp }) => {
     const isAlertDetailsPageEnabled = useIsExperimentalFeatureEnabled('alertDetailsPageEnabled');
+    const { onClick } = useGetSecuritySolutionLinkProps()({
+      deepLinkId: SecurityPageName.alerts,
+      path: eventId && isAlert ? getAlertDetailsUrl(eventId) : '',
+    });
     return (
       <StyledEuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap={true}>
         <EuiFlexItem grow={false}>
@@ -95,8 +102,7 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
                   <SecuritySolutionLinkAnchor
                     data-test-subj="open-alert-details-page"
                     deepLinkId={SecurityPageName.alerts}
-                    path={getAlertDetailsUrl(eventId)}
-                    target="_blank"
+                    onClick={onClick}
                   >
                     {i18n.OPEN_ALERT_DETAILS_PAGE}
                   </SecuritySolutionLinkAnchor>

@@ -7,9 +7,7 @@
 
 import React from 'react';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { SecurityPageName } from '../../../../../common/constants';
 import { HeaderPage } from '../../../../common/components/header_page';
-import { BACK_TO_ALERTS_LINK } from '../translations';
 
 interface AlertDetailsHeaderProps {
   loading: boolean;
@@ -21,11 +19,6 @@ export const AlertDetailsHeader = React.memo(
   ({ loading, ruleName, timestamp }: AlertDetailsHeaderProps) => {
     return (
       <HeaderPage
-        backOptions={{
-          pageId: SecurityPageName.alerts,
-          text: BACK_TO_ALERTS_LINK,
-          dataTestSubj: 'alert-details-back-to-alerts-link',
-        }}
         badgeOptions={{ beta: true, text: 'Beta' }}
         border
         isLoading={loading}
