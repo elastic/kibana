@@ -5,12 +5,10 @@
  * 2.0.
  */
 
+import { APMEventClient } from "../../lib/helpers/create_es_client/create_apm_event_client";
 import { RandomSampler } from "../../lib/helpers/get_random_sampler";
-import { Setup } from "../../lib/helpers/setup_request";
 import { withApmSpan } from "../../utils/with_apm_span";
 import { getAgentsDetails } from "./get_agents_items_details";
-
-export type AgenItemsSetup = Setup;
 
 const MAX_NUMBER_OF_SERVICES = 500;
 
@@ -19,7 +17,7 @@ export async function getAgentItems({
   serviceName,
   agentLanguage,
   kuery,
-  setup,
+  apmEventClient,
   start,
   end,
   randomSampler,
@@ -28,7 +26,7 @@ export async function getAgentItems({
   serviceName?: string;
   agentLanguage?: string;
   kuery: string;
-  setup: AgenItemsSetup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   randomSampler: RandomSampler;
@@ -39,7 +37,7 @@ export async function getAgentItems({
       serviceName,
       agentLanguage,
       kuery,
-      setup,
+      apmEventClient,
       maxNumServices: MAX_NUMBER_OF_SERVICES,
       start,
       end,

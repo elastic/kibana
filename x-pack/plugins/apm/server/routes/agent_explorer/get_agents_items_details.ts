@@ -9,7 +9,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event
 import {
   kqlQuery,
   rangeQuery,
-  termQuery,
+  termQuery
 } from '@kbn/observability-plugin/server/utils/queries';
 import {
   AGENT_NAME,
@@ -17,19 +17,19 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_LANGUAGE_NAME,
   SERVICE_NAME,
-  SERVICE_NODE_NAME,
+  SERVICE_NODE_NAME
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
-import { AgenItemsSetup } from './get_agents_items';
 
 interface AggregationParams {
   environment: string;
   serviceName?: string;
   agentLanguage?: string;
   kuery: string;
-  setup: AgenItemsSetup;
+  apmEventClient: APMEventClient;
   maxNumServices: number;
   start: number;
   end: number;
@@ -41,14 +41,12 @@ export async function getAgentsDetails({
   agentLanguage,
   serviceName,
   kuery,
-  setup,
+  apmEventClient,
   maxNumServices,
   start,
   end,
   randomSampler,
 }: AggregationParams) {
-  const { apmEventClient } = setup;
-
   const response = await apmEventClient.search('get_agent_details', {
     apm: {
       events: [ProcessorEvent.metric],

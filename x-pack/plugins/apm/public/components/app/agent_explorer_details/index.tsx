@@ -72,8 +72,6 @@ export function AgentExplorerDetails() {
 
   const isLoading = agents.status === FETCH_STATUS.LOADING;
 
-  const isFailure = agents.status === FETCH_STATUS.FAILURE;
-
   const noItemsMessage = (
     <EuiEmptyPrompt
       title={
@@ -153,7 +151,6 @@ export function AgentExplorerDetails() {
       <EuiFlexItem>
         <AgentList
           isLoading={isLoading}
-          isFailure={isFailure}
           items={agents.data?.items ?? []}
           noItemsMessage={noItemsMessage}
         />

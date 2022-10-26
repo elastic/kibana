@@ -6,14 +6,14 @@
  */
 
 import * as t from 'io-ts';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
-import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
   environmentRt,
   kueryRt,
   probabilityRt,
-  rangeRt,
+  rangeRt
 } from '../default_api_types';
 import { getAgents } from './get_agents';
 
@@ -60,8 +60,8 @@ const agentExplorerRoute = createApmServerRoute({
       agentLanguage,
     } = params.query;
 
-    const [setup, randomSampler] = await Promise.all([
-      setupRequest(resources),
+    const [apmEventClient, randomSampler] = await Promise.all([
+      getApmEventClient(resources),
       getRandomSampler({ security, request, probability }),
     ]);
 
@@ -70,7 +70,7 @@ const agentExplorerRoute = createApmServerRoute({
       serviceName,
       agentLanguage,
       kuery,
-      setup,
+      apmEventClient,
       start,
       end,
       randomSampler,
