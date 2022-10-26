@@ -9,8 +9,7 @@ import type { ReactChild } from 'react';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import useObservable from 'react-use/lib/useObservable';
-import { of } from 'rxjs';
-import { useIsWithinBreakpoints } from '@elastic/eui';
+import { catchError, of, timeout } from 'rxjs';
 import { useKibana } from '../../lib/kibana';
 import { securityTourConfig, SecurityStepId } from './tour_config';
 
@@ -32,33 +31,33 @@ const TourContext = createContext<TourContextValue>(initialState);
 
 export const TourContextProvider = ({ children }: { children: ReactChild }) => {
   const { guidedOnboardingApi } = useKibana().services.guidedOnboarding;
-  const isAddDataTourActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$('security', SecurityStepId.addData) ?? of(false),
-    false
-  );
+
   const isRulesTourActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$('security', SecurityStepId.rules) ?? of(false),
+    guidedOnboardingApi?.isGuideStepActive$('security', SecurityStepId.rules).pipe(
+      // if no result after 30s the observable will error, but the error handler will just emit false
+      timeout(30000),
+      catchError((error) => of(false))
+    ) ?? of(false),
     false
   );
   const isAlertsCasesTourActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$('security', SecurityStepId.alertsCases) ?? of(false),
+    guidedOnboardingApi?.isGuideStepActive$('security', SecurityStepId.alertsCases).pipe(
+      // if no result after 30s the observable will error, but the error handler will just emit false
+      timeout(30000),
+      catchError((error) => of(false))
+    ) ?? of(false),
     false
   );
 
   const tourStatus = useMemo(
     () => ({
-      [SecurityStepId.addData]: isAddDataTourActive,
       [SecurityStepId.rules]: isRulesTourActive,
       [SecurityStepId.alertsCases]: isAlertsCasesTourActive,
     }),
-    [isAddDataTourActive, isRulesTourActive, isAlertsCasesTourActive]
+    [isRulesTourActive, isAlertsCasesTourActive]
   );
 
-  const isSmallScreen = useIsWithinBreakpoints(['xs', 's']);
-  const isTourShown = useCallback(
-    (stepId: SecurityStepId) => tourStatus[stepId] && !isSmallScreen,
-    [isSmallScreen, tourStatus]
-  );
+  const isTourShown = useCallback((stepId: SecurityStepId) => tourStatus[stepId], [tourStatus]);
   const [activeStep, _setActiveStep] = useState<number>(1);
 
   const incrementStep = useCallback((stepId: SecurityStepId, step?: number) => {

@@ -41,6 +41,7 @@ export const SecurityTourStep = ({ children, step, stepId }: SecurityTourStep) =
       onClick={() => incrementStep(stepId)}
       color="success"
       data-test-subj="onboarding--securityTourNextStepButton"
+      tour-step="nextButton"
     >
       <FormattedMessage
         id="xpack.securitySolution.guided_onboarding.nextStep.buttonLabel"

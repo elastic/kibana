@@ -10,8 +10,6 @@ import { i18n } from '@kbn/i18n';
 import type { ElementTarget } from '@elastic/eui/src/services/findElement';
 
 export const enum SecurityStepId {
-  // TODO: @Yulia, can we make these either all snake case or all camelcase?
-  addData = 'add_data',
   rules = 'rules',
   alertsCases = 'alertsCases',
 }
@@ -55,6 +53,8 @@ const alertsCasesConfig: StepConfig[] = [
     ),
     anchorPosition: 'downCenter',
     dataTestSubj: getTourAnchor(1, SecurityStepId.alertsCases),
+    initialFocus: `button[tour-step="nextButton"]`,
+    ownFocus: true,
   },
   {
     ...defaultConfig,
@@ -127,16 +127,14 @@ const alertsCasesConfig: StepConfig[] = [
 ];
 
 interface SecurityTourConfig {
-  [SecurityStepId.addData]: StepConfig[];
   [SecurityStepId.rules]: StepConfig[];
   [SecurityStepId.alertsCases]: StepConfig[];
 }
 
 export const securityTourConfig: SecurityTourConfig = {
   /**
-   * OLM/D&R team implement your tour config here
+   * D&R team implement your tour config here
    */
-  [SecurityStepId.addData]: [],
   [SecurityStepId.rules]: [],
   [SecurityStepId.alertsCases]: alertsCasesConfig,
 };

@@ -143,6 +143,7 @@ describe('SecurityTourStep', () => {
        data-test-subj="onboarding--securityTourNextStepButton"
        onClick={[Function]}
        size="s"
+       tour-step="nextButton"
      >
        <FormattedMessage
          defaultMessage="Next"
