@@ -198,6 +198,18 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ])}`,
           `--xpack.actions.preconfiguredAlertHistoryEsIndex=${preconfiguredAlertHistoryEsIndex}`,
           `--xpack.actions.preconfigured=${JSON.stringify({
+            'my-test-email': {
+              actionTypeId: '.email',
+              name: 'TestEmail#xyz',
+              config: {
+                from: 'me@test.com',
+                service: '__json',
+              },
+              secrets: {
+                user: 'user',
+                password: 'password',
+              },
+            },
             'my-slack1': {
               actionTypeId: '.slack',
               name: 'Slack#xyz',
