@@ -56,9 +56,8 @@ export function renderMustacheObject<Params>(params: Params, variables: Variable
 
 // return variables cloned, with a toString() added to objects
 function augmentObjectVariables(variables: Variables): Variables {
-  // convert context variables with '.' in the name to objects
-
   const result = JSON.parse(JSON.stringify(variables));
+  // convert variables with '.' in the name to objects
   convertDotVariables(result);
   addToStringDeep(result);
   return result;
