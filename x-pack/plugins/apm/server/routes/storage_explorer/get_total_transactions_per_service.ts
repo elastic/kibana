@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   termQuery,
   kqlQuery,
   rangeQuery,
 } from '@kbn/observability-plugin/server';
-import { Setup } from '../../lib/helpers/setup_request';
 import {
   getProcessorEventForTransactions,
   getDocumentTypeFilterForTransactions,
@@ -22,9 +20,10 @@ import {
 } from '../../../common/storage_explorer_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getTotalTransactionsPerService({
-  setup,
+  apmEventClient,
   searchAggregatedTransactions,
   indexLifecyclePhase,
   randomSampler,
@@ -33,7 +32,7 @@ export async function getTotalTransactionsPerService({
   environment,
   kuery,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   randomSampler: RandomSampler;
@@ -42,8 +41,6 @@ export async function getTotalTransactionsPerService({
   environment: string;
   kuery: string;
 }) {
-  const { apmEventClient } = setup;
-
   const response = await apmEventClient.search(
     'get_total_transactions_per_service',
     {
@@ -70,7 +67,7 @@ export async function getTotalTransactionsPerService({
                     indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
                   )
                 : []),
-            ] as QueryDslQueryContainer[],
+            ],
           },
         },
         aggs: {
