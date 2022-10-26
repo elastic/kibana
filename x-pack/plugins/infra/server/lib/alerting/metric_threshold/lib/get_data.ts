@@ -124,15 +124,19 @@ export const getData = async (
         } = bucket;
 
         const containerList = [];
-        for (const containerBucket of containers?.buckets) {
-          const containerContext = containerBucket.containerContext;
-          const containerHits = containerContext.hits?.hits;
-          const containerContextSource =
-          containerHits && containerHits.length > 0 ? containerHits[0]._source : null;
-          if(containerContextSource) {
-            containerList.push(containerContextSource.container);
+
+        if (containers) {
+          for (const containerBucket of containers.buckets) {
+            const containerContext = containerBucket.containerContext;
+            const containerHits = containerContext.hits?.hits;
+            const containerContextSource =
+              containerHits && containerHits.length > 0 ? containerHits[0]._source : null;
+            if (containerContextSource) {
+              containerList.push(containerContextSource.container);
+            }
           }
         }
+
         const bucketHits = additionalContext.hits?.hits;
         const additionalContextSource =
           bucketHits && bucketHits.length > 0 ? bucketHits[0]._source : null;
@@ -230,7 +234,7 @@ export const getData = async (
     groupBy?.includes(groupByForContainerContext)
       ? await doFieldsExist(
         esClient,
-        [termsAggMapping[groupByForContainerContext]],
+        [termsAggMapping.groupByForContainerContext],
         index)
       : null;
 

@@ -85,11 +85,11 @@ export const getElasticsearchMetricQuery = (
   const containerContextAgg =
     groupBy?.includes(groupByForContainerContext) &&
       fieldsExisted &&
-      fieldsExisted[termsAggMapping[groupByForContainerContext]]
+      fieldsExisted[termsAggMapping.groupByForContainerContext]
       ? {
         containers: {
           terms: {
-            field: termsAggMapping[groupByForContainerContext],
+            field: termsAggMapping.groupByForContainerContext,
             size: NUMBER_OF_DOCUMENTS
           },
           aggs: {
@@ -108,7 +108,7 @@ export const getElasticsearchMetricQuery = (
 
   const includesList = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
   if(containerContextAgg === null) includesList.push('container.*');
-  
+
   const excludesList = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
 
   const additionalContextAgg = {
