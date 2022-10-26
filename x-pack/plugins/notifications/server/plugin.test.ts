@@ -7,7 +7,7 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { NotificationsConfigType } from './config';
+import type { NotificationsConfigType } from './config';
 import { NotificationsPlugin } from './plugin';
 import * as emailServiceFactory from './services/connectors_email_service_factory';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';

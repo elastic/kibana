@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { PluginSetupContract, PluginStartContract } from '@kbn/actions-plugin/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { ConnectorsEmailService } from './connectors_email_service';
 import type { EmailService } from './types';
 import { PLUGIN_ID } from '../../common';

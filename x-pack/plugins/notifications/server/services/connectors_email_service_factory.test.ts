@@ -10,8 +10,8 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import {
   checkEmailServiceConfiguration,
-  CheckEmailServiceParams,
-  EmailServiceFactoryParams,
+  type CheckEmailServiceParams,
+  type EmailServiceFactoryParams,
   getEmailService,
 } from './connectors_email_service_factory';
 import { LicensedEmailService } from './licensed_email_service';

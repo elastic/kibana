@@ -7,7 +7,7 @@
 
 import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured_actions_client/unsecured_actions_client.mock';
 import { ConnectorsEmailService } from './connectors_email_service';
-import { PlainTextEmail } from './types';
+import type { PlainTextEmail } from './types';
 
 const REQUESTER_ID = 'requesterId';
 const CONNECTOR_ID = 'connectorId';

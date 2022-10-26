@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 import { configSchema, type ConnectorsEmailConfigType } from './connectors_email_config';
 
 export type NotificationsConfigType = ConnectorsEmailConfigType;
