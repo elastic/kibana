@@ -27,7 +27,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       APIClientRequestParamsOf<'GET /internal/apm/storage_explorer_summary_stats'>['params']
     >
   ) {
-    return await apmApiClient.monitorIndicesUser({
+    return await apmApiClient.monitorClusterAndIndicesUser({
       endpoint: 'GET /internal/apm/storage_explorer_summary_stats',
       params: {
         query: {
@@ -53,7 +53,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(status).to.be(200);
         expect(body.tracesPerMinute).to.be(0);
         expect(body.numberOfServices).to.be(0);
-        expect(body.estimatedSize).to.be(0);
+        expect(body.totalSize).to.be(0);
+        expect(body.estimatedIncrementalSize).to.be(0);
+        expect(body.diskSpaceUsedPct).to.be(0);
         expect(body.dailyDataGeneration).to.be(0);
       });
     }
@@ -100,7 +102,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(status).to.be(200);
         expect(body.numberOfServices).to.be(2);
         expect(roundNumber(body.tracesPerMinute)).to.be(2);
-        expect(body.estimatedSize).to.be.greaterThan(0);
+        expect(body.totalSize).to.be.greaterThan(0);
+        expect(body.estimatedIncrementalSize).to.be.greaterThan(0);
+        expect(body.diskSpaceUsedPct).to.be.greaterThan(0);
         expect(body.dailyDataGeneration).to.be.greaterThan(0);
       });
 
@@ -114,7 +118,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(status).to.be(200);
         expect(body.numberOfServices).to.be(1);
         expect(roundNumber(body.tracesPerMinute)).to.be(1);
-        expect(body.estimatedSize).to.be.greaterThan(0);
+        expect(body.totalSize).to.be.greaterThan(0);
+        expect(body.estimatedIncrementalSize).to.be.greaterThan(0);
+        expect(body.diskSpaceUsedPct).to.be.greaterThan(0);
         expect(body.dailyDataGeneration).to.be.greaterThan(0);
       });
 
@@ -128,7 +134,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(status).to.be(200);
         expect(body.tracesPerMinute).to.be(0);
         expect(body.numberOfServices).to.be(0);
-        expect(body.estimatedSize).to.be(0);
+        expect(body.totalSize).to.be.greaterThan(0);
+        expect(body.estimatedIncrementalSize).to.be(0);
+        expect(body.diskSpaceUsedPct).to.be.greaterThan(0);
         expect(body.dailyDataGeneration).to.be(0);
       });
 
@@ -142,7 +150,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(status).to.be(200);
         expect(body.numberOfServices).to.be(1);
         expect(roundNumber(body.tracesPerMinute)).to.be(1);
-        expect(body.estimatedSize).to.be.greaterThan(0);
+        expect(body.totalSize).to.be.greaterThan(0);
+        expect(body.estimatedIncrementalSize).to.be.greaterThan(0);
+        expect(body.diskSpaceUsedPct).to.be.greaterThan(0);
         expect(body.dailyDataGeneration).to.be.greaterThan(0);
       });
     });

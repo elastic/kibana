@@ -197,13 +197,13 @@ export const uiSettings: Record<string, UiSettings> = {
   [apmServiceInventoryOptimizedSorting]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmServiceInventoryOptimizedSorting', {
-      defaultMessage: 'Optimize APM Service Inventory page load performance',
+      defaultMessage: 'Optimize services list load performance in APM',
     }),
     description: i18n.translate(
       'xpack.observability.apmServiceInventoryOptimizedSortingDescription',
       {
         defaultMessage:
-          '{technicalPreviewLabel} Default APM Service Inventory page sort (for Services without Machine Learning applied) to sort by Service Name. {feedbackLink}.',
+          '{technicalPreviewLabel} Default APM Service Inventory and Storage Explorer pages sort (for Services without Machine Learning applied) to sort by Service Name. {feedbackLink}.',
         values: {
           technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
           feedbackLink: feedbackLink({ href: 'https://ela.st/feedback-apm-page-performance' }),

@@ -7,6 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { Environment } from '../../../../common/environment_rt';
@@ -15,7 +16,39 @@ import { ServiceGroup } from '../../../../common/service_groups';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getHealthStatuses } from './get_health_statuses';
 import { lookupServices } from '../../service_groups/lookup_services';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+
+export async function getServiceNamesFromTermsEnum({
+  apmEventClient,
+  environment,
+  maxNumberOfServices,
+}: {
+  apmEventClient: APMEventClient;
+  environment: Environment;
+  maxNumberOfServices: number;
+}) {
+  if (environment !== ENVIRONMENT_ALL.value) {
+    return [];
+  }
+  const response = await apmEventClient.termsEnum(
+    'get_services_from_terms_enum',
+    {
+      apm: {
+        events: [
+          ProcessorEvent.transaction,
+          ProcessorEvent.span,
+          ProcessorEvent.metric,
+          ProcessorEvent.error,
+        ],
+      },
+      body: {
+        size: maxNumberOfServices,
+        field: SERVICE_NAME,
+      },
+    }
+  );
+
+  return response.terms;
+}
 
 export async function getSortedAndFilteredServices({
   setup,
@@ -36,31 +69,6 @@ export async function getSortedAndFilteredServices({
   serviceGroup: ServiceGroup | null;
   maxNumberOfServices: number;
 }) {
-  async function getServiceNamesFromTermsEnum() {
-    if (environment !== ENVIRONMENT_ALL.value) {
-      return [];
-    }
-    const response = await apmEventClient.termsEnum(
-      'get_services_from_terms_enum',
-      {
-        apm: {
-          events: [
-            ProcessorEvent.transaction,
-            ProcessorEvent.span,
-            ProcessorEvent.metric,
-            ProcessorEvent.error,
-          ],
-        },
-        body: {
-          size: maxNumberOfServices,
-          field: SERVICE_NAME,
-        },
-      }
-    );
-
-    return response.terms;
-  }
-
   const [servicesWithHealthStatuses, selectedServices] = await Promise.all([
     getHealthStatuses({
       setup,
@@ -79,7 +87,11 @@ export async function getSortedAndFilteredServices({
           maxNumberOfServices,
           serviceGroup,
         })
-      : getServiceNamesFromTermsEnum(),
+      : getServiceNamesFromTermsEnum({
+          apmEventClient,
+          environment,
+          maxNumberOfServices,
+        }),
   ]);
 
   const services = joinByKey(
