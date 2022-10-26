@@ -18,6 +18,14 @@ export const mockAPMIndexPatternIds: IndexPatternMapping[] = [
   { title: 'traces-apm*,logs-apm*,metrics-apm*,apm-*', id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918' },
 ];
 
+export const mockLayerGroup = {
+  id: 'uuid.v4()',
+  label: 'filebeat-*',
+  sourceDescriptor: null,
+  type: LAYER_TYPE.LAYER_GROUP,
+  visible: true,
+}
+
 export const mockSourceLayer = {
   sourceDescriptor: {
     id: 'uuid.v4()',
@@ -64,6 +72,7 @@ export const mockSourceLayer = {
     },
   },
   id: 'uuid.v4()',
+  parent: 'uuid.v4()',
   label: `filebeat-* | Source Point`,
   minZoom: 0,
   maxZoom: 24,
@@ -121,6 +130,7 @@ export const mockDestinationLayer = {
     },
   },
   id: 'uuid.v4()',
+  parent: 'uuid.v4()',
   label: `filebeat-* | Destination Point`,
   minZoom: 0,
   maxZoom: 24,
@@ -176,6 +186,7 @@ export const mockClientLayer = {
     },
   },
   id: 'uuid.v4()',
+  parent: 'uuid.v4()',
   label: `apm-* | Client Point`,
   minZoom: 0,
   maxZoom: 24,
@@ -238,6 +249,7 @@ export const mockServerLayer = {
     },
   },
   id: 'uuid.v4()',
+  parent: 'uuid.v4()',
   label: `apm-* | Server Point`,
   minZoom: 0,
   maxZoom: 24,
@@ -307,6 +319,7 @@ export const mockLineLayer = {
     },
   },
   id: 'uuid.v4()',
+  parent: 'uuid.v4()',
   label: `filebeat-* | Line`,
   minZoom: 0,
   maxZoom: 24,
@@ -371,6 +384,7 @@ export const mockClientServerLineLayer = {
     },
   },
   id: 'uuid.v4()',
+  parent: 'uuid.v4()',
   label: `apm-* | Line`,
   minZoom: 0,
   maxZoom: 24,
@@ -399,6 +413,7 @@ export const mockLayerList = [
   mockLineLayer,
   mockDestinationLayer,
   mockSourceLayer,
+  mockLayerGroup,
 ];
 
 export const mockLayerListDouble = [
@@ -416,9 +431,11 @@ export const mockLayerListDouble = [
   mockLineLayer,
   mockDestinationLayer,
   mockSourceLayer,
+  mockLayerGroup,
   mockLineLayer,
   mockDestinationLayer,
   mockSourceLayer,
+  mockLayerGroup,
 ];
 
 export const mockLayerListMixed = [
@@ -436,12 +453,21 @@ export const mockLayerListMixed = [
   mockLineLayer,
   mockDestinationLayer,
   mockSourceLayer,
+  mockLayerGroup,
   mockClientServerLineLayer,
   mockServerLayer,
   mockClientLayer,
+  {
+    ...mockLayerGroup,
+    label: 'apm-*',
+  },
   mockApmDataStreamClientServerLineLayer,
   mockApmDataStreamServerLayer,
   mockApmDataStreamClientLayer,
+  {
+    ...mockLayerGroup,
+    label: 'traces-apm*,logs-apm*,metrics-apm*,apm-*',
+  },
 ];
 
 export const mockAPMIndexPattern: IndexPatternSavedObject = {
