@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiFilePicker,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -29,16 +30,32 @@ export interface Props {
   fullWidth?: boolean;
   immediate?: boolean;
   allowClear?: boolean;
+  compressed?: boolean;
   initialFilePromptText?: string;
 }
 
 const { euiFormMaxWidth, euiButtonHeightSmall } = euiThemeVars;
 
+const horizontalContainer = css`
+  display: flex;
+  flex-direction: row;
+`;
+
 export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
   (
-    { meta, accept, immediate, allowClear = false, multiple, initialFilePromptText, fullWidth },
+    {
+      compressed,
+      meta,
+      accept,
+      immediate,
+      allowClear = false,
+      multiple,
+      initialFilePromptText,
+      fullWidth,
+    },
     ref
   ) => {
+    const { euiTheme } = useEuiTheme();
     const uploadState = useUploadState();
     const uploading = useBehaviorSubject(uploadState.uploading$);
     const error = useBehaviorSubject(uploadState.error$);
@@ -52,9 +69,12 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
     return (
       <div
         data-test-subj="filesUploadFile"
-        css={css`
-          max-width: ${fullWidth ? '100%' : euiFormMaxWidth};
-        `}
+        css={[
+          css`
+            max-width: ${fullWidth ? '100%' : euiFormMaxWidth};
+          `,
+          compressed ? horizontalContainer : undefined,
+        ]}
       >
         <EuiFilePicker
           fullWidth={fullWidth}
@@ -63,7 +83,7 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
           ref={ref}
           onChange={(fs) => {
             uploadState.setFiles(Array.from(fs ?? []));
-            if (immediate) uploadState.upload(meta);
+            if (immediate && uploadState.hasFiles()) uploadState.upload(meta);
           }}
           multiple={multiple}
           initialPromptText={initialFilePromptText}
@@ -72,25 +92,36 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
           accept={accept}
           disabled={Boolean(done?.length || uploading)}
           aria-describedby={errorMessage ? errorId : undefined}
+          display={compressed ? 'default' : 'large'}
         />
 
-        <EuiSpacer size="s" />
+        <EuiSpacer
+          size="s"
+          css={
+            compressed
+              ? css`
+                  width: ${euiTheme.size.s};
+                `
+              : undefined
+          }
+        />
 
         <EuiFlexGroup
           justifyContent="flexStart"
-          alignItems="flexStart"
-          direction="rowReverse"
-          gutterSize="m"
+          alignItems={compressed ? 'center' : 'flexStart'}
+          direction={compressed ? undefined : 'rowReverse'}
+          gutterSize={compressed ? 'none' : 'm'}
           responsive={false}
         >
           <EuiFlexItem grow={false}>
             <ControlButton
+              compressed={compressed}
               immediate={immediate}
               onCancel={uploadState.abort}
               onUpload={() => uploadState.upload(meta)}
             />
           </EuiFlexItem>
-          {Boolean(!done && !uploading && errorMessage) && (
+          {!compressed && Boolean(!done && !uploading && errorMessage) && (
             <EuiFlexItem>
               <EuiText
                 data-test-subj="error"
@@ -106,7 +137,7 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
               </EuiText>
             </EuiFlexItem>
           )}
-          {done?.length && allowClear && (
+          {!compressed && done?.length && allowClear && (
             <>
               <EuiFlexItem /> {/* Occupy middle space */}
               <EuiFlexItem grow={false}>

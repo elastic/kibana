@@ -18,3 +18,4 @@ export class SLONotFound extends ObservabilityError {}
 export class InternalQueryError extends ObservabilityError {}
 export class NotSupportedError extends ObservabilityError {}
 export class IllegalArgumentError extends ObservabilityError {}
+export class InvalidTransformError extends ObservabilityError {}
