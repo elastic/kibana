@@ -68,7 +68,7 @@ export async function getColdStartDuration({
 
   const [series] = coldStartDurationMetric.series;
 
-  const data = series.data.map(({ x, y }) => ({
+  const data = series?.data?.map(({ x, y }) => ({
     x,
     // Cold start duration duration is stored in ms, convert it to microseconds so it uses the same unit as the other charts
     y: isFiniteNumber(y) ? y * 1000 : y,
@@ -76,13 +76,15 @@ export async function getColdStartDuration({
 
   return {
     ...coldStartDurationMetric,
-    series: [
-      {
-        ...series,
-        // Cold start duration duration is stored in ms, convert it to microseconds
-        overallValue: series.overallValue * 1000,
-        data,
-      },
-    ],
+    series: series
+      ? [
+          {
+            ...series,
+            // Cold start duration duration is stored in ms, convert it to microseconds
+            overallValue: series.overallValue * 1000,
+            data,
+          },
+        ]
+      : [],
   };
 }
