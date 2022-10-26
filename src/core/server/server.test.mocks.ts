@@ -13,10 +13,10 @@ jest.doMock('@kbn/core-http-server-internal', () => ({
   HttpService: jest.fn(() => mockHttpService),
 }));
 
-import { pluginServiceMock } from './plugins/plugins_service.mock';
+import { pluginServiceMock } from '@kbn/core-plugins-server-mocks';
 
 export const mockPluginsService = pluginServiceMock.create();
-jest.doMock('./plugins/plugins_service', () => ({
+jest.doMock('@kbn/core-plugins-server-internal', () => ({
   PluginsService: jest.fn(() => mockPluginsService),
 }));
 

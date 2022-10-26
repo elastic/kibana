@@ -7,7 +7,7 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '../../../..';
-import { InternalCoreStart } from '../../../../internal_types';
+import { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import * as kbnTestServer from '../../../../../test_helpers/kbn_server';
 import { Root } from '../../../../root';
 import {

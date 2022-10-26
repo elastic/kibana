@@ -13,7 +13,7 @@ import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { coreMock, httpServerMock } from '../mocks';
 import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
-import { PluginType } from '../plugins';
+import { PluginType } from '@kbn/core-base-common';
 import { CoreApp } from './core_app';
 import { RequestHandlerContext } from '..';
 
