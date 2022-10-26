@@ -5,25 +5,29 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiLink, EuiToolTip } from '@elastic/eui';
 import { AgentExplorerFieldName } from '@kbn/apm-plugin/common/agent_explorer';
 import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
 import { i18n } from '@kbn/i18n';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TypeOf } from '@kbn/typed-react-router-config';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ValuesType } from 'utility-types';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { unit } from '../../../../utils/style';
+import { truncate, unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ItemsBadge } from '../../../shared/item_badge';
 import { ServiceLink } from '../../../shared/service_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { AgentExplorerDocsLink } from '../../agent_explorer_docs_link';
+import { AgentInstances } from '../agent_instances';
 
-type AgentExplorerItem = ValuesType<
+const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
+
+export type AgentExplorerItem = ValuesType<
   APIReturnType<'GET /internal/apm/agent_explorer'>['items']
 >;
 
@@ -33,8 +37,10 @@ function formatString(value?: string | null) {
 
 export function getAgentsColumns({
   query,
+  onAgentSelected,
 }: {
   query: TypeOf<ApmRoutes, '/agent-explorer'>['query'];
+  onAgentSelected: (agent: AgentExplorerItem) => void;
 }): Array<EuiBasicTableColumn<AgentExplorerItem>> {
   return [
     {
@@ -89,6 +95,22 @@ export function getAgentsColumns({
         { defaultMessage: 'Agent Name' }
       ),
       sortable: true,
+      render: (_, agent) => (
+        <EuiToolTip
+          content={formatString(`${agent.agentName} instances details`)}
+        >
+          <StyledLink
+            data-test-subj={`agentInstanceLink_${agent.serviceName}-${agent.agentName}`}
+            onClick={() => onAgentSelected(agent)}
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem className="eui-textTruncate">
+                <span className="eui-textTruncate">{agent.agentName}</span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </StyledLink>
+      </EuiToolTip>
+      ),
     },
     {
       field: AgentExplorerFieldName.AgentVersion,
@@ -110,15 +132,6 @@ export function getAgentsColumns({
           )}
         />
       ),
-    },
-    {
-      field: AgentExplorerFieldName.AgentLastVersion,
-      name: i18n.translate(
-        'xpack.apm.agentExplorerTable.latestVersionColumnLabel',
-        { defaultMessage: 'Latest Version' }
-      ),
-      width: `${unit * 10}px`,
-      render: (_, { agentLastVersion }) => formatString(agentLastVersion),
     },
     {
       field: AgentExplorerFieldName.AgentRepoUrl,
@@ -152,35 +165,59 @@ export function AgentList({
   noItemsMessage,
   isLoading,
 }: Props) {
+  const [selectedAgent, setSelectedAgent] = useState<AgentExplorerItem>();
+  const [showFlyout, setShowFlyout] = useState(false);
+
+  useEffect(() => {
+    setShowFlyout(!!selectedAgent);
+  }, [selectedAgent]);
+
+  const onAgentSelected = (agent: AgentExplorerItem) => {
+    setSelectedAgent(agent);
+  }
+
+  const onCloseFlyout = () => {
+    setShowFlyout(false);
+    setSelectedAgent(undefined);
+  };
+
   const { query } = useApmParams('/agent-explorer');
 
-  const agentColumns = useMemo(() => getAgentsColumns({ query }), [query]);
+  const agentColumns = useMemo(() => getAgentsColumns({ query, onAgentSelected }), [query]);
 
   return (
-    <EuiInMemoryTable
-      tableCaption={i18n.translate('xpack.apm.agentExplorer.table.caption', {
-        defaultMessage: 'Agent Explorer',
-      })}
-      items={items}
-      columns={agentColumns}
-      pagination={{
-        pageSizeOptions: [25, 50, 100],
-      }}
-      sorting={{
-        sort: {
-          field: AgentExplorerFieldName.Environments,
-          direction: 'desc',
-        },
-      }}
-      loading={isLoading}
-      data-test-subj="agentExplorerTable"
-      message={
-        isLoading
-          ? i18n.translate('xpack.apm.agentExplorer.table.loading', {
-              defaultMessage: 'Loading...',
-            })
-          : noItemsMessage
-      }
-    />
+    <>
+      {showFlyout && (
+        <AgentInstances
+          agent={selectedAgent}
+          onClose={onCloseFlyout}
+        />
+      )}
+      <EuiInMemoryTable
+        tableCaption={i18n.translate('xpack.apm.agentExplorer.table.caption', {
+          defaultMessage: 'Agent Explorer',
+        })}
+        items={items}
+        columns={agentColumns}
+        pagination={{
+          pageSizeOptions: [25, 50, 100],
+        }}
+        sorting={{
+          sort: {
+            field: AgentExplorerFieldName.Environments,
+            direction: 'desc',
+          },
+        }}
+        loading={isLoading}
+        data-test-subj="agentExplorerTable"
+        message={
+          isLoading
+            ? i18n.translate('xpack.apm.agentExplorer.table.loading', {
+                defaultMessage: 'Loading...',
+              })
+            : noItemsMessage
+        }
+      />
+    </>
   );
 }

@@ -16,6 +16,7 @@ import {
   rangeRt
 } from '../default_api_types';
 import { getAgents } from './get_agents';
+import { getAgentInstances } from './get_agent_instances';
 
 const agentExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/agent_explorer',
@@ -38,7 +39,6 @@ const agentExplorerRoute = createApmServerRoute({
       environments: string[];
       agentName?: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
       agentVersion: string[];
-      agentLastVersion?: string;
       agentRepoUrl?: string;
     }>;
   }> {
@@ -80,6 +80,67 @@ const agentExplorerRoute = createApmServerRoute({
   },
 });
 
+const agentExplorerInstanceRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/agent_instances',
+  options: { tags: ['access:apm'] },
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: t.intersection([
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      probabilityRt,
+    ]),
+  }),
+  async handler(resources): Promise<{
+    agentInstances: {
+      instances: number;
+      items: Array<{
+        serviceNode: string;
+        environments: string[];
+        agentVersion: string;
+        lastReport: string;
+      }>
+    }
+  }> {
+    const {
+      params,
+      request,
+      plugins: { security },
+    } = resources;
+
+    const {
+      environment,
+      kuery,
+      start,
+      end,
+      probability,
+    } = params.query;
+
+    const {
+      serviceName,
+    } = params.path;
+
+    const [apmEventClient, randomSampler] = await Promise.all([
+      getApmEventClient(resources),
+      getRandomSampler({ security, request, probability }),
+    ]);
+
+    return {
+      agentInstances: await getAgentInstances({
+        environment,
+        serviceName,
+        kuery,
+        apmEventClient,
+        start,
+        end,
+        randomSampler,
+      }),
+    }
+  },
+});
+
 export const agentExplorerRouteRepository = {
   ...agentExplorerRoute,
+  ...agentExplorerInstanceRoute,
 };

@@ -3,8 +3,7 @@ import { CoreSetup, Logger } from "@kbn/core/server";
 import { APMEventClient } from "../../lib/helpers/create_es_client/create_apm_event_client";
 import { RandomSampler } from "../../lib/helpers/get_random_sampler";
 import { withApmSpan } from "../../utils/with_apm_span";
-import { getAgentItems } from "./get_agents_items";
-import { getAgentsLatestVersion } from "./get_agents_latest_version";
+import { getAgentsItems } from "./get_agents_items";
 import { getAgentRepositoryUrl } from "./get_agent_url_repository";
 
 export async function getAgents({
@@ -31,24 +30,20 @@ export async function getAgents({
   logger: Logger;
 }) {
   return withApmSpan('get_agents', async () => {
-    const [agentsLastVersion, items] = await Promise.all([
-      getAgentsLatestVersion({core, logger}),
-      getAgentItems({
-        environment,
-        serviceName,
-        agentLanguage,
-        kuery,
-        apmEventClient,
-        start,
-        end,
-        randomSampler,
-      }),
-    ]);
+    const items = await getAgentsItems({
+      environment,
+      serviceName,
+      agentLanguage,
+      kuery,
+      apmEventClient,
+      start,
+      end,
+      randomSampler,
+    });
 
     return {
       items: items.map((item) => ({
         ...item,
-        agentLastVersion: agentsLastVersion[item.agentName as AgentName] as string,
         agentRepoUrl: getAgentRepositoryUrl(item.agentName as AgentName),
       }))
     };
