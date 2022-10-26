@@ -491,7 +491,7 @@ activities.
 |The features plugin enhance Kibana with a per-feature privilege system.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/files/README.md[files]
+|{kib-repo}blob/{branch}/src/plugins/files/README.md[files]
 |File upload, download, sharing, and serving over HTTP implementation in Kibana.
 
 
