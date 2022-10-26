@@ -36,6 +36,7 @@ import {
   getMainSummaryStats,
   getTracesPerMinute,
 } from './get_summary_statistics';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { isCrossClusterSearch } from './is_cross_cluster_search';
 import { getServiceNamesFromTermsEnum } from '../services/get_services/get_sorted_and_filtered_services';
 
@@ -80,19 +81,21 @@ const storageExplorerRoute = createApmServerRoute({
       },
     } = params;
 
-    const [setup, randomSampler] = await Promise.all([
+    const [setup, apmEventClient, randomSampler] = await Promise.all([
       setupRequest(resources),
+      getApmEventClient(resources),
       getRandomSampler({ security, request, probability }),
     ]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient: setup.apmEventClient,
+      apmEventClient,
       config: setup.config,
       kuery,
     });
 
     const serviceStatistics = await getServiceStatistics({
       setup,
+      apmEventClient,
       context,
       indexLifecyclePhase,
       randomSampler,
@@ -165,13 +168,15 @@ const storageExplorerServiceDetailsRoute = createApmServerRoute({
       },
     } = params;
 
-    const [setup, randomSampler] = await Promise.all([
+    const [setup, apmEventClient, randomSampler] = await Promise.all([
       setupRequest(resources),
+      getApmEventClient(resources),
       getRandomSampler({ security, request, probability }),
     ]);
 
     const [processorEventStats, indicesStats] = await Promise.all([
       getStorageDetailsPerProcessorEvent({
+        apmEventClient,
         setup,
         context,
         indexLifecyclePhase,
@@ -183,6 +188,7 @@ const storageExplorerServiceDetailsRoute = createApmServerRoute({
         serviceName,
       }),
       getStorageDetailsPerIndex({
+        apmEventClient,
         setup,
         context,
         indexLifecyclePhase,
@@ -237,13 +243,14 @@ const storageChartRoute = createApmServerRoute({
       },
     } = params;
 
-    const [setup, randomSampler] = await Promise.all([
+    const [setup, apmEventClient, randomSampler] = await Promise.all([
       setupRequest(resources),
+      getApmEventClient(resources),
       getRandomSampler({ security, request, probability }),
     ]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient: setup.apmEventClient,
+      apmEventClient,
       config: setup.config,
       kuery,
     });
@@ -257,6 +264,7 @@ const storageChartRoute = createApmServerRoute({
       start,
       end,
       setup,
+      apmEventClient,
       context,
     });
 
@@ -328,13 +336,14 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
       },
     } = params;
 
-    const [setup, randomSampler] = await Promise.all([
+    const [setup, apmEventClient, randomSampler] = await Promise.all([
       setupRequest(resources),
+      getApmEventClient(resources),
       getRandomSampler({ security, request, probability }),
     ]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient: setup.apmEventClient,
+      apmEventClient,
       config: setup.config,
       kuery,
     });
@@ -342,6 +351,7 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
     const [mainSummaryStats, tracesPerMinute] = await Promise.all([
       getMainSummaryStats({
         setup,
+        apmEventClient,
         context,
         indexLifecyclePhase,
         randomSampler,
@@ -351,7 +361,7 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
         kuery,
       }),
       getTracesPerMinute({
-        setup,
+        apmEventClient,
         indexLifecyclePhase,
         start,
         end,
@@ -406,9 +416,10 @@ const storageExplorerGetServices = createApmServerRoute({
       };
     }
 
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
+
     const services = await getServiceNamesFromTermsEnum({
-      setup,
+      apmEventClient,
       environment,
       maxNumberOfServices: 500,
     });

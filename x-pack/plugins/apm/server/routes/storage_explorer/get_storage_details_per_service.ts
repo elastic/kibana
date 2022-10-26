@@ -31,9 +31,11 @@ import {
   getIndicesInfo,
 } from './indices_stats_helpers';
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getStorageDetailsPerProcessorEvent({
   setup,
+  apmEventClient,
   context,
   indexLifecyclePhase,
   randomSampler,
@@ -44,6 +46,7 @@ export async function getStorageDetailsPerProcessorEvent({
   serviceName,
 }: {
   setup: Setup;
+  apmEventClient: APMEventClient;
   context: ApmPluginRequestHandlerContext;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   randomSampler: RandomSampler;
@@ -53,8 +56,6 @@ export async function getStorageDetailsPerProcessorEvent({
   kuery: string;
   serviceName: string;
 }) {
-  const { apmEventClient } = setup;
-
   const [{ indices: allIndicesStats }, response] = await Promise.all([
     getTotalIndicesStats({ setup, context }),
     apmEventClient.search('get_storage_details_per_service', {
@@ -156,6 +157,7 @@ export async function getStorageDetailsPerProcessorEvent({
 }
 
 export async function getStorageDetailsPerIndex({
+  apmEventClient,
   setup,
   context,
   indexLifecyclePhase,
@@ -166,6 +168,7 @@ export async function getStorageDetailsPerIndex({
   kuery,
   serviceName,
 }: {
+  apmEventClient: APMEventClient;
   setup: Setup;
   context: ApmPluginRequestHandlerContext;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
@@ -176,8 +179,6 @@ export async function getStorageDetailsPerIndex({
   kuery: string;
   serviceName: string;
 }) {
-  const { apmEventClient } = setup;
-
   const [
     { indices: allIndicesStats },
     indicesLifecycleStatus,

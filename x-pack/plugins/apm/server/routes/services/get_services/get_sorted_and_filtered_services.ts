@@ -7,6 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { Environment } from '../../../../common/environment_rt';
@@ -17,19 +18,17 @@ import { getHealthStatuses } from './get_health_statuses';
 import { lookupServices } from '../../service_groups/lookup_services';
 
 export async function getServiceNamesFromTermsEnum({
-  setup,
+  apmEventClient,
   environment,
   maxNumberOfServices,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   environment: Environment;
   maxNumberOfServices: number;
 }) {
   if (environment !== ENVIRONMENT_ALL.value) {
     return [];
   }
-  const { apmEventClient } = setup;
-
   const response = await apmEventClient.termsEnum(
     'get_services_from_terms_enum',
     {
@@ -53,6 +52,7 @@ export async function getServiceNamesFromTermsEnum({
 
 export async function getSortedAndFilteredServices({
   setup,
+  apmEventClient,
   start,
   end,
   environment,
@@ -61,6 +61,7 @@ export async function getSortedAndFilteredServices({
   maxNumberOfServices,
 }: {
   setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   environment: Environment;
@@ -80,14 +81,14 @@ export async function getSortedAndFilteredServices({
     }),
     serviceGroup
       ? getServiceNamesFromServiceGroup({
-          setup,
+          apmEventClient,
           start,
           end,
           maxNumberOfServices,
           serviceGroup,
         })
       : getServiceNamesFromTermsEnum({
-          setup,
+          apmEventClient,
           environment,
           maxNumberOfServices,
         }),
@@ -105,20 +106,20 @@ export async function getSortedAndFilteredServices({
 }
 
 async function getServiceNamesFromServiceGroup({
-  setup,
+  apmEventClient,
   start,
   end,
   maxNumberOfServices,
   serviceGroup: { kuery },
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   maxNumberOfServices: number;
   serviceGroup: ServiceGroup;
 }) {
   const services = await lookupServices({
-    setup,
+    apmEventClient,
     kuery,
     start,
     end,
