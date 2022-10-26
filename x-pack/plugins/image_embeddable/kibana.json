@@ -8,6 +8,6 @@
     "githubTeam": "kibana-app-services"
   },
   "description": "Image embeddable",
-  "requiredPlugins": ["embeddable"],
+  "requiredPlugins": ["embeddable", "files"],
   "requiredBundles": ["kibanaUtils", "kibanaReact"]
 }
