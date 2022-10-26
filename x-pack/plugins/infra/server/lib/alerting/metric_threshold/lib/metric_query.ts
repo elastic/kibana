@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
-import { groupByForContainerContext, NUMBER_OF_DOCUMENTS, termsAggMapping } from '../../common/utils';
+import { KUBERNETES_POD_UID, NUMBER_OF_DOCUMENTS, termsAggField } from '../../common/utils';
 import { createBucketSelector } from './create_bucket_selector';
 import { createPercentileAggregation } from './create_percentile_aggregation';
 import { createRateAggsBuckets, createRateAggsBucketScript } from './create_rate_aggregation';
@@ -83,13 +83,13 @@ export const getElasticsearchMetricQuery = (
   const currentPeriod = wrapInCurrentPeriod(currentTimeframe, metricAggregations);
 
   const containerContextAgg =
-    groupBy?.includes(groupByForContainerContext) &&
+    groupBy?.includes(KUBERNETES_POD_UID) &&
       fieldsExisted &&
-      fieldsExisted[termsAggMapping.groupByForContainerContext]
+      fieldsExisted[termsAggField.KUBERNETES_POD_UID]
       ? {
         containerContext: {
           terms: {
-            field: termsAggMapping.groupByForContainerContext,
+            field: termsAggField.KUBERNETES_POD_UID,
             size: NUMBER_OF_DOCUMENTS
           },
           aggs: {

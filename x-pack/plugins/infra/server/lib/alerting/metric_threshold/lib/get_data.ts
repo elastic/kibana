@@ -14,7 +14,7 @@ import {
   Comparator,
   MetricExpressionParams,
 } from '../../../../../common/alerting/metrics';
-import { AdditionalContext, doFieldsExist, groupByForContainerContext, termsAggMapping, UNGROUPED_FACTORY_KEY } from '../../common/utils';
+import { AdditionalContext, doFieldsExist, KUBERNETES_POD_UID, termsAggField, UNGROUPED_FACTORY_KEY } from '../../common/utils';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 export type GetDataResponse = Record<
@@ -234,10 +234,10 @@ export const getData = async (
   };
 
   const fieldsExisted =
-    groupBy?.includes(groupByForContainerContext)
+    groupBy?.includes(KUBERNETES_POD_UID)
       ? await doFieldsExist(
         esClient,
-        [termsAggMapping.groupByForContainerContext],
+        [termsAggField.KUBERNETES_POD_UID],
         index)
       : null;
 

@@ -372,7 +372,9 @@ const formatAlertResult = <AlertResult>(
   };
 };
 
-const hasAdditionalContext = (groupBy: string[] | null) => {
-  // if (groupBy === null) return false;
-  return groupBy?.every(group => groupByListForContext.includes(group));
+const hasAdditionalContext = (groupBy: string | string[] | null) => {
+  if (!groupBy) return false;
+  return Array.isArray(groupBy)
+    ? groupBy?.every(group => groupByListForContext.includes(group))
+    : groupByListForContext.includes(groupBy);
 };
