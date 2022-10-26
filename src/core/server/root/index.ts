@@ -7,10 +7,20 @@
  */
 
 import { ConnectableObservable, Subscription } from 'rxjs';
-import { first, publishReplay, switchMap, concatMap, tap } from 'rxjs/operators';
+import {
+  first,
+  publishReplay,
+  switchMap,
+  concatMap,
+  tap,
+  distinctUntilChanged,
+} from 'rxjs/operators';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import { Env, RawConfigurationProvider } from '@kbn/config';
 import { LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
+import type { ElasticApmConfigType } from '@kbn/apm-config-loader';
+import apm from 'elastic-apm-node';
+import { isEqual } from 'lodash';
 import { Server } from '../server';
 
 /**
@@ -22,6 +32,7 @@ export class Root {
   private readonly loggingSystem: LoggingSystem;
   private readonly server: Server;
   private loggingConfigSubscription?: Subscription;
+  private apmConfigSubscription?: Subscription;
 
   constructor(
     rawConfigProvider: RawConfigurationProvider,
@@ -37,7 +48,9 @@ export class Root {
   public async preboot() {
     try {
       this.server.setupCoreConfig();
+      this.setupApmLabelSync();
       await this.setupLogging();
+
       this.log.debug('prebooting root');
       return await this.server.preboot();
     } catch (e) {
@@ -85,11 +98,31 @@ export class Root {
       this.loggingConfigSubscription.unsubscribe();
       this.loggingConfigSubscription = undefined;
     }
+    if (this.apmConfigSubscription !== undefined) {
+      this.apmConfigSubscription.unsubscribe();
+      this.apmConfigSubscription = undefined;
+    }
     await this.loggingSystem.stop();
 
     if (this.onShutdown !== undefined) {
       this.onShutdown(reason);
     }
+  }
+
+  private setupApmLabelSync() {
+    const { configService } = this.server;
+
+    // Update APM labels on config change
+    this.apmConfigSubscription = configService
+      .getConfig$()
+      .pipe(
+        switchMap(() => configService.atPath<ElasticApmConfigType>('elastic')),
+        distinctUntilChanged(isEqual),
+        tap((elasticConfig) => {
+          apm.addLabels(elasticConfig.apm.globalLabels);
+        })
+      )
+      .subscribe();
   }
 
   private async setupLogging() {

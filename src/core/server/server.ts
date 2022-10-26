@@ -55,6 +55,7 @@ import {
   DeprecationsService,
   config as deprecationConfig,
 } from '@kbn/core-deprecations-server-internal';
+import { config as elasticApmConfig } from '@kbn/apm-config-loader';
 import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { StatusService, statusConfig } from '@kbn/core-status-server-internal';
 import { UiSettingsService, uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
@@ -450,6 +451,7 @@ export class Server {
       cspConfig,
       deprecationConfig,
       elasticsearchConfig,
+      elasticApmConfig,
       executionContextConfig,
       externalUrlConfig,
       httpConfig,
