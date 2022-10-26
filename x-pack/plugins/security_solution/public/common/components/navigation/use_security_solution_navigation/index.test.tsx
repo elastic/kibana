@@ -187,25 +187,4 @@ describe('useSecuritySolutionNavigation', () => {
       });
     });
   });
-
-  describe('Guided onboarding tour', () => {
-    it('nav can be collapsed if tour is not shown', () => {
-      const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
-        () => useSecuritySolutionNavigation(),
-        { wrapper: TestProviders }
-      );
-
-      expect(result.current?.canBeCollapsed).toBe(true);
-    });
-    it(`nav can't be collapsed if tour is shown`, () => {
-      (useTourContext as jest.Mock).mockReturnValue({ isTourShown: true });
-
-      const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
-        () => useSecuritySolutionNavigation(),
-        { wrapper: TestProviders }
-      );
-
-      expect(result.current?.canBeCollapsed).toBe(false);
-    });
-  });
 });
