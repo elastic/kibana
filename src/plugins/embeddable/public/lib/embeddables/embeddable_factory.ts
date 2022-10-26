@@ -96,8 +96,10 @@ export interface EmbeddableFactory<
    * Can be used to request explicit input from the user, to be passed in to `EmbeddableFactory:create`.
    * Explicit input is stored on the parent container for this embeddable. It overrides all inherited
    * input passed down from the parent container.
+   *
+   * Can be used to edit an embeddable by re-request the explicit input by providing initial input
    */
-  getExplicitInput(): Promise<Partial<TEmbeddableInput>>;
+  getExplicitInput(initialInput?: Partial<TEmbeddableInput>): Promise<Partial<TEmbeddableInput>>;
 
   /**
    * Creates a new embeddable instance based off the saved object id.

@@ -365,6 +365,8 @@
       "@kbn/graph-plugin/*": ["x-pack/plugins/graph/*"],
       "@kbn/grokdebugger-plugin": ["x-pack/plugins/grokdebugger"],
       "@kbn/grokdebugger-plugin/*": ["x-pack/plugins/grokdebugger/*"],
+      "@kbn/image-embeddable-plugin": ["x-pack/plugins/image_embeddable"],
+      "@kbn/image-embeddable-plugin/*": ["x-pack/plugins/image_embeddable/*"],
       "@kbn/index-lifecycle-management-plugin": ["x-pack/plugins/index_lifecycle_management"],
       "@kbn/index-lifecycle-management-plugin/*": ["x-pack/plugins/index_lifecycle_management/*"],
       "@kbn/index-management-plugin": ["x-pack/plugins/index_management"],

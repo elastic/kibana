@@ -28,6 +28,8 @@ export interface EmbeddableOutput {
   defaultTitle?: string;
   title?: string;
   editable?: boolean;
+  // Whether the embeddable can be edited inline by re-requesting the explicit input from the user
+  editableWithExplicitInput?: boolean;
   savedObjectId?: string;
 }
 

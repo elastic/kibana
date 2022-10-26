@@ -1,0 +1,13 @@
+{
+  "id": "imageEmbeddable",
+  "version": "kibana",
+  "server": false,
+  "ui": true,
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Image embeddable",
+  "requiredPlugins": ["embeddable"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact"]
+}

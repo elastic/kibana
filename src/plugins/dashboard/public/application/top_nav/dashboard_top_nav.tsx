@@ -30,7 +30,12 @@ import type { OverlayRef } from '@kbn/core/public';
 import type { SavedQuery } from '@kbn/data-plugin/common';
 import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import type { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
-import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableFactory,
+  isErrorEmbeddable,
+  openAddPanelFlyout,
+  ViewMode,
+} from '@kbn/embeddable-plugin/public';
 
 import {
   setFullScreenMode,
@@ -59,7 +64,11 @@ import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 import { DashboardConstants, getFullEditPath } from '../../dashboard_constants';
 import { DashboardAppState, DashboardSaveOptions, NavAction } from '../../types';
-import { getCreateVisualizationButtonTitle, unsavedChangesBadge } from '../../dashboard_strings';
+import {
+  dashboardReplacePanelAction,
+  getCreateVisualizationButtonTitle,
+  unsavedChangesBadge,
+} from '../../dashboard_strings';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -129,7 +138,13 @@ export function DashboardTopNav({
   const [isLabsShown, setIsLabsShown] = useState(false);
 
   const lensAlias = getVisTypeAliases().find(({ name }) => name === 'lens');
-  const quickButtonVisTypes = ['markdown', 'maps'];
+  const quickButtonVisTypes: Array<
+    { type: 'vis'; visType: string } | { type: 'embeddable'; embeddableType: string }
+  > = [
+    { type: 'vis', visType: 'markdown' },
+    { type: 'embeddable', embeddableType: 'IMAGE_EMBEDDABLE' },
+    { type: 'vis', visType: 'maps' },
+  ];
   const stateTransferService = getStateTransfer();
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
@@ -215,6 +230,28 @@ export function DashboardTopNav({
       });
     },
     [stateTransferService, search.session, trackUiMetric]
+  );
+
+  const createNewEmbeddable = useCallback(
+    async (embeddableFactory: EmbeddableFactory) => {
+      if (trackUiMetric) {
+        trackUiMetric(METRIC_TYPE.CLICK, embeddableFactory.type);
+      }
+
+      const explicitInput = await embeddableFactory.getExplicitInput();
+      const newEmbeddable = await dashboardAppState.dashboardContainer.addNewEmbeddable(
+        embeddableFactory.type,
+        explicitInput
+      );
+
+      if (newEmbeddable) {
+        pluginServices.getServices().notifications.toasts.addSuccess({
+          title: dashboardReplacePanelAction.getSuccessMessage(newEmbeddable.getTitle()),
+          'data-test-subj': 'addEmbeddableToDashboardSuccess',
+        });
+      }
+    },
+    [trackUiMetric, dashboardAppState.dashboardContainer]
   );
 
   const closeAllFlyouts = useCallback(() => {
@@ -542,30 +579,47 @@ export function DashboardTopNav({
     };
   };
 
-  const getVisTypeQuickButton = (visTypeName: string) => {
-    const visType =
-      getVisualization(visTypeName) || getVisTypeAliases().find(({ name }) => name === visTypeName);
+  const getVisTypeQuickButton = (quickButtonForType: typeof quickButtonVisTypes[0]) => {
+    if (quickButtonForType.type === 'vis') {
+      const visTypeName = quickButtonForType.visType;
+      const visType =
+        getVisualization(visTypeName) ||
+        getVisTypeAliases().find(({ name }) => name === visTypeName);
 
-    if (visType) {
-      if ('aliasPath' in visType) {
-        const { name, icon, title } = visType as VisTypeAlias;
+      if (visType) {
+        if ('aliasPath' in visType) {
+          const { name, icon, title } = visType as VisTypeAlias;
 
-        return {
-          iconType: icon,
-          createType: title,
-          onClick: createNewVisType(visType as VisTypeAlias),
-          'data-test-subj': `dashboardQuickButton${name}`,
-        };
-      } else {
-        const { name, icon, title, titleInWizard } = visType as BaseVisType;
+          return {
+            iconType: icon,
+            createType: title,
+            onClick: createNewVisType(visType as VisTypeAlias),
+            'data-test-subj': `dashboardQuickButton${name}`,
+          };
+        } else {
+          const { name, icon, title, titleInWizard } = visType as BaseVisType;
 
-        return {
-          iconType: icon,
-          createType: titleInWizard || title,
-          onClick: createNewVisType(visType as BaseVisType),
-          'data-test-subj': `dashboardQuickButton${name}`,
-        };
+          return {
+            iconType: icon,
+            createType: titleInWizard || title,
+            onClick: createNewVisType(visType as BaseVisType),
+            'data-test-subj': `dashboardQuickButton${name}`,
+          };
+        }
       }
+    } else {
+      const embeddableType = quickButtonForType.embeddableType;
+      const embeddableFactory = getEmbeddableFactory(embeddableType);
+      return {
+        iconType: embeddableFactory?.getIconType(),
+        createType: embeddableFactory?.getDisplayName(),
+        onClick: () => {
+          if (embeddableFactory) {
+            createNewEmbeddable(embeddableFactory);
+          }
+        },
+        'data-test-subj': `dashboardQuickButton${embeddableType}`,
+      };
     }
 
     return;
@@ -599,7 +653,7 @@ export function DashboardTopNav({
               extraButtons: [
                 <EditorMenu
                   createNewVisType={createNewVisType}
-                  dashboardContainer={dashboardAppState.dashboardContainer}
+                  createNewEmbeddable={createNewEmbeddable}
                 />,
                 <AddFromLibraryButton
                   onClick={addFromLibrary}
