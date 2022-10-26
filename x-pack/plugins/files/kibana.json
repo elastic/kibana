@@ -9,7 +9,6 @@
   "description": "File upload, download, sharing, and serving over HTTP implementation in Kibana.",
   "server": true,
   "ui": true,
-  "requiredPlugins": [],
   "requiredBundles": ["kibanaUtils"],
   "optionalPlugins": ["security", "usageCollection"]
 }
