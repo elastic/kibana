@@ -8,10 +8,25 @@
 import React, { useCallback } from 'react';
 import { useServices } from './services';
 
+import { InspectorLoader } from './components';
+export interface OpenInspectorParams {
+  title: string;
+  description?: string;
+  onSave(args: { title: string; desciption?: string }): Promise<void>;
+}
+
 export function useOpenInspector() {
   const { openFlyout } = useServices();
 
-  return useCallback(() => {
-    openFlyout(<div>Hello</div>);
-  }, [openFlyout]);
+  return useCallback(
+    (args: OpenInspectorParams) => {
+      openFlyout(<InspectorLoader />, {
+        maxWidth: 708,
+        size: 'l',
+        ownFocus: true,
+        hideCloseButton: true,
+      });
+    },
+    [openFlyout]
+  );
 }
