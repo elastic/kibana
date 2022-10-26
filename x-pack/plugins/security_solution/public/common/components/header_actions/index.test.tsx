@@ -7,23 +7,23 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { TableId } from '../../../../../../common/types/timeline';
-import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../../common/mock';
 import { Actions, isAlert } from '.';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
-import { licenseService } from '../../../../../common/hooks/use_license';
+import { mockTimelineData, mockTimelineModel, TestProviders } from '../../mock';
+import { useShallowEqualSelector } from '../../hooks/use_selector';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { licenseService } from '../../hooks/use_license';
+import { TableId } from '../../../../common/types';
 
-jest.mock('../../../../../detections/components/user_info', () => ({
+jest.mock('../../../detections/components/user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
 }));
-jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
+jest.mock('../../hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
-jest.mock('../../../../../common/hooks/use_selector');
+jest.mock('../../hooks/use_selector');
 jest.mock(
-  '../../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline',
+  '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline',
   () => ({
     useInvestigateInTimeline: jest.fn().mockReturnValue({
       investigateInTimelineActionItems: [],
@@ -33,8 +33,8 @@ jest.mock(
   })
 );
 
-jest.mock('../../../../../common/lib/kibana', () => {
-  const originalKibanaLib = jest.requireActual('../../../../../common/lib/kibana');
+jest.mock('../../lib/kibana', () => {
+  const originalKibanaLib = jest.requireActual('../../lib/kibana');
 
   return {
     useKibana: () => ({
@@ -64,7 +64,7 @@ jest.mock('../../../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../../../common/hooks/use_license', () => {
+jest.mock('../../hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
     isEnterprise: jest.fn(() => false),

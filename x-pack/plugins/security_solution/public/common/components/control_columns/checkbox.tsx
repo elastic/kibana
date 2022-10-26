@@ -6,8 +6,8 @@
  */
 
 import { EuiCheckbox, EuiLoadingSpinner } from '@elastic/eui';
-import type { ActionProps, HeaderActionProps } from '@kbn/timelines-plugin/common';
 import React, { useCallback } from 'react';
+import type { ActionProps, HeaderActionProps } from '../../../../common/types';
 import * as i18n from './translations';
 
 export const RowCheckBox = ({

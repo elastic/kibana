@@ -19,13 +19,10 @@ import {
   getColumnHeader,
   allowSorting,
 } from './helpers';
-import {
-  DEFAULT_ACTION_BUTTON_WIDTH,
-  DEFAULT_COLUMN_MIN_WIDTH,
-  DEFAULT_DATE_COLUMN_MIN_WIDTH,
-} from '../constants';
+import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
 import type { ColumnHeaderOptions } from '../../../../../common/types';
 import { mockBrowserFields } from '../../../containers/source/mock';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../header_actions';
 
 window.matchMedia = jest.fn().mockImplementation((query) => {
   return {

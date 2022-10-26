@@ -7,10 +7,10 @@
 
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import type { ExpandedDetail } from '../../../../common/types/detail_panel';
+import type { SessionViewConfig } from '../../../../common/types/session_view';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
-import type { SessionViewConfig } from '../../../timelines/components/timeline/session_tab_content/use_session_view';
-import type { ColumnHeaderOptions, TimelineExpandedDetail } from '../../../../common/types';
-import type { SortColumnTable } from '../../components/data_table/types';
+import type { ColumnHeaderOptions, SortColumnTable } from '../../../../common/types';
 
 export interface TGridModelSettings {
   defaultColumns: Array<
@@ -38,7 +38,7 @@ export interface TGridModel extends TGridModelSettings {
   /** Events to not be rendered **/
   deletedEventIds: string[];
   /** This holds the view information for the flyout when viewing data in a consuming view (i.e. hosts page) or the side panel in the primary data view */
-  expandedDetail: TimelineExpandedDetail;
+  expandedDetail: ExpandedDetail;
   filters?: Filter[];
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;

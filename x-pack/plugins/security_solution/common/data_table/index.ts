@@ -14,9 +14,6 @@ export interface TableById {
   [id: string]: TGridModel;
 }
 
-export type SetEventsLoading = (params: { eventIds: string[]; isLoading: boolean }) => void;
-export type SetEventsDeleted = (params: { eventIds: string[]; isDeleted: boolean }) => void;
-
 export const EMPTY_TABLE_BY_ID: TableById = {}; // stable reference
 
 export interface TGridEpicDependencies<State> {

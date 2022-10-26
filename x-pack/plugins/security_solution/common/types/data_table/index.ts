@@ -5,15 +5,25 @@
  * 2.0.
  */
 
+import type { EuiDataGridColumn } from '@elastic/eui';
 import * as runtimeTypes from 'io-ts';
-import type { TGridModel } from './model';
+import type { TGridModelSettings } from '../../../public/common/store/data_table/model';
+import type { TGridModel } from '../../../public/common/store/data_table/types';
+import type { ColumnHeaderOptions } from '../../data_table/columns';
+import type { Direction } from '../../search_strategy';
+
+export type SortDirection = 'none' | 'asc' | 'desc' | Direction;
+export interface SortColumnTable {
+  columnId: string;
+  columnType: string;
+  esTypes?: string[];
+  sortDirection: SortDirection;
+}
 
 /** The state of all timelines is stored here */
 export interface DataTableState {
   dataTable: TableState;
 }
-
-export type { TGridModel };
 
 /** A map of id to data table  */
 export interface TableById {
@@ -58,12 +68,6 @@ export const TableIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TableId.kubernetesPageSessions),
 ]);
 export type TableIdLiteral = runtimeTypes.TypeOf<typeof TableIdLiteralRt>;
-
-export enum TimelineId {
-  active = 'timeline-1',
-  casePage = 'timeline-case',
-  test = 'timeline-test', // Reserved for testing purposes
-}
 
 export interface InitialyzeTGridSettings extends Partial<TGridModelSettings> {
   id: string;

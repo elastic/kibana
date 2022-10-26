@@ -15,12 +15,9 @@ import type {
   BrowserFields,
 } from '../../../../../common/search_strategy/index_fields';
 import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
-import {
-  DEFAULT_ACTION_BUTTON_WIDTH,
-  DEFAULT_COLUMN_MIN_WIDTH,
-  DEFAULT_DATE_COLUMN_MIN_WIDTH,
-} from '../constants';
+import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
 import { defaultColumnHeaderType } from './default_headers';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../header_actions';
 
 const defaultActions: EuiDataGridColumnActions = {
   showSortAsc: true,

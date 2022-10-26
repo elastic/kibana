@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ControlColumnProps } from '@kbn/timelines-plugin/common';
+import type { ControlColumnProps } from '../../../../common/types';
 import { HeaderCheckBox, RowCheckBox } from './checkbox';
 
 export const checkBoxControlColumn: ControlColumnProps = {

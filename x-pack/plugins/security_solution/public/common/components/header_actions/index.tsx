@@ -10,35 +10,49 @@ import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import styled from 'styled-components';
+import { euiThemeVars } from '@kbn/ui-theme';
 
-import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
-import { getScopedActions, isTimelineScope } from '../../../../../helpers';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { eventHasNotes, getEventType, getPinOnClick } from '../helpers';
-import { AlertContextMenu } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
-import { InvestigateInTimelineAction } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
+import {
+  eventHasNotes,
+  getEventType,
+  getPinOnClick,
+} from '../../../timelines/components/timeline/body/helpers';
+import { getScopedActions, isTimelineScope } from '../../../helpers';
+import { isInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
+import type { ActionProps, OnPinEvent, TimelineEventsType } from '../../../../common/types';
+import { TableId, TimelineId, TimelineTabs } from '../../../../common/types';
 import { AddEventNoteAction } from './add_note_icon_item';
 import { PinEventAction } from './pin_event_action';
-import { EventsTdContent } from '../../styles';
-import * as i18n from '../translations';
-import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
-import { setActiveTabTimeline } from '../../../../store/timeline/actions';
-import {
-  useGlobalFullScreen,
-  useTimelineFullScreen,
-} from '../../../../../common/containers/use_full_screen';
-import type {
-  ActionProps,
-  OnPinEvent,
-  TimelineEventsType,
-} from '../../../../../../common/types/timeline';
-import { TableId, TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
-import { timelineActions, timelineSelectors } from '../../../../store/timeline';
-import { timelineDefaults } from '../../../../store/timeline/defaults';
-import { isInvestigateInResolverActionEnabled } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
-import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
-import { ALERTS_ACTIONS } from '../../../../../common/lib/apm/user_actions';
-import { useLicense } from '../../../../../common/hooks/use_license';
+import { useShallowEqualSelector } from '../../hooks/use_selector';
+import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
+import { useStartTransaction } from '../../lib/apm/use_start_transaction';
+import { useLicense } from '../../hooks/use_license';
+import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use_full_screen';
+import { ALERTS_ACTIONS } from '../../lib/apm/user_actions';
+import { setActiveTabTimeline } from '../../../timelines/store/timeline/actions';
+import { EventsTdContent } from '../../../timelines/components/timeline/styles';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { AlertContextMenu } from '../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
+import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
+import * as i18n from './translations';
+
+/**
+ * This is the effective width in pixels of an action button used with
+ * `EuiDataGrid` `leadingControlColumns`. (See Notes below for details)
+ *
+ * Notes:
+ * 1) This constant is necessary because `width` is a required property of
+ *    the `EuiDataGridControlColumn` interface, so it must be calculated before
+ *    content is rendered. (The width of a `EuiDataGridControlColumn` does not
+ *    automatically size itself to fit all the content.)
+ *
+ * 2) This is the *effective* width, because at the time of this writing,
+ *    `EuiButtonIcon` has a `margin-left: -4px`, which is subtracted from the
+ *    `width`
+ */
+export const DEFAULT_ACTION_BUTTON_WIDTH =
+  parseInt(euiThemeVars.euiSizeXL, 10) - parseInt(euiThemeVars.euiSizeXS, 10); // px
 
 export const isAlert = (eventType: TimelineEventsType | Omit<TimelineEventsType, 'all'>): boolean =>
   eventType === 'signal';

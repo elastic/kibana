@@ -15,7 +15,6 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import type { ControlColumnProps } from '../../common/types/timeline';
 
 const SelectionHeaderCell = () => {
   return (

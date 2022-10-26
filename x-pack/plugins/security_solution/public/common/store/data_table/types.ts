@@ -48,12 +48,6 @@ export enum TableId {
   kubernetesPageSessions = 'kubernetes-page-sessions',
 }
 
-export enum TimelineId {
-  active = 'timeline-1',
-  casePage = 'timeline-case',
-  test = 'timeline-test', // Reserved for testing purposes
-}
-
 export interface InitialyzeTGridSettings extends Partial<TGridModelSettings> {
   id: string;
 }

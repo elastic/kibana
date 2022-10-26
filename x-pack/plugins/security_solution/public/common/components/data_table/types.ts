@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Direction } from '@kbn/timelines-plugin/common';
+import type { SortDirection } from '../../../../common/types/data_table';
 import type { ColumnHeaderOptions, ColumnId } from '../../../../common/data_table/columns';
 
 export type KueryFilterQueryKind = 'kuery' | 'lucene' | 'eql';
@@ -18,14 +18,6 @@ export interface KueryFilterQuery {
 export interface SerializedFilterQuery {
   kuery: KueryFilterQuery | null;
   serializedQuery: string;
-}
-
-export type SortDirection = 'none' | 'asc' | 'desc' | Direction;
-export interface SortColumnTable {
-  columnId: string;
-  columnType: string;
-  esTypes?: string[];
-  sortDirection: SortDirection;
 }
 
 /** Invoked when a column is sorted */

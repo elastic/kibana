@@ -7,19 +7,16 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-
-import { TestProviders, mockTimelineModel } from '../../../../../common/mock';
+import { mockTimelineModel, TestProviders } from '../../mock';
+import { mockTriggersActionsUi } from '../../mock/mock_triggers_actions_ui_plugin';
+import type { HeaderActionProps } from '../toolbar/bulk_actions/types';
+import type { ColumnHeaderOptions } from '../../../../common/types';
+import { TimelineTabs } from '../../../../common/types';
 import { HeaderActions } from './header_actions';
-import { mockTriggersActionsUi } from '../../../../../common/mock/mock_triggers_actions_ui_plugin';
-import type {
-  ColumnHeaderOptions,
-  HeaderActionProps,
-} from '../../../../../../common/types/timeline';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
-import { timelineActions } from '../../../../store/timeline';
-import { getColumnHeader } from '../column_headers/helpers';
+import { timelineActions } from '../../../timelines/store/timeline';
+import { getColumnHeader } from '../../../timelines/components/timeline/body/column_headers/helpers';
 
-jest.mock('../../../row_renderers_browser', () => ({
+jest.mock('../../../timelines/components/row_renderers_browser', () => ({
   StatefulRowRenderersBrowser: () => null,
 }));
 
@@ -29,7 +26,7 @@ jest.mock('react-redux', () => ({
   useDispatch: () => mockDispatch,
 }));
 
-jest.mock('../../../../../common/hooks/use_selector', () => ({
+jest.mock('../../hooks/use_selector', () => ({
   useDeepEqualSelector: () => mockTimelineModel,
   useShallowEqualSelector: jest.fn(),
 }));
@@ -53,7 +50,7 @@ mockTriggersActionsUi.getFieldBrowser.mockImplementation(
   )
 );
 
-jest.mock('../../../../../common/lib/kibana', () => ({
+jest.mock('../../lib/kibana', () => ({
   useKibana: () => ({
     services: {
       triggersActionsUi: { ...mockTriggersActionsUi },

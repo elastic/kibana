@@ -5,15 +5,10 @@
  * 2.0.
  */
 import type { ComponentType } from 'react';
-import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
+import type { HeaderActionProps } from '../../../../../common/types';
 import type { TimelineItem } from '../../../../../common/search_strategy/timeline/events/all';
-import type { BrowserFields } from '../../../containers/source';
 import type { AlertWorkflowStatus } from '../../../types';
-import type { SortColumnTable } from '../../data_table/types';
-import type { ColumnHeaderOptions } from '../../../../../common/types';
 
-export type SetEventsLoading = (params: { eventIds: string[]; isLoading: boolean }) => void;
-export type SetEventsDeleted = (params: { eventIds: string[]; isDeleted: boolean }) => void;
 export type OnUpdateAlertStatusSuccess = (
   updated: number,
   conflicts: number,
@@ -33,21 +28,6 @@ export interface CustomBulkAction {
 export type CustomBulkActionProp = Omit<CustomBulkAction, 'onClick'> & {
   onClick: (eventIds: string[]) => void;
 };
-
-export interface HeaderActionProps {
-  width: number;
-  browserFields: BrowserFields;
-  columnHeaders: ColumnHeaderOptions[];
-  fieldBrowserOptions?: FieldBrowserOptions;
-  isEventViewer?: boolean;
-  isSelectAllChecked: boolean;
-  onSelectAll: ({ isSelected }: { isSelected: boolean }) => void;
-  showEventsSelect: boolean;
-  showSelectAllCheckbox: boolean;
-  sort: SortColumnTable[];
-  tabType: string;
-  timelineId: string;
-}
 
 export type HeaderCellRender = ComponentType | ComponentType<HeaderActionProps>;
 

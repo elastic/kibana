@@ -7,19 +7,18 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import type {
-  SetEventsDeleted,
-  SetEventsLoading,
-  OnUpdateAlertStatusSuccess,
-  OnUpdateAlertStatusError,
-  CustomBulkActionProp,
-} from '@kbn/timelines-plugin/common';
+import type { SetEventsDeleted, SetEventsLoading } from '../../../../../common/types/bulk_actions';
 import * as i18n from './translations';
 import { useUpdateAlertsStatus } from './use_update_alerts';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useStartTransaction } from '../../../lib/apm/use_start_transaction';
 import { APM_USER_INTERACTIONS } from '../../../lib/apm/constants';
 import type { AlertWorkflowStatus } from '../../../types';
+import type {
+  CustomBulkActionProp,
+  OnUpdateAlertStatusError,
+  OnUpdateAlertStatusSuccess,
+} from './types';
 
 export const getUpdateAlertsQuery = (eventIds: Readonly<string[]>) => {
   return { bool: { filter: { terms: { _id: eventIds } } } };

@@ -8,22 +8,22 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { AddEventNoteAction } from './add_note_icon_item';
-import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
-import { TestProviders } from '../../../../../common/mock';
-import { TimelineType } from '../../../../../../common/types';
+import { PinEventAction } from './pin_event_action';
+import { useUserPrivileges } from '../user_privileges';
+import { getEndpointPrivilegesInitialStateMock } from '../user_privileges/endpoint/mocks';
+import { TestProviders } from '../../mock';
+import { TimelineType } from '../../../../common/types';
 
-jest.mock('../../../../../common/components/user_privileges');
+jest.mock('../user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
-describe('AddEventNoteAction', () => {
+describe('PinEventAction', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
   describe('isDisabled', () => {
-    test('it disables the add note button when the user does NOT have crud privileges', () => {
+    test('it disables the pin event button when the user does NOT have crud privileges', () => {
       useUserPrivilegesMock.mockReturnValue({
         kibanaSecuritySolutionsPrivileges: { crud: false, read: true },
         endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
@@ -31,20 +31,20 @@ describe('AddEventNoteAction', () => {
 
       render(
         <TestProviders>
-          <AddEventNoteAction
-            showNotes={false}
+          <PinEventAction
+            isAlert={false}
+            noteIds={[]}
+            onPinClicked={jest.fn}
+            eventIsPinned={false}
             timelineType={TimelineType.default}
-            toggleShowNotes={jest.fn}
           />
         </TestProviders>
       );
 
-      expect(screen.getByTestId('timeline-notes-button-small')).toHaveClass(
-        'euiButtonIcon-isDisabled'
-      );
+      expect(screen.getByTestId('pin')).toHaveClass('euiButtonIcon-isDisabled');
     });
 
-    test('it enables the add note button when the user has crud privileges', () => {
+    test('it enables the pin event button when the user has crud privileges', () => {
       useUserPrivilegesMock.mockReturnValue({
         kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
         endpointPrivileges: getEndpointPrivilegesInitialStateMock(),
@@ -52,17 +52,17 @@ describe('AddEventNoteAction', () => {
 
       render(
         <TestProviders>
-          <AddEventNoteAction
-            showNotes={false}
+          <PinEventAction
+            isAlert={false}
+            noteIds={[]}
+            onPinClicked={jest.fn}
+            eventIsPinned={false}
             timelineType={TimelineType.default}
-            toggleShowNotes={jest.fn}
           />
         </TestProviders>
       );
 
-      expect(screen.getByTestId('timeline-notes-button-small')).not.toHaveClass(
-        'euiButtonIcon-isDisabled'
-      );
+      expect(screen.getByTestId('pin')).not.toHaveClass('euiButtonIcon-isDisabled');
     });
   });
 });

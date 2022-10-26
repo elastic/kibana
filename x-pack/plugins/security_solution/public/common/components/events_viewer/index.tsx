@@ -15,7 +15,7 @@ import type { Direction, EntityType, RowRenderer } from '@kbn/timelines-plugin/c
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DataTableCellAction } from '../../../../common/data_table/columns';
-import type { ControlColumnProps } from '../../../../common/types';
+import type { ControlColumnProps, Sort } from '../../../../common/types';
 import { dataTableActions, dataTableSelectors } from '../../store/data_table';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';

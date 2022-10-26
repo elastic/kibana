@@ -11,6 +11,7 @@ import uuid from 'uuid';
 
 import type { Filter } from '@kbn/es-query';
 
+import type { ExpandedDetail } from '../../../../common/types/detail_panel';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { Sort } from '../../components/timeline/body/sort';
 import type {
@@ -31,7 +32,6 @@ import type {
   SerializedFilterQuery,
   TimelinePersistInput,
   ToggleDetailPanel,
-  TimelineExpandedDetail,
   SortColumnTimeline,
 } from '../../../../common/types/timeline';
 import { TimelineType, TimelineStatus, TimelineId } from '../../../../common/types/timeline';
@@ -1232,7 +1232,7 @@ export const updateExcludedRowRenderersIds = ({
   };
 };
 
-export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): TimelineExpandedDetail => {
+export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): ExpandedDetail => {
   const { tabType, id, ...expandedDetails } = action;
 
   const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail', 'userDetail']);
@@ -1240,7 +1240,7 @@ export const updateTimelineDetailsPanel = (action: ToggleDetailPanel): TimelineE
   const newExpandDetails = {
     params: expandedDetails.params ? { ...expandedDetails.params } : {},
     panelView: expandedDetails.panelView,
-  } as TimelineExpandedDetail;
+  } as ExpandedDetail;
   return {
     [expandedTabType]: panelViewOptions.has(expandedDetails.panelView ?? '')
       ? newExpandDetails

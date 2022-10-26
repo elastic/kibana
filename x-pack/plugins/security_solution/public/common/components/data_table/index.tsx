@@ -27,12 +27,11 @@ import type { Filter } from '@kbn/es-query';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { SetEventsDeleted, SetEventsLoading } from '../../../../common/data_table';
+import type { SetEventsDeleted, SetEventsLoading } from '../../../../common/types/bulk_actions';
 import type { DataTableCellAction } from '../../../../common/data_table/columns';
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
-  ControlColumnProps,
   OnRowSelected,
   OnSelectAll,
   RowRenderer,
@@ -57,11 +56,11 @@ import type { AlertWorkflowStatus, Refetch } from '../../types';
 import type { TableState, TGridModel } from '../../store/data_table/types';
 import { AlertCount, defaultUnit } from '../toolbar/alert';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
-import type { SortColumnTable } from './types';
 import { useKibana } from '../../lib/kibana';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { checkBoxControlColumn } from '../control_columns';
 import { getPageRowIndex } from './pagination';
+import type { ControlColumnProps, SortColumnTable } from '../../../../common/types';
 
 const DATA_TABLE_ARIA_LABEL = i18n.translate('xpack.timelines.tgrid.body.ariaLabel', {
   defaultMessage: 'Alerts',
@@ -330,7 +329,7 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
           isSelectAllChecked: isSelected && selectedCount + 1 === data.length,
         });
       },
-      [setSelected, id, data, queryFields, hasAlertsCrud, hasAlertsCrudPermissions, selectedCount]
+      [setSelected, id, data, queryFields, hasAlertsCrud, selectedCount]
     );
 
     const onSelectPage: OnSelectAll = useCallback(
@@ -349,7 +348,7 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
               isSelectAllChecked: isSelected,
             })
           : clearSelected({ id }),
-      [setSelected, id, data, queryFields, hasAlertsCrud, hasAlertsCrudPermissions, clearSelected]
+      [setSelected, id, data, queryFields, hasAlertsCrud, clearSelected]
     );
 
     // Sync to selectAll so parent components can select all events

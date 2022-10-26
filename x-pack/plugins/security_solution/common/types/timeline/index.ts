@@ -22,12 +22,11 @@ import {
   success,
   success_count as successCount,
 } from '../../detection_engine/schemas/common/schemas';
-import type { FlowTargetSourceDest } from '../../search_strategy/security_solution/network';
 import { errorSchema } from '../../detection_engine/schemas/response/error_schema';
 import type { Maybe } from '../../search_strategy';
 import { Direction } from '../../search_strategy';
+import type { ExpandedDetailType } from '../detail_panel';
 
-export * from './actions';
 export * from './cells';
 export * from './columns';
 export * from './data_provider';
@@ -453,59 +452,7 @@ export interface ScrollToTopEvent {
   timestamp: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type EmptyObject = Record<any, never>;
-
-export type TimelineExpandedEventType =
-  | {
-      panelView?: 'eventDetail';
-      params?: {
-        eventId: string;
-        indexName: string;
-        refetch?: () => void;
-      };
-    }
-  | EmptyObject;
-
-export type TimelineExpandedHostType =
-  | {
-      panelView?: 'hostDetail';
-      params?: {
-        hostName: string;
-      };
-    }
-  | EmptyObject;
-
-export type TimelineExpandedNetworkType =
-  | {
-      panelView?: 'networkDetail';
-      params?: {
-        ip: string;
-        flowTarget: FlowTargetSourceDest;
-      };
-    }
-  | EmptyObject;
-
-export type TimelineExpandedUserType =
-  | {
-      panelView?: 'userDetail';
-      params?: {
-        userName: string;
-      };
-    }
-  | EmptyObject;
-
-export type TimelineExpandedDetailType =
-  | TimelineExpandedEventType
-  | TimelineExpandedHostType
-  | TimelineExpandedNetworkType
-  | TimelineExpandedUserType;
-
-export type TimelineExpandedDetail = {
-  [tab in TimelineTabs]?: TimelineExpandedDetailType;
-};
-
-export type ToggleDetailPanel = TimelineExpandedDetailType & {
+export type ToggleDetailPanel = ExpandedDetailType & {
   tabType?: TimelineTabs;
   id: string;
 };

@@ -6,3 +6,7 @@
  */
 
 export * from './timeline';
+export * from './data_table';
+export * from './detail_panel';
+export * from './header_actions';
+export * from './session_view';

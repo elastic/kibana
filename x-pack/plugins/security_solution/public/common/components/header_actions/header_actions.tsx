@@ -11,24 +11,23 @@ import { EuiButtonIcon, EuiCheckbox, EuiToolTip, useDataGridColumnSorting } from
 import { useDispatch } from 'react-redux';
 
 import styled from 'styled-components';
-import { isActiveTimeline } from '../../../../../helpers';
-import type { HeaderActionProps, SortDirection } from '../../../../../../common/types/timeline';
-import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
-import { EXIT_FULL_SCREEN } from '../../../../../common/components/exit_full_screen/translations';
-import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../../../common/constants';
-import {
-  useGlobalFullScreen,
-  useTimelineFullScreen,
-} from '../../../../../common/containers/use_full_screen';
-import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { StatefulRowRenderersBrowser } from '../../../row_renderers_browser';
-import { EventsTh, EventsThContent } from '../../styles';
-import { EventsSelect } from '../column_headers/events_select';
-import * as i18n from '../column_headers/translations';
-import { timelineActions, timelineSelectors } from '../../../../store/timeline';
-import { isFullScreen } from '../column_headers';
-import { useKibana } from '../../../../../common/lib/kibana';
-import { getColumnHeader } from '../column_headers/helpers';
+import type { SortDirection } from '../../../../common/types';
+import { TimelineTabs, TimelineId } from '../../../../common/types';
+import { isFullScreen } from '../../../timelines/components/timeline/body/column_headers';
+import { isActiveTimeline } from '../../../helpers';
+import { getColumnHeader } from '../../../timelines/components/timeline/body/column_headers/helpers';
+import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use_full_screen';
+import { useKibana } from '../../lib/kibana';
+import type { HeaderActionProps } from '../toolbar/bulk_actions/types';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '.';
+import { EventsTh, EventsThContent } from '../../../timelines/components/timeline/styles';
+import { StatefulRowRenderersBrowser } from '../../../timelines/components/row_renderers_browser';
+import { EXIT_FULL_SCREEN } from '../exit_full_screen/translations';
+import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
+import { EventsSelect } from '../../../timelines/components/timeline/body/column_headers/events_select';
+import * as i18n from './translations';
 
 const SortingColumnsContainer = styled.div`
   button {

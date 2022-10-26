@@ -7,13 +7,12 @@
 
 import React, { useMemo } from 'react';
 import { EuiToolTip } from '@elastic/eui';
-
-import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
-import { EventsTdContent } from '../../styles';
-import { eventHasNotes, getPinTooltip } from '../helpers';
-import { Pin } from '../../pin';
-import type { TimelineType } from '../../../../../../common/types/timeline';
-import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { EventsTdContent } from '../../../timelines/components/timeline/styles';
+import { eventHasNotes, getPinTooltip } from '../../../timelines/components/timeline/body/helpers';
+import type { TimelineType } from '../../../../common/types';
+import { useUserPrivileges } from '../user_privileges';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '.';
+import { Pin } from '../../../timelines/components/timeline/pin';
 
 interface PinEventActionProps {
   ariaLabel?: string;

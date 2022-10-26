@@ -17,17 +17,12 @@
 export { DELETED_SECURITY_SOLUTION_DATA_VIEW } from './constants';
 
 export type {
-  ActionProps,
   CellValueElementProps,
   DataProvidersAnd,
   DataProvider,
-  GenericActionRowCellRenderProps,
   QueryOperator,
   QueryMatch,
-  RowCellRender,
   RowRenderer,
-  SetEventsDeleted,
-  SetEventsLoading,
   TimelineType,
   CustomBulkActionProp,
 } from './types';

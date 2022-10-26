@@ -8,9 +8,8 @@
 import type { MouseEvent } from 'react';
 import React from 'react';
 import { EuiContextMenuItem, EuiButtonIcon, EuiToolTip, EuiText } from '@elastic/eui';
-
-import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
-import { EventsTdContent } from '../../styles';
+import { EventsTdContent } from '../../../timelines/components/timeline/styles';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '.';
 
 interface ActionIconItemProps {
   ariaLabel?: string;

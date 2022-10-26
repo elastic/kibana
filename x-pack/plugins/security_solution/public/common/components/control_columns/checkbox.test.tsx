@@ -6,10 +6,10 @@
  */
 
 import { render, fireEvent } from '@testing-library/react';
-import type { ActionProps, HeaderActionProps } from '@kbn/timelines-plugin/common';
 import { HeaderCheckBox, RowCheckBox } from './checkbox';
 import React from 'react';
-import { TimelineTabs } from '@kbn/timelines-plugin/common/types';
+import type { ActionProps, HeaderActionProps } from '../../../../common/types';
+import { TimelineTabs } from '../../../../common/types';
 
 describe('checkbox control column', () => {
   describe('RowCheckBox', () => {

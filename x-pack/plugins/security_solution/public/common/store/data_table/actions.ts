@@ -6,15 +6,16 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import type { SessionViewConfig } from '../../../timelines/components/timeline/session_tab_content/use_session_view';
+import type { SessionViewConfig } from '../../../../common/types/session_view';
+import type { ExpandedDetailType } from '../../../../common/types/detail_panel';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
-import type { ColumnHeaderOptions, TimelineExpandedDetailType } from '../../../../common/types';
+import type { ColumnHeaderOptions } from '../../../../common/types';
 import type { SortColumnTable } from '../../components/data_table/types';
 import type { InitialyzeTGridSettings, TGridPersistInput } from './types';
 
-const actionCreator = actionCreatorFactory('x-pack/timelines/t-grid');
+const actionCreator = actionCreatorFactory('x-pack/security_solution/data-table');
 
-export const createTGrid = actionCreator<TGridPersistInput>('CREATE_TGRID');
+export const createTGrid = actionCreator<TGridPersistInput>('CREATE_DATA_TABLE');
 
 export const upsertColumn = actionCreator<{
   column: ColumnHeaderOptions;
@@ -39,7 +40,7 @@ export const updateColumnWidth = actionCreator<{
   width: number;
 }>('UPDATE_COLUMN_WIDTH');
 
-export type TableToggleDetailPanel = TimelineExpandedDetailType & {
+export type TableToggleDetailPanel = ExpandedDetailType & {
   tabType?: string;
   id: string;
 };
@@ -77,46 +78,47 @@ export const setSelected = actionCreator<{
   eventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   isSelected: boolean;
   isSelectAllChecked: boolean;
-}>('SET_TGRID_SELECTED');
+}>('SET_DATA_TABLE_SELECTED');
 
 export const clearSelected = actionCreator<{
   id: string;
-}>('CLEAR_TGRID_SELECTED');
+}>('CLEAR_DATA_TABLE_SELECTED');
 
 export const setEventsLoading = actionCreator<{
   id: string;
   eventIds: string[];
   isLoading: boolean;
-}>('SET_TGRID_EVENTS_LOADING');
+}>('SET_DATA_TABLE_EVENTS_LOADING');
 
 export const clearEventsLoading = actionCreator<{
   id: string;
-}>('CLEAR_TGRID_EVENTS_LOADING');
+}>('CLEAR_DATA_TABLE_EVENTS_LOADING');
 
 export const setEventsDeleted = actionCreator<{
   id: string;
   eventIds: string[];
   isDeleted: boolean;
-}>('SET_TGRID_EVENTS_DELETED');
+}>('SET_DATA_TABLE_EVENTS_DELETED');
 
 export const clearEventsDeleted = actionCreator<{
   id: string;
-}>('CLEAR_TGRID_EVENTS_DELETED');
+}>('CLEAR_DATA_TABLE_EVENTS_DELETED');
 
-export const initializeTGridSettings = actionCreator<InitialyzeTGridSettings>('INITIALIZE_TGRID');
+export const initializeTGridSettings =
+  actionCreator<InitialyzeTGridSettings>('INITIALIZE_DATA_TABLE');
 
 export const setTGridSelectAll = actionCreator<{ id: string; selectAll: boolean }>(
-  'SET_TGRID_SELECT_ALL'
+  'SET_DATA_TABLE_SELECT_ALL'
 );
 
 export const updateGraphEventId = actionCreator<{ id: string; graphEventId: string }>(
-  'UPDATE_TGRID_GRAPH_EVENT_ID'
+  'UPDATE_DATA_TABLE_GRAPH_EVENT_ID'
 );
 
 export const updateSessionViewConfig = actionCreator<{
   id: string;
   sessionViewConfig: SessionViewConfig | null;
-}>('UPDATE_TGRID_SESSION_VIEW_CONFIG');
+}>('UPDATE_DATA_TABLE_SESSION_VIEW_CONFIG');
 
 export const setTableUpdatedAt = actionCreator<{ id: string; updated: number }>(
   'SET_TABLE_UPDATED_AT'

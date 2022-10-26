@@ -4,11 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export type {
-  ActionProps,
-  HeaderActionProps,
-  GenericActionRowCellRenderProps,
-  HeaderCellRender,
-  RowCellRender,
-  ControlColumnProps,
-} from '@kbn/timelines-plugin/common';
+
+export interface SessionViewConfig {
+  sessionEntityId: string;
+  jumpToEntityId?: string;
+  jumpToCursor?: string;
+  investigatedAlertId?: string;
+}
