@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { withApmSpan } from '../../../../utils/with_apm_span';
-import { getServerlessFunctionLatency } from './serverless_function_latency';
-import { getColdStartDuration } from './cold_start_duration';
-import { getMemoryChartData } from '../shared/memory';
-import { getComputeUsage } from './compute_usage';
-import { getActiveInstances } from './active_instances';
-import { getColdStartCount } from './cold_start_count';
-import { getSearchTransactionsEvents } from '../../../../lib/helpers/transactions';
-import { APMConfig } from '../../../..';
-import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
+import { withApmSpan } from '../../../utils/with_apm_span';
+import { getMemoryChartData } from '../by_agent/shared/memory';
+import { getColdStartCountChart } from './get_cold_start_count_chart';
+import { getColdStartDurationChart } from './get_cold_start_duration_chart';
+import { getComputeUsageChart } from './get_compute_usage_chart';
+import { getServerlessFunctionLatencyChart } from './get_serverless_function_latency_chart';
+import { APMConfig } from '../../..';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
-export function getServerlessAgentMetricCharts({
+export function getServerlessAgentMetricsCharts({
   environment,
   kuery,
   config,
@@ -24,6 +23,7 @@ export function getServerlessAgentMetricCharts({
   serviceName,
   start,
   end,
+  serverlessId,
 }: {
   environment: string;
   kuery: string;
@@ -32,6 +32,7 @@ export function getServerlessAgentMetricCharts({
   serviceName: string;
   start: number;
   end: number;
+  serverlessId?: string;
 }) {
   return withApmSpan('get_serverless_agent_metric_charts', async () => {
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
@@ -50,17 +51,17 @@ export function getServerlessAgentMetricCharts({
       serviceName,
       start,
       end,
+      serverlessId,
     };
     return await Promise.all([
-      getServerlessFunctionLatency({
+      getServerlessFunctionLatencyChart({
         ...options,
         searchAggregatedTransactions,
       }),
       getMemoryChartData(options),
-      getColdStartDuration(options),
-      getColdStartCount(options),
-      getComputeUsage(options),
-      getActiveInstances({ ...options, searchAggregatedTransactions }),
+      getColdStartDurationChart(options),
+      getColdStartCountChart(options),
+      getComputeUsageChart(options),
     ]);
   });
 }
