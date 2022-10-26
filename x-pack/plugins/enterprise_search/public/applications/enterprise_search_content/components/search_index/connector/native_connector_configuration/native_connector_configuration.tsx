@@ -37,24 +37,25 @@ import { NativeConnectorConfigurationConfig } from './native_connector_configura
 import { ResearchConfiguration } from './research_configuration';
 
 export const NativeConnectorConfiguration: React.FC = () => {
-  const { index: indexData } = useValues(IndexViewLogic);
+  const {
+    indexData: { index },
+  } = useValues(IndexViewLogic);
 
-  if (!isConnectorIndex(indexData)) {
+  if (!isConnectorIndex(index)) {
     return <></>;
   }
 
   const nativeConnector = NATIVE_CONNECTORS.find(
-    (connector) => connector.serviceType === indexData.connector.service_type
+    (connector) => connector.serviceType === index.connector.service_type
   );
 
   if (!nativeConnector) {
     return <></>;
   }
 
-  const hasDescription = !!indexData.connector.description;
-  const hasConfigured = hasConfiguredConfiguration(indexData.connector.configuration);
-  const hasConfiguredAdvanced =
-    indexData.connector.last_synced || indexData.connector.scheduling.enabled;
+  const hasDescription = !!index.connector.description;
+  const hasConfigured = hasConfiguredConfiguration(index.connector.configuration);
+  const hasConfiguredAdvanced = index.connector.last_synced || index.connector.scheduling.enabled;
   const hasResearched = hasDescription || hasConfigured || hasConfiguredAdvanced;
 
   const icon = NATIVE_CONNECTOR_ICONS[nativeConnector.serviceType];

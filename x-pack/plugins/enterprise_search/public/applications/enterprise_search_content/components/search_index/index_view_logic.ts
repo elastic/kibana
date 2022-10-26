@@ -76,9 +76,9 @@ export interface IndexViewValues {
   data: typeof FetchIndexApiLogic.values.data;
   fetchIndexApiStatus: Status;
   fetchIndexTimeoutId: NodeJS.Timeout | null;
-  index: ElasticsearchViewIndex | undefined;
   indexData: {
-    index: ElasticsearchIndexWithIngestion | undefined;
+    index: ElasticsearchViewIndex | undefined;
+    indexApiData: ElasticsearchIndexWithIngestion | undefined;
   };
   indexName: string;
   ingestionMethod: IngestionMethod;
@@ -221,10 +221,13 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       },
     ],
     indexData: [
-      { index: undefined },
+      { index: undefined, indexApiData: undefined },
       {
-        fetchIndexApiSuccess: (_, index) => ({ index }),
-        resetFetchIndexApi: () => ({ index: undefined }),
+        fetchIndexApiSuccess: (_, indexData) => ({
+          index: indexToViewIndex(indexData),
+          indexApiData: indexData,
+        }),
+        resetFetchIndexApi: () => ({ index: undefined, indexApiData: undefined }),
       },
     ],
     localSyncNowValue: [
@@ -245,17 +248,18 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
   },
   selectors: ({ selectors }) => ({
     connector: [
-      () => [selectors.index],
-      (index: ElasticsearchViewIndex | undefined) =>
-        index && (isConnectorViewIndex(index) || isCrawlerIndex(index))
-          ? index.connector
+      () => [selectors.indexData],
+      (indexData) =>
+        indexData.index &&
+        (isConnectorViewIndex(indexData.index) || isCrawlerIndex(indexData.index))
+          ? indexData.index.connector
           : undefined,
     ],
     connectorId: [
-      () => [selectors.index],
-      (index) => (isConnectorViewIndex(index) ? index.connector.id : null),
+      () => [selectors.indexData],
+      (indexData) => (isConnectorViewIndex(indexData.index) ? indexData.index.connector.id : null),
     ],
-    index: [() => [selectors.data], (data) => (data ? indexToViewIndex(data) : undefined)],
+    // index: [() => [selectors.data], (data) => (data ? indexToViewIndex(data) : undefined)],
     ingestionMethod: [() => [selectors.data], (data) => getIngestionMethod(data)],
     ingestionStatus: [() => [selectors.data], (data) => getIngestionStatus(data)],
     isSyncing: [

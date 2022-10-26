@@ -43,7 +43,10 @@ import { SearchIndexTabId } from '../search_index';
 import { ConnectorSchedulingLogic } from './connector_scheduling_logic';
 
 export const ConnectorSchedulingComponent: React.FC = () => {
-  const { index, ingestionStatus } = useValues(IndexViewLogic);
+  const {
+    indexData: { index },
+    ingestionStatus,
+  } = useValues(IndexViewLogic);
   const { status } = useValues(UpdateConnectorSchedulingApiLogic);
   const { makeRequest } = useActions(UpdateConnectorSchedulingApiLogic);
   const { hasChanges } = useValues(ConnectorSchedulingLogic);
