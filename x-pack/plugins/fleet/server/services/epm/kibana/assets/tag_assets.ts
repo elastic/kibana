@@ -16,6 +16,7 @@ import { KibanaSavedObjectTypeMapping } from './install';
 const TAG_COLOR = '#FFFFFF';
 const MANAGED_TAG_NAME = 'Managed';
 const LEGACY_MANAGED_TAG_ID = 'managed';
+
 const getManagedTagId = (spaceId: string) => `fleet-managed-${spaceId}`;
 const getPackageTagId = (spaceId: string, pkgName: string) => `fleet-pkg-${pkgName}-${spaceId}`;
 const getLegacyPackageTagId = (pkgName: string) => pkgName;
@@ -29,7 +30,43 @@ interface TagAssetsParams {
   spaceId: string;
 }
 
-async function _maybeCreateManagedTag(
+export async function tagKibanaAssets(opts: TagAssetsParams) {
+  const { savedObjectTagAssignmentService, kibanaAssets } = opts;
+  const taggableAssets = getTaggableAssets(kibanaAssets);
+
+  // no assets to tag
+  if (taggableAssets.length === 0) {
+    return;
+  }
+
+  const [managedTagId, packageTagId] = await Promise.all([
+    ensureManagedTag(opts),
+    ensurePackageTag(opts),
+  ]);
+
+  await savedObjectTagAssignmentService.updateTagAssignments({
+    tags: [managedTagId, packageTagId],
+    assign: taggableAssets,
+    unassign: [],
+    refresh: false,
+  });
+}
+
+function getTaggableAssets(kibanaAssets: TagAssetsParams['kibanaAssets']) {
+  return Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
+    if (!taggableTypes.includes(KibanaSavedObjectTypeMapping[assetType as KibanaAssetType])) {
+      return [];
+    }
+
+    if (!assets.length) {
+      return [];
+    }
+
+    return assets;
+  });
+}
+
+async function ensureManagedTag(
   opts: Pick<TagAssetsParams, 'spaceId' | 'savedObjectTagClient'>
 ): Promise<string> {
   const { spaceId, savedObjectTagClient } = opts;
@@ -55,7 +92,7 @@ async function _maybeCreateManagedTag(
   return managedTagId;
 }
 
-export async function _maybeCreatePackageTag(
+async function ensurePackageTag(
   opts: Pick<TagAssetsParams, 'spaceId' | 'savedObjectTagClient' | 'pkgName' | 'pkgTitle'>
 ): Promise<string> {
   const { spaceId, savedObjectTagClient, pkgName, pkgTitle } = opts;
@@ -80,40 +117,4 @@ export async function _maybeCreatePackageTag(
   );
 
   return packageTagId;
-}
-
-export function _getTaggableAssets(kibanaAssets: TagAssetsParams['kibanaAssets']) {
-  return Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
-    if (!taggableTypes.includes(KibanaSavedObjectTypeMapping[assetType as KibanaAssetType])) {
-      return [];
-    }
-
-    if (!assets.length) {
-      return [];
-    }
-
-    return assets;
-  });
-}
-
-export async function tagKibanaAssets(opts: TagAssetsParams) {
-  const { savedObjectTagAssignmentService, kibanaAssets } = opts;
-  const taggableAssets = _getTaggableAssets(kibanaAssets);
-
-  // no assets to tag
-  if (taggableAssets.length === 0) {
-    return;
-  }
-
-  const [managedTagId, packageTagId] = await Promise.all([
-    _maybeCreateManagedTag(opts),
-    _maybeCreatePackageTag(opts),
-  ]);
-
-  await savedObjectTagAssignmentService.updateTagAssignments({
-    tags: [managedTagId, packageTagId],
-    assign: taggableAssets,
-    unassign: [],
-    refresh: false,
-  });
 }
