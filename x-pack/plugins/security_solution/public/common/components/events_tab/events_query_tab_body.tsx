@@ -153,7 +153,14 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
     [additionalFilters, showExternalAlerts]
   );
 
-  const addBulkToTimelineAction = useAddBulkToTimelineAction();
+  const addBulkToTimelineAction = useAddBulkToTimelineAction({
+    localFilters: composedPageFilters,
+    tableId,
+    from: startDate,
+    to: endDate,
+    scopeId: SourcererScopeName.default,
+  });
+
   const bulkActions = useMemo<BulkActionsProp | boolean>(() => {
     return {
       alertStatusActions: false,

@@ -199,7 +199,12 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   }, []);
 
   const addToCaseBulkActions = useBulkAddToCaseActions();
-  const addBulkToTimelineAction = useAddBulkToTimelineAction();
+  const addBulkToTimelineAction = useAddBulkToTimelineAction({
+    localFilters: defaultFiltersMemo ?? [],
+    tableId,
+    from,
+    to,
+  });
 
   const bulkActions = useMemo(
     () => ({

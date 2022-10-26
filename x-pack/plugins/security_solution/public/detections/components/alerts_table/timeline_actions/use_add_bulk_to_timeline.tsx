@@ -6,18 +6,129 @@
  */
 
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
-import { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import type { Filter } from '@kbn/es-query';
+import { combineQueries } from '@kbn/timelines-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { MAX_LIMIT_TIMELINE } from '../../../../../common/constants';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import type { TimelineArgs } from '../../../../timelines/containers';
+import { useTimelineEventsHandler } from '../../../../timelines/containers';
+import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
+import type { State } from '../../../../common/store/types';
 import { dispatchUpdateTimeline } from '../../../../timelines/components/open_timeline/helpers';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
-import { ADD_BULK_TO_TIMELINE } from '../translations';
+import { INVESTIGATE_BULK_IN_TIMELINE } from '../translations';
+import type { TableId } from '../../../../../common/types/timeline';
 import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { sendBulkEventsToTimelineAction } from '../actions';
 import type { CreateTimelineProps } from '../types';
+import { tableDefaults } from '../../../../common/store/data_table/defaults';
+import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import type { Direction } from '../../../../../common/search_strategy';
+import { setEventsLoading } from '../../../../common/store/data_table/actions';
 
-export const useAddBulkToTimelineAction = () => {
+export interface UseAddBulkToTimelineActionProps {
+  /* filters being passed to the Alert/events table */
+  localFilters: Filter[];
+  /* Table ID for which this hook is being used */
+  tableId: TableId;
+  /* start time being passed to the Events Table */
+  from: string;
+  /* End Time of the table being passed to the Events Table */
+  to: string;
+  /* Sourcerer Scope Id*/
+  scopeId: SourcererScopeName;
+}
+
+/*
+ * useAddBulkToTimelineAction  returns a bulk action that can be passed to the
+ * TGrid so that multiple items at a time can be added to the timeline.
+ *
+ * It also syncs the timerange passed to the TGrid to that of  timeline
+ *
+ * */
+export const useAddBulkToTimelineAction = ({
+  localFilters,
+  tableId,
+  from,
+  to,
+  scopeId,
+}: UseAddBulkToTimelineActionProps) => {
+  const [disableActionOnSelectAll, setDisabledActionOnSelectAll] = useState(false);
+
+  const {
+    browserFields,
+    dataViewId,
+    runtimeMappings,
+    indexPattern,
+    // important to get selectedPatterns from useSourcererDataView
+    // in order to include the exclude filters in the search that are not stored in the timeline
+    selectedPatterns,
+  } = useSourcererDataView(scopeId);
   const dispatch = useDispatch();
+  const { uiSettings } = useKibana().services;
+
+  const { filters, dataTable: { selectAll, totalCount, sort, selectedEventIds } = tableDefaults } =
+    useSelector((state: State) => eventsViewerSelector(state, tableId));
+
+  const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
+
+  const timelineQuerySortField = sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
+    field: columnId,
+    direction: sortDirection as Direction,
+    esTypes: esTypes ?? [],
+    type: columnType,
+  }));
+
+  const combinedFilters = useMemo(() => [...localFilters, ...filters], [localFilters, filters]);
+
+  const combinedQuery = combineQueries({
+    config: esQueryConfig,
+    dataProviders: [],
+    indexPattern,
+    filters: combinedFilters,
+    kqlQuery: { query: '', language: 'kuery' },
+    browserFields,
+    kqlMode: 'filter',
+  });
+
+  const filterQuery = useMemo(() => {
+    if (!combinedQuery) return '';
+    return combinedQuery.filterQuery;
+  }, [combinedQuery]);
+
+  // in case user selects all items, we will use below handler to get the IDs of
+  // all items (with max limit)
+  const [, , searchhandler] = useTimelineEventsHandler({
+    dataViewId,
+    endDate: to,
+    startDate: from,
+    id: tableId,
+    fields: ['_id', 'timestamp'],
+    sort: timelineQuerySortField,
+    indexNames: selectedPatterns,
+    filterQuery,
+    runtimeMappings,
+    limit: Math.min(10000, totalCount),
+    timerangeKind: 'absolute',
+  });
+
+  useEffect(() => {
+    if (!selectAll) {
+      setDisabledActionOnSelectAll(false);
+      return;
+    }
+    if (totalCount > 4000) {
+      setDisabledActionOnSelectAll(true);
+    } else {
+      setDisabledActionOnSelectAll(false);
+    }
+  }, [selectAll, totalCount]);
+
   const clearActiveTimeline = useCreateTimeline({
     timelineId: TimelineId.active,
     timelineType: TimelineType.default,
@@ -29,43 +140,82 @@ export const useAddBulkToTimelineAction = () => {
   );
 
   const createTimeline = useCallback(
-    ({ from: fromTimeline, timeline, to: toTimeline, ruleNote }: CreateTimelineProps) => {
+    ({ timeline, ruleNote, timeline: { filters: eventIdFilters } }: CreateTimelineProps) => {
       clearActiveTimeline();
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
       dispatchUpdateTimeline(dispatch)({
         duplicate: true,
-        from: fromTimeline,
+        from,
         id: TimelineId.active,
         notes: [],
         timeline: {
           ...timeline,
           indexNames: timeline.indexNames ?? [],
           show: true,
+          filters: eventIdFilters,
         },
-        to: toTimeline,
+        to,
         ruleNote,
       })();
     },
-    [dispatch, updateTimelineIsLoading, clearActiveTimeline]
+    [dispatch, updateTimelineIsLoading, clearActiveTimeline, from, to]
+  );
+
+  const onResponseHandler = useCallback(
+    (localResponse: TimelineArgs) => {
+      dispatch(
+        setEventsLoading({
+          id: tableId,
+          isLoading: true,
+          eventIds: Object.keys(selectedEventIds),
+        })
+      );
+      sendBulkEventsToTimelineAction(
+        createTimeline,
+        localResponse.events.map((item) => item.ecs),
+        'KqlFilter'
+      );
+
+      dispatch(
+        setEventsLoading({
+          id: tableId,
+          isLoading: false,
+          eventIds: Object.keys(selectedEventIds),
+        })
+      );
+    },
+    [dispatch, createTimeline, selectedEventIds, tableId]
   );
 
   const onActionClick = useCallback(
     (items: TimelineItem[] | undefined) => {
       if (!items) return;
+
+      if (selectAll) {
+        searchhandler(onResponseHandler);
+        return;
+      }
+
       sendBulkEventsToTimelineAction(
         createTimeline,
         items.map((item) => item.ecs),
         'KqlFilter'
       );
     },
-    [createTimeline]
+    [createTimeline, searchhandler, selectAll, onResponseHandler]
   );
 
+  const investigateInTimelineTitle = useMemo(() => {
+    return disableActionOnSelectAll
+      ? `${INVESTIGATE_BULK_IN_TIMELINE} ( max ${MAX_LIMIT_TIMELINE} )`
+      : INVESTIGATE_BULK_IN_TIMELINE;
+  }, [disableActionOnSelectAll]);
+
   return {
-    label: ADD_BULK_TO_TIMELINE,
+    label: investigateInTimelineTitle,
     key: 'add-bulk-to-timeline',
-    'data-test-subj': 'add-bulk-to-timeline',
-    disableOnQuery: true,
+    'data-test-subj': 'investigate-bulk-in-timeline',
+    disableOnQuery: disableActionOnSelectAll,
     onClick: onActionClick,
   };
 };

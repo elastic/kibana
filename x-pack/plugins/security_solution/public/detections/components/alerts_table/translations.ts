@@ -281,9 +281,9 @@ export const ADD_TO_CASE_DISABLED = i18n.translate(
   }
 );
 
-export const ADD_BULK_TO_TIMELINE = i18n.translate(
+export const INVESTIGATE_BULK_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addBulkToTimeline',
   {
-    defaultMessage: 'Add To timeline',
+    defaultMessage: 'Investigate in timeline',
   }
 );

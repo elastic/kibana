@@ -29,6 +29,7 @@ export const tableDefaults: SubsetTGridModel = {
       sortDirection: 'desc',
     },
   ],
+  selectAll: false,
   graphEventId: '',
   sessionViewConfig: null,
   columns: defaultHeaders,
