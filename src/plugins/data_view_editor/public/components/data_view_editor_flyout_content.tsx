@@ -179,14 +179,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   ] = useFormData<FormInternal>({
     form,
     onChange,
-    /*
-    onChange: () => {
-      // newItem$.current.next(undefined);
-    },
-    */
   });
-
-  // const currentLoadingMatchedIndicesRef = useRef(0);
 
   const isLoadingSources = useObservable(dataViewEditorService.isLoadingSources$, true);
 
@@ -197,32 +190,15 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const isLoadingDataViewNames = useObservable(isLoadingDataViewNames$.current, true);
   const newItem$ = useRef(new Subject());
 
-  // I'm pretty sure this is here for debugging purposes
-  /*
-  useEffect(() => {
-    const a = dataViewEditorService.matchedIndices$
-      .pipe(distinctUntilChanged(isEqual))
-      .subscribe((item) => {
-        newItem$.current.next(item);
-        newItem$.current.next(undefined);
-      });
-
-    const b = newItem$.current.subscribe((item) => console.log('newItem$', item));
-
-    return () => {
-      a.unsubscribe();
-      b.unsubscribe();
-    };
-  }, [dataViewEditorService.matchedIndices$]);
-  */
-
   const rollupIndicesCapabilities = useObservable(
     dataViewEditorService.rollupIndicesCapabilities$,
     {}
   );
 
+  // this shouldn't be needed
   // const rollupIndex$ = useRef(new BehaviorSubject<string | undefined>(undefined));
 
+  // could this be moved to the service?
   // initial loading of indicies and data view names
   useEffect(() => {
     let isCancelled = false;
@@ -253,6 +229,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     };
   }, [editData, type, title, allowHidden, requireTimestampField, dataViewEditorService]);
 
+  // part of service?
   const getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
 
   const onTypeChange = useCallback(
@@ -387,62 +364,3 @@ const IndexPatternEditorFlyoutContentComponent = ({
 };
 
 export const IndexPatternEditorFlyoutContent = React.memo(IndexPatternEditorFlyoutContentComponent);
-
-// loadMatchedIndices is called both as an side effect inside of a parent component and the inside forms validation functions
-// that are challenging to synchronize without a larger refactor
-// Use memoizeOne as a caching layer to avoid excessive network requests on each key type
-// TODO: refactor to remove `memoize` when https://github.com/elastic/kibana/pull/109238 is done
-
-/*
-const loadMatchedIndices = memoizeOne(
-  async (
-    query: string,
-    allowHidden: boolean,
-    allSources: MatchedItem[],
-    dataViewEditorService: DataViewEditorService
-  ): Promise<{
-    matchedIndicesResult: MatchedIndicesSet;
-    exactMatched: MatchedItem[];
-    partialMatched: MatchedItem[];
-  }> => {
-    const indexRequests = [];
-
-    if (query?.endsWith('*')) {
-      const exactMatchedQuery = dataViewEditorService.getIndicesCached({
-        pattern: query,
-        showAllIndices: allowHidden,
-      });
-      indexRequests.push(exactMatchedQuery);
-      // provide default value when not making a request for the partialMatchQuery
-      indexRequests.push(Promise.resolve([]));
-    } else {
-      const exactMatchQuery = dataViewEditorService.getIndicesCached({
-        pattern: query,
-        showAllIndices: allowHidden,
-      });
-      const partialMatchQuery = dataViewEditorService.getIndicesCached({
-        pattern: `${query}*`,
-        showAllIndices: allowHidden,
-      });
-
-      indexRequests.push(exactMatchQuery);
-      indexRequests.push(partialMatchQuery);
-    }
-
-    const [exactMatched, partialMatched] = (await ensureMinimumTime(
-      indexRequests
-    )) as MatchedItem[][];
-
-    const matchedIndicesResult = getMatchedIndices(
-      allSources,
-      partialMatched,
-      exactMatched,
-      allowHidden
-    );
-
-    return { matchedIndicesResult, exactMatched, partialMatched };
-  },
-  // compare only query and allowHidden
-  (newArgs, oldArgs) => newArgs[0] === oldArgs[0] && newArgs[1] === oldArgs[1]
-);
-*/

@@ -7,7 +7,6 @@
  */
 
 import React, { ChangeEvent, useState, useMemo } from 'react';
-import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { Subject } from 'rxjs';
@@ -181,10 +180,6 @@ export const TitleField = ({
     >
       {(field) => {
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-        const setField = debounce((query: string) => {
-          console.log('*** field value update:', query);
-          field.setValue(query);
-        }, 300);
         return (
           <EuiFormRow
             label={field.label}
@@ -209,7 +204,7 @@ export const TitleField = ({
                     setAppendedWildcard(false);
                   }
                 }
-                setField(query);
+                field.setValue(query);
               }}
               isLoading={field.isValidating}
               fullWidth
