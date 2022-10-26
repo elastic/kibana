@@ -3117,6 +3117,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-lifecycle-server-internal@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-lifecycle-server-mocks@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-lifecycle-server@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal":
   version "0.0.0"
   uid ""
@@ -3206,6 +3218,18 @@
   uid ""
 
 "@kbn/core-plugins-browser@link:bazel-bin/packages/core/plugins/core-plugins-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugins-server-internal@link:bazel-bin/packages/core/plugins/core-plugins-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugins-server-mocks@link:bazel-bin/packages/core/plugins/core-plugins-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugins-server@link:bazel-bin/packages/core/plugins/core-plugins-server":
   version "0.0.0"
   uid ""
 
@@ -7326,6 +7350,18 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-lifecycle-server-internal@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-lifecycle-server-mocks@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-lifecycle-server@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7415,6 +7451,18 @@
   uid ""
 
 "@types/kbn__core-plugins-browser@link:bazel-bin/packages/core/plugins/core-plugins-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-server-internal@link:bazel-bin/packages/core/plugins/core-plugins-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-server-mocks@link:bazel-bin/packages/core/plugins/core-plugins-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-server@link:bazel-bin/packages/core/plugins/core-plugins-server/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -23643,10 +23691,10 @@ react-grid-layout@^1.3.4:
     react-draggable "^4.0.0"
     react-resizable "^3.0.4"
 
-react-hook-form@^7.37.0:
-  version "7.37.0"
-  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.37.0.tgz#4d1738f092d3d8a3ade34ee892d97350b1032b19"
-  integrity sha512-6NFTxsnw+EXSpNNvLr5nFMjPdYKRryQcelTHg7zwBB6vAzfPIcZq4AExP4heVlwdzntepQgwiOQW4z7Mr99Lsg==
+react-hook-form@^7.38.0:
+  version "7.38.0"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.38.0.tgz#53d6a68df587ce4ce88352f63e0ecc7fc8779320"
+  integrity sha512-gxWW1kMeru9xR1GoR+Iw4hA+JBOM3SHfr4DWCUKY0xc7Vv1MLsF109oHtBeWl9shcyPFx67KHru44DheN0XY5A==
 
 react-input-autosize@^3.0.0:
   version "3.0.0"
