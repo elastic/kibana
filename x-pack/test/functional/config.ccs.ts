@@ -15,7 +15,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
 
-    testFiles: [require.resolve('./apps/canvas'), require.resolve('./apps/lens/group1')],
+    testFiles: [
+      require.resolve('./apps/canvas'),
+      require.resolve('./apps/lens/group1'),
+      require.resolve('./apps/rollup_job'),
+    ],
 
     junit: {
       reportName: 'X-Pack CCS Tests',
@@ -42,7 +46,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         remoteClusterUrl:
           process.env.REMOTE_CLUSTER_URL ??
           'http://elastic:changeme@localhost:' +
-            `${functionalConfig.get('servers.elasticsearch.port') + 1}`,
+          `${functionalConfig.get('servers.elasticsearch.port') + 1}`,
       },
     },
     services: {
