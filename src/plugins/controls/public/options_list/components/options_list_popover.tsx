@@ -55,12 +55,12 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
     actions: {
-      selectOption,
-      deselectOption,
-      clearSelections,
       replaceSelection,
-      setExclude,
+      clearSelections,
+      deselectOption,
       selectExists,
+      selectOption,
+      setExclude,
     },
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
 
@@ -74,12 +74,12 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   const field = select((state) => state.componentState.field);
 
   const selectedOptions = select((state) => state.explicitInput.selectedOptions);
-  const hideExclude = select((state) => state.explicitInput.hideExclude);
   const existsSelected = select((state) => state.explicitInput.existsSelected);
   const singleSelect = select((state) => state.explicitInput.singleSelect);
+  const hideExclude = select((state) => state.explicitInput.hideExclude);
   const hideExists = select((state) => state.explicitInput.hideExists);
-  const title = select((state) => state.explicitInput.title);
   const exclude = select((state) => state.explicitInput.exclude);
+  const title = select((state) => state.explicitInput.title);
 
   const loading = select((state) => state.output.loading);
 
@@ -118,6 +118,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
                     ? OptionsListStrings.popover.getTotalCardinalityPlaceholder(totalCardinality)
                     : undefined
                 }
+                autoFocus={true}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -174,13 +175,13 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
       </div>
     ),
     [
-      clearSelections,
-      dispatch,
+      updateSearchString,
       invalidSelections,
-      searchString,
       showOnlySelected,
       totalCardinality,
-      updateSearchString,
+      clearSelections,
+      searchString,
+      dispatch,
     ]
   );
 
@@ -279,21 +280,21 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
       </>
     );
   }, [
-    availableOptions,
-    deselectOption,
-    dispatch,
-    exclude,
-    existsSelected,
-    hideExists,
     invalidSelectionsSet,
-    loading,
+    selectedOptionsSet,
+    availableOptions,
     replaceSelection,
+    showOnlySelected,
+    selectedOptions,
+    deselectOption,
+    existsSelected,
     selectExists,
     selectOption,
-    selectedOptions,
-    selectedOptionsSet,
-    showOnlySelected,
     singleSelect,
+    hideExists,
+    dispatch,
+    exclude,
+    loading,
   ]);
 
   const renderInvalidSelections = useCallback(
