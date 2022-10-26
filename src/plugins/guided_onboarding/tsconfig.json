@@ -13,10 +13,8 @@
       "path": "../../core/tsconfig.json"
     },
     {
-      "path": "../navigation/tsconfig.json"
-    },
-    {
       "path": "../kibana_react/tsconfig.json"
     },
+    { "path": "../../../x-pack/plugins/cloud/tsconfig.json" },
   ]
 }

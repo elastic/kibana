@@ -6,28 +6,25 @@
  */
 
 import type { Query, TimeRange } from '@kbn/es-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';
 import { SearchBar } from '@kbn/unified-search-plugin/public';
+import { EuiSpacer } from '@elastic/eui';
+import { NoData } from '../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../components/loading';
 import { useMetricsDataViewContext } from './hooks/use_data_view';
 import { HostsTable } from './components/hosts_table';
-import { InfraClientStartDeps } from '../../../types';
 import { useSourceContext } from '../../../containers/metrics_source';
+import { useSnapshot } from '../inventory_view/hooks/use_snaphot';
+import type { SnapshotMetricType } from '../../../../common/inventory_models/types';
 
 export const HostsContent: React.FunctionComponent = () => {
-  const {
-    services: { data },
-  } = useKibana<InfraClientStartDeps>();
-  const { source } = useSourceContext();
+  const { source, sourceId } = useSourceContext();
   const [dateRange, setDateRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
   const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
   const { metricsDataView, hasFailedCreatingDataView, hasFailedFetchingDataView } =
     useMetricsDataViewContext();
   // needed to refresh the lens table when filters havent changed
-  const [searchSessionId, setSearchSessionId] = useState(data.search.session.start());
-  const [isLensLoading, setIsLensLoading] = useState(false);
 
   const onQuerySubmit = useCallback(
     (payload: { dateRange: TimeRange; query?: Query }) => {
@@ -35,52 +32,75 @@ export const HostsContent: React.FunctionComponent = () => {
       if (payload.query) {
         setQuery(payload.query);
       }
-      setIsLensLoading(true);
-      setSearchSessionId(data.search.session.start());
     },
-    [setDateRange, setQuery, data.search.session]
+    [setDateRange, setQuery]
   );
 
-  const onLoading = useCallback(
-    (isLoading: boolean) => {
-      if (isLensLoading) {
-        setIsLensLoading(isLoading);
-      }
-    },
-    [setIsLensLoading, isLensLoading]
+  const hostMetrics: Array<{ type: SnapshotMetricType }> = [
+    { type: 'rx' },
+    { type: 'tx' },
+    { type: 'memory' },
+    { type: 'cpuCores' },
+    { type: 'memoryTotal' },
+  ];
+
+  const { loading, nodes, reload } = useSnapshot(
+    '', // use the unified search query, supported type?
+    hostMetrics,
+    [],
+    'host',
+    sourceId,
+    1666710279338, // currentTime.  need to add support for TimeRange?
+    '',
+    '',
+    true,
+    {
+      from: 1666710279338, // dynamic time range needs to be supported
+      interval: '1m',
+      lookbackSize: 5,
+      to: 1666711479338,
+    }
   );
 
-  const onRefetch = useCallback(() => {
-    setIsLensLoading(true);
-    setSearchSessionId(data.search.session.start());
-  }, [data.search.session]);
+  const noData = !loading && nodes && nodes.length === 0;
 
   return (
     <div>
-      {metricsDataView ? (
-        <>
-          <SearchBar
-            showFilterBar={false}
-            showDatePicker={true}
-            showAutoRefreshOnly={false}
-            showSaveQuery={true}
-            showQueryInput={true}
-            query={query}
-            dateRangeFrom={dateRange.from}
-            dateRangeTo={dateRange.to}
-            indexPatterns={[metricsDataView]}
-            onQuerySubmit={onQuerySubmit}
+      {metricsDataView && !loading ? (
+        noData ? (
+          <NoData
+            titleText={i18n.translate('xpack.infra.waffle.noDataTitle', {
+              defaultMessage: 'There is no data to display.',
+            })}
+            bodyText={i18n.translate('xpack.infra.waffle.noDataDescription', {
+              defaultMessage: 'Try adjusting your time or filter.',
+            })}
+            refetchText={i18n.translate('xpack.infra.waffle.checkNewDataButtonLabel', {
+              defaultMessage: 'Check for new data',
+            })}
+            onRefetch={() => {
+              reload();
+            }}
+            testString="noMetricsDataPrompt"
           />
-          <HostsTable
-            dataView={metricsDataView}
-            timeRange={dateRange}
-            query={query}
-            searchSessionId={searchSessionId}
-            onRefetch={onRefetch}
-            onLoading={onLoading}
-            isLensLoading={isLensLoading}
-          />
-        </>
+        ) : (
+          <>
+            <SearchBar
+              showFilterBar={false}
+              showDatePicker={true}
+              showAutoRefreshOnly={false}
+              showSaveQuery={true}
+              showQueryInput={true}
+              query={query}
+              dateRangeFrom={dateRange.from}
+              dateRangeTo={dateRange.to}
+              indexPatterns={[metricsDataView]}
+              onQuerySubmit={onQuerySubmit}
+            />
+            <EuiSpacer />
+            <HostsTable nodes={nodes} />
+          </>
+        )
       ) : hasFailedCreatingDataView || hasFailedFetchingDataView ? (
         <div>
           <div>There was an error trying to load or create the Data View:</div>

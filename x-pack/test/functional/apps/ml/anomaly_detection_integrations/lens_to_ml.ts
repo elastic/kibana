@@ -86,6 +86,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testExecution.logTestStep('pre-fills the job selection');
       await ml.jobSelection.assertJobSelection([jobId]);
 
+      await ml.api.assertModelMemoryLimitForJob(jobId, '11mb');
+
       await ml.api.deleteAnomalyDetectionJobES(jobId);
     });
 
@@ -117,6 +119,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await ml.testExecution.logTestStep('pre-fills the job selection');
       await ml.jobSelection.assertJobSelection([jobId]);
+
+      await ml.api.assertModelMemoryLimitForJob(jobId, '12mb');
 
       await ml.api.deleteAnomalyDetectionJobES(jobId);
     });
