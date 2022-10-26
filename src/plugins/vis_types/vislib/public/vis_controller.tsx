@@ -9,13 +9,10 @@
 import $ from 'jquery';
 import React, { RefObject } from 'react';
 
-import { METRIC_TYPE } from '@kbn/analytics';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
-import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import { getUsageCollectionStart } from './services';
 import { VisTypeVislibCoreSetup } from './plugin';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
 import { BasicVislibParams } from './types';
@@ -29,38 +26,6 @@ const legendClassName = {
 };
 
 export type VislibVisController = InstanceType<ReturnType<typeof createVislibVisController>>;
-
-/** @internal **/
-const extractContainerType = (context?: KibanaExecutionContext): string | undefined => {
-  if (context) {
-    const recursiveGet = (item: KibanaExecutionContext): KibanaExecutionContext | undefined => {
-      if (item.type) {
-        return item;
-      } else if (item.child) {
-        return recursiveGet(item.child);
-      }
-    };
-    return recursiveGet(context)?.type;
-  }
-};
-
-const renderComplete = (
-  visParams: BasicVislibParams | PieVisParams,
-  handlers: IInterpreterRenderHandlers
-) => {
-  const usageCollection = getUsageCollectionStart();
-  const containerType = extractContainerType(handlers.getExecutionContext());
-
-  if (usageCollection && containerType) {
-    usageCollection.reportUiCounter(
-      containerType,
-      METRIC_TYPE.COUNT,
-      `render_agg_based_${visParams.type}`
-    );
-  }
-
-  handlers.done();
-};
 
 export const createVislibVisController = (
   core: VisTypeVislibCoreSetup,
@@ -99,7 +64,8 @@ export const createVislibVisController = (
     async render(
       esResponse: any,
       visParams: BasicVislibParams | PieVisParams,
-      handlers: IInterpreterRenderHandlers
+      handlers: IInterpreterRenderHandlers,
+      renderComplete: (() => void) | undefined
     ): Promise<void> {
       if (this.vislibVis) {
         this.destroy(false);
@@ -109,7 +75,7 @@ export const createVislibVisController = (
       this.chartEl.dataset.vislibChartType = visParams.type;
 
       if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
-        renderComplete(visParams, handlers);
+        renderComplete?.();
         return;
       }
 
@@ -133,7 +99,7 @@ export const createVislibVisController = (
           this.mountLegend(esResponse, visParams, fireEvent, uiState as PersistedState);
         }
 
-        renderComplete(visParams, handlers);
+        renderComplete?.();
       });
 
       this.removeListeners = () => {
