@@ -11629,10 +11629,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^106.0.1:
-  version "106.0.1"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-106.0.1.tgz#f3850cc0a6904336b552d1b13a8ae1705d127bbe"
-  integrity sha512-thaBvbDEPgGocSp4/SBIajQz3G7UQfUqCOHZBp9TVhRJv7c91eZrUGcjeJUaNF4p9CfSjCYNYzs4EVVryqmddA==
+chromedriver@^107.0.0:
+  version "107.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-107.0.0.tgz#9443ceb6020190f1a0f96ae6b5fad5453c0cd582"
+  integrity sha512-/VpGc83szXYUu9gBhCl6tg6XvtVwj2RQjOZ4wDA5TPSqudTMgWcMbkjeZbCfHwReJ9Qqo0hJ1jipG1IXWDxg3g==
   dependencies:
     "@testim/chrome-version" "^1.1.3"
     axios "^0.27.2"
@@ -15898,7 +15898,7 @@ gaze@^1.0.0:
   dependencies:
     globule "^1.0.0"
 
-geckodriver@^3.1.0:
+geckodriver@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/geckodriver/-/geckodriver-3.2.0.tgz#6b0a85e2aafbce209bca30e2d53af857707b1034"
   integrity sha512-p+qR2RKlI/TQoCEYrSuTaYCLqsJNni96WmEukTyXmOmLn+3FLdgPAEwMZ0sG2Cwi9hozUzGAWyT6zLuhF6cpiQ==
