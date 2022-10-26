@@ -51,7 +51,7 @@ export function setupFleetServer() {
 
 export function setFleetServerHost(host = 'https://fleetserver:8220') {
   cy.request({
-    method: 'PUT',
+    method: 'POST',
     url: '/api/fleet/fleet_server_hosts',
     headers: { 'kbn-xsrf': 'xx' },
     body: {
