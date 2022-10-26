@@ -6,12 +6,15 @@
  */
 
 import { CreateAlertParamsSchema } from './schema';
-import { ValidCreateAlertSchema } from './test_schema';
+import { OpsgenieCreateAlertExample, ValidCreateAlertSchema } from './test_schema';
 
 describe('opsgenie schema', () => {
   describe('CreateAlertParamsSchema', () => {
-    it('validates the test object correctly', () => {
-      expect(() => CreateAlertParamsSchema.validate(ValidCreateAlertSchema)).not.toThrow();
+    it.each([
+      ['ValidCreateAlertSchema', ValidCreateAlertSchema],
+      ['OpsgenieCreateAlertExample', OpsgenieCreateAlertExample],
+    ])('validates the test object [%s] correctly', (objectName, testObject) => {
+      expect(() => CreateAlertParamsSchema.validate(testObject)).not.toThrow();
     });
   });
 });

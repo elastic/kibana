@@ -6,7 +6,10 @@
  */
 
 import { decodeCreateAlert } from './schema';
-import { ValidCreateAlertSchema } from '../../../../../server/connector_types/stack/opsgenie/test_schema';
+import {
+  OpsgenieCreateAlertExample,
+  ValidCreateAlertSchema,
+} from '../../../../../server/connector_types/stack/opsgenie/test_schema';
 
 describe('decodeCreateAlert', () => {
   it('throws an error when the message field is not present', () => {
@@ -93,10 +96,13 @@ describe('decodeCreateAlert', () => {
         message: 'hi',
         details: { id: 1 },
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"Invalid value \\"1\\" supplied to \\"details,id\\""`);
+    ).toThrowErrorMatchingInlineSnapshot(`"Invalid value \\"1\\" supplied to \\"details.id\\""`);
   });
 
-  it('does not throw an error when validating the valid create alert object from the server', () => {
-    expect(() => decodeCreateAlert(ValidCreateAlertSchema)).not.toThrow();
+  it.each([
+    ['ValidCreateAlertSchema', ValidCreateAlertSchema],
+    ['OpsgenieCreateAlertExample', OpsgenieCreateAlertExample],
+  ])('validates the test object [%s] correctly', (objectName, testObject) => {
+    expect(() => decodeCreateAlert(testObject)).not.toThrow();
   });
 });
