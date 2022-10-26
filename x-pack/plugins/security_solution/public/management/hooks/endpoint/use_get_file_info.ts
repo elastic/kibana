@@ -31,7 +31,7 @@ export const useGetFileInfo = (
   const http = useHttp();
 
   return useQuery<ActionFileInfoApiResponse, IHttpFetchError>({
-    queryKey: ['get-action-file-info', action.id],
+    queryKey: ['get-action-file-info', action.id, agentId ?? action.agents[0]],
     ...options,
     queryFn: () => {
       const apiUrl = resolvePathVariables(ACTION_AGENT_FILE_INFO_ROUTE, {
