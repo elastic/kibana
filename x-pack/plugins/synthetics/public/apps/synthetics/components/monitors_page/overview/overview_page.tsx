@@ -4,18 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { isEqual } from 'lodash';
 import React, { useEffect } from 'react';
+import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
-import { EuiLoadingElastic, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { Redirect } from 'react-router-dom';
 import { useEnablement, useGetUrlParams } from '../../../hooks';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import {
   fetchMonitorOverviewAction,
-  setOverviewPageStateAction,
-  fetchOverviewStatusAction,
   selectOverviewState,
   selectServiceLocationsState,
 } from '../../../state';
@@ -26,6 +24,8 @@ import { GETTING_STARTED_ROUTE, MONITORS_ROUTE } from '../../../../../../common/
 import { useMonitorList } from '../hooks/use_monitor_list';
 import { useOverviewBreadcrumbs } from './use_breadcrumbs';
 import { OverviewGrid } from './overview/overview_grid';
+import { OverviewStatus } from './overview/overview_status';
+import { SearchField } from '../common/search_field';
 
 export const OverviewPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview' });
@@ -35,9 +35,9 @@ export const OverviewPage: React.FC = () => {
   const dispatch = useDispatch();
 
   const { refreshApp } = useSyntheticsRefreshContext();
-  const { query } = useGetUrlParams();
+  const { query = '' } = useGetUrlParams();
 
-  const { loading, pageState } = useSelector(selectOverviewState);
+  const { pageState } = useSelector(selectOverviewState);
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
 
   useEffect(() => {
@@ -51,16 +51,19 @@ export const OverviewPage: React.FC = () => {
     if (!locationsLoading && !locationsLoaded) {
       dispatch(getServiceLocations());
     }
-  }, [dispatch, locationsLoaded, locationsLoading, pageState]);
+  }, [dispatch, locationsLoaded, locationsLoading]);
 
+  // fetch overview for query changes
+  useEffect(() => {
+    if (!isEqual(pageState, { ...pageState, query })) {
+      dispatch(fetchMonitorOverviewAction.get({ ...pageState, query }));
+    }
+  }, [dispatch, pageState, query]);
+
+  // fetch overview for all other page state changes
   useEffect(() => {
     dispatch(fetchMonitorOverviewAction.get(pageState));
-    dispatch(fetchOverviewStatusAction.get());
   }, [dispatch, pageState]);
-
-  useEffect(() => {
-    dispatch(setOverviewPageStateAction({ query }));
-  }, [dispatch, query]);
 
   const {
     enablement: { isEnabled },
@@ -77,14 +80,17 @@ export const OverviewPage: React.FC = () => {
     return <Redirect to={MONITORS_ROUTE} />;
   }
 
-  return !loading ? (
-    <OverviewGrid />
-  ) : (
-    <EuiFlexGroup alignItems="center" justifyContent="center">
-      <EuiSpacer size="xxl" />
-      <EuiFlexItem grow={false}>
-        <EuiLoadingElastic size="xxl" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+  return (
+    <>
+      <SearchField />
+      <EuiSpacer />
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem grow={false}>
+          <OverviewStatus />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <OverviewGrid />
+    </>
   );
 };

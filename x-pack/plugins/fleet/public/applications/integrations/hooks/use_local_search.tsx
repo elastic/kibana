@@ -6,7 +6,7 @@
  */
 
 import { Search as LocalSearch, PrefixIndexStrategy } from 'js-search';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 
 import type { IntegrationCardItem } from '../../../../common/types/models';
 
@@ -16,13 +16,11 @@ export const fieldsToSearch = ['name', 'title'];
 export function useLocalSearch(packageList: IntegrationCardItem[]) {
   const localSearchRef = useRef<LocalSearch>(new LocalSearch(searchIdField));
 
-  useEffect(() => {
-    const localSearch = new LocalSearch(searchIdField);
-    localSearch.indexStrategy = new PrefixIndexStrategy();
-    fieldsToSearch.forEach((field) => localSearch.addIndex(field));
-    localSearch.addDocuments(packageList);
-    localSearchRef.current = localSearch;
-  }, [packageList]);
+  const localSearch = new LocalSearch(searchIdField);
+  localSearch.indexStrategy = new PrefixIndexStrategy();
+  fieldsToSearch.forEach((field) => localSearch.addIndex(field));
+  localSearch.addDocuments(packageList);
+  localSearchRef.current = localSearch;
 
   return localSearchRef;
 }

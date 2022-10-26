@@ -27,6 +27,7 @@
     { "path": "../licensing/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../encrypted_saved_objects/tsconfig.json" },
+    {"path":  "../../../src/plugins/guided_onboarding/tsconfig.json"},
 
     // optionalPlugins from ./kibana.json
     { "path": "../security/tsconfig.json" },
@@ -36,6 +37,7 @@
     { "path": "../../../src/plugins/home/tsconfig.json" },
 
     // requiredBundles from ./kibana.json
+    { "path": "../cloud_integrations/cloud_chat/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
     { "path": "../infra/tsconfig.json" },

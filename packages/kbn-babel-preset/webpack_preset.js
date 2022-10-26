@@ -18,7 +18,7 @@ module.exports = (_, options = {}) => {
           modules: false,
           // Please read the explanation for this
           // in node_preset.js
-          corejs: '3.25.1',
+          corejs: '3.25.5',
           bugfixes: true,
         },
       ],

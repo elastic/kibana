@@ -29,6 +29,8 @@ export const FetchMonitorOverviewQueryArgsCodec = t.partial({
   tags: t.array(t.string),
   locations: t.array(t.string),
   monitorType: t.array(t.string),
+  sortField: t.string,
+  sortOrder: t.string,
 });
 
 export type FetchMonitorOverviewQueryArgs = t.TypeOf<typeof FetchMonitorOverviewQueryArgsCodec>;

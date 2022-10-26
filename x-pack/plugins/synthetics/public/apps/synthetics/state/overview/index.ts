@@ -7,9 +7,8 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
-import { serializeHttpFetchError } from '../utils/http_error';
-
 import { MonitorOverviewState } from './models';
+
 import {
   clearOverviewStatusErrorAction,
   fetchMonitorOverviewAction,
@@ -22,10 +21,12 @@ const initialState: MonitorOverviewState = {
   data: {
     total: 0,
     allMonitorIds: [],
-    pages: {},
+    monitors: [],
   },
   pageState: {
-    perPage: 20,
+    perPage: 16,
+    sortOrder: 'asc',
+    sortField: 'status',
   },
   loading: false,
   loaded: false,
@@ -48,13 +49,13 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
     })
     .addCase(fetchMonitorOverviewAction.fail, (state, action) => {
       state.loading = false;
-      state.error = serializeHttpFetchError(action.payload);
+      state.error = action.payload;
     })
     .addCase(quietFetchOverviewAction.success, (state, action) => {
       state.data = action.payload;
     })
     .addCase(quietFetchOverviewAction.fail, (state, action) => {
-      state.error = serializeHttpFetchError(action.payload);
+      state.error = action.payload;
     })
     .addCase(setOverviewPageStateAction, (state, action) => {
       state.pageState = {
@@ -67,7 +68,7 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
       state.status = action.payload;
     })
     .addCase(fetchOverviewStatusAction.fail, (state, action) => {
-      state.statusError = serializeHttpFetchError(action.payload);
+      state.statusError = action.payload;
     })
     .addCase(clearOverviewStatusErrorAction, (state) => {
       state.statusError = null;

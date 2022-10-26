@@ -100,7 +100,7 @@ describe('Insights', () => {
   it('does not render when there is no content to show', () => {
     render(
       <TestProviders>
-        <Insights browserFields={{}} eventId="test" data={[]} timelineId="" />
+        <Insights browserFields={{}} eventId="test" data={[]} scopeId="" />
       </TestProviders>
     );
 
@@ -120,7 +120,7 @@ describe('Insights', () => {
 
     render(
       <TestProviders>
-        <Insights browserFields={{}} eventId="test" data={[]} timelineId="" />
+        <Insights browserFields={{}} eventId="test" data={[]} scopeId="" />
       </TestProviders>
     );
 
@@ -140,13 +140,13 @@ describe('Insights', () => {
       it('should show insights for related alerts by process ancestry', () => {
         render(
           <TestProviders>
-            <Insights browserFields={{}} eventId="test" data={data} timelineId="" />
+            <Insights browserFields={{}} eventId="test" data={data} scopeId="" />
           </TestProviders>
         );
 
         expect(screen.getByTestId('related-alerts-by-ancestry')).toBeInTheDocument();
         expect(
-          screen.queryByRole('link', { name: new RegExp(i18n.ALERT_UPSELL) })
+          screen.queryByRole('button', { name: new RegExp(i18n.INSIGHTS_UPSELL) })
         ).not.toBeInTheDocument();
       });
 
@@ -154,12 +154,7 @@ describe('Insights', () => {
         it('should not show the related alerts by process ancestry insights module', () => {
           render(
             <TestProviders>
-              <Insights
-                browserFields={{}}
-                eventId="test"
-                data={dataWithoutAgentType}
-                timelineId=""
-              />
+              <Insights browserFields={{}} eventId="test" data={dataWithoutAgentType} scopeId="" />
             </TestProviders>
           );
 
@@ -174,12 +169,12 @@ describe('Insights', () => {
 
         render(
           <TestProviders>
-            <Insights browserFields={{}} eventId="test" data={data} timelineId="" />
+            <Insights browserFields={{}} eventId="test" data={data} scopeId="" />
           </TestProviders>
         );
 
         expect(
-          screen.getByRole('link', { name: new RegExp(i18n.ALERT_UPSELL) })
+          screen.getByRole('button', { name: new RegExp(i18n.INSIGHTS_UPSELL) })
         ).toBeInTheDocument();
         expect(screen.queryByTestId('related-alerts-by-ancestry')).not.toBeInTheDocument();
       });
@@ -192,13 +187,13 @@ describe('Insights', () => {
 
       render(
         <TestProviders>
-          <Insights browserFields={{}} eventId="test" data={data} timelineId="" />
+          <Insights browserFields={{}} eventId="test" data={data} scopeId="" />
         </TestProviders>
       );
 
       expect(screen.queryByTestId('related-alerts-by-ancestry')).not.toBeInTheDocument();
       expect(
-        screen.queryByRole('link', { name: new RegExp(i18n.ALERT_UPSELL) })
+        screen.queryByRole('button', { name: new RegExp(i18n.INSIGHTS_UPSELL) })
       ).not.toBeInTheDocument();
     });
   });

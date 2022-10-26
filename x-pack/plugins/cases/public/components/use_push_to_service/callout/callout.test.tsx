@@ -8,7 +8,8 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { CallOut, CallOutProps } from './callout';
+import type { CallOutProps } from './callout';
+import { CallOut } from './callout';
 import { CLOSED_CASE_PUSH_ERROR_ID } from './types';
 import { TestProviders } from '../../../common/mock';
 

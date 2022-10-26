@@ -30,6 +30,8 @@ jest.mock('../timeline', () => ({
   StatefulTimeline: () => <div />,
 }));
 
+jest.mock('../../../common/hooks/timeline/use_timeline_save_prompt');
+
 describe('Flyout', () => {
   const props = {
     onAppLeave: jest.fn(),
@@ -69,7 +71,9 @@ describe('Flyout', () => {
 
       userEvent.click(screen.getByTestId('flyoutOverlay'));
 
-      expect(mockDispatch).toBeCalledWith(timelineActions.showTimeline({ id: 'test', show: true }));
+      expect(mockDispatch).toBeCalledWith(
+        timelineActions.showTimeline({ id: TimelineId.test, show: true })
+      );
     });
   });
 });

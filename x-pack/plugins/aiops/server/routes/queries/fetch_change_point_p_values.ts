@@ -8,9 +8,12 @@ import { uniqBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 
+import type { Logger } from '@kbn/logging';
 import { ChangePoint } from '@kbn/ml-agg-utils';
 import { SPIKE_ANALYSIS_THRESHOLD } from '../../../common/constants';
 import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
+
+import { isRequestAbortedError } from '../../lib/is_request_aborted_error';
 
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
@@ -92,16 +95,53 @@ interface Aggs extends estypes.AggregationsSignificantLongTermsAggregate {
 export const fetchChangePointPValues = async (
   esClient: ElasticsearchClient,
   params: AiopsExplainLogRateSpikesSchema,
-  fieldNames: string[]
+  fieldNames: string[],
+  logger: Logger,
+  emitError: (m: string) => void,
+  abortSignal?: AbortSignal
 ): Promise<ChangePoint[]> => {
   const result: ChangePoint[] = [];
 
-  for (const fieldName of fieldNames) {
-    const request = getChangePointRequest(params, fieldName);
-    const resp = await esClient.search<unknown, { change_point_p_value: Aggs }>(request);
+  const settledPromises = await Promise.allSettled(
+    fieldNames.map((fieldName) =>
+      esClient.search<unknown, { change_point_p_value: Aggs }>(
+        getChangePointRequest(params, fieldName),
+        {
+          signal: abortSignal,
+          maxRetries: 0,
+        }
+      )
+    )
+  );
+
+  function reportError(fieldName: string, error: unknown) {
+    if (!isRequestAbortedError(error)) {
+      logger.error(
+        `Failed to fetch p-value aggregation for fieldName "${fieldName}", got: \n${JSON.stringify(
+          error,
+          null,
+          2
+        )}`
+      );
+      emitError(`Failed to fetch p-value aggregation for fieldName "${fieldName}".`);
+    }
+  }
+
+  for (const [index, settledPromise] of settledPromises.entries()) {
+    const fieldName = fieldNames[index];
+
+    if (settledPromise.status === 'rejected') {
+      reportError(fieldName, settledPromise.reason);
+      // Still continue the analysis even if individual p-value queries fail.
+      continue;
+    }
+
+    const resp = settledPromise.value;
 
     if (resp.aggregations === undefined) {
-      throw new Error('fetchChangePoint failed, did not return aggregations.');
+      reportError(fieldName, resp);
+      // Still continue the analysis even if individual p-value queries fail.
+      continue;
     }
 
     const overallResult = resp.aggregations.change_point_p_value;

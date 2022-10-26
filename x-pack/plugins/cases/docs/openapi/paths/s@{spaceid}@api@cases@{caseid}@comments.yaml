@@ -12,12 +12,11 @@ post:
     - $ref: '../components/parameters/case_id.yaml'
     - $ref: '../components/parameters/space_id.yaml'
   requestBody:
+    required: true
     content:
       application/json:
         schema:
-          oneOf: 
-            - $ref: '../components/schemas/add_alert_comment_request_properties.yaml'
-            - $ref: '../components/schemas/add_user_comment_request_properties.yaml'
+          $ref: '../components/schemas/add_case_comment_request.yaml'
         examples:
           createCaseCommentRequest:
             $ref: '../components/examples/add_comment_request.yaml'
@@ -25,11 +24,9 @@ post:
     '200':
       description: Indicates a successful call.
       content:
-         application/json; charset=utf-8:
+         application/json:
           schema:
-            type: object
-            properties:
-              $ref: '../components/schemas/case_response_properties.yaml'
+            $ref: '../components/schemas/case_response_properties.yaml'
           examples:
             createCaseCommentResponse:
               $ref: '../components/examples/add_comment_response.yaml'
@@ -70,12 +67,11 @@ patch:
     - $ref: '../components/parameters/case_id.yaml'
     - $ref: '../components/parameters/space_id.yaml'
   requestBody:
+    required: true
     content:
       application/json:
         schema:
-          oneOf: 
-            - $ref: '../components/schemas/update_alert_comment_request_properties.yaml'
-            - $ref: '../components/schemas/update_user_comment_request_properties.yaml'
+          $ref: '../components/schemas/update_case_comment_request.yaml'
         examples:
           updateCaseCommentRequest:
             $ref: '../components/examples/update_comment_request.yaml'
@@ -83,11 +79,9 @@ patch:
     '200':
       description: Indicates a successful call.
       content:
-        application/json; charset=utf-8:
+        application/json:
           schema:
-            type: object
-            properties:
-              $ref: '../components/schemas/case_response_properties.yaml'
+           $ref: '../components/schemas/case_response_properties.yaml'
           examples:
             updateCaseCommentResponse:
               $ref: '../components/examples/update_comment_response.yaml'
@@ -111,14 +105,10 @@ get:
     '200':
       description: Indicates a successful call.
       content:
-        application/json; charset=utf-8:
+        application/json:
           schema:
-            type: array
-            items:
-              anyOf:
-                - $ref: '../components/schemas/alert_comment_response_properties.yaml'
-                - $ref: '../components/schemas/user_comment_response_properties.yaml'
-        examples: {}
+            $ref: '../components/schemas/case_response_properties.yaml'
+
   servers:
     - url: https://localhost:5601
 

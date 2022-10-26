@@ -25,6 +25,8 @@ function toMonitorOverviewQueryArgs(
     tags: pageState.tags,
     locations: pageState.locations,
     monitorType: pageState.monitorType,
+    sortField: pageState.sortField,
+    sortOrder: pageState.sortOrder,
     searchFields: [],
   };
 }

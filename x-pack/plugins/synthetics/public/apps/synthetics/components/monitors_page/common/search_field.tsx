@@ -19,7 +19,9 @@ export function SearchField() {
 
   useDebounce(
     () => {
-      updateUrlParams({ query: search });
+      if (search !== query) {
+        updateUrlParams({ query: search });
+      }
     },
     300,
     [search]

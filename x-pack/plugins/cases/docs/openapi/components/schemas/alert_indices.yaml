@@ -1,0 +1,14 @@
+title: Alert indices
+description: >
+  The alert index. It is required only when `type` is `alert`. If it is an
+  array, `alertId` must also be an array with the same length or number of
+  elements. This functionality is in technical preview and may be changed or
+  removed in a future release. Elastic will apply best effort to fix any issues,
+  but features in technical preview are not subject to the support SLA of
+  official GA features.
+oneOf:
+  - type: string
+  - type: array
+    items:
+      type: string
+x-technical-preview: true

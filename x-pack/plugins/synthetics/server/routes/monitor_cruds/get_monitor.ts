@@ -6,7 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { ConfigKey } from '../../../common/runtime_types';
+import { ConfigKey, MonitorOverviewItem } from '../../../common/runtime_types';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -112,12 +112,13 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
     query: querySchema,
   },
   handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
-    const { perPage = 5, query } = request.query;
+    const { sortField, sortOrder, query } = request.query;
     const { saved_objects: monitors } = await getMonitors(
       {
         perPage: 1000,
-        sortField: 'name.keyword',
-        sortOrder: 'asc',
+        // monitors are sorted by status on the client side via useMonitorsSortedByStatus
+        sortField: sortField === 'status' ? `${ConfigKey.NAME}.keyword` : sortField,
+        sortOrder,
         page: 1,
         query,
       },
@@ -126,10 +127,8 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
     );
 
     const allMonitorIds: string[] = [];
-    const pages: Record<number, unknown[]> = {};
-    let currentPage = 0;
-    let currentItem = 0;
     let total = 0;
+    const allMonitors: MonitorOverviewItem[] = [];
 
     monitors.forEach((monitor) => {
       /* collect all monitor ids for use
@@ -146,22 +145,13 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
           location,
           isEnabled: monitor.attributes[ConfigKey.ENABLED],
         };
-        if (!pages[currentPage]) {
-          pages[currentPage] = [config];
-        } else {
-          pages[currentPage].push(config);
-        }
-        currentItem++;
+        allMonitors.push(config);
         total++;
-        if (currentItem % perPage === 0) {
-          currentPage++;
-          currentItem = 0;
-        }
       });
     });
 
     return {
-      pages,
+      monitors: allMonitors,
       total,
       allMonitorIds,
     };

@@ -1271,31 +1271,7 @@
             "label": "Component",
             "description": [],
             "signature": [
-              "React.ExoticComponent<(",
-              {
-                "pluginId": "fleet",
-                "scope": "public",
-                "docId": "kibFleetPluginApi",
-                "section": "def-public.PackagePolicyCreateMultiStepExtensionComponentProps",
-                "text": "PackagePolicyCreateMultiStepExtensionComponentProps"
-              },
-              " & React.RefAttributes<React.Component<",
-              {
-                "pluginId": "fleet",
-                "scope": "public",
-                "docId": "kibFleetPluginApi",
-                "section": "def-public.PackagePolicyCreateMultiStepExtensionComponentProps",
-                "text": "PackagePolicyCreateMultiStepExtensionComponentProps"
-              },
-              ", any, any>>) | (",
-              {
-                "pluginId": "fleet",
-                "scope": "public",
-                "docId": "kibFleetPluginApi",
-                "section": "def-public.PackagePolicyCreateMultiStepExtensionComponentProps",
-                "text": "PackagePolicyCreateMultiStepExtensionComponentProps"
-              },
-              " & { children?: React.ReactNode; })> & { readonly _result: ",
+              "React.ExoticComponent<{ children?: React.ReactNode; } | React.RefAttributes<React.Component<{}, any, any>>> & { readonly _result: ",
               {
                 "pluginId": "fleet",
                 "scope": "public",
@@ -1325,42 +1301,6 @@
                 "trackAdoption": false
               }
             ]
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
-        "id": "def-public.PackagePolicyCreateMultiStepExtensionComponentProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "PackagePolicyCreateMultiStepExtensionComponentProps",
-        "description": [],
-        "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "fleet",
-            "id": "def-public.PackagePolicyCreateMultiStepExtensionComponentProps.newPolicy",
-            "type": "Object",
-            "tags": [],
-            "label": "newPolicy",
-            "description": [
-              "The integration policy being created"
-            ],
-            "signature": [
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.NewPackagePolicy",
-                "text": "NewPackagePolicy"
-              }
-            ],
-            "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2287,23 +2227,7 @@
           "\nUI Component Extension is used on the pages displaying the ability to Create a multi step\nIntegration Policy"
         ],
         "signature": [
-          "React.ComponentClass<",
-          {
-            "pluginId": "fleet",
-            "scope": "public",
-            "docId": "kibFleetPluginApi",
-            "section": "def-public.PackagePolicyCreateMultiStepExtensionComponentProps",
-            "text": "PackagePolicyCreateMultiStepExtensionComponentProps"
-          },
-          ", any> | React.FunctionComponent<",
-          {
-            "pluginId": "fleet",
-            "scope": "public",
-            "docId": "kibFleetPluginApi",
-            "section": "def-public.PackagePolicyCreateMultiStepExtensionComponentProps",
-            "text": "PackagePolicyCreateMultiStepExtensionComponentProps"
-          },
-          ">"
+          "React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
         ],
         "path": "x-pack/plugins/fleet/public/types/ui_extensions.ts",
         "deprecated": false,
@@ -5347,10 +5271,10 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.PackageClient.getRegistryPackage",
+            "id": "def-server.PackageClient.getPackage",
             "type": "Function",
             "tags": [],
-            "label": "getRegistryPackage",
+            "label": "getPackage",
             "description": [],
             "signature": [
               "(packageName: string, packageVersion: string) => Promise<{ packageInfo: ",
@@ -5358,8 +5282,8 @@
                 "pluginId": "fleet",
                 "scope": "common",
                 "docId": "kibFleetPluginApi",
-                "section": "def-common.RegistryPackage",
-                "text": "RegistryPackage"
+                "section": "def-common.ArchivePackage",
+                "text": "ArchivePackage"
               },
               "; paths: string[]; }>"
             ],
@@ -5369,7 +5293,7 @@
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackageClient.getRegistryPackage.$1",
+                "id": "def-server.PackageClient.getPackage.$1",
                 "type": "string",
                 "tags": [],
                 "label": "packageName",
@@ -5384,7 +5308,7 @@
               },
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.PackageClient.getRegistryPackage.$2",
+                "id": "def-server.PackageClient.getPackage.$2",
                 "type": "string",
                 "tags": [],
                 "label": "packageVersion",
@@ -8257,6 +8181,20 @@
             "description": [],
             "signature": [
               "{ id: string; retired_at: string; }[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Agent.outputs",
+            "type": "Object",
+            "tags": [],
+            "label": "outputs",
+            "description": [],
+            "signature": [
+              "Record<string, { api_key_id: string; to_retire_api_key_ids?: { id: string; retired_at: string; }[] | undefined; }> | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/agent.ts",
             "deprecated": false,
@@ -13238,7 +13176,7 @@
           {
             "parentPluginId": "fleet",
             "id": "def-common.RegistryElasticsearch.index_template.settings",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "'index_template.settings'",
             "description": [],
@@ -14105,7 +14043,7 @@
             "section": "def-common.RegistryPackage",
             "text": "RegistryPackage"
           },
-          ", \"internal\" | \"assets\" | \"readme\" | \"data_streams\" | \"elasticsearch\">"
+          ", \"elasticsearch\" | \"internal\" | \"assets\" | \"readme\" | \"data_streams\">"
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,

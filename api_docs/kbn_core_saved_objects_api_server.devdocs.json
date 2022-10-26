@@ -5209,6 +5209,53 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsFindOptions.hasNoReference",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasNoReference",
+            "description": [
+              "\nSearch for documents *not* having a reference to the specified objects.\nUse `hasNoReferenceOperator` to specify the operator to use when searching for multiple references."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsFindOptionsReference",
+                "text": "SavedObjectsFindOptionsReference"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-server.SavedObjectsFindOptionsReference",
+                "text": "SavedObjectsFindOptionsReference"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
+            "id": "def-server.SavedObjectsFindOptions.hasNoReferenceOperator",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasNoReferenceOperator",
+            "description": [
+              "\nThe operator to use when searching by multiple references using the `hasNoReference` option. Defaults to `OR`"
+            ],
+            "signature": [
+              "\"AND\" | \"OR\" | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-server",
             "id": "def-server.SavedObjectsFindOptions.defaultSearchOperator",
             "type": "CompoundType",
             "tags": [],
@@ -6447,7 +6494,23 @@
             "section": "def-server.SavedObjectsFindOptionsReference",
             "text": "SavedObjectsFindOptionsReference"
           },
-          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; }"
+          "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsFindOptionsReference",
+            "text": "SavedObjectsFindOptionsReference"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-saved-objects-api-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+            "section": "def-server.SavedObjectsFindOptionsReference",
+            "text": "SavedObjectsFindOptionsReference"
+          },
+          "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; }"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/create_point_in_time_finder.ts",
         "deprecated": false,

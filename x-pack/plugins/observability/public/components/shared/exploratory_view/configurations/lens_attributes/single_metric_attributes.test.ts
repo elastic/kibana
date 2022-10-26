@@ -16,7 +16,7 @@ import { TRANSACTION_DURATION } from '../constants/elasticsearch_fieldnames';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import { DataTypes } from '../constants';
-import { sampleMetricFormulaAttribute } from './sample_formula_metric_attribute';
+import { sampleMetricFormulaAttribute } from '../test_data/test_formula_metric_attribute';
 
 describe('SingleMetricAttributes', () => {
   mockAppDataView();
@@ -35,7 +35,7 @@ describe('SingleMetricAttributes', () => {
   const layerConfig: LayerConfig = {
     seriesConfig: reportViewConfig,
     operationType: 'median',
-    indexPattern: mockDataView,
+    dataView: mockDataView,
     reportDefinitions: {},
     time: { from: 'now-15m', to: 'now' },
     color: 'green',
@@ -60,21 +60,23 @@ describe('SingleMetricAttributes', () => {
     const jsonAttr = lnsAttr.getJSON();
     expect(jsonAttr).toEqual({
       description: 'undefined',
-      references: [
-        {
-          id: 'apm-*',
-          name: 'indexpattern-datasource-current-indexpattern',
-          type: 'index-pattern',
-        },
-        {
-          id: 'apm-*',
-          name: 'indexpattern-datasource-layer-layer0',
-          type: 'index-pattern',
-        },
-      ],
+      references: [],
       state: {
+        adHocDataViews: { [mockDataView.title]: mockDataView.toSpec(false) },
+        internalReferences: [
+          {
+            id: 'apm-*',
+            name: 'indexpattern-datasource-current-indexpattern',
+            type: 'index-pattern',
+          },
+          {
+            id: 'apm-*',
+            name: 'indexpattern-datasource-layer-layer0',
+            type: 'index-pattern',
+          },
+        ],
         datasourceStates: {
-          indexpattern: {
+          formBased: {
             layers: {
               layer0: {
                 columnOrder: ['layer-0-column-1'],
@@ -122,21 +124,23 @@ describe('SingleMetricAttributes', () => {
     const jsonAttr = lnsAttr.getJSON();
     expect(jsonAttr).toEqual({
       description: 'undefined',
-      references: [
-        {
-          id: 'apm-*',
-          name: 'indexpattern-datasource-current-indexpattern',
-          type: 'index-pattern',
-        },
-        {
-          id: 'apm-*',
-          name: 'indexpattern-datasource-layer-layer0',
-          type: 'index-pattern',
-        },
-      ],
+      references: [],
       state: {
+        adHocDataViews: { [mockDataView.title]: mockDataView.toSpec(false) },
+        internalReferences: [
+          {
+            id: 'apm-*',
+            name: 'indexpattern-datasource-current-indexpattern',
+            type: 'index-pattern',
+          },
+          {
+            id: 'apm-*',
+            name: 'indexpattern-datasource-layer-layer0',
+            type: 'index-pattern',
+          },
+        ],
         datasourceStates: {
-          indexpattern: {
+          formBased: {
             layers: {
               layer0: {
                 columnOrder: ['layer-0-column-1'],
@@ -188,7 +192,7 @@ describe('SingleMetricAttributes', () => {
     const layerConfigFormula: LayerConfig = {
       seriesConfig: reportViewConfigFormula,
       operationType: 'median',
-      indexPattern: mockDataView,
+      dataView: mockDataView,
       reportDefinitions: {},
       time: { from: 'now-15m', to: 'now' },
       color: 'green',

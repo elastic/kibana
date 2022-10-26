@@ -31,7 +31,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       resolve(__dirname, './test_suites/resolver'),
       resolve(__dirname, './test_suites/global_search'),
-      resolve(__dirname, './test_suites/timelines'),
     ],
 
     services,
@@ -61,9 +60,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xpackFunctionalConfig.get('apps'),
       resolverTest: {
         pathname: '/app/resolverTest',
-      },
-      timelineTest: {
-        pathname: '/app/timelinesTest',
       },
     },
 

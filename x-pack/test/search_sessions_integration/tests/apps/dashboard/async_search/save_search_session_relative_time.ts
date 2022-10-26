@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.debug('Checking saved searches rendered');
     await dashboardExpect.savedSearchRowCount(11);
     log.debug('Checking input controls rendered');
-    await dashboardExpect.inputControlItemCount(3);
+    await dashboardExpect.controlCount(3);
     log.debug('Checking tag cloud rendered');
     await dashboardExpect.tagCloudWithValuesFound(['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail']);
     log.debug('Checking vega chart rendered');

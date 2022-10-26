@@ -4,10 +4,10 @@
   "kibanaVersion": "kibana",
   "requiredPlugins": ["features", "spaces", "security", "licensing", "data", "charts", "infra", "cloud", "esUiShared"],
   "configPath": ["enterpriseSearch"],
-  "optionalPlugins": ["usageCollection", "home", "cloud", "customIntegrations"],
+  "optionalPlugins": ["usageCollection", "home", "customIntegrations", "ml"],
   "server": true,
   "ui": true,
-  "requiredBundles": ["kibanaReact"],
+  "requiredBundles": ["kibanaReact", "cloudChat"],
   "owner": {
     "name": "Enterprise Search",
     "githubTeam": "enterprise-search-frontend"

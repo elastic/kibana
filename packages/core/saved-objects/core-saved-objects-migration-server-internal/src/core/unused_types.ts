@@ -22,6 +22,8 @@ export const REMOVED_TYPES: string[] = [
   'fleet-agents',
   'fleet-agent-actions',
   'fleet-enrollment-api-keys',
+  // replaced by guided-onboarding-guide-state in 8.6
+  'guided-setup-state',
   // Was removed in 7.12
   'ml-telemetry',
   'server',

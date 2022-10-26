@@ -15,11 +15,12 @@ import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { createAnomalyDetectionJobs } from '../../../lib/anomaly_detection/create_anomaly_detection_jobs';
 import { setupRequest } from '../../../lib/helpers/setup_request';
 import { getAllEnvironments } from '../../environments/get_all_environments';
-import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
+import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
 import { notifyFeatureUsage } from '../../../feature';
 import { updateToV3 } from './update_to_v3';
 import { environmentStringRt } from '../../../../common/environment_rt';
 import { getMlJobsWithAPMGroup } from '../../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
+import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 
 // get ML anomaly detection jobs for each environment
 const anomalyDetectionJobsRoute = createApmServerRoute({
@@ -94,11 +95,14 @@ const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/anomaly-detection/environments',
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<{ environments: string[] }> => {
-    const setup = await setupRequest(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
     const coreContext = await resources.context.core;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
-      apmEventClient: setup.apmEventClient,
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
+      apmEventClient,
       config: setup.config,
       kuery: '',
     });
@@ -108,7 +112,7 @@ const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
     const environments = await getAllEnvironments({
       includeMissing: true,
       searchAggregatedTransactions,
-      setup,
+      apmEventClient,
       size,
     });
 
