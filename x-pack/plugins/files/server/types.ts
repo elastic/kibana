@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { FileKind } from '../common';
 import { FileServiceFactory } from './file_service/file_service_factory';
@@ -27,6 +27,10 @@ export interface FilesSetup {
 export interface FilesPluginSetupDependencies {
   security?: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
+}
+
+export interface FilesPluginStartDependencies {
+  security?: SecurityPluginStart;
 }
 
 /**

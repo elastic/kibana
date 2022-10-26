@@ -20,6 +20,10 @@ export interface CreateFileArgs<Meta = unknown> {
    */
   fileKind: string;
   /**
+   * Username of the user who created the file.
+   */
+  createdBy?: string;
+  /**
    * Alternate text for accessibility and display purposes.
    */
   alt?: string;
