@@ -23,6 +23,7 @@ export const Pagination: FunctionComponent = () => {
   }
   return (
     <EuiPagination
+      data-test-subj="paginationControls"
       onPageClick={isUploading ? () => {} : state.setPage}
       pageCount={pageCount}
       activePage={page}
