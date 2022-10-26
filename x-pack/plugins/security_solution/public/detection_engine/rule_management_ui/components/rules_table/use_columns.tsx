@@ -80,7 +80,7 @@ const useEnabledColumn = ({ hasCRUDPermissions }: ColumnsProps): TableColumn => 
             isDisabled={
               !canEditRuleWithActions(rule, hasActionsPrivileges) ||
               !hasCRUDPermissions ||
-              (isMlRule(rule.type) && !hasMlPermissions && !rule.enabled)
+              (isMlRule(rule.type) && !hasMlPermissions)
             }
             isLoading={loadingIds.includes(rule.id)}
           />

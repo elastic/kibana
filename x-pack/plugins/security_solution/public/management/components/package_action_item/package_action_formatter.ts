@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DocLinks } from '@kbn/doc-links';
+import type {
+  FleetServerAgentComponentUnit,
+  FleetServerAgentComponentStatus,
+} from '@kbn/fleet-plugin/common/types';
 
 import { ENDPOINT_ERROR_CODES } from '../../../../common/endpoint/constants';
 
@@ -78,13 +82,12 @@ export class PackageActionFormatter {
   public linkText?: string;
 
   constructor(
-    code: number,
-    message: string,
+    unit: FleetServerAgentComponentUnit,
     private docLinks: DocLinks['securitySolution']['packageActionTroubleshooting']
   ) {
-    this.key = this.getKeyFromErrorCode(code);
+    this.key = this.getKeyFromErrorCode(unit.payload?.error?.code, unit.status);
     this.title = titles.get(this.key) ?? this.key;
-    this.description = descriptions.get(this.key) || message;
+    this.description = descriptions.get(this.key) || unit.payload?.error?.message;
     this.linkText = linkTexts.get(this.key);
   }
 
@@ -94,10 +97,13 @@ export class PackageActionFormatter {
     ];
   }
 
-  private getKeyFromErrorCode(code: number): PackageActions {
+  private getKeyFromErrorCode(
+    code: number,
+    status: FleetServerAgentComponentStatus
+  ): PackageActions {
     if (code === ENDPOINT_ERROR_CODES.ES_CONNECTION_ERROR) {
       return 'es_connection';
-    } else if (code === 124) {
+    } else if (status === 'failed') {
       return 'policy_failure';
     } else {
       throw new Error(`Invalid error code ${code}`);
