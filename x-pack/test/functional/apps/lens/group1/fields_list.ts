@@ -60,13 +60,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // check for popover
           await testSubjects.exists('lnsFieldListPanel-title');
           // check for top values chart
-          await testSubjects.existOrFail('lnsFieldListPanel-topValues');
+          await testSubjects.existOrFail('lnsFieldListPanel-buttonGroup-topValuesButton');
           const topValuesRows = await testSubjects.findAll('lnsFieldListPanel-topValues-bucket');
           expect(topValuesRows.length).to.eql(11);
           // check for the Other entry
           expect(await topValuesRows[10].getVisibleText()).to.eql('Other\n96.7%');
           // switch to date histogram
-          await testSubjects.click('lnsFieldListPanel-distribution');
+          await testSubjects.click('lnsFieldListPanel-buttonGroup-distributionButton');
           // check for date histogram chart
           expect(
             await find.existsByCssSelector(
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // check for popover
           await testSubjects.exists('lnsFieldListPanel-title');
           // check for top values chart
-          await testSubjects.existOrFail('lnsFieldListPanel-topValues');
+          await testSubjects.existOrFail('lnsFieldListPanel-buttonGroup-topValuesButton');
           const topValuesRows = await testSubjects.findAll('lnsFieldListPanel-topValues-bucket');
           expect(topValuesRows.length).to.eql(11);
           // check for the Other entry
@@ -106,13 +106,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             )
           ).to.eql(true);
           // check no top values chart
-          await testSubjects.missingOrFail('lnsFieldListPanel-topValues');
+          await testSubjects.missingOrFail('lnsFieldListPanel-buttonGroup-topValuesButton');
         });
 
         it('should show a placeholder message about geo points field', async () => {
           const [fieldId] = await PageObjects.lens.findFieldIdsByType('geo_point');
           await testSubjects.click(fieldId);
-          const message = await testSubjects.getVisibleText('lnsFieldListPanel-missingContent');
+          const message = await testSubjects.getVisibleText('lnsFieldListPanel-missingFieldStats');
           expect(message).to.eql('Analysis is not available for this field.');
         });
 
@@ -124,14 +124,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // check for popover
           await testSubjects.exists('lnsFieldListPanel-title');
           // check for top values chart
-          await testSubjects.existOrFail('lnsFieldListPanel-topValues');
+          await testSubjects.existOrFail('lnsFieldListPanel-buttonGroup-topValuesButton');
           // check values
           const topValuesRows = await testSubjects.findAll('lnsFieldListPanel-topValues-bucket');
           expect(topValuesRows.length).to.eql(11);
           // check for the Other entry
           expect(await topValuesRows[10].getVisibleText()).to.eql('Other\n96.7%');
           // switch to date histogram
-          await testSubjects.click('lnsFieldListPanel-distribution');
+          await testSubjects.click('lnsFieldListPanel-buttonGroup-distributionButton');
           // check for date histogram chart
           expect(
             await find.existsByCssSelector(
@@ -148,7 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // check for popover
           await testSubjects.exists('lnsFieldListPanel-title');
           // check for top values chart
-          await testSubjects.existOrFail('lnsFieldListPanel-topValues');
+          await testSubjects.existOrFail('lnsFieldListPanel-buttonGroup-topValuesButton');
           // check no date histogram
           expect(
             await find.existsByCssSelector(
@@ -191,7 +191,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const [fieldId] = await PageObjects.lens.findFieldIdsByType('string');
           await retry.try(async () => {
             await testSubjects.click(fieldId);
-            expect(await testSubjects.find('lnsFieldListPanel-missingContent')).to.be.ok();
+            expect(await testSubjects.find('lnsFieldListPanel-missingFieldStats')).to.be.ok();
             // close the popover
             await testSubjects.click(fieldId);
           });

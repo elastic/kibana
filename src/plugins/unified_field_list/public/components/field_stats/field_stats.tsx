@@ -75,8 +75,7 @@ export interface FieldStatsProps {
   'data-test-subj'?: string;
   overrideMissingContent?: (params: {
     element: JSX.Element;
-    noDataFound?: boolean;
-    supported?: boolean;
+    reason: 'no-data' | 'unsupported';
   }) => JSX.Element | null;
   overrideFooter?: (params: {
     element: JSX.Element;
@@ -305,8 +304,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     return overrideMissingContent
       ? overrideMissingContent({
-          supported: false,
-          noDataFound: false,
+          reason: 'unsupported',
           element: messageNoAnalysis,
         })
       : messageNoAnalysis;
@@ -340,7 +338,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
     return overrideMissingContent
       ? overrideMissingContent({
-          noDataFound: true,
+          reason: 'no-data',
           element: messageNoData,
         })
       : messageNoData;
@@ -360,14 +358,14 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
               defaultMessage: 'Top values',
             }),
             id: 'topValues',
-            'data-test-subj': `${dataTestSubject}-topValues`,
+            'data-test-subj': `${dataTestSubject}-buttonGroup-topValuesButton`,
           },
           {
             label: i18n.translate('unifiedFieldList.fieldStats.fieldDistributionLabel', {
               defaultMessage: 'Distribution',
             }),
             id: 'histogram',
-            'data-test-subj': `${dataTestSubject}-distribution`,
+            'data-test-subj': `${dataTestSubject}-buttonGroup-distributionButton`,
           },
         ]}
         onChange={(optionId: string) => {

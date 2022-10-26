@@ -334,11 +334,11 @@ function FieldItemPopoverContents(
         field={dataViewField}
         data-test-subj="lnsFieldListPanel"
         overrideMissingContent={(params) => {
-          if (params?.noDataFound) {
+          if (params.reason === 'no-data') {
             // TODO: should we replace this with a default message "Analysis is not available for this field?"
             const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
             return (
-              <EuiText size="s" data-test-subj="lnsFieldListPanel-missingContent">
+              <EuiText size="s" data-test-subj="lnsFieldListPanel-missingFieldStats">
                 {isUsingSampling
                   ? i18n.translate('xpack.lens.indexPattern.fieldStatsSamplingNoData', {
                       defaultMessage:
@@ -351,9 +351,11 @@ function FieldItemPopoverContents(
               </EuiText>
             );
           }
-          if (!params.supported) {
+          if (params.reason === 'unsupported') {
             return (
-              <EuiText data-test-subj="lnsFieldListPanel-missingContent">{params.element}</EuiText>
+              <EuiText data-test-subj="lnsFieldListPanel-missingFieldStats">
+                {params.element}
+              </EuiText>
             );
           }
           return params.element;
