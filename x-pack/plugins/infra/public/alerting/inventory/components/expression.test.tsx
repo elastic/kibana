@@ -121,7 +121,6 @@ describe('Expression', () => {
         setRuleProperty={() => {}}
         metadata={{}}
         dataViews={dataViewMock}
-        onChangeMetaData={() => {}}
       />
     );
 
