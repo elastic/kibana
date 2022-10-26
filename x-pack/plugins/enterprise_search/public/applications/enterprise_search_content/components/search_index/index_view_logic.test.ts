@@ -204,7 +204,7 @@ describe('IndexViewLogic', () => {
   describe('createNewFetchIndexTimeout', () => {
     it('should trigger fetchIndex after timeout', async () => {
       IndexViewLogic.actions.fetchIndex = jest.fn();
-      jest.useFakeTimers();
+      jest.useFakeTimers('legacy');
       IndexViewLogic.actions.createNewFetchIndexTimeout(1);
       expect(IndexViewLogic.actions.fetchIndex).not.toHaveBeenCalled();
       jest.advanceTimersByTime(2);
