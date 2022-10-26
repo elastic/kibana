@@ -128,5 +128,7 @@ export const decodeMatchedBucketKey = (
   // if newTermsFields has length greater than 1, bucketKey can't be umber, so casting is safe here
   return (bucketKey as string)
     .split(DELIMITER)
-    .map((encodedValue) => Buffer.from(encodedValue, 'base64').toString());
+    .map((encodedValue, i) =>
+      [newTermsFields[i], Buffer.from(encodedValue, 'base64').toString()].join(': ')
+    );
 };

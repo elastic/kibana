@@ -123,13 +123,6 @@ export const ALERTS_HEADERS_NEW_TERMS = i18n.translate(
   }
 );
 
-export const ALERTS_HEADERS_NEW_TERMS_FIELDS = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.newTermsFields',
-  {
-    defaultMessage: 'New Terms fields',
-  }
-);
-
 export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineTitle',
   {
