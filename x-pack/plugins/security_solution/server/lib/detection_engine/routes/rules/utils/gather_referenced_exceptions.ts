@@ -10,16 +10,13 @@ import type { ExceptionListQueryInfo } from '@kbn/lists-plugin/server/services/e
 import { getAllListTypes } from '@kbn/lists-plugin/server/services/exception_lists/utils/import/find_all_exception_list_types';
 import type { ImportRulesSchema } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
 
-
-
-
 /**
  * splitting out the parsing of the lists from the fetching
  * for easier and more compartmentalized testing
  * @param rules Array<RuleToImport | Error>
  * @returns [ExceptionListQueryInfo[], ExceptionListQueryInfo[]]
  */
- export const parseReferencedExceptionsLists = (
+export const parseReferencedExceptionsLists = (
   rules: Array<ImportRulesSchema | Error>
 ): [ExceptionListQueryInfo[], ExceptionListQueryInfo[]] => {
   const lists = rules.reduce<ListArray>((acc, rule) => {
@@ -54,7 +51,6 @@ import type { ImportRulesSchema } from '../../../../../../common/detection_engin
   return [agnosticLists, nonAgnosticLists];
 };
 
-
 /**
  * Helper that takes rules, goes through their referenced exception lists and
  * searches for them, returning an object with all those found, using list_id as keys
@@ -62,7 +58,7 @@ import type { ImportRulesSchema } from '../../../../../../common/detection_engin
  * @param savedObjectsClient {object}
  * @returns {Promise} an object with all referenced lists found, using list_id as keys
  */
- export const getReferencedExceptionLists = async ({
+export const getReferencedExceptionLists = async ({
   rules,
   savedObjectsClient,
 }: {
