@@ -2736,6 +2736,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-inspector@link:bazel-bin/packages/content-management/inspector":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-table-list@link:bazel-bin/packages/content-management/table_list":
   version "0.0.0"
   uid ""

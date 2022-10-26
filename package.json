@@ -148,6 +148,7 @@
     "@kbn/config": "link:bazel-bin/packages/kbn-config",
     "@kbn/config-mocks": "link:bazel-bin/packages/kbn-config-mocks",
     "@kbn/config-schema": "link:bazel-bin/packages/kbn-config-schema",
+    "@kbn/content-management-inspector": "link:bazel-bin/packages/content-management/inspector",
     "@kbn/content-management-table-list": "link:bazel-bin/packages/content-management/table_list",
     "@kbn/core-analytics-browser": "link:bazel-bin/packages/core/analytics/core-analytics-browser",
     "@kbn/core-analytics-browser-internal": "link:bazel-bin/packages/core/analytics/core-analytics-browser-internal",
