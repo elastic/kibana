@@ -161,7 +161,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should handle a 40x Torq error', async () => {
+    it('should handle a 400 Torq error', async () => {
       const { body: result } = await supertest
         .post(`/api/actions/connector/${simulatedActionId}/_execute`)
         .set('kbn-xsrf', 'foo')
@@ -173,6 +173,20 @@ export default function torqTest({ getService }: FtrProviderContext) {
         .expect(200);
       expect(result.status).to.equal('error');
       expect(result.message).to.match(/error triggering Torq workflow, invalid response/);
+    });
+
+    it('should handle a 404 Torq error', async () => {
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            body: `{"msg": "respond-with-404"}`,
+          },
+        })
+        .expect(200);
+      expect(result.status).to.equal('error');
+      expect(result.message).to.match(/error triggering Torq workflow, make sure the webhook URL is valid/);
     });
 
     it('should handle a 429 Torq error', async () => {

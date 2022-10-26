@@ -43,6 +43,8 @@ export function initPlugin(router: IRouter, path: string) {
       switch (content) {
         case 'respond-with-400':
           return jsonErrorResponse(res, 400, new Error(content));
+        case 'respond-with-404':
+          return jsonErrorResponse(res, 404, new Error(content));
         case 'respond-with-429':
           return jsonErrorResponse(res, 429, new Error(content));
         case 'respond-with-405':

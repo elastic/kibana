@@ -228,6 +228,10 @@ async function handleExecutionError(
       return errorResultUnauthorised(actionId, message);
     }
 
+    if (status === 404) {
+      return errorNotFound(actionId, message);
+    }
+
     return errorResultInvalid(actionId, message);
   } else if (error.code) {
     const message = `[${error.code}] ${error.message}`;
@@ -253,6 +257,21 @@ function errorResultInvalid(
 ): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate('xpack.actions.builtin.torq.invalidResponseErrorMessage', {
     defaultMessage: 'error triggering Torq workflow, invalid response',
+  });
+  return {
+    status: 'error',
+    message: errMessage,
+    actionId,
+    serviceMessage,
+  };
+}
+
+function errorNotFound(
+  actionId: string,
+  serviceMessage: string
+): ActionTypeExecutorResult<void> {
+  const errMessage = i18n.translate('xpack.actions.builtin.torq.notFoundErrorMessage', {
+    defaultMessage: 'error triggering Torq workflow, make sure the webhook URL is valid',
   });
   return {
     status: 'error',
