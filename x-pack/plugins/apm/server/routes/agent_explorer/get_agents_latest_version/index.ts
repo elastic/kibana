@@ -20,7 +20,13 @@ const getAllAgentsLatestVersion = async () => {
     getAllAgentsName().map((agent) => fetchAgentLatestReleaseVersion(agent))
   );
 
-  const versions = versionsReq.map((res) => (res as any).value);
+  const versions = versionsReq.map((result) => {
+    if (result.status === 'fulfilled') {
+      return result.value;
+    }
+
+    return {};
+  });
 
   return Object.assign({}, ...versions);
 };

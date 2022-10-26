@@ -7,7 +7,6 @@
 
 import { APMEventClient } from "../../lib/helpers/create_es_client/create_apm_event_client";
 import { RandomSampler } from "../../lib/helpers/get_random_sampler";
-import { withApmSpan } from "../../utils/with_apm_span";
 import { getAgentsDetails } from "./get_agents_items_details";
 
 const MAX_NUMBER_OF_SERVICES = 500;
@@ -31,19 +30,17 @@ export async function getAgentItems({
   end: number;
   randomSampler: RandomSampler;
 }) {
-  return withApmSpan('get_agent_items', async () => {
-    const params = {
-      environment,
-      serviceName,
-      agentLanguage,
-      kuery,
-      apmEventClient,
-      maxNumServices: MAX_NUMBER_OF_SERVICES,
-      start,
-      end,
-      randomSampler,
-    };
+  const params = {
+    environment,
+    serviceName,
+    agentLanguage,
+    kuery,
+    apmEventClient,
+    maxNumServices: MAX_NUMBER_OF_SERVICES,
+    start,
+    end,
+    randomSampler,
+  };
 
-    return getAgentsDetails(params);
-  });
+  return getAgentsDetails(params);
 }

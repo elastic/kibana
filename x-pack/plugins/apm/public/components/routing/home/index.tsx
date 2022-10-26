@@ -25,7 +25,6 @@ import { RedirectTo } from '../redirect_to';
 import { ServiceGroupsRedirect } from '../service_groups_redirect';
 import { ApmMainTemplate } from '../templates/apm_main_template';
 import { ServiceGroupTemplate } from '../templates/service_group_template';
-import { agentExplorer } from './agent_explorer';
 import { dependencies } from './dependencies';
 import { legacyBackends } from './legacy_backends';
 import { storageExplorer } from './storage_explorer';
@@ -235,7 +234,6 @@ export const home = {
       ...dependencies,
       ...legacyBackends,
       ...storageExplorer,
-      ...agentExplorer,
       '/': {
         element: (
           <ServiceGroupsRedirect>

@@ -53,7 +53,14 @@ export function getAgentsColumns({
           content={
             <ServiceLink
               agentName={agentName}
-              query={{ ...query, serviceGroup: '' }}
+              query={{
+                kuery: query.kuery,
+                serviceGroup: '',
+                rangeFrom: query.rangeFrom,
+                rangeTo: query.rangeTo,
+                environment: query.environment,
+                comparisonEnabled: true,
+              }}
               serviceName={serviceName}
             />
           }
@@ -145,16 +152,7 @@ export function AgentList({
   noItemsMessage,
   isLoading,
 }: Props) {
-  const {
-    // removes pagination and sort instructions from the query so it won't be passed down to next route
-    query: {
-      page,
-      pageSize,
-      sortDirection: direction,
-      sortField: field,
-      ...query
-    },
-  } = useApmParams('/agent-explorer');
+  const { query } = useApmParams('/agent-explorer');
 
   const agentColumns = useMemo(() => getAgentsColumns({ query }), [query]);
 

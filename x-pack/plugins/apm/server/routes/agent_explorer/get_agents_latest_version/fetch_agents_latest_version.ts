@@ -19,11 +19,13 @@ const getAgentReleasesApiUrl = (
     : undefined;
 };
 
-export const fetchAgentLatestReleaseVersion = async (agent: AgentName) => {
+export type AgentLastVersion = Partial<Record<AgentName, string>>;
+
+export const fetchAgentLatestReleaseVersion = async (agent: AgentName): Promise<AgentLastVersion | undefined> => {
   const url = getAgentReleasesApiUrl(agent);
 
   if (!url) {
-    return;
+    return {};
   }
 
   const response = await fetch(url);
@@ -32,6 +34,6 @@ export const fetchAgentLatestReleaseVersion = async (agent: AgentName) => {
   const latestVersion = releases[0]?.tag_name.replace('v', '');
 
   return {
-    [agent]: latestVersion
+    [agent]: latestVersion,
   };
 }

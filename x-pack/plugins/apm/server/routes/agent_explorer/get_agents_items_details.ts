@@ -98,11 +98,6 @@ export async function getAgentsDetails({
                     size: maxNumServices,
                   },
                   aggs: {
-                    environments: {
-                      terms: {
-                        field: SERVICE_ENVIRONMENT,
-                      },
-                    },
                     sample: {
                       top_metrics: {
                         metrics: [
@@ -117,6 +112,11 @@ export async function getAgentsDetails({
                     },
                   },
                 },
+                environments: {
+                  terms: {
+                    field: SERVICE_ENVIRONMENT,
+                  },
+                },
               },
             },
           },
@@ -129,14 +129,6 @@ export async function getAgentsDetails({
     response.aggregations?.sample.services.buckets.map((bucket) => {
       const agent = bucket.serviceNodes.buckets.reduce(
         (acc, serviceNode) => ({
-          environments: Array.from(
-            new Set([
-              ...acc.environments,
-              ...serviceNode.environments.buckets.map(
-                (env) => env.key as string
-              ),
-            ])
-          ),
           agentName: serviceNode.sample.top[0].metrics[AGENT_NAME] as AgentName,
           agentVersion: Array.from(
             new Set([
@@ -145,8 +137,7 @@ export async function getAgentsDetails({
             ])
           ),
         }),
-        { environments: [], agentVersion: [] } as {
-          environments: string[];
+        { agentVersion: [] } as {
           agentName?: AgentName;
           agentVersion: string[];
         }
@@ -154,7 +145,9 @@ export async function getAgentsDetails({
 
       return {
         serviceName: bucket.key as string,
-        environments: agent.environments,
+        environments: bucket.environments.buckets.map(
+          (env) => env.key as string
+        ),
         agentName: agent.agentName,
         agentVersion: agent.agentVersion,
       };

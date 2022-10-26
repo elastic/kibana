@@ -20,6 +20,7 @@ import { ApmMainTemplate } from './templates/apm_main_template';
 import { ServiceGroupsList } from '../app/service_groups';
 import { ServiceGroupsRedirect } from './service_groups_redirect';
 import { offsetRt } from '../../../common/comparison_rt';
+import { agentExplorer } from './agent_explorer';
 
 const ServiceGroupsTitle = i18n.translate(
   'xpack.apm.views.serviceGroups.title',
@@ -105,6 +106,7 @@ const apmRoutes = {
         }),
       },
       ...settings,
+      ...agentExplorer,
       ...serviceDetail,
       ...home,
     },
