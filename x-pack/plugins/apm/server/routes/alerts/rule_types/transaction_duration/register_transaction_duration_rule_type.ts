@@ -50,8 +50,8 @@ import { RegisterRuleDependencies } from '../../register_apm_rule_types';
 import {
   averageOrPercentileAgg,
   getMultiTermsSortOrder,
-} from '../../average_or_percentile_agg';
-import { getSourceFields, getSourceFieldsAgg } from '../../get_source_fields';
+} from './average_or_percentile_agg';
+import { getSourceFields, getSourceFieldsAgg } from '../get_source_fields';
 
 const paramsSchema = schema.object({
   serviceName: schema.string(),

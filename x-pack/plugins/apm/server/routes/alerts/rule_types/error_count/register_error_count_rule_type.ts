@@ -37,7 +37,7 @@ import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import { RegisterRuleDependencies } from '../../register_apm_rule_types';
-import { getSourceFieldsAgg, getSourceFields } from '../../get_source_fields';
+import { getSourceFieldsAgg, getSourceFields } from '../get_source_fields';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),

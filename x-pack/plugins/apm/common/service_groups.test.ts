@@ -1,0 +1,63 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  isSupportedField,
+  validateServiceGroupKuery,
+  SERVICE_GROUP_SUPPORTED_FIELDS,
+} from './service_groups';
+import {
+  TRANSACTION_TYPE,
+  TRANSACTION_DURATION,
+  SERVICE_FRAMEWORK_VERSION,
+} from './elasticsearch_fieldnames';
+
+const unsupportedFields = [
+  TRANSACTION_TYPE,
+  TRANSACTION_DURATION,
+  SERVICE_FRAMEWORK_VERSION,
+];
+const mockFields = [...SERVICE_GROUP_SUPPORTED_FIELDS, ...unsupportedFields];
+
+describe('service_groups common utils', () => {
+  describe('isSupportedField', () => {
+    it('should only filter supported supported fields for service groups', () => {
+      const supportedFields = mockFields.filter(isSupportedField);
+      expect(supportedFields).toEqual(SERVICE_GROUP_SUPPORTED_FIELDS);
+    });
+  });
+  describe('validateServiceGroupKuery', () => {
+    it('should validate supported KQL filter for a service group', () => {
+      const result = validateServiceGroupKuery(
+        `service.name: testbeans* or agent.name: "nodejs"`
+      );
+      expect(result).toHaveProperty('isValid', true);
+      expect(result).toHaveProperty('isParsingError', false);
+      expect(result).toHaveProperty('message', '');
+    });
+    it('should return validation error when unsupported fields are used', () => {
+      const result = validateServiceGroupKuery(
+        `service.name: testbeans* or agent.name: "nodejs" or transaction.type: request`
+      );
+      expect(result).toHaveProperty('isValid', false);
+      expect(result).toHaveProperty('isParsingError', false);
+      expect(result).toHaveProperty(
+        'message',
+        'Query filter for service group does not support fields [transaction.type]'
+      );
+    });
+    it('should return parsing error when KQL is incomplete', () => {
+      const result = validateServiceGroupKuery(
+        `service.name: testbeans* or agent.name: "nod`
+      );
+      expect(result).toHaveProperty('isValid', false);
+      expect(result).toHaveProperty('isParsingError', true);
+      expect(result).toHaveProperty('message');
+      expect(result).not.toBe('');
+    });
+  });
+});

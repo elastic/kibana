@@ -12,7 +12,7 @@ import {
   TRANSACTION_DURATION,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { alertingEsClient } from '../../alerting_es_client';
-import { getSourceFields, getSourceFieldsAgg } from '../../get_source_fields';
+import { getSourceFields, getSourceFieldsAgg } from '../get_source_fields';
 
 export async function getAnomalousEventSourceFields({
   scopedClusterClient,

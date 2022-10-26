@@ -44,7 +44,7 @@ import { alertingEsClient } from '../../alerting_es_client';
 import { RegisterRuleDependencies } from '../../register_apm_rule_types';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import { getDocumentTypeFilterForTransactions } from '../../../../lib/helpers/transactions';
-import { getSourceFields, getSourceFieldsAgg } from '../../get_source_fields';
+import { getSourceFields, getSourceFieldsAgg } from '../get_source_fields';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),

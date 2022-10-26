@@ -6,7 +6,7 @@
  */
 
 import { AggregationsTopHitsAggregation } from '@elastic/elasticsearch/lib/api/types';
-import { SERVICE_GROUP_SUPPORTED_FIELDS } from '../../../common/service_groups';
+import { SERVICE_GROUP_SUPPORTED_FIELDS } from '../../../../common/service_groups';
 
 export interface SourceDoc {
   [key: string]: string | SourceDoc;
