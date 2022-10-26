@@ -96,7 +96,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
             context: {
               cloud: result.cloud,
               host: result.host,
-              containers: result.containers,
+              container: result.container,
               orchestrator: result.orchestrator,
               labels: result.labels,
               tags: result.tags,

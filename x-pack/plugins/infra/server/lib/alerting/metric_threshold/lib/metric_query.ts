@@ -87,13 +87,13 @@ export const getElasticsearchMetricQuery = (
       fieldsExisted &&
       fieldsExisted[termsAggMapping.groupByForContainerContext]
       ? {
-        containers: {
+        containerContext: {
           terms: {
             field: termsAggMapping.groupByForContainerContext,
             size: NUMBER_OF_DOCUMENTS
           },
           aggs: {
-            containerContext: {
+            container: {
               top_hits: {
                 size: 1,
                 _source: {

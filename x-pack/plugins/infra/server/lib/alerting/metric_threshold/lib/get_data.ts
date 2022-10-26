@@ -42,16 +42,18 @@ interface Aggs {
   missingGroup?: {
     value: number;
   };
-  containers: {
-    buckets: ContainerBucket[];
-  };
+  containerContext: ContainerContext;
   additionalContext: SearchResponse<EcsFieldsResponse, Record<string, AggregationsAggregate>>;
+}
+
+interface ContainerContext {
+  buckets: ContainerBucket[];
 }
 
 interface ContainerBucket {
   key: BucketKey;
   doc_count: number;
-  containerContext: SearchResponse<EcsFieldsResponse, Record<string, AggregationsAggregate>>;
+  container: SearchResponse<EcsFieldsResponse, Record<string, AggregationsAggregate>>;
 }
 
 interface Bucket extends Aggs {
@@ -84,6 +86,19 @@ const NO_DATA_RESPONSE = {
     trigger: false,
   },
 };
+
+const createContainerList = (containerContext: ContainerContext) => {
+  const containerList = [];
+  for (const containerBucket of containerContext.buckets) {
+    const containerHits = containerBucket.container.hits?.hits;
+    const containerSource =
+      containerHits && containerHits.length > 0 ? containerHits[0]._source : null;
+    if (containerSource && containerSource.container) {
+      containerList.push(containerSource.container);
+    }
+  }
+  return containerList;
+}
 
 export const getData = async (
   esClient: ElasticsearchClient,
@@ -119,23 +134,11 @@ export const getData = async (
           missingGroup,
           currentPeriod: { aggregatedValue, doc_count: docCount },
           aggregatedValue: aggregatedValueForRate,
-          containers,
-          additionalContext
+          additionalContext,
+          containerContext
         } = bucket;
 
-        const containerList = [];
-
-        if (containers) {
-          for (const containerBucket of containers.buckets) {
-            const containerContext = containerBucket.containerContext;
-            const containerHits = containerContext.hits?.hits;
-            const containerContextSource =
-              containerHits && containerHits.length > 0 ? containerHits[0]._source : null;
-            if (containerContextSource) {
-              containerList.push(containerContextSource.container);
-            }
-          }
-        }
+        const containerList = containerContext ? createContainerList(containerContext) : null;
 
         const bucketHits = additionalContext.hits?.hits;
         const additionalContextSource =
@@ -162,7 +165,7 @@ export const getData = async (
             warn: (shouldWarn && shouldWarn.value > 0) || false,
             value,
             ...additionalContextSource,
-            containers: containerList
+            container: containerList
           };
         }
       }
