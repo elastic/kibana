@@ -134,6 +134,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         timeslice: newInput.timeslice,
         filters: newInput.filters,
         query: newInput.query,
+        exclude: newInput.exclude,
       })),
       distinctUntilChanged(diffDataFetchProps)
     );
@@ -153,7 +154,11 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
      **/
     this.subscriptions.add(
       this.getInput$()
-        .pipe(distinctUntilChanged((a, b) => isEqual(a.selectedOptions, b.selectedOptions)))
+        .pipe(
+          distinctUntilChanged(
+            (a, b) => isEqual(a.selectedOptions, b.selectedOptions) && a.exclude === b.exclude
+          )
+        )
         .subscribe(async ({ selectedOptions: newSelectedOptions }) => {
           const {
             actions: {
@@ -364,6 +369,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private buildFilter = async () => {
     const { getState } = this.reduxEmbeddableTools;
     const { validSelections } = getState().componentState ?? {};
+    const { exclude } = this.getInput();
 
     if (!validSelections || isEmpty(validSelections)) {
       return [];
@@ -379,6 +385,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     }
 
     newFilter.meta.key = field?.name;
+    if (exclude) newFilter.meta.negate = true;
     return [newFilter];
   };
 

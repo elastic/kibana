@@ -92,7 +92,7 @@ export const thresholdExecutor = async ({
       : await getThresholdSignalHistory({
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
-          ruleId: ruleParams.ruleId,
+          frameworkRuleId: completeRule.alertId,
           bucketByFields: ruleParams.threshold.field,
           ruleDataReader,
         });
