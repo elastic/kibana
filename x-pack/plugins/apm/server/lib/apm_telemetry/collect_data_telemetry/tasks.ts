@@ -1032,8 +1032,9 @@ export const tasks: TelemetryTask[] = [
   },
   {
     name: 'cardinality',
-    executor: async ({ search }) => {
+    executor: async ({ indices, search }) => {
       const allAgentsCardinalityResponse = await search({
+        index: [indices.transaction],
         body: {
           size: 0,
           timeout,
@@ -1058,6 +1059,7 @@ export const tasks: TelemetryTask[] = [
       });
 
       const rumAgentCardinalityResponse = await search({
+        index: [indices.transaction],
         body: {
           size: 0,
           timeout,
