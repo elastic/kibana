@@ -34,11 +34,12 @@ const CloseButton = styled(EuiButtonIcon)`
 
 const ViewSelect = styled(EuiSuperSelect)`
   z-index: 999999;
-  width: 155px;
+  width: 170px;
 `;
 
 const TopNContent = styled.div`
   margin-top: 4px;
+  margin-right: 5px;
 
   .euiPanel {
     border: none;
