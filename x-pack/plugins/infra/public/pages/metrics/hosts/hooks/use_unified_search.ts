@@ -14,6 +14,7 @@ import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
 import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
 import { useTimeRangeUrlState } from './use_time_range_url_state';
+import { useHostsQueryContext } from './use_host_query';
 
 const DEFAULT_FROM_MINUTES_VALUE = 15;
 
@@ -28,6 +29,8 @@ export const useUnifiedSearch = () => {
 
   const { timeRange: selectedTimeRange, setTimeRange: setSelectedTimeRange } =
     useTimeRangeUrlState();
+
+  const { applyFilterQuery } = useHostsQueryContext();
 
   const [getTime, setTime] = useKibanaTimefilterTime({
     from: selectedTimeRange.startTime,
@@ -75,12 +78,18 @@ export const useUnifiedSearch = () => {
         ...dateRange,
       });
 
+      if (query) {
+        const queryAsString =
+          typeof query.query !== 'string' ? JSON.stringify(query.query) : query.query; // TODO Check the query object
+        applyFilterQuery({ language: query.language, expression: queryAsString });
+      }
+
       queryString.setQuery({ ...queryString.getQuery(), ...query });
       // Unified search holds the all state, we need to force the hook to rerender so that it can return the most recent values
       // This can be removed once we get the state from the URL
       forceUpdate();
     },
-    [setTime, getTime, queryString, filterManager, handleSelectedTimeRangeChange]
+    [setTime, getTime, queryString, filterManager, handleSelectedTimeRangeChange, applyFilterQuery]
   );
 
   const saveQuery = useCallback(
