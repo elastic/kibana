@@ -7,14 +7,43 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Readable } from 'stream';
+import type { FileClient } from '@kbn/files-plugin/server';
 import { createEsFileClient } from '@kbn/files-plugin/server';
 import { errors } from '@elastic/elasticsearch';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { UploadedFileInfo } from '../../../../common/endpoint/types';
 import { NotFoundError } from '../../errors';
 import {
   FILE_STORAGE_DATA_INDEX,
   FILE_STORAGE_METADATA_INDEX,
 } from '../../../../common/endpoint/constants';
 import { EndpointError } from '../../../../common/endpoint/errors';
+
+const getFileClient = (esClient: ElasticsearchClient, logger: Logger): FileClient => {
+  return createEsFileClient({
+    metadataIndex: FILE_STORAGE_METADATA_INDEX,
+    blobStorageIndex: FILE_STORAGE_DATA_INDEX,
+    elasticsearchClient: esClient,
+    logger,
+  });
+};
+
+const getFileRetrievalError = (
+  error: Error | errors.ResponseError,
+  fileId: string
+): EndpointError => {
+  if (error instanceof errors.ResponseError) {
+    const statusCode = error.statusCode;
+
+    // 404 will be returned if file id is not found -or- index does not exist yet.
+    // Using the `NotFoundError` error class will result in the API returning a 404
+    if (statusCode === 404) {
+      return new NotFoundError(`File with id [${fileId}] not found`, error);
+    }
+  }
+
+  return new EndpointError(`Failed to get file using id [${fileId}]: ${error.message}`, error);
+};
 
 /**
  * Returns a NodeJS `Readable` data stream to a file
@@ -27,14 +56,8 @@ export const getFileDownloadStream = async (
   logger: Logger,
   fileId: string
 ): Promise<{ stream: Readable; fileName: string; mimeType?: string }> => {
-  const fileClient = createEsFileClient({
-    metadataIndex: FILE_STORAGE_METADATA_INDEX,
-    blobStorageIndex: FILE_STORAGE_DATA_INDEX,
-    elasticsearchClient: esClient,
-    logger,
-  });
-
   try {
+    const fileClient = getFileClient(esClient, logger);
     const file = await fileClient.get({ id: fileId });
     const { name: fileName, mimeType } = file.data;
 
@@ -44,16 +67,69 @@ export const getFileDownloadStream = async (
       mimeType,
     };
   } catch (error) {
-    if (error instanceof errors.ResponseError) {
-      const statusCode = error.statusCode;
+    throw getFileRetrievalError(error, fileId);
+  }
+};
 
-      // 404 will be returned if file id is not found -or- index does not exist yet.
-      // Using the `NotFoundError` error class will result in the API returning a 404
-      if (statusCode === 404) {
-        throw new NotFoundError(`File with id [${fileId}] not found`, error);
+/**
+ * Retrieve information about a file
+ *
+ * @param esClient
+ * @param logger
+ * @param fileId
+ */
+export const getFileInfo = async (
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  fileId: string
+): Promise<UploadedFileInfo> => {
+  try {
+    const fileClient = getFileClient(esClient, logger);
+    const file = await fileClient.get({ id: fileId });
+    const { name, id, mimeType, size, status, created } = file.data;
+    let fileHasChunks: boolean = true;
+
+    if (status === 'READY') {
+      fileHasChunks = await doesFileHaveChunks(esClient, fileId);
+
+      if (!fileHasChunks) {
+        logger.debug(
+          `File with id [${fileId}] has no data chunks. Status will be adjusted to DELETED`
+        );
       }
     }
 
-    throw new EndpointError(`Failed to get file using id [${fileId}]: ${error.message}`, error);
+    // TODO: add `ttl` to the return payload by retrieving the value from ILM?
+
+    return {
+      name,
+      id,
+      mimeType,
+      size,
+      created,
+      status: fileHasChunks ? status : 'DELETED',
+    };
+  } catch (error) {
+    throw getFileRetrievalError(error, fileId);
   }
+};
+
+const doesFileHaveChunks = async (
+  esClient: ElasticsearchClient,
+  fileId: string
+): Promise<boolean> => {
+  const chunks = await esClient.search({
+    index: FILE_STORAGE_DATA_INDEX,
+    body: {
+      query: {
+        term: {
+          'bid.keyword': fileId,
+        },
+      },
+      // Setting `_source` to false - we don't need the actual document to be returned
+      _source: false,
+    },
+  });
+
+  return Boolean((chunks.hits?.total as SearchTotalHits)?.value);
 };
