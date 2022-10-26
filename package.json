@@ -593,7 +593,7 @@
     "react-fast-compare": "^2.0.4",
     "react-focus-on": "^3.6.0",
     "react-grid-layout": "^1.3.4",
-    "react-hook-form": "^7.37.0",
+    "react-hook-form": "^7.38.0",
     "react-intl": "^2.8.0",
     "react-is": "^17.0.2",
     "react-markdown": "^6.0.3",
@@ -666,7 +666,7 @@
     "vinyl": "^2.2.0",
     "whatwg-fetch": "^3.0.0",
     "xml2js": "^0.4.22",
-    "xterm": "^4.18.0",
+    "xterm": "^5.0.0",
     "yauzl": "^2.10.0",
     "yazl": "^2.5.1"
   },
