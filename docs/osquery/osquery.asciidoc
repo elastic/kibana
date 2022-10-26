@@ -173,11 +173,10 @@ For information about the prebuilt packs that are available, refer to <<prebuilt
 [[load-prebuilt-packs]]
 ==== Load and activate prebuilt Elastic packs
 
-. Go to *Packs*, and then click *Load Elastic prebuilt packs*.
-+
-NOTE: This option is only available if new or updated prebuilt packs are available.
+Follow these steps to load and turn on new or updated prebuilt packs:
 
-. For each pack that you want to schedule:
+. Go to *Packs*, and then click *Load Elastic prebuilt packs*.
+. For each pack that you want to activate and schedule:
 
 * Turn on the *Active* toggle to ensure the pack runs continuously.
 +
