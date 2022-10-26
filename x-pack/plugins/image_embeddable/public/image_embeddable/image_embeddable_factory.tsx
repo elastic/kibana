@@ -50,10 +50,13 @@ export class ImageEmbeddableFactoryDefinition
   public async getExplicitInput(initialInput: ImageEmbeddableInput) {
     const { configureImage } = await import('../image_editor');
 
-    const image = await configureImage({
-      overlays: this.deps.start().core.overlays,
-      currentAppId$: this.deps.start().core.application.currentAppId$,
-    });
+    const image = await configureImage(
+      {
+        overlays: this.deps.start().core.overlays,
+        currentAppId$: this.deps.start().core.application.currentAppId$,
+      },
+      initialInput ? { src: initialInput.imageSrc } : undefined
+    );
 
     return { imageSrc: image.imageConfig.src };
   }

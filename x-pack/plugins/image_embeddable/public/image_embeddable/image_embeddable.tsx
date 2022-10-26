@@ -6,6 +6,8 @@
  */
 
 // import { i18n } from '@kbn/i18n';
+import React from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { ImageEmbeddableInput } from './image_embeddable_factory';
 
@@ -25,11 +27,18 @@ export class ImageEmbeddable extends Embeddable<ImageEmbeddableInput> {
     );
   }
 
-  private node: HTMLElement | undefined;
-  public render(node: HTMLElement) {
-    this.node = node;
-    // eslint-disable-next-line no-unsanitized/property
-    node.innerHTML = `<div data-test-subj="helloWorldEmbeddable" data-render-complete="true">Image here! ${this.input.imageSrc} </div>`;
+  public render() {
+    function ImageEmbeddableViewer(props: { embeddable: ImageEmbeddable }) {
+      const input = useObservable(props.embeddable.getInput$(), props.embeddable.getInput());
+
+      return (
+        <div data-test-subj="imageEmbeddable" data-render-complete="true">
+          Image here! {input.imageSrc}
+        </div>
+      );
+    }
+
+    return <ImageEmbeddableViewer embeddable={this} />;
   }
 
   public reload() {}

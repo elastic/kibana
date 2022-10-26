@@ -16,18 +16,18 @@ import { ImageEditorFlyout } from './image_editor_flyout';
 /**
  * @throws in case user cancels
  */
-export async function configureImage(deps: {
-  overlays: OverlayStart;
-  currentAppId$: ApplicationStart['currentAppId$'];
-}): Promise<{
-  imageConfig: ImageConfig;
-  references: unknown[];
-}> {
+export async function configureImage(
+  deps: {
+    overlays: OverlayStart;
+    currentAppId$: ApplicationStart['currentAppId$'];
+  },
+  initialImageConfig?: ImageConfig
+): Promise<ImageConfig> {
   return new Promise((resolve, reject) => {
     const closed$ = new Subject<true>();
 
-    const onSave = (config: { imageConfig: ImageConfig; references: unknown[] }) => {
-      resolve(config);
+    const onSave = (imageConfig: ImageConfig) => {
+      resolve(imageConfig);
       handle.close();
     };
 
@@ -42,7 +42,13 @@ export async function configureImage(deps: {
     });
 
     const handle = deps.overlays.openFlyout(
-      toMountPoint(<ImageEditorFlyout onCancel={onCancel} onSave={onSave} />),
+      toMountPoint(
+        <ImageEditorFlyout
+          onCancel={onCancel}
+          onSave={onSave}
+          initialImageConfig={initialImageConfig}
+        />
+      ),
       {
         ownFocus: true,
         'data-test-subj': 'createImageEmbeddableFlyout',

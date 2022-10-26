@@ -9,8 +9,3 @@ export interface ImageConfig {
   src: string;
   alt?: string;
 }
-
-export interface ImageConfigWithReferences {
-  imageConfig: ImageConfig;
-  references: unknown[];
-}

@@ -17,24 +17,21 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { ImageConfigWithReferences } from '../types';
+import { ImageConfig } from '../types';
 
 export interface ImageEditorFlyoutProps {
   onCancel: () => void;
-  onSave: (imageConfigWithReferences: ImageConfigWithReferences) => void;
-  initialImageConfig?: ImageConfigWithReferences;
+  onSave: (imageConfigWithReferences: ImageConfig) => void;
+  initialImageConfig?: ImageConfig;
 }
 
 export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
-  const [src, setSrc] = useState(props.initialImageConfig?.imageConfig.src ?? '');
+  const [src, setSrc] = useState(props.initialImageConfig?.src ?? '');
 
   const onSave = () => {
     props.onSave({
       ...props.initialImageConfig,
-      references: [],
-      imageConfig: {
-        src,
-      },
+      src,
     });
   };
 
