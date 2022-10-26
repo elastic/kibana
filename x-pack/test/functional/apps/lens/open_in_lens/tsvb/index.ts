@@ -14,5 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./timeseries'));
     loadTestFile(require.resolve('./dashboard'));
     loadTestFile(require.resolve('./top_n'));
+    loadTestFile(require.resolve('./table'));
   });
 }

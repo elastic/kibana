@@ -14,7 +14,7 @@ import { getConfigurationForMetric, getConfigurationForGauge } from '.';
 
 const mockGetPalette = jest.fn();
 
-jest.mock('./palette', () => ({
+jest.mock('../palette', () => ({
   getPalette: jest.fn(() => mockGetPalette()),
 }));
 

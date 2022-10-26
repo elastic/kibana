@@ -8,7 +8,7 @@
 import color from 'color';
 import { ColorStop, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { uniqBy } from 'lodash';
-import { Panel } from '../../../../../common/types';
+import { Panel, Series } from '../../../../../common/types';
 
 const Operators = {
   GTE: 'gte',
@@ -24,9 +24,11 @@ type ColorStopsWithMinMax = Pick<
 
 type MetricColorRules = Exclude<Panel['background_color_rules'], undefined>;
 type GaugeColorRules = Exclude<Panel['gauge_color_rules'], undefined>;
+type SeriesColorRules = Exclude<Series['color_rules'], undefined>;
 
 type MetricColorRule = MetricColorRules[number];
 type GaugeColorRule = GaugeColorRules[number];
+type SeriesColorRule = SeriesColorRules[number];
 
 type ValidMetricColorRule = Omit<MetricColorRule, 'background_color' | 'color'> &
   (
@@ -44,31 +46,47 @@ type ValidGaugeColorRule = Omit<GaugeColorRule, 'gauge'> & {
   gauge: Exclude<GaugeColorRule['gauge'], undefined>;
 };
 
+type ValidSeriesColorRule = Omit<SeriesColorRule, 'text'> & {
+  text: Exclude<SeriesColorRule['text'], undefined>;
+};
+
 const isValidColorRule = (
   rule: MetricColorRule | GaugeColorRule
-): rule is ValidMetricColorRule | ValidGaugeColorRule => {
+): rule is ValidMetricColorRule | ValidGaugeColorRule | ValidSeriesColorRule => {
   const { background_color: bColor, color: textColor } = rule as MetricColorRule;
   const { gauge } = rule as GaugeColorRule;
+  const { text } = rule as SeriesColorRule;
 
-  return rule.operator && (bColor ?? textColor ?? gauge) && rule.value !== undefined ? true : false;
+  return Boolean(
+    rule.operator && (bColor ?? textColor ?? gauge ?? text) && rule.value !== undefined
+  );
 };
 
 const isMetricColorRule = (
-  rule: ValidMetricColorRule | ValidGaugeColorRule
+  rule: ValidMetricColorRule | ValidGaugeColorRule | ValidSeriesColorRule
 ): rule is ValidMetricColorRule => {
   const metricRule = rule as ValidMetricColorRule;
   return metricRule.background_color ?? metricRule.color ? true : false;
 };
 
-const getColor = (rule: ValidMetricColorRule | ValidGaugeColorRule) => {
+const isGaugeColorRule = (
+  rule: ValidMetricColorRule | ValidGaugeColorRule | ValidSeriesColorRule
+): rule is ValidGaugeColorRule => {
+  const metricRule = rule as ValidGaugeColorRule;
+  return Boolean(metricRule.gauge);
+};
+
+const getColor = (rule: ValidMetricColorRule | ValidGaugeColorRule | ValidSeriesColorRule) => {
   if (isMetricColorRule(rule)) {
     return rule.background_color ?? rule.color;
+  } else if (isGaugeColorRule(rule)) {
+    return rule.gauge;
   }
-  return rule.gauge;
+  return rule.text;
 };
 
 const getColorStopsWithMinMaxForAllGteOrWithLte = (
-  rules: Array<ValidMetricColorRule | ValidGaugeColorRule>,
+  rules: Array<ValidMetricColorRule | ValidGaugeColorRule | ValidSeriesColorRule>,
   tailOperator: string,
   baseColor?: string
 ): ColorStopsWithMinMax => {
@@ -125,7 +143,7 @@ const getColorStopsWithMinMaxForAllGteOrWithLte = (
 };
 
 const getColorStopsWithMinMaxForLtWithLte = (
-  rules: Array<ValidMetricColorRule | ValidGaugeColorRule>
+  rules: Array<ValidMetricColorRule | ValidGaugeColorRule | ValidSeriesColorRule>
 ): ColorStopsWithMinMax => {
   const lastRule = rules[rules.length - 1];
   const colorStops = rules.reduce<ColorStop[]>((colors, rule, index, rulesArr) => {
@@ -166,7 +184,7 @@ const getColorStopsWithMinMaxForLtWithLte = (
 };
 
 const getColorStopWithMinMaxForLte = (
-  rule: ValidMetricColorRule | ValidGaugeColorRule
+  rule: ValidMetricColorRule | ValidGaugeColorRule | ValidSeriesColorRule
 ): ColorStopsWithMinMax => {
   const colorStop = {
     color: color(getColor(rule)).hex(),
@@ -183,7 +201,7 @@ const getColorStopWithMinMaxForLte = (
 };
 
 const getColorStopWithMinMaxForGte = (
-  rule: ValidMetricColorRule | ValidGaugeColorRule,
+  rule: ValidMetricColorRule | ValidGaugeColorRule | ValidSeriesColorRule,
   baseColor?: string
 ): ColorStopsWithMinMax => {
   const colorStop = {
@@ -224,12 +242,14 @@ const getCustomPalette = (
 };
 
 export const getPalette = (
-  rules: MetricColorRules | GaugeColorRules,
+  rules: MetricColorRules | GaugeColorRules | SeriesColorRules,
   baseColor?: string
 ): PaletteOutput<CustomPaletteParams> | null | undefined => {
-  const validRules = (rules as Array<MetricColorRule | GaugeColorRule>).filter<
-    ValidMetricColorRule | ValidGaugeColorRule
-  >((rule): rule is ValidMetricColorRule | ValidGaugeColorRule => isValidColorRule(rule));
+  const validRules = (rules as Array<MetricColorRule | GaugeColorRule | SeriesColorRule>).filter<
+    ValidMetricColorRule | ValidGaugeColorRule | ValidSeriesColorRule
+  >((rule): rule is ValidMetricColorRule | ValidGaugeColorRule | ValidSeriesColorRule =>
+    isValidColorRule(rule)
+  );
 
   validRules.sort((rule1, rule2) => {
     return rule1.value! - rule2.value!;
