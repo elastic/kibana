@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const find = getService('find');
+  const log = getService('log');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const fieldEditor = getService('fieldEditor');
@@ -56,11 +57,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should show a histogram and top values popover for numeric field', async () => {
           const [fieldId] = await PageObjects.lens.findFieldIdsByType('number');
+          await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           // check for popover
           await testSubjects.exists('lnsFieldListPanel-title');
           // check for top values chart
-          await testSubjects.existOrFail('lnsFieldListPanel-buttonGroup-topValuesButton');
+          await testSubjects.existOrFail('lnsFieldListPanel-topValues');
           const topValuesRows = await testSubjects.findAll('lnsFieldListPanel-topValues-bucket');
           expect(topValuesRows.length).to.eql(11);
           // check for the Other entry
@@ -77,11 +79,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should show a top values popover for a keyword field', async () => {
           const [fieldId] = await PageObjects.lens.findFieldIdsByType('string');
+          await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           // check for popover
           await testSubjects.exists('lnsFieldListPanel-title');
           // check for top values chart
-          await testSubjects.existOrFail('lnsFieldListPanel-buttonGroup-topValuesButton');
+          await testSubjects.existOrFail('lnsFieldListPanel-topValues');
           const topValuesRows = await testSubjects.findAll('lnsFieldListPanel-topValues-bucket');
           expect(topValuesRows.length).to.eql(11);
           // check for the Other entry
@@ -96,6 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should show a date histogram popover for a date field', async () => {
           const [fieldId] = await PageObjects.lens.findFieldIdsByType('date');
+          await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           // check for popover
           await testSubjects.exists('lnsFieldListPanel-title');
@@ -111,6 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should show a placeholder message about geo points field', async () => {
           const [fieldId] = await PageObjects.lens.findFieldIdsByType('geo_point');
+          await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           const message = await testSubjects.getVisibleText('lnsFieldListPanel-missingFieldStats');
           expect(message).to.eql('Analysis is not available for this field.');
@@ -120,11 +125,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.lens.searchField('runtime');
           await PageObjects.lens.waitForField('runtime_number');
           const [fieldId] = await PageObjects.lens.findFieldIdsByType('number');
+          await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           // check for popover
           await testSubjects.exists('lnsFieldListPanel-title');
           // check for top values chart
-          await testSubjects.existOrFail('lnsFieldListPanel-buttonGroup-topValuesButton');
+          await testSubjects.existOrFail('lnsFieldListPanel-topValues');
           // check values
           const topValuesRows = await testSubjects.findAll('lnsFieldListPanel-topValues-bucket');
           expect(topValuesRows.length).to.eql(11);
@@ -144,11 +150,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.lens.searchField('runtime');
           await PageObjects.lens.waitForField('runtime_string');
           const [fieldId] = await PageObjects.lens.findFieldIdsByType('string');
+          await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           // check for popover
           await testSubjects.exists('lnsFieldListPanel-title');
           // check for top values chart
-          await testSubjects.existOrFail('lnsFieldListPanel-buttonGroup-topValuesButton');
+          await testSubjects.existOrFail('lnsFieldListPanel-topValues');
           // check no date histogram
           expect(
             await find.existsByCssSelector(
@@ -161,6 +168,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should change popover content if user defines a filter that affects field values', async () => {
           // check the current records count for stats
           const [fieldId] = await PageObjects.lens.findFieldIdsByType('string');
+          await log.debug(`Opening field stats for ${fieldId}`);
           await testSubjects.click(fieldId);
           const valuesCount = parseInt(
             (await testSubjects.getVisibleText('lnsFieldListPanel-statsFooter'))
@@ -189,6 +197,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await filterBar.addFilter('bytes', 'is', '-1');
           // check via popup fields have no data
           const [fieldId] = await PageObjects.lens.findFieldIdsByType('string');
+          await log.debug(`Opening field stats for ${fieldId}`);
           await retry.try(async () => {
             await testSubjects.click(fieldId);
             expect(await testSubjects.find('lnsFieldListPanel-missingFieldStats')).to.be.ok();
