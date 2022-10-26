@@ -53,6 +53,8 @@ import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 
+import { getSettings } from '../../settings';
+
 import { formatVerificationResultForSO } from './package_verification';
 
 import { getInstallation, getInstallationObject } from '.';
@@ -300,11 +302,21 @@ async function installPackageFromRegistry({
       installType,
     });
 
+    let prerelease: boolean = false;
+    try {
+      // check prerelease setting to enable installing latest GA version, even if there is a newer prerelease version
+      ({ prerelease_integrations_enabled: prerelease } = await getSettings(savedObjectsClient));
+    } catch (err) {
+      appContextService
+        .getLogger()
+        .warn('Error while trying to load prerelease flag from settings, defaulting to false', err);
+    }
+
     // get latest package version and requested version in parallel for performance
     const [latestPackage, { paths, packageInfo, verificationResult }] = await Promise.all([
       Registry.fetchFindLatestPackageOrThrow(pkgName, {
         ignoreConstraints,
-        prerelease: true,
+        prerelease,
       }),
       Registry.getPackage(pkgName, pkgVersion, {
         ignoreUnverified: force && !neverIgnoreVerificationError,

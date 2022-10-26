@@ -46,6 +46,20 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
+    before(async () => {
+      await supertest
+        .put('/api/fleet/settings')
+        .set('kbn-xsrf', 'xxxx')
+        .send({ prerelease_integrations_enabled: true });
+    });
+
+    after(async () => {
+      await supertest
+        .put('/api/fleet/settings')
+        .set('kbn-xsrf', 'xxxx')
+        .send({ prerelease_integrations_enabled: false });
+    });
+
     describe('installs all assets when installing a package for the first time', async () => {
       before(async () => {
         if (!server.enabled) return;

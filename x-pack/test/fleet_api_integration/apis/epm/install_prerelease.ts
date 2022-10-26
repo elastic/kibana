@@ -32,6 +32,20 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
+    before(async () => {
+      await supertest
+        .put('/api/fleet/settings')
+        .set('kbn-xsrf', 'xxxx')
+        .send({ prerelease_integrations_enabled: true });
+    });
+
+    after(async () => {
+      await supertest
+        .put('/api/fleet/settings')
+        .set('kbn-xsrf', 'xxxx')
+        .send({ prerelease_integrations_enabled: false });
+    });
+
     it('should install the package correctly', async function () {
       await supertest
         .post(`/api/fleet/epm/packages/${testPackage}/${testPackageVersion}`)
