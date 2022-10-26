@@ -6,7 +6,7 @@
  */
 
 import type { ReactChild } from 'react';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 import useObservable from 'react-use/lib/useObservable';
 import { catchError, of, timeout } from 'rxjs';
@@ -71,11 +71,6 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
   const resetStep = useCallback(() => {
     _setActiveStep(1);
   }, []);
-
-  useEffect(() => {
-    resetStep();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tourStatus]);
 
   // TODO: @Steph figure out if we're allowing user to skip tour or not, implement this if so
   // const onSkipTour = useCallback((stepId: SecurityStepId) => {
