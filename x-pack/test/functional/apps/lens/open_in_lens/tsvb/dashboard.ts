@@ -46,9 +46,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.clickEdit();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart');
+      await lens.waitForVisualization('xyVisChart', 250);
       await retry.try(async () => {
-        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', 250);
         expect(await dimensions[1].getVisibleText()).to.be('Count of records');
       });
 
@@ -74,9 +74,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.clickEdit();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('legacyMtrVis');
+      await lens.waitForVisualization('legacyMtrVis', 250);
       await retry.try(async () => {
-        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', 250);
         expect(await dimensions[1].getVisibleText()).to.be('Count of records');
       });
 
@@ -86,7 +86,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(embeddableCount).to.eql(originalEmbeddableCount);
       });
 
-      const panel = await testSubjects.find(`embeddablePanelHeading-`);
+      const panel = await testSubjects.find(`embeddablePanelHeading-`, 250);
       const descendants = await testSubjects.findAllDescendant(
         'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
         panel
