@@ -13,16 +13,14 @@ import {
   ExternalConnectionNode,
   ServiceConnectionNode,
 } from '../../../common/service_map';
-import { Setup } from '../../lib/helpers/setup_request';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function fetchServicePathsFromTraceIds(
-  setup: Setup,
+  apmEventClient: APMEventClient,
   traceIds: string[],
   start: number,
   end: number
 ) {
-  const { apmEventClient } = setup;
-
   // make sure there's a range so ES can skip shards
   const dayInMs = 24 * 60 * 60 * 1000;
   const startRange = start - dayInMs;

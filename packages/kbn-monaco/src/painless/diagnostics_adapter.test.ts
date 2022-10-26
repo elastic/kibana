@@ -24,9 +24,8 @@ const getMockWorker = async () => {
   } as any;
 };
 
-function flushPromises() {
-  return new Promise((resolve) => setImmediate(resolve));
-}
+const flushPromises = () =>
+  new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
 
 describe('Painless DiagnosticAdapter', () => {
   let diagnosticAdapter: DiagnosticsAdapter;
@@ -35,7 +34,7 @@ describe('Painless DiagnosticAdapter', () => {
   let validation: LangValidation;
 
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   afterAll(() => {
