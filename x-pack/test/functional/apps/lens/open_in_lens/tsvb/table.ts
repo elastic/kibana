@@ -208,7 +208,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const colorStops = await lens.getPaletteColorStops();
 
         expect(colorStops).to.eql([
-          { stop: '', color: 'rgba(104, 188, 0, 1)' },
           { stop: '10', color: 'rgba(84, 179, 153, 1)' },
           { stop: '100', color: 'rgba(84, 160, 0, 1)' },
           { stop: '', color: undefined },
