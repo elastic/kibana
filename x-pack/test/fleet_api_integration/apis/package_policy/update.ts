@@ -38,6 +38,20 @@ export default function (providerContext: FtrProviderContext) {
       );
     });
 
+    before(async () => {
+      await supertest
+        .put('/api/fleet/settings')
+        .set('kbn-xsrf', 'xxxx')
+        .send({ prerelease_integrations_enabled: true });
+    });
+
+    after(async () => {
+      await supertest
+        .put('/api/fleet/settings')
+        .set('kbn-xsrf', 'xxxx')
+        .send({ prerelease_integrations_enabled: false });
+    });
+
     before(async function () {
       if (!server.enabled) {
         return;

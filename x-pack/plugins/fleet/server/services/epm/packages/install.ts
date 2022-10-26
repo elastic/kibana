@@ -102,7 +102,6 @@ export async function ensureInstalledPackage(options: {
   pkgVersion?: string;
   spaceId?: string;
   force?: boolean;
-  prerelease?: boolean;
 }): Promise<Installation> {
   const {
     savedObjectsClient,
@@ -111,8 +110,17 @@ export async function ensureInstalledPackage(options: {
     pkgVersion,
     force = false,
     spaceId = DEFAULT_SPACE_ID,
-    prerelease = false,
   } = options;
+
+  let prerelease: boolean = false;
+  try {
+    // check prerelease setting to enable installing latest GA version, even if there is a newer prerelease version
+    ({ prerelease_integrations_enabled: prerelease } = await getSettings(savedObjectsClient));
+  } catch (err) {
+    appContextService
+      .getLogger()
+      .warn('Error while trying to load prerelease flag from settings, defaulting to false', err);
+  }
 
   // If pkgVersion isn't specified, find the latest package version
   const pkgKeyProps = pkgVersion

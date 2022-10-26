@@ -132,7 +132,7 @@ export async function getPackageInfo({
   pkgVersion,
   skipArchive = false,
   ignoreUnverified = false,
-  prerelease = false,
+  prerelease = true,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;

@@ -37,6 +37,20 @@ export default function (providerContext: FtrProviderContext) {
       await getService('kibanaServer').savedObjects.cleanStandardList();
     });
 
+    before(async () => {
+      await supertest
+        .put('/api/fleet/settings')
+        .set('kbn-xsrf', 'xxxx')
+        .send({ prerelease_integrations_enabled: true });
+    });
+
+    after(async () => {
+      await supertest
+        .put('/api/fleet/settings')
+        .set('kbn-xsrf', 'xxxx')
+        .send({ prerelease_integrations_enabled: false });
+    });
+
     describe('get by id', async function () {
       let agentPolicyId: string;
       let packagePolicyId: string;
