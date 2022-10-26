@@ -1452,7 +1452,7 @@
     "tree-kill": "^1.2.2",
     "ts-loader": "^7.0.5",
     "ts-morph": "^13.0.2",
-    "tsd": "^0.20.0",
+    "tsd": "^0.24.1",
     "typescript": "4.6.3",
     "url-loader": "^2.2.0",
     "val-loader": "^1.1.1",
