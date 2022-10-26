@@ -30,7 +30,6 @@ export interface SavedSearchData {
   main$: DataMain$;
   documents$: DataDocuments$;
   totalHits$: DataTotalHits$;
-  charts$: DataCharts$;
   availableFields$: AvailableFields$;
 }
 

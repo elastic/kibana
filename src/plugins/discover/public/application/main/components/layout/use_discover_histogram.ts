@@ -12,7 +12,6 @@ import {
   getVisualizeInformation,
   triggerVisualizeActions,
 } from '@kbn/unified-field-list-plugin/public';
-import { buildChartData } from '@kbn/unified-histogram-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getUiActions } from '../../../../kibana_services';
 import { PLUGIN_ID } from '../../../../../common';
@@ -42,7 +41,7 @@ export const useDiscoverHistogram = ({
   isTimeBased: boolean;
   isPlainRecord: boolean;
 }) => {
-  const { storage, data } = useDiscoverServices();
+  const { storage } = useDiscoverServices();
 
   /**
    * Visualize
@@ -134,41 +133,15 @@ export const useDiscoverHistogram = ({
     [hitsFetchStatus, hitsTotal, isPlainRecord]
   );
 
-  const { fetchStatus: chartFetchStatus, response, error } = useDataState(savedSearchData$.charts$);
-
-  const { bucketInterval, chartData } = useMemo(
-    () =>
-      buildChartData({
-        data,
-        dataView,
-        timeInterval: state.interval,
-        response,
-      }),
-    [data, dataView, response, state.interval]
-  );
-
   const chart = useMemo(
     () =>
       isPlainRecord || !isTimeBased
         ? undefined
         : {
-            status: chartFetchStatus,
             hidden: state.hideChart,
             timeInterval: state.interval,
-            bucketInterval,
-            data: chartData,
-            error,
           },
-    [
-      bucketInterval,
-      chartData,
-      chartFetchStatus,
-      error,
-      isPlainRecord,
-      isTimeBased,
-      state.hideChart,
-      state.interval,
-    ]
+    [isPlainRecord, isTimeBased, state.hideChart, state.interval]
   );
 
   /**

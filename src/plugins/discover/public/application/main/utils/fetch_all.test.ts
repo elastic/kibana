@@ -17,7 +17,6 @@ import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchAll } from './fetch_all';
 import {
   DataAvailableFieldsMsg,
-  DataChartsMessage,
   DataDocumentsMsg,
   DataMainMsg,
   DataTotalHitsMsg,
@@ -26,11 +25,9 @@ import {
 
 import { fetchDocuments } from './fetch_documents';
 import { fetchSql } from './fetch_sql';
-import { fetchChart } from './fetch_chart';
 import { fetchTotalHits } from './fetch_total_hits';
 import { buildDataTableRecord } from '../../../utils/build_data_record';
 import { dataViewMock } from '../../../__mocks__/data_view';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
@@ -40,17 +37,12 @@ jest.mock('./fetch_sql', () => ({
   fetchSql: jest.fn().mockResolvedValue([]),
 }));
 
-jest.mock('./fetch_chart', () => ({
-  fetchChart: jest.fn(),
-}));
-
 jest.mock('./fetch_total_hits', () => ({
   fetchTotalHits: jest.fn(),
 }));
 
 const mockFetchDocuments = fetchDocuments as unknown as jest.MockedFunction<typeof fetchDocuments>;
 const mockFetchTotalHits = fetchTotalHits as unknown as jest.MockedFunction<typeof fetchTotalHits>;
-const mockFetchChart = fetchChart as unknown as jest.MockedFunction<typeof fetchChart>;
 const mockFetchSQL = fetchSql as unknown as jest.MockedFunction<typeof fetchSql>;
 
 function subjectCollector<T>(subject: Subject<T>): () => Promise<T[]> {
@@ -73,7 +65,6 @@ describe('test fetchAll', () => {
       main$: new BehaviorSubject<DataMainMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
       documents$: new BehaviorSubject<DataDocumentsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
       totalHits$: new BehaviorSubject<DataTotalHitsMsg>({ fetchStatus: FetchStatus.UNINITIALIZED }),
-      charts$: new BehaviorSubject<DataChartsMessage>({ fetchStatus: FetchStatus.UNINITIALIZED }),
       availableFields$: new BehaviorSubject<DataAvailableFieldsMsg>({
         fetchStatus: FetchStatus.UNINITIALIZED,
       }),
@@ -98,9 +89,6 @@ describe('test fetchAll', () => {
     mockFetchDocuments.mockReset().mockResolvedValue([]);
     mockFetchSQL.mockReset().mockResolvedValue([]);
     mockFetchTotalHits.mockReset().mockResolvedValue(42);
-    mockFetchChart
-      .mockReset()
-      .mockResolvedValue({ totalHits: 42, response: {} as unknown as SearchResponse });
   });
 
   test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', async () => {
@@ -157,25 +145,9 @@ describe('test fetchAll', () => {
     ]);
   });
 
-  test('emits loading and response on charts$ correctly', async () => {
-    const collect = subjectCollector(subjects.charts$);
-    searchSource.getField('index')!.isTimeBased = () => true;
-    await fetchAll(subjects, searchSource, false, deps);
-    expect(await collect()).toEqual([
-      { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
-      {
-        fetchStatus: FetchStatus.COMPLETE,
-        recordRawType: 'document',
-        response: {},
-      },
-    ]);
-  });
-
   test('should use charts query to fetch total hit count when chart is visible', async () => {
     const collect = subjectCollector(subjects.totalHits$);
     searchSource.getField('index')!.isTimeBased = () => true;
-    mockFetchChart.mockResolvedValue({ totalHits: 32, response: {} as unknown as SearchResponse });
     await fetchAll(subjects, searchSource, false, deps);
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },

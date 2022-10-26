@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
 import { useChartPanels } from './use_chart_panels';
@@ -30,7 +30,7 @@ import type {
   UnifiedHistogramHitsContext,
   UnifiedHistogramServices,
 } from '../types';
-import { BreakdownFieldSelector } from '../breakdown/breakdown_field_selector';
+import { BreakdownFieldSelector } from './breakdown_field_selector';
 
 export interface ChartProps {
   className?: string;
@@ -106,7 +106,12 @@ export function Chart({
     setTotalHits(newTotalHits);
   }, []);
 
-  const chartVisible = chart && !chart.hidden;
+  const chartVisible =
+    chart &&
+    !chart.hidden &&
+    dataView.id &&
+    dataView.type !== DataViewType.ROLLUP &&
+    dataView.isTimeBased();
 
   const { euiTheme } = useEuiTheme();
   const resultCountCss = css`

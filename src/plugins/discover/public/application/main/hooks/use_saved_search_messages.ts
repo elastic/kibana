@@ -105,11 +105,6 @@ export function sendResetMsg(data: SavedSearchData, initialFetchStatus: FetchSta
     result: [],
     recordRawType,
   });
-  data.charts$.next({
-    fetchStatus: initialFetchStatus,
-    response: undefined,
-    recordRawType,
-  });
   data.totalHits$.next({
     fetchStatus: initialFetchStatus,
     result: undefined,

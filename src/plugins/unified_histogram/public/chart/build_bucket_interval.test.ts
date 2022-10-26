@@ -9,7 +9,7 @@
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { calculateBounds } from '@kbn/data-plugin/public';
-import { buildChartData } from './build_chart_data';
+import { buildBucketInterval } from './build_bucket_interval';
 
 describe('buildChartData', () => {
   const getOptions = () => {
@@ -99,27 +99,27 @@ describe('buildChartData', () => {
   };
 
   it('should return the correct data', () => {
-    const { bucketInterval, chartData } = buildChartData(getOptions());
+    const { bucketInterval, chartData } = buildBucketInterval(getOptions());
     expect(bucketInterval!.toString()).toEqual('P0D');
     expect(JSON.stringify(chartData)).toEqual(JSON.stringify(expectedChartData));
   });
 
   it('should return an empty object if response or timeInterval is undefined', () => {
     expect(
-      buildChartData({
+      buildBucketInterval({
         ...getOptions(),
         response: undefined,
         timeInterval: undefined,
       })
     ).toEqual({});
     expect(
-      buildChartData({
+      buildBucketInterval({
         ...getOptions(),
         response: undefined,
       })
     ).toEqual({});
     expect(
-      buildChartData({
+      buildBucketInterval({
         ...getOptions(),
         timeInterval: undefined,
       })

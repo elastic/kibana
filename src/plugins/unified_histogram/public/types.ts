@@ -10,9 +10,6 @@ import type { Theme } from '@kbn/charts-plugin/public/plugin';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { Duration, Moment } from 'moment';
-import type { Unit } from '@kbn/datemath';
-import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 
@@ -37,71 +34,6 @@ export interface UnifiedHistogramServices {
   lens: LensPublicStart;
 }
 
-interface Column {
-  id: string;
-  name: string;
-}
-
-interface Row {
-  [key: string]: number | 'NaN';
-}
-
-interface Dimension {
-  accessor: 0 | 1;
-  format: SerializedFieldFormat<{ pattern: string }>;
-  label: string;
-}
-
-interface Ordered {
-  date: true;
-  interval: Duration;
-  intervalESUnit: string;
-  intervalESValue: number;
-  min: Moment;
-  max: Moment;
-}
-
-interface HistogramParams {
-  date: true;
-  interval: Duration;
-  intervalESValue: number;
-  intervalESUnit: Unit;
-  format: string;
-  bounds: HistogramParamsBounds;
-}
-
-export interface HistogramParamsBounds {
-  min: Moment;
-  max: Moment;
-}
-
-export interface Table {
-  columns: Column[];
-  rows: Row[];
-}
-
-export interface Dimensions {
-  x: Dimension & { params: HistogramParams };
-  y: Dimension;
-}
-
-/**
- * The chartData object returned by {@link buildChartData} that
- * should be used to set {@link UnifiedHistogramChartContext.data}
- */
-export interface UnifiedHistogramChartData {
-  values: Array<{
-    x: number;
-    y: number;
-  }>;
-  xAxisOrderedValues: number[];
-  xAxisFormat: Dimension['format'];
-  yAxisFormat: Dimension['format'];
-  xAxisLabel: Column['name'];
-  yAxisLabel?: Column['name'];
-  ordered: Ordered;
-}
-
 /**
  * The bucketInterval object returned by {@link buildChartData} that
  * should be used to set {@link UnifiedHistogramChartContext.bucketInterval}
@@ -119,7 +51,7 @@ export interface UnifiedHistogramHitsContext {
   /**
    * The fetch status of the hits count request
    */
-  status: UnifiedHistogramFetchStatus;
+  status?: UnifiedHistogramFetchStatus;
   /**
    * The total number of hits
    */
@@ -131,10 +63,6 @@ export interface UnifiedHistogramHitsContext {
  */
 export interface UnifiedHistogramChartContext {
   /**
-   * The fetch status of the chart request
-   */
-  status: UnifiedHistogramFetchStatus;
-  /**
    * Controls whether or not the chart is hidden
    */
   hidden?: boolean;
@@ -142,18 +70,6 @@ export interface UnifiedHistogramChartContext {
    * Controls the time interval of the chart
    */
   timeInterval?: string;
-  /**
-   * The bucketInterval object returned by {@link buildChartData}
-   */
-  bucketInterval?: UnifiedHistogramBucketInterval;
-  /**
-   * The chartData object returned by {@link buildChartData}
-   */
-  data?: UnifiedHistogramChartData;
-  /**
-   * Error from failed chart request
-   */
-  error?: Error;
 }
 
 /**

@@ -22,7 +22,6 @@ import {
 import { updateSearchSource } from './update_search_source';
 import { fetchDocuments } from './fetch_documents';
 import { fetchTotalHits } from './fetch_total_hits';
-import { fetchChart } from './fetch_chart';
 import { AppState } from '../services/discover_state';
 import { FetchStatus } from '../../types';
 import {
@@ -105,7 +104,6 @@ export function fetchAll(
     sendLoadingMsg(dataSubjects.main$, recordRawType);
     sendLoadingMsg(dataSubjects.documents$, recordRawType, query);
     sendLoadingMsg(dataSubjects.totalHits$, recordRawType);
-    sendLoadingMsg(dataSubjects.charts$, recordRawType);
 
     const isChartVisible =
       !hideChart && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP;
@@ -115,8 +113,6 @@ export function fetchAll(
       useSql && query
         ? fetchSql(query, services.dataViews, data, services.expressions)
         : fetchDocuments(searchSource.createCopy(), fetchDeps);
-    const charts =
-      isChartVisible && !useSql ? fetchChart(searchSource.createCopy(), fetchDeps) : undefined;
     const totalHits =
       !isChartVisible && !useSql ? fetchTotalHits(searchSource.createCopy(), fetchDeps) : undefined;
     /**
@@ -162,18 +158,6 @@ export function fetchAll(
       // but their errors will be shown in-place (e.g. of the chart).
       .catch(sendErrorTo(dataSubjects.documents$, dataSubjects.main$));
 
-    charts
-      ?.then((chart) => {
-        dataSubjects.charts$.next({
-          fetchStatus: FetchStatus.COMPLETE,
-          response: chart.response,
-          recordRawType,
-        });
-
-        checkHitCount(chart.totalHits);
-      })
-      .catch(sendErrorTo(dataSubjects.charts$, dataSubjects.totalHits$));
-
     totalHits
       ?.then((hitCount) => {
         dataSubjects.totalHits$.next({
@@ -186,7 +170,7 @@ export function fetchAll(
       .catch(sendErrorTo(dataSubjects.totalHits$));
 
     // Return a promise that will resolve once all the requests have finished or failed
-    return Promise.allSettled([documents, charts, totalHits]).then(() => {
+    return Promise.allSettled([documents, totalHits]).then(() => {
       // Send a complete message to main$ once all queries are done and if main$
       // is not already in an ERROR state, e.g. because the document query has failed.
       // This will only complete main$, if it hasn't already been completed previously

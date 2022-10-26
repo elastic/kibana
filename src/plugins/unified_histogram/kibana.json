@@ -11,5 +11,5 @@
   "ui": true,
   "requiredPlugins": [],
   "optionalPlugins": [],
-  "requiredBundles": ["data", "embeddable"]
+  "requiredBundles": ["data", "dataViews", "embeddable", "kibanaUtils"]
 }

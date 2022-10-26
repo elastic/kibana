@@ -6,20 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, useEuiTheme } from '@elastic/eui';
-import dateMath from '@kbn/datemath';
-import { i18n } from '@kbn/i18n';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import { connectToQueryState, IKibanaSearchResponse, QueryState } from '@kbn/data-plugin/public';
+import type { estypes } from '@elastic/elasticsearch';
+import { createStateContainer, useContainerState } from '@kbn/kibana-utils-plugin/public';
 import type {
   UnifiedHistogramBreakdownContext,
+  UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
   UnifiedHistogramServices,
 } from '../types';
 import { getLensAttributes } from './get_lens_attributes';
+import { buildBucketInterval } from './build_bucket_interval';
+import { useTimeRange } from './use_time_range';
 
 export interface HistogramProps {
   services: UnifiedHistogramServices;
@@ -32,53 +36,47 @@ export interface HistogramProps {
 export function Histogram({
   services: { data, lens, uiSettings },
   dataView,
-  chart: { timeInterval, bucketInterval, data: chartData },
+  chart: { timeInterval },
   breakdown: { field: breakdownField } = {},
   onTotalHitsChange,
 }: HistogramProps) {
-  const filters = data.query.filterManager.getFilters();
-  const query = data.query.queryString.getQuery();
+  const queryStateContainer = useMemo(() => {
+    return createStateContainer<QueryState>({
+      filters: data.query.filterManager.getFilters(),
+      query: data.query.queryString.getQuery(),
+      refreshInterval: data.query.timefilter.timefilter.getRefreshInterval(),
+      time: data.query.timefilter.timefilter.getTime(),
+    });
+  }, [data.query.filterManager, data.query.queryString, data.query.timefilter.timefilter]);
+
+  const queryState = useContainerState(queryStateContainer);
+
+  useEffect(() => {
+    return connectToQueryState(data.query, queryStateContainer, {
+      time: true,
+      query: true,
+      filters: true,
+      refreshInterval: true,
+    });
+  }, [data.query, queryStateContainer]);
+
+  const filters = useMemo(() => queryState.filters ?? [], [queryState.filters]);
+  const query = useMemo(
+    () => queryState.query ?? data.query.queryString.getDefaultQuery(),
+    [data.query.queryString, queryState.query]
+  );
   const attributes = useMemo(
     () => getLensAttributes({ filters, query, dataView, timeInterval, breakdownField }),
     [breakdownField, dataView, filters, query, timeInterval]
   );
-
-  const { timefilter } = data.query.timefilter;
-  const { from, to } = timefilter.getAbsoluteTime();
-  const dateFormat = useMemo(() => uiSettings.get('dateFormat'), [uiSettings]);
-
-  const toMoment = useCallback(
-    (datetime: moment.Moment | undefined) => {
-      if (!datetime) {
-        return '';
-      }
-      if (!dateFormat) {
-        return String(datetime);
-      }
-      return datetime.format(dateFormat);
-    },
-    [dateFormat]
-  );
-
-  const timeRangeText = useMemo(() => {
-    const timeRange = {
-      from: dateMath.parse(from),
-      to: dateMath.parse(to, { roundUp: true }),
-    };
-    const intervalText = i18n.translate('unifiedHistogram.histogramTimeRangeIntervalDescription', {
-      defaultMessage: '(interval: {value})',
-      values: {
-        value: `${
-          timeInterval === 'auto'
-            ? `${i18n.translate('unifiedHistogram.histogramTimeRangeIntervalAuto', {
-                defaultMessage: 'Auto',
-              })} - `
-            : ''
-        }${bucketInterval?.description}`,
-      },
-    });
-    return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`;
-  }, [from, to, timeInterval, bucketInterval?.description, toMoment]);
+  const timeRange = data.query.timefilter.timefilter.getAbsoluteTime();
+  const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
+  const { timeRangeText, timeRangeDisplay } = useTimeRange({
+    uiSettings,
+    bucketInterval,
+    timeRange,
+    timeInterval,
+  });
 
   const onLoad = useCallback(
     (_, adapters: Partial<DefaultInspectorAdapters> | undefined) => {
@@ -87,8 +85,23 @@ export function Histogram({
       if (totalHits) {
         onTotalHitsChange(totalHits);
       }
+
+      const request = adapters?.requests?.getRequests()[0];
+      const json = request?.response?.json as IKibanaSearchResponse<estypes.SearchResponse>;
+      const response = json?.rawResponse;
+
+      if (response) {
+        const newBucketInterval = buildBucketInterval({
+          data,
+          dataView,
+          timeInterval,
+          response,
+        });
+
+        setBucketInterval(newBucketInterval);
+      }
     },
-    [onTotalHitsChange]
+    [data, dataView, onTotalHitsChange, timeInterval]
   );
 
   const { euiTheme } = useEuiTheme();
@@ -112,76 +125,19 @@ export function Histogram({
     }
   `;
 
-  if (!chartData || !dataView.id || !dataView.isTimeBased()) {
-    return null;
-  }
-
-  const toolTipTitle = i18n.translate('unifiedHistogram.timeIntervalWithValueWarning', {
-    defaultMessage: 'Warning',
-  });
-
-  const toolTipContent = i18n.translate('unifiedHistogram.bucketIntervalTooltip', {
-    defaultMessage:
-      'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}.',
-    values: {
-      bucketsDescription:
-        bucketInterval!.scale && bucketInterval!.scale > 1
-          ? i18n.translate('unifiedHistogram.bucketIntervalTooltip.tooLargeBucketsText', {
-              defaultMessage: 'buckets that are too large',
-            })
-          : i18n.translate('unifiedHistogram.bucketIntervalTooltip.tooManyBucketsText', {
-              defaultMessage: 'too many buckets',
-            }),
-      bucketIntervalDescription: bucketInterval?.description,
-    },
-  });
-
-  const timeRangeCss = css`
-    padding: 0 ${euiTheme.size.s} 0 ${euiTheme.size.s};
-  `;
-
-  let timeRange = (
-    <EuiText size="xs" textAlign="center" css={timeRangeCss}>
-      {timeRangeText}
-    </EuiText>
-  );
-
-  if (bucketInterval?.scaled) {
-    const timeRangeWrapperCss = css`
-      flex-grow: 0;
-    `;
-
-    timeRange = (
-      <EuiFlexGroup
-        alignItems="baseline"
-        justifyContent="center"
-        gutterSize="none"
-        responsive={false}
-        css={timeRangeWrapperCss}
-      >
-        <EuiFlexItem grow={false}>{timeRange}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip type="alert" color="warning" title={toolTipTitle} content={toolTipContent} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-
-  const LensComponent = lens.EmbeddableComponent;
-
   return (
     <>
       <div data-test-subj="unifiedHistogramChart" data-time-range={timeRangeText} css={chartCss}>
-        <LensComponent
+        <lens.EmbeddableComponent
           id="unifiedHistogramLensComponent"
           viewMode={ViewMode.VIEW}
-          timeRange={{ from, to }}
+          timeRange={timeRange}
           attributes={attributes}
           noPadding
           onLoad={onLoad}
         />
       </div>
-      {timeRange}
+      {timeRangeDisplay}
     </>
   );
 }
