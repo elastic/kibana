@@ -65,7 +65,7 @@ const RuleActionsOverflowComponent = ({
   const { navigateToApp } = useKibana().services.application;
   const toasts = useAppToasts();
   const { startTransaction } = useStartTransaction();
-  const { executeBulkAction } = useExecuteBulkAction();
+  const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: true });
   const { bulkExport } = useBulkExport();
 
   const onRuleDeletedCallback = useCallback(() => {
@@ -88,11 +88,8 @@ const RuleActionsOverflowComponent = ({
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
                 closePopover();
                 const result = await executeBulkAction({
-                  bulkActionDescriptor: {
-                    type: BulkAction.duplicate,
-                    ids: [rule.id],
-                  },
-                  onSuccess: noop,
+                  type: BulkAction.duplicate,
+                  ids: [rule.id],
                 });
                 const createdRules = result?.attributes.results.created;
                 if (createdRules?.length) {
@@ -139,12 +136,11 @@ const RuleActionsOverflowComponent = ({
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
                 closePopover();
                 await executeBulkAction({
-                  bulkActionDescriptor: {
-                    type: BulkAction.delete,
-                    ids: [rule.id],
-                  },
-                  onSuccess: onRuleDeletedCallback,
+                  type: BulkAction.delete,
+                  ids: [rule.id],
                 });
+
+                onRuleDeletedCallback();
               }}
             >
               {i18nActions.DELETE_RULE}

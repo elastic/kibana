@@ -46,7 +46,7 @@ export const RuleSwitchComponent = ({
   const [myIsLoading, setMyIsLoading] = useState(false);
   const rulesTableContext = useRulesTableContextOptional();
   const { startTransaction } = useStartTransaction();
-  const { executeBulkAction } = useExecuteBulkAction();
+  const { executeBulkAction } = useExecuteBulkAction({ suppressSuccessToast: !rulesTableContext });
 
   const onRuleStateChange = useCallback(
     async (event: EuiSwitchEvent) => {
@@ -55,13 +55,8 @@ export const RuleSwitchComponent = ({
         name: enabled ? SINGLE_RULE_ACTIONS.DISABLE : SINGLE_RULE_ACTIONS.ENABLE,
       });
       const bulkActionResponse = await executeBulkAction({
-        bulkActionDescriptor: {
-          type: event.target.checked ? BulkAction.enable : BulkAction.disable,
-          ids: [id],
-        },
-        setLoadingRules: rulesTableContext?.actions.setLoadingRules,
-        onSuccess: rulesTableContext ? undefined : noop,
-        visibleRuleIds: [],
+        type: event.target.checked ? BulkAction.enable : BulkAction.disable,
+        ids: [id],
       });
       if (bulkActionResponse?.attributes.results.updated.length) {
         // The rule was successfully updated

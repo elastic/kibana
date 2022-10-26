@@ -5,92 +5,104 @@
  * 2.0.
  */
 
-import type { ErrorToastOptions } from '@kbn/core-notifications-browser';
+import type { HTTPError } from '../../../../../common/detection_engine/types';
 import { BulkAction } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
-import type { BulkActionSummary } from '../../api/api';
+import type { BulkActionResponse, BulkActionSummary } from '../../api/api';
 
-export function getErrorToastContent(
-  action: BulkAction,
-  summary: BulkActionSummary
-): ErrorToastOptions {
-  let title: string;
-  let toastMessage: string | undefined;
-
+export function summarizeBulkSuccess(action: BulkAction): string {
   switch (action) {
     case BulkAction.export:
-      title = i18n.RULES_BULK_EXPORT_FAILURE;
-      if (summary) {
-        toastMessage = i18n.RULES_BULK_EXPORT_FAILURE_DESCRIPTION(summary.failed);
-      }
-      break;
-    case BulkAction.duplicate:
-      title = i18n.RULES_BULK_DUPLICATE_FAILURE;
-      if (summary) {
-        toastMessage = i18n.RULES_BULK_DUPLICATE_FAILURE_DESCRIPTION(summary.failed);
-      }
-      break;
-    case BulkAction.delete:
-      title = i18n.RULES_BULK_DELETE_FAILURE;
-      if (summary) {
-        toastMessage = i18n.RULES_BULK_DELETE_FAILURE_DESCRIPTION(summary.failed);
-      }
-      break;
-    case BulkAction.enable:
-      title = i18n.RULES_BULK_ENABLE_FAILURE;
-      if (summary) {
-        toastMessage = i18n.RULES_BULK_ENABLE_FAILURE_DESCRIPTION(summary.failed);
-      }
-      break;
-    case BulkAction.disable:
-      title = i18n.RULES_BULK_DISABLE_FAILURE;
-      if (summary) {
-        toastMessage = i18n.RULES_BULK_DISABLE_FAILURE_DESCRIPTION(summary.failed);
-      }
-      break;
-    case BulkAction.edit:
-      title = i18n.RULES_BULK_EDIT_FAILURE;
-      if (summary) {
-        toastMessage = i18n.RULES_BULK_EDIT_FAILURE_DESCRIPTION(summary.failed);
-      }
-      break;
-  }
+      return i18n.RULES_BULK_EXPORT_SUCCESS;
 
-  return { title, toastMessage };
+    case BulkAction.duplicate:
+      return i18n.RULES_BULK_DUPLICATE_SUCCESS;
+
+    case BulkAction.delete:
+      return i18n.RULES_BULK_DELETE_SUCCESS;
+
+    case BulkAction.enable:
+      return i18n.RULES_BULK_ENABLE_SUCCESS;
+
+    case BulkAction.disable:
+      return i18n.RULES_BULK_DISABLE_SUCCESS;
+
+    case BulkAction.edit:
+      return i18n.RULES_BULK_EDIT_SUCCESS;
+  }
 }
 
-export function getSuccessToastContent(action: BulkAction, summary: BulkActionSummary) {
-  let title: string;
-  let text: string | undefined;
+export function explainBulkSuccess(action: BulkAction, summary: BulkActionSummary): string {
+  switch (action) {
+    case BulkAction.export:
+      return getExportSuccessToastMessage(summary.succeeded, summary.total);
+
+    case BulkAction.duplicate:
+      return i18n.RULES_BULK_DUPLICATE_SUCCESS_DESCRIPTION(summary.succeeded);
+
+    case BulkAction.delete:
+      return i18n.RULES_BULK_DELETE_SUCCESS_DESCRIPTION(summary.succeeded);
+
+    case BulkAction.enable:
+      return i18n.RULES_BULK_ENABLE_SUCCESS_DESCRIPTION(summary.succeeded);
+
+    case BulkAction.disable:
+      return i18n.RULES_BULK_DISABLE_SUCCESS_DESCRIPTION(summary.succeeded);
+
+    case BulkAction.edit:
+      return i18n.RULES_BULK_EDIT_SUCCESS_DESCRIPTION(summary.succeeded);
+  }
+}
+
+export function summarizeBulkError(action: BulkAction): string {
+  switch (action) {
+    case BulkAction.export:
+      return i18n.RULES_BULK_EXPORT_FAILURE;
+
+    case BulkAction.duplicate:
+      return i18n.RULES_BULK_DUPLICATE_FAILURE;
+
+    case BulkAction.delete:
+      return i18n.RULES_BULK_DELETE_FAILURE;
+
+    case BulkAction.enable:
+      return i18n.RULES_BULK_ENABLE_FAILURE;
+
+    case BulkAction.disable:
+      return i18n.RULES_BULK_DISABLE_FAILURE;
+
+    case BulkAction.edit:
+      return i18n.RULES_BULK_EDIT_FAILURE;
+  }
+}
+
+export function explainBulkError(action: BulkAction, error: HTTPError): string {
+  // if response doesn't have number of failed rules, it means the whole bulk action failed
+  const summary = (error.body as BulkActionResponse)?.attributes?.summary;
+
+  if (!summary) {
+    return '';
+  }
 
   switch (action) {
     case BulkAction.export:
-      title = i18n.RULES_BULK_EXPORT_SUCCESS;
-      text = getExportSuccessToastMessage(summary.succeeded, summary.total);
-      break;
-    case BulkAction.duplicate:
-      title = i18n.RULES_BULK_DUPLICATE_SUCCESS;
-      text = i18n.RULES_BULK_DUPLICATE_SUCCESS_DESCRIPTION(summary.succeeded);
-      break;
-    case BulkAction.delete:
-      title = i18n.RULES_BULK_DELETE_SUCCESS;
-      text = i18n.RULES_BULK_DELETE_SUCCESS_DESCRIPTION(summary.succeeded);
-      break;
-    case BulkAction.enable:
-      title = i18n.RULES_BULK_ENABLE_SUCCESS;
-      text = i18n.RULES_BULK_ENABLE_SUCCESS_DESCRIPTION(summary.succeeded);
-      break;
-    case BulkAction.disable:
-      title = i18n.RULES_BULK_DISABLE_SUCCESS;
-      text = i18n.RULES_BULK_DISABLE_SUCCESS_DESCRIPTION(summary.succeeded);
-      break;
-    case BulkAction.edit:
-      title = i18n.RULES_BULK_EDIT_SUCCESS;
-      text = i18n.RULES_BULK_EDIT_SUCCESS_DESCRIPTION(summary.succeeded);
-      break;
-  }
+      return i18n.RULES_BULK_EXPORT_FAILURE_DESCRIPTION(summary.failed);
 
-  return { title, text };
+    case BulkAction.duplicate:
+      return i18n.RULES_BULK_DUPLICATE_FAILURE_DESCRIPTION(summary.failed);
+
+    case BulkAction.delete:
+      return i18n.RULES_BULK_DELETE_FAILURE_DESCRIPTION(summary.failed);
+
+    case BulkAction.enable:
+      return i18n.RULES_BULK_ENABLE_FAILURE_DESCRIPTION(summary.failed);
+
+    case BulkAction.disable:
+      return i18n.RULES_BULK_DISABLE_FAILURE_DESCRIPTION(summary.failed);
+
+    case BulkAction.edit:
+      return i18n.RULES_BULK_EDIT_FAILURE_DESCRIPTION(summary.failed);
+  }
 }
 
 const getExportSuccessToastMessage = (succeeded: number, total: number) => {

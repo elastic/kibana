@@ -105,12 +105,8 @@ export const useBulkActions = ({
           : disabledRulesNoML.map(({ id }) => id);
 
         await executeBulkAction({
-          bulkActionDescriptor: {
-            type: BulkAction.enable,
-            ...(isAllSelected ? { query: filterQuery } : { ids: ruleIds }),
-          },
-          visibleRuleIds: ruleIds,
-          setLoadingRules,
+          type: BulkAction.enable,
+          ...(isAllSelected ? { query: filterQuery } : { ids: ruleIds }),
         });
       };
 
@@ -121,12 +117,8 @@ export const useBulkActions = ({
         const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
 
         await executeBulkAction({
-          bulkActionDescriptor: {
-            type: BulkAction.disable,
-            ...(isAllSelected ? { query: filterQuery } : { ids: enabledIds }),
-          },
-          visibleRuleIds: enabledIds,
-          setLoadingRules,
+          type: BulkAction.disable,
+          ...(isAllSelected ? { query: filterQuery } : { ids: enabledIds }),
         });
       };
 
@@ -135,12 +127,8 @@ export const useBulkActions = ({
         closePopover();
 
         await executeBulkAction({
-          bulkActionDescriptor: {
-            type: BulkAction.duplicate,
-            ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
-          },
-          visibleRuleIds: selectedRuleIds,
-          setLoadingRules,
+          type: BulkAction.duplicate,
+          ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
         });
         clearRulesSelection();
       };
@@ -158,12 +146,8 @@ export const useBulkActions = ({
         startTransaction({ name: BULK_RULE_ACTIONS.DELETE });
 
         await executeBulkAction({
-          bulkActionDescriptor: {
-            type: BulkAction.delete,
-            ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
-          },
-          visibleRuleIds: selectedRuleIds,
-          setLoadingRules,
+          type: BulkAction.delete,
+          ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
         });
       };
 
@@ -265,18 +249,15 @@ export const useBulkActions = ({
         }, 5 * 1000);
 
         await executeBulkAction({
-          bulkActionDescriptor: {
-            type: BulkAction.edit,
-            ...prepareSearchParams({
-              ...(isAllSelected ? { filterOptions } : { selectedRuleIds }),
-              dryRunResult,
-            }),
-            editPayload: [editPayload],
-          },
-          visibleRuleIds: selectedRuleIds,
-          setLoadingRules,
-          onFinish: () => hideWarningToast(),
+          type: BulkAction.edit,
+          ...prepareSearchParams({
+            ...(isAllSelected ? { filterOptions } : { selectedRuleIds }),
+            dryRunResult,
+          }),
+          editPayload: [editPayload],
         });
+
+        hideWarningToast();
 
         isBulkEditFinished = true;
       };
