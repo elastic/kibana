@@ -26,6 +26,13 @@ export const getMonitorAction = createAsyncAction<
 >('[MONITOR DETAILS] GET MONITOR');
 
 export const getMonitorRecentPingsAction = createAsyncAction<
-  { monitorId: string; locationId: string; size?: number; pageIndex?: number },
+  {
+    monitorId: string;
+    locationId: string;
+    size?: number;
+    pageIndex?: number;
+    from?: string;
+    to?: string;
+  },
   PingsResponse
 >('[MONITOR DETAILS] GET RECENT PINGS');

@@ -44,16 +44,23 @@ import { useJourneySteps } from '../hooks/use_journey_steps';
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
 
 interface TestRunsTableProps {
+  from: string;
+  to: string;
   paginable?: boolean;
 }
 
-export const TestRunsTable = ({ paginable = true }: TestRunsTableProps) => {
+export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps) => {
   const { basePath } = useSyntheticsSettingsContext();
   const [page, setPage] = useState({ index: 0, size: 10 });
 
   const [sortField, setSortField] = useState<SortableField>('timestamp');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const { pings, total } = useMonitorPings({ pageSize: page.size, pageIndex: page.index });
+  const { pings, total } = useMonitorPings({
+    from,
+    to,
+    pageSize: page.size,
+    pageIndex: page.index,
+  });
   // const pings = useSelector(selectMonitorRecentPings);
   const sortedPings = useMemo(() => {
     return sortPings(pings, sortField, sortDirection);
