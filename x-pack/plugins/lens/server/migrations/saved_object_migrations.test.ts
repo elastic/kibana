@@ -2382,6 +2382,9 @@ describe('Lens migrations', () => {
               },
             ],
           },
+          datasourceStates: {
+            indexpattern: {},
+          },
         },
       },
     } as unknown as SavedObjectUnsanitizedDoc<LensDocShape810>;
