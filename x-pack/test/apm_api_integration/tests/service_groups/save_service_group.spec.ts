@@ -53,8 +53,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     const response = await supertest
       .get('/api/saved_objects/_find?type=apm-service-group')
       .set('kbn-xsrf', 'true');
-    const saved_objects: SavedObjectsFindResults = response.body.saved_objects;
-    const bulkDeleteBody = saved_objects.map(({ id, type }) => ({ id, type }));
+    const savedObjects: SavedObjectsFindResults = response.body.saved_objects;
+    const bulkDeleteBody = savedObjects.map(({ id, type }) => ({ id, type }));
     return supertest
       .post(`/api/saved_objects/_bulk_delete?force=true`)
       .set('kbn-xsrf', 'foo')
