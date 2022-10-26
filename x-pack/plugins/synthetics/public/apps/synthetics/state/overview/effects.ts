@@ -9,8 +9,9 @@ import { takeLatest, takeLeading } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
   fetchMonitorOverviewAction,
-  fetchOverviewStatusAction,
   quietFetchOverviewAction,
+  fetchOverviewStatusAction,
+  quietFetchOverviewStatusAction,
 } from './actions';
 import { fetchMonitorOverview, fetchOverviewStatus } from './api';
 
@@ -39,6 +40,17 @@ export function* quietFetchOverviewEffect() {
 export function* fetchOverviewStatusEffect() {
   yield takeLatest(
     fetchOverviewStatusAction.get,
+    fetchEffectFactory(
+      fetchOverviewStatus,
+      fetchOverviewStatusAction.success,
+      fetchOverviewStatusAction.fail
+    )
+  );
+}
+
+export function* quietFetchOverviewStatusEffect() {
+  yield takeLatest(
+    quietFetchOverviewStatusAction.get,
     fetchEffectFactory(
       fetchOverviewStatus,
       fetchOverviewStatusAction.success,

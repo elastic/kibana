@@ -7,11 +7,12 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiStat, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   clearOverviewStatusErrorAction,
   fetchOverviewStatusAction,
+  quietFetchOverviewStatusAction,
   selectOverviewPageState,
   selectOverviewStatus,
 } from '../../../../state';
@@ -28,10 +29,16 @@ export function OverviewStatus() {
   const dispatch = useDispatch();
 
   const { lastRefresh } = useSyntheticsRefreshContext();
+  const lastRefreshRef = useRef(lastRefresh);
 
   useEffect(() => {
-    dispatch(fetchOverviewStatusAction.get(pageState));
-  }, [dispatch, pageState, lastRefresh]);
+    if (lastRefresh !== lastRefreshRef.current) {
+      dispatch(quietFetchOverviewStatusAction.get(pageState));
+      lastRefreshRef.current = lastRefresh;
+    } else {
+      dispatch(fetchOverviewStatusAction.get(pageState));
+    }
+  }, [dispatch, lastRefresh, pageState]);
 
   useEffect(() => {
     if (statusError) {

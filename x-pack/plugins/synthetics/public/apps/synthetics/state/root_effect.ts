@@ -14,6 +14,7 @@ import {
   fetchMonitorOverviewEffect,
   quietFetchOverviewEffect,
   fetchOverviewStatusEffect,
+  quietFetchOverviewStatusEffect,
 } from './overview';
 import { fetchServiceLocationsEffect } from './service_locations';
 import { browserJourneyEffects } from './browser_journey';
@@ -30,5 +31,6 @@ export const rootEffect = function* root(): Generator {
     fork(quietFetchOverviewEffect),
     fork(browserJourneyEffects),
     fork(fetchOverviewStatusEffect),
+    fork(quietFetchOverviewStatusEffect),
   ]);
 };
