@@ -96,14 +96,16 @@ export const IntegrationPreference = ({
     boolean | undefined
   >(undefined);
 
-  const { data: settings } = useGetSettings();
+  const { data: settings, error: settingsError } = useGetSettings();
 
   useEffect(() => {
     const isEnabled = Boolean(settings?.item.prerelease_integrations_enabled);
     if (settings?.item) {
       setPrereleaseIntegrationsEnabled(isEnabled);
+    } else if (settingsError) {
+      setPrereleaseIntegrationsEnabled(false);
     }
-  }, [settings?.item]);
+  }, [settings?.item, settingsError]);
 
   useEffect(() => {
     if (prereleaseIntegrationsEnabled !== undefined) {
