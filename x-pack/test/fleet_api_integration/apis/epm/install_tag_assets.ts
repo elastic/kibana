@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -17,7 +16,6 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const dockerServers = getService('dockerServers');
   const server = dockerServers.get('registry');
-  const es: Client = getService('es');
   const pkgName = 'only_dashboard';
   const pkgVersion = '0.1.0';
 
@@ -47,7 +45,7 @@ export default function (providerContext: FtrProviderContext) {
       .expect(200);
   };
 
-  const getTag = async (id, space) =>
+  const getTag = async (id: string, space?: string) =>
     kibanaServer.savedObjects
       .get({
         type: 'tag',
@@ -56,7 +54,7 @@ export default function (providerContext: FtrProviderContext) {
       })
       .catch(() => {});
 
-  const deleteTag = async (id) =>
+  const deleteTag = async (id: string) =>
     kibanaServer.savedObjects
       .delete({
         type: 'tag',
