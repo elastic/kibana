@@ -8,7 +8,9 @@ import {
   map,
   tap,
   from,
+  EMPTY,
   switchMap,
+  catchError,
   Observable,
   shareReplay,
   debounceTime,
@@ -17,8 +19,8 @@ import {
   BehaviorSubject,
   distinctUntilChanged,
 } from 'rxjs';
-import { FileJSON } from '../../../common';
-import { FilesClient } from '../../types';
+import type { FileJSON } from '../../../common';
+import type { FilesClient } from '../../types';
 
 function naivelyFuzzify(query: string): string {
   return query.includes('*') ? query : `*${query}*`;
@@ -57,23 +59,22 @@ export class FilePickerState {
     this.subscriptions = [
       this.query$
         .pipe(
-          tap(() => this.setIsLoading(true)),
           map((query) => Boolean(query)),
           distinctUntilChanged()
         )
         .subscribe(this.hasQuery$),
-      this.requests$.pipe(tap(() => this.setIsLoading(true))).subscribe(),
-      this.internalIsLoading$
-        .pipe(debounceTime(100), distinctUntilChanged())
-        .subscribe(this.isLoading$),
+      this.internalIsLoading$.pipe(distinctUntilChanged()).subscribe(this.isLoading$),
     ];
   }
 
   private readonly requests$ = combineLatest([
     this.currentPage$.pipe(distinctUntilChanged()),
-    this.query$.pipe(distinctUntilChanged(), debounceTime(100)),
+    this.query$.pipe(distinctUntilChanged()),
     this.retry$,
-  ]);
+  ]).pipe(
+    tap(() => this.setIsLoading(true)), // set loading state as early as possible
+    debounceTime(100)
+  );
 
   /**
    * File objects we have loaded on the front end, stored here so that it can
@@ -136,6 +137,15 @@ export class FilePickerState {
         abortSignal: abortController.signal,
       })
     ).pipe(
+      catchError((e) => {
+        if (e.name !== 'AbortError') {
+          this.setIsLoading(false);
+          this.loadingError$.next(e);
+        } else {
+          // If the request was aborted, we assume another request is now in progress
+        }
+        return EMPTY;
+      }),
       tap(() => {
         this.setIsLoading(false);
         this.abort = undefined;
@@ -143,13 +153,7 @@ export class FilePickerState {
       shareReplay()
     );
 
-    request$.subscribe({
-      error: (e: Error) => {
-        if (e.name === 'AbortError') return;
-        this.setIsLoading(false);
-        this.loadingError$.next(e);
-      },
-    });
+    request$.subscribe();
 
     return request$;
   };
