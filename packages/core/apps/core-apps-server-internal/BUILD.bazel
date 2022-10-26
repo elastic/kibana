@@ -46,6 +46,19 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
+  "@npm//elastic-apm-node",
+  "@npm//fs",
+  "@npm//lru-cache",
+  "@npm//mime-types",
+  "//packages/kbn-config",
+  "//packages/kbn-config-schema",
+  "//packages/kbn-utils",
+  "//packages/kbn-logging",
+  "//packages/kbn-ui-shared-deps-npm",
+  "//packages/kbn-ui-shared-deps-src",
+  "//packages/core/base/core-base-server-internal",
+  "//packages/core/lifecycle/core-lifecycle-server-internal",
+  "//packages/core/plugins/core-plugins-base-server-internal",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -58,8 +71,23 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
+  "@npm//elastic-apm-node",
+  "@npm//fs",
   "@npm//@types/node",
   "@npm//@types/jest",
+  "@npm//@types/lru-cache",
+  "@npm//@types/mime-types",
+  "//packages/kbn-config:npm_module_types",
+  "//packages/kbn-config-schema:npm_module_types",
+  "//packages/kbn-ui-shared-deps-npm:npm_module_types",
+  "//packages/kbn-ui-shared-deps-src:npm_module_types",
+  "//packages/kbn-utils:npm_module_types",
+  "//packages/kbn-logging:npm_module_types",
+  "//packages/core/base/core-base-server-internal:npm_module_types",
+  "//packages/core/http/core-http-resources-server:npm_module_types",
+  "//packages/core/http/core-http-server:npm_module_types",
+  "//packages/core/lifecycle/core-lifecycle-server-internal:npm_module_types",
+  "//packages/core/plugins/core-plugins-base-server-internal:npm_module_types",
 ]
 
 jsts_transpiler(
