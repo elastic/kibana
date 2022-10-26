@@ -60,9 +60,18 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
     return item.listId === ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID;
   }
 
+  protected async validateHasWritePrivilege(): Promise<void> {
+    return super.validateHasPrivilege('canWriteHostIsolationExceptions');
+  }
+
+  protected async validateHasReadPrivilege(): Promise<void> {
+    return super.validateHasPrivilege('canReadHostIsolationExceptions');
+  }
+
   async validatePreCreateItem(
     item: CreateExceptionListItemOptions
   ): Promise<CreateExceptionListItemOptions> {
+    await this.validateHasWritePrivilege();
     await this.validateCanIsolateHosts();
     await this.validateHostIsolationData(item);
     await this.validateByPolicyItem(item);
@@ -75,6 +84,7 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
   ): Promise<UpdateExceptionListItemOptions> {
     const updatedItem = _updatedItem as ExceptionItemLikeOptions;
 
+    await this.validateHasWritePrivilege();
     await this.validateCanIsolateHosts();
     await this.validateHostIsolationData(updatedItem);
     await this.validateByPolicyItem(updatedItem);
@@ -83,27 +93,27 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
   }
 
   async validatePreGetOneItem(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreSummary(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreDeleteItem(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasWritePrivilege();
   }
 
   async validatePreExport(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasWritePrivilege();
   }
 
   async validatePreSingleListFind(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreMultiListFind(): Promise<void> {
-    await this.validateCanManageEndpointArtifacts();
+    await this.validateHasReadPrivilege();
   }
 
   async validatePreImport(): Promise<void> {
