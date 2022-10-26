@@ -61,7 +61,7 @@ export const getMonitors = (
     page,
     sortField: sortField === 'schedule.keyword' ? 'schedule.number' : sortField,
     sortOrder,
-    searchFields: ['name', 'tags.text', 'locations.id.text', 'urls'],
+    searchFields: ['name', 'tags.text', 'locations.id.text', 'urls', 'project_id.text'],
     search: query ? `${query}*` : undefined,
     filter: filters + filter,
     fields,
