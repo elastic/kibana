@@ -58,7 +58,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
             useCustomActions
             text={i18n.EXCEPTION_LIST_HEADER_LINKED_RULES(linkedRules.length)}
             actions={referencedLinks}
-            disableActions={isReadonly}
+            disableActions={false}
             iconType="arrowDown"
             iconSide="right"
             panelPaddingSize="none"

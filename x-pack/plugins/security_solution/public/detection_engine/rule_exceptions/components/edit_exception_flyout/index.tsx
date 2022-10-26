@@ -244,7 +244,6 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     if (submitEditExceptionItems == null) return;
 
     try {
-      debugger;
       const items = entrichExceptionItemsForUpdate({
         itemName: exceptionItemName,
         commentToAdd: newComment,
