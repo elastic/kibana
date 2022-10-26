@@ -26,7 +26,7 @@ import {
   // buildRecoveredAlertReason,
   stateToAlertMessage,
 } from '../common/messages';
-import { UNGROUPED_FACTORY_KEY, getViewInAppUrl, createScopedLogger } from '../common/utils';
+import { UNGROUPED_FACTORY_KEY, getViewInAppUrl, createScopedLogger, AdditionalContext } from '../common/utils';
 import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 
 import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
@@ -54,7 +54,7 @@ type MetricThresholdAlert = Alert<
 type MetricThresholdAlertFactory = (
   id: string,
   reason: string,
-  additionalContext?: [x: string] | null,
+  additionalContext?: AdditionalContext | null,
   threshold?: number | undefined,
   value?: number | undefined
 ) => MetricThresholdAlert;

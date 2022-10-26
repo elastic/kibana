@@ -120,6 +120,10 @@ export const groupByForContainerContext = 'kubernetes.pod.uid';
 export const termsAggMapping: Record<string, string> =
   { groupByForContainerContext: 'container.id' };
 
+export type AdditionalContext = {
+  [x: string]: any;
+};
+
 export const doFieldsExist = async (
   esClient: ElasticsearchClient,
   fields: string[],

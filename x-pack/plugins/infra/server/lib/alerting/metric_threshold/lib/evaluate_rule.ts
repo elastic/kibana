@@ -14,6 +14,7 @@ import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_i
 import { DOCUMENT_COUNT_I18N } from '../../common/messages';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
+import { AdditionalContext } from '../../common/utils';
 
 export interface EvaluatedRuleParams {
   criteria: MetricExpressionParams[];
@@ -29,7 +30,7 @@ export type Evaluation = Omit<MetricExpressionParams, 'metric'> & {
   shouldFire: boolean;
   shouldWarn: boolean;
   isNoData: boolean;
-  context?: [x: string];
+  context?: AdditionalContext;
 };
 
 export const evaluateRule = async <Params extends EvaluatedRuleParams = EvaluatedRuleParams>(

@@ -14,12 +14,8 @@ import {
   Comparator,
   MetricExpressionParams,
 } from '../../../../../common/alerting/metrics';
-import { doFieldsExist, groupByForContainerContext, termsAggMapping, UNGROUPED_FACTORY_KEY } from '../../common/utils';
+import { AdditionalContext, doFieldsExist, groupByForContainerContext, termsAggMapping, UNGROUPED_FACTORY_KEY } from '../../common/utils';
 import { getElasticsearchMetricQuery } from './metric_query';
-
-export type AdditionalContext = {
-  [x: string]: any;
-};
 
 export type GetDataResponse = Record<
   string,
