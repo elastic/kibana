@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import type { StatItems } from '../../../../common/components/stat_items';
 import { kpiUniqueIpsAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_area';
 import { kpiUniqueIpsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_bar';
 import { kpiUniqueIpsDestinationMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_destination_metric';
 import { kpiUniqueIpsSourceMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_source_metric';
-import { ID } from '../../../containers/kpi_hosts/unique_ips';
-import { KpiBaseComponentManage } from '../common/kpi_embeddable_component';
+import { useHostsKpiUniqueIps, ID } from '../../../containers/kpi_hosts/unique_ips';
+import { KpiBaseComponentManage } from '../common';
 import type { HostsKpiProps } from '../types';
 import { HostsKpiChartColors } from '../types';
 import * as i18n from './translations';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export const fieldsMapping: Readonly<StatItems[]> = [
   {
@@ -49,15 +51,43 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({ from, to, setQuery }) => {
+const HostsKpiUniqueIpsComponent: React.FC<HostsKpiProps> = ({
+  filterQuery,
+  from,
+  indexNames,
+  to,
+  updateDateRange,
+  setQuery,
+  skip,
+}) => {
+  const { toggleStatus } = useQueryToggle(ID);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
+  const [loading, { refetch, id, inspect, ...data }] = useHostsKpiUniqueIps({
+    filterQuery,
+    endDate: to,
+    indexNames,
+    startDate: from,
+    skip: querySkip || isChartEmbeddablesEnabled,
+  });
+
   return (
     <KpiBaseComponentManage
+      data={data}
+      id={id}
+      inspect={inspect}
+      loading={loading}
       fieldsMapping={fieldsMapping}
       from={from}
-      id={ID}
-      loading={false}
-      setQuery={setQuery}
       to={to}
+      updateDateRange={updateDateRange}
+      refetch={refetch}
+      setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
     />
   );
 };

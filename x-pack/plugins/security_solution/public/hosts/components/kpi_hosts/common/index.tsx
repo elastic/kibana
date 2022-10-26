@@ -19,7 +19,6 @@ import type { StatItemsProps, StatItems } from '../../../../common/components/st
 import { StatItemsComponent, useKpiMatrixStatus } from '../../../../common/components/stat_items';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import type { UserskKpiStrategyResponse } from '../../../../../common/search_strategy/security_solution/users';
-
 const kpiWidgetHeight = 247;
 
 export const FlexGroup = styled(EuiFlexGroup)`

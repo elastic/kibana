@@ -11,7 +11,7 @@ import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
-import type { InputsModelId } from '../../store/inputs/constants';
+import { InputsModelId } from '../../store/inputs/constants';
 
 interface UseRefetchByRestartingSessionProps {
   inputId?: InputsModelId;
@@ -38,7 +38,7 @@ export const useRefetchByRestartingSession = ({
         id: queryId,
         selectedInspectIndex,
         isInspected: false,
-        inputId: 'global',
+        inputId: InputsModelId.global,
         searchSessionId: session.current.start(),
       })
     );

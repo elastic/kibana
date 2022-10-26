@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import type { StatItems } from '../../../../common/components/stat_items';
 import { kpiHostAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_host_area';
 import { kpiHostMetricLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_host_metric';
-import { ID } from '../../../containers/kpi_hosts/hosts';
-import { KpiBaseComponentManage } from '../common/kpi_embeddable_component';
+import { useHostsKpiHosts, ID } from '../../../containers/kpi_hosts/hosts';
+import { KpiBaseComponentManage } from '../common';
 import type { HostsKpiProps } from '../types';
 import { HostsKpiChartColors } from '../types';
 import * as i18n from './translations';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export const fieldsMapping: Readonly<StatItems[]> = [
   {
@@ -34,15 +36,43 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const HostsKpiHostsComponent: React.FC<HostsKpiProps> = ({ from, to, setQuery }) => {
+const HostsKpiHostsComponent: React.FC<HostsKpiProps> = ({
+  filterQuery,
+  from,
+  indexNames,
+  to,
+  updateDateRange,
+  setQuery,
+  skip,
+}) => {
+  const { toggleStatus } = useQueryToggle(ID);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
+  const [loading, { refetch, id, inspect, ...data }] = useHostsKpiHosts({
+    filterQuery,
+    endDate: to,
+    indexNames,
+    startDate: from,
+    skip: querySkip || isChartEmbeddablesEnabled,
+  });
+
   return (
     <KpiBaseComponentManage
+      data={data}
+      id={id}
+      inspect={inspect}
+      loading={loading}
       fieldsMapping={fieldsMapping}
       from={from}
-      id={ID}
-      loading={false} // TODO: remove unused props
-      setQuery={setQuery}
       to={to}
+      updateDateRange={updateDateRange}
+      refetch={refetch}
+      setQuery={setQuery}
+      setQuerySkip={setQuerySkip}
     />
   );
 };

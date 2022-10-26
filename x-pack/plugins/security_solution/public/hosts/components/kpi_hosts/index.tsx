@@ -16,10 +16,26 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
   ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => (
     <EuiFlexGroup wrap>
       <EuiFlexItem grow={1}>
-        <HostsKpiHosts from={from} to={to} setQuery={setQuery} />
+        <HostsKpiHosts
+          filterQuery={filterQuery}
+          from={from}
+          indexNames={indexNames}
+          to={to}
+          updateDateRange={updateDateRange}
+          setQuery={setQuery}
+          skip={skip}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
-        <HostsKpiUniqueIps from={from} to={to} setQuery={setQuery} />
+        <HostsKpiUniqueIps
+          filterQuery={filterQuery}
+          from={from}
+          indexNames={indexNames}
+          to={to}
+          updateDateRange={updateDateRange}
+          setQuery={setQuery}
+          skip={skip}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   )
@@ -27,14 +43,24 @@ export const HostsKpiComponent = React.memo<HostsKpiProps>(
 
 HostsKpiComponent.displayName = 'HostsKpiComponent';
 
-export const HostsDetailsKpiComponent = React.memo<HostsKpiProps>(({ from, to, setQuery }) => {
-  return (
-    <EuiFlexGroup wrap>
-      <EuiFlexItem grow={1}>
-        <HostsKpiUniqueIps from={from} to={to} setQuery={setQuery} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
+export const HostsDetailsKpiComponent = React.memo<HostsKpiProps>(
+  ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => {
+    return (
+      <EuiFlexGroup wrap>
+        <EuiFlexItem grow={1}>
+          <HostsKpiUniqueIps
+            filterQuery={filterQuery}
+            from={from}
+            indexNames={indexNames}
+            to={to}
+            updateDateRange={updateDateRange}
+            setQuery={setQuery}
+            skip={skip}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+);
 
 HostsDetailsKpiComponent.displayName = 'HostsDetailsKpiComponent';
