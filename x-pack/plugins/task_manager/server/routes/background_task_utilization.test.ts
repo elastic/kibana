@@ -54,7 +54,7 @@ describe('backgroundTaskUtilizationRoute', () => {
     const [config] = router.get.mock.calls[0];
 
     expect(config.path).toMatchInlineSnapshot(
-      `"/internal/api/task_manager/_background_task_utilization"`
+      `"/internal/task_manager/_background_task_utilization"`
     );
   });
 

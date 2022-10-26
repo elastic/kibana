@@ -198,7 +198,7 @@ export function summarizeUtilizationStats({
   stats: MonitoredStat<BackgroundTaskUtilizationStat> | undefined;
 }): {
   last_update: string;
-  stats: MonitoredStat<SummarizedBackgroundTaskUtilizationStat> | {};
+  stats: MonitoredStat<SummarizedBackgroundTaskUtilizationStat> | null;
 } {
   return {
     last_update,
@@ -207,7 +207,7 @@ export function summarizeUtilizationStats({
           timestamp: stats.timestamp,
           ...summarizeUtilizationStat(stats.value),
         }
-      : {},
+      : null,
   };
 }
 

@@ -14,13 +14,23 @@ import {
   Logger,
 } from '@kbn/core/server';
 import { IClusterClient } from '@kbn/core/server';
-import { Observable } from 'rxjs';
-import { throttleTime } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { throttleTime, tap, map } from 'rxjs/operators';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { isEmpty } from 'lodash';
 import { MonitoringStats } from '../monitoring';
 import { TaskManagerConfig } from '../config';
-import { summarizeUtilizationStats } from '../monitoring/background_task_utilization_statistics';
+import {
+  SummarizedBackgroundTaskUtilizationStat,
+  summarizeUtilizationStats,
+} from '../monitoring/background_task_utilization_statistics';
+import { MonitoredStat } from '../monitoring/monitoring_stats_stream';
+
+export interface MonitoredUtilization {
+  process_uuid: string;
+  timestamp: string;
+  last_update: string;
+  stats: MonitoredStat<SummarizedBackgroundTaskUtilizationStat> | null;
+}
 
 export interface BackgroundTaskUtilRouteParams {
   router: IRouter;
@@ -34,7 +44,9 @@ export interface BackgroundTaskUtilRouteParams {
   usageCounter?: UsageCounter;
 }
 
-export function backgroundTaskUtilizationRoute(params: BackgroundTaskUtilRouteParams) {
+export function backgroundTaskUtilizationRoute(
+  params: BackgroundTaskUtilRouteParams
+): Observable<MonitoredUtilization> {
   const {
     router,
     monitoringStats$,
@@ -59,19 +71,30 @@ export function backgroundTaskUtilizationRoute(params: BackgroundTaskUtilRoutePa
     return { process_uuid: taskManagerId, timestamp, ...summarizedStats };
   }
 
+  const monitoredUtilization$: Subject<MonitoredUtilization> = new Subject<MonitoredUtilization>();
   /* keep track of last utilization summary, as we'll return that to the next call to _background_task_utilization */
   let lastMonitoredStats: MonitoringStats | null = null;
 
-  monitoringStats$.pipe(throttleTime(requiredHotStatsFreshness)).subscribe((stats) => {
-    lastMonitoredStats = stats;
-    if (isEmpty(lastMonitoredStats.stats.utilization)) {
-      logger.debug('Unable to get Task Manager background task utilization metrics.');
-    }
-  });
+  monitoringStats$
+    .pipe(
+      throttleTime(requiredHotStatsFreshness),
+      tap((stats) => {
+        lastMonitoredStats = stats;
+      }),
+      // Only calculate the summerized stats (calculates all runnign averages and evaluates state)
+      // when needed by throttling down to the requiredHotStatsFreshness
+      map((stats) => getBackgroundTaskUtilization(stats))
+    )
+    .subscribe((utilizationStats) => {
+      monitoredUtilization$.next(utilizationStats);
+      if (utilizationStats.stats == null) {
+        logger.debug('Unable to get Task Manager background task utilization metrics.');
+      }
+    });
 
   router.get(
     {
-      path: '/internal/api/task_manager/_background_task_utilization',
+      path: '/internal/task_manager/_background_task_utilization',
       // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
       // options: { tags: ['access:taskManager'] },
       validate: false,
@@ -121,4 +144,6 @@ export function backgroundTaskUtilizationRoute(params: BackgroundTaskUtilRoutePa
       });
     }
   );
+
+  return monitoredUtilization$;
 }

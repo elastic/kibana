@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   function getUtilizationRequest() {
     return request
-      .get('/internal/api/task_manager/_background_task_utilization')
+      .get('/internal/task_manager/_background_task_utilization')
       .set('kbn-xsrf', 'foo');
   }
 

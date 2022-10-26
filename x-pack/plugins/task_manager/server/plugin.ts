@@ -135,7 +135,7 @@ export class TaskManagerPlugin
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
       shouldRunTasks: this.shouldRunBackgroundTasks,
     });
-    backgroundTaskUtilizationRoute({
+    const monitoredUtilization$ = backgroundTaskUtilizationRoute({
       router,
       monitoringStats$: this.monitoringStats$,
       logger: this.logger,
@@ -169,6 +169,7 @@ export class TaskManagerPlugin
       registerTaskManagerUsageCollector(
         usageCollection,
         monitoredHealth$,
+        monitoredUtilization$,
         this.config.ephemeral_tasks.enabled,
         this.config.ephemeral_tasks.request_capacity,
         this.config.unsafe.exclude_task_types
