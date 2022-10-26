@@ -193,7 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'browser',
             'url.port': null,
             urls: '',
-            id: decryptedCreatedMonitor.body.id,
+            id: `${journeyId}-test-suite-default`,
             hash: 'ekrjelkjrelkjre',
           });
         }
@@ -251,7 +251,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
             'check.request.method': 'POST',
             'check.response.status': ['200'],
-            config_id: '',
+            config_id: decryptedCreatedMonitor.body.id,
             custom_heartbeat_id: `${journeyId}-test-suite-default`,
             'check.response.body.negative': [],
             'check.response.body.positive': ['Saved', 'saved'],
@@ -308,7 +308,7 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'http',
             urls: Array.isArray(monitor.urls) ? monitor.urls?.[0] : monitor.urls,
             'url.port': null,
-            id: '',
+            id: `${journeyId}-test-suite-default`,
             hash: 'ekrjelkjrelkjre',
           });
         }
@@ -410,7 +410,7 @@ export default function ({ getService }: FtrProviderContext) {
             hosts: Array.isArray(monitor.hosts) ? monitor.hosts?.[0] : monitor.hosts,
             'url.port': null,
             urls: '',
-            id: decryptedCreatedMonitor.body.id,
+            id: `${journeyId}-test-suite-default`,
             hash: 'ekrjelkjrelkjre',
           });
         }
@@ -513,7 +513,7 @@ export default function ({ getService }: FtrProviderContext) {
               monitor.wait?.slice(-1) === 's'
                 ? monitor.wait?.slice(0, -1)
                 : `${parseInt(monitor.wait?.slice(0, -1) || '1', 10) * 60}`,
-            id: decryptedCreatedMonitor.body.id,
+            id: `${journeyId}-test-suite-default`,
             hash: 'ekrjelkjrelkjre',
           });
         }
@@ -1449,7 +1449,8 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             }-${testPolicyId}`
         );
         expect(packagePolicy.name).eql(
@@ -1507,7 +1508,8 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             }-${testPolicyId}`
         );
 
@@ -1528,7 +1530,8 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             }-${testPolicyId}`
         );
 
@@ -1565,7 +1568,8 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             }-${testPolicyId}`
         );
 
@@ -1599,7 +1603,8 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             }-${testPolicyId}`
         );
 
@@ -1643,8 +1648,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-            '-' +
-            testPolicyId
+              '-' +
+              testPolicyId
         );
 
         expect(packagePolicy.policy_id).eql(testPolicyId);
@@ -1693,8 +1698,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-            '-' +
-            testPolicyId
+              '-' +
+              testPolicyId
         );
 
         expect(packagePolicy2).eql(undefined);
@@ -1736,7 +1741,8 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             }-${testPolicyId}`
         );
 
@@ -1864,7 +1870,8 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
+            `${
+              monitorsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID]
             } - ${testPolicyId}`
         );
 

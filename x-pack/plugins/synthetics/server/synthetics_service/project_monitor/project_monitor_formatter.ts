@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { Subject } from 'rxjs';
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 import pMap from 'p-map';
 import { KibanaRequest } from '@kbn/core/server';
 import {
@@ -375,10 +375,13 @@ export class ProjectMonitorFormatter {
       const previousMonitor = monitors[i].previousMonitor;
       const normalizedMonitor = monitors[i].monitor;
 
-      const {
-        attributes: { [ConfigKey.REVISION]: _, ...normalizedPreviousMonitorAttributes },
-      } = normalizeSecrets(decryptedPreviousMonitor);
-      const hasMonitorBeenEdited = !isEqual(normalizedMonitor, normalizedPreviousMonitorAttributes);
+      const keysToOmit = [ConfigKey.REVISION, ConfigKey.ID, ConfigKey.CONFIG_ID];
+      const { attributes: normalizedPreviousMonitorAttributes } =
+        normalizeSecrets(decryptedPreviousMonitor);
+      const hasMonitorBeenEdited = !isEqual(
+        omit(normalizedMonitor, keysToOmit),
+        omit(normalizedPreviousMonitorAttributes, keysToOmit)
+      );
 
       if (hasMonitorBeenEdited) {
         const monitorWithRevision = formatSecrets({
