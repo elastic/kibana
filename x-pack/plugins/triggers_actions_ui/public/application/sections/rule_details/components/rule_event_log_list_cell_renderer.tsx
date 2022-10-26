@@ -50,8 +50,8 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
     [activeSpace, spaceIds]
   );
 
-  const onClickRuleName = useCallback(() => {
-    if (!ruleId) return;
+  const ruleNamePathname = useMemo(() => {
+    if (!ruleId) return '';
     const ruleRoute = routeToRuleDetails.replace(':ruleId', ruleId);
     if (ruleOnDifferentSpace) {
       const [linkedSpaceId] = spaceIds ?? [];
@@ -60,12 +60,20 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
       const newPathname = `${spacePath}${window.location.pathname
         .replace(/^\/s\/([^/])+/, '')
         .replace(historyPathname, ruleRoute)}`;
-      const newUrl = window.location.href.replace(window.location.pathname, newPathname);
+      return newPathname;
+    }
+    return ruleRoute;
+  }, [ruleId, ruleOnDifferentSpace, history, spaceIds]);
+
+  const onClickRuleName = useCallback(() => {
+    if (!ruleId) return;
+    if (ruleOnDifferentSpace) {
+      const newUrl = window.location.href.replace(window.location.pathname, ruleNamePathname);
       window.open(newUrl, '_blank');
       return;
     }
-    history.push(ruleRoute);
-  }, [ruleId, history, ruleOnDifferentSpace, spaceIds]);
+    history.push(ruleNamePathname);
+  }, [ruleNamePathname, history, ruleOnDifferentSpace]);
 
   if (typeof value === 'undefined') {
     return null;
@@ -80,7 +88,11 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
   }
 
   if (columnId === 'rule_name' && ruleId) {
-    return <EuiLink onClick={onClickRuleName}>{value}</EuiLink>;
+    return (
+      <EuiLink onClick={onClickRuleName} data-href={ruleNamePathname}>
+        {value}
+      </EuiLink>
+    );
   }
 
   if (columnId === 'space_ids') {

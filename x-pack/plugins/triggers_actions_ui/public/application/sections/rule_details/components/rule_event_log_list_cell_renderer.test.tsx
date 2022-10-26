@@ -7,7 +7,7 @@
 
 import React from 'react';
 import moment from 'moment';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiLink } from '@elastic/eui';
 import { shallow, mount } from 'enzyme';
 import {
   RuleEventLogListCellRenderer,
@@ -16,7 +16,44 @@ import {
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
 import { RuleDurationFormat } from '../../rules_list/components/rule_duration_format';
 
+jest.mock('react-router-dom', () => ({
+  useHistory: () => ({
+    location: {
+      pathname: '/logs',
+    },
+  }),
+}));
+
+jest.mock('../../../../common/lib/kibana', () => ({
+  useSpacesData: () => ({
+    spacesMap: new Map([
+      ['space1', { id: 'space1' }],
+      ['space2', { id: 'space2' }],
+    ]),
+    activeSpaceId: 'space1',
+  }),
+}));
+
 describe('rule_event_log_list_cell_renderer', () => {
+  const savedLocation = window.location;
+  beforeAll(() => {
+    // @ts-ignore Mocking window.location
+    delete window.location;
+    // @ts-ignore
+    window.location = Object.assign(
+      new URL('https://localhost/app/management/insightsAndAlerting/triggersActions/logs'),
+      {
+        ancestorOrigins: '',
+        assign: jest.fn(),
+        reload: jest.fn(),
+        replace: jest.fn(),
+      }
+    );
+  });
+  afterAll(() => {
+    window.location = savedLocation;
+  });
+
   it('renders primitive values correctly', () => {
     const wrapper = mount(<RuleEventLogListCellRenderer columnId="message" value="test" />);
 
@@ -66,5 +103,32 @@ describe('rule_event_log_list_cell_renderer', () => {
     expect(wrapper.find(RuleEventLogListStatus).exists()).toBeTruthy();
     expect(wrapper.find(RuleEventLogListStatus).text()).toEqual('newOutcome');
     expect(wrapper.find(EuiIcon).props().color).toEqual('gray');
+  });
+
+  it('links to rules on the correct space', () => {
+    const wrapper1 = shallow(
+      <RuleEventLogListCellRenderer
+        columnId="rule_name"
+        value="Rule"
+        ruleId="1"
+        spaceIds={['space1']}
+      />
+    );
+    //@ts-ignore data-href is not a native EuiLink prop
+    expect(wrapper1.find(EuiLink).props()['data-href']).toEqual('/rule/1');
+    const wrapper2 = shallow(
+      <RuleEventLogListCellRenderer
+        columnId="rule_name"
+        value="Rule"
+        ruleId="1"
+        spaceIds={['space2']}
+      />
+    );
+    //@ts-ignore data-href is not a native EuiLink prop
+    expect(wrapper2.find(EuiLink).props()['data-href']).toEqual(
+      '/s/space2/app/management/insightsAndAlerting/triggersActions/rule/1'
+    );
+
+    window.location = savedLocation;
   });
 });
