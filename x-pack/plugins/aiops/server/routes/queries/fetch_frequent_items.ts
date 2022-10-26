@@ -56,7 +56,8 @@ export async function fetchFrequentItems(
   deviationMin: number,
   deviationMax: number,
   logger: Logger,
-  emitError: (m: string) => void
+  emitError: (m: string) => void,
+  abortSignal?: AbortSignal
 ) {
   // get unique fields from change points
   const fields = [...new Set(changePoints.map((t) => t.fieldName))];
@@ -127,7 +128,7 @@ export async function fetchFrequentItems(
         track_total_hits: true,
       },
     },
-    { maxRetries: 0 }
+    { signal: abortSignal, maxRetries: 0 }
   );
 
   if (body.aggregations === undefined) {
