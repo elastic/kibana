@@ -26,10 +26,14 @@ interface ExceptionListDetailsContextProps {
   isLoading: boolean;
   pagination: Pagination;
   isReadOnly: boolean;
+  showAddExceptionFlyout: boolean;
+  showEditExceptionFlyout: boolean;
   setIsLoading: Dispatch<React.SetStateAction<boolean>>;
   setExceptions: Dispatch<React.SetStateAction<ExceptionListItemSchema[] | ListArray>>;
   setPagination: Dispatch<React.SetStateAction<Pagination>>;
   setIsReadOnly: Dispatch<React.SetStateAction<boolean>>;
+  setShowAddExceptionFlyout: Dispatch<React.SetStateAction<boolean>>;
+  setShowEditExceptionFlyout: Dispatch<React.SetStateAction<boolean>>;
   setExceptionListReferences: Dispatch<React.SetStateAction<RuleReferences | null>>;
   setViewerStatus: Dispatch<React.SetStateAction<ViewerStatus | ''>>;
   handleErrorStatus: (error: Error, title?: string, description?: string) => void;
@@ -41,11 +45,15 @@ const defaultState: ExceptionListDetailsContextProps = {
   isLoading: false,
   pagination: { pageIndex: 0, pageSize: 0, totalItemCount: 0 },
   isReadOnly: false,
+  showAddExceptionFlyout: false,
+  showEditExceptionFlyout: false,
   http: undefined,
   setIsLoading: () => {},
   setExceptions: () => {},
   setPagination: () => null,
   setIsReadOnly: () => {},
+  setShowAddExceptionFlyout: () => {},
+  setShowEditExceptionFlyout: () => {},
   setExceptionListReferences: () => {},
   setViewerStatus: () => {},
   handleErrorStatus: (error, title, description) => {},
@@ -73,6 +81,8 @@ export const ExceptionListDetailsProvider = ({ children }: ExceptionListDetailsP
   );
   const [pagination, setPagination] = useState(defaultState.pagination);
   const [isReadOnly, setIsReadOnly] = useState(defaultState.isReadOnly);
+  const [showAddExceptionFlyout, setShowAddExceptionFlyout] = useState(false);
+  const [showEditExceptionFlyout, setShowEditExceptionFlyout] = useState(false);
 
   const handleErrorStatus = useCallback(
     (error: Error, errorTitle?: string, errorDescription?: string) => {
@@ -92,6 +102,8 @@ export const ExceptionListDetailsProvider = ({ children }: ExceptionListDetailsP
       pagination,
       exceptions,
       isReadOnly,
+      showAddExceptionFlyout,
+      showEditExceptionFlyout,
       toasts,
       exceptionListReferences,
       setViewerStatus,
@@ -101,16 +113,20 @@ export const ExceptionListDetailsProvider = ({ children }: ExceptionListDetailsP
       setIsReadOnly,
       setExceptionListReferences,
       handleErrorStatus,
+      setShowAddExceptionFlyout,
+      setShowEditExceptionFlyout,
     }),
     [
-      exceptionListReferences,
-      exceptions,
       http,
-      isLoading,
-      isReadOnly,
-      pagination,
-      toasts,
       viewerStatus,
+      isLoading,
+      pagination,
+      exceptions,
+      isReadOnly,
+      showAddExceptionFlyout,
+      showEditExceptionFlyout,
+      toasts,
+      exceptionListReferences,
       handleErrorStatus,
     ]
   );

@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import React, { FC, useMemo } from 'react';
 import { HeaderMenu } from '../../header_menu';
-import { headerMenuCss } from '../list_header.styles';
+import { headerMenuCss, noLinkedRulesCss } from '../list_header.styles';
 import * as i18n from '../../translations';
 import { Rule } from '../../types';
 import { generateLinkedRulesMenuItems } from '../../generate_linked_rules_menu_item';
@@ -51,17 +51,23 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
       gutterSize="l"
     >
       <EuiFlexItem css={headerMenuCss}>
-        <HeaderMenu
-          dataTestSubj={`${dataTestSubj || ''}LinkedRulesMenu`}
-          emptyButton
-          useCustomActions
-          text={i18n.EXCEPTION_LIST_HEADER_LINKED_RULES(linkedRules.length)}
-          actions={referencedLinks}
-          disableActions={isReadonly}
-          iconType="arrowDown"
-          iconSide="right"
-          panelPaddingSize="none"
-        />
+        {linkedRules.length ? (
+          <HeaderMenu
+            dataTestSubj={`${dataTestSubj || ''}LinkedRulesMenu`}
+            emptyButton
+            useCustomActions
+            text={i18n.EXCEPTION_LIST_HEADER_LINKED_RULES(linkedRules.length)}
+            actions={referencedLinks}
+            disableActions={isReadonly}
+            iconType="arrowDown"
+            iconSide="right"
+            panelPaddingSize="none"
+          />
+        ) : (
+          <EuiTextColor data-test-subj="noLinkedRules" css={noLinkedRulesCss} color="subdued">
+            {i18n.EXCEPTION_LIST_HEADER_LINKED_RULES(linkedRules.length)}
+          </EuiTextColor>
+        )}
       </EuiFlexItem>
 
       <EuiFlexItem>

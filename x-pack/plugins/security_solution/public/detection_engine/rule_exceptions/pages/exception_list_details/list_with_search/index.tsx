@@ -24,6 +24,8 @@ import { ListDetailsLinkAnchor } from '../../../components/list_details_link_anc
 import { useManageListWithSearchComponent } from './use_manage_list_with_search';
 import { ExceptionsUtility } from '../../../components/exceptions_utility';
 import type { ExceptionListWithRules } from '../types';
+import { AddExceptionFlyout } from '../../../components/add_exception_flyout';
+import { EditExceptionFlyout } from '../../../components/edit_exception_flyout';
 
 interface ListWithSearchComponentProps {
   list: ExceptionListWithRules;
@@ -41,63 +43,92 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list }) => 
     emptyViewerBody,
     viewerStatus,
     ruleReferences,
+    showAddExceptionFlyout,
+    showEditExceptionFlyout,
+    exceptionToEdit,
     onSearch,
     onAddExceptionClick,
     onDeleteException,
     onEditExceptionItem,
     onPaginationChange,
-    onCreateExceptionListItem,
+    handleCancelExceptionItemFlyout,
+    handleConfirmExceptionFlyout,
   } = useManageListWithSearchComponent(list);
 
-  return viewerStatus === ViewerStatus.EMPTY || viewerStatus === ViewerStatus.LOADING ? (
-    <EmptyViewerState
-      isReadOnly={isReadOnly}
-      viewerStatus={viewerStatus as ViewerStatus}
-      onCreateExceptionListItem={onCreateExceptionListItem}
-      title={i18n.EXCEPTION_LIST_EMPTY_VIEWER_TITLE}
-      body={i18n.EXCEPTION_LIST_EMPTY_VIEWER_BODY(listName)}
-      buttonText={i18n.EXCEPTION_LIST_EMPTY_VIEWER_BUTTON}
-    />
-  ) : (
-    <EuiPanel hasBorder={false} hasShadow={false}>
-      <>
-        <SearchBar
-          addExceptionButtonText={i18n.EXCEPTION_LIST_EMPTY_SEARCH_BAR_BUTTON}
-          listType={listType as ExceptionListTypeEnum}
-          onSearch={onSearch}
-          onAddExceptionClick={onAddExceptionClick}
-          isSearching={viewerStatus === ViewerStatus.SEARCHING}
-          isButtonFilled={false}
-          buttonIconType="plusInCircle"
+  return (
+    <>
+      {showAddExceptionFlyout ? (
+        <AddExceptionFlyout
+          rules={null} // which rule list.rules?
+          isBulkAction={false}
+          isEndpointItem={false}
+          onCancel={handleCancelExceptionItemFlyout}
+          onConfirm={handleConfirmExceptionFlyout}
+          data-test-subj="addExceptionItemFlyoutInList"
+          showAlertCloseOptions={false} // TODO ask if we need it
+          // ask if we need the add to rule/list section and which list should we link the exception here
         />
-        <ExceptionItems
-          viewerStatus={viewerStatus as ViewerStatus}
-          listType={listType as ExceptionListTypeEnum}
-          ruleReferences={ruleReferences}
+      ) : viewerStatus === ViewerStatus.EMPTY || viewerStatus === ViewerStatus.LOADING ? (
+        <EmptyViewerState
           isReadOnly={isReadOnly}
-          exceptions={exceptions}
-          emptyViewerTitle={emptyViewerTitle}
-          emptyViewerBody={emptyViewerBody}
-          pagination={pagination}
-          lastUpdated={lastUpdated}
-          editActionLabel={i18n.EXCEPTION_ITEM_CARD_EDIT_LABEL}
-          deleteActionLabel={i18n.EXCEPTION_ITEM_CARD_DELETE_LABEL}
-          onPaginationChange={onPaginationChange}
-          onEditExceptionItem={onEditExceptionItem}
-          onDeleteException={onDeleteException}
-          getFormattedComments={getFormattedComments}
-          securityLinkAnchorComponent={ListDetailsLinkAnchor}
-          formattedDateComponent={FormattedDate}
-          exceptionsUtilityComponent={() => (
-            <ExceptionsUtility
-              exceptionsTitle={i18n.EXCEPTION_UTILITY_TITLE}
+          viewerStatus={viewerStatus as ViewerStatus}
+          onCreateExceptionListItem={onAddExceptionClick}
+          title={i18n.EXCEPTION_LIST_EMPTY_VIEWER_TITLE}
+          body={i18n.EXCEPTION_LIST_EMPTY_VIEWER_BODY(listName)}
+          buttonText={i18n.EXCEPTION_LIST_EMPTY_VIEWER_BUTTON}
+        />
+      ) : (
+        <EuiPanel hasBorder={false} hasShadow={false}>
+          <>
+            {showEditExceptionFlyout && exceptionToEdit && (
+              <EditExceptionFlyout
+                list={list}
+                itemToEdit={exceptionToEdit}
+                showAlertCloseOptions
+                onCancel={handleCancelExceptionItemFlyout}
+                onConfirm={handleConfirmExceptionFlyout}
+                data-test-subj="editExceptionItemFlyoutInList"
+              />
+            )}
+            <SearchBar
+              addExceptionButtonText={i18n.EXCEPTION_LIST_EMPTY_SEARCH_BAR_BUTTON}
+              listType={listType as ExceptionListTypeEnum}
+              onSearch={onSearch}
+              onAddExceptionClick={onAddExceptionClick}
+              isSearching={viewerStatus === ViewerStatus.SEARCHING}
+              isButtonFilled={false}
+              buttonIconType="plusInCircle"
+            />
+            <ExceptionItems
+              viewerStatus={viewerStatus as ViewerStatus}
+              listType={listType as ExceptionListTypeEnum}
+              ruleReferences={ruleReferences}
+              isReadOnly={isReadOnly}
+              exceptions={exceptions}
+              emptyViewerTitle={emptyViewerTitle}
+              emptyViewerBody={emptyViewerBody}
               pagination={pagination}
               lastUpdated={lastUpdated}
+              editActionLabel={i18n.EXCEPTION_ITEM_CARD_EDIT_LABEL}
+              deleteActionLabel={i18n.EXCEPTION_ITEM_CARD_DELETE_LABEL}
+              onPaginationChange={onPaginationChange}
+              onEditExceptionItem={onEditExceptionItem}
+              onDeleteException={onDeleteException}
+              getFormattedComments={getFormattedComments}
+              securityLinkAnchorComponent={ListDetailsLinkAnchor}
+              formattedDateComponent={FormattedDate}
+              exceptionsUtilityComponent={() => (
+                <ExceptionsUtility
+                  exceptionsTitle={i18n.EXCEPTION_UTILITY_TITLE}
+                  pagination={pagination}
+                  lastUpdated={lastUpdated}
+                />
+              )}
             />
-          )}
-        />
-      </>
-    </EuiPanel>
+          </>
+        </EuiPanel>
+      )}
+    </>
   );
 };
 

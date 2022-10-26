@@ -45,59 +45,59 @@ const EditModalComponent: FC<EditModalProps> = ({ listDetails, onSave, onCancel 
     e?.preventDefault();
   };
   return (
-    <>
-      <EuiModal data-test-subj="EditModal" onClose={onSubmit} initialFocus="[name=popswitch]">
-        {showProgress && <EuiProgress size="xs" position="absolute" />}
-        <EuiModalHeader>
-          <EuiModalHeaderTitle data-test-subj="editModalTitle">
-            <h1>{i18n.EXCEPTION_LIST_HEADER_EDIT_MODAL_TITLE(listDetails.name)}</h1>
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
+    <EuiModal data-test-subj="EditModal" onClose={onSubmit} initialFocus="[name=popswitch]">
+      {showProgress && <EuiProgress size="xs" position="absolute" />}
+      <EuiModalHeader>
+        <EuiModalHeaderTitle data-test-subj="editModalTitle">
+          <h1>{i18n.EXCEPTION_LIST_HEADER_EDIT_MODAL_TITLE(listDetails.name)}</h1>
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
 
-        <EuiModalBody>
-          <EuiForm
-            id={modalFormId}
-            data-test-subj="editModalForm"
-            component="form"
-            onSubmit={onSubmit}
-          >
-            <EuiFormRow label={i18n.EXCEPTION_LIST_HEADER_NAME_TEXTBOX}>
-              <EuiFieldText
-                data-test-subj="editModalNameTextField"
-                name="name"
-                value={newListDetails.name}
-                onChange={onChange}
-              />
-            </EuiFormRow>
+      <EuiModalBody>
+        <EuiForm
+          id={modalFormId}
+          data-test-subj="editModalForm"
+          component="form"
+          onSubmit={onSubmit}
+        >
+          <EuiFormRow fullWidth label={i18n.EXCEPTION_LIST_HEADER_NAME_TEXTBOX}>
+            <EuiFieldText
+              fullWidth
+              data-test-subj="editModalNameTextField"
+              name="name"
+              value={newListDetails.name}
+              onChange={onChange}
+            />
+          </EuiFormRow>
 
-            <EuiFormRow label={i18n.EXCEPTION_LIST_HEADER_DESCRIPTION_TEXTBOX}>
-              <EuiTextArea
-                data-test-subj="editModalDescriptionTextField"
-                name="description"
-                value={newListDetails.description}
-                onChange={onChange}
-              />
-            </EuiFormRow>
-          </EuiForm>
-        </EuiModalBody>
+          <EuiFormRow fullWidth label={i18n.EXCEPTION_LIST_HEADER_DESCRIPTION_TEXTBOX}>
+            <EuiTextArea
+              fullWidth
+              data-test-subj="editModalDescriptionTextField"
+              name="description"
+              value={newListDetails.description}
+              onChange={onChange}
+            />
+          </EuiFormRow>
+        </EuiForm>
+      </EuiModalBody>
 
-        <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="editModalCancelBtn" onClick={onCancel}>
-            {i18n.EXCEPTION_LIST_HEADER_EDIT_MODAL_CANCEL_BUTTON}
-          </EuiButtonEmpty>
+      <EuiModalFooter>
+        <EuiButtonEmpty data-test-subj="editModalCancelBtn" onClick={onCancel}>
+          {i18n.EXCEPTION_LIST_HEADER_EDIT_MODAL_CANCEL_BUTTON}
+        </EuiButtonEmpty>
 
-          <EuiButton
-            data-test-subj="editModalSaveBtn"
-            type="submit"
-            form={modalFormId}
-            onClick={onSubmit}
-            fill
-          >
-            {i18n.EXCEPTION_LIST_HEADER_EDIT_MODAL_SAVE_BUTTON}
-          </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
-    </>
+        <EuiButton
+          data-test-subj="editModalSaveBtn"
+          type="submit"
+          form={modalFormId}
+          onClick={onSubmit}
+          fill
+        >
+          {i18n.EXCEPTION_LIST_HEADER_EDIT_MODAL_SAVE_BUTTON}
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
   );
 };
 EditModalComponent.displayName = 'EditModalComponent';

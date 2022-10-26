@@ -18,7 +18,7 @@ import {
   prepareFetchExceptionItemsParams,
   fetchListExceptionItems,
   getExceptionItemsReferences,
-  deleteExceptionListItem,
+  deleteException,
 } from '../api';
 import * as i18n from '../translations';
 import { useExceptionListDetailsContext } from '../context';
@@ -33,14 +33,19 @@ export const useManageListWithSearchComponent = (list: ExceptionListWithRules) =
     pagination,
     exceptions,
     exceptionListReferences,
+    showAddExceptionFlyout,
+    showEditExceptionFlyout,
     setExceptions,
     setPagination,
     setExceptionListReferences,
     setViewerStatus,
     handleErrorStatus,
+    setShowAddExceptionFlyout,
+    setShowEditExceptionFlyout,
   } = useExceptionListDetailsContext();
 
   const [lastUpdated, setLastUpdated] = useState<null | string | number>(null);
+  const [exceptionToEdit, setExceptionToEdit] = useState<ExceptionListItemSchema>();
 
   const getReferences = useCallback(async () => {
     try {
@@ -111,13 +116,17 @@ export const useManageListWithSearchComponent = (list: ExceptionListWithRules) =
     [fetchItems, setViewerStatus]
   );
 
-  const onAddExceptionClick = () => {};
+  const onAddExceptionClick = useCallback(() => {
+    debugger;
+    setShowAddExceptionFlyout(true);
+  }, [setShowAddExceptionFlyout]);
+
   const onDeleteException = useCallback(
     async ({ id, name, namespaceType }) => {
       try {
         // setViewerStatus(ViewerStatus.DELETING); // TODO ASK YARA if it is needed or it can be replaced with Loading
         setViewerStatus(ViewerStatus.LOADING);
-        await deleteExceptionListItem({ id, http, namespaceType });
+        await deleteException({ id, http, namespaceType });
         toasts?.addSuccess({
           title: i18n.EXCEPTION_ITEM_DELETE_TITLE,
           text: i18n.EXCEPTION_ITEM_DELETE_TEXT(name),
@@ -129,8 +138,28 @@ export const useManageListWithSearchComponent = (list: ExceptionListWithRules) =
     },
     [http, toasts, fetchItems, handleErrorStatus, setViewerStatus]
   );
-  const onEditExceptionItem = (exception: ExceptionListItemSchema) => {};
+  const onEditExceptionItem = (exception: ExceptionListItemSchema) => {
+    setExceptionToEdit(exception);
+    setShowEditExceptionFlyout(true);
+  };
   const onCreateExceptionListItem = useCallback(() => {}, []);
+
+  const handleCancelExceptionItemFlyout = () => {
+    setShowAddExceptionFlyout(false);
+    setShowEditExceptionFlyout(false);
+  };
+  const handleConfirmExceptionFlyout = useCallback(
+    (didExceptionChange: boolean): void => {
+      // && onRuleChange != null) {
+      // onRuleChange();
+
+      setShowAddExceptionFlyout(false);
+      setShowEditExceptionFlyout(false);
+      if (!didExceptionChange) return;
+      fetchItems();
+    },
+    [fetchItems, setShowAddExceptionFlyout, setShowEditExceptionFlyout]
+  );
   // #endregion
 
   return {
@@ -144,11 +173,16 @@ export const useManageListWithSearchComponent = (list: ExceptionListWithRules) =
     emptyViewerTitle,
     emptyViewerBody,
     ruleReferences: exceptionListReferences,
+    showAddExceptionFlyout,
+    showEditExceptionFlyout,
+    exceptionToEdit,
     onSearch,
     onAddExceptionClick,
     onDeleteException,
     onEditExceptionItem,
     onPaginationChange,
     onCreateExceptionListItem,
+    handleCancelExceptionItemFlyout,
+    handleConfirmExceptionFlyout,
   };
 };

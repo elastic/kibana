@@ -32,6 +32,21 @@ describe('MenuItems', () => {
     expect(wrapper.getByTestId('ManageRulesButton')).toBeInTheDocument();
     expect(wrapper.getByTestId('MenuActionsButtonIcon')).toBeInTheDocument();
   });
+  it('should not render linkedRules HeaderMenu component, instead should render a text', () => {
+    const wrapper = render(
+      <MenuItems
+        isReadonly={false}
+        linkedRules={[]}
+        securityLinkAnchorComponent={securityLinkAnchorComponentMock}
+        onExportList={onExportList}
+        onDeleteList={onDeleteList}
+        onManageRules={onManageRules}
+      />
+    );
+    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.queryByTestId('LinkedRulesMenuItems')).not.toBeInTheDocument();
+    expect(wrapper.getByTestId('noLinkedRules')).toBeInTheDocument();
+  });
   it('should call onManageRules', () => {
     const wrapper = render(
       <MenuItems

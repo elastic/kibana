@@ -10,17 +10,13 @@ import React from 'react';
 import type { FC } from 'react';
 import { EuiIcon, EuiPageHeader, EuiText } from '@elastic/eui';
 import * as i18n from '../translations';
-import {
-  textWithEditContainerCss,
-  textCss,
-  descriptionContainerCss,
-  headerCss,
-} from './list_header.styles';
+import { textCss, descriptionContainerCss, headerCss } from './list_header.styles';
 import { MenuItems } from './menu_items';
 import { TextWithEdit } from '../text_with_edit';
 import { EditModal } from './edit_modal';
 import { ListDetails, Rule } from '../types';
 import { useExceptionListHeader } from './use_list_header';
+import { textWithEditContainerCss } from '../text_with_edit/text_with_edit.styles';
 
 interface ExceptionListHeaderComponentProps {
   name: string;
