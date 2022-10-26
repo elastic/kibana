@@ -13,6 +13,8 @@ import { ChangePoint } from '@kbn/ml-agg-utils';
 import { SPIKE_ANALYSIS_THRESHOLD } from '../../../common/constants';
 import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
 
+import { isRequestAbortedError } from '../../lib/is_request_aborted_error';
+
 import { getQueryWithParams } from './get_query_with_params';
 import { getRequestBase } from './get_request_base';
 
@@ -95,28 +97,34 @@ export const fetchChangePointPValues = async (
   params: AiopsExplainLogRateSpikesSchema,
   fieldNames: string[],
   logger: Logger,
-  emitError: (m: string) => void
+  emitError: (m: string) => void,
+  abortSignal?: AbortSignal
 ): Promise<ChangePoint[]> => {
   const result: ChangePoint[] = [];
 
   const settledPromises = await Promise.allSettled(
     fieldNames.map((fieldName) =>
       esClient.search<unknown, { change_point_p_value: Aggs }>(
-        getChangePointRequest(params, fieldName)
+        getChangePointRequest(params, fieldName),
+        {
+          signal: abortSignal,
+          maxRetries: 0,
+        }
       )
     )
   );
 
   function reportError(fieldName: string, error: unknown) {
-    logger.error(
-      `Failed to fetch p-value aggregation for fieldName "${fieldName}", got: \n${JSON.stringify(
-        error,
-        null,
-        2
-      )}`
-    );
-    emitError(`Failed to fetch p-value aggregation for fieldName "${fieldName}".`);
-    // Still continue the analysis even if individual p-value queries fail.
+    if (!isRequestAbortedError(error)) {
+      logger.error(
+        `Failed to fetch p-value aggregation for fieldName "${fieldName}", got: \n${JSON.stringify(
+          error,
+          null,
+          2
+        )}`
+      );
+      emitError(`Failed to fetch p-value aggregation for fieldName "${fieldName}".`);
+    }
   }
 
   for (const [index, settledPromise] of settledPromises.entries()) {

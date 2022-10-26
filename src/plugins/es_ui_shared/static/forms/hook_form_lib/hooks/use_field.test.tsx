@@ -17,7 +17,7 @@ import { FieldHook, FieldValidateResponse, VALIDATION_TYPES, FieldConfig } from 
 
 describe('useField() hook', () => {
   beforeAll(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
   });
 
   afterAll(() => {
