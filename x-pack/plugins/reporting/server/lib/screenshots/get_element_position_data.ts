@@ -28,7 +28,7 @@ export const getElementPositionAndAttributes = async (
       ElementsPositionAndAttribute[] | null
     >(
       {
-        fn: (selector, attributes) => {
+        fn: (selector: string, attributes: typeof screenshotAttributes) => {
           const elements = Array.from(document.querySelectorAll<Element>(selector));
           const results: ElementsPositionAndAttribute[] = [];
 

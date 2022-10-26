@@ -35,7 +35,7 @@ export const injectCustomCss = async (
   try {
     await browser.evaluate<string[]>(
       {
-        fn: (css) => {
+        fn: (css: string) => {
           const node = document.createElement('style');
           node.type = 'text/css';
           node.innerHTML = css; // eslint-disable-line no-unsanitized/property

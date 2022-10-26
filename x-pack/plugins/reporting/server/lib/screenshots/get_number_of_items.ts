@@ -42,7 +42,7 @@ export const getNumberOfItems = async (
     // we just count the number of `itemSelector`: the number of items already rendered
     itemsCount = await browser.evaluate<string[], number>(
       {
-        fn: (selector, countAttribute) => {
+        fn: (selector: string, countAttribute: string) => {
           const elementWithCount = document.querySelector(`[${countAttribute}]`);
           if (elementWithCount && elementWithCount != null) {
             const count = elementWithCount.getAttribute(countAttribute);

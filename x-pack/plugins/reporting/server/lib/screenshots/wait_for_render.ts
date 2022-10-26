@@ -28,7 +28,7 @@ export const waitForRenderComplete = async (
   return await browser
     .evaluate<[string, number]>(
       {
-        fn: (selector, visLoadDelay) => {
+        fn: (selector: string, visLoadDelay: number) => {
           // wait for visualizations to finish loading
           const visualizations: NodeListOf<Element> = document.querySelectorAll(selector);
           const visCount = visualizations.length;

@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { map, truncate } from 'lodash';
 import open from 'opn';
-import puppeteer, { ElementHandle, Page, EvaluateFunc } from 'puppeteer';
 import { parse as parseUrl } from 'url';
 import type { LocatorParams } from '../../../../common/types';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../../../../common/constants';
@@ -21,16 +20,6 @@ import { Layout, ViewZoomWidthHeight } from '../../../lib/layouts/layout';
 import { ElementPosition } from '../../../lib/screenshots';
 import { allowRequest, NetworkPolicy } from '../../network_policy';
 
-declare module 'puppeteer' {
-  interface Page {
-    _client(): CDPSession;
-  }
-
-  interface Target {
-    _targetId: string;
-  }
-}
-
 export interface ChromiumDriverOptions {
   inspect: boolean;
   networkPolicy: NetworkPolicy;
@@ -41,7 +30,7 @@ interface WaitForSelectorOpts {
 }
 
 interface EvaluateOpts<A extends unknown[]> {
-  fn: EvaluateFunc<A>;
+  fn: any;
   args: unknown[];
 }
 
@@ -67,7 +56,7 @@ interface InterceptedRequest {
 const WAIT_FOR_DELAY_MS: number = 100;
 
 export class HeadlessChromiumDriver {
-  private readonly page: Page;
+  private readonly page: any;
   private readonly inspect: boolean;
   private readonly networkPolicy: NetworkPolicy;
 
@@ -75,7 +64,11 @@ export class HeadlessChromiumDriver {
   private interceptedCount = 0;
   private core: ReportingCore;
 
-  constructor(core: ReportingCore, page: Page, { inspect, networkPolicy }: ChromiumDriverOptions) {
+  constructor(
+    core: ReportingCore,
+    page: unknown,
+    { inspect, networkPolicy }: ChromiumDriverOptions
+  ) {
     this.core = core;
     this.page = page;
     this.inspect = inspect;
@@ -204,7 +197,7 @@ export class HeadlessChromiumDriver {
     logger: LevelLogger
   ): Promise<T> {
     logger.debug(`evaluate ${meta.context}`);
-    return this.page.evaluate(fn as EvaluateFunc<unknown[]>, ...args) as Promise<T>;
+    return this.page.evaluate(fn, ...args) as Promise<T>;
   }
 
   public async waitForSelector(
@@ -212,7 +205,7 @@ export class HeadlessChromiumDriver {
     opts: WaitForSelectorOpts,
     context: EvaluateMetaOpts,
     logger: LevelLogger
-  ): Promise<ElementHandle<Element>> {
+  ): Promise<unknown> {
     const { timeout } = opts;
     logger.debug(`waitForSelector ${selector}`);
     const resp = await this.page.waitForSelector(selector, { timeout }); // override default 30000ms
@@ -230,16 +223,12 @@ export class HeadlessChromiumDriver {
     args,
     timeout,
   }: {
-    fn: EvaluateFunc<T>;
+    fn: unknown;
     args: unknown[];
     toEqual: number;
     timeout: number;
   }): Promise<void> {
-    await this.page.waitForFunction(
-      fn as EvaluateFunc<unknown[]>,
-      { timeout, polling: WAIT_FOR_DELAY_MS },
-      ...args
-    );
+    await this.page.waitForFunction(fn, { timeout, polling: WAIT_FOR_DELAY_MS }, ...args);
   }
 
   public async setViewport(
@@ -340,7 +329,7 @@ export class HeadlessChromiumDriver {
     // Even though 3xx redirects go through our request
     // handler, we should probably inspect responses just to
     // avoid being bamboozled by some malicious request
-    this.page.on('response', (interceptedResponse: puppeteer.HTTPResponse) => {
+    this.page.on('response', (interceptedResponse: any) => {
       const interceptedUrl = interceptedResponse.url();
       const allowed = !interceptedUrl.startsWith('file://');
 
