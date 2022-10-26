@@ -15,11 +15,11 @@ const expecteds = [
     layerCount: 4,
     basemapCounts: { roadmap: 1 },
     joinCounts: {},
-    layerCounts: { ems_basemap: 1, ems_region: 1, es_agg_clusters: 1, layer_group: 1, },
+    layerCounts: { ems_basemap: 1, ems_region: 1, es_agg_clusters: 1, layer_group: 1 },
     resolutionCounts: { coarse: 1 },
     scalingCounts: {},
     emsFileCounts: { italy_provinces: 1 },
-    layerTypeCounts: { GEOJSON_VECTOR: 2, LAYER_GROUP: 1, TILE: 1, },
+    layerTypeCounts: { GEOJSON_VECTOR: 2, LAYER_GROUP: 1, TILE: 1 },
     sourceCount: 3,
   },
   {
