@@ -22,19 +22,6 @@ export interface EvaluatedRuleParams {
   filterQueryText?: string;
 }
 
-interface AdditionalContextField {
-  [x: string]: any;
-}
-
-export interface AdditionalContext {
-  cloud?: AdditionalContextField;
-  host?: AdditionalContextField;
-  container?: AdditionalContextField;
-  orchestrator?: AdditionalContextField;
-  labels?: AdditionalContextField;
-  tags?: AdditionalContextField;
-}
-
 export type Evaluation = Omit<MetricExpressionParams, 'metric'> & {
   metric: string;
   currentValue: number | null;
@@ -42,7 +29,7 @@ export type Evaluation = Omit<MetricExpressionParams, 'metric'> & {
   shouldFire: boolean;
   shouldWarn: boolean;
   isNoData: boolean;
-  context?: AdditionalContext;
+  context?: [x: string];
 };
 
 export const evaluateRule = async <Params extends EvaluatedRuleParams = EvaluatedRuleParams>(
@@ -108,7 +95,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
             context: {
               cloud: result.cloud,
               host: result.host,
-              container: result.container,
+              containers: result.containers,
               orchestrator: result.orchestrator,
               labels: result.labels,
               tags: result.tags,

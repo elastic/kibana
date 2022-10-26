@@ -54,9 +54,19 @@ type MetricThresholdAlert = Alert<
 type MetricThresholdAlertFactory = (
   id: string,
   reason: string,
+  additionalContext?: [x: string] | null,
   threshold?: number | undefined,
   value?: number | undefined
 ) => MetricThresholdAlert;
+
+export const groupByListForContext =
+  [
+    'host.name',
+    'host.hostname',
+    'host.id',
+    'kubernetes.pod.uid',
+    'container.id'
+  ];
 
 export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   libs.metricsRules.createLifecycleRuleExecutor<
@@ -72,11 +82,12 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const logger = createScopedLogger(libs.logger, 'metricThresholdRule', { alertId, executionId });
     const { alertWithLifecycle, savedObjectsClient } = services;
-    const alertFactory: MetricThresholdAlertFactory = (id, reason) =>
+    const alertFactory: MetricThresholdAlertFactory = (id, reason, additionalContext) =>
       alertWithLifecycle({
         id,
         fields: {
           [ALERT_REASON]: reason,
+          ...additionalContext
         },
       });
 
@@ -227,10 +238,13 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
 
-        const additionalContext =
-          alertResults && alertResults.length > 0 ? alertResults[0][group].context : null;
+        const additionalContext = hasAdditionalContext(params.groupBy)
+          ? alertResults && alertResults.length > 0
+            ? alertResults[0][group].context
+            : null
+          : null;
 
-        const alert = alertFactory(`${group}`, reason);
+        const alert = alertFactory(`${group}`, reason, additionalContext);
         scheduledActionsCount++;
         alert.scheduleActions(actionGroupId, {
           group,
@@ -257,6 +271,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
     for (const alert of recoveredAlerts) {
       const recoveredAlertId = alert.getId();
       const viewInAppUrl = getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER);
+      
       const context = {
         group: recoveredAlertId,
         alertState: stateToAlertMessage[AlertStates.OK],
@@ -355,4 +370,9 @@ const formatAlertResult = <AlertResult>(
       : formatter(thresholdToFormat),
     comparator: comparatorToUse,
   };
+};
+
+const hasAdditionalContext = (groupBy: string[] | null) => {
+  // if (groupBy === null) return false;
+  return groupBy?.every(group => groupByListForContext.includes(group));
 };

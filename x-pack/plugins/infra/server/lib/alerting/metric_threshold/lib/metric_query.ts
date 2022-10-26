@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import { groupByForContainerContext, NUMBER_OF_DOCUMENTS, termsAggMapping } from '../../common/utils';
 import { createBucketSelector } from './create_bucket_selector';
 import { createPercentileAggregation } from './create_percentile_aggregation';
 import { createRateAggsBuckets, createRateAggsBucketScript } from './create_rate_aggregation';
@@ -27,7 +28,8 @@ export const getElasticsearchMetricQuery = (
   lastPeriodEnd?: number,
   groupBy?: string | string[],
   filterQuery?: string,
-  afterKey?: Record<string, string>
+  afterKey?: Record<string, string>,
+  fieldsExisted?: Record<string, boolean> | null
 ) => {
   const { metric, aggType } = metricParams;
   if (aggType === Aggregators.COUNT && metric) {
@@ -80,13 +82,42 @@ export const getElasticsearchMetricQuery = (
 
   const currentPeriod = wrapInCurrentPeriod(currentTimeframe, metricAggregations);
 
+  const containerContextAgg =
+    groupBy?.includes(groupByForContainerContext) &&
+      fieldsExisted &&
+      fieldsExisted[termsAggMapping[groupByForContainerContext]]
+      ? {
+        containers: {
+          terms: {
+            field: termsAggMapping[groupByForContainerContext],
+            size: NUMBER_OF_DOCUMENTS
+          },
+          aggs: {
+            containerContext: {
+              top_hits: {
+                size: 1,
+                _source: {
+                  includes: ['container.*']
+                },
+              },
+            }
+          }
+        }
+      }
+      : null;
+
+  const includesList = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
+  if(containerContextAgg === null) includesList.push('container.*');
+  
+  const excludesList = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
+
   const additionalContextAgg = {
     additionalContext: {
       top_hits: {
         size: 1,
         _source: {
-          includes: ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*', 'container.*'],
-          excludes: ['host.cpu.*', 'host.disk.*', 'host.network.*'],
+          includes: includesList,
+          excludes: excludesList,
         },
       },
     },
@@ -118,6 +149,7 @@ export const getElasticsearchMetricQuery = (
             ...rateAggBucketScript,
             ...bucketSelectorAggregations,
             ...additionalContextAgg,
+            ...containerContextAgg,
           },
         },
       }
@@ -134,7 +166,6 @@ export const getElasticsearchMetricQuery = (
             ...currentPeriod,
             ...rateAggBucketScript,
             ...bucketSelectorAggregations,
-            ...additionalContextAgg,
           },
         },
       };

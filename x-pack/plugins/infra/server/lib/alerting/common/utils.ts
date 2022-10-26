@@ -8,7 +8,7 @@
 import { isEmpty, isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
-import type { IBasePath } from '@kbn/core/server';
+import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
@@ -16,6 +16,13 @@ import {
   AlertExecutionDetails,
   InventoryMetricConditions,
 } from '../../../../common/alerting/metrics/types';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+
+const SUPPORTED_ES_FIELD_TYPES = [
+  ES_FIELD_TYPES.KEYWORD,
+  ES_FIELD_TYPES.IP,
+  ES_FIELD_TYPES.BOOLEAN,
+];
 
 export const oneOfLiterals = (arrayOfLiterals: Readonly<string[]>) =>
   schema.string({
@@ -106,4 +113,40 @@ export const getViewInAppUrlInventory = (
 
   const relativeViewInAppUrl = getInventoryViewInAppUrl(parseTechnicalFields(fields, true));
   return getViewInAppUrl(basePath, relativeViewInAppUrl);
+};
+
+export const NUMBER_OF_DOCUMENTS = 10;
+export const groupByForContainerContext = 'kubernetes.pod.uid';
+export const termsAggMapping: Record<string, string> =
+  { groupByForContainerContext: 'container.id' };
+
+export const doFieldsExist = async (
+  esClient: ElasticsearchClient,
+  fields: string[],
+  index: string
+): Promise<Record<string, boolean>> => {
+  // Get all supported fields
+  const respMapping = await esClient.fieldCaps({
+    index,
+    fields: '*',
+  });
+
+  const fieldsExisted: Record<string, boolean> = {};
+  const acceptableFields: Set<string> = new Set();
+
+  Object.entries(respMapping.fields).forEach(([key, value]) => {
+    const fieldTypes = Object.keys(value) as ES_FIELD_TYPES[];
+    const isSupportedType = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES.includes(type));
+    
+    // Check if fieldName is something we can aggregate on
+    if (isSupportedType) {
+      acceptableFields.add(key);
+    }
+  });
+
+  fields.forEach((field) => {
+    fieldsExisted[field] = acceptableFields.has(field);
+  });
+
+  return fieldsExisted;
 };

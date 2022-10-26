@@ -14,9 +14,12 @@ import {
   Comparator,
   MetricExpressionParams,
 } from '../../../../../common/alerting/metrics';
-import { UNGROUPED_FACTORY_KEY } from '../../common/utils';
-import { AdditionalContext } from './evaluate_rule';
+import { doFieldsExist, groupByForContainerContext, termsAggMapping, UNGROUPED_FACTORY_KEY } from '../../common/utils';
 import { getElasticsearchMetricQuery } from './metric_query';
+
+export type AdditionalContext = {
+  [x: string]: any;
+};
 
 export type GetDataResponse = Record<
   string,
@@ -43,8 +46,18 @@ interface Aggs {
   missingGroup?: {
     value: number;
   };
+  containers: {
+    buckets: containerBucket[];
+  };
   additionalContext: SearchResponse<EcsFieldsResponse, Record<string, AggregationsAggregate>>;
 }
+
+interface containerBucket {
+  key: BucketKey;
+  doc_count: number;
+  containerContext: SearchResponse<EcsFieldsResponse, Record<string, AggregationsAggregate>>;
+}
+
 interface Bucket extends Aggs {
   key: BucketKey;
   doc_count: number;
@@ -110,9 +123,21 @@ export const getData = async (
           missingGroup,
           currentPeriod: { aggregatedValue, doc_count: docCount },
           aggregatedValue: aggregatedValueForRate,
+          containers,
+          additionalContext
         } = bucket;
 
-        const bucketHits = bucket.additionalContext?.hits?.hits;
+        const containerList = [];
+        for (const containerBucket of containers?.buckets) {
+          const containerContext = containerBucket.containerContext;
+          const containerHits = containerContext.hits?.hits;
+          const containerContextSource =
+          containerHits && containerHits.length > 0 ? containerHits[0]._source : null;
+          if(containerContextSource) {
+            containerList.push(containerContextSource.container);
+          }
+        }
+        const bucketHits = additionalContext.hits?.hits;
         const additionalContextSource =
           bucketHits && bucketHits.length > 0 ? bucketHits[0]._source : null;
 
@@ -121,7 +146,6 @@ export const getData = async (
             trigger: false,
             warn: false,
             value: null,
-            ...additionalContextSource,
           };
         } else {
           const value =
@@ -138,6 +162,7 @@ export const getData = async (
             warn: (shouldWarn && shouldWarn.value > 0) || false,
             value,
             ...additionalContextSource,
+            containers: containerList
           };
         }
       }
@@ -165,12 +190,7 @@ export const getData = async (
         aggregatedValue: aggregatedValueForRate,
         shouldWarn,
         shouldTrigger,
-        additionalContext,
       } = aggs.all.buckets.all;
-
-      const bucketHits = additionalContext.hits?.hits;
-      const additionalContextSource =
-        bucketHits && bucketHits.length > 0 ? bucketHits[0]._source : null;
 
       const value =
         params.aggType === Aggregators.COUNT
@@ -195,7 +215,6 @@ export const getData = async (
             value,
             warn,
             trigger,
-            ...additionalContextSource,
           },
         };
       }
@@ -204,13 +223,21 @@ export const getData = async (
           value,
           warn: (shouldWarn && shouldWarn.value > 0) || false,
           trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
-          ...additionalContextSource,
         },
       };
     } else {
       return NO_DATA_RESPONSE;
     }
   };
+
+  const fieldsExisted =
+    groupBy?.includes(groupByForContainerContext)
+      ? await doFieldsExist(
+        esClient,
+        [termsAggMapping[groupByForContainerContext]],
+        index)
+      : null;
+
   const request = {
     index,
     allow_no_indices: true,
@@ -223,7 +250,8 @@ export const getData = async (
       lastPeriodEnd,
       groupBy,
       filterQuery,
-      afterKey
+      afterKey,
+      fieldsExisted
     ),
   };
   logger.trace(`Request: ${JSON.stringify(request)}`);
