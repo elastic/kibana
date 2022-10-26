@@ -10,10 +10,11 @@ import React, { FC, useContext, useMemo, useCallback } from 'react';
 import type { SearchFilterConfig } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import type { FormattedRelative } from '@kbn/i18n-react';
+import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
+import { InspectorKibanaProvider } from '@kbn/content-management-inspector';
 
-type UnmountCallback = () => void;
-type MountPoint = (element: HTMLElement) => UnmountCallback;
 type NotifyFn = (title: JSX.Element, text?: string) => void;
 
 export interface SavedObjectsReference {
@@ -78,6 +79,9 @@ export interface TableListViewKibanaDependencies {
       toasts: {
         addDanger: (notifyArgs: { title: MountPoint; text?: string }) => void;
       };
+    };
+    overlays: {
+      openFlyout(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
     };
   };
   /**
@@ -183,26 +187,28 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
 
   return (
     <RedirectAppLinksKibanaProvider coreStart={core}>
-      <TableListViewProvider
-        canEditAdvancedSettings={Boolean(core.application.capabilities.advancedSettings?.save)}
-        getListingLimitSettingsUrl={() =>
-          core.application.getUrlForApp('management', {
-            path: `/kibana/settings?query=savedObjects:listingLimit`,
-          })
-        }
-        notifyError={(title, text) => {
-          core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
-        }}
-        getSearchBarFilters={getSearchBarFilters}
-        searchQueryParser={searchQueryParser}
-        DateFormatterComp={(props) => <FormattedRelative {...props} />}
-        currentAppId$={core.application.currentAppId$}
-        navigateToUrl={core.application.navigateToUrl}
-        TagList={TagList}
-        itemHasTags={itemHasTags}
-      >
-        {children}
-      </TableListViewProvider>
+      <InspectorKibanaProvider core={core} toMountPoint={toMountPoint}>
+        <TableListViewProvider
+          canEditAdvancedSettings={Boolean(core.application.capabilities.advancedSettings?.save)}
+          getListingLimitSettingsUrl={() =>
+            core.application.getUrlForApp('management', {
+              path: `/kibana/settings?query=savedObjects:listingLimit`,
+            })
+          }
+          notifyError={(title, text) => {
+            core.notifications.toasts.addDanger({ title: toMountPoint(title), text });
+          }}
+          getSearchBarFilters={getSearchBarFilters}
+          searchQueryParser={searchQueryParser}
+          DateFormatterComp={(props) => <FormattedRelative {...props} />}
+          currentAppId$={core.application.currentAppId$}
+          navigateToUrl={core.application.navigateToUrl}
+          TagList={TagList}
+          itemHasTags={itemHasTags}
+        >
+          {children}
+        </TableListViewProvider>
+      </InspectorKibanaProvider>
     </RedirectAppLinksKibanaProvider>
   );
 };
