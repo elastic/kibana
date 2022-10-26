@@ -20,7 +20,8 @@
     "taskManager",
     "triggersActionsUi",
     "ruleRegistry",
-    "security"
+    "security",
+    "spaces"
   ],
   "server": true,
   "ui": true,

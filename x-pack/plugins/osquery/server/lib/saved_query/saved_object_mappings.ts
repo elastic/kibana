@@ -80,7 +80,7 @@ export const savedQueryType: SavedObjectsType = {
   management: {
     importableAndExportable: true,
     getTitle: (savedObject) => savedObject.attributes.id,
-    getEditUrl: (savedObject) => `/saved_queries/${savedObject.id}/edit`,
+    getEditUrl: (savedObject) => `/osquery/saved_queries/${savedObject.id}/edit`,
     getInAppUrl: (savedObject) => ({
       path: `/app/osquery/saved_queries/${savedObject.id}`,
       uiCapabilitiesPath: 'osquery.read',
@@ -162,7 +162,7 @@ export const packType: SavedObjectsType = {
     defaultSearchField: 'name',
     importableAndExportable: true,
     getTitle: (savedObject) => `Pack: ${savedObject.attributes.name}`,
-    getEditUrl: (savedObject) => `/packs/${savedObject.id}/edit`,
+    getEditUrl: (savedObject) => `/osquery/packs/${savedObject.id}/edit`,
     getInAppUrl: (savedObject) => ({
       path: `/app/osquery/packs/${savedObject.id}`,
       uiCapabilitiesPath: 'osquery.read',

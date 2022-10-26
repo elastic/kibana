@@ -100,6 +100,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     this.osqueryAppContextService.start({
       ...plugins.fleet,
+      spacesService: plugins.spaces?.spacesService,
       ruleRegistryService: plugins.ruleRegistry,
       // @ts-expect-error update types
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

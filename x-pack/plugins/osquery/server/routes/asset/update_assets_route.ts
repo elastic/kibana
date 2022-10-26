@@ -6,12 +6,24 @@
  */
 
 import moment from 'moment-timezone';
-import { filter, omit, some } from 'lodash';
+import {
+  filter,
+  omit,
+  some,
+  every,
+  find,
+  pick,
+  map,
+  mapKeys,
+  uniq,
+  uniqWith,
+  isEqual,
+} from 'lodash';
+import deepmerge from 'deepmerge';
 import { schema } from '@kbn/config-schema';
 import { asyncForEach } from '@kbn/std';
-import deepmerge from 'deepmerge';
-
-import type { IRouter } from '@kbn/core/server';
+import type { IRouter, SavedObject } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import type { KibanaAssetReference } from '@kbn/fleet-plugin/common';
 import { packAssetSavedObjectType, packSavedObjectType } from '../../../common/types';
 import { combineMerge } from './utils';
@@ -19,6 +31,7 @@ import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertSOQueriesToPack, convertPackQueriesToSO } from '../pack/utils';
 import type { PackSavedObjectAttributes } from '../../common/types';
+import { copySavedObjectsToSpacesFactory } from '../../utils/copy_to_spaces';
 
 export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -30,7 +43,12 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
     },
     async (context, request, response) => {
+      const [coreStart] = await osqueryContext.getStartServices();
       const savedObjectsClient = (await context.core).savedObjects.client;
+      const internalSOClient = new SavedObjectsClient(
+        coreStart.savedObjects.createInternalRepository()
+      );
+
       const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
       let installation;
@@ -44,150 +62,275 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
       }
 
       if (installation) {
-        const installationPackAssets = filter(installation.installed_kibana, [
-          'type',
-          packAssetSavedObjectType,
-        ]);
-
         const install: KibanaAssetReference[] = [];
         const update: KibanaAssetReference[] = [];
         const upToDate: KibanaAssetReference[] = [];
 
-        await asyncForEach(installationPackAssets, async (installationPackAsset) => {
-          const isInstalled = await savedObjectsClient.find<{ version: number }>({
-            type: packSavedObjectType,
-            hasReference: {
-              type: installationPackAsset.type,
-              id: installationPackAsset.id,
-            },
-          });
+        await asyncForEach(installation.installed_kibana, async (installationAsset) => {
+          if (installationAsset.type === packAssetSavedObjectType) {
+            const isInstalled = await savedObjectsClient.find<{ version: number }>({
+              type: packSavedObjectType,
+              hasReference: {
+                type: installationAsset.type,
+                id: installationAsset.id,
+              },
+            });
 
-          if (!isInstalled.total) {
-            install.push(installationPackAsset);
-          }
+            if (!isInstalled.total) {
+              install.push(installationAsset);
+            }
 
-          if (isInstalled.total) {
-            const packAssetSavedObject = await savedObjectsClient.get<{ version: number }>(
-              installationPackAsset.type,
-              installationPackAsset.id
-            );
+            if (isInstalled.total) {
+              const assetSavedObject = await savedObjectsClient.get<{ version: number }>(
+                installationAsset.type,
+                installationAsset.id
+              );
 
-            if (packAssetSavedObject) {
-              if (
-                !packAssetSavedObject.attributes.version ||
-                !isInstalled.saved_objects[0].attributes.version
-              ) {
-                install.push(installationPackAsset);
-              } else if (
-                packAssetSavedObject.attributes.version >
-                isInstalled.saved_objects[0].attributes.version
-              ) {
-                update.push(installationPackAsset);
-              } else {
-                upToDate.push(installationPackAsset);
+              if (assetSavedObject) {
+                if (
+                  !assetSavedObject.attributes.version ||
+                  !isInstalled.saved_objects[0].attributes.version
+                ) {
+                  install.push(installationAsset);
+                } else if (
+                  assetSavedObject.attributes.version >
+                    isInstalled.saved_objects[0].attributes.version ||
+                  !every(assetSavedObject.references, (reference) =>
+                    find(isInstalled.saved_objects[0].references, pick(reference, ['type', 'name']))
+                  )
+                ) {
+                  update.push(installationAsset);
+                } else {
+                  upToDate.push(installationAsset);
+                }
               }
+            }
+          } else {
+            let isInstalled: SavedObject<{ updated_at?: string; version?: number }> | undefined;
+
+            try {
+              const spaceId = osqueryContext.service.getSpacesService()?.getSpaceId(request);
+
+              if (spaceId !== 'default') {
+                const results = await savedObjectsClient.find<{
+                  updated_at?: string;
+                  version?: number;
+                }>({
+                  type: installationAsset.type,
+                  search: installationAsset.id,
+                  rootSearchFields: ['originId'],
+                });
+                if (results.total) {
+                  isInstalled = results.saved_objects[0];
+                }
+              } else {
+                isInstalled = await savedObjectsClient.get(
+                  installationAsset.type,
+                  installationAsset.id
+                );
+              }
+
+              if (isInstalled) {
+                const originalAsset = await internalSOClient.get<{
+                  updated_at?: string;
+                  version?: number;
+                }>(installationAsset.type, installationAsset.id);
+
+                if (
+                  (isInstalled.attributes?.updated_at &&
+                    isInstalled.attributes?.updated_at !== originalAsset.attributes?.updated_at) ||
+                  (isInstalled.attributes?.version &&
+                    isInstalled.attributes?.version !== originalAsset.attributes?.version)
+                ) {
+                  update.push(installationAsset);
+                } else {
+                  upToDate.push(installationAsset);
+                }
+              } else {
+                install.push(installationAsset);
+              }
+            } catch (e) {
+              install.push(installationAsset);
             }
           }
         });
 
+        const spaceId = osqueryContext.service.getSpacesService()?.getSpaceId(request);
+
+        if (spaceId && spaceId !== 'default') {
+          const copySavedObjectsToSpaces = copySavedObjectsToSpacesFactory(
+            coreStart.savedObjects,
+            request
+          );
+
+          await copySavedObjectsToSpaces('default', [spaceId], {
+            objects: [...install, ...update],
+            overwrite: true,
+            includeReferences: true,
+            createNewCopies: false,
+          });
+        }
+
         await Promise.all([
-          ...install.map(async (installationPackAsset) => {
-            const packAssetSavedObject = await savedObjectsClient.get<PackSavedObjectAttributes>(
-              installationPackAsset.type,
-              installationPackAsset.id
-            );
+          ...filter(install, (asset) => asset.type === packAssetSavedObjectType).map(
+            async (installationAsset) => {
+              const assetSavedObject = await savedObjectsClient.get<PackSavedObjectAttributes>(
+                installationAsset.type,
+                installationAsset.id
+              );
 
-            const conflictingEntries = await savedObjectsClient.find({
-              type: packSavedObjectType,
-              filter: `${packSavedObjectType}.attributes.name: "${packAssetSavedObject.attributes.name}"`,
-            });
-
-            const name =
-              conflictingEntries.saved_objects.length &&
-              some(conflictingEntries.saved_objects, [
-                'attributes.name',
-                packAssetSavedObject.attributes.name,
-              ])
-                ? `${packAssetSavedObject.attributes.name}-elastic`
-                : packAssetSavedObject.attributes.name;
-
-            await savedObjectsClient.create(
-              packSavedObjectType,
-              {
-                name,
-                description: packAssetSavedObject.attributes.description,
-                queries: packAssetSavedObject.attributes.queries,
-                enabled: false,
-                created_at: moment().toISOString(),
-                created_by: currentUser,
-                updated_at: moment().toISOString(),
-                updated_by: currentUser,
-                version: packAssetSavedObject.attributes.version ?? 1,
-              },
-              {
-                references: [
-                  ...packAssetSavedObject.references,
-                  {
-                    type: packAssetSavedObject.type,
-                    id: packAssetSavedObject.id,
-                    name: packAssetSavedObject.attributes.name,
-                  },
-                ],
-                refresh: 'wait_for',
-              }
-            );
-          }),
-          ...update.map(async (updatePackAsset) => {
-            const packAssetSavedObject = await savedObjectsClient.get<PackSavedObjectAttributes>(
-              updatePackAsset.type,
-              updatePackAsset.id
-            );
-
-            const packSavedObjectsResponse =
-              await savedObjectsClient.find<PackSavedObjectAttributes>({
-                type: 'osquery-pack',
-                hasReference: {
-                  type: updatePackAsset.type,
-                  id: updatePackAsset.id,
-                },
+              const conflictingEntries = await savedObjectsClient.find({
+                type: packSavedObjectType,
+                filter: `${packSavedObjectType}.attributes.name: "${assetSavedObject.attributes.name}"`,
               });
 
-            if (packSavedObjectsResponse.total) {
-              await savedObjectsClient.update(
-                packSavedObjectsResponse.saved_objects[0].type,
-                packSavedObjectsResponse.saved_objects[0].id,
-                deepmerge.all([
-                  omit(packSavedObjectsResponse.saved_objects[0].attributes, 'queries'),
-                  omit(packAssetSavedObject.attributes, 'queries'),
-                  {
-                    updated_at: moment().toISOString(),
-                    updated_by: currentUser,
-                    queries: convertPackQueriesToSO(
-                      deepmerge(
-                        convertSOQueriesToPack(
-                          packSavedObjectsResponse.saved_objects[0].attributes.queries
-                        ),
-                        convertSOQueriesToPack(packAssetSavedObject.attributes.queries),
-                        {
-                          arrayMerge: combineMerge,
-                        }
-                      )
-                    ),
-                  },
-                  {
-                    arrayMerge: combineMerge,
-                  },
-                ]),
-                { refresh: 'wait_for' }
+              const name =
+                conflictingEntries.saved_objects.length &&
+                some(conflictingEntries.saved_objects, [
+                  'attributes.name',
+                  assetSavedObject.attributes.name,
+                ])
+                  ? `${assetSavedObject.attributes.name}-elastic`
+                  : assetSavedObject.attributes.name;
+
+              let assetSavedObjectReferences;
+
+              if (spaceId === 'default') {
+                assetSavedObjectReferences = await savedObjectsClient.bulkGet(
+                  assetSavedObject.references
+                );
+              } else {
+                assetSavedObjectReferences = await savedObjectsClient.find({
+                  type: uniq(map(assetSavedObject.references, 'type')),
+                  search: map(assetSavedObject.references, 'id').join(' '),
+                  rootSearchFields: ['originId'],
+                });
+              }
+
+              const assetSavedObjectReferencesMap = mapKeys(
+                assetSavedObjectReferences.saved_objects,
+                spaceId === 'default' ? 'id' : 'originId'
+              );
+
+              await savedObjectsClient.create(
+                packSavedObjectType,
+                {
+                  name,
+                  description: assetSavedObject.attributes.description,
+                  queries: assetSavedObject.attributes.queries,
+                  enabled: false,
+                  created_at: moment().toISOString(),
+                  created_by: currentUser,
+                  updated_at: moment().toISOString(),
+                  updated_by: currentUser,
+                  version: assetSavedObject.attributes.version ?? 1,
+                },
+                {
+                  references: uniqWith(
+                    [
+                      {
+                        type: assetSavedObject.type,
+                        id: assetSavedObject.id,
+                        name: assetSavedObject.attributes.name,
+                      },
+                      ...map(assetSavedObject.references, (reference) => ({
+                        type: reference.type,
+                        id: assetSavedObjectReferencesMap[reference.id].id,
+                        name: reference.name,
+                      })),
+                    ],
+                    isEqual
+                  ),
+                  refresh: 'wait_for',
+                }
               );
             }
-          }),
+          ),
+          ...filter(update, (asset) => asset.type === packAssetSavedObjectType).map(
+            async (updatePackAsset) => {
+              const assetSavedObject = await savedObjectsClient.get<PackSavedObjectAttributes>(
+                updatePackAsset.type,
+                updatePackAsset.id
+              );
+
+              const packSavedObjectsResponse =
+                await savedObjectsClient.find<PackSavedObjectAttributes>({
+                  type: 'osquery-pack',
+                  hasReference: {
+                    type: updatePackAsset.type,
+                    id: updatePackAsset.id,
+                  },
+                });
+
+              if (packSavedObjectsResponse.total) {
+                let assetSavedObjectReferences;
+
+                if (spaceId === 'default') {
+                  assetSavedObjectReferences = await savedObjectsClient.bulkGet(
+                    assetSavedObject.references
+                  );
+                } else {
+                  assetSavedObjectReferences = await savedObjectsClient.find({
+                    type: uniq(map(assetSavedObject.references, 'type')),
+                    search: map(assetSavedObject.references, 'id').join(' '),
+                    rootSearchFields: ['originId'],
+                  });
+                }
+
+                const assetSavedObjectReferencesMap = mapKeys(
+                  assetSavedObjectReferences.saved_objects,
+                  spaceId === 'default' ? 'id' : 'originId'
+                );
+
+                await savedObjectsClient.update(
+                  packSavedObjectsResponse.saved_objects[0].type,
+                  packSavedObjectsResponse.saved_objects[0].id,
+                  deepmerge.all([
+                    omit(packSavedObjectsResponse.saved_objects[0].attributes, 'queries'),
+                    omit(assetSavedObject.attributes, 'queries'),
+                    {
+                      updated_at: moment().toISOString(),
+                      updated_by: currentUser,
+                      queries: convertPackQueriesToSO(
+                        deepmerge(
+                          convertSOQueriesToPack(
+                            packSavedObjectsResponse.saved_objects[0].attributes.queries
+                          ),
+                          convertSOQueriesToPack(assetSavedObject.attributes.queries),
+                          {
+                            arrayMerge: combineMerge,
+                          }
+                        )
+                      ),
+                    },
+                    {
+                      arrayMerge: combineMerge,
+                    },
+                  ]),
+                  {
+                    references: uniqWith(
+                      [
+                        ...packSavedObjectsResponse.saved_objects[0].references,
+                        ...map(assetSavedObject.references, (reference) => ({
+                          type: reference.type,
+                          id: assetSavedObjectReferencesMap[reference.id].id,
+                          name: reference.name,
+                        })),
+                      ],
+                      isEqual
+                    ),
+                    refresh: 'wait_for',
+                  }
+                );
+              }
+            }
+          ),
         ]);
 
         return response.ok({
           body: {
-            install,
-            update,
+            installed: install,
+            updated: update,
             upToDate,
           },
         });
@@ -195,8 +338,8 @@ export const updateAssetsRoute = (router: IRouter, osqueryContext: OsqueryAppCon
 
       return response.ok({
         body: {
-          install: 0,
-          update: 0,
+          installed: 0,
+          updated: 0,
           upToDate: 0,
         },
       });
