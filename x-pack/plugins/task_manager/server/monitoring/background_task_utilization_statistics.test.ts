@@ -62,7 +62,7 @@ describe('Task Run Statistics', () => {
       const events = [];
       const now = Date.now();
       for (const time of serviceTimes) {
-        events.push({ start: runAtMillisecondsAgo(time).getTime(), stop: now });
+        events.push({ start: runAtMillisecondsAgo(now, time).getTime(), stop: now });
       }
       BackgroundTaskUtilizationAggregator.pipe(
         // skip initial stat which is just initialized data which
@@ -125,7 +125,7 @@ describe('Task Run Statistics', () => {
       const events = [];
       const now = Date.now();
       for (const time of serviceTimes) {
-        events.push({ start: runAtMillisecondsAgo(time).getTime(), stop: now });
+        events.push({ start: runAtMillisecondsAgo(now, time).getTime(), stop: now });
       }
       BackgroundTaskUtilizationAggregator.pipe(
         // skip initial stat which is just initialized data which
@@ -295,7 +295,7 @@ describe('Task Run Statistics', () => {
       const events = [];
       const now = Date.now();
       for (const time of serviceTimes) {
-        events.push({ start: runAtMillisecondsAgo(time).getTime(), stop: now });
+        events.push({ start: runAtMillisecondsAgo(now, time).getTime(), stop: now });
       }
       BackgroundTaskUtilizationAggregator.pipe(
         // skip initial stat which is just initialized data which
@@ -358,7 +358,7 @@ describe('Task Run Statistics', () => {
       const events = [];
       const now = Date.now();
       for (const time of serviceTimes) {
-        events.push({ start: runAtMillisecondsAgo(time).getTime(), stop: now });
+        events.push({ start: runAtMillisecondsAgo(now, time).getTime(), stop: now });
       }
       BackgroundTaskUtilizationAggregator.pipe(
         // skip initial stat which is just initialized data which
@@ -504,8 +504,8 @@ describe('Task Run Statistics', () => {
   });
 });
 
-function runAtMillisecondsAgo(ms: number): Date {
-  return new Date(Date.now() - ms);
+function runAtMillisecondsAgo(now: number, ms: number): Date {
+  return new Date(now - ms);
 }
 
 function roundUpToNearestSec(duration: number[], s: number): number[] {
