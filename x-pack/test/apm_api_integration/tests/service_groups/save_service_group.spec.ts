@@ -34,8 +34,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           serviceGroupId,
         },
         body: {
-          groupName: groupName,
-          kuery: kuery,
+          groupName,
+          kuery,
           description,
           color,
         },
