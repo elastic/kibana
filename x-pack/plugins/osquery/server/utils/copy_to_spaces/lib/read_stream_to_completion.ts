@@ -8,8 +8,8 @@
 import type { Readable } from 'stream';
 import { pipeline, Writable } from 'stream';
 
-export const readStreamToCompletion = <T = any>(stream: Readable) => {
-  return new Promise<T[]>((resolve, reject) => {
+export const readStreamToCompletion = <T = any>(stream: Readable) =>
+  new Promise<T[]>((resolve, reject) => {
     const chunks: T[] = [];
     pipeline(
       stream,
@@ -29,4 +29,3 @@ export const readStreamToCompletion = <T = any>(stream: Readable) => {
       }
     );
   });
-};

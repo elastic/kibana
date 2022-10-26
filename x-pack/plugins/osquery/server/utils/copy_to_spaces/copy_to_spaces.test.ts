@@ -94,8 +94,8 @@ describe('copySavedObjectsToSpaces', () => {
         .some((t) => t.name === type && t.namespaceType === 'agnostic')
     );
 
-    savedObjectsExporter.exportByObjects.mockImplementation(async (opts) => {
-      return (
+    savedObjectsExporter.exportByObjects.mockImplementation(
+      async (opts) =>
         setupOpts.exportByObjectsImpl?.(opts) ??
         new Readable({
           objectMode: true,
@@ -105,8 +105,7 @@ describe('copySavedObjectsToSpaces', () => {
             this.push(null);
           },
         })
-      );
-    });
+    );
 
     savedObjectsImporter.import.mockImplementation(async (opts) => {
       if (opts.namespace === FAILURE_SPACE) {
@@ -340,16 +339,15 @@ describe('copySavedObjectsToSpaces', () => {
   it(`handles stream read errors`, async () => {
     const { savedObjects } = setup({
       objects: mockExportResults,
-      exportByObjectsImpl: (_opts) => {
-        return Promise.resolve(
+      exportByObjectsImpl: (_opts) =>
+        Promise.resolve(
           new Readable({
             objectMode: true,
             read() {
               this.destroy(new Error('Something went wrong while reading this stream'));
             },
           })
-        );
-      },
+        ),
     });
 
     const request = httpServerMock.createKibanaRequest();

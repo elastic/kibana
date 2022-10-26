@@ -8,12 +8,11 @@
 import { Readable } from 'stream';
 
 // TODO: Remove in favor of Readable.from once we upgrade to Node 12.x
-export const createReadableStreamFromArray = (array: unknown[]) => {
-  return new Readable({
+export const createReadableStreamFromArray = (array: unknown[]) =>
+  new Readable({
     objectMode: true,
     read() {
       array.forEach((entry) => this.push(entry));
       this.push(null);
     },
   });
-};

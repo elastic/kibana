@@ -15,8 +15,10 @@ export const createEmptyFailureResponse = (errors?: Array<SavedObjectsImportErro
     if (Boom.isBoom(error as any)) {
       return (error as Boom.Boom).output.payload as Payload;
     }
+
     return error as SavedObjectsImportError;
   });
+
   return {
     success: false,
     successCount: 0,
