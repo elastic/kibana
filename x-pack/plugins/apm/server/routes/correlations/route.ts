@@ -30,6 +30,7 @@ import { fetchFieldValuePairs } from './queries/fetch_field_value_pairs';
 import { fetchSignificantCorrelations } from './queries/fetch_significant_correlations';
 import { fetchFieldsStats } from './queries/field_stats/fetch_fields_stats';
 import { fetchPValues } from './queries/fetch_p_values';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
   defaultMessage:
@@ -58,7 +59,7 @@ const fieldCandidatesTransactionsRoute = createApmServerRoute({
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       query: {
@@ -87,7 +88,7 @@ const fieldCandidatesTransactionsRoute = createApmServerRoute({
           ],
         },
       },
-      setup,
+      apmEventClient,
     });
   },
 });
@@ -124,7 +125,7 @@ const fieldStatsTransactionsRoute = createApmServerRoute({
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       body: {
@@ -140,7 +141,7 @@ const fieldStatsTransactionsRoute = createApmServerRoute({
     } = resources.params;
 
     return fetchFieldsStats({
-      setup,
+      apmEventClient,
       eventType: ProcessorEvent.transaction,
       start,
       end,
@@ -190,7 +191,7 @@ const fieldValueStatsTransactionsRoute = createApmServerRoute({
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       query: {
@@ -207,7 +208,7 @@ const fieldValueStatsTransactionsRoute = createApmServerRoute({
     } = resources.params;
 
     return fetchFieldValueFieldStats({
-      setup,
+      apmEventClient,
       eventType: ProcessorEvent.transaction,
       start,
       end,
@@ -262,7 +263,7 @@ const fieldValuePairsTransactionsRoute = createApmServerRoute({
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
-    const setup = await setupRequest(resources);
+    const apmEventClient = await getApmEventClient(resources);
 
     const {
       body: {
@@ -278,7 +279,7 @@ const fieldValuePairsTransactionsRoute = createApmServerRoute({
     } = resources.params;
 
     return fetchFieldValuePairs({
-      setup,
+      apmEventClient,
       eventType: ProcessorEvent.transaction,
       start,
       end,
@@ -334,8 +335,10 @@ const significantCorrelationsTransactionsRoute = createApmServerRoute({
     totalDocCount: number;
     fallbackResult?: import('./../../../common/correlations/latency_correlations/types').LatencyCorrelation;
   }> => {
-    const setup = await setupRequest(resources);
-
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
     const {
       body: {
         serviceName,
@@ -353,6 +356,7 @@ const significantCorrelationsTransactionsRoute = createApmServerRoute({
 
     return fetchSignificantCorrelations({
       setup,
+      apmEventClient,
       start,
       end,
       environment,
@@ -402,7 +406,10 @@ const pValuesTransactionsRoute = createApmServerRoute({
     ccsWarning: boolean;
     fallbackResult?: import('./../../../common/correlations/failed_transactions_correlations/types').FailedTransactionsCorrelation;
   }> => {
-    const setup = await setupRequest(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
 
     const {
       body: {
@@ -421,6 +428,7 @@ const pValuesTransactionsRoute = createApmServerRoute({
 
     return fetchPValues({
       setup,
+      apmEventClient,
       start,
       end,
       environment,
