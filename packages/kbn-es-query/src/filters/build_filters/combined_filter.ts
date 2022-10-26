@@ -50,7 +50,8 @@ export function isCombinedFilter(filter: Filter): filter is CombinedFilter {
 export function buildCombinedFilter(
   relation: BooleanRelation,
   filters: Filter[],
-  alias?: string | null
+  alias?: string | null,
+  dataViewId?: string
 ): CombinedFilter {
   const filter = buildEmptyFilter(false);
   return {
@@ -60,6 +61,7 @@ export function buildCombinedFilter(
       type: FILTERS.COMBINED,
       relation,
       alias,
+      index: dataViewId,
       params: filters,
     },
   };

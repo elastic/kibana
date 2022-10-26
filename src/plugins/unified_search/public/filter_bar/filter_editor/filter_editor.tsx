@@ -322,6 +322,10 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       }
     }
 
+    if (!indexPattern) {
+      return false;
+    }
+
     const mappedFilter = (filter: Filter) => {
       return filter.meta.params.map((item: Filter) => validationCheck(item));
     };
@@ -409,7 +413,8 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       const builedFilter =
         filters.length === 1
           ? filters[0]
-          : buildCombinedFilter(BooleanRelation.AND, filters, alias);
+          : buildCombinedFilter(BooleanRelation.AND, filters, alias, indexPattern.id);
+
       this.props.onSubmit(builedFilter);
     }
   };
