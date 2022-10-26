@@ -185,6 +185,13 @@ export const getKibanaPrivilegesFeaturePrivileges = (
   subFeatures: experimentalFeatures.endpointRbacEnabled
     ? [
         {
+          requireAllSpaces: true,
+          privilegesTooltip: i18n.translate(
+            'xpack.securitySolution.featureRegistry.subFeatures.endpointList.privilegesTooltip',
+            {
+              defaultMessage: 'All Spaces is required for Endpoint List access.',
+            }
+          ),
           name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.endpointList', {
             defaultMessage: 'Endpoint List',
           }),
@@ -195,7 +202,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
                 {
                   api: [`${APP_ID}-writeEndpointList`, `${APP_ID}-readEndpointList`],
                   id: 'endpoint_list_all',
-                  includeIn: 'all',
+                  includeIn: 'none',
                   name: 'All',
                   savedObject: {
                     all: [],
@@ -206,7 +213,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
                 {
                   api: [`${APP_ID}-readEndpointList`],
                   id: 'endpoint_list_read',
-                  includeIn: 'read',
+                  includeIn: 'none',
                   name: 'Read',
                   savedObject: {
                     all: [],
@@ -219,6 +226,13 @@ export const getKibanaPrivilegesFeaturePrivileges = (
           ],
         },
         {
+          requireAllSpaces: true,
+          privilegesTooltip: i18n.translate(
+            'xpack.securitySolution.featureRegistry.subFeatures.trustedApplications.privilegesTooltip',
+            {
+              defaultMessage: 'All Spaces is required for Trusted Applications access.',
+            }
+          ),
           name: i18n.translate(
             'xpack.securitySolution.featureRegistry.subFeatures.trustedApplications',
             {
@@ -232,7 +246,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
                 {
                   api: [`${APP_ID}-writeTrustedApplications`, `${APP_ID}-readTrustedApplications`],
                   id: 'trusted_applications_all',
-                  includeIn: 'all',
+                  includeIn: 'none',
                   name: 'All',
                   savedObject: {
                     all: [],
@@ -243,7 +257,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
                 {
                   api: [`${APP_ID}-readTrustedApplications`],
                   id: 'trusted_applications_read',
-                  includeIn: 'read',
+                  includeIn: 'none',
                   name: 'Read',
                   savedObject: {
                     all: [],
@@ -256,6 +270,13 @@ export const getKibanaPrivilegesFeaturePrivileges = (
           ],
         },
         {
+          requireAllSpaces: true,
+          privilegesTooltip: i18n.translate(
+            'xpack.securitySolution.featureRegistry.subFeatures.hostIsolationExceptions.privilegesTooltip',
+            {
+              defaultMessage: 'All Spaces is required for Host Isolation Exceptions access.',
+            }
+          ),
           name: i18n.translate(
             'xpack.securitySolution.featureRegistry.subFeatures.hostIsolationExceptions',
             {
@@ -272,7 +293,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
                     `${APP_ID}-readHostIsolationExceptions`,
                   ],
                   id: 'host_isolation_exceptions_all',
-                  includeIn: 'all',
+                  includeIn: 'none',
                   name: 'All',
                   savedObject: {
                     all: [],
@@ -283,7 +304,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
                 {
                   api: [`${APP_ID}-readHostIsolationExceptions`],
                   id: 'host_isolation_exceptions_read',
-                  includeIn: 'read',
+                  includeIn: 'none',
                   name: 'Read',
                   savedObject: {
                     all: [],
@@ -296,6 +317,13 @@ export const getKibanaPrivilegesFeaturePrivileges = (
           ],
         },
         {
+          requireAllSpaces: true,
+          privilegesTooltip: i18n.translate(
+            'xpack.securitySolution.featureRegistry.subFeatures.blockList.privilegesTooltip',
+            {
+              defaultMessage: 'All Spaces is required for Blocklist access.',
+            }
+          ),
           name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.blockList', {
             defaultMessage: 'Blocklist',
           }),
@@ -306,7 +334,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
                 {
                   api: [`${APP_ID}-writeBlocklist`, `${APP_ID}-readBlocklist`],
                   id: 'blocklist_all',
-                  includeIn: 'all',
+                  includeIn: 'none',
                   name: 'All',
                   savedObject: {
                     all: [],
@@ -317,7 +345,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
                 {
                   api: [`${APP_ID}-readBlocklist`],
                   id: 'blocklist_read',
-                  includeIn: 'read',
+                  includeIn: 'none',
                   name: 'Read',
                   savedObject: {
                     all: [],
@@ -330,6 +358,13 @@ export const getKibanaPrivilegesFeaturePrivileges = (
           ],
         },
         {
+          requireAllSpaces: true,
+          privilegesTooltip: i18n.translate(
+            'xpack.securitySolution.featureRegistry.subFeatures.eventFilters.privilegesTooltip',
+            {
+              defaultMessage: 'All Spaces is required for Event Filters access.',
+            }
+          ),
           name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.eventFilters', {
             defaultMessage: 'Event Filters',
           }),
@@ -340,7 +375,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
                 {
                   api: [`${APP_ID}-writeEventFilters`, `${APP_ID}-readEventFilters`],
                   id: 'event_filters_all',
-                  includeIn: 'all',
+                  includeIn: 'none',
                   name: 'All',
                   savedObject: {
                     all: [],
@@ -351,7 +386,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
                 {
                   api: [`${APP_ID}-readEventFilters`],
                   id: 'event_filters_read',
-                  includeIn: 'read',
+                  includeIn: 'none',
                   name: 'Read',
                   savedObject: {
                     all: [],
@@ -364,6 +399,13 @@ export const getKibanaPrivilegesFeaturePrivileges = (
           ],
         },
         {
+          requireAllSpaces: true,
+          privilegesTooltip: i18n.translate(
+            'xpack.securitySolution.featureRegistry.subFeatures.policyManagement.privilegesTooltip',
+            {
+              defaultMessage: 'All Spaces is required for Policy Management access.',
+            }
+          ),
           name: i18n.translate(
             'xpack.securitySolution.featureRegistry.subFeatures.policyManagement',
             {
@@ -377,7 +419,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
                 {
                   api: [`${APP_ID}-writePolicyManagement`, `${APP_ID}-readPolicyManagement`],
                   id: 'policy_management_all',
-                  includeIn: 'all',
+                  includeIn: 'none',
                   name: 'All',
                   savedObject: {
                     all: [],
@@ -388,7 +430,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
                 {
                   api: [`${APP_ID}-readPolicyManagement`],
                   id: 'policy_management_read',
-                  includeIn: 'read',
+                  includeIn: 'none',
                   name: 'Read',
                   savedObject: {
                     all: [],
@@ -401,6 +443,13 @@ export const getKibanaPrivilegesFeaturePrivileges = (
           ],
         },
         {
+          requireAllSpaces: true,
+          privilegesTooltip: i18n.translate(
+            'xpack.securitySolution.featureRegistry.subFeatures.actionsLogManagement.privilegesTooltip',
+            {
+              defaultMessage: 'All Spaces is required for Actions Log Management access.',
+            }
+          ),
           name: i18n.translate(
             'xpack.securitySolution.featureRegistry.subFeatures.actionsLogManagement',
             {
@@ -417,7 +466,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
                     `${APP_ID}-readActionsLogManagement`,
                   ],
                   id: 'actions_log_management_all',
-                  includeIn: 'all',
+                  includeIn: 'none',
                   name: 'All',
                   savedObject: {
                     all: [],
@@ -428,7 +477,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
                 {
                   api: [`${APP_ID}-readActionsLogManagement`],
                   id: 'actions_log_management_read',
-                  includeIn: 'read',
+                  includeIn: 'none',
                   name: 'Read',
                   savedObject: {
                     all: [],
@@ -441,6 +490,13 @@ export const getKibanaPrivilegesFeaturePrivileges = (
           ],
         },
         {
+          requireAllSpaces: true,
+          privilegesTooltip: i18n.translate(
+            'xpack.securitySolution.featureRegistry.subFeatures.hostIsolation.privilegesTooltip',
+            {
+              defaultMessage: 'All Spaces is required for Host Isolation access.',
+            }
+          ),
           name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.hostIsolation', {
             defaultMessage: 'Host Isolation',
           }),
@@ -451,7 +507,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
                 {
                   api: [`${APP_ID}-writeHostIsolation`],
                   id: 'host_isolation_all',
-                  includeIn: 'all',
+                  includeIn: 'none',
                   name: 'All',
                   savedObject: {
                     all: [],
@@ -464,6 +520,13 @@ export const getKibanaPrivilegesFeaturePrivileges = (
           ],
         },
         {
+          requireAllSpaces: true,
+          privilegesTooltip: i18n.translate(
+            'xpack.securitySolution.featureRegistry.subFeatures.processOperations.privilegesTooltip',
+            {
+              defaultMessage: 'All Spaces is required for Process Operations access.',
+            }
+          ),
           name: i18n.translate(
             'xpack.securitySolution.featureRegistry.subFeatures.processOperations',
             {
@@ -477,7 +540,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
                 {
                   api: [`${APP_ID}-writeProcessOperations`],
                   id: 'process_operations_all',
-                  includeIn: 'all',
+                  includeIn: 'none',
                   name: 'All',
                   savedObject: {
                     all: [],
@@ -490,6 +553,13 @@ export const getKibanaPrivilegesFeaturePrivileges = (
           ],
         },
         {
+          requireAllSpaces: true,
+          privilegesTooltip: i18n.translate(
+            'xpack.securitySolution.featureRegistry.subFeatures.fileOperations.privilegesTooltip',
+            {
+              defaultMessage: 'All Spaces is required for File Operations access.',
+            }
+          ),
           name: i18n.translate('xpack.securitySolution.featureRegistr.subFeatures.fileOperations', {
             defaultMessage: 'File Operations',
           }),
@@ -500,7 +570,7 @@ export const getKibanaPrivilegesFeaturePrivileges = (
                 {
                   api: [`${APP_ID}-writeFileOperations`],
                   id: 'file_operations_all',
-                  includeIn: 'all',
+                  includeIn: 'none',
                   name: 'All',
                   savedObject: {
                     all: [],

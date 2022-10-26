@@ -250,6 +250,7 @@ export class FeatureTable extends Component<Props, State> {
                   selectedFeaturePrivileges={
                     this.props.role.kibana[this.props.privilegeIndex].feature[feature.id] ?? []
                   }
+                  allSpacesSelected={this.props.allSpacesSelected}
                   disabled={this.props.disabled}
                   licenseAllowsSubFeatPrivCustomization={
                     this.props.canCustomizeSubFeaturePrivileges
