@@ -44,7 +44,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       it('returns empty', () => {
-        expect(serverlessSummary).to.be.empty();
+        expect(serverlessSummary).to.be.eql({
+          estimedCost: 0,
+        });
       });
     }
   );
