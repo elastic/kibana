@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
+import { useHistory } from 'react-router-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -45,9 +46,10 @@ const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.butto
 });
 
 export const GettingStarted = () => {
-  const { application, trackUiMetric, chrome, guidedOnboardingService, http, uiSettings } =
+  const { application, trackUiMetric, chrome, guidedOnboardingService, http, uiSettings, cloud } =
     getServices();
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
+  const history = useHistory();
 
   useEffect(() => {
     chrome.setBreadcrumbs([
@@ -76,6 +78,12 @@ export const GettingStarted = () => {
     fetchGuidesState();
   }, [fetchGuidesState]);
 
+  useEffect(() => {
+    if (cloud?.isCloudEnabled === false) {
+      return history.push('/');
+    }
+  }, [cloud, history]);
+
   const onSkip = () => {
     trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__skipped');
     // disable welcome screen on the home page
@@ -92,6 +100,7 @@ export const GettingStarted = () => {
     await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
     // TODO error handling https://github.com/elastic/kibana/issues/139798
   };
+
   return (
     <KibanaPageTemplate panelled={false} grow>
       <EuiPageTemplate.Section alignment="center">
@@ -109,7 +118,7 @@ export const GettingStarted = () => {
             {['search', 'observability', 'observabilityLink', 'security'].map((useCase) => {
               if (useCase === 'observabilityLink') {
                 return (
-                  <EuiFlexItem>
+                  <EuiFlexItem key={`linkCard-${useCase}`}>
                     <ObservabilityLinkCard
                       navigateToApp={application.navigateToApp}
                       isDarkTheme={isDarkTheme}
@@ -119,7 +128,7 @@ export const GettingStarted = () => {
                 );
               }
               return (
-                <EuiFlexItem>
+                <EuiFlexItem key={`guideCard-${useCase}`}>
                   <GuideCard
                     useCase={useCase as UseCase}
                     guides={guidesState}
