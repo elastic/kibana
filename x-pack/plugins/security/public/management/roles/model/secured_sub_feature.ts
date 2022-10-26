@@ -13,12 +13,15 @@ import { SubFeaturePrivilegeGroup } from './sub_feature_privilege_group';
 
 export class SecuredSubFeature extends SubFeature {
   public readonly privileges: SubFeaturePrivilege[];
+  public readonly privilegesTooltip: string;
 
   constructor(
     config: SubFeatureConfig,
     private readonly actionMapping: { [privilegeId: string]: string[] } = {}
   ) {
     super(config);
+
+    this.privilegesTooltip = config.privilegesTooltip || '';
 
     this.privileges = [];
     for (const privilege of this.privilegeIterator()) {
