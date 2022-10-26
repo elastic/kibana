@@ -58,6 +58,7 @@ import type {
   ValueListIndicatorMatchResponseAggregation,
 } from './types';
 import { telemetryConfiguration } from './configuration';
+import { telemetryTimelineArtifact } from './timeline_artifact'
 
 export interface ITelemetryReceiver {
   start(
@@ -754,8 +755,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
 
     const request: TreeOptions = {
-      ancestors: 200,
-      descendants: 500,
+      ancestors: telemetryTimelineArtifact.ancestors,
+      descendants: telemetryTimelineArtifact.descendants,
       timeRange: {
         from: startOfDay,
         to: endOfDay,
@@ -763,7 +764,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       schema: resolverSchema,
       nodes: [entityId],
       indexPatterns: [`${this.alertsIndex}*`, 'logs-*'],
-      descendantLevels: 20,
+      descendantLevels: telemetryTimelineArtifact.descendant_levels,
     };
 
     return this.processTreeFetcher.tree(request, true);

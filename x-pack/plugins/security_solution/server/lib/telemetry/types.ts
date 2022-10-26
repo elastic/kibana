@@ -429,3 +429,9 @@ export interface TelemetryConfiguration {
   max_detection_rule_telemetry_batch: number;
   max_detection_alerts_batch: number;
 }
+
+export interface TelemetryTimelineArtifact {
+  ancestors: number;
+  descendants: number;
+  descendant_levels: number;
+}

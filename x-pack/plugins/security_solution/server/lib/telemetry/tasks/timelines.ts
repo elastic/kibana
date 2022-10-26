@@ -16,10 +16,14 @@ import type {
   ESLicense,
   TimelineTelemetryTemplate,
   TimelineTelemetryEvent,
+  TelemetryTimelineArtifact
 } from '../types';
 import { TELEMETRY_CHANNEL_TIMELINE, TASK_METRICS_CHANNEL } from '../constants';
 import { resolverEntity } from '../../../endpoint/routes/resolver/entity/utils/build_resolver_entity';
 import { tlog, createTaskMetric } from '../helpers';
+import { artifactService } from '../artifact';
+import { telemetryTimelineArtifact } from '../timeline_artifact'
+
 
 export function createTelemetryTimelineTaskConfig() {
   return {
@@ -35,6 +39,7 @@ export function createTelemetryTimelineTaskConfig() {
       sender: ITelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
+      await updateArtifact(logger);
       const startTime = Date.now();
       const taskName = 'Security Solution Timeline telemetry';
       try {
@@ -190,4 +195,20 @@ export function createTelemetryTimelineTaskConfig() {
       }
     },
   };
+}
+
+const updateArtifact = async (logger: Logger) => {
+  try {
+    const artifact = (await artifactService.getArtifact(
+      'telemetry-timeline-v1'
+    )) as unknown as TelemetryTimelineArtifact;
+    telemetryTimelineArtifact.ancestors = artifact.ancestors;
+    telemetryTimelineArtifact.descendants = artifact.descendants;
+    telemetryTimelineArtifact.descendant_levels = artifact.descendant_levels;
+    return 0;
+  } catch (err) {
+    tlog(logger, `Failed to set telemetry timeline artifact due to ${err.message}`);
+    telemetryTimelineArtifact.resetAllToDefault();
+    return 0;
+  }
 }
