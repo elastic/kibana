@@ -10,4 +10,5 @@ export { getConfiguration } from './src/config_loader';
 export { initApm } from './src/init_apm';
 export { shouldInstrumentClient } from './src/rum_agent_configuration';
 export type { ApmConfiguration } from './src/config';
-export { ElasticApmConfigType, elasticApmConfig as config } from './src/apm_config';
+export { elasticApmConfig as config } from './src/apm_config';
+export type { ElasticApmConfigType } from './src/apm_config';
