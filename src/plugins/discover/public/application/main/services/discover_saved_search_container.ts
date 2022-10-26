@@ -8,12 +8,11 @@
 
 import { getSavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { differenceWith, isEqual, toPairs } from 'lodash';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { loadSavedSearch } from '../utils/load_saved_search';
-import { InternalStateContainer } from './discover_internal_state_container';
 import { updateSavedSearch } from '../utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
@@ -29,39 +28,45 @@ export interface PersistParams {
   saveOptions: SavedObjectSaveOpts;
 }
 
+export type LoadFunction = (
+  id: string,
+  {
+    setError,
+    dataViewSpec,
+    dataViewList,
+  }: {
+    setError: (e: Error) => void;
+    dataViewSpec?: DataViewSpec;
+    dataViewList: DataViewListItem[];
+  }
+) => Promise<SavedSearch | undefined>;
+
+export type UpdateFunction = (
+  nextDataView: DataView | undefined,
+  nextState: AppState,
+  resetSavedSearch?: boolean,
+  filterAndQuery?: boolean
+) => SavedSearch;
+
+export type PersistFunction = (
+  nextSavedSearch: SavedSearch,
+  params: PersistParams,
+  dataView?: DataView
+) => Promise<{ id: string | undefined } | undefined>;
+
 export interface SavedSearchContainer {
   savedSearch$: BehaviorSubject<SavedSearch>;
   savedSearchPersisted$: BehaviorSubject<SavedSearch>;
   hasChanged$: BehaviorSubject<boolean>;
   set: (savedSearch: SavedSearch) => SavedSearch;
-  load: (
-    id: string,
-    {
-      internalStateContainer,
-      setError,
-      dataViewSpec,
-    }: {
-      internalStateContainer: InternalStateContainer;
-      setError: (e: Error) => void;
-      dataViewSpec?: DataViewSpec;
-    }
-  ) => Promise<SavedSearch | undefined>;
+  load: LoadFunction;
   get: () => SavedSearch;
-  update: (
-    nextDataView: DataView | undefined,
-    nextState: AppState,
-    resetSavedSearch?: boolean,
-    filterAndQuery?: boolean
-  ) => SavedSearch;
-  reset: (id: string | undefined) => Promise<SavedSearch>;
-  resetUrl: (id: string | SavedSearch) => Promise<SavedSearch>;
+  update: UpdateFunction;
+  reset: (id: string | undefined) => Promise<SavedSearch | undefined>;
+  resetUrl: (id: SavedSearch) => Promise<SavedSearch | undefined>;
   undo: () => void;
   isPersisted: () => boolean;
-  persist: (
-    nextSavedSearch: SavedSearch,
-    params: PersistParams,
-    dataView?: DataView
-  ) => Promise<{ id: string | undefined } | undefined>;
+  persist: PersistFunction;
   new: () => Promise<SavedSearch>;
 }
 
@@ -112,8 +117,8 @@ export function getSavedSearchContainer({
     return newSavedSearch;
   };
 
-  const resetUrl = async (id: string | SavedSearch) => {
-    const nextSavedSearch = typeof id === 'string' ? await reset(id) : await set(id);
+  const resetUrl = async (nextSavedSearch: SavedSearch) => {
+    await set(nextSavedSearch);
     const newAppState = handleSourceColumnState(
       getStateDefaults({
         savedSearch: nextSavedSearch,
@@ -155,11 +160,7 @@ export function getSavedSearchContainer({
     return nextSavedSearchToSet;
   };
 
-  const persist = async (
-    nextSavedSearch: SavedSearch,
-    params: PersistParams,
-    dataView?: DataView
-  ) => {
+  const persist: PersistFunction = async (nextSavedSearch, params, dataView?) => {
     addLog('🔎 [savedSearch] persists', nextSavedSearch);
     try {
       const id = await persistSavedSearch(nextSavedSearch, {
@@ -179,11 +180,11 @@ export function getSavedSearchContainer({
   };
 
   const isPersisted = () => Boolean(savedSearch$.getValue().id);
-  const update = (
-    nextDataView: DataView | undefined,
-    nextState: AppState,
-    resetPersisted: boolean = false,
-    filterAndQuery: boolean = false
+  const update: UpdateFunction = (
+    nextDataView,
+    nextState,
+    resetPersisted = false,
+    filterAndQuery = false
   ) => {
     addLog('🔎 [savedSearch] update', { nextDataView, nextState, resetPersisted });
 
@@ -224,32 +225,21 @@ export function getSavedSearchContainer({
       }
 
       hasChanged$.next(hasChanged);
-      addLog('🔎 [savedSearch] updated savedSearch', nextSavedSearch);
       savedSearch$.next(nextSavedSearch);
+      addLog('🔎 [savedSearch] updated savedSearch', nextSavedSearch);
     }
     return nextSavedSearch;
   };
   const undo = () => {
-    return resetUrl(get().id || '');
+    return resetUrl(savedSearchPersisted$.getValue());
   };
 
-  const load = (
-    id: string,
-    {
-      internalStateContainer,
-      setError,
-      dataViewSpec,
-    }: {
-      internalStateContainer: InternalStateContainer;
-      setError: (e: Error) => void;
-      dataViewSpec?: DataViewSpec;
-    }
-  ) => {
+  const load: LoadFunction = (id, { setError, dataViewSpec, dataViewList }) => {
     return loadSavedSearch(id, {
       services,
       appStateContainer,
+      dataViewList,
       dataViewSpec,
-      internalStateContainer,
       setError,
     });
   };

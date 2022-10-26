@@ -117,6 +117,7 @@ export interface DiscoverStateContainer {
      */
     fetch: (reset?: boolean) => void;
     changeDataView: (id: string, replace?: boolean) => void;
+    setDataView: (dataView: DataView) => void;
     loadDataViewList: () => Promise<void>;
     loadSavedSearch: (
       id: string,
@@ -217,7 +218,9 @@ export function getDiscoverStateContainer({
         if (currentSavedSearch.id && currentSavedSearch.id === newSavedSearchId) {
           addLog("🧭 [discoverState] onOpenSavedSearch just reset since id didn't change");
           const nextSavedSearch = await savedSearchContainer.reset(currentSavedSearch.id);
-          await appStateContainer.reset(nextSavedSearch);
+          if (nextSavedSearch) {
+            await appStateContainer.reset(nextSavedSearch);
+          }
         } else {
           addLog('🧭 [discoverState] onOpenSavedSearch open view URL');
           history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
@@ -254,6 +257,9 @@ export function getDiscoverStateContainer({
         setAppState({ index: id }, replaceURL);
         return;
       },
+      setDataView: (dataView: DataView) => {
+        internalStateContainer.transitions.setDataView(dataView);
+      },
       loadDataViewList: async () => {
         const dataViewList = await services.dataViews.getIdsWithTitle();
         internalStateContainer.transitions.setDataViews(dataViewList);
@@ -267,9 +273,9 @@ export function getDiscoverStateContainer({
           appStateContainer.set({});
         }
         const currentSavedSearch = await savedSearchContainer.load(id, {
-          internalStateContainer,
           setError: onError,
           dataViewSpec,
+          dataViewList: internalStateContainer.getState().dataViews,
         });
         if (currentSavedSearch) {
           await savedSearchContainer.set(currentSavedSearch);
@@ -292,9 +298,7 @@ export function getDiscoverStateContainer({
       ) => {
         addLog('🧭 [discoverState] loadNewSavedSearch');
         const nextSavedSearch = await savedSearchContainer.new();
-        addLog('🧭 [discoverState] loadNewSavedSearch', nextSavedSearch);
         if (!appStateContainer.isEmptyURL()) {
-          addLog('🧭 [discoverState] update by given state since URL is not empty');
           await savedSearchContainer.update(
             nextSavedSearch.searchSource.getField('index'),
             appStateContainer.getState()
@@ -304,7 +308,7 @@ export function getDiscoverStateContainer({
         const nextDataView = await loadDataViewBySavedSearch(
           nextSavedSearch,
           appStateContainer,
-          internalStateContainer,
+          internalStateContainer.getState().dataViews,
           services,
           onError,
           dataViewSpec
@@ -315,7 +319,6 @@ export function getDiscoverStateContainer({
         }
         appStateContainer.reset(nextSavedSearch);
         await savedSearchContainer.update(nextDataView, appStateContainer.getState(), true);
-        addLog('🧭 [discoverState] loadNewSavedSearch result', nextSavedSearch);
         return nextSavedSearch;
       },
       newSavedSearch: async () => {
