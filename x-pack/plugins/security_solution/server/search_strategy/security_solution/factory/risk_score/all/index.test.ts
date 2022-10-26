@@ -133,4 +133,19 @@ describe('buildRiskScoreQuery search strategy', () => {
 
     expect(get('data[0].alertsCount', result)).toBe(alertsCunt);
   });
+
+  test('should enhance data with alerts oldest timestamp', async () => {
+    const oldestAlertTimestamp = 'oldesTimestamp_test';
+    searchMock.mockReturnValue({
+      aggregations: {
+        oldesAlertTimestamp: {
+          value_as_string: oldestAlertTimestamp,
+        },
+      },
+    });
+
+    const result = await riskScore.parse(mockOptions, mockSearchStrategyResponse, mockDeps);
+
+    expect(get('data[0].oldestAlertTimestamp', result)).toBe(oldestAlertTimestamp);
+  });
 });

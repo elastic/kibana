@@ -77,6 +77,11 @@ async function enhanceData(
 
   const response = await ruleDataReader?.search(query);
   const buckets: BucketItem[] = getOr([], 'aggregations.alertsByEntity.buckets', response);
+  const oldestAlertTimestamp: string | undefined = getOr(
+    undefined,
+    'aggregations.oldesAlertTimestamp.value_as_string',
+    response
+  );
 
   const alertsCountByEntityName: Record<string, number> = buckets.reduce(
     (acc, { key, doc_count: count }) => ({
@@ -89,6 +94,7 @@ async function enhanceData(
   return data.map((risk) => ({
     ...risk,
     alertsCount: alertsCountByEntityName[get(nameField, risk)] ?? 0,
+    oldestAlertTimestamp,
   }));
 }
 
@@ -107,6 +113,9 @@ const getAlertsQueryForEntity = (names: string[], nameField: string): SearchRequ
       terms: {
         field: nameField,
       },
+    },
+    oldesAlertTimestamp: {
+      min: { field: '@timestamp' },
     },
   },
 });

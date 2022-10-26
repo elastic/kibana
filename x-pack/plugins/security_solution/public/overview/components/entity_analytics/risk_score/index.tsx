@@ -41,6 +41,7 @@ import { Panel } from '../../../../common/components/panel';
 import * as commonI18n from '../common/translations';
 import { usersActions } from '../../../../users/store';
 import { useNavigateToTimeline } from '../../detection_response/hooks/use_navigate_to_timeline';
+import type { TimeRange } from '../../../../common/store/inputs/model';
 
 const HOST_RISK_TABLE_QUERY_ID = 'hostRiskDashboardTable';
 const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';
@@ -94,11 +95,27 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
   const { openHostInTimeline, openUserInTimeline } = useNavigateToTimeline();
 
   const openEntityInTimeline = useCallback(
-    (entityName: string) => {
+    (entityName: string, oldestAlertTimestamp?: string) => {
+      const timeRange: TimeRange | undefined = oldestAlertTimestamp
+        ? {
+            kind: 'relative',
+            from: oldestAlertTimestamp ?? '',
+            fromStr: oldestAlertTimestamp ?? '',
+            to: new Date().toISOString(),
+            toStr: 'now',
+          }
+        : undefined;
+
       if (riskEntity === RiskScoreEntity.host) {
-        openHostInTimeline({ hostName: entityName });
+        openHostInTimeline({
+          hostName: entityName,
+          timeRange,
+        });
       } else if (riskEntity === RiskScoreEntity.user) {
-        openUserInTimeline({ userName: entityName });
+        openUserInTimeline({
+          userName: entityName,
+          timeRange,
+        });
       }
     },
     [riskEntity, openHostInTimeline, openUserInTimeline]

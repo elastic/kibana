@@ -17,6 +17,7 @@ import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
 import { updateProviders } from '../../../../timelines/store/timeline/actions';
 import { sourcererSelectors } from '../../../../common/store';
+import type { TimeRange } from '../../../../common/store/inputs/model';
 
 export interface Filter {
   field: string;
@@ -39,9 +40,9 @@ export const useNavigateToTimeline = () => {
     timelineType: TimelineType.default,
   });
 
-  const navigateToTimeline = (dataProviders: DataProvider[]) => {
+  const navigateToTimeline = (dataProviders: DataProvider[], timeRange?: TimeRange) => {
     // Reset the current timeline
-    clearTimeline();
+    clearTimeline({ timeRange });
     // Update the timeline's providers to match the current prevalence field query
     dispatch(
       updateProviders({
@@ -86,23 +87,39 @@ export const useNavigateToTimeline = () => {
 
   // TODO: Replace the usage of functions with openTimelineWithFilters
 
-  const openHostInTimeline = ({ hostName, severity }: { hostName: string; severity?: string }) => {
+  const openHostInTimeline = ({
+    hostName,
+    severity,
+    timeRange,
+  }: {
+    hostName: string;
+    severity?: string;
+    timeRange?: TimeRange;
+  }) => {
     const dataProvider = getDataProvider('host.name', '', hostName);
 
     if (severity) {
       dataProvider.and.push(getDataProvider('kibana.alert.severity', '', severity));
     }
 
-    navigateToTimeline([dataProvider]);
+    navigateToTimeline([dataProvider], timeRange);
   };
 
-  const openUserInTimeline = ({ userName, severity }: { userName: string; severity?: string }) => {
+  const openUserInTimeline = ({
+    userName,
+    severity,
+    timeRange,
+  }: {
+    userName: string;
+    severity?: string;
+    timeRange?: TimeRange;
+  }) => {
     const dataProvider = getDataProvider('user.name', '', userName);
 
     if (severity) {
       dataProvider.and.push(getDataProvider('kibana.alert.severity', '', severity));
     }
-    navigateToTimeline([dataProvider]);
+    navigateToTimeline([dataProvider], timeRange);
   };
 
   const openRuleInTimeline = (ruleName: string) => {
