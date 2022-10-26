@@ -10,6 +10,7 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { LicenseService } from '../../../common/license';
 import { createDefaultPolicy } from './create_default_policy';
 import type { PolicyConfig } from '../../../common/endpoint/types';
+import { ProtectionModes } from '../../../common/endpoint/types';
 import {
   policyFactory as policyConfigFactory,
   policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
@@ -37,16 +38,18 @@ describe('Create Default Policy tests ', () => {
     licenseEmitter.next(Platinum); // set license level to platinum
   });
   describe('When no config is set', () => {
-    it('Should return the Default Policy Config when license is at least platinum', () => {
+    it('Should return PolicyConfig for events only when license is at least platinum', () => {
       const policy = createDefaultPolicyCallback(undefined);
-      expect(policy).toEqual(policyConfigFactory());
+      expect(policy).toEqual(eventsOnlyPolicy);
     });
-    it('Should return the Default Policy Config without paid features when license is below platinum', () => {
+
+    it('Should return PolicyConfig for events only without paid features when license is below platinum', () => {
       licenseEmitter.next(Gold);
       const policy = createDefaultPolicyCallback(undefined);
-      expect(policy).toEqual(policyConfigFactoryWithoutPaidFeatures());
+      expect(policy).toEqual(policyConfigFactoryWithoutPaidFeatures(eventsOnlyPolicy));
     });
   });
+
   describe('When endpoint config is set', () => {
     const createEndpointConfig = (
       endpointConfig: PolicyCreateEndpointConfig['endpointConfig']
@@ -139,4 +142,63 @@ describe('Create Default Policy tests ', () => {
       expect(policy.windows.ransomware.mode).toBe('off');
     });
   });
+
+  // This constant makes sure that if the type `PolicyConfig` is ever modified,
+  // the logic for disabling protections is also modified due to type check.
+  const eventsOnlyPolicy: PolicyConfig = {
+    windows: {
+      events: {
+        dll_and_driver_load: true,
+        dns: true,
+        file: true,
+        network: true,
+        process: true,
+        registry: true,
+        security: true,
+      },
+      malware: { mode: ProtectionModes.off, blocklist: false },
+      ransomware: { mode: ProtectionModes.off, supported: true },
+      memory_protection: { mode: ProtectionModes.off, supported: true },
+      behavior_protection: { mode: ProtectionModes.off, supported: true },
+      popup: {
+        malware: { message: '', enabled: false },
+        ransomware: { message: '', enabled: false },
+        memory_protection: { message: '', enabled: false },
+        behavior_protection: { message: '', enabled: false },
+      },
+      logging: { file: 'info' },
+      antivirus_registration: { enabled: false },
+      attack_surface_reduction: { credential_hardening: { enabled: false } },
+    },
+    mac: {
+      events: { process: true, file: true, network: true },
+      malware: { mode: ProtectionModes.off, blocklist: false },
+      behavior_protection: { mode: ProtectionModes.off, supported: true },
+      memory_protection: { mode: ProtectionModes.off, supported: true },
+      popup: {
+        malware: { message: '', enabled: false },
+        behavior_protection: { message: '', enabled: false },
+        memory_protection: { message: '', enabled: false },
+      },
+      logging: { file: 'info' },
+    },
+    linux: {
+      events: {
+        process: true,
+        file: true,
+        network: true,
+        session_data: false,
+        tty_io: false,
+      },
+      malware: { mode: ProtectionModes.off, blocklist: false },
+      behavior_protection: { mode: ProtectionModes.off, supported: true },
+      memory_protection: { mode: ProtectionModes.off, supported: true },
+      popup: {
+        malware: { message: '', enabled: false },
+        behavior_protection: { message: '', enabled: false },
+        memory_protection: { message: '', enabled: false },
+      },
+      logging: { file: 'info' },
+    },
+  };
 });

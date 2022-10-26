@@ -14,7 +14,12 @@ import { isAtLeast } from '../../../common/license/license';
 import { ProtectionModes } from '../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../common/endpoint/types';
 import type { AnyPolicyCreateConfig, PolicyCreateEndpointConfig } from '../types';
-import { ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL, ENDPOINT_CONFIG_PRESET_NGAV } from '../constants';
+import {
+  ENDPOINT_CONFIG_PRESET_EDR_COMPLETE,
+  ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL,
+  ENDPOINT_CONFIG_PRESET_NGAV,
+} from '../constants';
+import { disableProtections } from '../../../common/endpoint/models/policy_config_helpers';
 
 /**
  * Create the default endpoint policy based on the current license and configuration type
@@ -50,9 +55,15 @@ const getEndpointPolicyWithIntegrationConfig = (
   policy: PolicyConfig,
   config: PolicyCreateEndpointConfig | undefined
 ): PolicyConfig => {
+  const isNGAV = config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_NGAV;
   const isEDREssential = config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL;
+  const isEDRComplete = config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_EDR_COMPLETE;
 
-  if (config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_NGAV || isEDREssential) {
+  const isOnlyEvents = !isNGAV && !isEDREssential && !isEDRComplete;
+
+  if (isOnlyEvents) {
+    return disableProtections(policy);
+  } else if (isNGAV || isEDREssential) {
     const events = {
       process: true,
       file: isEDREssential,
@@ -83,9 +94,9 @@ const getEndpointPolicyWithIntegrationConfig = (
         },
       },
     };
+  } else {
+    return policy;
   }
-
-  return policy;
 };
 
 /**
