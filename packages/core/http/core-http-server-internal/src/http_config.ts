@@ -112,6 +112,10 @@ const configSchema = schema.object(
     }),
     compression: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
+      brotli: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+        quality: schema.number({ defaultValue: 3, min: 0, max: 11 }),
+      }),
       referrerWhitelist: schema.maybe(
         schema.arrayOf(
           schema.string({
@@ -209,7 +213,11 @@ export class HttpConfig implements IHttpConfig {
   public publicBaseUrl?: string;
   public rewriteBasePath: boolean;
   public ssl: SslConfig;
-  public compression: { enabled: boolean; referrerWhitelist?: string[] };
+  public compression: {
+    enabled: boolean;
+    referrerWhitelist?: string[];
+    brotli: { enabled: boolean; quality: number };
+  };
   public csp: ICspConfig;
   public externalUrl: IExternalUrlConfig;
   public xsrf: { disableProtection: boolean; allowlist: string[] };
