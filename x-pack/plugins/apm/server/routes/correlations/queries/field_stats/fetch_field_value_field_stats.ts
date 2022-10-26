@@ -19,11 +19,11 @@ import {
   FieldValueFieldStats,
   TopValueBucket,
 } from '../../../../../common/correlations/field_stats_types';
-import { Setup } from '../../../../lib/helpers/setup_request';
 import { getCommonCorrelationsQuery } from '../get_common_correlations_query';
+import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export const fetchFieldValueFieldStats = async ({
-  setup,
+  apmEventClient,
   eventType,
   start,
   end,
@@ -34,11 +34,10 @@ export const fetchFieldValueFieldStats = async ({
   samplerShardSize,
 }: CommonCorrelationsQueryParams & {
   eventType: ProcessorEvent;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   field: FieldValuePair;
   samplerShardSize?: number;
 }): Promise<FieldValueFieldStats> => {
-  const { apmEventClient } = setup;
   const shouldSample = samplerShardSize !== undefined && samplerShardSize > 0;
 
   let aggs: Record<string, AggregationsAggregationContainer> = {

@@ -12,10 +12,12 @@ import {
   indicatorDataSchema,
   indicatorSchema,
   indicatorTypesSchema,
+  kqlCustomIndicatorSchema,
 } from '../schema';
 
 type APMTransactionErrorRateIndicator = t.TypeOf<typeof apmTransactionErrorRateIndicatorSchema>;
 type APMTransactionDurationIndicator = t.TypeOf<typeof apmTransactionDurationIndicatorSchema>;
+type KQLCustomIndicator = t.TypeOf<typeof kqlCustomIndicatorSchema>;
 type Indicator = t.TypeOf<typeof indicatorSchema>;
 type IndicatorTypes = t.TypeOf<typeof indicatorTypesSchema>;
 type IndicatorData = t.TypeOf<typeof indicatorDataSchema>;
@@ -25,5 +27,6 @@ export type {
   IndicatorTypes,
   APMTransactionErrorRateIndicator,
   APMTransactionDurationIndicator,
+  KQLCustomIndicator,
   IndicatorData,
 };

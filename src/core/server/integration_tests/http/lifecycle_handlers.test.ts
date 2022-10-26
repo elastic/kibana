@@ -52,7 +52,7 @@ describe('core lifecycle handlers', () => {
           cors: {
             enabled: false,
           },
-          compression: { enabled: true },
+          compression: { enabled: true, brotli: { enabled: false } },
           name: kibanaName,
           securityResponseHeaders: {
             // reflects default config

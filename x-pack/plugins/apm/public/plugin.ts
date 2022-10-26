@@ -18,8 +18,8 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import type {
-  DataPublicPluginSetup,
   DataPublicPluginStart,
+  DataPublicPluginSetup,
 } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -53,7 +53,7 @@ import { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { registerApmAlerts } from './components/alerting/register_apm_alerts';
+import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
   getApmEnrollmentFlyoutData,
   LazyApmCustomAssetsExtension,
@@ -349,7 +349,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       },
     });
 
-    registerApmAlerts(observabilityRuleTypeRegistry);
+    registerApmRuleTypes(observabilityRuleTypeRegistry);
 
     const locator = plugins.share.url.locators.create(
       new APMServiceDetailLocator(core.uiSettings)
