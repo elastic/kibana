@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { FormProvider, useForm as useHookForm } from 'react-hook-form';
 
-import { useRouterNavigate } from '../../common/lib/kibana';
+import { useKibana, useRouterNavigate } from '../../common/lib/kibana';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
 import { QueriesField } from './queries_field';
 import { ConfirmDeployAgentPolicyModal } from './confirmation_modal';
@@ -47,6 +47,20 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   editMode = false,
   isReadOnly = false,
 }) => {
+  const {
+    services: { spaces },
+  } = useKibana();
+
+  const [currentSpace, setSpace] = useState<string | null>(null);
+  useEffect(() => {
+    async function getSpaces() {
+      const response = await spaces?.getActiveSpace();
+      setSpace(response.id);
+    }
+
+    getSpaces();
+  }, [spaces]);
+
   const [packType, setPackType] = useState('policy');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const handleHideConfirmationModal = useCallback(() => setShowConfirmationModal(false), []);
@@ -114,11 +128,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
 
-  const { policy_ids: policyIds, namespaces = [] } = watch();
+  const { policy_ids: policyIds } = watch();
 
-  // TODO need to figure out how to verify namespace, because at the beginning the namespace is empty
-  const isDefaultNamespace = namespaces.length === 0 || namespaces?.[0] === 'default';
-
+  const isDefaultNamespace = useMemo(() => currentSpace === 'default', [currentSpace]);
   const agentCount = useMemo(
     () =>
       reduce(
