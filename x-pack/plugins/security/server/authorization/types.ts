@@ -139,9 +139,9 @@ export interface CheckUserProfilesPrivilegesResponse {
    * The subset of the requested profile IDs of the users that have all the requested privileges.
    */
   hasPrivilegeUids: string[];
-  /**
-   * The subset of the requested profile IDs for which an error was encountered. It does not include the missing profile
-   * IDs or the profile IDs of the users that do not have all the requested privileges.
-   */
-  errorUids: string[];
+
+  errors?: {
+    count: number;
+    details: Record<string, { type: string; reason: string }>;
+  };
 }
