@@ -8,7 +8,7 @@
 import React, { lazy, useEffect } from 'react';
 import { Route, RouteComponentProps, Switch, Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
+import { EuiSpacer, EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
 
 import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
 import { Section, routeToRules, routeToInternalAlerts, routeToLogs } from './constants';
@@ -78,7 +78,8 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
   return (
     <>
-      <EuiPageHeader
+      <EuiPageTemplate.Header
+        paddingSize="none"
         bottomBorder
         pageTitle={
           <span data-test-subj="appTitle">
@@ -112,16 +113,18 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           'data-test-subj': `${tab.id}Tab`,
         }))}
       />
-
       <EuiSpacer size="l" />
-
       <HealthContextProvider>
         <HealthCheck waitForCheck={true}>
           <Switch>
             <Route
               exact
               path={routeToLogs}
-              component={suspendedComponentWithProps(LogsList, 'xl')}
+              component={() => (
+                <EuiPageTemplate.Section grow={false} paddingSize="none">
+                  {suspendedComponentWithProps(LogsList, 'xl')({})}
+                </EuiPageTemplate.Section>
+              )}
             />
             <Route
               exact
@@ -132,7 +135,11 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
               <Route
                 exact
                 path={routeToInternalAlerts}
-                component={suspendedComponentWithProps(AlertsPage, 'xl')}
+                component={() => (
+                  <EuiPageTemplate.Section grow={false} paddingSize="none">
+                    {suspendedComponentWithProps(AlertsPage, 'xl')({})}
+                  </EuiPageTemplate.Section>
+                )}
               />
             ) : (
               <Redirect to={routeToRules} />

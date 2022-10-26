@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 
 export const EmptyPrompt = ({
   onCTAClicked,
@@ -16,7 +16,7 @@ export const EmptyPrompt = ({
   onCTAClicked: () => void;
   showCreateRuleButton: boolean;
 }) => (
-  <EuiEmptyPrompt
+  <EuiPageTemplate.EmptyPrompt
     iconType="watchesApp"
     data-test-subj="createFirstRuleEmptyPrompt"
     title={
