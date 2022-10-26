@@ -10,8 +10,21 @@ import { LevelLogger, startTrace } from '../';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { LayoutInstance } from '../layouts';
 
-const getCompletedItemsCount = (renderCompleteSelector: string) => {
-  return document.querySelectorAll(renderCompleteSelector).length;
+interface CompletedItemsCountParameters {
+  count: number;
+  renderCompleteSelector: string;
+}
+
+const getCompletedItemsCount = ({
+  count,
+  renderCompleteSelector,
+}: CompletedItemsCountParameters) => {
+  const { length } = document.querySelectorAll(renderCompleteSelector);
+
+  // eslint-disable-next-line no-console
+  console.debug(`waitng for ${count} elements, got ${length}.`);
+
+  return length >= count;
 };
 
 /*
@@ -32,10 +45,9 @@ export const waitForVisualizations = async (
   logger.debug(`Waiting for ${toEqual} rendered elements to be in the DOM`);
 
   try {
-    await browser.waitFor<string[]>({
+    await browser.waitFor<CompletedItemsCountParameters[]>({
       fn: getCompletedItemsCount,
-      args: [renderCompleteSelector],
-      toEqual,
+      args: [{ renderCompleteSelector, count: toEqual }],
       timeout,
     });
 

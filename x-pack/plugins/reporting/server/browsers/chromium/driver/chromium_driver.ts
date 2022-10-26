@@ -225,7 +225,6 @@ export class HeadlessChromiumDriver {
   }: {
     fn: unknown;
     args: unknown[];
-    toEqual: number;
     timeout: number;
   }): Promise<void> {
     await this.page.waitForFunction(fn, { timeout, polling: WAIT_FOR_DELAY_MS }, ...args);

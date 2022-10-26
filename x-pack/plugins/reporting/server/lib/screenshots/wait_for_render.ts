@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { LevelLogger, startTrace } from '../';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { LayoutInstance } from '../layouts';
@@ -19,11 +18,7 @@ export const waitForRenderComplete = async (
 ) => {
   const endTrace = startTrace('wait_for_render', 'wait');
 
-  logger.debug(
-    i18n.translate('xpack.reporting.screencapture.waitingForRenderComplete', {
-      defaultMessage: 'waiting for rendering to complete',
-    })
-  );
+  logger.debug('waiting for rendering to complete');
 
   return await browser
     .evaluate<[string, number]>(
@@ -73,11 +68,7 @@ export const waitForRenderComplete = async (
       logger
     )
     .then(() => {
-      logger.debug(
-        i18n.translate('xpack.reporting.screencapture.renderIsComplete', {
-          defaultMessage: 'rendering is complete',
-        })
-      );
+      logger.debug('rendering is complete');
 
       endTrace();
     });
