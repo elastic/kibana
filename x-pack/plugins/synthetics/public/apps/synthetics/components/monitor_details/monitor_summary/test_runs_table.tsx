@@ -61,7 +61,6 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
     pageSize: page.size,
     pageIndex: page.index,
   });
-  // const pings = useSelector(selectMonitorRecentPings);
   const sortedPings = useMemo(() => {
     return sortPings(pings, sortField, sortDirection);
   }, [pings, sortField, sortDirection]);

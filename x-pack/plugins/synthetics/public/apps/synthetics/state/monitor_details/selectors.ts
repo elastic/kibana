@@ -23,6 +23,4 @@ export const selectPingsLoading = createSelector(getState, (state) => state.load
 
 export const selectMonitorPingsMetadata = createSelector(getState, (state) => state.pings);
 
-export const selectMonitorRecentPings = createSelector(getState, (state) => state.pings.data);
-
 export const selectPingsError = createSelector(getState, (state) => state.error);
