@@ -1,0 +1,7 @@
+{
+  "password": "changeme",
+  "roles": [without_response_actions_role],
+  username: noResponseActions,
+  "full_name": No RA,
+  "email": noResponseActions@example.com"
+}
