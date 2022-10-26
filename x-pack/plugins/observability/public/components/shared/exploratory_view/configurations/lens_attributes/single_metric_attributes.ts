@@ -15,7 +15,7 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { Query } from '@kbn/es-query';
-import { FORMULA_COLUMN } from '../constants';
+import { FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
 import { ColumnFilter, MetricOption } from '../../types';
 import { SeriesConfig } from '../../../../..';
 import {
@@ -105,7 +105,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
             [this.columnId]: {
               ...buildNumberColumn(sourceField),
               label: columnLabel ?? '',
-              operationType: sourceField === 'Records' ? 'count' : operationType || 'median',
+              operationType: sourceField === RECORDS_FIELD ? 'count' : operationType || 'median',
               filter: columnFilter,
             },
           },

@@ -8,6 +8,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { Evaluation } from '../../../../common/types';
 import { CloudPosturePageTitle } from '../../../components/cloud_posture_page_title';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
@@ -30,6 +31,7 @@ import { findingsNavigation } from '../../../common/navigation/constants';
 import { ResourceFindings } from './resource_findings/resource_findings_container';
 import { ErrorCallout } from '../layout/error_callout';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
+import { LOCAL_STORAGE_PAGE_SIZE_FINDINGS_BY_RESOURCE_KEY } from '../../../../common/constants';
 
 const getDefaultQuery = ({
   query,
@@ -59,6 +61,10 @@ export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => 
 const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
+  const [pageSize, setPageSize] = useLocalStorage(
+    LOCAL_STORAGE_PAGE_SIZE_FINDINGS_BY_RESOURCE_KEY,
+    urlQuery.pageSize
+  );
 
   /**
    * Page URL query to ES query
@@ -73,7 +79,10 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
    * Page ES query result
    */
   const findingsGroupByResource = useFindingsByResource({
-    ...getPaginationQuery(urlQuery),
+    ...getPaginationQuery({
+      pageIndex: urlQuery.pageIndex,
+      pageSize: pageSize || urlQuery.pageSize,
+    }),
     sortDirection: urlQuery.sortDirection,
     query: baseEsQuery.query,
     enabled: !baseEsQuery.error,
@@ -148,17 +157,18 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
             loading={findingsGroupByResource.isFetching}
             items={findingsGroupByResource.data?.page || []}
             pagination={getPaginationTableParams({
-              pageSize: urlQuery.pageSize,
+              pageSize: pageSize || urlQuery.pageSize,
               pageIndex: urlQuery.pageIndex,
               totalItemCount: findingsGroupByResource.data?.total || 0,
             })}
-            setTableOptions={({ sort, page }) =>
+            setTableOptions={({ sort, page }) => {
+              setPageSize(page.size);
               setUrlQuery({
                 sortDirection: sort?.direction,
                 pageIndex: page.index,
                 pageSize: page.size,
-              })
-            }
+              });
+            }}
             sorting={{
               sort: { field: 'failed_findings', direction: urlQuery.sortDirection },
             }}

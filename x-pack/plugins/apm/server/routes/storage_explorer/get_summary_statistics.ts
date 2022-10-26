@@ -36,9 +36,10 @@ import {
   isRootTransaction,
 } from '../../lib/helpers/transactions';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getTracesPerMinute({
-  setup,
+  apmEventClient,
   indexLifecyclePhase,
   start,
   end,
@@ -46,7 +47,7 @@ export async function getTracesPerMinute({
   kuery,
   searchAggregatedTransactions,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   start: number;
   end: number;
@@ -54,8 +55,6 @@ export async function getTracesPerMinute({
   kuery: string;
   searchAggregatedTransactions: boolean;
 }) {
-  const { apmEventClient } = setup;
-
   const response = await apmEventClient.search('get_traces_per_minute', {
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
@@ -103,6 +102,7 @@ export async function getTracesPerMinute({
 
 export async function getMainSummaryStats({
   setup,
+  apmEventClient,
   context,
   indexLifecyclePhase,
   randomSampler,
@@ -112,6 +112,7 @@ export async function getMainSummaryStats({
   kuery,
 }: {
   setup: Setup;
+  apmEventClient: APMEventClient;
   context: ApmPluginRequestHandlerContext;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
   randomSampler: RandomSampler;
@@ -120,8 +121,6 @@ export async function getMainSummaryStats({
   environment: string;
   kuery: string;
 }) {
-  const { apmEventClient } = setup;
-
   const [{ indices: allIndicesStats }, res] = await Promise.all([
     getTotalIndicesStats({ context, setup }),
     apmEventClient.search('get_storage_explorer_main_summary_stats', {
