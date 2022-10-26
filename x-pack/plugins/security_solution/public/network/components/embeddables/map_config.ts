@@ -123,12 +123,22 @@ export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
         sourceDescriptor: null,
         type: LAYER_TYPE.LAYER_GROUP,
         visible: true,
-      }
+      };
       return [
         ...acc,
         getLineLayer(title, id, layerGroupDescriptor.id, lmc[title] ?? lmc.default),
-        getDestinationLayer(title, id, layerGroupDescriptor.id, lmc[title]?.destination ?? lmc.default.destination),
-        getSourceLayer(title, id, layerGroupDescriptor.id, lmc[title]?.source ?? lmc.default.source),
+        getDestinationLayer(
+          title,
+          id,
+          layerGroupDescriptor.id,
+          lmc[title]?.destination ?? lmc.default.destination
+        ),
+        getSourceLayer(
+          title,
+          id,
+          layerGroupDescriptor.id,
+          lmc[title]?.source ?? lmc.default.source
+        ),
         layerGroupDescriptor,
       ];
     }, []),

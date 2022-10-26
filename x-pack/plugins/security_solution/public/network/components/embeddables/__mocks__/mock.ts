@@ -24,7 +24,7 @@ export const mockLayerGroup = {
   sourceDescriptor: null,
   type: LAYER_TYPE.LAYER_GROUP,
   visible: true,
-}
+};
 
 export const mockSourceLayer = {
   sourceDescriptor: {
