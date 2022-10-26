@@ -24,7 +24,7 @@ Object {
               >
                 <button
                   aria-label="Header menu Button Empty"
-                  class="euiButtonEmpty euiButtonEmpty--primary"
+                  class="euiButtonEmpty css-9t7nyf-empty-primary"
                   data-test-subj="LinkedRulesMenuEmptyButton"
                   type="button"
                 >
@@ -51,15 +51,15 @@ Object {
           class="euiFlexItem"
         >
           <button
-            class="euiButton euiButton--primary euiButton--fill"
+            class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
             data-test-subj="ManageRulesButton"
             type="button"
           >
             <span
-              class="euiButtonContent euiButton__content"
+              class="emotion-euiButtonDisplayContent"
             >
               <span
-                class="euiButton__text"
+                class="eui-textTruncate"
               >
                 Manage rules
               </span>
@@ -81,7 +81,7 @@ Object {
               >
                 <button
                   aria-label="Header menu Button Icon"
-                  class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                  class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                   data-test-subj="MenuActionsButtonIcon"
                   type="button"
                 >
@@ -119,7 +119,7 @@ Object {
             >
               <button
                 aria-label="Header menu Button Empty"
-                class="euiButtonEmpty euiButtonEmpty--primary"
+                class="euiButtonEmpty css-9t7nyf-empty-primary"
                 data-test-subj="LinkedRulesMenuEmptyButton"
                 type="button"
               >
@@ -146,15 +146,15 @@ Object {
         class="euiFlexItem"
       >
         <button
-          class="euiButton euiButton--primary euiButton--fill"
+          class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
           data-test-subj="ManageRulesButton"
           type="button"
         >
           <span
-            class="euiButtonContent euiButton__content"
+            class="emotion-euiButtonDisplayContent"
           >
             <span
-              class="euiButton__text"
+              class="eui-textTruncate"
             >
               Manage rules
             </span>
@@ -176,7 +176,7 @@ Object {
             >
               <button
                 aria-label="Header menu Button Icon"
-                class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
                 data-test-subj="MenuActionsButtonIcon"
                 type="button"
               >

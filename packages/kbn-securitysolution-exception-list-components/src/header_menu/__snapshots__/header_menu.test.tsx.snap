@@ -17,7 +17,7 @@ Object {
           >
             <button
               aria-label="Header menu Button Icon"
-              class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+              class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
               data-test-subj="ButtonIcon"
               type="button"
             >
@@ -46,7 +46,7 @@ Object {
         >
           <button
             aria-label="Header menu Button Icon"
-            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+            class="euiButtonIcon euiButtonIcon--xSmall emotion-euiButtonIcon-empty-primary-hoverStyles"
             data-test-subj="ButtonIcon"
             type="button"
           >
@@ -132,7 +132,7 @@ Object {
           >
             <button
               aria-label="Header menu Button Empty"
-              class="euiButtonEmpty euiButtonEmpty--primary"
+              class="euiButtonEmpty css-9t7nyf-empty-primary"
               data-test-subj="EmptyButton"
               type="button"
             >
@@ -167,7 +167,7 @@ Object {
         >
           <button
             aria-label="Header menu Button Empty"
-            class="euiButtonEmpty euiButtonEmpty--primary"
+            class="euiButtonEmpty css-9t7nyf-empty-primary"
             data-test-subj="EmptyButton"
             type="button"
           >
@@ -259,7 +259,7 @@ Object {
           >
             <button
               aria-label="Header menu Button Empty"
-              class="euiButtonEmpty euiButtonEmpty--primary"
+              class="euiButtonEmpty css-9t7nyf-empty-primary"
               data-test-subj="EmptyButton"
               type="button"
             >
@@ -294,7 +294,7 @@ Object {
         >
           <button
             aria-label="Header menu Button Empty"
-            class="euiButtonEmpty euiButtonEmpty--primary"
+            class="euiButtonEmpty css-9t7nyf-empty-primary"
             data-test-subj="EmptyButton"
             type="button"
           >
@@ -386,7 +386,7 @@ Object {
           >
             <button
               aria-label="Header menu Button Empty"
-              class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty-isDisabled"
+              class="euiButtonEmpty css-1at5a38-empty-disabled"
               data-test-subj="EmptyButton"
               disabled=""
               type="button"
@@ -422,7 +422,7 @@ Object {
         >
           <button
             aria-label="Header menu Button Empty"
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty-isDisabled"
+            class="euiButtonEmpty css-1at5a38-empty-disabled"
             data-test-subj="EmptyButton"
             disabled=""
             type="button"
@@ -515,7 +515,7 @@ Object {
           >
             <button
               aria-label="Header menu Button Empty"
-              class="euiButtonEmpty euiButtonEmpty--primary"
+              class="euiButtonEmpty css-9t7nyf-empty-primary"
               data-test-subj="EmptyButton"
               type="button"
             >
@@ -550,7 +550,7 @@ Object {
         >
           <button
             aria-label="Header menu Button Empty"
-            class="euiButtonEmpty euiButtonEmpty--primary"
+            class="euiButtonEmpty css-9t7nyf-empty-primary"
             data-test-subj="EmptyButton"
             type="button"
           >

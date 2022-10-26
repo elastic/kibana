@@ -3,12 +3,12 @@
 exports[`EditModal should render the title and description from listDetails 1`] = `
 Object {
   "asFragment": [Function],
-  "baseElement": <body
-    class="euiBody-hasOverlayMask"
-  >
+  "baseElement": <body>
     <div />
     <div
-      class="euiOverlayMask euiOverlayMask--aboveHeader"
+      class="euiOverlayMask"
+      data-euiportal="true"
+      data-relative-to-header="above"
     >
       <div
         data-eui="EuiFocusTrap"
@@ -20,7 +20,7 @@ Object {
         >
           <button
             aria-label="Closes this modal window"
-            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+            class="euiButtonIcon euiButtonIcon--xSmall euiModal__closeIcon emotion-euiButtonIcon-empty-text-hoverStyles"
             type="button"
           >
             <span
@@ -31,141 +31,137 @@ Object {
             />
           </button>
           <div
-            class="euiModal__flex"
+            class="euiModalHeader"
           >
             <div
-              class="euiModalHeader"
+              class="euiModalHeader__title"
+              data-test-subj="editModalTitle"
             >
-              <div
-                class="euiModalHeader__title"
-                data-test-subj="editModalTitle"
-              >
-                <h1>
-                  Edit list name
-                </h1>
-              </div>
+              <h1>
+                Edit list name
+              </h1>
             </div>
+          </div>
+          <div
+            class="euiModalBody"
+          >
             <div
-              class="euiModalBody"
+              class="euiModalBody__overflow"
             >
-              <div
-                class="euiModalBody__overflow"
+              <form
+                class="euiForm"
+                data-test-subj="editModalForm"
+                id="modalForm_generated-id"
               >
-                <form
-                  class="euiForm"
-                  data-test-subj="editModalForm"
-                  id="modalForm_generated-id"
+                <div
+                  class="euiFormRow euiFormRow--hasLabel"
+                  id="generated-id-row"
                 >
                   <div
-                    class="euiFormRow euiFormRow--hasLabel"
-                    id="generated-id-row"
+                    class="euiFormRow__labelWrapper"
+                  >
+                    <label
+                      class="euiFormLabel euiFormRow__label"
+                      for="generated-id"
+                      id="generated-id-label"
+                    >
+                      Name
+                    </label>
+                  </div>
+                  <div
+                    class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormRow__labelWrapper"
-                    >
-                      <label
-                        class="euiFormLabel euiFormRow__label"
-                        for="generated-id"
-                        id="generated-id-label"
-                      >
-                        Name
-                      </label>
-                    </div>
-                    <div
-                      class="euiFormRow__fieldWrapper"
+                      class="euiFormControlLayout"
                     >
                       <div
-                        class="euiFormControlLayout"
+                        class="euiFormControlLayout__childrenWrapper"
                       >
-                        <div
-                          class="euiFormControlLayout__childrenWrapper"
-                        >
-                          <input
-                            class="euiFieldText"
-                            data-test-subj="editModalNameTextField"
-                            id="generated-id"
-                            name="name"
-                            type="text"
-                            value="list name"
-                          />
-                        </div>
+                        <input
+                          class="euiFieldText"
+                          data-test-subj="editModalNameTextField"
+                          id="generated-id"
+                          name="name"
+                          type="text"
+                          value="list name"
+                        />
                       </div>
                     </div>
                   </div>
+                </div>
+                <div
+                  class="euiFormRow euiFormRow--hasLabel"
+                  id="generated-id-row"
+                >
                   <div
-                    class="euiFormRow euiFormRow--hasLabel"
-                    id="generated-id-row"
+                    class="euiFormRow__labelWrapper"
+                  >
+                    <label
+                      class="euiFormLabel euiFormRow__label"
+                      for="generated-id"
+                      id="generated-id-label"
+                    >
+                      Description
+                    </label>
+                  </div>
+                  <div
+                    class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormRow__labelWrapper"
-                    >
-                      <label
-                        class="euiFormLabel euiFormRow__label"
-                        for="generated-id"
-                        id="generated-id-label"
-                      >
-                        Description
-                      </label>
-                    </div>
-                    <div
-                      class="euiFormRow__fieldWrapper"
+                      class="euiFormControlLayout"
                     >
                       <div
-                        class="euiFormControlLayout"
+                        class="euiFormControlLayout__childrenWrapper"
                       >
-                        <div
-                          class="euiFormControlLayout__childrenWrapper"
-                        >
-                          <input
-                            class="euiFieldText"
-                            data-test-subj="editModalDescriptionTextField"
-                            id="generated-id"
-                            name="description"
-                            type="text"
-                            value="list description"
-                          />
-                        </div>
+                        <input
+                          class="euiFieldText"
+                          data-test-subj="editModalDescriptionTextField"
+                          id="generated-id"
+                          name="description"
+                          type="text"
+                          value="list description"
+                        />
                       </div>
                     </div>
                   </div>
-                </form>
-              </div>
+                </div>
+              </form>
             </div>
-            <div
-              class="euiModalFooter"
+          </div>
+          <div
+            class="euiModalFooter"
+          >
+            <button
+              class="euiButtonEmpty css-9t7nyf-empty-primary"
+              data-test-subj="editModalCancelBtn"
+              type="button"
             >
-              <button
-                class="euiButtonEmpty euiButtonEmpty--primary"
-                data-test-subj="editModalCancelBtn"
-                type="button"
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
               >
                 <span
-                  class="euiButtonContent euiButtonEmpty__content"
+                  class="euiButtonEmpty__text"
                 >
-                  <span
-                    class="euiButtonEmpty__text"
-                  >
-                    Cancel
-                  </span>
+                  Cancel
                 </span>
-              </button>
-              <button
-                class="euiButton euiButton--primary euiButton--fill"
-                data-test-subj="editModalSaveBtn"
-                form="modalForm_generated-id"
-                type="submit"
+              </span>
+            </button>
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-m-fill-primary"
+              data-test-subj="editModalSaveBtn"
+              form="modalForm_generated-id"
+              type="submit"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonContent euiButton__content"
+                  class="eui-textTruncate"
                 >
-                  <span
-                    class="euiButton__text"
-                  >
-                    Save
-                  </span>
+                  Save
                 </span>
-              </button>
-            </div>
+              </span>
+            </button>
           </div>
         </div>
       </div>

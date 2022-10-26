@@ -23,15 +23,15 @@ Object {
           data-test-subj="MetaInfoDetailslastUpdate"
         >
           <span
-            class="euiBadge euiBadge--iconLeft emotion-EuiInnerText"
+            class="euiBadge emotion-EuiInnerText"
             style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
             title="Last update value"
           >
             <span
-              class="euiBadge__content"
+              class="euiBadge__content emotion-euiBadge__content"
             >
               <span
-                class="euiBadge__text"
+                class="euiBadge__text emotion-euiBadge__text"
               >
                 <p>
                   Last update value
@@ -60,14 +60,14 @@ Object {
               class="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <span
-                class="euiBadge euiBadge--hollow euiBadge--iconLeft emotion-EuiInnerText"
+                class="euiBadge emotion-EuiInnerText"
                 title="value"
               >
                 <span
-                  class="euiBadge__content"
+                  class="euiBadge__content emotion-euiBadge__content"
                 >
                   <span
-                    class="euiBadge__text"
+                    class="euiBadge__text emotion-euiBadge__text"
                   >
                     value
                   </span>
@@ -98,15 +98,15 @@ Object {
         data-test-subj="MetaInfoDetailslastUpdate"
       >
         <span
-          class="euiBadge euiBadge--iconLeft emotion-EuiInnerText"
+          class="euiBadge emotion-EuiInnerText"
           style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
           title="Last update value"
         >
           <span
-            class="euiBadge__content"
+            class="euiBadge__content emotion-euiBadge__content"
           >
             <span
-              class="euiBadge__text"
+              class="euiBadge__text emotion-euiBadge__text"
             >
               <p>
                 Last update value
@@ -135,14 +135,14 @@ Object {
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <span
-              class="euiBadge euiBadge--hollow euiBadge--iconLeft emotion-EuiInnerText"
+              class="euiBadge emotion-EuiInnerText"
               title="value"
             >
               <span
-                class="euiBadge__content"
+                class="euiBadge__content emotion-euiBadge__content"
               >
                 <span
-                  class="euiBadge__text"
+                  class="euiBadge__text emotion-euiBadge__text"
                 >
                   value
                 </span>
@@ -230,15 +230,15 @@ Object {
           data-test-subj="MetaInfoDetailslastUpdate"
         >
           <span
-            class="euiBadge euiBadge--iconLeft emotion-EuiInnerText"
+            class="euiBadge emotion-EuiInnerText"
             style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
             title="last update"
           >
             <span
-              class="euiBadge__content"
+              class="euiBadge__content emotion-euiBadge__content"
             >
               <span
-                class="euiBadge__text"
+                class="euiBadge__text emotion-euiBadge__text"
               >
                 last update
               </span>
@@ -265,14 +265,14 @@ Object {
               class="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <span
-                class="euiBadge euiBadge--hollow euiBadge--iconLeft emotion-EuiInnerText"
+                class="euiBadge emotion-EuiInnerText"
                 title="value"
               >
                 <span
-                  class="euiBadge__content"
+                  class="euiBadge__content emotion-euiBadge__content"
                 >
                   <span
-                    class="euiBadge__text"
+                    class="euiBadge__text emotion-euiBadge__text"
                   >
                     value
                   </span>
@@ -303,15 +303,15 @@ Object {
         data-test-subj="MetaInfoDetailslastUpdate"
       >
         <span
-          class="euiBadge euiBadge--iconLeft emotion-EuiInnerText"
+          class="euiBadge emotion-EuiInnerText"
           style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
           title="last update"
         >
           <span
-            class="euiBadge__content"
+            class="euiBadge__content emotion-euiBadge__content"
           >
             <span
-              class="euiBadge__text"
+              class="euiBadge__text emotion-euiBadge__text"
             >
               last update
             </span>
@@ -338,14 +338,14 @@ Object {
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <span
-              class="euiBadge euiBadge--hollow euiBadge--iconLeft emotion-EuiInnerText"
+              class="euiBadge emotion-EuiInnerText"
               title="value"
             >
               <span
-                class="euiBadge__content"
+                class="euiBadge__content emotion-euiBadge__content"
               >
                 <span
-                  class="euiBadge__text"
+                  class="euiBadge__text emotion-euiBadge__text"
                 >
                   value
                 </span>
