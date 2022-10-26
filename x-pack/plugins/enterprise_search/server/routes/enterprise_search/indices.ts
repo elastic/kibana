@@ -697,7 +697,20 @@ export function registerIndexRoutes({
             response,
             statusCode: 404,
           });
+        } else if (error.message === ErrorCode.PIPELINE_IS_IN_USE) {
+          return createError({
+            errorCode: ErrorCode.PIPELINE_IS_IN_USE,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.indices.mlInference.pipelineProcessors.pipelineIsInUseError',
+              {
+                defaultMessage: 'Inference pipeline is used in a pipeline of a different index',
+              }
+            ),
+            response,
+            statusCode: 400,
+          });
         }
+
         // otherwise, let the default handler wrap it
         throw error;
       }

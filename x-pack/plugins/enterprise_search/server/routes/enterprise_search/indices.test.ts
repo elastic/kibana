@@ -39,6 +39,7 @@ jest.mock(
   '../../lib/indices/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline',
   () => ({
     deleteMlInferencePipeline: jest.fn(),
+    isPipelineInUse: jest.fn(),
   })
 );
 jest.mock(
@@ -434,6 +435,24 @@ describe('Enterprise Search Managed Indices', () => {
           },
         },
       };
+      (deleteMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
+        return Promise.reject(mockError);
+      });
+
+      await mockRouter.callRoute({
+        params: { indexName, pipelineName },
+      });
+
+      expect(deleteMlInferencePipeline).toHaveBeenCalledWith(
+        indexName,
+        pipelineName,
+        mockClient.asCurrentUser
+      );
+      expect(mockRouter.response.customError).toHaveBeenCalledTimes(1);
+    });
+
+    it('raises error if the pipeline is in use', async () => {
+      const mockError = new Error(ErrorCode.PIPELINE_IS_IN_USE);
       (deleteMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
         return Promise.reject(mockError);
       });
