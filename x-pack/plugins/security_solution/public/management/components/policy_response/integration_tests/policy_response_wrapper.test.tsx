@@ -7,28 +7,26 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import type { AppContextTestRender } from '../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import type { PolicyResponseWrapperProps } from './policy_response_wrapper';
-import { PolicyResponseWrapper } from './policy_response_wrapper';
-import { HostPolicyResponseActionStatus } from '../../../../common/search_strategy';
-import { useGetEndpointPolicyResponse } from '../../hooks/endpoint/use_get_endpoint_policy_response';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import type { PolicyResponseWrapperProps } from '../policy_response_wrapper';
+import { PolicyResponseWrapper } from '../policy_response_wrapper';
+import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy';
+import { useGetEndpointPolicyResponse } from '../../../hooks/endpoint/use_get_endpoint_policy_response';
 import type {
   HostPolicyResponse,
   HostPolicyResponseAppliedAction,
-} from '../../../../common/endpoint/types';
-import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { useGetEndpointDetails } from '../../hooks';
+} from '../../../../../common/endpoint/types';
+import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
+import { useGetEndpointDetails } from '../../../hooks';
 import {
   descriptions,
   LINUX_DEADLOCK_MESSAGE,
   policyResponseTitles,
-} from './policy_response_friendly_names';
+} from '../policy_response_friendly_names';
 
-jest.setTimeout(10000);
-
-jest.mock('../../hooks/endpoint/use_get_endpoint_policy_response');
-jest.mock('../../hooks/endpoint/use_get_endpoint_details');
+jest.mock('../../../hooks/endpoint/use_get_endpoint_policy_response');
+jest.mock('../../../hooks/endpoint/use_get_endpoint_details');
 
 describe('when on the policy response', () => {
   const docGenerator = new EndpointDocGenerator();
