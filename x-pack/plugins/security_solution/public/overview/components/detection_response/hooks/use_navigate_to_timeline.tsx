@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -40,25 +40,28 @@ export const useNavigateToTimeline = () => {
     timelineType: TimelineType.default,
   });
 
-  const navigateToTimeline = (dataProviders: DataProvider[], timeRange?: TimeRange) => {
-    // Reset the current timeline
-    clearTimeline({ timeRange });
-    // Update the timeline's providers to match the current prevalence field query
-    dispatch(
-      updateProviders({
-        id: TimelineId.active,
-        providers: dataProviders,
-      })
-    );
+  const navigateToTimeline = useCallback(
+    (dataProviders: DataProvider[], timeRange?: TimeRange) => {
+      // Reset the current timeline
+      clearTimeline({ timeRange });
+      // Update the timeline's providers to match the current prevalence field query
+      dispatch(
+        updateProviders({
+          id: TimelineId.active,
+          providers: dataProviders,
+        })
+      );
 
-    dispatch(
-      sourcererActions.setSelectedDataView({
-        id: SourcererScopeName.timeline,
-        selectedDataViewId: defaultDataView.id,
-        selectedPatterns: [signalIndexName || ''],
-      })
-    );
-  };
+      dispatch(
+        sourcererActions.setSelectedDataView({
+          id: SourcererScopeName.timeline,
+          selectedDataViewId: defaultDataView.id,
+          selectedPatterns: [signalIndexName || ''],
+        })
+      );
+    },
+    [clearTimeline, defaultDataView.id, dispatch, signalIndexName]
+  );
 
   /** *
    * Open a timeline with the given filters prepopulated.
@@ -67,66 +70,78 @@ export const useNavigateToTimeline = () => {
    * [[filter1 & filter2] OR [filter3 & filter4]]
    *
    */
-  const openTimelineWithFilters = (filters: Array<[...Filter[]]>) => {
-    const dataProviders = [];
+  const openTimelineWithFilters = useCallback(
+    (filters: Array<[...Filter[]]>) => {
+      const dataProviders = [];
 
-    for (const orFilterGroup of filters) {
-      const mainFilter = orFilterGroup[0];
+      for (const orFilterGroup of filters) {
+        const mainFilter = orFilterGroup[0];
 
-      if (mainFilter) {
-        const dataProvider = getDataProvider(mainFilter.field, '', mainFilter.value);
+        if (mainFilter) {
+          const dataProvider = getDataProvider(mainFilter.field, '', mainFilter.value);
 
-        for (const filter of orFilterGroup.slice(1)) {
-          dataProvider.and.push(getDataProvider(filter.field, '', filter.value));
+          for (const filter of orFilterGroup.slice(1)) {
+            dataProvider.and.push(getDataProvider(filter.field, '', filter.value));
+          }
+          dataProviders.push(dataProvider);
         }
-        dataProviders.push(dataProvider);
       }
-    }
-    navigateToTimeline(dataProviders);
-  };
+      navigateToTimeline(dataProviders);
+    },
+    [navigateToTimeline]
+  );
 
   // TODO: Replace the usage of functions with openTimelineWithFilters
 
-  const openHostInTimeline = ({
-    hostName,
-    severity,
-    timeRange,
-  }: {
-    hostName: string;
-    severity?: string;
-    timeRange?: TimeRange;
-  }) => {
-    const dataProvider = getDataProvider('host.name', '', hostName);
+  const openHostInTimeline = useCallback(
+    ({
+      hostName,
+      severity,
+      timeRange,
+    }: {
+      hostName: string;
+      severity?: string;
+      timeRange?: TimeRange;
+    }) => {
+      const dataProvider = getDataProvider('host.name', '', hostName);
 
-    if (severity) {
-      dataProvider.and.push(getDataProvider('kibana.alert.severity', '', severity));
-    }
+      if (severity) {
+        dataProvider.and.push(getDataProvider('kibana.alert.severity', '', severity));
+      }
 
-    navigateToTimeline([dataProvider], timeRange);
-  };
+      navigateToTimeline([dataProvider], timeRange);
+    },
+    [navigateToTimeline]
+  );
 
-  const openUserInTimeline = ({
-    userName,
-    severity,
-    timeRange,
-  }: {
-    userName: string;
-    severity?: string;
-    timeRange?: TimeRange;
-  }) => {
-    const dataProvider = getDataProvider('user.name', '', userName);
+  const openUserInTimeline = useCallback(
+    ({
+      userName,
+      severity,
+      timeRange,
+    }: {
+      userName: string;
+      severity?: string;
+      timeRange?: TimeRange;
+    }) => {
+      const dataProvider = getDataProvider('user.name', '', userName);
 
-    if (severity) {
-      dataProvider.and.push(getDataProvider('kibana.alert.severity', '', severity));
-    }
-    navigateToTimeline([dataProvider], timeRange);
-  };
+      if (severity) {
+        dataProvider.and.push(getDataProvider('kibana.alert.severity', '', severity));
+      }
+      navigateToTimeline([dataProvider], timeRange);
+    },
+    [navigateToTimeline]
+  );
 
-  const openRuleInTimeline = (ruleName: string) => {
-    const dataProvider = getDataProvider('kibana.alert.rule.name', '', ruleName);
+  const openRuleInTimeline = useCallback(
+    (ruleName: string) => {
+      const dataProvider = getDataProvider('kibana.alert.rule.name', '', ruleName);
 
-    navigateToTimeline([dataProvider]);
-  };
+      navigateToTimeline([dataProvider]);
+    },
+    [navigateToTimeline]
+  );
 
   return {
     openTimelineWithFilters,
