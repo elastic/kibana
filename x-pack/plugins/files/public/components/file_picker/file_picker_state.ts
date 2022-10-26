@@ -61,11 +61,18 @@ export class FilePickerState {
           distinctUntilChanged()
         )
         .subscribe(this.hasQuery$),
+      this.requests$.pipe(tap(() => this.setIsLoading(true))).subscribe(),
       this.internalIsLoading$
         .pipe(debounceTime(100), distinctUntilChanged())
         .subscribe(this.isLoading$),
     ];
   }
+
+  private readonly requests$ = combineLatest([
+    this.currentPage$.pipe(distinctUntilChanged()),
+    this.query$.pipe(distinctUntilChanged(), debounceTime(100)),
+    this.retry$,
+  ]);
 
   /**
    * File objects we have loaded on the front end, stored here so that it can
@@ -74,11 +81,7 @@ export class FilePickerState {
    * @note This is not explicitly kept in sync with the selected files!
    * @note This is not explicitly kept in sync with the selected files!
    */
-  public readonly files$ = combineLatest([
-    this.currentPage$.pipe(distinctUntilChanged()),
-    this.query$.pipe(distinctUntilChanged(), debounceTime(100)),
-    this.retry$,
-  ]).pipe(
+  public readonly files$ = this.requests$.pipe(
     switchMap(([page, query]) => this.sendRequest(page, query)),
     tap(({ total }) => this.updateTotalPages({ total })),
     tap(({ total }) => this.hasFiles$.next(Boolean(total))),
