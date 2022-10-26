@@ -113,7 +113,7 @@ export class FilePickerState {
     page: number,
     query: undefined | string
   ): Observable<{ files: FileJSON[]; total: number }> => {
-    if (this.isUploading$.getValue()) throw new Error('Cannot fetch files while uploading');
+    if (this.isUploading$.getValue()) return EMPTY;
     if (this.abort) this.abort();
     this.setIsLoading(true);
     this.loadingError$.next(undefined);

@@ -177,11 +177,7 @@ describe('FilePickerState', () => {
       const upload$ = cold(uploadInput).pipe(tap(() => filePickerState.setIsUploading(true)));
       const query$ = cold(queryInput).pipe(tap((q) => filePickerState.setQuery(q)));
       expectObservable(merge(upload$, query$)).toBe('---a-a|');
-      expectObservable(filePickerState.files$).toBe(
-        'a----#-',
-        { a: [] },
-        new Error('Cannot fetch files while uploading')
-      );
+      expectObservable(filePickerState.files$).toBe('a------', { a: [] });
     });
   });
 });
