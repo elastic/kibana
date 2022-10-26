@@ -87,7 +87,7 @@
           },
           "[], samplerShardSize: number, runtimeMappings?: ",
           "MappingRuntimeFields",
-          " | undefined) => Promise<",
+          " | undefined, abortSignal?: AbortSignal | undefined) => Promise<",
           {
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "server",
@@ -198,6 +198,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.fetchAggIntervals.$7",
+            "type": "Object",
+            "tags": [],
+            "label": "abortSignal",
+            "description": [],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -225,7 +240,7 @@
           },
           ", samplerShardSize: number, runtimeMappings?: ",
           "MappingRuntimeFields",
-          " | undefined) => Promise<(",
+          " | undefined, abortSignal?: AbortSignal | undefined) => Promise<(",
           "NumericChartData",
           " | OrdinalChartData | UnsupportedChartData)[]>"
         ],
@@ -336,6 +351,21 @@
             "signature": [
               "MappingRuntimeFields",
               " | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-server.fetchHistogramsForFields.$7",
+            "type": "Object",
+            "tags": [],
+            "label": "abortSignal",
+            "description": [],
+            "signature": [
+              "AbortSignal | undefined"
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
             "deprecated": false,
