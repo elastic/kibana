@@ -3117,6 +3117,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-lifecycle-server-internal@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-lifecycle-server-mocks@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-lifecycle-server@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal":
   version "0.0.0"
   uid ""
@@ -3206,6 +3218,18 @@
   uid ""
 
 "@kbn/core-plugins-browser@link:bazel-bin/packages/core/plugins/core-plugins-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugins-server-internal@link:bazel-bin/packages/core/plugins/core-plugins-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugins-server-mocks@link:bazel-bin/packages/core/plugins/core-plugins-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugins-server@link:bazel-bin/packages/core/plugins/core-plugins-server":
   version "0.0.0"
   uid ""
 
@@ -7326,6 +7350,18 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-lifecycle-server-internal@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-lifecycle-server-mocks@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-lifecycle-server@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7415,6 +7451,18 @@
   uid ""
 
 "@types/kbn__core-plugins-browser@link:bazel-bin/packages/core/plugins/core-plugins-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-server-internal@link:bazel-bin/packages/core/plugins/core-plugins-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-server-mocks@link:bazel-bin/packages/core/plugins/core-plugins-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-server@link:bazel-bin/packages/core/plugins/core-plugins-server/npm_module_types":
   version "0.0.0"
   uid ""
 
