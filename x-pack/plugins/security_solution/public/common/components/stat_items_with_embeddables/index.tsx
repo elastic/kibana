@@ -58,7 +58,7 @@ const StatValue = styled(EuiTitle)`
 
 StatValue.displayName = 'StatValue';
 
-const ChartHeight = '90px';
+const ChartHeight = '100px';
 
 interface StatItem {
   color?: string;
@@ -224,15 +224,19 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
 
                       <MetrixItem>
                         {field.lensAttributes && (
-                          <LensEmbeddable
-                            data-test-subj="embeddable-metric"
-                            height="36px"
-                            id={id}
-                            lensAttributes={field.lensAttributes}
-                            timerange={timerange}
-                            inspectTitle={description}
-                            metricAlignment={!field.icon && !field.description ? 'left' : 'center'}
-                          />
+                          <p data-test-subj="stat-title">
+                            <LensEmbeddable
+                              data-test-subj="embeddable-metric"
+                              height="36px"
+                              id={id}
+                              lensAttributes={field.lensAttributes}
+                              timerange={timerange}
+                              inspectTitle={description}
+                              metricAlignment={
+                                !field.icon && !field.description ? 'left' : 'center'
+                              }
+                            />
+                          </p>
                         )}
                       </MetrixItem>
                       {field.description != null && (

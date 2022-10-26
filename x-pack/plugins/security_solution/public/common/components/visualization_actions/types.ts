@@ -33,6 +33,7 @@ export interface LensEmbeddableComponentProps {
   inputsModelId?: InputsModelId;
   inspectTitle?: string;
   lensAttributes: LensAttributes;
+  metricAlignment?: 'left' | 'center';
   stackByField?: string;
   timerange: { from: string; to: string };
 }
