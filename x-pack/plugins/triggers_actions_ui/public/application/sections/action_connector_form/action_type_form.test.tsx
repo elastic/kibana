@@ -181,7 +181,7 @@ describe('action_type_form', () => {
 
     // Verify that the tooltip renders
     // Use fake timers so we don't have to wait for the EuiToolTip timeout
-    jest.useFakeTimers();
+    jest.useFakeTimers('legacy');
     wrapper.find('[data-test-subj="action-group-error-icon"]').first().simulate('mouseOver');
     // Run the timers so the EuiTooltip will be visible
     jest.runAllTimers();
