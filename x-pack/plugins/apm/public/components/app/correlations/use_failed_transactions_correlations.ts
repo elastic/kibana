@@ -248,7 +248,7 @@ export function useFailedTransactionsCorrelations() {
         }
       }
 
-      setResponse.flush();
+      // setResponse.flush();
 
       setResponse({
         ...responseUpdate,

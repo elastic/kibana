@@ -225,46 +225,6 @@ describe('useFailedTransactionsCorrelations', () => {
         });
 
         jest.advanceTimersByTime(100);
-        await waitFor(() => expect(result.current.progress.loaded).toBe(0.9));
-
-        expect(result.current.progress).toEqual({
-          error: undefined,
-          isRunning: true,
-          loaded: 0.9,
-        });
-
-        expect(result.current.response).toEqual({
-          ccsWarning: false,
-          errorHistogram: [
-            {
-              doc_count: 1234,
-              key: 'the-key',
-            },
-          ],
-          failedTransactionsCorrelations: [
-            {
-              fieldName: 'field-name-1',
-              fieldValue: 'field-value-1',
-              doc_count: 123,
-              bg_count: 1234,
-              score: 0.66,
-              pValue: 0.01,
-              normalizedScore: 0.85,
-              failurePercentage: 30,
-              successPercentage: 70,
-              histogram: [{ key: 'the-key', doc_count: 123 }],
-            },
-          ],
-          overallHistogram: [
-            {
-              doc_count: 1234,
-              key: 'the-key',
-            },
-          ],
-          percentileThresholdValue: 1.234,
-        });
-
-        jest.advanceTimersByTime(100);
         await waitFor(() => expect(result.current.progress.loaded).toBe(1));
 
         expect(result.current.progress).toEqual({
