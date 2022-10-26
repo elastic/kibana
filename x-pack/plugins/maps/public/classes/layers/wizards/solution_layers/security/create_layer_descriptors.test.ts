@@ -257,7 +257,7 @@ describe('createLayerDescriptor', () => {
         sourceDescriptor: null,
         type: 'LAYER_GROUP',
         visible: true,
-      }
+      },
     ]);
   });
 
@@ -481,7 +481,7 @@ describe('createLayerDescriptor', () => {
         sourceDescriptor: null,
         type: 'LAYER_GROUP',
         visible: true,
-      }
+      },
     ]);
   });
 
@@ -705,7 +705,7 @@ describe('createLayerDescriptor', () => {
         sourceDescriptor: null,
         type: 'LAYER_GROUP',
         visible: true,
-      }
+      },
     ]);
   });
 });

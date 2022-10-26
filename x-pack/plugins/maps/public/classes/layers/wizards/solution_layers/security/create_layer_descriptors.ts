@@ -49,7 +49,11 @@ function getDestinationField(indexPatternTitle: string) {
   return isApmIndex(indexPatternTitle) ? 'server.geo.location' : 'destination.geo.location';
 }
 
-function createSourceLayerDescriptor(indexPatternId: string, indexPatternTitle: string, parentId: string) {
+function createSourceLayerDescriptor(
+  indexPatternId: string,
+  indexPatternTitle: string,
+  parentId: string
+) {
   const sourceDescriptor = ESSearchSource.createDescriptor({
     indexPatternId,
     geoField: getSourceField(indexPatternTitle),
@@ -103,7 +107,11 @@ function createSourceLayerDescriptor(indexPatternId: string, indexPatternTitle: 
   });
 }
 
-function createDestinationLayerDescriptor(indexPatternId: string, indexPatternTitle: string, parentId: string) {
+function createDestinationLayerDescriptor(
+  indexPatternId: string,
+  indexPatternTitle: string,
+  parentId: string
+) {
   const sourceDescriptor = ESSearchSource.createDescriptor({
     indexPatternId,
     geoField: getDestinationField(indexPatternTitle),
@@ -157,7 +165,11 @@ function createDestinationLayerDescriptor(indexPatternId: string, indexPatternTi
   });
 }
 
-function createLineLayerDescriptor(indexPatternId: string, indexPatternTitle: string, parentId: string) {
+function createLineLayerDescriptor(
+  indexPatternId: string,
+  indexPatternTitle: string,
+  parentId: string
+) {
   const sourceDescriptor = ESPewPewSource.createDescriptor({
     indexPatternId,
     sourceGeoField: getSourceField(indexPatternTitle),
