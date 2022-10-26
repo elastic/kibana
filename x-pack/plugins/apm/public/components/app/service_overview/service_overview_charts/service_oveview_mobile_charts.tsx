@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import {
+  EuiFlexGroup,
+  EuiTitle,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -18,6 +24,16 @@ import { TransactionsTable } from '../../../shared/transactions_table';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { termQueryClient } from '../../../../../common/utils/term_query_client';
+import { environmentQuery } from '../../../../../common/utils/environment_query';
+import {
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../../common/elasticsearch_fieldnames';
+import {
+  MostUsedChart,
+  MostUsedMetric,
+} from '../../../shared/charts/most_used_chart';
 
 interface Props {
   latencyChartHeight: number;
@@ -37,7 +53,7 @@ export function ServiceOverviewMobileCharts({
 
   const {
     query,
-    query: { environment, kuery, rangeFrom, rangeTo },
+    query: { environment, kuery, rangeFrom, rangeTo, transactionType },
   } = useApmParams('/services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -48,6 +64,16 @@ export function ServiceOverviewMobileCharts({
     },
     query,
   });
+
+  const mostUsedChartFilters = useMemo(() => {
+    return [
+      ...termQueryClient(SERVICE_NAME, serviceName),
+      ...termQueryClient(TRANSACTION_TYPE, transactionType),
+      ...environmentQuery(environment),
+    ];
+  }, [environment, transactionType, serviceName]);
+
+  console.log('mostUsedChartFilters', mostUsedChartFilters);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -117,6 +143,140 @@ export function ServiceOverviewMobileCharts({
                   </EuiLink>
                 }
               />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiFlexGroup direction={rowDirection} gutterSize="s">
+          {/* Device */}
+          <EuiFlexItem grow={5}>
+            <EuiPanel hasBorder={true}>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <EuiFlexGroup alignItems="center" wrap>
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="xs">
+                        <h2>
+                          {i18n.translate(
+                            'xpack.apm.serviceOverview.mostUsedDevice',
+                            {
+                              defaultMessage: 'Most used device',
+                            }
+                          )}
+                        </h2>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexItem>
+                <MostUsedChart
+                  metric={MostUsedMetric.DEVICE_NAME}
+                  start={start}
+                  end={end}
+                  filters={mostUsedChartFilters}
+                />
+              </EuiFlexItem>
+            </EuiPanel>
+          </EuiFlexItem>
+          {/* NCT */}
+          <EuiFlexItem grow={5}>
+            <EuiPanel hasBorder={true}>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <EuiFlexGroup alignItems="center" wrap>
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="xs">
+                        <h2>
+                          {i18n.translate(
+                            'xpack.apm.serviceOverview.mostUsedVersion',
+                            {
+                              defaultMessage: 'Most used NCT',
+                            }
+                          )}
+                        </h2>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexItem>
+                <MostUsedChart
+                  metric={MostUsedMetric.NCT}
+                  start={start}
+                  end={end}
+                  filters={mostUsedChartFilters}
+                />
+              </EuiFlexItem>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiFlexGroup direction={rowDirection} gutterSize="s">
+          {/* OS Version */}
+          <EuiFlexItem grow={5}>
+            <EuiPanel hasBorder={true}>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <EuiFlexGroup alignItems="center" wrap>
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="xs">
+                        <h2>
+                          {i18n.translate(
+                            'xpack.apm.serviceOverview.mostUsedOsVersion',
+                            {
+                              defaultMessage: 'Most used OS version',
+                            }
+                          )}
+                        </h2>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexItem>
+                <MostUsedChart
+                  metric={MostUsedMetric.OS_VERSION}
+                  start={start}
+                  end={end}
+                  filters={mostUsedChartFilters}
+                />
+              </EuiFlexItem>
+            </EuiPanel>
+          </EuiFlexItem>
+          {/* App version */}
+          <EuiFlexItem grow={5}>
+            <EuiPanel hasBorder={true}>
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <EuiFlexGroup alignItems="center" wrap>
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="xs">
+                        <h2>
+                          {i18n.translate(
+                            'xpack.apm.serviceOverview.mostUsedVersion',
+                            {
+                              defaultMessage: 'Most used app version',
+                            }
+                          )}
+                        </h2>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexItem>
+                <MostUsedChart
+                  metric={MostUsedMetric.APP_VERSION}
+                  start={start}
+                  end={end}
+                  filters={mostUsedChartFilters}
+                />
+              </EuiFlexItem>
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>

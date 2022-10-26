@@ -20,7 +20,8 @@
     "share",
     "unifiedSearch",
     "dataViews",
-    "advancedSettings"
+    "advancedSettings",
+    "lens"
   ],
   "optionalPlugins": [
     "actions",
