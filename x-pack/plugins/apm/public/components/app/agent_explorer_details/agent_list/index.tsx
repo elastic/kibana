@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiLink, EuiToolTip } from '@elastic/eui';
-import { AgentExplorerFieldName } from '@kbn/apm-plugin/common/agent_explorer';
-import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
+import {
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ValuesType } from 'utility-types';
+import { AgentExplorerFieldName } from '../../../../../common/agent_explorer';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { truncate, unit } from '../../../../utils/style';
@@ -109,7 +116,7 @@ export function getAgentsColumns({
               </EuiFlexItem>
             </EuiFlexGroup>
           </StyledLink>
-      </EuiToolTip>
+        </EuiToolTip>
       ),
     },
     {
@@ -158,11 +165,7 @@ interface Props {
   isLoading: boolean;
 }
 
-export function AgentList({
-  items,
-  noItemsMessage,
-  isLoading,
-}: Props) {
+export function AgentList({ items, noItemsMessage, isLoading }: Props) {
   const [selectedAgent, setSelectedAgent] = useState<AgentExplorerItem>();
   const [showFlyout, setShowFlyout] = useState(false);
 
@@ -172,7 +175,7 @@ export function AgentList({
 
   const onAgentSelected = (agent: AgentExplorerItem) => {
     setSelectedAgent(agent);
-  }
+  };
 
   const onCloseFlyout = () => {
     setShowFlyout(false);
@@ -181,15 +184,15 @@ export function AgentList({
 
   const { query } = useApmParams('/agent-explorer');
 
-  const agentColumns = useMemo(() => getAgentsColumns({ query, onAgentSelected }), [query]);
+  const agentColumns = useMemo(
+    () => getAgentsColumns({ query, onAgentSelected }),
+    [query]
+  );
 
   return (
     <>
       {showFlyout && (
-        <AgentInstances
-          agent={selectedAgent}
-          onClose={onCloseFlyout}
-        />
+        <AgentInstances agent={selectedAgent} onClose={onCloseFlyout} />
       )}
       <EuiInMemoryTable
         tableCaption={i18n.translate('xpack.apm.agentExplorer.table.caption', {

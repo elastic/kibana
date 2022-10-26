@@ -6,17 +6,18 @@
  */
 
 import {
-  EuiCallOut, EuiEmptyPrompt,
+  EuiCallOut,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import {
   SERVICE_LANGUAGE_NAME,
-  SERVICE_NAME
+  SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -66,7 +67,7 @@ export function AgentExplorerDetails() {
     query: { serviceName, agentLanguage, rangeFrom, rangeTo },
   } = useApmParams('/agent-explorer');
 
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo});
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const agents = useAgentExplorerFetcher({ start, end });
 
   const isLoading = agents.status === FETCH_STATUS.LOADING;
@@ -147,14 +148,14 @@ export function AgentExplorerDetails() {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-				<EuiCallOut
-					size="s"
-					title={i18n.translate('xpack.apm.agentExplorer.callout.24hoursData', {
-						defaultMessage: 'Information based on the lastest 24h',
-					})}
-					iconType="clock"
-				/>
-			</EuiFlexItem>
+        <EuiCallOut
+          size="s"
+          title={i18n.translate('xpack.apm.agentExplorer.callout.24hoursData', {
+            defaultMessage: 'Information based on the lastest 24h',
+          })}
+          iconType="clock"
+        />
+      </EuiFlexItem>
       <EuiSpacer />
       <EuiFlexItem>
         <AgentList

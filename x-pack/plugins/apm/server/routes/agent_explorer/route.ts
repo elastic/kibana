@@ -46,8 +46,6 @@ const agentExplorerRoute = createApmServerRoute({
       params,
       request,
       plugins: { security },
-      logger,
-      core,
     } = resources;
 
     const {
@@ -74,8 +72,6 @@ const agentExplorerRoute = createApmServerRoute({
       start,
       end,
       randomSampler,
-      core: core.setup,
-      logger,
     });
   },
 });
@@ -85,12 +81,7 @@ const agentExplorerInstanceRoute = createApmServerRoute({
   options: { tags: ['access:apm'] },
   params: t.type({
     path: t.type({ serviceName: t.string }),
-    query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      probabilityRt,
-    ]),
+    query: t.intersection([environmentRt, kueryRt, rangeRt, probabilityRt]),
   }),
   async handler(resources): Promise<{
     agentInstances: {
@@ -100,8 +91,8 @@ const agentExplorerInstanceRoute = createApmServerRoute({
         environments: string[];
         agentVersion: string;
         lastReport: string;
-      }>
-    }
+      }>;
+    };
   }> {
     const {
       params,
@@ -109,17 +100,9 @@ const agentExplorerInstanceRoute = createApmServerRoute({
       plugins: { security },
     } = resources;
 
-    const {
-      environment,
-      kuery,
-      start,
-      end,
-      probability,
-    } = params.query;
+    const { environment, kuery, start, end, probability } = params.query;
 
-    const {
-      serviceName,
-    } = params.path;
+    const { serviceName } = params.path;
 
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(resources),
@@ -136,7 +119,7 @@ const agentExplorerInstanceRoute = createApmServerRoute({
         end,
         randomSampler,
       }),
-    }
+    };
   },
 });
 

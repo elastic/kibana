@@ -5,14 +5,23 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiLoadingContent } from '@elastic/eui';
+import {
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiLoadingContent,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
-import { ValuesType } from "utility-types";
+import { ValuesType } from 'utility-types';
 import { AgentExplorerFieldName } from '../../../../../../common/agent_explorer';
-import { getServiceNodeName, SERVICE_NODE_NAME_MISSING } from '../../../../../../common/service_nodes';
-import { APIReturnType } from "../../../../../services/rest/create_call_apm_api";
+import {
+  getServiceNodeName,
+  SERVICE_NODE_NAME_MISSING,
+} from '../../../../../../common/service_nodes';
+import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../../utils/style';
 import { EnvironmentBadge } from '../../../../shared/environment_badge';
 import { ItemsBadge } from '../../../../shared/item_badge';
@@ -30,27 +39,32 @@ enum AgentExplorerInstanceFieldName {
   LastReport = 'lastReport',
 }
 
-export function getInstanceColumns(): Array<EuiBasicTableColumn<AgentExplorerInstance>> {
+export function getInstanceColumns(): Array<
+  EuiBasicTableColumn<AgentExplorerInstance>
+> {
   return [
     {
       field: AgentExplorerInstanceFieldName.InstanceName,
-      name: i18n.translate('xpack.apm.agentExplorerTable.serviceNameColumnLabel', {
-        defaultMessage: 'Instance',
-      }),
+      name: i18n.translate(
+        'xpack.apm.agentExplorerTable.serviceNameColumnLabel',
+        {
+          defaultMessage: 'Instance',
+        }
+      ),
       sortable: true,
       render: (_, { serviceNode }) => {
         const { displayedName, tooltip } =
           serviceNode === SERVICE_NODE_NAME_MISSING
             ? {
-              displayedName: getServiceNodeName(serviceNode),
-              tooltip: i18n.translate(
-                'xpack.apm.jvmsTable.explainServiceNodeNameMissing',
-                {
-                  defaultMessage:
-                    'We could not identify which JVMs these metrics belong to. This is likely caused by running a version of APM Server that is older than 7.5. Upgrading to APM Server 7.5 or higher should resolve this issue.',
-                }
-              ),
-            }
+                displayedName: getServiceNodeName(serviceNode),
+                tooltip: i18n.translate(
+                  'xpack.apm.jvmsTable.explainServiceNodeNameMissing',
+                  {
+                    defaultMessage:
+                      'We could not identify which JVMs these metrics belong to. This is likely caused by running a version of APM Server that is older than 7.5. Upgrading to APM Server 7.5 or higher should resolve this issue.',
+                  }
+                ),
+              }
             : { displayedName: serviceNode, tooltip: serviceNode };
 
         return (
@@ -58,14 +72,18 @@ export function getInstanceColumns(): Array<EuiBasicTableColumn<AgentExplorerIns
             data-test-subj="apmAgentExplorerListServiceLink"
             text={tooltip}
             content={
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+                responsive={false}
+              >
                 <EuiFlexItem className="eui-textTruncate">
                   <span className="eui-textTruncate">{displayedName}</span>
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
           />
-        )
+        );
       },
     },
     {
@@ -97,7 +115,8 @@ export function getInstanceColumns(): Array<EuiBasicTableColumn<AgentExplorerIns
             'xpack.apm.agentExplorerTable.agentVersionColumnLabel.multipleVersions',
             {
               values: { versionsCount: agentVersion.length },
-              defaultMessage: '{versionsCount, plural, one {1 version} other {# versions}}',
+              defaultMessage:
+                '{versionsCount, plural, one {1 version} other {# versions}}',
             }
           )}
         />
@@ -114,9 +133,7 @@ export function getInstanceColumns(): Array<EuiBasicTableColumn<AgentExplorerIns
       width: `${unit * 15}px`,
       sortable: true,
       render: (_, { lastReport }) => (
-        <>
-          {moment(new Date(`${lastReport}`)).fromNow()}
-        </>
+        <>{moment(new Date(`${lastReport}`)).fromNow()}</>
       ),
     },
   ];
@@ -127,11 +144,7 @@ interface Props {
   isLoading: boolean;
 }
 
-export function AgentInstancesDetails({
-  items,
-  isLoading,
-}: Props) {
-
+export function AgentInstancesDetails({ items, isLoading }: Props) {
   if (isLoading) {
     return (
       <div style={{ width: '50%' }}>
@@ -153,8 +166,8 @@ export function AgentInstancesDetails({
       sorting={{
         sort: {
           field: AgentExplorerFieldName.AgentVersion,
-          direction: 'desc'
-        }
+          direction: 'desc',
+        },
       }}
       data-test-subj="agentExplorerTable"
       message={

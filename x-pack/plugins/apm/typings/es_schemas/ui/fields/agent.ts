@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ValuesType } from 'utility-types';
+
 const elasticAgentNames = [
   'go',
   'java',
@@ -19,7 +21,7 @@ const elasticAgentNames = [
   'android/java',
 ] as const;
 
-export type ElasticAgentName = typeof elasticAgentNames[number];
+export type ElasticAgentName = ValuesType<typeof elasticAgentNames>;
 
 export const isElasticAgentName = (agentName: AgentName) =>
   elasticAgentNames.includes(agentName as ElasticAgentName);

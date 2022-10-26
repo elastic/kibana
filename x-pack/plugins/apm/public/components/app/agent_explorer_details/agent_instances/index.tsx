@@ -10,15 +10,17 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiHorizontalRule, EuiLoadingSpinner, EuiPortal,
+  EuiHorizontalRule,
+  EuiLoadingSpinner,
+  EuiPortal,
   EuiSpacer,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
-import { AgentExplorerFieldName } from '@kbn/apm-plugin/common/agent_explorer';
-import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { AgentExplorerFieldName } from '../../../../../common/agent_explorer';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
@@ -31,20 +33,19 @@ import { ResponsiveFlyout } from '../../transaction_details/waterfall_with_summa
 import { AgentExplorerItem } from '../agent_list';
 import { AgentInstancesDetails } from './agent_instances_details';
 
-function useAgentInstancesFetcher({
-  serviceName,
-}: {
-  serviceName: string;
-}) {
-
+function useAgentInstancesFetcher({ serviceName }: { serviceName?: string }) {
   const {
     query: { environment, rangeFrom, rangeTo, kuery },
   } = useApmParams('/agent-explorer');
 
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo});
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   return useProgressiveFetcher(
     (callApmApi) => {
+      if (!serviceName) {
+        return;
+      }
+
       return callApmApi(
         'GET /internal/apm/services/{serviceName}/agent_instances',
         {
@@ -53,10 +54,10 @@ function useAgentInstancesFetcher({
               serviceName,
             },
             query: {
-              environment: environment,
+              environment,
               start,
               end,
-              kuery: kuery,
+              kuery,
             },
           },
         }
@@ -70,21 +71,19 @@ function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
 }
 
-export function AgentContextualInformation(
-  {
-    agentName,
-    serviceName,
-    agentRepoUrl,
-    isLoading,
-    instances,
-  }: {
-    agentName?: AgentName;
-    serviceName: string;
-    agentRepoUrl?: string;
-    isLoading: boolean;
-    instances?: number;
-  }) {
-
+export function AgentContextualInformation({
+  agentName,
+  serviceName,
+  agentRepoUrl,
+  isLoading,
+  instances,
+}: {
+  agentName?: AgentName;
+  serviceName?: string;
+  agentRepoUrl?: string;
+  isLoading: boolean;
+  instances?: number;
+}) {
   const stickyProperties = [
     {
       label: i18n.translate('xpack.apm.agentInstancesDetails.serviceLabel', {
@@ -135,9 +134,12 @@ export function AgentContextualInformation(
       width: '25%',
     },
     {
-      label: i18n.translate('xpack.apm.agentInstancesDetails.agentDocsUrlLabel', {
-        defaultMessage: 'Agent documentation',
-      }),
+      label: i18n.translate(
+        'xpack.apm.agentInstancesDetails.agentDocsUrlLabel',
+        {
+          defaultMessage: 'Agent documentation',
+        }
+      ),
       fieldName: AgentExplorerFieldName.AgentRepoUrl,
       val: (
         <TruncateWithTooltip
@@ -163,16 +165,14 @@ interface Props {
   onClose: () => void;
 }
 
-export function AgentInstances({
-  agent,
-  onClose,
-}: Props) {
+export function AgentInstances({ agent, onClose }: Props) {
+  const instances = useAgentInstancesFetcher({
+    serviceName: agent?.serviceName,
+  });
 
-  if(!agent){
+  if (!instances) {
     return null;
   }
-
-  const instances = useAgentInstancesFetcher({ serviceName: agent.serviceName });
 
   const isLoading = instances.status === FETCH_STATUS.LOADING;
 
@@ -197,15 +197,18 @@ export function AgentInstances({
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <AgentContextualInformation
-            agentName={agent.agentName}
-            serviceName={agent.serviceName}
-            agentRepoUrl={agent.agentRepoUrl}
+            agentName={agent?.agentName}
+            serviceName={agent?.serviceName}
+            agentRepoUrl={agent?.agentRepoUrl}
             instances={instances.data?.agentInstances.instances}
             isLoading={isLoading}
           />
           <EuiHorizontalRule margin="m" />
           <EuiSpacer size="m" />
-          <AgentInstancesDetails isLoading={isLoading} items={instances.data?.agentInstances.items ?? []} />
+          <AgentInstancesDetails
+            isLoading={isLoading}
+            items={instances.data?.agentInstances.items ?? []}
+          />
         </EuiFlyoutBody>
       </ResponsiveFlyout>
     </EuiPortal>
