@@ -33,7 +33,7 @@ describe('#handleCombinedFilter', function () {
 
   describe('AND relation', () => {
     it('Generates an empty bool should clause with no filters', () => {
-      const filter = buildCombinedFilter(BooleanRelation.AND, []);
+      const filter = buildCombinedFilter(BooleanRelation.AND, [], indexPattern);
       const result = handleCombinedFilter(filter);
       expect(result.query).toMatchInlineSnapshot(`
         Object {
@@ -53,7 +53,7 @@ describe('#handleCombinedFilter', function () {
         buildRangeFilter(getField('bytes'), { gte: 10 }, indexPattern),
         buildExistsFilter(getField('machine.os'), indexPattern),
       ];
-      const filter = buildCombinedFilter(BooleanRelation.AND, filters);
+      const filter = buildCombinedFilter(BooleanRelation.AND, filters, indexPattern);
       const result = handleCombinedFilter(filter);
       expect(result.query).toMatchInlineSnapshot(`
         Object {
@@ -93,7 +93,7 @@ describe('#handleCombinedFilter', function () {
         buildRangeFilter(getField('bytes'), { gte: 10 }, indexPattern),
         buildExistsFilter(getField('machine.os'), indexPattern),
       ];
-      const filter = buildCombinedFilter(BooleanRelation.AND, filters);
+      const filter = buildCombinedFilter(BooleanRelation.AND, filters, indexPattern);
       const result = handleCombinedFilter(filter);
       expect(result.query).toMatchInlineSnapshot(`
         Object {
@@ -146,7 +146,7 @@ describe('#handleCombinedFilter', function () {
         disabledFilter,
         buildExistsFilter(getField('machine.os'), indexPattern),
       ];
-      const filter = buildCombinedFilter(BooleanRelation.AND, filters);
+      const filter = buildCombinedFilter(BooleanRelation.AND, filters, indexPattern);
       const result = handleCombinedFilter(filter);
       expect(result.query).toMatchInlineSnapshot(`
         Object {
@@ -177,7 +177,7 @@ describe('#handleCombinedFilter', function () {
         buildRangeFilter(getField('bytes'), { gte: 10 }, indexPattern),
         buildExistsFilter(getField('machine.os'), indexPattern),
       ];
-      const filter = buildCombinedFilter(BooleanRelation.AND, filters);
+      const filter = buildCombinedFilter(BooleanRelation.AND, filters, indexPattern);
       const { query, ...rest } = handleCombinedFilter(filter);
       expect(rest).toMatchInlineSnapshot(`
         Object {
@@ -187,7 +187,7 @@ describe('#handleCombinedFilter', function () {
           "meta": Object {
             "alias": undefined,
             "disabled": false,
-            "index": undefined,
+            "index": "logstash-*",
             "negate": false,
             "params": Array [
               Object {
@@ -235,7 +235,7 @@ describe('#handleCombinedFilter', function () {
 
   describe('OR relation', () => {
     it('Generates an empty bool should clause with no filters', () => {
-      const filter = buildCombinedFilter(BooleanRelation.OR, []);
+      const filter = buildCombinedFilter(BooleanRelation.OR, [], indexPattern);
       const result = handleCombinedFilter(filter);
       expect(result.query).toMatchInlineSnapshot(`
               Object {
@@ -253,7 +253,7 @@ describe('#handleCombinedFilter', function () {
         buildRangeFilter(getField('bytes'), { gte: 10 }, indexPattern),
         buildExistsFilter(getField('machine.os'), indexPattern),
       ];
-      const filter = buildCombinedFilter(BooleanRelation.OR, filters);
+      const filter = buildCombinedFilter(BooleanRelation.OR, filters, indexPattern);
       const result = handleCombinedFilter(filter);
       expect(result.query).toMatchInlineSnapshot(`
         Object {
@@ -318,7 +318,7 @@ describe('#handleCombinedFilter', function () {
         buildRangeFilter(getField('bytes'), { gte: 10 }, indexPattern),
         buildExistsFilter(getField('machine.os'), indexPattern),
       ];
-      const filter = buildCombinedFilter(BooleanRelation.OR, filters);
+      const filter = buildCombinedFilter(BooleanRelation.OR, filters, indexPattern);
       const result = handleCombinedFilter(filter);
       expect(result.query).toMatchInlineSnapshot(`
         Object {
@@ -395,7 +395,7 @@ describe('#handleCombinedFilter', function () {
         disabledFilter,
         buildExistsFilter(getField('machine.os'), indexPattern),
       ];
-      const filter = buildCombinedFilter(BooleanRelation.OR, filters);
+      const filter = buildCombinedFilter(BooleanRelation.OR, filters, indexPattern);
       const result = handleCombinedFilter(filter);
       expect(result.query).toMatchInlineSnapshot(`
         Object {
@@ -450,7 +450,7 @@ describe('#handleCombinedFilter', function () {
         buildRangeFilter(getField('bytes'), { gte: 10 }, indexPattern),
         buildExistsFilter(getField('machine.os'), indexPattern),
       ];
-      const filter = buildCombinedFilter(BooleanRelation.OR, filters);
+      const filter = buildCombinedFilter(BooleanRelation.OR, filters, indexPattern);
       const { query, ...rest } = handleCombinedFilter(filter);
       expect(rest).toMatchInlineSnapshot(`
         Object {
@@ -460,7 +460,7 @@ describe('#handleCombinedFilter', function () {
           "meta": Object {
             "alias": undefined,
             "disabled": false,
-            "index": undefined,
+            "index": "logstash-*",
             "negate": false,
             "params": Array [
               Object {
@@ -509,18 +509,26 @@ describe('#handleCombinedFilter', function () {
   describe('Nested relations', () => {
     it('Handles complex-nested filters with ANDs and ORs', () => {
       const filters = [
-        buildCombinedFilter(BooleanRelation.OR, [
-          buildPhrasesFilter(getField('extension'), ['tar', 'gz'], indexPattern),
-          buildPhraseFilter(getField('ssl'), false, indexPattern),
-          buildCombinedFilter(BooleanRelation.AND, [
-            buildPhraseFilter(getField('extension'), 'value', indexPattern),
-            buildRangeFilter(getField('bytes'), { gte: 10 }, indexPattern),
-          ]),
-          buildExistsFilter(getField('machine.os'), indexPattern),
-        ]),
+        buildCombinedFilter(
+          BooleanRelation.OR,
+          [
+            buildPhrasesFilter(getField('extension'), ['tar', 'gz'], indexPattern),
+            buildPhraseFilter(getField('ssl'), false, indexPattern),
+            buildCombinedFilter(
+              BooleanRelation.AND,
+              [
+                buildPhraseFilter(getField('extension'), 'value', indexPattern),
+                buildRangeFilter(getField('bytes'), { gte: 10 }, indexPattern),
+              ],
+              indexPattern
+            ),
+            buildExistsFilter(getField('machine.os'), indexPattern),
+          ],
+          indexPattern
+        ),
         buildPhrasesFilter(getField('machine.os.keyword'), ['foo', 'bar'], indexPattern),
       ];
-      const filter = buildCombinedFilter(BooleanRelation.AND, filters);
+      const filter = buildCombinedFilter(BooleanRelation.AND, filters, indexPattern);
       const result = handleCombinedFilter(filter);
       expect(result.query).toMatchInlineSnapshot(`
         Object {

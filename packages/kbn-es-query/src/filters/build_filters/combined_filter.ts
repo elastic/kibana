@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Filter, FilterMeta, FILTERS } from './types';
-import { buildEmptyFilter } from './build_empty_filter';
+import { Filter, FilterMeta, FILTERS, FilterStateStore } from './types';
+import { DataViewBase } from '../../es_query';
 
 /**
  * @public
@@ -50,19 +50,22 @@ export function isCombinedFilter(filter: Filter): filter is CombinedFilter {
 export function buildCombinedFilter(
   relation: BooleanRelation,
   filters: Filter[],
-  alias?: string | null,
-  dataViewId?: string
+  indexPattern: DataViewBase,
+  disabled: FilterMeta['disabled'] = false,
+  negate: FilterMeta['negate'] = false,
+  alias?: FilterMeta['alias'],
+  store: FilterStateStore = FilterStateStore.APP_STATE
 ): CombinedFilter {
-  const filter = buildEmptyFilter(false);
   return {
-    ...filter,
+    $state: { store },
     meta: {
-      ...filter.meta,
       type: FILTERS.COMBINED,
       relation,
-      alias,
-      index: dataViewId,
       params: filters,
+      index: indexPattern.id,
+      disabled,
+      negate,
+      alias,
     },
   };
 }

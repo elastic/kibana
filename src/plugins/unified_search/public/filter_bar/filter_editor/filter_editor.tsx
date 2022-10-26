@@ -381,9 +381,9 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       return; // typescript validation
     }
     const alias = useCustomLabel ? customLabel : null;
+    const { index, disabled = false, negate = false } = this.props.filter.meta;
 
     if (isCustomEditorOpen) {
-      const { index, disabled = false, negate = false } = this.props.filter.meta;
       const newIndex = index || this.props.indexPatterns[0].id!;
       const body = JSON.parse(queryDsl);
       const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
@@ -395,7 +395,15 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
 
       const builderFilter = (filter: Filter) => {
         if (isCombinedFilter(filter)) {
-          return buildCombinedFilter(filter.meta.relation, mappedFilter(filter));
+          return buildCombinedFilter(
+            filter.meta.relation,
+            mappedFilter(filter),
+            indexPattern,
+            disabled,
+            negate,
+            alias,
+            $state.store
+          );
         } else {
           return buildFilter(
             indexPattern,
@@ -413,7 +421,15 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       const builedFilter =
         filters.length === 1
           ? filters[0]
-          : buildCombinedFilter(BooleanRelation.AND, filters, alias, indexPattern.id);
+          : buildCombinedFilter(
+              BooleanRelation.AND,
+              filters,
+              indexPattern,
+              disabled,
+              negate,
+              alias,
+              $state.store
+            );
 
       this.props.onSubmit(builedFilter);
     }
