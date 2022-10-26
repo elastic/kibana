@@ -10,6 +10,8 @@ import React, { createContext, useCallback, useContext, useMemo, useState } from
 
 import useObservable from 'react-use/lib/useObservable';
 import { catchError, of, timeout } from 'rxjs';
+import { useLocation } from 'react-router-dom';
+import { isDetectionsPath } from '../../../helpers';
 import { useKibana } from '../../lib/kibana';
 import { securityTourConfig, SecurityStepId } from './tour_config';
 
@@ -29,7 +31,7 @@ const initialState: TourContextValue = {
 
 const TourContext = createContext<TourContextValue>(initialState);
 
-export const TourContextProvider = ({ children }: { children: ReactChild }) => {
+export const RealTourContextProvider = ({ children }: { children: ReactChild }) => {
   const { guidedOnboardingApi } = useKibana().services.guidedOnboarding;
 
   const isRulesTourActive = useObservable(
@@ -95,6 +97,16 @@ export const TourContextProvider = ({ children }: { children: ReactChild }) => {
   };
 
   return <TourContext.Provider value={context}>{children}</TourContext.Provider>;
+};
+
+export const TourContextProvider = ({ children }: { children: ReactChild }) => {
+  const { pathname } = useLocation();
+
+  if (isDetectionsPath(pathname)) {
+    return <RealTourContextProvider>{children}</RealTourContextProvider>;
+  }
+
+  return <TourContext.Provider value={initialState}>{children}</TourContext.Provider>;
 };
 
 export const useTourContext = (): TourContextValue => {
