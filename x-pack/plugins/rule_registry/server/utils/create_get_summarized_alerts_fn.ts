@@ -9,13 +9,14 @@ import type { PublicContract } from '@kbn/utility-types';
 import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import type { GetSummarizedAlertsFnOpts } from '@kbn/alerting-plugin/server';
 import {
+  ALERT_END,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
+  ALERT_START,
   EVENT_ACTION,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import {
-  MappingRuntimeFields,
   QueryDslQueryContainer,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -204,7 +205,7 @@ interface GetAlertsByTimeRangeOpts {
   isLifecycleAlert: boolean;
 }
 
-const getAlertsByTimeRange = async <TSearchRequest extends ESSearchRequest>({
+const getAlertsByTimeRange = async ({
   start,
   end,
   ruleId,
@@ -223,6 +224,12 @@ interface GetAlertsByTimeRangeHelperOpts {
   end: Date;
   ruleId: string;
   ruleDataClientReader: IRuleDataReader;
+}
+
+enum AlertTypes {
+  NEW = 0,
+  ONGOING,
+  RECOVERED,
 }
 
 const getPersistentAlertsByTimeRange = async <TSearchRequest extends ESSearchRequest>({
@@ -259,9 +266,9 @@ const getLifecycleAlertsByTimeRange = async ({
   ruleDataClientReader,
 }: GetAlertsByTimeRangeHelperOpts) => {
   const requests = [
-    getQueryByTimeRange(start, end, ruleId, 'new'),
-    getQueryByTimeRange(start, end, ruleId, 'ongoing'),
-    getQueryByTimeRange(start, end, ruleId, 'recovered'),
+    getQueryByTimeRange(start, end, ruleId, AlertTypes.NEW),
+    getQueryByTimeRange(start, end, ruleId, AlertTypes.ONGOING),
+    getQueryByTimeRange(start, end, ruleId, AlertTypes.RECOVERED),
   ];
 
   const responses = await Promise.all(
@@ -275,13 +282,13 @@ const getLifecycleAlertsByTimeRange = async ({
   };
 };
 
-const getQueryByTimeRange = (start: Date, end: Date, ruleId: string, type?: string) => {
-  const filter: QueryDslQueryContainer[] = [
+const getQueryByTimeRange = (start: Date, end: Date, ruleId: string, type?: AlertTypes) => {
+  let filter: QueryDslQueryContainer[] = [
     {
       range: {
         [TIMESTAMP]: {
-          gte: start?.toISOString(),
-          lte: end?.toISOString(),
+          gte: start.toISOString(),
+          lte: end.toISOString(),
         },
       },
     },
@@ -291,42 +298,49 @@ const getQueryByTimeRange = (start: Date, end: Date, ruleId: string, type?: stri
       },
     },
   ];
-  if (type) {
+  if (type === AlertTypes.NEW) {
     filter.push({
-      term: {
-        alert_type: type,
+      range: {
+        [ALERT_START]: {
+          gte: start.toISOString(),
+        },
+      },
+    });
+  } else if (type === AlertTypes.ONGOING) {
+    filter = [
+      ...filter,
+      {
+        range: {
+          [ALERT_START]: {
+            lt: start.toISOString(),
+          },
+        },
+      },
+      {
+        bool: {
+          must_not: {
+            exists: {
+              field: ALERT_END,
+            },
+          },
+        },
+      },
+    ];
+  } else if (type === AlertTypes.RECOVERED) {
+    filter.push({
+      range: {
+        [ALERT_END]: {
+          gte: start.toISOString(),
+          lte: end.toISOString(),
+        },
       },
     });
   }
-
-  const runtimeMapping: MappingRuntimeFields = {
-    alert_type: {
-      type: 'keyword',
-      script: {
-        source: `
-          def start = doc['kibana.alert.start'];
-          def timestamp = doc['@timestamp'];
-          def end = doc['kibana.alert.end'];
-
-          if (start.value.getMillis() == timestamp.value.getMillis()) {
-            emit('new');
-          } else if (end.empty && start.value.getMillis() < timestamp.value.getMillis()) {
-            emit('ongoing');
-          } else if (!end.empty && end.value.getMillis() == timestamp.value.getMillis()) {
-            emit('recovered');
-          } else {
-            emit('unknown');
-          }
-        `,
-      },
-    },
-  };
 
   return {
     body: {
       size: MAX_ALERT_DOCS_TO_RETURN,
       track_total_hits: true,
-      runtime_mappings: runtimeMapping,
       query: {
         bool: {
           filter,

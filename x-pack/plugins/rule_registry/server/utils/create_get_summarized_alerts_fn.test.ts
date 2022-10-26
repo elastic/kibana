@@ -424,28 +424,6 @@ describe('createGetSummarizedAlertsFn', () => {
       body: {
         size: 1000,
         track_total_hits: true,
-        runtime_mappings: {
-          alert_type: {
-            type: 'keyword',
-            script: {
-              source: `
-          def start = doc['kibana.alert.start'];
-          def timestamp = doc['@timestamp'];
-          def end = doc['kibana.alert.end'];
-
-          if (start.value.getMillis() == timestamp.value.getMillis()) {
-            emit('new');
-          } else if (end.empty && start.value.getMillis() < timestamp.value.getMillis()) {
-            emit('ongoing');
-          } else if (!end.empty && end.value.getMillis() == timestamp.value.getMillis()) {
-            emit('recovered');
-          } else {
-            emit('unknown');
-          }
-        `,
-            },
-          },
-        },
         query: {
           bool: {
             filter: [
@@ -463,8 +441,10 @@ describe('createGetSummarizedAlertsFn', () => {
                 },
               },
               {
-                term: {
-                  alert_type: 'new',
+                range: {
+                  [ALERT_START]: {
+                    gte: '2020-01-01T11:00:00.000Z',
+                  },
                 },
               },
             ],
@@ -476,28 +456,6 @@ describe('createGetSummarizedAlertsFn', () => {
       body: {
         size: 1000,
         track_total_hits: true,
-        runtime_mappings: {
-          alert_type: {
-            type: 'keyword',
-            script: {
-              source: `
-          def start = doc['kibana.alert.start'];
-          def timestamp = doc['@timestamp'];
-          def end = doc['kibana.alert.end'];
-
-          if (start.value.getMillis() == timestamp.value.getMillis()) {
-            emit('new');
-          } else if (end.empty && start.value.getMillis() < timestamp.value.getMillis()) {
-            emit('ongoing');
-          } else if (!end.empty && end.value.getMillis() == timestamp.value.getMillis()) {
-            emit('recovered');
-          } else {
-            emit('unknown');
-          }
-        `,
-            },
-          },
-        },
         query: {
           bool: {
             filter: [
@@ -515,8 +473,19 @@ describe('createGetSummarizedAlertsFn', () => {
                 },
               },
               {
-                term: {
-                  alert_type: 'ongoing',
+                range: {
+                  [ALERT_START]: {
+                    lt: '2020-01-01T11:00:00.000Z',
+                  },
+                },
+              },
+              {
+                bool: {
+                  must_not: {
+                    exists: {
+                      field: ALERT_END,
+                    },
+                  },
                 },
               },
             ],
@@ -528,28 +497,6 @@ describe('createGetSummarizedAlertsFn', () => {
       body: {
         size: 1000,
         track_total_hits: true,
-        runtime_mappings: {
-          alert_type: {
-            type: 'keyword',
-            script: {
-              source: `
-          def start = doc['kibana.alert.start'];
-          def timestamp = doc['@timestamp'];
-          def end = doc['kibana.alert.end'];
-
-          if (start.value.getMillis() == timestamp.value.getMillis()) {
-            emit('new');
-          } else if (end.empty && start.value.getMillis() < timestamp.value.getMillis()) {
-            emit('ongoing');
-          } else if (!end.empty && end.value.getMillis() == timestamp.value.getMillis()) {
-            emit('recovered');
-          } else {
-            emit('unknown');
-          }
-        `,
-            },
-          },
-        },
         query: {
           bool: {
             filter: [
@@ -567,8 +514,11 @@ describe('createGetSummarizedAlertsFn', () => {
                 },
               },
               {
-                term: {
-                  alert_type: 'recovered',
+                range: {
+                  [ALERT_END]: {
+                    gte: '2020-01-01T11:00:00.000Z',
+                    lte: '2020-01-01T12:25:00.000Z',
+                  },
                 },
               },
             ],
@@ -900,28 +850,6 @@ describe('createGetSummarizedAlertsFn', () => {
       body: {
         size: 1000,
         track_total_hits: true,
-        runtime_mappings: {
-          alert_type: {
-            type: 'keyword',
-            script: {
-              source: `
-          def start = doc['kibana.alert.start'];
-          def timestamp = doc['@timestamp'];
-          def end = doc['kibana.alert.end'];
-
-          if (start.value.getMillis() == timestamp.value.getMillis()) {
-            emit('new');
-          } else if (end.empty && start.value.getMillis() < timestamp.value.getMillis()) {
-            emit('ongoing');
-          } else if (!end.empty && end.value.getMillis() == timestamp.value.getMillis()) {
-            emit('recovered');
-          } else {
-            emit('unknown');
-          }
-        `,
-            },
-          },
-        },
         query: {
           bool: {
             filter: [
