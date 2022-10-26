@@ -124,7 +124,6 @@ export function ExpressionWrapper({
   executionContext,
   lensInspector,
   noPadding,
-  test,
 }: ExpressionWrapperProps) {
   return (
     <I18nProvider>
@@ -167,7 +166,6 @@ export function ExpressionWrapper({
             }}
             onEvent={handleEvent}
             hasCompatibleActions={hasCompatibleActions}
-            test={test}
           />
         </div>
       )}
