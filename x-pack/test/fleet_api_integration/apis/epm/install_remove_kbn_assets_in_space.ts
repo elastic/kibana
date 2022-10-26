@@ -30,17 +30,22 @@ export default function (providerContext: FtrProviderContext) {
     await supertest
       .post(`/s/${spaceId}/api/fleet/epm/packages/${pkg}/${version}`)
       .set('kbn-xsrf', 'xxxx')
-      .send({ force: true });
+      .send({ force: true })
+      .expect(200);
   };
   const createSpace = async (spaceId: string) => {
-    await supertest.post(`/api/spaces/space`).set('kbn-xsrf', 'xxxx').send({
-      name: spaceId,
-      id: spaceId,
-      initials: 's',
-      color: '#D6BF57',
-      disabledFeatures: [],
-      imageUrl: '',
-    });
+    await supertest
+      .post(`/api/spaces/space`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({
+        name: spaceId,
+        id: spaceId,
+        initials: 's',
+        color: '#D6BF57',
+        disabledFeatures: [],
+        imageUrl: '',
+      })
+      .expect(200);
   };
 
   const deleteSpace = async (spaceId: string) => {
@@ -74,46 +79,47 @@ export default function (providerContext: FtrProviderContext) {
         kibanaServer,
       });
     });
-    describe.only('installs all assets when installing a package in non default space after installing in default space', async () => {
+    describe('creates correct tags when installing a package in non default space after installing in default space', async () => {
       before(async () => {
         if (!server.enabled) return;
-        await installPackageInSpace(pkgName, '0.1.1', 'default');
+        await installPackageInSpace('all_assets', pkgVersion, 'default');
         await installPackageInSpace(pkgName, pkgVersion, testSpaceId);
       });
       after(async () => {
         if (!server.enabled) return;
+        await uninstallPackage('all_assets', pkgVersion);
         await uninstallPackage(pkgName, pkgVersion);
-        await uninstallPackage(pkgName, '0.1.1');
       });
 
       it('Should create managed tag saved objects', async () => {
         const defaultTag = await kibanaServer.savedObjects.get({
           type: 'tag',
-          id: 'default-managed',
+          id: 'fleet-managed-default',
           space: 'default',
         });
 
         expect(defaultTag).not.equal(undefined);
         const spaceTag = await kibanaServer.savedObjects.get({
           type: 'tag',
-          id: 'fleet_test_space-managed',
+          id: 'fleet-managed-fleet_test_space',
           space: testSpaceId,
         });
         expect(spaceTag).not.equal(undefined);
       });
+      it('Should create package tag saved objects', async () => {
+        const defaultTag = await kibanaServer.savedObjects.get({
+          type: 'tag',
+          id: `fleet-pkg-all_assets-default`,
+          space: 'default',
+        });
 
-      expectAssetsInstalled({
-        pkgVersion,
-        pkgName,
-        es,
-        kibanaServer,
-      });
-
-      expectAssetsInstalled({
-        pkgVersion: '0.1.1',
-        pkgName,
-        es,
-        kibanaServer,
+        expect(defaultTag).not.equal(undefined);
+        const spaceTag = await kibanaServer.savedObjects.get({
+          type: 'tag',
+          id: `fleet-pkg-${pkgName}-fleet_test_space`,
+          space: testSpaceId,
+        });
+        expect(spaceTag).not.equal(undefined);
       });
     });
 
