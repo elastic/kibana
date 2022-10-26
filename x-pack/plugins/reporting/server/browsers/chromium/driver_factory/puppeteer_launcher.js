@@ -5,9 +5,21 @@
  * 2.0.
  */
 
-import puppeteer from '../../../../../../../node_modules/puppeteer/lib/cjs/puppeteer/puppeteer';
+import puppeteer from 'puppeteer';
 
-export async function launch(browserConfig, userDataDir, binaryPath, chromiumArgs, viewport, browserTimezone) {
+/**
+ * This function exists as a JS file in order to prevent the v4.1.3 TypeScript compiler from interpreting types
+ * in the Puppeteer node module.
+ */
+
+export async function launch(
+  browserConfig,
+  userDataDir,
+  binaryPath,
+  chromiumArgs,
+  viewport,
+  browserTimezone
+) {
   return await puppeteer.launch({
     pipe: !browserConfig.inspect,
     userDataDir: userDataDir,
@@ -19,5 +31,5 @@ export async function launch(browserConfig, userDataDir, binaryPath, chromiumArg
     env: {
       TZ: browserTimezone,
     },
-  })
+  });
 }
