@@ -39,6 +39,24 @@ interface CommonRoutesParams {
 }
 
 /** @internal */
+interface CoreAppsServicePrebootDeps {
+  corePreboot: InternalCorePreboot;
+  uiPlugins: UiPlugins;
+}
+
+/** @internal */
+interface CoreAppsServiceSetupDeps {
+  corePreboot: InternalCoreSetup;
+  uiPlugins: UiPlugins;
+}
+
+/** @internal */
+type DefaultRoutesDeps = CoreAppsServiceSetupDeps; // note: CommonRoutesParams isn't prefixed with 'Register' so we do the same here for DefaultRoutes
+
+/** @internal */
+type PrebootDefaultRoutesDeps = CoreAppsServicePrebootDeps;
+
+/** @internal */
 export class CoreAppsService {
   private readonly logger: Logger;
   private readonly env: Env;

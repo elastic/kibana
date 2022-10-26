@@ -11,11 +11,13 @@ import { registerBundleRoutesMock } from './core_app.test.mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
-import { coreMock, httpServerMock } from '../mocks';
+// import { coreMock } from '../mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
 import { PluginType } from '@kbn/core-base-common';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server'; // packages/core/http/core-http-request-handler-context-server/index.ts
+import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { CoreAppsService } from './core_app';
-import { RequestHandlerContext } from '..';
 
 const emptyPlugins = (): UiPlugins => ({
   internal: new Map(),
@@ -26,15 +28,16 @@ const emptyPlugins = (): UiPlugins => ({
 describe('CoreApp', () => {
   let coreContext: ReturnType<typeof mockCoreContext.create>;
   let coreApp: CoreAppsService;
-  let internalCorePreboot: ReturnType<typeof coreMock.createInternalPreboot>;
+  let internalCorePreboot: ReturnType<typeof coreInternalLifecycleMock.createInternalPreboot>;
   let prebootHTTPResourcesRegistrar: ReturnType<typeof httpResourcesMock.createRegistrar>;
-  let internalCoreSetup: ReturnType<typeof coreMock.createInternalSetup>;
+  let internalCoreSetup: ReturnType<typeof coreInternalLifecycleMock.createInternalSetup>;
   let httpResourcesRegistrar: ReturnType<typeof httpResourcesMock.createRegistrar>;
 
   beforeEach(() => {
     coreContext = mockCoreContext.create();
 
-    internalCorePreboot = coreMock.createInternalPreboot();
+    internalCorePreboot = coreInternalLifecycleMock.createInternalPreboot(); // -> coreInternalLifecycleMock.createInternalPreboot,
+
     internalCorePreboot.http.registerRoutes.mockImplementation((path, callback) =>
       callback(mockRouter.create())
     );
@@ -43,7 +46,8 @@ describe('CoreApp', () => {
       prebootHTTPResourcesRegistrar
     );
 
-    internalCoreSetup = coreMock.createInternalSetup();
+    internalCoreSetup = coreInternalLifecycleMock.createInternalSetup(); // -> coreInternalLifecycleMock.createInternalSetup,
+
     httpResourcesRegistrar = httpResourcesMock.createRegistrar();
     internalCoreSetup.httpResources.createRegistrar.mockReturnValue(httpResourcesRegistrar);
     coreApp = new CoreAppsService(coreContext);
