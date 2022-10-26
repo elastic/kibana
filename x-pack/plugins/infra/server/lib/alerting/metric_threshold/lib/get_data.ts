@@ -43,12 +43,12 @@ interface Aggs {
     value: number;
   };
   containers: {
-    buckets: containerBucket[];
+    buckets: ContainerBucket[];
   };
   additionalContext: SearchResponse<EcsFieldsResponse, Record<string, AggregationsAggregate>>;
 }
 
-interface containerBucket {
+interface ContainerBucket {
   key: BucketKey;
   doc_count: number;
   containerContext: SearchResponse<EcsFieldsResponse, Record<string, AggregationsAggregate>>;
