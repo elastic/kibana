@@ -48,6 +48,14 @@ export const useGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
   });
 };
 
+export const sendGetCategories = (query: GetCategoriesRequest['query'] = {}) => {
+  return sendRequest<GetCategoriesResponse>({
+    path: epmRouteService.getCategoriesPath(),
+    method: 'get',
+    query,
+  });
+};
+
 export const useGetPackages = (query: GetPackagesRequest['query'] = {}) => {
   return useRequest<GetPackagesResponse>({
     path: epmRouteService.getListPath(),

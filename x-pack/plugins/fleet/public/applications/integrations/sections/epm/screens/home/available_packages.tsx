@@ -20,12 +20,10 @@ import {
   isIntegrationPolicyTemplate,
 } from '../../../../../../../common/services';
 
-import { useStartServices } from '../../../../hooks';
+import { useCategories, usePackages, useStartServices } from '../../../../hooks';
 
 import { pagePathGetters } from '../../../../constants';
 import {
-  useGetCategories,
-  useGetPackages,
   useBreadcrumbs,
   useGetAppendCustomIntegrations,
   useGetReplacementCustomIntegrations,
@@ -218,16 +216,11 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
     history.replace(pagePathGetters.integrations_all({ searchTerm: search, category })[1]);
   }
 
-  // TODO delay get packages and get categories until prerelease setting loaded
   const {
     data: eprPackages,
     isLoading: isLoadingAllPackages,
     error: eprPackageLoadingError,
-  } = useGetPackages({
-    category: '',
-    excludeInstallStatus: true,
-    prerelease: prereleaseIntegrationsEnabled,
-  });
+  } = usePackages(prereleaseIntegrationsEnabled);
 
   // Remove Kubernetes package granularity
   if (eprPackages?.items) {
@@ -278,10 +271,7 @@ export const AvailablePackages: React.FC<{}> = ({}) => {
     data: eprCategories,
     isLoading: isLoadingCategories,
     error: eprCategoryLoadingError,
-  } = useGetCategories({
-    include_policy_templates: true,
-    prerelease: prereleaseIntegrationsEnabled,
-  });
+  } = useCategories(prereleaseIntegrationsEnabled);
 
   const categories: CategoryFacet[] = useMemo(() => {
     const eprAndCustomCategories: CategoryFacet[] = isLoadingCategories

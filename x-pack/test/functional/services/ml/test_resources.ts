@@ -598,7 +598,7 @@ export function MachineLearningTestResourcesProvider(
 
       await retry.tryForTime(10 * 1000, async () => {
         const { body, status } = await supertest
-          .get(`/api/fleet/epm/packages?experimental=true`)
+          .get(`/api/fleet/epm/packages?prerelease=true`)
           .set(COMMON_REQUEST_HEADERS);
         mlApi.assertResponseStatusCode(200, status, body);
 
