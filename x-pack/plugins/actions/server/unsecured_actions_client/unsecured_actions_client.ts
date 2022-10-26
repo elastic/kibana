@@ -24,6 +24,10 @@ export interface UnsecuredActionsClientOpts {
   executionEnqueuer: BulkUnsecuredExecutionEnqueuer<void>;
 }
 
+export interface IUnsecuredActionsClient {
+  bulkEnqueueExecution: (requesterId: string, actionsToExecute: ExecuteOptions[]) => Promise<void>;
+}
+
 export class UnsecuredActionsClient {
   private readonly internalSavedObjectsRepository: ISavedObjectsRepository;
   private readonly executionEnqueuer: BulkUnsecuredExecutionEnqueuer<void>;

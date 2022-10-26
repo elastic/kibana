@@ -101,7 +101,10 @@ import { createSubActionConnectorFramework } from './sub_action_framework';
 import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';
-import { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
+import {
+  IUnsecuredActionsClient,
+  UnsecuredActionsClient,
+} from './unsecured_actions_client/unsecured_actions_client';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 
 export interface PluginSetupContract {
@@ -140,7 +143,7 @@ export interface PluginStartContract {
 
   preconfiguredActions: PreConfiguredAction[];
 
-  getUnsecuredActionsClient(): PublicMethodsOf<UnsecuredActionsClient>;
+  getUnsecuredActionsClient(): IUnsecuredActionsClient;
 
   renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,

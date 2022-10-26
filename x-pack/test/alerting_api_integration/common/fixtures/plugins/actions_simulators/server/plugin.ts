@@ -7,7 +7,7 @@
 
 import http from 'http';
 import https from 'https';
-import { Plugin, CoreSetup, CoreStart, IRouter } from '@kbn/core/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import {
@@ -86,14 +86,12 @@ interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
 }
 
-interface FixtureStartDeps {
+export interface FixtureStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   actions: ActionsPluginStartContract;
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
-  private router?: IRouter;
-
   public setup(core: CoreSetup<FixtureStartDeps>, { features, actions }: FixtureSetupDeps) {
     // this action is specifically NOT enabled in ../../config.ts
     const notEnabledActionType: ActionType = {
@@ -133,24 +131,21 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       },
     });
 
-    this.router = core.http.createRouter();
+    const router = core.http.createRouter();
 
-    initXmatters(this.router, getExternalServiceSimulatorPath(ExternalServiceSimulator.XMATTERS));
-    initPagerduty(this.router, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
-    initJira(this.router, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
-    initResilient(this.router, getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT));
-    initMSExchange(
-      this.router,
-      getExternalServiceSimulatorPath(ExternalServiceSimulator.MS_EXCHANGE)
-    );
+    initXmatters(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.XMATTERS));
+    initPagerduty(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
+    initJira(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
+    initResilient(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT));
+    initMSExchange(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.MS_EXCHANGE));
     initServiceNowOAuth(
-      this.router,
+      router,
       getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
     );
+    initUnsecuredAction(router, core);
   }
 
-  public start(core: CoreStart, { actions }: FixtureStartDeps) {
-    initUnsecuredAction(this.router!, actions);
-  }
+  public start() {}
+
   public stop() {}
 }
