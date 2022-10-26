@@ -7,7 +7,11 @@
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migration860 } from './8.6.0';
 import { migrationMocks } from '@kbn/core/server/mocks';
-import { ConfigKey, SyntheticsMonitorWithSecrets } from '../../../../../../common/runtime_types';
+import {
+  ConfigKey,
+  LocationStatus,
+  SyntheticsMonitorWithSecrets,
+} from '../../../../../../common/runtime_types';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -77,7 +81,7 @@ const monitor850Project = {
         geo: { lat: 41.25, lon: -95.86 },
         url: 'https://us-central.synthetics.elastic.dev',
         isServiceManaged: true,
-        status: 'ga',
+        status: LocationStatus.GA,
         isInvalid: false,
       },
     ],
