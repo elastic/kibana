@@ -25,7 +25,7 @@ export interface CreateCaseFlyoutProps {
   onClose?: () => void;
   onSuccess?: (theCase: Case) => Promise<void>;
   attachments?: CaseAttachmentsWithoutOwner;
-  optionalContent?: React.ReactNode;
+  headerContent?: React.ReactNode;
 }
 
 const StyledFlyout = styled(EuiFlyout)`
@@ -72,7 +72,7 @@ const FormWrapper = styled.div`
 `;
 
 export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
-  ({ afterCaseCreated, onClose, onSuccess, attachments, optionalContent }) => {
+  ({ afterCaseCreated, onClose, onSuccess, attachments, headerContent }) => {
     const handleCancel = onClose || function () {};
     const handleOnSuccess = onSuccess || async function () {};
 
@@ -85,11 +85,11 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
           // maskProps is needed in order to apply the z-index to the parent overlay element, not to the flyout only
           maskProps={{ className: maskOverlayClassName }}
         >
-          <EuiFlyoutHeader hasBorder>
+          <EuiFlyoutHeader data-test-subj="create-case-flyout-header" hasBorder>
             <EuiTitle size="m">
               <h2>{i18n.CREATE_CASE_TITLE}</h2>
             </EuiTitle>
-            {optionalContent && optionalContent}
+            {headerContent && headerContent}
           </EuiFlyoutHeader>
           <StyledEuiFlyoutBody>
             <FormWrapper>

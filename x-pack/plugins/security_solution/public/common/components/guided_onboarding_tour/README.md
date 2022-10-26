@@ -100,14 +100,14 @@ It was important that the `EuiTourStep` **anchor** is in the DOM when the tour s
      <img width="1336" alt="5" src="https://user-images.githubusercontent.com/6935300/197848670-09a6fa58-7417-4c9b-9be0-fb58224c2dc8.png">
 
 
-     Since cases is its own plugin and we are using a method to generate the flyout, we cannot wrap the flyout as children of the `GuidedOnboardingTourStep`. We do however need the `EuiTourStep` component to mount in the same location as the anchor. Therefore, I had to pass a new optional property to the case component called `optionalContent` that simply accepts and renders ` React.ReactNode` at the top of the flyout.  In the code, this looks something like:
+     Since cases is its own plugin and we are using a method to generate the flyout, we cannot wrap the flyout as children of the `GuidedOnboardingTourStep`. We do however need the `EuiTourStep` component to mount in the same location as the anchor. Therefore, I had to pass a new optional property to the case component called `headerContent` that simply accepts and renders ` React.ReactNode` at the top of the flyout.  In the code, this looks something like:
 
       ```
       createCaseFlyout.open({
         attachments: caseAttachments,
         ...(isTourShown(SecurityStepId.alertsCases) && activeStep === 4
           ? {
-              optionalContent: (
+              headerContent: (
                 // isTourAnchor=true no matter what in order to
                 // force active guide step outside of security solution (cases)
                 <GuidedOnboardingTourStep isTourAnchor step={5} stepId={SecurityStepId.alertsCases} />

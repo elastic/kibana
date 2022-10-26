@@ -32,14 +32,14 @@ export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps = {}) 
   const openFlyout = useCallback(
     ({
       attachments,
-      optionalContent,
-    }: { attachments?: CaseAttachmentsWithoutOwner; optionalContent?: React.ReactNode } = {}) => {
+      headerContent,
+    }: { attachments?: CaseAttachmentsWithoutOwner; headerContent?: React.ReactNode } = {}) => {
       dispatch({
         type: CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT,
         payload: {
           ...props,
           attachments,
-          optionalContent,
+          headerContent,
           onClose: () => {
             closeFlyout();
             if (props.onClose) {
