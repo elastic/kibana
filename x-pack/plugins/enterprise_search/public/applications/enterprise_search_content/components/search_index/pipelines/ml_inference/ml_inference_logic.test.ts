@@ -7,11 +7,17 @@
 
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 
-import { HttpError, Status } from '../../../../../../../common/types/api';
+import { HttpResponse } from '@kbn/core/public';
+
+import { ErrorResponse, HttpError, Status } from '../../../../../../../common/types/api';
+import { TrainedModelState } from '../../../../../../../common/types/pipelines';
 
 import { MappingsApiLogic } from '../../../../api/mappings/mappings_logic';
 import { MLModelsApiLogic } from '../../../../api/ml_models/ml_models_logic';
+import { AttachMlInferencePipelineApiLogic } from '../../../../api/pipelines/attach_ml_inference_pipeline';
 import { CreateMlInferencePipelineApiLogic } from '../../../../api/pipelines/create_ml_inference_pipeline';
+import { FetchMlInferencePipelineProcessorsApiLogic } from '../../../../api/pipelines/fetch_ml_inference_pipeline_processors';
+import { FetchMlInferencePipelinesApiLogic } from '../../../../api/pipelines/fetch_ml_inference_pipelines';
 import { SimulateMlInterfacePipelineApiLogic } from '../../../../api/pipelines/simulate_ml_inference_pipeline_processors';
 
 import {
@@ -81,13 +87,25 @@ describe('MlInferenceLogic', () => {
   const { mount: mountCreateMlInferencePipelineApiLogic } = new LogicMounter(
     CreateMlInferencePipelineApiLogic
   );
+  const { mount: mountAttachMlInferencePipelineApiLogic } = new LogicMounter(
+    AttachMlInferencePipelineApiLogic
+  );
+  const { mount: mountFetchMlInferencePipelineProcessorsApiLogic } = new LogicMounter(
+    FetchMlInferencePipelineProcessorsApiLogic
+  );
+  const { mount: mountFetchMlInferencePipelinesApiLogic } = new LogicMounter(
+    FetchMlInferencePipelinesApiLogic
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
     mountMappingApiLogic();
     mountMLModelsApiLogic();
+    mountFetchMlInferencePipelineProcessorsApiLogic();
+    mountFetchMlInferencePipelinesApiLogic();
     mountSimulateMlInterfacePipelineApiLogic();
     mountCreateMlInferencePipelineApiLogic();
+    mountAttachMlInferencePipelineApiLogic();
     mount();
   });
 
@@ -112,6 +130,70 @@ describe('MlInferenceLogic', () => {
             'I would be another one',
           ],
         });
+      });
+    });
+    describe('attachApiError', () => {
+      it('updates create errors', () => {
+        MLInferenceLogic.actions.attachApiError({
+          body: {
+            error: '',
+            message: 'this is an error',
+            statusCode: 500,
+          },
+        } as HttpResponse<ErrorResponse>);
+
+        expect(MLInferenceLogic.values.createErrors).toEqual(['this is an error']);
+      });
+    });
+    describe('createApiError', () => {
+      it('updates create errors', () => {
+        MLInferenceLogic.actions.createApiError({
+          body: {
+            error: '',
+            message: 'this is an error',
+            statusCode: 500,
+          },
+        } as HttpResponse<ErrorResponse>);
+
+        expect(MLInferenceLogic.values.createErrors).toEqual(['this is an error']);
+      });
+    });
+    describe('makeAttachPipelineRequest', () => {
+      it('clears existing errors', () => {
+        MLInferenceLogic.actions.attachApiError({
+          body: {
+            error: '',
+            message: 'this is an error',
+            statusCode: 500,
+          },
+        } as HttpResponse<ErrorResponse>);
+
+        expect(MLInferenceLogic.values.createErrors).not.toHaveLength(0);
+        MLInferenceLogic.actions.makeAttachPipelineRequest({
+          indexName: 'test',
+          pipelineName: 'unit-test',
+        });
+        expect(MLInferenceLogic.values.createErrors).toHaveLength(0);
+      });
+    });
+    describe('makeCreatePipelineRequest', () => {
+      it('clears existing errors', () => {
+        MLInferenceLogic.actions.createApiError({
+          body: {
+            error: '',
+            message: 'this is an error',
+            statusCode: 500,
+          },
+        } as HttpResponse<ErrorResponse>);
+
+        expect(MLInferenceLogic.values.createErrors).not.toHaveLength(0);
+        MLInferenceLogic.actions.makeCreatePipelineRequest({
+          indexName: 'test',
+          pipelineName: 'unit-test',
+          modelId: 'test-model',
+          sourceField: 'body',
+        });
+        expect(MLInferenceLogic.values.createErrors).toHaveLength(0);
       });
     });
   });
@@ -164,6 +246,220 @@ describe('MlInferenceLogic', () => {
         SimulateMlInterfacePipelineApiLogic.actions.apiSuccess(simulateResponse);
 
         expect(MLInferenceLogic.values.simulatePipelineResult).toEqual(simulateResponse);
+      });
+    });
+    describe('existingInferencePipelines', () => {
+      beforeEach(() => {
+        MappingsApiLogic.actions.apiSuccess({
+          mappings: {
+            properties: {
+              body: {
+                type: 'text',
+              },
+            },
+          },
+        });
+      });
+      it('returns empty list when there is not existing pipelines available', () => {
+        expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([]);
+      });
+      it('returns existing pipeline option', () => {
+        FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
+          'unit-test': {
+            processors: [
+              {
+                inference: {
+                  field_map: {
+                    body: 'text_field',
+                  },
+                  model_id: 'test-model',
+                  target_field: 'ml.inference.test-field',
+                },
+              },
+            ],
+            version: 1,
+          },
+        });
+
+        expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
+          {
+            destinationField: 'test-field',
+            disabled: false,
+            pipelineName: 'unit-test',
+            modelType: '',
+            modelId: 'test-model',
+            sourceField: 'body',
+          },
+        ]);
+      });
+      it('returns disabled pipeline option if missing source field', () => {
+        FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
+          'unit-test': {
+            processors: [
+              {
+                inference: {
+                  field_map: {
+                    body_content: 'text_field',
+                  },
+                  model_id: 'test-model',
+                  target_field: 'ml.inference.test-field',
+                },
+              },
+            ],
+            version: 1,
+          },
+        });
+
+        expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
+          {
+            destinationField: 'test-field',
+            disabled: true,
+            disabledReason: expect.any(String),
+            pipelineName: 'unit-test',
+            modelType: '',
+            modelId: 'test-model',
+            sourceField: 'body_content',
+          },
+        ]);
+      });
+      it('returns disabled pipeline option if model is redacted', () => {
+        FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
+          'unit-test': {
+            processors: [
+              {
+                inference: {
+                  field_map: {
+                    body: 'text_field',
+                  },
+                  model_id: '',
+                  target_field: 'ml.inference.test-field',
+                },
+              },
+            ],
+            version: 1,
+          },
+        });
+
+        expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
+          {
+            destinationField: 'test-field',
+            disabled: true,
+            disabledReason: expect.any(String),
+            pipelineName: 'unit-test',
+            modelType: '',
+            modelId: '',
+            sourceField: 'body',
+          },
+        ]);
+      });
+      it('returns disabled pipeline option if pipeline already attached', () => {
+        FetchMlInferencePipelineProcessorsApiLogic.actions.apiSuccess([
+          {
+            modelId: 'test-model',
+            modelState: TrainedModelState.Started,
+            pipelineName: 'unit-test',
+            pipelineReferences: ['test@ml-inference'],
+            types: ['ner', 'pytorch'],
+          },
+        ]);
+        FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
+          'unit-test': {
+            processors: [
+              {
+                inference: {
+                  field_map: {
+                    body: 'text_field',
+                  },
+                  model_id: 'test-model',
+                  target_field: 'ml.inference.test-field',
+                },
+              },
+            ],
+            version: 1,
+          },
+        });
+
+        expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
+          {
+            destinationField: 'test-field',
+            disabled: true,
+            disabledReason: expect.any(String),
+            pipelineName: 'unit-test',
+            modelType: '',
+            modelId: 'test-model',
+            sourceField: 'body',
+          },
+        ]);
+      });
+    });
+    describe('mlInferencePipeline', () => {
+      it('returns undefined when configuration is invalid', () => {
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          destinationField: '',
+          modelID: '',
+          pipelineName: 'unit-test',
+          sourceField: '',
+        });
+
+        expect(MLInferenceLogic.values.mlInferencePipeline).toBeUndefined();
+      });
+      it('generates inference pipeline', () => {
+        MLModelsApiLogic.actions.apiSuccess([
+          {
+            inference_config: {
+              text_classification: {
+                classification_labels: ['one', 'two'],
+                tokenization: {
+                  bert: {},
+                },
+              },
+            },
+            input: {
+              field_names: ['text_field'],
+            },
+            model_id: 'test-model',
+            model_type: 'pytorch',
+            tags: [],
+            version: '1.0.0',
+          },
+        ]);
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          destinationField: '',
+          modelID: 'test-model',
+          pipelineName: 'unit-test',
+          sourceField: 'body',
+        });
+
+        expect(MLInferenceLogic.values.mlInferencePipeline).not.toBeUndefined();
+      });
+      it('returns undefined when existing pipeline not yet selected', () => {
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          existingPipeline: true,
+          destinationField: '',
+          modelID: '',
+          pipelineName: '',
+          sourceField: '',
+        });
+        expect(MLInferenceLogic.values.mlInferencePipeline).toBeUndefined();
+      });
+      it('return existing pipeline when selected', () => {
+        const existingPipeline = {
+          description: 'this is a test',
+          processors: [],
+          version: 1,
+        };
+        FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
+          'unit-test': existingPipeline,
+        });
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          existingPipeline: true,
+          destinationField: '',
+          modelID: '',
+          pipelineName: 'unit-test',
+          sourceField: '',
+        });
+        expect(MLInferenceLogic.values.mlInferencePipeline).not.toBeUndefined();
+        expect(MLInferenceLogic.values.mlInferencePipeline).toEqual(existingPipeline);
       });
     });
   });
