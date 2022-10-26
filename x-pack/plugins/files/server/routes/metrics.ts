@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { FILES_MANAGE_PRIVILEGE } from '../../common/constants';
 import type { FilesRouter } from './types';
 
 import { FilesMetrics } from '../../common';
@@ -27,6 +28,9 @@ export function register(router: FilesRouter) {
     {
       path: FILES_API_ROUTES.metrics,
       validate: {},
+      options: {
+        tags: [`access:${FILES_MANAGE_PRIVILEGE}`],
+      },
     },
     handler
   );
