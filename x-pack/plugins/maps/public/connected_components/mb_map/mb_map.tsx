@@ -13,12 +13,17 @@ import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { maplibregl } from '@kbn/mapbox-gl';
 import type { Map as MapboxMap, MapOptions, MapMouseEvent } from '@kbn/mapbox-gl';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
 import { TooltipControl } from './tooltip_control';
 import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
 import { getInitialView } from './get_initial_view';
-import { getPreserveDrawingBuffer, isScreenshotMode } from '../../kibana_services';
+import {
+  getPreserveDrawingBuffer,
+  getUsageCollection,
+  isScreenshotMode,
+} from '../../kibana_services';
 import { ILayer } from '../../classes/layers/layer';
 import {
   CustomIcon,
@@ -28,6 +33,7 @@ import {
   Timeslice,
 } from '../../../common/descriptor_types';
 import {
+  APP_ID,
   CUSTOM_ICON_SIZE,
   DECIMAL_DEGREES_PRECISION,
   MAKI_ICON_SIZE,
@@ -149,6 +155,7 @@ export class MbMap extends Component<Props, State> {
   }
 
   async _createMbMapInstance(initialView: MapCenterAndZoom | null): Promise<MapboxMap> {
+    this._reportUsage();
     return new Promise((resolve) => {
       const mbStyle = {
         version: 8 as 8,
@@ -268,6 +275,24 @@ export class MbMap extends Component<Props, State> {
         this.state.mbMap.resize();
       }
     });
+  }
+
+  _reportUsage() {
+    const usageCollector = getUsageCollection();
+    if (!usageCollector) return;
+
+    const webglSupport = maplibregl.supported();
+
+    usageCollector.reportUiCounter(
+      APP_ID,
+      METRIC_TYPE.LOADED,
+      webglSupport ? 'gl_webglSupported' : 'gl_webglNotSupported'
+    );
+
+    // Report low system performance or no hardware GPU
+    if (webglSupport && !maplibregl.supported({ failIfMajorPerformanceCaveat: true })) {
+      usageCollector.reportUiCounter(APP_ID, METRIC_TYPE.LOADED, 'gl_majorPerformanceCaveat');
+    }
   }
 
   async _loadMakiSprites(mbMap: MapboxMap) {
