@@ -22,12 +22,6 @@ import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { fetchStackVersion } from './common/stack_services';
 import { ENDPOINT_ALERTS_INDEX, ENDPOINT_EVENTS_INDEX } from './common/constants';
-import {
-  noResponseActionsRole,
-  noResponseActionsUser,
-  withResponseActionsRole,
-  withResponseActionsUser,
-} from './common/roles_users';
 
 main();
 
