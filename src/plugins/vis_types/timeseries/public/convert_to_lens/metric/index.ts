@@ -27,7 +27,10 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeR
   const seriesNum = model.series.filter((series) => !series.hidden).length;
 
   const indexPatternIds = new Set();
-  const visibleSeries = model.series.filter(({ hidden }) => !hidden);
+  // we should get max only 2 series
+  const visibleSeries = model.series
+    .filter(({ hidden }) => !hidden)
+    .filter((_, index) => index < 2);
   let currentIndexPattern: DataView | null = null;
   for (const series of visibleSeries) {
     const datasourceInfo = await getDataSourceInfo(
