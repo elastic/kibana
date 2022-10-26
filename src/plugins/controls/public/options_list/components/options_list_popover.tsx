@@ -234,7 +234,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
       <>
         {!hideExists && !(showOnlySelected && !existsSelected) && (
           <EuiFilterSelectItem
-            data-test-subj={`optionsList-control-selection-test`}
+            data-test-subj={`optionsList-control-selection-exists`}
             checked={existsSelected ? 'on' : undefined}
             key={'exists-option'}
             onClick={() => {

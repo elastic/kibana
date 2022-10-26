@@ -115,4 +115,38 @@ describe('Options list popover', () => {
     expect(includeButton.prop('checked')).toBeFalsy();
     expect(excludeButton.prop('checked')).toBe(true);
   });
+
+  test('if exclude = false and existsSelected = true, then the option should read "Exists"', () => {
+    const popover = mountComponent({
+      explicitInput: { exclude: false, existsSelected: true },
+    });
+    const existsOption = findTestSubject(popover, 'optionsList-control-selection-exists');
+    expect(existsOption.text()).toBe('Exists (*)');
+  });
+
+  test('if exclude = true and existsSelected = true, then the option should read "Does not exist"', () => {
+    const popover = mountComponent({
+      explicitInput: { exclude: true, existsSelected: true },
+    });
+    const existsOption = findTestSubject(popover, 'optionsList-control-selection-exists');
+    expect(existsOption.text()).toBe('Does not exist (!)');
+  });
+
+  test('if existsSelected = false and no suggestions, then "Exists" does not show up', () => {
+    const popover = mountComponent({
+      componentState: { availableOptions: [] },
+      explicitInput: { existsSelected: false },
+    });
+    const existsOption = findTestSubject(popover, 'optionsList-control-selection-exists');
+    expect(existsOption.exists()).toBeFalsy();
+  });
+
+  test('if existsSelected = true, "Exists" is the only option when "Show only selected options" is toggled', () => {
+    const popover = mountComponent({
+      explicitInput: { existsSelected: true },
+    });
+    clickShowOnlySelections(popover);
+    const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
+    expect(availableOptionsDiv.children().at(0).text()).toBe('Exists (*)');
+  });
 });
