@@ -11,7 +11,7 @@ import { Route } from '@kbn/kibana-react-plugin/public';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import * as i18n from './translations';
 import { EXCEPTIONS_PATH, SecurityPageName } from '../../common/constants';
-import { ExceptionListsTable } from '../detections/pages/detection_engine/rules/all/exceptions/exceptions_table';
+import { ExceptionListsTable } from '../detection_engine/rule_exceptions_ui/pages/exceptions/exceptions_table';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { NotFoundPage } from '../app/404';
 import { useReadonlyHeader } from '../use_readonly_header';

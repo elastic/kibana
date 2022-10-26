@@ -43,7 +43,7 @@ import {
 import { ActionsConfig, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client';
-import { ActionTypeRegistry } from './action_type_registry';
+import { ActionTypeRegistry, MAX_ATTEMPTS } from './action_type_registry';
 import {
   createExecutionEnqueuerFunction,
   createEphemeralExecutionEnqueuerFunction,
@@ -355,6 +355,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
       ) => {
         ensureSufficientLicense(actionType);
+        actionType.maxAttempts = actionType.maxAttempts ?? MAX_ATTEMPTS;
         actionTypeRegistry.register(actionType);
       },
       registerSubActionConnectorType: <

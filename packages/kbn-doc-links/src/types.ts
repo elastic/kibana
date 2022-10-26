@@ -35,6 +35,10 @@ export interface DocLinks {
     readonly overview: string;
     readonly tailSamplingPolicies: string;
     readonly elasticAgent: string;
+    readonly storageExplorer: string;
+    readonly spanCompression: string;
+    readonly transactionSampling: string;
+    readonly indexLifecycleManagement: string;
   };
   readonly canvas: {
     readonly guide: string;
@@ -111,7 +115,6 @@ export interface DocLinks {
     readonly connectorsMongoDB: string;
     readonly connectorsMySQL: string;
     readonly connectorsWorkplaceSearch: string;
-    readonly crawlerGettingStarted: string;
     readonly crawlerManaging: string;
     readonly crawlerOverview: string;
     readonly deployTrainedModels: string;
