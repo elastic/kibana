@@ -207,20 +207,34 @@ export class LayerGroup implements ILayer {
     return zoom >= this.getMinZoom() && zoom <= this.getMaxZoom();
   }
 
+  /*
+   * Returns smallest min from children or MIN_ZOOM when there are no children
+   */
   getMinZoom(): number {
-    let min = MIN_ZOOM;
+    let min: number | undefined;
     this._children.forEach((child) => {
-      min = Math.max(min, child.getMinZoom());
+      if (min !== undefined) {
+        min = Math.min(min, child.getMinZoom());
+      } else {
+        min = child.getMinZoom();
+      }
     });
-    return min;
+    return min !== undefined ? min : MIN_ZOOM;
   }
 
+  /*
+   * Returns largest max from children or MAX_ZOOM when there are no children
+   */
   getMaxZoom(): number {
-    let max = MAX_ZOOM;
+    let max: number | undefined;
     this._children.forEach((child) => {
-      max = Math.min(max, child.getMaxZoom());
+      if (max !== undefined) {
+        max = Math.max(max, child.getMaxZoom());
+      } else {
+        max = child.getMaxZoom();
+      }
     });
-    return max;
+    return max !== undefined ? max : MAX_ZOOM;
   }
 
   getMinSourceZoom(): number {
