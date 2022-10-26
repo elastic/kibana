@@ -10,11 +10,13 @@ import {
   EuiRange,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiBadge,
+  EuiBetaBadge,
   EuiText,
   EuiLink,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DatasourceLayerSettingsProps } from '../../types';
@@ -35,41 +37,51 @@ export function LayerSettingsPanel({
       data-test-subj="lns-indexPattern-random-sampling-row"
       fullWidth
       helpText={
-        <FormattedMessage
-          id="xpack.lens.xyChart.randomSampling.help"
-          defaultMessage="The sampling is accomplished by providing a random subset of the entire set of documents. The lower the value the higher the error and speed: consider the usage of lower values for big datasets. {link}"
-          values={{
-            link: (
-              <EuiLink
-                href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-random-sampler-aggregation.html"
-                target="_blank"
-                external
-              >
-                <FormattedMessage
-                  id="xpack.lens.xyChart.randomSampling.learnMore"
-                  defaultMessage="Learn more"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
+        <>
+          <EuiSpacer size="s" />
+          <p>
+            <FormattedMessage
+              id="xpack.lens.xyChart.randomSampling.help"
+              defaultMessage="Lower sampling percentages increase speed at the cost of accuracy. It is recommended that lower sampling percentages only be used for large datasets. {link}"
+              values={{
+                link: (
+                  <EuiLink
+                    href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-random-sampler-aggregation.html"
+                    target="_blank"
+                    external
+                  >
+                    <FormattedMessage
+                      id="xpack.lens.xyChart.randomSampling.learnMore"
+                      defaultMessage="View documentation"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </>
       }
       label={
         <>
           {i18n.translate('xpack.lens.xyChart.randomSampling.label', {
             defaultMessage: 'Random sampling',
           })}{' '}
-          <EuiBadge color="hollow">
-            {i18n.translate('xpack.lens.randomSampling.experimentalLabel', {
+          <EuiBetaBadge
+            css={css`
+              vertical-align: middle;
+            `}
+            iconType="beaker"
+            label={i18n.translate('xpack.lens.randomSampling.experimentalLabel', {
               defaultMessage: 'Technical preview',
             })}
-          </EuiBadge>
+            size="s"
+          />
         </>
       }
     >
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="none">
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
+          <EuiText color="subdued" size="xs">
             <FormattedMessage
               id="xpack.lens.xyChart.randomSampling.speedLabel"
               defaultMessage="Speed"
@@ -102,7 +114,7 @@ export function LayerSettingsPanel({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="s">
+          <EuiText color="subdued" size="xs">
             <FormattedMessage
               id="xpack.lens.xyChart.randomSampling.accuracyLabel"
               defaultMessage="Accuracy"
