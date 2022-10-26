@@ -1309,10 +1309,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       expect(focusedElementText).to.eql(name);
     },
 
-    async waitForVisualization(visDataTestSubj?: string) {
+    async waitForVisualization(visDataTestSubj?: string, timeout?: number) {
       async function getRenderingCount() {
         const visualizationContainer = await testSubjects.find(
-          visDataTestSubj || 'lnsVisualizationContainer'
+          visDataTestSubj || 'lnsVisualizationContainer',
+          timeout
         );
         const renderingCount = await visualizationContainer.getAttribute('data-rendering-count');
         return Number(renderingCount);
@@ -1321,7 +1322,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.waitFor('rendering count to stabilize', async () => {
         const firstCount = await getRenderingCount();
 
-        await PageObjects.common.sleep(1000);
+        await PageObjects.common.sleep(timeout ?? 1000);
 
         const secondCount = await getRenderingCount();
 
@@ -1625,9 +1626,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getPaletteColorStops() {
       const stops = await find.allByCssSelector(
-        `[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]`
+        `[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]`,
+        500
       );
-      const colorsElements = await testSubjects.findAll('euiColorPickerAnchor');
+      const colorsElements = await testSubjects.findAll('euiColorPickerAnchor', 500);
       const colors = await Promise.all(
         colorsElements.map((c) => c.getComputedStyle('background-color'))
       );

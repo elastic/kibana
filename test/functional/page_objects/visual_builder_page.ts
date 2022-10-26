@@ -417,12 +417,12 @@ export class VisualBuilderPageObject extends FtrService {
     });
   }
 
-  public async createColorRule(nth = 0) {
-    const elements = await this.testSubjects.findAll('AddAddBtn');
+  public async createColorRule(nth = 0, timeout?: number) {
+    const elements = await this.testSubjects.findAll('AddAddBtn', timeout);
     await elements[nth].click();
     await this.visChart.waitForVisualizationRenderingStabilized();
     await this.retry.waitFor('new color rule is added', async () => {
-      const currentAddButtons = await this.testSubjects.findAll('AddAddBtn');
+      const currentAddButtons = await this.testSubjects.findAll('AddAddBtn', timeout);
       return currentAddButtons.length > elements.length;
     });
   }
