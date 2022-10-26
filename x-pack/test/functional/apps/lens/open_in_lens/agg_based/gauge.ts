@@ -19,7 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-
+  const timeout = 250;
   describe('Gauge', function describeIndexTests() {
     const isNewChartsLibraryEnabled = true;
 
@@ -40,7 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert to Lens', async () => {
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('gaugeChart');
+      await lens.waitForVisualization('gaugeChart', timeout);
     });
 
     it('should convert aggregation with params', async () => {
@@ -50,17 +50,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('gaugeChart');
+      await lens.waitForVisualization('gaugeChart', timeout);
 
-      expect(await lens.getLayerCount()).to.be(1);
+      expect(await lens.getLayerCount(timeout)).to.be(1);
 
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
       expect(dimensions).to.have.length(3);
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
       expect(await dimensions[1].getVisibleText()).to.be('Static value: 0');
       expect(await dimensions[2].getVisibleText()).to.be('Static value: 100');
 
-      const elementWithInfo = await find.byCssSelector('.echScreenReaderOnly');
+      const elementWithInfo = await find.byCssSelector('.echScreenReaderOnly', timeout);
       const textContent = await elementWithInfo.getAttribute('textContent');
       expect(textContent).to.contain('Average machine.ram');
       expect(textContent).to.contain('horizontalBullet chart');
@@ -102,17 +102,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('gaugeChart');
+      await lens.waitForVisualization('gaugeChart', timeout);
 
-      expect(await lens.getLayerCount()).to.be(1);
+      expect(await lens.getLayerCount(timeout)).to.be(1);
 
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
       expect(dimensions).to.have.length(3);
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
       expect(await dimensions[1].getVisibleText()).to.be('Static value: 0');
       expect(await dimensions[2].getVisibleText()).to.be('Static value: 15000000000');
 
-      const elementWithInfo = await find.byCssSelector('.echScreenReaderOnly');
+      const elementWithInfo = await find.byCssSelector('.echScreenReaderOnly', timeout);
       const textContent = await elementWithInfo.getAttribute('textContent');
       expect(textContent).to.contain('Average machine.ram');
       expect(textContent).to.contain('horizontalBullet chart');
@@ -120,10 +120,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(textContent).to.contain('Maximum:15000000000');
       expect(textContent).to.contain('Value:13104036080.615');
 
-      dimensions[0].click();
+      await dimensions[0].click();
 
       await lens.openPalettePanel('lnsGauge');
-      const colorStops = await lens.getPaletteColorStops();
+      const colorStops = await lens.getPaletteColorStops(timeout);
 
       expect(colorStops).to.eql([
         { stop: '0', color: 'rgba(0, 104, 55, 1)' },

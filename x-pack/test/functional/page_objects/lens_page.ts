@@ -883,8 +883,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Returns the number of layers visible in the chart configuration
      */
-    async getLayerCount() {
-      return (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length;
+    async getLayerCount(timeout?: number) {
+      return (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`, timeout)).length;
     },
 
     /**
@@ -1624,12 +1624,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
     },
 
-    async getPaletteColorStops() {
+    async getPaletteColorStops(timeout: number = 10000) {
       const stops = await find.allByCssSelector(
         `[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]`,
-        500
+        timeout
       );
-      const colorsElements = await testSubjects.findAll('euiColorPickerAnchor', 500);
+      const colorsElements = await testSubjects.findAll('euiColorPickerAnchor', timeout);
       const colors = await Promise.all(
         colorsElements.map((c) => c.getComputedStyle('background-color'))
       );

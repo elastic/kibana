@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
+  const timeout = 250;
 
   describe('Gauge', function describeIndexTests() {
     before(async () => {
@@ -39,7 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('mtrVis', 250);
+      await lens.waitForVisualization('mtrVis', timeout);
 
       const metricData = await lens.getMetricVisualizationData();
       expect(metricData[0].title).to.eql('Count of records');
@@ -52,12 +53,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('mtrVis', 250);
+      await lens.waitForVisualization('mtrVis', timeout);
       await retry.try(async () => {
-        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`, 250);
+        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`, timeout);
         expect(layers).to.have.length(1);
 
-        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', 250);
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
         expect(dimensions).to.have.length(2);
         expect(await dimensions[0].getVisibleText()).to.be('Count of bytes');
         expect(await dimensions[1].getVisibleText()).to.be('overall_max(count(bytes))');
@@ -100,18 +101,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await visualize.navigateToLensFromAnotherVisulization();
 
-      await lens.waitForVisualization('mtrVis', 250);
+      await lens.waitForVisualization('mtrVis', timeout);
       await retry.try(async () => {
         const closePalettePanels = await testSubjects.findAll(
           'lns-indexPattern-PalettePanelContainerBack',
-          250
+          timeout
         );
         if (closePalettePanels.length) {
           await lens.closePalettePanel();
           await lens.closeDimensionEditor();
         }
 
-        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', 250);
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
         expect(dimensions).to.have.length(3);
 
         await dimensions[0].click();

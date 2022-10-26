@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const timeout = 250;
 
   describe('Metric', function describeIndexTests() {
     const isNewChartsLibraryEnabled = true;
@@ -40,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert to Lens', async () => {
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('mtrVis');
+      await lens.waitForVisualization('mtrVis', timeout);
       expect((await lens.getMetricVisualizationData()).length).to.be.equal(1);
       expect(await lens.getMetricVisualizationData()).to.eql([
         {
@@ -62,11 +63,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('mtrVis');
+      await lens.waitForVisualization('mtrVis', timeout);
 
-      expect(await lens.getLayerCount()).to.be(1);
+      expect(await lens.getLayerCount(timeout)).to.be(1);
 
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
       expect(dimensions).to.have.length(1);
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
 
@@ -90,11 +91,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('mtrVis');
+      await lens.waitForVisualization('mtrVis', timeout);
 
-      expect(await lens.getLayerCount()).to.be(1);
+      expect(await lens.getLayerCount(timeout)).to.be(1);
 
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
       expect(dimensions).to.have.length(2);
       expect(await dimensions[0].getVisibleText()).to.be('Overall Max of Count');
       expect(await dimensions[1].getVisibleText()).to.be('@timestamp');
@@ -139,16 +140,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.setValue('metricColorRange1__to', '20000');
       await visChart.waitForVisualizationRenderingStabilized();
 
-      const backgroundButton = await find.byCssSelector('[data-text="Background"]');
+      const backgroundButton = await find.byCssSelector('[data-text="Background"]', timeout);
       await backgroundButton.click();
       await visEditor.clickGo();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('mtrVis');
+      await lens.waitForVisualization('mtrVis', timeout);
 
-      expect(await lens.getLayerCount()).to.be(1);
+      expect(await lens.getLayerCount(timeout)).to.be(1);
 
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
       expect(dimensions).to.have.length(2);
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
       expect(await dimensions[1].getVisibleText()).to.be('machine.os.raw: Descending');
@@ -211,10 +212,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         },
       ]);
 
-      dimensions[0].click();
+      await dimensions[0].click();
 
       await lens.openPalettePanel('lnsMetric');
-      const colorStops = await lens.getPaletteColorStops();
+      const colorStops = await lens.getPaletteColorStops(timeout);
 
       expect(colorStops).to.eql([
         { stop: '0', color: 'rgba(0, 104, 55, 1)' },

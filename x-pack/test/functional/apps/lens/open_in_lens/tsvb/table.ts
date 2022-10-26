@@ -25,6 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const timeout = 250;
 
   describe('Table', function describeIndexTests() {
     before(async () => {
@@ -108,13 +109,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('lnsDataTable');
+      await lens.waitForVisualization('lnsDataTable', timeout);
       await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
       await testSubjects.click('indexPattern-advanced-accordion');
-      const reducedTimeRange = await testSubjects.find('indexPattern-dimension-reducedTimeRange');
+      const reducedTimeRange = await testSubjects.find(
+        'indexPattern-dimension-reducedTimeRange',
+        timeout
+      );
       expect(await reducedTimeRange.getVisibleText()).to.be('1 minute (1m)');
       await retry.try(async () => {
-        const layerCount = await lens.getLayerCount();
+        const layerCount = await lens.getLayerCount(timeout);
         expect(layerCount).to.be(1);
         const metricDimensionText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 0);
         expect(metricDimensionText).to.be('Count of records last 1m');
@@ -129,9 +133,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('lnsDataTable');
+      await lens.waitForVisualization('lnsDataTable', timeout);
       await retry.try(async () => {
-        const layerCount = await lens.getLayerCount();
+        const layerCount = await lens.getLayerCount(timeout);
         expect(layerCount).to.be(1);
         const metricDimensionText1 = await lens.getDimensionTriggerText('lnsDatatable_metrics', 0);
         const metricDimensionText2 = await lens.getDimensionTriggerText('lnsDatatable_metrics', 1);
@@ -147,9 +151,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('lnsDataTable');
+      await lens.waitForVisualization('lnsDataTable', timeout);
       await retry.try(async () => {
-        const layerCount = await lens.getLayerCount();
+        const layerCount = await lens.getLayerCount(timeout);
         expect(layerCount).to.be(1);
         const splitRowsText1 = await lens.getDimensionTriggerText('lnsDatatable_rows', 0);
         const splitRowsText2 = await lens.getDimensionTriggerText('lnsDatatable_rows', 1);
@@ -158,7 +162,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       await lens.openDimensionEditor('lnsDatatable_rows > lns-dimensionTrigger', 0, 1);
-      const collapseBy = await testSubjects.find('indexPattern-collapse-by');
+      const collapseBy = await testSubjects.find('indexPattern-collapse-by', timeout);
       expect(await collapseBy.getAttribute('value')).to.be('sum');
     });
 
@@ -167,9 +171,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('lnsDataTable');
+      await lens.waitForVisualization('lnsDataTable', timeout);
       await retry.try(async () => {
-        const layerCount = await lens.getLayerCount();
+        const layerCount = await lens.getLayerCount(timeout);
         expect(layerCount).to.be(1);
         const splitRowsText = await lens.getDimensionTriggerText('lnsDatatable_rows', 0);
         expect(splitRowsText).to.be('test');
@@ -192,10 +196,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisulization();
 
-      await lens.waitForVisualization('lnsDataTable');
+      await lens.waitForVisualization('lnsDataTable', timeout);
       await retry.try(async () => {
         const closePalettePanels = await testSubjects.findAll(
-          'lns-indexPattern-PalettePanelContainerBack'
+          'lns-indexPattern-PalettePanelContainerBack',
+          timeout
         );
         if (closePalettePanels.length) {
           await lens.closePalettePanel();
@@ -205,7 +210,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
 
         await lens.openPalettePanel('lnsDatatable');
-        const colorStops = await lens.getPaletteColorStops();
+        const colorStops = await lens.getPaletteColorStops(timeout);
 
         expect(colorStops).to.eql([
           { stop: '10', color: 'rgba(84, 179, 153, 1)' },
