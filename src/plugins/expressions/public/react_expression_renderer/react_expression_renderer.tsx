@@ -49,7 +49,7 @@ export function ReactExpressionRenderer({
   });
 
   const expressionStyles: React.CSSProperties = {};
-  console.log('------', expressionRendererOptions.test);
+
   if (padding) {
     expressionStyles.padding = euiTheme.size[padding];
   }

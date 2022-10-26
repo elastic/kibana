@@ -22,7 +22,7 @@ import { autoScaleWrapperStyle } from './with_auto_scale.styles';
 interface AutoScaleParams {
   minScale?: number;
   containerStyles: CSSProperties;
-  alignment?: 'left';
+  alignment?: 'left' | 'center';
 }
 
 interface AutoScaleProps {
