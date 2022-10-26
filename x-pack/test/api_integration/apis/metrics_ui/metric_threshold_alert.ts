@@ -125,6 +125,14 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
               },
             },
           ]);
@@ -174,6 +182,14 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                context: {
+                  cloud: undefined,
+                  container: null,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
               },
             },
           ]);
@@ -222,6 +238,14 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                context: {
+                  cloud: undefined,
+                  container: null,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
               },
               middleware: {
                 timeSize: 5,
@@ -235,6 +259,14 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
               },
             },
           ]);
@@ -281,6 +313,14 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
               },
             },
           ]);
@@ -312,6 +352,14 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
               },
             },
           ]);
@@ -358,6 +406,14 @@ export default function ({ getService }: FtrProviderContext) {
                   shouldFire: false,
                   shouldWarn: false,
                   isNoData: true,
+                  context: {
+                    cloud: undefined,
+                    container: undefined,
+                    host: undefined,
+                    labels: undefined,
+                    orchestrator: undefined,
+                    tags: undefined
+                  }
                 },
               },
             ]);
@@ -404,6 +460,14 @@ export default function ({ getService }: FtrProviderContext) {
                   shouldFire: false,
                   shouldWarn: false,
                   isNoData: true,
+                  context: {
+                    cloud: undefined,
+                    container: undefined,
+                    host: undefined,
+                    labels: undefined,
+                    orchestrator: undefined,
+                    tags: undefined
+                  }
                 },
                 web: {
                   timeSize: 5,
@@ -417,6 +481,14 @@ export default function ({ getService }: FtrProviderContext) {
                   shouldFire: false,
                   shouldWarn: false,
                   isNoData: true,
+                  context: {
+                    cloud: undefined,
+                    container: undefined,
+                    host: undefined,
+                    labels: undefined,
+                    orchestrator: undefined,
+                    tags: undefined
+                  }
                 },
                 prod: {
                   timeSize: 5,
@@ -430,6 +502,14 @@ export default function ({ getService }: FtrProviderContext) {
                   shouldFire: false,
                   shouldWarn: false,
                   isNoData: true,
+                  context: {
+                    cloud: undefined,
+                    container: undefined,
+                    host: undefined,
+                    labels: undefined,
+                    orchestrator: undefined,
+                    tags: undefined
+                  }
                 },
               },
             ]);
@@ -480,6 +560,14 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
               },
             },
           ]);
@@ -522,6 +610,14 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
               },
             },
           ]);
@@ -553,6 +649,14 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
               },
             },
           ]);
@@ -598,6 +702,14 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                context: {
+                  cloud: undefined,
+                  container: null,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
               },
               prod: {
                 timeSize: 5,
@@ -611,6 +723,14 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                context: {
+                  cloud: undefined,
+                  container: null,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
               },
             },
           ]);
@@ -645,6 +765,14 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                context: {
+                  cloud: undefined,
+                  container: null,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
               },
             },
           ]);
@@ -681,6 +809,14 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
               },
             },
           ]);
@@ -746,6 +882,14 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
               },
               dev: {
                 timeSize: 5,
@@ -759,6 +903,14 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: false,
                 isNoData: true,
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
               },
             },
           ]);
@@ -807,6 +959,14 @@ export default function ({ getService }: FtrProviderContext) {
               shouldFire: true,
               shouldWarn: false,
               isNoData: false,
+              context: {
+                cloud: undefined,
+                container: undefined,
+                host: undefined,
+                labels: undefined,
+                orchestrator: undefined,
+                tags: undefined
+              }
             },
           },
         ]);
@@ -851,6 +1011,14 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: true,
                 shouldWarn: false,
                 isNoData: false,
+                context: {
+                  cloud: undefined,
+                  container: undefined,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
               },
             },
           ]);
@@ -901,6 +1069,14 @@ export default function ({ getService }: FtrProviderContext) {
                 shouldFire: false,
                 shouldWarn: true,
                 isNoData: false,
+                context: {
+                  cloud: undefined,
+                  container: null,
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
               },
             },
           ]);
