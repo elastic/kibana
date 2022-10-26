@@ -6,6 +6,7 @@
  */
 
 import { fromKueryExpression } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { getKueryFields } from './utils/get_kuery_fields';
 import {
   AGENT_NAME,
@@ -13,7 +14,6 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_LANGUAGE_NAME,
 } from './elasticsearch_fieldnames';
-import { i18n } from '@kbn/i18n';
 
 const LABELS = 'labels'; // implies labels.* wildcard
 

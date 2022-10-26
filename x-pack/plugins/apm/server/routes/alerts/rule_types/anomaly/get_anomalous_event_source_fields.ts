@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { IScopedClusterClient } from '@kbn/core/server';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
   TRANSACTION_DURATION,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { IScopedClusterClient } from '@kbn/core/server';
 import { alertingEsClient } from '../../alerting_es_client';
 import { getSourceFields, getSourceFieldsAgg } from '../../get_source_fields';
 

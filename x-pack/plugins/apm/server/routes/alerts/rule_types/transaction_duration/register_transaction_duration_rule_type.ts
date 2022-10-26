@@ -188,7 +188,7 @@ export function registerTransactionDurationRuleType({
       const thresholdMicroseconds = ruleParams.threshold * 1000;
 
       const triggeredBuckets = [];
-      for (let bucket of response.aggregations.series.buckets) {
+      for (const bucket of response.aggregations.series.buckets) {
         const [serviceName, environment, transactionType] = bucket.key;
         const transactionDuration =
           'avgLatency' in bucket // only true if ruleParams.aggregationType === 'avg'
