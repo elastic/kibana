@@ -83,9 +83,7 @@ export function SelectServices({
     const { isValid, isParsingError, message } =
       validateServiceGroupKuery(stagedKuery);
     if (isValid || isParsingError) {
-      if (kueryValidationMessage !== '') {
-        setKueryValidationMessage('');
-      }
+      setKueryValidationMessage('');
     } else {
       setKueryValidationMessage(message);
     }

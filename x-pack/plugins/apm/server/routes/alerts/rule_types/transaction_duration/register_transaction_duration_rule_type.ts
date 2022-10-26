@@ -31,6 +31,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   SERVICE_ENVIRONMENT,
+  TRANSACTION_DURATION,
 } from '../../../../../common/elasticsearch_fieldnames';
 import {
   ENVIRONMENT_NOT_DEFINED,
@@ -159,7 +160,8 @@ export function registerTransactionDurationRuleType({
                   },
                   { field: TRANSACTION_TYPE },
                 ],
-                size: 10000,
+                size: 1000,
+                order: { [TRANSACTION_DURATION]: 'desc' as const },
               },
               aggs: {
                 ...averageOrPercentileAgg({

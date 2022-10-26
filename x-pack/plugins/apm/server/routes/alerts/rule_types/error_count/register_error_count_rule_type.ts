@@ -31,6 +31,7 @@ import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  TRANSACTION_DURATION,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
 import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
@@ -123,7 +124,8 @@ export function registerErrorCountRuleType({
                       missing: ENVIRONMENT_NOT_DEFINED.value,
                     },
                   ],
-                  size: 10000,
+                  size: 1000,
+                  order: { [TRANSACTION_DURATION]: 'desc' as const },
                 },
                 aggs: getSourceFieldsAgg(),
               },

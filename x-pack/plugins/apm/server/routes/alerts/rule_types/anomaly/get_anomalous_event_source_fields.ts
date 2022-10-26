@@ -35,6 +35,7 @@ export async function getAnomalousEventSourceFields({
     index,
     body: {
       size: 0,
+      track_total_hits: false,
       query: {
         bool: {
           filter: [

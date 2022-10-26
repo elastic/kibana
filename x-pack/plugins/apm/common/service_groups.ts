@@ -59,7 +59,7 @@ export function validateServiceGroupKuery(kuery: string) {
         isValid: false,
         isParsingError: false,
         message: i18n.translate(
-          'xpack.apm.serviceGroups.selectServicesForm.title',
+          'xpack.apm.serviceGroups.invalidFields.message',
           {
             defaultMessage:
               'Query filter for service group does not support fields [{unsupportedFieldNames}]',

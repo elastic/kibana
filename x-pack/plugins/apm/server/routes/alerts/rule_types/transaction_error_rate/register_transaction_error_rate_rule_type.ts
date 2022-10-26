@@ -34,6 +34,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
+  TRANSACTION_DURATION,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { EventOutcome } from '../../../../../common/event_outcome';
 import { asDecimalOrInteger } from '../../../../../common/utils/formatters';
@@ -154,7 +155,8 @@ export function registerTransactionErrorRateRuleType({
                     },
                     { field: TRANSACTION_TYPE },
                   ],
-                  size: 10000,
+                  size: 1000,
+                  order: { [TRANSACTION_DURATION]: 'desc' as const },
                 },
                 aggs: {
                   outcomes: {
