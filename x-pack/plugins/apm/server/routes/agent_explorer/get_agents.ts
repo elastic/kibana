@@ -45,7 +45,7 @@ export async function getAgents({
       items: items.map((item) => ({
         ...item,
         agentRepoUrl: getAgentRepositoryUrl(item.agentName as AgentName),
-      }))
+      })),
     };
   });
 }

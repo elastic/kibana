@@ -21,5 +21,7 @@ export const APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE = 'apm-server-schema';
 export const APM_SERVER_SCHEMA_SAVED_OBJECT_ID = 'apm-server-schema';
 
 // APM agent latest version
-export const APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_TYPE = 'apm-agents-latest-version';
-export const APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_ID = 'apm-agents-latest-version';
+export const APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_TYPE =
+  'apm-agents-latest-version';
+export const APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_ID =
+  'apm-agents-latest-version';

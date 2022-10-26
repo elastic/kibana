@@ -13,7 +13,7 @@ import {
   environmentRt,
   kueryRt,
   probabilityRt,
-  rangeRt
+  rangeRt,
 } from '../default_api_types';
 import { getAgents } from './get_agents';
 import { getAgentInstances } from './get_agent_instances';

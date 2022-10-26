@@ -225,7 +225,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                           path: '/service-map',
                         },
                       ]),
-                  { label: apmAgentsExplorerTitle, app: 'apm', path: '/agent-explorer' },
+                  {
+                    label: apmAgentsExplorerTitle,
+                    app: 'apm',
+                    path: '/agent-explorer',
+                  },
                 ],
               },
             ];
@@ -333,7 +337,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           title: apmStorageExplorerTitle,
           path: '/storage-explorer',
         },
-        { id:'agents', title: apmAgentsExplorerTitle, path: '/agent-explorer' },
+        {
+          id: 'agents',
+          title: apmAgentsExplorerTitle,
+          path: '/agent-explorer',
+        },
       ],
 
       async mount(appMountParameters: AppMountParameters<unknown>) {

@@ -141,9 +141,7 @@ export function getAgentsColumns({
       ),
       width: `${unit * 10}px`,
       render: (_, { agentName, agentRepoUrl }) => (
-        <EuiToolTip
-          content={formatString(`${agentName} agent docs`)}
-        >
+        <EuiToolTip content={formatString(`${agentName} agent docs`)}>
           <AgentExplorerDocsLink
             agentName={agentName as AgentName}
             repositoryUrl={agentRepoUrl}
