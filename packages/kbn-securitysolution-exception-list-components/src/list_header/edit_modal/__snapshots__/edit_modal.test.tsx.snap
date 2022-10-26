@@ -57,7 +57,7 @@ Object {
                   id="modalForm_generated-id"
                 >
                   <div
-                    class="euiFormRow euiFormRow--hasLabel"
+                    class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
                     id="generated-id-row"
                   >
                     <div
@@ -75,13 +75,13 @@ Object {
                       class="euiFormRow__fieldWrapper"
                     >
                       <div
-                        class="euiFormControlLayout"
+                        class="euiFormControlLayout euiFormControlLayout--fullWidth"
                       >
                         <div
                           class="euiFormControlLayout__childrenWrapper"
                         >
                           <input
-                            class="euiFieldText"
+                            class="euiFieldText euiFieldText--fullWidth"
                             data-test-subj="editModalNameTextField"
                             id="generated-id"
                             name="name"
@@ -93,7 +93,7 @@ Object {
                     </div>
                   </div>
                   <div
-                    class="euiFormRow euiFormRow--hasLabel"
+                    class="euiFormRow euiFormRow--fullWidth euiFormRow--hasLabel"
                     id="generated-id-row"
                   >
                     <div
@@ -111,7 +111,7 @@ Object {
                       class="euiFormRow__fieldWrapper"
                     >
                       <textarea
-                        class="euiTextArea euiTextArea--resizeVertical"
+                        class="euiTextArea euiTextArea--resizeVertical euiTextArea--fullWidth"
                         data-test-subj="editModalDescriptionTextField"
                         id="generated-id"
                         name="description"

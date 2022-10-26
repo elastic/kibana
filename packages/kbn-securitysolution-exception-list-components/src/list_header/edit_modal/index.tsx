@@ -45,7 +45,7 @@ const EditModalComponent: FC<EditModalProps> = ({ listDetails, onSave, onCancel 
     e?.preventDefault();
   };
   return (
-    <EuiModal data-test-subj="EditModal" onClose={onSubmit} initialFocus="[name=popswitch]">
+    <EuiModal data-test-subj="EditModal" onClose={onCancel} initialFocus="[name=popswitch]">
       {showProgress && <EuiProgress size="xs" position="absolute" />}
       <EuiModalHeader>
         <EuiModalHeaderTitle data-test-subj="editModalTitle">

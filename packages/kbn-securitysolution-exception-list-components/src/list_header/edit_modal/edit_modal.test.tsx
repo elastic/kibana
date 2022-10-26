@@ -24,7 +24,7 @@ describe('EditModal', () => {
     expect(wrapper).toMatchSnapshot();
     expect(wrapper.getByTestId('editModalTitle')).toHaveTextContent('list name');
   });
-  it('should call onSave', () => {
+  it('should call onSave when submitting the form', () => {
     const wrapper = render(
       <EditModal
         listDetails={{ name: 'list name', description: 'list description' }}
@@ -67,5 +67,17 @@ describe('EditModal', () => {
       name: 'New list name',
       description: 'New description name',
     });
+  });
+  it('should call onCanel when clicking on close button', () => {
+    const wrapper = render(
+      <EditModal
+        listDetails={{ name: 'list name', description: 'list description' }}
+        onSave={onSave}
+        onCancel={onCancel}
+      />
+    );
+    const closeButton = wrapper.getByLabelText('Closes this modal window');
+    fireEvent.click(closeButton);
+    expect(onCancel).toBeCalled();
   });
 });
