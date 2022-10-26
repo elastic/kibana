@@ -31,7 +31,6 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
   SERVICE_ENVIRONMENT,
-  TRANSACTION_DURATION,
 } from '../../../../../common/elasticsearch_fieldnames';
 import {
   ENVIRONMENT_NOT_DEFINED,
@@ -48,7 +47,10 @@ import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import { RegisterRuleDependencies } from '../../register_apm_rule_types';
-import { averageOrPercentileAgg } from '../../average_or_percentile_agg';
+import {
+  averageOrPercentileAgg,
+  getMultiTermsSortOrder,
+} from '../../average_or_percentile_agg';
 import { getSourceFields, getSourceFieldsAgg } from '../../get_source_fields';
 
 const paramsSchema = schema.object({
@@ -161,7 +163,7 @@ export function registerTransactionDurationRuleType({
                   { field: TRANSACTION_TYPE },
                 ],
                 size: 1000,
-                order: { [TRANSACTION_DURATION]: 'desc' as const },
+                ...getMultiTermsSortOrder(ruleParams.aggregationType),
               },
               aggs: {
                 ...averageOrPercentileAgg({

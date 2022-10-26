@@ -45,3 +45,13 @@ export function averageOrPercentileAgg({
     },
   };
 }
+
+export function getMultiTermsSortOrder(aggregationType: AggregationType): {
+  order: { [path: string]: 'desc' };
+} {
+  if (aggregationType === AggregationType.Avg) {
+    return { order: { avgLatency: 'desc' } };
+  }
+  const percentsKey = aggregationType === AggregationType.P95 ? 95 : 99;
+  return { order: { [`pctLatency.${percentsKey}`]: 'desc' } };
+}

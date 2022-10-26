@@ -196,7 +196,8 @@ export function registerAnomalyRuleType({
                     { field: 'by_field_value' },
                     { field: 'job_id' },
                   ],
-                  size: 10000,
+                  size: 1000,
+                  order: { 'latest_score.record_score': 'desc' as const },
                 },
                 aggs: {
                   latest_score: {
