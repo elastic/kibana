@@ -1,0 +1,67 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { EuiFlexGroup, EuiIcon, EuiStat } from '@elastic/eui';
+import React from 'react';
+import { FlexItem, MetricItem } from './utils';
+import type { StatItem } from './types';
+import { LensEmbeddable } from '../visualization_actions/lens_embeddable';
+
+const MetricComponent = ({
+  fields,
+  id,
+  timerange,
+  inspectTitle,
+}: {
+  fields: StatItem[];
+  id: string;
+  timerange: { from: string; to: string };
+  inspectTitle?: string;
+}) => {
+  return (
+    <EuiFlexGroup gutterSize="none">
+      {fields.map((field) => (
+        <FlexItem key={`stat-items-field-${field.key}`}>
+          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+            {field.icon && (
+              <FlexItem grow={false}>
+                <EuiIcon
+                  type={field.icon}
+                  color={field.color}
+                  size="l"
+                  data-test-subj="stat-icon"
+                />
+              </FlexItem>
+            )}
+
+            <MetricItem>
+              {field.lensAttributes && (
+                <p data-test-subj="stat-title">
+                  <LensEmbeddable
+                    data-test-subj="embeddable-metric"
+                    height="36px"
+                    id={id}
+                    lensAttributes={field.lensAttributes}
+                    timerange={timerange}
+                    inspectTitle={inspectTitle}
+                    metricAlignment={!field.icon && !field.description ? 'left' : 'center'}
+                  />
+                </p>
+              )}
+            </MetricItem>
+            {field.description != null && (
+              <FlexItem>
+                <EuiStat title={field.description} description={null} titleSize="m" />
+              </FlexItem>
+            )}
+          </EuiFlexGroup>
+        </FlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+};
+
+export const Metric = React.memo(MetricComponent);
