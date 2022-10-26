@@ -57,10 +57,11 @@ describe('checkEmailServiceConfiguration()', () => {
         config: missingConnectorConfig,
         plugins: {
           actions: actionsMock.createSetup(),
+          licensing: licensingMock.createSetup(),
         },
       };
       checkEmailServiceConfiguration(params);
-    }).toThrowErrorMatchingInlineSnapshot(`"'actions' and 'licensing' plugins are required."`);
+    }).toThrowErrorMatchingInlineSnapshot(`"Email connector not specified."`);
   });
 
   it('should throw an Error if the specified email connector is not a preconfigured connector', () => {
@@ -73,10 +74,13 @@ describe('checkEmailServiceConfiguration()', () => {
         config: invalidConnectorConfig,
         plugins: {
           actions,
+          licensing: licensingMock.createSetup(),
         },
       };
       checkEmailServiceConfiguration(params);
-    }).toThrowErrorMatchingInlineSnapshot(`"'actions' and 'licensing' plugins are required."`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Unexisting email connector 'someUnexistingConnectorId' specified."`
+    );
   });
 
   it('should not throw an Error if required plugins are present and the specified email connector is valid', () => {
