@@ -17,7 +17,7 @@ interface Props {
   dataView: DataView;
 }
 
-export const FilterBar = ({ dataView }: Props) => {
+export const UnifiedSearchBar = ({ dataView }: Props) => {
   const {
     services: { unifiedSearch },
   } = useKibana<InfraClientStartDeps>();
@@ -59,8 +59,7 @@ export const FilterBar = ({ dataView }: Props) => {
 
   return (
     <SearchBar
-      appName={'infra_hosts'}
-      data-test-subj="infraApp_filterBar"
+      appName={'Infra Hosts'}
       indexPatterns={[dataView]}
       query={unifiedSearchQuery}
       dateRangeFrom={unifiedSearchDateRange.from}

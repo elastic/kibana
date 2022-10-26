@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { InfraLoadingPanel } from '../../../../components/loading';
 import { useMetricsDataViewContext } from '../hooks/use_data_view';
-import { FilterBar } from './filter_bar';
+import { UnifiedSearchBar } from './unified_search_bar';
 import { HostsTable } from './hosts_table';
 
 export const HostContainer = () => {
@@ -25,11 +25,11 @@ export const HostContainer = () => {
         defaultMessage: 'Loading data',
       })}
     />
-  ) : !!metricsDataView && !hasFailedLoadingDataView ? (
+  ) : hasFailedLoadingDataView || !metricsDataView ? null : (
     <>
-      <FilterBar dataView={metricsDataView} />
+      <UnifiedSearchBar dataView={metricsDataView} />
       <EuiSpacer />
       <HostsTable />
     </>
-  ) : null;
+  );
 };

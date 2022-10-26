@@ -18,17 +18,17 @@ import type { InfraTimerangeInput } from '../../../../../common/http_api';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { useSourceContext } from '../../../../containers/metrics_source';
 
+const HOST_METRICS: Array<{ type: SnapshotMetricType }> = [
+  { type: 'rx' },
+  { type: 'tx' },
+  { type: 'memory' },
+  { type: 'cpuCores' },
+  { type: 'memoryTotal' },
+];
+
 export const HostsTable = () => {
   const { sourceId } = useSourceContext();
   const { esQuery, dateRangeTimestamp } = useUnifiedSearchContext();
-
-  const hostMetrics: Array<{ type: SnapshotMetricType }> = [
-    { type: 'rx' },
-    { type: 'tx' },
-    { type: 'memory' },
-    { type: 'cpuCores' },
-    { type: 'memoryTotal' },
-  ];
 
   const timeRange: InfraTimerangeInput = {
     from: dateRangeTimestamp.from,
@@ -37,12 +37,12 @@ export const HostsTable = () => {
     ignoreLookback: true,
   };
 
-  // Snapshot endpoint uses internally the indices stored in source.configuration.metricAlias.
-  // For the Unified Search, we create a data view, which for now will be built off source.configuration.metricAlias too
-  // if we introduce data view selection, we'll have to change this hook and the endpoint
+  // Snapshot endpoint internally uses the indices stored in source.configuration.metricAlias.
+  // For the Unified Search, we create a data view, which for now will be built off of source.configuration.metricAlias too
+  // if we introduce data view selection, we'll have to change this hook and the endpoint to accept a new parameter for the indices
   const { loading, nodes, reload } = useSnapshot(
     esQuery && JSON.stringify(esQuery),
-    hostMetrics,
+    HOST_METRICS,
     [],
     'host',
     sourceId,
