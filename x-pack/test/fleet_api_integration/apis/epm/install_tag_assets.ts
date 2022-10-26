@@ -47,6 +47,23 @@ export default function (providerContext: FtrProviderContext) {
       .expect(200);
   };
 
+  const getTag = async (id, space) =>
+    kibanaServer.savedObjects
+      .get({
+        type: 'tag',
+        id,
+        ...(space && { space }),
+      })
+      .catch(() => {});
+
+  const deleteTag = async (id) =>
+    kibanaServer.savedObjects
+      .delete({
+        type: 'tag',
+        id,
+      })
+      .catch(() => {});
+
   const deleteSpace = async (spaceId: string) => {
     await supertest.delete(`/api/spaces/space/${spaceId}`).set('kbn-xsrf', 'xxxx').send();
   };
@@ -73,33 +90,17 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('Should create managed tag saved objects', async () => {
-        const defaultTag = await kibanaServer.savedObjects.get({
-          type: 'tag',
-          id: 'fleet-managed-default',
-          space: 'default',
-        });
-
+        const defaultTag = await getTag('fleet-managed-default');
         expect(defaultTag).not.equal(undefined);
-        const spaceTag = await kibanaServer.savedObjects.get({
-          type: 'tag',
-          id: 'fleet-managed-fleet_test_space',
-          space: testSpaceId,
-        });
+
+        const spaceTag = await getTag('fleet-managed-fleet_test_space', testSpaceId);
         expect(spaceTag).not.equal(undefined);
       });
       it('Should create package tag saved objects', async () => {
-        const defaultTag = await kibanaServer.savedObjects.get({
-          type: 'tag',
-          id: `fleet-pkg-all_assets-default`,
-          space: 'default',
-        });
-
+        const defaultTag = await getTag(`fleet-pkg-all_assets-default`);
         expect(defaultTag).not.equal(undefined);
-        const spaceTag = await kibanaServer.savedObjects.get({
-          type: 'tag',
-          id: `fleet-pkg-${pkgName}-fleet_test_space`,
-          space: testSpaceId,
-        });
+
+        const spaceTag = await getTag(`fleet-pkg-${pkgName}-fleet_test_space`, testSpaceId);
         expect(spaceTag).not.equal(undefined);
       });
     });
@@ -107,6 +108,12 @@ export default function (providerContext: FtrProviderContext) {
     describe('Handles presence of legacy tags', async () => {
       before(async () => {
         if (!server.enabled) return;
+
+        // first clean up any existing tag saved objects as they arent cleaned on uninstall
+        await deleteTag('fleet-managed-default');
+        await deleteTag(`fleet-pkg-${pkgName}-default`);
+
+        // now create the legacy tags
         await kibanaServer.savedObjects.create({
           type: 'tag',
           id: 'managed',
@@ -133,32 +140,15 @@ export default function (providerContext: FtrProviderContext) {
       after(async () => {
         if (!server.enabled) return;
         await uninstallPackage(pkgName, pkgVersion);
-        await kibanaServer.savedObjects.delete({ id: 'managed', type: 'tag' });
-        await kibanaServer.savedObjects.delete({
-          id: pkgName,
-          type: 'tag',
-        });
+        await deleteTag('managed');
+        await deleteTag('tag');
       });
 
       it('Should not create space aware tag saved objects if legacy tags exist', async () => {
-        const managedTag = await kibanaServer.savedObjects
-          .get({
-            type: 'tag',
-            id: 'fleet-managed-default',
-            space: 'default',
-          })
-          .catch(() => {});
-
+        const managedTag = await getTag('fleet-managed-default');
         expect(managedTag).equal(undefined);
 
-        const pkgTag = await kibanaServer.savedObjects
-          .get({
-            type: 'tag',
-            id: `fleet-pkg-${pkgName}-default`,
-            space: 'default',
-          })
-          .catch(() => {});
-
+        const pkgTag = await getTag(`fleet-pkg-${pkgName}-default`);
         expect(pkgTag).equal(undefined);
       });
     });
