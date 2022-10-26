@@ -21,11 +21,19 @@ export const useManageExceptionListDetails = ({
   const { name: listName, description: listDescription, list_id: listId, rules: allRules } = list;
   const linkedRules = useMemo(() => mapListRulesToUIRules(list.rules), [list.rules]);
 
-  const { toasts, viewerStatus, http, setIsReadOnly, handleErrorStatus } =
-    useExceptionListDetailsContext();
+  const {
+    isReadOnly: canUserEditDetails,
+    toasts,
+    viewerStatus,
+    http,
+    setIsReadOnly,
+    handleErrorStatus,
+  } = useExceptionListDetailsContext();
+
   useEffect(() => {
+    if (list.list_id === 'endpoint_list') return setIsReadOnly(true);
     setIsReadOnly(isReadOnly);
-  }, [isReadOnly, setIsReadOnly]);
+  }, [isReadOnly, list.list_id, setIsReadOnly]);
 
   const onEditListDetails = useCallback(
     async (listDetails: ListDetails) => {
@@ -87,6 +95,7 @@ export const useManageExceptionListDetails = ({
   }, []);
   const onRuleSelectionChange = useCallback(() => {}, []);
   return {
+    canUserEditDetails,
     allRules,
     linkedRules,
     exportedList,

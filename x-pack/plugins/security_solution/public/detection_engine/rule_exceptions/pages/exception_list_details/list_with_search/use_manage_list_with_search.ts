@@ -117,7 +117,6 @@ export const useManageListWithSearchComponent = (list: ExceptionListWithRules) =
   );
 
   const onAddExceptionClick = useCallback(() => {
-    debugger;
     setShowAddExceptionFlyout(true);
   }, [setShowAddExceptionFlyout]);
 
