@@ -62,11 +62,9 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
   const isTourShown = useCallback((stepId: SecurityStepId) => tourStatus[stepId], [tourStatus]);
   const [activeStep, _setActiveStep] = useState<number>(1);
 
-  const incrementStep = useCallback((stepId: SecurityStepId, step?: number) => {
-    _setActiveStep((prevState) =>
-      step != null && step <= securityTourConfig[stepId].length
-        ? step
-        : (prevState >= securityTourConfig[stepId].length ? 0 : prevState) + 1
+  const incrementStep = useCallback((stepId: SecurityStepId) => {
+    _setActiveStep(
+      (prevState) => (prevState >= securityTourConfig[stepId].length ? 0 : prevState) + 1
     );
   }, []);
 
