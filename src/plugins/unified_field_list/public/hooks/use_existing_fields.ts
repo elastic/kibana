@@ -89,7 +89,7 @@ export const useExistingFieldsFetcher = (
       dataViewId: string | undefined;
       fetchId: string;
     }): Promise<void> => {
-      if (!dataViewId) {
+      if (!dataViewId || !query || !filters) {
         return;
       }
 
@@ -169,8 +169,26 @@ export const useExistingFieldsFetcher = (
   );
 
   const dataViewsHash = getDataViewsHash(params.dataViews);
+  // const prevParamsRef = useRef<any[]>([]);
   const refetchFieldsExistenceInfo = useCallback(
     async (dataViewId?: string) => {
+      // const currentParams = [
+      //   fetchFieldsExistenceInfo,
+      //   dataViewsHash,
+      //   params.query,
+      //   params.filters,
+      //   params.fromDate,
+      //   params.toDate,
+      // ];
+      //
+      // currentParams.forEach((param, index) => {
+      //   if (param !== prevParamsRef.current[index]) {
+      //     console.log('different param', param, prevParamsRef.current[index]);
+      //   }
+      // });
+      //
+      // prevParamsRef.current = currentParams;
+      // console.log('refetch triggered', { dataViewId });
       const fetchId = generateId();
       lastFetchId = fetchId;
       // refetch only for the specified data view
