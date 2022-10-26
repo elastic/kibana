@@ -54,7 +54,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   const [currentSpace, setSpace] = useState<string | null>(null);
   useEffect(() => {
     async function getSpaces() {
-      const response = await spaces?.getActiveSpace();
+      const response = await spaces.getActiveSpace();
       setSpace(response.id);
     }
 
@@ -192,7 +192,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
             isGlobalEnabled={isDefaultNamespace}
           />
         </EuiFlexGroup>
-        {/* <EuiSpacer size="xxl" />*/}
 
         {packType === 'policy' && (
           <EuiFlexGroup>
@@ -201,11 +200,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-        {/* {isDefaultNamespace && (*/}
-        {/*  <EuiFlexItem>*/}
-        {/*  <GlobalPackField />*/}
-        {/*  </EuiFlexItem>*/}
-        {/*  )}*/}
         <EuiSpacer size="xxl" />
 
         <EuiHorizontalRule />

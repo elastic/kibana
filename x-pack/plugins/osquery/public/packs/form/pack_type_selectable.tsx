@@ -16,10 +16,6 @@ const StyledEuiCard = styled(EuiCard)`
 
   .euiTitle {
     font-size: 1rem;
-    color: ${(props) =>
-      props.selectable?.isSelected
-        ? props.theme.eui.euiLinkColor
-        : props.theme.eui.EuiTextSubduedColor};
   }
 
   .euiText {
@@ -71,6 +67,14 @@ export const PackTypeSelectable = ({
     [packType, handleChange]
   );
 
+  // Couldn't pass styles through StyleEuiCard, becasue 'color' conflicts with layout 'horizontal'
+  const getRadioStyle = useCallback(
+    (selected) => ({
+      ...(selected && { color: '#006BB4' }),
+    }),
+    []
+  );
+
   return (
     <EuiFlexItem>
       <EuiFormRow label="Type" fullWidth>
@@ -80,6 +84,7 @@ export const PackTypeSelectable = ({
               layout="horizontal"
               title={
                 <EuiRadio
+                  style={getRadioStyle(policyCardSelectable.isSelected)}
                   id={'osquery_pack_type_policy'}
                   label={i18n.translate('xpack.osquery.pack.form.policyLabel', {
                     defaultMessage: 'Policy',
@@ -101,6 +106,7 @@ export const PackTypeSelectable = ({
               layout="horizontal"
               title={
                 <EuiRadio
+                  style={getRadioStyle(globalCardSelectable.isSelected)}
                   id={'osquery_pack_type_global'}
                   label={i18n.translate('xpack.osquery.pack.form.globalLabel', {
                     defaultMessage: 'Global',
