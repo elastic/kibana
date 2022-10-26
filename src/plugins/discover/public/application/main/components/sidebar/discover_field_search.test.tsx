@@ -97,30 +97,17 @@ describe('DiscoverFieldSearch', () => {
     expect(badge.text()).toEqual('1');
   });
 
-  test('change in missing fields switch should not change filter count', () => {
-    const component = mountComponent();
-    const btn = findTestSubject(component, 'toggleFieldFilterButton');
-    btn.simulate('click');
-    const badge = btn.find('.euiNotificationBadge');
-    expect(badge.text()).toEqual('0');
-    const missingSwitch = findTestSubject(component, 'missingSwitch');
-    missingSwitch.simulate('change', { target: { value: false } });
-    expect(badge.text()).toEqual('0');
-  });
-
   test('change in filters triggers onChange', () => {
     const onChange = jest.fn();
     const component = mountComponent({ ...defaultProps, ...{ onChange } });
     const btn = findTestSubject(component, 'toggleFieldFilterButton');
     btn.simulate('click');
     const aggregtableButtonGroup = findButtonGroup(component, 'aggregatable');
-    const missingSwitch = findTestSubject(component, 'missingSwitch');
     act(() => {
       // @ts-expect-error
       (aggregtableButtonGroup.props() as EuiButtonGroupProps).onChange('aggregatable-true', null);
     });
-    missingSwitch.simulate('click');
-    expect(onChange).toBeCalledTimes(2);
+    expect(onChange).toBeCalledTimes(1);
   });
 
   test('change in type filters triggers onChange with appropriate value', () => {

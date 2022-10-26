@@ -22,7 +22,6 @@ export function groupFields(
   fields: DataViewField[] | null,
   columns: string[],
   popularLimit: number,
-  fieldCounts: Record<string, number> | undefined,
   fieldFilterState: FieldFilterState,
   useNewFieldsApi: boolean
 ): GroupedFields {
@@ -32,7 +31,7 @@ export function groupFields(
     popular: [],
     unpopular: [],
   };
-  if (!Array.isArray(fields) || !Array.isArray(columns) || typeof fieldCounts !== 'object') {
+  if (!Array.isArray(fields) || !Array.isArray(columns)) {
     return result;
   }
 
@@ -51,7 +50,7 @@ export function groupFields(
   const fieldsSorted = fields.sort(compareFn);
 
   for (const field of fieldsSorted) {
-    if (!isFieldFiltered(field, fieldFilterState, fieldCounts)) {
+    if (!isFieldFiltered(field, fieldFilterState)) {
       continue;
     }
 
@@ -82,7 +81,7 @@ export function groupFields(
     } as DataViewField;
     if (
       !result.selected.find((field) => field.name === column) &&
-      isFieldFiltered(tmpField, fieldFilterState, fieldCounts)
+      isFieldFiltered(tmpField, fieldFilterState)
     ) {
       result.selected.push(tmpField);
     }

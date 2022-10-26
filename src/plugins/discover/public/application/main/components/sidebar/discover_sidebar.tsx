@@ -132,8 +132,8 @@ export function DiscoverSidebarComponent({
   }, [selectedDataView, fieldCounts, documents]);
 
   const onChangeFieldSearch = useCallback(
-    (field: string, value: string | boolean | undefined) => {
-      const newState = setFieldFilterProp(fieldFilter, field, value);
+    (filterName: string, value: string | boolean | undefined) => {
+      const newState = setFieldFilterProp(fieldFilter, filterName, value);
       setFieldFilter(newState);
     },
     [fieldFilter, setFieldFilter]
@@ -146,8 +146,8 @@ export function DiscoverSidebarComponent({
     popular: popularFields,
     unpopular: unpopularFields,
   } = useMemo(
-    () => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi),
-    [fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi]
+    () => groupFields(fields, columns, popularLimit, fieldFilter, useNewFieldsApi),
+    [fields, columns, popularLimit, fieldFilter, useNewFieldsApi]
   );
 
   // console.log({

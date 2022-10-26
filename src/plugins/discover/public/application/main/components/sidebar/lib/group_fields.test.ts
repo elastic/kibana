@@ -43,25 +43,11 @@ const fields = [
   },
 ];
 
-const fieldCounts = {
-  category: 1,
-  currency: 1,
-  customer_birth_date: 1,
-  unknown_field: 1,
-};
-
 describe('group_fields', function () {
   it('should group fields in selected, popular, unpopular group', function () {
     const fieldFilterState = getDefaultFieldFilter();
 
-    const actual = groupFields(
-      fields as DataViewField[],
-      ['currency'],
-      5,
-      fieldCounts,
-      fieldFilterState,
-      false
-    );
+    const actual = groupFields(fields as DataViewField[], ['currency'], 5, fieldFilterState, false);
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "popular": Array [
@@ -171,7 +157,7 @@ describe('group_fields', function () {
 
     const fieldFilterState = getDefaultFieldFilter();
 
-    const actual = groupFields(fieldsToGroup, ['currency'], 5, fieldCounts, fieldFilterState, true);
+    const actual = groupFields(fieldsToGroup, ['currency'], 5, fieldFilterState, true);
 
     expect(actual.popular).toEqual([category]);
     expect(actual.selected).toEqual([currency]);
@@ -185,7 +171,6 @@ describe('group_fields', function () {
       fields as DataViewField[],
       ['customer_birth_date', 'currency', 'unknown'],
       5,
-      fieldCounts,
       fieldFilterState,
       false
     );
@@ -199,7 +184,6 @@ describe('group_fields', function () {
       fields as DataViewField[],
       ['currency', 'customer_birth_date', 'unknown'],
       5,
-      fieldCounts,
       fieldFilterState,
       false
     );
@@ -217,7 +201,6 @@ describe('group_fields', function () {
       fields as DataViewField[],
       ['customer_birth_date', 'currency', 'unknown'],
       5,
-      fieldCounts,
       fieldFilterState,
       false
     );
@@ -242,7 +225,6 @@ describe('group_fields', function () {
       fieldsWithUnmappedField as DataViewField[],
       ['customer_birth_date', 'currency'],
       5,
-      fieldCounts,
       fieldFilterState,
       true
     );
@@ -267,7 +249,6 @@ describe('group_fields', function () {
       fieldsWithUnmappedField as DataViewField[],
       ['customer_birth_date', 'currency'],
       5,
-      fieldCounts,
       fieldFilterState,
       false
     );
