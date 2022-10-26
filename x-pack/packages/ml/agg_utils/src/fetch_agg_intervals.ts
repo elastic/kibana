@@ -29,7 +29,8 @@ export const fetchAggIntervals = async (
   query: estypes.QueryDslQueryContainer,
   fields: HistogramField[],
   samplerShardSize: number,
-  runtimeMappings?: estypes.MappingRuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields,
+  abortSignal?: AbortSignal
 ): Promise<NumericColumnStatsMap> => {
   const numericColumns = fields.filter((field) => {
     return field.type === KBN_FIELD_TYPES.NUMBER || field.type === KBN_FIELD_TYPES.DATE;
@@ -49,16 +50,19 @@ export const fetchAggIntervals = async (
     return aggs;
   }, {} as Record<string, object>);
 
-  const body = await client.search({
-    index: indexPattern,
-    size: 0,
-    body: {
-      query,
-      aggs: buildSamplerAggregation(minMaxAggs, samplerShardSize),
+  const body = await client.search(
+    {
+      index: indexPattern,
       size: 0,
-      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      body: {
+        query,
+        aggs: buildSamplerAggregation(minMaxAggs, samplerShardSize),
+        size: 0,
+        ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      },
     },
-  });
+    { signal: abortSignal, maxRetries: 0 }
+  );
 
   const aggsPath = getSamplerAggregationsResponsePath(samplerShardSize);
   const aggregations = aggsPath.length > 0 ? get(body.aggregations, aggsPath) : body.aggregations;
