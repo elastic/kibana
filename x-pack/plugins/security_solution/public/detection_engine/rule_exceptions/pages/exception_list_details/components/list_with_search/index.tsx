@@ -17,15 +17,15 @@ import {
   EmptyViewerState,
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
-import * as i18n from '../translations';
-import { FormattedDate } from '../../../../../common/components/formatted_date';
-import { getFormattedComments } from '../../../utils/helpers';
-import { ListDetailsLinkAnchor } from '../../../components/list_details_link_anchor';
+import { FormattedDate } from '../../../../../../common/components/formatted_date';
+import { getFormattedComments } from '../../../../utils/helpers';
+import { ListDetailsLinkAnchor } from '../../../../components/list_details_link_anchor';
+import { ExceptionsUtility } from '../../../../components/exceptions_utility';
+import { AddExceptionFlyout } from '../../../../components/add_exception_flyout';
+import { EditExceptionFlyout } from '../../../../components/edit_exception_flyout';
+import * as i18n from '../../translations';
+import type { ExceptionListWithRules } from '../../types';
 import { useManageListWithSearchComponent } from './use_manage_list_with_search';
-import { ExceptionsUtility } from '../../../components/exceptions_utility';
-import type { ExceptionListWithRules } from '../types';
-import { AddExceptionFlyout } from '../../../components/add_exception_flyout';
-import { EditExceptionFlyout } from '../../../components/edit_exception_flyout';
 
 interface ListWithSearchComponentProps {
   list: ExceptionListWithRules;

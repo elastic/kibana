@@ -6,11 +6,11 @@
  */
 import { useCallback, useEffect, useState, useMemo } from 'react';
 import type { ListDetails } from '@kbn/securitysolution-exception-list-components';
-import { useExceptionListDetailsContext } from '../context';
-import type { ExceptionListDetailsComponentProps } from '../types';
-import { deleteList, exportList, updateList } from '../api';
-import { mapListRulesToUIRules } from '../utils';
-import * as i18n from '../translations';
+import { useExceptionListDetailsContext } from './context';
+import type { ExceptionListDetailsComponentProps } from './types';
+import { deleteList, exportList, updateList } from './api';
+import { mapListRulesToUIRules } from './utils';
+import * as i18n from './translations';
 
 export const useManageExceptionListDetails = ({
   isReadOnly,
@@ -18,20 +18,16 @@ export const useManageExceptionListDetails = ({
 }: ExceptionListDetailsComponentProps) => {
   const [showManageRulesFlyout, setShowManageRulesFlyout] = useState(false);
   const [exportedList, setExportedList] = useState<Blob>();
+  const [canUserEditDetails, setCanUserEditDetails] = useState(true);
   const { name: listName, description: listDescription, list_id: listId, rules: allRules } = list;
   const linkedRules = useMemo(() => mapListRulesToUIRules(list.rules), [list.rules]);
 
-  const {
-    isReadOnly: canUserEditDetails,
-    toasts,
-    viewerStatus,
-    http,
-    setIsReadOnly,
-    handleErrorStatus,
-  } = useExceptionListDetailsContext();
+  const { toasts, viewerStatus, http, setIsReadOnly, handleErrorStatus } =
+    useExceptionListDetailsContext();
 
   useEffect(() => {
-    if (list.list_id === 'endpoint_list') return setIsReadOnly(true);
+    if (list.list_id === 'endpoint_list') return setCanUserEditDetails(false);
+
     setIsReadOnly(isReadOnly);
   }, [isReadOnly, list.list_id, setIsReadOnly]);
 

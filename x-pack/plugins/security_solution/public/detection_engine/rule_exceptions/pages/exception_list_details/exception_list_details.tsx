@@ -12,13 +12,11 @@ import {
   ExceptionListHeader,
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
-
 import { AutoDownload } from '../../../../common/components/auto_download/auto_download';
-import { ListWithSearch } from './list_with_search';
-import { useManageExceptionListDetails } from './hooks/use_manage_exception_list_details';
-import type { ExceptionListDetailsComponentProps } from './types';
 import { ListDetailsLinkAnchor } from '../../components/list_details_link_anchor';
-import { ManageRules } from './manage_rules';
+import { ListWithSearch, ManageRules } from './components';
+import { useManageExceptionListDetails } from './use_manage_exception_list_details';
+import type { ExceptionListDetailsComponentProps } from './types';
 
 export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProps> = ({
   isReadOnly = false,
@@ -49,7 +47,7 @@ export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProp
         description={listDescription}
         listId={listId}
         linkedRules={linkedRules}
-        isReadonly={canUserEditDetails}
+        isReadonly={!canUserEditDetails}
         securityLinkAnchorComponent={ListDetailsLinkAnchor}
         onEditListDetails={onEditListDetails}
         onExportList={onExportList}

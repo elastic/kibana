@@ -19,10 +19,10 @@ import {
   fetchListExceptionItems,
   getExceptionItemsReferences,
   deleteException,
-} from '../api';
-import * as i18n from '../translations';
-import { useExceptionListDetailsContext } from '../context';
-import type { ExceptionListWithRules } from '../types';
+} from '../../api';
+import * as i18n from '../../translations';
+import { useExceptionListDetailsContext } from '../../context';
+import type { ExceptionListWithRules } from '../../types';
 
 export const useManageListWithSearchComponent = (list: ExceptionListWithRules) => {
   const {
