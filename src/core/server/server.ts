@@ -55,7 +55,6 @@ import {
   DeprecationsService,
   config as deprecationConfig,
 } from '@kbn/core-deprecations-server-internal';
-import { config as elasticApmConfig } from '@kbn/apm-config-loader';
 import { CoreUsageDataService } from '@kbn/core-usage-data-server-internal';
 import { StatusService, statusConfig } from '@kbn/core-status-server-internal';
 import { UiSettingsService, uiSettingsConfig } from '@kbn/core-ui-settings-server-internal';
@@ -72,6 +71,7 @@ import { RenderingService } from '@kbn/core-rendering-server-internal';
 import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
 import { CoreApp } from './core_app';
 import { PluginsService, config as pluginsConfig } from './plugins';
+import { elasticApmConfig } from './root/elastic_config';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { DiscoveredPlugins } from './plugins';
 

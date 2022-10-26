@@ -46,7 +46,6 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/kbn-safer-lodash-set:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
-  "//packages/core/base/core-base-server-internal:npm_module_types",
   "@npm//@elastic/apm-rum",
   "@npm//@types/jest",
   "@npm//@types/js-yaml",

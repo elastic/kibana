@@ -6,21 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import { schema } from '@kbn/config-schema';
 
-const migrationSchema = schema.object({
-  apm: schema.object({
-    active: schema.maybe(schema.boolean()),
-    serverUrl: schema.maybe(schema.uri()),
-    secretToken: schema.maybe(schema.string()),
-    globalLabels: schema.object({}, { unknowns: 'allow' }),
-  }),
+export const apmConfigSchema = schema.object({
+  apm: schema.object(
+    {
+      active: schema.maybe(schema.boolean()),
+      serverUrl: schema.maybe(schema.uri()),
+      secretToken: schema.maybe(schema.string()),
+      globalLabels: schema.object({}, { unknowns: 'allow' }),
+    },
+    { unknowns: 'allow' }
+  ),
 });
-
-export type ElasticApmConfigType = TypeOf<typeof migrationSchema>;
-
-export const elasticApmConfig: ServiceConfigDescriptor<ElasticApmConfigType> = {
-  path: 'elastic',
-  schema: migrationSchema,
-};
