@@ -634,7 +634,15 @@
               },
               "[]>) => ",
               "Observable",
-              "<Record<string, unknown>>"
+              "<Record<string, unknown> | ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueError",
+                "text": "ExpressionValueError"
+              },
+              ">"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -13696,7 +13704,15 @@
               },
               "[]>) => ",
               "Observable",
-              "<Record<string, unknown>>"
+              "<Record<string, unknown> | ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueError",
+                "text": "ExpressionValueError"
+              },
+              ">"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -22527,7 +22543,15 @@
               },
               "[]>) => ",
               "Observable",
-              "<Record<string, unknown>>"
+              "<Record<string, unknown> | ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueError",
+                "text": "ExpressionValueError"
+              },
+              ">"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
