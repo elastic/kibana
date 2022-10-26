@@ -556,7 +556,12 @@ export class Embeddable
     });
 
     if (warningsMap.size && this.warningDomNode) {
-      render(<Warnings warnings={[...warningsMap.values()].flat()} />, this.warningDomNode);
+      render(
+        <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+          <Warnings warnings={[...warningsMap.values()].flat()} />
+        </KibanaThemeProvider>,
+        this.warningDomNode
+      );
     }
   }
 
