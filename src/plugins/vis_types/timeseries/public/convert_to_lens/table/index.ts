@@ -28,6 +28,8 @@ const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<st
   return newLayers;
 };
 
+const invalidModelError = () => new Error('Invalid model');
+
 export const convertToLens: ConvertTsvbToLensVisualization = async (
   { params: model, uiState },
   timeRange,
@@ -52,7 +54,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
     );
 
     if (!datasourceInfo) {
-      return null;
+      throw invalidModelError();
     }
 
     const { indexPatternId, indexPattern } = datasourceInfo;
@@ -72,7 +74,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
     );
 
     if (!commonBucketsColumns) {
-      return null;
+      throw invalidModelError();
     }
 
     const sortConfiguration = {
@@ -93,7 +95,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
             s.aggregate_function === model.series[0].aggregate_function)
       )
     ) {
-      return null;
+      throw invalidModelError();
     }
 
     if (model.series[0].aggregate_by) {
@@ -101,7 +103,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
         !model.series[0].aggregate_function ||
         !['sum', 'mean', 'min', 'max'].includes(model.series[0].aggregate_function)
       ) {
-        return null;
+        throw invalidModelError();
       }
       bucketsColumns = getBucketsColumns(
         undefined,
@@ -114,7 +116,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
         false
       );
       if (bucketsColumns === null) {
-        return null;
+        throw invalidModelError();
       }
 
       columnStates.push(
@@ -135,11 +137,11 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
 
       // not valid time shift
       if (series.offset_time && parseTimeShift(series.offset_time) === 'invalid') {
-        return null;
+        throw invalidModelError();
       }
 
       if (!isValidMetrics(series.metrics, PANEL_TYPES.TABLE, series.time_range_mode)) {
-        return null;
+        throw invalidModelError();
       }
 
       const reducedTimeRange = getReducedTimeRange(model, series, timeRange);
@@ -149,7 +151,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
         reducedTimeRange,
       });
       if (!metricsColumns) {
-        return null;
+        throw invalidModelError();
       }
 
       columnStates.push(getColumnState(metricsColumns[0].columnId, undefined, series));
@@ -162,7 +164,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
     }
 
     if (!metrics.length || metrics.every((metric) => metric.operationType === 'static_value')) {
-      return null;
+      throw invalidModelError();
     }
 
     const extendedLayer: ExtendedLayer = {
