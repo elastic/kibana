@@ -15,7 +15,7 @@ import styled from 'styled-components';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
 import { useMonitorEnableHandler } from '../../../../hooks/use_monitor_enable_handler';
 import { quietFetchOverviewAction } from '../../../../state/overview/actions';
-import { selectOverviewState } from '../../../../state/overview/selectors';
+import { selectOverviewPageState } from '../../../../state/overview/selectors';
 import { useEditMonitorLocator } from '../../hooks/use_edit_monitor_locator';
 import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
 
@@ -48,7 +48,7 @@ export function ActionsPopover({
   const theme = useTheme();
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
-  const { pageState } = useSelector(selectOverviewState);
+  const pageState = useSelector(selectOverviewPageState);
 
   const detailUrl = useMonitorDetailLocator({
     monitorId: monitor.id,

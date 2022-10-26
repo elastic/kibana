@@ -6,7 +6,6 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import { schema } from '@kbn/config-schema';
 import datemath, { Unit } from '@kbn/datemath';
 import { IKibanaResponse, SavedObjectsClientContract } from '@kbn/core/server';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
@@ -16,6 +15,7 @@ import { getMonitors } from '../common';
 import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { ConfigKey, OverviewStatus } from '../../../common/runtime_types';
+import { QuerySchema, MonitorsQuery } from '../common';
 
 /**
  * Helper function that converts a monitor's schedule to a value to use to generate
@@ -132,10 +132,12 @@ export async function queryMonitorStatus(
 export async function getStatus(
   uptimeEsClient: UptimeEsClient,
   savedObjectsClient: SavedObjectsClientContract,
-  syntheticsMonitorClient: SyntheticsMonitorClient
+  syntheticsMonitorClient: SyntheticsMonitorClient,
+  params: MonitorsQuery
 ) {
-  let monitors;
   const enabledIds: Array<string | undefined> = [];
+  const { query } = params;
+  let monitors;
   let disabledCount = 0;
   let page = 1;
   let maxPeriod = 0;
@@ -153,6 +155,7 @@ export async function getStatus(
         page,
         sortField: 'name.keyword',
         sortOrder: 'asc',
+        query,
       },
       syntheticsMonitorClient.syntheticsService,
       savedObjectsClient
@@ -187,16 +190,18 @@ export const createGetCurrentStatusRoute: SyntheticsRestApiRouteFactory = (libs:
   method: 'GET',
   path: SYNTHETICS_API_URLS.OVERVIEW_STATUS,
   validate: {
-    query: schema.object({}),
+    query: QuerySchema,
   },
   handler: async ({
     uptimeEsClient,
     savedObjectsClient,
     syntheticsMonitorClient,
     response,
+    request,
   }): Promise<IKibanaResponse<OverviewStatus>> => {
+    const params = request.query;
     return response.ok({
-      body: await getStatus(uptimeEsClient, savedObjectsClient, syntheticsMonitorClient),
+      body: await getStatus(uptimeEsClient, savedObjectsClient, syntheticsMonitorClient, params),
     });
   },
 });

@@ -24,8 +24,9 @@ export const quietFetchOverviewAction = createAsyncAction<
   MonitorOverviewResult
 >('quietFetchOverviewAction');
 
-export const fetchOverviewStatusAction = createAsyncAction<undefined, OverviewStatus>(
-  'fetchOverviewStatusAction'
-);
+export const fetchOverviewStatusAction = createAsyncAction<
+  MonitorOverviewPageState,
+  OverviewStatus
+>('fetchOverviewStatusAction');
 
 export const clearOverviewStatusErrorAction = createAction<void>('clearOverviewStatusErrorAction');

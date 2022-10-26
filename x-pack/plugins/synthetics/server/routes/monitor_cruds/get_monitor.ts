@@ -12,20 +12,7 @@ import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types'
 import { API_URLS, SYNTHETICS_API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';
-import { getMonitors } from '../common';
-
-const querySchema = schema.object({
-  page: schema.maybe(schema.number()),
-  perPage: schema.maybe(schema.number()),
-  sortField: schema.maybe(schema.string()),
-  sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
-  query: schema.maybe(schema.string()),
-  filter: schema.maybe(schema.string()),
-  tags: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  monitorType: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  locations: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-  status: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-});
+import { getMonitors, QuerySchema } from '../common';
 
 export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
@@ -63,7 +50,7 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
   method: 'GET',
   path: API_URLS.SYNTHETICS_MONITORS,
   validate: {
-    query: querySchema,
+    query: QuerySchema,
   },
   handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
     const { filters, query } = request.query;
@@ -109,7 +96,7 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW,
   validate: {
-    query: querySchema,
+    query: QuerySchema,
   },
   handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
     const { sortField, sortOrder, query } = request.query;

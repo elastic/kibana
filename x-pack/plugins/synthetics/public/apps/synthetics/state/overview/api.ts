@@ -42,5 +42,9 @@ export const fetchMonitorOverview = async (
   );
 };
 
-export const fetchOverviewStatus = async (): Promise<OverviewStatus> =>
-  apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, {}, OverviewStatusType);
+export const fetchOverviewStatus = async (
+  pageState: MonitorOverviewPageState
+): Promise<OverviewStatus> => {
+  const params = toMonitorOverviewQueryArgs(pageState);
+  return await apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, params, OverviewStatusType);
+};

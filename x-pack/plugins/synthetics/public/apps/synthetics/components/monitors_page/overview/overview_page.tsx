@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEqual } from 'lodash';
 import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,7 +13,8 @@ import { useEnablement, useGetUrlParams } from '../../../hooks';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import {
   fetchMonitorOverviewAction,
-  selectOverviewState,
+  setOverviewPageStateAction,
+  selectOverviewPageState,
   selectServiceLocationsState,
 } from '../../../state';
 import { getServiceLocations } from '../../../state/service_locations';
@@ -37,7 +37,7 @@ export const OverviewPage: React.FC = () => {
   const { refreshApp } = useSyntheticsRefreshContext();
   const { query = '' } = useGetUrlParams();
 
-  const { pageState } = useSelector(selectOverviewState);
+  const pageState = useSelector(selectOverviewPageState);
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
 
   useEffect(() => {
@@ -53,10 +53,11 @@ export const OverviewPage: React.FC = () => {
     }
   }, [dispatch, locationsLoaded, locationsLoading]);
 
-  // fetch overview for query changes
+  // fetch overview for query state changes
   useEffect(() => {
-    if (!isEqual(pageState, { ...pageState, query })) {
+    if (pageState.query !== query) {
       dispatch(fetchMonitorOverviewAction.get({ ...pageState, query }));
+      dispatch(setOverviewPageStateAction({ query }));
     }
   }, [dispatch, pageState, query]);
 

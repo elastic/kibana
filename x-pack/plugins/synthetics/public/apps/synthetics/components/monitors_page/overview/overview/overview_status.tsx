@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   clearOverviewStatusErrorAction,
   fetchOverviewStatusAction,
+  selectOverviewPageState,
   selectOverviewStatus,
 } from '../../../../state';
 import { kibanaService } from '../../../../../../utils/kibana_service';
@@ -23,13 +24,14 @@ function title(t?: number) {
 
 export function OverviewStatus() {
   const { status, statusError } = useSelector(selectOverviewStatus);
+  const pageState = useSelector(selectOverviewPageState);
   const dispatch = useDispatch();
 
   const { lastRefresh } = useSyntheticsRefreshContext();
 
   useEffect(() => {
-    dispatch(fetchOverviewStatusAction.get());
-  }, [dispatch, lastRefresh]);
+    dispatch(fetchOverviewStatusAction.get(pageState));
+  }, [dispatch, pageState, lastRefresh]);
 
   useEffect(() => {
     if (statusError) {

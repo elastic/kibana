@@ -38,7 +38,6 @@ const initialState: MonitorOverviewState = {
 export const monitorOverviewReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(fetchMonitorOverviewAction.get, (state, action) => {
-      state.pageState = action.payload;
       state.loading = true;
       state.loaded = false;
     })
@@ -63,6 +62,9 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
         ...action.payload,
       };
       state.loaded = false;
+    })
+    .addCase(fetchOverviewStatusAction.get, (state) => {
+      state.status = null;
     })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {
       state.status = action.payload;
