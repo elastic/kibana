@@ -48,7 +48,7 @@ const getMaxFormula = (metric: Metric, column?: Column) => {
 const invalidModelError = () => new Error('Invalid model');
 
 export const convertToLens: ConvertTsvbToLensVisualization = async (
-  model,
+  { params: model },
   timeRange,
   clearAdHocDataViews
 ) => {

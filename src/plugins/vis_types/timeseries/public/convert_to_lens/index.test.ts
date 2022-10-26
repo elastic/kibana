@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Vis } from '@kbn/visualizations-plugin/public';
 import type { Panel } from '../../common/types';
 import { convertTSVBtoLensConfiguration } from '.';
 
@@ -42,7 +43,20 @@ describe('convertTSVBtoLensConfiguration', () => {
       ...model,
       type: 'markdown',
     } as Panel;
-    const triggerOptions = await convertTSVBtoLensConfiguration(metricModel);
+    const triggerOptions = await convertTSVBtoLensConfiguration({
+      params: metricModel,
+    } as Vis<Panel>);
+    expect(triggerOptions).toBeNull();
+  });
+
+  test('should return null for a string index pattern', async () => {
+    const stringIndexPatternModel = {
+      ...model,
+      use_kibana_indexes: false,
+    };
+    const triggerOptions = await convertTSVBtoLensConfiguration({
+      params: stringIndexPatternModel,
+    } as Vis<Panel>);
     expect(triggerOptions).toBeNull();
   });
 });

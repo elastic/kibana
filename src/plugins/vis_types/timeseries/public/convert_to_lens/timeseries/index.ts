@@ -43,7 +43,7 @@ const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<st
 const invalidModelError = () => new Error('Invalid model');
 
 export const convertToLens: ConvertTsvbToLensVisualization = async (
-  model,
+  { params: model },
   timeRange,
   clearAdHocDataViews
 ) => {
