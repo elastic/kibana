@@ -34,12 +34,12 @@ export const providers: PluginServiceProviders<
   controls: new PluginServiceProvider(controlsServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),
-  embeddable: new PluginServiceProvider(embeddableServiceFactory),
   http: new PluginServiceProvider(httpServiceFactory),
   optionsList: new PluginServiceProvider(optionsListServiceFactory, ['data', 'http']),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   settings: new PluginServiceProvider(settingsServiceFactory),
   theme: new PluginServiceProvider(themeServiceFactory),
+  embeddable: new PluginServiceProvider(embeddableServiceFactory),
   unifiedSearch: new PluginServiceProvider(unifiedSearchServiceFactory),
 };
 
