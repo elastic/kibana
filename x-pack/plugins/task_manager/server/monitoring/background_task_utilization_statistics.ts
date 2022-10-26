@@ -6,13 +6,14 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
+import { get } from 'lodash';
 import { combineLatest, filter, map, Observable, startWith } from 'rxjs';
 import { CreateTaskCounter } from '../lib/create_task_counter';
 import { parseIntervalAsMinute } from '../lib/intervals';
 import { unwrap } from '../lib/result_type';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from '../polling_lifecycle';
 import { ConcreteTaskInstance } from '../task';
-import { isTaskRunEvent, TaskPersistence, TaskRun, TaskTiming } from '../task_events';
+import { isTaskRunEvent, TaskRun, TaskTiming } from '../task_events';
 import { MonitoredStat } from './monitoring_stats_stream';
 import { AggregatedStat, AggregatedStatProvider } from './runtime_statistics_aggregator';
 import {
@@ -84,7 +85,7 @@ export function createBackgroundTaskUtilizationAggregator(
         taskEvent,
         ...unwrap((taskEvent as TaskRun).event),
       })),
-      filter(({ persistence }) => persistence === TaskPersistence.NonRecurring),
+      filter(({ task }) => get(task, 'schedule.interval', null) == null),
       map(({ taskEvent }) => {
         return taskRunEventToAdhocStat(taskEvent.timing!, createTaskCounter);
       })
@@ -98,7 +99,7 @@ export function createBackgroundTaskUtilizationAggregator(
         taskEvent,
         ...unwrap((taskEvent as TaskRun).event),
       })),
-      filter(({ persistence }) => persistence === TaskPersistence.Recurring),
+      filter(({ task }) => get(task, 'schedule.interval', null) != null),
       map(({ taskEvent, task }) => {
         return taskRunEventToRecurringStat(taskEvent.timing!, task);
       })

@@ -568,6 +568,7 @@ describe('TaskStore', () => {
         esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
+        createTaskCounter,
       });
     });
 

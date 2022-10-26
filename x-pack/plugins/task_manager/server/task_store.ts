@@ -9,7 +9,7 @@
  * This module contains helpers for managing the task manager storage layer.
  */
 import { Subject } from 'rxjs';
-import { omit, defaults } from 'lodash';
+import { omit, defaults, get } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsBulkDeleteResponse } from '@kbn/core/server';
@@ -144,7 +144,7 @@ export class TaskStore {
         taskInstanceToAttributes(taskInstance),
         { id: taskInstance.id, refresh: false }
       );
-      if (!taskInstance.schedule) {
+      if (get(taskInstance, 'schedule.interval', null) == null) {
         this.createTaskCounter.increment();
       }
     } catch (e) {
@@ -178,7 +178,7 @@ export class TaskStore {
       );
       this.createTaskCounter.increment(
         savedObjects.saved_objects.filter((so) => {
-          return !so.attributes.schedule;
+          return get(so, 'schedule.interval', null) == null;
         }).length
       );
     } catch (e) {
