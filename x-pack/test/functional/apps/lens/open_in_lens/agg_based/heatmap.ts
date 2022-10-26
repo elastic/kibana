@@ -75,5 +75,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         },
       ]);
     });
+
+    it('should not convert to Lens if Y-axis is defined, but X-axis is not', async () => {
+      await visEditor.clickBucket('Y-axis');
+      await visEditor.selectAggregation('Terms');
+      await visEditor.selectField('machine.os.raw');
+      await visEditor.clickGo();
+
+      expect(await visualize.hasNavigateToLensButton()).to.eql(false);
+    });
   });
 }
