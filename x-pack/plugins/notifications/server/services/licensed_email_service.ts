@@ -36,7 +36,7 @@ export class LicensedEmailService implements EmailService {
     const licenseCheck = license.check(PLUGIN_ID, this.minimumLicense);
 
     if (licenseCheck.state === 'valid') {
-      this.logger.info('Your current license allows sending email notifications');
+      this.logger.debug('Your current license allows sending email notifications');
       return true;
     }
 

@@ -33,22 +33,22 @@ const someEmail: PlainTextEmail = {
 };
 
 describe('LicensedEmailService', () => {
+  const logger = loggerMock.create();
+
+  beforeEach(() => loggerMock.clear(logger));
   it('observes license$ changes and logs info or warning messages accordingly', () => {
     const license$ = new Subject<ILicense>();
-    const logger = loggerMock.create();
-
     new LicensedEmailService(emailServiceMock, license$, 'platinum', logger);
-
     license$.next(invalidLicense);
 
-    expect(logger.info).not.toHaveBeenCalled();
+    expect(logger.debug).not.toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith('This is an invalid testing license');
 
     license$.next(validLicense);
     expect(logger.warn).toHaveBeenCalledTimes(1);
-    expect(logger.info).toHaveBeenCalledTimes(1);
-    expect(logger.info).toHaveBeenCalledWith(
+    expect(logger.debug).toHaveBeenCalledTimes(1);
+    expect(logger.debug).toHaveBeenCalledWith(
       'Your current license allows sending email notifications'
     );
   });
@@ -56,7 +56,6 @@ describe('LicensedEmailService', () => {
   describe('sendPlainTextEmail()', () => {
     it('does not call the underlying email service until the license is determined and valid', async () => {
       const license$ = new Subject<ILicense>();
-      const logger = loggerMock.create();
       const email = new LicensedEmailService(emailServiceMock, license$, 'platinum', logger);
 
       email.sendPlainTextEmail(someEmail);
@@ -71,7 +70,6 @@ describe('LicensedEmailService', () => {
 
     it('does not call the underlying email service if the license is invalid', async () => {
       const license$ = new Subject<ILicense>();
-      const logger = loggerMock.create();
       const email = new LicensedEmailService(emailServiceMock, license$, 'platinum', logger);
       license$.next(invalidLicense);
 
@@ -89,13 +87,12 @@ describe('LicensedEmailService', () => {
 
     it('does not log a warning for every email attempt, but rather for every license change', async () => {
       const license$ = new Subject<ILicense>();
-      const logger = loggerMock.create();
       const email = new LicensedEmailService(emailServiceMock, license$, 'platinum', logger);
       license$.next(invalidLicense);
       license$.next(validLicense);
       license$.next(invalidLicense);
 
-      expect(logger.info).toHaveBeenCalledTimes(1);
+      expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledTimes(2);
 
       let emailsOk = 0;
@@ -119,7 +116,7 @@ describe('LicensedEmailService', () => {
       await silentSend();
       await silentSend();
 
-      expect(logger.info).toHaveBeenCalledTimes(2);
+      expect(logger.debug).toHaveBeenCalledTimes(2);
       expect(logger.warn).toHaveBeenCalledTimes(2);
       expect(emailsKo).toEqual(4);
       expect(emailsOk).toEqual(4);

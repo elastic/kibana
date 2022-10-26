@@ -15,11 +15,11 @@ interface RelatedSavedObject {
   namespace: string;
 }
 
-export type SenderContext = RelatedSavedObject[];
-
 export interface PlainTextEmail {
   to: string[];
   subject: string;
   message: string;
-  context?: SenderContext;
+  context?: {
+    relatedObjects?: RelatedSavedObject[];
+  };
 }

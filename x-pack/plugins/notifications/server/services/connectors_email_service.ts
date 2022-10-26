@@ -24,7 +24,9 @@ export class ConnectorsEmailService implements EmailService {
         subject: params.subject,
         message: params.message,
       },
-      relatedSavedObjects: params.context?.length ? params.context : undefined,
+      relatedSavedObjects: params.context?.relatedObjects?.length
+        ? params.context.relatedObjects
+        : undefined,
     }));
     return await this.actionsClient.bulkEnqueueExecution(this.requesterId, actions);
   }

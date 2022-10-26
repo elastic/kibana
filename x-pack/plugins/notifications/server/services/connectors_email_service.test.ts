@@ -45,13 +45,15 @@ describe('sendPlainTextEmail()', () => {
         to: ['user1@email.com', 'user2@email.com', 'user3@email.com'],
         subject: 'This is a notification email',
         message: 'With some contents inside.',
-        context: [
-          {
-            id: '9c9456a4-c160-46f5-96f7-e9ac734d0d9b',
-            type: 'cases',
-            namespace: 'some-space',
-          },
-        ],
+        context: {
+          relatedObjects: [
+            {
+              id: '9c9456a4-c160-46f5-96f7-e9ac734d0d9b',
+              type: 'cases',
+              namespace: 'some-space',
+            },
+          ],
+        },
       };
 
       email.sendPlainTextEmail(payload);
