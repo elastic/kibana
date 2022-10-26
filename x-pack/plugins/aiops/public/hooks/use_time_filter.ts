@@ -7,7 +7,8 @@
 
 import { useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { map } from 'rxjs/operators';
+import { distinctUntilChanged, map } from 'rxjs/operators';
+import { isEqual } from 'lodash';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
 interface UseTimefilterOptions {
@@ -47,10 +48,12 @@ export const useTimefilter = ({
 export const useRefreshIntervalUpdates = () => {
   const timefilter = useTimefilter();
 
-  return useObservable(
-    timefilter.getRefreshIntervalUpdate$().pipe(map(timefilter.getRefreshInterval)),
-    timefilter.getRefreshInterval()
+  const refreshIntervalObservable$ = useMemo(
+    () => timefilter.getRefreshIntervalUpdate$().pipe(map(timefilter.getRefreshInterval)),
+    [timefilter]
   );
+
+  return useObservable(refreshIntervalObservable$, timefilter.getRefreshInterval());
 };
 
 export const useTimeRangeUpdates = (absolute = false) => {
@@ -62,5 +65,10 @@ export const useTimeRangeUpdates = (absolute = false) => {
       : timefilter.getTime.bind(timefilter);
   }, [absolute, timefilter]);
 
-  return useObservable(timefilter.getTimeUpdate$().pipe(map(getTimeCallback)), getTimeCallback());
+  const timeChangeObservable$ = useMemo(
+    () => timefilter.getTimeUpdate$().pipe(map(getTimeCallback), distinctUntilChanged(isEqual)),
+    [timefilter, getTimeCallback]
+  );
+
+  return useObservable(timeChangeObservable$, getTimeCallback());
 };
