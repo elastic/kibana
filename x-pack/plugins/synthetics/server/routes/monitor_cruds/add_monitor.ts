@@ -132,9 +132,9 @@ export const createNewSavedObjectMonitor = async ({
     }),
     id
       ? {
-        id,
-        overwrite: true,
-      }
+          id,
+          overwrite: true,
+        }
       : undefined
   );
 };
