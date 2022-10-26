@@ -54,7 +54,6 @@ const alertsCasesConfig: StepConfig[] = [
     anchorPosition: 'downCenter',
     dataTestSubj: getTourAnchor(1, SecurityStepId.alertsCases),
     initialFocus: `button[tour-step="nextButton"]`,
-    ownFocus: true,
   },
   {
     ...defaultConfig,
