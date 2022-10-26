@@ -17,16 +17,16 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
-import { PluginWrapper } from './plugin';
-
 import type { PluginManifest } from '@kbn/core-plugins-server';
+import { PluginWrapper } from './plugin';
+import { PluginType } from '@kbn/core-base-common';
+import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
+
 import {
   createPluginInitializerContext,
   createPluginSetupContext,
   InstanceInfo,
 } from './plugin_context';
-import { PluginType } from '@kbn/core-base-common';
-import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 
 const mockPluginInitializer = jest.fn();
 const logger = loggingSystemMock.create();
