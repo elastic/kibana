@@ -7,8 +7,8 @@
  */
 
 import { readConfig } from 'jest-config';
-import { createContext } from 'jest-runtime';
 import { SearchSource } from 'jest';
+import Runtime from 'jest-runtime';
 import { asyncMapWithLimit } from '@kbn/std';
 
 const EMPTY_ARGV = {
@@ -34,7 +34,7 @@ export async function getTestsForConfigPaths(
   return await asyncMapWithLimit(configPaths, 60, async (path) => {
     const config = await readConfig(EMPTY_ARGV, path);
     const searchSource = new SearchSource(
-      await createContext(config.projectConfig, {
+      await Runtime.createContext(config.projectConfig, {
         maxWorkers: 1,
         watchman: false,
         watch: false,
