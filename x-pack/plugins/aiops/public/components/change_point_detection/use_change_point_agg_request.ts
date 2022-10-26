@@ -11,7 +11,6 @@ import {
   ChangePointDetectionRequestParams,
   ChangePointType,
 } from './change_point_detection_context';
-import { TimeBuckets } from '../../../common/time_buckets';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useCancellableRequest } from '../../hooks/use_cancellable_request';
 
@@ -86,7 +85,6 @@ function getChangePointDetectionRequestBody({
 }
 
 export function useChangePointRequest(
-  timeBuckets: TimeBuckets,
   requestParams: ChangePointDetectionRequestParams,
   timeRange: TimeRange
 ) {
@@ -97,14 +95,14 @@ export function useChangePointRequest(
       index: dataView.getIndexPattern(),
       fn: requestParams.fn,
       timeRange,
-      timeInterval: timeBuckets.getInterval().expression,
+      timeInterval: requestParams.interval,
       metricField: requestParams.metricField,
       timeField: dataView.timeFieldName!,
       splitField: requestParams.splitField,
     };
 
     return getChangePointDetectionRequestBody(params);
-  }, [timeRange, dataView, requestParams, timeBuckets]);
+  }, [timeRange, dataView, requestParams]);
 
   return useCancellableRequest<typeof requestBoby, { rawResponse: ChangePointAggResponse }>(
     requestBoby

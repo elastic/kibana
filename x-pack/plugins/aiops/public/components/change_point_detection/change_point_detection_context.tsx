@@ -16,10 +16,12 @@ import React, {
 } from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/public';
 import moment from 'moment';
+import { startWith } from 'rxjs';
+import useMount from 'react-use/lib/useMount';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useTimefilter, useTimeRangeUpdates } from '../../hooks/use_time_filter';
 import { useChangePointRequest } from './use_change_point_agg_request';
-import { type TimeBuckets } from '../../../common/time_buckets';
+import { type TimeBuckets, TimeBucketsInterval } from '../../../common/time_buckets';
 import { useDataSource } from '../../hooks/use_data_source';
 import { usePageUrlState } from '../../hooks/use_url_state';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
@@ -28,10 +30,12 @@ export interface ChangePointDetectionRequestParams {
   fn: string;
   splitField: string;
   metricField: string;
+  interval: string;
 }
 
 export const ChangePointDetectionContext = createContext<{
   timeBuckets: TimeBuckets;
+  bucketInterval: TimeBucketsInterval;
   requestParams: ChangePointDetectionRequestParams;
   metricFieldOptions: DataViewField[];
   splitFieldsOptions: DataViewField[];
@@ -44,6 +48,7 @@ export const ChangePointDetectionContext = createContext<{
   metricFieldOptions: [],
   requestParams: {} as ChangePointDetectionRequestParams,
   timeBuckets: {} as TimeBuckets,
+  bucketInterval: {} as TimeBucketsInterval,
   updateRequestParams: () => {},
   annotations: [],
 });
@@ -76,12 +81,27 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   const timeBuckets = useTimeBuckets();
   const [annotations, setAnnotations] = useState<ChangePointAnnotation[]>([]);
 
+  const [bucketInterval, setBucketInterval] = useState<TimeBucketsInterval>();
+
   const timeRange = useTimeRangeUpdates();
 
-  useEffect(() => {
-    timeBuckets.setBounds(timefilter.getActiveBounds()!);
-    timeBuckets.setInterval('auto');
-  }, [timeBuckets, timefilter, timeRange]);
+  useMount(function updateIntervalOnTimeBoundsChange() {
+    const timeUpdateSubscription = timefilter
+      .getTimeUpdate$()
+      .pipe(startWith(timefilter.getTime()))
+      .subscribe(() => {
+        const activeBounds = timefilter.getActiveBounds();
+        if (!activeBounds) {
+          throw new Error('Time bound not available');
+        }
+        timeBuckets.setInterval('auto');
+        timeBuckets.setBounds(activeBounds);
+        setBucketInterval(timeBuckets.getInterval());
+      });
+    return () => {
+      timeUpdateSubscription.unsubscribe();
+    };
+  });
 
   const metricFieldOptions = useMemo<DataViewField[]>(() => {
     return dataView.fields.filter(({ aggregatable, type }) => aggregatable && type === 'number');
@@ -111,15 +131,14 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     if (!params.splitField && splitFieldsOptions.length > 0) {
       params.splitField = splitFieldsOptions[0].name;
     }
+    params.interval = bucketInterval?.expression!;
     return params;
-  }, [requestParamsFromUrl, metricFieldOptions, splitFieldsOptions]);
+  }, [requestParamsFromUrl, metricFieldOptions, splitFieldsOptions, bucketInterval]);
 
-  const { runRequest, isLoading } = useChangePointRequest(timeBuckets, requestParams, timeRange);
+  const { runRequest, isLoading } = useChangePointRequest(requestParams, timeRange);
 
   const fetchChangePoints = useCallback(async () => {
-    const interval = timeBuckets.getInterval().asSeconds();
-
-    if (!interval) return;
+    if (!bucketInterval) return;
 
     const result = await runRequest();
     if (!result.rawResponse.aggregations) {
@@ -147,14 +166,15 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
           p_value: v.change_point_request.type[changePointType].p_value,
           timestamp: timeAsString,
           // @ts-ignore
-          endTimestamp: moment(timeAsString).add(timeBuckets.getInterval()).toISOString(),
+          endTimestamp: moment(timeAsString).add(bucketInterval).toISOString(),
           label: changePointType,
         } as ChangePointAnnotation;
       })
-      .filter((v): v is ChangePointAnnotation => !!v);
+      .filter((v): v is ChangePointAnnotation => !!v)
+      .sort((a, b) => (a.p_value ?? 100) - (b.p_value ?? 100));
 
     setAnnotations(groups);
-  }, [timeBuckets, runRequest, setAnnotations, toasts]);
+  }, [runRequest, setAnnotations, toasts, bucketInterval]);
 
   useEffect(
     function fetchAggResults() {
@@ -162,6 +182,8 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     },
     [fetchChangePoints, runRequest, requestParams]
   );
+
+  if (!bucketInterval) return null;
 
   const value = {
     isLoading,
@@ -171,6 +193,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     metricFieldOptions,
     splitFieldsOptions,
     annotations,
+    bucketInterval,
   };
 
   return (

@@ -7,7 +7,7 @@
 
 import React, { FC, useMemo } from 'react';
 import { type TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { useRequestParams } from './change_point_detection_context';
+import { useChangePontDetectionContext } from './change_point_detection_context';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useTimeRangeUpdates } from '../../hooks/use_time_filter';
@@ -28,7 +28,7 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
 
   const timeRange = useTimeRangeUpdates();
   const { dataView } = useDataSource();
-  const requestParams = useRequestParams();
+  const { requestParams, bucketInterval } = useChangePontDetectionContext();
 
   const filters = useMemo(
     () => [
@@ -60,7 +60,7 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
   // @ts-ignore
   const attributes = useMemo<TypedLensByValueInput['attributes']>(() => {
     return {
-      title: 'change_point_test',
+      title: annotation.group_field,
       description: '',
       visualizationType: 'lnsXY',
       type: 'lens',
@@ -124,15 +124,17 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
                       {
                         type: 'manual',
                         label: annotation.label,
-                        icon: 'bell',
+                        icon: 'triangle',
+                        textVisibility: true,
                         key: {
-                          type: 'range',
+                          type: 'point_in_time',
                           timestamp: annotation.timestamp,
-                          endTimestamp: annotation.endTimestamp,
                         },
                         id: 'a8fb297c-8d96-4011-93c0-45af110d5302',
                         isHidden: false,
-                        color: '#F04E981A',
+                        color: '#F04E98',
+                        lineStyle: 'solid',
+                        lineWidth: 2,
                         outside: false,
                       },
                     ],
@@ -160,7 +162,7 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
                     isBucketed: true,
                     scale: 'interval',
                     params: {
-                      interval: 'auto',
+                      interval: bucketInterval.expression,
                       includeEmptyRows: true,
                       dropPartials: false,
                     },
@@ -193,7 +195,7 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
         adHocDataViews: {},
       },
     };
-  }, [dataView.id, dataView.timeFieldName, annotation, requestParams, filters]);
+  }, [dataView.id, dataView.timeFieldName, annotation, requestParams, filters, bucketInterval]);
 
   return (
     <EmbeddableComponent
