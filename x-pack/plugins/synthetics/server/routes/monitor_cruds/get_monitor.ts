@@ -155,7 +155,4 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
       allMonitorIds,
     };
   },
-
-  // get all monitors
-  // get status for each location
 });
