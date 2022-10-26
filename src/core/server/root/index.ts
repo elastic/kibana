@@ -20,7 +20,7 @@ import { Env, RawConfigurationProvider } from '@kbn/config';
 import { LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
 import apm from 'elastic-apm-node';
 import { isEqual } from 'lodash';
-import type { ElasticApmConfigType } from './elastic_config';
+import type { ElasticConfigType } from './elastic_config';
 import { Server } from '../server';
 
 /**
@@ -116,7 +116,7 @@ export class Root {
     this.apmConfigSubscription = configService
       .getConfig$()
       .pipe(
-        switchMap(() => configService.atPath<ElasticApmConfigType>('elastic')),
+        switchMap(() => configService.atPath<ElasticConfigType>('elastic')),
         distinctUntilChanged(isEqual),
         tap((elasticConfig) => {
           const labels = elasticConfig.apm?.globalLabels || {};
