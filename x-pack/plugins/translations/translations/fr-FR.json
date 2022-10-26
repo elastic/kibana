@@ -15601,7 +15601,6 @@
     "xpack.infra.hostsTable.averageRxColumnHeader": "",
     "xpack.infra.hostsTable.averageTxColumnHeader": "",
     "xpack.infra.hostsTable.diskLatencyColumnHeader": "",
-    "xpack.infra.hostsTable.errorOnCreateOrLoadDataview": "",
     "xpack.infra.hostsTable.nameColumnHeader": "Nom",
     "xpack.infra.hostsTable.numberOfCpusColumnHeader": "Nombre de processeurs",
     "xpack.infra.hostsTable.operatingSystemColumnHeader": "Système d'exploitation",

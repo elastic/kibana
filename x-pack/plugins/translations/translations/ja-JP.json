@@ -15586,7 +15586,6 @@
     "xpack.infra.hostsTable.averageTxColumnHeader": "",
     "xpack.infra.hostsTable.averageRxColumnHeader": "",
     "xpack.infra.hostsTable.diskLatencyColumnHeader": "",
-    "xpack.infra.hostsTable.errorOnCreateOrLoadDataview": "",
     "xpack.infra.hostsTable.nameColumnHeader": "名前",
     "xpack.infra.hostsTable.numberOfCpusColumnHeader": "CPU数",
     "xpack.infra.hostsTable.operatingSystemColumnHeader": "オペレーティングシステム",
