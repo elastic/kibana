@@ -61,8 +61,6 @@ export const registerActionFileInfoRoute = (
   router: SecuritySolutionPluginRouter,
   endpointContext: EndpointAppContext
 ) => {
-  const logger = endpointContext.logFactory.get('actionFileInfo');
-
   router.get(
     {
       path: ACTION_AGENT_FILE_INFO_ROUTE,
@@ -71,7 +69,7 @@ export const registerActionFileInfoRoute = (
     },
     withEndpointAuthz(
       { all: ['canWriteFileOperations'] },
-      logger,
+      endpointContext.logFactory.get('actionFileInfo'),
       getActionFileInfoRouteHandler(endpointContext)
     )
   );

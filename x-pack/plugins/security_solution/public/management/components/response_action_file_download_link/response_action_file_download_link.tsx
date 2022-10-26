@@ -53,7 +53,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     const getTestId = useTestIdGenerator(dataTestSubj);
     const { canWriteFileOperations } = useUserPrivileges().endpointPrivileges;
 
-    // We don't need to call the file info API everytime, specially if this component is used from the
+    // We don't need to call the file info API every time, especially if this component is used from the
     // console, where the link is displayed within a short time. So we only do the API call if the
     // action was completed more than 2 days ago.
     const checkIfStillAvailable = useMemo(() => {
@@ -86,20 +86,14 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     }
 
     // Check if file is no longer available
-    if (error || fileInfo?.data.status === 'DELETED') {
-      if ((error && error?.response?.status === 404) || fileInfo?.data.status === 'DELETED') {
-        return (
-          <EuiText size="s" data-test-subj={getTestId('fileNoLongerAvailable')}>
-            {FILE_NO_LONGER_AVAILABLE_MESSAGE}
-          </EuiText>
-        );
-      }
-
-      if (error) {
-        return <FormattedError error={error} data-test-subj={getTestId('apiError')} />;
-      }
-
-      return null;
+    if ((error && error?.response?.status === 404) || fileInfo?.data.status === 'DELETED') {
+      return (
+        <EuiText size="s" data-test-subj={getTestId('fileNoLongerAvailable')}>
+          {FILE_NO_LONGER_AVAILABLE_MESSAGE}
+        </EuiText>
+      );
+    } else if (error) {
+      return <FormattedError error={error} data-test-subj={getTestId('apiError')} />;
     }
 
     return (
