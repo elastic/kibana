@@ -34,6 +34,7 @@ import {
   useGlobalFullScreen,
 } from '../../../../common/containers/use_full_screen';
 import { detectionsTimelineIds } from '../../../containers/helpers';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { timelineDefaults } from '../../../store/timeline/defaults';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -259,6 +260,7 @@ export const useSessionView = ({
   }, [scopeId]);
   const { globalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen } = useTimelineFullScreen();
+  const { canAccessEndpointManagement } = useUserPrivileges().endpointPrivileges;
 
   const defaults = isTimelineScope(scopeId) ? timelineDefaults : tableDefaults;
   const { sessionViewConfig, activeTab } = useDeepEqualSelector((state) => ({
@@ -303,9 +305,17 @@ export const useSessionView = ({
           loadAlertDetails: openDetailsPanel,
           isFullScreen: fullScreen,
           height: heightMinusSearchBar,
+          canAccessEndpointManagement,
         })
       : null;
-  }, [fullScreen, openDetailsPanel, sessionView, sessionViewConfig, height]);
+  }, [
+    height,
+    sessionViewConfig,
+    sessionView,
+    openDetailsPanel,
+    fullScreen,
+    canAccessEndpointManagement,
+  ]);
 
   return {
     openDetailsPanel,
