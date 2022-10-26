@@ -9,7 +9,6 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { isEqual } from 'lodash';
 import { useEsSearch } from '@kbn/observability-plugin/public';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
 import { Ping, MonitorOverviewItem } from '../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
@@ -33,8 +32,6 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
   const currentMonitors = useRef<MonitorOverviewItem[] | null>(monitors);
   const locationNames = useLocationNames();
   const { lastRefresh } = useSyntheticsRefreshContext();
-
-  const { monitorId } = useParams<{ monitorId: string }>();
 
   const { data, loading } = useEsSearch(
     {
@@ -83,7 +80,7 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
         },
       },
     },
-    [lastRefresh, monitorId, shouldUpdate, currentMonitors.current],
+    [lastRefresh, allMonitorIds, shouldUpdate, currentMonitors.current],
     { name: 'getMonitorStatusByLocation' }
   );
 
