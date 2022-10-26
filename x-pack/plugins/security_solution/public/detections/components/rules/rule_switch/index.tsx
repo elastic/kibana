@@ -55,10 +55,12 @@ export const RuleSwitchComponent = ({
         name: enabled ? SINGLE_RULE_ACTIONS.DISABLE : SINGLE_RULE_ACTIONS.ENABLE,
       });
       const bulkActionResponse = await executeBulkAction({
+        bulkActionDescriptor: {
+          type: event.target.checked ? BulkAction.enable : BulkAction.disable,
+          ids: [id],
+        },
         setLoadingRules: rulesTableContext?.actions.setLoadingRules,
         onSuccess: rulesTableContext ? undefined : noop,
-        action: event.target.checked ? BulkAction.enable : BulkAction.disable,
-        search: { ids: [id] },
         visibleRuleIds: [],
       });
       if (bulkActionResponse?.attributes.results.updated.length) {

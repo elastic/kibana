@@ -37,6 +37,7 @@ import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
 import type { BulkActionForConfirmation, DryRunResult } from './types';
 import type { ExecuteBulkActionsDryRun } from './use_bulk_actions_dry_run';
+import { computeDryRunPayload } from './utils/compute_dry_run_payload';
 import { transformExportDetailsToDryRunResult } from './utils/dry_run_result';
 import { prepareSearchParams } from './utils/prepare_search_params';
 
@@ -104,10 +105,12 @@ export const useBulkActions = ({
           : disabledRulesNoML.map(({ id }) => id);
 
         await executeBulkAction({
+          bulkActionDescriptor: {
+            type: BulkAction.enable,
+            ...(isAllSelected ? { query: filterQuery } : { ids: ruleIds }),
+          },
           visibleRuleIds: ruleIds,
-          action: BulkAction.enable,
           setLoadingRules,
-          search: isAllSelected ? { query: filterQuery } : { ids: ruleIds },
         });
       };
 
@@ -118,10 +121,12 @@ export const useBulkActions = ({
         const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
 
         await executeBulkAction({
+          bulkActionDescriptor: {
+            type: BulkAction.disable,
+            ...(isAllSelected ? { query: filterQuery } : { ids: enabledIds }),
+          },
           visibleRuleIds: enabledIds,
-          action: BulkAction.disable,
           setLoadingRules,
-          search: isAllSelected ? { query: filterQuery } : { ids: enabledIds },
         });
       };
 
@@ -130,10 +135,12 @@ export const useBulkActions = ({
         closePopover();
 
         await executeBulkAction({
+          bulkActionDescriptor: {
+            type: BulkAction.duplicate,
+            ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
+          },
           visibleRuleIds: selectedRuleIds,
-          action: BulkAction.duplicate,
           setLoadingRules,
-          search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
         clearRulesSelection();
       };
@@ -151,10 +158,12 @@ export const useBulkActions = ({
         startTransaction({ name: BULK_RULE_ACTIONS.DELETE });
 
         await executeBulkAction({
+          bulkActionDescriptor: {
+            type: BulkAction.delete,
+            ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
+          },
           visibleRuleIds: selectedRuleIds,
-          action: BulkAction.delete,
           setLoadingRules,
-          search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
         });
       };
 
@@ -195,11 +204,11 @@ export const useBulkActions = ({
         closePopover();
 
         const dryRunResult = await executeBulkActionsDryRun({
-          action: BulkAction.edit,
-          editAction: bulkEditActionType,
-          searchParams: isAllSelected
+          type: BulkAction.edit,
+          ...(isAllSelected
             ? { query: convertRulesFilterToKQL(filterOptions) }
-            : { ids: selectedRuleIds },
+            : { ids: selectedRuleIds }),
+          editPayload: computeDryRunPayload(bulkEditActionType),
         });
 
         // User has cancelled edit action or there are no custom rules to proceed
@@ -256,15 +265,17 @@ export const useBulkActions = ({
         }, 5 * 1000);
 
         await executeBulkAction({
+          bulkActionDescriptor: {
+            type: BulkAction.edit,
+            ...prepareSearchParams({
+              ...(isAllSelected ? { filterOptions } : { selectedRuleIds }),
+              dryRunResult,
+            }),
+            editPayload: [editPayload],
+          },
           visibleRuleIds: selectedRuleIds,
-          action: BulkAction.edit,
           setLoadingRules,
-          payload: { edit: [editPayload] },
           onFinish: () => hideWarningToast(),
-          search: prepareSearchParams({
-            ...(isAllSelected ? { filterOptions } : { selectedRuleIds }),
-            dryRunResult,
-          }),
         });
 
         isBulkEditFinished = true;

@@ -18,6 +18,7 @@ import type { UseAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 import type { RulesTableActions } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
+import { BulkActionDescriptor } from '../../api/api';
 import { useBulkActionMutation } from '../../api/hooks/use_bulk_action_mutation';
 import { getErrorToastContent, getSuccessToastContent } from './translations';
 
@@ -40,10 +41,8 @@ type OnActionSuccessCallback = (
 type OnActionErrorCallback = (toasts: UseAppToasts, action: BulkAction, error: HTTPError) => void;
 
 interface RulesBulkActionArgs {
-  action: Exclude<BulkAction, BulkAction.export>;
+  bulkActionDescriptor: BulkActionDescriptor;
   visibleRuleIds?: string[];
-  search: { query: string } | { ids: string[] };
-  payload?: { edit?: BulkActionEditPayload[] };
   onError?: OnActionErrorCallback;
   onFinish?: () => void;
   onSuccess?: OnActionSuccessCallback;
@@ -56,24 +55,22 @@ export const useExecuteBulkAction = () => {
 
   const executeBulkAction = useCallback(
     async ({
+      bulkActionDescriptor,
       visibleRuleIds = [],
-      action,
       setLoadingRules,
-      search,
-      payload,
       onSuccess = defaultSuccessHandler,
       onError = defaultErrorHandler,
       onFinish,
     }: RulesBulkActionArgs) => {
       try {
-        setLoadingRules?.({ ids: visibleRuleIds, action });
-        const response = await mutateAsync({ ...search, action, edit: payload?.edit });
-        sendTelemetry(action, response);
-        onSuccess(toasts, action, response.attributes.summary);
+        setLoadingRules?.({ ids: visibleRuleIds, action: bulkActionDescriptor.type });
+        const response = await mutateAsync(bulkActionDescriptor);
+        sendTelemetry(bulkActionDescriptor.type, response);
+        onSuccess(toasts, bulkActionDescriptor.type, response.attributes.summary);
 
         return response;
       } catch (error) {
-        onError(toasts, action, error);
+        onError(toasts, bulkActionDescriptor.type, error);
       } finally {
         setLoadingRules?.({ ids: [], action: null });
         onFinish?.();

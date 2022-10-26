@@ -213,44 +213,46 @@ export interface BulkActionResponse {
   };
 }
 
-export interface BulkActionProps {
-  action: Exclude<BulkAction, BulkAction.export>;
-  query?: string;
-  ids?: string[];
-  edit?: BulkActionEditPayload[];
-  isDryRun?: boolean;
-}
+type QueryOrIds = { query: string } | { ids: string[] };
+type PlainBulkActionDescriptor = {
+  type: Exclude<BulkAction, BulkAction.edit | BulkAction.export>;
+} & QueryOrIds;
+type EditBulkActionDescriptor = {
+  type: BulkAction.edit;
+  editPayload: BulkActionEditPayload[];
+} & QueryOrIds;
+export type BulkActionDescriptor = PlainBulkActionDescriptor | EditBulkActionDescriptor;
 
 /**
  * Perform bulk action with rules selected by a filter query
  *
+ * @param type bulk action to perform
  * @param query filter query to select rules to perform bulk action with
  * @param ids string[] rule ids to select rules to perform bulk action with
  * @param edit BulkEditActionPayload edit action payload
- * @param action bulk action to perform
- * @param isDryRun enables dry run mode for bulk actions
+ * @param dryRun enables dry run mode for bulk actions
  *
  * @throws An error if response is not OK
  */
-export const performBulkAction = async ({
-  action,
-  query,
-  edit,
-  ids,
-  isDryRun,
-}: BulkActionProps): Promise<BulkActionResponse> =>
-  KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
+export async function performBulkAction(
+  bulkActionDescriptor: BulkActionDescriptor,
+  dryRun?: boolean
+): Promise<BulkActionResponse> {
+  const params = {
+    action: bulkActionDescriptor.type,
+    ...('query' in bulkActionDescriptor ? { query: bulkActionDescriptor.query } : {}),
+    ...('ids' in bulkActionDescriptor ? { ids: bulkActionDescriptor.ids } : {}),
+    ...(bulkActionDescriptor.type === BulkAction.edit
+      ? { edit: bulkActionDescriptor.editPayload }
+      : {}),
+  };
+
+  return KibanaServices.get().http.fetch<BulkActionResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
     method: 'POST',
-    body: JSON.stringify({
-      action,
-      ...(edit ? { edit } : {}),
-      ...(ids ? { ids } : {}),
-      ...(query !== undefined ? { query } : {}),
-    }),
-    query: {
-      ...(isDryRun ? { dry_run: isDryRun } : {}),
-    },
+    body: JSON.stringify(params),
+    query: dryRun ? { dry_run: true } : {},
   });
+}
 
 export interface BulkExportProps {
   query?: string;

@@ -88,9 +88,11 @@ const RuleActionsOverflowComponent = ({
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
                 closePopover();
                 const result = await executeBulkAction({
-                  action: BulkAction.duplicate,
+                  bulkActionDescriptor: {
+                    type: BulkAction.duplicate,
+                    ids: [rule.id],
+                  },
                   onSuccess: noop,
-                  search: { ids: [rule.id] },
                 });
                 const createdRules = result?.attributes.results.created;
                 if (createdRules?.length) {
@@ -137,9 +139,11 @@ const RuleActionsOverflowComponent = ({
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
                 closePopover();
                 await executeBulkAction({
-                  action: BulkAction.delete,
+                  bulkActionDescriptor: {
+                    type: BulkAction.delete,
+                    ids: [rule.id],
+                  },
                   onSuccess: onRuleDeletedCallback,
-                  search: { ids: [rule.id] },
                 });
               }}
             >

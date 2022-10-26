@@ -7,7 +7,7 @@
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import { BulkAction } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import type { BulkActionProps, BulkActionResponse } from '../api';
+import type { BulkActionDescriptor, BulkActionResponse } from '../api';
 import { performBulkAction } from '../api';
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFindRulesQuery, useUpdateRulesCache } from './use_find_rules_query';
@@ -18,7 +18,7 @@ import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/consta
 export const BULK_ACTION_MUTATION_KEY = ['POST', DETECTION_ENGINE_RULES_BULK_ACTION];
 
 export const useBulkActionMutation = (
-  options?: UseMutationOptions<BulkActionResponse, Error, BulkActionProps>
+  options?: UseMutationOptions<BulkActionResponse, Error, BulkActionDescriptor>
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
@@ -26,14 +26,14 @@ export const useBulkActionMutation = (
   const invalidateFetchPrebuiltRulesStatusQuery = useInvalidateFetchPrebuiltRulesStatusQuery();
   const updateRulesCache = useUpdateRulesCache();
 
-  return useMutation<BulkActionResponse, Error, BulkActionProps>(
-    (action: BulkActionProps) => performBulkAction(action),
+  return useMutation<BulkActionResponse, Error, BulkActionDescriptor>(
+    (bulkActionDescriptor: BulkActionDescriptor) => performBulkAction(bulkActionDescriptor),
     {
       ...options,
       mutationKey: BULK_ACTION_MUTATION_KEY,
       onSuccess: (...args) => {
-        const [res, { action }] = args;
-        switch (action) {
+        const [res, { type: actionType }] = args;
+        switch (actionType) {
           case BulkAction.enable:
           case BulkAction.disable: {
             invalidateFetchRuleByIdQuery();

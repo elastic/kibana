@@ -69,10 +69,12 @@ export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
         const result = await executeBulkAction({
-          action: BulkAction.duplicate,
+          bulkActionDescriptor: {
+            type: BulkAction.duplicate,
+            ids: [rule.id],
+          },
           setLoadingRules,
           visibleRuleIds: [rule.id],
-          search: { ids: [rule.id] },
         });
         const createdRules = result?.attributes.results.created;
         if (createdRules?.length) {
@@ -111,10 +113,12 @@ export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
         await executeBulkAction({
-          action: BulkAction.delete,
+          bulkActionDescriptor: {
+            type: BulkAction.delete,
+            ids: [rule.id],
+          },
           setLoadingRules,
           visibleRuleIds: [rule.id],
-          search: { ids: [rule.id] },
         });
       },
     },
