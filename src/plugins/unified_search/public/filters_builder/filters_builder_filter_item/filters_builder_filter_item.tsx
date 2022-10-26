@@ -222,7 +222,7 @@ export function FilterItem({
                       <EuiFlexItem grow={true}>
                         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="center">
                           <EuiFlexItem grow={4}>
-                            <EuiFormRow fullWidth>
+                            <EuiFormRow>
                               <FieldInput
                                 field={field}
                                 dataView={dataView}
@@ -231,7 +231,7 @@ export function FilterItem({
                             </EuiFormRow>
                           </EuiFlexItem>
                           <EuiFlexItem grow={2}>
-                            <EuiFormRow fullWidth>
+                            <EuiFormRow>
                               <OperatorInput
                                 field={field}
                                 operator={operator}
@@ -241,7 +241,7 @@ export function FilterItem({
                             </EuiFormRow>
                           </EuiFlexItem>
                           <EuiFlexItem grow={4}>
-                            <EuiFormRow fullWidth>
+                            <EuiFormRow>
                               <ParamsEditor
                                 dataView={dataView}
                                 field={field}
