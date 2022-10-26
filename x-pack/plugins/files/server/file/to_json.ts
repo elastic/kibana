@@ -9,7 +9,19 @@ import { pickBy } from 'lodash';
 import type { FileMetadata, FileJSON } from '../../common/types';
 
 export function serializeJSON<M = unknown>(attrs: Partial<FileJSON>): Partial<FileMetadata> {
-  const { name, mimeType, size, created, updated, fileKind, status, alt, extension, meta } = attrs;
+  const {
+    name,
+    mimeType,
+    size,
+    created,
+    updated,
+    fileKind,
+    status,
+    alt,
+    extension,
+    meta,
+    createdBy,
+  } = attrs;
   return pickBy(
     {
       name,
@@ -20,6 +32,7 @@ export function serializeJSON<M = unknown>(attrs: Partial<FileJSON>): Partial<Fi
       Alt: alt,
       Status: status,
       Meta: meta as M,
+      CreatedBy: createdBy,
       Updated: updated,
       FileKind: fileKind,
     },
@@ -31,6 +44,7 @@ export function toJSON<M = unknown>(id: string, attrs: FileMetadata): FileJSON<M
   const {
     name,
     mime_type: mimeType,
+    CreatedBy,
     size,
     created,
     Updated,
@@ -53,6 +67,7 @@ export function toJSON<M = unknown>(id: string, attrs: FileMetadata): FileJSON<M
       meta: Meta as M,
       updated: Updated,
       fileKind: FileKind,
+      createdBy: CreatedBy,
     },
     (v) => v != null
   ) as FileJSON<M>;
