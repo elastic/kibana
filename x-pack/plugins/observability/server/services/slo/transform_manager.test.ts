@@ -138,13 +138,13 @@ describe('TransformManager', () => {
   });
 });
 
-class DummyTransformGenerator implements TransformGenerator {
+class DummyTransformGenerator extends TransformGenerator {
   getTransformParams(slo: SLO): TransformPutTransformRequest {
     return {} as TransformPutTransformRequest;
   }
 }
 
-class FailTransformGenerator implements TransformGenerator {
+class FailTransformGenerator extends TransformGenerator {
   getTransformParams(slo: SLO): TransformPutTransformRequest {
     throw new Error('Some error');
   }

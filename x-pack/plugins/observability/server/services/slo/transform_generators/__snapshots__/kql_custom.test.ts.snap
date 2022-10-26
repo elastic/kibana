@@ -141,6 +141,31 @@ Object {
           "field": "@timestamp",
         },
       },
+      "slo._internal.budgeting_method": Object {
+        "terms": Object {
+          "field": "slo._internal.budgeting_method",
+        },
+      },
+      "slo._internal.name": Object {
+        "terms": Object {
+          "field": "slo._internal.name",
+        },
+      },
+      "slo._internal.objective.target": Object {
+        "terms": Object {
+          "field": "slo._internal.objective.target",
+        },
+      },
+      "slo._internal.time_window.duration": Object {
+        "terms": Object {
+          "field": "slo._internal.time_window.duration",
+        },
+      },
+      "slo._internal.time_window.is_rolling": Object {
+        "terms": Object {
+          "field": "slo._internal.time_window.is_rolling",
+        },
+      },
       "slo.id": Object {
         "terms": Object {
           "field": "slo.id",
@@ -171,6 +196,36 @@ Object {
       },
     },
     "runtime_mappings": Object {
+      "slo._internal.budgeting_method": Object {
+        "script": Object {
+          "source": "emit('occurrences')",
+        },
+        "type": "keyword",
+      },
+      "slo._internal.name": Object {
+        "script": Object {
+          "source": "emit('irrelevant')",
+        },
+        "type": "keyword",
+      },
+      "slo._internal.objective.target": Object {
+        "script": Object {
+          "source": "emit(0.999)",
+        },
+        "type": "double",
+      },
+      "slo._internal.time_window.duration": Object {
+        "script": Object {
+          "source": "emit('7d')",
+        },
+        "type": "keyword",
+      },
+      "slo._internal.time_window.is_rolling": Object {
+        "script": Object {
+          "source": "emit(true)",
+        },
+        "type": "boolean",
+      },
       "slo.id": Object {
         "script": Object {
           "source": Any<String>,

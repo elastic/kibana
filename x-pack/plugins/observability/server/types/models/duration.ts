@@ -33,6 +33,10 @@ class Duration {
     const currentDurationMoment = moment.duration(this.value, toMomentUnitOfTime(this.unit));
     return currentDurationMoment.asSeconds() < otherDurationMoment.asSeconds();
   }
+
+  format(): string {
+    return `${this.value}${this.unit}`;
+  }
 }
 
 const toMomentUnitOfTime = (unit: DurationUnit): moment.unitOfTime.Diff => {

@@ -20,6 +20,18 @@ describe('Duration', () => {
     expect(() => new Duration(1, 'z' as DurationUnit)).toThrow('invalid duration unit');
   });
 
+  describe('format', () => {
+    it('formats the duration correctly', () => {
+      expect(new Duration(1, DurationUnit.m).format()).toBe('1m');
+      expect(new Duration(1, DurationUnit.h).format()).toBe('1h');
+      expect(new Duration(1, DurationUnit.d).format()).toBe('1d');
+      expect(new Duration(1, DurationUnit.w).format()).toBe('1w');
+      expect(new Duration(1, DurationUnit.M).format()).toBe('1M');
+      expect(new Duration(1, DurationUnit.Q).format()).toBe('1Q');
+      expect(new Duration(1, DurationUnit.Y).format()).toBe('1Y');
+    });
+  });
+
   describe('isShorterThan', () => {
     it('returns true when the current duration is shorter than the other duration', () => {
       const short = new Duration(1, DurationUnit.m);
