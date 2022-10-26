@@ -8,6 +8,13 @@ PKG_REQUIRE_NAME = "@kbn/core-apps-server-internal"
 SOURCE_FILES = glob(
   [
     "**/*.ts",
+    "src/**/*.css",
+    "src/**/*.ttf",
+    "src/**/*.woff",
+    "src/**/*.woff2",
+    "src/**/*.ico",
+    "src/**/*.png",
+    "src/**/*.svg",
   ],
   exclude = [
     "**/*.config.js",
@@ -35,19 +42,8 @@ NPM_MODULE_EXTRA_FILES = [
   "package.json",
 ]
 
-# In this array place runtime dependencies, including other packages and NPM packages
-# which must be available for this code to run.
-#
-#  To reference other packages use:
-#    "//repo/relative/path/to/package"
-#    eg. "//packages/kbn-utils"
-#
-#  To reference a NPM package use:
-#    "@npm//name-of-package"
-#    eg. "@npm//lodash"
 RUNTIME_DEPS = [
   "@npm//elastic-apm-node",
-  "@npm//fs",
   "@npm//lru-cache",
   "@npm//mime-types",
   "//packages/kbn-config",
@@ -61,18 +57,8 @@ RUNTIME_DEPS = [
   "//packages/core/plugins/core-plugins-base-server-internal",
 ]
 
-# In this array place dependencies necessary to build the types, which will include the
-# :npm_module_types target of other packages and packages from NPM, including @types/*
-# packages.
-#
-#  To reference the types for another package use:
-#    "//repo/relative/path/to/package:npm_module_types"
-#    eg. "//packages/kbn-utils:npm_module_types"
-#
-#  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
   "@npm//elastic-apm-node",
-  "@npm//fs",
   "@npm//@types/node",
   "@npm//@types/jest",
   "@npm//@types/lru-cache",
@@ -94,6 +80,10 @@ jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+  additional_args = [
+    "--copy-files",
+    "--quiet"
+  ],
 )
 
 ts_config(

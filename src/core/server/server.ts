@@ -79,7 +79,7 @@ import {
   PluginsService,
   config as pluginsConfig,
 } from '@kbn/core-plugins-server-internal';
-import { CoreAppsService } from './core_app';
+import { CoreAppsService } from '@kbn/core-apps-server-internal';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';

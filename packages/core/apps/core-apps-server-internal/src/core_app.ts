@@ -22,7 +22,7 @@ import type {
 } from '@kbn/core-http-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { HttpResources, HttpResourcesServiceToolkit } from '@kbn/core-http-resources-server';
-import { InternalCorePreboot, InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
+import type { InternalCorePreboot, InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
 import { registerBundleRoutes } from './bundle_routes';
 import type { InternalCoreAppsServiceRequestHandlerContext } from './internal_types';
 
@@ -37,24 +37,6 @@ interface CommonRoutesParams {
     res: HttpResourcesServiceToolkit & KibanaResponseFactory
   ) => Promise<IKibanaResponse>;
 }
-
-// /** @internal */
-// interface CoreAppsServicePrebootDeps {
-//   corePreboot: InternalCorePreboot;
-//   uiPlugins: UiPlugins;
-// }
-
-// /** @internal */
-// interface CoreAppsServiceSetupDeps {
-//   corePreboot: InternalCoreSetup;
-//   uiPlugins: UiPlugins;
-// }
-
-// /** @internal */
-// type DefaultRoutesDeps = CoreAppsServiceSetupDeps; // note: CommonRoutesParams isn't prefixed with 'Register' so we do the same here for DefaultRoutes
-
-// /** @internal */
-// type PrebootDefaultRoutesDeps = CoreAppsServicePrebootDeps;
 
 /** @internal */
 export class CoreAppsService {

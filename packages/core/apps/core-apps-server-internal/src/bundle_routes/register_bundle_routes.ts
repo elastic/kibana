@@ -7,7 +7,7 @@
  */
 
 import { join } from 'path';
-import { PackageInfo } from '@kbn/config';
+import type { PackageInfo } from '@kbn/config';
 import { fromRoot } from '@kbn/utils';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import { distDir as UiSharedDepsSrcDistDir } from '@kbn/ui-shared-deps-src';
