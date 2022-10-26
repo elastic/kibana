@@ -84,18 +84,13 @@ export const UseCaseCard = ({
       </h4>
     </EuiText>
   );
-  const descriptionElement = (
-    <EuiText size="s" textAlign="center">
-      <p>{description}</p>
-    </EuiText>
-  );
+
   return (
     <EuiCard
       display="subdued"
-      textAlign="left"
       image={<EuiImage src={getImageUrl(useCase)} alt={constants[useCase].logAltText} />}
       title={titleElement}
-      description={descriptionElement}
+      description={description}
       footer={footer}
       betaBadgeProps={{
         label: constants[useCase].betaBadgeLabel,
