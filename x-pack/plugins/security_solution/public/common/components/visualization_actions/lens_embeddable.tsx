@@ -78,6 +78,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   id,
   inputsModelId = InputsModelId.global,
   lensAttributes,
+  metricAlignment,
   stackByField,
   timerange,
   inspectTitle,
@@ -181,6 +182,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             extraActions={actions}
             searchSessionId={searchSessionId}
             showInspector={false}
+            metricAlignment={metricAlignment}
           />
         </LensComponentWrapper>
       ) : null}

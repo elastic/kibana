@@ -48,7 +48,7 @@ export interface ModalInspectProps {
   additionalRequests?: string[] | null;
   additionalResponses?: string[] | null;
   closeModal: () => void;
-  inputId?: InputsModelId.global | InputsModelId.timeline;
+  inputId?: InputsModelId;
   request: string;
   response: string;
   title: string | React.ReactElement | React.ReactNode;

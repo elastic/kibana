@@ -135,8 +135,8 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
 
     return (
       <MetricComponent
-        autoScaleParams={
-          this.isAutoScaleWithColorizingContainer()
+        autoScaleParams={{
+          ...(this.isAutoScaleWithColorizingContainer()
             ? {
                 containerStyles: {
                   backgroundColor: metric.bgColor,
@@ -144,8 +144,9 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
                   minWidth: '100%',
                 },
               }
-            : undefined
-        }
+            : {}),
+          alignment: this.props.visParams.metric.alignment,
+        }}
         key={index}
         metric={metric}
         style={this.props.visParams.metric.style}
