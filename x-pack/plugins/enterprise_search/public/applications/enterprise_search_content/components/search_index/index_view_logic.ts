@@ -9,23 +9,28 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
+import { Status } from '../../../../../common/types/api';
 import {
   Connector,
   IngestPipelineParams,
   SyncStatus,
 } from '../../../../../common/types/connectors';
+import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
+
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import {
   flashAPIErrors,
   clearFlashMessages,
   flashSuccessToast,
 } from '../../../shared/flash_messages';
+
 import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector/start_sync_api_logic';
 import {
   FetchIndexApiLogic,
   FetchIndexApiParams,
   FetchIndexApiResponse,
 } from '../../api/index/fetch_index_api_logic';
+
 import { ElasticsearchViewIndex, IngestionMethod, IngestionStatus } from '../../types';
 import {
   getIngestionMethod,
@@ -69,8 +74,12 @@ export interface IndexViewValues {
   connector: Connector | undefined;
   connectorId: string | null;
   data: typeof FetchIndexApiLogic.values.data;
+  fetchIndexApiStatus: Status;
   fetchIndexTimeoutId: NodeJS.Timeout | null;
   index: ElasticsearchViewIndex | undefined;
+  indexData: {
+    index: ElasticsearchIndexWithIngestion | undefined;
+  };
   indexName: string;
   ingestionMethod: IngestionMethod;
   ingestionStatus: IngestionStatus;
@@ -116,7 +125,12 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       IndexNameLogic,
       ['setIndexName'],
     ],
-    values: [FetchIndexApiLogic, ['data'], IndexNameLogic, ['indexName']],
+    values: [
+      FetchIndexApiLogic,
+      ['data', 'status as fetchIndexApiStatus'],
+      IndexNameLogic,
+      ['indexName'],
+    ],
   },
   events: ({ actions, values }) => ({
     afterMount: () => {
@@ -204,6 +218,13 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       {
         clearFetchIndexTimeout: () => null,
         setFetchIndexTimeoutId: (_, { timeoutId }) => timeoutId,
+      },
+    ],
+    indexData: [
+      { index: undefined },
+      {
+        fetchIndexApiSuccess: (_, index) => ({ index }),
+        resetFetchIndexApi: () => ({ index: undefined }),
       },
     ],
     localSyncNowValue: [

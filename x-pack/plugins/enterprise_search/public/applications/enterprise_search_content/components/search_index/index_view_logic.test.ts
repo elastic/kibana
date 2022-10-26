@@ -29,6 +29,7 @@ const DEFAULT_VALUES = {
   connectorId: null,
   data: undefined,
   index: undefined,
+  indexData: { index: undefined },
   indexName: '',
   ingestionMethod: IngestionMethod.API,
   ingestionStatus: IngestionStatus.CONNECTED,
@@ -93,6 +94,12 @@ describe('IndexViewLogic', () => {
               ...CONNECTOR_VALUES.index,
               connector: { ...CONNECTOR_VALUES.index.connector, sync_now: true },
             },
+            indexData: {
+              index: {
+                ...CONNECTOR_VALUES.index,
+                connector: { ...CONNECTOR_VALUES.index.connector, sync_now: true },
+              },
+            },
             isWaitingForSync: true,
             localSyncNowValue: true,
             syncStatus: SyncStatus.COMPLETED,
@@ -108,6 +115,9 @@ describe('IndexViewLogic', () => {
             ...DEFAULT_VALUES,
             data: apiIndex,
             index: apiIndex,
+            indexData: {
+              index: apiIndex,
+            },
           })
         );
       });
