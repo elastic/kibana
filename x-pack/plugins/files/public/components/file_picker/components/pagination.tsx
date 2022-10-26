@@ -8,14 +8,19 @@
 import React from 'react';
 import type { FunctionComponent } from 'react';
 import { EuiPagination } from '@elastic/eui';
+import useObservable from 'react-use/lib/useObservable';
 import { useFilePickerContext } from '../context';
 import { useBehaviorSubject } from '../../use_behavior_subject';
 
 export const Pagination: FunctionComponent = () => {
   const { state } = useFilePickerContext();
   const page = useBehaviorSubject(state.currentPage$);
+  const files = useObservable(state.files$, []);
   const pageCount = useBehaviorSubject(state.totalPages$);
   const isUploading = useBehaviorSubject(state.isUploading$);
+  if (files.length === 0) {
+    return null;
+  }
   return (
     <EuiPagination
       onPageClick={isUploading ? () => {} : state.setPage}
