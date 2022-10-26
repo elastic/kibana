@@ -12,57 +12,49 @@ import type {
   CoreSetup,
   CoreStart,
   Plugin,
-  Logger,
-} from '@kbn/core/server';
-import type { DeepReadonly } from 'utility-types';
+  Logger
+} from "@kbn/core/server";
+import type { DeepReadonly } from "utility-types";
 import type {
   DeletePackagePoliciesResponse,
   PackagePolicy,
-  NewPackagePolicy,
-} from '@kbn/fleet-plugin/common';
+  NewPackagePolicy
+} from "@kbn/fleet-plugin/common";
 import type {
   TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
-import { isSubscriptionAllowed } from '../common/utils/subscription';
+  TaskManagerStartContract
+} from "@kbn/task-manager-plugin/server";
+import { isSubscriptionAllowed } from "../common/utils/subscription";
 import type {
   CspServerPluginSetup,
   CspServerPluginStart,
   CspServerPluginSetupDeps,
   CspServerPluginStartDeps,
-  CspServerPluginStartServices,
-} from './types';
-import { setupRoutes } from './routes/setup_routes';
-import { setupSavedObjects } from './saved_objects';
-import { initializeCspIndices } from './create_indices/create_indices';
-import { initializeCspTransforms } from './create_transforms/create_transforms';
+  CspServerPluginStartServices
+} from "./types";
+import { setupRoutes } from "./routes/setup_routes";
+import { setupSavedObjects } from "./saved_objects";
+import { initializeCspIndices } from "./create_indices/create_indices";
+import { initializeCspTransforms } from "./create_transforms/create_transforms";
 import {
   isCspPackage,
   isCspPackageInstalled,
   onPackagePolicyPostCreateCallback,
-  removeCspRulesInstancesCallback,
-} from './fleet_integration/fleet_integration';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
-import {
-  updatePackagePolicyRuntimeCfgVar,
-  getCspRulesSO,
-} from './routes/configuration/update_rules_configuration';
+  removeCspRulesInstancesCallback
+} from "./fleet_integration/fleet_integration";
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from "../common/constants";
 import {
   removeFindingsStatsTask,
   scheduleFindingsStatsTask,
-  setupFindingsStatsTask,
-} from './tasks/findings_stats_task';
-import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
+  setupFindingsStatsTask
+} from "./tasks/findings_stats_task";
+import { registerCspmUsageCollector } from "./lib/telemetry/collectors/register";
 
 export class CspPlugin
-  implements
-    Plugin<
-      CspServerPluginSetup,
-      CspServerPluginStart,
-      CspServerPluginSetupDeps,
-      CspServerPluginStartDeps
-    >
-{
+  implements Plugin<CspServerPluginSetup,
+    CspServerPluginStart,
+    CspServerPluginSetupDeps,
+    CspServerPluginStartDeps> {
   private readonly logger: Logger;
   private isCloudEnabled?: boolean;
 
@@ -78,7 +70,7 @@ export class CspPlugin
 
     setupRoutes({
       core,
-      logger: this.logger,
+      logger: this.logger
     });
 
     const coreStartServices = core.getStartServices();
@@ -103,7 +95,7 @@ export class CspPlugin
       }
 
       plugins.fleet.registerExternalCallback(
-        'packagePolicyCreate',
+        "packagePolicyCreate",
         async (
           packagePolicy: NewPackagePolicy,
           _context: RequestHandlerContext,
@@ -113,7 +105,7 @@ export class CspPlugin
           if (isCspPackage(packagePolicy.package?.name)) {
             if (!isSubscriptionAllowed(this.isCloudEnabled, license)) {
               throw new Error(
-                'To use this feature you must upgrade your subscription or start a trial'
+                "To use this feature you must upgrade your subscription or start a trial"
               );
             }
           }
@@ -123,31 +115,19 @@ export class CspPlugin
       );
 
       plugins.fleet.registerExternalCallback(
-        'packagePolicyPostCreate',
+        "packagePolicyPostCreate",
         async (
           packagePolicy: PackagePolicy,
           context: RequestHandlerContext,
-          request: KibanaRequest
+          _: KibanaRequest
         ): Promise<PackagePolicy> => {
           if (isCspPackage(packagePolicy.package?.name)) {
             await this.initialize(core, plugins.taskManager);
 
             const soClient = (await context.core).savedObjects.client;
-            const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-            const user = await plugins.security.authc.getCurrentUser(request);
-
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
 
-            const updatedPackagePolicy = await updatePackagePolicyRuntimeCfgVar({
-              rules: await getCspRulesSO(soClient, packagePolicy.id, packagePolicy.policy_id),
-              packagePolicy,
-              packagePolicyService: plugins.fleet.packagePolicyService,
-              esClient,
-              soClient,
-              user,
-            });
-
-            return updatedPackagePolicy;
+            return packagePolicy;
           }
 
           return packagePolicy;
@@ -155,7 +135,7 @@ export class CspPlugin
       );
 
       plugins.fleet.registerExternalCallback(
-        'postPackagePolicyDelete',
+        "postPackagePolicyDelete",
         async (deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>) => {
           for (const deletedPackagePolicy of deletedPackagePolicies) {
             if (isCspPackage(deletedPackagePolicy.package?.name)) {
@@ -176,10 +156,11 @@ export class CspPlugin
     return {};
   }
 
-  public stop() {}
+  public stop() {
+  }
 
   async initialize(core: CoreStart, taskManager: TaskManagerStartContract): Promise<void> {
-    this.logger.debug('initialize');
+    this.logger.debug("initialize");
     const esClient = core.elasticsearch.client.asInternalUser;
     await initializeCspIndices(esClient, this.logger);
     await initializeCspTransforms(esClient, this.logger);
