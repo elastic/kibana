@@ -92,7 +92,7 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     [dispatch, riskEntity]
   );
 
-  const { openHostInTimeline, openUserInTimeline } = useNavigateToTimeline();
+  const { openTimelineWithFilters } = useNavigateToTimeline();
 
   const openEntityInTimeline = useCallback(
     (entityName: string, oldestAlertTimestamp?: string) => {
@@ -106,19 +106,13 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
           }
         : undefined;
 
-      if (riskEntity === RiskScoreEntity.host) {
-        openHostInTimeline({
-          hostName: entityName,
-          timeRange,
-        });
-      } else if (riskEntity === RiskScoreEntity.user) {
-        openUserInTimeline({
-          userName: entityName,
-          timeRange,
-        });
-      }
+      const filter = {
+        field: riskEntity === RiskScoreEntity.host ? 'host.name' : 'user.name',
+        value: entityName,
+      };
+      openTimelineWithFilters([[filter]], timeRange);
     },
-    [riskEntity, openHostInTimeline, openUserInTimeline]
+    [riskEntity, openTimelineWithFilters]
   );
 
   const { toggleStatus, setToggleStatus } = useQueryToggle(entity.tableQueryId);

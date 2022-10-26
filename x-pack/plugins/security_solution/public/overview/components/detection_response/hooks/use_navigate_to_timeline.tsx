@@ -69,9 +69,10 @@ export const useNavigateToTimeline = () => {
    *
    * [[filter1 & filter2] OR [filter3 & filter4]]
    *
+   * @param timeRange Defines the timeline time range field and removes the time range lock
    */
   const openTimelineWithFilters = useCallback(
-    (filters: Array<[...Filter[]]>) => {
+    (filters: Array<[...Filter[]]>, timeRange?: TimeRange) => {
       const dataProviders = [];
 
       for (const orFilterGroup of filters) {
@@ -86,67 +87,12 @@ export const useNavigateToTimeline = () => {
           dataProviders.push(dataProvider);
         }
       }
-      navigateToTimeline(dataProviders);
-    },
-    [navigateToTimeline]
-  );
-
-  // TODO: Replace the usage of functions with openTimelineWithFilters
-
-  const openHostInTimeline = useCallback(
-    ({
-      hostName,
-      severity,
-      timeRange,
-    }: {
-      hostName: string;
-      severity?: string;
-      timeRange?: TimeRange;
-    }) => {
-      const dataProvider = getDataProvider('host.name', '', hostName);
-
-      if (severity) {
-        dataProvider.and.push(getDataProvider('kibana.alert.severity', '', severity));
-      }
-
-      navigateToTimeline([dataProvider], timeRange);
-    },
-    [navigateToTimeline]
-  );
-
-  const openUserInTimeline = useCallback(
-    ({
-      userName,
-      severity,
-      timeRange,
-    }: {
-      userName: string;
-      severity?: string;
-      timeRange?: TimeRange;
-    }) => {
-      const dataProvider = getDataProvider('user.name', '', userName);
-
-      if (severity) {
-        dataProvider.and.push(getDataProvider('kibana.alert.severity', '', severity));
-      }
-      navigateToTimeline([dataProvider], timeRange);
-    },
-    [navigateToTimeline]
-  );
-
-  const openRuleInTimeline = useCallback(
-    (ruleName: string) => {
-      const dataProvider = getDataProvider('kibana.alert.rule.name', '', ruleName);
-
-      navigateToTimeline([dataProvider]);
+      navigateToTimeline(dataProviders, timeRange);
     },
     [navigateToTimeline]
   );
 
   return {
     openTimelineWithFilters,
-    openHostInTimeline,
-    openRuleInTimeline,
-    openUserInTimeline,
   };
 };
