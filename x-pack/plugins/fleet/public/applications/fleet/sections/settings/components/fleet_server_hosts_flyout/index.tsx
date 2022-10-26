@@ -136,6 +136,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
           </EuiFormRow>
           <EuiFormRow fullWidth {...inputs.isDefaultInput.formRowProps}>
             <EuiSwitch
+              data-test-subj="fleetServerHostsFlyout.isDefaultSwitch"
               {...inputs.isDefaultInput.props}
               label={
                 <FormattedMessage

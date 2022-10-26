@@ -51,7 +51,7 @@ export const AddFleetServerHostStepContent = ({
 }: {
   fleetServerHostForm: FleetServerHostForm;
 }) => {
-  const { fleetServerHost, saveFleetServerHost, error, validate, inputs } = fleetServerHostForm;
+  const { setFleetServerHost, saveFleetServerHost, error, validate, inputs } = fleetServerHostForm;
 
   const [isLoading, setIsLoading] = useState(false);
   const [submittedFleetServerHost, setSubmittedFleetServerHost] = useState<FleetServerHost>();
@@ -63,9 +63,17 @@ export const AddFleetServerHostStepContent = ({
       setSubmittedFleetServerHost(undefined);
       setIsLoading(true);
 
-      if (fleetServerHost && validate()) {
-        await saveFleetServerHost(fleetServerHost);
-        setSubmittedFleetServerHost(fleetServerHost);
+      const newFleetServerHost = {
+        name: inputs.nameInput.value,
+        host_urls: inputs.hostUrlsInput.value,
+        is_default: true,
+        id: 'fleet-server-host',
+        is_preconfigured: false,
+      };
+      setFleetServerHost(newFleetServerHost);
+      if (validate()) {
+        await saveFleetServerHost(newFleetServerHost);
+        setSubmittedFleetServerHost(newFleetServerHost);
       }
     } catch (err) {
       notifications.toasts.addError(err, {
@@ -76,7 +84,14 @@ export const AddFleetServerHostStepContent = ({
     } finally {
       setIsLoading(false);
     }
-  }, [validate, saveFleetServerHost, fleetServerHost, notifications.toasts]);
+  }, [
+    inputs.nameInput.value,
+    inputs.hostUrlsInput.value,
+    setFleetServerHost,
+    validate,
+    saveFleetServerHost,
+    notifications.toasts,
+  ]);
 
   return (
     <EuiForm onSubmit={onSubmit}>

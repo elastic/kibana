@@ -64,7 +64,7 @@ export const FleetServerHostsSection: React.FunctionComponent<FleetServerHostsSe
       <EuiButtonEmpty
         iconType="plusInCircle"
         href={getHref('settings_create_fleet_server_hosts')}
-        data-test-subj="addFleetServerHostBtn"
+        data-test-subj="settings.fleetServerHosts.addFleetServerHostBtn"
       >
         <FormattedMessage
           id="xpack.fleet.settings.fleetServerHostCreateButtonLabel"

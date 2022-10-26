@@ -105,7 +105,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
           {...inputs.nameInput.formRowProps}
         >
           <EuiFieldText
-            data-test-subj="fleetServerHosts.getStarted.nameInput"
+            data-test-subj="fleetServerSetup.nameInput"
             fullWidth
             placeholder={i18n.translate('xpack.fleet.fleetServerSetup.nameInputPlaceholder', {
               defaultMessage: 'Specify name',
@@ -121,7 +121,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
         >
           <>
             <MultiRowInput
-              data-test-subj="fleetServerHosts.getStarted.multiRowInput"
+              data-test-subj="fleetServerSetup.multiRowInput"
               {...inputs.hostUrlsInput.props}
               placeholder={i18n.translate(
                 'xpack.fleet.fleetServerSetup.fleetServerHostsInputPlaceholder',
