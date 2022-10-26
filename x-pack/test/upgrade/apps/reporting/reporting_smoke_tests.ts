@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     { name: 'ecommerce', type: 'png', link: 'PNG Reports' },
   ];
 
-  describe('upgrade reporting smoke tests', () => {
+  describe('reporting ', () => {
     let completedReportCount: number;
     let usage: UsageStats;
     describe('initial state', () => {
@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
     spaces.forEach(({ space, basePath }) => {
-      describe('generate report for space ' + space, () => {
+      describe('space ' + space, () => {
         beforeEach(async () => {
           await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,
@@ -66,6 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         reportingTests.forEach(({ name, type, link }) => {
           it('name: ' + name + ' type: ' + type, async () => {
+            let startTime;
             await PageObjects.home.launchSampleDashboard(name);
             await PageObjects.share.openShareMenuItem(link);
             if (type === 'pdf_optimize') {
@@ -75,6 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // if we can read the clipboard (not Chrome headless) then get the reporting URL and post it
             // else click the reporting button and wait for the count of completed reports to increment
             if (canReadClipboard) {
+              log.debug('We have clipboard access.  Getting the POST URL and posting it via API');
               const advOpt = await find.byXPath(
                 `//button[descendant::*[text()='Advanced options']]`
               );
@@ -108,14 +110,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               } catch (e) {
                 log.debug(`Error waiting for job to finish: ${e}`);
               }
+              startTime = new Date();
             } else {
+              log.debug(`We don't have clipboard access.  Clicking the Generate report button`);
               await testSubjects.click('generateReportButton');
+              startTime = new Date();
             }
 
             await retry.tryForTime(50000, async () => {
               usage = (await usageAPI.getUsageStats()) as UsageStats;
               reportingAPI.expectCompletedReportCount(usage, completedReportCount + 1);
             });
+            log.debug(`Elapsed Time: ${new Date() - startTime}`);
           });
         });
       });
