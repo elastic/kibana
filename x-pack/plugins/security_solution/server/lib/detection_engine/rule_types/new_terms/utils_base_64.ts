@@ -85,17 +85,23 @@ export const getRuntimeMappings = (
     [AGGR_FIELD]: {
       type: 'keyword',
       script: `
-      String[] fields = new String[] {${fields}};
-      String acc = doc[fields[0]].value.encodeBase64();
 
-      for (int i = 1; i < fields.length; i++) {
-        acc = acc + '${DELIMITER}' + doc[fields[i]].value.encodeBase64();
+      void traverseDocFields(def doc, def fields, def index, def line) {
+        if (index === fields.length) {
+          emit(line);
+        } else {
+          for (field in doc[fields[index]]) {
+            def delimiter = index === 0 ? '' : '${DELIMITER}';
+            def nextLine = line + delimiter + String.valueOf(field).encodeBase64();
+
+            traverseDocFields(doc, fields, index + 1, nextLine);
+          }
+        }
       }
-      
-      String[] arr = new String[1];
-      arr[0] = acc;
-      
-      emit(arr[0])
+
+      String[] fields = new String[] {${fields}};
+
+      traverseDocFields(doc, fields, 0, '');
     `,
     },
   };
