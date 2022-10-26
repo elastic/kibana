@@ -275,7 +275,6 @@ async function installPackageFromRegistry({
   force = false,
   ignoreConstraints = false,
   neverIgnoreVerificationError = false,
-  prerelease = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -305,7 +304,7 @@ async function installPackageFromRegistry({
     const [latestPackage, { paths, packageInfo, verificationResult }] = await Promise.all([
       Registry.fetchFindLatestPackageOrThrow(pkgName, {
         ignoreConstraints,
-        prerelease,
+        prerelease: true,
       }),
       Registry.getPackage(pkgName, pkgVersion, {
         ignoreUnverified: force && !neverIgnoreVerificationError,

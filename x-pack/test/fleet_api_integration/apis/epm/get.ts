@@ -149,7 +149,7 @@ export default function (providerContext: FtrProviderContext) {
       // not from the package registry. This is because they contain a field the registry
       // does not support
       const res = await supertest
-        .get(`/api/fleet/epm/packages/integration_to_input/0.9.1`)
+        .get(`/api/fleet/epm/packages/integration_to_input/0.9.1?prerelease=true`)
         .expect(200);
 
       const packageInfo = res.body.item;
@@ -158,14 +158,16 @@ export default function (providerContext: FtrProviderContext) {
     });
     describe('Pkg verification', () => {
       it('should return validation error for unverified input only pkg', async function () {
-        const res = await supertest.get(`/api/fleet/epm/packages/input_only/0.1.0`).expect(400);
+        const res = await supertest
+          .get(`/api/fleet/epm/packages/input_only/0.1.0?prerelease=true`)
+          .expect(400);
         const error = res.body;
 
         expect(error?.attributes?.type).to.equal('verification_failed');
       });
       it('should not return validation error for unverified input only pkg if ignoreUnverified is true', async function () {
         await supertest
-          .get(`/api/fleet/epm/packages/input_only/0.1.0?ignoreUnverified=true`)
+          .get(`/api/fleet/epm/packages/input_only/0.1.0?ignoreUnverified=true&prerelease=true`)
           .expect(200);
       });
     });
