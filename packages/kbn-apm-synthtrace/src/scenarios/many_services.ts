@@ -39,25 +39,29 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
 
       const successfulTimestamps = range.ratePerMinute(180);
 
-      const instances = flatten([...Array(numServices).keys()].map((index) => {
-        const language = languages[index % languages.length];
-        const agentLanguageVersions =  agentVersions[language];
+      const instances = flatten(
+        [...Array(numServices).keys()].map((index) => {
+          const language = languages[index % languages.length];
+          const agentLanguageVersions = agentVersions[language];
 
-        const numOfInstances = Math.floor(Math.random() * (maxInstancesPerService - minInstancesPerService + 1) + minInstancesPerService);
+          const numOfInstances = Math.floor(
+            Math.random() * (maxInstancesPerService - minInstancesPerService + 1) +
+              minInstancesPerService
+          );
 
-        return [...Array(numOfInstances).keys()].map((instanceIndex) =>
-          apm
-            .service({
-              name: `${services[index % services.length]}-${
-                language
-              }-${index}`,
-              environment: ENVIRONMENT,
-              agentName: language,
-              agentVersion: agentLanguageVersions[Math.floor(Math.random() * agentLanguageVersions.length)],
-            })
-            .instance(`instance-${index}-${instanceIndex}`),
-        );
-      }));
+          return [...Array(numOfInstances).keys()].map((instanceIndex) =>
+            apm
+              .service({
+                name: `${services[index % services.length]}-${language}-${index}`,
+                environment: ENVIRONMENT,
+                agentName: language,
+                agentVersion:
+                  agentLanguageVersions[Math.floor(Math.random() * agentLanguageVersions.length)],
+              })
+              .instance(`instance-${index}-${instanceIndex}`)
+          );
+        })
+      );
 
       const urls = ['GET /order/{id}', 'POST /basket/{id}', 'DELETE /basket', 'GET /products'];
 

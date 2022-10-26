@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_ID } from '@kbn/apm-plugin/common/apm_saved_object_constants';
 import { SavedObjectsType } from '@kbn/core/server';
+import { APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_ID } from '../../common/apm_saved_object_constants';
 
 export const apmAgentsLatestVersion: SavedObjectsType = {
   name: APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_ID,

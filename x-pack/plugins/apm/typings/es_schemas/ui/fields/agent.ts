@@ -16,7 +16,7 @@ const elasticAgentNames = [
   'dotnet',
   'ruby',
   'php',
-  'android/java'
+  'android/java',
 ] as const;
 
 export type ElasticAgentName = typeof elasticAgentNames[number];
