@@ -13,6 +13,7 @@ import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { maplibregl } from '@kbn/mapbox-gl';
 import type { Map as MapboxMap, MapOptions, MapMouseEvent } from '@kbn/mapbox-gl';
 import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { DrawFilterControl } from './draw_control/draw_filter_control';
 import { ScaleControl } from './scale_control';
 import { TooltipControl } from './tooltip_control';
@@ -149,7 +150,16 @@ export class MbMap extends Component<Props, State> {
   }
 
   async _createMbMapInstance(initialView: MapCenterAndZoom | null): Promise<MapboxMap> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
+      if (!maplibregl.supported({ failIfMajorPerformanceCaveat: true }))
+        reject(
+          new Error(
+            i18n.translate('xpack.maps.webGlError', {
+              defaultMessage: `Your browser or device does not support WebGL or hardware acceleration is not available.`,
+            })
+          )
+        );
+
       const mbStyle = {
         version: 8 as 8,
         sources: {},
