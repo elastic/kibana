@@ -114,6 +114,7 @@ const TopNav = ({
     vis.type,
     vis.params,
     uiStateJSON?.vis,
+    uiStateJSON?.table,
     vis.data.indexPattern,
   ]);
 
