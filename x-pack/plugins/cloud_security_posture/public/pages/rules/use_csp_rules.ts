@@ -7,9 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { FunctionKeys } from 'utility-types';
 import type { SavedObjectsFindOptions, SimpleSavedObject } from '@kbn/core/public';
-import {
-  CSP_RULE_SAVED_OBJECT_TYPE,
-} from '../../../common/constants';
+import { CSP_RULE_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { CspRule } from '../../../common/schemas';
 import { useKibana } from '../../common/hooks/use_kibana';
 
@@ -35,4 +33,3 @@ export const useFindCspRules = ({ search, page, perPage, filter }: RulesQuery) =
     })
   );
 };
-
