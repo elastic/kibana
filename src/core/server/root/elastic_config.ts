@@ -10,11 +10,13 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { apmConfigSchema } from '@kbn/apm-config-loader';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
-export type ElasticApmConfigType = TypeOf<typeof apmConfigSchema>;
+const elasticConfig = schema.object({
+  apm: apmConfigSchema,
+});
 
-export const elasticApmConfig: ServiceConfigDescriptor<ElasticApmConfigType> = {
+export type ElasticConfigType = TypeOf<typeof elasticConfig>;
+
+export const elasticApmConfig: ServiceConfigDescriptor<ElasticConfigType> = {
   path: 'elastic',
-  schema: schema.object({
-    apm: apmConfigSchema,
-  }),
+  schema: elasticConfig,
 };

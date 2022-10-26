@@ -119,7 +119,8 @@ export class Root {
         switchMap(() => configService.atPath<ElasticApmConfigType>('elastic')),
         distinctUntilChanged(isEqual),
         tap((elasticConfig) => {
-          apm.addLabels(elasticConfig.apm.globalLabels);
+          const labels = elasticConfig.apm?.globalLabels || {};
+          apm.addLabels(labels);
         })
       )
       .subscribe();
