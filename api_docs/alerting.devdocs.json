@@ -2848,7 +2848,11 @@
           "GetGlobalExecutionKPIParams",
           ") => Promise<{ success: number; unknown: number; failure: number; warning: number; activeAlerts: number; newAlerts: number; recoveredAlerts: number; erroredActions: number; triggeredActions: number; }>; getRuleExecutionKPI: ({ id, dateStart, dateEnd, filter }: ",
           "GetRuleExecutionKPIParams",
-          ") => Promise<{ success: number; unknown: number; failure: number; warning: number; activeAlerts: number; newAlerts: number; recoveredAlerts: number; erroredActions: number; triggeredActions: number; }>; bulkEdit: <Params extends ",
+          ") => Promise<{ success: number; unknown: number; failure: number; warning: number; activeAlerts: number; newAlerts: number; recoveredAlerts: number; erroredActions: number; triggeredActions: number; }>; bulkDeleteRules: (options: ",
+          "BulkDeleteOptions",
+          ") => Promise<{ errors: ",
+          "BulkDeleteError",
+          "[]; total: number; taskIdsFailedToBeDeleted: string[]; }>; bulkEdit: <Params extends ",
           {
             "pluginId": "alerting",
             "scope": "common",

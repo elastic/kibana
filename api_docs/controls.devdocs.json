@@ -3739,6 +3739,34 @@
             "path": "src/plugins/controls/common/options_list/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddableInput.hideExclude",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideExclude",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.OptionsListEmbeddableInput.exclude",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "exclude",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4831,6 +4859,34 @@
             "type": "CompoundType",
             "tags": [],
             "label": "singleSelect",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.OptionsListEmbeddableInput.hideExclude",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideExclude",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/controls/common/options_list/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.OptionsListEmbeddableInput.exclude",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "exclude",
             "description": [],
             "signature": [
               "boolean | undefined"

@@ -189,6 +189,50 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.ChromeGlobalHelpExtensionMenuLink",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChromeGlobalHelpExtensionMenuLink",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeGlobalHelpExtensionMenuLink",
+            "text": "ChromeGlobalHelpExtensionMenuLink"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeHelpExtensionMenuCustomLink",
+            "text": "ChromeHelpExtensionMenuCustomLink"
+          }
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeGlobalHelpExtensionMenuLink.priority",
+            "type": "number",
+            "tags": [],
+            "label": "priority",
+            "description": [
+              "\nHighest priority items are listed at the top of the list of links."
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/help_extension.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
         "id": "def-common.ChromeHelpExtension",
         "type": "Interface",
         "tags": [],
@@ -1884,12 +1928,88 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeStart.getGlobalHelpExtensionMenuLinks$",
+            "type": "Function",
+            "tags": [],
+            "label": "getGlobalHelpExtensionMenuLinks$",
+            "description": [
+              "\nGet the list of the registered global help extension menu links"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeGlobalHelpExtensionMenuLink",
+                "text": "ChromeGlobalHelpExtensionMenuLink"
+              },
+              "[]>"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeStart.registerGlobalHelpExtensionMenuLink",
+            "type": "Function",
+            "tags": [],
+            "label": "registerGlobalHelpExtensionMenuLink",
+            "description": [
+              "\nAppend a global help extension menu link"
+            ],
+            "signature": [
+              "(globalHelpExtensionMenuLink: ",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeGlobalHelpExtensionMenuLink",
+                "text": "ChromeGlobalHelpExtensionMenuLink"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-browser",
+                "id": "def-common.ChromeStart.registerGlobalHelpExtensionMenuLink.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "globalHelpExtensionMenuLink",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-chrome-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreChromeBrowserPluginApi",
+                    "section": "def-common.ChromeGlobalHelpExtensionMenuLink",
+                    "text": "ChromeGlobalHelpExtensionMenuLink"
+                  }
+                ],
+                "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
             "id": "def-common.ChromeStart.getHelpExtension$",
             "type": "Function",
             "tags": [],
             "label": "getHelpExtension$",
             "description": [
-              "\nGet an observable of the current custom help conttent"
+              "\nGet an observable of the current custom help content"
             ],
             "signature": [
               "() => ",

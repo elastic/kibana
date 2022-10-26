@@ -1534,7 +1534,9 @@
         "TaskScheduling",
         ", \"schedule\" | \"runSoon\" | \"ephemeralRunNow\" | \"ensureScheduled\" | \"bulkUpdateSchedules\" | \"bulkEnable\" | \"bulkDisable\" | \"bulkSchedule\"> & Pick<",
         "TaskStore",
-        ", \"get\" | \"aggregate\" | \"fetch\" | \"remove\"> & { removeIfExists: (id: string) => Promise<void>; } & { supportsEphemeralTasks: () => boolean; }"
+        ", \"get\" | \"aggregate\" | \"fetch\" | \"remove\"> & { removeIfExists: (id: string) => Promise<void>; } & { bulkRemoveIfExist: (ids: string[]) => Promise<",
+        "SavedObjectsBulkDeleteResponse",
+        " | undefined>; } & { supportsEphemeralTasks: () => boolean; }"
       ],
       "path": "x-pack/plugins/task_manager/server/plugin.ts",
       "deprecated": false,

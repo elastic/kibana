@@ -901,24 +901,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "files",
-            "id": "def-public.Props.lazy",
-            "type": "CompoundType",
-            "tags": [
-              "default"
-            ],
-            "label": "lazy",
-            "description": [
-              "\nAs an optimisation images are only loaded when they are visible.\nThis setting overrides this behavior and loads an image as soon as the\ncomponent mounts.\n"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/files/public/components/image/image.tsx",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
