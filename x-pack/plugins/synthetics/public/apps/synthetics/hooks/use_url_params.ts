@@ -32,7 +32,7 @@ export const useUrlParams: SyntheticsUrlParamsHook = () => {
   const history = useHistory();
 
   const updateUrlParams: UpdateUrlParams = useCallback(
-    (updatedParams) => {
+    (updatedParams, clear = false) => {
       const currentParams = getParsedParams(search);
       const mergedParams = {
         ...currentParams,
@@ -56,7 +56,7 @@ export const useUrlParams: SyntheticsUrlParamsHook = () => {
 
       // only update the URL if the search has actually changed
       if (search !== updatedSearch) {
-        history.push({ pathname, search: updatedSearch });
+        history.push({ pathname, search: !clear ? updatedSearch : undefined });
       }
     },
     [history, pathname, search]

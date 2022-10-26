@@ -19,11 +19,11 @@ import {
 } from '@elastic/eui';
 import { selectOverviewState } from '../../../../state/overview';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
+import { useMonitorsSortedByStatus } from '../../../../hooks/use_monitors_sorted_by_status';
+import { OverviewLoader } from './overview_loader';
 import { OverviewPaginationInfo } from './overview_pagination_info';
 import { OverviewGridItem } from './overview_grid_item';
 import { SortFields } from './sort_fields';
-import { useMonitorsSortedByStatus } from '../../../../hooks/use_monitors_sorted_by_status';
-import { OverviewLoader } from './overview_loader';
 
 export const OverviewGrid = memo(() => {
   const {

@@ -8,7 +8,7 @@ import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
-import { Redirect } from 'react-router-dom';
+import { Redirect, useLocation } from 'react-router-dom';
 import { useEnablement, useGetUrlParams } from '../../../hooks';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import {
@@ -26,6 +26,7 @@ import { useOverviewBreadcrumbs } from './use_breadcrumbs';
 import { OverviewGrid } from './overview/overview_grid';
 import { OverviewStatus } from './overview/overview_status';
 import { SearchField } from '../common/search_field';
+import { NoMonitorsFound } from '../common/no_monitors_found';
 
 export const OverviewPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview' });
@@ -35,7 +36,8 @@ export const OverviewPage: React.FC = () => {
   const dispatch = useDispatch();
 
   const { refreshApp } = useSyntheticsRefreshContext();
-  const { query = '' } = useGetUrlParams();
+  const { query } = useGetUrlParams();
+  const { search } = useLocation();
 
   const pageState = useSelector(selectOverviewPageState);
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
@@ -73,11 +75,23 @@ export const OverviewPage: React.FC = () => {
 
   const { syntheticsMonitors, loading: monitorsLoading, loaded: monitorsLoaded } = useMonitorList();
 
-  if (!enablementLoading && isEnabled && !monitorsLoading && syntheticsMonitors.length === 0) {
+  if (
+    !search &&
+    enablementLoading &&
+    isEnabled &&
+    !monitorsLoading &&
+    syntheticsMonitors.length === 0
+  ) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;
   }
 
-  if (!enablementLoading && !isEnabled && monitorsLoaded && syntheticsMonitors.length === 0) {
+  if (
+    !search &&
+    !enablementLoading &&
+    !isEnabled &&
+    monitorsLoaded &&
+    syntheticsMonitors.length === 0
+  ) {
     return <Redirect to={MONITORS_ROUTE} />;
   }
 
@@ -85,13 +99,18 @@ export const OverviewPage: React.FC = () => {
     <>
       <SearchField />
       <EuiSpacer />
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem grow={false}>
-          <OverviewStatus />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer />
-      <OverviewGrid />
+      {Boolean(!monitorsLoaded || syntheticsMonitors?.length > 0) && (
+        <>
+          <EuiFlexGroup gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <OverviewStatus />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <OverviewGrid />
+        </>
+      )}
+      {monitorsLoaded && syntheticsMonitors?.length === 0 && <NoMonitorsFound />}
     </>
   );
 };
