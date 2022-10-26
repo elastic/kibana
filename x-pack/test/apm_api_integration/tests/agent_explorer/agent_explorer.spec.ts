@@ -41,32 +41,43 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when(
-    'Agent explorer when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
-      it('handles empty state', async () => {
-        const { status, body } = await callApi();
+  registry.when('Agent explorer when data is not loaded', { config: 'basic', archives: [] }, () => {
+    it('handles empty state', async () => {
+      const { status, body } = await callApi();
 
-        expect(status).to.be(200);
-        expect(body.items).to.be.empty();
-      });
-    }
-  );
+      expect(status).to.be(200);
+      expect(body.items).to.be.empty();
+    });
+  });
 
   registry.when('Agent explorer', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
       before(async () => {
         const serviceGo = apm
-          .service({ name: goServiceName, environment: 'production', agentName: 'go', agentVersion: '5.1.2' })
+          .service({
+            name: goServiceName,
+            environment: 'production',
+            agentName: 'go',
+            agentVersion: '5.1.2',
+          })
           .instance('instance-go');
 
         const serviceNodeStaging = apm
-          .service({ name: nodeServiceName, environment: 'staging', agentName: 'nodejs', agentVersion: '1.0.0' })
+          .service({
+            name: nodeServiceName,
+            environment: 'staging',
+            agentName: 'nodejs',
+            agentVersion: '1.0.0',
+          })
           .instance('instance-node-staging');
 
         const serviceNodeDev = apm
-          .service({ name: nodeServiceName, environment: 'dev', agentName: 'nodejs', agentVersion: '1.0.3' })
+          .service({
+            name: nodeServiceName,
+            environment: 'dev',
+            agentName: 'nodejs',
+            agentVersion: '1.0.3',
+          })
           .instance('instance-node-dev');
 
         await synthtraceEsClient.index([
@@ -131,7 +142,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const matchingFilterTests = [
         ['environment', 'dev', nodeServiceName],
         ['serviceName', nodeServiceName, nodeServiceName],
-        ['kuery', `service.name : ${goServiceName}`, goServiceName]
+        ['kuery', `service.name : ${goServiceName}`, goServiceName],
       ];
 
       matchingFilterTests.forEach(([filterName, filterValue, expectedService]) => {

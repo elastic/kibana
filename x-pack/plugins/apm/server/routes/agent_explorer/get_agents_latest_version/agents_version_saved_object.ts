@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_ID, APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_TYPE } from '@kbn/apm-plugin/common/apm_saved_object_constants';
-import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
-import { ISavedObjectsRepository, SavedObjectsFindResponse } from '@kbn/core-saved-objects-api-server';
+import {
+  ISavedObjectsRepository,
+  SavedObjectsFindResponse,
+} from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
+import {
+  APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_ID,
+  APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_TYPE,
+} from '../../../../common/apm_saved_object_constants';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 
 const ONE_HOUR_IN_MS = 3_600_000;
 
@@ -32,12 +38,12 @@ export async function saveAgentsVersion({
   agentsVersion,
 }: {
   savedObjectsClient: ISavedObjectsRepository;
-  agentsVersion: Record<AgentName, string> | {}
+  agentsVersion: Record<AgentName, string> | {};
 }) {
   return await savedObjectsClient.create(
     APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_TYPE,
     {
-      ...agentsVersion
+      ...agentsVersion,
     },
     { id: APM_AGENTS_LATEST_VERSION_SAVED_OBJECT_ID, overwrite: true }
   );
@@ -54,14 +60,18 @@ export async function getSavedAgentsVersion({
   savedObjectsClient: ISavedObjectsRepository;
   logger: Logger;
 }) {
-  const savedObjectAgentsVersion = await getSavedObjectAgentsVersion(savedObjectsClient);
+  const savedObjectAgentsVersion = await getSavedObjectAgentsVersion(
+    savedObjectsClient
+  );
   if (savedObjectAgentsVersion.saved_objects.length === 0) {
-    await saveAgentsVersion({savedObjectsClient, agentsVersion: {}});
+    await saveAgentsVersion({ savedObjectsClient, agentsVersion: {} });
     return {};
   }
 
   try {
-    const savedObjectDate = new Date(savedObjectAgentsVersion.saved_objects[0].updated_at as string).getTime();
+    const savedObjectDate = new Date(
+      savedObjectAgentsVersion.saved_objects[0].updated_at as string
+    ).getTime();
     if (savedObjectDate < Date.now() - ONE_HOUR_IN_MS) {
       return {};
     }

@@ -1,8 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import * as t from 'io-ts';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { setupRequest } from '../../lib/helpers/setup_request';
-import { createApmServerRoute } from "../apm_routes/create_apm_server_route";
-import { environmentRt, kueryRt, probabilityRt, rangeRt } from '../default_api_types';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import {
+  environmentRt,
+  kueryRt,
+  probabilityRt,
+  rangeRt,
+} from '../default_api_types';
 import { getAgents } from './get_agents';
 
 const agentExplorerRoute = createApmServerRoute({

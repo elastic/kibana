@@ -6,10 +6,10 @@
  */
 
 import { EuiIcon, EuiLink } from '@elastic/eui';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import React from 'react';
-import { AgentName } from "../../../../typings/es_schemas/ui/fields/agent";
 import { i18n } from '@kbn/i18n';
+import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 
 interface AgentExplorerDocsLinkProps {
   agentName: AgentName;
@@ -18,15 +18,10 @@ interface AgentExplorerDocsLinkProps {
 
 export function AgentExplorerDocsLink({
   agentName,
-  repositoryUrl
+  repositoryUrl,
 }: AgentExplorerDocsLinkProps) {
-
   if (!repositoryUrl) {
-    return (
-      <>
-        {NOT_AVAILABLE_LABEL}
-      </>
-    )
+    return <>{NOT_AVAILABLE_LABEL}</>;
   }
 
   return (
@@ -36,16 +31,16 @@ export function AgentExplorerDocsLink({
       target="_blank"
       external
     >
-      <EuiIcon type='logoGithub' size='m' title={
-        i18n.translate('xpack.apm.agentExplorer.docsLink.logo',
-        { defaultMessage: 'Github logo' }
-      )} 
-      />
-      {' '}
-      {
-        i18n.translate('xpack.apm.agentExplorer.docsLink.message',
-        { defaultMessage: 'github' }
-      )}
+      <EuiIcon
+        type="logoGithub"
+        size="m"
+        title={i18n.translate('xpack.apm.agentExplorer.docsLink.logo', {
+          defaultMessage: 'Github logo',
+        })}
+      />{' '}
+      {i18n.translate('xpack.apm.agentExplorer.docsLink.message', {
+        defaultMessage: 'github',
+      })}
     </EuiLink>
   );
 }

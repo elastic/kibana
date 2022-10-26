@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn, EuiInMemoryTable
-} from '@elastic/eui';
-import { AgentExplorerFieldName } from '@kbn/apm-plugin/common/agent_explorer';
-import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
+import { EuiBasicTableColumn, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React, { useMemo } from 'react';
-import { ValuesType } from "utility-types";
+import { ValuesType } from 'utility-types';
+import { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
+import { AgentExplorerFieldName } from '../../../../../common/agent_explorer';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { APIReturnType } from "../../../../services/rest/create_call_apm_api";
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
@@ -41,9 +39,12 @@ export function getAgentsColumns({
   return [
     {
       field: AgentExplorerFieldName.ServiceName,
-      name: i18n.translate('xpack.apm.agentExplorerTable.serviceNameColumnLabel', {
-        defaultMessage: 'Service Name',
-      }),
+      name: i18n.translate(
+        'xpack.apm.agentExplorerTable.serviceNameColumnLabel',
+        {
+          defaultMessage: 'Service Name',
+        }
+      ),
       sortable: true,
       render: (_, { serviceName, agentName }) => (
         <TruncateWithTooltip
@@ -94,9 +95,10 @@ export function getAgentsColumns({
           items={agentVersion ?? []}
           multipleItemsMessage={i18n.translate(
             'xpack.apm.agentExplorerTable.agentVersionColumnLabel.multipleVersions',
-            { 
+            {
               values: { versionsCount: agentVersion.length },
-              defaultMessage: '{versionsCount, plural, one {1 version} other {# versions}}',
+              defaultMessage:
+                '{versionsCount, plural, one {1 version} other {# versions}}',
             }
           )}
         />
@@ -109,9 +111,7 @@ export function getAgentsColumns({
         { defaultMessage: 'Latest Version' }
       ),
       width: `${unit * 10}px`,
-      render: (_, { agentLastVersion }) => (
-        formatString(agentLastVersion)
-      ),
+      render: (_, { agentLastVersion }) => formatString(agentLastVersion),
     },
     {
       field: AgentExplorerFieldName.AgentRepoUrl,
@@ -132,7 +132,7 @@ export function getAgentsColumns({
           }
         />
       ),
-    }
+    },
   ];
 }
 
@@ -160,11 +160,7 @@ export function AgentList({
     },
   } = useApmParams('/agent-explorer');
 
-  const agentColumns = useMemo(
-    () =>
-      getAgentsColumns({ query }),
-    [ query ]
-  );
+  const agentColumns = useMemo(() => getAgentsColumns({ query }), [query]);
 
   return (
     <EuiInMemoryTable
@@ -176,10 +172,11 @@ export function AgentList({
       pagination={{
         pageSizeOptions: [25, 50, 100],
       }}
-      sorting={{ sort: {
+      sorting={{
+        sort: {
           field: AgentExplorerFieldName.Environments,
-          direction: 'desc'
-        }
+          direction: 'desc',
+        },
       }}
       loading={isLoading}
       data-test-subj="agentExplorerTable"

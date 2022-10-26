@@ -17,7 +17,7 @@ export function ItemsBadge({
   items = [],
   multipleItemsMessage = i18n.translate(
     'xpack.apm.agentExplorer.serviceNameSelect.placeholder',
-    { 
+    {
       values: { itemsCount: items.length },
       defaultMessage: '{itemsCount, plural, one {1 item} other {# items}}',
     }
@@ -44,9 +44,7 @@ export function ItemsBadge({
         </React.Fragment>
       ))}
     >
-      <EuiBadge>
-        { multipleItemsMessage }
-      </EuiBadge>
+      <EuiBadge>{multipleItemsMessage}</EuiBadge>
     </EuiToolTip>
   );
 }
