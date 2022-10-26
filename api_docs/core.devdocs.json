@@ -550,6 +550,10 @@
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
               },
               {
@@ -683,6 +687,14 @@
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/track_clicks.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-server-internal",
@@ -924,6 +936,10 @@
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
               },
               {
@@ -1076,19 +1092,19 @@
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.ts"
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.ts"
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.ts"
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.ts"
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-server-internal",
@@ -4140,12 +4156,70 @@
           },
           {
             "parentPluginId": "core",
+            "id": "def-public.ChromeStart.getGlobalHelpExtensionMenuLinks$",
+            "type": "Function",
+            "tags": [],
+            "label": "getGlobalHelpExtensionMenuLinks$",
+            "description": [
+              "\nGet the list of the registered global help extension menu links"
+            ],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              "ChromeGlobalHelpExtensionMenuLink",
+              "[]>"
+            ],
+            "path": "node_modules/@types/kbn__core-chrome-browser/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.ChromeStart.registerGlobalHelpExtensionMenuLink",
+            "type": "Function",
+            "tags": [],
+            "label": "registerGlobalHelpExtensionMenuLink",
+            "description": [
+              "\nAppend a global help extension menu link"
+            ],
+            "signature": [
+              "(globalHelpExtensionMenuLink: ",
+              "ChromeGlobalHelpExtensionMenuLink",
+              ") => void"
+            ],
+            "path": "node_modules/@types/kbn__core-chrome-browser/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-public.ChromeStart.registerGlobalHelpExtensionMenuLink.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "globalHelpExtensionMenuLink",
+                "description": [],
+                "signature": [
+                  "ChromeGlobalHelpExtensionMenuLink"
+                ],
+                "path": "node_modules/@types/kbn__core-chrome-browser/index.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
             "id": "def-public.ChromeStart.getHelpExtension$",
             "type": "Function",
             "tags": [],
             "label": "getHelpExtension$",
             "description": [
-              "\nGet an observable of the current custom help conttent"
+              "\nGet an observable of the current custom help content"
             ],
             "signature": [
               "() => ",
@@ -11176,19 +11250,19 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
             "plugin": "taskManager",
@@ -19351,6 +19425,10 @@
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
               },
               {
@@ -19484,6 +19562,14 @@
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/track_clicks.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-server-internal",
@@ -19725,6 +19811,10 @@
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.ts"
+              },
+              {
+                "plugin": "@kbn/core-analytics-browser-internal",
                 "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.ts"
               },
               {
@@ -19877,19 +19967,19 @@
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.ts"
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.ts"
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.ts"
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
-                "path": "packages/core/analytics/core-analytics-browser-internal/src/analytics_service.test.ts"
+                "path": "packages/core/analytics/core-analytics-browser-internal/src/track_viewport_size.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-server-internal",
@@ -40916,19 +41006,19 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_types.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_types.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions/legacy_migrations.ts"
+            "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/logic/rule_actions/legacy_migrations.ts"
           },
           {
             "plugin": "taskManager",
