@@ -7,3 +7,4 @@
  */
 
 export { InspectorLoader } from './inspector_loader';
+export type { Props as InspectorFlyoutContentContainerProps } from './inspector_flyout_content_container';

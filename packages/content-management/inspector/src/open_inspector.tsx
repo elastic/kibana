@@ -5,27 +5,31 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
+import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+
 import { useServices } from './services';
 
 import { InspectorLoader } from './components';
-export interface OpenInspectorParams {
-  title: string;
-  description?: string;
-  onSave(args: { title: string; desciption?: string }): Promise<void>;
-}
+import type { InspectorFlyoutContentContainerProps } from './components';
+
+export type OpenInspectorParams = Pick<InspectorFlyoutContentContainerProps, 'item' | 'onSave'>;
 
 export function useOpenInspector() {
   const { openFlyout } = useServices();
+  const flyout = useRef<OverlayRef | null>(null);
 
   return useCallback(
     (args: OpenInspectorParams) => {
-      openFlyout(<InspectorLoader />, {
-        maxWidth: 708,
-        size: 'l',
-        ownFocus: true,
-        hideCloseButton: true,
-      });
+      flyout.current = openFlyout(
+        <InspectorLoader {...args} onCancel={() => flyout.current?.close()} />,
+        {
+          maxWidth: 708,
+          size: 'l',
+          ownFocus: true,
+          hideCloseButton: true,
+        }
+      );
     },
     [openFlyout]
   );

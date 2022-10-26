@@ -9,11 +9,12 @@ import React from 'react';
 import type { FC } from 'react';
 
 import { InspectorFlyoutContent } from './inspector_flyout_content';
+import type { Props as InspectorFlyoutContentProps } from './inspector_flyout_content';
 
-export interface Props {
-  todo?: boolean;
-}
+type CommonProps = Pick<InspectorFlyoutContentProps, 'item' | 'onSave' | 'onCancel'>;
 
-export const InspectorFlyoutContentContainer: FC<Props> = () => {
-  return <InspectorFlyoutContent />;
+export type Props = CommonProps;
+
+export const InspectorFlyoutContentContainer: FC<Props> = (props) => {
+  return <InspectorFlyoutContent {...props} />;
 };
