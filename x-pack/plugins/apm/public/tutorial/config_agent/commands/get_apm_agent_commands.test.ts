@@ -37,7 +37,7 @@ describe('getCommands', () => {
         -Delastic.apm.service_name=my-service-name \\\\
         -Delastic.apm.secret_token= \\\\
         -Delastic.apm.server_url= \\\\
-        -Delastic.apm.environment=production \\\\
+        -Delastic.apm.environment=my-environment \\\\
         -Delastic.apm.application_packages=org.example \\\\
         -jar my-service-name.jar"
       `);
@@ -57,7 +57,7 @@ describe('getCommands', () => {
         -Delastic.apm.service_name=my-service-name \\\\
         -Delastic.apm.secret_token=foobar \\\\
         -Delastic.apm.server_url=localhost:8220 \\\\
-        -Delastic.apm.environment=production \\\\
+        -Delastic.apm.environment=my-environment \\\\
         -Delastic.apm.application_packages=org.example \\\\
         -jar my-service-name.jar"
       `);
