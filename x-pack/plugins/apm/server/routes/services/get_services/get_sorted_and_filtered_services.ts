@@ -15,9 +15,11 @@ import { ServiceGroup } from '../../../../common/service_groups';
 import { Setup } from '../../../lib/helpers/setup_request';
 import { getHealthStatuses } from './get_health_statuses';
 import { lookupServices } from '../../service_groups/lookup_services';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getSortedAndFilteredServices({
   setup,
+  apmEventClient,
   start,
   end,
   environment,
@@ -26,6 +28,7 @@ export async function getSortedAndFilteredServices({
   maxNumberOfServices,
 }: {
   setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   environment: Environment;
@@ -33,8 +36,6 @@ export async function getSortedAndFilteredServices({
   serviceGroup: ServiceGroup | null;
   maxNumberOfServices: number;
 }) {
-  const { apmEventClient } = setup;
-
   async function getServiceNamesFromTermsEnum() {
     if (environment !== ENVIRONMENT_ALL.value) {
       return [];
@@ -72,7 +73,7 @@ export async function getSortedAndFilteredServices({
     }),
     serviceGroup
       ? getServiceNamesFromServiceGroup({
-          setup,
+          apmEventClient,
           start,
           end,
           maxNumberOfServices,
@@ -93,20 +94,20 @@ export async function getSortedAndFilteredServices({
 }
 
 async function getServiceNamesFromServiceGroup({
-  setup,
+  apmEventClient,
   start,
   end,
   maxNumberOfServices,
   serviceGroup: { kuery },
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   start: number;
   end: number;
   maxNumberOfServices: number;
   serviceGroup: ServiceGroup;
 }) {
   const services = await lookupServices({
-    setup,
+    apmEventClient,
     kuery,
     start,
     end,
