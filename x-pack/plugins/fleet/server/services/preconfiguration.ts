@@ -82,8 +82,15 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     pkg.version === PRECONFIGURATION_LATEST_KEYWORD ? pkg.name : pkg
   );
 
-  // auto upgrade to prerelease versions only if the setting is enabled
-  const { prerelease_integrations_enabled: prerelease } = await getSettings(soClient);
+  let prerelease: boolean = false;
+  try {
+    // auto upgrade to prerelease versions only if the setting is enabled
+    ({ prerelease_integrations_enabled: prerelease } = await getSettings(soClient));
+  } catch (err) {
+    appContextService
+      .getLogger()
+      .warn('Error while trying to load prerelease flag from settings, defaulting to false', err);
+  }
 
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await bulkInstallPackages({
