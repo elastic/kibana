@@ -7,11 +7,12 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { DeleteMlInferencePipelineResponse } from '../../../../../../common/types/pipelines';
 import { ErrorCode } from '../../../../../../common/types/error_codes';
+import { DeleteMlInferencePipelineResponse } from '../../../../../../common/types/pipelines';
+
+import { getInferencePipelineNameFromIndexName } from '../../../../../utils/ml_inference_pipeline_utils';
 
 import { detachMlInferencePipeline } from './detach_ml_inference_pipeline';
-import { getInferencePipelineNameFromIndexName } from '../../../../../utils/ml_inference_pipeline_utils';
 
 export const deleteMlInferencePipeline = async (
   indexName: string,
@@ -67,7 +68,9 @@ const isPipelineInUse = async (
   // The given inference pipeline is being used in another index's managed pipeline if:
   // - The index name is different from the one we're deleting from, AND
   // - Its processors contain at least one entry in which the supplied pipeline name is referenced
-  return Object.entries(pipelines)
-    .some(([name, pipeline]) => name !== getInferencePipelineNameFromIndexName(indexName) &&
-      pipeline.processors?.some((processor) => processor.pipeline?.name === pipelineName));
-}
+  return Object.entries(pipelines).some(
+    ([name, pipeline]) =>
+      name !== getInferencePipelineNameFromIndexName(indexName) &&
+      pipeline.processors?.some((processor) => processor.pipeline?.name === pipelineName)
+  );
+};

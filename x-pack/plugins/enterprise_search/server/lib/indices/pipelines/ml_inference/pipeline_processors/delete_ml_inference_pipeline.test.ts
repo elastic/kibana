@@ -72,7 +72,8 @@ describe('deleteMlInferencePipeline lib function', () => {
   });
 
   it('should succeed when parent pipeline is missing', async () => {
-    mockClient.ingest.getPipeline.mockImplementationOnce(() => Promise.resolve({})) // 1st call (get *@ml-inference)
+    mockClient.ingest.getPipeline
+      .mockImplementationOnce(() => Promise.resolve({})) // 1st call (get *@ml-inference)
       .mockImplementation(() => Promise.reject(notFoundError)); // Subsequent calls
     mockClient.ingest.deletePipeline.mockImplementation(() =>
       Promise.resolve({ acknowledged: true })
@@ -117,7 +118,7 @@ describe('deleteMlInferencePipeline lib function', () => {
     });
   });
 
-  it('should fail when pipeline is used in another index\'s pipeline', async () => {
+  it("should fail when pipeline is used in another index's pipeline", async () => {
     const mockGetPipelines = {
       ...mockGetPipeline, // References my-ml-pipeline
       'my-other-index@ml-inference': {
@@ -125,14 +126,15 @@ describe('deleteMlInferencePipeline lib function', () => {
         processors: [
           {
             pipeline: {
-              name: 'my-ml-pipeline' // Also references my-ml-pipeline
-            }
-          }
-        ]
-      }
+              name: 'my-ml-pipeline', // Also references my-ml-pipeline
+            },
+          },
+        ],
+      },
     };
 
-    mockClient.ingest.getPipeline.mockImplementationOnce(() => Promise.resolve(mockGetPipelines)) // 1st call
+    mockClient.ingest.getPipeline
+      .mockImplementationOnce(() => Promise.resolve(mockGetPipelines)) // 1st call
       .mockImplementation(() => Promise.resolve(mockGetPipeline)); // Subsequent calls
     mockClient.ingest.deletePipeline.mockImplementation(() => Promise.reject(notFoundError));
 
