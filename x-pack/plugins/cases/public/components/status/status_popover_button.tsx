@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiBadge } from '@elastic/eui';
 
-import { CaseStatuses } from '@kbn/cases-components';
+import type { CaseStatuses } from '@kbn/cases-components';
 import { statuses } from './config';
 import * as i18n from './translations';
 

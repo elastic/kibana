@@ -209,6 +209,12 @@ export function getTextBasedDatasource({
         initialContext: context,
       };
     },
+
+    syncColumns({ state }) {
+      // TODO implement this for real
+      return state;
+    },
+
     onRefreshIndexPattern() {},
 
     getUsedDataViews: (state) => {
@@ -275,18 +281,24 @@ export function getTextBasedDatasource({
       };
 
       return {
-        ...state,
-        layers: newLayers,
-        fieldList: state.fieldList,
+        removedLayerIds: [layerId],
+        newState: {
+          ...state,
+          layers: newLayers,
+          fieldList: state.fieldList,
+        },
       };
     },
 
     clearLayer(state: TextBasedPrivateState, layerId: string) {
       return {
-        ...state,
-        layers: {
-          ...state.layers,
-          [layerId]: { ...state.layers[layerId], columns: [] },
+        removedLayerIds: [],
+        newState: {
+          ...state,
+          layers: {
+            ...state.layers,
+            [layerId]: { ...state.layers[layerId], columns: [] },
+          },
         },
       };
     },
@@ -581,6 +593,7 @@ export function getTextBasedDatasource({
               label: columnLabelMap[columnId] ?? column?.fieldName,
               isBucketed: Boolean(column?.meta?.type !== 'number'),
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;
@@ -606,6 +619,7 @@ export function getTextBasedDatasource({
             },
           };
         },
+        hasDefaultTimeField: () => false,
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {

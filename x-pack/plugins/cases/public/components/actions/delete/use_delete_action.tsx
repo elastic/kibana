@@ -7,11 +7,11 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiIcon, EuiTextColor, useEuiTheme } from '@elastic/eui';
-import { Case } from '../../../../common';
+import type { Case } from '../../../../common';
 import { useDeleteCases } from '../../../containers/use_delete_cases';
 
 import * as i18n from './translations';
-import { UseActionProps } from '../types';
+import type { UseActionProps } from '../types';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 
 const getDeleteActionTitle = (totalCases: number): string =>

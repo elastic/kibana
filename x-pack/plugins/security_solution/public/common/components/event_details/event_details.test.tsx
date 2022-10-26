@@ -51,7 +51,7 @@ mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCa
 
 jest.mock('../../containers/cti/event_enrichment');
 
-jest.mock('../../../detections/containers/detection_engine/rules/use_rule_with_fallback', () => {
+jest.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => {
   return {
     useRuleWithFallback: jest.fn().mockReturnValue({
       rule: {
@@ -72,7 +72,7 @@ describe('EventDetails', () => {
     onEventViewSelected: jest.fn(),
     onThreatViewSelected: jest.fn(),
     timelineTabType: TimelineTabs.query,
-    timelineId: 'test',
+    scopeId: 'table-test',
     eventView: EventsViewType.summaryView,
     hostRisk: { fields: [], loading: true },
     indexName: 'test',

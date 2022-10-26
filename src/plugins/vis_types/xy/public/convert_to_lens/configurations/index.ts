@@ -24,10 +24,11 @@ import {
   Scale,
   ScaleType,
   SeriesParam,
+  ThresholdLineStyle,
   ValueAxis,
   VisParams,
 } from '../../types';
-import { getCurveType, getLineStyle, getMode, getYAxisPosition } from '../../utils/common';
+import { getCurveType, getMode, getYAxisPosition } from '../../utils/common';
 
 function getYScaleType(scale?: Scale): XYConfiguration['yLeftScale'] | undefined {
   const type = scale?.type;
@@ -181,7 +182,11 @@ function getReferenceLineLayers(
           axisMode: getYAxisPosition(yAxis?.position ?? 'left'),
           color: thresholdLineConfig.color,
           lineWidth: thresholdLineConfig.width !== null ? thresholdLineConfig.width : undefined,
-          lineStyle: getLineStyle(thresholdLineConfig.style),
+          lineStyle:
+            thresholdLineConfig.style === ThresholdLineStyle.DotDashed ||
+            thresholdLineConfig.style === ThresholdLineStyle.Full
+              ? 'solid'
+              : thresholdLineConfig.style,
         };
       }),
     };

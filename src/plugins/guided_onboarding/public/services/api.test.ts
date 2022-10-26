@@ -8,11 +8,11 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import type { GuideState } from '@kbn/guided-onboarding';
 import { firstValueFrom, Subscription } from 'rxjs';
 
 import { API_BASE_PATH } from '../../common/constants';
 import { guidesConfig } from '../constants/guides_config';
-import type { GuideState } from '../../common/types';
 import { ApiService } from './api';
 import {
   noGuideActiveState,
@@ -57,7 +57,7 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it('broadcasts the updated state', async () => {
-      await apiService.activateGuide(searchGuide);
+      await apiService.activateGuide(searchGuide, searchAddDataActiveState);
 
       const state = await firstValueFrom(apiService.fetchActiveGuideState$());
       expect(state).toEqual(searchAddDataActiveState);
@@ -108,7 +108,7 @@ describe('GuidedOnboarding ApiService', () => {
   });
 
   describe('isGuideStepActive$', () => {
-    it('returns true if the step has been started', async (done) => {
+    it('returns true if the step has been started', (done) => {
       const updatedState: GuideState = {
         ...searchAddDataActiveState,
         steps: [
@@ -120,8 +120,7 @@ describe('GuidedOnboarding ApiService', () => {
           searchAddDataActiveState.steps[2],
         ],
       };
-      await apiService.updateGuideState(updatedState, false);
-
+      apiService.updateGuideState(updatedState, false);
       subscription = apiService
         .isGuideStepActive$(searchGuide, firstStep)
         .subscribe((isStepActive) => {
@@ -131,8 +130,8 @@ describe('GuidedOnboarding ApiService', () => {
         });
     });
 
-    it('returns false if the step is not been started', async (done) => {
-      await apiService.updateGuideState(searchAddDataActiveState, false);
+    it('returns false if the step is not been started', (done) => {
+      apiService.updateGuideState(searchAddDataActiveState, false);
       subscription = apiService
         .isGuideStepActive$(searchGuide, firstStep)
         .subscribe((isStepActive) => {
@@ -151,7 +150,7 @@ describe('GuidedOnboarding ApiService', () => {
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
         body: JSON.stringify({
           isActive: true,
-          status: 'in_progress',
+          status: 'not_started',
           steps: [
             {
               id: 'add_data',
@@ -371,7 +370,7 @@ describe('GuidedOnboarding ApiService', () => {
   });
 
   describe('isGuidedOnboardingActiveForIntegration$', () => {
-    it('returns true if the integration is part of the active step', async (done) => {
+    it('returns true if the integration is part of the active step', (done) => {
       httpClient.get.mockResolvedValue({
         state: [securityAddDataInProgressState],
       });
@@ -385,7 +384,7 @@ describe('GuidedOnboarding ApiService', () => {
         });
     });
 
-    it('returns false if another integration is part of the active step', async (done) => {
+    it('returns false if another integration is part of the active step', (done) => {
       httpClient.get.mockResolvedValue({
         state: [securityAddDataInProgressState],
       });
@@ -399,7 +398,7 @@ describe('GuidedOnboarding ApiService', () => {
         });
     });
 
-    it('returns false if no guide is active', async (done) => {
+    it('returns false if no guide is active', (done) => {
       httpClient.get.mockResolvedValue({
         state: [noGuideActiveState],
       });
