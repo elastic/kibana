@@ -30,10 +30,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await timePicker.setDefaultAbsoluteRange();
     });
 
+    it('should not show the "Edit Visualization in Lens" menu item if no X-axis was specified', async () => {
+      expect(await visualize.hasNavigateToLensButton()).to.eql(false);
+    });
+
     it('should show the "Edit Visualization in Lens" menu item', async () => {
       await visEditor.clickBucket('X-axis');
       await visEditor.selectAggregation('Terms');
       await visEditor.selectField('machine.os.raw');
+      await visEditor.clickGo();
 
       expect(await visualize.hasNavigateToLensButton()).to.eql(true);
     });
