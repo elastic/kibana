@@ -48,6 +48,7 @@ describe('rule_quick_edit_buttons', () => {
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
         setRulesToDelete={() => {}}
+        setRulesToDeleteFilter={() => {}}
         setRulesToUpdateAPIKey={() => {}}
         setRulesToSnooze={() => {}}
         setRulesToUnsnooze={() => {}}
@@ -85,6 +86,7 @@ describe('rule_quick_edit_buttons', () => {
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
         setRulesToDelete={() => {}}
+        setRulesToDeleteFilter={() => {}}
         setRulesToUpdateAPIKey={() => {}}
         setRulesToSnooze={() => {}}
         setRulesToUnsnooze={() => {}}
@@ -116,6 +118,7 @@ describe('rule_quick_edit_buttons', () => {
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
         setRulesToDelete={() => {}}
+        setRulesToDeleteFilter={() => {}}
         setRulesToUpdateAPIKey={() => {}}
         setRulesToSnooze={() => {}}
         setRulesToUnsnooze={() => {}}
@@ -130,7 +133,7 @@ describe('rule_quick_edit_buttons', () => {
     );
 
     expect(wrapper.find('[data-test-subj="disableAll"]').first().prop('isDisabled')).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="deleteAll"]').first().prop('isDisabled')).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="deleteAll"]').first().prop('isDisabled')).toBeFalsy();
     expect(wrapper.find('[data-test-subj="updateAPIKeys"]').first().prop('isDisabled')).toBeFalsy();
     expect(wrapper.find('[data-test-subj="bulkSnooze"]').first().prop('isDisabled')).toBeFalsy();
     expect(wrapper.find('[data-test-subj="bulkUnsnooze"]').first().prop('isDisabled')).toBeFalsy();
@@ -157,6 +160,7 @@ describe('rule_quick_edit_buttons', () => {
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
         setRulesToDelete={() => {}}
+        setRulesToDeleteFilter={() => {}}
         setRulesToSnooze={setRulesToSnooze}
         setRulesToUnsnooze={setRulesToUnsnooze}
         setRulesToSchedule={setRulesToSchedule}
@@ -207,6 +211,7 @@ describe('rule_quick_edit_buttons', () => {
         onPerformingAction={() => {}}
         onActionPerformed={() => {}}
         setRulesToDelete={() => {}}
+        setRulesToDeleteFilter={() => {}}
         setRulesToSnooze={setRulesToSnooze}
         setRulesToUnsnooze={setRulesToUnsnooze}
         setRulesToSchedule={setRulesToSchedule}
