@@ -8,7 +8,7 @@
 
 import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import type { BooleanRelation } from '@kbn/es-query';
 import { EuiTextColor, useEuiPaddingCSS, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -62,7 +62,7 @@ export function FilterExpressionBadge({
         </span>
       ) : null}
       <FilterBadgeGroup
-        filters={Array.isArray(filter) ? filter : filter.meta?.params}
+        filters={filter.meta?.params}
         dataViews={dataViews}
         booleanRelation={conditionalOperationType}
       />
