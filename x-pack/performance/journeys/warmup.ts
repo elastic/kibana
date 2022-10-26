@@ -10,13 +10,25 @@ import { subj } from '@kbn/test-subj-selector';
 import { ToastsService } from '../services/toasts';
 import { waitForVisualizations } from '../utils';
 
+const sampleData = ['ecommerce', 'flights', 'logs'];
+
 export const journey = new Journey({
   skipAutoLogin: true,
   extendContext: ({ page, log }) => ({
     toasts: new ToastsService(log, page),
   }),
 })
-  .step('Login', async ({ page, kbnUrl, inputDelays }) => {
+  .step('Load sample data via API', async ({ kibanaServer, log }) => {
+    for (const name of sampleData) {
+      const { status } = await kibanaServer.request({
+        path: `/api/sample_data/${name}`,
+        method: 'POST',
+      });
+      log.debug(`Data set '${name}' is added with code '${status}'`);
+    }
+  })
+
+  .step('Login to Kibana', async ({ page, kbnUrl, inputDelays }) => {
     await page.goto(kbnUrl.get());
 
     await page.type(subj('loginUsername'), 'elastic', { delay: inputDelays.TYPING });
@@ -26,67 +38,53 @@ export const journey = new Journey({
     await page.waitForSelector('#headerUserMenu');
   })
 
-  .step('Go to Sample Data Page', async ({ page, kbnUrl }) => {
+  .step('Go to Sample Data', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`/app/home#/tutorial_directory/sampleData`));
-
     await page.waitForSelector(subj('showSampleDataButton'));
   })
 
-  .step('Open Sample Data pane', async ({ page }) => {
-    // open the "other sample data sets" section
-    await page.click(subj('showSampleDataButton'));
-    // wait for the logs card to be visible
-    await page.waitForSelector(subj('sampleDataSetCardecommerce'));
-  })
-
-  .step('Install Ecommerce Sample Data', async ({ page, toasts }) => {
-    // click the "add data" button
-    await page.click(subj('addSampleDataSetecommerce'));
-    // wait for the toast acknowledging installation
-    await toasts.waitForAndClear('installed');
-  })
-
-  .step('Install Flights Sample Data', async ({ page, toasts }) => {
-    // click the "add data" button
-    await page.click(subj('addSampleDataSetflights'));
-    // wait for the toast acknowledging installation
-    await toasts.waitForAndClear('installed');
-  })
-
-  .step('Install Logs Sample Data', async ({ page, toasts }) => {
-    // click the "add data" button
-    await page.click(subj('addSampleDataSetlogs'));
-    // wait for the toast acknowledging installation
-    await toasts.waitForAndClear('installed');
-  })
-
-  .step('Go to dashboards', async ({ page, kbnUrl }) => {
+  .step('Go to Dasboards', async ({ page, kbnUrl, log }) => {
+    log.debug('Loading eCommerce dashboard');
     await page.goto(kbnUrl.get(`/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f`));
     await waitForVisualizations(page, 12);
+    log.debug('Loading Flights dashboard');
     await page.goto(kbnUrl.get(`/app/dashboards#/view/7adfa750-4c81-11e8-b3d7-01146121b73d`));
     await waitForVisualizations(page, 14);
+    log.debug('Loading Logs dashboard');
     await page.goto(kbnUrl.get(`/app/dashboards#/view/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b`));
     await waitForVisualizations(page, 11);
   })
 
-  .step('Go to Sample Data Page again', async ({ page, kbnUrl }) => {
-    await page.goto(kbnUrl.get(`/app/home#/tutorial_directory/sampleData`));
-    await page.waitForSelector(subj('showSampleDataButton'));
-    // open the "other sample data sets" section
-    await page.click(subj('showSampleDataButton'));
+  .step('Go to Discover', async ({ page, kbnUrl, log }) => {
+    log.debug('Loading eCommerce Discover view last 7d');
+    await page.goto(
+      kbnUrl.get(
+        '/app/discover#/view/3ba638e0-b894-11e8-a6d9-e546fe2bba5f?_g=(time:(from:now-7d,to:now))'
+      )
+    );
+    await page.waitForSelector(subj('discoverDocTable'));
+    log.debug('Loading Flights Discover view last 7d');
+    await page.goto(
+      kbnUrl.get(
+        '/app/discover#/view/571aaf70-4c88-11e8-b3d7-01146121b73d?_g=(time:(from:now-7d,to:now))'
+      )
+    );
+    await page.waitForSelector(subj('discoverDocTable'));
+    log.debug('Loading Logs Discover view last 7d');
+    await page.goto(
+      kbnUrl.get(
+        '/app/discover#/view/2f360f30-ea74-11eb-b4c6-3d2afc1cb389?_g=(time:(from:now-7d,to:now))'
+      )
+    );
+    await page.waitForSelector(subj('discoverDocTable'));
   })
 
-  .step('Remove Sample Data', async ({ page, toasts }) => {
-    // click the "remove" button
-    await page.click(subj('removeSampleDataSetecommerce'));
-    // wait for the toast acknowledging uninstallation
-    await toasts.waitForAndClear('uninstalled');
-    // click the "remove" button
-    await page.click(subj('removeSampleDataSetflights'));
-    // wait for the toast acknowledging uninstallation
-    await toasts.waitForAndClear('uninstalled');
-    // click the "remove" button
-    await page.click(subj('removeSampleDataSetlogs'));
-    // wait for the toast acknowledging uninstallation
-    await toasts.waitForAndClear('uninstalled');
+  .step('Remove Sample Data via API', async ({ kibanaServer, log }) => {
+    for (const name of sampleData) {
+      const { status } = await kibanaServer.request({
+        path: `/api/sample_data/${name}`,
+        method: 'DELETE',
+      });
+      log.debug(`Data set '${name}' is deleted with code '${status}'`);
+    }
   });
