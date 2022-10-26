@@ -92,12 +92,15 @@ export function getJobsItemsFromEmbeddable(embeddable: Embeddable) {
     );
   }
 
+  const dashboard = embeddable.parent?.type === 'dashboard' ? embeddable.parent : undefined;
+
   return {
     vis,
     from,
     to,
     query,
     filters,
+    dashboard,
   };
 }
 

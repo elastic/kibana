@@ -49,7 +49,7 @@ export function ReactExpressionRenderer({
   });
 
   const expressionStyles: React.CSSProperties = {};
-
+  console.log('------', expressionRendererOptions.test);
   if (padding) {
     expressionStyles.padding = euiTheme.size[padding];
   }
@@ -57,7 +57,9 @@ export function ReactExpressionRenderer({
   return (
     <div {...dataAttrs} className={classes}>
       {isEmpty && <EuiLoadingChart mono size="l" />}
-      {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+      {isLoading && (
+        <EuiProgress size="xs" color="accent" position="absolute" style={{ zIndex: 1 }} />
+      )}
       {!isLoading && error && renderError?.(error.message, error)}
       <div className="expExpressionRenderer__expression" style={expressionStyles} ref={nodeRef} />
     </div>

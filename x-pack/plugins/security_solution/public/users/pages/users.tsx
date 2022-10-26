@@ -70,7 +70,7 @@ const UsersComponent = () => {
   );
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
-  const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const getUserRiskScoreFilterQuerySelector = useMemo(
     () => usersSelectors.userRiskScoreSeverityFilterSelector(),
@@ -87,27 +87,27 @@ const UsersComponent = () => {
   const { tabName } = useParams<{ tabName: string }>();
   const tabsFilters: Filter[] = React.useMemo(() => {
     if (tabName === UsersTableType.events) {
-      return filters.length > 0 ? [...filters, ...userNameExistsFilter] : userNameExistsFilter;
+      return [...globalFilters, ...userNameExistsFilter];
     }
 
     if (tabName === UsersTableType.risk) {
       const severityFilter = generateSeverityFilter(severitySelection, RiskScoreEntity.user);
 
-      return [...severityFilter, ...filters];
+      return [...severityFilter, ...globalFilters];
     }
-    return filters;
-  }, [severitySelection, tabName, filters]);
+    return globalFilters;
+  }, [severitySelection, tabName, globalFilters]);
 
   const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
-  const [filterQuery, kqlError] = useMemo(
+  const [globalFiltersQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
-        filters,
+        filters: globalFilters,
       }),
-    [filters, indexPattern, uiSettings, query]
+    [globalFilters, indexPattern, uiSettings, query]
   );
   const [tabsFilterQuery] = useMemo(
     () =>
@@ -120,7 +120,14 @@ const UsersComponent = () => {
     [indexPattern, query, tabsFilters, uiSettings]
   );
 
-  useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
+  useInvalidFilterQuery({
+    id: ID,
+    filterQuery: globalFiltersQuery,
+    kqlError,
+    query,
+    startDate: from,
+    endDate: to,
+  });
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     containerElement.current
@@ -181,14 +188,13 @@ const UsersComponent = () => {
 
             <UsersTabs
               deleteQuery={deleteQuery}
-              filterQuery={tabsFilterQuery || ''}
+              filterQuery={tabsFilterQuery}
               from={from}
               indexNames={selectedPatterns}
               isInitializing={isInitializing}
               setQuery={setQuery}
               to={to}
               type={usersModel.UsersType.page}
-              pageFilters={tabsFilters}
             />
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>

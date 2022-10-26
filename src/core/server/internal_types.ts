@@ -59,7 +59,10 @@ import type {
   InternalUiSettingsServiceStart,
 } from '@kbn/core-ui-settings-server-internal';
 import type { InternalRenderingServiceSetup } from '@kbn/core-rendering-server-internal';
-import { InternalHttpResourcesPreboot, InternalHttpResourcesSetup } from './http_resources';
+import type {
+  InternalHttpResourcesPreboot,
+  InternalHttpResourcesSetup,
+} from '@kbn/core-http-resources-server-internal';
 
 /** @internal */
 export interface InternalCorePreboot {

@@ -9,29 +9,30 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { NOT_AVAILABLE_LABEL } from '../../../common';
-import { AsyncStatus } from '../../hooks/use_async';
 import { getImpactRows } from './get_impact_rows';
+import { getInformationRows } from './get_information_rows';
 
 interface Props {
   frame?: {
+    fileID: string;
+    frameType: number;
     exeFileName: string;
+    addressOrLine: number;
     functionName: string;
     sourceFileName: string;
+    sourceLine: number;
     countInclusive: number;
     countExclusive: number;
   };
   totalSamples: number;
   totalSeconds: number;
   onClose: () => void;
-  status: AsyncStatus;
 }
 
 function KeyValueList({ rows }: { rows: Array<{ label: string; value: React.ReactNode }> }) {
@@ -61,11 +62,9 @@ function KeyValueList({ rows }: { rows: Array<{ label: string; value: React.Reac
 function FlamegraphFrameInformationPanel({
   children,
   onClose,
-  status,
 }: {
   children: React.ReactNode;
   onClose: () => void;
-  status: AsyncStatus;
 }) {
   return (
     <EuiPanel style={{ width: 400, maxHeight: '100%', overflow: 'auto' }} hasBorder>
@@ -83,11 +82,6 @@ function FlamegraphFrameInformationPanel({
                     </h2>
                   </EuiTitle>
                 </EuiFlexItem>
-                {status === AsyncStatus.Loading ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiLoadingSpinner />
-                  </EuiFlexItem>
-                ) : undefined}
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -101,16 +95,10 @@ function FlamegraphFrameInformationPanel({
   );
 }
 
-export function FlamegraphInformationWindow({
-  onClose,
-  frame,
-  totalSamples,
-  totalSeconds,
-  status,
-}: Props) {
+export function FlamegraphInformationWindow({ onClose, frame, totalSamples, totalSeconds }: Props) {
   if (!frame) {
     return (
-      <FlamegraphFrameInformationPanel status={status} onClose={onClose}>
+      <FlamegraphFrameInformationPanel onClose={onClose}>
         <EuiText>
           {i18n.translate('xpack.profiling.flamegraphInformationWindow.selectFrame', {
             defaultMessage: 'Click on a frame to display more information',
@@ -120,7 +108,27 @@ export function FlamegraphInformationWindow({
     );
   }
 
-  const { exeFileName, functionName, sourceFileName, countInclusive, countExclusive } = frame;
+  const {
+    fileID,
+    frameType,
+    exeFileName,
+    addressOrLine,
+    functionName,
+    sourceFileName,
+    sourceLine,
+    countInclusive,
+    countExclusive,
+  } = frame;
+
+  const informationRows = getInformationRows({
+    fileID,
+    frameType,
+    exeFileName,
+    addressOrLine,
+    functionName,
+    sourceFileName,
+    sourceLine,
+  });
 
   const impactRows = getImpactRows({
     countInclusive,
@@ -130,33 +138,10 @@ export function FlamegraphInformationWindow({
   });
 
   return (
-    <FlamegraphFrameInformationPanel status={status} onClose={onClose}>
+    <FlamegraphFrameInformationPanel onClose={onClose}>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <KeyValueList
-            rows={[
-              {
-                label: i18n.translate(
-                  'xpack.profiling.flameGraphInformationWindow.executableLabel',
-                  { defaultMessage: 'Executable' }
-                ),
-                value: exeFileName || NOT_AVAILABLE_LABEL,
-              },
-              {
-                label: i18n.translate('xpack.profiling.flameGraphInformationWindow.functionLabel', {
-                  defaultMessage: 'Function',
-                }),
-                value: functionName || NOT_AVAILABLE_LABEL,
-              },
-              {
-                label: i18n.translate(
-                  'xpack.profiling.flameGraphInformationWindow.sourceFileLabel',
-                  { defaultMessage: 'Source file' }
-                ),
-                value: sourceFileName || NOT_AVAILABLE_LABEL,
-              },
-            ]}
-          />
+          <KeyValueList rows={informationRows} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column">

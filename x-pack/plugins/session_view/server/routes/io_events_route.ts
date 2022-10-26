@@ -79,7 +79,7 @@ export const searchProcessWithIOEvents = async (
     ? [
         {
           range: {
-            '@timestamp': {
+            [TIMESTAMP]: {
               gte: range[0],
               lte: range[1],
             },
@@ -105,13 +105,7 @@ export const searchProcessWithIOEvents = async (
         custom_agg: {
           terms: {
             field: PROCESS_ENTITY_ID_PROPERTY,
-          },
-          aggs: {
-            bucket_sort: {
-              bucket_sort: {
-                size: PROCESS_EVENTS_PER_PAGE,
-              },
-            },
+            size: PROCESS_EVENTS_PER_PAGE,
           },
         },
       },
@@ -126,6 +120,7 @@ export const searchProcessWithIOEvents = async (
       event: {
         kind: EventKind.event,
         action: EventAction.text_output,
+        id: bucket.key,
       },
       process: {
         entity_id: bucket.key,

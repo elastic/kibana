@@ -12,17 +12,24 @@ import { i18n } from '@kbn/i18n';
 import { DataViewSpec, useKibana } from '../shared_imports';
 import { IndexPatternEditorFlyoutContent } from './data_view_editor_flyout_content';
 import { DataViewEditorContext, DataViewEditorProps } from '../types';
+import { DataViewEditorService } from '../data_view_editor_service';
 
-const IndexPatternFlyoutContentContainer = ({
+// @ts-ignore
+export const DataViewEditorServiceContext = React.createContext<{
+  dataViewEditorService: DataViewEditorService;
+}>();
+
+const DataViewFlyoutContentContainer = ({
   onSave,
   onCancel = () => {},
   defaultTypeIsRollup,
   requireTimestampField = false,
   editData,
   allowAdHocDataView,
+  showManagementLink,
 }: DataViewEditorProps) => {
   const {
-    services: { dataViews, notifications },
+    services: { dataViews, notifications, http },
   } = useKibana<DataViewEditorContext>();
 
   const onSaveClick = async (dataViewSpec: DataViewSpec, persist: boolean = true) => {
@@ -30,7 +37,7 @@ const IndexPatternFlyoutContentContainer = ({
       let saveResponse;
       if (editData) {
         const { name = '', timeFieldName, title = '' } = dataViewSpec;
-        editData.title = title;
+        editData.setIndexPattern(title);
         editData.name = name;
         editData.timeFieldName = timeFieldName;
         saveResponse = editData.isPersisted()
@@ -62,16 +69,21 @@ const IndexPatternFlyoutContentContainer = ({
   };
 
   return (
-    <IndexPatternEditorFlyoutContent
-      onSave={onSaveClick}
-      onCancel={onCancel}
-      defaultTypeIsRollup={defaultTypeIsRollup}
-      requireTimestampField={requireTimestampField}
-      editData={editData}
-      allowAdHoc={allowAdHocDataView || false}
-    />
+    <DataViewEditorServiceContext.Provider
+      value={{ dataViewEditorService: new DataViewEditorService(http, dataViews) }}
+    >
+      <IndexPatternEditorFlyoutContent
+        onSave={onSaveClick}
+        onCancel={onCancel}
+        defaultTypeIsRollup={defaultTypeIsRollup}
+        requireTimestampField={requireTimestampField}
+        editData={editData}
+        showManagementLink={showManagementLink}
+        allowAdHoc={allowAdHocDataView || false}
+      />
+    </DataViewEditorServiceContext.Provider>
   );
 };
 
 /* eslint-disable import/no-default-export */
-export default IndexPatternFlyoutContentContainer;
+export default DataViewFlyoutContentContainer;

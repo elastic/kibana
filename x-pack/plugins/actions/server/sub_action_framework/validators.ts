@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { ActionTypeConfig, ActionTypeSecrets } from '../types';
-import { SubActionConnectorType } from './types';
+import { ActionTypeConfig, ActionTypeSecrets, ValidatorServices } from '../types';
+import { SubActionConnectorType, ValidateFn, Validators, ValidatorType } from './types';
 
 export const buildValidators = <
   Config extends ActionTypeConfig,
@@ -20,12 +20,16 @@ export const buildValidators = <
   configurationUtilities: ActionsConfigurationUtilities;
   connector: SubActionConnectorType<Config, Secrets>;
 }) => {
+  const { config, secrets } = buildCustomValidators(connector.validators);
+
   return {
     config: {
       schema: connector.schema.config,
+      customValidator: config,
     },
     secrets: {
       schema: connector.schema.secrets,
+      customValidator: secrets,
     },
     params: {
       schema: schema.object({
@@ -40,5 +44,37 @@ export const buildValidators = <
         subActionParams: schema.object({}, { unknowns: 'allow' }),
       }),
     },
+  };
+};
+
+const buildCustomValidators = <Config, Secrets>(validators?: Validators<Config, Secrets>) => {
+  const partitionedValidators: {
+    config: Array<ValidateFn<Config>>;
+    secrets: Array<ValidateFn<Secrets>>;
+  } = { config: [], secrets: [] };
+
+  for (const validatorInfo of validators ?? []) {
+    if (validatorInfo.type === ValidatorType.CONFIG) {
+      partitionedValidators.config.push(validatorInfo.validator);
+    } else {
+      partitionedValidators.secrets.push(validatorInfo.validator);
+    }
+  }
+
+  return {
+    config: createCustomValidatorFunction(partitionedValidators.config),
+    secrets: createCustomValidatorFunction(partitionedValidators.secrets),
+  };
+};
+
+const createCustomValidatorFunction = <T>(validators: Array<ValidateFn<T>>) => {
+  if (validators.length <= 0) {
+    return;
+  }
+
+  return (value: T, validatorServices: ValidatorServices) => {
+    for (const validate of validators) {
+      validate(value, validatorServices);
+    }
   };
 };

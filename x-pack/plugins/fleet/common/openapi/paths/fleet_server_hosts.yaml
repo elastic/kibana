@@ -1,0 +1,57 @@
+get:
+  summary: Fleet Server Hosts - List
+  description: Return a list of Fleet server hosts
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  $ref: ../components/schemas/fleet_server_host.yaml
+              total:
+                type: integer
+              page:
+                type: integer
+              perPage:
+                type: integer
+  operationId: get-fleet-server-hosts
+post:
+  summary: Fleet Server Hosts - Create
+  description: 'Create a new Fleet Server Host'
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              item:
+                $ref: ../components/schemas/fleet_server_host.yaml
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            is_default:
+              type: boolean
+            host_urls:
+              type: array
+              items:
+                type: string
+          required:
+            - name
+            - host_urls
+  operationId: post-fleet-server-hosts

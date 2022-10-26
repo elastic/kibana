@@ -6,11 +6,13 @@
  */
 
 import * as t from 'io-ts';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import { FetchAndTransformMetrics } from './fetch_and_transform_metrics';
 import { getMetricsChartDataByAgent } from './get_metrics_chart_data_by_agent';
+import { getServiceNodes } from './get_service_nodes';
 
 const metricsChartsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
@@ -38,7 +40,10 @@ const metricsChartsRoute = createApmServerRoute({
     charts: FetchAndTransformMetrics[];
   }> => {
     const { params } = resources;
-    const setup = await setupRequest(resources);
+    const [setup, apmEventClient] = await Promise.all([
+      setupRequest(resources),
+      getApmEventClient(resources),
+    ]);
     const { serviceName } = params.path;
     const {
       agentName,
@@ -53,7 +58,8 @@ const metricsChartsRoute = createApmServerRoute({
     const charts = await getMetricsChartDataByAgent({
       environment,
       kuery,
-      setup,
+      config: setup.config,
+      apmEventClient,
       serviceName,
       agentName,
       serviceNodeName,
@@ -66,4 +72,45 @@ const metricsChartsRoute = createApmServerRoute({
   },
 });
 
-export const metricsRouteRepository = metricsChartsRoute;
+const serviceMetricsJvm = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/nodes',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([kueryRt, rangeRt, environmentRt]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{
+    serviceNodes: Array<{
+      name: string;
+      cpu: number | null;
+      heapMemory: number | null;
+      hostName: string | null | undefined;
+      nonHeapMemory: number | null;
+      threadCount: number | null;
+    }>;
+  }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { kuery, environment, start, end } = params.query;
+
+    const serviceNodes = await getServiceNodes({
+      kuery,
+      apmEventClient,
+      serviceName,
+      environment,
+      start,
+      end,
+    });
+    return { serviceNodes };
+  },
+});
+
+export const metricsRouteRepository = {
+  ...metricsChartsRoute,
+  ...serviceMetricsJvm,
+};

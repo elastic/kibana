@@ -52,9 +52,9 @@ export const useSendCurrentRequest = () => {
       const results = await sendRequest({ http, requests });
 
       let saveToHistoryError: undefined | Error;
-      const { isHistoryDisabled } = settings.toJSON();
+      const { isHistoryEnabled } = settings.toJSON();
 
-      if (!isHistoryDisabled) {
+      if (isHistoryEnabled) {
         results.forEach(({ request: { path, method, data } }) => {
           try {
             history.addToHistory(path, method, data);
@@ -84,7 +84,7 @@ export const useSendCurrentRequest = () => {
                   notifications.toasts.remove(toast);
                 },
                 onDisableSavingToHistory: () => {
-                  settings.setIsHistoryDisabled(true);
+                  settings.setIsHistoryEnabled(false);
                   notifications.toasts.remove(toast);
                 },
               }),

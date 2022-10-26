@@ -19,6 +19,7 @@ const DefaultParams: Writable<Partial<CoreQueryParams>> = {
   groupBy: 'all',
   timeWindowSize: 5,
   timeWindowUnit: 'm',
+  filterKuery: 'event.provider: alerting',
 };
 
 export function runTests(schema: ObjectType, defaultTypeParams: Record<string, unknown>): void {
@@ -181,6 +182,13 @@ export function runTests(schema: ObjectType, defaultTypeParams: Record<string, u
       delete params.aggField;
       expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
         `"[aggField]: must have a value when [aggType] is \\"avg\\""`
+      );
+    });
+
+    it('fails for invalid filterKuery', async () => {
+      params.filterKuery = 'event:';
+      expect(onValidate()).toThrowErrorMatchingInlineSnapshot(
+        '"[filterKuery]: Filter query is invalid."'
       );
     });
   });

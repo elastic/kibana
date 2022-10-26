@@ -151,22 +151,20 @@ export class TelemetryManagementSection extends Component<Props, State> {
         color="primary"
         iconType="spacesApp"
         title={
-          <p>
-            <FormattedMessage
-              id="telemetry.callout.appliesSettingTitle"
-              defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
-              values={{
-                allOfKibanaText: (
-                  <strong>
-                    <FormattedMessage
-                      id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
-                      defaultMessage="all of Kibana"
-                    />
-                  </strong>
-                ),
-              }}
-            />
-          </p>
+          <FormattedMessage
+            id="telemetry.callout.appliesSettingTitle"
+            defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
+            values={{
+              allOfKibanaText: (
+                <strong>
+                  <FormattedMessage
+                    id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
+                    defaultMessage="all of Kibana"
+                  />
+                </strong>
+              ),
+            }}
+          />
         }
       />
     );

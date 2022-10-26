@@ -40,8 +40,15 @@ const FlexItem = styled(EuiFlexItem)`
   min-width: 0;
   position: relative;
 `;
-
 FlexItem.displayName = 'FlexItem';
+
+const MetrixItem = styled(EuiFlexItem)`
+  &.euiFlexItem {
+    flex-basis: 0;
+    flex-grow: 0;
+  }
+`;
+MetrixItem.displayName = 'MetrixItem';
 
 const StatValue = styled(EuiTitle)`
   overflow: hidden;
@@ -215,7 +222,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                         </FlexItem>
                       )}
 
-                      <FlexItem>
+                      <MetrixItem>
                         {field.lensAttributes && (
                           <LensEmbeddable
                             data-test-subj="embeddable-metric"
@@ -224,12 +231,13 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
                             lensAttributes={field.lensAttributes}
                             timerange={timerange}
                             inspectTitle={description}
+                            metricAlignment={!field.icon && !field.description ? 'left' : 'center'}
                           />
                         )}
-                      </FlexItem>
+                      </MetrixItem>
                       {field.description != null && (
                         <FlexItem>
-                          <EuiStat title={field.description} description={null} titleSize="s" />
+                          <EuiStat title={field.description} description={null} titleSize="m" />
                         </FlexItem>
                       )}
                     </EuiFlexGroup>

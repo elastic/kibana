@@ -16,7 +16,7 @@ import { useRouteSpy } from '../../utils/route/use_route_spy';
 import type { LensAttributes, GetLensAttributes } from './types';
 import {
   getHostDetailsPageFilter,
-  filterNetworkExternalAlertData,
+  sourceOrDestinationIpExistsFilter,
   hostNameExistsFilter,
   getIndexFilters,
 } from './utils';
@@ -48,7 +48,7 @@ export const useLensAttributes = ({
     }
 
     if (pageName === SecurityPageName.network && tabName === NetworkRouteType.events) {
-      return filterNetworkExternalAlertData;
+      return sourceOrDestinationIpExistsFilter;
     }
 
     return [];
