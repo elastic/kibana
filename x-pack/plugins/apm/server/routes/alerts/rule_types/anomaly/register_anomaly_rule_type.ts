@@ -19,6 +19,7 @@ import { KibanaRequest } from '@kbn/core/server';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { firstValueFrom } from 'rxjs';
 import {
   ApmRuleType,
   RULE_TYPES_CONFIG,
@@ -47,7 +48,6 @@ import { getMLJobs } from '../../../service_map/get_service_anomalies';
 import { apmActionVariables } from '../../action_variables';
 import { RegisterRuleDependencies } from '../../register_apm_rule_types';
 import { getAnomalousEventSourceFields } from './get_anomalous_event_source_fields';
-import { firstValueFrom } from 'rxjs';
 import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 
 const paramsSchema = schema.object({
