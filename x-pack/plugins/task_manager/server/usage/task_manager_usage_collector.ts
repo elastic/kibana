@@ -101,7 +101,7 @@ export function createTaskManagerUsageCollector(
         },
         capacity:
           lastMonitoredHealth?.stats.capacity_estimation?.value.observed
-            .avg_required_throughput_per_minute_per_kibana ?? 0,
+            .max_throughput_per_minute_per_kibana ?? 0,
       };
     },
     schema: {
