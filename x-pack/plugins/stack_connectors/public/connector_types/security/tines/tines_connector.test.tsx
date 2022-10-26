@@ -42,12 +42,12 @@ describe('TinesConnectorFields renders', () => {
 
     await waitForComponentToUpdate();
 
-    expect(wrapper.find('[data-test-subj="tinesUrlInput"]').exists()).toBe(true);
-    expect(wrapper.find('[data-test-subj="tinesUrlInput"]').first().prop('value')).toBe(url);
-    expect(wrapper.find('[data-test-subj="tinesEmailInput"]').exists()).toBe(true);
-    expect(wrapper.find('[data-test-subj="tinesEmailInput"]').first().prop('value')).toBe(email);
-    expect(wrapper.find('[data-test-subj="tinesTokenInput"]').exists()).toBe(true);
-    expect(wrapper.find('[data-test-subj="tinesTokenInput"]').first().prop('value')).toBe(token);
+    expect(wrapper.find('input[data-test-subj="tinesUrlInput"]').exists()).toBe(true);
+    expect(wrapper.find('input[data-test-subj="tinesUrlInput"]').prop('value')).toBe(url);
+    expect(wrapper.find('input[data-test-subj="tinesEmailInput"]').exists()).toBe(true);
+    expect(wrapper.find('input[data-test-subj="tinesEmailInput"]').prop('value')).toBe(email);
+    expect(wrapper.find('input[data-test-subj="tinesTokenInput"]').exists()).toBe(true);
+    expect(wrapper.find('input[data-test-subj="tinesTokenInput"]').prop('value')).toBe(token);
   });
 
   describe('Validation', () => {

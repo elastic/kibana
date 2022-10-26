@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnectorFieldsProps, PasswordField } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from './translations';
 
 const { emptyField, urlField } = fieldValidators;
@@ -32,7 +32,6 @@ const TinesActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         componentProps={{
           euiFieldProps: { readOnly, 'data-test-subj': 'tinesUrlInput', fullWidth: true },
         }}
-        helpText={i18n.AUTHENTICATION_HELP}
       />
     </EuiFlexItem>
     <EuiFlexItem>
@@ -52,21 +51,17 @@ const TinesActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         componentProps={{
           euiFieldProps: { readOnly, 'data-test-subj': 'tinesEmailInput' },
         }}
-        helpText={i18n.EMAIL_HELP}
       />
     </EuiFlexItem>
     <EuiFlexItem>
-      <UseField
+      <PasswordField
         path="secrets.token"
+        label={i18n.TOKEN_LABEL}
         config={{
-          label: i18n.TOKEN_LABEL,
           validations: [{ validator: emptyField(i18n.TOKEN_REQUIRED) }],
         }}
-        component={Field}
-        componentProps={{
-          euiFieldProps: { readOnly, 'data-test-subj': 'tinesTokenInput' },
-        }}
-        helpText={i18n.TOKEN_HELP}
+        readOnly={readOnly}
+        data-test-subj="tinesTokenInput"
       />
     </EuiFlexItem>
   </EuiFlexGroup>

@@ -191,6 +191,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
             onChange={onChangeStory}
             isDisabled={isLoadingStories}
             isLoading={isLoadingStories}
+            fullWidth
             data-test-subj="tines-storySelector"
           />
         </EuiFormRow>
@@ -211,6 +212,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
             onChange={onChangeWebhook}
             isDisabled={!selectedStoryOption || isLoadingWebhooks}
             isLoading={isLoadingWebhooks}
+            fullWidth
             data-test-subj="tines-webhookSelector"
           />
         </EuiFormRow>
