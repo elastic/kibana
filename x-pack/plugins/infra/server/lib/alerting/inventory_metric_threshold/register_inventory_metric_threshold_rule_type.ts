@@ -116,5 +116,6 @@ export async function registerMetricInventoryThresholdRuleType(
         { name: 'tags', description: tagsActionVariableDescription },
       ],
     },
+    getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
   });
 }

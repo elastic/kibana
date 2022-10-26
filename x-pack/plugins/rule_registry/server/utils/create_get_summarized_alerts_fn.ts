@@ -308,11 +308,11 @@ const getQueryByTimeRange = (start: Date, end: Date, ruleId: string, type?: stri
           def timestamp = doc['@timestamp'];
           def end = doc['kibana.alert.end'];
 
-          if (start === timestamp) {
+          if (start.value.getMillis() == timestamp.value.getMillis()) {
             emit('new');
-          } else if (start.value.getMillis() < timestamp.value.getMillis() && end.empty) {
+          } else if (end.empty && start.value.getMillis() < timestamp.value.getMillis()) {
             emit('ongoing');
-          } else if (!end.empty && end === timestamp) {
+          } else if (!end.empty && end.value.getMillis() == timestamp.value.getMillis()) {
             emit('recovered');
           } else {
             emit('unknown');
