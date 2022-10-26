@@ -92,12 +92,11 @@ export function useMonitorsSortedByStatus(shouldUpdate: boolean) {
     (data.aggregations?.ids?.buckets || []).forEach((idBucket) => {
       idBucket.locations.buckets.forEach((location) => {
         const ping = location.summary.hits.hits[0]._source as Ping;
-        const configId = ping.config_id!;
-        const isDown = (ping?.summary?.down || 0) > 0;
-        const locationName = ping?.observer?.geo?.name;
-        if (!isDown) {
+        if ((!ping?.summary?.down || 0) > 0) {
           return;
         }
+        const configId = ping.config_id!;
+        const locationName = ping?.observer?.geo?.name;
         if (downMonitorMap[configId]) {
           downMonitorMap[configId].push(locationName!);
         } else {
