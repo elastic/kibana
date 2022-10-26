@@ -9,7 +9,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common/processor_event
 import {
   kqlQuery,
   rangeQuery,
-  termQuery
+  termQuery,
 } from '@kbn/observability-plugin/server/utils/queries';
 import {
   AGENT_NAME,
@@ -17,7 +17,7 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_LANGUAGE_NAME,
   SERVICE_NAME,
-  SERVICE_NODE_NAME
+  SERVICE_NODE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';

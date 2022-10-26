@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
-import { AgentExplorerFieldName } from '@kbn/apm-plugin/common/agent_explorer';
-import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
+import {
+  EuiBasicTableColumn,
+  EuiInMemoryTable,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React, { useMemo } from 'react';
 import { ValuesType } from 'utility-types';
+import { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
+import { AgentExplorerFieldName } from '../../../../../common/agent_explorer';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
@@ -128,9 +132,7 @@ export function getAgentsColumns({
       ),
       width: `${unit * 10}px`,
       render: (_, { agentName, agentRepoUrl }) => (
-        <EuiToolTip
-          content={formatString(`${agentName} agent docs`)}
-        >
+        <EuiToolTip content={formatString(`${agentName} agent docs`)}>
           <AgentExplorerDocsLink
             agentName={agentName as AgentName}
             repositoryUrl={agentRepoUrl}
@@ -147,11 +149,7 @@ interface Props {
   isLoading: boolean;
 }
 
-export function AgentList({
-  items,
-  noItemsMessage,
-  isLoading,
-}: Props) {
+export function AgentList({ items, noItemsMessage, isLoading }: Props) {
   const { query } = useApmParams('/agent-explorer');
 
   const agentColumns = useMemo(() => getAgentsColumns({ query }), [query]);

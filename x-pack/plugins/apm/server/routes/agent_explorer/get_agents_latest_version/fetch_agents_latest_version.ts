@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
 import fetch from 'node-fetch';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { getAgentRepositoryDetails } from '../get_agent_url_repository';
 
-const getAgentReleasesApiUrl = (
-  agentName: AgentName,
-) => {
+const getAgentReleasesApiUrl = (agentName: AgentName) => {
   const repositoryDetails = getAgentRepositoryDetails(agentName);
 
   return repositoryDetails
@@ -21,7 +19,9 @@ const getAgentReleasesApiUrl = (
 
 export type AgentLastVersion = Partial<Record<AgentName, string>>;
 
-export const fetchAgentLatestReleaseVersion = async (agent: AgentName): Promise<AgentLastVersion | undefined> => {
+export const fetchAgentLatestReleaseVersion = async (
+  agent: AgentName
+): Promise<AgentLastVersion | undefined> => {
   const url = getAgentReleasesApiUrl(agent);
 
   if (!url) {
@@ -36,4 +36,4 @@ export const fetchAgentLatestReleaseVersion = async (agent: AgentName): Promise<
   return {
     [agent]: latestVersion,
   };
-}
+};

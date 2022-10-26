@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { APMEventClient } from "../../lib/helpers/create_es_client/create_apm_event_client";
-import { RandomSampler } from "../../lib/helpers/get_random_sampler";
-import { getAgentsDetails } from "./get_agents_items_details";
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { RandomSampler } from '../../lib/helpers/get_random_sampler';
+import { getAgentsDetails } from './get_agents_items_details';
 
 const MAX_NUMBER_OF_SERVICES = 500;
 
