@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { CoreApp } from './core_app';
+export { CoreAppsService } from './core_app';

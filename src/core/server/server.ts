@@ -79,7 +79,7 @@ import {
   PluginsService,
   config as pluginsConfig,
 } from '@kbn/core-plugins-server-internal';
-import { CoreApp } from './core_app';
+import { CoreAppsService } from './core_app';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -117,7 +117,7 @@ export class Server {
   private readonly httpResources: HttpResourcesService;
   private readonly status: StatusService;
   private readonly logging: LoggingService;
-  private readonly coreApp: CoreApp;
+  private readonly coreApp: CoreAppsService;
   private readonly coreUsageData: CoreUsageDataService;
   private readonly i18n: I18nService;
   private readonly deprecations: DeprecationsService;
@@ -160,7 +160,7 @@ export class Server {
     this.node = new NodeService(core);
     this.metrics = new MetricsService(core);
     this.status = new StatusService(core);
-    this.coreApp = new CoreApp(core);
+    this.coreApp = new CoreAppsService(core);
     this.httpResources = new HttpResourcesService(core);
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);

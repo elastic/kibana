@@ -14,7 +14,7 @@ import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { coreMock, httpServerMock } from '../mocks';
 import { httpResourcesMock } from '@kbn/core-http-resources-server-mocks';
 import { PluginType } from '@kbn/core-base-common';
-import { CoreApp } from './core_app';
+import { CoreAppsService } from './core_app';
 import { RequestHandlerContext } from '..';
 
 const emptyPlugins = (): UiPlugins => ({
@@ -25,7 +25,7 @@ const emptyPlugins = (): UiPlugins => ({
 
 describe('CoreApp', () => {
   let coreContext: ReturnType<typeof mockCoreContext.create>;
-  let coreApp: CoreApp;
+  let coreApp: CoreAppsService;
   let internalCorePreboot: ReturnType<typeof coreMock.createInternalPreboot>;
   let prebootHTTPResourcesRegistrar: ReturnType<typeof httpResourcesMock.createRegistrar>;
   let internalCoreSetup: ReturnType<typeof coreMock.createInternalSetup>;
@@ -46,7 +46,7 @@ describe('CoreApp', () => {
     internalCoreSetup = coreMock.createInternalSetup();
     httpResourcesRegistrar = httpResourcesMock.createRegistrar();
     internalCoreSetup.httpResources.createRegistrar.mockReturnValue(httpResourcesRegistrar);
-    coreApp = new CoreApp(coreContext);
+    coreApp = new CoreAppsService(coreContext);
   });
 
   afterEach(() => {
