@@ -18,6 +18,7 @@ import { type DataViewField } from '@kbn/data-views-plugin/public';
 import moment from 'moment';
 import { startWith } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
+import type { Query, Filter } from '@kbn/es-query';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useTimefilter, useTimeRangeUpdates } from '../../hooks/use_time_filter';
 import { useChangePointRequest } from './use_change_point_agg_request';
@@ -31,6 +32,8 @@ export interface ChangePointDetectionRequestParams {
   splitField: string;
   metricField: string;
   interval: string;
+  query: Query;
+  filters: Filter[];
 }
 
 export const ChangePointDetectionContext = createContext<{
@@ -76,10 +79,14 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   const { dataView } = useDataSource();
   const {
     notifications: { toasts },
+    data: {
+      query: { filterManager },
+    },
   } = useAiopsAppContext();
   const timefilter = useTimefilter();
   const timeBuckets = useTimeBuckets();
   const [annotations, setAnnotations] = useState<ChangePointAnnotation[]>([]);
+  const [resultFilters, setResultFilter] = useState<Filter[]>([]);
 
   const [bucketInterval, setBucketInterval] = useState<TimeBucketsInterval>();
 
@@ -135,10 +142,38 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     return params;
   }, [requestParamsFromUrl, metricFieldOptions, splitFieldsOptions, bucketInterval]);
 
-  const { runRequest, isLoading } = useChangePointRequest(requestParams, timeRange);
+  useMount(() => {
+    const sub = filterManager.getUpdates$().subscribe(() => {
+      setResultFilter(filterManager.getFilters());
+    });
+    return () => {
+      sub.unsubscribe();
+    };
+  });
+
+  useEffect(
+    function syncFilters() {
+      const globalFilters = filterManager?.getGlobalFilters();
+      if (requestParamsFromUrl.filters) {
+        filterManager.setFilters(requestParamsFromUrl.filters);
+      }
+      if (globalFilters) {
+        filterManager?.addFilters(globalFilters);
+      }
+    },
+    [requestParamsFromUrl.filters, filterManager]
+  );
+
+  const { runRequest, cancelRequest, isLoading } = useChangePointRequest(
+    requestParams,
+    timeRange,
+    resultFilters
+  );
 
   const fetchChangePoints = useCallback(async () => {
     if (!bucketInterval) return;
+
+    cancelRequest();
 
     const result = await runRequest();
     if (!result.rawResponse.aggregations) {
@@ -174,13 +209,13 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
       .sort((a, b) => (a.p_value ?? 100) - (b.p_value ?? 100));
 
     setAnnotations(groups);
-  }, [runRequest, setAnnotations, toasts, bucketInterval]);
+  }, [runRequest, cancelRequest, setAnnotations, toasts, bucketInterval]);
 
   useEffect(
     function fetchAggResults() {
       fetchChangePoints();
     },
-    [fetchChangePoints, runRequest, requestParams]
+    [fetchChangePoints, runRequest, requestParams, resultFilters]
   );
 
   if (!bucketInterval) return null;

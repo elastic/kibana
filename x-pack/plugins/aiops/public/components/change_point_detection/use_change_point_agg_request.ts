@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { TimeRange } from '@kbn/data-plugin/common';
+import type { Filter } from '@kbn/es-query';
 import {
   ChangePointDetectionRequestParams,
   ChangePointType,
@@ -24,15 +25,12 @@ interface RequestOptions {
   timeRange: TimeRange;
 }
 
-function getChangePointDetectionRequestBody({
-  index,
-  fn,
-  metricField,
-  splitField,
-  timeField,
-  timeInterval,
-  timeRange,
-}: RequestOptions) {
+function getChangePointDetectionRequestBody(
+  { index, fn, metricField, splitField, timeField, timeInterval, timeRange }: RequestOptions,
+  filters: Filter[]
+) {
+  const appliedFilters = filters.map((v) => v.query);
+
   return {
     params: {
       index,
@@ -41,6 +39,7 @@ function getChangePointDetectionRequestBody({
         query: {
           bool: {
             filter: [
+              ...appliedFilters,
               {
                 range: {
                   [timeField]: {
@@ -86,7 +85,8 @@ function getChangePointDetectionRequestBody({
 
 export function useChangePointRequest(
   requestParams: ChangePointDetectionRequestParams,
-  timeRange: TimeRange
+  timeRange: TimeRange,
+  filters: Filter[]
 ) {
   const { dataView } = useDataSource();
 
@@ -101,8 +101,8 @@ export function useChangePointRequest(
       splitField: requestParams.splitField,
     };
 
-    return getChangePointDetectionRequestBody(params);
-  }, [timeRange, dataView, requestParams]);
+    return getChangePointDetectionRequestBody(params, filters);
+  }, [timeRange, dataView, requestParams, filters]);
 
   return useCancellableRequest<typeof requestBoby, { rawResponse: ChangePointAggResponse }>(
     requestBoby

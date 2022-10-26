@@ -19,6 +19,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Query, Filter } from '@kbn/es-query';
+import { SearchBarWrapper } from './search_bar';
 import { useChangePontDetectionContext } from './change_point_detection_context';
 import { MetricFieldSelector } from './metric_field_selector';
 import { SplitFieldSelector } from './split_field_selector';
@@ -50,8 +52,29 @@ export const ChangePointDetectionPage: FC = () => {
     [updateRequestParams]
   );
 
+  const setQuery = useCallback(
+    (query: Query) => {
+      updateRequestParams({ query });
+    },
+    [updateRequestParams]
+  );
+
+  const setFilters = useCallback(
+    (filters: Filter[]) => {
+      updateRequestParams({ filters });
+    },
+    [updateRequestParams]
+  );
+
   return (
     <div data-test-subj="aiopsChanePointDetectionPage">
+      <SearchBarWrapper
+        query={requestParams.query}
+        onQueryChange={setQuery}
+        filters={requestParams.filters ?? []}
+        onFiltersChange={setFilters}
+      />
+
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems={'center'}>
         <EuiFlexItem grow={false}>
