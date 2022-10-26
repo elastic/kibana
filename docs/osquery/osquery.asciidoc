@@ -181,7 +181,7 @@ NOTE: This option is only available if new or updated prebuilt packs are availab
 
 * Turn on the *Active* toggle to ensure the pack runs continuously.
 +
-NOTE: To use an inactive pack, you must manually run it.
+NOTE: You must manually run inactive packs.
 
 * Click the pack name, then *Edit*.
 
