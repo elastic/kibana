@@ -6,7 +6,7 @@
  */
 
 import type { ReactChild } from 'react';
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import useObservable from 'react-use/lib/useObservable';
 import { catchError, of, timeout } from 'rxjs';
@@ -81,12 +81,22 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
   //   // guidedOnboardingApi.idkSetStepTo(stepId, 'active')
   // }, []);
 
+  const [isMounted, setIsMounted] = useState(true);
+
+  useEffect(() => {
+    return () => {
+      setIsMounted(false);
+    };
+  }, []);
+
   const endTourStep = useCallback(
     async (stepId: SecurityStepId) => {
       await guidedOnboardingApi?.completeGuideStep('security', stepId);
-      resetStep();
+      if (isMounted) {
+        resetStep();
+      }
     },
-    [resetStep, guidedOnboardingApi]
+    [resetStep, guidedOnboardingApi, isMounted]
   );
 
   const context = {
