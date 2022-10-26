@@ -50,7 +50,6 @@ describe('FileService', () => {
     kbnRoot = createRootWithCorePlugins();
     await kbnRoot.preboot();
     coreSetup = await kbnRoot.setup();
-    FileServiceFactory.setup(coreSetup.savedObjects);
     coreStart = await kbnRoot.start();
     setFileKindsRegistry(new FileKindsRegistryImpl());
     const fileKindsRegistry = getFileKindsRegistry();
