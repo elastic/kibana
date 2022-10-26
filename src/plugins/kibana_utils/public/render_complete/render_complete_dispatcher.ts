@@ -38,6 +38,7 @@ export class RenderCompleteDispatcher {
   }
 
   public setEl(el?: HTMLElement) {
+    if (this.el !== el) {
     this.el = el;
     this.count = 0;
     if (el) this.dispatchInProgress();

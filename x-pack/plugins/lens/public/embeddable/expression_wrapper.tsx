@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon, EuiEmptyPrompt } from '@elastic/eui';
@@ -45,6 +45,7 @@ export interface ExpressionWrapperProps {
   className?: string;
   canEdit: boolean;
   onRuntimeError: () => void;
+  onExpressionError: () => void;
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
   noPadding?: boolean;
@@ -53,9 +54,28 @@ export interface ExpressionWrapperProps {
 interface VisualizationErrorProps {
   errors: ExpressionWrapperProps['errors'];
   canEdit: boolean;
+  onExpressionError: ExpressionWrapperProps['onExpressionError'];
+  searchSessionId?: string;
 }
 
-export function VisualizationErrorPanel({ errors, canEdit }: VisualizationErrorProps) {
+export function VisualizationErrorPanel({
+  errors,
+  canEdit,
+  onExpressionError,
+  searchSessionId,
+}: VisualizationErrorProps) {
+  // use a combination of sessionid + error messages to decide whether to trigger a rerender
+  const rerenderKey = `${searchSessionId || ''}-${errors
+    ?.map(({ longMessage }) => longMessage)
+    .join('-')}`;
+
+  const keyRef = useRef(rerenderKey);
+  // Skip error logging when no search session id is passed
+  if (keyRef.current !== rerenderKey) {
+    keyRef.current = rerenderKey;
+    onExpressionError();
+  }
+
   const showMore = errors && errors.length > 1;
   const canFixInLens = canEdit && errors?.some(({ type }) => type === 'fixable');
   return (
@@ -121,6 +141,7 @@ export function ExpressionWrapper({
   errors,
   canEdit,
   onRuntimeError,
+  onExpressionError,
   executionContext,
   lensInspector,
   noPadding,
@@ -128,7 +149,12 @@ export function ExpressionWrapper({
   return (
     <I18nProvider>
       {errors || expression === null || expression === '' ? (
-        <VisualizationErrorPanel errors={errors} canEdit={canEdit} />
+        <VisualizationErrorPanel
+          errors={errors}
+          canEdit={canEdit}
+          onExpressionError={onExpressionError}
+          searchSessionId={searchSessionId}
+        />
       ) : (
         <div className={classNames('lnsExpressionRenderer', className)} style={style}>
           <ExpressionRendererComponent

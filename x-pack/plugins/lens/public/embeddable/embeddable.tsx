@@ -493,7 +493,9 @@ export class Embeddable
   }
 
   onContainerStateChanged(containerState: LensEmbeddableInput) {
-    if (this.handleContainerStateChanged(containerState) || this.errors?.length) this.reload();
+    if (this.handleContainerStateChanged(containerState)) {
+      this.reload();
+    }
   }
 
   handleContainerStateChanged(containerState: LensEmbeddableInput): boolean {
@@ -611,6 +613,10 @@ export class Embeddable
     });
   };
 
+  private onError: ExpressionWrapperProps['onExpressionError'] = () => {
+    this.renderComplete.dispatchError();
+  };
+
   getExecutionContext() {
     if (this.savedVis) {
       const parentContext = this.parent?.getInput().executionContext || this.input.executionContext;
@@ -651,7 +657,7 @@ export class Embeddable
     this.updateOutput({
       ...this.getOutput(),
       loading: true,
-      error: undefined,
+      error: undefined, // Lens handles errors internally
     });
     this.renderComplete.dispatchInProgress();
 
@@ -683,6 +689,7 @@ export class Embeddable
           style={input.style}
           executionContext={this.getExecutionContext()}
           canEdit={this.getIsEditable() && input.viewMode === 'edit'}
+          onExpressionError={this.onError}
           onRuntimeError={() => {
             this.logError('runtime');
           }}
