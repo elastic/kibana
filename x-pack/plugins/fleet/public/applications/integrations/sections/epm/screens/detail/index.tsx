@@ -155,8 +155,9 @@ export function Detail() {
     packageInfo.savedObject &&
     semverLt(packageInfo.savedObject.attributes.version, packageInfo.latestVersion);
 
-  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] =
-    React.useState<boolean>(false);
+  const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
+    boolean | undefined
+  >();
 
   const { data: settings } = useGetSettings();
 
@@ -165,7 +166,6 @@ export function Detail() {
     setPrereleaseIntegrationsEnabled(isEnabled);
   }, [settings?.item.prerelease_integrations_enabled]);
 
-  // TODO delay get package info until prerelease setting loaded
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   // Fetch package info
   const {
@@ -174,7 +174,10 @@ export function Detail() {
     isLoading: packageInfoLoading,
     isInitialRequest: packageIsInitialRequest,
     resendRequest: refreshPackageInfo,
-  } = useGetPackageInfoByKey(pkgName, pkgVersion, { prerelease: prereleaseIntegrationsEnabled });
+    // no need to reload package if using a specific version
+  } = useGetPackageInfoByKey(pkgName, pkgVersion, {
+    prerelease: !pkgVersion ? prereleaseIntegrationsEnabled : undefined,
+  });
 
   const [latestGAVersion, setLatestGAVersion] = useState<string | undefined>();
   const [latestPrereleaseVersion, setLatestPrereleaseVersion] = useState<string | undefined>();
