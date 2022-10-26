@@ -43,7 +43,7 @@ then view the results.
 and you'll get suggestions for agents by name, ID, platform, and policy.
 . Specify the query or pack to run:
 ** *Query*: Select a saved query or enter a new one in the text box. After you enter the query, you can expand the **Advanced** section to view or set <<osquery-map-fields,mapped ECS fields>> included in the results from the live query. Mapping ECS fields is optional.
-** *Pack*: Select from query packs that have been loaded and activated. After you select a pack, all of the queries in the pack are displayed.
+** *Pack*: Select from available query packs. After you select a pack, all of the queries in the pack are displayed.
 +
 TIP: Refer to <<osquery-prebuilt-packs,prebuilt packs>> to learn about using and managing Elastic prebuilt packs.
 +
@@ -179,7 +179,9 @@ NOTE: This option is only available if new or updated prebuilt packs are availab
 
 . For each pack that you want to schedule:
 
-* Enable the option to make the pack *Active*.
+* Turn on the *Active* toggle to ensure the pack runs continuously.
++
+NOTE: To use an inactive pack, you must manually run it.
 
 * Click the pack name, then *Edit*.
 
@@ -314,7 +316,8 @@ Osquery responses include the following information:
 * For scheduled queries in a pack, the `action_id` has the format `pack_<pack-name>_<query-ID>`. You can use this information to look up the query that was run.
 
 * By default, all query results are https://osquery.readthedocs.io/en/stable/deployment/logging/#snapshot-logs[snapshot logs]
-that represent a point in time with a set of results. You can modify the result type to be https://osquery.readthedocs.io/en/stable/deployment/logging/#differential-logs[differential logs] or differential logs without removals (results only show data that has been added).
+that represent a point in time with a set of results, with no
+https://osquery.readthedocs.io/en/stable/deployment/logging/#differential-logs[differentials].
 
 * Osquery data is stored in the `logs-osquery_manager.result-<namespace>` datastream, and the result row data is under the `osquery` property in the document.
 
