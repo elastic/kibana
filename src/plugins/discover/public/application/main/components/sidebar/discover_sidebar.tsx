@@ -7,24 +7,26 @@
  */
 
 import './discover_sidebar.scss';
-import React, { useCallback, useEffect, useState, useMemo, memo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPageSideBar_Deprecated as EuiPageSideBar,
   EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageSideBar_Deprecated as EuiPageSideBar,
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { type DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import {
-  triggerVisualizeActionsTextBasedLanguages,
   FieldListGrouped,
+  FieldListGroupedProps,
+  FieldsGroupNames,
+  GroupedFieldsParams,
+  triggerVisualizeActionsTextBasedLanguages,
   useExistingFieldsReader,
   useGroupedFields,
-  FieldListGroupedProps,
 } from '@kbn/unified-field-list-plugin/public';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -39,6 +41,8 @@ import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import type { DataTableRecord } from '../../../../types';
 import { getUiActions } from '../../../../kibana_services';
+import { getRawRecordType } from '../../utils/get_raw_record_type';
+import { RecordRawType } from '../../hooks/use_saved_search';
 
 export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   /**
@@ -115,7 +119,9 @@ export function DiscoverSidebarComponent({
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor, dataViews } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);
-  const isPlainRecord = !onAddFilter;
+  const isPlainRecord = useAppStateSelector(
+    (state) => getRawRecordType(state.query) === RecordRawType.PLAIN
+  );
   const query = useAppStateSelector((state) => state.query);
 
   useEffect(() => {
@@ -142,14 +148,6 @@ export function DiscoverSidebarComponent({
   } = useMemo(
     () => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi),
     [fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi]
-  );
-
-  /**
-   * Popular fields are not displayed in text based lang mode
-   */
-  const restFields = useMemo(
-    () => (isPlainRecord ? [...popularFields, ...unpopularFields] : unpopularFields),
-    [isPlainRecord, popularFields, unpopularFields]
   );
 
   // console.log({
@@ -248,8 +246,6 @@ export function DiscoverSidebarComponent({
     ]
   );
 
-  // const filterChanged = useMemo(() => isEqual(fieldFilter, getDefaultFieldFilter()), [fieldFilter]);
-
   const visualizeAggregateQuery = useCallback(() => {
     const aggregateQuery = query && isOfAggregateQueryType(query) ? query : undefined;
     triggerVisualizeActionsTextBasedLanguages(
@@ -261,18 +257,29 @@ export function DiscoverSidebarComponent({
     );
   }, [columns, selectedDataView, query]);
 
+  const allFields = useMemo(() => {
+    return [...selectedFields, ...popularFields, ...unpopularFields];
+  }, [selectedFields, popularFields, unpopularFields]);
+  const onSelectedFieldFilter: GroupedFieldsParams<DataViewField>['onSelectedFieldFilter'] =
+    useCallback(
+      (field) => {
+        return selectedFields.some((selectedField) => selectedField.name === field.name);
+      },
+      [selectedFields]
+    );
   const fieldsExistenceReader = useExistingFieldsReader();
   const { fieldGroups } = useGroupedFields({
-    dataViewId: isPlainRecord || !selectedDataView?.id ? null : selectedDataView.id,
+    dataViewId: isPlainRecord || !selectedDataView?.id ? null : selectedDataView.id, // TODO: check whether we need Empty fields for text-based query
     fieldsExistenceReader,
-    allFields: restFields,
+    allFields,
     services: {
       dataViews,
     },
+    onSelectedFieldFilter,
   });
 
   const renderFieldItem: FieldListGroupedProps<DataViewField>['renderFieldItem'] = useCallback(
-    ({ field, itemIndex, groupIndex, hideDetails }) => (
+    ({ field, groupName }) => (
       <li key={`field${field.name}`} data-attr-field={field.name}>
         <DiscoverField
           alwaysShowActionButton={alwaysShowActionButtons}
@@ -288,6 +295,7 @@ export function DiscoverSidebarComponent({
           onDeleteField={deleteField}
           showFieldStats={showFieldStats}
           contextualFields={columns}
+          selected={groupName === FieldsGroupNames.SelectedFields}
         />
       </li>
     ),
@@ -359,7 +367,7 @@ export function DiscoverSidebarComponent({
               selectedDataView.id!
             )}
             renderFieldItem={renderFieldItem}
-            existFieldsInIndex={Boolean(restFields.length)}
+            existFieldsInIndex={Boolean(allFields.length)}
           />
           {/* <div */}
           {/*  ref={(el) => {*/}

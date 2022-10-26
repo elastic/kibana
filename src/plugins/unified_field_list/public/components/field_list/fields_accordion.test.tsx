@@ -11,7 +11,7 @@ import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/
 import { EuiLoadingSpinner, EuiNotificationBadge, EuiText } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { FieldsAccordion, FieldsAccordionProps } from './fields_accordion';
-import { FieldListItem } from '../../types';
+import { FieldListItem, FieldsGroupNames } from '../../types';
 
 describe('UnifiedFieldList <FieldsAccordion />', () => {
   let defaultProps: FieldsAccordionProps<FieldListItem>;
@@ -21,7 +21,8 @@ describe('UnifiedFieldList <FieldsAccordion />', () => {
     defaultProps = {
       initialIsOpen: true,
       onToggle: jest.fn(),
-      groupIndex: 0,
+      groupIndex: 1,
+      groupName: FieldsGroupNames.AvailableFields,
       id: 'id',
       label: 'label-test',
       hasLoaded: true,
