@@ -112,8 +112,9 @@ export function registerTransactionErrorRateRuleType({
 
         const searchParams = {
           index,
-          size: 0,
           body: {
+            track_total_hits: false,
+            size: 0,
             query: {
               bool: {
                 filter: [
