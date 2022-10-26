@@ -15,7 +15,7 @@ import {
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { Query } from '@kbn/es-query';
-import { FORMULA_COLUMN } from '../constants';
+import { FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
 import { ColumnFilter, MetricOption } from '../../types';
 import { SeriesConfig } from '../../../../..';
 import {
@@ -48,7 +48,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
   }
 
   getSingleMetricLayer() {
-    const { seriesConfig, selectedMetricField, operationType, indexPattern } = this.layerConfigs[0];
+    const { seriesConfig, selectedMetricField, operationType, dataView } = this.layerConfigs[0];
 
     const metricOption = parseCustomFieldName(seriesConfig, selectedMetricField);
 
@@ -69,7 +69,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
         return this.getFormulaLayer({
           formula,
           label: columnLabel,
-          dataView: indexPattern,
+          dataView,
           format,
           filter: columnFilter,
         });
@@ -105,7 +105,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
             [this.columnId]: {
               ...buildNumberColumn(sourceField),
               label: columnLabel ?? '',
-              operationType: sourceField === 'Records' ? 'count' : operationType || 'median',
+              operationType: sourceField === RECORDS_FIELD ? 'count' : operationType || 'median',
               filter: columnFilter,
             },
           },
@@ -197,12 +197,16 @@ export class SingleMetricLensAttributes extends LensAttributes {
 
     const visualization = this.getMetricState();
 
+    const { internalReferences, adHocDataViews } = this.getReferences();
+
     return {
       title: 'Prefilled from exploratory view app',
       description: String(refresh),
       visualizationType: 'lnsLegacyMetric',
-      references: this.getReferences(),
+      references: [],
       state: {
+        internalReferences,
+        adHocDataViews,
         visualization,
         datasourceStates: {
           formBased: {
