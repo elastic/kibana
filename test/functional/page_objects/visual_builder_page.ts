@@ -340,10 +340,10 @@ export class VisualBuilderPageObject extends FtrService {
     await el.type(value);
   }
 
-  public async getRhythmChartLegendValue(nth = 0) {
+  public async getRhythmChartLegendValue(nth = 0, timeout?: number) {
     await this.visChart.waitForVisualizationRenderingStabilized();
     const metricValue = (
-      await this.find.allByCssSelector(`.echLegendItem .echLegendItem__extra`, 20000)
+      await this.find.allByCssSelector(`.echLegendItem .echLegendItem__extra`, timeout ?? 20000)
     )[nth];
     await metricValue.moveMouseTo();
     return await metricValue.getVisibleText();
