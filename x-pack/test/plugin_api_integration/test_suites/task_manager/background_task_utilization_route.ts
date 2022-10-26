@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import url from 'url';
 import supertest from 'supertest';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 interface MonitoringStats {
@@ -62,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
       .then((response) => response.body);
   }
 
-  function getUtilizationForSampleTask(): Promise<MonitoringStats> {
+  function getBackgroundTaskUtilization(): Promise<MonitoringStats> {
     return retry.try(async () => {
       const utilization = await getUtilization();
 
@@ -75,28 +74,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
   }
 
-  function scheduleTask(task: Partial<ConcreteTaskInstance>): Promise<ConcreteTaskInstance> {
-    return request
-      .post('/api/sample_tasks/schedule')
-      .set('kbn-xsrf', 'xxx')
-      .send({ task })
-      .expect(200)
-      .then((response: { body: ConcreteTaskInstance }) => response.body);
-  }
-
   describe('background task utilization', () => {
     it('should return the task manager background task utilization for recurring stats', async () => {
-      await scheduleTask({
-        taskType: 'sampleTask',
-        schedule: { interval: '5s' },
-      });
-
       const {
         value: {
           // eslint-disable-next-line @typescript-eslint/naming-convention
           recurring: { tasks_per_min, ran },
         },
-      } = (await getUtilizationForSampleTask()).stats;
+      } = (await getBackgroundTaskUtilization()).stats;
       const serviceTime = ran.service_time;
       expect(typeof tasks_per_min.p50).to.eql('number');
       expect(typeof tasks_per_min.p90).to.eql('number');
@@ -117,15 +102,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return the task manager background task utilization for adhoc stats', async () => {
-      await scheduleTask({
-        taskType: 'sampleTask',
-      });
-
       const {
         value: {
           adhoc: { created, ran },
         },
-      } = (await getUtilizationForSampleTask()).stats;
+      } = (await getBackgroundTaskUtilization()).stats;
       const serviceTime = ran.service_time;
       expect(typeof created.counter).to.eql('number');
 
