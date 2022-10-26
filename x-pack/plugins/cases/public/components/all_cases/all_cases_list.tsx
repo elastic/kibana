@@ -11,12 +11,7 @@ import { EuiProgress } from '@elastic/eui';
 import { difference, head, isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 
-import type {
-  Case,
-  CaseStatusWithAllStatus,
-  FilterOptions,
-  QueryParams,
-} from '../../../common/ui/types';
+import type { Case, CaseStatusWithAllStatus, FilterOptions } from '../../../common/ui/types';
 import { SortFieldCase, StatusAll } from '../../../common/ui/types';
 import { CaseStatuses, caseStatuses } from '../../../common/api';
 
@@ -39,6 +34,7 @@ import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { getAllPermissionsExceptFrom, isReadOnlyPermissions } from '../../utils/permissions';
 import { useIsLoadingCases } from './use_is_loading_cases';
+import { useUrlState } from '../../common/hooks';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -80,7 +76,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       ...DEFAULT_FILTER_OPTIONS,
       ...initialFilterOptions,
     });
-    const [queryParams, setQueryParams] = useState<QueryParams>(DEFAULT_QUERY_PARAMS);
+    const { queryParams, setUrlQueryParams } = useUrlState();
     const [selectedCases, setSelectedCases] = useState<Case[]>([]);
 
     const { data = initialData, isFetching: isLoadingCases } = useGetCases({
@@ -141,32 +137,23 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             perPage: page.size,
           };
         }
-        setQueryParams(newQueryParams);
+        setUrlQueryParams(newQueryParams);
         deselectCases();
       },
-      [queryParams, deselectCases, setQueryParams]
+      [queryParams, deselectCases, setUrlQueryParams]
     );
 
     const onFilterChangedCallback = useCallback(
       (newFilterOptions: Partial<FilterOptions>) => {
         if (newFilterOptions.status && newFilterOptions.status === CaseStatuses.closed) {
-          setQueryParams((prevQueryParams) => ({
-            ...prevQueryParams,
-            sortField: SortFieldCase.closedAt,
-          }));
+          setUrlQueryParams({ sortField: SortFieldCase.closedAt });
         } else if (newFilterOptions.status && newFilterOptions.status === CaseStatuses.open) {
-          setQueryParams((prevQueryParams) => ({
-            ...prevQueryParams,
-            sortField: SortFieldCase.createdAt,
-          }));
+          setUrlQueryParams({ sortField: SortFieldCase.createdAt });
         } else if (
           newFilterOptions.status &&
           newFilterOptions.status === CaseStatuses['in-progress']
         ) {
-          setQueryParams((prevQueryParams) => ({
-            ...prevQueryParams,
-            sortField: SortFieldCase.createdAt,
-          }));
+          setUrlQueryParams({ sortField: SortFieldCase.createdAt });
         }
 
         deselectCases();
@@ -193,7 +180,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             : {}),
         }));
       },
-      [deselectCases, hasOwner, availableSolutions, owner]
+      [deselectCases, hasOwner, availableSolutions, owner, setUrlQueryParams]
     );
 
     const { columns } = useCasesColumns({

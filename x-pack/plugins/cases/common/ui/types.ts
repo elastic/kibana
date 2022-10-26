@@ -98,6 +98,19 @@ export interface QueryParams {
   sortOrder: 'asc' | 'desc';
 }
 
+export interface UrlQueryParams {
+  page?: number;
+  perPage?: number;
+  sortField?: SortFieldCase;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface LocalStorageQueryParams {
+  perPage?: number;
+  sortField?: SortFieldCase;
+  sortOrder?: 'asc' | 'desc';
+}
+
 export interface FilterOptions {
   search: string;
   searchFields: string[];
