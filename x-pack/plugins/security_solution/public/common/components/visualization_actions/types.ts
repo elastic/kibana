@@ -33,6 +33,7 @@ export interface LensEmbeddableComponentProps {
   inputsModelId?: InputsModelId.global | InputsModelId.timeline;
   inspectTitle?: string;
   lensAttributes: LensAttributes;
+  metricAlignment?: 'left' | 'center';
   stackByField?: string;
   timerange: { from: string; to: string };
 }
