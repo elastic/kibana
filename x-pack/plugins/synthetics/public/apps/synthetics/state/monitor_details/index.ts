@@ -21,8 +21,8 @@ export interface MonitorDetailsState {
   pings: {
     total: number;
     data: Ping[];
+    loading: boolean;
   };
-  loading: boolean;
   syntheticsMonitorLoading: boolean;
   syntheticsMonitor: EncryptedSyntheticsSavedMonitor | null;
   error: IHttpSerializedFetchError | null;
@@ -30,8 +30,7 @@ export interface MonitorDetailsState {
 }
 
 const initialState: MonitorDetailsState = {
-  pings: { total: 0, data: [] },
-  loading: false,
+  pings: { total: 0, data: [], loading: false },
   syntheticsMonitor: null,
   syntheticsMonitorLoading: false,
   error: null,
@@ -45,7 +44,7 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
     })
 
     .addCase(getMonitorRecentPingsAction.get, (state, action) => {
-      state.loading = true;
+      state.pings.loading = true;
       state.pings.data = state.pings.data.filter(
         (ping) => !checkIsStalePing(action.payload.monitorId, ping)
       );
@@ -53,11 +52,11 @@ export const monitorDetailsReducer = createReducer(initialState, (builder) => {
     .addCase(getMonitorRecentPingsAction.success, (state, action) => {
       state.pings.total = action.payload.total;
       state.pings.data = action.payload.pings;
-      state.loading = false;
+      state.pings.loading = false;
     })
     .addCase(getMonitorRecentPingsAction.fail, (state, action) => {
       state.error = action.payload;
-      state.loading = false;
+      state.pings.loading = false;
     })
 
     .addCase(getMonitorAction.get, (state) => {

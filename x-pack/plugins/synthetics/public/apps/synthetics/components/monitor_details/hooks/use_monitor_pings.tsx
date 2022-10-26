@@ -51,9 +51,10 @@ export const useMonitorPings = (props?: UseMonitorPingsProps) => {
     props?.to,
   ]);
 
-  const { total, data: pings } = useSelector(selectMonitorPingsMetadata);
+  const { total, data: pings, loading } = useSelector(selectMonitorPingsMetadata);
 
   return {
+    loading,
     total,
     pings,
   };

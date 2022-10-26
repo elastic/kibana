@@ -31,7 +31,7 @@ import {
 import { useSyntheticsSettingsContext } from '../../../contexts/synthetics_settings_context';
 
 import { sortPings } from '../../../utils/monitor_test_result/sort_pings';
-import { selectPingsLoading, selectPingsError } from '../../../state';
+import { selectPingsError } from '../../../state';
 import { parseBadgeStatus, StatusBadge } from '../../common/monitor_test_result/status_badge';
 import { isStepEnd } from '../../common/monitor_test_result/browser_steps_list';
 import { JourneyStepScreenshotContainer } from '../../common/monitor_test_result/journey_step_screenshot_container';
@@ -55,7 +55,11 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
 
   const [sortField, setSortField] = useState<SortableField>('timestamp');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const { pings, total } = useMonitorPings({
+  const {
+    pings,
+    total,
+    loading: pingsLoading,
+  } = useMonitorPings({
     from,
     to,
     pageSize: page.size,
@@ -64,7 +68,7 @@ export const TestRunsTable = ({ paginable = true, from, to }: TestRunsTableProps
   const sortedPings = useMemo(() => {
     return sortPings(pings, sortField, sortDirection);
   }, [pings, sortField, sortDirection]);
-  const pingsLoading = useSelector(selectPingsLoading);
+
   const pingsError = useSelector(selectPingsError);
   const { monitor } = useSelectedMonitor();
 
