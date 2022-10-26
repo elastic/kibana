@@ -8709,7 +8709,7 @@
           }
         },
         "observability:apmAWSLambdaPriceFactor": {
-          "type": "string",
+          "type": "text",
           "_meta": {
             "description": "Non-default value of setting."
           }
