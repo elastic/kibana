@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getPalette } from './palette';
+import { getPalette } from '.';
 
 describe('getPalette', () => {
   const baseColor = '#fff';
