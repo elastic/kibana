@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexItem,
@@ -14,9 +14,12 @@ import {
   EuiPopover,
   EuiButtonIconProps,
   EuiToolTip,
+  useEuiTheme,
+  euiShadowMedium,
 } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { css } from '@emotion/react';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 
 interface AddFilterPopoverProps {
@@ -36,6 +39,20 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
   buttonProps,
   isDisabled,
 }: AddFilterPopoverProps) {
+  const euiTheme = useEuiTheme();
+
+  const popoverDragAndDropStyle = useMemo(
+    () =>
+      css`
+        // Always needed for popover with drag & drop in them
+        transform: none !important;
+        transition: none !important;
+        filter: none !important;
+        ${euiShadowMedium(euiTheme)}
+      `,
+    [euiTheme]
+  );
+
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
 
   const buttonIconLabel = i18n.translate('unifiedSearch.filter.filterBar.addFilterButtonLabel', {
@@ -66,7 +83,10 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
         closePopover={() => setIsAddFilterPopoverOpen(false)}
         anchorPosition="downLeft"
         panelPaddingSize="none"
-        panelProps={{ 'data-test-subj': 'addFilterPopover' }}
+        panelProps={{
+          'data-test-subj': 'addFilterPopover',
+          css: popoverDragAndDropStyle,
+        }}
         initialFocus=".filterEditor__hiddenItem"
         ownFocus
         repositionOnScroll
