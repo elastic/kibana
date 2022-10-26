@@ -45,8 +45,8 @@
           "actions_log_management_all",
           "actions_log_management_read",
           "host_isolation_all",
-          process_operations_all,
-          file_operations_all
+          "process_operations_all",
+          "file_operations_all"
         ],
         "stackAlerts": ["all"]
       },
