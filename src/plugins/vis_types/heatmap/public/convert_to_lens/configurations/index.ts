@@ -34,7 +34,7 @@ export const getConfiguration = async (
     return null;
   }
   const { params, uiState } = vis;
-  const state = uiState.get('vis', {});
+  const state = uiState.get('vis', {}) ?? {};
 
   const palette = await getPaletteForHeatmap(params);
   return {
