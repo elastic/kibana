@@ -272,7 +272,7 @@ export const policyFactoryWithoutPaidFeatures = (
 };
 
 /**
- * Strips paid features from an existing or new `PolicyConfig` for gold and below license
+ * Enables support for paid features for an existing or new `PolicyConfig` for platinum and above license
  */
 export const policyFactoryWithSupportedFeatures = (
   policy: PolicyConfig = policyFactory()
