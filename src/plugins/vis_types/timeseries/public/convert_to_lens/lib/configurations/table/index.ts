@@ -10,7 +10,7 @@ import { Series } from '../../../../../common/types';
 import { getPalette } from '../palette';
 
 export const getColumnState = (columnId: string, collapseFn?: string, series?: Series) => {
-  const palette = series ? getPalette(series.color_rules ?? [], series.color) : undefined;
+  const palette = series ? getPalette(series.color_rules ?? []) : undefined;
   return {
     columnId,
     alignment: 'left' as const,

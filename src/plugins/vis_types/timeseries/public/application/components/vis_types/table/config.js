@@ -221,7 +221,7 @@ class TableSeriesConfigUi extends Component {
         <EuiHorizontalRule margin="s" />
 
         <EuiFlexGroup responsive={false} wrap={true}>
-          <EuiFlexItem grow={true} data-test-subj="aggregateBy">
+          <EuiFlexItem grow={true} data-test-subj="tsvbAggregateBySelect">
             <FieldSelect
               label={
                 <FormattedMessage id="visTypeTimeseries.table.fieldLabel" defaultMessage="Field" />
@@ -254,7 +254,7 @@ class TableSeriesConfigUi extends Component {
               fullWidth
             >
               <EuiComboBox
-                data-test-subj="aggregateFunction"
+                data-test-subj="tsvbAggregateFunctionCombobox"
                 options={functionOptions}
                 selectedOptions={selectedAggFuncOption ? [selectedAggFuncOption] : []}
                 onChange={this.handleSelectChange('aggregate_function')}

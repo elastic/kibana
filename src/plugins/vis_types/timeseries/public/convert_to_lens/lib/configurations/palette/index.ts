@@ -57,9 +57,9 @@ const isValidColorRule = (
   const { gauge } = rule as GaugeColorRule;
   const { text } = rule as SeriesColorRule;
 
-  return rule.operator && (bColor ?? textColor ?? gauge ?? text) && rule.value !== undefined
-    ? true
-    : false;
+  return Boolean(
+    rule.operator && (bColor ?? textColor ?? gauge ?? text) && rule.value !== undefined
+  );
 };
 
 const isMetricColorRule = (
@@ -73,7 +73,7 @@ const isGaugeColorRule = (
   rule: ValidMetricColorRule | ValidGaugeColorRule | ValidSeriesColorRule
 ): rule is ValidGaugeColorRule => {
   const metricRule = rule as ValidGaugeColorRule;
-  return metricRule.gauge ? true : false;
+  return Boolean(metricRule.gauge);
 };
 
 const getColor = (rule: ValidMetricColorRule | ValidGaugeColorRule | ValidSeriesColorRule) => {
