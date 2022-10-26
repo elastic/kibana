@@ -21,11 +21,6 @@ export type TestEnvironmentUtils = Awaited<ReturnType<typeof setupIntegrationEnv
 export async function setupIntegrationEnvironment() {
   const fileKind: string = 'test-file-kind';
   const testIndex = '.kibana-test-files';
-  const testConfig = {
-    xpack: {
-      reporting: { enabled: false },
-    },
-  };
 
   /**
    * Functionality to create files easily
@@ -86,7 +81,7 @@ export async function setupIntegrationEnvironment() {
    */
   const manageES = await startES();
 
-  const root = createRootWithCorePlugins(testConfig, { oss: false });
+  const root = createRootWithCorePlugins({}, { oss: false });
   await root.preboot();
   await root.setup();
 
