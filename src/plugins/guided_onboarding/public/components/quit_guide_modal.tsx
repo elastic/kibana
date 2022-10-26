@@ -7,7 +7,16 @@
  */
 import React, { useState } from 'react';
 
-import { EuiText, EuiConfirmModal } from '@elastic/eui';
+import {
+  EuiText,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { GuideState } from '@kbn/guided-onboarding';
 import { apiService } from '../services/api';
@@ -27,32 +36,52 @@ export const QuitGuideModal = ({ closeModal, currentGuide }: QuitGuideModalProps
   };
 
   return (
-    <EuiConfirmModal
-      maxWidth={448}
-      title={i18n.translate('guidedOnboarding.quitGuideModal.modalTitle', {
-        defaultMessage: 'Quit this guide?',
-      })}
-      onCancel={closeModal}
-      onConfirm={deleteGuide}
-      cancelButtonText={i18n.translate('guidedOnboarding.quitGuideModal.cancelButtonLabel', {
-        defaultMessage: 'Cancel',
-      })}
-      confirmButtonText={i18n.translate('guidedOnboarding.quitGuideModal.quitButtonLabel', {
-        defaultMessage: 'Quit guide',
-      })}
+    <EuiModal
       aria-label="quitGuideModal"
-      buttonColor="warning"
-      isLoading={isDeleting}
       data-test-subj="onboarding--quitGuideModal"
+      maxWidth={448}
+      onClose={closeModal}
     >
-      <EuiText>
-        <p>
-          {i18n.translate('guidedOnboarding.quitGuideModal.modalDescription', {
-            defaultMessage:
-              'You can restart anytime by opening the Setup guide from the Help menu.',
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          {i18n.translate('guidedOnboarding.quitGuideModal.modalTitle', {
+            defaultMessage: 'Quit this guide?',
           })}
-        </p>
-      </EuiText>
-    </EuiConfirmModal>
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiText>
+          <p>
+            {i18n.translate('guidedOnboarding.quitGuideModal.modalDescription', {
+              defaultMessage:
+                'You can restart anytime by opening the Setup guide from the Help menu.',
+            })}
+          </p>
+        </EuiText>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty
+          data-test-subj={`onboarding--cancelQuitGuideButton--${currentGuide.guideId}`}
+          onClick={closeModal}
+        >
+          {i18n.translate('guidedOnboarding.quitGuideModal.cancelButtonLabel', {
+            defaultMessage: 'Cancel',
+          })}
+        </EuiButtonEmpty>
+
+        <EuiButton
+          // Used for FS tracking and tests
+          data-test-subj={`onboarding--quitGuideButton--${currentGuide.guideId}`}
+          onClick={deleteGuide}
+          isLoading={isDeleting}
+          fill
+          color="warning"
+        >
+          {i18n.translate('guidedOnboarding.quitGuideModal.quitButtonLabel', {
+            defaultMessage: 'Quit guide',
+          })}
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
   );
 };

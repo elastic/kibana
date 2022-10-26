@@ -306,7 +306,7 @@ describe('Guided setup', () => {
         const { component, find, exists } = testBed;
 
         await act(async () => {
-          find('confirmModalConfirmButton').simulate('click');
+          find('onboarding--quitGuideButton--search').simulate('click');
         });
 
         component.update();
@@ -320,7 +320,7 @@ describe('Guided setup', () => {
         const { component, find, exists } = testBed;
 
         await act(async () => {
-          find('confirmModalCancelButton').simulate('click');
+          find('onboarding--cancelQuitGuideButton--search').simulate('click');
         });
 
         component.update();
