@@ -19,11 +19,11 @@ describe('getAllEnvironments', () => {
   });
 
   it('fetches all environments', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams((setup, apmEventClient) =>
       getAllEnvironments({
         searchAggregatedTransactions: false,
         serviceName: 'test',
-        setup,
+        apmEventClient,
         size: 50,
       })
     );
@@ -32,12 +32,12 @@ describe('getAllEnvironments', () => {
   });
 
   it('fetches all environments with includeMissing', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams((setup, apmEventClient) =>
       getAllEnvironments({
         includeMissing: true,
         searchAggregatedTransactions: false,
         serviceName: 'test',
-        setup,
+        apmEventClient,
         size: 50,
       })
     );

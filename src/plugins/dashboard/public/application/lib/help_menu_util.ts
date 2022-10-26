@@ -12,9 +12,8 @@ import { pluginServices } from '../../services/plugin_services';
 export function addHelpMenuToAppChrome() {
   const {
     chrome: { setHelpExtension },
-    documentationLinks: { kibanaGuideDocLink },
+    documentationLinks: { dashboardDocLink },
   } = pluginServices.getServices();
-
   setHelpExtension({
     appName: i18n.translate('dashboard.helpMenu.appName', {
       defaultMessage: 'Dashboards',
@@ -22,7 +21,7 @@ export function addHelpMenuToAppChrome() {
     links: [
       {
         linkType: 'documentation',
-        href: `${kibanaGuideDocLink}`,
+        href: `${dashboardDocLink}`,
       },
     ],
   });

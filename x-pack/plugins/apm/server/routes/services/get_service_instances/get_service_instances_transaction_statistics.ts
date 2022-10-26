@@ -27,8 +27,8 @@ import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../../lib/helpers/latency_aggregation_type';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 interface ServiceInstanceTransactionPrimaryStatistics {
   serviceNodeName: string;
@@ -54,7 +54,7 @@ export async function getServiceInstancesTransactionStatistics<
   environment,
   kuery,
   latencyAggregationType,
-  setup,
+  apmEventClient,
   transactionType,
   serviceName,
   size,
@@ -67,7 +67,7 @@ export async function getServiceInstancesTransactionStatistics<
   offset,
 }: {
   latencyAggregationType: LatencyAggregationType;
-  setup: Setup;
+  apmEventClient: APMEventClient;
   serviceName: string;
   transactionType: string;
   searchAggregatedTransactions: boolean;
@@ -81,8 +81,6 @@ export async function getServiceInstancesTransactionStatistics<
   numBuckets?: number;
   offset?: string;
 }): Promise<Array<ServiceInstanceTransactionStatistics<T>>> {
-  const { apmEventClient } = setup;
-
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
     end,
