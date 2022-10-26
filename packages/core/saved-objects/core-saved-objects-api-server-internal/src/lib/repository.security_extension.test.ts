@@ -25,6 +25,7 @@ import {
   ISavedObjectsSecurityExtension,
   AuditAction,
   SavedObjectsRawDocSource,
+  AuthorizationTypeEntry,
 } from '@kbn/core-saved-objects-server';
 import { kibanaMigratorMock } from '../mocks';
 import {
@@ -64,6 +65,7 @@ import {
   expectUpdateResult,
   bulkDeleteSuccess,
   createBulkDeleteSuccessStatus,
+  namespaceMapsAreEqual,
 } from './repository.common.test';
 import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 
@@ -1045,39 +1047,28 @@ describe('SavedObjectsRepository Security Extension', () => {
       );
     });
 
-    // TODO: TEST IN PROGRESS - MOCK CALL ARGUMENT ISSUE
-    // test.only(`calls es search with only authorized spaces when partially authorized`, async () => {
-    //   // setupCheckPartiallyAuthorized(mockSecurityExt);
-    //   const authRecord: Record<string, AuthorizationTypeEntry> = {
-    //     find: { authorizedSpaces: [namespace] },
-    //   };
-    //   mockSecurityExt.checkAuthorization.mockResolvedValue({
-    //     status: 'partially_authorized',
-    //     typeMap: Object.freeze(new Map([[type, authRecord]])),
-    //   });
+    test(`calls es search with only authorized spaces when partially authorized`, async () => {
+      // Setup partial authorization with the specific type and space of the current test definition
+      const authRecord: Record<string, AuthorizationTypeEntry> = {
+        find: { authorizedSpaces: [namespace] },
+      };
+      mockSecurityExt.checkAuthorization.mockResolvedValue({
+        status: 'partially_authorized',
+        typeMap: Object.freeze(new Map([[type, authRecord]])),
+      });
 
-    //   await findSuccess(client, repository, { type, namespaces: [namespace, 'ns-1'] });
+      await findSuccess(client, repository, { type, namespaces: [namespace, 'ns-1'] });
+      expect(mockGetSearchDsl.mock.calls[0].length).toBe(3); // Find success verifies this is called once, this shouyld always pass
+      const {
+        typeToNamespacesMap: actualMap,
+      }: { typeToNamespacesMap: Map<string, string[] | undefined> } =
+        mockGetSearchDsl.mock.calls[0][2];
 
-    //   const { options: actualOptions }: { options: GetSearchDslOptions } =
-    //     mockGetSearchDsl.mock.calls[0][0].typeToNamespacesMap;
-
-    //   console.log(`CALLS: ${JSON.stringify(mockGetSearchDsl.mock.calls)}`);
-    //   // console.log(
-    //   //   `MAP: ${JSON.stringify(
-    //   //     JSON.stringify(mockGetSearchDsl.mock.calls[0][0].typeToNamespacesMap.get(type))
-    //   //   )}`
-    //   // );
-
-    //   // const actualMap: Map<string, string[] | undefined> =
-    //   //   mockGetSearchDsl.mock.calls[0][0].typeToNamespacesMap!;
-
-    //   expect(actualOptions.typeToNamespacesMap).toBeDefined();
-    //   // const actualMap: Map<string, string[] | undefined> =
-    //   //   mockGetSearchDsl.mock.calls[0][0].typeToNamespacesMap;
-    //   const expectedMap = new Map<string, string[] | undefined>();
-    //   expectedMap.set(type, [namespace]);
-    //   expect(namespaceMapsAreEqual(actualOptions.typeToNamespacesMap!, expectedMap)).toBeTruthy();
-    // });
+      expect(actualMap).toBeDefined();
+      const expectedMap = new Map<string, string[] | undefined>();
+      expectedMap.set(type, [namespace]);
+      expect(namespaceMapsAreEqual(actualMap, expectedMap)).toBeTruthy();
+    });
 
     test(`returns result of es find when fully authorized`, async () => {
       setupCheckAuthorized(mockSecurityExt);
