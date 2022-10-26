@@ -15,7 +15,6 @@ import {
   IngestPipelineParams,
   SyncStatus,
 } from '../../../../../common/types/connectors';
-import { ElasticsearchIndexWithIngestion } from '../../../../../common/types/indices';
 
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import {
@@ -78,7 +77,6 @@ export interface IndexViewValues {
   fetchIndexTimeoutId: NodeJS.Timeout | null;
   indexData: {
     index: ElasticsearchViewIndex | undefined;
-    indexApiData: ElasticsearchIndexWithIngestion | undefined;
   };
   indexName: string;
   ingestionMethod: IngestionMethod;
@@ -221,13 +219,15 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
       },
     ],
     indexData: [
-      { index: undefined, indexApiData: undefined },
+      { index: undefined },
       {
-        fetchIndexApiSuccess: (_, indexData) => ({
-          index: indexToViewIndex(indexData),
-          indexApiData: indexData,
-        }),
-        resetFetchIndexApi: () => ({ index: undefined, indexApiData: undefined }),
+        fetchIndexApiSuccess: (_, indexData) => {
+          return {
+            index: indexToViewIndex(indexData),
+          };
+        },
+
+        resetFetchIndexApi: () => ({ index: undefined }),
       },
     ],
     localSyncNowValue: [

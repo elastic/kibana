@@ -10,7 +10,7 @@ import { apiIndex, connectorIndex, crawlerIndex } from '../../__mocks__/view_ind
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import { HttpError } from '../../../../../common/types/api';
+import { HttpError, Status } from '../../../../../common/types/api';
 
 import { SyncStatus } from '../../../../../common/types/connectors';
 import { StartSyncApiLogic } from '../../api/connector/start_sync_api_logic';
@@ -28,8 +28,8 @@ import { IndexViewLogic } from './index_view_logic';
 const DEFAULT_VALUES = {
   connectorId: null,
   data: undefined,
-  index: undefined,
-  indexData: { index: undefined },
+  fetchIndexApiStatus: Status.SUCCESS,
+  indexData: { index: { ingestionMethod: 'api', ingestionStatus: 0, lastUpdated: null } },
   indexName: '',
   ingestionMethod: IngestionMethod.API,
   ingestionStatus: IngestionStatus.CONNECTED,
@@ -45,7 +45,7 @@ const CONNECTOR_VALUES = {
   ...DEFAULT_VALUES,
   connectorId: connectorIndex.connector.id,
   data: connectorIndex,
-  index: indexToViewIndex(connectorIndex),
+  indexData: { index: indexToViewIndex(connectorIndex) },
   ingestionMethod: IngestionMethod.CONNECTOR,
   ingestionStatus: IngestionStatus.INCOMPLETE,
   lastUpdated: 'never',
@@ -90,14 +90,10 @@ describe('IndexViewLogic', () => {
               ...CONNECTOR_VALUES.data,
               connector: { ...CONNECTOR_VALUES.data.connector, sync_now: true },
             },
-            index: {
-              ...CONNECTOR_VALUES.index,
-              connector: { ...CONNECTOR_VALUES.index.connector, sync_now: true },
-            },
             indexData: {
               index: {
-                ...CONNECTOR_VALUES.index,
-                connector: { ...CONNECTOR_VALUES.index.connector, sync_now: true },
+                ...CONNECTOR_VALUES.indexData.index,
+                connector: { ...CONNECTOR_VALUES.indexData.index.connector, sync_now: true },
               },
             },
             isWaitingForSync: true,
@@ -114,7 +110,6 @@ describe('IndexViewLogic', () => {
           expect.objectContaining({
             ...DEFAULT_VALUES,
             data: apiIndex,
-            index: apiIndex,
             indexData: {
               index: apiIndex,
             },
@@ -224,6 +219,7 @@ describe('IndexViewLogic', () => {
       expect(IndexViewLogic.values).toEqual(
         expect.objectContaining({
           ...DEFAULT_VALUES,
+          fetchIndexApiStatus: Status.LOADING,
           recheckIndexLoading: true,
         })
       );
@@ -234,6 +230,7 @@ describe('IndexViewLogic', () => {
       expect(IndexViewLogic.values).toEqual(
         expect.objectContaining({
           ...DEFAULT_VALUES,
+          fetchIndexApiStatus: Status.LOADING,
           recheckIndexLoading: false,
         })
       );
