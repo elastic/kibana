@@ -67,8 +67,10 @@ const TopNav = ({
   const [navigateToLens, setNavigateToLens] = useState(false);
 
   const selectedDataView = vis.data.indexPattern;
-  const [adHocDataViews] = useState(
-    selectedDataView && !selectedDataView.isPersisted() ? [selectedDataView] : []
+  const adHocDataViews = useMemo(
+    () => (selectedDataView && !selectedDataView.isPersisted() ? [selectedDataView] : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
   // If the user has clicked the edit in lens button, we want to hide the badge.
