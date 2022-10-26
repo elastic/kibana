@@ -14,14 +14,14 @@ import {
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { serviceGroupQuery } from '../../../lib/service_group_query';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getServicesFromErrorAndMetricDocuments({
   environment,
-  setup,
+  apmEventClient,
   maxNumServices,
   kuery,
   start,
@@ -29,7 +29,7 @@ export async function getServicesFromErrorAndMetricDocuments({
   serviceGroup,
   randomSampler,
 }: {
-  setup: Setup;
+  apmEventClient: APMEventClient;
   environment: string;
   maxNumServices: number;
   kuery: string;
@@ -38,8 +38,6 @@ export async function getServicesFromErrorAndMetricDocuments({
   serviceGroup: ServiceGroup | null;
   randomSampler: RandomSampler;
 }) {
-  const { apmEventClient } = setup;
-
   const response = await apmEventClient.search(
     'get_services_from_error_and_metric_documents',
     {
