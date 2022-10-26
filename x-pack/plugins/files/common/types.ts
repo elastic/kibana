@@ -119,6 +119,11 @@ export type BaseFileMetadata = {
   /**
    * ISO string representing when the file was last updated
    */
+  CreatedBy?: string;
+
+  /**
+   * ISO string representing when the file was last updated
+   */
   Updated?: string;
 
   /**
@@ -172,6 +177,10 @@ export interface FileJSON<Meta = unknown> {
    * ISO string of when the file was updated
    */
   updated: FileMetadata['Updated'];
+  /**
+   * User who created the file
+   */
+  createdBy: FileMetadata['CreatedBy'];
   /**
    * File name.
    *

@@ -42,6 +42,9 @@ const properties: Properties = {
   FileKind: {
     type: 'keyword',
   },
+  CreatedBy: {
+    type: 'keyword',
+  },
 };
 
 export const fileObjectType: SavedObjectsType<FileMetadata> = {
