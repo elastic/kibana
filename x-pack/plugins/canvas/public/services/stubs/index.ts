@@ -15,6 +15,7 @@ import {
 
 import { CanvasPluginServices } from '..';
 import { customElementServiceFactory } from './custom_element';
+import { dataViewsServiceFactory } from './data_views';
 import { embeddablesServiceFactory } from './embeddables';
 import { expressionsServiceFactory } from './expressions';
 import { labsServiceFactory } from './labs';
@@ -27,6 +28,7 @@ import { workpadServiceFactory } from './workpad';
 import { filtersServiceFactory } from './filters';
 
 export { customElementServiceFactory } from './custom_element';
+export { dataViewsServiceFactory } from './data_views';
 export { expressionsServiceFactory } from './expressions';
 export { filtersServiceFactory } from './filters';
 export { labsServiceFactory } from './labs';
@@ -39,6 +41,7 @@ export { workpadServiceFactory } from './workpad';
 
 export const pluginServiceProviders: PluginServiceProviders<CanvasPluginServices> = {
   customElement: new PluginServiceProvider(customElementServiceFactory),
+  dataViews: new PluginServiceProvider(dataViewsServiceFactory),
   embeddables: new PluginServiceProvider(embeddablesServiceFactory),
   expressions: new PluginServiceProvider(expressionsServiceFactory, ['filters', 'notify']),
   filters: new PluginServiceProvider(filtersServiceFactory),
