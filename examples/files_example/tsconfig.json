@@ -6,17 +6,15 @@
   "include": [
     "index.ts",
     "common/**/*",
-    "public/**/*",
-    "server/**/*",
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
-    "../../../typings/**/*"
+    "../../typings/**/*"
   ],
   "exclude": [],
   "references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../../plugins/files/tsconfig.json" },
-    { "path": "../../../examples/developer_examples/tsconfig.json" }
+    { "path": "../../src/core/tsconfig.json" },
+    { "path": "../developer_examples/tsconfig.json" },
+    { "path": "../../src/plugins/files/tsconfig.json" },
   ]
 }
