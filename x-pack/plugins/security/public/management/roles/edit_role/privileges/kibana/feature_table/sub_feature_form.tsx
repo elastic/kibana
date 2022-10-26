@@ -13,7 +13,7 @@ import {
   EuiIconTip,
   EuiText,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -40,7 +40,7 @@ export const SubFeatureForm = (props: Props) => {
     .getPrivilegeGroups()
     .filter((group) => group.privileges.length > 0);
 
-  const tooltip = useMemo(() => {
+  const getTooltip = () => {
     if (!props.subFeature.privilegesTooltip) {
       return null;
     }
@@ -59,7 +59,7 @@ export const SubFeatureForm = (props: Props) => {
         content={tooltipContent}
       />
     );
-  }, [props.subFeature.privilegesTooltip]);
+  };
 
   if (groupsWithPrivileges.length === 0) {
     return null;
@@ -69,7 +69,7 @@ export const SubFeatureForm = (props: Props) => {
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiText size="s">
-          {props.subFeature.name} {tooltip}
+          {props.subFeature.name} {getTooltip()}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>{groupsWithPrivileges.map(renderPrivilegeGroup)}</EuiFlexItem>
