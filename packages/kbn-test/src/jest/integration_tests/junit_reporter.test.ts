@@ -26,8 +26,7 @@ afterAll(async () => {
 });
 
 const parseXml = promisify(xml2js.parseString);
-// FLAKY https://github.com/elastic/kibana/issues/143993
-it.skip(
+it(
   'produces a valid junit report for failures',
   async () => {
     const result = await execa(
