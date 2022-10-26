@@ -6,7 +6,7 @@
  */
 
 import Mustache from 'mustache';
-import { isString, isPlainObject, cloneDeepWith } from 'lodash';
+import { isString, isPlainObject, cloneDeepWith, merge } from 'lodash';
 
 export type Escape = 'markdown' | 'slack' | 'json' | 'none';
 type Variables = Record<string, unknown>;
@@ -57,11 +57,9 @@ export function renderMustacheObject<Params>(params: Params, variables: Variable
 // return variables cloned, with a toString() added to objects
 function augmentObjectVariables(variables: Variables): Variables {
   // convert context variables with '.' in the name to objects
-  if (variables.context) {
-    convertDotVariables(variables.context as Variables);
-  }
 
   const result = JSON.parse(JSON.stringify(variables));
+  convertDotVariables(result);
   addToStringDeep(result);
   return result;
 }
@@ -69,8 +67,8 @@ function augmentObjectVariables(variables: Variables): Variables {
 function convertDotVariables(variables: Variables) {
   Object.keys(variables).forEach((key) => {
     if (key.includes('.')) {
-      const { k, v } = buildObject(key, variables[key]);
-      variables[k] = v;
+      const obj = buildObject(key, variables[key]);
+      variables = merge(variables, obj);
     }
     if (typeof variables[key] === 'object' && variables[key] != null) {
       convertDotVariables(variables[key] as Variables);
@@ -87,8 +85,7 @@ function buildObject(key: string, value: unknown) {
     tempObject[k] = index === length ? value : ({} as unknown);
     tempObject = tempObject[k] as Variables;
   });
-  const k = splits[0];
-  return { k, v: newObject[k] };
+  return newObject;
 }
 
 function addToStringDeep(object: unknown): void {
