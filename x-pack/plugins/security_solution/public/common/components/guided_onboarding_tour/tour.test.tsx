@@ -12,6 +12,14 @@ import { SecurityStepId, securityTourConfig } from './tour_config';
 import { useKibana } from '../../lib/kibana';
 
 jest.mock('../../lib/kibana');
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+
+  return {
+    ...original,
+    useLocation: jest.fn().mockReturnValue({ pathname: '/alerts' }),
+  };
+});
 
 describe('useTourContext', () => {
   const mockCompleteGuideStep = jest.fn();
@@ -80,48 +88,6 @@ describe('useTourContext', () => {
         result.current.incrementStep(stepId);
         expect(result.current.activeStep).toBe(1);
       });
-    });
-  });
-  it('when the tourStatus changes, reset active step to 1', async () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        guidedOnboarding: {
-          guidedOnboardingApi: {
-            isGuideStepActive$: (_: string, currentStep: SecurityStepId) =>
-              of(currentStep === SecurityStepId.alertsCases),
-          },
-        },
-      },
-    });
-    await act(async () => {
-      const { result, waitForNextUpdate, rerender } = renderHook(() => useTourContext(), {
-        wrapper: TourContextProvider,
-      });
-      await waitForNextUpdate();
-
-      // set SecurityStepId.alertsCases activeStep to 3
-      result.current.incrementStep(SecurityStepId.alertsCases, 3);
-      expect(result.current.activeStep).toBe(3);
-      expect(result.current.isTourShown(SecurityStepId.alertsCases)).toBe(true);
-      expect(result.current.isTourShown(SecurityStepId.rules)).toBe(false);
-
-      // update active step to be SecurityStepId.rules
-      (useKibana as jest.Mock).mockReturnValue({
-        services: {
-          guidedOnboarding: {
-            guidedOnboardingApi: {
-              isGuideStepActive$: (_: string, currentStep: SecurityStepId) =>
-                of(currentStep === SecurityStepId.rules),
-            },
-          },
-        },
-      });
-      rerender();
-
-      // check that activeStep has been reset
-      expect(result.current.activeStep).toBe(1);
-      expect(result.current.isTourShown(SecurityStepId.alertsCases)).toBe(false);
-      expect(result.current.isTourShown(SecurityStepId.rules)).toBe(true);
     });
   });
 });
