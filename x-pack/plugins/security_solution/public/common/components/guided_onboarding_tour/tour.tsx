@@ -68,10 +68,6 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
     );
   }, []);
 
-  const resetStep = useCallback(() => {
-    _setActiveStep(1);
-  }, []);
-
   // TODO: @Steph figure out if we're allowing user to skip tour or not, implement this if so
   // const onSkipTour = useCallback((stepId: SecurityStepId) => {
   //   // active state means the user is on this step but has not yet begun. so when the user hits skip,
@@ -79,23 +75,29 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
   //   // guidedOnboardingApi.idkSetStepTo(stepId, 'active')
   // }, []);
 
-  const [isMounted, setIsMounted] = useState(true);
+  const [completeStep, setCompleteStep] = useState<null | SecurityStepId>(null);
 
   useEffect(() => {
-    return () => {
-      setIsMounted(false);
-    };
-  }, []);
-
-  const endTourStep = useCallback(
-    async (stepId: SecurityStepId) => {
-      await guidedOnboardingApi?.completeGuideStep('security', stepId);
-      if (isMounted) {
-        resetStep();
+    if (!completeStep || !guidedOnboardingApi) {
+      return;
+    }
+    let ignore = false;
+    const complete = async () => {
+      await guidedOnboardingApi.completeGuideStep('security', completeStep);
+      if (!ignore) {
+        setCompleteStep(null);
+        _setActiveStep(1);
       }
-    },
-    [resetStep, guidedOnboardingApi, isMounted]
-  );
+    };
+    complete();
+    return () => {
+      ignore = true;
+    };
+  }, [completeStep, guidedOnboardingApi]);
+
+  const endTourStep = useCallback((stepId: SecurityStepId) => {
+    setCompleteStep(stepId);
+  }, []);
 
   const context = {
     activeStep,
