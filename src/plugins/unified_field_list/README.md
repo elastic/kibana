@@ -92,7 +92,7 @@ const { fieldGroups } = useGroupedFields({
 <FieldListGrouped
   fieldGroups={fieldGroups}
   fieldsExistenceStatus={fieldsExistenceReader.getFieldsExistenceStatus(currentDataViewId)}
-  existFieldsInIndex={!!allFields.length}
+  fieldsExistInIndex={!!allFields.length}
   renderFieldItem={renderFieldItem}
   screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
 />

@@ -18,19 +18,19 @@ const defaultNoFieldsMessageCopy = i18n.translate(
 );
 
 export const NoFieldsCallout = ({
-  existFieldsInIndex,
+  fieldsExistInIndex,
   defaultNoFieldsMessage = defaultNoFieldsMessageCopy,
   isAffectedByFieldFilter = false,
   isAffectedByTimerange = false,
   isAffectedByGlobalFilter = false,
 }: {
-  existFieldsInIndex: boolean;
+  fieldsExistInIndex: boolean;
   isAffectedByFieldFilter?: boolean;
   defaultNoFieldsMessage?: string;
   isAffectedByTimerange?: boolean;
   isAffectedByGlobalFilter?: boolean;
 }) => {
-  if (!existFieldsInIndex) {
+  if (!fieldsExistInIndex) {
     return (
       <EuiCallOut
         size="s"

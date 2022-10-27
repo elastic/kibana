@@ -44,7 +44,7 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     defaultProps = {
       fieldGroups: {},
       fieldsExistenceStatus: ExistenceFetchStatus.succeeded,
-      existFieldsInIndex: true,
+      fieldsExistInIndex: true,
       screenReaderDescriptionForSearchInputId: 'testId',
       renderFieldItem: jest.fn(({ field, itemIndex, groupIndex }) => (
         <EuiText
@@ -181,7 +181,7 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     const wrapper = await mountGroupedList({
       listProps: {
         ...defaultProps,
-        existFieldsInIndex: false,
+        fieldsExistInIndex: false,
         fieldsExistenceStatus: ExistenceFetchStatus.failed,
       },
       hookParams: {
@@ -196,7 +196,7 @@ describe('UnifiedFieldList <FieldListGrouped /> + useGroupedFields()', () => {
     expect(wrapper.find(FieldsAccordion)).toHaveLength(3);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(0);
     expect(
-      wrapper.find(NoFieldsCallout).map((callout) => callout.prop('existFieldsInIndex'))
+      wrapper.find(NoFieldsCallout).map((callout) => callout.prop('fieldsExistInIndex'))
     ).toStrictEqual([false, false, false]);
   });
 

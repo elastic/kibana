@@ -31,7 +31,7 @@ function getDisplayedFieldsLength<T extends FieldListItem>(
 export interface FieldListGroupedProps<T extends FieldListItem> {
   fieldGroups: FieldListGroups<T>;
   fieldsExistenceStatus: ExistenceFetchStatus;
-  existFieldsInIndex: boolean;
+  fieldsExistInIndex: boolean;
   renderFieldItem: FieldsAccordionProps<T>['renderFieldItem'];
   screenReaderDescriptionForSearchInputId?: string;
 }
@@ -39,7 +39,7 @@ export interface FieldListGroupedProps<T extends FieldListItem> {
 function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   fieldGroups,
   fieldsExistenceStatus,
-  existFieldsInIndex,
+  fieldsExistInIndex,
   renderFieldItem,
   screenReaderDescriptionForSearchInputId,
 }: FieldListGroupedProps<T>) {
@@ -220,7 +220,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                     isAffectedByGlobalFilter={fieldGroup.isAffectedByGlobalFilter}
                     isAffectedByTimerange={fieldGroup.isAffectedByTimeFilter}
                     isAffectedByFieldFilter={fieldGroup.fieldCount !== fieldGroup.fields.length}
-                    existFieldsInIndex={!!existFieldsInIndex}
+                    fieldsExistInIndex={!!fieldsExistInIndex}
                     defaultNoFieldsMessage={fieldGroup.defaultNoFieldsMessage}
                   />
                 )}

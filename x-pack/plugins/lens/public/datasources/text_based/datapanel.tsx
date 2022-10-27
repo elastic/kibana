@@ -199,7 +199,7 @@ export function TextBasedDataPanel({
               fieldsExistenceStatus={
                 dataHasLoaded ? ExistenceFetchStatus.succeeded : ExistenceFetchStatus.unknown
               }
-              existFieldsInIndex={Boolean(fieldList.length)}
+              fieldsExistInIndex={Boolean(fieldList.length)}
               renderFieldItem={renderFieldItem}
               screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
             />

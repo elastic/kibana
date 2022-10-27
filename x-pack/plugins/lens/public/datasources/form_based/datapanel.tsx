@@ -618,7 +618,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
           <FieldListGrouped<IndexPatternField>
             fieldGroups={fieldGroups}
             fieldsExistenceStatus={fieldsExistenceStatus}
-            existFieldsInIndex={!!allFields.length}
+            fieldsExistInIndex={!!allFields.length}
             renderFieldItem={renderFieldItem}
             screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
           />
