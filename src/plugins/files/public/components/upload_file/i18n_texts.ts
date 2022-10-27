@@ -9,32 +9,32 @@
 import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
-  defaultPickerLabel: i18n.translate('xpack.files.uploadFile.defaultFilePickerLabel', {
+  defaultPickerLabel: i18n.translate('files.uploadFile.defaultFilePickerLabel', {
     defaultMessage: 'Upload a file',
   }),
-  upload: i18n.translate('xpack.files.uploadFile.uploadButtonLabel', {
+  upload: i18n.translate('files.uploadFile.uploadButtonLabel', {
     defaultMessage: 'Upload',
   }),
-  uploading: i18n.translate('xpack.files.uploadFile.uploadingButtonLabel', {
+  uploading: i18n.translate('files.uploadFile.uploadingButtonLabel', {
     defaultMessage: 'Uploading',
   }),
-  uploadComplete: i18n.translate('xpack.files.uploadFile.uploadCompleteButtonLabel', {
+  uploadComplete: i18n.translate('files.uploadFile.uploadCompleteButtonLabel', {
     defaultMessage: 'Upload complete',
   }),
-  retry: i18n.translate('xpack.files.uploadFile.retryButtonLabel', {
+  retry: i18n.translate('files.uploadFile.retryButtonLabel', {
     defaultMessage: 'Retry',
   }),
-  clear: i18n.translate('xpack.files.uploadFile.clearButtonLabel', {
+  clear: i18n.translate('files.uploadFile.clearButtonLabel', {
     defaultMessage: 'Clear',
   }),
-  cancel: i18n.translate('xpack.files.uploadFile.cancelButtonLabel', {
+  cancel: i18n.translate('files.uploadFile.cancelButtonLabel', {
     defaultMessage: 'Cancel',
   }),
-  uploadDone: i18n.translate('xpack.files.uploadFile.uploadDoneToolTipContent', {
+  uploadDone: i18n.translate('files.uploadFile.uploadDoneToolTipContent', {
     defaultMessage: 'Your file was successfully uploaded!',
   }),
   fileTooLarge: (expectedSize: string) =>
-    i18n.translate('xpack.files.uploadFile.fileTooLargeErrorMessage', {
+    i18n.translate('files.uploadFile.fileTooLargeErrorMessage', {
       defaultMessage:
         'File is too large. Maximum size is {expectedSize, plural, one {# byte} other {# bytes} }.',
       values: { expectedSize },

@@ -16,14 +16,14 @@ import { hiddenTypes } from './saved_objects';
 // TODO: This should be registered once we have a management section for files content
 export const filesFeature: KibanaFeatureConfig = {
   id: PLUGIN_ID,
-  name: i18n.translate('xpack.files.featureRegistry.filesFeatureName', {
+  name: i18n.translate('files.featureRegistry.filesFeatureName', {
     defaultMessage: 'Files',
   }),
   minimumLicense: 'basic',
   order: 10000,
   category: DEFAULT_APP_CATEGORIES.management,
   app: [PLUGIN_ID],
-  privilegesTooltip: i18n.translate('xpack.files.featureRegistry.filesPrivilegesTooltip', {
+  privilegesTooltip: i18n.translate('files.featureRegistry.filesPrivilegesTooltip', {
     defaultMessage: 'Provide access to files across all apps',
   }),
   privileges: {

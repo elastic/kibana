@@ -9,39 +9,39 @@
 import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
-  title: i18n.translate('xpack.files.filePicker.title', {
+  title: i18n.translate('files.filePicker.title', {
     defaultMessage: 'Select a file',
   }),
-  loadingFilesErrorTitle: i18n.translate('xpack.files.filePicker.error.loadingTitle', {
+  loadingFilesErrorTitle: i18n.translate('files.filePicker.error.loadingTitle', {
     defaultMessage: 'Could not load files',
   }),
-  retryButtonLabel: i18n.translate('xpack.files.filePicker.error.retryButtonLabel', {
+  retryButtonLabel: i18n.translate('files.filePicker.error.retryButtonLabel', {
     defaultMessage: 'Retry',
   }),
-  emptyStatePrompt: i18n.translate('xpack.files.filePicker.emptyStatePrompt', {
+  emptyStatePrompt: i18n.translate('files.filePicker.emptyStatePrompt', {
     defaultMessage: 'No files found',
   }),
-  emptyStatePromptSubtitle: i18n.translate('xpack.files.filePicker.emptyStatePromptSubtitle', {
+  emptyStatePromptSubtitle: i18n.translate('files.filePicker.emptyStatePromptSubtitle', {
     defaultMessage: 'Upload your first file.',
   }),
-  selectFileLabel: i18n.translate('xpack.files.filePicker.selectFileButtonLable', {
+  selectFileLabel: i18n.translate('files.filePicker.selectFileButtonLable', {
     defaultMessage: 'Select file',
   }),
   selectFilesLabel: (nrOfFiles: number) =>
-    i18n.translate('xpack.files.filePicker.selectFilesButtonLable', {
+    i18n.translate('files.filePicker.selectFilesButtonLable', {
       defaultMessage: 'Select {nrOfFiles} files',
       values: { nrOfFiles },
     }),
-  searchFieldPlaceholder: i18n.translate('xpack.files.filePicker.searchFieldPlaceholder', {
+  searchFieldPlaceholder: i18n.translate('files.filePicker.searchFieldPlaceholder', {
     defaultMessage: 'my-file-*',
   }),
-  emptyFileGridPrompt: i18n.translate('xpack.files.filePicker.emptyGridPrompt', {
+  emptyFileGridPrompt: i18n.translate('files.filePicker.emptyGridPrompt', {
     defaultMessage: 'No files matched filter',
   }),
-  loadMoreButtonLabel: i18n.translate('xpack.files.filePicker.loadMoreButtonLabel', {
+  loadMoreButtonLabel: i18n.translate('files.filePicker.loadMoreButtonLabel', {
     defaultMessage: 'Load more',
   }),
-  clearFilterButton: i18n.translate('xpack.files.filePicker.clearFilterButtonLabel', {
+  clearFilterButton: i18n.translate('files.filePicker.clearFilterButtonLabel', {
     defaultMessage: 'Clear filter',
   }),
 };
