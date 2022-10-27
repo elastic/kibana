@@ -332,8 +332,7 @@ export async function getAggregatedCriticalPath({
                 "metadata": metadata,
                 "nodes": nodes,
                 "rootNodes": rootNodes,
-                "operationIdByNodeId": operationIdByNodeId,
-                "processedEvents": processedEvents
+                "operationIdByNodeId": operationIdByNodeId
               ];
               `,
             },
