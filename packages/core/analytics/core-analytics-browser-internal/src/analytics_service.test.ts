@@ -62,7 +62,7 @@ describe('AnalyticsService', () => {
   });
 
   test('should register the `performance_metric` and `click` event types on creation', () => {
-    expect(analyticsClientMock.registerEventType).toHaveBeenCalledTimes(3);
+    expect(analyticsClientMock.registerEventType).toHaveBeenCalledTimes(5);
     expect(findRegisteredEventTypeByName('performance_metric')).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -200,6 +200,49 @@ describe('AnalyticsService', () => {
         },
       ]
     `);
+    expect(findRegisteredEventTypeByName('subscription__upsell__click')).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "eventType": "subscription__upsell__click",
+          "schema": Object {
+            "feature": Object {
+              "_meta": Object {
+                "description": "A human-readable identifier describing the feature that is being promoted",
+              },
+              "type": "keyword",
+            },
+            "source": Object {
+              "_meta": Object {
+                "description": "A human-readable identifier describing the location of the beginning of the subscription flow",
+              },
+              "type": "keyword",
+            },
+          },
+        },
+      ]
+    `);
+    expect(findRegisteredEventTypeByName('subscription__upsell__impression'))
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "eventType": "subscription__upsell__impression",
+          "schema": Object {
+            "feature": Object {
+              "_meta": Object {
+                "description": "A human-readable identifier describing the feature that is being promoted",
+              },
+              "type": "keyword",
+            },
+            "source": Object {
+              "_meta": Object {
+                "description": "A human-readable identifier describing the location of the beginning of the subscription flow",
+              },
+              "type": "keyword",
+            },
+          },
+        },
+      ]
+    `);
   });
 
   test('setup should expose all the register APIs, reportEvent and opt-in', () => {
@@ -208,7 +251,6 @@ describe('AnalyticsService', () => {
       registerShipper: expect.any(Function),
       registerContextProvider: expect.any(Function),
       removeContextProvider: expect.any(Function),
-      isEventTypeRegistered: expect.any(Function),
       registerEventType: expect.any(Function),
       reportEvent: expect.any(Function),
       optIn: expect.any(Function),

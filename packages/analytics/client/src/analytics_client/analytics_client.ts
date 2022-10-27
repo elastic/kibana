@@ -155,12 +155,8 @@ export class AnalyticsClient implements IAnalyticsClient {
     }
   };
 
-  public isEventTypeRegistered = (eventType: string) => {
-    return !!this.eventTypeRegistry.get(eventType);
-  };
-
   public registerEventType = <EventTypeData>(eventTypeOps: EventTypeOpts<EventTypeData>) => {
-    if (this.isEventTypeRegistered(eventTypeOps.eventType)) {
+    if (this.eventTypeRegistry.get(eventTypeOps.eventType)) {
       throw new Error(`Event Type "${eventTypeOps.eventType}" is already registered.`);
     }
 

@@ -178,12 +178,6 @@ export interface IAnalyticsClient {
   ) => void;
 
   /**
-   * Checks wherter an event type has already been registered.
-   * @param eventType The event type that might have been registered.
-   */
-  isEventTypeRegistered: (eventType: EventType) => boolean;
-
-  /**
    * Registers the event type that will be emitted via the reportEvent API.
    * @param eventTypeOps The definition of the event type {@link EventTypeOpts}.
    */

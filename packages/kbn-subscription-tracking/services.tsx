@@ -27,7 +27,6 @@ export const SubscriptionTrackingProvider: FC<Services> = ({ children, ...servic
 const analyticsClientMock: AnalyticsClient = {
   optIn: () => {},
   reportEvent: () => {},
-  isEventTypeRegistered: () => false,
   registerEventType: () => {},
   registerContextProvider: () => {},
   removeContextProvider: () => {},
@@ -81,20 +80,14 @@ const subscriptionContextSchema: EventTypeOpts<SubscriptionContext>['schema'] = 
 /**
  * Registers the subscription-specific event types
  */
-export function registerEvents(
-  analyticsClient: Pick<AnalyticsClient, 'registerEventType' | 'isEventTypeRegistered'>
-) {
-  if (!analyticsClient.isEventTypeRegistered(EVENT_NAMES.IMPRESSION)) {
-    analyticsClient.registerEventType<SubscriptionContext>({
-      eventType: EVENT_NAMES.IMPRESSION,
-      schema: subscriptionContextSchema,
-    });
-  }
+export function registerEvents(analyticsClient: Pick<AnalyticsClient, 'registerEventType'>) {
+  analyticsClient.registerEventType<SubscriptionContext>({
+    eventType: EVENT_NAMES.IMPRESSION,
+    schema: subscriptionContextSchema,
+  });
 
-  if (!analyticsClient.isEventTypeRegistered(EVENT_NAMES.CLICK)) {
-    analyticsClient.registerEventType<SubscriptionContext>({
-      eventType: EVENT_NAMES.CLICK,
-      schema: subscriptionContextSchema,
-    });
-  }
+  analyticsClient.registerEventType<SubscriptionContext>({
+    eventType: EVENT_NAMES.CLICK,
+    schema: subscriptionContextSchema,
+  });
 }

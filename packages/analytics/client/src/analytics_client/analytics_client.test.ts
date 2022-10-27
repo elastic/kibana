@@ -35,24 +35,6 @@ describe('AnalyticsClient', () => {
     jest.useRealTimers();
   });
 
-  describe('isEventTypeRegistered', () => {
-    test('checks if an event type has been regiestered or not', () => {
-      analyticsClient.registerEventType({
-        eventType: 'testEvent',
-        schema: {
-          a_field: {
-            type: 'keyword',
-            _meta: {
-              description: 'description of a_field',
-            },
-          },
-        },
-      });
-      expect(analyticsClient.isEventTypeRegistered('testEvent')).toBeTruthy();
-      expect(analyticsClient.isEventTypeRegistered('does not exist')).toBeFalsy();
-    });
-  });
-
   describe('registerEventType', () => {
     test('successfully registers a event type', () => {
       analyticsClient.registerEventType({

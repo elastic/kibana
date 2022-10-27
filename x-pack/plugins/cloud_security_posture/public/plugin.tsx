@@ -8,10 +8,7 @@ import React, { lazy, Suspense } from 'react';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import {
-  registerEvents as registerSubscriptionEvents,
-  SubscriptionTrackingProvider,
-} from '@kbn/subscription-tracking';
+import { SubscriptionTrackingProvider } from '@kbn/subscription-tracking';
 import { CspLoadingState } from './components/csp_loading_state';
 import type { CspRouterProps } from './application/csp_router';
 import type {
@@ -54,7 +51,6 @@ export class CspPlugin
     plugins: CspClientPluginSetupDeps
   ): CspClientPluginSetup {
     this.isCloudEnabled = plugins.cloud.isCloudEnabled;
-    registerSubscriptionEvents(core.analytics);
     // Return methods that should be available to other plugins
     return {};
   }

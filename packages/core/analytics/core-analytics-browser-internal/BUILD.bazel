@@ -40,6 +40,7 @@ RUNTIME_DEPS = [
   "@npm//uuid",
   "//packages/analytics/client",
   "//packages/kbn-ebt-tools",
+  "//packages/kbn-subscription-tracking",
   "//packages/core/base/core-base-browser-mocks",
   "//packages/core/injected-metadata/core-injected-metadata-browser-mocks",
 ]
@@ -52,6 +53,7 @@ TYPES_DEPS = [
   "//packages/kbn-logging:npm_module_types",
   "//packages/analytics/client:npm_module_types",
   "//packages/kbn-ebt-tools:npm_module_types",
+  "//packages/kbn-subscription-tracking:npm_module_types",
   "//packages/core/base/core-base-browser-internal:npm_module_types",
   "//packages/core/injected-metadata/core-injected-metadata-browser-internal:npm_module_types",
   "//packages/core/analytics/core-analytics-browser:npm_module_types",

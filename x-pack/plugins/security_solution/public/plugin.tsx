@@ -19,7 +19,6 @@ import type {
   Plugin as IPlugin,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
-import { registerEvents as registerSubscriptionEvents } from '@kbn/subscription-tracking';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type {
   PluginSetup,
@@ -100,8 +99,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
       APP_UI_ID
     );
-
-    registerSubscriptionEvents(core.analytics);
 
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({

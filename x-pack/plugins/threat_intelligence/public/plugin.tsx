@@ -7,10 +7,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import {
-  registerEvents as registerSubscriptionEvents,
-  SubscriptionTrackingProvider,
-} from '@kbn/subscription-tracking';
+import { SubscriptionTrackingProvider } from '@kbn/subscription-tracking';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -60,7 +57,6 @@ export const createApp =
 
 export class ThreatIntelligencePlugin implements Plugin<void, void> {
   public async setup(core: CoreSetup): Promise<ThreatIntelligencePluginSetup> {
-    registerSubscriptionEvents(core.analytics);
     return {};
   }
 

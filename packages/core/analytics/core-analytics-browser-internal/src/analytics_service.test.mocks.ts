@@ -12,7 +12,6 @@ import { Subject } from 'rxjs';
 export const analyticsClientMock: jest.Mocked<AnalyticsClient> = {
   optIn: jest.fn(),
   reportEvent: jest.fn(),
-  isEventTypeRegistered: jest.fn(),
   registerEventType: jest.fn(),
   registerContextProvider: jest.fn(),
   removeContextProvider: jest.fn(),
