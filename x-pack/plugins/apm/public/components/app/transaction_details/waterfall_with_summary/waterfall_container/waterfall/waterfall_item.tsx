@@ -277,7 +277,8 @@ function RelatedErrors({
   const theme = useTheme();
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
-    '/traces/explorer'
+    '/traces/explorer',
+    '/dependencies/operation'
   );
 
   let kuery = `${TRACE_ID} : "${item.doc.trace.id}"`;
