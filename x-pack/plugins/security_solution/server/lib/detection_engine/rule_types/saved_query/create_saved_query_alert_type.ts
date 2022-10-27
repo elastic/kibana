@@ -9,16 +9,18 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
-import type { CompleteRule, UnifiedQueryRuleParams } from '../../rule_schema';
+import type { UnifiedQueryRuleParams } from '../../rule_schema';
 import { unifiedQueryRuleParams } from '../../rule_schema';
 import { queryExecutor } from '../../signals/executors/query';
+import type { QueryRuleState } from '../query/create_query_alert_type';
 import type { CreateQueryRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';
 
 export const createSavedQueryAlertType = (
   createOptions: CreateQueryRuleOptions
-): SecurityAlertType<UnifiedQueryRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, version, osqueryCreateAction, licensing } = createOptions;
+): SecurityAlertType<UnifiedQueryRuleParams, QueryRuleState, {}, 'default'> => {
+  const { eventsTelemetry, experimentalFeatures, version, osqueryCreateAction, licensing } =
+    createOptions;
   return {
     id: SAVED_QUERY_RULE_TYPE_ID,
     name: 'Saved Query Rule',
@@ -61,44 +63,16 @@ export const createSavedQueryAlertType = (
     isExportable: false,
     producer: SERVER_APP_ID,
     async executor(execOptions) {
-      const {
-        runOpts: {
-          inputIndex,
-          runtimeMappings,
-          completeRule,
-          tuple,
-          listClient,
-          ruleExecutionLogger,
-          searchAfterSize,
-          bulkCreate,
-          wrapHits,
-          primaryTimestamp,
-          secondaryTimestamp,
-          exceptionFilter,
-          unprocessedExceptions,
-        },
-        services,
-        state,
-      } = execOptions;
+      const { runOpts, services, spaceId, state } = execOptions;
 
       const result = await queryExecutor({
-        inputIndex,
-        runtimeMappings,
-        completeRule: completeRule as CompleteRule<UnifiedQueryRuleParams>,
-        tuple,
+        runOpts,
         experimentalFeatures,
-        listClient,
-        ruleExecutionLogger,
-        eventsTelemetry: undefined,
+        eventsTelemetry,
         services,
         version,
-        searchAfterSize,
-        bulkCreate,
-        wrapHits,
-        primaryTimestamp,
-        secondaryTimestamp,
-        exceptionFilter,
-        unprocessedExceptions,
+        spaceId,
+        bucketHistory: state.throttleGroupHistory,
         osqueryCreateAction,
         licensing,
       });
