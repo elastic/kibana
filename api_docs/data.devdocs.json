@@ -1402,6 +1402,36 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.AggConfigs.samplerConfig",
+            "type": "Object",
+            "tags": [],
+            "label": "samplerConfig",
+            "description": [],
+            "signature": [
+              "{ probability: number; seed: number | undefined; }"
+            ],
+            "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.AggConfigs.isSamplingEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSamplingEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.AggConfigs.setTimeFields",
             "type": "Function",
             "tags": [],
@@ -11502,10 +11532,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "maps",
-              "path": "x-pack/plugins/maps/public/kibana_services.ts"
-            },
-            {
               "plugin": "infra",
               "path": "x-pack/plugins/infra/public/hooks/use_kibana_index_patterns.ts"
             },
@@ -11726,13 +11752,7 @@
             "text": "DataServerPlugin"
           },
           " implements ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "data",
@@ -11781,13 +11801,7 @@
                 "label": "initializerContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>>"
                 ],
                 "path": "src/plugins/data/server/plugin.ts",
@@ -11807,13 +11821,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<",
               "DataPluginStartDependencies",
               ", ",
@@ -11852,13 +11860,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<",
                   "DataPluginStartDependencies",
                   ", ",
@@ -11903,13 +11905,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", { fieldFormats, dataViews, taskManager }: ",
               "DataPluginStartDependencies",
               ") => { datatableUtilities: ",
@@ -11962,13 +11958,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/plugins/data/server/plugin.ts",
                 "deprecated": false,
@@ -12256,50 +12246,6 @@
                 "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/scaling_form.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/top_hits_form.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/trigger_actions/visualize_geo_field_action.ts"
-              },
-              {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/full_time_range_selector/full_time_range_selector_service.ts"
               },
@@ -12532,6 +12478,14 @@
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/services/kibana/data_views.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/services/kibana/data_views.ts"
+              },
+              {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
               },
@@ -12730,6 +12684,38 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/remove_nested_field_children.test.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_kpi.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/mobile_test_attribute.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
               },
               {
                 "plugin": "transform",
@@ -19728,50 +19714,6 @@
                 "path": "x-pack/plugins/infra/common/log_views/resolved_log_view.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_geo_grid_source/es_geo_grid_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/util/scaling_form.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/top_hits/top_hits_form.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/trigger_actions/visualize_geo_field_action.ts"
-              },
-              {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/full_time_range_selector/full_time_range_selector_service.ts"
               },
@@ -20004,6 +19946,14 @@
                 "path": "x-pack/plugins/apm/server/routes/data_view/create_static_data_view.ts"
               },
               {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/services/kibana/data_views.ts"
+              },
+              {
+                "plugin": "canvas",
+                "path": "x-pack/plugins/canvas/public/services/kibana/data_views.ts"
+              },
+              {
                 "plugin": "reporting",
                 "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
               },
@@ -20202,6 +20152,38 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/services/new_job_capabilities/remove_nested_field_children.test.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_kpi.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_with_reference_lines.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/test_formula_metric_attribute.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/lens_attributes/single_metric_attributes.test.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/mobile_test_attribute.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/test_data/sample_attribute_cwv.ts"
               },
               {
                 "plugin": "transform",

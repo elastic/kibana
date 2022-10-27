@@ -12,8 +12,14 @@ import {
   EuiSpacer,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
+  EuiCallOut,
+  EuiLink,
+  EuiButton,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
 import { ServicesTable } from './services_table';
 import { SearchBar } from '../../shared/search_bar';
@@ -22,18 +28,51 @@ import { PermissionDenied } from './prompts/permission_denied';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { SummaryStats } from './summary_stats';
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
+import { TipsAndResources } from './resources/tips_and_resources';
+import { useLocalStorage } from '../../../hooks/use_local_storage';
+import { getKibanaAdvancedSettingsHref } from './get_storage_explorer_links';
 
-const INITIAL_DATA = { hasPrivileges: false };
+type CalloutType = 'crossClusterSearch' | 'optimizePerformance';
+
+const CALLOUT_DISMISS_INITIAL_STATE: Record<CalloutType, boolean> = {
+  crossClusterSearch: false,
+  optimizePerformance: false,
+};
+
+const dismissButtonText = i18n.translate(
+  'xpack.apm.storageExplorer.callout.dimissButton',
+  {
+    defaultMessage: 'Dismiss',
+  }
+);
 
 export function StorageExplorer() {
-  const { data: { hasPrivileges } = INITIAL_DATA, status } = useFetcher(
+  const { core } = useApmPluginContext();
+
+  const [calloutDismissed, setCalloutDismissed] = useLocalStorage(
+    'apm.storageExplorer.calloutDismissed',
+    CALLOUT_DISMISS_INITIAL_STATE
+  );
+
+  const { data: hasPrivilegesData, status: hasPrivilegesStatus } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/storage_explorer/privileges');
     },
     []
   );
 
-  const loading = status === FETCH_STATUS.LOADING;
+  const { data: isCrossClusterSearchData } = useFetcher(
+    (callApmApi) => {
+      if (!calloutDismissed.crossClusterSearch) {
+        return callApmApi(
+          'GET /internal/apm/storage_explorer/is_cross_cluster_search'
+        );
+      }
+    },
+    [calloutDismissed]
+  );
+
+  const loading = hasPrivilegesStatus === FETCH_STATUS.LOADING;
 
   if (loading) {
     return (
@@ -51,7 +90,7 @@ export function StorageExplorer() {
     );
   }
 
-  if (!hasPrivileges) {
+  if (!hasPrivilegesData?.hasPrivileges) {
     return <PermissionDenied />;
   }
 
@@ -67,11 +106,94 @@ export function StorageExplorer() {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
+
+      {!calloutDismissed.optimizePerformance && (
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.apm.storageExplorer.longLoadingTimeCalloutTitle',
+            {
+              defaultMessage: 'Long loading time?',
+            }
+          )}
+          iconType="timeRefresh"
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.apm.storageExplorer.longLoadingTimeCalloutText"
+              defaultMessage="Enable progressive loading of data or optimized sorting for services list in {kibanaAdvancedSettingsLink}."
+              values={{
+                kibanaAdvancedSettingsLink: (
+                  <EuiLink href={getKibanaAdvancedSettingsHref(core)}>
+                    {i18n.translate(
+                      'xpack.apm.storageExplorer.longLoadingTimeCalloutLink',
+                      {
+                        defaultMessage: 'Kibana advanced settings',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+          <EuiButton
+            onClick={() =>
+              setCalloutDismissed({
+                ...calloutDismissed,
+                optimizePerformance: true,
+              })
+            }
+          >
+            {dismissButtonText}
+          </EuiButton>
+        </EuiCallOut>
+      )}
+
+      {!calloutDismissed.crossClusterSearch &&
+        isCrossClusterSearchData?.isCrossClusterSearch && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.apm.storageExplorer.crossClusterSearchCalloutTitle',
+                {
+                  defaultMessage: 'Searching across clusters?',
+                }
+              )}
+              iconType="search"
+            >
+              <p>
+                {i18n.translate(
+                  'xpack.apm.storageExplorer.crossClusterSearchCalloutText',
+                  {
+                    defaultMessage:
+                      'While getting document count works with cross-cluster search, index statistics such as size are only displayed for data that are stored in this cluster.',
+                  }
+                )}
+              </p>
+              <EuiButton
+                onClick={() =>
+                  setCalloutDismissed({
+                    ...calloutDismissed,
+                    crossClusterSearch: true,
+                  })
+                }
+              >
+                {dismissButtonText}
+              </EuiButton>
+            </EuiCallOut>
+          </>
+        )}
+
+      <EuiSpacer />
       <SummaryStats />
       <EuiSpacer />
-      <StorageChart />
+      <EuiPanel hasShadow={false} hasBorder={true}>
+        <StorageChart />
+        <EuiSpacer />
+        <ServicesTable />
+      </EuiPanel>
       <EuiSpacer />
-      <ServicesTable />
+      <TipsAndResources />
     </>
   );
 }
