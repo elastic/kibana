@@ -56,6 +56,7 @@ export function OperatorInput<TParams = unknown>({
       onChange={onOperatorChange}
       singleSelection={{ asPlainText: true }}
       isClearable={false}
+      data-test-subj="filterOperatorList"
     />
   );
 }

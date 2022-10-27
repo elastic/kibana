@@ -242,15 +242,17 @@ export function FilterItem({
                           </EuiFlexItem>
                           <EuiFlexItem grow={4}>
                             <EuiFormRow>
-                              <ParamsEditor
-                                dataView={dataView}
-                                field={field}
-                                operator={operator}
-                                params={params}
-                                onHandleParamsChange={onHandleParamsChange}
-                                onHandleParamsUpdate={onHandleParamsUpdate}
-                                timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-                              />
+                              <div data-test-subj="filterParams">
+                                <ParamsEditor
+                                  dataView={dataView}
+                                  field={field}
+                                  operator={operator}
+                                  params={params}
+                                  onHandleParamsChange={onHandleParamsChange}
+                                  onHandleParamsUpdate={onHandleParamsUpdate}
+                                  timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+                                />
+                              </div>
                             </EuiFormRow>
                           </EuiFlexItem>
                         </EuiFlexGroup>

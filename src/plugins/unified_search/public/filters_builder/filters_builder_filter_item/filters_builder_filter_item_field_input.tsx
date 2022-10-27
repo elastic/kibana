@@ -46,6 +46,7 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
       isClearable={false}
       compressed
       fullWidth
+      data-test-subj="filterFieldSuggestionList"
     />
   );
 }
