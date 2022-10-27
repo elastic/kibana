@@ -111,6 +111,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   renderMode?: RenderMode;
   style?: React.CSSProperties;
   className?: string;
+  metricAlignment?: 'left' | 'center';
   noPadding?: boolean;
   onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
   onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
@@ -643,7 +644,7 @@ export class Embeddable
     }
     super.render(domNode as HTMLElement);
     if (this.input.onLoad) {
-      this.input.onLoad(true, this.getInspectorAdapters());
+      this.input.onLoad(true);
     }
 
     this.domNode.setAttribute('data-shared-item', '');
