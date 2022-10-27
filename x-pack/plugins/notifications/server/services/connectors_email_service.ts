@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import type { UnsecuredActionsClient } from '@kbn/actions-plugin/server/unsecured_actions_client/unsecured_actions_client';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { EmailService, PlainTextEmail } from './types';
 
 export class ConnectorsEmailService implements EmailService {
   constructor(
     private requesterId: string,
     private connectorId: string,
-    private actionsClient: PublicMethodsOf<UnsecuredActionsClient>
+    private actionsClient: IUnsecuredActionsClient
   ) {}
 
   async sendPlainTextEmail(params: PlainTextEmail): Promise<void> {

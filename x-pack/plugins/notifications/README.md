@@ -8,8 +8,10 @@ The Notifications plugin provides a set of services to help Solutions and plugin
 
 The `start` function exposes the following interface:
 
-- `email: EmailService`:
-  A simple service that can be used to send plain text emails.
+- `isEmailServiceAvailable(): boolean`:
+  A function to check whether the deployment is properly configured and the EmailService can be correctly retrieved.
+- `getEmailService(): EmailService`:
+- A function to get the basic EmailService, which can be used to send plain text emails. If the EmailService is not available, trying to retrieve it will result in an Exception.
 
 
 ### Usage
@@ -41,8 +43,8 @@ class MyPlugin {
     core: CoreStart,
     { notifications }: MyPluginStartDeps
   ) {
-    const emailService = notifications.email;
-    if (emailService) {
+    if (notifications.isEmailServiceAvailable()) {
+      const emailService = notifications.getEmailService();
       emailService.sendPlainTextEmail({
           to: 'foo@bar.com',
           subject: 'Some subject',
