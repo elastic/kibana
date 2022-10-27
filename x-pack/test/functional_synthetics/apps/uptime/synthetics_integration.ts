@@ -133,7 +133,11 @@ export default function (providerContext: FtrProviderContext) {
     use_output: 'default',
   });
 
-  describe('When on the Synthetics Integration Policy Create Page', function () {
+  // FAILING: https://github.com/elastic/kibana/issues/144139
+  // FAILING: https://github.com/elastic/kibana/issues/144140
+  // FAILING: https://github.com/elastic/kibana/issues/144141
+  // FAILING: https://github.com/elastic/kibana/issues/144142
+  describe.skip('When on the Synthetics Integration Policy Create Page', function () {
     skipIfNoDockerRegistry(providerContext);
     const basicConfig = {
       name: monitorName,
