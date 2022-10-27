@@ -47,7 +47,7 @@ export function getInstanceColumns(
     {
       field: AgentExplorerInstanceFieldName.InstanceName,
       name: i18n.translate(
-        'xpack.apm.agentExplorerTable.serviceNameColumnLabel',
+        'xpack.apm.agentExplorerInstanceTable.InstanceColumnLabel',
         {
           defaultMessage: 'Instance',
         }
@@ -59,7 +59,7 @@ export function getInstanceColumns(
             ? {
                 displayedName: getServiceNodeName(serviceNode),
                 tooltip: i18n.translate(
-                  'xpack.apm.jvmsTable.explainServiceNodeNameMissing',
+                  'xpack.apm.agentExplorerInstanceTable.explainServiceNodeNameMissing',
                   {
                     defaultMessage:
                       'We could not identify which JVMs these metrics belong to. This is likely caused by running a version of APM Server that is older than 7.5. Upgrading to APM Server 7.5 or higher should resolve this issue.',
@@ -70,7 +70,7 @@ export function getInstanceColumns(
 
         return (
           <TruncateWithTooltip
-            data-test-subj="apmAgentExplorerListServiceLink"
+            data-test-subj="apmAgentExplorerInstanceListServiceLink"
             text={tooltip}
             content={
               <EuiFlexGroup
@@ -95,7 +95,7 @@ export function getInstanceColumns(
     {
       field: AgentExplorerInstanceFieldName.Environments,
       name: i18n.translate(
-        'xpack.apm.agentExplorerTable.environmentColumnLabel',
+        'xpack.apm.agentExplorerInstanceTable.environmentColumnLabel',
         {
           defaultMessage: 'Environment',
         }
@@ -109,7 +109,7 @@ export function getInstanceColumns(
     {
       field: AgentExplorerInstanceFieldName.AgentVersion,
       name: i18n.translate(
-        'xpack.apm.agentExplorerTable.agentVersionColumnLabel',
+        'xpack.apm.agentExplorerInstanceTable.agentVersionColumnLabel',
         { defaultMessage: 'Agent Version' }
       ),
       width: `${unit * 15}px`,
@@ -118,7 +118,7 @@ export function getInstanceColumns(
         <ItemsBadge
           items={agentVersion ? [agentVersion] : []}
           multipleItemsMessage={i18n.translate(
-            'xpack.apm.agentExplorerTable.agentVersionColumnLabel.multipleVersions',
+            'xpack.apm.agentExplorerInstanceTable.agentVersionColumnLabel.multipleVersions',
             {
               values: { versionsCount: agentVersion.length },
               defaultMessage:
@@ -131,7 +131,7 @@ export function getInstanceColumns(
     {
       field: AgentExplorerInstanceFieldName.LastReport,
       name: i18n.translate(
-        'xpack.apm.agentExplorerTable.environmentColumnLabel',
+        'xpack.apm.agentExplorerInstanceTable.lastReportColumnLabel',
         {
           defaultMessage: 'Last report',
         }
@@ -166,9 +166,12 @@ export function AgentInstancesDetails({
 
   return (
     <EuiInMemoryTable
-      tableCaption={i18n.translate('xpack.apm.agentExplorer.table.caption', {
-        defaultMessage: 'Agent Explorer',
-      })}
+      tableCaption={i18n.translate(
+        'xpack.apm.agentExplorerInstanceTable.table.caption',
+        {
+          defaultMessage: 'Agent Explorer',
+        }
+      )}
       items={items}
       columns={getInstanceColumns(serviceName)}
       pagination={{

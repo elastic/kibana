@@ -6,13 +6,15 @@
  */
 
 import { EuiPageHeaderProps } from '@elastic/eui';
+import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
-import { ApmMainTemplate } from './apm_main_template';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmRouter } from '../../../hooks/use_apm_router';
+import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 import { ApmRouter } from '../apm_route_config';
+import { ApmMainTemplate } from './apm_main_template';
 
 type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
   key:
@@ -22,7 +24,8 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'apm-indices'
     | 'custom-links'
     | 'schema'
-    | 'general-settings';
+    | 'general-settings'
+    | 'agent-explorer';
   hidden?: boolean;
 };
 
@@ -113,13 +116,29 @@ function getTabs({
       }),
       href: router.link('/settings/schema'),
     },
+    {
+      key: 'agent-explorer',
+      label: i18n.translate('xpack.apm.settings.agentExplorer', {
+        defaultMessage: 'Agent explorer',
+      }),
+      href: router.link('/settings/agent-explorer', {
+        query: {
+          environment: ENVIRONMENT_ALL.value,
+          rangeFrom: 'now-24h',
+          rangeTo: 'now',
+          kuery: '',
+        },
+      }),
+      append: <TechnicalPreviewBadge icon="beaker" />,
+    },
   ];
 
   return tabs
     .filter((t) => !t.hidden)
-    .map(({ href, key, label }) => ({
+    .map(({ href, key, label, append }) => ({
       href,
       label,
+      append,
       isSelected: key === selectedTab,
     }));
 }

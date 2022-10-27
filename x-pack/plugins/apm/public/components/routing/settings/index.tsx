@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 import { Outlet } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
+import { environmentRt } from '../../../../common/environment_rt';
 import { agentConfigurationPageStepRt } from '../../../../common/agent_configuration/constants';
 import { Breadcrumb } from '../../app/breadcrumb';
 import { SettingsTemplate } from '../templates/settings_template';
@@ -21,6 +22,7 @@ import { Schema } from '../../app/settings/schema';
 import { AnomalyDetection } from '../../app/settings/anomaly_detection';
 import { AgentKeys } from '../../app/settings/agent_keys';
 import { GeneralSettings } from '../../app/settings/general_settings';
+import { AgentExplorerDetails } from '../../app/agent_explorer_details';
 
 function page({
   title,
@@ -141,6 +143,32 @@ export const settings = {
         element: <AgentKeys />,
         tab: 'agent-keys',
       }),
+      '/settings/agent-explorer': {
+        ...page({
+          title: i18n.translate(
+            'xpack.apm.views.settings.agentExplorer.title',
+            {
+              defaultMessage: 'Agent explorer',
+            }
+          ),
+          element: <AgentExplorerDetails />,
+          tab: 'agent-explorer',
+        }),
+        params: t.type({
+          query: t.intersection([
+            environmentRt,
+            t.type({
+              kuery: t.string,
+              rangeFrom: t.string,
+              rangeTo: t.string,
+            }),
+            t.partial({
+              agentLanguage: t.string,
+              serviceName: t.string,
+            }),
+          ]),
+        }),
+      },
       '/settings': {
         element: <Redirect to="/settings/general-settings" />,
       },

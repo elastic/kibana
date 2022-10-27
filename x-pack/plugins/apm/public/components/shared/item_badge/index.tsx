@@ -15,13 +15,10 @@ interface Props {
 }
 export function ItemsBadge({
   items = [],
-  multipleItemsMessage = i18n.translate(
-    'xpack.apm.agentExplorer.serviceNameSelect.placeholder',
-    {
-      values: { itemsCount: items.length },
-      defaultMessage: '{itemsCount, plural, one {1 item} other {# items}}',
-    }
-  ),
+  multipleItemsMessage = i18n.translate('xpack.apm.itemsBadge.placeholder', {
+    values: { itemsCount: items.length },
+    defaultMessage: '{itemsCount, plural, one {1 item} other {# items}}',
+  }),
 }: Props) {
   if (items.length < 2) {
     return (

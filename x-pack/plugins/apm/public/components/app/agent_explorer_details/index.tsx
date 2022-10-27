@@ -11,6 +11,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -37,7 +39,7 @@ function useAgentExplorerFetcher({
 }) {
   const {
     query: { environment, serviceName, agentLanguage, kuery },
-  } = useApmParams('/agent-explorer');
+  } = useApmParams('/settings/agent-explorer');
 
   return useProgressiveFetcher(
     (callApmApi) => {
@@ -65,7 +67,7 @@ export function AgentExplorerDetails() {
 
   const {
     query: { serviceName, agentLanguage, rangeFrom, rangeTo },
-  } = useApmParams('/agent-explorer');
+  } = useApmParams('/settings/agent-explorer');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const agents = useAgentExplorerFetcher({ start, end });
@@ -87,6 +89,25 @@ export function AgentExplorerDetails() {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <EuiText color="subdued">
+          {i18n.translate('xpack.apm.settings.agentExplorer.descriptionText', {
+            defaultMessage:
+              'Check information around agents that are deployed.',
+          })}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiSpacer size="s" />
+      <EuiFlexItem grow={false}>
+        <EuiTitle>
+          <h2>
+            {i18n.translate('xpack.apm.settings.agentExplorer.title', {
+              defaultMessage: 'Agent explorer',
+            })}
+          </h2>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiSpacer />
       <EuiFlexItem grow={false}>
         <KueryBar />
       </EuiFlexItem>
