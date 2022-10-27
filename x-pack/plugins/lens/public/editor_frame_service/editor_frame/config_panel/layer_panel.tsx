@@ -612,7 +612,7 @@ export function LayerPanel(
                       className="lnsLayerPanel__dimension lnsDragDrop-isDraggable"
                       css={css`
                         cursor: default !important;
-                        border-color: #0000 !important;
+                        border-color: transparent !important;
                         margin-top: ${group.accessors.length ? 8 : 0}px !important;
                       `}
                     >
