@@ -34,6 +34,8 @@ interface Props<TSample extends {}> {
   serviceName?: string;
   waterfallItemId?: string;
   detailTab?: TransactionTab;
+  showCriticalPath: boolean;
+  onShowCriticalPathChange: (showCriticalPath: boolean) => void;
   selectedSample?: TSample | null;
 }
 
@@ -47,6 +49,8 @@ export function WaterfallWithSummary<TSample extends {}>({
   serviceName,
   waterfallItemId,
   detailTab,
+  showCriticalPath,
+  onShowCriticalPathChange,
   selectedSample,
 }: Props<TSample>) {
   const [sampleActivePage, setSampleActivePage] = useState(0);
@@ -171,6 +175,8 @@ export function WaterfallWithSummary<TSample extends {}>({
         onTabClick={onTabClick}
         waterfall={waterfallFetchResult.waterfall}
         isLoading={isLoading}
+        showCriticalPath={showCriticalPath}
+        onShowCriticalPathChange={onShowCriticalPathChange}
       />
     </>
   );
