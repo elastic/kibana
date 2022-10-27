@@ -28,6 +28,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   };
   fieldsExistenceReader?: ExistingFieldsReader;
   popularFieldsLimit?: number;
+  sortedSelectedFields?: T[];
   onOverrideFieldGroupDetails?: (
     groupName: FieldsGroupNames
   ) => Partial<FieldsGroupDetails> | undefined | null;
@@ -46,6 +47,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   services,
   fieldsExistenceReader,
   popularFieldsLimit,
+  sortedSelectedFields,
   onOverrideFieldGroupDetails,
   onSupportedFieldFilter,
   onSelectedFieldFilter,
@@ -96,7 +98,9 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         } else return 'emptyFields';
       }),
     };
-    const selectedFields = onSelectedFieldFilter ? sortedFields.filter(onSelectedFieldFilter) : [];
+    const selectedFields =
+      sortedSelectedFields ||
+      (onSelectedFieldFilter ? sortedFields.filter(onSelectedFieldFilter) : []);
     const popularFields = popularFieldsLimit
       ? sortedFields
           .filter((field) => field.count && field.type !== '_source')
@@ -242,6 +246,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     hasFieldDataHandler,
     fieldsExistenceInfoUnavailable,
     popularFieldsLimit,
+    sortedSelectedFields,
   ]);
 
   const fieldGroups: FieldListGroups<T> = useMemo(() => {

@@ -33,7 +33,7 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING, PLUGIN_ID } from '../../../../../common';
-import { groupFields } from './lib/group_fields';
+import { groupFields, getSelectedFields } from './lib/group_fields';
 import { FieldFilterState, setFieldFilterProp } from './lib/field_filter';
 import { getDataViewFieldList } from './lib/get_data_view_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
@@ -142,13 +142,17 @@ export function DiscoverSidebarComponent({
   const popularFieldsLimit = useMemo(() => uiSettings.get(FIELDS_LIMIT_SETTING), [uiSettings]);
 
   const {
-    selected: selectedFields,
+    // selected: oldSelectedFields,
     popular: popularFields,
     unpopular: unpopularFields,
   } = useMemo(
     () => groupFields(fields, columns, popularFieldsLimit, fieldFilter, useNewFieldsApi),
     [fields, columns, popularFieldsLimit, fieldFilter, useNewFieldsApi]
   );
+
+  const selectedFields = useMemo(() => {
+    return getSelectedFields(fields, columns);
+  }, [fields, columns]);
 
   const { fieldTypes, presentFieldTypes } = useMemo(() => {
     const result = ['any'];
@@ -265,6 +269,7 @@ export function DiscoverSidebarComponent({
     fieldsExistenceReader,
     allFields,
     popularFieldsLimit: isPlainRecord ? 0 : popularFieldsLimit,
+    sortedSelectedFields: selectedFields,
     services: {
       dataViews,
     },
@@ -275,10 +280,11 @@ export function DiscoverSidebarComponent({
 
   // console.log({
   //   fields,
-  //   selectedFields,
+  //   oldSelectedFields,
   //   popularFields,
   //   unpopularFields,
   //   fieldGroups,
+  //   columns,
   // });
 
   const renderFieldItem: FieldListGroupedProps<DataViewField>['renderFieldItem'] = useCallback(

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { uniqBy } from 'lodash';
 import { DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import { FieldFilterState, isFieldFiltered } from './field_filter';
 
@@ -91,4 +92,38 @@ export function groupFields(
   });
 
   return result;
+}
+
+export function getSelectedFields(
+  fields: DataViewField[] | null,
+  columns: string[]
+): DataViewField[] {
+  let selectedFields: DataViewField[] = [];
+  if (!Array.isArray(fields) || !Array.isArray(columns)) {
+    return [];
+  }
+
+  // add selected columns, that are not part of the data view, to be removable
+  for (const column of columns) {
+    const selectedField =
+      fields.find((field) => field.name === column) ||
+      ({
+        name: column,
+        displayName: column,
+        type: 'unknown_selected',
+      } as DataViewField);
+    selectedFields.push(selectedField);
+  }
+
+  selectedFields = uniqBy(selectedFields, 'name');
+
+  if (selectedFields.length === 1 && selectedFields[0].name === '_source') {
+    return [];
+  }
+
+  selectedFields.sort((a, b) => {
+    return columns.indexOf(a.name) - columns.indexOf(b.name);
+  });
+
+  return selectedFields;
 }
