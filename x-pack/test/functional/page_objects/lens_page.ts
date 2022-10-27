@@ -1194,8 +1194,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       // TODO: target dimensionTrigger color element after merging https://github.com/elastic/kibana/pull/76871
       await testSubjects.getAttribute('~indexPattern-dimension-colorPicker', color);
     },
-    async getMetricTiles() {
-      return findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li');
+    async getMetricTiles(timeout?: number) {
+      return findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li', timeout);
     },
 
     async getMetricElementIfExists(selector: string, container: WebElementWrapper) {
@@ -1225,18 +1225,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       };
     },
 
-    async getMetricVisualizationData() {
-      const tiles = await this.getMetricTiles();
-      const showingBar = Boolean(await findService.existsByCssSelector('.echSingleMetricProgress'));
+    async getMetricVisualizationData(timeout?: number) {
+      const tiles = await this.getMetricTiles(timeout);
+      const showingBar = Boolean(
+        await findService.existsByCssSelector('.echSingleMetricProgress', timeout)
+      );
 
-      const metricData = [];
+      const metricDataPromises = [];
       for (const tile of tiles) {
-        metricData.push({
-          ...(await this.getMetricDatum(tile)),
-          showingBar,
-        });
+        metricDataPromises.push(this.getMetricDatum(tile));
       }
-      return metricData;
+      const metricData = await Promise.all(metricDataPromises);
+      return metricData.map((d) => ({ ...d, showingBar }));
     },
 
     /**

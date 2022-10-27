@@ -39,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('mtrVis', timeout);
 
-      const metricData = await lens.getMetricVisualizationData();
+      const metricData = await lens.getMetricVisualizationData(timeout);
       expect(metricData[0].title).to.eql('Count of records');
     });
 
