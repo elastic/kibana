@@ -11,6 +11,7 @@ import { useLocation } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { enableServiceGroups } from '@kbn/observability-plugin/public';
+import { ObservabilityPageTemplateProps } from '@kbn/observability-plugin/public/components/shared/page_template/page_template';
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
@@ -44,7 +45,8 @@ export function ApmMainTemplate({
   children: React.ReactNode;
   environmentFilter?: boolean;
   showServiceGroupSaveButton?: boolean;
-} & KibanaPageTemplateProps) {
+} & KibanaPageTemplateProps &
+  Pick<ObservabilityPageTemplateProps, 'pageSectionProps'>) {
   const location = useLocation();
 
   const { services } = useKibana<ApmPluginStartDeps>();

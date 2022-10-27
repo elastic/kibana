@@ -19,6 +19,8 @@ import { ServiceInventory } from '../../app/service_inventory';
 import { ServiceMapHome } from '../../app/service_map';
 import { TopTracesOverview } from '../../app/top_traces_overview';
 import { TraceExplorer } from '../../app/trace_explorer';
+import { TraceExplorerAggregatedCriticalPath } from '../../app/trace_explorer/trace_explorer_aggregated_critical_path';
+import { TraceExplorerWaterfall } from '../../app/trace_explorer/trace_explorer_waterfall';
 import { TraceOverview } from '../../app/trace_overview';
 import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
 import { RedirectTo } from '../redirect_to';
@@ -185,11 +187,7 @@ export const home = {
         element: <ServiceMapHome />,
         serviceGroupContextTab: 'service-map',
       }),
-      ...page({
-        path: '/traces',
-        title: i18n.translate('xpack.apm.views.traceOverview.title', {
-          defaultMessage: 'Traces',
-        }),
+      '/traces': {
         element: (
           <TraceOverview>
             <Outlet />
@@ -197,21 +195,48 @@ export const home = {
         ),
         children: {
           '/traces/explorer': {
-            element: <TraceExplorer />,
+            element: (
+              <TraceExplorer>
+                <Outlet />
+              </TraceExplorer>
+            ),
+            children: {
+              '/traces/explorer/waterfall': {
+                element: <TraceExplorerWaterfall />,
+                params: t.type({
+                  query: t.type({
+                    traceId: t.string,
+                    transactionId: t.string,
+                    waterfallItemId: t.string,
+                    detailTab: t.union([
+                      t.literal(TransactionTab.timeline),
+                      t.literal(TransactionTab.metadata),
+                      t.literal(TransactionTab.logs),
+                    ]),
+                  }),
+                }),
+                defaults: {
+                  query: {
+                    waterfallItemId: '',
+                    traceId: '',
+                    transactionId: '',
+                    detailTab: TransactionTab.timeline,
+                  },
+                },
+              },
+              '/traces/explorer/critical_path': {
+                element: <TraceExplorerAggregatedCriticalPath />,
+              },
+              '/traces/explorer': {
+                element: <RedirectTo pathname="/traces/explorer/waterfall" />,
+              },
+            },
             params: t.type({
               query: t.type({
                 query: t.string,
                 type: t.union([
                   t.literal(TraceSearchType.kql),
                   t.literal(TraceSearchType.eql),
-                ]),
-                waterfallItemId: t.string,
-                traceId: t.string,
-                transactionId: t.string,
-                detailTab: t.union([
-                  t.literal(TransactionTab.timeline),
-                  t.literal(TransactionTab.metadata),
-                  t.literal(TransactionTab.logs),
                 ]),
                 showCriticalPath: toBooleanRt,
               }),
@@ -220,10 +245,6 @@ export const home = {
               query: {
                 query: '',
                 type: TraceSearchType.kql,
-                waterfallItemId: '',
-                traceId: '',
-                transactionId: '',
-                detailTab: TransactionTab.timeline,
                 showCriticalPath: '',
               },
             },
@@ -232,7 +253,7 @@ export const home = {
             element: <TopTracesOverview />,
           },
         },
-      }),
+      },
       ...dependencies,
       ...legacyBackends,
       ...storageExplorer,
