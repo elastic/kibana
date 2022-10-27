@@ -32,6 +32,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/__mocks__/**/*',
   'x-pack/docs/**/*',
   'src/core/server/core_app/assets/fonts/**/*',
+  'packages/core/apps/core-apps-server-internal/src/assets/fonts/**/*',
   'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/**/*',
   'packages/kbn-utility-types/test-d/**/*',
   '**/Jenkinsfile*',
