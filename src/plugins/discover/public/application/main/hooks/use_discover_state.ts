@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useMemo, useEffect, useState, useCallback } from 'react';
+import { useMemo, useEffect, useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { History } from 'history';
 import { DataViewListItem, DataViewType } from '@kbn/data-views-plugin/public';
@@ -13,7 +13,7 @@ import { SavedSearch, getSavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { useUrlTracking } from './use_url_tracking';
-import { getState } from '../services/discover_state';
+import { getDiscoverStateContainer } from '../services/discover_state';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
@@ -57,19 +57,18 @@ export function useDiscoverState({
 
   const { setUrlTracking } = useUrlTracking(savedSearch, dataView);
 
-  const stateContainer = useMemo(
-    () =>
-      getState({
-        history,
-        savedSearch,
-        services,
-      }),
-    [history, savedSearch, services]
-  );
+  const stateContainer = useMemo(() => {
+    const container = getDiscoverStateContainer({
+      history,
+      savedSearch,
+      services,
+    });
+    container.internalState.transitions.setDataViews(dataViewList);
+    container.internalState.transitions.setDataView(dataView);
+    return container;
+  }, [dataView, dataViewList, history, savedSearch, services]);
 
-  const { appStateContainer, replaceUrlAppState } = stateContainer;
-
-  const [state, setState] = useState(appStateContainer.getState());
+  const { appState, replaceUrlAppState } = stateContainer;
 
   /**
    * Search session logic
@@ -92,6 +91,7 @@ export function useDiscoverState({
    */
   const onChangeDataView = useCallback(
     async (id: string) => {
+      const state = stateContainer.appState.getState();
       const nextDataView = await dataViews.get(id);
       if (nextDataView && dataView) {
         const nextAppState = getDataViewAppState(
@@ -104,28 +104,18 @@ export function useDiscoverState({
           state.query
         );
         setUrlTracking(nextDataView);
+        stateContainer.internalState.transitions.setDataView(nextDataView);
         stateContainer.setAppState(nextAppState);
       }
       setExpandedDoc(undefined);
     },
-    [
-      setUrlTracking,
-      uiSettings,
-      dataView,
-      dataViews,
-      setExpandedDoc,
-      state.columns,
-      state.query,
-      state.sort,
-      stateContainer,
-    ]
+    [setUrlTracking, uiSettings, dataView, dataViews, setExpandedDoc, stateContainer]
   );
 
   /**
    * Adhoc data views functionality
    */
-  const { adHocDataViewList, persistDataView, updateAdHocDataViewId } = useAdHocDataViews({
-    dataView,
+  const { persistDataView, updateAdHocDataViewId } = useAdHocDataViews({
     stateContainer,
     savedSearch,
     setUrlTracking,
@@ -168,8 +158,6 @@ export function useDiscoverState({
    */
   useEffect(() => {
     const stopSync = stateContainer.initializeAndSync(dataView, filterManager, data);
-    setState(stateContainer.appStateContainer.getState());
-
     return () => stopSync();
   }, [stateContainer, filterManager, data, dataView]);
 
@@ -177,8 +165,8 @@ export function useDiscoverState({
    * Track state changes that should trigger a fetch
    */
   useEffect(() => {
-    const unsubscribe = appStateContainer.subscribe(async (nextState) => {
-      const { hideChart, interval, sort, index } = state;
+    const unsubscribe = appState.subscribe(async (nextState) => {
+      const { hideChart, interval, sort, index } = stateContainer.getPreviousAppState();
       // chart was hidden, now it should be displayed, so data is needed
       const chartDisplayChanged = nextState.hideChart !== hideChart && hideChart;
       const chartIntervalChanged = nextState.interval !== interval;
@@ -202,6 +190,7 @@ export function useDiscoverState({
           savedSearch.searchSource,
           services.toastNotifications
         );
+        stateContainer.internalState.transitions.setDataView(nextDataView);
 
         // If the requested data view is not found, don't try to load it,
         // and instead reset the app state to the fallback data view
@@ -209,7 +198,6 @@ export function useDiscoverState({
           replaceUrlAppState({ index: nextDataView.id });
           return;
         }
-
         savedSearch.searchSource.setField('index', nextDataView);
         reset();
       }
@@ -217,18 +205,18 @@ export function useDiscoverState({
       if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
         refetch$.next(undefined);
       }
-      setState(nextState);
     });
     return () => unsubscribe();
   }, [
-    services,
-    appStateContainer,
-    state,
+    appState,
     refetch$,
-    data$,
+    replaceUrlAppState,
     reset,
     savedSearch.searchSource,
-    replaceUrlAppState,
+    services.dataViews,
+    services.toastNotifications,
+    services.uiSettings,
+    stateContainer,
   ]);
 
   /**
@@ -256,7 +244,6 @@ export function useDiscoverState({
       });
 
       await stateContainer.replaceUrlAppState(newAppState);
-      setState(newAppState);
     },
     [services, dataView, stateContainer]
   );
@@ -302,10 +289,7 @@ export function useDiscoverState({
     onChangeDataView,
     onUpdateQuery,
     searchSource,
-    setState,
-    state,
     stateContainer,
-    adHocDataViewList,
     persistDataView,
     updateAdHocDataViewId,
   };

@@ -13,7 +13,6 @@ import { getDataTableRecords } from '../../../../__fixtures__/real_hits';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import {
   DiscoverSidebarResponsive,
   DiscoverSidebarResponsiveProps,
@@ -140,12 +139,6 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
 
   const hits = getDataTableRecords(dataView);
 
-  const dataViewList = [
-    { id: '0', title: 'b' } as DataViewListItem,
-    { id: '1', title: 'a' } as DataViewListItem,
-    { id: '2', title: 'c' } as DataViewListItem,
-  ];
-
   for (const hit of hits) {
     for (const key of Object.keys(hit.flattened)) {
       mockfieldCounts[key] = (mockfieldCounts[key] || 0) + 1;
@@ -162,7 +155,6 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
       fetchStatus: FetchStatus.COMPLETE,
       fields: [] as string[],
     }) as AvailableFields$,
-    dataViewList,
     onChangeDataView: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
@@ -183,7 +175,7 @@ describe('discover responsive sidebar', function () {
   beforeAll(async () => {
     props = getCompProps();
     await act(async () => {
-      const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
+      const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
       appStateContainer.set({
         query: { query: '', language: 'lucene' },
         filters: [],
@@ -269,7 +261,7 @@ describe('discover responsive sidebar', function () {
         result: getDataTableRecords(stubLogstashDataView),
       }) as DataDocuments$,
     };
-    const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
+    const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
     appStateContainer.set({
       query: { sql: 'SELECT * FROM `index`' },
     });
@@ -294,7 +286,7 @@ describe('discover responsive sidebar', function () {
         },
       },
     };
-    const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
+    const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appState;
     appStateContainer.set({
       query: { query: '', language: 'lucene' },
       filters: [],

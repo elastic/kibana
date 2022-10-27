@@ -22,7 +22,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
-import type { GetStateReturn } from '../../services/discover_state';
+import type { DiscoverStateContainer } from '../../services/discover_state';
 import { AvailableFields$, DataRefetch$, DataTotalHits$ } from '../../hooks/use_saved_search';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
@@ -76,7 +76,7 @@ export interface FieldStatisticsTableProps {
   /**
    * State container with persisted settings
    */
-  stateContainer?: GetStateReturn;
+  stateContainer?: DiscoverStateContainer;
   /**
    * Callback to add a filter to filter bar
    */
@@ -118,7 +118,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
 
   const showPreviewByDefault = useMemo(
     () =>
-      stateContainer ? !stateContainer.appStateContainer.getState().hideAggregatedPreview : true,
+      stateContainer ? !stateContainer.appState.getState().hideAggregatedPreview : true,
     [stateContainer]
   );
 

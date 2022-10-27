@@ -10,12 +10,13 @@ import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { ENABLE_SQL } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
-import { GetStateReturn } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
 
 export type DiscoverTopNavProps = Pick<
@@ -29,7 +30,7 @@ export type DiscoverTopNavProps = Pick<
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
     isUpdate?: boolean
   ) => void;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverStateContainer;
   resetSavedSearch: () => void;
   onChangeDataView: (dataView: string) => void;
   isPlainRecord: boolean;
@@ -37,7 +38,6 @@ export type DiscoverTopNavProps = Pick<
   onFieldEdited: () => Promise<void>;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
-  adHocDataViewList: DataView[];
 };
 
 export const DiscoverTopNav = ({
@@ -57,9 +57,9 @@ export const DiscoverTopNav = ({
   onFieldEdited,
   persistDataView,
   updateAdHocDataViewId,
-  adHocDataViewList,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
+  const adHocDataViewList = useInternalStateSelector((state) => state.dataViewsAdHoc);
 
   const showDatePicker = useMemo(
     () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,
@@ -180,16 +180,16 @@ export const DiscoverTopNav = ({
   );
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
-    const { appStateContainer, setAppState } = stateContainer;
+    const { appState, setAppState } = stateContainer;
     if (newSavedQueryId) {
       setAppState({ savedQuery: newSavedQueryId });
     } else {
       // remove savedQueryId from state
       const newState = {
-        ...appStateContainer.getState(),
+        ...appState.getState(),
       };
       delete newState.savedQuery;
-      appStateContainer.set(newState);
+      appState.set(newState);
     }
   };
   const setMenuMountPoint = useMemo(() => {

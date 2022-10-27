@@ -14,27 +14,26 @@ import {
 } from '@kbn/unified-field-list-plugin/public';
 import { buildChartData } from '@kbn/unified-histogram-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { getUiActions } from '../../../../kibana_services';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDataState } from '../../hooks/use_data_state';
 import type { SavedSearchData } from '../../hooks/use_saved_search';
-import type { AppState, GetStateReturn } from '../../services/discover_state';
+import type { DiscoverStateContainer } from '../../services/discover_state';
 
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramHeight';
 
 export const useDiscoverHistogram = ({
   stateContainer,
-  state,
   savedSearchData$,
   dataView,
   savedSearch,
   isTimeBased,
   isPlainRecord,
 }: {
-  stateContainer: GetStateReturn;
-  state: AppState;
+  stateContainer: DiscoverStateContainer;
   savedSearchData$: SavedSearchData;
   dataView: DataView;
   savedSearch: SavedSearch;
@@ -42,6 +41,7 @@ export const useDiscoverHistogram = ({
   isPlainRecord: boolean;
 }) => {
   const { storage, data } = useDiscoverServices();
+  const [hideChart, interval] = useAppStateSelector((state) => [state.hideChart, state.interval]);
 
   /**
    * Visualize
@@ -140,10 +140,10 @@ export const useDiscoverHistogram = ({
       buildChartData({
         data,
         dataView,
-        timeInterval: state.interval,
+        timeInterval: interval,
         response,
       }),
-    [data, dataView, response, state.interval]
+    [data, dataView, response, interval]
   );
 
   const chart = useMemo(
@@ -152,8 +152,8 @@ export const useDiscoverHistogram = ({
         ? undefined
         : {
             status: chartFetchStatus,
-            hidden: state.hideChart,
-            timeInterval: state.interval,
+            hidden: hideChart,
+            timeInterval: interval,
             bucketInterval,
             data: chartData,
             error,
@@ -165,8 +165,8 @@ export const useDiscoverHistogram = ({
       error,
       isPlainRecord,
       isTimeBased,
-      state.hideChart,
-      state.interval,
+      hideChart,
+      interval,
     ]
   );
 

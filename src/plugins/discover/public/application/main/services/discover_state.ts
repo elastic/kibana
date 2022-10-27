@@ -36,6 +36,10 @@ import {
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import {
+  InternalStateContainer,
+  getInternalStateContainer,
+} from './discover_internal_state_container';
 import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
@@ -107,7 +111,7 @@ export interface AppStateUrl extends Omit<AppState, 'sort'> {
   sort?: string[][] | [string, string];
 }
 
-interface GetStateParams {
+interface DiscoverStateContainerArgs {
   /**
    * Browser history
    */
@@ -122,7 +126,7 @@ interface GetStateParams {
   services: DiscoverServices;
 }
 
-export interface GetStateReturn {
+export interface DiscoverStateContainer {
   /**
    * kbnUrlStateStorage
    */
@@ -130,7 +134,11 @@ export interface GetStateReturn {
   /**
    * App state, the _a part of the URL
    */
-  appStateContainer: ReduxLikeStateContainer<AppState>;
+  appState: ReduxLikeStateContainer<AppState>;
+  /**
+   * Internal state that's used at several places in the UI
+   */
+  internalState: InternalStateContainer;
   /**
    * Initialize state with filters and query,  start state syncing
    */
@@ -175,6 +183,12 @@ export interface GetStateReturn {
    * Pause the auto refresh interval without pushing an entry to history
    */
   pauseAutoRefreshInterval: () => Promise<void>;
+  /**
+   * functions executed by UI
+   */
+  actions: {
+    setDataView: (dataView: DataView) => void;
+  };
 }
 
 const APP_STATE_URL_KEY = '_a';
@@ -184,7 +198,11 @@ const GLOBAL_STATE_URL_KEY = '_g';
  * Builds and returns appState and globalState containers and helper functions
  * Used to sync URL with UI state
  */
-export function getState({ history, savedSearch, services }: GetStateParams): GetStateReturn {
+export function getDiscoverStateContainer({
+  history,
+  savedSearch,
+  services,
+}: DiscoverStateContainerArgs): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
   const defaultAppState = getStateDefaults({
@@ -239,6 +257,8 @@ export function getState({ history, savedSearch, services }: GetStateParams): Ge
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
   };
 
+  const internalStateContainer = getInternalStateContainer();
+
   const pauseAutoRefreshInterval = async () => {
     const state = stateStorage.get<QueryState>(GLOBAL_STATE_URL_KEY);
     if (state?.refreshInterval && !state.refreshInterval.pause) {
@@ -250,9 +270,21 @@ export function getState({ history, savedSearch, services }: GetStateParams): Ge
     }
   };
 
+  const setDataView = (dataView: DataView) => {
+    internalStateContainer.transitions.setDataView(dataView);
+    if (!dataView.isPersisted()) {
+      const adHocDataViewList = internalStateContainer.getState().dataViewsAdHoc;
+      const existing = adHocDataViewList.find((prevDataView) => prevDataView.id === dataView.id);
+      if (!existing) {
+        internalStateContainer.transitions.setDataViewsAdHoc([...adHocDataViewList, dataView]);
+      }
+    }
+  };
+
   return {
     kbnUrlStateStorage: stateStorage,
-    appStateContainer: appStateContainerModified,
+    appState: appStateContainerModified,
+    internalState: internalStateContainer,
     startSync: () => {
       const { start, stop } = syncAppState();
       start();
@@ -327,6 +359,9 @@ export function getState({ history, savedSearch, services }: GetStateParams): Ge
         stopSyncingGlobalStateWithUrl();
         stop();
       };
+    },
+    actions: {
+      setDataView,
     },
   };
 }

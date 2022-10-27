@@ -12,8 +12,6 @@ import { getDataTableRecords } from '../../../../__fixtures__/real_hits';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { DiscoverSidebarProps } from './discover_sidebar';
-import { DataViewListItem } from '@kbn/data-views-plugin/public';
-
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebarComponent as DiscoverSidebar } from './discover_sidebar';
 import { discoverServiceMock as mockDiscoverServices } from '../../../../__mocks__/services';
@@ -24,7 +22,7 @@ import { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import { AvailableFields$ } from '../../hooks/use_saved_search';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
+import { DiscoverMainProvider } from '../../services/discover_state_provider';
 
 const mockGetActions = jest.fn<Promise<Array<Action<object>>>, [string, { fieldName: string }]>(
   () => Promise.resolve([])
@@ -36,16 +34,20 @@ jest.mock('../../../../kibana_services', () => ({
   }),
 }));
 
+function getStateContainer() {
+  const state = getDiscoverStateMock({ isTimeBased: true });
+  state.appState.set({
+    query: { query: '', language: 'lucene' },
+    filters: [],
+  });
+  state.internalState.transitions.setDataView(stubLogstashDataView);
+  return state;
+}
+
 function getCompProps(): DiscoverSidebarProps {
   const dataView = stubLogstashDataView;
   dataView.toSpec = jest.fn(() => ({}));
   const hits = getDataTableRecords(dataView);
-
-  const dataViewList = [
-    { id: '0', title: 'b' } as DataViewListItem,
-    { id: '1', title: 'a' } as DataViewListItem,
-    { id: '2', title: 'c' } as DataViewListItem,
-  ];
 
   const fieldCounts: Record<string, number> = {};
 
@@ -63,7 +65,6 @@ function getCompProps(): DiscoverSidebarProps {
     columns: ['extension'],
     fieldCounts,
     documents: hits,
-    dataViewList,
     onChangeDataView: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
@@ -82,34 +83,18 @@ function getCompProps(): DiscoverSidebarProps {
   };
 }
 
-function getAppStateContainer() {
-  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
-  appStateContainer.set({
-    query: { query: '', language: 'lucene' },
-    filters: [],
-  });
-  return appStateContainer;
-}
-
 describe('discover sidebar', function () {
   let props: DiscoverSidebarProps;
   let comp: ReactWrapper<DiscoverSidebarProps>;
 
   beforeAll(async () => {
     props = getCompProps();
-    mockDiscoverServices.data.dataViews.getIdsWithTitle = jest
-      .fn()
-      .mockReturnValue(props.dataViewList);
-    mockDiscoverServices.data.dataViews.get = jest.fn().mockImplementation((id) => {
-      const dataView = props.dataViewList.find((d) => d.id === id);
-      return { ...dataView, isPersisted: () => true };
-    });
 
     comp = await mountWithIntl(
       <KibanaContextProvider services={mockDiscoverServices}>
-        <DiscoverAppStateProvider value={getAppStateContainer()}>
+        <DiscoverMainProvider value={getStateContainer()}>
           <DiscoverSidebar {...props} />
-        </DiscoverAppStateProvider>
+        </DiscoverMainProvider>
       </KibanaContextProvider>
     );
     // wait for lazy modules
@@ -154,9 +139,9 @@ describe('discover sidebar', function () {
   it('should not render Add/Edit field buttons in viewer mode', () => {
     const compInViewerMode = mountWithIntl(
       <KibanaContextProvider services={mockDiscoverServices}>
-        <DiscoverAppStateProvider value={getAppStateContainer()}>
+        <DiscoverMainProvider value={getStateContainer()}>
           <DiscoverSidebar {...props} editField={undefined} />
-        </DiscoverAppStateProvider>
+        </DiscoverMainProvider>
       </KibanaContextProvider>
     );
     const addFieldButton = findTestSubject(compInViewerMode, 'dataView-add-field_btn');
@@ -169,9 +154,9 @@ describe('discover sidebar', function () {
   it('should render buttons in data view picker correctly', async () => {
     const compWithPicker = mountWithIntl(
       <KibanaContextProvider services={mockDiscoverServices}>
-        <DiscoverAppStateProvider value={getAppStateContainer()}>
+        <DiscoverMainProvider value={getStateContainer()}>
           <DiscoverSidebar {...props} showDataViewPicker />
-        </DiscoverAppStateProvider>
+        </DiscoverMainProvider>
       </KibanaContextProvider>
     );
     // open data view picker
@@ -195,14 +180,14 @@ describe('discover sidebar', function () {
   it('should not render buttons in data view picker when in viewer mode', async () => {
     const compWithPickerInViewerMode = mountWithIntl(
       <KibanaContextProvider services={mockDiscoverServices}>
-        <DiscoverAppStateProvider value={getAppStateContainer()}>
+        <DiscoverMainProvider value={getStateContainer()}>
           <DiscoverSidebar
             {...props}
             showDataViewPicker
             editField={undefined}
             createNewDataView={undefined}
           />
-        </DiscoverAppStateProvider>
+        </DiscoverMainProvider>
       </KibanaContextProvider>
     );
     // open data view picker
@@ -221,9 +206,9 @@ describe('discover sidebar', function () {
   it('should render the Visualize in Lens button in text based languages mode', () => {
     const compInViewerMode = mountWithIntl(
       <KibanaContextProvider services={mockDiscoverServices}>
-        <DiscoverAppStateProvider value={getAppStateContainer()}>
+        <DiscoverMainProvider value={getStateContainer()}>
           <DiscoverSidebar {...props} onAddFilter={undefined} />
-        </DiscoverAppStateProvider>
+        </DiscoverMainProvider>
       </KibanaContextProvider>
     );
     const visualizeField = findTestSubject(compInViewerMode, 'textBased-visualize');

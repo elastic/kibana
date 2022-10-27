@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import {
@@ -18,11 +18,10 @@ import type { FilterManager } from '@kbn/data-plugin/public';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { getUiActions } from '../../../kibana_services';
 import { useConfirmPersistencePrompt } from '../../../hooks/use_confirm_persistence_prompt';
-import { GetStateReturn } from '../services/discover_state';
+import { DiscoverStateContainer } from '../services/discover_state';
 import { useFiltersValidation } from './use_filters_validation';
 
 export const useAdHocDataViews = ({
-  dataView,
   savedSearch,
   stateContainer,
   setUrlTracking,
@@ -30,27 +29,13 @@ export const useAdHocDataViews = ({
   dataViews,
   toastNotifications,
 }: {
-  dataView: DataView;
   savedSearch: SavedSearch;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverStateContainer;
   setUrlTracking: (dataView: DataView) => void;
   dataViews: DataViewsContract;
   filterManager: FilterManager;
   toastNotifications: ToastsStart;
 }) => {
-  const [adHocDataViewList, setAdHocDataViewList] = useState<DataView[]>(
-    !dataView.isPersisted() ? [dataView] : []
-  );
-
-  useEffect(() => {
-    if (!dataView.isPersisted()) {
-      setAdHocDataViewList((prev) => {
-        const existing = prev.find((prevDataView) => prevDataView.id === dataView.id);
-        return existing ? prev : [...prev, dataView];
-      });
-    }
-  }, [dataView]);
-
   /**
    * Takes care of checking data view id references in filters
    */
@@ -62,12 +47,14 @@ export const useAdHocDataViews = ({
    */
   const updateAdHocDataViewId = useCallback(
     async (dataViewToUpdate: DataView) => {
+      const adHocDataViewList = stateContainer.internalState.getState().dataViewsAdHoc;
       const newDataView = await dataViews.create({ ...dataViewToUpdate.toSpec(), id: undefined });
 
       dataViews.clearInstanceCache(dataViewToUpdate.id);
-      setAdHocDataViewList((prev) =>
-        prev.filter((d) => d.id && dataViewToUpdate.id && d.id !== dataViewToUpdate.id)
+      const nextAdHocDataViewList = adHocDataViewList.filter(
+        (d: DataView) => d.id && dataViewToUpdate.id && d.id !== dataViewToUpdate.id
       );
+      stateContainer.internalState.transitions.setDataViewsAdHoc(nextAdHocDataViewList);
 
       const uiActions = await getUiActions();
       const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
@@ -97,7 +84,7 @@ export const useAdHocDataViews = ({
 
       // update saved search with saved data view
       if (createdDataView && savedSearch.id) {
-        const currentState = stateContainer.appStateContainer.getState();
+        const currentState = stateContainer.appState.getState();
         await updateSavedSearch({ savedSearch, dataView: createdDataView, state: currentState });
       }
       return createdDataView;
@@ -105,5 +92,5 @@ export const useAdHocDataViews = ({
     return currentDataView;
   }, [stateContainer, openConfirmSavePrompt, savedSearch, updateSavedSearch]);
 
-  return { adHocDataViewList, persistDataView, updateAdHocDataViewId };
+  return { persistDataView, updateAdHocDataViewId };
 };

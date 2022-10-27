@@ -18,6 +18,8 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { urlTrackerMock } from '../../__mocks__/url_tracker.mock';
+import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
+import { DiscoverMainProvider } from './services/discover_state_provider';
 
 setHeaderActionMenuMounter(jest.fn());
 setUrlTracker(urlTrackerMock);
@@ -27,6 +29,8 @@ describe('DiscoverMainApp', () => {
     const dataViewList = [dataViewMock].map((ip) => {
       return { ...ip, ...{ attributes: { title: ip.title } } };
     }) as unknown as DataViewListItem[];
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    stateContainer.internalState.transitions.setDataView(dataViewMock);
     const props = {
       dataViewList,
       savedSearch: savedSearchMock,
@@ -38,7 +42,9 @@ describe('DiscoverMainApp', () => {
     const component = mountWithIntl(
       <Router history={history}>
         <KibanaContextProvider services={discoverServiceMock}>
-          <DiscoverMainApp {...props} />
+          <DiscoverMainProvider value={stateContainer}>
+            <DiscoverMainApp {...props} />
+          </DiscoverMainProvider>
         </KibanaContextProvider>
       </Router>
     );

@@ -16,6 +16,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
@@ -29,7 +30,7 @@ import {
 } from '../../../../../common';
 import { useColumns } from '../../../../hooks/use_data_grid_columns';
 import { DataDocuments$, RecordRawType } from '../../hooks/use_saved_search';
-import { AppState, GetStateReturn } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../services/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
@@ -44,9 +45,9 @@ const DataGridMemoized = React.memo(DiscoverGrid);
 // export needs for testing
 export const onResize = (
   colSettings: { columnId: string; width: number },
-  stateContainer: GetStateReturn,
-  state: AppState
+  stateContainer: DiscoverStateContainer
 ) => {
+  const state = stateContainer.appState.getState();
   const grid = { ...(state.grid || {}) };
   const newColumns = { ...(grid.columns || {}) };
   newColumns[colSettings.columnId] = {
@@ -63,7 +64,6 @@ function DiscoverDocumentsComponent({
   onAddFilter,
   savedSearch,
   setExpandedDoc,
-  state,
   stateContainer,
   onFieldEdited,
 }: {
@@ -74,11 +74,14 @@ function DiscoverDocumentsComponent({
   onAddFilter?: DocViewFilterFn;
   savedSearch: SavedSearch;
   setExpandedDoc: (doc?: DataTableRecord) => void;
-  state: AppState;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverStateContainer;
   onFieldEdited?: () => void;
 }) {
   const { capabilities, dataViews, uiSettings } = useDiscoverServices();
+  const [query, sort, rowHeight, rowsPerPage, grid, columns] = useAppStateSelector((state) => {
+    return [state.query, state.sort, state.rowHeight, state.rowsPerPage, state.grid, state.columns];
+  });
+
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
   const hideAnnouncements = useMemo(() => uiSettings.get(HIDE_ANNOUNCEMENTS), [uiSettings]);
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
@@ -86,37 +89,41 @@ function DiscoverDocumentsComponent({
 
   const documentState = useDataState(documents$);
   const isLoading = documentState.fetchStatus === FetchStatus.LOADING;
-  const isPlainRecord = useMemo(
-    () => getRawRecordType(state.query) === RecordRawType.PLAIN,
-    [state.query]
-  );
+  const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
-  const { columns, onAddColumn, onRemoveColumn, onMoveColumn, onSetColumns } = useColumns({
+  const {
+    columns: currentColumns,
+    onAddColumn,
+    onRemoveColumn,
+    onMoveColumn,
+    onSetColumns,
+  } = useColumns({
     capabilities,
     config: uiSettings,
     dataView,
     dataViews,
     setAppState: stateContainer.setAppState,
-    state,
     useNewFieldsApi,
+    columns,
+    sort,
   });
 
   const onResizeDataGrid = useCallback(
-    (colSettings) => onResize(colSettings, stateContainer, state),
-    [stateContainer, state]
+    (colSettings) => onResize(colSettings, stateContainer),
+    [stateContainer]
   );
 
   const onUpdateRowsPerPage = useCallback(
-    (rowsPerPage: number) => {
-      stateContainer.setAppState({ rowsPerPage });
+    (nextRowsPerPage: number) => {
+      stateContainer.setAppState({ rowsPerPage: nextRowsPerPage });
     },
     [stateContainer]
   );
 
   const onSort = useCallback(
-    (sort: string[][]) => {
-      stateContainer.setAppState({ sort });
+    (nextSort: string[][]) => {
+      stateContainer.setAppState({ sort: nextSort });
     },
     [stateContainer]
   );
@@ -162,10 +169,10 @@ function DiscoverDocumentsComponent({
         <>
           {!hideAnnouncements && <DocumentExplorerCallout />}
           <DocTableInfiniteMemoized
-            columns={columns}
+            columns={currentColumns}
             dataView={dataView}
             rows={rows}
-            sort={state.sort || []}
+            sort={sort || []}
             isLoading={isLoading}
             searchDescription={savedSearch.description}
             sharedItemTitle={savedSearch.title}
@@ -189,18 +196,18 @@ function DiscoverDocumentsComponent({
           <div className="dscDiscoverGrid">
             <DataGridMemoized
               ariaLabelledBy="documentsAriaLabel"
-              columns={columns}
+              columns={currentColumns}
               expandedDoc={expandedDoc}
               dataView={dataView}
               isLoading={isLoading}
               rows={rows}
-              sort={(state.sort as SortOrder[]) || []}
+              sort={(sort as SortOrder[]) || []}
               sampleSize={sampleSize}
               searchDescription={savedSearch.description}
               searchTitle={savedSearch.title}
               setExpandedDoc={!isPlainRecord ? setExpandedDoc : undefined}
               showTimeCol={showTimeCol}
-              settings={state.grid}
+              settings={grid}
               onAddColumn={onAddColumn}
               onFilter={onAddFilter as DocViewFilterFn}
               onRemoveColumn={onRemoveColumn}
@@ -208,11 +215,11 @@ function DiscoverDocumentsComponent({
               onSort={!isPlainRecord ? onSort : undefined}
               onResize={onResizeDataGrid}
               useNewFieldsApi={useNewFieldsApi}
-              rowHeightState={state.rowHeight}
+              rowHeightState={rowHeight}
               onUpdateRowHeight={onUpdateRowHeight}
               isSortEnabled={!isPlainRecord}
               isPlainRecord={isPlainRecord}
-              rowsPerPageState={state.rowsPerPage}
+              rowsPerPageState={rowsPerPage}
               onUpdateRowsPerPage={onUpdateRowsPerPage}
               onFieldEdited={onFieldEdited}
             />

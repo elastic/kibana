@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { discoverServiceMock as mockDiscoverServices } from '../../../__mocks__/services';
-import { GetStateReturn } from '../services/discover_state';
 import { useAdHocDataViews } from './use_adhoc_data_views';
 import * as persistencePromptModule from '../../../hooks/use_confirm_persistence_prompt';
 import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';
 import { setUrlTracker } from '../../../kibana_services';
+import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import { DiscoverMainProvider } from '../services/discover_state_provider';
 
 jest.mock('../../../hooks/use_confirm_persistence_prompt', () => {
   const createdDataView = {
@@ -72,22 +74,24 @@ const savedSearchMock = {
 
 describe('useAdHocDataViews', () => {
   it('should save data view with new id and update saved search', async () => {
-    const hook = renderHook((d: DataView) =>
-      useAdHocDataViews({
-        dataView: mockDataView,
-        savedSearch: savedSearchMock,
-        stateContainer: {
-          appStateContainer: { getState: jest.fn().mockReturnValue({}) },
-          replaceUrlAppState: jest.fn(),
-          kbnUrlStateStorage: {
-            kbnUrlControls: { flush: jest.fn() },
-          },
-        } as unknown as GetStateReturn,
-        setUrlTracking: jest.fn(),
-        dataViews: mockDiscoverServices.dataViews,
-        filterManager: mockDiscoverServices.filterManager,
-        toastNotifications: mockDiscoverServices.toastNotifications,
-      })
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+
+    const hook = renderHook(
+      () =>
+        useAdHocDataViews({
+          dataView: mockDataView,
+          savedSearch: savedSearchMock,
+          stateContainer,
+          setUrlTracking: jest.fn(),
+          dataViews: mockDiscoverServices.dataViews,
+          filterManager: mockDiscoverServices.filterManager,
+          toastNotifications: mockDiscoverServices.toastNotifications,
+        }),
+      {
+        wrapper: ({ children }: { children: React.ReactElement }) => (
+          <DiscoverMainProvider value={stateContainer}>{children}</DiscoverMainProvider>
+        ),
+      }
     );
 
     const savedDataView = await hook.result.current.persistDataView();
@@ -104,22 +108,23 @@ describe('useAdHocDataViews', () => {
       ...mockDataView,
       id: 'updated-mock-id',
     }));
-    const hook = renderHook((d: DataView) =>
-      useAdHocDataViews({
-        dataView: mockDataView,
-        savedSearch: savedSearchMock,
-        stateContainer: {
-          appStateContainer: { getState: jest.fn().mockReturnValue({}) },
-          replaceUrlAppState: jest.fn(),
-          kbnUrlStateStorage: {
-            kbnUrlControls: { flush: jest.fn() },
-          },
-        } as unknown as GetStateReturn,
-        setUrlTracking: jest.fn(),
-        dataViews: mockDiscoverServices.dataViews,
-        filterManager: mockDiscoverServices.filterManager,
-        toastNotifications: mockDiscoverServices.toastNotifications,
-      })
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const hook = renderHook(
+      () =>
+        useAdHocDataViews({
+          dataView: mockDataView,
+          savedSearch: savedSearchMock,
+          stateContainer: getDiscoverStateMock({ isTimeBased: true }),
+          setUrlTracking: jest.fn(),
+          dataViews: mockDiscoverServices.dataViews,
+          filterManager: mockDiscoverServices.filterManager,
+          toastNotifications: mockDiscoverServices.toastNotifications,
+        }),
+      {
+        wrapper: ({ children }: { children: React.ReactElement }) => (
+          <DiscoverMainProvider value={stateContainer}>{children}</DiscoverMainProvider>
+        ),
+      }
     );
 
     let updatedDataView: DataView;
