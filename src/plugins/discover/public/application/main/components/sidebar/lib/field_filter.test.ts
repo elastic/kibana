@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getDefaultFieldFilter, setFieldFilterProp, isFieldFiltered } from './field_filter';
+import { getDefaultFieldFilter, setFieldFilterProp, doesFieldMatchFilters } from './field_filter';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 
 describe('field_filter', function () {
@@ -75,7 +75,7 @@ describe('field_filter', function () {
       { filter: { type: 'string' }, result: ['extension'] },
     ].forEach((test) => {
       const filtered = fieldList
-        .filter((field) => isFieldFiltered(field, { ...defaultState, ...test.filter }))
+        .filter((field) => doesFieldMatchFilters(field, { ...defaultState, ...test.filter }))
         .map((field) => field.name);
 
       expect(filtered).toEqual(test.result);

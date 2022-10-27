@@ -33,16 +33,17 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING, PLUGIN_ID } from '../../../../../common';
-import { groupFields, getSelectedFields } from './lib/group_fields';
-import { FieldFilterState, setFieldFilterProp } from './lib/field_filter';
+import { shouldShowField, getSelectedFields } from './lib/group_fields';
+import { doesFieldMatchFilters, FieldFilterState, setFieldFilterProp } from './lib/field_filter';
 import { getDataViewFieldList } from './lib/get_data_view_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
-import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import type { DataTableRecord } from '../../../../types';
 import { getUiActions } from '../../../../kibana_services';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { RecordRawType } from '../../hooks/use_saved_search';
+
+const EMPTY_FIELD_LIST: DataViewField[] = [];
 
 export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   /**
@@ -137,17 +138,6 @@ export function DiscoverSidebarComponent({
       setFieldFilter(newState);
     },
     [fieldFilter, setFieldFilter]
-  );
-
-  const popularFieldsLimit = useMemo(() => uiSettings.get(FIELDS_LIMIT_SETTING), [uiSettings]);
-
-  const {
-    // selected: oldSelectedFields,
-    popular: popularFields,
-    unpopular: unpopularFields,
-  } = useMemo(
-    () => groupFields(fields, columns, popularFieldsLimit, fieldFilter, useNewFieldsApi),
-    [fields, columns, popularFieldsLimit, fieldFilter, useNewFieldsApi]
   );
 
   const selectedFields = useMemo(() => {
@@ -253,27 +243,32 @@ export function DiscoverSidebarComponent({
     );
   }, [columns, selectedDataView, query]);
 
-  const allFields = useMemo(() => {
-    return [...selectedFields, ...popularFields, ...unpopularFields];
-  }, [selectedFields, popularFields, unpopularFields]);
-  const onSelectedFieldFilter: GroupedFieldsParams<DataViewField>['onSelectedFieldFilter'] =
+  const popularFieldsLimit = useMemo(() => uiSettings.get(FIELDS_LIMIT_SETTING), [uiSettings]);
+  const onFilterField: GroupedFieldsParams<DataViewField>['onFilterField'] = useCallback(
+    (field) => {
+      return doesFieldMatchFilters(field, fieldFilter);
+    },
+    [fieldFilter]
+  );
+  const onSupportedFieldFilter: GroupedFieldsParams<DataViewField>['onSupportedFieldFilter'] =
     useCallback(
       (field) => {
-        return selectedFields.some((selectedField) => selectedField.name === field.name);
+        return shouldShowField(field, useNewFieldsApi);
       },
-      [selectedFields]
+      [useNewFieldsApi]
     );
   const fieldsExistenceReader = useExistingFieldsReader();
   const { fieldGroups } = useGroupedFields({
     dataViewId: isPlainRecord || !selectedDataView?.id ? null : selectedDataView.id, // TODO: check whether we need Empty fields for text-based query
     fieldsExistenceReader,
-    allFields,
+    allFields: fields || EMPTY_FIELD_LIST,
     popularFieldsLimit: isPlainRecord ? 0 : popularFieldsLimit,
     sortedSelectedFields: selectedFields,
     services: {
       dataViews,
     },
-    onSelectedFieldFilter,
+    onFilterField,
+    onSupportedFieldFilter,
   });
 
   // TODO: hide meta fields on Discover for text-based queries
@@ -304,7 +299,7 @@ export function DiscoverSidebarComponent({
           onDeleteField={deleteField}
           showFieldStats={showFieldStats}
           contextualFields={columns}
-          selected={groupName === FieldsGroupNames.SelectedFields || onSelectedFieldFilter(field)}
+          selected={groupName === FieldsGroupNames.SelectedFields || selectedFields.includes(field)}
         />
       </li>
     ),
@@ -321,7 +316,7 @@ export function DiscoverSidebarComponent({
       deleteField,
       showFieldStats,
       columns,
-      onSelectedFieldFilter,
+      selectedFields,
     ]
   );
 
@@ -370,15 +365,17 @@ export function DiscoverSidebarComponent({
             />
           </form>
         </EuiFlexItem>
-        <EuiFlexItem id={DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields}>
-          <FieldListGrouped
-            fieldGroups={fieldGroups}
-            fieldsExistenceStatus={fieldsExistenceReader.getFieldsExistenceStatus(
-              selectedDataView.id!
-            )}
-            renderFieldItem={renderFieldItem}
-            existFieldsInIndex={Boolean(allFields.length)}
-          />
+        <EuiFlexItem>
+          {Boolean(fields) && (
+            <FieldListGrouped
+              fieldGroups={fieldGroups}
+              fieldsExistenceStatus={fieldsExistenceReader.getFieldsExistenceStatus(
+                selectedDataView.id!
+              )}
+              renderFieldItem={renderFieldItem}
+              existFieldsInIndex={Boolean(fields?.length)}
+            />
+          )}
           {/* <div */}
           {/*  ref={(el) => {*/}
           {/*    if (documents && el && !el.dataset.dynamicScroll) {*/}

@@ -129,6 +129,7 @@ const ActionButton: React.FC<ActionButtonProps> = memo(
     } else {
       return (
         <EuiToolTip
+          key={`tooltip-${field.name}-${field.count || 0}-${isSelected}`}
           delay="long"
           content={i18n.translate('discover.fieldChooser.discoverField.removeFieldTooltip', {
             defaultMessage: 'Remove field from table',

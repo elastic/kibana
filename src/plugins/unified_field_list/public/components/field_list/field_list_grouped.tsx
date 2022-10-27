@@ -171,22 +171,26 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
             </div>
           </EuiScreenReaderOnly>
         )}
-        <ul>
-          {fieldGroupsToCollapse.flatMap(([, { fields }]) =>
-            fields.map((field, index) => (
-              <Fragment key={field.name}>
-                {renderFieldItem({
-                  field,
-                  itemIndex: index,
-                  groupIndex: 0,
-                  groupName: FieldsGroupNames.SelectedFields,
-                  hideDetails: true,
-                })}
-              </Fragment>
-            ))
-          )}
-        </ul>
-        <EuiSpacer size="s" />
+        {Boolean(fieldGroupsToCollapse[0]?.[1]?.fields.length) && (
+          <>
+            <ul>
+              {fieldGroupsToCollapse.flatMap(([key, { fields }]) =>
+                fields.map((field, index) => (
+                  <Fragment key={field.name}>
+                    {renderFieldItem({
+                      field,
+                      itemIndex: index,
+                      groupIndex: 0,
+                      groupName: key as FieldsGroupNames,
+                      hideDetails: true,
+                    })}
+                  </Fragment>
+                ))
+              )}
+            </ul>
+            <EuiSpacer size="s" />
+          </>
+        )}
         {fieldGroupsToShow.map(([key, fieldGroup], index) => {
           const hidden = Boolean(fieldGroup.hideIfEmpty) && !fieldGroup.fields.length;
           if (hidden) {

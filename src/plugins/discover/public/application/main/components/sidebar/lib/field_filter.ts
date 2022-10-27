@@ -42,7 +42,10 @@ export function setFieldFilterProp(
   return newState;
 }
 
-export function isFieldFiltered(field: DataViewField, filterState: FieldFilterState): boolean {
+export function doesFieldMatchFilters(
+  field: DataViewField,
+  filterState: FieldFilterState
+): boolean {
   const matchFilter = filterState.type === 'any' || field.type === filterState.type;
   const isAggregatable =
     filterState.aggregatable === null || field.aggregatable === filterState.aggregatable;
