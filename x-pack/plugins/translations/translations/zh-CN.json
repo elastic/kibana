@@ -1163,7 +1163,6 @@
     "data.advancedSettings.timepicker.refreshIntervalDefaultsText": "时间筛选的默认刷新时间间隔。需要使用毫秒单位指定“值”。",
     "data.advancedSettings.timepicker.refreshIntervalDefaultsTitle": "时间筛选刷新时间间隔",
     "data.advancedSettings.timepicker.thisWeek": "本周",
-    "data.advancedSettings.timepicker.timeDefaultsText": "在未使用时间筛选的情况下启动 Kibana 时要使用的时间筛选选项",
     "data.advancedSettings.timepicker.timeDefaultsTitle": "时间筛选默认值",
     "data.advancedSettings.timepicker.today": "今日",
     "data.errors.fetchError": "请检查您的网络和代理配置。如果问题持续存在，请联系网络管理员。",
