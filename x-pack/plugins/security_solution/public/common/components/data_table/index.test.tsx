@@ -9,16 +9,17 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 import type { StatefulBodyProps } from '.';
-import { BodyComponent } from '.';
-import type { Sort } from './sort';
+import { DataTableComponent } from '.';
 import { REMOVE_COLUMN } from './column_headers/translations';
 import { Direction } from '../../../../common/search_strategy';
 import { useMountAppended } from '../../utils/use_mount_appended';
-import { defaultHeaders, mockBrowserFields, mockTimelineData, TestProviders } from '../../../mock';
-import { TestCellRenderer } from '../../../mock/cell_renderer';
-import { mockGlobalState } from '../../../mock/global_state';
 import type { EuiDataGridColumn } from '@elastic/eui';
-import { defaultColumnHeaderType } from '../../../store/t_grid/defaults';
+import { defaultHeaders, mockGlobalState, mockTimelineData, TestProviders } from '../../mock';
+import { defaultColumnHeaderType } from '../../store/data_table/defaults';
+import { mockBrowserFields } from '../../containers/source/mock';
+import type { Sort } from '../../../timelines/components/timeline/body/sort';
+import { getMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
+import type { CellValueElementProps } from '../../../../common/types';
 
 const mockSort: Sort[] = [
   {
@@ -53,9 +54,9 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
-jest.mock('../../../hooks/use_selector', () => ({
-  useShallowEqualSelector: () => mockGlobalState.tableById['table-test'],
-  useDeepEqualSelector: () => mockGlobalState.tableById['table-test'],
+jest.mock('../../hooks/use_selector', () => ({
+  useShallowEqualSelector: () => mockGlobalState.dataTable.tableById['table-test'],
+  useDeepEqualSelector: () => mockGlobalState.dataTable.tableById['table-test'],
 }));
 
 jest.mock(
@@ -75,7 +76,16 @@ window.matchMedia = jest.fn().mockImplementation((query) => {
   };
 });
 
-describe('Body', () => {
+export const TestCellRenderer: React.FC<CellValueElementProps> = ({ columnId, data }) => (
+  <>
+    {getMappedNonEcsValue({
+      data,
+      fieldName: columnId,
+    })?.reduce((x) => x[0]) ?? ''}
+  </>
+);
+
+describe('DataTable', () => {
   const mount = useMountAppended();
   const props: StatefulBodyProps = {
     activePage: 0,
@@ -99,10 +109,8 @@ describe('Body', () => {
     sort: mockSort,
     showCheckboxes: false,
     tabType: 'query',
-    tableView: 'gridView',
     totalItems: 1,
     leadingControlColumns: [],
-    trailingControlColumns: [],
     filterStatus: 'open',
     filterQuery: '',
     refetch: jest.fn(),
@@ -117,7 +125,7 @@ describe('Body', () => {
     test('it renders the body data grid', () => {
       const wrapper = mount(
         <TestProviders>
-          <BodyComponent {...props} />
+          <DataTableComponent {...props} />
         </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="body-data-grid"]').first().exists()).toEqual(true);
@@ -126,7 +134,7 @@ describe('Body', () => {
     test('it renders the column headers', () => {
       const wrapper = mount(
         <TestProviders>
-          <BodyComponent {...props} />
+          <DataTableComponent {...props} />
         </TestProviders>
       );
 
@@ -136,7 +144,7 @@ describe('Body', () => {
     test('it renders the scroll container', () => {
       const wrapper = mount(
         <TestProviders>
-          <BodyComponent {...props} />
+          <DataTableComponent {...props} />
         </TestProviders>
       );
 
@@ -146,7 +154,7 @@ describe('Body', () => {
     test('it renders events', () => {
       const wrapper = mount(
         <TestProviders>
-          <BodyComponent {...props} />
+          <DataTableComponent {...props} />
         </TestProviders>
       );
 
@@ -162,7 +170,7 @@ describe('Body', () => {
       };
       const wrapper = mount(
         <TestProviders>
-          <BodyComponent {...testProps} />
+          <DataTableComponent {...testProps} />
         </TestProviders>
       );
       wrapper.update();
@@ -185,7 +193,7 @@ describe('Body', () => {
       };
       const wrapper = mount(
         <TestProviders>
-          <BodyComponent {...testProps} />
+          <DataTableComponent {...testProps} />
         </TestProviders>
       );
       wrapper.update();
@@ -217,7 +225,7 @@ describe('Body', () => {
       };
       const wrapper = mount(
         <TestProviders>
-          <BodyComponent {...testProps} />
+          <DataTableComponent {...testProps} />
         </TestProviders>
       );
       wrapper.update();
@@ -249,7 +257,7 @@ describe('Body', () => {
       };
       const wrapper = mount(
         <TestProviders>
-          <BodyComponent {...testProps} />
+          <DataTableComponent {...testProps} />
         </TestProviders>
       );
       wrapper.update();
@@ -282,7 +290,7 @@ describe('Body', () => {
     };
     const wrapper = mount(
       <TestProviders>
-        <BodyComponent {...testProps} />
+        <DataTableComponent {...testProps} />
       </TestProviders>
     );
     wrapper.update();
@@ -299,7 +307,7 @@ describe('Body', () => {
   test('it does NOT render switches for hiding columns in the `EuiDataGrid` `Columns` popover', async () => {
     render(
       <TestProviders>
-        <BodyComponent {...props} />
+        <DataTableComponent {...props} />
       </TestProviders>
     );
 
@@ -315,7 +323,7 @@ describe('Body', () => {
   test('it dispatches the `REMOVE_COLUMN` action when a user clicks `Remove column` in the column header popover', async () => {
     render(
       <TestProviders>
-        <BodyComponent {...props} />
+        <DataTableComponent {...props} />
       </TestProviders>
     );
 
@@ -334,7 +342,7 @@ describe('Body', () => {
   test('it dispatches the `UPDATE_COLUMN_WIDTH` action when a user resizes a column', async () => {
     render(
       <TestProviders>
-        <BodyComponent {...props} />
+        <DataTableComponent {...props} />
       </TestProviders>
     );
 

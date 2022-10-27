@@ -8,7 +8,6 @@ import type {
   CriteriaWithPagination,
   EuiBasicTableProps,
   EuiDataGridCellValueElementProps,
-  EuiDataGridControlColumn,
 } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -16,16 +15,27 @@ import { ALERT_REASON, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-u
 import { get } from 'lodash';
 import moment from 'moment';
 import type { ComponentType } from 'react';
-import React, { useCallback, useMemo, Suspense, lazy } from 'react';
-import styled from 'styled-components';
+import React, { useCallback, useMemo, Suspense, lazy, useContext } from 'react';
+import styled, { ThemeContext } from 'styled-components';
 
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
 import type { ConnectedProps } from 'react-redux';
-import { connect } from 'react-redux';
-import type { Ecs } from '../../../../common/ecs';
-import type { TimelineItem } from '../../../../common/search_strategy';
-import type { RowRenderer } from '../../../../common/types';
+import { useDispatch, connect } from 'react-redux';
+import memoizeOne from 'memoize-one';
+import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { SetEventsDeleted, SetEventsLoading } from '../../../../common/types/bulk_actions';
+import { APP_UI_ID } from '../../../../common/constants';
+import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
+import type { BrowserFields, TimelineItem } from '../../../../common/search_strategy';
+import type {
+  ColumnHeaderOptions,
+  ControlColumnProps,
+  OnRowSelected,
+  OnSelectAll,
+  RowRenderer,
+} from '../../../../common/types';
 import { RuleName } from '../rule_name';
 import { isEventBuildingBlockType } from './helpers';
 import { AlertCount } from '../toolbar/alert/styles';
@@ -36,6 +46,10 @@ import type { TableState } from '../../store/data_table/types';
 import type { Refetch } from '../../store/data_table/inputs';
 import type { AlertWorkflowStatus } from '../../types';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
+import { checkBoxControlColumn, transformControlColumns } from '../control_columns';
+import { getColumnHeaders } from '../data_table/column_headers/helpers';
+import { getEventIdToDataMapping } from '../data_table/helpers';
+import { clearSelected } from '../../store/data_table/actions';
 
 const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
 
@@ -79,33 +93,27 @@ const StyledEuiBasicTable = styled(EuiBasicTable as BasicTableType)`
 `;
 
 export interface EventRenderedViewProps {
-  appId: string;
   events: TimelineItem[];
   bulkActions?: BulkActionsProp;
-  id: string;
-  getRowRenderer?: ({
-    data,
-    rowRenderers,
-  }: {
-    data: Ecs;
-    rowRenderers: RowRenderer[];
-  }) => RowRenderer | null;
-  leadingControlColumns: EuiDataGridControlColumn[];
-  onChangePage: (newActivePage: number) => void;
-  onChangeItemsPerPage: (newItemsPerPage: number) => void;
+  leadingControlColumns: ControlColumnProps[];
   pageIndex: number;
   pageSize: number;
   pageSizeOptions: number[];
   rowRenderers: RowRenderer[];
-  timelineId: string;
+  tableId: string;
   totalItemCount: number;
   unit?: (total: number) => React.ReactNode;
   hasAlertsCrud?: boolean;
   refetch: Refetch;
-  totalSelectAllAlerts?: number;
   filterQuery?: string;
   filterStatus?: AlertWorkflowStatus;
   indexNames: string[];
+  loadPage: (newActivePage: number) => void;
+  browserFields: BrowserFields;
+  fieldBrowserOptions?: FieldBrowserOptions;
+  disabledCellActions: string[];
+  tabType: string;
+  onRuleChange?: () => void;
 }
 
 export type StatefulEventRenderedViewProps = EventRenderedViewProps & PropsFromRedux;
@@ -120,30 +128,38 @@ const PreferenceFormattedDateComponent = ({ value }: { value: Date }) => {
 export const PreferenceFormattedDate = React.memo(PreferenceFormattedDateComponent);
 
 const EventRenderedViewComponent = ({
-  appId,
   events,
   bulkActions,
-  id,
-  getRowRenderer,
   leadingControlColumns,
-  onChangePage,
-  onChangeItemsPerPage,
   pageIndex,
   pageSize,
   pageSizeOptions,
   rowRenderers,
-  timelineId,
+  tableId,
   totalItemCount,
   unit = defaultUnit,
   selectedEventIds,
   showCheckboxes,
   hasAlertsCrud,
   refetch,
-  totalSelectAllAlerts,
   filterQuery,
   filterStatus,
   indexNames,
+  loadPage,
+  browserFields,
+  fieldBrowserOptions,
+  columnHeaders,
+  disabledCellActions,
+  isSelectAllChecked,
+  loadingEventIds,
+  setSelected,
+  sort,
+  tabType,
+  queryFields,
+  onRuleChange,
 }: StatefulEventRenderedViewProps) => {
+  const dispatch = useDispatch();
+  const theme: EuiTheme = useContext(ThemeContext);
   const alertCountText = useMemo(
     () => `${totalItemCount.toLocaleString()} ${unit(totalItemCount)}`,
     [totalItemCount, unit]
@@ -180,6 +196,66 @@ const EventRenderedViewComponent = ({
     }
   }, [bulkActions]);
 
+  const onChangeItemsPerPage = useCallback(
+    (itemsChangedPerPage) => {
+      dispatch(
+        dataTableActions.updateItemsPerPage({ id: tableId, itemsPerPage: itemsChangedPerPage })
+      );
+    },
+    [tableId, dispatch]
+  );
+
+  const onChangePage = useCallback(
+    (page) => {
+      loadPage(page);
+    },
+    [loadPage]
+  );
+
+  const setEventsLoading = useCallback<SetEventsLoading>(
+    ({ eventIds, isLoading: loading }) => {
+      dispatch(dataTableActions.setEventsLoading({ id: tableId, eventIds, isLoading: loading }));
+    },
+    [dispatch, tableId]
+  );
+
+  const setEventsDeleted = useCallback<SetEventsDeleted>(
+    ({ eventIds, isDeleted }) => {
+      dispatch(dataTableActions.setEventsDeleted({ id: tableId, eventIds, isDeleted }));
+    },
+    [dispatch, tableId]
+  );
+
+  const onRowSelected: OnRowSelected = useCallback(
+    ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
+      setSelected({
+        id: tableId,
+        eventIds: getEventIdToDataMapping(events, eventIds, queryFields, hasAlertsCrud ?? false),
+        isSelected,
+        isSelectAllChecked: isSelected && selectedCount + 1 === events.length,
+      });
+    },
+    [setSelected, tableId, events, queryFields, hasAlertsCrud, selectedCount]
+  );
+
+  const onSelectPage: OnSelectAll = useCallback(
+    ({ isSelected }: { isSelected: boolean }) =>
+      isSelected
+        ? setSelected({
+            id: tableId,
+            eventIds: getEventIdToDataMapping(
+              events,
+              events.map((event) => event._id),
+              queryFields,
+              hasAlertsCrud ?? false
+            ),
+            isSelected,
+            isSelectAllChecked: isSelected,
+          })
+        : clearSelected({ id: tableId }),
+    [setSelected, tableId, events, queryFields, hasAlertsCrud]
+  );
+
   const onAlertStatusActionFailure = useMemo(() => {
     if (bulkActions && bulkActions !== true) {
       return bulkActions.onAlertStatusActionFailure;
@@ -213,8 +289,8 @@ const EventRenderedViewComponent = ({
             <StatefulAlertBulkActions
               showAlertStatusActions={showAlertStatusActions}
               data-test-subj="bulk-actions"
-              id={id}
-              totalItems={totalSelectAllAlerts ?? totalItemCount}
+              id={tableId}
+              totalItems={totalItemCount}
               filterStatus={filterStatus}
               query={filterQuery}
               indexName={indexNames.join()}
@@ -232,7 +308,7 @@ const EventRenderedViewComponent = ({
       alertCountText,
       filterQuery,
       filterStatus,
-      id,
+      tableId,
       indexNames,
       onAlertStatusActionFailure,
       onAlertStatusActionSuccess,
@@ -240,14 +316,63 @@ const EventRenderedViewComponent = ({
       showAlertStatusActions,
       showBulkActions,
       totalItemCount,
-      totalSelectAllAlerts,
     ]
   );
+
+  const [leadingTGridControlColumns] = useMemo(() => {
+    return [
+      showCheckboxes ? [checkBoxControlColumn, ...leadingControlColumns] : leadingControlColumns,
+    ].map((controlColumns) =>
+      transformControlColumns({
+        columnHeaders,
+        controlColumns,
+        data: events,
+        disabledCellActions,
+        fieldBrowserOptions,
+        loadingEventIds,
+        onRowSelected,
+        onRuleChange,
+        selectedEventIds,
+        showCheckboxes,
+        tabType,
+        timelineId: tableId,
+        isSelectAllChecked,
+        sort,
+        browserFields,
+        onSelectPage,
+        theme,
+        setEventsLoading,
+        setEventsDeleted,
+        pageSize,
+      })
+    );
+  }, [
+    showCheckboxes,
+    leadingControlColumns,
+    columnHeaders,
+    events,
+    disabledCellActions,
+    fieldBrowserOptions,
+    loadingEventIds,
+    onRowSelected,
+    onRuleChange,
+    selectedEventIds,
+    tabType,
+    tableId,
+    isSelectAllChecked,
+    sort,
+    browserFields,
+    onSelectPage,
+    theme,
+    setEventsLoading,
+    setEventsDeleted,
+    pageSize,
+  ]);
 
   const ActionTitle = useMemo(
     () => (
       <EuiFlexGroup gutterSize="m">
-        {leadingControlColumns.map((action) => {
+        {leadingTGridControlColumns.map((action) => {
           const ActionHeader = action.headerCellRender;
           return (
             <EuiFlexItem grow={false}>
@@ -257,7 +382,7 @@ const EventRenderedViewComponent = ({
         })}
       </EuiFlexGroup>
     ),
-    [leadingControlColumns]
+    [leadingTGridControlColumns]
   );
 
   const columns = useMemo(
@@ -272,8 +397,8 @@ const EventRenderedViewComponent = ({
           const rowIndex = events.findIndex((evt) => evt._id === alertId);
           return (
             <ActionsContainer>
-              {leadingControlColumns.length > 0
-                ? leadingControlColumns.map((action) => {
+              {leadingTGridControlColumns.length > 0
+                ? leadingTGridControlColumns.map((action) => {
                     const getActions = action.rowCellRender as (
                       props: Omit<EuiDataGridCellValueElementProps, 'colIndex'>
                     ) => React.ReactNode;
@@ -315,7 +440,7 @@ const EventRenderedViewComponent = ({
         render: (name: unknown, item: TimelineItem) => {
           const ruleName = get(item, `ecs.signal.rule.name`) ?? get(item, `ecs.${ALERT_RULE_NAME}`);
           const ruleId = get(item, `ecs.signal.rule.id`) ?? get(item, `ecs.${ALERT_RULE_UUID}`);
-          return <RuleName name={ruleName} id={ruleId} appId={appId} />;
+          return <RuleName name={ruleName} id={ruleId} appId={APP_UI_ID} />;
         },
       },
       {
@@ -328,10 +453,7 @@ const EventRenderedViewComponent = ({
         render: (name: unknown, item: TimelineItem) => {
           const ecsData = get(item, 'ecs');
           const reason = get(item, `ecs.signal.reason`) ?? get(item, `ecs.${ALERT_REASON}`);
-          const rowRenderer =
-            getRowRenderer != null
-              ? getRowRenderer({ data: ecsData, rowRenderers })
-              : rowRenderers.find((x) => x.isInstance(ecsData)) ?? null;
+          const rowRenderer = getRowRenderer({ data: ecsData, rowRenderers });
 
           return (
             <EuiFlexGroup gutterSize="none" direction="column" className="eui-fullWidth">
@@ -341,7 +463,7 @@ const EventRenderedViewComponent = ({
                     {rowRenderer.renderRow({
                       data: ecsData,
                       isDraggable: false,
-                      scopeId: timelineId,
+                      scopeId: tableId,
                     })}
                   </div>
                 </EventRenderedFlexItem>
@@ -356,7 +478,7 @@ const EventRenderedViewComponent = ({
         width: '60%',
       },
     ],
-    [ActionTitle, events, leadingControlColumns, appId, getRowRenderer, rowRenderers, timelineId]
+    [ActionTitle, events, leadingTGridControlColumns, rowRenderers, tableId]
   );
 
   const handleTableChange = useCallback(
@@ -407,15 +529,37 @@ const EventRenderedViewComponent = ({
 export const EventRenderedView = React.memo(EventRenderedViewComponent);
 
 const makeMapStateToProps = () => {
+  const memoizedColumnHeaders: (
+    headers: ColumnHeaderOptions[],
+    browserFields: BrowserFields
+  ) => ColumnHeaderOptions[] = memoizeOne(getColumnHeaders);
   const getDataTable = dataTableSelectors.getTableByIdSelector();
-  const mapStateToProps = (state: TableState, { id, hasAlertsCrud }: EventRenderedViewProps) => {
-    const dataTable: TGridModel = getDataTable(state, id);
-    const { selectedEventIds, showCheckboxes } = dataTable;
+  const mapStateToProps = (
+    state: TableState,
+    { tableId, hasAlertsCrud, browserFields }: EventRenderedViewProps
+  ) => {
+    const dataTable: TGridModel = getDataTable(state, tableId);
+    const {
+      columns,
+      isSelectAllChecked,
+      loadingEventIds,
+      selectedEventIds,
+      showCheckboxes,
+      sort,
+      isLoading,
+      queryFields,
+    } = dataTable;
 
     return {
-      id,
+      tableId,
+      columnHeaders: memoizedColumnHeaders(columns, browserFields),
+      isSelectAllChecked,
+      loadingEventIds,
+      isLoading,
       selectedEventIds,
       showCheckboxes: hasAlertsCrud === true && showCheckboxes,
+      sort,
+      queryFields,
     };
   };
   return mapStateToProps;

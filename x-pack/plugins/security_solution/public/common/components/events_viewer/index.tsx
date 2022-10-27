@@ -14,8 +14,9 @@ import type { Filter } from '@kbn/es-query';
 import type { Direction, EntityType, RowRenderer } from '@kbn/timelines-plugin/common';
 import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import type { Sort } from '../../../timelines/components/timeline/body/sort';
 import type { DataTableCellAction } from '../../../../common/data_table/columns';
-import type { ControlColumnProps, Sort } from '../../../../common/types';
+import type { ControlColumnProps } from '../../../../common/types';
 import { dataTableActions, dataTableSelectors } from '../../store/data_table';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
@@ -58,6 +59,7 @@ import { InspectButton } from '../data_table/inspect';
 import { StatefulDataTableComponent } from '../data_table';
 import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
 import type { AlertWorkflowStatus } from '../../types';
+import { StatefulEventRenderedView } from '../event_rendered_view';
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
   height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
@@ -120,7 +122,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
   const {
     filters,
-    input,
     query,
     globalQueries,
     dataTable: {
@@ -185,8 +186,6 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
-
   const { Navigation } = useSessionViewNavigation({
     scopeId: tableId,
   });
@@ -245,7 +244,7 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   const tableContext = useMemo(() => ({ tableId }), [tableId]);
 
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
-  const { uiSettings } = useKibana().services;
+  const { uiSettings, data } = useKibana().services;
 
   const getManageDataTable = useMemo(() => dataTableSelectors.getManageDataTableById(), []);
 
@@ -280,7 +279,8 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
   );
 
   const fields = useMemo(
-    () => [...columnsHeader.map((c) => c.id), ...(queryFields ?? [])],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    () => [...columnsHeader.map((c: { id: any }) => c.id), ...(queryFields ?? [])],
     [columnsHeader, queryFields]
   );
 
@@ -424,6 +424,29 @@ const StatefulEventsViewerComponent: React.FC<Props> = ({
                         onRuleChange={onRuleChange}
                         leadingControlColumns={leadingControlColumns}
                       />
+                      {tableView === 'eventRenderedView' && (
+                        <StatefulEventRenderedView
+                          events={events}
+                          leadingControlColumns={leadingControlColumns}
+                          pageIndex={pageInfo.activePage}
+                          pageSize={pageInfo.querySize}
+                          pageSizeOptions={itemsPerPageOptions}
+                          rowRenderers={rowRenderers}
+                          tableId={tableId}
+                          totalItemCount={totalCountMinusDeleted}
+                          loadPage={loadPage}
+                          indexNames={selectedPatterns}
+                          refetch={refetch}
+                          unit={unit}
+                          hasAlertsCrud={hasAlertsCrud}
+                          filterQuery={filterQuery}
+                          filterStatus={currentFilter}
+                          bulkActions={bulkActions}
+                          browserFields={browserFields}
+                          disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
+                          tabType={'query'}
+                        />
+                      )}
                     </ScrollableFlexItem>
                   </FullWidthFlexGroupTable>
                 )}

@@ -9,20 +9,17 @@ import type {
   EuiDataGridRefProps,
   EuiDataGridColumn,
   EuiDataGridCellValueElementProps,
-  EuiDataGridControlColumn,
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
 import { EuiDataGrid, EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import type { ComponentType } from 'react';
 import React, { Suspense, useCallback, useEffect, useMemo, useContext, useRef, lazy } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 
 import styled, { ThemeContext } from 'styled-components';
-import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import type { Filter } from '@kbn/es-query';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
@@ -37,7 +34,7 @@ import type {
   RowRenderer,
 } from '../../../../common/types/timeline';
 
-import type { TimelineItem, TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
+import type { TimelineItem } from '../../../../common/search_strategy/timeline';
 
 import { getColumnHeader, getColumnHeaders } from './column_headers/helpers';
 import {
@@ -49,7 +46,6 @@ import {
 } from './helpers';
 
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
-import { RowAction } from './row_action';
 import { REMOVE_COLUMN } from './column_headers/translations';
 import { dataTableActions, dataTableSelectors } from '../../store/data_table';
 import type { AlertWorkflowStatus, Refetch } from '../../types';
@@ -58,9 +54,9 @@ import { AlertCount, defaultUnit } from '../toolbar/alert';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { useKibana } from '../../lib/kibana';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { checkBoxControlColumn } from '../control_columns';
+import { checkBoxControlColumn, transformControlColumns } from '../control_columns';
 import { getPageRowIndex } from './pagination';
-import type { ControlColumnProps, SortColumnTable } from '../../../../common/types';
+import type { ControlColumnProps } from '../../../../common/types';
 
 const DATA_TABLE_ARIA_LABEL = i18n.translate('xpack.timelines.tgrid.body.ariaLabel', {
   defaultMessage: 'Alerts',
@@ -100,8 +96,6 @@ const ES_LIMIT_COUNT = 9999;
 
 const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
-const EmptyHeaderCellRender: ComponentType = () => null;
-
 const gridStyle: EuiDataGridStyle = { border: 'none', fontSize: 's', header: 'underline' };
 
 const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
@@ -111,145 +105,6 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
     }
   }
 `;
-
-const transformControlColumns = ({
-  columnHeaders,
-  controlColumns,
-  data,
-  fieldBrowserOptions,
-  loadingEventIds,
-  onRowSelected,
-  onRuleChange,
-  selectedEventIds,
-  showCheckboxes,
-  tabType,
-  timelineId,
-  isSelectAllChecked,
-  onSelectPage,
-  browserFields,
-  pageSize,
-  sort,
-  theme,
-  setEventsLoading,
-  setEventsDeleted,
-  hasAlertsCrudPermissions,
-}: {
-  columnHeaders: ColumnHeaderOptions[];
-  controlColumns: ControlColumnProps[];
-  data: TimelineItem[];
-  disabledCellActions: string[];
-  fieldBrowserOptions?: FieldBrowserOptions;
-  loadingEventIds: string[];
-  onRowSelected: OnRowSelected;
-  onRuleChange?: () => void;
-  selectedEventIds: Record<string, TimelineNonEcsData[]>;
-  showCheckboxes: boolean;
-  tabType: string;
-  timelineId: string;
-  isSelectAllChecked: boolean;
-  browserFields: BrowserFields;
-  onSelectPage: OnSelectAll;
-  pageSize: number;
-  sort: SortColumnTable[];
-  theme: EuiTheme;
-  setEventsLoading: SetEventsLoading;
-  setEventsDeleted: SetEventsDeleted;
-  hasAlertsCrudPermissions?: ({
-    ruleConsumer,
-    ruleProducer,
-  }: {
-    ruleConsumer: string;
-    ruleProducer?: string;
-  }) => boolean;
-}): EuiDataGridControlColumn[] =>
-  controlColumns.map(
-    ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
-      id: `${columnId}`,
-      headerCellRender: () => {
-        const HeaderActions = headerCellRender;
-        return (
-          <>
-            {HeaderActions && (
-              <HeaderActions
-                width={width}
-                browserFields={browserFields}
-                fieldBrowserOptions={fieldBrowserOptions}
-                columnHeaders={columnHeaders}
-                isEventViewer={false}
-                isSelectAllChecked={isSelectAllChecked}
-                onSelectAll={onSelectPage}
-                showEventsSelect={false}
-                showSelectAllCheckbox={showCheckboxes}
-                sort={sort}
-                tabType={tabType}
-                timelineId={timelineId}
-              />
-            )}
-          </>
-        );
-      },
-      rowCellRender: ({
-        isDetails,
-        isExpandable,
-        isExpanded,
-        rowIndex,
-        colIndex,
-        setCellProps,
-      }: EuiDataGridCellValueElementProps) => {
-        const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
-        const rowData = data[pageRowIndex];
-
-        let disabled = false;
-        if (rowData) {
-          addBuildingBlockStyle(rowData.ecs, theme, setCellProps);
-          if (columnId === 'checkbox-control-column' && hasAlertsCrudPermissions != null) {
-            // FUTURE ENGINEER, the assumption here is you can only have one producer and consumer at this time
-            const ruleConsumers =
-              rowData.data.find((d) => d.field === ALERT_RULE_CONSUMER)?.value ?? [];
-            const ruleProducers =
-              rowData.data.find((d) => d.field === ALERT_RULE_PRODUCER)?.value ?? [];
-            disabled = !hasAlertsCrudPermissions({
-              ruleConsumer: ruleConsumers.length > 0 ? ruleConsumers[0] : '',
-              ruleProducer: ruleProducers.length > 0 ? ruleProducers[0] : undefined,
-            });
-          }
-        } else {
-          // disable the cell when it has no data
-          setCellProps({ style: { display: 'none' } });
-        }
-
-        return (
-          <RowAction
-            columnId={columnId ?? ''}
-            columnHeaders={columnHeaders}
-            controlColumn={controlColumns[i]}
-            data={data}
-            disabled={disabled}
-            index={i}
-            isDetails={isDetails}
-            isExpanded={isExpanded}
-            isEventViewer={false}
-            isExpandable={isExpandable}
-            loadingEventIds={loadingEventIds}
-            onRowSelected={onRowSelected}
-            onRuleChange={onRuleChange}
-            rowIndex={rowIndex}
-            colIndex={colIndex}
-            pageRowIndex={pageRowIndex}
-            selectedEventIds={selectedEventIds}
-            setCellProps={setCellProps}
-            showCheckboxes={showCheckboxes}
-            tabType={tabType}
-            tableId={timelineId}
-            width={width}
-            setEventsLoading={setEventsLoading}
-            setEventsDeleted={setEventsDeleted}
-          />
-        );
-      },
-      width,
-    })
-  );
 
 export type StatefulBodyProps = OwnProps & PropsFromRedux;
 
@@ -318,13 +173,7 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
       ({ eventIds, isSelected }: { eventIds: string[]; isSelected: boolean }) => {
         setSelected({
           id,
-          eventIds: getEventIdToDataMapping(
-            data,
-            eventIds,
-            queryFields,
-            hasAlertsCrud ?? false,
-            hasAlertsCrudPermissions
-          ),
+          eventIds: getEventIdToDataMapping(data, eventIds, queryFields, hasAlertsCrud ?? false),
           isSelected,
           isSelectAllChecked: isSelected && selectedCount + 1 === data.length,
         });
@@ -341,8 +190,7 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
                 data,
                 data.map((event) => event._id),
                 queryFields,
-                hasAlertsCrud ?? false,
-                hasAlertsCrudPermissions
+                hasAlertsCrud ?? false
               ),
               isSelected,
               isSelectAllChecked: isSelected,
@@ -449,7 +297,7 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
                     showAlertStatusActions={showAlertStatusActions}
                     data-test-subj="bulk-actions"
                     id={id}
-                    totalItems={totalSelectAllAlerts ?? totalItems}
+                    totalItems={totalItems}
                     filterStatus={filterStatus}
                     query={filterQuery}
                     indexName={indexNames.join()}
@@ -494,7 +342,6 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
         showBulkActions,
         showAlertStatusActions,
         id,
-        totalSelectAllAlerts,
         totalItems,
         filterStatus,
         filterQuery,
@@ -591,7 +438,7 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
       [dispatch, id]
     );
 
-    const [leadingTGridControlColumns, trailingTGridControlColumns] = useMemo(() => {
+    const [leadingTGridControlColumns] = useMemo(() => {
       return [
         showCheckboxes ? [checkBoxControlColumn, ...leadingControlColumns] : leadingControlColumns,
       ].map((controlColumns) =>
@@ -616,7 +463,6 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
           setEventsLoading,
           setEventsDeleted,
           pageSize,
-          hasAlertsCrudPermissions,
         })
       );
     }, [
@@ -640,7 +486,6 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
       pageSize,
       setEventsLoading,
       setEventsDeleted,
-      hasAlertsCrudPermissions,
     ]);
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
@@ -783,7 +628,6 @@ export const DataTableComponent = React.memo<StatefulBodyProps>(
             columnVisibility={{ visibleColumns, setVisibleColumns: onSetVisibleColumns }}
             gridStyle={gridStyle}
             leadingControlColumns={leadingTGridControlColumns}
-            trailingControlColumns={trailingTGridControlColumns}
             toolbarVisibility={toolbarVisibility}
             rowCount={totalItems}
             renderCellValue={renderTGridCellValue}
