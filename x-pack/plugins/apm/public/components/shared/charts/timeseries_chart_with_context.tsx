@@ -19,7 +19,7 @@ import { TimeseriesChart } from './timeseries_chart';
 interface AnomalyTimeseries extends ServiceAnomalyTimeseries {
   color?: string;
 }
-interface Props {
+export interface TimeseriesChartWithContextProps {
   id: string;
   fetchStatus: FETCH_STATUS;
   height?: number;
@@ -52,7 +52,7 @@ export function TimeseriesChartWithContext({
   yDomain,
   anomalyTimeseries,
   customTheme = {},
-}: Props) {
+}: TimeseriesChartWithContextProps) {
   const {
     query: { comparisonEnabled, offset },
   } = useAnyOfApmParams(
