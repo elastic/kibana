@@ -693,7 +693,7 @@
           },
           ", ",
           "SearchOutput",
-          ">"
+          ", any>"
         ],
         "path": "src/plugins/discover/public/embeddable/types.ts",
         "deprecated": false,
