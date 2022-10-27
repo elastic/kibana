@@ -32,11 +32,10 @@ import {
   parseDateString,
   validateHistoryWindowStart,
   retrieveValuesFromBuckets,
-  getRuntimeMappings as getRuntimeMappingsForNewTerms,
+  getNewTermsRuntimeMappings,
   getAggregationField,
   decodeMatchedBucketKey,
 } from './utils';
-// } from './utils_base_64';
 import {
   addToSearchAfterReturn,
   createSearchAfterReturnType,
@@ -210,7 +209,7 @@ export const createNewTermsAlertType = (
           }),
           runtimeMappings: {
             ...runtimeMappings,
-            ...getRuntimeMappingsForNewTerms(params.newTermsFields),
+            ...getNewTermsRuntimeMappings(params.newTermsFields),
           },
           searchAfterSortIds: undefined,
           index: inputIndex,
@@ -256,7 +255,7 @@ export const createNewTermsAlertType = (
             }),
             runtimeMappings: {
               ...runtimeMappings,
-              ...getRuntimeMappingsForNewTerms(params.newTermsFields),
+              ...getNewTermsRuntimeMappings(params.newTermsFields),
             },
             searchAfterSortIds: undefined,
             index: inputIndex,

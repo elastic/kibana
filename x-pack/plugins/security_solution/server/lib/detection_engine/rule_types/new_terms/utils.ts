@@ -9,8 +9,8 @@ import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-const AGGR_FIELD = 'new_terms_values';
-const DELIMITER = '_______';
+const AGG_FIELD_NAME = 'new_terms_values';
+const DELIMITER = '_';
 
 export const parseDateString = ({
   date,
@@ -62,12 +62,24 @@ export const retrieveValuesFromBuckets = (
       .filter((value): value is string | number => value != null);
   }
 
-  return buckets.map((bucket) => Object.values(bucket.key).join(DELIMITER));
+  return buckets.map((bucket) =>
+    Object.values(bucket.key)
+      .filter((value): value is string | number => value != null)
+      .map((value) =>
+        Buffer.from(typeof value !== 'string' ? value.toString() : value).toString('base64')
+      )
+      .join(DELIMITER)
+  );
 };
 
-export const getRuntimeMappings = (
+/**
+ * creates runtime field
+ * @param newTermsFields
+ * @returns
+ */
+export const getNewTermsRuntimeMappings = (
   newTermsFields: string[]
-): undefined | { [AGGR_FIELD]: estypes.MappingRuntimeField } => {
+): undefined | { [AGG_FIELD_NAME]: estypes.MappingRuntimeField } => {
   // if new terms include only one field we don't use runtime mappings and don't stich fields buckets together
   if (newTermsFields.length === 1) {
     return undefined;
@@ -75,20 +87,26 @@ export const getRuntimeMappings = (
 
   const fields = newTermsFields.map((field) => `'${field}'`).join(', ');
   return {
-    [AGGR_FIELD]: {
+    [AGG_FIELD_NAME]: {
       type: 'keyword',
       script: `
-      String[] fields = new String[] {${fields}};
-      String acc = doc[fields[0]].value;
 
-      for (int i = 1; i < fields.length; i++) {
-        acc = acc + '${DELIMITER}' + doc[fields[i]].value
+      void traverseDocFields(def doc, def fields, def index, def line) {
+        if (index === fields.length) {
+          emit(line);
+        } else {
+          for (field in doc[fields[index]]) {
+            def delimiter = index === 0 ? '' : '${DELIMITER}';
+            def nextLine = line + delimiter + String.valueOf(field).encodeBase64();
+
+            traverseDocFields(doc, fields, index + 1, nextLine);
+          }
+        }
       }
-      
-      String[] arr = new String[1];
-      arr[0] = acc;
-      
-      emit(arr[0])
+
+      String[] fields = new String[] {${fields}};
+
+      traverseDocFields(doc, fields, 0, '');
     `,
     },
   };
@@ -100,7 +118,7 @@ export const getAggregationField = (newTermsFields: string[]): string => {
     return newTermsFields[0];
   }
 
-  return AGGR_FIELD;
+  return AGG_FIELD_NAME;
 };
 
 export const decodeMatchedBucketKey = (
@@ -112,6 +130,10 @@ export const decodeMatchedBucketKey = (
     return [bucketKey];
   }
 
-  // if newTermsFields has length greater than 1, bucketKey can't be umber, so casting is safe here
-  return (bucketKey as string).split(DELIMITER);
+  // if newTermsFields has length greater than 1, bucketKey can't be number, so casting is safe here
+  return (bucketKey as string)
+    .split(DELIMITER)
+    .map((encodedValue, i) =>
+      [newTermsFields[i], Buffer.from(encodedValue, 'base64').toString()].join(': ')
+    );
 };
