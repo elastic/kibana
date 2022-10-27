@@ -14,6 +14,7 @@ import { validateDurationSchema } from '../../lib';
 import { handleDisabledApiKeysError } from '../lib/error_handler';
 import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { actionsSchema, rewriteActions } from '../lib';
 import {
   RuleNotifyWhenType,
   LEGACY_BASE_ALERT_API_PATH,
@@ -32,15 +33,7 @@ const bodySchema = schema.object({
   }),
   throttle: schema.nullable(schema.string({ validate: validateDurationSchema })),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-  actions: schema.arrayOf(
-    schema.object({
-      group: schema.string(),
-      id: schema.string(),
-      params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-      actionTypeId: schema.maybe(schema.string()),
-    }),
-    { defaultValue: [] }
-  ),
+  actions: actionsSchema,
   notifyWhen: schema.nullable(schema.string({ validate: validateNotifyWhenType })),
 });
 
@@ -72,7 +65,7 @@ export const updateAlertRoute = (
             id,
             data: {
               name,
-              actions,
+              actions: rewriteActions(actions),
               params,
               schedule,
               tags,

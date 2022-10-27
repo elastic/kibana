@@ -11,9 +11,11 @@ import { CreateOptions } from '../rules_client';
 import {
   RewriteRequestCase,
   RewriteResponseCase,
+  rewriteActions,
   handleDisabledApiKeysError,
   verifyAccessAndContext,
   countUsageOfPredefinedIds,
+  actionsSchema,
 } from './lib';
 import {
   SanitizedRule,
@@ -35,14 +37,7 @@ export const bodySchema = schema.object({
   schedule: schema.object({
     interval: schema.string({ validate: validateDurationSchema }),
   }),
-  actions: schema.arrayOf(
-    schema.object({
-      group: schema.string(),
-      id: schema.string(),
-      params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-    }),
-    { defaultValue: [] }
-  ),
+  actions: actionsSchema,
   notify_when: schema.string({ validate: validateNotifyWhenType }),
 });
 
@@ -55,6 +50,7 @@ const rewriteBodyReq: RewriteRequestCase<CreateOptions<RuleTypeParams>['data']> 
   alertTypeId,
   notifyWhen,
 });
+
 const rewriteBodyRes: RewriteResponseCase<SanitizedRule<RuleTypeParams>> = ({
   actions,
   alertTypeId,
@@ -127,6 +123,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
               await rulesClient.create<RuleTypeParams>({
                 data: rewriteBodyReq({
                   ...rule,
+                  actions: rewriteActions(rule.actions),
                   notify_when: rule.notify_when as RuleNotifyWhenType,
                 }),
                 options: { id: params?.id },

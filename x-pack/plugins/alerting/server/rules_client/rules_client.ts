@@ -3489,9 +3489,7 @@ export class RulesClient {
         );
       }
     } else {
-      const actionsWithoutFrequency = actions.filter(
-        (action) => !action.frequency || !action.frequency.notifyWhen || !action.frequency.throttle
-      );
+      const actionsWithoutFrequency = actions.filter((action) => !action.frequency);
       if (actionsWithoutFrequency.length) {
         throw Boom.badRequest(
           i18n.translate('xpack.alerting.rulesClient.validateActions.notAllActionsWithFreq', {

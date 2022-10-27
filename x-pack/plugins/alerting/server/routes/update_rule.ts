@@ -15,6 +15,8 @@ import {
   RewriteResponseCase,
   RewriteRequestCase,
   handleDisabledApiKeysError,
+  rewriteActions,
+  actionsSchema,
 } from './lib';
 import {
   RuleTypeParams,
@@ -36,14 +38,7 @@ const bodySchema = schema.object({
   }),
   throttle: schema.nullable(schema.string({ validate: validateDurationSchema })),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-  actions: schema.arrayOf(
-    schema.object({
-      group: schema.string(),
-      id: schema.string(),
-      params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
-    }),
-    { defaultValue: [] }
-  ),
+  actions: actionsSchema,
   notify_when: schema.string({ validate: validateNotifyWhenType }),
 });
 
@@ -132,6 +127,7 @@ export const updateRuleRoute = (
                 id,
                 data: {
                   ...rule,
+                  actions: rewriteActions(rule.actions),
                   notify_when: rule.notify_when as RuleNotifyWhenType,
                 },
               })

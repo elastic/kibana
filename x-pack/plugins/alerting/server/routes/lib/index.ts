@@ -19,3 +19,5 @@ export type {
 export { verifyAccessAndContext } from './verify_access_and_context';
 export { countUsageOfPredefinedIds } from './count_usage_of_predefined_ids';
 export { rewriteRule } from './rewrite_rule';
+export { rewriteActions } from './rewrite_actions';
+export { actionsSchema } from './actions_schema';

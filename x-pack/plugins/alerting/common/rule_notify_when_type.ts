@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-const RuleNotifyWhenTypeValues = [
+export const RuleNotifyWhenTypeValues = [
   'onActionGroupChange',
   'onActiveAlert',
   'onThrottleInterval',
