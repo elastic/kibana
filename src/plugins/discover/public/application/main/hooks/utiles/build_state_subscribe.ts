@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { differenceWith, isEqual, toPairs } from 'lodash';
+import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { SavedSearchContainer } from '../../services/discover_saved_search_container';
 import { AppState, DiscoverAppStateContainer } from '../../services/discover_app_state_container';
 import { DiscoverServices } from '../../../../build_services';
@@ -13,21 +14,22 @@ import { addLog } from '../../../../utils/add_log';
 import { loadDataView, resolveDataView } from '../../utils/resolve_data_view';
 import { FetchStatus } from '../../../types';
 import { DataStateContainer } from '../../services/discover_data_state_container';
-import { InternalStateContainer } from '../../services/discover_internal_state_container';
 
 export const buildStateSubscribe =
   ({
     appStateContainer,
     savedSearchContainer,
     dataStateContainer,
-    internalStateContainer,
     services,
+    setDataView,
+    getDataViewList,
   }: {
     appStateContainer: DiscoverAppStateContainer;
     savedSearchContainer: SavedSearchContainer;
     dataStateContainer: DataStateContainer;
-    internalStateContainer: InternalStateContainer;
     services: DiscoverServices;
+    setDataView: (dataView: DataView) => void;
+    getDataViewList: () => DataViewListItem[];
   }) =>
   async (nextState: AppState) => {
     const prevState = appStateContainer.getPrevious();
@@ -57,11 +59,7 @@ export const buildStateSubscribe =
        *  That's because appState is updated before savedSearchData$
        *  The following line of code catches this, but should be improved
        */
-      const nextDataViewObj = await loadDataView(
-        internalStateContainer.getState().dataViews,
-        services,
-        nextState.index
-      );
+      const nextDataViewObj = await loadDataView(getDataViewList(), services, nextState.index);
 
       // If the requested data view is not found, don't try to load it,
       // and instead reset the app state to the fallback data view
@@ -76,7 +74,7 @@ export const buildStateSubscribe =
       }
       nextDataView = nextDataViewObj.loaded;
       dataStateContainer.reset();
-      internalStateContainer.transitions.setDataView(nextDataView);
+      setDataView(nextDataView);
     }
     savedSearchContainer.update(nextDataView, nextState);
 

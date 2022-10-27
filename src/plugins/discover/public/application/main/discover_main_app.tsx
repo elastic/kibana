@@ -11,7 +11,7 @@ import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
 import { useDiscoverState } from './hooks/use_discover_state';
-import { DiscoverStateContainer, useSavedSearch } from './services/discover_state';
+import { DiscoverStateContainer, useSavedSearchPersisted } from './services/discover_state';
 import { useUrl } from './hooks/use_url';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
@@ -25,7 +25,7 @@ export interface DiscoverMainProps {
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
   const { stateContainer } = props;
-  const savedSearch = useSavedSearch();
+  const savedSearch = useSavedSearchPersisted();
   const services = useDiscoverServices();
   const { chrome, docLinks, data, spaces, history } = services;
   const usedHistory = useHistory();

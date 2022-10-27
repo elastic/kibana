@@ -16,15 +16,13 @@ import { DataViewListItem, DataView } from '@kbn/data-views-plugin/common';
 export interface InternalState {
   dataView: DataView | undefined;
   dataViews: DataViewListItem[];
-  dataViewsAdHoc: DataViewListItem[];
-  savedSearchLoading: boolean;
+  dataViewsAdHoc: DataView[];
 }
 
 interface InternalStateTransitions {
   setDataView: (state: InternalState) => (dataView: DataView) => InternalState;
   setDataViews: (state: InternalState) => (dataViews: DataViewListItem[]) => InternalState;
-  setDataViewsAdHoc: (state: InternalState) => (dataViews: DataViewListItem[]) => InternalState;
-  setSavedSearchLoading: (state: InternalState) => (isLoading: boolean) => InternalState;
+  setDataViewsAdHoc: (state: InternalState) => (dataViews: DataView[]) => InternalState;
 }
 
 export type InternalStateContainer = ReduxLikeStateContainer<
@@ -41,7 +39,6 @@ export function getInternalStateContainer() {
       dataView: undefined,
       dataViews: [],
       dataViewsAdHoc: [],
-      savedSearchLoading: true,
     },
     {
       setDataView: (prevState: InternalState) => (nextDataView: DataView) => ({
@@ -52,13 +49,9 @@ export function getInternalStateContainer() {
         ...prevState,
         dataViews,
       }),
-      setDataViewsAdHoc: (prevState: InternalState) => (dataViewsAdHoc: DataViewListItem[]) => ({
+      setDataViewsAdHoc: (prevState: InternalState) => (dataViewsAdHoc: DataView[]) => ({
         ...prevState,
         dataViewsAdHoc,
-      }),
-      setSavedSearchLoading: (prevState: InternalState) => (isLoading: boolean) => ({
-        ...prevState,
-        savedSearchLoading: isLoading,
       }),
     },
     {},

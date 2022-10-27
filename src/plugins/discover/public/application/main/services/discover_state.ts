@@ -203,6 +203,17 @@ export function getDiscoverStateContainer({
     dataStateContainer.refetch$.next(msg);
   };
 
+  const setDataView = (dataView: DataView) => {
+    internalStateContainer.transitions.setDataView(dataView);
+    if (!dataView.isPersisted()) {
+      const adHocDataViewList = internalStateContainer.getState().dataViewsAdHoc;
+      const existing = adHocDataViewList.find((prevDataView) => prevDataView.id === dataView.id);
+      if (!existing) {
+        internalStateContainer.transitions.setDataViewsAdHoc([...adHocDataViewList, dataView]);
+      }
+    }
+  };
+
   return {
     appState: appStateContainer,
     internalState: internalStateContainer,
@@ -257,9 +268,7 @@ export function getDiscoverStateContainer({
         setAppState({ index: id }, replaceURL);
         return;
       },
-      setDataView: (dataView: DataView) => {
-        internalStateContainer.transitions.setDataView(dataView);
-      },
+      setDataView,
       loadDataViewList: async () => {
         const dataViewList = await services.dataViews.getIdsWithTitle();
         internalStateContainer.transitions.setDataViews(dataViewList);
@@ -286,9 +295,7 @@ export function getDiscoverStateContainer({
             );
           }
           await appStateContainer.reset(currentSavedSearch);
-          internalStateContainer.transitions.setDataView(
-            currentSavedSearch.searchSource.getField('index')!
-          );
+          setDataView(currentSavedSearch.searchSource.getField('index')!);
         }
         return currentSavedSearch;
       },
@@ -315,7 +322,7 @@ export function getDiscoverStateContainer({
         );
         if (nextDataView) {
           nextSavedSearch.searchSource.setField('index', nextDataView);
-          internalStateContainer.transitions.setDataView(nextDataView);
+          setDataView(nextDataView);
         }
         appStateContainer.reset(nextSavedSearch);
         await savedSearchContainer.update(nextDataView, appStateContainer.getState(), true);
@@ -332,10 +339,11 @@ export function getDiscoverStateContainer({
         const unsubscribe = appStateContainer.subscribe(
           buildStateSubscribe({
             appStateContainer,
-            internalStateContainer,
             savedSearchContainer,
             dataStateContainer,
             services,
+            getDataViewList: () => internalStateContainer.getState().dataViews,
+            setDataView,
           })
         );
 
@@ -370,7 +378,7 @@ export function getDiscoverStateContainer({
         const usedDataView = nextDataView || dataView;
         if (usedDataView) {
           savedSearchContainer.get().searchSource.setField('index', usedDataView);
-          internalStateContainer.transitions.setDataView(usedDataView);
+          setDataView(usedDataView);
         }
         fetchData(true);
       },

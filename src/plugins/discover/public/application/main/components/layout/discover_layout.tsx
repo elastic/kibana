@@ -25,7 +25,7 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { DataMainMsg, RecordRawType } from '../../services/discover_data_state_container';
-import { useSavedSearch } from '../../services/discover_state';
+import { useSavedSearchPersisted } from '../../services/discover_state';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { useInspector } from '../../hooks/use_inspector';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -86,7 +86,7 @@ export function DiscoverLayout({
     state.sort,
   ]);
   const dataView = useInternalStateSelector((state) => state.dataView!);
-  const savedSearch = useSavedSearch();
+  const savedSearch = useSavedSearchPersisted();
   const dataState: DataMainMsg = useDataState(stateContainer.dataState.data$.main$);
 
   const currentViewMode = useMemo(() => {

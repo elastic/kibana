@@ -18,6 +18,8 @@ import * as persistencePromptModule from '../../../hooks/use_confirm_persistence
 import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';
 import { setUrlTracker } from '../../../kibana_services';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import React, { ReactElement } from 'react';
+import { DiscoverMainProvider } from '../services/discover_state_react';
 
 jest.mock('../../../hooks/use_confirm_persistence_prompt', () => {
   const createdDataView = {
@@ -78,12 +80,17 @@ describe('useAdHocDataViews', () => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     stateContainer.savedSearchState.set(savedSearchMock);
 
-    const hook = renderHook((d: DataView) =>
-      useAdHocDataViews({
-        dataView: mockDataView,
-        stateContainer,
-        services: discoverServiceMock,
-      })
+    const hook = renderHook(
+      () =>
+        useAdHocDataViews({
+          stateContainer,
+          services: discoverServiceMock,
+        }),
+      {
+        wrapper: ({ children }: { children: ReactElement }) => (
+          <DiscoverMainProvider value={stateContainer}>{children}</DiscoverMainProvider>
+        ),
+      }
     );
 
     const savedDataView = await hook.result.current.persistDataView();
@@ -100,12 +107,18 @@ describe('useAdHocDataViews', () => {
       ...mockDataView,
       id: 'updated-mock-id',
     }));
-    const hook = renderHook((d: DataView) =>
-      useAdHocDataViews({
-        dataView: mockDataView,
-        stateContainer: getDiscoverStateMock({ isTimeBased: true }),
-        services: discoverServiceMock,
-      })
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const hook = renderHook(
+      () =>
+        useAdHocDataViews({
+          stateContainer: getDiscoverStateMock({ isTimeBased: true }),
+          services: discoverServiceMock,
+        }),
+      {
+        wrapper: ({ children }: { children: ReactElement }) => (
+          <DiscoverMainProvider value={stateContainer}>{children}</DiscoverMainProvider>
+        ),
+      }
     );
 
     let updatedDataView: DataView;
