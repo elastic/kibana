@@ -104,7 +104,6 @@ export interface RuleExecutorOptions<
   state: State;
   tags: string[];
   updatedBy: string | null;
-  logger: Logger;
   namespace?: string;
   isPreview?: boolean;
 }
