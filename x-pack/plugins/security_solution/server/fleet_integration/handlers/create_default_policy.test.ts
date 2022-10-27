@@ -9,12 +9,9 @@ import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { LicenseService } from '../../../common/license';
 import { createDefaultPolicy } from './create_default_policy';
-import type { PolicyConfig } from '../../../common/endpoint/types';
 import { ProtectionModes } from '../../../common/endpoint/types';
-import {
-  policyFactory as policyConfigFactory,
-  policyFactoryWithoutPaidFeatures as policyConfigFactoryWithoutPaidFeatures,
-} from '../../../common/endpoint/models/policy_config';
+import type { PolicyConfig } from '../../../common/endpoint/types';
+import { policyFactory } from '../../../common/endpoint/models/policy_config';
 import type {
   AnyPolicyCreateConfig,
   PolicyCreateCloudConfig,
@@ -39,14 +36,38 @@ describe('Create Default Policy tests ', () => {
   });
   describe('When no config is set', () => {
     it('Should return PolicyConfig for events only when license is at least platinum', () => {
+      const defaultPolicy = policyFactory();
+
       const policy = createDefaultPolicyCallback(undefined);
-      expect(policy).toEqual(eventsOnlyPolicy);
+
+      // events are the same
+      expect(policy.windows.events).toEqual(defaultPolicy.windows.events);
+      expect(policy.linux.events).toEqual(defaultPolicy.linux.events);
+      expect(policy.mac.events).toEqual(defaultPolicy.mac.events);
+
+      // check some of the protections to be disabled
+      const disabledButSupported = { mode: ProtectionModes.off, supported: true };
+      expect(policy.windows.behavior_protection).toEqual(disabledButSupported);
+      expect(policy.mac.memory_protection).toEqual(disabledButSupported);
+      expect(policy.linux.behavior_protection).toEqual(disabledButSupported);
     });
 
     it('Should return PolicyConfig for events only without paid features when license is below platinum', () => {
+      const defaultPolicy = policyFactory();
       licenseEmitter.next(Gold);
+
       const policy = createDefaultPolicyCallback(undefined);
-      expect(policy).toEqual(policyConfigFactoryWithoutPaidFeatures(eventsOnlyPolicy));
+
+      // events are the same
+      expect(policy.windows.events).toEqual(defaultPolicy.windows.events);
+      expect(policy.linux.events).toEqual(defaultPolicy.linux.events);
+      expect(policy.mac.events).toEqual(defaultPolicy.mac.events);
+
+      // check some of the protections to be disabled and unsupported
+      const disabledAndUnsupported = { mode: ProtectionModes.off, supported: false };
+      expect(policy.windows.behavior_protection).toEqual(disabledAndUnsupported);
+      expect(policy.mac.memory_protection).toEqual(disabledAndUnsupported);
+      expect(policy.linux.behavior_protection).toEqual(disabledAndUnsupported);
     });
   });
 
@@ -115,8 +136,8 @@ describe('Create Default Policy tests ', () => {
     it('Should return the default config when preset is EDR Complete', () => {
       const config = createEndpointConfig({ preset: 'EDRComplete' });
       const policy = createDefaultPolicyCallback(config);
-      const policyFactory = policyConfigFactory();
-      expect(policy).toMatchObject(policyFactory);
+      const defaultPolicy = policyFactory();
+      expect(policy).toMatchObject(defaultPolicy);
     });
   });
   describe('When cloud config is set', () => {
@@ -142,63 +163,4 @@ describe('Create Default Policy tests ', () => {
       expect(policy.windows.ransomware.mode).toBe('off');
     });
   });
-
-  // This constant makes sure that if the type `PolicyConfig` is ever modified,
-  // the logic for disabling protections is also modified due to type check.
-  const eventsOnlyPolicy: PolicyConfig = {
-    windows: {
-      events: {
-        dll_and_driver_load: true,
-        dns: true,
-        file: true,
-        network: true,
-        process: true,
-        registry: true,
-        security: true,
-      },
-      malware: { mode: ProtectionModes.off, blocklist: false },
-      ransomware: { mode: ProtectionModes.off, supported: true },
-      memory_protection: { mode: ProtectionModes.off, supported: true },
-      behavior_protection: { mode: ProtectionModes.off, supported: true },
-      popup: {
-        malware: { message: '', enabled: false },
-        ransomware: { message: '', enabled: false },
-        memory_protection: { message: '', enabled: false },
-        behavior_protection: { message: '', enabled: false },
-      },
-      logging: { file: 'info' },
-      antivirus_registration: { enabled: false },
-      attack_surface_reduction: { credential_hardening: { enabled: false } },
-    },
-    mac: {
-      events: { process: true, file: true, network: true },
-      malware: { mode: ProtectionModes.off, blocklist: false },
-      behavior_protection: { mode: ProtectionModes.off, supported: true },
-      memory_protection: { mode: ProtectionModes.off, supported: true },
-      popup: {
-        malware: { message: '', enabled: false },
-        behavior_protection: { message: '', enabled: false },
-        memory_protection: { message: '', enabled: false },
-      },
-      logging: { file: 'info' },
-    },
-    linux: {
-      events: {
-        process: true,
-        file: true,
-        network: true,
-        session_data: false,
-        tty_io: false,
-      },
-      malware: { mode: ProtectionModes.off, blocklist: false },
-      behavior_protection: { mode: ProtectionModes.off, supported: true },
-      memory_protection: { mode: ProtectionModes.off, supported: true },
-      popup: {
-        malware: { message: '', enabled: false },
-        behavior_protection: { message: '', enabled: false },
-        memory_protection: { message: '', enabled: false },
-      },
-      logging: { file: 'info' },
-    },
-  };
 });
