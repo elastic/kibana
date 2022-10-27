@@ -42,7 +42,7 @@ export const MonitorEnabled = ({
 
   const { isEnabled, updateMonitorEnabledState, status } = useMonitorEnableHandler({
     id,
-    isEnabled: monitor.enabled,
+    isEnabled: monitor[ConfigKey.ENABLED],
     reloadPage,
     labels: statusLabels,
   });

@@ -48,7 +48,12 @@ import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enab
 import { ActionsPopover } from './actions_popover';
 import { selectOverviewState } from '../../../../state';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
-import { EncryptedSyntheticsMonitor, MonitorOverviewItem, SyntheticsMonitor } from '../types';
+import {
+  ConfigKey,
+  EncryptedSyntheticsMonitor,
+  MonitorOverviewItem,
+  SyntheticsMonitor,
+} from '../types';
 import { useMonitorDetailLocator } from '../../hooks/use_monitor_detail_locator';
 import { fetchSyntheticsMonitor } from '../../../../state/overview/api';
 
@@ -285,7 +290,7 @@ export function MonitorDetailFlyout(props: Props) {
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
-                    <h2>{monitorSavedObject?.attributes.name}</h2>
+                    <h2>{monitorSavedObject?.attributes[ConfigKey.NAME]}</h2>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -344,10 +349,10 @@ export function MonitorDetailFlyout(props: Props) {
                       title: LAST_MODIFIED_HEADER_TEXT,
                       description: <Time timestamp={monitorSavedObject.updated_at} />,
                     },
-                    monitorSavedObject?.attributes.project_id
+                    monitorSavedObject?.attributes[ConfigKey.PROJECT_ID]
                       ? {
                           title: PROJECT_ID_HEADER_TEXT,
-                          description: monitorSavedObject?.attributes.project_id || '',
+                          description: monitorSavedObject?.attributes[ConfigKey.PROJECT_ID] || '',
                         }
                       : undefined,
                     {
@@ -356,19 +361,21 @@ export function MonitorDetailFlyout(props: Props) {
                     },
                     {
                       title: MONITOR_TYPE_HEADER_TEXT,
-                      description: capitalize(monitorSavedObject.type),
+                      description: capitalize(
+                        monitorSavedObject?.attributes[ConfigKey.FORM_MONITOR_TYPE]
+                      ),
                     },
                     {
                       title: FREQUENCY_HEADER_TEXT,
-                      description: freqeuncyStr(monitorSavedObject?.attributes.schedule),
+                      description: freqeuncyStr(monitorSavedObject?.attributes[ConfigKey.SCHEDULE]),
                     },
-                    monitorSavedObject?.attributes.tags &&
-                    monitorSavedObject?.attributes.tags.length
+                    monitorSavedObject?.attributes[ConfigKey.TAGS] &&
+                    monitorSavedObject?.attributes[ConfigKey.TAGS].length
                       ? {
                           title: TAGS_HEADER_TEXT,
                           description: (
                             <>
-                              {monitorSavedObject?.attributes.tags?.map((tag) => (
+                              {monitorSavedObject?.attributes[ConfigKey.TAGS]?.map((tag) => (
                                 <EuiFlexItem key={`${tag}-tag`} grow={false}>
                                   <EuiBadge color="hollow">{tag}</EuiBadge>
                                 </EuiFlexItem>
