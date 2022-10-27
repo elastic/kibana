@@ -21,10 +21,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const { dashboardControls, timePicker, common, dashboard, header } = getPageObjects([
+
+  const { dashboardControls, timePicker, console, common, dashboard, header } = getPageObjects([
     'dashboardControls',
     'timePicker',
     'dashboard',
+    'console',
     'common',
     'header',
   ]);
@@ -34,6 +36,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Dashboard options list integration', () => {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
+
+      /* start by adding some incomplete data so that we can test `exists` query */
+      await common.navigateToApp('console');
+      await console.collapseHelp();
+      await console.clearTextArea();
+      await console.enterRequest(
+        '\nPOST animals-dogs-2018-01-01/_doc/ \n{\n "@timestamp": "2018-01-01T16:00:00.000Z", \n"name": "Max", \n"sound": "bark'
+      );
+      await console.clickPlay();
+      await header.waitUntilLoadingHasFinished();
+
+      /* then, create our testing dashboard */
       await common.navigateToApp('dashboard');
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
@@ -194,8 +208,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const ensureAvailableOptionsEql = async (expectation: string[], skipOpen?: boolean) => {
         if (!skipOpen) await dashboardControls.optionsListOpenPopover(controlId);
         await retry.try(async () => {
-          expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql(
-            expectation
+          expect((await dashboardControls.optionsListPopoverGetAvailableOptions()).sort()).to.eql(
+            expectation.sort()
           );
         });
         if (!skipOpen) await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
@@ -336,10 +350,75 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const selectionString = await dashboardControls.optionsListGetSelectionsString(controlId);
           expect(selectionString).to.be('hiss, grr');
+        });
+
+        it('excluding selections has expected results', async () => {
+          await dashboard.clickQuickSave();
+          await dashboard.waitForRenderComplete();
 
           await dashboardControls.optionsListOpenPopover(controlId);
-          await dashboardControls.optionsListPopoverClearSelections();
+          await dashboardControls.optionsListPopoverSetIncludeSelections(false);
           await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+          await dashboard.waitForRenderComplete();
+
+          expect(await pieChart.getPieSliceCount()).to.be(5);
+          await dashboard.clearUnsavedChanges();
+        });
+
+        it('including selections has expected results', async () => {
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await dashboardControls.optionsListPopoverSetIncludeSelections(true);
+          await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+          await dashboard.waitForRenderComplete();
+
+          expect(await pieChart.getPieSliceCount()).to.be(2);
+          await dashboard.clearUnsavedChanges();
+        });
+
+        describe('test exists query', async () => {
+          before(async () => {
+            await dashboardControls.deleteAllControls();
+            await dashboardControls.createControl({
+              controlType: OPTIONS_LIST_CONTROL,
+              dataViewTitle: 'animals-*',
+              fieldName: 'animal.keyword',
+              title: 'Animal',
+            });
+            controlId = (await dashboardControls.getAllControlIds())[0];
+          });
+
+          it('creating exists query has expected results', async () => {
+            expect((await pieChart.getPieChartValues())[2]).to.be(4);
+            await dashboardControls.optionsListOpenPopover(controlId);
+            await dashboardControls.optionsListPopoverSelectOption('exists');
+            await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+            await dashboard.waitForRenderComplete();
+
+            expect(await pieChart.getPieSliceCount()).to.be(5);
+            expect((await pieChart.getPieChartValues())[2]).to.be(3);
+          });
+
+          it('negating exists query has expected results', async () => {
+            await dashboardControls.optionsListOpenPopover(controlId);
+            await dashboardControls.optionsListPopoverSetIncludeSelections(false);
+            await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+            await dashboard.waitForRenderComplete();
+
+            expect(await pieChart.getPieSliceCount()).to.be(1);
+            expect((await pieChart.getPieChartValues())[0]).to.be(1);
+          });
+        });
+
+        after(async () => {
+          await dashboardControls.deleteAllControls();
+
+          await dashboardControls.createControl({
+            controlType: OPTIONS_LIST_CONTROL,
+            dataViewTitle: 'animals-*',
+            fieldName: 'sound.keyword',
+            title: 'Animal Sounds',
+          });
+          controlId = (await dashboardControls.getAllControlIds())[0];
         });
       });
 
@@ -383,27 +462,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await header.waitUntilLoadingHasFinished();
           await ensureAvailableOptionsEql(allAvailableOptions);
           expect(await pieChart.getPieSliceCount()).to.be(2);
-        });
-
-        it('excluding selections has expected results', async () => {
-          await dashboard.clickQuickSave();
-          await dashboard.waitForRenderComplete();
-
-          await dashboardControls.optionsListOpenPopover(controlId);
-          await dashboardControls.optionsListPopoverSetIncludeSelections(false);
-          await dashboard.waitForRenderComplete();
-
-          expect(await pieChart.getPieSliceCount()).to.be(5);
-          await dashboard.clearUnsavedChanges();
-        });
-
-        it('including selections has expected results', async () => {
-          await dashboardControls.optionsListOpenPopover(controlId);
-          await dashboardControls.optionsListPopoverSetIncludeSelections(true);
-          await dashboard.waitForRenderComplete();
-
-          expect(await pieChart.getPieSliceCount()).to.be(2);
-          await dashboard.clearUnsavedChanges();
         });
 
         it('Can mark multiple selections invalid with Filter', async () => {
