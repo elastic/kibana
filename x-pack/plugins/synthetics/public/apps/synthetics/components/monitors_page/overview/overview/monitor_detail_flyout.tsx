@@ -7,6 +7,7 @@
 
 import {
   EuiBadge,
+  EuiBadgeGroup,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -374,13 +375,13 @@ export function MonitorDetailFlyout(props: Props) {
                       ? {
                           title: TAGS_HEADER_TEXT,
                           description: (
-                            <>
+                            <EuiBadgeGroup>
                               {monitorSavedObject?.attributes[ConfigKey.TAGS]?.map((tag) => (
-                                <EuiFlexItem key={`${tag}-tag`} grow={false}>
-                                  <EuiBadge color="hollow">{tag}</EuiBadge>
-                                </EuiFlexItem>
+                                <EuiBadge key={`${tag}-tag`} color="hollow">
+                                  {tag}
+                                </EuiBadge>
                               ))}
-                            </>
+                            </EuiBadgeGroup>
                           ),
                         }
                       : undefined,
