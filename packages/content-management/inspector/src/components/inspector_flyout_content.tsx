@@ -19,6 +19,10 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
+import type { Item } from '../types';
+import { MetadataForm } from './metadata_form';
+import { useMetadataForm } from './use_metadata_form';
+
 const getI18nTexts = ({ entityName }: { entityName: string }) => ({
   title: i18n.translate('contentManagement.inspector.flyoutTitle', {
     defaultMessage: 'Inspector',
@@ -35,23 +39,21 @@ const getI18nTexts = ({ entityName }: { entityName: string }) => ({
 });
 
 export interface Props {
-  item: {
-    title: string;
-    description?: string;
-  };
-  onSave(args: { title: string; desciption?: string }): Promise<void>;
+  item: Item;
+  onSave(args: { title: string; description?: string }): Promise<void>;
   onCancel: () => void;
 }
 
-export const InspectorFlyoutContent: FC<Props> = ({ onSave, onCancel }) => {
+export const InspectorFlyoutContent: FC<Props> = ({ item, onSave, onCancel }) => {
   const i18nTexts = getI18nTexts({ entityName: 'Dashboard' });
   const [isSaving] = useState(false);
   const [isSubmitting] = useState(false);
   const [hasErrors] = useState(false);
+  const form = useMetadataForm({ item });
 
   const onClickSave = useCallback(() => {
-    return onSave({ title: 'changed', desciption: 'new' });
-  }, [onSave]);
+    return onSave({ title: form.title, description: form.description });
+  }, [form, onSave]);
 
   const onClickCancel = useCallback(() => {
     onCancel();
@@ -67,7 +69,9 @@ export const InspectorFlyoutContent: FC<Props> = ({ onSave, onCancel }) => {
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>Here will be the body</EuiFlyoutBody>
+      <EuiFlyoutBody>
+        <MetadataForm form={form} />
+      </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
         <>

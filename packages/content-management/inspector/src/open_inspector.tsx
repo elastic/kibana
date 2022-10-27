@@ -24,8 +24,8 @@ export function useOpenInspector() {
       flyout.current = openFlyout(
         <InspectorLoader {...args} onCancel={() => flyout.current?.close()} />,
         {
-          maxWidth: 708,
-          size: 'l',
+          maxWidth: 600,
+          size: 'm',
           ownFocus: true,
           hideCloseButton: true,
         }
