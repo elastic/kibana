@@ -9,28 +9,28 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { EuiFlexItem } from '@elastic/eui';
-import { getDurationFormatter } from '../../../common/utils/formatters/duration';
-import { ApmMlDetectorType } from '../../../common/anomaly_detection/apm_ml_detectors';
-import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { useFetcher } from '../../hooks/use_fetcher';
-import { useTimeRange } from '../../hooks/use_time_range';
-import { isTimeComparison } from '../shared/time_comparison/get_comparison_options';
-import { getComparisonChartTheme } from '../shared/time_comparison/get_comparison_chart_theme';
-import { getLatencyChartSelector } from '../../selectors/latency_chart_selectors';
-import { TimeseriesChart } from '../shared/charts/timeseries_chart';
-import { filterNil } from '../shared/charts/latency_chart';
-import { usePreferredServiceAnomalyTimeseries } from '../../hooks/use_preferred_service_anomaly_timeseries';
+import { getDurationFormatter } from '../../../../common/utils/formatters/duration';
+import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { useFetcher } from '../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
+import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
+import { getComparisonChartTheme } from '../../shared/time_comparison/get_comparison_chart_theme';
+import { getLatencyChartSelector } from '../../../selectors/latency_chart_selectors';
+import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
+import { filterNil } from '../../shared/charts/latency_chart';
+import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferred_service_anomaly_timeseries';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
-} from '../shared/charts/transaction_charts/helper';
-import { ChartPointerEventContextProvider } from '../../context/chart_pointer_event/chart_pointer_event_context';
+} from '../../shared/charts/transaction_charts/helper';
+import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 
 export interface AlertDetailsAppSectionProps {
   rule: Rule<RuleTypeParams>;
   timeZone: string;
 }
-export function AlertDetailsAppSection({
+export function AlertDetailsAppSectionTransactionDuration({
   rule,
   timeZone,
 }: AlertDetailsAppSectionProps) {
@@ -148,4 +148,4 @@ export function AlertDetailsAppSection({
 }
 
 // eslint-disable-next-line import/no-default-export
-export default AlertDetailsAppSection;
+export default AlertDetailsAppSectionTransactionDuration;

@@ -89,7 +89,12 @@ export function registerApmRuleTypes(
     validate: () => ({
       errors: [],
     }),
-    alertDetailsAppSection: lazy(() => import('../alert_details_app_section')),
+    alertDetailsAppSection: lazy(
+      () =>
+        import(
+          '../alert_details_app_section/alert_details_app_section_transaction_duration'
+        )
+    ),
     requiresAppContext: false,
     defaultActionMessage: i18n.translate(
       'xpack.apm.alertTypes.transactionDuration.defaultActionMessage',
