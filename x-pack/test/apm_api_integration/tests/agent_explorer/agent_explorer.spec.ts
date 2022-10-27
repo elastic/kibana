@@ -26,7 +26,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       APIClientRequestParamsOf<'GET /internal/apm/agent_explorer'>['params']
     >
   ) {
-    return await apmApiClient.monitorIndicesUser({
+    return await apmApiClient.monitorClusterAndIndicesUser({
       endpoint: 'GET /internal/apm/agent_explorer',
       params: {
         query: {
@@ -126,7 +126,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(goAgent?.agentName).to.be('go');
         expect(goAgent?.agentVersion).to.contain('5.1.2');
         expect(goAgent?.agentRepoUrl).to.be('https://github.com/elastic/apm-agent-go');
-        expect(goAgent?.agentLastVersion).not.to.be.empty();
 
         const nodeAgent = agents[nodeServiceName];
         expect(nodeAgent?.environments).to.have.length(2);
@@ -136,7 +135,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(nodeAgent?.agentVersion).to.contain('1.0.0');
         expect(nodeAgent?.agentVersion).to.contain('1.0.3');
         expect(nodeAgent?.agentRepoUrl).to.be('https://github.com/elastic/apm-agent-nodejs');
-        expect(nodeAgent?.agentLastVersion).not.to.be.empty();
       });
 
       const matchingFilterTests = [

@@ -34,7 +34,6 @@ import {
   apmTelemetry,
   apmServerSettings,
   apmServiceGroups,
-  apmAgentsLatestVersion,
 } from './saved_objects';
 import type {
   ApmPluginRequestHandlerContext,
@@ -82,7 +81,6 @@ export class APMPlugin
     core.savedObjects.registerType(apmTelemetry);
     core.savedObjects.registerType(apmServerSettings);
     core.savedObjects.registerType(apmServiceGroups);
-    core.savedObjects.registerType(apmAgentsLatestVersion);
 
     const currentConfig = this.initContext.config.get<APMConfig>();
     this.currentConfig = currentConfig;

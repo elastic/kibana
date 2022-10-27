@@ -20,7 +20,6 @@ const previouslyRegisteredTypes = [
   'apm-service-group',
   'apm-services-telemetry',
   'apm-telemetry',
-  'apm-agents-latest-version',
   'app_search_telemetry',
   'application_usage_daily',
   'application_usage_totals',
