@@ -124,7 +124,7 @@ describe('interpreter/functions#pieVis', () => {
     ).toThrowErrorMatchingSnapshot();
   });
 
-  it.skip('logs correct datatable to inspector', async () => {
+  it('logs correct datatable to inspector', async () => {
     let loggedTable: Datatable;
     const handlers = {
       inspectorAdapters: {
