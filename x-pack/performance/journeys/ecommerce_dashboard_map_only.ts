@@ -9,10 +9,10 @@ import { Journey } from '@kbn/journeys';
 import { waitForChrome, waitForVisualizations } from '../utils';
 
 export const journey = new Journey({
-  esArchives: ['x-pack/performance/es_archives/sample_data_flights'],
-  kbnArchives: ['x-pack/performance/kbn_archives/flights_no_map_dashboard'],
-}).step('Go to Flights Dashboard', async ({ kbnUrl, page }) => {
-  await page.goto(kbnUrl.get(`/app/dashboards#/view/7adfa750-4c81-11e8-b3d7-01146121b73d`));
+  esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce'],
+  kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_map_only_dashboard'],
+}).step('Go to Ecommerce Dashboard', async ({ page, kbnUrl }) => {
+  await page.goto(kbnUrl.get(`/app/dashboards#/view/914d5090-55dd-11ed-989d-f3a363484c6c`));
   await waitForChrome(page);
-  await waitForVisualizations(page, 13);
+  await waitForVisualizations(page, 1);
 });
