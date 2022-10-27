@@ -613,11 +613,21 @@ export function setLayerQuery(id: string, query: Query) {
 }
 
 export function setLayerParent(id: string, parent: string | undefined) {
-  return {
-    type: UPDATE_LAYER_PROP,
-    id,
-    propName: 'parent',
-    newValue: parent,
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id,
+      propName: 'parent',
+      newValue: parent,
+    });
+
+    if (parent) {
+      // Open parent layer details. Without opening parent details, layer disappears from legend and this confuses users
+      dispatch(showTOCDetails(parent));
+    }
   };
 }
 
