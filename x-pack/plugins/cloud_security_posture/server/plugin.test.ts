@@ -19,7 +19,12 @@ import { createPackagePolicyMock, deletePackagePolicyMock } from '@kbn/fleet-plu
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CspPlugin } from './plugin';
 import { CspServerPluginStartDeps } from './types';
-import { createFleetAuthzMock, Installation } from '@kbn/fleet-plugin/common';
+import {
+  createFleetAuthzMock,
+  Installation,
+  PackagePolicy,
+  UpdatePackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import {
   ExternalCallback,
   FleetStartContract,
@@ -30,7 +35,11 @@ import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import Chance from 'chance';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { RequestHandlerContext } from '@kbn/core/server';
+import {
+  ElasticsearchClient,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
@@ -211,6 +220,61 @@ describe('Cloud Security Posture Plugin', () => {
       }
 
       expect(spy).toHaveBeenCalledTimes(0);
+    });
+
+    it('packagePolicyPostCreate should return the same received policy', async () => {
+      fleetMock.packageService.asInternalUser.getInstallation.mockImplementationOnce(
+        async (): Promise<Installation | undefined> => {
+          return;
+        }
+      );
+
+      fleetMock.packagePolicyService.update.mockImplementation(
+        (
+          soClient: SavedObjectsClientContract,
+          esClient: ElasticsearchClient,
+          id: string,
+          packagePolicyUpdate: UpdatePackagePolicy
+        ): Promise<PackagePolicy> => {
+          // @ts-expect-error 2322
+          return packagePolicyUpdate;
+        }
+      );
+
+      const packageMock = createPackagePolicyMock();
+      packageMock.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+      packageMock.vars = { runtimeCfg: { type: 'foo' } };
+
+      const packagePolicyPostCreateCallbacks: PostPackagePolicyPostCreateCallback[] = [];
+      fleetMock.registerExternalCallback.mockImplementation((...args) => {
+        if (args[0] === 'packagePolicyPostCreate') {
+          packagePolicyPostCreateCallbacks.push(args[1]);
+        }
+      });
+
+      const context = coreMock.createPluginInitializerContext<unknown>();
+      plugin = new CspPlugin(context);
+      const spy = jest.spyOn(plugin, 'initialize').mockImplementation();
+
+      // Act
+      await plugin.start(coreMock.createStart(), mockPlugins);
+      await mockPlugins.fleet.fleetSetupCompleted();
+
+      // Assert
+      expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledTimes(0);
+
+      expect(packagePolicyPostCreateCallbacks.length).toBeGreaterThan(0);
+
+      for (const cb of packagePolicyPostCreateCallbacks) {
+        const updatedPackagePolicy = await cb(
+          packageMock,
+          contextMock,
+          httpServerMock.createKibanaRequest()
+        );
+        expect(updatedPackagePolicy).toEqual(packageMock);
+      }
+      expect(fleetMock.packagePolicyService.update).toHaveBeenCalledTimes(0);
     });
 
     it('should uninstall resources when package is removed', async () => {
