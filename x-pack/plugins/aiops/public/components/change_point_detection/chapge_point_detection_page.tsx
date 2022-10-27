@@ -13,11 +13,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIcon,
   EuiPanel,
   EuiProgress,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query, Filter } from '@kbn/es-query';
 import { SearchBarWrapper } from './search_bar';
@@ -121,9 +124,30 @@ export const ChangePointDetectionPage: FC = () => {
               <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
                 <EuiFlexGroup justifyContent={'spaceBetween'} alignItems={'center'}>
                   <EuiFlexItem grow={false}>
-                    <EuiTitle size="xxs">
-                      <h3>{v.group_field}</h3>
-                    </EuiTitle>
+                    <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
+                      <EuiFlexItem grow={false}>
+                        <EuiTitle size="xxs">
+                          <h3>{v.group_field}</h3>
+                        </EuiTitle>
+                      </EuiFlexItem>
+                      {v.reason ? (
+                        <EuiFlexItem grow={false}>
+                          <EuiToolTip position="top" content={v.reason}>
+                            <EuiIcon
+                              tabIndex={0}
+                              color={'warning'}
+                              type="alert"
+                              title={i18n.translate(
+                                'xpack.aiops.changePointDetection.notResultsWarning',
+                                {
+                                  defaultMessage: 'No change point agg results warning',
+                                }
+                              )}
+                            />
+                          </EuiToolTip>
+                        </EuiFlexItem>
+                      ) : null}
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiBadge color="hollow">{v.type}</EuiBadge>

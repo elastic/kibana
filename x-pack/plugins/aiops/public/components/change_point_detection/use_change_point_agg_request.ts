@@ -129,7 +129,9 @@ interface ChangePointAggResponse {
         };
         change_point_request: {
           bucket?: { doc_count: number; function_value: { value: number }; key: string };
-          type: { [key in ChangePointType]: { p_value: number; change_point: number } };
+          type: {
+            [key in ChangePointType]: { p_value: number; change_point: number; reason?: string };
+          };
         };
       }>;
     };

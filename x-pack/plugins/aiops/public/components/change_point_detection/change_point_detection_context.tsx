@@ -15,7 +15,6 @@ import React, {
   useState,
 } from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/public';
-import moment from 'moment';
 import { startWith } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
 import type { Query, Filter } from '@kbn/es-query';
@@ -68,8 +67,8 @@ export type ChangePointType =
 
 interface ChangePointAnnotation {
   label: string;
+  reason: string;
   timestamp: string;
-  endTimestamp: string;
   group_field: string;
   type: ChangePointType;
   p_value?: number;
@@ -185,14 +184,6 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
       .map((v) => {
         const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
 
-        if (changePointType === 'indeterminable') {
-          toasts.addWarning(
-            // @ts-ignore
-            v.change_point_request.type[changePointType].reason
-          );
-          return;
-        }
-
         const timeAsString = v.change_point_request.bucket?.key;
 
         return {
@@ -200,9 +191,8 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
           type: changePointType,
           p_value: v.change_point_request.type[changePointType].p_value,
           timestamp: timeAsString,
-          // @ts-ignore
-          endTimestamp: moment(timeAsString).add(bucketInterval).toISOString(),
           label: changePointType,
+          reason: v.change_point_request.type[changePointType].reason,
         } as ChangePointAnnotation;
       })
       .filter((v): v is ChangePointAnnotation => !!v)

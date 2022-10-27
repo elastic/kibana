@@ -17,7 +17,7 @@ export interface ChartComponentProps {
     group_field: string;
     label: string;
     timestamp: string;
-    endTimestamp: string;
+    reason: string;
   };
 }
 
