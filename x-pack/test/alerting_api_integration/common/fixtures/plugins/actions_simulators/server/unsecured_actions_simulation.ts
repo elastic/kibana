@@ -7,15 +7,16 @@
 
 import { schema } from '@kbn/config-schema';
 import {
+  CoreSetup,
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
   IRouter,
 } from '@kbn/core/server';
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { FixtureStartDeps } from './plugin';
 
-export function initPlugin(router: IRouter, actionsStart: ActionsPluginStartContract) {
+export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDeps>) {
   router.post(
     {
       path: `/api/sample_unsecured_action`,
@@ -32,10 +33,11 @@ export function initPlugin(router: IRouter, actionsStart: ActionsPluginStartCont
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
+      const [_, { actions }] = await coreSetup.getStartServices();
       const { body } = req;
 
       try {
-        const unsecuredActionsClient = actionsStart.getUnsecuredActionsClient();
+        const unsecuredActionsClient = actions.getUnsecuredActionsClient();
         const { requesterId, id, params } = body;
         await unsecuredActionsClient.bulkEnqueueExecution(requesterId, [{ id, params }]);
 

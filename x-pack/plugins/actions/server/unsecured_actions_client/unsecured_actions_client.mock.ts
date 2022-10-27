@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { UnsecuredActionsClient } from './unsecured_actions_client';
+import type { IUnsecuredActionsClient } from './unsecured_actions_client';
 
-type UnsecuredActionsClientContract = PublicMethodsOf<UnsecuredActionsClient>;
-export type UnsecuredActionsClientMock = jest.Mocked<UnsecuredActionsClientContract>;
+export type UnsecuredActionsClientMock = jest.Mocked<IUnsecuredActionsClient>;
 
 const createUnsecuredActionsClientMock = () => {
   const mocked: UnsecuredActionsClientMock = {
@@ -18,8 +16,6 @@ const createUnsecuredActionsClientMock = () => {
   return mocked;
 };
 
-export const unsecuredActionsClientMock: {
-  create: () => UnsecuredActionsClientMock;
-} = {
+export const unsecuredActionsClientMock = {
   create: createUnsecuredActionsClientMock,
 };
