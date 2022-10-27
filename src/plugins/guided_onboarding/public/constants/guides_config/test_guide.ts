@@ -23,7 +23,6 @@ export const testGuideConfig: GuideConfig = {
       descriptionList: [
         `This step is directly completed by clicking the button that uses the API function 'completeGuideStep`,
         'Navigate to /guidedOnboardingExample/stepOne to complete the step.',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
       ],
       location: {
         appID: 'guidedOnboardingExample',
@@ -37,7 +36,6 @@ export const testGuideConfig: GuideConfig = {
       descriptionList: [
         'This step is set to ready_to_complete on page navigation.',
         'After that click the popover on the guide button in the header and mark the step done',
-        'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
       ],
       location: {
         appID: 'guidedOnboardingExample',

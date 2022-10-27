@@ -53,38 +53,12 @@ export const StepTwo = (props: StepTwoProps) => {
         <EuiText>
           <p>
             <FormattedMessage
-              id="guidedOnboardingExample.guidesSelection.stepTwo.explanation1"
-              defaultMessage="The code on this page is listening to the guided setup state using an Observable subscription. If the state is set to
-              Search guide, step Browse documents, a EUI tour will be displayed."
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="guidedOnboardingExample.guidesSelection.stepTwo.explanation2"
+              id="guidedOnboardingExample.guidesSelection.stepTwo.explanation"
               defaultMessage="This page is used for the manual completion of Test guide, step 2. The manual completion popover
               should appear on the header button 'Setup guide' to open the panel and mark the step done."
             />
           </p>
         </EuiText>
-        <EuiSpacer />
-        <EuiTourStep
-          content={
-            <EuiText>
-              <p>The tour step is displayed when Test guide, step 2 is active.</p>
-            </EuiText>
-          }
-          isStepOpen={isTourStepOpen}
-          minWidth={300}
-          onFinish={() => {
-            setIsTourStepOpen(false);
-          }}
-          step={1}
-          stepsTotal={1}
-          title="Step 2"
-          anchorPosition="rightUp"
-        >
-          <EuiText>Test guide, step 2</EuiText>
-        </EuiTourStep>
       </EuiPageContentBody>
     </>
   );
