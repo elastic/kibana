@@ -33,7 +33,7 @@ const INGEST_API_PACKAGE_POLICIES = `${INGEST_API_ROOT}/package_policies`;
 const INGEST_API_PACKAGE_POLICIES_DELETE = `${INGEST_API_PACKAGE_POLICIES}/delete`;
 const INGEST_API_EPM_PACKAGES = `${INGEST_API_ROOT}/epm/packages`;
 
-const SECURITY_PACKAGES_ROUTE = `${INGEST_API_EPM_PACKAGES}?category=security&prerelease=true`;
+const SECURITY_PACKAGES_ROUTE = `${INGEST_API_EPM_PACKAGES}?category=security`;
 
 /**
  * Holds information about the test resources created to support an Endpoint Policy
