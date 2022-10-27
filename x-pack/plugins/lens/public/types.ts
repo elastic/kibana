@@ -766,7 +766,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   /** ID is passed back to visualization. For example, `x` */
   groupId: string;
   accessors: AccessorConfig[];
-  // this is just to show a UI signifier
+  // currently used only on partition charts to display non-editable UI dimension trigger in the buckets group when multiple metrics exist 
   fakeFinalAccessor?: {
     label: string;
   };
