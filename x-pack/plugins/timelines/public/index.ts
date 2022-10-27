@@ -17,7 +17,6 @@
 import { TimelinesPlugin } from './plugin';
 
 export type { TimelinesUIStart } from './types';
-export type { SortDirection } from './types';
 export type { OnColumnFocused } from '../common/utils/accessibility';
 
 export {
@@ -55,5 +54,10 @@ export {
 export function plugin() {
   return new TimelinesPlugin();
 }
+
+export {
+  addFieldToTimelineColumns,
+  getTimelineIdFromColumnDroppableId,
+} from './components/drag_and_drop/helpers';
 
 export type { AddToTimelineButtonProps } from './components/hover_actions/actions/add_to_timeline';

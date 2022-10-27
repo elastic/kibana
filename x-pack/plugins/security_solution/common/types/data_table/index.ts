@@ -10,14 +10,18 @@ import * as runtimeTypes from 'io-ts';
 import type { TGridModelSettings } from '../../../public/common/store/data_table/model';
 import type { TGridModel } from '../../../public/common/store/data_table/types';
 import type { ColumnHeaderOptions } from '../../data_table/columns';
-import type { Direction } from '../../search_strategy';
 
-export type SortDirection = 'none' | 'asc' | 'desc' | Direction;
+export enum Direction {
+  asc = 'asc',
+  desc = 'desc',
+}
+
+export type SortDirectionTable = 'none' | 'asc' | 'desc' | Direction;
 export interface SortColumnTable {
   columnId: string;
   columnType: string;
   esTypes?: string[];
-  sortDirection: SortDirection;
+  sortDirection: SortDirectionTable;
 }
 
 /** The state of all timelines is stored here */

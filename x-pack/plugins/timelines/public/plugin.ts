@@ -6,19 +6,18 @@
  */
 
 import { Store, Unsubscribe } from 'redux';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
-import type { LoadingPanelProps } from './components';
-import { getLoadingPanelLazy } from './methods';
+import { getLastUpdatedLazy, getLoadingPanelLazy } from './methods';
 import type { TimelinesUIStart, TimelinesStartPlugins } from './types';
-import { useDraggableKeyboardWrapper } from './components/drag_and_drop/draggable_keyboard_wrapper_hook';
 import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
 import { getHoverActions, HoverActionsConfig } from './components/hover_actions';
 import { timelineReducer } from './store/timeline/reducer';
+import { useDraggableKeyboardWrapper } from './components/drag_and_drop';
+import { LoadingPanelProps } from './components/loading';
+import { LastUpdatedAtProps } from './components/last_updated';
 
 export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
   private _store: Store | undefined;
-  private _storage = new Storage(localStorage);
   private _storeUnsubscribe: Unsubscribe | undefined;
 
   private _hoverActions: HoverActionsConfig | undefined;
@@ -41,6 +40,9 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       },
       getLoadingPanel: (props: LoadingPanelProps) => {
         return getLoadingPanelLazy(props);
+      },
+      getLastUpdated: (props: LastUpdatedAtProps) => {
+        return getLastUpdatedLazy(props);
       },
       getUseAddToTimeline: () => {
         return useAddToTimeline;

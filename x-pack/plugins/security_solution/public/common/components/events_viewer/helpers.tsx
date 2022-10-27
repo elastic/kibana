@@ -9,15 +9,13 @@ import type { Filter, EsQueryConfig, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { get, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import { elementOrChildrenHasFocus } from '../../../common/utils/accessibility';
-import type { BrowserFields } from '../../../common/search_strategy/index_fields';
-import type { DataProvider, DataProvidersAnd } from '../../../common/types/timeline';
-import { DataProviderType, EXISTS_OPERATOR } from '../../../common/types/timeline';
-import { convertToBuildEsQuery, escapeQueryValue } from '../utils/keury';
+import type { BrowserFields } from '../../../../common/search_strategy';
+import type { DataProvider, DataProvidersAnd } from '../../../../common/types';
+import { DataProviderType, EXISTS_OPERATOR, TableId } from '../../../../common/types';
+import { convertToBuildEsQuery, escapeQueryValue } from '../../lib/kuery';
+import type { ViewSelection } from '../event_rendered_view/selector';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
-import { TableId } from '../../types';
-import type { ViewSelection } from './event_rendered_view/selector';
 
 interface CombineQueries {
   config: EsQueryConfig;
@@ -240,6 +238,10 @@ export const resolverIsShowing = (graphEventId: string | undefined): boolean =>
   graphEventId != null && graphEventId !== '';
 
 export const EVENTS_COUNT_BUTTON_CLASS_NAME = 'local-events-count-button';
+
+/** Returns `true` when the element, or one of it's children has focus */
+export const elementOrChildrenHasFocus = (element: HTMLElement | null | undefined): boolean =>
+  element === document.activeElement || element?.querySelector(':focus-within') != null;
 
 /** Returns true if the events table has focus */
 export const tableHasFocus = (containerElement: HTMLElement | null): boolean =>

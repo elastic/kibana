@@ -23,25 +23,22 @@ import type {
   TimelineEventsAllStrategyResponse,
   TimelineItem,
 } from '@kbn/timelines-plugin/common';
-import { TimelineId } from '@kbn/timelines-plugin/common';
 import type {
   EntityType,
   TimelineFactoryQueryTypes,
   TimelineRequestSortField,
   TimelineStrategyResponseType,
 } from '@kbn/timelines-plugin/common/search_strategy';
-import { Direction, TimelineEventsQueries } from '@kbn/timelines-plugin/common/search_strategy';
-import type { KueryFilterQueryKind } from '@kbn/timelines-plugin/common/types';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { TimelineEventsQueries } from '../../../../common/search_strategy';
+import type { KueryFilterQueryKind } from '../../../../common/types';
+import { Direction, TableId } from '../../../../common/types';
 import { timelineActions } from '../../../timelines/store/timeline';
 import type { ESQuery } from '../../../../common/typed_json';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 export type InspectResponse = Inspect & { response: string[] };
 
-export const detectionsTimelineIds = [
-  TimelineId.detectionsPage,
-  TimelineId.detectionsRulesDetailsPage,
-];
+export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
 
 export type Refetch = () => void;
 

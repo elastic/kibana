@@ -13,19 +13,20 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { ApmBase } from '@elastic/apm-rum';
-import type {
-  LoadingPanelProps,
-  UseDraggableKeyboardWrapper,
-  UseDraggableKeyboardWrapperProps,
-} from './components';
-export type { SortDirection } from '../common/types';
 import type { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
 import { HoverActionsConfig } from './components/hover_actions';
+import { LastUpdatedAtProps } from './components/last_updated';
+import { LoadingPanelProps } from './components/loading';
+import {
+  UseDraggableKeyboardWrapper,
+  UseDraggableKeyboardWrapperProps,
+} from './components/drag_and_drop';
 export interface TimelinesUIStart {
   getHoverActions: () => HoverActionsConfig;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getTimelineReducer: () => any;
   getLoadingPanel: (props: LoadingPanelProps) => ReactElement<LoadingPanelProps>;
+  getLastUpdated: (props: LastUpdatedAtProps) => ReactElement<LastUpdatedAtProps>;
   getUseAddToTimeline: () => (props: UseAddToTimelineProps) => UseAddToTimeline;
   getUseAddToTimelineSensor: () => (api: SensorAPI) => void;
   getUseDraggableKeyboardWrapper: () => (

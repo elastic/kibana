@@ -7,8 +7,8 @@
 import type { DropResult } from 'react-beautiful-dnd';
 import type { Dispatch } from 'redux';
 import type { ActionCreator } from 'typescript-fsa';
-import { getProviderIdFromDraggable } from '@kbn/securitysolution-t-grid';
 
+import { getProviderIdFromDraggable } from '@kbn/securitysolution-t-grid';
 import { dragAndDropActions } from '../../store/actions';
 import type { IdToDataProvider } from '../../store/drag_and_drop/model';
 import { addContentToTimeline } from '../../../timelines/components/timeline/data_providers/helpers';

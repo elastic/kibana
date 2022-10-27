@@ -16,3 +16,10 @@ export const ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE = (fieldOrValue: string, isTi
     values: { fieldOrValue, isTimeline },
     defaultMessage: `Added {fieldOrValue} to {isTimeline, select, true {timeline} false {template}}`,
   });
+
+export const COPY_TO_CLIPBOARD = i18n.translate(
+  'xpack.securitySolution.dragAndDrop.copyToClipboardTooltip',
+  {
+    defaultMessage: 'Copy to Clipboard',
+  }
+);

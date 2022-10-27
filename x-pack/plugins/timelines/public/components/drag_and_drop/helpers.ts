@@ -9,12 +9,9 @@ import type { DropResult, FluidDragActions, Position } from 'react-beautiful-dnd
 import { KEYBOARD_DRAG_OFFSET, getFieldIdFromDraggable } from '@kbn/securitysolution-t-grid';
 import type { Dispatch } from 'redux';
 import { isString, keyBy } from 'lodash/fp';
-import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
-import { dataTableActions } from '../../../store/data_table';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../constants';
-import { TableId } from '../../../store/data_table/types';
-import type { BrowserField, BrowserFields } from '../../../containers/source';
-import type { ColumnHeaderOptions } from '../../../../../common/types';
+import { BrowserField, BrowserFields } from '../../../common';
+import { ColumnHeaderOptions, DEFAULT_COLUMN_MIN_WIDTH } from '../../../common/types';
+import { stopPropagationAndPreventDefault } from '../..';
 
 /**
  * Temporarily disables tab focus on child links of the draggable to work
