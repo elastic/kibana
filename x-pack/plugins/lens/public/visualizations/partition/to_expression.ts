@@ -226,8 +226,7 @@ const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) => {
           buckets: rest[2]
             .filter(({ columnId }) => !isCollapsed(columnId, rest[3]))
             .reverse()
-            .map((o) => o.columnId)
-            .map(prepareDimension),
+            .map((o) => prepareDimension(o.columnId)),
           ...args,
         },
       },
@@ -290,7 +289,7 @@ function expressionHelper(
     }))
     .filter((o): o is { columnId: string; operation: Operation } => !!o.operation);
 
-  if (!layer.metrics.length) {
+  if (!layer.metrics.length || (!operations.length && !layer.allowMultipleMetrics)) {
     return null;
   }
   const visualizationAst = generateExprAst(

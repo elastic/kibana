@@ -10,6 +10,10 @@ import { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugi
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 
+function nonNullable<T>(value: T): value is NonNullable<T> {
+  return value !== null && value !== undefined;
+}
+
 export const consolidateMetricColumns = (
   table: Datatable,
   bucketAccessors: Array<string | ExpressionValueVisDimension> = [],
@@ -29,11 +33,11 @@ export const consolidateMetricColumns = (
 
   const bucketColumns = bucketAccessors
     ?.map((accessor) => getColumnByAccessor(accessor, table.columns))
-    .filter(Boolean) as DatatableColumn[];
+    .filter(nonNullable);
 
   const metricColumns = metricAccessors
     ?.map((accessor) => getColumnByAccessor(accessor, table.columns))
-    .filter(Boolean) as DatatableColumn[];
+    .filter(nonNullable);
 
   const transposedRows: DatatableRow[] = [];
 
