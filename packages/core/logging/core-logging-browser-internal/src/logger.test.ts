@@ -7,9 +7,10 @@
  */
 
 import { LogLevel, Appender } from '@kbn/logging';
-import { BaseLogger } from './logger';
+import { getLoggerContext } from '@kbn/core-logging-common-internal';
+import { BaseLogger, BROWSER_PID } from './logger';
 
-const context = LoggingConfig.getLoggerContext(['context', 'parent', 'child']);
+const context = getLoggerContext(['context', 'parent', 'child']);
 let appenderMocks: Appender[];
 let logger: BaseLogger;
 const factory = {
@@ -40,7 +41,7 @@ test('`trace()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-1',
       meta: undefined,
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 
@@ -55,7 +56,7 @@ test('`trace()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-2',
       meta: { trace: true },
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 });
@@ -71,7 +72,7 @@ test('`debug()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-1',
       meta: undefined,
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 
@@ -86,7 +87,7 @@ test('`debug()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-2',
       meta: { debug: true },
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 });
@@ -102,7 +103,7 @@ test('`info()` correctly forms `LogRecord` and passes it to all appenders.', () 
       message: 'message-1',
       meta: undefined,
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 
@@ -117,7 +118,7 @@ test('`info()` correctly forms `LogRecord` and passes it to all appenders.', () 
       message: 'message-2',
       meta: { info: true },
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 });
@@ -133,7 +134,7 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
       message: 'message-1',
       meta: undefined,
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 
@@ -148,7 +149,7 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
       message: 'message-2',
       meta: undefined,
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 
@@ -163,7 +164,7 @@ test('`warn()` correctly forms `LogRecord` and passes it to all appenders.', () 
       message: 'message-3',
       meta: { warn: true },
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 });
@@ -179,7 +180,7 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-1',
       meta: undefined,
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 
@@ -194,7 +195,7 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-2',
       meta: undefined,
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 
@@ -209,7 +210,7 @@ test('`error()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-3',
       meta: { error: true },
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 });
@@ -225,7 +226,7 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-1',
       meta: undefined,
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 
@@ -240,7 +241,7 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-2',
       meta: undefined,
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 
@@ -255,7 +256,7 @@ test('`fatal()` correctly forms `LogRecord` and passes it to all appenders.', ()
       message: 'message-3',
       meta: { fatal: true },
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 });
@@ -316,7 +317,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       level: LogLevel.Trace,
       message: 'trace-message',
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 
@@ -328,7 +329,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       level: LogLevel.Debug,
       message: 'debug-message',
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 
@@ -340,7 +341,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       level: LogLevel.Info,
       message: 'info-message',
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 
@@ -352,7 +353,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       level: LogLevel.Warn,
       message: 'warn-message',
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 
@@ -364,7 +365,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       level: LogLevel.Error,
       message: 'error-message',
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 
@@ -376,7 +377,7 @@ test('logger with `All` level passes all records to appenders.', () => {
       level: LogLevel.Fatal,
       message: 'fatal-message',
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 });
@@ -400,7 +401,7 @@ test('passes log record to appenders only if log level is supported.', () => {
       level: LogLevel.Warn,
       message: 'warn-message',
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 
@@ -412,7 +413,7 @@ test('passes log record to appenders only if log level is supported.', () => {
       level: LogLevel.Error,
       message: 'error-message',
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 
@@ -424,7 +425,7 @@ test('passes log record to appenders only if log level is supported.', () => {
       level: LogLevel.Fatal,
       message: 'fatal-message',
       timestamp,
-      pid: expect.any(Number),
+      pid: BROWSER_PID,
     });
   }
 });

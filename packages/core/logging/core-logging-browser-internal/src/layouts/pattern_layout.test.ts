@@ -9,7 +9,7 @@
 import stripAnsi from 'strip-ansi';
 import hasAnsi from 'has-ansi';
 import { LogLevel, LogRecord } from '@kbn/logging';
-import { PatternLayout, patternSchema } from './pattern_layout';
+import { PatternLayout } from './pattern_layout';
 
 const stripAnsiSnapshotSerializer: jest.SnapshotSerializerPlugin = {
   serialize(value: string) {
@@ -74,34 +74,6 @@ const records: LogRecord[] = [
 
 expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
 
-test('`createConfigSchema()` creates correct schema.', () => {
-  const layoutSchema = PatternLayout.configSchema;
-
-  const validConfigWithOptional = { type: 'pattern' };
-  expect(layoutSchema.validate(validConfigWithOptional)).toEqual({
-    highlight: undefined,
-    type: 'pattern',
-    pattern: undefined,
-  });
-
-  const validConfig = {
-    highlight: true,
-    type: 'pattern',
-    pattern: '%message',
-  };
-  expect(layoutSchema.validate(validConfig)).toEqual({
-    highlight: true,
-    type: 'pattern',
-    pattern: '%message',
-  });
-
-  const wrongConfig1 = { type: 'json' };
-  expect(() => layoutSchema.validate(wrongConfig1)).toThrow();
-
-  const wrongConfig2 = { type: 'pattern', pattern: 1 };
-  expect(() => layoutSchema.validate(wrongConfig2)).toThrow();
-});
-
 test('`format()` correctly formats record with full pattern.', () => {
   const layout = new PatternLayout();
 
@@ -158,14 +130,6 @@ test('`format()` correctly formats record with meta data.', () => {
       pid: 5355,
     })
   ).toBe('[2012-02-01T09:30:22.011-05:00][DEBUG][context-meta] message-meta');
-});
-
-test('`format()` correctly formats record with highlighting.', () => {
-  const layout = new PatternLayout(undefined, true);
-
-  for (const record of records) {
-    expect(layout.format(record)).toMatchSnapshot();
-  }
 });
 
 test('allows specifying the PID in custom pattern', () => {
@@ -277,54 +241,6 @@ describe('format', () => {
       );
 
       expect(layout.format(record)).toBe('[06:30:22.011][context][1328106622]');
-    });
-  });
-});
-
-describe('schema', () => {
-  describe('pattern', () => {
-    describe('%date', () => {
-      it('does not fail when %date not present', () => {
-        expect(patternSchema.validate('')).toBe('');
-        expect(patternSchema.validate('{pid}')).toBe('{pid}');
-      });
-
-      it('does not fail on %date without params', () => {
-        expect(patternSchema.validate('%date')).toBe('%date');
-        expect(patternSchema.validate('%date')).toBe('%date');
-        expect(patternSchema.validate('{%date}')).toBe('{%date}');
-        expect(patternSchema.validate('%date%date')).toBe('%date%date');
-      });
-
-      it('does not fail on %date with predefined date format', () => {
-        expect(patternSchema.validate('%date{ISO8601}')).toBe('%date{ISO8601}');
-      });
-
-      it('does not fail on %date with predefined date format and valid timezone', () => {
-        expect(patternSchema.validate('%date{ISO8601_TZ}{Europe/Berlin}')).toBe(
-          '%date{ISO8601_TZ}{Europe/Berlin}'
-        );
-      });
-
-      it('fails on %date with unknown date format', () => {
-        expect(() => patternSchema.validate('%date{HH:MM:SS}')).toThrowErrorMatchingInlineSnapshot(
-          `"Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH:MM:SS"`
-        );
-      });
-
-      it('fails on %date with predefined date format and invalid timezone', () => {
-        expect(() =>
-          patternSchema.validate('%date{ISO8601_TZ}{Europe/Kibana}')
-        ).toThrowErrorMatchingInlineSnapshot(`"Unknown timezone: Europe/Kibana"`);
-      });
-
-      it('validates several %date in pattern', () => {
-        expect(() =>
-          patternSchema.validate('%date{ISO8601_TZ}{Europe/Berlin}%message%date{HH}')
-        ).toThrowErrorMatchingInlineSnapshot(
-          `"Date format expected one of ISO8601, ISO8601_TZ, ABSOLUTE, UNIX, UNIX_MILLIS, but given: HH"`
-        );
-      });
     });
   });
 });
