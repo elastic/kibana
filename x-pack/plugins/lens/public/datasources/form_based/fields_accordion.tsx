@@ -169,14 +169,18 @@ export const FieldsAccordion = memo(function InnerFieldsAccordion({
     }
     if (hasLoaded) {
       return (
-        <EuiNotificationBadge size="m" color={isFiltered ? 'accent' : 'subdued'}>
+        <EuiNotificationBadge
+          size="m"
+          color={isFiltered ? 'accent' : 'subdued'}
+          data-test-subj={`${id}-count`}
+        >
           {fieldsCount}
         </EuiNotificationBadge>
       );
     }
 
     return <EuiLoadingSpinner size="m" />;
-  }, [showExistenceFetchError, showExistenceFetchTimeout, hasLoaded, isFiltered, fieldsCount]);
+  }, [showExistenceFetchError, showExistenceFetchTimeout, hasLoaded, isFiltered, id, fieldsCount]);
 
   return (
     <EuiAccordion
