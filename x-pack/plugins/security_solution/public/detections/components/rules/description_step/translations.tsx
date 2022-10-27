@@ -112,23 +112,6 @@ export const ML_JOB_STOPPED = i18n.translate(
   }
 );
 
-export const JOB_FAILED_STATUS_POPOVER_TITLE = (jobName: string) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.ruleDescription.mlFailedJobStatusPopoverTitle',
-    {
-      defaultMessage: '{jobName} failed to run',
-      values: { jobName },
-    }
-  );
-
-export const JOB_FAILED_STATUS_POPOVER_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.mlFailedJobStatusPopoverTitle',
-  {
-    defaultMessage:
-      'This ML job failed to run. Please go to Machine Learning to run this job before enabling this rule.',
-  }
-);
-
 export const THRESHOLD_RESULTS_ALL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAllDescription',
   {
