@@ -12,7 +12,7 @@ Use KQL to filter documents where a value for a field exists, matches a given va
 === Filter for documents where a field exists
 
 To filter documents for which an indexed value exists for a given field, use the `*` operator.
-For example, to filter for documents where the `http.request.method field` exists, use the following syntax:
+For example, to filter for documents where the `http.request.method` field exists, use the following syntax:
 
 [source,yaml]
 -------------------
