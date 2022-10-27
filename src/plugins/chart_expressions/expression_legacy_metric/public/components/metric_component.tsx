@@ -143,6 +143,9 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
                   minHeight: '100%',
                   minWidth: '100%',
                 },
+                ...(this.props.visParams.metric?.alignment
+                  ? { alignment: this.props.visParams.metric?.alignment }
+                  : {}),
               }
             : {}),
           alignment: this.props.visParams.metric.alignment,

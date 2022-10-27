@@ -19,9 +19,14 @@ type Props = {
   onSeekLine(line: number): void;
 };
 
+export enum TTYPlayerLineMarkerType {
+  ProcessChanged = 'process_changed',
+  ProcessDataLimitReached = 'data_limited',
+}
+
 type TTYPlayerLineMarker = {
   line: number;
-  type: 'output' | 'data_limited';
+  type: TTYPlayerLineMarkerType;
   name: string;
 };
 
@@ -44,10 +49,11 @@ export const TTYPlayerControlsMarkers = ({
       return [];
     }
     return processStartMarkers.map(
-      ({ event, line }) =>
+      ({ event, line, maxBytesExceeded }) =>
         ({
-          type:
-            event.process?.io?.max_bytes_per_process_exceeded === true ? 'data_limited' : 'output',
+          type: maxBytesExceeded
+            ? TTYPlayerLineMarkerType.ProcessDataLimitReached
+            : TTYPlayerLineMarkerType.ProcessChanged,
           line,
           name: event.process?.name,
         } as TTYPlayerLineMarker)
