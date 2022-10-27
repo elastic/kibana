@@ -28,6 +28,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
     metrics: {
       types: ['vis_dimension', 'string'],
       help: strings.getMetricArgHelp(),
+      required: true,
       multi: true,
     },
     buckets: {
