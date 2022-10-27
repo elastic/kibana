@@ -168,19 +168,6 @@ export const defineExplainLogRateSpikesRoute = (
           logDebugMessage('Reset.');
           push(resetAction());
           pushPingWithTimeout();
-          logDebugMessage('Load field candidates.');
-          push(
-            updateLoadingStateAction({
-              ccsWarning: false,
-              loaded,
-              loadingState: i18n.translate(
-                'xpack.aiops.explainLogRateSpikes.loadingState.loadingFieldCandidates',
-                {
-                  defaultMessage: 'Loading field candidates.',
-                }
-              ),
-            })
-          );
 
           // Step 1: Index Info: Field candidates, total doc count, sample probability
 
@@ -188,15 +175,15 @@ export const defineExplainLogRateSpikesRoute = (
           let sampleProbability = 1;
           let totalDocCount = 0;
 
-          logDebugMessage('Fetch field candidates.');
+          logDebugMessage('Fetch index information.');
           push(
             updateLoadingStateAction({
               ccsWarning: false,
               loaded,
               loadingState: i18n.translate(
-                'xpack.aiops.explainLogRateSpikes.loadingState.loadingFieldCandidates',
+                'xpack.aiops.explainLogRateSpikes.loadingState.loadingIndexInformation',
                 {
-                  defaultMessage: 'Loading field candidates.',
+                  defaultMessage: 'Loading index information.',
                 }
               ),
             })
