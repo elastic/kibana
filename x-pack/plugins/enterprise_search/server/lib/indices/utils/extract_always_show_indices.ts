@@ -25,8 +25,8 @@ export const expandAliases = (
   },
   alwaysShowPattern?: AlwaysShowPattern
 ) => {
-  const filteredAliases = alwaysShowPattern?.alias_pattern
-    ? aliases.filter((alias) => alias.startsWith(alwaysShowPattern?.alias_pattern || ''))
+  const filteredAliases = alwaysShowPattern
+    ? aliases.filter((alias) => alias.startsWith(alwaysShowPattern.alias_pattern))
     : aliases;
   return filteredAliases.map((alias) => ({
     alias: true,

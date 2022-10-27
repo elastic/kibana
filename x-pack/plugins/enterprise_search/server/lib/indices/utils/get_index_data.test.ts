@@ -246,7 +246,6 @@ describe('getIndexData util function', () => {
         'regular-index',
         'search-prefixed-regular-index',
         '.ent-search-engine-documents-12345',
-        'search-prefixed-.ent-search-engine-documents-12345',
       ],
     });
   });

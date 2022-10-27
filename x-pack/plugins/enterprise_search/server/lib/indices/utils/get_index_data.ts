@@ -64,7 +64,8 @@ export const getIndexData = async (
     : Object.keys(totalIndices).filter(
         (indexName) =>
           !(totalIndices[indexName]?.settings?.index?.hidden === 'true') ||
-          (alwaysShowPattern?.index_pattern && indexName.includes(alwaysShowPattern.index_pattern))
+          (alwaysShowPattern?.index_pattern &&
+            indexName.startsWith(alwaysShowPattern.index_pattern))
       );
   return {
     allIndexMatches: totalIndices,

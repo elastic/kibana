@@ -156,8 +156,8 @@ export const getIndexReturnValue = (indexName: string) => {
     ...mockMultiStatsResponse.indices[indexName],
     alias: indexName.startsWith('alias') || indexName.startsWith('search-alias'),
     count: 100,
-    name: indexName,
     hidden: indexName.includes('hidden') || indexName.includes('.ent-search-engine-documents'),
+    name: indexName,
     privileges: { manage: true, read: true },
     total: {
       ...mockMultiStatsResponse.indices[indexName].total,
