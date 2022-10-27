@@ -6,19 +6,15 @@
  * Side Public License, v 1.
  */
 
-export {
-  PatternLayout,
-  DateConversion,
-  LoggerConversion,
-  MessageConversion,
-  LevelConversion,
-  MetaConversion,
-  type Conversion,
-  AbstractLogger,
-  type CreateLogRecordFn,
-  getLoggerContext,
-  getParentLoggerContext,
-  CONTEXT_SEPARATOR,
-  ROOT_CONTEXT_NAME,
-  DEFAULT_APPENDER_NAME,
-} from './src';
+import { LogLevelId } from '@kbn/logging';
+
+/**
+ * Describes the configuration of a given logger.
+ *
+ * @public
+ */
+export interface LoggerConfigType {
+  appenders: string[];
+  name: string;
+  level: LogLevelId;
+}

@@ -12,6 +12,7 @@ import {
   InjectedMetadataService,
   type InjectedMetadataParams,
 } from '@kbn/core-injected-metadata-browser-internal';
+import { BrowserLoggingSystem } from '@kbn/core-logging-browser-internal';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 import { ThemeService } from '@kbn/core-theme-browser-internal';
 import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -78,6 +79,7 @@ interface ExtendedNavigator {
  * @internal
  */
 export class CoreSystem {
+  private readonly loggingSystem: BrowserLoggingSystem;
   private readonly analytics: AnalyticsService;
   private readonly fatalErrors: FatalErrorsService;
   private readonly injectedMetadata: InjectedMetadataService;
@@ -106,12 +108,18 @@ export class CoreSystem {
 
     this.rootDomElement = rootDomElement;
 
+    // TODO: change log level depending on environment.
+    this.loggingSystem = new BrowserLoggingSystem({ logLevel: 'info' });
     this.i18n = new I18nService();
 
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,
     });
-    this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
+    this.coreContext = {
+      coreId: Symbol('core'),
+      env: injectedMetadata.env,
+      logger: this.loggingSystem.asLoggerFactory(),
+    };
 
     this.analytics = new AnalyticsService(this.coreContext);
 

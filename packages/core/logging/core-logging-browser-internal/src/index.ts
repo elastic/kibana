@@ -7,3 +7,4 @@
  */
 
 export { BaseLogger } from './logger';
+export { BrowserLoggingSystem } from './logging_system';

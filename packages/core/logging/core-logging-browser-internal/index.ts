@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { BaseLogger } from './src';
+export { BaseLogger, BrowserLoggingSystem } from './src';
