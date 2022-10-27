@@ -6,13 +6,14 @@
  */
 
 import type { Position } from '@elastic/charts';
-import { omit } from 'lodash/fp';
+import { noop, omit } from 'lodash/fp';
 import React, { useEffect } from 'react';
 
 import type { inputsModel } from '../../store';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import { useRefetchByRestartingSession } from './use_refetch_by_session';
-import type { InputsModelId } from '../../store/inputs/constants';
+import { InputsModelId } from '../../store/inputs/constants';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 export interface OwnProps extends Pick<GlobalTimeArgs, 'deleteQuery' | 'setQuery'> {
   headerChildren?: React.ReactNode;
@@ -28,10 +29,12 @@ export function manageQuery<T>(
   WrappedComponent: React.ComponentClass<T> | React.ComponentType<T>
 ): React.FC<OwnProps & T> {
   const ManageQuery = (props: OwnProps & T) => {
+    const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+
     const {
       deleteQuery,
       id,
-      inputId = 'global',
+      inputId = InputsModelId.global,
       inspect = null,
       loading,
       refetch,
@@ -47,7 +50,7 @@ export function manageQuery<T>(
       inspect,
       loading,
       queryId: id,
-      refetch: refetch ?? refetchByRestartingSession, // refetchByRestartingSession is for refetching Lens Embeddables
+      refetch: isChartEmbeddablesEnabled ? refetchByRestartingSession : refetch ?? noop, // refetchByRestartingSession is for refetching Lens Embeddables
       searchSessionId,
       setQuery,
     });
