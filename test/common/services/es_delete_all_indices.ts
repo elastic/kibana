@@ -23,7 +23,7 @@ export function EsDeleteAllIndicesProvider({ getService }: FtrProviderContext) {
   }
 
   return async (patterns: string | string[], remote: boolean = false) => {
-    const esNode = remote ? getService('remoteEs' as 'es') : getService('es')
+    const esNode = remote ? getService('remoteEs' as 'es') : getService('es');
     for (const pattern of [patterns].flat()) {
       for (let attempt = 1; ; attempt++) {
         if (attempt > 5) {
