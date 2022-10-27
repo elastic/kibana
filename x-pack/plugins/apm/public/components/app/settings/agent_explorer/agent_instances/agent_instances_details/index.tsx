@@ -7,8 +7,6 @@
 
 import {
   EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInMemoryTable,
   EuiLoadingContent,
 } from '@elastic/eui';
@@ -73,20 +71,12 @@ export function getInstanceColumns(
             data-test-subj="apmAgentExplorerInstanceListServiceLink"
             text={tooltip}
             content={
-              <EuiFlexGroup
-                alignItems="center"
-                gutterSize="s"
-                responsive={false}
+              <ServiceNodeMetricOverviewLink
+                serviceName={serviceName}
+                serviceNodeName={serviceNode}
               >
-                <EuiFlexItem className="eui-textTruncate">
-                  <ServiceNodeMetricOverviewLink
-                    serviceName={serviceName}
-                    serviceNodeName={serviceNode}
-                  >
-                    <span className="eui-textTruncate">{displayedName}</span>
-                  </ServiceNodeMetricOverviewLink>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                <span className="eui-textTruncate">{displayedName}</span>
+              </ServiceNodeMetricOverviewLink>
             }
           />
         );

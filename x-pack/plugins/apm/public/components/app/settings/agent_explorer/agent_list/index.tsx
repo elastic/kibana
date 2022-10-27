@@ -7,32 +7,26 @@
 
 import {
   EuiBasicTableColumn,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiLink,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { TypeOf } from '@kbn/typed-react-router-config';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ValuesType } from 'utility-types';
 import { AgentExplorerFieldName } from '../../../../../../common/agent_explorer';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
-import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
-import { truncate, unit } from '../../../../../utils/style';
-import { ApmRoutes } from '../../../../routing/apm_route_config';
+import { unit } from '../../../../../utils/style';
 import { AgentIcon } from '../../../../shared/agent_icon';
 import { EnvironmentBadge } from '../../../../shared/environment_badge';
 import { ItemsBadge } from '../../../../shared/item_badge';
 import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 import { AgentExplorerDocsLink } from '../agent_explorer_docs_link';
 import { AgentInstances } from '../agent_instances';
-
-const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
 export type AgentExplorerItem = ValuesType<
   APIReturnType<'GET /internal/apm/agent_explorer'>['items']
@@ -43,13 +37,44 @@ function formatString(value?: string | null) {
 }
 
 export function getAgentsColumns({
-  query,
+  selectedAgent,
   onAgentSelected,
 }: {
-  query: TypeOf<ApmRoutes, '/settings/agent-explorer'>['query'];
+  selectedAgent?: AgentExplorerItem;
   onAgentSelected: (agent: AgentExplorerItem) => void;
 }): Array<EuiBasicTableColumn<AgentExplorerItem>> {
   return [
+    {
+      field: AgentExplorerFieldName.ServiceName,
+      name: '',
+      width: `${unit * 3}px`,
+      render: (_, agent) => {
+        const isSelected = selectedAgent === agent;
+
+        return (
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.apm.agentExplorerTable.viewAgentInstances',
+              {
+                defaultMessage: 'Toggle agent instances view',
+              }
+            )}
+            delay="long"
+          >
+            <EuiButtonIcon
+              size="xs"
+              iconSize="s"
+              aria-label="Toggle agent instances view"
+              data-test-subj="apmAgentExplorerListToggle"
+              onClick={() => onAgentSelected(agent)}
+              display={isSelected ? 'base' : 'empty'}
+              iconType={isSelected ? 'minimize' : 'expand'}
+              isSelected={isSelected}
+            />
+          </EuiToolTip>
+        );
+      },
+    },
     {
       field: AgentExplorerFieldName.ServiceName,
       name: i18n.translate(
@@ -109,22 +134,6 @@ export function getAgentsColumns({
         { defaultMessage: 'Agent Name' }
       ),
       sortable: true,
-      render: (_, agent) => (
-        <EuiToolTip
-          content={formatString(`${agent.agentName} instances details`)}
-        >
-          <StyledLink
-            data-test-subj={`agentInstanceLink_${agent.serviceName}-${agent.agentName}`}
-            onClick={() => onAgentSelected(agent)}
-          >
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem className="eui-textTruncate">
-                <span className="eui-textTruncate">{agent.agentName}</span>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </StyledLink>
-        </EuiToolTip>
-      ),
     },
     {
       field: AgentExplorerFieldName.AgentVersion,
@@ -189,11 +198,9 @@ export function AgentList({ items, noItemsMessage, isLoading }: Props) {
     setSelectedAgent(undefined);
   };
 
-  const { query } = useApmParams('/settings/agent-explorer');
-
   const agentColumns = useMemo(
-    () => getAgentsColumns({ query, onAgentSelected }),
-    [query]
+    () => getAgentsColumns({ selectedAgent, onAgentSelected }),
+    [selectedAgent]
   );
 
   return (
