@@ -93,8 +93,6 @@ describe('tagKibanaAssets', () => {
       search: [{ id: 's1', type: 'search' }],
       config: [{ id: 'c1', type: 'config' }],
       visualization: [{ id: 'v1', type: 'visualization' }],
-      osquery_pack_asset: [{ id: 'osquery-pack-asset1', type: 'osquery-pack-asset' }],
-      osquery_saved_query: [{ id: 'osquery_saved_query1', type: 'osquery_saved_query' }],
     } as any;
 
     await tagKibanaAssets({
@@ -112,8 +110,6 @@ describe('tagKibanaAssets', () => {
         ...kibanaAssets.dashboard,
         ...kibanaAssets.search,
         ...kibanaAssets.visualization,
-        ...kibanaAssets.osquery_pack_asset,
-        ...kibanaAssets.osquery_saved_query,
       ],
       unassign: [],
       refresh: false,
