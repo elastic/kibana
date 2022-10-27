@@ -41,6 +41,7 @@ function OperationLink({ spanName }: { spanName: string }) {
           {...query}
           spanName={spanName}
           detailTab={TransactionTab.timeline}
+          showCriticalPath={false}
         />
       }
     />

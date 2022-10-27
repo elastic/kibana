@@ -27,6 +27,7 @@ export {
   enableInfrastructureHostsView,
   enableServiceMetrics,
   enableAwsLambdaMetrics,
+  enableCriticalPath,
 } from './ui_settings_keys';
 
 export {
