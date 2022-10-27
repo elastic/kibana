@@ -329,7 +329,7 @@ describe('LogRetentionLogic', () => {
     });
 
     describe('fetchLogRetention', () => {
-      beforeAll(() => jest.useFakeTimers());
+      beforeAll(() => jest.useFakeTimers('legacy'));
       afterAll(() => jest.useRealTimers());
 
       describe('isLogRetentionUpdating', () => {
