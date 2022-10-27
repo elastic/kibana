@@ -36,7 +36,8 @@ import {
 } from '../../../common';
 import { suggestions } from './suggestions';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { DimensionEditor, LayerSettings, PieToolbar } from './toolbar';
+import { DimensionEditor, PieToolbar } from './toolbar';
+import { LayerSettings } from './layer_settings';
 import { checkTableForContainsSmallValues } from './render_helpers';
 
 function newLayerState(layerId: string): PieLayerState {
