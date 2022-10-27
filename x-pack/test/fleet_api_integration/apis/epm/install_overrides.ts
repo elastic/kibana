@@ -26,14 +26,13 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs packages that include settings and mappings overrides', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+    setPrereleaseSetting(supertest);
     after(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests
         await deletePackage(mappingsPackage, mappingsPackageVersion);
       }
     });
-
-    setPrereleaseSetting(supertest);
 
     it('should install the overrides package correctly', async function () {
       let { body } = await supertest

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
@@ -36,6 +36,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('package installation error handling and rollback', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+    setPrereleaseSetting(supertest);
     beforeEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });

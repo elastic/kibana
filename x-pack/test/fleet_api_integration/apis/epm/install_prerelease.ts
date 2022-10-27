@@ -25,14 +25,13 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs package that has a prerelease version', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+    setPrereleaseSetting(supertest);
     after(async () => {
       if (server.enabled) {
         // remove the package just in case it being installed will affect other tests
         await deletePackage(testPackage, testPackageVersion);
       }
     });
-
-    setPrereleaseSetting(supertest);
 
     it('should install the package correctly', async function () {
       await supertest

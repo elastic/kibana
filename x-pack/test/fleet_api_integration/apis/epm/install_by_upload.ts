@@ -10,7 +10,7 @@ import path from 'path';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 
@@ -60,6 +60,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs packages from direct upload', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+    setPrereleaseSetting(supertest);
     afterEach(async () => {
       if (server) {
         // remove the packages just in case it being installed will affect other tests

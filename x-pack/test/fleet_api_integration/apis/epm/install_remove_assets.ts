@@ -45,7 +45,6 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs and uninstalls all assets', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
-
     setPrereleaseSetting(supertest);
 
     describe('installs all assets when installing a package for the first time', async () => {

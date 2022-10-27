@@ -260,6 +260,15 @@
         },
         {
           "in": "query",
+          "name": "experimental",
+          "deprecated": true,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        {
+          "in": "query",
           "name": "include_policy_templates",
           "schema": {
             "type": "boolean",
@@ -332,6 +341,15 @@
             "default": false
           },
           "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
+        },
+        {
+          "in": "query",
+          "name": "experimental",
+          "deprecated": true,
+          "schema": {
+            "type": "boolean",
+            "default": false
+          }
         },
         {
           "in": "query",

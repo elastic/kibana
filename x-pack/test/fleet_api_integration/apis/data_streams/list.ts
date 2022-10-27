@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { keyBy } from 'lodash';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
 
 interface IndexResponse {
   _id: string;
@@ -107,6 +107,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('data_streams_list', async () => {
     skipIfNoDockerRegistry(providerContext);
+    setPrereleaseSetting(supertest);
 
     beforeEach(async () => {
       await installPackage(pkgName, pkgVersion);

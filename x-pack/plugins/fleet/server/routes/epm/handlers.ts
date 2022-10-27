@@ -67,7 +67,10 @@ export const getCategoriesHandler: FleetRequestHandler<
   TypeOf<typeof GetCategoriesRequestSchema.query>
 > = async (context, request, response) => {
   try {
-    const res = await getCategories(request.query);
+    const res = await getCategories({
+      ...request.query,
+      prerelease: request.query.prerelease ?? request.query.experimental,
+    });
     const body: GetCategoriesResponse = {
       items: res,
       response: res,
@@ -87,6 +90,7 @@ export const getListHandler: FleetRequestHandler<
     const res = await getPackages({
       savedObjectsClient,
       ...request.query,
+      prerelease: request.query.prerelease ?? request.query.experimental,
     });
     const body: GetPackagesResponse = {
       items: res,

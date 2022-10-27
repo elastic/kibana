@@ -6,7 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 
@@ -34,6 +34,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('delete and force delete scenarios', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+    setPrereleaseSetting(supertest);
     before(async () => {
       await installPackage(requiredPackage, pkgVersion);
     });

@@ -10,7 +10,7 @@ import path from 'path';
 import fs from 'fs';
 import { promisify } from 'util';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 const sleep = promisify(setTimeout);
 
@@ -103,7 +103,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('legacy component template removal', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
-
+    setPrereleaseSetting(supertest);
     afterEach(async () => {
       if (!server.enabled) return;
       await deleteLegacyComponentTemplates();
