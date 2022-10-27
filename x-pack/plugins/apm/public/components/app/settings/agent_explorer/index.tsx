@@ -28,6 +28,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { KueryBar } from '../../../shared/kuery_bar';
 import * as urlHelpers from '../../../shared/links/url_helpers';
 import { SuggestionsSelect } from '../../../shared/suggestions_select';
+import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { AgentList } from './agent_list';
 
 function useAgentExplorerFetcher({
@@ -100,11 +101,18 @@ export function AgentExplorer() {
       <EuiSpacer size="s" />
       <EuiFlexItem grow={false}>
         <EuiTitle>
-          <h2>
-            {i18n.translate('xpack.apm.settings.agentExplorer.title', {
-              defaultMessage: 'Agent explorer',
-            })}
-          </h2>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <h2>
+                {i18n.translate('xpack.apm.settings.agentExplorer.title', {
+                  defaultMessage: 'Agent explorer',
+                })}
+              </h2>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <TechnicalPreviewBadge icon="beaker" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiTitle>
       </EuiFlexItem>
       <EuiSpacer />

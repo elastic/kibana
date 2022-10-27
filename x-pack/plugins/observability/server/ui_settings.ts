@@ -318,6 +318,9 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.enableAgentExplorerDescription', {
       defaultMessage: '{technicalPreviewLabel} Enables Agent explorer view.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
     }),
     schema: schema.boolean(),
     value: false,
