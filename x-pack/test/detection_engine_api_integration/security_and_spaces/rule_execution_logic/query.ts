@@ -24,6 +24,11 @@ import {
   ALERT_DEPTH,
   ALERT_ORIGINAL_TIME,
   ALERT_ORIGINAL_EVENT,
+  ALERT_THROTTLE_FIELDS,
+  ALERT_THROTTLE_VALUES,
+  ALERT_THROTTLE_START,
+  ALERT_THROTTLE_END,
+  ALERT_THROTTLE_COUNT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import {
   createRule,
@@ -421,6 +426,163 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule, invocationCount: 2 });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
       expect(previewAlerts.length).to.eql(1);
+    });
+
+    describe('with throttling enabled', async () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/throttling');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/throttling');
+      });
+
+      it('should generate only 1 alert per host name when grouping by host name', async () => {
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForSignalTesting(['throttling-data']),
+          query: `host.name: "host-0"`,
+          alert_grouping: {
+            groupBy: ['host.name'],
+          },
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T05:30:00.000Z'),
+        });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts.length).to.eql(1);
+        expect(previewAlerts[0]._source).to.eql({
+          ...previewAlerts[0]._source,
+          [ALERT_THROTTLE_FIELDS]: ['host.name'],
+          [ALERT_THROTTLE_VALUES]: ['host-0'],
+          [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
+          [ALERT_THROTTLE_START]: '2020-10-28T05:00:00.000Z',
+          [ALERT_THROTTLE_END]: '2020-10-28T05:00:02.000Z',
+          [ALERT_THROTTLE_COUNT]: 6,
+        });
+      });
+
+      it('should generate multiple alerts when multiple host names are found', async () => {
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForSignalTesting(['throttling-data']),
+          query: `host.name: *`,
+          alert_grouping: {
+            groupBy: ['host.name'],
+          },
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T05:30:00.000Z'),
+        });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 1000 });
+        expect(previewAlerts.length).to.eql(3);
+
+        previewAlerts.sort((a, b) =>
+          (a._source?.host?.name ?? '0') > (b._source?.host?.name ?? '0') ? 1 : -1
+        );
+
+        const hostNames = previewAlerts.map((alert) => alert._source?.host?.name);
+        expect(hostNames).to.eql(['host-0', 'host-1', 'host-2']);
+        expect(previewAlerts[0]._source).to.eql({
+          ...previewAlerts[0]._source,
+          [ALERT_THROTTLE_FIELDS]: ['host.name'],
+          [ALERT_THROTTLE_VALUES]: ['host-0'],
+          [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
+          [ALERT_THROTTLE_START]: '2020-10-28T05:00:00.000Z',
+          [ALERT_THROTTLE_END]: '2020-10-28T05:00:02.000Z',
+          [ALERT_THROTTLE_COUNT]: 6,
+        });
+      });
+
+      it('should generate alerts when using multiple group by fields', async () => {
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForSignalTesting(['throttling-data']),
+          query: `host.name: *`,
+          alert_grouping: {
+            groupBy: ['host.name', 'source.ip'],
+          },
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T05:30:00.000Z'),
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 1000,
+          sort: ['host.name', 'source.ip'],
+        });
+        expect(previewAlerts.length).to.eql(6);
+
+        expect(previewAlerts[0]._source).to.eql({
+          ...previewAlerts[0]._source,
+          [ALERT_THROTTLE_FIELDS]: ['host.name', 'source.ip'],
+          [ALERT_THROTTLE_VALUES]: ['host-0', '192.168.1.1'],
+          [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
+          [ALERT_THROTTLE_START]: '2020-10-28T05:00:00.000Z',
+          [ALERT_THROTTLE_END]: '2020-10-28T05:00:02.000Z',
+          [ALERT_THROTTLE_COUNT]: 3,
+        });
+      });
+
+      it('should generate new alerts for new data on subsequent rule executions', async () => {
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForSignalTesting(['throttling-data']),
+          query: `host.name: *`,
+          alert_grouping: {
+            groupBy: ['host.name', 'source.ip'],
+          },
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          invocationCount: 2,
+        });
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 1000,
+          sort: ['host.name', 'source.ip'],
+        });
+        expect(previewAlerts.length).to.eql(12);
+
+        expect(previewAlerts[0]._source).to.eql({
+          ...previewAlerts[0]._source,
+          [ALERT_THROTTLE_FIELDS]: ['host.name', 'source.ip'],
+          [ALERT_THROTTLE_VALUES]: ['host-0', '192.168.1.1'],
+          [ALERT_ORIGINAL_TIME]: '2020-10-28T05:00:00.000Z',
+          [ALERT_THROTTLE_START]: '2020-10-28T05:00:00.000Z',
+          [ALERT_THROTTLE_END]: '2020-10-28T05:00:02.000Z',
+          [ALERT_THROTTLE_COUNT]: 3,
+        });
+
+        expect(previewAlerts[1]._source).to.eql({
+          ...previewAlerts[1]._source,
+          [ALERT_THROTTLE_FIELDS]: ['host.name', 'source.ip'],
+          [ALERT_THROTTLE_VALUES]: ['host-0', '192.168.1.1'],
+          // Note: the timestamps here are 1 hour after the timestamps for previewAlerts[0]
+          [ALERT_ORIGINAL_TIME]: '2020-10-28T06:00:00.000Z',
+          [ALERT_THROTTLE_START]: '2020-10-28T06:00:00.000Z',
+          [ALERT_THROTTLE_END]: '2020-10-28T06:00:02.000Z',
+          [ALERT_THROTTLE_COUNT]: 3,
+        });
+      });
     });
   });
 };

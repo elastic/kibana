@@ -86,6 +86,7 @@ export const groupAndBulkCreate = async ({
       success: true,
       warning: false,
       searchAfterTimes: [],
+      enrichmentTimes: [],
       bulkCreateTimes: [],
       lastLookBackDate: null,
       createdSignalsCount: 0,
@@ -172,8 +173,6 @@ export const groupAndBulkCreate = async ({
         groupByFields,
       });
 
-      // const enrichedEvents = await enrichment(wrappedAlerts);
-
       const bulkCreateResult = await runOpts.bulkCreate(wrappedAlerts);
 
       addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
@@ -195,13 +194,6 @@ export const groupAndBulkCreate = async ({
         });
 
       toReturn.state.throttleGroupHistory.push(...newBucketHistory);
-      // TODO: telemetry?`
-      /* sendAlertTelemetryEvents(
-        enrichedEvents,
-        createdItems,
-        eventsTelemetry,
-        ruleExecutionLogger
-      );*/
     } catch (exc) {
       toReturn.success = false;
       toReturn.errors.push(exc.message);

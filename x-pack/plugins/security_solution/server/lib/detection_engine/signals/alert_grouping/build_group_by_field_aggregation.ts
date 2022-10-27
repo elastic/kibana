@@ -31,6 +31,14 @@ export const buildGroupByFieldAggregation = ({
       topHits: {
         top_hits: {
           size: maxSignals,
+          sort: [
+            {
+              [aggregatableTimestampField]: {
+                order: 'asc' as const,
+                unmapped_type: 'date',
+              },
+            },
+          ],
         },
       },
       max_timestamp: {
