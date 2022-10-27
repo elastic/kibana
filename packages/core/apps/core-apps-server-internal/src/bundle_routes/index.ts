@@ -7,3 +7,4 @@
  */
 
 export { registerBundleRoutes } from './register_bundle_routes';
+export { type IFileHashCache, FileHashCache } from './file_hash_cache';
