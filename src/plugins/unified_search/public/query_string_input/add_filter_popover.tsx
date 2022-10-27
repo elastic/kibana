@@ -41,6 +41,7 @@ export const AddFilterPopover = React.memo(function AddFilterPopover({
 }: AddFilterPopoverProps) {
   const euiTheme = useEuiTheme();
 
+  /** @todo important style should be remove after fixing elastic/eui/issues/6314. */
   const popoverDragAndDropStyle = useMemo(
     () =>
       css`
