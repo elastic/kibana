@@ -257,11 +257,11 @@ export const RulesList = ({
   );
 
   const [rulesTypesFilter, hasDefaultRuleTypesFiltersOn] = useMemo(() => {
-    if (isEmpty(typesFilter) && !isEmpty(filteredRuleTypes)) {
+    if (isEmpty(typesFilter)) {
       return [authorizedRuleTypes.map((art) => art.id), true];
     }
     return [typesFilter, false];
-  }, [typesFilter, filteredRuleTypes, authorizedRuleTypes]);
+  }, [typesFilter, authorizedRuleTypes]);
 
   const { rulesState, setRulesState, loadRules, noData, initialLoad } = useLoadRules({
     page,
