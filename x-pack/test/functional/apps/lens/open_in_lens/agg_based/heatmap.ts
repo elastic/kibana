@@ -16,6 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'timePicker',
     'visEditor',
   ]);
+  const log = getService('log');
 
   describe('Heatmap', function describeIndexTests() {
     const isNewChartsLibraryEnabled = true;
@@ -31,8 +32,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await timePicker.setDefaultAbsoluteRange();
     });
 
-    it('should not show the "Edit Visualization in Lens" menu item if no X-axis was specified', async () => {
-      expect(await visualize.hasNavigateToLensButton()).to.eql(false);
+    it('should show the "Edit Visualization in Lens" menu item if no X-axis was specified', async () => {
+      await visChart.waitForVisualizationRenderingStabilized();
+
+      expect(await visualize.hasNavigateToLensButton()).to.eql(true);
     });
 
     it('should show the "Edit Visualization in Lens" menu item', async () => {
@@ -82,13 +85,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       ]);
     });
 
-    it('should not convert to Lens if Y-axis is defined, but X-axis is not', async () => {
+    it('should convert to Lens if Y-axis is defined, but X-axis is not', async () => {
       await visEditor.clickBucket('Y-axis');
       await visEditor.selectAggregation('Terms');
       await visEditor.selectField('machine.os.raw');
       await visEditor.clickGo();
 
-      expect(await visualize.hasNavigateToLensButton()).to.eql(false);
+      await visualize.navigateToLensFromAnotherVisulization();
+      await lens.waitForVisualization('heatmapChart');
+      const debugState = await lens.getCurrentChartDebugState('heatmapChart');
+
+      if (!debugState) {
+        throw new Error('Debug state is not available');
+      }
+
+      expect(debugState.axes!.x[0].labels).to.eql(['*']);
+      expect(debugState.axes!.y[0].labels).to.eql(['win 8', 'win xp', 'win 7', 'ios', 'osx']);
+      expect(debugState.heatmap!.cells.length).to.eql(5);
     });
 
     it('should respect heatmap colors number', async () => {

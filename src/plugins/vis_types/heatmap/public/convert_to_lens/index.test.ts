@@ -14,6 +14,7 @@ import { HeatmapVisParams } from '../types';
 const mockGetColumnsFromVis = jest.fn();
 const mockGetConfiguration = jest.fn().mockReturnValue({});
 const mockGetDataViewByIndexPatternId = jest.fn();
+const mockConvertToFiltersColumn = jest.fn();
 
 jest.mock('../services', () => ({
   getDataViewsStart: jest.fn(() => ({ get: () => ({}), getDefault: () => ({}) })),
@@ -22,6 +23,7 @@ jest.mock('../services', () => ({
 jest.mock('@kbn/visualizations-plugin/public', () => ({
   convertToLensModule: Promise.resolve({
     getColumnsFromVis: jest.fn(() => mockGetColumnsFromVis()),
+    convertToFiltersColumn: jest.fn(() => mockConvertToFiltersColumn()),
   }),
   getDataViewByIndexPatternId: jest.fn(() => mockGetDataViewByIndexPatternId()),
 }));
@@ -58,6 +60,7 @@ const timefilter = {
 describe('convertToLens', () => {
   beforeEach(() => {
     mockGetDataViewByIndexPatternId.mockReturnValue({ id: 'index-pattern' });
+    mockConvertToFiltersColumn.mockReturnValue({ columnId: 'column-id-1' });
   });
 
   afterEach(() => {
@@ -97,21 +100,7 @@ describe('convertToLens', () => {
     expect(result).toBeNull();
   });
 
-  test('should return null if getConfiguration returns null', async () => {
-    mockGetColumnsFromVis.mockReturnValue([
-      {
-        metrics: ['1'],
-        buckets: { all: ['2'] },
-        columns: [{ columnId: '2' }, { columnId: '1' }],
-      },
-    ]);
-    mockGetConfiguration.mockReturnValue(Promise.resolve(null));
-    const result = await convertToLens(vis, timefilter);
-    expect(mockGetConfiguration).toBeCalledTimes(1);
-    expect(result).toBeNull();
-  });
-
-  test('should return null if no buckets are specified', async () => {
+  test('should return empty filters for x-axis if no buckets are specified', async () => {
     mockGetColumnsFromVis.mockReturnValue([
       {
         metrics: ['1'],
@@ -120,12 +109,26 @@ describe('convertToLens', () => {
         columnsWithoutReferenced: [
           { columnId: '1', meta: { aggId: 'agg-1' } },
           { columnId: '2', meta: { aggId: 'agg-2' } },
+          { columnId: 'column-id-1' },
         ],
       },
     ]);
     const result = await convertToLens(vis, timefilter);
     expect(mockGetColumnsFromVis).toBeCalledTimes(1);
-    expect(result).toBeNull();
+    expect(result).toEqual(
+      expect.objectContaining({
+        configuration: {},
+        indexPatternIds: ['index-pattern'],
+        layers: [
+          expect.objectContaining({
+            columnOrder: [],
+            columns: [{ columnId: '1', dataType: 'number' }, { columnId: 'column-id-1' }],
+            indexPatternId: 'index-pattern',
+          }),
+        ],
+        type: 'lnsHeatmap',
+      })
+    );
   });
 
   test('should return correct state for valid vis', async () => {
@@ -154,7 +157,7 @@ describe('convertToLens', () => {
     expect(result?.layers[0]).toEqual(
       expect.objectContaining({
         columnOrder: [],
-        columns: [{ columnId: '1', dataType: 'number' }],
+        columns: [{ columnId: '1', dataType: 'number' }, { columnId: 'column-id-1' }],
         indexPatternId: 'index-pattern',
       })
     );

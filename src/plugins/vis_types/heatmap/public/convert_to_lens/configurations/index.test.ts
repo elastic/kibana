@@ -53,21 +53,10 @@ describe('getConfiguration', () => {
     vis = sampleHeatmapVis as unknown as Vis<HeatmapVisParams>;
   });
 
-  test('should return null if yColumn is defined, but xColumn is not', async () => {
-    const result = await getConfiguration(layerId, vis, {
-      metrics: [metric.columnId],
-      buckets: { all: [xColumn.columnId, yColumn.columnId], customBuckets: {} },
-      columns: [metric, { ...xColumn, isBucketed: false }, yColumn],
-    });
-
-    expect(result).toBeNull();
-  });
-
   test('should return valid configuration', async () => {
     const result = await getConfiguration(layerId, vis, {
       metrics: [metric.columnId],
-      buckets: { all: [xColumn.columnId, yColumn.columnId], customBuckets: {} },
-      columns: [metric, xColumn, yColumn],
+      buckets: [xColumn.columnId, yColumn.columnId],
     });
     expect(result).toEqual({
       gridConfig: {

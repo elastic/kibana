@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Column, HeatmapConfiguration } from '@kbn/visualizations-plugin/common';
+import { HeatmapConfiguration } from '@kbn/visualizations-plugin/common';
 import { Vis } from '@kbn/visualizations-plugin/public';
 import { HeatmapVisParams } from '../../types';
 import { getPaletteForHeatmap } from './palette';
@@ -17,22 +17,14 @@ export const getConfiguration = async (
   {
     metrics,
     buckets,
-    columns,
   }: {
     metrics: string[];
-    buckets: {
-      all: string[];
-      customBuckets: Record<string, string>;
-    };
-    columns: Column[];
+    buckets: string[];
   }
-): Promise<HeatmapConfiguration | null> => {
+): Promise<HeatmapConfiguration> => {
   const [valueAccessor] = metrics;
-  const xColumn = columns.find(({ isBucketed, isSplit }) => isBucketed && !isSplit);
-  const yColumn = columns.find(({ isBucketed, isSplit }) => isBucketed && isSplit);
-  if (yColumn && !xColumn) {
-    return null;
-  }
+  const [xAccessor, yAccessor] = buckets;
+
   const { params, uiState } = vis;
   const state = uiState.get('vis', {}) ?? {};
 
@@ -55,8 +47,8 @@ export const getConfiguration = async (
       isXAxisTitleVisible: true,
     },
     valueAccessor,
-    xAccessor: xColumn?.columnId,
-    yAccessor: yColumn?.columnId,
+    xAccessor,
+    yAccessor,
     palette: palette ? { ...palette, accessor: valueAccessor } : undefined,
   };
 };

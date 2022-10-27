@@ -43,7 +43,7 @@ export const convertToLens: ConvertHeatmapToLensVisualization = async (vis, time
     return null;
   }
 
-  const { getColumnsFromVis } = await convertToLensModule;
+  const { getColumnsFromVis, convertToFiltersColumn } = await convertToLensModule;
   const layers = getColumnsFromVis(vis, timefilter, dataView, {
     buckets: ['segment'],
     splits: ['group'],
@@ -56,6 +56,17 @@ export const convertToLens: ConvertHeatmapToLensVisualization = async (vis, time
 
   const [layerConfig] = layers;
 
+  const xColumn = layerConfig.columns.find(({ isBucketed, isSplit }) => isBucketed && !isSplit);
+  const xAxisColumn =
+    xColumn ??
+    convertToFiltersColumn(uuid(), { filters: [{ input: { language: 'lucene', query: '*' } }] })!;
+
+  if (xColumn?.columnId !== xAxisColumn?.columnId) {
+    layerConfig.buckets.all.push(xAxisColumn.columnId);
+    layerConfig.columns.push(xAxisColumn);
+  }
+  const yColumn = layerConfig.columns.find(({ isBucketed, isSplit }) => isBucketed && isSplit);
+
   if (!layerConfig.buckets.all.length || layerConfig.metrics.length > 1) {
     return null;
   }
@@ -63,10 +74,12 @@ export const convertToLens: ConvertHeatmapToLensVisualization = async (vis, time
   const layerId = uuid();
 
   const indexPatternId = dataView.id!;
-  const configuration = await getConfiguration(layerId, vis, layerConfig);
-  if (configuration === null) {
-    return null;
-  }
+  const configuration = await getConfiguration(layerId, vis, {
+    metrics: layerConfig.metrics,
+    buckets: [xAxisColumn.columnId, yColumn?.columnId].filter<string>((c): c is string =>
+      Boolean(c)
+    ),
+  });
 
   return {
     type: 'lnsHeatmap',

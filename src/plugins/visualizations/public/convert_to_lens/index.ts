@@ -8,6 +8,7 @@
 
 export { getColumnsFromVis } from './schemas';
 export {
+  convertToFiltersColumn,
   getPercentageColumnFormulaColumn,
   getPalette,
   getPaletteFromStopsWithColors,
