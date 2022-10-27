@@ -6,10 +6,22 @@
  */
 
 import moment from 'moment-timezone';
-import { set, unset, has, difference, filter, find, map, mapKeys, uniq, some } from 'lodash';
+import {
+  set,
+  unset,
+  has,
+  difference,
+  filter,
+  find,
+  map,
+  mapKeys,
+  uniq,
+  some,
+  isEmpty,
+} from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { produce } from 'immer';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -42,8 +54,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             description: schema.maybe(schema.string()),
             enabled: schema.maybe(schema.boolean()),
             policy_ids: schema.maybe(schema.arrayOf(schema.string())),
-            is_global: schema.maybe(schema.boolean()),
-            // is_global: schema.maybe(schema.recordOf(schema.string(), schema.number())),
+            shards: schema.maybe(schema.recordOf(schema.string(), schema.number())),
             queries: schema.maybe(
               schema.recordOf(
                 schema.string(),
@@ -86,7 +97,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { name, description, queries, enabled, policy_ids, is_global } = request.body;
+      const { name, description, queries, enabled, policy_ids, shards } = request.body;
 
       const currentPackSO = await savedObjectsClient.get<{ name: string; enabled: boolean }>(
         packSavedObjectType,
@@ -122,51 +133,68 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       );
 
       const getPolicies = async () => {
-        if (is_global) {
-          const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
-            satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
-          );
-          const globalPoliciesIds = uniq(map(supportedPackagePolicyIds, 'policy_id'));
-          const agentPoliciesResult = await agentPolicyService?.getByIds(
-            internalSavedObjectsClient,
-            globalPoliciesIds
-          );
-
-          return map(agentPoliciesResult, 'id');
+        if (policy_ids?.length) {
+          return policy_ids;
         }
 
-        return policy_ids;
+        const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
+          satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
+        );
+
+        return uniq(map(supportedPackagePolicyIds, 'policy_id'));
       };
 
-      const policiesList = await getPolicies();
+      let policiesList = await getPolicies();
 
-      const agentPolicies = policiesList
-        ? mapKeys(
-            await agentPolicyService?.getByIds(internalSavedObjectsClient, policiesList),
-            'id'
-          )
-        : {};
-      const agentPolicyIds = Object.keys(agentPolicies);
+      const agentPolicies = await agentPolicyService?.getByIds(
+        internalSavedObjectsClient,
+        policiesList
+      );
+
+      // Find the agentPolicies that has name containing shard name
+      const filteredList: AgentPolicy[] = [];
+      if (!isEmpty(shards)) {
+        const agentPoliciesNames = map(agentPolicies, 'name');
+        const agentPoliciesNameMap = mapKeys(agentPolicies, 'name');
+
+        map(shards, (shard, shardName) => {
+          map(agentPoliciesNames, (agentPolicyName) => {
+            if (agentPolicyName.includes(shardName)) {
+              filteredList.push(agentPoliciesNameMap[agentPolicyName]);
+            }
+          });
+        });
+      }
+
+      // We update policiesList only if we find any valid shards, otherwise it has all policies - which makes it global
+      // TODO add functionality to add shard to a global pack
+      if (filteredList.length) {
+        policiesList = map(filteredList, 'id');
+      }
+
+      const agentPoliciesIdMap = mapKeys(agentPolicies, 'id');
 
       const nonAgentPolicyReferences = filter(
         currentPackSO.references,
         (reference) => reference.type !== AGENT_POLICY_SAVED_OBJECT_TYPE
       );
-
       const getUpdatedReferences = () => {
-        if (policiesList) {
-          return [
-            ...nonAgentPolicyReferences,
-            ...policiesList.map((id) => ({
-              id,
-              name: agentPolicies[id].name,
-              type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-            })),
-          ];
+        if (!policy_ids && isEmpty(shards)) {
+          return currentPackSO.references;
         }
 
-        return currentPackSO.references;
+        return [
+          ...nonAgentPolicyReferences,
+          ...policiesList.map((id) => ({
+            id,
+            name: agentPoliciesIdMap[id]?.name,
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          })),
+        ];
       };
+
+      const references = getUpdatedReferences();
+      // TODO find out where to put the shard
 
       await savedObjectsClient.update<PackSavedObjectAttributes>(
         packSavedObjectType,
@@ -178,11 +206,11 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           queries: queries && convertPackQueriesToSO(queries),
           updated_at: moment().toISOString(),
           updated_by: currentUser,
-          is_global,
+          shards: shards || {},
         },
         {
           refresh: 'wait_for',
-          references: getUpdatedReferences(),
+          references,
         }
       );
 
@@ -190,7 +218,6 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         filter(currentPackSO.references, ['type', AGENT_POLICY_SAVED_OBJECT_TYPE]),
         'id'
       );
-
       const updatedPackSO = await savedObjectsClient.get<{
         name: string;
         enabled: boolean;
@@ -205,7 +232,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
       if (enabled != null && enabled !== currentPackSO.attributes.enabled) {
         if (enabled) {
-          const policyIds = policy_ids ? agentPolicyIds : currentAgentPolicyIds;
+          const policyIds = policy_ids || shards ? policiesList : currentAgentPolicyIds;
 
           await Promise.all(
             policyIds.map((agentPolicyId) => {
@@ -260,11 +287,11 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           );
         }
       } else {
-        const agentPolicyIdsToRemove = uniq(difference(currentAgentPolicyIds, agentPolicyIds));
+        const agentPolicyIdsToRemove = uniq(difference(currentAgentPolicyIds, policiesList));
         const agentPolicyIdsToUpdate = uniq(
           difference(currentAgentPolicyIds, agentPolicyIdsToRemove)
         );
-        const agentPolicyIdsToAdd = uniq(difference(agentPolicyIds, currentAgentPolicyIds));
+        const agentPolicyIdsToAdd = uniq(difference(policiesList, currentAgentPolicyIds));
 
         await Promise.all(
           agentPolicyIdsToRemove.map((agentPolicyId) => {

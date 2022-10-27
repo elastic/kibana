@@ -23,5 +23,5 @@ export type PackItem = PackSavedObject['attributes'] & {
   id: string;
   policy_ids: string[];
   read_only?: boolean;
-  is_global?: boolean;
+  shards?: Record<string, number>;
 };

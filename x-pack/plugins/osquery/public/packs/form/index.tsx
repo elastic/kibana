@@ -20,6 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { FormProvider, useForm as useHookForm } from 'react-hook-form';
 
+import { PackShardsField } from './pack_shards_field';
 import { useKibana, useRouterNavigate } from '../../common/lib/kibana';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
 import { QueriesField } from './queries_field';
@@ -95,10 +96,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   });
 
   useEffect(() => {
-    if (defaultValue?.is_global) {
+    if (defaultValue?.shards?.['*']) {
       setPackType('global');
     }
-  }, [defaultValue?.is_global]);
+  }, [defaultValue, defaultValue?.shards]);
 
   const {
     handleSubmit,
@@ -106,12 +107,32 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     formState: { isSubmitting },
   } = hooksForm;
 
+  const getShards = useCallback(() => {
+    if (packType === 'global') {
+      return { '*': 100 };
+    }
+
+    if (packType === 'shards') {
+      // for testing
+      return {
+        Pack: 100,
+      };
+    }
+  }, [packType]);
+
   const onSubmit = useCallback(
     async (values: PackFormData) => {
-      const serializer = (payload: PackFormData) => ({
-        ...payload,
-        is_global: packType === 'global',
-        queries: convertSOQueriesToPack(payload.queries),
+      const shards = getShards();
+      const serializer = ({
+        shards: _,
+        policy_ids: policyIds,
+        queries,
+        ...restPayload
+      }: PackFormData) => ({
+        ...restPayload,
+        policy_ids: packType === 'policy' ? policyIds : [],
+        queries: convertSOQueriesToPack(queries),
+        shards: packType !== 'policy' ? shards : {},
       });
 
       try {
@@ -123,7 +144,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         // eslint-disable-next-line no-empty
       } catch (e) {}
     },
-    [createAsync, defaultValue?.id, editMode, packType, updateAsync]
+    [createAsync, defaultValue?.id, editMode, getShards, packType, updateAsync]
   );
 
   const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
@@ -164,7 +185,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   // const policyIdsFieldProps = useMemo(() => ({ isDisabled: isGlobalEnabled }), [isGlobalEnabled]);
 
   const changePackType = useCallback(
-    (type: 'global' | 'policy') => {
+    (type: 'global' | 'policy' | 'shards') => {
       setPackType(type);
     },
     [setPackType]
@@ -189,7 +210,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           <PackTypeSelectable
             packType={packType}
             setPackType={changePackType}
-            isGlobalEnabled={isDefaultNamespace}
+            isGlobalDisabled={!isDefaultNamespace}
           />
         </EuiFlexGroup>
 
@@ -197,6 +218,14 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           <EuiFlexGroup>
             <EuiFlexItem>
               <PolicyIdComboBoxField />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+
+        {packType !== 'policy' && (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <PackShardsField />
             </EuiFlexItem>
           </EuiFlexGroup>
         )}

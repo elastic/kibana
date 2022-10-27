@@ -29,7 +29,6 @@ export const packEventFields: AllowlistFields = {
   name: true,
   created_at: true,
   updated_at: true,
-  is_global: true,
   enabled: true,
   queries: true,
 };

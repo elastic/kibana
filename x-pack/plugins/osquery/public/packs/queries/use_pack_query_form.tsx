@@ -27,6 +27,7 @@ export interface PackSOQueryFormData {
   version?: string | undefined;
   ecs_mapping?: ECSMapping;
   is_global?: boolean;
+  shards: Record<string, number>;
 }
 
 export type PackQuerySOECSMapping = Array<{ field: string; value: string }>;

@@ -35,8 +35,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             description: schema.maybe(schema.string()),
             enabled: schema.maybe(schema.boolean()),
             policy_ids: schema.maybe(schema.arrayOf(schema.string())),
-            is_global: schema.boolean(),
-            // is_global: schema.maybe(schema.recordOf(schema.string(), schema.number())),
+            shards: schema.maybe(schema.recordOf(schema.string(), schema.number())),
             queries: schema.recordOf(
               schema.string(),
               schema.object({
@@ -78,8 +77,8 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { name, description, queries, enabled, policy_ids, is_global } = request.body;
-
+      const { name, description, queries, enabled, policy_ids, shards } = request.body;
+      const isGlobal = shards?.['*'];
       const conflictingEntries = await savedObjectsClient.find({
         type: packSavedObjectType,
         filter: `${packSavedObjectType}.attributes.name: "${name}"`,
@@ -102,17 +101,12 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       )) ?? { items: [] };
 
       const getPolicies = async () => {
-        if (is_global) {
+        if (isGlobal) {
           const supportedPackagePolicyIds = filter(packagePolicies, (packagePolicy) =>
             satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')
           );
-          const globalPoliciesIds = uniq(map(supportedPackagePolicyIds, 'policy_id'));
-          const agentPoliciesResult = await agentPolicyService?.getByIds(
-            internalSavedObjectsClient,
-            globalPoliciesIds
-          );
 
-          return map(agentPoliciesResult, 'id');
+          return uniq(map(supportedPackagePolicyIds, 'policy_id'));
         }
 
         return policy_ids;
@@ -146,7 +140,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           created_by: currentUser,
           updated_at: moment().toISOString(),
           updated_by: currentUser,
-          is_global,
+          shards,
         },
         {
           references,

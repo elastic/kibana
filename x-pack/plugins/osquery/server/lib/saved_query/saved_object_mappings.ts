@@ -126,6 +126,10 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
     is_global: {
       type: 'boolean',
     },
+    shards: {
+      type: 'object',
+      enabled: false,
+    },
     version: {
       type: 'long',
     },
