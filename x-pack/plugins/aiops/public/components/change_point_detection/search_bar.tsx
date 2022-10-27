@@ -9,7 +9,6 @@ import React, { FC, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { type Filter, fromKueryExpression, type Query } from '@kbn/es-query';
 import { type SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar';
-import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiSpacer, EuiTextColor } from '@elastic/eui';
 import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -20,11 +19,6 @@ export interface SearchBarProps {
   filters: Filter[];
   onQueryChange: (update: Query) => void;
   onFiltersChange: (update: Filter[]) => void;
-  /**
-   * Provides a result ES query
-   * @param query
-   */
-  onESQueryChange: (query: QueryDslQueryContainer) => void;
 }
 
 /**

@@ -21,7 +21,7 @@ export function useCancellableRequest<RequestBody, ResponseType extends IKibanaS
   const abortController = useRef(new AbortController());
   const [isLoading, setIsFetching] = useState<boolean>(false);
 
-  const runRequest = useCallback((): Promise<ResponseType> => {
+  const runRequest = useCallback((): Promise<ResponseType | null> => {
     return new Promise((resolve, reject) => {
       data.search
         .search<RequestBody, ResponseType>(requestBody, {
@@ -47,7 +47,7 @@ export function useCancellableRequest<RequestBody, ResponseType extends IKibanaS
           },
           error: (error) => {
             if (error.name === 'AbortError') {
-              return resolve();
+              return resolve(null);
             }
             reject(error);
           },

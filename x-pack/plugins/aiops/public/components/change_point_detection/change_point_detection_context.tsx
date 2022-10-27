@@ -181,6 +181,10 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     cancelRequest();
 
     const result = await runRequest();
+    if (result === null) {
+      return;
+    }
+
     if (!result.rawResponse.aggregations) {
       toasts.addDanger('No agg results');
       return;
