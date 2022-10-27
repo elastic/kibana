@@ -782,6 +782,7 @@ export class SettingsPageObject extends FtrService {
   async setFieldType(type: string) {
     this.log.debug('set type = ' + type);
     await this.testSubjects.setValue('typeField', type);
+    await this.browser.pressKeys(this.browser.keys.ENTER);
   }
 
   async setFieldTypeComposite() {
@@ -793,6 +794,12 @@ export class SettingsPageObject extends FtrService {
   async setFieldScript(script: string) {
     this.log.debug('set script = ' + script);
     await this.toggleRow('valueRow');
+    await this.monacoEditor.waitCodeEditorReady('valueRow');
+    await this.monacoEditor.setCodeEditorValue(script);
+  }
+
+  async setFieldScriptWithoutToggle(script: string) {
+    this.log.debug('set script without toggle = ' + script);
     await this.monacoEditor.waitCodeEditorReady('valueRow');
     await this.monacoEditor.setCodeEditorValue(script);
   }
