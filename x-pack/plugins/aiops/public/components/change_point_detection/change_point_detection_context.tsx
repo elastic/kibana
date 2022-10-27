@@ -18,6 +18,7 @@ import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { startWith } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
 import type { Query, Filter } from '@kbn/es-query';
+import { createMergedEsQuery } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useTimefilter, useTimeRangeUpdates } from '../../hooks/use_time_filter';
 import { useChangePointRequest } from './use_change_point_agg_request';
@@ -77,6 +78,7 @@ interface ChangePointAnnotation {
 export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   const { dataView } = useDataSource();
   const {
+    uiSettings,
     notifications: { toasts },
     data: {
       query: { filterManager },
@@ -163,10 +165,14 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     [requestParamsFromUrl.filters, filterManager]
   );
 
+  const combinedQuery = useMemo(() => {
+    return createMergedEsQuery(requestParams.query, resultFilters, dataView, uiSettings);
+  }, [resultFilters, requestParams.query, uiSettings, dataView]);
+
   const { runRequest, cancelRequest, isLoading } = useChangePointRequest(
     requestParams,
     timeRange,
-    resultFilters
+    combinedQuery
   );
 
   const fetchChangePoints = useCallback(async () => {

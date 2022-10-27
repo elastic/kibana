@@ -7,7 +7,8 @@
 
 import { useMemo } from 'react';
 import { TimeRange } from '@kbn/data-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { cloneDeep } from 'lodash';
 import {
   ChangePointDetectionRequestParams,
   ChangePointType,
@@ -27,30 +28,32 @@ interface RequestOptions {
 
 function getChangePointDetectionRequestBody(
   { index, fn, metricField, splitField, timeField, timeInterval, timeRange }: RequestOptions,
-  filters: Filter[]
+  query: QueryDslQueryContainer
 ) {
-  const appliedFilters = filters.map((v) => v.query);
+  const resultQuery = cloneDeep(query);
+
+  if (!Array.isArray(resultQuery.bool?.filter)) {
+    if (!resultQuery.bool) {
+      resultQuery.bool = {};
+    }
+    resultQuery.bool.filter = [];
+  }
+
+  resultQuery.bool!.filter.push({
+    range: {
+      [timeField]: {
+        from: timeRange.from,
+        to: timeRange.to,
+      },
+    },
+  });
 
   return {
     params: {
       index,
       size: 0,
       body: {
-        query: {
-          bool: {
-            filter: [
-              ...appliedFilters,
-              {
-                range: {
-                  [timeField]: {
-                    from: timeRange.from,
-                    to: timeRange.to,
-                  },
-                },
-              },
-            ],
-          },
-        },
+        query: resultQuery,
         aggregations: {
           groupings: {
             terms: {
@@ -86,7 +89,7 @@ function getChangePointDetectionRequestBody(
 export function useChangePointRequest(
   requestParams: ChangePointDetectionRequestParams,
   timeRange: TimeRange,
-  filters: Filter[]
+  query: QueryDslQueryContainer
 ) {
   const { dataView } = useDataSource();
 
@@ -101,8 +104,8 @@ export function useChangePointRequest(
       splitField: requestParams.splitField,
     };
 
-    return getChangePointDetectionRequestBody(params, filters);
-  }, [timeRange, dataView, requestParams, filters]);
+    return getChangePointDetectionRequestBody(params, query);
+  }, [timeRange, dataView, requestParams, query]);
 
   return useCancellableRequest<typeof requestBoby, { rawResponse: ChangePointAggResponse }>(
     requestBoby
