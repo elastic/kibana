@@ -98,7 +98,7 @@ describe('TinesParamsFields renders', () => {
 
       expect(wrapper.find('[data-test-subj="tines-storySelector"]').exists()).toBe(true);
       expect(wrapper.find('[data-test-subj="tines-storySelector"]').first().text()).toBe(
-        'Select a Tines Story'
+        'Select a Tines story'
       );
       expect(wrapper.find('[data-test-subj="tines-webhookSelector"]').exists()).toBe(true);
       expect(wrapper.find('[data-test-subj="tines-webhookSelector"]').first().text()).toBe(
@@ -123,7 +123,7 @@ describe('TinesParamsFields renders', () => {
 
       expect(wrapper.find('[data-test-subj="tines-storySelector"]').exists()).toBe(true);
       expect(wrapper.find('[data-test-subj="tines-storySelector"]').first().text()).toBe(
-        'Select a Tines Story'
+        'Select a Tines story'
       );
       expect(wrapper.find('[data-test-subj="tines-webhookSelector"]').exists()).toBe(true);
       expect(wrapper.find('[data-test-subj="tines-webhookSelector"]').first().text()).toBe(
