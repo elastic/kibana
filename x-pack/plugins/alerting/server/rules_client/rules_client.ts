@@ -589,6 +589,7 @@ export class RulesClient {
     const createTime = Date.now();
     const legacyId = Semver.lt(this.kibanaVersion, '8.0.0') ? id : null;
     const notifyWhen = getRuleNotifyWhenType(data.notifyWhen ?? null, data.throttle ?? null);
+    const throttle = data.throttle ?? null;
 
     const rawRule: RawRule = {
       ...data,
@@ -604,6 +605,7 @@ export class RulesClient {
       muteAll: false,
       mutedInstanceIds: [],
       notifyWhen,
+      throttle,
       executionStatus: getRuleExecutionStatusPending(new Date().toISOString()),
       monitoring: getDefaultRuleMonitoring(),
     };
