@@ -200,7 +200,7 @@
             "section": "def-public.MapEmbeddableOutput",
             "text": "MapEmbeddableOutput"
           },
-          "> implements ",
+          ", any> implements ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -4470,7 +4470,7 @@
           "StyleDescriptor",
           " | null | undefined; query?: ",
           "Query",
-          " | undefined; includeInFitToBounds?: boolean | undefined; }"
+          " | undefined; includeInFitToBounds?: boolean | undefined; parent?: string | undefined; }"
         ],
         "path": "x-pack/plugins/maps/common/descriptor_types/layer_descriptor_types.ts",
         "deprecated": false,

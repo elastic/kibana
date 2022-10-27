@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { TimelineId } from '../../../../../../common/types/timeline';
+import { TableId, TimelineId } from '../../../../../../common/types/timeline';
 import { TestProviders, mockTimelineModel, mockTimelineData } from '../../../../../common/mock';
 import { Actions, isAlert } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -97,7 +97,7 @@ const defaultProps = {
   setEventsLoading: () => {},
   showCheckboxes: true,
   showNotes: false,
-  timelineId: 'test',
+  timelineId: TimelineId.test,
   toggleShowNotes: () => {},
 };
 
@@ -271,7 +271,7 @@ describe('Actions', () => {
           <Actions
             {...defaultProps}
             ecsData={ecsData}
-            timelineId={TimelineId.kubernetesPageSessions}
+            timelineId={TableId.kubernetesPageSessions} // not a bug, this needs to be fixed by providing a generic interface for actions registry
           />
         </TestProviders>
       );

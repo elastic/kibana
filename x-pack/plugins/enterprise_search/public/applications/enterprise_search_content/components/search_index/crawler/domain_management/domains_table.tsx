@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiBasicTableColumn, EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiBasicTable, EuiButtonIcon, EuiCopy } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -39,18 +39,23 @@ export const DomainsTable: React.FC = () => {
     {
       field: 'url',
       name: i18n.translate('xpack.enterpriseSearch.crawler.domainsTable.column.domainURL', {
-        defaultMessage: 'Domain URL',
+        defaultMessage: 'Domain',
       }),
       render: (_, domain: CrawlerDomain) => (
-        <EuiLinkTo
-          data-test-subj="CrawlerDomainURL"
-          to={generateEncodedPath(SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH, {
-            domainId: domain.id,
-            indexName,
-          })}
-        >
-          {domain.url}
-        </EuiLinkTo>
+        <>
+          <EuiCopy textToCopy={domain.url}>
+            {(copy) => <EuiButtonIcon onClick={copy} iconSize="s" iconType="copy" />}
+          </EuiCopy>
+          <EuiLinkTo
+            data-test-subj="CrawlerDomainURL"
+            to={generateEncodedPath(SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH, {
+              domainId: domain.id,
+              indexName,
+            })}
+          >
+            {domain.url}
+          </EuiLinkTo>
+        </>
       ),
     },
     {

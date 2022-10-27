@@ -11,7 +11,7 @@ import { EuiProgress, EuiButtonGroup } from '@elastic/eui';
 import { ThemeProvider } from 'styled-components';
 
 import { StepAboutRuleToggleDetails } from '.';
-import { mockAboutStepRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
+import { mockAboutStepRule } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { StepAboutRule } from '../step_about_rule';
 import type { AboutStepRule } from '../../../pages/detection_engine/rules/types';

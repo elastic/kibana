@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useState } from 'react';
-import { EuiContextMenu } from '@elastic/eui';
+import type { FunctionComponent } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
-  UtilityBar,
-  UtilityBarAction,
-  UtilityBarGroup,
-  UtilityBarSection,
-  UtilityBarText,
-} from '../utility_bar';
+  EuiButtonEmpty,
+  EuiContextMenu,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import * as i18n from './translations';
-import { Case } from '../../../common/ui/types';
+import type { Case } from '../../../common/ui/types';
 import { useRefreshCases } from './use_on_refresh_cases';
-import { UtilityBarBulkActions } from '../utility_bar/utility_bar_bulk_actions';
 import { useBulkActions } from './use_bulk_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
@@ -30,6 +31,7 @@ interface Props {
 
 export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
   ({ isSelectorView, totalCases, selectedCases, deselectCases }) => {
+    const { euiTheme } = useEuiTheme();
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
     const closePopover = useCallback(() => setIsPopoverOpen(false), []);
@@ -56,47 +58,82 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
 
     return (
       <>
-        <UtilityBar border>
-          <UtilityBarSection>
-            <UtilityBarGroup>
-              <UtilityBarText data-test-subj="case-table-case-count">
-                {i18n.SHOWING_CASES(totalCases)}
-              </UtilityBarText>
-            </UtilityBarGroup>
-            <UtilityBarGroup data-test-subj="case-table-utility-bar-actions">
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="flexStart"
+          gutterSize="s"
+          css={{
+            borderBottom: euiTheme.border.thin,
+            marginTop: 0,
+            marginBottom: 0,
+            paddingTop: euiTheme.size.s,
+            paddingBottom: euiTheme.size.s,
+          }}
+        >
+          <EuiFlexItem
+            data-test-subj="case-table-case-count"
+            grow={false}
+            css={{
+              borderRight: euiTheme.border.thin,
+              paddingRight: euiTheme.size.s,
+            }}
+          >
+            <EuiText size="xs" color="subdued">
+              {i18n.SHOWING_CASES(totalCases)}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem data-test-subj="case-table-utility-bar-actions" grow={false}>
+            <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
               {!isSelectorView && showBulkActions && (
                 <>
-                  <UtilityBarText data-test-subj="case-table-selected-case-count">
-                    {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
-                  </UtilityBarText>
-                  <UtilityBarBulkActions
-                    dataTestSubj="case-table-bulk-actions"
-                    iconSide="right"
-                    iconType="arrowDown"
-                    buttonTitle={i18n.BULK_ACTIONS}
-                    isPopoverOpen={isPopoverOpen}
-                    closePopover={closePopover}
-                    onButtonClick={togglePopover}
-                  >
-                    <EuiContextMenu
-                      panels={panels}
-                      initialPanelId={0}
-                      data-test-subj="case-table-bulk-actions-context-menu"
-                    />
-                  </UtilityBarBulkActions>
+                  <EuiFlexItem data-test-subj="case-table-selected-case-count" grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      {i18n.SHOWING_SELECTED_CASES(selectedCases.length)}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiPopover
+                      isOpen={isPopoverOpen}
+                      closePopover={closePopover}
+                      panelPaddingSize="none"
+                      data-test-subj="case-table-bulk-actions-popover"
+                      button={
+                        <EuiButtonEmpty
+                          onClick={togglePopover}
+                          size="xs"
+                          iconSide="right"
+                          iconType="arrowDown"
+                          flush="left"
+                          data-test-subj="case-table-bulk-actions-link-icon"
+                        >
+                          {i18n.BULK_ACTIONS}
+                        </EuiButtonEmpty>
+                      }
+                    >
+                      <EuiContextMenu
+                        panels={panels}
+                        initialPanelId={0}
+                        data-test-subj="case-table-bulk-actions-context-menu"
+                      />
+                    </EuiPopover>
+                  </EuiFlexItem>
                 </>
               )}
-              <UtilityBarAction
-                iconSide="left"
-                iconType="refresh"
-                onClick={onRefresh}
-                dataTestSubj="all-cases-refresh"
-              >
-                {i18n.REFRESH}
-              </UtilityBarAction>
-            </UtilityBarGroup>
-          </UtilityBarSection>
-        </UtilityBar>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={onRefresh}
+                  size="xs"
+                  iconSide="left"
+                  iconType="refresh"
+                  flush="left"
+                  data-test-subj="all-cases-refresh-link-icon"
+                >
+                  {i18n.REFRESH}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         {modals}
       </>
     );

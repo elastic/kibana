@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiModal, EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 
-import { Case } from '../../containers/types';
+import type { Case } from '../../containers/types';
 import * as i18n from '../../common/translations';
 import { CreateCase } from '../create';
 

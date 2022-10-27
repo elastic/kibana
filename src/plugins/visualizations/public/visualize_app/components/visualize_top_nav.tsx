@@ -114,6 +114,7 @@ const TopNav = ({
     vis.type,
     vis.params,
     uiStateJSON?.vis,
+    uiStateJSON?.table,
     vis.data.indexPattern,
   ]);
 
@@ -170,8 +171,7 @@ const TopNav = ({
     return vis.type.options.showTimePicker && hasTimeField;
   };
   const showFilterBar = vis.type.options.showFilterBar;
-  const showQueryInput =
-    vis.type.requiresSearch && vis.type.options.showQueryBar && vis.type.options.showQueryInput;
+  const showQueryInput = vis.type.requiresSearch && vis.type.options.showQueryInput;
 
   useEffect(() => {
     return () => {

@@ -24,6 +24,7 @@ interface FooterProps {
   isEdit: boolean;
   isPersisted: boolean;
   allowAdHoc: boolean;
+  canSave: boolean;
 }
 
 const closeButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutCloseButtonLabel', {
@@ -56,6 +57,7 @@ export const Footer = ({
   isEdit,
   allowAdHoc,
   isPersisted,
+  canSave,
 }: FooterProps) => {
   const submitPersisted = () => {
     onSubmit(false);
@@ -96,21 +98,23 @@ export const Footer = ({
               </EuiFlexItem>
             )}
 
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                color="primary"
-                onClick={submitPersisted}
-                data-test-subj="saveIndexPatternButton"
-                fill
-                disabled={submitDisabled}
-              >
-                {isEdit
-                  ? isPersisted
-                    ? editButtonLabel
-                    : editUnpersistedButtonLabel
-                  : saveButtonLabel}
-              </EuiButton>
-            </EuiFlexItem>
+            {(canSave || (isEdit && !isPersisted)) && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  onClick={submitPersisted}
+                  data-test-subj="saveIndexPatternButton"
+                  fill
+                  disabled={submitDisabled}
+                >
+                  {isEdit
+                    ? isPersisted
+                      ? editButtonLabel
+                      : editUnpersistedButtonLabel
+                    : saveButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

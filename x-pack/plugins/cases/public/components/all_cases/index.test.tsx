@@ -9,11 +9,8 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 
 import { AllCases } from '.';
-import {
-  AppMockRenderer,
-  createAppMockRenderer,
-  noCreateCasesPermissions,
-} from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, noCreateCasesPermissions } from '../../common/mock';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { connectorsMock, useGetCasesMockState } from '../../containers/mock';
 import { useGetConnectors } from '../../containers/configure/use_connectors';

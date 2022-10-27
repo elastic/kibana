@@ -12,10 +12,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('compression', () => {
+  const compressionSuite = (url: string) => {
     it(`uses compression when there isn't a referer`, async () => {
       await supertest
-        .get('/app/kibana')
+        .get(url)
         .set('accept-encoding', 'gzip')
         .then((response) => {
           expect(response.header).to.have.property('content-encoding', 'gzip');
@@ -24,7 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`uses compression when there is a whitelisted referer`, async () => {
       await supertest
-        .get('/app/kibana')
+        .get(url)
         .set('accept-encoding', 'gzip')
         .set('referer', 'https://some-host.com')
         .then((response) => {
@@ -34,12 +34,27 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`doesn't use compression when there is a non-whitelisted referer`, async () => {
       await supertest
-        .get('/app/kibana')
+        .get(url)
         .set('accept-encoding', 'gzip')
         .set('referer', 'https://other.some-host.com')
         .then((response) => {
           expect(response.header).not.to.have.property('content-encoding');
         });
+    });
+
+    it(`supports brotli compression`, async () => {
+      await supertest
+        .get(url)
+        .set('accept-encoding', 'br')
+        .then((response) => {
+          expect(response.header).to.have.property('content-encoding', 'br');
+        });
+    });
+  };
+
+  describe('compression', () => {
+    describe('against an application page', () => {
+      compressionSuite('/app/kibana');
     });
   });
 }

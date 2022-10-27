@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { MatcherFunction } from '@testing-library/react';
+import type { MatcherFunction } from '@testing-library/react';
 
 /**
  * Convenience utility to remove text appended to links by EUI

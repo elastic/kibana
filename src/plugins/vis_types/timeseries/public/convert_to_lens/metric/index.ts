@@ -22,7 +22,10 @@ import { excludeMetaFromLayers, getUniqueBuckets } from '../utils';
 const MAX_SERIES = 2;
 const MAX_BUCKETS = 2;
 
-export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeRange) => {
+export const convertToLens: ConvertTsvbToLensVisualization = async (
+  { params: model },
+  timeRange
+) => {
   const dataViews = getDataViewsStart();
   const seriesNum = model.series.filter((series) => !series.hidden).length;
 

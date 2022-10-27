@@ -2613,7 +2613,7 @@
                 "section": "def-public.IEmbeddable",
                 "text": "IEmbeddable"
               },
-              "<ReduxEmbeddableStateType[\"explicitInput\"], ReduxEmbeddableStateType[\"output\"]>; initialComponentState?: ReduxEmbeddableStateType[\"componentState\"] | undefined; syncSettings?: ",
+              "<ReduxEmbeddableStateType[\"explicitInput\"], ReduxEmbeddableStateType[\"output\"], any>; initialComponentState?: ReduxEmbeddableStateType[\"componentState\"] | undefined; syncSettings?: ",
               "ReduxEmbeddableSyncSettings",
               "<",
               {
@@ -2670,7 +2670,7 @@
                     "section": "def-public.IEmbeddable",
                     "text": "IEmbeddable"
                   },
-                  "<ReduxEmbeddableStateType[\"explicitInput\"], ReduxEmbeddableStateType[\"output\"]>; initialComponentState?: ReduxEmbeddableStateType[\"componentState\"] | undefined; syncSettings?: ",
+                  "<ReduxEmbeddableStateType[\"explicitInput\"], ReduxEmbeddableStateType[\"output\"], any>; initialComponentState?: ReduxEmbeddableStateType[\"componentState\"] | undefined; syncSettings?: ",
                   "ReduxEmbeddableSyncSettings",
                   "<",
                   {

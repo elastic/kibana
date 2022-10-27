@@ -15,11 +15,8 @@
   ],
   "exclude": [],
   "references": [
-    {
-      "path": "../../../src/core/tsconfig.json"
-    },
-    {
-      "path": "../../plugins/files/tsconfig.json"
-    }
+    { "path": "../../../src/core/tsconfig.json" },
+    { "path": "../../plugins/files/tsconfig.json" },
+    { "path": "../../../examples/developer_examples/tsconfig.json" }
   ]
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CasePostRequest,
   CasesPatchRequest,
   CasesFindRequest,
@@ -14,9 +14,9 @@ import {
   AllReportersFindRequest,
   CasesByAlertId,
 } from '../../../common/api';
-import { CasesClient } from '../client';
-import { CasesClientInternal } from '../client_internal';
-import {
+import type { CasesClient } from '../client';
+import type { CasesClientInternal } from '../client_internal';
+import type {
   ICasePostRequest,
   ICaseResolveResponse,
   ICaseResponse,
@@ -25,20 +25,14 @@ import {
   ICasesPatchRequest,
   ICasesResponse,
 } from '../typedoc_interfaces';
-import { CasesClientArgs } from '../types';
+import type { CasesClientArgs } from '../types';
 import { create } from './create';
 import { deleteCases } from './delete';
 import { find } from './find';
-import {
-  CasesByAlertIDParams,
-  get,
-  resolve,
-  getCasesByAlertID,
-  GetParams,
-  getReporters,
-  getTags,
-} from './get';
-import { push, PushParams } from './push';
+import type { CasesByAlertIDParams, GetParams } from './get';
+import { get, resolve, getCasesByAlertID, getReporters, getTags } from './get';
+import type { PushParams } from './push';
+import { push } from './push';
 import { update } from './update';
 
 /**

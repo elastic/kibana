@@ -6,16 +6,14 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiButtonIcon,
-  EuiContextMenu,
+import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
-  EuiPopover,
   EuiTableComputedColumnType,
 } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Case } from '../../containers/types';
+import type { Case } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useStatusAction } from '../actions/status/use_status_action';
@@ -23,6 +21,8 @@ import { useRefreshCases } from './use_on_refresh_cases';
 import * as i18n from './translations';
 import { statuses } from '../status';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { useSeverityAction } from '../actions/severity/use_severity_action';
+import { severities } from '../severity/config';
 
 const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }> = ({
   theCase,
@@ -44,6 +44,13 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
     onAction: closePopover,
     onActionSuccess: refreshCases,
     selectedStatus: theCase.status,
+  });
+
+  const severityAction = useSeverityAction({
+    isDisabled: false,
+    onAction: closePopover,
+    onActionSuccess: refreshCases,
+    selectedSeverity: theCase.severity,
   });
 
   const canDelete = deleteAction.canDelete;
@@ -68,6 +75,20 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
         disabled: !canUpdate,
         key: `case-action-status-panel-${theCase.id}`,
         'data-test-subj': `case-action-status-panel-${theCase.id}`,
+      });
+
+      mainPanelItems.push({
+        name: (
+          <FormattedMessage
+            defaultMessage="Severity: {severity}"
+            id="xpack.cases.allCasesView.severityWithValue"
+            values={{ severity: <b>{severities[theCase.severity]?.label ?? '-'}</b> }}
+          />
+        ),
+        panel: 2,
+        disabled: !canUpdate,
+        key: `case-action-severity-panel-${theCase.id}`,
+        'data-test-subj': `case-action-severity-panel-${theCase.id}`,
       });
     }
 
@@ -94,10 +115,16 @@ const ActionColumnComponent: React.FC<{ theCase: Case; disableActions: boolean }
         title: i18n.STATUS,
         items: statusAction.getActions([theCase]),
       });
+
+      panelsToBuild.push({
+        id: 2,
+        title: i18n.SEVERITY,
+        items: severityAction.getActions([theCase]),
+      });
     }
 
     return panelsToBuild;
-  }, [canDelete, canUpdate, deleteAction, statusAction, theCase]);
+  }, [canDelete, canUpdate, deleteAction, severityAction, statusAction, theCase]);
 
   return (
     <>
