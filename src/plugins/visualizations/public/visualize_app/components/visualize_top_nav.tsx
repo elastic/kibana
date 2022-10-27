@@ -7,7 +7,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
-
+import { EventEmitter } from 'events';
 import { AppMountParameters, OverlayRef } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -40,6 +40,7 @@ interface VisualizeTopNavProps {
   visualizationIdFromUrl?: string;
   embeddableId?: string;
   onAppLeave: AppMountParameters['onAppLeave'];
+  eventEmitter?: EventEmitter;
 }
 
 const TopNav = ({
@@ -57,6 +58,7 @@ const TopNav = ({
   visualizationIdFromUrl,
   embeddableId,
   onAppLeave,
+  eventEmitter,
 }: VisualizeTopNavProps) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
@@ -116,6 +118,7 @@ const TopNav = ({
     uiStateJSON?.vis,
     uiStateJSON?.table,
     vis.data.indexPattern,
+    eventEmitter,
   ]);
 
   const displayEditInLensItem = Boolean(vis.type.navigateToLens && editInLensConfig);
@@ -140,6 +143,7 @@ const TopNav = ({
           hideLensBadge,
           setNavigateToLens,
           showBadge: !hideTryInLensBadge && displayEditInLensItem,
+          eventEmitter,
         },
         services
       );
@@ -162,6 +166,7 @@ const TopNav = ({
     displayEditInLensItem,
     hideLensBadge,
     hideTryInLensBadge,
+    eventEmitter,
   ]);
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const showDatePicker = () => {
