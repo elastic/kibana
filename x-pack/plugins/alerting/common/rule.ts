@@ -72,6 +72,11 @@ export interface RuleAction {
   id: string;
   actionTypeId: string;
   params: RuleActionParams;
+  frequency?: {
+    summary: boolean;
+    notifyWhen: RuleNotifyWhenType;
+    throttle: string | null;
+  };
 }
 
 export interface RuleAggregations {
@@ -107,9 +112,9 @@ export interface Rule<Params extends RuleTypeParams = never> {
   updatedAt: Date;
   apiKey: string | null;
   apiKeyOwner: string | null;
-  throttle: string | null;
+  throttle?: string | null;
   muteAll: boolean;
-  notifyWhen: RuleNotifyWhenType | null;
+  notifyWhen?: RuleNotifyWhenType | null;
   mutedInstanceIds: string[];
   executionStatus: RuleExecutionStatus;
   monitoring?: RuleMonitoring;
