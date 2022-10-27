@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { CreateMlInferencePipelineParameters } from '../../../../../common/types/pipelines';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
@@ -23,7 +24,7 @@ export const createMlInferencePipeline = async (
   args: CreateMlInferencePipelineApiLogicArgs
 ): Promise<CreateMlInferencePipelineResponse> => {
   const route = `/internal/enterprise_search/indices/${args.indexName}/ml_inference/pipeline_processors`;
-  const params = {
+  const params: CreateMlInferencePipelineParameters = {
     destination_field: args.destinationField,
     model_id: args.modelId,
     pipeline_name: args.pipelineName,
