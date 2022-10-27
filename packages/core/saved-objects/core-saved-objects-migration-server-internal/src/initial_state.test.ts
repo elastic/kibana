@@ -239,10 +239,9 @@ describe('createInitialState', () => {
         logger: mockLogger.get(),
       })
     ).toMatchObject({
-        "waitForMigrationCompletion": false,
-      }
-    );
-  })
+      waitForMigrationCompletion: false,
+    });
+  });
 
   it('returns state with the correct `knownTypes`', () => {
     typeRegistry.registerType({

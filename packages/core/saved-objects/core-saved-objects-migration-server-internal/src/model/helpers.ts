@@ -78,10 +78,7 @@ export function versionMigrationCompleted(
   versionAlias: string,
   aliases: Record<string, string | undefined>
 ): boolean {
-  return (
-    aliases[currentAlias] != null &&
-    aliases[currentAlias] === aliases[versionAlias]
-  );
+  return aliases[currentAlias] != null && aliases[currentAlias] === aliases[versionAlias];
 }
 
 export function indexBelongsToLaterVersion(indexName: string, kibanaVersion: string): boolean {
@@ -178,7 +175,7 @@ export function getAliases(
   const aliases = {} as Record<string, string | undefined>;
   for (const index of Object.getOwnPropertyNames(indices)) {
     for (const alias of Object.getOwnPropertyNames(indices[index].aliases || {})) {
-      let secondIndexThisAliasPointsTo = aliases[alias];
+      const secondIndexThisAliasPointsTo = aliases[alias];
       if (secondIndexThisAliasPointsTo != null) {
         return Either.left({
           type: 'multiple_indices_per_alias',
