@@ -208,8 +208,10 @@ export function getShardFailuresWarningMessages(
         default:
           return [
             <>
-              <EuiTextColor color="accent">{warning.message}</EuiTextColor>
-              <EuiText size="s">{warning.text}</EuiText>
+              <EuiText size="s">
+                <strong>{warning.message}</strong>
+                <p>{warning.text}</p>
+              </EuiText>
               <EuiSpacer size="s" />
               {warning.text ? (
                 <ShardFailureOpenModalButton
@@ -220,6 +222,8 @@ export function getShardFailuresWarningMessages(
                     request: request as ShardFailureRequest,
                     response,
                   })}
+                  color="primary"
+                  isButtonEmpty={true}
                 />
               ) : null}
             </>,

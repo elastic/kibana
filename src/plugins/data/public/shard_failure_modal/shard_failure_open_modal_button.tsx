@@ -8,7 +8,7 @@
 
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiButtonProps } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiButtonProps } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -21,10 +21,12 @@ export interface ShardFailureOpenModalButtonProps {
   theme: ThemeServiceStart;
   title: string;
   size?: EuiButtonProps['size'];
+  color?: EuiButtonProps['color'];
   getRequestMeta: () => {
     request: ShardFailureRequest;
     response: estypes.SearchResponse<any>;
   };
+  isButtonEmpty?: boolean;
 }
 
 // Needed for React.lazy
@@ -34,6 +36,8 @@ export default function ShardFailureOpenModalButton({
   theme,
   title,
   size = 's',
+  color = 'warning',
+  isButtonEmpty = false,
 }: ShardFailureOpenModalButtonProps) {
   const onClick = useCallback(() => {
     const { request, response } = getRequestMeta();
@@ -53,9 +57,11 @@ export default function ShardFailureOpenModalButton({
     );
   }, [getRequestMeta, theme.theme$, title]);
 
+  const Component = isButtonEmpty ? EuiLink : EuiButton;
+
   return (
-    <EuiButton
-      color="warning"
+    <Component
+      color={color}
       size={size}
       onClick={onClick}
       data-test-subj="openShardFailureModalBtn"
@@ -65,6 +71,6 @@ export default function ShardFailureOpenModalButton({
         defaultMessage="Show details"
         description="Open the modal to show details"
       />
-    </EuiButton>
+    </Component>
   );
 }
