@@ -19,7 +19,7 @@ export type UpdateUrlParams = (
   updatedParams: {
     [key: string]: string | number | boolean | undefined;
   },
-  clearAllParams: boolean
+  clearAllParams?: boolean
 ) => void;
 
 export type SyntheticsUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
