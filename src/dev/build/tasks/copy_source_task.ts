@@ -33,6 +33,7 @@ export const CopySource: Task = {
       '!src/**/mocks.{js,ts}',
       '!src/cli*/dev.js',
       '!src/plugins/telemetry/schema/**',
+      '!src/core/server/core_app/assets/favicons/favicon.distribution.{ico,png,svg}',
       '!packages/core/apps/core-apps-server-internal/src/assets/favicons/favicon.distribution.{ico,png,svg}',
       '!src/setup_node_env/index.js',
 

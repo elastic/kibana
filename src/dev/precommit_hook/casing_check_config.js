@@ -31,6 +31,7 @@ export const IGNORE_FILE_GLOBS = [
   '**/.*',
   '**/__mocks__/**/*',
   'x-pack/docs/**/*',
+  'src/core/server/core_app/assets/fonts/**/*',
   'packages/core/apps/core-apps-server-internal/src/assets/fonts/**/*',
   'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/**/*',
   'packages/kbn-utility-types/test-d/**/*',
@@ -131,6 +132,18 @@ export const REMOVE_EXTENSION = ['packages/kbn-plugin-generator/template/**/*.ej
  * @type {Array}
  */
 export const TEMPORARILY_IGNORED_PATHS = [
+  'src/core/server/core_app/assets/favicons/android-chrome-192x192.png',
+  'src/core/server/core_app/assets/favicons/android-chrome-256x256.png',
+  'src/core/server/core_app/assets/favicons/android-chrome-512x512.png',
+  'src/core/server/core_app/assets/favicons/apple-touch-icon.png',
+  'src/core/server/core_app/assets/favicons/favicon-16x16.png',
+  'src/core/server/core_app/assets/favicons/favicon-32x32.png',
+  'src/core/server/core_app/assets/favicons/mstile-70x70.png',
+  'src/core/server/core_app/assets/favicons/mstile-144x144.png',
+  'src/core/server/core_app/assets/favicons/mstile-150x150.png',
+  'src/core/server/core_app/assets/favicons/mstile-310x150.png',
+  'src/core/server/core_app/assets/favicons/mstile-310x310.png',
+  'src/core/server/core_app/assets/favicons/safari-pinned-tab.svg',
   'test/functional/apps/management/exports/_import_objects-conflicts.json',
   'x-pack/legacy/plugins/index_management/public/lib/editSettings.js',
   'x-pack/legacy/plugins/license_management/public/store/reducers/licenseManagement.js',

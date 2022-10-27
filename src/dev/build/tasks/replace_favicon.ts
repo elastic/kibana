@@ -13,30 +13,18 @@ export const ReplaceFavicon: Task = {
 
   async run(config, log, build) {
     await copy(
-      config.resolveFromRepo(
-        'packages/core/apps/core-apps-server-internal/src/assets/favicons/favicon.distribution.ico'
-      ),
-      build.resolvePath(
-        'packages/core/apps/core-apps-server-internal/src/assets/favicons/favicon.ico'
-      )
+      config.resolveFromRepo('src/core/server/core_app/assets/favicons/favicon.distribution.ico'),
+      build.resolvePath('src/core/server/core_app/assets/favicons/favicon.ico')
     );
 
     await copy(
-      config.resolveFromRepo(
-        'packages/core/apps/core-apps-server-internal/src/assets/favicons/favicon.distribution.png'
-      ),
-      build.resolvePath(
-        'packages/core/apps/core-apps-server-internal/src/assets/favicons/favicon.png'
-      )
+      config.resolveFromRepo('src/core/server/core_app/assets/favicons/favicon.distribution.png'),
+      build.resolvePath('src/core/server/core_app/assets/favicons/favicon.png')
     );
 
     await copy(
-      config.resolveFromRepo(
-        'packages/core/apps/core-apps-server-internal/src/assets/favicons/favicon.distribution.svg'
-      ),
-      build.resolvePath(
-        'packages/core/apps/core-apps-server-internal/src/assets/favicons/favicon.svg'
-      )
+      config.resolveFromRepo('src/core/server/core_app/assets/favicons/favicon.distribution.svg'),
+      build.resolvePath('src/core/server/core_app/assets/favicons/favicon.svg')
     );
   },
 };
