@@ -27,15 +27,15 @@ export const RulesDeleteModalConfirmation = ({
   onErrors,
   showWarningText,
   warningText,
-  setIsLoadingState,
+  setIsDeletingRules,
 }: {
   idsToDelete: string[];
   rulesToDeleteFilter?: KueryNode | null;
   numberOfSelectedItems: number;
-  onDeleted: any;
+  onDeleted: () => Promise<void>;
   onCancel: () => void;
-  onErrors: () => void;
-  setIsLoadingState: (isLoading: boolean) => void;
+  onErrors: () => Promise<void>;
+  setIsDeletingRules: (isLoading: boolean) => void;
   showWarningText?: boolean;
   warningText?: string;
 }) => {
@@ -67,13 +67,13 @@ export const RulesDeleteModalConfirmation = ({
       }}
       onConfirm={async () => {
         setDeleteModalVisibility(false);
-        setIsLoadingState(true);
+        setIsDeletingRules(true);
         const { errors, total } = await bulkDeleteRules({
           filter: rulesToDeleteFilter,
           ids: idsToDelete,
           http,
         });
-        setIsLoadingState(false);
+        setIsDeletingRules(false);
 
         const numErrors = errors.length;
         const numSuccesses = total - numErrors;
@@ -83,9 +83,9 @@ export const RulesDeleteModalConfirmation = ({
 
         if (numErrors > 0) {
           toasts.addDanger(getFailedNotificationText(numErrors));
-          onErrors();
+          await onErrors();
         }
-        onDeleted();
+        await onDeleted();
       }}
       cancelButtonText={cancelButtonText}
       confirmButtonText={getConfirmButtonText(numberIdsToDelete)}

@@ -1027,7 +1027,7 @@ export const RulesList = ({
         numberOfSelectedItems={numberOfSelectedItems}
         idsToDelete={rulesToDelete}
         rulesToDeleteFilter={rulesToDeleteFilter}
-        setIsLoadingState={setIsDeletingRules}
+        setIsDeletingRules={setIsDeletingRules}
       />
       <BulkSnoozeModal
         rulesToSnooze={rulesToSnooze}
