@@ -38,7 +38,6 @@ describe('FileService', () => {
   let fileService: FileServiceStart;
   let blobStorageService: BlobStorageService;
   let esClient: ElasticsearchClient;
-  let coreSetup: Awaited<ReturnType<typeof kbnRoot.setup>>;
   let coreStart: CoreStart;
   let fileServiceFactory: FileServiceFactory;
   let security: ReturnType<typeof securityMock.createSetup>;
@@ -49,7 +48,7 @@ describe('FileService', () => {
     manageES = await startES();
     kbnRoot = createRootWithCorePlugins();
     await kbnRoot.preboot();
-    coreSetup = await kbnRoot.setup();
+    await kbnRoot.setup();
     coreStart = await kbnRoot.start();
     setFileKindsRegistry(new FileKindsRegistryImpl());
     const fileKindsRegistry = getFileKindsRegistry();
