@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import Url from 'url';
 import type { UrlObject } from 'url';
+import Url from 'url';
 
 import * as yaml from 'js-yaml';
 
