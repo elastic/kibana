@@ -376,6 +376,19 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.click(`optionsList-control-clear-all-selections`);
   }
 
+  public async optionsListPopoverSetIncludeSelections(include: boolean) {
+    this.log.debug(`exclude selections`);
+    await this.optionsListPopoverAssertOpen();
+
+    const buttonGroup = await this.testSubjects.find('optionsList__includeExcludeButtonGroup');
+    await (
+      await this.find.descendantDisplayedByCssSelector(
+        include ? '[data-text="Include"]' : '[data-text="Exclude"]',
+        buttonGroup
+      )
+    ).click();
+  }
+
   /* -----------------------------------------------------------
      Control editor flyout
      ----------------------------------------------------------- */

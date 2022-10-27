@@ -7,7 +7,7 @@
 import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
 import { apiIndex, connectorIndex } from '../../../__mocks__/view_index.mock';
 
-import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 import { UpdatePipelineApiLogic } from '../../../api/connector/update_pipeline_api_logic';
 import { FetchCustomPipelineApiLogic } from '../../../api/index/fetch_custom_pipeline_api_logic';
@@ -223,15 +223,15 @@ describe('PipelinesLogic', () => {
 
         expect(PipelinesLogic.values).toEqual({
           ...DEFAULT_VALUES,
+          canSetPipeline: false,
+          canUseMlInferencePipeline: true,
           customPipelineData: indexPipelines,
+          hasIndexIngestionPipeline: true,
           index: {
             ...apiIndex,
           },
           indexName,
           pipelineName: indexName,
-          canSetPipeline: false,
-          hasIndexIngestionPipeline: true,
-          canUseMlInferencePipeline: true,
         });
       });
     });

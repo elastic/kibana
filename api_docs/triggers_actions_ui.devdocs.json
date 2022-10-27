@@ -3007,7 +3007,8 @@
             "label": "defaultActionParams",
             "description": [],
             "signature": [
-              "Partial<ActionParams> | undefined"
+              "RecursivePartial",
+              "<ActionParams> | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -3021,7 +3022,8 @@
             "label": "defaultRecoveredActionParams",
             "description": [],
             "signature": [
-              "Partial<ActionParams> | undefined"
+              "RecursivePartial",
+              "<ActionParams> | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -8164,7 +8166,7 @@
         "label": "CoreQueryParams",
         "description": [],
         "signature": [
-          "{ readonly aggField?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly index: string | string[]; readonly timeField: string; readonly aggType: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly groupBy: string; }"
+          "{ readonly aggField?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly filterKuery?: string | undefined; readonly index: string | string[]; readonly timeField: string; readonly aggType: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly groupBy: string; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
         "deprecated": false,
@@ -8236,7 +8238,7 @@
         "label": "TimeSeriesQuery",
         "description": [],
         "signature": [
-          "{ readonly interval?: string | undefined; readonly aggField?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly index: string | string[]; readonly timeField: string; readonly aggType: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly groupBy: string; }"
+          "{ readonly interval?: string | undefined; readonly aggField?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly filterKuery?: string | undefined; readonly index: string | string[]; readonly timeField: string; readonly aggType: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly groupBy: string; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/time_series_types.ts",
         "deprecated": false,
@@ -8349,6 +8351,23 @@
             "label": "termField",
             "description": [
               "// field to group on (for groupBy: top)"
+            ],
+            "signature": [
+              "Type",
+              "<string | undefined>"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-server.CoreQueryParamsSchemaProperties.filterKuery",
+            "type": "Object",
+            "tags": [],
+            "label": "filterKuery",
+            "description": [
+              "// filter field"
             ],
             "signature": [
               "Type",

@@ -17,11 +17,13 @@ jest.mock('../../kibana_services', () => {
   const { chromeServiceMock, applicationServiceMock } =
     jest.requireActual('@kbn/core/public/mocks');
   const { uiSettingsServiceMock } = jest.requireActual('@kbn/core-ui-settings-browser-mocks');
+  const { cloudMock } = jest.requireActual('@kbn/cloud-plugin/public/mocks');
 
   const uiSettingsMock = uiSettingsServiceMock.createSetupContract();
   uiSettingsMock.get.mockReturnValue(false);
   return {
     getServices: () => ({
+      cloud: cloudMock.createSetup(),
       chrome: chromeServiceMock.createStartContract(),
       application: applicationServiceMock.createStartContract(),
       trackUiMetric: jest.fn(),
@@ -30,6 +32,9 @@ jest.mock('../../kibana_services', () => {
         basePath: {
           prepend: jest.fn(),
         },
+      },
+      guidedOnboardingService: {
+        fetchAllGuidesState: jest.fn(),
       },
     }),
   };

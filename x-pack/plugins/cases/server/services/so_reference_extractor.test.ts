@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectReference } from '@kbn/core/server';
+import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import { SOReferenceExtractor } from './so_reference_extractor';
 
 describe('SOReferenceExtractor', () => {

@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiCommentList,
-  EuiCommentProps,
-} from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCommentList } from '@elastic/eui';
 
 import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';

@@ -11,6 +11,7 @@ import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { AnnotationsPanel } from '.';
 import { FramePublicAPI } from '../../../../types';
+import { DatasourcePublicAPI } from '../../../..';
 import { createMockFramePublicAPI } from '../../../../mocks';
 import { State } from '../../types';
 import { Position } from '@elastic/charts';
@@ -88,6 +89,9 @@ describe('AnnotationsPanel', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -152,6 +156,9 @@ describe('AnnotationsPanel', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -191,6 +198,9 @@ describe('AnnotationsPanel', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -293,6 +303,9 @@ describe('AnnotationsPanel', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -350,6 +363,9 @@ describe('AnnotationsPanel', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -403,6 +419,9 @@ describe('AnnotationsPanel', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -476,6 +495,9 @@ describe('AnnotationsPanel', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -547,6 +569,9 @@ describe('AnnotationsPanel', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 
@@ -615,6 +640,9 @@ describe('AnnotationsPanel', () => {
           formatFactory={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
           panelRef={React.createRef()}
+          addLayer={jest.fn()}
+          removeLayer={jest.fn()}
+          datasource={{} as DatasourcePublicAPI}
         />
       );
 

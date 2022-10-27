@@ -1,0 +1,90 @@
+{
+  "id": "@kbn/cases-components",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/cases-components",
+        "id": "def-common.getStatusConfiguration",
+        "type": "Function",
+        "tags": [],
+        "label": "getStatusConfiguration",
+        "description": [],
+        "signature": [
+          "() => { open: { color: string; label: string; icon: \"folderOpen\"; }; \"in-progress\": { color: string; label: string; icon: \"folderExclamation\"; }; closed: { color: string; label: string; icon: \"folderCheck\"; }; }"
+        ],
+        "path": "packages/kbn-cases-components/src/status/config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cases-components",
+        "id": "def-common.Status",
+        "type": "Function",
+        "tags": [],
+        "label": "Status",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<Props>"
+        ],
+        "path": "packages/kbn-cases-components/src/status/status.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/cases-components",
+            "id": "def-common.Status.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/cases-components",
+        "id": "def-common.CaseStatuses",
+        "type": "Enum",
+        "tags": [],
+        "label": "CaseStatuses",
+        "description": [],
+        "path": "packages/kbn-cases-components/src/status/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [],
+    "objects": []
+  }
+}

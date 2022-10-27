@@ -12,4 +12,5 @@ export default createTestConfig('security_and_spaces', {
   license: 'basic',
   ssl: true,
   testFiles: [require.resolve('./tests/basic')],
+  publicBaseUrl: true,
 });

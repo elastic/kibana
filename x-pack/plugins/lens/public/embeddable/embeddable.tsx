@@ -304,13 +304,21 @@ export class Embeddable
 
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
+    let containerStateChangedCalledAlready = false;
     this.initializeSavedVis(initialInput)
-      .then(() => this.onContainerStateChanged(initialInput))
+      .then(() => {
+        if (!containerStateChangedCalledAlready) {
+          this.onContainerStateChanged(initialInput);
+        } else {
+          this.reload();
+        }
+      })
       .catch((e) => this.onFatalError(e));
 
-    this.subscription = this.getUpdated$().subscribe(() =>
-      this.onContainerStateChanged(this.input)
-    );
+    this.subscription = this.getUpdated$().subscribe(() => {
+      containerStateChangedCalledAlready = true;
+      this.onContainerStateChanged(this.input);
+    });
 
     const input$ = this.getInput$();
     this.embeddableTitle = this.getTitle();
@@ -669,6 +677,7 @@ export class Embeddable
           renderMode={input.renderMode}
           syncColors={input.syncColors}
           syncTooltips={input.syncTooltips}
+          syncCursor={input.syncCursor}
           hasCompatibleActions={this.hasCompatibleActions}
           className={input.className}
           style={input.style}
