@@ -8,7 +8,7 @@
 import { Page } from 'playwright';
 
 export async function waitForChrome(page: Page) {
-  return page.waitForSelector('.headerGlobalNav');
+  return page.waitForSelector('.headerGlobalNav', {state: 'attached'});
 }
 
 export async function waitForVisualizations(page: Page, visCount: number) {
