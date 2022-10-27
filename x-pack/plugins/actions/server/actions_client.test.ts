@@ -2254,7 +2254,7 @@ describe('execute()', () => {
             id: 'some-id',
             typeId: 'some-type-id',
             type: 'some-type',
-            namespace: 'some-namespace',
+            namespaces: ['some-namespace'],
           },
         ],
       })
@@ -2271,7 +2271,7 @@ describe('execute()', () => {
           id: 'some-id',
           typeId: 'some-type-id',
           type: 'some-type',
-          namespace: 'some-namespace',
+          namespaces: ['some-namespace'],
         },
       ],
     });

@@ -378,6 +378,13 @@
                             "type": "keyword",
                             "ignore_above": 1024
                         },
+                        "namespaces": {
+                            "type": "keyword",
+                            "ignore_above": 1024,
+                            "meta": {
+                                "isArray": "true"
+                            }
+                        },
                         "id": {
                             "type": "keyword",
                             "ignore_above": 1024

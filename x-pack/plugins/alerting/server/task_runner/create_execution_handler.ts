@@ -178,7 +178,7 @@ export function createExecutionHandler<
           {
             id: ruleId,
             type: 'alert',
-            namespace: namespace.namespace,
+            ...(namespace.namespace ? { namespaces: [namespace.namespace] } : {}),
             typeId: ruleType.id,
           },
         ],

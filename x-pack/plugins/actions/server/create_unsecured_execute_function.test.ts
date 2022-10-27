@@ -294,7 +294,7 @@ describe('bulkExecute()', () => {
         relatedSavedObjects: [
           {
             id: 'some-id',
-            namespace: 'some-namespace',
+            namespaces: ['some-namespace'],
             type: 'some-type',
           },
         ],

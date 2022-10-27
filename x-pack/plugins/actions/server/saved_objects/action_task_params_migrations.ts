@@ -16,7 +16,7 @@ import {
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IsMigrationNeededPredicate } from '@kbn/encrypted-saved-objects-plugin/server';
 import { ActionTaskParams, PreConfiguredAction } from '../types';
-import { RelatedSavedObjects } from '../lib/related_saved_objects';
+import { RelatedSavedObject, RelatedSavedObjects } from '../lib/related_saved_objects';
 
 interface ActionTaskParamsLogMeta extends LogMeta {
   migrations: { actionTaskParamDocument: SavedObjectUnsanitizedDoc<ActionTaskParams> };
@@ -56,9 +56,18 @@ export function getActionTaskParamsMigrations(
     (doc) => doc // no-op
   );
 
+  const migrationActionsTaskParams860 = createEsoMigration(
+    encryptedSavedObjects,
+    (
+      doc: SavedObjectUnsanitizedDoc<ActionTaskParams>
+    ): doc is SavedObjectUnsanitizedDoc<ActionTaskParams> => true,
+    pipeMigrations(copyNamespaceToNamespaces)
+  );
+
   return {
     '7.16.0': executeMigrationWithErrorHandling(migrationActionTaskParamsSixteen, '7.16.0'),
     '8.0.0': executeMigrationWithErrorHandling(migrationActionsTaskParams800, '8.0.0'),
+    '8.6.0': executeMigrationWithErrorHandling(migrationActionsTaskParams860, '8.6.0'),
   };
 }
 
@@ -140,6 +149,44 @@ function useSavedObjectReferences(
     },
     references: [...(references ?? []), ...(newReferences ?? [])],
   };
+}
+
+type LegacyRelatedSavedObject = Omit<RelatedSavedObject, 'namespaces'> & {
+  namespace?: string;
+};
+
+function copyNamespaceToNamespaces(
+  doc: SavedObjectUnsanitizedDoc<ActionTaskParams>
+): SavedObjectUnsanitizedDoc<ActionTaskParams> {
+  const {
+    attributes: { relatedSavedObjects },
+  } = doc;
+
+  if (relatedSavedObjects) {
+    const updatedRelatedSavedObjects: RelatedSavedObjects = (
+      (relatedSavedObjects as LegacyRelatedSavedObject[]) ?? []
+    ).map((relatedSavedObject: LegacyRelatedSavedObject) => {
+      const { namespace, ...rest } = relatedSavedObject;
+      if (namespace) {
+        return {
+          ...rest,
+          namespaces: [namespace],
+        };
+      }
+
+      return relatedSavedObject;
+    });
+
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        relatedSavedObjects: updatedRelatedSavedObjects,
+      },
+    };
+  }
+
+  return doc;
 }
 
 function pipeMigrations(...migrations: ActionTaskParamMigration[]): ActionTaskParamMigration {

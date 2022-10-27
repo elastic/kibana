@@ -39,7 +39,7 @@ describe('extractSavedObjectReferences()', () => {
         id: 'xyz',
         type: 'alert',
         typeId: 'ruleTypeB',
-        namespace: 'custom',
+        namespaces: ['custom'],
       },
     ];
 
@@ -210,7 +210,7 @@ describe('injectSavedObjectReferences()', () => {
             id: 'related_alert_2',
             type: 'alert',
             typeId: 'ruleTypeB',
-            namespace: 'custom',
+            namespaces: ['custom'],
           },
         ]
       )
@@ -272,7 +272,7 @@ describe('injectSavedObjectReferences()', () => {
             id: 'related_alert_2',
             type: 'alert',
             typeId: 'ruleTypeB',
-            namespace: 'custom',
+            namespaces: ['custom'],
           },
         ]
       )
@@ -317,7 +317,7 @@ describe('injectSavedObjectReferences()', () => {
             id: 'xyz',
             type: 'alert',
             typeId: 'ruleTypeB',
-            namespace: 'custom',
+            namespaces: ['custom'],
           },
         ]
       )
@@ -373,7 +373,7 @@ describe('injectSavedObjectReferences()', () => {
             id: 'xyz',
             type: 'alert',
             typeId: 'ruleTypeB',
-            namespace: 'custom',
+            namespaces: ['custom'],
           },
         ]
       )
