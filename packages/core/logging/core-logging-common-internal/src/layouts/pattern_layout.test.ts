@@ -83,7 +83,7 @@ test('`format()` correctly formats record with full pattern.', () => {
 });
 
 test('`format()` correctly formats record with custom pattern.', () => {
-  const layout = new PatternLayout('mock-%message-%logger-%message');
+  const layout = new PatternLayout({ pattern: 'mock-%message-%logger-%message' });
 
   for (const record of records) {
     expect(layout.format(record)).toMatchSnapshot();
@@ -91,7 +91,7 @@ test('`format()` correctly formats record with custom pattern.', () => {
 });
 
 test('`format()` correctly formats record with meta data.', () => {
-  const layout = new PatternLayout('[%date][%level][%logger]%meta %message');
+  const layout = new PatternLayout({ pattern: '[%date][%level][%logger]%meta %message' });
 
   expect(
     layout.format({
@@ -133,7 +133,7 @@ test('`format()` correctly formats record with meta data.', () => {
 });
 
 test('`format()` correctly formats record with highlighting.', () => {
-  const layout = new PatternLayout(undefined, true);
+  const layout = new PatternLayout({ highlight: true });
 
   for (const record of records) {
     expect(layout.format(record)).toMatchSnapshot();
@@ -141,7 +141,7 @@ test('`format()` correctly formats record with highlighting.', () => {
 });
 
 test('allows specifying the PID in custom pattern', () => {
-  const layout = new PatternLayout('%pid-%logger-%message');
+  const layout = new PatternLayout({ pattern: '%pid-%logger-%message' });
 
   for (const record of records) {
     expect(layout.format(record)).toMatchSnapshot();
@@ -149,7 +149,7 @@ test('allows specifying the PID in custom pattern', () => {
 });
 
 test('`format()` allows specifying pattern with meta.', () => {
-  const layout = new PatternLayout('%logger-%meta-%message');
+  const layout = new PatternLayout({ pattern: '%logger-%meta-%message' });
   const record = {
     context: 'context',
     level: LogLevel.Debug,
@@ -182,31 +182,31 @@ describe('format', () => {
 
     describe('supports specifying a predefined format', () => {
       it('ISO8601', () => {
-        const layout = new PatternLayout('[%date{ISO8601}][%logger]');
+        const layout = new PatternLayout({ pattern: '[%date{ISO8601}][%logger]' });
 
         expect(layout.format(record)).toBe('[2012-02-01T14:30:22.011Z][context]');
       });
 
       it('ISO8601_TZ', () => {
-        const layout = new PatternLayout('[%date{ISO8601_TZ}][%logger]');
+        const layout = new PatternLayout({ pattern: '[%date{ISO8601_TZ}][%logger]' });
 
         expect(layout.format(record)).toBe('[2012-02-01T09:30:22.011-05:00][context]');
       });
 
       it('ABSOLUTE', () => {
-        const layout = new PatternLayout('[%date{ABSOLUTE}][%logger]');
+        const layout = new PatternLayout({ pattern: '[%date{ABSOLUTE}][%logger]' });
 
         expect(layout.format(record)).toBe('[09:30:22.011][context]');
       });
 
       it('UNIX', () => {
-        const layout = new PatternLayout('[%date{UNIX}][%logger]');
+        const layout = new PatternLayout({ pattern: '[%date{UNIX}][%logger]' });
 
         expect(layout.format(record)).toBe('[1328106622][context]');
       });
 
       it('UNIX_MILLIS', () => {
-        const layout = new PatternLayout('[%date{UNIX_MILLIS}][%logger]');
+        const layout = new PatternLayout({ pattern: '[%date{UNIX_MILLIS}][%logger]' });
 
         expect(layout.format(record)).toBe('[1328106622011][context]');
       });
@@ -214,39 +214,49 @@ describe('format', () => {
 
     describe('supports specifying a predefined format and timezone', () => {
       it('ISO8601', () => {
-        const layout = new PatternLayout('[%date{ISO8601}{America/Los_Angeles}][%logger]');
+        const layout = new PatternLayout({
+          pattern: '[%date{ISO8601}{America/Los_Angeles}][%logger]',
+        });
 
         expect(layout.format(record)).toBe('[2012-02-01T14:30:22.011Z][context]');
       });
 
       it('ISO8601_TZ', () => {
-        const layout = new PatternLayout('[%date{ISO8601_TZ}{America/Los_Angeles}][%logger]');
+        const layout = new PatternLayout({
+          pattern: '[%date{ISO8601_TZ}{America/Los_Angeles}][%logger]',
+        });
 
         expect(layout.format(record)).toBe('[2012-02-01T06:30:22.011-08:00][context]');
       });
 
       it('ABSOLUTE', () => {
-        const layout = new PatternLayout('[%date{ABSOLUTE}{America/Los_Angeles}][%logger]');
+        const layout = new PatternLayout({
+          pattern: '[%date{ABSOLUTE}{America/Los_Angeles}][%logger]',
+        });
 
         expect(layout.format(record)).toBe('[06:30:22.011][context]');
       });
 
       it('UNIX', () => {
-        const layout = new PatternLayout('[%date{UNIX}{America/Los_Angeles}][%logger]');
+        const layout = new PatternLayout({
+          pattern: '[%date{UNIX}{America/Los_Angeles}][%logger]',
+        });
 
         expect(layout.format(record)).toBe('[1328106622][context]');
       });
 
       it('UNIX_MILLIS', () => {
-        const layout = new PatternLayout('[%date{UNIX_MILLIS}{America/Los_Angeles}][%logger]');
+        const layout = new PatternLayout({
+          pattern: '[%date{UNIX_MILLIS}{America/Los_Angeles}][%logger]',
+        });
 
         expect(layout.format(record)).toBe('[1328106622011][context]');
       });
     });
     it('formats several conversions patterns correctly', () => {
-      const layout = new PatternLayout(
-        '[%date{ABSOLUTE}{America/Los_Angeles}][%logger][%date{UNIX}]'
-      );
+      const layout = new PatternLayout({
+        pattern: '[%date{ABSOLUTE}{America/Los_Angeles}][%logger][%date{UNIX}]',
+      });
 
       expect(layout.format(record)).toBe('[06:30:22.011][context][1328106622]');
     });
