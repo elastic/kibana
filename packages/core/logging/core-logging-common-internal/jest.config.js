@@ -6,18 +6,8 @@
  * Side Public License, v 1.
  */
 
-import chalk from 'chalk';
-import { LogRecord } from '@kbn/logging';
-
-import { Conversion } from './type';
-
-export const LoggerConversion: Conversion = {
-  pattern: /%logger/g,
-  convert(record: LogRecord, highlight: boolean) {
-    let message = record.context;
-    if (highlight) {
-      message = chalk.magenta(message);
-    }
-    return message;
-  },
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/logging/core-logging-common-internal'],
 };

@@ -6,12 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { LogRecord } from '@kbn/logging';
-import type { Conversion } from '@kbn/core-logging-common-internal';
+import chalk from 'chalk';
+import { LogRecord } from '@kbn/logging';
+import { Conversion } from './types';
 
-export const PidConversion: Conversion = {
-  pattern: /%pid/g,
-  convert(record: LogRecord) {
-    return String(record.pid);
+export const LoggerConversion: Conversion = {
+  pattern: /%logger/g,
+  convert(record: LogRecord, highlight: boolean) {
+    let message = record.context;
+    if (highlight) {
+      message = chalk.magenta(message);
+    }
+    return message;
   },
 };

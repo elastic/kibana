@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { LogRecord } from '@kbn/logging';
-import type { Conversion } from '@kbn/core-logging-common-internal';
-
-export const PidConversion: Conversion = {
-  pattern: /%pid/g,
-  convert(record: LogRecord) {
-    return String(record.pid);
-  },
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/logging/core-logging-browser-internal'],
 };

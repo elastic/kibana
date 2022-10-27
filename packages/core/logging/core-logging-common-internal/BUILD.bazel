@@ -2,12 +2,13 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "core-logging-server-internal"
-PKG_REQUIRE_NAME = "@kbn/core-logging-server-internal"
+PKG_DIRNAME = "core-logging-common-internal"
+PKG_REQUIRE_NAME = "@kbn/core-logging-common-internal"
 
 SOURCE_FILES = glob(
   [
     "**/*.ts",
+    "**/*.tsx",
   ],
   exclude = [
     "**/*.config.js",
@@ -16,6 +17,7 @@ SOURCE_FILES = glob(
     "**/*.stories.*",
     "**/__snapshots__/**",
     "**/integration_tests/**",
+    "**/mocks/**",
     "**/scripts/**",
     "**/storybook/**",
     "**/test_fixtures/**",
@@ -37,32 +39,29 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "@npm//lodash",
   "@npm//moment-timezone",
-  "@npm//elastic-apm-node",
-  "//packages/kbn-safer-lodash-set",
-  "//packages/kbn-config-schema",
-  "//packages/kbn-std",
-  "//packages/core/logging/core-logging-common-internal",
+  "@npm//chalk",
 ]
 
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/lodash",
-  "@npm//rxjs",
   "@npm//@types/moment-timezone",
-  "@npm//elastic-apm-node",
-  "//packages/kbn-safer-lodash-set:npm_module_types",
+  "@npm//lodash",
+  "@npm//chalk",
   "//packages/kbn-logging:npm_module_types",
-  "//packages/kbn-config-schema:npm_module_types",
-  "//packages/core/base/core-base-server-internal:npm_module_types",
-  "//packages/core/logging/core-logging-common-internal:npm_module_types",
-  "//packages/core/logging/core-logging-server:npm_module_types",
 ]
 
 jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+)
+
+jsts_transpiler(
+  name = "target_web",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+  web = True,
 )
 
 ts_config(
@@ -89,7 +88,7 @@ ts_project(
 js_library(
   name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

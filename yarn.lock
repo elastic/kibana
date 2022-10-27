@@ -3129,6 +3129,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-logging-browser-internal@link:bazel-bin/packages/core/logging/core-logging-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-logging-common-internal@link:bazel-bin/packages/core/logging/core-logging-common-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal":
   version "0.0.0"
   uid ""
@@ -7359,6 +7367,14 @@
   uid ""
 
 "@types/kbn__core-lifecycle-server@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-logging-browser-internal@link:bazel-bin/packages/core/logging/core-logging-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-logging-common-internal@link:bazel-bin/packages/core/logging/core-logging-common-internal/npm_module_types":
   version "0.0.0"
   uid ""
 

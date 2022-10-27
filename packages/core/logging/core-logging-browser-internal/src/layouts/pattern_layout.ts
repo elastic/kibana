@@ -6,40 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
 import {
   PatternLayout as BasePatternLayout,
   type Conversion,
-} from '@kbn/core-logging-common-internal';
-import {
   LoggerConversion,
   LevelConversion,
   MetaConversion,
   MessageConversion,
-  PidConversion,
   DateConversion,
-} from './conversions';
+} from '@kbn/core-logging-common-internal';
 
 const DEFAULT_PATTERN = `[%date][%level][%logger] %message`;
-
-export const patternSchema = schema.string({
-  validate: (string) => {
-    DateConversion.validate!(string);
-  },
-});
-
-const patternLayoutSchema = schema.object({
-  highlight: schema.maybe(schema.boolean()),
-  type: schema.literal('pattern'),
-  pattern: schema.maybe(patternSchema),
-});
 
 const conversions: Conversion[] = [
   LoggerConversion,
   MessageConversion,
   LevelConversion,
   MetaConversion,
-  PidConversion,
   DateConversion,
 ];
 
@@ -49,12 +32,10 @@ const conversions: Conversion[] = [
  * @internal
  */
 export class PatternLayout extends BasePatternLayout {
-  public static configSchema = patternLayoutSchema;
-
-  constructor(pattern: string = DEFAULT_PATTERN, highlight: boolean = false) {
+  constructor(pattern: string = DEFAULT_PATTERN) {
     super({
       pattern,
-      highlight,
+      highlight: false,
       conversions,
     });
   }

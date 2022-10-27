@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { LogRecord } from '@kbn/logging';
-import type { Conversion } from '@kbn/core-logging-common-internal';
+import { LogRecord } from '@kbn/logging';
+import { Conversion } from './types';
 
-export const PidConversion: Conversion = {
-  pattern: /%pid/g,
+export const MessageConversion: Conversion = {
+  pattern: /%message/g,
   convert(record: LogRecord) {
-    return String(record.pid);
+    // Error stack is much more useful than just the message.
+    return (record.error && record.error.stack) || record.message;
   },
 };

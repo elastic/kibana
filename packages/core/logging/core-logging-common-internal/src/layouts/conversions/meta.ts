@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { LogRecord } from '@kbn/logging';
-import type { Conversion } from '@kbn/core-logging-common-internal';
+import { LogRecord } from '@kbn/logging';
+import { Conversion } from './types';
 
-export const PidConversion: Conversion = {
-  pattern: /%pid/g,
+export const MetaConversion: Conversion = {
+  pattern: /%meta/g,
   convert(record: LogRecord) {
-    return String(record.pid);
+    return record.meta ? `${JSON.stringify(record.meta)}` : '';
   },
 };

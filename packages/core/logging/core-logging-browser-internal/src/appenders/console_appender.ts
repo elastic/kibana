@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
 import type { Layout, LogRecord, DisposableAppender } from '@kbn/logging';
-import { Layouts } from '../../layouts/layouts';
-
-const { literal, object } = schema;
 
 /**
  *
@@ -18,11 +14,6 @@ const { literal, object } = schema;
  * @internal
  */
 export class ConsoleAppender implements DisposableAppender {
-  public static configSchema = object({
-    type: literal('console'),
-    layout: Layouts.configSchema,
-  });
-
   /**
    * Creates ConsoleAppender instance.
    * @param layout Instance of `Layout` sub-class responsible for `LogRecord` formatting.
