@@ -56,7 +56,7 @@ import {
   setupCheckUnauthorized,
   generateIndexPatternSearchResults,
   bulkDeleteSuccess,
-} from './repository.common.test';
+} from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository

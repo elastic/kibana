@@ -37,7 +37,7 @@ import {
   setupEnforceFailure,
   setupEnforceSuccess,
   setupRedactPassthrough,
-} from './repository.common.test';
+} from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 type SetupParams = Partial<

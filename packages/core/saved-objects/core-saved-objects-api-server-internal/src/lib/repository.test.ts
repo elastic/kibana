@@ -119,7 +119,7 @@ import {
   getMockEsBulkDeleteResponse,
   bulkDeleteSuccess,
   createBulkDeleteSuccessStatus,
-} from './repository.common.test';
+} from '../test_helpers/repository.test.common';
 
 const { nodeTypes } = esKuery;
 

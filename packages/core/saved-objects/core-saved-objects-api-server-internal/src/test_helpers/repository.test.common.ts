@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { mockGetSearchDsl } from './repository.test.mock';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -47,7 +46,8 @@ import {
   ElasticsearchClientMock,
 } from '@kbn/core-elasticsearch-client-server-mocks';
 import { DocumentMigrator } from '@kbn/core-saved-objects-migration-server-internal';
-import { SavedObjectsRepository } from './repository';
+import { mockGetSearchDsl } from '../lib/repository.test.mock';
+import { SavedObjectsRepository } from '../lib/repository';
 
 export const DEFAULT_SPACE = 'default';
 
