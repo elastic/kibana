@@ -34,7 +34,7 @@ import {
   retrieveValuesFromBuckets,
   getNewTermsRuntimeMappings,
   getAggregationField,
-  decodeMatchedBucketKey,
+  prepareNewTerms,
 } from './utils';
 import {
   addToSearchAfterReturn,
@@ -283,7 +283,7 @@ export const createNewTermsAlertType = (
             newTerms: Array<string | number | null>;
           }> = docFetchResultWithAggs.aggregations.new_terms.buckets.map((bucket) => ({
             event: bucket.docs.hits.hits[0],
-            newTerms: decodeMatchedBucketKey(params.newTermsFields, bucket.key),
+            newTerms: prepareNewTerms(params.newTermsFields, bucket.key),
           }));
 
           const wrappedAlerts = wrapNewTermsAlerts({

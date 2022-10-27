@@ -120,19 +120,21 @@ export const getAggregationField = (newTermsFields: string[]): string => {
   return AGG_FIELD_NAME;
 };
 
-export const decodeMatchedBucketKey = (
-  newTermsFields: string[],
-  bucketKey: string | number
-): Array<string | number> => {
-  // if new terms include only one field we don't use runtime mappings and don't stich fields buckets together
-  if (newTermsFields.length === 1) {
-    return newTermsFields.map((field) => [field, bucketKey].join(': '));
-  }
-
+const decodeBucketKey = (bucketKey: string): string[] => {
   // if newTermsFields has length greater than 1, bucketKey can't be number, so casting is safe here
-  return (bucketKey as string)
+  return bucketKey
     .split(DELIMITER)
-    .map((encodedValue, i) =>
-      [newTermsFields[i], Buffer.from(encodedValue, 'base64').toString()].join(': ')
-    );
+    .map((encodedValue) => Buffer.from(encodedValue, 'base64').toString());
+};
+
+/**
+ * returns new term fields and values in following format
+ * @example
+ * [ 'field1: new_value1', 'field2: new_value2']
+ */
+export const prepareNewTerms = (newTermsFields: string[], bucketKey: string | number) => {
+  // if newTermsFields has length greater than 1, bucketKey can't be number, so casting is safe here
+  const values = newTermsFields.length === 1 ? [bucketKey] : decodeBucketKey(bucketKey as string);
+
+  return newTermsFields.map((field, i) => [field, values[i]].join(': '));
 };
