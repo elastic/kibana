@@ -85,29 +85,28 @@ export const getNewTermsRuntimeMappings = (
     return undefined;
   }
 
-  const fields = newTermsFields.map((field) => `'${field}'`).join(', ');
   return {
     [AGG_FIELD_NAME]: {
       type: 'keyword',
-      script: `
+      script: {
+        params: { fields: newTermsFields },
+        source: `
+          void traverseDocFields(def doc, def fields, def index, def line) {
+            if (index === fields.length) {
+              emit(line);
+            } else {
+              for (field in doc[fields[index]]) {
+                def delimiter = index === 0 ? '' : '${DELIMITER}';
+                def nextLine = line + delimiter + String.valueOf(field).encodeBase64();
 
-      void traverseDocFields(def doc, def fields, def index, def line) {
-        if (index === fields.length) {
-          emit(line);
-        } else {
-          for (field in doc[fields[index]]) {
-            def delimiter = index === 0 ? '' : '${DELIMITER}';
-            def nextLine = line + delimiter + String.valueOf(field).encodeBase64();
-
-            traverseDocFields(doc, fields, index + 1, nextLine);
+                traverseDocFields(doc, fields, index + 1, nextLine);
+              }
+            }
           }
-        }
-      }
 
-      String[] fields = new String[] {${fields}};
-
-      traverseDocFields(doc, fields, 0, '');
-    `,
+          traverseDocFields(doc, params['fields'], 0, '');
+        `,
+      },
     },
   };
 };
@@ -127,7 +126,7 @@ export const decodeMatchedBucketKey = (
 ): Array<string | number> => {
   // if new terms include only one field we don't use runtime mappings and don't stich fields buckets together
   if (newTermsFields.length === 1) {
-    return [bucketKey];
+    return newTermsFields.map((field) => [field, bucketKey].join(': '));
   }
 
   // if newTermsFields has length greater than 1, bucketKey can't be number, so casting is safe here
