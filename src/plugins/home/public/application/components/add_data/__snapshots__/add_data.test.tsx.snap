@@ -28,7 +28,7 @@ exports[`AddData render 1`] = `
       <EuiText>
         <p>
           <FormattedMessage
-            defaultMessage="To start working with your data, use one of our many ingest options. Collect data from an app or service, or upload a file. If you're not ready to use your own data, add a sample data set."
+            defaultMessage="To start working with your data, use one of our many ingest options. Collect data from an app or service, or upload a file. If you're not ready to use your own data, play with a sample data set."
             id="home.addData.text"
             values={Object {}}
           />
@@ -37,8 +37,6 @@ exports[`AddData render 1`] = `
       <EuiSpacer />
       <EuiFlexGroup
         gutterSize="m"
-        responsive={false}
-        wrap={true}
       >
         <EuiFlexItem
           grow={false}
@@ -57,6 +55,7 @@ exports[`AddData render 1`] = `
             <EuiButton
               data-test-subj="homeAddData"
               fill={true}
+              fullWidth={true}
               href="/app/integrations/browse"
               iconType="plusInCircle"
               onClick={[Function]}
