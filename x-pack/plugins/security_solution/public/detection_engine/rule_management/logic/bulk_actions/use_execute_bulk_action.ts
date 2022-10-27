@@ -7,24 +7,18 @@
 
 import type { NavigateToAppOptions } from '@kbn/core/public';
 import { useCallback } from 'react';
-import type { BulkActionResponse, BulkActionSummary } from '..';
+import type { BulkActionResponse } from '..';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { BulkAction } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import type { HTTPError } from '../../../../../common/detection_engine/types';
 import { SecurityPageName } from '../../../../app/types';
 import { getEditRuleUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
-import type { UseAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
-import { BulkActionDescriptor } from '../../api/api';
+import type { BulkActionDescriptor } from '../../api/api';
 import { useBulkActionMutation } from '../../api/hooks/use_bulk_action_mutation';
-import {
-  explainBulkError,
-  explainBulkSuccess,
-  summarizeBulkError,
-  summarizeBulkSuccess,
-} from './translations';
+import { showBulkErrorToast } from './show_bulk_error_toast';
+import { showBulkSuccessToast } from './show_bulk_success_toast';
 
 export const goToRuleEditPage = (
   ruleId: string,
@@ -36,9 +30,9 @@ export const goToRuleEditPage = (
   });
 };
 
-type UseExecuteBulkActionOptions = {
+interface UseExecuteBulkActionOptions {
   suppressSuccessToast?: boolean;
-};
+}
 
 export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
   const toasts = useAppToasts();
@@ -68,39 +62,11 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
         setLoadingRules?.({ ids: [], action: null });
       }
     },
-    [options?.suppressSuccessToast, mutateAsync, toasts]
+    [options?.suppressSuccessToast, setLoadingRules, mutateAsync, toasts]
   );
 
   return { executeBulkAction };
 };
-
-export function showBulkSuccessToast(
-  toasts: UseAppToasts,
-  action: BulkAction,
-  summary: BulkActionSummary
-): void {
-  toasts.addSuccess({
-    title: summarizeBulkSuccess(action),
-    text: explainBulkSuccess(action, summary),
-  });
-}
-
-export function showBulkErrorToast(
-  toasts: UseAppToasts,
-  action: BulkAction,
-  error: HTTPError
-): void {
-  toasts.addError(populateErrorStack(error), {
-    title: summarizeBulkError(action),
-    toastMessage: explainBulkError(action, error),
-  });
-}
-
-function populateErrorStack(error: HTTPError): HTTPError {
-  error.stack = JSON.stringify(error.body, null, 2);
-
-  return error;
-}
 
 function sendTelemetry(action: BulkAction, response: BulkActionResponse): void {
   if (action !== BulkAction.disable && action !== BulkAction.enable) {

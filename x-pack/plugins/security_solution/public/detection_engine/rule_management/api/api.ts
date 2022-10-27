@@ -213,7 +213,7 @@ export interface BulkActionResponse {
   };
 }
 
-type QueryOrIds = { query: string } | { ids: string[] };
+export type QueryOrIds = { query: string } | { ids: string[] };
 type PlainBulkActionDescriptor = {
   type: Exclude<BulkAction, BulkAction.edit | BulkAction.export>;
 } & QueryOrIds;
@@ -226,10 +226,7 @@ export type BulkActionDescriptor = PlainBulkActionDescriptor | EditBulkActionDes
 /**
  * Perform bulk action with rules selected by a filter query
  *
- * @param type bulk action to perform
- * @param query filter query to select rules to perform bulk action with
- * @param ids string[] rule ids to select rules to perform bulk action with
- * @param edit BulkEditActionPayload edit action payload
+ * @param bulkActionDescriptor bulk action descriptor which contains type, query or ids and edit fields
  * @param dryRun enables dry run mode for bulk actions
  *
  * @throws An error if response is not OK
@@ -254,11 +251,6 @@ export async function performBulkAction(
   });
 }
 
-export interface BulkExportProps {
-  query?: string;
-  ids?: string[];
-}
-
 export type BulkExportResponse = Blob;
 
 /**
@@ -269,18 +261,18 @@ export type BulkExportResponse = Blob;
  *
  * @throws An error if response is not OK
  */
-export const bulkExportRules = async ({
-  query,
-  ids,
-}: BulkExportProps): Promise<BulkExportResponse> =>
-  KibanaServices.get().http.fetch<BulkExportResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
+export async function bulkExportRules(queryOrIds: QueryOrIds): Promise<BulkExportResponse> {
+  const params = {
+    action: BulkAction.export,
+    ...('query' in queryOrIds ? { query: queryOrIds.query } : {}),
+    ...('ids' in queryOrIds ? { ids: queryOrIds.ids } : {}),
+  };
+
+  return KibanaServices.get().http.fetch<BulkExportResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {
     method: 'POST',
-    body: JSON.stringify({
-      action: BulkAction.export,
-      ...(ids ? { ids } : {}),
-      ...(query !== undefined ? { query } : {}),
-    }),
+    body: JSON.stringify(params),
   });
+}
 
 export interface CreatePrepackagedRulesResponse {
   rules_installed: number;

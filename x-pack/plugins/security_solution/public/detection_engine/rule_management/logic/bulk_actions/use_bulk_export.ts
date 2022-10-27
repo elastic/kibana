@@ -6,44 +6,42 @@
  */
 
 import { useCallback } from 'react';
-import type { BulkActionResponse, BulkActionSummary } from '..';
 import { BulkAction } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import type { HTTPError } from '../../../../../common/detection_engine/types';
 import type { UseAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { downloadBlob } from '../../../../common/utils/download_blob';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { getExportedRulesCounts } from '../../../rule_management_ui/components/rules_table/helpers';
-import type { RulesTableActions } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useBulkExportMutation } from '../../api/hooks/use_bulk_export_mutation';
-import { getErrorToastContent, getSuccessToastContent } from './translations';
+import { showBulkErrorToast } from './show_bulk_error_toast';
+import { showBulkSuccessToast } from './show_bulk_success_toast';
+import type { QueryOrIds } from '../../api/api';
 
-interface RulesBulkActionArgs {
-  visibleRuleIds?: string[];
-  search: { query: string } | { ids: string[] };
-  setLoadingRules?: RulesTableActions['setLoadingRules'];
-}
-
-export const useBulkExport = () => {
+export function useBulkExport() {
   const toasts = useAppToasts();
   const { mutateAsync } = useBulkExportMutation();
+  const rulesTableContext = useRulesTableContextOptional();
+  const setLoadingRules = rulesTableContext?.actions.setLoadingRules;
 
   const bulkExport = useCallback(
-    async ({ visibleRuleIds = [], setLoadingRules, search }: RulesBulkActionArgs) => {
+    async (queryOrIds: QueryOrIds) => {
+      const ids = 'ids' in queryOrIds ? queryOrIds.ids : [];
+
       try {
-        setLoadingRules?.({ ids: visibleRuleIds, action: BulkAction.export });
-        return await mutateAsync(search);
+        setLoadingRules?.({ ids, action: BulkAction.export });
+        return await mutateAsync(queryOrIds);
       } catch (error) {
-        defaultErrorHandler(toasts, error);
+        showBulkErrorToast(toasts, BulkAction.export, error);
       } finally {
         setLoadingRules?.({ ids: [], action: null });
       }
     },
-    [mutateAsync, toasts]
+    [setLoadingRules, mutateAsync, toasts]
   );
 
   return { bulkExport };
-};
+}
 
 /**
  * downloads exported rules, received from export action
@@ -61,19 +59,8 @@ export async function downloadExportedRules({
 }) {
   try {
     downloadBlob(response, `${i18n.EXPORT_FILENAME}.ndjson`);
-    defaultSuccessHandler(toasts, await getExportedRulesCounts(response));
+    showBulkSuccessToast(toasts, BulkAction.export, await getExportedRulesCounts(response));
   } catch (error) {
-    defaultErrorHandler(toasts, error);
+    showBulkErrorToast(toasts, BulkAction.export, error);
   }
-}
-
-function defaultErrorHandler(toasts: UseAppToasts, error: HTTPError): void {
-  const summary = (error?.body as BulkActionResponse)?.attributes?.summary;
-  error.stack = JSON.stringify(error.body, null, 2);
-
-  toasts.addError(error, getErrorToastContent(BulkAction.export, summary));
-}
-
-function defaultSuccessHandler(toasts: UseAppToasts, summary: BulkActionSummary): void {
-  toasts.addSuccess(getSuccessToastContent(BulkAction.export, summary));
 }
