@@ -10,6 +10,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Logger } from '@kbn/logging';
 import { ChangePoint } from '@kbn/ml-agg-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { SPIKE_ANALYSIS_THRESHOLD } from '../../../common/constants';
 import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
 
@@ -24,6 +25,7 @@ import { getRequestBase } from './get_request_base';
 export const getChangePointRequest = (
   params: AiopsExplainLogRateSpikesSchema,
   fieldName: string,
+  // The default value of 1 means no sampling will be used
   sampleProbability: number = 1
 ): estypes.SearchRequest => {
   const query = getQueryWithParams({
@@ -51,44 +53,47 @@ export const getChangePointRequest = (
     ];
   }
 
-  const aggs: Record<string, estypes.AggregationsAggregationContainer> = {
+  const pValueAgg: Record<string, estypes.AggregationsAggregationContainer> = {
+    change_point_p_value: {
+      significant_terms: {
+        field: fieldName,
+        background_filter: {
+          bool: {
+            filter: [
+              ...filter,
+              {
+                range: {
+                  [timeFieldName]: {
+                    gte: params.baselineMin,
+                    lt: params.baselineMax,
+                    format: 'epoch_millis',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        // @ts-expect-error `p_value` is not yet part of `AggregationsAggregationContainer`
+        p_value: { background_is_superset: false },
+        size: 1000,
+      },
+    },
+  };
+
+  const randomSamplerAgg: Record<string, estypes.AggregationsAggregationContainer> = {
     sample: {
+      // @ts-expect-error `random_sampler` is not yet part of `AggregationsAggregationContainer`
       random_sampler: {
         probability: sampleProbability,
       },
-      aggs: {
-        change_point_p_value: {
-          significant_terms: {
-            field: fieldName,
-            background_filter: {
-              bool: {
-                filter: [
-                  ...filter,
-                  {
-                    range: {
-                      [timeFieldName]: {
-                        gte: params.baselineMin,
-                        lt: params.baselineMax,
-                        format: 'epoch_millis',
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-            // @ts-expect-error `p_value` is not yet part of `AggregationsAggregationContainer`
-            p_value: { background_is_superset: false },
-            size: 1000,
-          },
-        },
-      },
+      aggs: pValueAgg,
     },
   };
 
   const body = {
     query,
     size: 0,
-    aggs,
+    aggs: sampleProbability < 1 ? randomSamplerAgg : pValueAgg,
   };
 
   return {
@@ -107,11 +112,20 @@ interface PValuesAggregation extends estypes.AggregationsSamplerAggregation {
   change_point_p_value: Aggs;
 }
 
+interface RandomSamplerAggregation {
+  sample: PValuesAggregation;
+}
+
+function isRandomSamplerAggregation(arg: unknown): arg is RandomSamplerAggregation {
+  return isPopulatedObject(arg, ['sample']);
+}
+
 export const fetchChangePointPValues = async (
   esClient: ElasticsearchClient,
   params: AiopsExplainLogRateSpikesSchema,
   fieldNames: string[],
   logger: Logger,
+  // The default value of 1 means no sampling will be used
   sampleProbability: number = 1,
   emitError: (m: string) => void,
   abortSignal?: AbortSignal
@@ -120,7 +134,7 @@ export const fetchChangePointPValues = async (
 
   const settledPromises = await Promise.allSettled(
     fieldNames.map((fieldName) =>
-      esClient.search<unknown, { sample: PValuesAggregation }>(
+      esClient.search<unknown, { sample: PValuesAggregation } | { change_point_p_value: Aggs }>(
         getChangePointRequest(params, fieldName, sampleProbability),
         { signal: abortSignal, maxRetries: 0 }
       )
@@ -157,7 +171,9 @@ export const fetchChangePointPValues = async (
       continue;
     }
 
-    const overallResult = resp.aggregations.sample.change_point_p_value;
+    const overallResult = isRandomSamplerAggregation(resp.aggregations)
+      ? resp.aggregations.sample.change_point_p_value
+      : resp.aggregations.change_point_p_value;
 
     for (const bucket of overallResult.buckets) {
       const pValue = Math.exp(-bucket.score);
