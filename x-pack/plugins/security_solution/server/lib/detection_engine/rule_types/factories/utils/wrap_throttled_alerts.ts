@@ -14,7 +14,7 @@ import type {
   WrappedFieldsLatest,
 } from '../../../../../../common/detection_engine/schemas/alerts';
 import type { ConfigType } from '../../../../../config';
-import type { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import type { SignalSource } from '../../../signals/types';
 import { buildBulkBody } from './build_bulk_body';
 import {
