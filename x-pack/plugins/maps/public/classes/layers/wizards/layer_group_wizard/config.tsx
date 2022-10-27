@@ -8,8 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { LayerWizard, RenderWizardArguments } from '../layer_wizard_registry';
-import { ClientFileCreateSourceEditor, UPLOAD_STEPS } from './wizard';
-import { getFileUpload } from '../../../../kibana_services';
+import { LayerGroupWizard } from './wizard';
 import { WIZARD_ID } from '../../../../../common/constants';
 
 export const layerGroupWizardConfig: LayerWizard = {
@@ -21,7 +20,7 @@ export const layerGroupWizardConfig: LayerWizard = {
   }),
   icon: 'layers',
   renderWizard: (renderWizardArguments: RenderWizardArguments) => {
-    return null;
+    return <LayerGroupWizard {...renderWizardArguments} />;
   },
   title: i18n.translate('xpack.maps.layerGroupWizard.title', {
     defaultMessage: 'Layer group',
