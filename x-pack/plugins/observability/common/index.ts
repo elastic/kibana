@@ -27,6 +27,7 @@ export {
   enableInfrastructureHostsView,
   enableServiceMetrics,
   enableAwsLambdaMetrics,
+  enableAgentExplorerView,
 } from './ui_settings_keys';
 
 export {

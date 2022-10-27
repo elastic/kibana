@@ -48,7 +48,10 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { enableServiceGroups } from '@kbn/observability-plugin/public';
+import {
+  enableAgentExplorerView,
+  enableServiceGroups,
+} from '@kbn/observability-plugin/public';
 import { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
@@ -166,6 +169,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       false
     );
 
+    const agentExplorerEnabled = core.uiSettings.get<boolean>(
+      enableAgentExplorerView,
+      false
+    );
+
     // register observability nav if user has access to plugin
     plugins.observability.navigation.registerSections(
       from(core.getStartServices()).pipe(
@@ -225,11 +233,15 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                           path: '/service-map',
                         },
                       ]),
-                  {
-                    label: apmAgentsExplorerTitle,
-                    app: 'apm',
-                    path: '/agent-explorer',
-                  },
+                  ...(agentExplorerEnabled
+                    ? [
+                        {
+                          label: apmAgentsExplorerTitle,
+                          app: 'apm',
+                          path: '/agent-explorer',
+                        },
+                      ]
+                    : []),
                 ],
               },
             ];

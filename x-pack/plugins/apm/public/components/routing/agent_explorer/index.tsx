@@ -16,6 +16,7 @@ import { AgentExplorerDetails } from '../../app/agent_explorer_details';
 import { Breadcrumb } from '../../app/breadcrumb';
 import { ApmMainTemplate } from '../templates/apm_main_template';
 import { environmentRt } from '../../../../common/environment_rt';
+import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 
 export const agentExplorer = {
   '/agent-explorer': {
@@ -43,6 +44,9 @@ export const agentExplorer = {
                       })}
                     </h2>
                   </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <TechnicalPreviewBadge />
                 </EuiFlexItem>
               </EuiFlexGroup>
             ),

@@ -25,6 +25,7 @@ import {
   enableInfrastructureHostsView,
   enableServiceMetrics,
   enableAwsLambdaMetrics,
+  enableAgentExplorerView,
 } from '../common/ui_settings_keys';
 
 const technicalPreviewLabel = i18n.translate(
@@ -305,6 +306,23 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.boolean(),
     value: true,
+    requiresPageReload: true,
+    type: 'boolean',
+    showInLabs: true,
+  },
+  [enableAgentExplorerView]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableAgentExplorer', {
+      defaultMessage: 'Agent explorer',
+    }),
+    description: i18n.translate('xpack.observability.enableAgentExplorerDescription', {
+      defaultMessage: '{technicalPreviewLabel} Enables Agent explorer view.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: false,
     requiresPageReload: true,
     type: 'boolean',
     showInLabs: true,
