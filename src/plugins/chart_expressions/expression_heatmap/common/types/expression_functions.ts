@@ -93,6 +93,7 @@ export interface HeatmapExpressionProps {
   data: Datatable;
   args: HeatmapArguments;
   syncTooltips: boolean;
+  syncCursor: boolean;
 }
 
 export interface HeatmapRender {

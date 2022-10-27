@@ -67,10 +67,10 @@ export function registerEndpointRoutes(
     {
       path: HOST_METADATA_GET_ROUTE,
       validate: GetMetadataRequestSchema,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      options: { authRequired: true },
     },
     withEndpointAuthz(
-      { all: ['canReadSecuritySolution'] },
+      { any: ['canReadSecuritySolution', 'canAccessFleet'] },
       logger,
       getMetadataRequestHandler(endpointAppContext, logger)
     )

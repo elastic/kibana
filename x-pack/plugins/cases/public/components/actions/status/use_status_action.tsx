@@ -6,12 +6,13 @@
  */
 
 import { useCallback } from 'react';
-import { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
-import { Case, CaseStatuses } from '../../../../common';
+import type { Case } from '../../../../common';
+import { CaseStatuses } from '../../../../common';
 
 import * as i18n from './translations';
-import { UseActionProps } from '../types';
+import type { UseActionProps } from '../types';
 import { statuses } from '../../status';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 

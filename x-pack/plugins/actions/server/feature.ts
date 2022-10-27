@@ -28,7 +28,7 @@ export const ACTIONS_FEATURE = {
   app: [],
   order: FEATURE_ORDER,
   management: {
-    insightsAndAlerting: ['triggersActions'],
+    insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
   },
   privileges: {
     all: {
@@ -36,7 +36,7 @@ export const ACTIONS_FEATURE = {
       api: [],
       catalogue: [],
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
       },
       savedObject: {
         all: [
@@ -53,7 +53,7 @@ export const ACTIONS_FEATURE = {
       api: [],
       catalogue: [],
       management: {
-        insightsAndAlerting: ['triggersActions'],
+        insightsAndAlerting: ['triggersActions', 'triggersActionsConnectors'],
       },
       savedObject: {
         // action execution requires 'read' over `actions`, but 'all' over `action_task_params`

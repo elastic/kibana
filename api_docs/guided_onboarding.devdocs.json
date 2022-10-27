@@ -6,111 +6,467 @@
     "interfaces": [
       {
         "parentPluginId": "guidedOnboarding",
-        "id": "def-public.GuideState",
+        "id": "def-public.GuidedOnboardingApi",
         "type": "Interface",
         "tags": [],
-        "label": "GuideState",
+        "label": "GuidedOnboardingApi",
         "description": [],
-        "path": "src/plugins/guided_onboarding/common/types.ts",
+        "path": "src/plugins/guided_onboarding/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "guidedOnboarding",
-            "id": "def-public.GuideState.guideId",
-            "type": "CompoundType",
+            "id": "def-public.GuidedOnboardingApi.setup",
+            "type": "Function",
             "tags": [],
-            "label": "guideId",
+            "label": "setup",
             "description": [],
             "signature": [
-              "\"search\" | \"security\" | \"observability\""
+              "(httpClient: ",
+              "HttpSetup",
+              ") => void"
             ],
-            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "path": "src/plugins/guided_onboarding/public/types.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "httpClient",
+                "description": [],
+                "signature": [
+                  "HttpSetup"
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "guidedOnboarding",
-            "id": "def-public.GuideState.status",
-            "type": "CompoundType",
+            "id": "def-public.GuidedOnboardingApi.fetchActiveGuideState$",
+            "type": "Function",
             "tags": [],
-            "label": "status",
+            "label": "fetchActiveGuideState$",
             "description": [],
             "signature": [
-              "\"complete\" | \"in_progress\" | \"ready_to_complete\""
+              "() => ",
+              "Observable",
+              "<",
+              "GuideState",
+              " | undefined>"
             ],
-            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "path": "src/plugins/guided_onboarding/public/types.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "guidedOnboarding",
-            "id": "def-public.GuideState.isActive",
-            "type": "CompoundType",
+            "id": "def-public.GuidedOnboardingApi.fetchAllGuidesState",
+            "type": "Function",
             "tags": [],
-            "label": "isActive",
+            "label": "fetchAllGuidesState",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              "() => Promise<{ state: ",
+              "GuideState",
+              "[]; } | undefined>"
             ],
-            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "path": "src/plugins/guided_onboarding/public/types.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "guidedOnboarding",
-            "id": "def-public.GuideState.steps",
-            "type": "Array",
+            "id": "def-public.GuidedOnboardingApi.updateGuideState",
+            "type": "Function",
             "tags": [],
-            "label": "steps",
+            "label": "updateGuideState",
             "description": [],
             "signature": [
-              "GuideStep",
-              "[]"
+              "(newState: ",
+              "GuideState",
+              ", panelState: boolean) => Promise<{ state: ",
+              "GuideState",
+              "; } | undefined>"
             ],
-            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "path": "src/plugins/guided_onboarding/public/types.ts",
             "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "guidedOnboarding",
-        "id": "def-public.GuideStep",
-        "type": "Interface",
-        "tags": [],
-        "label": "GuideStep",
-        "description": [],
-        "path": "src/plugins/guided_onboarding/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "guidedOnboarding",
-            "id": "def-public.GuideStep.id",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "signature": [
-              "\"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"rules\" | \"alertsCases\" | \"browse_docs\" | \"search_experience\""
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.updateGuideState.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "newState",
+                "description": [],
+                "signature": [
+                  "GuideState"
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.updateGuideState.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "panelState",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
             ],
-            "path": "src/plugins/guided_onboarding/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "returnComment": []
           },
           {
             "parentPluginId": "guidedOnboarding",
-            "id": "def-public.GuideStep.status",
-            "type": "CompoundType",
+            "id": "def-public.GuidedOnboardingApi.activateGuide",
+            "type": "Function",
             "tags": [],
-            "label": "status",
+            "label": "activateGuide",
             "description": [],
             "signature": [
-              "\"complete\" | \"in_progress\" | \"inactive\" | \"active\""
+              "(guideId: ",
+              "GuideId",
+              ", guide?: ",
+              "GuideState",
+              " | undefined) => Promise<{ state: ",
+              "GuideState",
+              "; } | undefined>"
             ],
-            "path": "src/plugins/guided_onboarding/common/types.ts",
+            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.activateGuide.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "guideId",
+                "description": [],
+                "signature": [
+                  "GuideId"
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.activateGuide.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "guide",
+                "description": [],
+                "signature": [
+                  "GuideState",
+                  " | undefined"
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-public.GuidedOnboardingApi.completeGuide",
+            "type": "Function",
+            "tags": [],
+            "label": "completeGuide",
+            "description": [],
+            "signature": [
+              "(guideId: ",
+              "GuideId",
+              ") => Promise<{ state: ",
+              "GuideState",
+              "; } | undefined>"
+            ],
+            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.completeGuide.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "guideId",
+                "description": [],
+                "signature": [
+                  "GuideId"
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-public.GuidedOnboardingApi.isGuideStepActive$",
+            "type": "Function",
+            "tags": [],
+            "label": "isGuideStepActive$",
+            "description": [],
+            "signature": [
+              "(guideId: ",
+              "GuideId",
+              ", stepId: ",
+              "GuideStepIds",
+              ") => ",
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.isGuideStepActive$.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "guideId",
+                "description": [],
+                "signature": [
+                  "GuideId"
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.isGuideStepActive$.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "stepId",
+                "description": [],
+                "signature": [
+                  "GuideStepIds"
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-public.GuidedOnboardingApi.startGuideStep",
+            "type": "Function",
+            "tags": [],
+            "label": "startGuideStep",
+            "description": [],
+            "signature": [
+              "(guideId: ",
+              "GuideId",
+              ", stepId: ",
+              "GuideStepIds",
+              ") => Promise<{ state: ",
+              "GuideState",
+              "; } | undefined>"
+            ],
+            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.startGuideStep.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "guideId",
+                "description": [],
+                "signature": [
+                  "GuideId"
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.startGuideStep.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "stepId",
+                "description": [],
+                "signature": [
+                  "GuideStepIds"
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-public.GuidedOnboardingApi.completeGuideStep",
+            "type": "Function",
+            "tags": [],
+            "label": "completeGuideStep",
+            "description": [],
+            "signature": [
+              "(guideId: ",
+              "GuideId",
+              ", stepId: ",
+              "GuideStepIds",
+              ") => Promise<{ state: ",
+              "GuideState",
+              "; } | undefined>"
+            ],
+            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.completeGuideStep.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "guideId",
+                "description": [],
+                "signature": [
+                  "GuideId"
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.completeGuideStep.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "stepId",
+                "description": [],
+                "signature": [
+                  "GuideStepIds"
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-public.GuidedOnboardingApi.isGuidedOnboardingActiveForIntegration$",
+            "type": "Function",
+            "tags": [],
+            "label": "isGuidedOnboardingActiveForIntegration$",
+            "description": [],
+            "signature": [
+              "(integration?: string | undefined) => ",
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.isGuidedOnboardingActiveForIntegration$.$1",
+                "type": "string",
+                "tags": [],
+                "label": "integration",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-public.GuidedOnboardingApi.completeGuidedOnboardingForIntegration",
+            "type": "Function",
+            "tags": [],
+            "label": "completeGuidedOnboardingForIntegration",
+            "description": [],
+            "signature": [
+              "(integration?: string | undefined) => Promise<{ state: ",
+              "GuideState",
+              "; } | undefined>"
+            ],
+            "path": "src/plugins/guided_onboarding/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "guidedOnboarding",
+                "id": "def-public.GuidedOnboardingApi.completeGuidedOnboardingForIntegration.$1",
+                "type": "string",
+                "tags": [],
+                "label": "integration",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/guided_onboarding/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-public.GuidedOnboardingApi.isGuidePanelOpen$",
+            "type": "Object",
+            "tags": [],
+            "label": "isGuidePanelOpen$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "src/plugins/guided_onboarding/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -119,38 +475,7 @@
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "guidedOnboarding",
-        "id": "def-public.GuideId",
-        "type": "Type",
-        "tags": [],
-        "label": "GuideId",
-        "description": [],
-        "signature": [
-          "\"search\" | \"security\" | \"observability\""
-        ],
-        "path": "src/plugins/guided_onboarding/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "guidedOnboarding",
-        "id": "def-public.GuideStepIds",
-        "type": "Type",
-        "tags": [],
-        "label": "GuideStepIds",
-        "description": [],
-        "signature": [
-          "\"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"rules\" | \"alertsCases\" | \"browse_docs\" | \"search_experience\""
-        ],
-        "path": "src/plugins/guided_onboarding/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "guidedOnboarding",
@@ -242,7 +567,13 @@
           "label": "guidedOnboardingApi",
           "description": [],
           "signature": [
-            "GuidedOnboardingApi",
+            {
+              "pluginId": "guidedOnboarding",
+              "scope": "public",
+              "docId": "kibGuidedOnboardingPluginApi",
+              "section": "def-public.GuidedOnboardingApi",
+              "text": "GuidedOnboardingApi"
+            },
             " | undefined"
           ],
           "path": "src/plugins/guided_onboarding/public/types.ts",

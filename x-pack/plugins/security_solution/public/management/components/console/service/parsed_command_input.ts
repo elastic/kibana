@@ -67,7 +67,7 @@ const parseInputString = (rawInput: string): ParsedCommandInput => {
           let newArgValue = argNameAndValueTrimmedString
             .substring(firstSpaceOrEqualSign.index + 1)
             .trim()
-            .replace(/\\/g, '');
+            .replace(/\\-\\-/g, '--');
 
           if (newArgValue.charAt(0) === '"') {
             newArgValue = newArgValue.substring(1);

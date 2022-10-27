@@ -6,7 +6,6 @@
  */
 
 import { URL } from 'url';
-import { curry } from 'lodash';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import { i18n } from '@kbn/i18n';
@@ -14,7 +13,6 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
-import { Logger } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -65,10 +63,8 @@ const ParamsSchema = schema.object({
 export const ConnectorTypeId = '.slack';
 // customizing executor is only used for tests
 export function getConnectorType({
-  logger,
-  executor = curry(slackExecutor)({ logger }),
+  executor = slackExecutor,
 }: {
-  logger: Logger;
   executor?: ExecutorType<{}, ConnectorTypeSecretsType, ActionParamsType, unknown>;
 }): SlackConnectorType {
   return {
@@ -138,13 +134,9 @@ function validateConnectorTypeConfig(
 // action executor
 
 async function slackExecutor(
-  { logger }: { logger: Logger },
   execOptions: SlackConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const actionId = execOptions.actionId;
-  const secrets = execOptions.secrets;
-  const params = execOptions.params;
-  const configurationUtilities = execOptions.configurationUtilities;
+  const { actionId, secrets, params, configurationUtilities, logger } = execOptions;
 
   let result: IncomingWebhookResult;
   const { webhookUrl } = secrets;

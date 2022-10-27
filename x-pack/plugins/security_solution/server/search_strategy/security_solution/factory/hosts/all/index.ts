@@ -19,7 +19,11 @@ import type {
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 
 import type { HostRiskScore } from '../../../../../../common/search_strategy';
-import { getHostRiskIndex, buildHostNamesFilter } from '../../../../../../common/search_strategy';
+import {
+  RiskScoreEntity,
+  getHostRiskIndex,
+  buildHostNamesFilter,
+} from '../../../../../../common/search_strategy';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../types';
@@ -116,6 +120,7 @@ async function getHostRiskData(
       buildRiskScoreQuery({
         defaultIndex: [getHostRiskIndex(spaceId)],
         filterQuery: buildHostNamesFilter(hostNames),
+        riskScoreEntity: RiskScoreEntity.host,
       })
     );
     return hostRiskResponse;
