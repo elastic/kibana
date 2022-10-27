@@ -7152,7 +7152,6 @@
     "xpack.apm.dependencyOperationDetailTraceListOutcomeColumn": "成果",
     "xpack.apm.dependencyOperationDetailTraceListServiceNameColumn": "発生元サービス",
     "xpack.apm.dependencyOperationDetailTraceListTimestampColumn": "タイムスタンプ",
-    "xpack.apm.dependencyOperationDetailTraceListTraceIdColumn": "トレース",
     "xpack.apm.dependencyOperationDetailTraceListTransactionNameColumn": "トランザクション名",
     "xpack.apm.dependencyOperationDistributionChart.allSpansLegendLabel": "すべてのスパン",
     "xpack.apm.dependencyOperationDistributionChart.failedSpansLegendLabel": "失敗したスパン",

@@ -22,55 +22,67 @@ import { MaybeViewTraceLink } from './maybe_view_trace_link';
 import { TransactionTab, TransactionTabs } from './transaction_tabs';
 import { Environment } from '../../../../../common/environment_rt';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { TraceSamplesFetchResult } from '../../../../hooks/use_transaction_trace_samples_fetcher';
 import { WaterfallFetchResult } from '../use_waterfall_fetcher';
 
-interface Props {
+interface Props<TSample extends {}> {
   waterfallFetchResult: WaterfallFetchResult;
-  traceSamplesFetchResult: TraceSamplesFetchResult;
+  traceSamples?: TSample[];
+  traceSamplesFetchStatus: FETCH_STATUS;
   environment: Environment;
-  onSampleClick: (sample: { transactionId: string; traceId: string }) => void;
-  onTabClick: (tab: string) => void;
+  onSampleClick: (sample: TSample) => void;
+  onTabClick: (tab: TransactionTab) => void;
   serviceName?: string;
   waterfallItemId?: string;
   detailTab?: TransactionTab;
+  selectedSample?: TSample | null;
 }
 
-export function WaterfallWithSummary({
+export function WaterfallWithSummary<TSample extends {}>({
   waterfallFetchResult,
-  traceSamplesFetchResult,
+  traceSamples,
+  traceSamplesFetchStatus,
   environment,
   onSampleClick,
   onTabClick,
   serviceName,
   waterfallItemId,
   detailTab,
-}: Props) {
+  selectedSample,
+}: Props<TSample>) {
   const [sampleActivePage, setSampleActivePage] = useState(0);
 
+  const isControlled = selectedSample !== undefined;
+
+  const isLoading =
+    waterfallFetchResult.status === FETCH_STATUS.LOADING ||
+    traceSamplesFetchStatus === FETCH_STATUS.LOADING;
+  const isSucceded =
+    waterfallFetchResult.status === FETCH_STATUS.SUCCESS &&
+    traceSamplesFetchStatus === FETCH_STATUS.SUCCESS;
+
   useEffect(() => {
-    setSampleActivePage(0);
-  }, [traceSamplesFetchResult.data.traceSamples]);
+    if (!isControlled) {
+      setSampleActivePage(0);
+    }
+  }, [traceSamples, isControlled]);
 
   const goToSample = (index: number) => {
-    setSampleActivePage(index);
-    const sample = traceSamplesFetchResult.data.traceSamples[index];
+    const sample = traceSamples![index];
+    if (!isControlled) {
+      setSampleActivePage(index);
+    }
     onSampleClick(sample);
   };
 
-  const { entryWaterfallTransaction } = waterfallFetchResult.waterfall;
-  const isLoading =
-    waterfallFetchResult.status === FETCH_STATUS.LOADING ||
-    traceSamplesFetchResult.status === FETCH_STATUS.LOADING;
-  const isSucceded =
-    waterfallFetchResult.status === FETCH_STATUS.SUCCESS &&
-    traceSamplesFetchResult.status === FETCH_STATUS.SUCCESS;
+  const samplePageIndex = isControlled
+    ? selectedSample
+      ? traceSamples?.indexOf(selectedSample)
+      : 0
+    : sampleActivePage;
 
-  if (
-    !entryWaterfallTransaction &&
-    traceSamplesFetchResult.data.traceSamples.length === 0 &&
-    isSucceded
-  ) {
+  const { entryWaterfallTransaction } = waterfallFetchResult.waterfall;
+
+  if (!entryWaterfallTransaction && traceSamples?.length === 0 && isSucceded) {
     return (
       <EuiEmptyPrompt
         title={
@@ -100,10 +112,10 @@ export function WaterfallWithSummary({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          {traceSamplesFetchResult.data.traceSamples.length > 0 && (
+          {!!traceSamples?.length && (
             <EuiPagination
-              pageCount={traceSamplesFetchResult.data.traceSamples.length}
-              activePage={sampleActivePage}
+              pageCount={traceSamples.length}
+              activePage={samplePageIndex}
               onPageClick={goToSample}
               compressed
             />

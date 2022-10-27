@@ -7168,7 +7168,6 @@
     "xpack.apm.dependencyOperationDetailTraceListOutcomeColumn": "结果",
     "xpack.apm.dependencyOperationDetailTraceListServiceNameColumn": "发起服务",
     "xpack.apm.dependencyOperationDetailTraceListTimestampColumn": "时间戳",
-    "xpack.apm.dependencyOperationDetailTraceListTraceIdColumn": "跟踪",
     "xpack.apm.dependencyOperationDetailTraceListTransactionNameColumn": "事务名称",
     "xpack.apm.dependencyOperationDistributionChart.allSpansLegendLabel": "所有跨度",
     "xpack.apm.dependencyOperationDistributionChart.failedSpansLegendLabel": "失败的跨度",
