@@ -230,7 +230,7 @@ describe('FieldSuggestions', () => {
     });
 
     it('should round timefilter `to` value', async () => {
-      getTimeMock.mockReturnValue({ from: 'now/d', to: 'now/d' });
+      getTimeMock.mockReturnValue({ from: '2022-10-27||/d', to: '2022-10-27||/d' });
 
       const [field] = stubFields.filter(
         ({ type, aggregatable }) => type === 'string' && aggregatable
