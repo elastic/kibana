@@ -28,6 +28,9 @@ import {
   GaugeCentralMajorModes,
   CollapseFunctions,
 } from '../constants';
+import { ExpressionValueVisDimension } from '../../expression_functions';
+
+export type ChartShapes = 'heatmap';
 
 export type CollapseFunction = typeof CollapseFunctions[number];
 
@@ -277,9 +280,63 @@ export type GaugeVisConfiguration = GaugeState & {
   layerType: typeof LayerTypes.DATA;
 };
 
+export interface HeatmapLegendConfig {
+  isVisible: boolean;
+  position: Position;
+  maxLines?: number;
+  shouldTruncate?: boolean;
+  legendSize?: LegendSize;
+  type: 'heatmap_legend';
+}
+
+export interface HeatmapGridConfig {
+  strokeWidth?: number;
+  strokeColor?: string;
+  isCellLabelVisible: boolean;
+  isYAxisLabelVisible: boolean;
+  isYAxisTitleVisible: boolean;
+  yTitle?: string;
+  isXAxisLabelVisible: boolean;
+  isXAxisTitleVisible: boolean;
+  xTitle?: string;
+  type: 'heatmap_grid';
+}
+export interface HeatmapArguments {
+  percentageMode?: boolean;
+  lastRangeIsRightOpen?: boolean;
+  showTooltip?: boolean;
+  highlightInHover?: boolean;
+  palette?: PaletteOutput<CustomPaletteParams>;
+  xAccessor?: string | ExpressionValueVisDimension;
+  yAccessor?: string | ExpressionValueVisDimension;
+  valueAccessor?: string | ExpressionValueVisDimension;
+  splitRowAccessor?: string | ExpressionValueVisDimension;
+  splitColumnAccessor?: string | ExpressionValueVisDimension;
+  legend: HeatmapLegendConfig;
+  gridConfig: HeatmapGridConfig;
+  ariaLabel?: string;
+}
+
+export type HeatmapLayerState = HeatmapArguments & {
+  layerId: string;
+  layerType: LayerType;
+  valueAccessor?: string;
+  xAccessor?: string;
+  yAccessor?: string;
+  shape: ChartShapes;
+};
+
+export type Palette = PaletteOutput<CustomPaletteParams> & { accessor: string };
+
+export type HeatmapConfiguration = HeatmapLayerState & {
+  // need to store the current accessor to reset the color stops at accessor change
+  palette?: Palette;
+};
+
 export type Configuration =
   | XYConfiguration
   | TableVisConfiguration
   | PartitionVisConfiguration
   | MetricVisConfiguration
-  | GaugeVisConfiguration;
+  | GaugeVisConfiguration
+  | HeatmapConfiguration;
