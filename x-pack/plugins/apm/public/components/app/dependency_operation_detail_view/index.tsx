@@ -192,6 +192,10 @@ export function DependencyOperationDetailView() {
                   },
                 });
               }}
+              serviceName={
+                waterfallFetch.waterfall.entryWaterfallTransaction?.doc.service
+                  .name
+              }
               waterfallItemId={waterfallItemId}
               detailTab={detailTab}
               selectedSample={selectedSample || null}
