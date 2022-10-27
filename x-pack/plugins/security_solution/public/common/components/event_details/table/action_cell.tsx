@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState, useContext } from 'react';
-import { TimelineContext } from '@kbn/timelines-plugin/public';
+import { TimelineContext } from '../../../../timelines/components/timeline';
 import { HoverActions } from '../../hover_actions';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
 import type { EnrichedFieldInfo } from '../types';
@@ -34,7 +34,7 @@ export const ActionCell: React.FC<Props> = React.memo(
     linkValue,
     onFilterAdded,
     setIsPopoverVisible,
-    timelineId,
+    scopeId,
     toggleColumn,
     values,
     hideAddToTimeline,
@@ -83,7 +83,7 @@ export const ActionCell: React.FC<Props> = React.memo(
         onFilterAdded={onFilterAdded}
         ownFocus={hoverActionsOwnFocus}
         showTopN={showTopN}
-        timelineId={timelineId ?? timelineIdFind}
+        scopeId={scopeId ?? timelineIdFind}
         toggleColumn={toggleColumn}
         toggleTopN={toggleTopN}
         values={actionCellConfig?.values}
