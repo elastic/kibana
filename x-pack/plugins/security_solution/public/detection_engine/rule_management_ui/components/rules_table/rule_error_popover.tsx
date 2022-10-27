@@ -10,17 +10,14 @@ import {
   EuiPopover,
   EuiText,
   EuiIcon,
-  EuiPopoverFooter,
   EuiPopoverTitle,
-  EuiButton,
   EuiDescriptionList,
   EuiSpacer,
 } from '@elastic/eui';
 
-import { useKibana } from '../../../../common/lib/kibana';
+import { getCapitalizedStatusText } from '../../../../detections/components/rules/rule_execution_status/utils';
 import { buildMlJobsDescription } from '../../../../detections/components/rules/description_step/ml_job_description';
 import type { Rule } from '../../../rule_management/logic';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 
 interface RuleErrorPopoverComponentProps {
   rule: Rule;
@@ -31,14 +28,8 @@ const RuleErrorPopoverComponent: React.FC<RuleErrorPopoverComponentProps> = ({ r
   const onButtonClick = () => setIsPopoverOpen((open) => !open);
   const closePopover = () => setIsPopoverOpen(false);
   const button = <EuiIcon type={'alert'} onClick={onButtonClick} />;
-  const { navigateToApp } = useKibana().services.application;
 
-  const handleGoToMlPageClick = () => {
-    onButtonClick();
-    navigateToApp('ml', {
-      openInNewTab: true,
-    });
-  };
+  const popoverTitle = getCapitalizedStatusText(rule.execution_summary?.last_execution.status);
 
   return (
     <EuiPopover
@@ -47,8 +38,8 @@ const RuleErrorPopoverComponent: React.FC<RuleErrorPopoverComponentProps> = ({ r
       closePopover={closePopover}
       anchorPosition="leftCenter"
     >
-      <EuiPopoverTitle>{i18n.FAILED_ML_RULE_POPEVER_TITLE}</EuiPopoverTitle>
-      <div style={{ width: '500px' }}>
+      <EuiPopoverTitle>{popoverTitle}</EuiPopoverTitle>
+      <div style={{ width: '340px' }}>
         <EuiText size="s">
           <p>{rule.execution_summary?.last_execution.message}</p>
         </EuiText>
@@ -59,11 +50,6 @@ const RuleErrorPopoverComponent: React.FC<RuleErrorPopoverComponentProps> = ({ r
           listItems={[buildMlJobsDescription(rule.machine_learning_job_id, '')]}
         />
       )}
-      <EuiPopoverFooter>
-        <EuiButton fullWidth size="s" onClick={handleGoToMlPageClick}>
-          {i18n.GO_TO_ML_PAGE_BUTTON_LABEL}
-        </EuiButton>
-      </EuiPopoverFooter>
     </EuiPopover>
   );
 };

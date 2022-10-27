@@ -129,13 +129,6 @@ export const JOB_FAILED_STATUS_POPOVER_DESCRIPTION = i18n.translate(
   }
 );
 
-export const GO_TO_ML_PAGE_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDescription.goToMlPageButtonLabel',
-  {
-    defaultMessage: 'Go to Machine Learning page',
-  }
-);
-
 export const THRESHOLD_RESULTS_ALL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDescription.thresholdResultsAllDescription',
   {

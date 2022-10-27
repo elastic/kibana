@@ -151,13 +151,12 @@ const useRuleExecutionStatusColumn = (sortable: boolean): TableColumn => {
                 </EuiToolTip>
               </EuiFlexItem>
             )}
-          {isMlRule(item.type) &&
-            (value === RuleExecutionStatus.failed ||
-              value === RuleExecutionStatus['partial failure']) && (
-              <EuiFlexItem grow={false}>
-                <RuleErrorPopover rule={item} />
-              </EuiFlexItem>
-            )}
+          {(value === RuleExecutionStatus.failed ||
+            value === RuleExecutionStatus['partial failure']) && (
+            <EuiFlexItem grow={false}>
+              <RuleErrorPopover rule={item} />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       ),
       sortable,

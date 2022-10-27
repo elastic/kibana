@@ -7,10 +7,11 @@
 
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 import { ML_PAGES, useMlHref } from '@kbn/ml-plugin/public';
+import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { useEnableDataFeed } from '../../../../common/components/ml_popover/hooks/use_enable_data_feed';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import { JobSwitch } from '../../../../common/components/ml_popover/jobs_table/job_switch';
@@ -18,7 +19,6 @@ import { useSecurityJobs } from '../../../../common/components/ml_popover/hooks/
 import { useKibana } from '../../../../common/lib/kibana';
 import type { ListItems } from './types';
 import * as i18n from './translations';
-import { JobStatusPopover } from './job_status_popover';
 
 enum MessageLevels {
   info = 'info',
@@ -52,6 +52,20 @@ const AuditIconComponent: React.FC<{
 };
 
 export const AuditIcon = React.memo(AuditIconComponent);
+
+const JobStatusBadgeComponent: React.FC<{ job: MlSummaryJob }> = ({ job }) => {
+  const isStarted = isJobStarted(job.jobState, job.datafeedState);
+  const color = isStarted ? 'success' : 'danger';
+  const text = isStarted ? i18n.ML_JOB_STARTED : i18n.ML_JOB_STOPPED;
+
+  return (
+    <EuiBadge data-test-subj="machineLearningJobStatus" color={color}>
+      {text}
+    </EuiBadge>
+  );
+};
+
+export const JobStatusBadge = React.memo(JobStatusBadgeComponent);
 
 const JobLink = styled(EuiLink)`
   margin-right: ${({ theme }) => theme.eui.euiSizeS};
@@ -98,7 +112,7 @@ const MlJobDescriptionComponent: React.FC<{
       </div>
       <EuiFlexGroup justifyContent="flexStart">
         <EuiFlexItem grow={false} style={{ marginRight: '0' }}>
-          <JobStatusPopover job={job} />
+          <JobStatusBadge job={job} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <JobSwitch
