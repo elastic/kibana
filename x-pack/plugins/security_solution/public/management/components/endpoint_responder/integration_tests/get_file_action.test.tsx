@@ -22,8 +22,11 @@ import { GET_FILE_ROUTE } from '../../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
 import { INSUFFICIENT_PRIVILEGES_FOR_COMMAND } from '../../../../common/translations';
+import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 
-describe('When using get-file aciton from response actions console', () => {
+jest.mock('../../../../common/components/user_privileges');
+
+describe('When using get-file action from response actions console', () => {
   let render: (
     capabilities?: EndpointCapabilities[]
   ) => Promise<ReturnType<AppContextTestRender['render']>>;
@@ -123,5 +126,33 @@ describe('When using get-file aciton from response actions console', () => {
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
       'Argument can only be used once: --comment'
     );
+  });
+
+  it('should display download link once action completes', async () => {
+    const actionDetailsApiResponseMock: ReturnType<typeof apiMocks.responseProvider.actionDetails> =
+      {
+        data: {
+          ...apiMocks.responseProvider.actionDetails({
+            path: '/1',
+          } as HttpFetchOptionsWithPath).data,
+
+          completedAt: new Date().toISOString(),
+          command: 'get-file',
+        },
+      };
+    apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
+
+    await render();
+    enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('getFileSuccess').textContent).toEqual(
+        'File retrieved from the host.Click here to download(ZIP file passcode: elastic)'
+      );
+    });
   });
 });
