@@ -54,6 +54,44 @@
       "references" : [
         {
           "name" : "source",
+          "id" : "918da460-0052-11ec-917b-f7aa317691ed",
+          "type" : "alert"
+        }
+      ]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_1",
+    "id": "action_task_params:0205a520-0054-11ec-917b-f7aa648792ed",
+    "source": {
+      "type": "action_task_params",
+      "action_task_params" : {
+        "actionId" : "my-slack1",
+        "params" : {
+          "level" : "info",
+          "message" : "hi hi"
+        },
+        "relatedSavedObjects" : [
+          {
+            "type" : "alert",
+            "typeId" : "example.always-firing",
+            "id" : "b50bfcb0-0053-11ec-917b-f7aa317691ed"
+          },
+          {
+            "type" : "alert",
+            "typeId" : "example.always-firing",
+            "id" : "b50bfcb0-0053-11ec-917b-f7aa317691ed",
+            "namespace": "custom-space"
+          }
+        ]
+      },
+      "references" : [
+        {
+          "name" : "source",
           "id" : "b50bfcb0-0053-11ec-917b-f7aa317691ed",
           "type" : "alert"
         }

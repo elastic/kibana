@@ -365,6 +365,87 @@ describe('successful migrations', () => {
       expect(migration800(actionTaskParam, context)).toEqual(actionTaskParam);
     });
   });
+
+  describe('8.6.0', () => {
+    test(`sets space_ids in relatedSavedObjects to 'default' if namespace is undefined`, () => {
+      const migration860 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup, [])['8.6.0'];
+      const actionTaskParam = getMockData({
+        relatedSavedObjects: [
+          {
+            id: 'some-id',
+            type: 'some-type',
+            typeId: 'some-typeId',
+          },
+        ],
+      });
+      const migratedActionTaskParam = migration860(actionTaskParam, context);
+      expect(migratedActionTaskParam).toEqual({
+        ...actionTaskParam,
+        attributes: {
+          ...actionTaskParam.attributes,
+          relatedSavedObjects: [
+            {
+              id: 'some-id',
+              type: 'some-type',
+              typeId: 'some-typeId',
+              space_ids: ['default'],
+            },
+          ],
+        },
+      });
+    });
+
+    test(`sets space_ids in relatedSavedObjects to value of namespace if namespace is defined`, () => {
+      const migration860 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup, [])['8.6.0'];
+      const actionTaskParam = getMockData({
+        relatedSavedObjects: [
+          {
+            id: 'some-id',
+            type: 'some-type',
+            typeId: 'some-typeId',
+            namespace: 'some-custom-space',
+          },
+        ],
+      });
+      const migratedActionTaskParam = migration860(actionTaskParam, context);
+      expect(migratedActionTaskParam).toEqual({
+        ...actionTaskParam,
+        attributes: {
+          ...actionTaskParam.attributes,
+          relatedSavedObjects: [
+            {
+              id: 'some-id',
+              type: 'some-type',
+              typeId: 'some-typeId',
+              space_ids: ['some-custom-space'],
+            },
+          ],
+        },
+      });
+    });
+
+    test(`handles empty relatedSavedObjects array`, () => {
+      const migration860 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup, [])['8.6.0'];
+      const actionTaskParam = getMockData({
+        relatedSavedObjects: [],
+      });
+      const migratedActionTaskParam = migration860(actionTaskParam, context);
+      expect(migratedActionTaskParam).toEqual({
+        ...actionTaskParam,
+        attributes: {
+          ...actionTaskParam.attributes,
+          relatedSavedObjects: [],
+        },
+      });
+    });
+
+    test(`handles undefined relatedSavedObjects array`, () => {
+      const migration860 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup, [])['8.6.0'];
+      const actionTaskParam = getMockData({});
+      const migratedActionTaskParam = migration860(actionTaskParam, context);
+      expect(migratedActionTaskParam).toEqual(actionTaskParam);
+    });
+  });
 });
 
 describe('handles errors during migrations', () => {

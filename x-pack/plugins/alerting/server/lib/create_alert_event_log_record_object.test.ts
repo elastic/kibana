@@ -98,7 +98,7 @@ describe('createAlertEventLogRecordObject', () => {
         instanceId: 'test1',
         group: 'group 1',
         message: 'message text here',
-        namespace: 'default',
+        namespace: 'custom-namespace',
         state: {
           start: '1970-01-01T00:00:00.000Z',
           end: '1970-01-01T00:05:00.000Z',
@@ -140,7 +140,7 @@ describe('createAlertEventLogRecordObject', () => {
         saved_objects: [
           {
             id: '1',
-            space_ids: ['default'],
+            space_ids: ['custom-namespace'],
             rel: 'primary',
             type: 'alert',
             type_id: 'test',

@@ -62,7 +62,7 @@ export function getActionTaskParamsMigrations(
     (
       doc: SavedObjectUnsanitizedDoc<ActionTaskParams>
     ): doc is SavedObjectUnsanitizedDoc<ActionTaskParams> => true,
-    pipeMigrations(copyNamespaceToNamespaces)
+    pipeMigrations(copyNamespaceToSpaceIds)
   );
 
   return {
@@ -156,7 +156,7 @@ type LegacyRelatedSavedObject = Omit<RelatedSavedObject, 'space_ids'> & {
   namespace?: string;
 };
 
-function copyNamespaceToNamespaces(
+function copyNamespaceToSpaceIds(
   doc: SavedObjectUnsanitizedDoc<ActionTaskParams>
 ): SavedObjectUnsanitizedDoc<ActionTaskParams> {
   const {

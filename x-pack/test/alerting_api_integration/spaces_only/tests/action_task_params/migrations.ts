@@ -79,6 +79,33 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         ).not.to.be(undefined);
       });
     });
+
+    it('8.6.0 migrates action_task_params from namespace to space ids in related saved objects', async () => {
+      const response = await es.get<SavedObject<ActionTaskParams>>(
+        {
+          index: '.kibana',
+          id: 'action_task_params:0205a520-0054-11ec-917b-f7aa648792ed',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      const { relatedSavedObjects } = getActionIdAndRelatedSavedObjects(response.body._source);
+
+      expect(relatedSavedObjects).to.eql([
+        {
+          type: 'alert',
+          typeId: 'example.always-firing',
+          id: 'related_alert_0',
+          space_ids: ['default'],
+        },
+        {
+          type: 'alert',
+          typeId: 'example.always-firing',
+          id: 'related_alert_1',
+          space_ids: ['custom-space'],
+        },
+      ]);
+    });
   });
 
   function getActionIdAndRelatedSavedObjects(responseSource: any) {
