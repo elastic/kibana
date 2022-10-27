@@ -8,3 +8,4 @@
 
 export { InspectorProvider, InspectorKibanaProvider } from './services';
 export { useOpenInspector } from './open_inspector';
+export type { OpenInspectorParams } from './open_inspector';

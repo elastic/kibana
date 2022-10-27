@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import type { OpenInspectorParams } from '@kbn/content-management-inspector';
 
 import {
   Table,
@@ -37,6 +38,10 @@ import type { SavedObjectsReference, SavedObjectsFindOptionsReference } from './
 import type { Action } from './actions';
 import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
+
+interface InspectorConfig extends Pick<OpenInspectorParams, 'isReadonly' | 'onSave'> {
+  enabled?: boolean;
+}
 
 export interface Props<T extends UserContentCommonSchema = UserContentCommonSchema> {
   entityName: string;
@@ -67,6 +72,7 @@ export interface Props<T extends UserContentCommonSchema = UserContentCommonSche
   createItem?(): void;
   deleteItems?(items: T[]): Promise<void>;
   editItem?(item: T): void;
+  inspector: InspectorConfig;
 }
 
 export interface State<T extends UserContentCommonSchema = UserContentCommonSchema> {
@@ -115,6 +121,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   getDetailViewLink,
   onClickTitle,
   id = 'userContent',
+  inspector,
   children,
 }: Props<T>) {
   if (!getDetailViewLink && !onClickTitle) {
@@ -126,6 +133,12 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   if (getDetailViewLink && onClickTitle) {
     throw new Error(
       `[TableListView] Either "getDetailViewLink" or "onClickTitle" can be provided. Not both.`
+    );
+  }
+
+  if (inspector.isReadonly === false && inspector.onSave === undefined) {
+    throw new Error(
+      `[TableListView] A value for [inspector.onSave()] must be provided when [inspector.isReadonly] is false.`
     );
   }
 
@@ -495,6 +508,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           tableCaption={tableListTitle}
           onTableChange={onTableChange}
           onSortChange={onSortChange}
+          inspector={inspector}
         />
 
         {/* Delete modal */}

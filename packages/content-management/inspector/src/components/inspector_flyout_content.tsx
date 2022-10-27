@@ -40,12 +40,17 @@ const getI18nTexts = ({ entityName }: { entityName: string }) => ({
 
 export interface Props {
   item: Item;
-  isReadonly: boolean;
+  isReadonly?: boolean;
   onSave?: (args: { title: string; description?: string }) => Promise<void>;
   onCancel: () => void;
 }
 
-export const InspectorFlyoutContent: FC<Props> = ({ item, isReadonly, onSave, onCancel }) => {
+export const InspectorFlyoutContent: FC<Props> = ({
+  item,
+  isReadonly = true,
+  onSave,
+  onCancel,
+}) => {
   const i18nTexts = getI18nTexts({ entityName: 'Dashboard' });
   const [isSaving] = useState(false);
   const [isSubmitting] = useState(false);

@@ -24,6 +24,11 @@ export function useOpenInspector() {
 
   return useCallback(
     (args: OpenInspectorParams) => {
+      // Validate arguments
+      if (args.isReadonly === false && args.onSave === undefined) {
+        throw new Error(`A value for [onSave()] must be provided when [isReadonly] is false.`);
+      }
+
       flyout.current = openFlyout(
         <InspectorLoader {...args} onCancel={() => flyout.current?.close()} />,
         {
