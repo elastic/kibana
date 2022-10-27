@@ -6,8 +6,9 @@
  */
 
 import { EuiIcon, EuiLink } from '@elastic/eui';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { isOpenTelemetryAgentName } from '../../../../../../common/agent_name';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 
@@ -31,15 +32,29 @@ export function AgentExplorerDocsLink({
       target="_blank"
       external
     >
-      <EuiIcon
-        type="logoGithub"
-        size="m"
-        title={i18n.translate('xpack.apm.agentExplorer.docsLink.logo', {
-          defaultMessage: 'Github logo',
-        })}
-      />{' '}
+      {isOpenTelemetryAgentName(agentName) && (
+        <EuiIcon
+          type="documentation"
+          size="m"
+          title={i18n.translate('xpack.apm.agentExplorer.docsLink.otel.logo', {
+            defaultMessage: 'Opentelemetry logo',
+          })}
+        />
+      )}
+      {!isOpenTelemetryAgentName(agentName) && (
+        <EuiIcon
+          type="logoElastic"
+          size="m"
+          title={i18n.translate(
+            'xpack.apm.agentExplorer.docsLink.elastic.logo',
+            {
+              defaultMessage: 'Elastic logo',
+            }
+          )}
+        />
+      )}{' '}
       {i18n.translate('xpack.apm.agentExplorer.docsLink.message', {
-        defaultMessage: 'github',
+        defaultMessage: 'Docs',
       })}
     </EuiLink>
   );

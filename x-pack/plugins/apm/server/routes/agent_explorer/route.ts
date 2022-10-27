@@ -39,7 +39,7 @@ const agentExplorerRoute = createApmServerRoute({
       environments: string[];
       agentName?: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
       agentVersion: string[];
-      agentRepoUrl?: string;
+      agentDocsPageUrl?: string;
       instances: number;
     }>;
   }> {

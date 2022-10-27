@@ -8,51 +8,40 @@
 import { isOpenTelemetryAgentName } from '../../../common/agent_name';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
-const agentsRepoName: Partial<Record<AgentName, string>> = {
-  go: 'apm-agent-go',
-  java: 'apm-agent-java',
-  'js-base': 'apm-agent-rum-js',
-  'iOS/swift': 'apm-agent-ios',
-  'rum-js': 'apm-agent-rum-js',
-  nodejs: 'apm-agent-nodejs',
-  python: 'apm-agent-python',
-  dotnet: 'apm-agent-dotnet',
-  ruby: 'apm-agent-ruby',
-  php: 'apm-agent-php',
-  'android/java': 'apm-agent-android',
-  'opentelemetry/cpp': 'opentelemetry-cpp',
-  'opentelemetry/dotnet': 'opentelemetry-dotnet',
-  'opentelemetry/erlang': 'opentelemetry-erlang',
-  'opentelemetry/go': 'opentelemetry-go',
-  'opentelemetry/java': 'opentelemetry-java',
-  'opentelemetry/nodejs': 'opentelemetry-js',
-  'opentelemetry/php': 'opentelemetry-php',
-  'opentelemetry/python': 'opentelemetry-python',
-  'opentelemetry/ruby': 'opentelemetry-ruby',
-  'opentelemetry/swift': 'opentelemetry-swift',
-  'opentelemetry/webjs': 'opentelemetry-js',
+const agentsDocPageName: Partial<Record<AgentName, string>> = {
+  go: 'go',
+  java: 'java',
+  'js-base': 'rum-js',
+  'iOS/swift': 'swift',
+  'rum-js': 'rum-js',
+  nodejs: 'nodejs',
+  python: 'python',
+  dotnet: 'dotnet',
+  ruby: 'ruby',
+  php: 'php',
+  'opentelemetry/cpp': 'cpp',
+  'opentelemetry/dotnet': 'net',
+  'opentelemetry/erlang': 'erlang',
+  'opentelemetry/go': 'go',
+  'opentelemetry/java': 'java',
+  'opentelemetry/nodejs': 'js',
+  'opentelemetry/php': 'php',
+  'opentelemetry/python': 'python',
+  'opentelemetry/ruby': 'ruby',
+  'opentelemetry/swift': 'swift',
+  'opentelemetry/webjs': 'js',
 };
 
-export const getAllAgentsName = () =>
-  Object.keys(agentsRepoName).map((agent) => agent as AgentName);
+export const getAgentDocsPageUrl = (agentName: AgentName) => {
+  const agentDocsPageName = agentsDocPageName[agentName];
 
-export const getAgentRepositoryDetails = (agentName: AgentName) => {
-  const user = isOpenTelemetryAgentName(agentName)
-    ? 'open-telemetry'
-    : 'elastic';
-  const repository = agentsRepoName[agentName];
-
-  if (!repository) {
+  if (!agentDocsPageName) {
     return undefined;
   }
 
-  return { user, repository };
-};
+  if (isOpenTelemetryAgentName(agentName)) {
+    return `https://opentelemetry.io/docs/instrumentation/${agentDocsPageName}`;
+  }
 
-export const getAgentRepositoryUrl = (agentName: AgentName) => {
-  const repositoryDetails = getAgentRepositoryDetails(agentName);
-
-  return repositoryDetails
-    ? `https://github.com/${repositoryDetails.user}/${repositoryDetails.repository}`
-    : undefined;
+  return `https://www.elastic.co/guide/en/apm/agent/${agentDocsPageName}/current/index.html`;
 };

@@ -48,10 +48,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import {
-  enableAgentExplorerView,
-  enableServiceGroups,
-} from '@kbn/observability-plugin/public';
+import { enableServiceGroups } from '@kbn/observability-plugin/public';
 import { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
@@ -142,13 +139,6 @@ const apmStorageExplorerTitle = i18n.translate(
   }
 );
 
-const apmAgentsExplorerTitle = i18n.translate(
-  'xpack.apm.navigation.apmAgentExplorerTitle',
-  {
-    defaultMessage: 'Agent Explorer',
-  }
-);
-
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
@@ -166,11 +156,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     const serviceGroupsEnabled = core.uiSettings.get<boolean>(
       enableServiceGroups,
-      false
-    );
-
-    const agentExplorerEnabled = core.uiSettings.get<boolean>(
-      enableAgentExplorerView,
       false
     );
 
@@ -233,15 +218,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                           path: '/service-map',
                         },
                       ]),
-                  ...(agentExplorerEnabled
-                    ? [
-                        {
-                          label: apmAgentsExplorerTitle,
-                          app: 'apm',
-                          path: '/agent-explorer',
-                        },
-                      ]
-                    : []),
                 ],
               },
             ];
@@ -348,11 +324,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           id: 'storage-explorer',
           title: apmStorageExplorerTitle,
           path: '/storage-explorer',
-        },
-        {
-          id: 'agents',
-          title: apmAgentsExplorerTitle,
-          path: '/agent-explorer',
         },
       ],
 

@@ -75,13 +75,13 @@ function formatString(value?: string | null) {
 export function AgentContextualInformation({
   agentName,
   serviceName,
-  agentRepoUrl,
+  agentDocsPageUrl,
   instances,
   query,
 }: {
   agentName?: AgentName;
   serviceName?: string;
-  agentRepoUrl?: string;
+  agentDocsPageUrl?: string;
   instances?: number;
   query: TypeOf<ApmRoutes, '/settings/agent-explorer'>['query'];
 }) {
@@ -148,7 +148,7 @@ export function AgentContextualInformation({
           defaultMessage: 'Agent documentation',
         }
       ),
-      fieldName: AgentExplorerFieldName.AgentRepoUrl,
+      fieldName: AgentExplorerFieldName.AgentDocsPageUrl,
       val: (
         <TruncateWithTooltip
           data-test-subj="apmAgentExplorerListDocsLink"
@@ -156,7 +156,7 @@ export function AgentContextualInformation({
           content={
             <AgentExplorerDocsLink
               agentName={agentName as AgentName}
-              repositoryUrl={agentRepoUrl}
+              repositoryUrl={agentDocsPageUrl}
             />
           }
         />
@@ -209,7 +209,7 @@ export function AgentInstances({ agent, onClose }: Props) {
           <AgentContextualInformation
             agentName={agent?.agentName}
             serviceName={agent?.serviceName}
-            agentRepoUrl={agent?.agentRepoUrl}
+            agentDocsPageUrl={agent?.agentDocsPageUrl}
             instances={agent?.instances}
             query={query}
           />

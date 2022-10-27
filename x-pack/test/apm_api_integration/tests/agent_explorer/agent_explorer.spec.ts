@@ -125,7 +125,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(goAgent?.environments).to.contain('production');
         expect(goAgent?.agentName).to.be('go');
         expect(goAgent?.agentVersion).to.contain('5.1.2');
-        expect(goAgent?.agentRepoUrl).to.be('https://github.com/elastic/apm-agent-go');
+        expect(goAgent?.agentDocsPageUrl).to.be(
+          'https://www.elastic.co/guide/en/apm/agent/go/current/index.html'
+        );
 
         const nodeAgent = agents[nodeServiceName];
         expect(nodeAgent?.environments).to.have.length(2);
@@ -134,7 +136,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(nodeAgent?.agentName).to.be('nodejs');
         expect(nodeAgent?.agentVersion).to.contain('1.0.0');
         expect(nodeAgent?.agentVersion).to.contain('1.0.3');
-        expect(nodeAgent?.agentRepoUrl).to.be('https://github.com/elastic/apm-agent-nodejs');
+        expect(nodeAgent?.agentDocsPageUrl).to.be(
+          'https://www.elastic.co/guide/en/apm/agent/nodejs/current/index.html'
+        );
       });
 
       const matchingFilterTests = [

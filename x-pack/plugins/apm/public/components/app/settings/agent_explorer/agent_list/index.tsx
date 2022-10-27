@@ -148,17 +148,17 @@ export function getAgentsColumns({
       ),
     },
     {
-      field: AgentExplorerFieldName.AgentRepoUrl,
+      field: AgentExplorerFieldName.AgentDocsPageUrl,
       name: i18n.translate(
         'xpack.apm.agentExplorerTable.agentDocsColumnLabel',
         { defaultMessage: 'Agent Docs' }
       ),
       width: `${unit * 10}px`,
-      render: (_, { agentName, agentRepoUrl }) => (
+      render: (_, { agentName, agentDocsPageUrl }) => (
         <EuiToolTip content={formatString(`${agentName} agent docs`)}>
           <AgentExplorerDocsLink
             agentName={agentName as AgentName}
-            repositoryUrl={agentRepoUrl}
+            repositoryUrl={agentDocsPageUrl}
           />
         </EuiToolTip>
       ),

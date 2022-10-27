@@ -11,6 +11,6 @@ export enum AgentExplorerFieldName {
   AgentName = 'agentName',
   AgentVersion = 'agentVersion',
   AgentLastVersion = 'agentLastVersion',
-  AgentRepoUrl = 'agentRepoUrl',
+  AgentDocsPageUrl = 'agentDocsPageUrl',
   Instances = 'instances',
 }

@@ -10,7 +10,7 @@ import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_ev
 import { RandomSampler } from '../../lib/helpers/get_random_sampler';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getAgentsItems } from './get_agents_items';
-import { getAgentRepositoryUrl } from './get_agent_url_repository';
+import { getAgentDocsPageUrl } from './get_agent_url_repository';
 
 export async function getAgents({
   environment,
@@ -46,7 +46,7 @@ export async function getAgents({
     return {
       items: items.map((item) => ({
         ...item,
-        agentRepoUrl: getAgentRepositoryUrl(item.agentName as AgentName),
+        agentDocsPageUrl: getAgentDocsPageUrl(item.agentName as AgentName),
       })),
     };
   });

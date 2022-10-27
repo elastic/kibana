@@ -8,6 +8,7 @@
 import { EuiPageHeaderProps } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { enableAgentExplorerView } from '@kbn/observability-plugin/public';
 import React from 'react';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -65,6 +66,11 @@ function getTabs({
 }) {
   const canReadMlJobs = !!core.application.capabilities.ml?.canGetJobs;
 
+  const agentExplorerEnabled = core.uiSettings.get<boolean>(
+    enableAgentExplorerView,
+    false
+  );
+
   const tabs: Tab[] = [
     {
       key: 'general-settings',
@@ -94,6 +100,7 @@ function getTabs({
         },
       }),
       append: <TechnicalPreviewBadge icon="beaker" />,
+      hidden: !agentExplorerEnabled,
     },
     {
       key: 'agent-keys',
