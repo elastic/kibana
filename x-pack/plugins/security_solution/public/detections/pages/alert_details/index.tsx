@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
 import { Switch, useParams } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 import { ALERT_RULE_NAME, TIMESTAMP } from '@kbn/rule-data-utils';
 import { EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
-import { useKibana } from '../../../common/lib/kibana';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { TimelineId } from '../../../../common/types';
 import { useGetFieldsData } from '../../../common/hooks/use_get_fields_data';
