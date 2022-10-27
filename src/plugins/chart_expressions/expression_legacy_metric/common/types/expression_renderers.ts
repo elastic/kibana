@@ -29,8 +29,10 @@ export type LabelPositionType = $Values<typeof LabelPosition>;
 export type MetricStyle = Style & Pick<ChartStyle, 'bgColor' | 'labelColor'>;
 
 export type LabelsConfig = Labels & { style: Style; position: LabelPositionType };
+
+export type MetricAlignment = 'left' | 'center';
 export interface MetricVisParam {
-  alignment?: 'left' | 'center';
+  alignment?: MetricAlignment;
   percentageMode: boolean;
   percentageFormatPattern?: string;
   metricColorMode: ColorMode;

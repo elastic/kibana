@@ -14,7 +14,7 @@ import {
   validateAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
 import { ColorMode } from '@kbn/charts-plugin/common';
-import { visType } from '../types';
+import { MetricAlignment, visType } from '../types';
 import { MetricVisExpressionFunctionDefinition } from '../types';
 import { EXPRESSION_METRIC_NAME, LabelPosition } from '../constants';
 
@@ -177,7 +177,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         visType,
         visConfig: {
           metric: {
-            alignment: handlers?.variables?.metricAlignment,
+            alignment: handlers?.variables?.metricAlignment as MetricAlignment,
             palette: args.palette?.params,
             percentageMode: args.percentageMode,
             metricColorMode: args.colorMode,
