@@ -24,8 +24,8 @@ export const ResponderActionButton = memo<ResponderContextMenuItemProps>(
       <EuiToolTip position="top" content={tooltip}>
         <EuiButton
           fill
-          key="endpointResponseActions-action-item"
-          data-test-subj="endpointResponseActions-action-item"
+          key="endpointResponseActions-action-button"
+          data-test-subj="endpointResponseActions-action-button"
           disabled={isDisabled}
           onClick={handleResponseActionsClick}
         >
