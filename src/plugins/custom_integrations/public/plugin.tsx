@@ -23,6 +23,7 @@ import {
 import { CustomIntegrationsServicesProvider } from './services';
 import { servicesFactory } from './services/kibana';
 import { SampleClientReadme } from './components/fleet_integration/sample/sample_client_readme';
+import { ElasticsearchJsClientReadme } from './components/fleet_integration/elasticsearch_js/elasticsearch_js_readme';
 
 export class CustomIntegrationsPlugin
   implements Plugin<CustomIntegrationsSetup, CustomIntegrationsStart>
@@ -46,7 +47,10 @@ export class CustomIntegrationsPlugin
   ): CustomIntegrationsStart {
     const services = servicesFactory({ coreStart, startPlugins });
 
-    const languageClientsUiComponents = { sample: SampleClientReadme };
+    const languageClientsUiComponents = {
+      sample: SampleClientReadme,
+      javascript: ElasticsearchJsClientReadme,
+    };
 
     const ContextProvider: React.FC = ({ children }) => (
       <CustomIntegrationsServicesProvider {...services}>
