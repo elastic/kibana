@@ -15,5 +15,6 @@
     {
       "path": "../kibana_react/tsconfig.json"
     },
+    { "path": "../../../x-pack/plugins/cloud/tsconfig.json" },
   ]
 }

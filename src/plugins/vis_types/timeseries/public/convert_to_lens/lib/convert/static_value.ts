@@ -32,6 +32,9 @@ export const convertToStaticValueColumn = (
     return null;
   }
   const currentMetric = metrics[metrics.length - 1];
+  if (!currentMetric.value) {
+    return null;
+  }
   return {
     operationType: 'static_value',
     references: [],
@@ -68,7 +71,10 @@ export const convertStaticValueToFormulaColumn = (
     return null;
   }
   const currentMetric = metrics[metrics.length - 1];
-  return createFormulaColumn(currentMetric.value ?? '', {
+  if (!currentMetric.value) {
+    return null;
+  }
+  return createFormulaColumn(currentMetric.value, {
     series,
     metric: currentMetric,
     dataView,

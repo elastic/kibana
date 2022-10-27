@@ -24,7 +24,7 @@ const durationType = new t.Type<Duration, string, unknown>(
         return t.failure(input, context);
       }
     }),
-  (duration: Duration): string => `${duration.value}${duration.unit}`
+  (duration: Duration): string => duration.format()
 );
 
 export { durationType };
