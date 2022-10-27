@@ -56,7 +56,9 @@ export const useTimelineEventsDetails = ({
   const refetch = useRef<() => Promise<void>>(asyncNoop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
-  const [loading, setLoading] = useState(false);
+
+  // loading = false initial state causes flashes of empty tables
+  const [loading, setLoading] = useState(true);
   const [timelineDetailsRequest, setTimelineDetailsRequest] =
     useState<TimelineEventsDetailsRequestOptions | null>(null);
   const { addError, addWarning } = useAppToasts();

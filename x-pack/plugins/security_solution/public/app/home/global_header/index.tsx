@@ -10,7 +10,7 @@ import {
   EuiHeaderSection,
   EuiHeaderSectionItem,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +28,6 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { getScopeFromPath, showSourcererByPath } from '../../../common/containers/sourcerer';
-import { useTourContext } from '../../../common/components/guided_onboarding';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',
@@ -83,12 +82,6 @@ export const GlobalHeader = React.memo(
       };
     }, [portalNode, setHeaderActionMenu, theme.theme$]);
 
-    const { isTourShown, endTour } = useTourContext();
-    const closeOnboardingTourIfShown = useCallback(() => {
-      if (isTourShown) {
-        endTour();
-      }
-    }, [isTourShown, endTour]);
     return (
       <InPortal node={portalNode}>
         <EuiHeaderSection side="right">
@@ -105,7 +98,6 @@ export const GlobalHeader = React.memo(
                 data-test-subj="add-data"
                 href={href}
                 iconType="indexOpen"
-                onClick={closeOnboardingTourIfShown}
               >
                 {BUTTON_ADD_DATA}
               </EuiHeaderLink>
