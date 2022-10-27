@@ -12,9 +12,11 @@ exports[`observability link card snapshots should render link card for observabi
         grow={false}
       >
         <EuiButton
+          color="primary"
           data-test-subj="onboarding--linkCard--observability"
           fill={true}
           onClick={[Function]}
+          size="m"
         >
           View integrations
         </EuiButton>
