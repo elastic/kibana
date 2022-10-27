@@ -411,13 +411,12 @@ export const ExceptionListsTable = React.memo(() => {
               onRefresh={handleRefresh}
             />
             <EuiSpacer size="m" />
-            {exceptionListsWithRuleRefs.length > 0 && (
+            {exceptionListsWithRuleRefs.length > 0 && canUserCRUD !== null && canUserREAD !== null && (
               <React.Fragment data-test-subj="exceptionsTable">
                 {exceptionListsWithRuleRefs.map((excList) => (
                   <ExceptionsListCard
                     key={excList.list_id}
                     data-test-subj="exceptionsListCard"
-                    // @ts-expect-error canUserREAD and canUserCRUD are typed as boolean | null
                     readOnly={canUserREAD && !canUserCRUD}
                     http={http}
                     exceptionsList={excList}
