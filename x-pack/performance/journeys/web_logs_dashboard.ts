@@ -6,13 +6,21 @@
  */
 
 import { Journey } from '@kbn/journeys';
+import { subj } from '@kbn/test-subj-selector';
 import { waitForChrome, waitForVisualizations } from '../utils';
 
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/sample_data_logs'],
   kbnArchives: ['x-pack/performance/kbn_archives/logs_no_map_dashboard'],
-}).step('Go to Web Logs Dashboard', async ({ page, kbnUrl }) => {
-  await page.goto(kbnUrl.get(`/app/dashboards#/view/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b`));
-  await waitForChrome(page);
-  await waitForVisualizations(page, 11);
-});
+})
+
+  .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get(`/app/dashboards`));
+    await page.waitForSelector('#dashboardListingHeading');
+  })
+
+  .step('Go to Web Logs Dashboard', async ({ page }) => {
+    await page.click(subj('dashboardListingTitleLink-[Logs]-Web-Traffic'));
+    await waitForChrome(page);
+    await waitForVisualizations(page, 11);
+  });

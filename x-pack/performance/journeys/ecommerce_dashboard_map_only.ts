@@ -6,13 +6,21 @@
  */
 
 import { Journey } from '@kbn/journeys';
+import { subj } from '@kbn/test-subj-selector';
 import { waitForChrome, waitForVisualizations } from '../utils';
 
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce'],
   kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_map_only_dashboard'],
-}).step('Go to Ecommerce Dashboard', async ({ page, kbnUrl }) => {
-  await page.goto(kbnUrl.get(`/app/dashboards#/view/914d5090-55dd-11ed-989d-f3a363484c6c`));
-  await waitForChrome(page);
-  await waitForVisualizations(page, 1);
-});
+})
+
+  .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
+    await page.goto(kbnUrl.get(`/app/dashboards`));
+    await page.waitForSelector('#dashboardListingHeading');
+  })
+
+  .step('Go to Ecommerce No Map Dashboard', async ({ page, kbnUrl }) => {
+    await page.click(subj('dashboardListingTitleLink-[eCommerce]-Map-Only'));
+    await waitForChrome(page);
+    await waitForVisualizations(page, 1);
+  });
