@@ -1170,7 +1170,7 @@ export const tasks: TelemetryTask[] = [
           query: {
             bool: {
               filter: [
-                { range: { '@timestamp': { gte: 'now-1h' } } },
+                range1d,
                 { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
               ],
             },
