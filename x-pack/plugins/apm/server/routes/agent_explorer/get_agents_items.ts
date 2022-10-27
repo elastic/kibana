@@ -92,6 +92,11 @@ export async function getAgentsItems({
                 size: MAX_NUMBER_OF_SERVICES,
               },
               aggs: {
+                instances: {
+                  cardinality: {
+                    field: SERVICE_NODE_NAME,
+                  },
+                },
                 serviceNodes: {
                   terms: {
                     field: SERVICE_NODE_NAME,
@@ -150,6 +155,7 @@ export async function getAgentsItems({
         ),
         agentName: agent.agentName,
         agentVersion: agent.agentVersion,
+        instances: bucket.instances.value as number,
       };
     }) ?? []
   );

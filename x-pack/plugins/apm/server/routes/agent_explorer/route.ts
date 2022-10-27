@@ -40,6 +40,7 @@ const agentExplorerRoute = createApmServerRoute({
       agentName?: import('./../../../typings/es_schemas/ui/fields/agent').AgentName;
       agentVersion: string[];
       agentRepoUrl?: string;
+      instances: number;
     }>;
   }> {
     const {
@@ -84,15 +85,12 @@ const agentExplorerInstanceRoute = createApmServerRoute({
     query: t.intersection([environmentRt, kueryRt, rangeRt, probabilityRt]),
   }),
   async handler(resources): Promise<{
-    agentInstances: {
-      instances: number;
-      items: Array<{
-        serviceNode: string;
-        environments: string[];
-        agentVersion: string;
-        lastReport: string;
-      }>;
-    };
+    items: Array<{
+      serviceNode: string;
+      environments: string[];
+      agentVersion: string;
+      lastReport: string;
+    }>;
   }> {
     const {
       params,
@@ -110,7 +108,7 @@ const agentExplorerInstanceRoute = createApmServerRoute({
     ]);
 
     return {
-      agentInstances: await getAgentInstances({
+      items: await getAgentInstances({
         environment,
         serviceName,
         kuery,

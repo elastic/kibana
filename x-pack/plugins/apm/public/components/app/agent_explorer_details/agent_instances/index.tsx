@@ -11,12 +11,12 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
-  EuiLoadingSpinner,
   EuiPortal,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { AgentExplorerFieldName } from '../../../../../common/agent_explorer';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
@@ -25,7 +25,8 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { AgentIcon } from '../../../shared/agent_icon';
+import { ApmRoutes } from '../../../routing/apm_route_config';
+import { ServiceLink } from '../../../shared/service_link';
 import { StickyProperties } from '../../../shared/sticky_properties';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { AgentExplorerDocsLink } from '../../agent_explorer_docs_link';
@@ -36,7 +37,7 @@ import { AgentInstancesDetails } from './agent_instances_details';
 function useAgentInstancesFetcher({ serviceName }: { serviceName?: string }) {
   const {
     query: { environment, rangeFrom, rangeTo, kuery },
-  } = useApmParams('/agent-explorer');
+  } = useApmParams('/settings/agent-explorer');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -75,14 +76,14 @@ export function AgentContextualInformation({
   agentName,
   serviceName,
   agentRepoUrl,
-  isLoading,
   instances,
+  query,
 }: {
   agentName?: AgentName;
   serviceName?: string;
   agentRepoUrl?: string;
-  isLoading: boolean;
   instances?: number;
+  query: TypeOf<ApmRoutes, '/settings/agent-explorer'>['query'];
 }) {
   const stickyProperties = [
     {
@@ -91,14 +92,24 @@ export function AgentContextualInformation({
       }),
       fieldName: AgentExplorerFieldName.ServiceName,
       val: (
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <AgentIcon agentName={agentName} />
-          </EuiFlexItem>
-          <EuiFlexItem className="eui-textTruncate">
-            <span className="eui-textTruncate">{serviceName}</span>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <TruncateWithTooltip
+          data-test-subj="apmAgentExplorerListServiceLink"
+          text={formatString(serviceName)}
+          content={
+            <ServiceLink
+              agentName={agentName}
+              query={{
+                kuery: query.kuery,
+                serviceGroup: '',
+                rangeFrom: query.rangeFrom,
+                rangeTo: query.rangeTo,
+                environment: query.environment,
+                comparisonEnabled: true,
+              }}
+              serviceName={serviceName ?? ''}
+            />
+          }
+        />
       ),
       width: '25%',
     },
@@ -124,10 +135,7 @@ export function AgentContextualInformation({
       val: (
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem className="eui-textTruncate">
-            <span className="eui-textTruncate">
-              {isLoading && <EuiLoadingSpinner size="s" />}
-              {!isLoading && <>{instances}</>}
-            </span>
+            <span className="eui-textTruncate">{instances}</span>
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
@@ -166,6 +174,8 @@ interface Props {
 }
 
 export function AgentInstances({ agent, onClose }: Props) {
+  const { query } = useApmParams('/settings/agent-explorer');
+
   const instances = useAgentInstancesFetcher({
     serviceName: agent?.serviceName,
   });
@@ -200,14 +210,15 @@ export function AgentInstances({ agent, onClose }: Props) {
             agentName={agent?.agentName}
             serviceName={agent?.serviceName}
             agentRepoUrl={agent?.agentRepoUrl}
-            instances={instances.data?.agentInstances.instances}
-            isLoading={isLoading}
+            instances={agent?.instances}
+            query={query}
           />
           <EuiHorizontalRule margin="m" />
           <EuiSpacer size="m" />
           <AgentInstancesDetails
+            serviceName={agent?.serviceName}
             isLoading={isLoading}
-            items={instances.data?.agentInstances.items ?? []}
+            items={instances.data?.items ?? []}
           />
         </EuiFlyoutBody>
       </ResponsiveFlyout>

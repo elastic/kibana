@@ -22,13 +22,14 @@ import {
   SERVICE_NODE_NAME_MISSING,
 } from '../../../../../../common/service_nodes';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import { ServiceNodeMetricOverviewLink } from '../../../../shared/links/apm/service_node_metric_overview_link';
 import { unit } from '../../../../../utils/style';
 import { EnvironmentBadge } from '../../../../shared/environment_badge';
 import { ItemsBadge } from '../../../../shared/item_badge';
 import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 
 type AgentExplorerInstance = ValuesType<
-  APIReturnType<'GET /internal/apm/services/{serviceName}/agent_instances'>['agentInstances']['items']
+  APIReturnType<'GET /internal/apm/services/{serviceName}/agent_instances'>['items']
 >;
 
 enum AgentExplorerInstanceFieldName {
@@ -39,9 +40,9 @@ enum AgentExplorerInstanceFieldName {
   LastReport = 'lastReport',
 }
 
-export function getInstanceColumns(): Array<
-  EuiBasicTableColumn<AgentExplorerInstance>
-> {
+export function getInstanceColumns(
+  serviceName = ''
+): Array<EuiBasicTableColumn<AgentExplorerInstance>> {
   return [
     {
       field: AgentExplorerInstanceFieldName.InstanceName,
@@ -78,7 +79,12 @@ export function getInstanceColumns(): Array<
                 responsive={false}
               >
                 <EuiFlexItem className="eui-textTruncate">
-                  <span className="eui-textTruncate">{displayedName}</span>
+                  <ServiceNodeMetricOverviewLink
+                    serviceName={serviceName}
+                    serviceNodeName={serviceNode}
+                  >
+                    <span className="eui-textTruncate">{displayedName}</span>
+                  </ServiceNodeMetricOverviewLink>
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
@@ -140,11 +146,16 @@ export function getInstanceColumns(): Array<
 }
 
 interface Props {
+  serviceName?: string;
   items: AgentExplorerInstance[];
   isLoading: boolean;
 }
 
-export function AgentInstancesDetails({ items, isLoading }: Props) {
+export function AgentInstancesDetails({
+  serviceName,
+  items,
+  isLoading,
+}: Props) {
   if (isLoading) {
     return (
       <div style={{ width: '50%' }}>
@@ -159,7 +170,7 @@ export function AgentInstancesDetails({ items, isLoading }: Props) {
         defaultMessage: 'Agent Explorer',
       })}
       items={items}
-      columns={getInstanceColumns()}
+      columns={getInstanceColumns(serviceName)}
       pagination={{
         pageSizeOptions: [25, 50, 100],
       }}

@@ -72,11 +72,6 @@ export async function getAgentInstances({
         sample: {
           random_sampler: randomSampler,
           aggs: {
-            instances: {
-              cardinality: {
-                field: SERVICE_NODE_NAME,
-              },
-            },
             serviceNodes: {
               terms: {
                 field: SERVICE_NODE_NAME,
@@ -104,20 +99,16 @@ export async function getAgentInstances({
     },
   });
 
-  return {
-    instances: response.aggregations?.sample.instances.value as number,
-    items:
-      response.aggregations?.sample.serviceNodes.buckets.map(
-        (agentInstance) => ({
-          serviceNode: agentInstance.key as string,
-          environments: agentInstance.environments.buckets.map(
-            (environmentBucket) => environmentBucket.key as string
-          ),
-          agentVersion: agentInstance.sample.top[0].metrics[
-            AGENT_VERSION
-          ] as string,
-          lastReport: agentInstance.sample.top[0].sort[0] as string,
-        })
-      ) ?? [],
-  };
+  return (
+    response.aggregations?.sample.serviceNodes.buckets.map((agentInstance) => ({
+      serviceNode: agentInstance.key as string,
+      environments: agentInstance.environments.buckets.map(
+        (environmentBucket) => environmentBucket.key as string
+      ),
+      agentVersion: agentInstance.sample.top[0].metrics[
+        AGENT_VERSION
+      ] as string,
+      lastReport: agentInstance.sample.top[0].sort[0] as string,
+    })) ?? []
+  );
 }

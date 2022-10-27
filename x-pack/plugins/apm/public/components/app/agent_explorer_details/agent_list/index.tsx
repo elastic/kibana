@@ -25,9 +25,9 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { truncate, unit } from '../../../../utils/style';
 import { ApmRoutes } from '../../../routing/apm_route_config';
+import { AgentIcon } from '../../../shared/agent_icon';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ItemsBadge } from '../../../shared/item_badge';
-import { ServiceLink } from '../../../shared/service_link';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
 import { AgentExplorerDocsLink } from '../../agent_explorer_docs_link';
 import { AgentInstances } from '../agent_instances';
@@ -46,7 +46,7 @@ export function getAgentsColumns({
   query,
   onAgentSelected,
 }: {
-  query: TypeOf<ApmRoutes, '/agent-explorer'>['query'];
+  query: TypeOf<ApmRoutes, '/settings/agent-explorer'>['query'];
   onAgentSelected: (agent: AgentExplorerItem) => void;
 }): Array<EuiBasicTableColumn<AgentExplorerItem>> {
   return [
@@ -64,18 +64,14 @@ export function getAgentsColumns({
           data-test-subj="apmAgentExplorerListServiceLink"
           text={formatString(serviceName)}
           content={
-            <ServiceLink
-              agentName={agentName}
-              query={{
-                kuery: query.kuery,
-                serviceGroup: '',
-                rangeFrom: query.rangeFrom,
-                rangeTo: query.rangeTo,
-                environment: query.environment,
-                comparisonEnabled: true,
-              }}
-              serviceName={serviceName}
-            />
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <AgentIcon agentName={agentName} />
+              </EuiFlexItem>
+              <EuiFlexItem className="eui-textTruncate">
+                <span className="eui-textTruncate">{serviceName}</span>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           }
         />
       ),
@@ -93,6 +89,17 @@ export function getAgentsColumns({
       render: (_, { environments }) => (
         <EnvironmentBadge environments={environments ?? []} />
       ),
+    },
+    {
+      field: AgentExplorerFieldName.Instances,
+      name: i18n.translate(
+        'xpack.apm.agentExplorerTable.instancesColumnLabel',
+        {
+          defaultMessage: 'Instances',
+        }
+      ),
+      width: `${unit * 10}px`,
+      sortable: true,
     },
     {
       field: AgentExplorerFieldName.AgentName,
@@ -182,7 +189,7 @@ export function AgentList({ items, noItemsMessage, isLoading }: Props) {
     setSelectedAgent(undefined);
   };
 
-  const { query } = useApmParams('/agent-explorer');
+  const { query } = useApmParams('/settings/agent-explorer');
 
   const agentColumns = useMemo(
     () => getAgentsColumns({ query, onAgentSelected }),
@@ -205,7 +212,7 @@ export function AgentList({ items, noItemsMessage, isLoading }: Props) {
         }}
         sorting={{
           sort: {
-            field: AgentExplorerFieldName.Environments,
+            field: AgentExplorerFieldName.Instances,
             direction: 'desc',
           },
         }}
