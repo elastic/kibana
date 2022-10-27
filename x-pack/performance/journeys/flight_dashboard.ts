@@ -8,7 +8,7 @@
 import { Journey } from '@kbn/journeys';
 
 import { ToastsService } from '../services/toasts';
-import { waitForVisualizations } from '../utils';
+import { waitForChrome, waitForVisualizations } from '../utils';
 
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/flights'],
@@ -18,5 +18,6 @@ export const journey = new Journey({
   }),
 }).step('Go to Flights Dashboard', async ({ kbnUrl, page }) => {
   await page.goto(kbnUrl.get(`/app/dashboards#/view/7adfa750-4c81-11e8-b3d7-01146121b73d`));
+  await waitForChrome(page);
   await waitForVisualizations(page, 13);
 });

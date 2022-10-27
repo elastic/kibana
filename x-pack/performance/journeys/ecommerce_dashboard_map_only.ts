@@ -11,10 +11,10 @@ import { waitForChrome, waitForVisualizations } from '../utils';
 
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/ecommerce'],
-  kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_no_map_dashboard'],
+  kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_map_only_dashboard'],
 }).step('Go to Ecommerce Dashboard', async ({ page, kbnUrl }) => {
-  await page.goto(kbnUrl.get(`/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f`));
+  await page.goto(kbnUrl.get(`/app/dashboards#/view/914d5090-55dd-11ed-989d-f3a363484c6c`));
 
   await waitForChrome(page);
-  await waitForVisualizations(page, 12);
+  await waitForVisualizations(page, 1);
 });

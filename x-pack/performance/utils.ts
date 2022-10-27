@@ -7,6 +7,10 @@
 
 import { Page } from 'playwright';
 
+export async function waitForChrome(page: Page) {
+  return page.waitForSelector('#globalHeaderBars');
+}
+
 export async function waitForVisualizations(page: Page, visCount: number) {
   return await page.waitForFunction(function renderCompleted(cnt) {
     const visualizations = Array.from(document.querySelectorAll('[data-rendering-count]'));
