@@ -148,6 +148,7 @@ export const tasks: TelemetryTask[] = [
         await search({
           index: indices.transaction,
           body: {
+            timeout,
             query: {
               bool: {
                 filter: [
@@ -355,6 +356,7 @@ export const tasks: TelemetryTask[] = [
       const response = await search({
         index: [indices.transaction],
         body: {
+          timeout,
           query: {
             bool: {
               filter: [{ range: { '@timestamp': { gte: 'now-1d' } } }],
