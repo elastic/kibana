@@ -506,7 +506,14 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['*'],
-                privileges: ['write', 'monitor', 'manage_follow_index', 'manage_leader_index'],
+                privileges: [
+                  'write',
+                  'monitor',
+                  'manage_follow_index',
+                  'manage_leader_index',
+                  'read',
+                  'view_index_metadata',
+                ],
               },
             ],
           },
