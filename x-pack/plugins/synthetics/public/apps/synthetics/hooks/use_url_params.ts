@@ -15,9 +15,12 @@ function getParsedParams(search: string) {
 }
 
 export type GetUrlParams = () => SyntheticsUrlParams;
-export type UpdateUrlParams = (updatedParams: {
-  [key: string]: string | number | boolean | undefined;
-}) => void;
+export type UpdateUrlParams = (
+  updatedParams: {
+    [key: string]: string | number | boolean | undefined;
+  },
+  clearAllParams: boolean
+) => void;
 
 export type SyntheticsUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
 
@@ -32,7 +35,7 @@ export const useUrlParams: SyntheticsUrlParamsHook = () => {
   const history = useHistory();
 
   const updateUrlParams: UpdateUrlParams = useCallback(
-    (updatedParams, clear = false) => {
+    (updatedParams, clearAllParams = false) => {
       const currentParams = getParsedParams(search);
       const mergedParams = {
         ...currentParams,
@@ -56,7 +59,7 @@ export const useUrlParams: SyntheticsUrlParamsHook = () => {
 
       // only update the URL if the search has actually changed
       if (search !== updatedSearch) {
-        history.push({ pathname, search: !clear ? updatedSearch : undefined });
+        history.push({ pathname, search: !clearAllParams ? updatedSearch : undefined });
       }
     },
     [history, pathname, search]
