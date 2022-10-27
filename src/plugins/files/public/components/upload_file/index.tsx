@@ -10,6 +10,7 @@ import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Props } from './upload_file';
 
+export type { DoneNotification } from './upload_state';
 export type { Props as UploadFileProps };
 
 const UploadFileContainer = lazy(() => import('./upload_file'));

@@ -43,4 +43,7 @@ export const fileAlt = schema.maybe(
   })
 );
 
+export const page = schema.number({ min: 1, defaultValue: 1 });
+export const pageSize = schema.number({ min: 1, defaultValue: 100 });
+
 export const fileMeta = schema.maybe(schema.object({}, { unknowns: 'allow' }));

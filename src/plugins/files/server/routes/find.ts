@@ -11,6 +11,7 @@ import type { CreateHandler, FilesRouter } from './types';
 import { FileJSON } from '../../common';
 import { FILES_MANAGE_PRIVILEGE } from '../../common/constants';
 import { FILES_API_ROUTES, CreateRouteDefinition } from './api_routes';
+import { page, pageSize } from './common_schemas';
 
 const method = 'post' as const;
 
@@ -34,8 +35,8 @@ const rt = {
     meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   }),
   query: schema.object({
-    page: schema.maybe(schema.number()),
-    perPage: schema.maybe(schema.number({ defaultValue: 100 })),
+    page: schema.maybe(page),
+    perPage: schema.maybe(pageSize),
   }),
 };
 

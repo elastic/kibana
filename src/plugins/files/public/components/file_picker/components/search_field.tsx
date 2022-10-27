@@ -18,10 +18,11 @@ export const SearchField: FunctionComponent = () => {
   const query = useBehaviorSubject(state.query$);
   const isLoading = useBehaviorSubject(state.isLoading$);
   const hasFiles = useBehaviorSubject(state.hasFiles$);
+  const isUploading = useBehaviorSubject(state.isUploading$);
   return (
     <EuiFieldSearch
       data-test-subj="searchField"
-      disabled={!query && !hasFiles}
+      disabled={isUploading || (!query && !hasFiles)}
       isLoading={isLoading}
       value={query ?? ''}
       placeholder={i18nTexts.searchFieldPlaceholder}

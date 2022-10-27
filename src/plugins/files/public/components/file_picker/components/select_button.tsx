@@ -19,11 +19,12 @@ export interface Props {
 
 export const SelectButton: FunctionComponent<Props> = ({ onClick }) => {
   const { state } = useFilePickerContext();
+  const isUploading = useBehaviorSubject(state.isUploading$);
   const selectedFiles = useBehaviorSubject(state.selectedFileIds$);
   return (
     <EuiButton
       data-test-subj="selectButton"
-      disabled={!state.hasFilesSelected()}
+      disabled={isUploading || !state.hasFilesSelected()}
       onClick={() => onClick(selectedFiles)}
     >
       {selectedFiles.length > 1

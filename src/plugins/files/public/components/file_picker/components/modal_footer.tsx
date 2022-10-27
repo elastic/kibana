@@ -6,24 +6,72 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiModalFooter } from '@elastic/eui';
+import { EuiModalFooter } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { useCallback } from 'react';
 
+import { UploadFile } from '../../upload_file';
+import type { Props as FilePickerProps } from '../file_picker';
+import { useFilePickerContext } from '../context';
+import { i18nTexts } from '../i18n_texts';
 import { Pagination } from './pagination';
 import { SelectButton, Props as SelectButtonProps } from './select_button';
 
 interface Props {
+  kind: string;
   onDone: SelectButtonProps['onClick'];
+  onUpload?: FilePickerProps['onUpload'];
 }
 
-export const ModalFooter: FunctionComponent<Props> = ({ onDone }) => {
+export const ModalFooter: FunctionComponent<Props> = ({ kind, onDone, onUpload }) => {
+  const { state } = useFilePickerContext();
+  const onUploadStart = useCallback(() => state.setIsUploading(true), [state]);
+  const onUploadEnd = useCallback(() => state.setIsUploading(false), [state]);
   return (
     <EuiModalFooter>
-      <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
-        <Pagination />
-        <SelectButton onClick={onDone} />
-      </EuiFlexGroup>
+      <div
+        css={css`
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          align-items: center;
+          width: 100%;
+        `}
+      >
+        <div
+          css={css`
+            place-self: stretch;
+          `}
+        >
+          <UploadFile
+            onDone={(n) => {
+              state.selectFile(n.map(({ id }) => id));
+              state.resetFilters();
+              onUpload?.(n);
+            }}
+            onUploadStart={onUploadStart}
+            onUploadEnd={onUploadEnd}
+            kind={kind}
+            initialPromptText={i18nTexts.uploadFilePlaceholderText}
+            multiple
+            compressed
+          />
+        </div>
+        <div
+          css={css`
+            place-self: center;
+          `}
+        >
+          <Pagination />
+        </div>
+        <div
+          css={css`
+            place-self: end;
+          `}
+        >
+          <SelectButton onClick={onDone} />
+        </div>
+      </div>
     </EuiModalFooter>
   );
 };

@@ -78,6 +78,16 @@ export interface Props<Kind extends string = string> {
   onError?: (e: Error) => void;
 
   /**
+   * Will be called whenever an upload starts
+   */
+  onUploadStart?: () => void;
+
+  /**
+   * Will be called when attempt ends, in error otherwise
+   */
+  onUploadEnd?: () => void;
+
+  /**
    * Whether to display the component in it's compact form.
    *
    * @default false
@@ -106,6 +116,8 @@ export const UploadFile = <Kind extends string = string>({
   onError,
   fullWidth,
   allowClear,
+  onUploadEnd,
+  onUploadStart,
   compressed = false,
   kind: kindId,
   multiple = false,
@@ -137,9 +149,12 @@ export const UploadFile = <Kind extends string = string>({
       }),
       uploadState.done$.subscribe((n) => n && onDone(n)),
       uploadState.error$.subscribe((e) => e && onError?.(e)),
+      uploadState.uploading$.subscribe((uploading) =>
+        uploading ? onUploadStart?.() : onUploadEnd?.()
+      ),
     ];
     return () => subs.forEach((sub) => sub.unsubscribe());
-  }, [uploadState, onDone, onError]);
+  }, [uploadState, onDone, onError, onUploadStart, onUploadEnd]);
 
   useEffect(() => uploadState.dispose, [uploadState]);
 

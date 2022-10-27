@@ -44,4 +44,7 @@ export const i18nTexts = {
   clearFilterButton: i18n.translate('files.filePicker.clearFilterButtonLabel', {
     defaultMessage: 'Clear filter',
   }),
+  uploadFilePlaceholderText: i18n.translate('xpack.files.filePicker.uploadFilePlaceholderText', {
+    defaultMessage: 'Drag and drop to upload new files',
+  }),
 };

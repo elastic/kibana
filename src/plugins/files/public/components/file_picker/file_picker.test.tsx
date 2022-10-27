@@ -52,6 +52,7 @@ describe('FilePicker', () => {
       selectButton: `${baseTestSubj}.selectButton`,
       loadingSpinner: `${baseTestSubj}.loadingSpinner`,
       fileGrid: `${baseTestSubj}.fileGrid`,
+      paginationControls: `${baseTestSubj}.paginationControls`,
     };
 
     return {
@@ -127,5 +128,11 @@ describe('FilePicker', () => {
     actions.done();
     expect(onDone).toHaveBeenCalledTimes(1);
     expect(onDone).toHaveBeenNthCalledWith(1, ['a', 'b']);
+  });
+  it('hides pagination if there are no files', async () => {
+    client.list.mockImplementation(() => Promise.resolve({ files: [] as FileJSON[], total: 2 }));
+    const { actions, testSubjects, exists } = await initTestBed();
+    await actions.waitUntilLoaded();
+    expect(exists(testSubjects.paginationControls)).toBe(false);
   });
 });

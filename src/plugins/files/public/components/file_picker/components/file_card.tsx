@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { FunctionComponent } from 'react';
 import numeral from '@elastic/numeral';
 import useObservable from 'react-use/lib/useObservable';
@@ -27,8 +27,8 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
   const { kind, state, client } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
   const displayImage = isImage({ type: file.mimeType });
-
-  const isSelected = useObservable(state.watchFileSelected$(file.id), false);
+  const isSelected$ = useMemo(() => state.watchFileSelected$(file.id), [file.id, state]);
+  const isSelected = useObservable(isSelected$, false);
 
   const imageHeight = `calc(${euiTheme.size.xxxl} * 2)`;
   return (
