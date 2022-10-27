@@ -20,7 +20,7 @@ export const allowedExperimentalValues = Object.freeze({
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
   policyResponseInFleetEnabled: true,
-  chartEmbeddablesEnabled: true,
+  chartEmbeddablesEnabled: false,
 
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
