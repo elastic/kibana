@@ -22,43 +22,43 @@ export const node = `// ${i18n.translate(
 )}
 var apm = require('elastic-apm-node').start({
 
-// ${i18n.translate(
-  'xpack.apm.tutorial.nodeClient.configure.commands.setRequiredServiceNameComment',
-  {
-    defaultMessage: 'Override the service name from package.json',
-  }
-)}
-// ${i18n.translate(
-  'xpack.apm.tutorial.nodeClient.configure.commands.allowedCharactersComment',
-  {
-    defaultMessage: 'Allowed characters: a-z, A-Z, 0-9, -, _, and space',
-  }
-)}
-${nodeVariables.apmServiceName}: '{{{apmServiceName}}}',
+  // ${i18n.translate(
+    'xpack.apm.tutorial.nodeClient.configure.commands.setRequiredServiceNameComment',
+    {
+      defaultMessage: 'Override the service name from package.json',
+    }
+  )}
+  // ${i18n.translate(
+    'xpack.apm.tutorial.nodeClient.configure.commands.allowedCharactersComment',
+    {
+      defaultMessage: 'Allowed characters: a-z, A-Z, 0-9, -, _, and space',
+    }
+  )}
+  ${nodeVariables.apmServiceName}: '{{{apmServiceName}}}',
 
-// ${i18n.translate(
-  'xpack.apm.tutorial.nodeClient.configure.commands.useIfApmRequiresTokenComment',
-  {
-    defaultMessage: 'Use if APM Server requires a secret token',
-  }
-)}
-${nodeVariables.secretToken}: '{{{secretToken}}}',
+  // ${i18n.translate(
+    'xpack.apm.tutorial.nodeClient.configure.commands.useIfApmRequiresTokenComment',
+    {
+      defaultMessage: 'Use if APM Server requires a secret token',
+    }
+  )}
+  ${nodeVariables.secretToken}: '{{{secretToken}}}',
 
-// ${i18n.translate(
-  'xpack.apm.tutorial.nodeClient.configure.commands.setCustomApmServerUrlComment',
-  {
-    defaultMessage:
-      'Set the custom APM Server URL (default: {defaultApmServerUrl})',
-    values: { defaultApmServerUrl: 'http://localhost:8200' },
-  }
-)}
-${nodeVariables.apmServerUrl}: '{{{apmServerUrl}}}',
+  // ${i18n.translate(
+    'xpack.apm.tutorial.nodeClient.configure.commands.setCustomApmServerUrlComment',
+    {
+      defaultMessage:
+        'Set the custom APM Server URL (default: {defaultApmServerUrl})',
+      values: { defaultApmServerUrl: 'http://localhost:8200' },
+    }
+  )}
+  ${nodeVariables.apmServerUrl}: '{{{apmServerUrl}}}',
 
-// ${i18n.translate(
-  'xpack.apm.tutorial.nodeClient.configure.commands.setCustomServiceEnvironmentComment',
-  {
-    defaultMessage: 'Set the service environment',
-  }
-)}
-${nodeVariables.apmEnvironment}: '{{{apmEnvironment}}}'
+  // ${i18n.translate(
+    'xpack.apm.tutorial.nodeClient.configure.commands.setCustomServiceEnvironmentComment',
+    {
+      defaultMessage: 'Set the service environment',
+    }
+  )}
+  ${nodeVariables.apmEnvironment}: '{{{apmEnvironment}}}'
 })`;
