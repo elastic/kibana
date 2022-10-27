@@ -20,10 +20,6 @@ import { useWaterfallFetcher } from '../transaction_details/use_waterfall_fetche
 import { WaterfallWithSummary } from '../transaction_details/waterfall_with_summary';
 import { TraceSearchBox } from './trace_search_box';
 
-const INITIAL_DATA = {
-  traceSamples: [],
-};
-
 export function TraceExplorer() {
   const [query, setQuery] = useState<TraceSearchQuery>({
     query: '',
@@ -59,11 +55,7 @@ export function TraceExplorer() {
     rangeTo,
   });
 
-  const {
-    data = INITIAL_DATA,
-    status,
-    error,
-  } = useFetcher(
+  const { data, status, error } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/traces/find', {
         params: {
@@ -81,7 +73,7 @@ export function TraceExplorer() {
   );
 
   useEffect(() => {
-    const nextSample = data.traceSamples[0];
+    const nextSample = data?.traceSamples[0];
     const nextWaterfallItemId = '';
     history.replace({
       ...history.location,
@@ -142,7 +134,8 @@ export function TraceExplorer() {
       <EuiFlexItem>
         <WaterfallWithSummary
           waterfallFetchResult={waterfallFetchResult}
-          traceSamplesFetchResult={traceSamplesFetchResult}
+          traceSamples={traceSamplesFetchResult.data?.traceSamples}
+          traceSamplesFetchStatus={traceSamplesFetchResult.status}
           environment={environment}
           onSampleClick={(sample) => {
             push(history, {

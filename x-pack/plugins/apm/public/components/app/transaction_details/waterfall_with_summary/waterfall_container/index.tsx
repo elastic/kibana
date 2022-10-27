@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import { keyBy } from 'lodash';
-import { EuiCheckbox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { keyBy } from 'lodash';
+import React from 'react';
+import { useCriticalPathFeatureEnabledSetting } from '../../../../../hooks/use_critical_path_feature_enabled_setting';
+import { TechnicalPreviewBadge } from '../../../../shared/technical_preview_badge';
+import { Waterfall } from './waterfall';
 import {
   IWaterfall,
   WaterfallLegendType,
 } from './waterfall/waterfall_helpers/waterfall_helpers';
-import { Waterfall } from './waterfall';
 import { WaterfallLegends } from './waterfall_legends';
-import { useCriticalPathEnabledSetting } from '../../../../../hooks/use_critical_path_enabled_setting';
-import { TechnicalPreviewBadge } from '../../../../shared/technical_preview_badge';
 
 interface Props {
   waterfallItemId?: string;
@@ -33,7 +33,7 @@ export function WaterfallContainer({
   showCriticalPath,
   onShowCriticalPathChange,
 }: Props) {
-  const isCriticalPathEnabled = useCriticalPathEnabledSetting();
+  const isCriticalPathFeatureEnabled = useCriticalPathFeatureEnabledSetting();
 
   if (!waterfall) {
     return null;
@@ -85,9 +85,9 @@ export function WaterfallContainer({
 
   return (
     <EuiFlexGroup direction="column">
-      {isCriticalPathEnabled ? (
+      {isCriticalPathFeatureEnabled ? (
         <EuiFlexItem>
-          <EuiCheckbox
+          <EuiSwitch
             id="showCriticalPath"
             label={
               <EuiFlexGroup gutterSize="s">
@@ -97,7 +97,7 @@ export function WaterfallContainer({
                   })}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <TechnicalPreviewBadge />
+                  <TechnicalPreviewBadge icon="beaker" />
                 </EuiFlexItem>
               </EuiFlexGroup>
             }

@@ -117,7 +117,8 @@ export function TransactionDistribution({
           waterfallItemId={waterfallItemId}
           detailTab={detailTab as TransactionTab | undefined}
           waterfallFetchResult={waterfallFetchResult}
-          traceSamplesFetchResult={traceSamplesFetchResult}
+          traceSamplesFetchStatus={traceSamplesFetchResult.status}
+          traceSamples={traceSamplesFetchResult.data?.traceSamples}
           showCriticalPath={showCriticalPath}
           onShowCriticalPathChange={(nextShowCriticalPath) => {
             push(history, {

@@ -30,17 +30,19 @@ describe('getCriticalPath', () => {
     };
   }
   it('adds the only active span to the critical path', () => {
-    const a = apm.service('a', 'development', 'java').instance('a');
+    const service = apm.service('a', 'development', 'java').instance('a');
 
     const {
       criticalPath: { segments },
       waterfall,
     } = getCriticalPathFromEvents(
-      a
+      service
         .transaction('/service-a')
         .timestamp(1)
         .duration(100)
-        .children(a.span('foo', 'external', 'db').duration(100).timestamp(1))
+        .children(
+          service.span('foo', 'external', 'db').duration(100).timestamp(1)
+        )
         .serialize()
     );
 
@@ -52,19 +54,19 @@ describe('getCriticalPath', () => {
   });
 
   it('adds the span that ended last', () => {
-    const a = apm.service('a', 'development', 'java').instance('a');
+    const service = apm.service('a', 'development', 'java').instance('a');
 
     const {
       criticalPath: { segments },
       waterfall,
     } = getCriticalPathFromEvents(
-      a
+      service
         .transaction('/service-a')
         .timestamp(1)
         .duration(100)
         .children(
-          a.span('foo', 'external', 'db').duration(99).timestamp(1),
-          a.span('bar', 'external', 'db').duration(100).timestamp(1)
+          service.span('foo', 'external', 'db').duration(99).timestamp(1),
+          service.span('bar', 'external', 'db').duration(100).timestamp(1)
         )
         .serialize()
     );
@@ -86,17 +88,19 @@ describe('getCriticalPath', () => {
   });
 
   it('adds segment for uninstrumented gaps in the parent', () => {
-    const a = apm.service('a', 'development', 'java').instance('a');
+    const service = apm.service('a', 'development', 'java').instance('a');
 
     const {
       criticalPath: { segments },
       waterfall,
     } = getCriticalPathFromEvents(
-      a
+      service
         .transaction('/service-a')
         .timestamp(1)
         .duration(100)
-        .children(a.span('foo', 'external', 'db').duration(50).timestamp(11))
+        .children(
+          service.span('foo', 'external', 'db').duration(50).timestamp(11)
+        )
         .serialize()
     );
 
@@ -137,27 +141,27 @@ describe('getCriticalPath', () => {
   });
 
   it('only considers a single child to be active at the same time', () => {
-    const a = apm.service('a', 'development', 'java').instance('a');
+    const service = apm.service('a', 'development', 'java').instance('a');
 
     const {
       criticalPath: { segments },
       waterfall,
     } = getCriticalPathFromEvents(
-      a
+      service
         .transaction('s1')
         .timestamp(1)
         .duration(100)
         .children(
-          a.span('s2', 'external', 'db').duration(1).timestamp(1),
-          a.span('s3', 'external', 'db').duration(1).timestamp(2),
-          a.span('s4', 'external', 'db').duration(98).timestamp(3),
-          a
+          service.span('s2', 'external', 'db').duration(1).timestamp(1),
+          service.span('s3', 'external', 'db').duration(1).timestamp(2),
+          service.span('s4', 'external', 'db').duration(98).timestamp(3),
+          service
             .span('s5', 'external', 'db')
             .duration(98)
             .timestamp(1)
             .children(
-              a.span('s6', 'external', 'db').duration(30).timestamp(5),
-              a.span('s7', 'external', 'db').duration(30).timestamp(35)
+              service.span('s6', 'external', 'db').duration(30).timestamp(5),
+              service.span('s7', 'external', 'db').duration(30).timestamp(35)
             )
         )
         .serialize()
@@ -180,25 +184,25 @@ describe('getCriticalPath', () => {
 
   // https://www.uber.com/en-NL/blog/crisp-critical-path-analysis-for-microservice-architectures/
   it('correctly returns the critical path for the CRISP example', () => {
-    const a = apm.service('a', 'development', 'java').instance('a');
+    const service = apm.service('a', 'development', 'java').instance('a');
 
     const {
       criticalPath: { segments },
       waterfall,
     } = getCriticalPathFromEvents(
-      a
+      service
         .transaction('s1')
         .timestamp(1)
         .duration(100)
         .children(
-          a.span('s2', 'external', 'db').duration(25).timestamp(6),
-          a
+          service.span('s2', 'external', 'db').duration(25).timestamp(6),
+          service
             .span('s3', 'external', 'db')
             .duration(50)
             .timestamp(41)
             .children(
-              a.span('s4', 'external', 'db').duration(20).timestamp(61),
-              a.span('s5', 'external', 'db').duration(30).timestamp(51)
+              service.span('s4', 'external', 'db').duration(20).timestamp(61),
+              service.span('s5', 'external', 'db').duration(30).timestamp(51)
             )
         )
         .serialize()

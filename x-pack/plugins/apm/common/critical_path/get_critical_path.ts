@@ -63,6 +63,7 @@ export function getCriticalPath(waterfall: IWaterfall): CriticalPath {
           // the critical path, but we only want one to contribute.
           // - The span/tx ends before the start of the initial scan period.
           // - The span ends _after_ the current scan time.
+
           (
             normalizedChildStart >= scanTime ||
             normalizedChildEnd < start ||
