@@ -206,11 +206,15 @@ export class DetectionsTestService extends FtrService {
       alerts: indexedAlerts,
       cleanup: async (): Promise<void> => {
         if (indexedAlerts.length) {
+          this.log.info(`cleaning up loaded endpoint rule alerts`);
+
           await esClient.bulk({
             body: indexedAlerts.map((indexedDoc) => {
               return {
-                _index: indexedDoc._index,
-                _id: indexedDoc._id,
+                delete: {
+                  _index: indexedDoc._index,
+                  _id: indexedDoc._id,
+                },
               };
             }),
           });
