@@ -39,7 +39,9 @@ export const fetchIndices = async (
   // This call retrieves alias and settings information about indices
   // If we provide an override pattern with alwaysShowPattern we get everything and filter out hiddens.
   const expandWildcards: ExpandWildcard[] =
-    returnHiddenIndices || alwaysShowPattern?.alias_pattern ? ['hidden', 'all'] : ['open'];
+    returnHiddenIndices || alwaysShowPattern?.alias_pattern || alwaysShowPattern?.index_pattern
+      ? ['hidden', 'all']
+      : ['open'];
 
   const { allIndexMatches, indexAndAliasNames, indicesNames, alwaysShowMatchNames } =
     await getIndexData(
