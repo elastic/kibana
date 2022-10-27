@@ -257,4 +257,51 @@ describe('createActionEventLogRecordObject', () => {
       message: 'action execution start',
     });
   });
+
+  test('created action event "execute" with preconfigured connector', async () => {
+    expect(
+      createActionEventLogRecordObject({
+        actionId: '1',
+        name: 'test name',
+        action: 'execute',
+        message: 'action execution start',
+        namespace: 'default',
+        executionId: '123abc',
+        consumer: 'test-consumer',
+        isPreconfigured: true,
+        savedObjects: [
+          {
+            id: 'preconfigured_email',
+            type: 'action',
+            typeId: '.email',
+            relation: 'primary',
+          },
+        ],
+      })
+    ).toStrictEqual({
+      event: {
+        action: 'execute',
+        kind: 'action',
+      },
+      kibana: {
+        alert: {
+          rule: {
+            consumer: 'test-consumer',
+            execution: {
+              uuid: '123abc',
+            },
+          },
+        },
+        saved_objects: [
+          {
+            id: 'preconfigured_email',
+            rel: 'primary',
+            type: 'action',
+            type_id: '.email',
+          },
+        ],
+      },
+      message: 'action execution start',
+    });
+  });
 });

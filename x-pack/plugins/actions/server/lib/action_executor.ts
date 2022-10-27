@@ -139,7 +139,7 @@ export class ActionExecutor {
           source
         );
 
-        const { actionTypeId, name, config, secrets } = actionInfo;
+        const { actionTypeId, name, config, secrets, isPreconfigured } = actionInfo;
         const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
         let { logger } = this.actionExecutorContext!;
         logger = logger.get(loggerId);
@@ -180,6 +180,7 @@ export class ActionExecutor {
           ...task,
           executionId,
           spaceId,
+          isPreconfigured,
           savedObjects: [
             {
               type: 'action',
@@ -369,6 +370,7 @@ interface ActionInfo {
   config: unknown;
   secrets: unknown;
   actionId: string;
+  isPreconfigured: boolean;
 }
 
 async function getActionInfoInternal<Source = unknown>(
@@ -395,6 +397,7 @@ async function getActionInfoInternal<Source = unknown>(
       config: pcAction.config,
       secrets: pcAction.secrets,
       actionId,
+      isPreconfigured: true,
     };
   }
 
@@ -422,6 +425,7 @@ async function getActionInfoInternal<Source = unknown>(
     config,
     secrets,
     actionId,
+    isPreconfigured: false,
   };
 }
 

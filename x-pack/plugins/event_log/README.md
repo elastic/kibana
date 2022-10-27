@@ -141,7 +141,7 @@ Below is a document in the expected structure, with descriptions of the fields:
     saved_objects: [
       {
         rel: "'primary' | undefined; see below",
-        namespace: "${spaceId} | undefined",
+        space_ids: "array of space IDs for saved object"
         id: "saved object id",
         type: "saved object type",
         type_id: "rule type id if saved object type is "alert"",

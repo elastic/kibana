@@ -41,6 +41,13 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
             subject: 'hello from Kibana!',
             message: 'does this work??',
           },
+          relatedSavedObjects: [
+            {
+              id: 'abc',
+              type: 'alert',
+              space_ids: ['space-1', 'space-2'],
+            },
+          ],
         })
         .expect(200);
       expect(result.status).to.eql('success');
@@ -108,6 +115,11 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
         expect(hit?._source?.message).to.eql(
           `action executed: .email:my-test-email: TestEmail#xyz`
         );
+        // @ts-expect-error _source: unknown
+        expect(hit?._source?.kibana.saved_objects).to.eql([
+          { rel: 'primary', type: 'action', id: 'my-test-email', type_id: '.email' },
+          { rel: 'primary', type: 'alert', id: 'abc', space_ids: ['space-1', 'space-2'] },
+        ]);
       });
     });
 

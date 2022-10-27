@@ -255,9 +255,6 @@ test('successfully executes with preconfigured connector', async () => {
               Object {
                 "id": "preconfigured",
                 "rel": "primary",
-                "space_ids": Array [
-                  "some-namespace",
-                ],
                 "type": "action",
                 "type_id": "test",
               },
@@ -288,9 +285,6 @@ test('successfully executes with preconfigured connector', async () => {
               Object {
                 "id": "preconfigured",
                 "rel": "primary",
-                "space_ids": Array [
-                  "some-namespace",
-                ],
                 "type": "action",
                 "type_id": "test",
               },
@@ -711,9 +705,6 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
               Object {
                 "id": "preconfigured",
                 "rel": "primary",
-                "space_ids": Array [
-                  "some-namespace",
-                ],
                 "type": "action",
                 "type_id": "test",
               },
@@ -744,9 +735,6 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
               Object {
                 "id": "preconfigured",
                 "rel": "primary",
-                "space_ids": Array [
-                  "some-namespace",
-                ],
                 "type": "action",
                 "type_id": "test",
               },

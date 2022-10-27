@@ -25,6 +25,18 @@ export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDep
           requesterId: schema.string(),
           id: schema.string(),
           params: schema.recordOf(schema.string(), schema.any()),
+          relatedSavedObjects: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                space_ids: schema.arrayOf(schema.string({ minLength: 1 })),
+                id: schema.string({ minLength: 1 }),
+                type: schema.string({ minLength: 1 }),
+                // optional; for SO types like action/alert that have type id's
+                typeId: schema.maybe(schema.string({ minLength: 1 })),
+              }),
+              { defaultValue: [] }
+            )
+          ),
         }),
       },
     },
@@ -38,8 +50,10 @@ export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDep
 
       try {
         const unsecuredActionsClient = actions.getUnsecuredActionsClient();
-        const { requesterId, id, params } = body;
-        await unsecuredActionsClient.bulkEnqueueExecution(requesterId, [{ id, params }]);
+        const { requesterId, id, params, relatedSavedObjects } = body;
+        await unsecuredActionsClient.bulkEnqueueExecution(requesterId, [
+          { id, params, relatedSavedObjects },
+        ]);
 
         return res.ok({ body: { status: 'success' } });
       } catch (err) {

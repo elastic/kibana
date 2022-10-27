@@ -21,6 +21,7 @@ interface CreateActionEventLogRecordParams {
   timestamp?: string;
   spaceId?: string;
   consumer?: string;
+  isPreconfigured?: boolean;
   task?: {
     scheduled?: string;
     scheduleDelay?: number;
@@ -36,8 +37,17 @@ interface CreateActionEventLogRecordParams {
 }
 
 export function createActionEventLogRecordObject(params: CreateActionEventLogRecordParams): Event {
-  const { action, message, task, namespace, executionId, spaceId, consumer, relatedSavedObjects } =
-    params;
+  const {
+    action,
+    message,
+    task,
+    namespace,
+    executionId,
+    spaceId,
+    consumer,
+    isPreconfigured,
+    relatedSavedObjects,
+  } = params;
 
   const kibanaAlertRule = {
     ...(consumer ? { consumer } : {}),
@@ -63,7 +73,7 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
         type: so.type,
         id: so.id,
         type_id: so.typeId,
-        space_ids: [namespaceToSpaceId(namespace)],
+        ...(isPreconfigured ? {} : { space_ids: [namespaceToSpaceId(namespace)] }),
       })),
       ...(spaceId ? { space_ids: [spaceId] } : {}),
       ...(task ? { task: { scheduled: task.scheduled, schedule_delay: task.scheduleDelay } } : {}),
