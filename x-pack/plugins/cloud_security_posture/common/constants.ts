@@ -47,3 +47,11 @@ export const CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'csp-rule-template';
 
 export const CLOUDBEAT_VANILLA = 'cloudbeat/cis_k8s'; // Integration input
 export const CLOUDBEAT_EKS = 'cloudbeat/cis_eks'; // Integration input
+
+export const LOCAL_STORAGE_PAGE_SIZE_LATEST_FINDINGS_KEY = 'cloudPosture:latestFindings:pageSize';
+export const LOCAL_STORAGE_PAGE_SIZE_RESOURCE_FINDINGS_KEY =
+  'cloudPosture:resourceFindings:pageSize';
+export const LOCAL_STORAGE_PAGE_SIZE_FINDINGS_BY_RESOURCE_KEY =
+  'cloudPosture:findingsByResource:pageSize';
+export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pageSize';
+export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
