@@ -52,7 +52,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
     expect(hashMap).toMatchInlineSnapshot(`
       Object {
         "action": "7858e6d5a9f231bf23f6f2e57328eb0095b26735",
-        "action_task_params": "bbd38cbfd74bf6713586fe078e3fa92db2234299",
+        "action_task_params": "19cf33becf9295c7940f15a24887a67d1840fead",
         "alert": "48461f3375d9ba22882ea23a318b62a5b0921a9b",
         "api_key_pending_invalidation": "9b4bc1235337da9a87ef05a1d1f4858b2a3b77c6",
         "apm-indices": "ceb0870f3a74e2ffc3a1cd3a3c73af76baca0999",

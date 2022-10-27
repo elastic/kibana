@@ -2240,6 +2240,7 @@ describe('execute()', () => {
           id: 'some-id',
           typeId: 'some-type-id',
           type: 'some-type',
+          space_ids: ['default'],
         },
       ],
     });
