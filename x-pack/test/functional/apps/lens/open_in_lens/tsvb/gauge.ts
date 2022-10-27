@@ -118,7 +118,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await dimensions[0].click();
 
         await lens.openPalettePanel('lnsMetric');
-        const colorStops = await lens.getPaletteColorStops();
+        const colorStops = await lens.getPaletteColorStops(timeout);
 
         expect(colorStops).to.eql([
           { stop: '', color: 'rgba(104, 188, 0, 1)' },

@@ -153,9 +153,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(dimensions).to.have.length(2);
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
       expect(await dimensions[1].getVisibleText()).to.be('machine.os.raw: Descending');
-
-      expect((await lens.getMetricVisualizationData()).length).to.be.equal(6);
-      expect(await lens.getMetricVisualizationData()).to.eql([
+      const data = await lens.getMetricVisualizationData();
+      expect(data.length).to.be.equal(6);
+      expect(data).to.eql([
         {
           title: 'osx',
           subtitle: 'Average machine.ram',

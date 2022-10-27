@@ -156,7 +156,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await lens.waitForVisualization('xyVisChart', timeout);
       await retry.try(async () => {
-        expect(await lens.getLayerCount()).to.be(1);
+        expect(await lens.getLayerCount(timeout)).to.be(1);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
         expect(dimensions).to.have.length(3);
@@ -179,7 +179,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await lens.waitForVisualization('xyVisChart', timeout);
       await retry.try(async () => {
-        expect(await lens.getLayerCount()).to.be(1);
+        expect(await lens.getLayerCount(timeout)).to.be(1);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
         expect(dimensions).to.have.length(3);

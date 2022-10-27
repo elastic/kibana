@@ -71,8 +71,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
       expect(await dimensions[1].getVisibleText()).to.be('Static value: 1');
 
-      expect((await lens.getMetricVisualizationData()).length).to.be.equal(1);
-      expect(await lens.getMetricVisualizationData()).to.eql([
+      const data = await lens.getMetricVisualizationData();
+      expect(data.length).to.be.equal(1);
+      expect(data).to.eql([
         {
           title: 'Average machine.ram',
           subtitle: undefined,
@@ -101,8 +102,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await dimensions[1].getVisibleText()).to.be('Static value: 1');
       expect(await dimensions[2].getVisibleText()).to.be('@timestamp');
 
-      expect((await lens.getMetricVisualizationData()).length).to.be.equal(1);
-      expect(await lens.getMetricVisualizationData()).to.eql([
+      const data = await lens.getMetricVisualizationData();
+      expect(data.length).to.be.equal(1);
+      expect(data).to.eql([
         {
           title: 'Overall Max of Count',
           subtitle: undefined,
@@ -143,8 +145,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await dimensions[1].getVisibleText()).to.be('Static value: 1');
       expect(await dimensions[2].getVisibleText()).to.be('machine.os.raw: Descending');
 
-      expect((await lens.getMetricVisualizationData()).length).to.be.equal(6);
-      expect(await lens.getMetricVisualizationData()).to.eql([
+      const data = await lens.getMetricVisualizationData();
+      expect(data.length).to.be.equal(6);
+      expect(data).to.eql([
         {
           title: 'ios',
           subtitle: 'Average machine.ram',

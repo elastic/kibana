@@ -22,6 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const panelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const timeout = 250;
 
   describe('Dashboard to TSVB to Lens', function describeIndexTests() {
     before(async () => {
@@ -46,9 +47,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.clickEdit();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', 250);
+      await lens.waitForVisualization('xyVisChart', timeout);
       await retry.try(async () => {
-        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', 250);
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
         expect(await dimensions[1].getVisibleText()).to.be('Count of records');
       });
 
@@ -74,9 +75,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.clickEdit();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('legacyMtrVis', 250);
+      await lens.waitForVisualization('legacyMtrVis', timeout);
       await retry.try(async () => {
-        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', 250);
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
         expect(await dimensions[1].getVisibleText()).to.be('Count of records');
       });
 
@@ -86,7 +87,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(embeddableCount).to.eql(originalEmbeddableCount);
       });
 
-      const panel = await testSubjects.find(`embeddablePanelHeading-`, 250);
+      const panel = await testSubjects.find(`embeddablePanelHeading-`, timeout);
       const descendants = await testSubjects.findAllDescendant(
         'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
         panel
