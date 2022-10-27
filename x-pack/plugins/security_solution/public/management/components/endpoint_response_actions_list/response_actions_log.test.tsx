@@ -21,6 +21,7 @@ import { getActionListMock } from './mocks';
 import { useGetEndpointsList } from '../../hooks/endpoint/use_get_endpoints_list';
 import uuid from 'uuid';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../common/endpoint/service/response_actions/constants';
+import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
 
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
@@ -113,9 +114,15 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
 
 jest.mock('../../hooks/endpoint/use_get_endpoints_list');
 
+jest.mock('../../../common/components/user_privileges');
+
 const mockUseGetEndpointsList = useGetEndpointsList as jest.Mock;
 
 describe('Response actions history', () => {
+  const useUserPrivilegesMock = _useUserPrivileges as jest.Mock<
+    ReturnType<typeof _useUserPrivileges>
+  >;
+
   const testPrefix = 'response-actions-list';
 
   let render: (
@@ -407,6 +414,72 @@ describe('Response actions history', () => {
           'Output:',
         ]
       );
+    });
+
+    it('should contain download link in expanded row for `get-file` action WITH file operation permission', async () => {
+      const privileges = useUserPrivilegesMock();
+
+      useUserPrivilegesMock.mockImplementationOnce(() => {
+        return {
+          ...privileges,
+          endpointPrivileges: {
+            ...privileges.endpointPrivileges,
+            canWriteFileOperations: true,
+          },
+        };
+      });
+
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
+      };
+
+      render();
+      const { getAllByTestId } = renderResult;
+
+      const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
+      expandButtons.map((button) => userEvent.click(button));
+      const trays = getAllByTestId(`${testPrefix}-details-tray`);
+      expect(trays).toBeTruthy();
+      expect(
+        Array.from(trays[0].querySelectorAll('dd pre code'))
+          .map((title) => title.textContent)
+          .slice(-1)
+      ).toEqual([
+        'get-file completed successfullyClick here to download(ZIP file passcode: elastic)',
+      ]);
+    });
+
+    it('should not contain download link in expanded row for `get-file` action when NO file operation permission', async () => {
+      const privileges = useUserPrivilegesMock();
+
+      useUserPrivilegesMock.mockImplementationOnce(() => {
+        return {
+          ...privileges,
+          endpointPrivileges: {
+            ...privileges.endpointPrivileges,
+            canWriteFileOperations: false,
+          },
+        };
+      });
+
+      mockUseGetEndpointActionList = {
+        ...baseMockedActionList,
+        data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
+      };
+
+      render();
+      const { getAllByTestId } = renderResult;
+
+      const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
+      expandButtons.map((button) => userEvent.click(button));
+      const trays = getAllByTestId(`${testPrefix}-details-tray`);
+      expect(trays).toBeTruthy();
+      expect(
+        Array.from(trays[0].querySelectorAll('dd pre code'))
+          .map((title) => title.textContent)
+          .slice(-1)
+      ).toEqual(['get-file completed successfully']);
     });
 
     it('should refresh data when autoRefresh is toggled on', async () => {
