@@ -53,3 +53,9 @@ export const UPGRADE_CONFIRMARION_MODAL = (riskScoreEntity: RiskScoreEntity) =>
 export const UPGRADE_CONFIRMATION_BUTTON = '[data-test-subj="confirmModalConfirmButton"]';
 
 export const UPGRADE_CANCELLATION_BUTTON = '[data-test-subj="confirmModalCancelButton"]';
+
+export const USERS_TABLE_ALERT_CELL =
+  '[data-test-subj="entity_analytics_users"] [data-test-subj="risk-score-alerts"]';
+
+export const HOSTS_TABLE_ALERT_CELL =
+  '[data-test-subj="entity_analytics_hosts"] [data-test-subj="risk-score-alerts"]';
