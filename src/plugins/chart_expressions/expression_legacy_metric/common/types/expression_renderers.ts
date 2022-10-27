@@ -30,6 +30,7 @@ export type MetricStyle = Style & Pick<ChartStyle, 'bgColor' | 'labelColor'>;
 
 export type LabelsConfig = Labels & { style: Style; position: LabelPositionType };
 export interface MetricVisParam {
+  alignment?: 'left' | 'center';
   percentageMode: boolean;
   percentageFormatPattern?: string;
   metricColorMode: ColorMode;
