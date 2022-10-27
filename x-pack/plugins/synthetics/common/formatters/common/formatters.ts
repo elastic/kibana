@@ -33,7 +33,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.CUSTOM_HEARTBEAT_ID]: null,
   [ConfigKey.ORIGINAL_SPACE]: null,
   [ConfigKey.CONFIG_HASH]: null,
-  [ConfigKey.ID]: null,
+  [ConfigKey.HEARTBEAT_ID]: null,
 };
 
 export const arrayToJsonFormatter = (value: string[] = []) =>

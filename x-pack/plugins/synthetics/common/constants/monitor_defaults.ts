@@ -48,7 +48,7 @@ export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.UI,
   [ConfigKey.JOURNEY_ID]: '',
   [ConfigKey.CONFIG_HASH]: '',
-  [ConfigKey.ID]: '',
+  [ConfigKey.HEARTBEAT_ID]: '',
 };
 
 export const DEFAULT_BROWSER_ADVANCED_FIELDS: BrowserAdvancedFields = {
