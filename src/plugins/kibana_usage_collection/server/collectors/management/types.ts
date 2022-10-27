@@ -44,7 +44,7 @@ export interface UsageStats {
   'observability:enableServiceGroups': boolean;
   'observability:apmEnableServiceMetrics': boolean;
   'observability:enableInfrastructureHostsView': boolean;
-  'observability:apmEnableAgentExplorerView': boolean;
+  'observability:apmAgentExplorerView': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
