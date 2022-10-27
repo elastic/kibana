@@ -52,13 +52,17 @@ export const InspectorFlyoutContent: FC<Props> = ({
   onCancel,
 }) => {
   const i18nTexts = getI18nTexts({ entityName: 'Dashboard' });
-  const [isSaving] = useState(false);
-  const [isSubmitting] = useState(false);
-  const [hasErrors] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const form = useMetadataForm({ item });
 
-  const onClickSave = useCallback(() => {
-    return onSave?.({ title: form.title, description: form.description });
+  const onClickSave = useCallback(async () => {
+    if (form.isValid) {
+      setIsSubmitting(true);
+      await onSave?.({ title: form.title.value, description: form.description.value });
+      setIsSubmitting(false);
+    }
+    setIsSubmitted(true);
   }, [form, onSave]);
 
   const onClickCancel = useCallback(() => {
@@ -100,8 +104,8 @@ export const InspectorFlyoutContent: FC<Props> = ({
                   onClick={onClickSave}
                   data-test-subj="fieldSaveButton"
                   fill
-                  disabled={hasErrors}
-                  isLoading={isSaving || isSubmitting}
+                  disabled={isSubmitted && !form.isValid}
+                  isLoading={isSubmitting}
                 >
                   {i18nTexts.saveButtonLabel}
                 </EuiButton>

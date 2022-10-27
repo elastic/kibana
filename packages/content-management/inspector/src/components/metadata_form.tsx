@@ -18,19 +18,19 @@ interface Props {
 }
 
 export const MetadataForm: FC<Props> = ({ form, isReadonly }) => {
-  const { errors, title, setTitle, description, setDescription } = form;
+  const { title, setTitle, description, setDescription } = form;
 
   return (
     <>
       <EuiFormRow
         label="Name"
-        error={errors.title?.message}
-        isInvalid={Boolean(errors.title)}
+        error={title.errorMessage}
+        isInvalid={!title.isChangingValue && !title.isValid}
         fullWidth
       >
         <EuiFieldText
-          isInvalid={Boolean(errors.title)}
-          value={title}
+          isInvalid={!title.isChangingValue && !title.isValid}
+          value={title.value}
           onChange={(e) => {
             setTitle(e.target.value);
           }}
@@ -44,13 +44,13 @@ export const MetadataForm: FC<Props> = ({ form, isReadonly }) => {
 
       <EuiFormRow
         label="Description"
-        error={errors.description?.message}
-        isInvalid={Boolean(errors.description)}
+        error={description.errorMessage}
+        isInvalid={!description.isChangingValue && !description.isValid}
         fullWidth
       >
         <EuiTextArea
-          isInvalid={Boolean(errors.description)}
-          value={description}
+          isInvalid={!description.isChangingValue && !description.isValid}
+          value={description.value}
           onChange={(e) => {
             setDescription(e.target.value);
           }}
