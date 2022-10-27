@@ -16,7 +16,6 @@ export class ServerlessFunction extends Entity<ApmFields> {
       ...this.fields,
       ['service.node.name']: instanceName,
       'host.name': instanceName,
-      'host.architecture': 'arm',
       ...apmFields,
     });
   }
@@ -27,11 +26,13 @@ export function serverlessFunction({
   serviceName,
   environment,
   agentName,
+  architecture = 'arm',
 }: {
   functionName: string;
   environment: string;
   agentName: string;
   serviceName?: string;
+  architecture?: string;
 }) {
   const faasId = `arn:aws:lambda:us-west-2:001:function:${functionName}`;
   return new ServerlessFunction({
@@ -41,5 +42,6 @@ export function serverlessFunction({
     'service.environment': environment,
     'agent.name': agentName,
     'service.runtime.name': 'AWS_lambda',
+    'host.architecture': architecture,
   });
 }

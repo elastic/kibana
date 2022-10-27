@@ -103,6 +103,7 @@ export async function getServiceMetadataDetails({
         ProcessorEvent.metric,
       ],
     },
+    sort: [{ '@timestamp': { order: 'desc' as const } }],
     body: {
       track_total_hits: 1,
       size: 1,

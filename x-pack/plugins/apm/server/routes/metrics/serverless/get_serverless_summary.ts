@@ -57,7 +57,7 @@ async function getTransactionThroughput({
       query: {
         bool: {
           filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
+            ...termQuery(SERVICE_NAME, serviceName),
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
