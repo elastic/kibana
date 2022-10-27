@@ -8,8 +8,7 @@
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import type { FluidDragActions } from 'react-beautiful-dnd';
-import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
-
+import { useKibana } from '../../../../lib/kibana';
 import { draggableKeyDownHandler } from '../helpers';
 
 export interface UseDraggableKeyboardWrapperProps {
@@ -32,6 +31,8 @@ export const useDraggableKeyboardWrapper = ({
   keyboardHandlerRef,
   openPopover,
 }: UseDraggableKeyboardWrapperProps): UseDraggableKeyboardWrapper => {
+  const { timelines } = useKibana().services;
+  const useAddToTimeline = timelines.getUseAddToTimeline();
   const { beginDrag, cancelDrag, dragToLocation, endDrag, hasDraggableLock } = useAddToTimeline({
     draggableId,
     fieldName,

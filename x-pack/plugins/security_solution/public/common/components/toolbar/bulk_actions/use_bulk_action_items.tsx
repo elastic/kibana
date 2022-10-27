@@ -7,6 +7,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
+import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import type { SetEventsDeleted, SetEventsLoading } from '../../../../../common/types/bulk_actions';
 import * as i18n from './translations';
 import { useUpdateAlertsStatus } from './use_update_alerts';
@@ -36,10 +37,6 @@ export interface BulkActionsProps {
   onUpdateFailure?: OnUpdateAlertStatusError;
   customBulkActions?: CustomBulkActionProp[];
 }
-
-const FILTER_ACKNOWLEDGED: AlertWorkflowStatus = 'acknowledged';
-const FILTER_OPEN: AlertWorkflowStatus = 'open';
-const FILTER_CLOSED: AlertWorkflowStatus = 'closed';
 
 export const useBulkActionItems = ({
   eventIds,
@@ -161,7 +158,7 @@ export const useBulkActionItems = ({
           <EuiContextMenuItem
             key="open"
             data-test-subj="open-alert-status"
-            onClick={() => onClickUpdate(FILTER_OPEN)}
+            onClick={() => onClickUpdate(FILTER_OPEN as AlertWorkflowStatus)}
           >
             {i18n.BULK_ACTION_OPEN_SELECTED}
           </EuiContextMenuItem>
@@ -172,7 +169,7 @@ export const useBulkActionItems = ({
           <EuiContextMenuItem
             key="acknowledge"
             data-test-subj="acknowledged-alert-status"
-            onClick={() => onClickUpdate(FILTER_ACKNOWLEDGED)}
+            onClick={() => onClickUpdate(FILTER_ACKNOWLEDGED as AlertWorkflowStatus)}
           >
             {i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED}
           </EuiContextMenuItem>
@@ -183,7 +180,7 @@ export const useBulkActionItems = ({
           <EuiContextMenuItem
             key="close"
             data-test-subj="close-alert-status"
-            onClick={() => onClickUpdate(FILTER_CLOSED)}
+            onClick={() => onClickUpdate(FILTER_CLOSED as AlertWorkflowStatus)}
           >
             {i18n.BULK_ACTION_CLOSE_SELECTED}
           </EuiContextMenuItem>

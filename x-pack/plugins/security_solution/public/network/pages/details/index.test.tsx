@@ -23,7 +23,7 @@ import type { State } from '../../../common/store';
 import { createStore } from '../../../common/store';
 import { NetworkDetails } from '.';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
+import { tGridReducer } from '../../../common/store/data_table/reducer';
 
 jest.mock('../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn().mockReturnValue({
@@ -85,12 +85,6 @@ jest.mock('../../../common/lib/kibana', () => {
     useKibana: () => ({
       services: {
         ...original.useKibana().services,
-        timelines: {
-          getUseDraggableKeyboardWrapper: () => () => ({
-            onBlur: jest.fn,
-            onKeyDown: jest.fn,
-          }),
-        },
       },
     }),
   };

@@ -24,7 +24,6 @@ export type {
   QueryMatch,
   RowRenderer,
   TimelineType,
-  CustomBulkActionProp,
 } from './types';
 
 export { IS_OPERATOR, EXISTS_OPERATOR, DataProviderType } from './types';

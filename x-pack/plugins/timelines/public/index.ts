@@ -55,9 +55,4 @@ export function plugin() {
   return new TimelinesPlugin();
 }
 
-export {
-  addFieldToTimelineColumns,
-  getTimelineIdFromColumnDroppableId,
-} from './components/drag_and_drop/helpers';
-
 export type { AddToTimelineButtonProps } from './components/hover_actions/actions/add_to_timeline';

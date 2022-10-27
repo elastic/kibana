@@ -14,10 +14,6 @@ import type { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
-import {
-  addFieldToTimelineColumns,
-  getTimelineIdFromColumnDroppableId,
-} from '@kbn/timelines-plugin/public';
 import type { BeforeCapture } from './drag_drop_context';
 import type { BrowserFields } from '../../containers/source';
 import { dragAndDropSelectors } from '../../store';
@@ -43,6 +39,10 @@ import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultAlertsHeaders } from '../events_viewer/default_alert_headers';
+import {
+  addFieldToTimelineColumns,
+  getTimelineIdFromColumnDroppableId,
+} from '../data_table/drag_and_drop';
 
 // @ts-expect-error
 window['__react-beautiful-dnd-disable-dev-warnings'] = true;

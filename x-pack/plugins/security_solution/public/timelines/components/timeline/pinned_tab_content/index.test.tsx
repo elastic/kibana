@@ -24,7 +24,6 @@ import { mockSourcererScope } from '../../../../common/containers/sourcerer/mock
 import type { Props as PinnedTabContentComponentProps } from '.';
 import { PinnedTabContentComponent } from '.';
 import { Direction } from '../../../../../common/search_strategy';
-import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '@kbn/timelines-plugin/public/components';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 
 jest.mock('../../../containers', () => ({
@@ -70,7 +69,6 @@ jest.mock('../../../../common/lib/kibana', () => {
         timelines: {
           getLastUpdated: jest.fn(),
           getFieldBrowser: jest.fn(),
-          getUseDraggableKeyboardWrapper: () => mockUseDraggableKeyboardWrapper,
         },
         triggersActionsUi: { getFieldBrowser: jest.fn() },
       },

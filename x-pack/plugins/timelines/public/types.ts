@@ -17,10 +17,6 @@ import type { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to
 import { HoverActionsConfig } from './components/hover_actions';
 import { LastUpdatedAtProps } from './components/last_updated';
 import { LoadingPanelProps } from './components/loading';
-import {
-  UseDraggableKeyboardWrapper,
-  UseDraggableKeyboardWrapperProps,
-} from './components/drag_and_drop';
 export interface TimelinesUIStart {
   getHoverActions: () => HoverActionsConfig;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -29,9 +25,6 @@ export interface TimelinesUIStart {
   getLastUpdated: (props: LastUpdatedAtProps) => ReactElement<LastUpdatedAtProps>;
   getUseAddToTimeline: () => (props: UseAddToTimelineProps) => UseAddToTimeline;
   getUseAddToTimelineSensor: () => (api: SensorAPI) => void;
-  getUseDraggableKeyboardWrapper: () => (
-    props: UseDraggableKeyboardWrapperProps
-  ) => UseDraggableKeyboardWrapper;
   setTimelineEmbeddedStore: (store: Store) => void;
 }
 

@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import type { Status } from '../detection_engine/schemas/common';
+
 export * from './timeline';
 export * from './data_table';
 export * from './detail_panel';
 export * from './header_actions';
 export * from './session_view';
+
+export const FILTER_OPEN: Status = 'open';
+export const FILTER_CLOSED: Status = 'closed';
+export const FILTER_ACKNOWLEDGED: Status = 'acknowledged';

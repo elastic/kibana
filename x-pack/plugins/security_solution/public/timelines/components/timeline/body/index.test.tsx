@@ -33,9 +33,9 @@ import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
-import { tGridReducer } from '@kbn/timelines-plugin/public';
 import { mount } from 'enzyme';
 import type { UseFieldBrowserOptionsProps } from '../../fields_browser';
+import { tGridReducer } from '../../../../common/store/data_table/reducer';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/components/user_privileges', () => {
@@ -84,11 +84,6 @@ jest.mock('../../../../common/lib/kibana', () => {
           getLastUpdated: jest.fn(),
           getLoadingPanel: jest.fn(),
           getFieldBrowser: jest.fn(),
-          getUseDraggableKeyboardWrapper: () =>
-            jest.fn().mockReturnValue({
-              onBlur: jest.fn(),
-              onKeyDown: jest.fn(),
-            }),
         },
       },
     }),

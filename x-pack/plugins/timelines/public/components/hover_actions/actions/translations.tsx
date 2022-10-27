@@ -23,3 +23,9 @@ export const COPY_TO_CLIPBOARD = i18n.translate(
     defaultMessage: 'Copy to Clipboard',
   }
 );
+
+export const SUCCESS_TOAST_TITLE = (field: string) =>
+  i18n.translate('xpack.timelines.clipboard.copy.successToastTitle', {
+    values: { field },
+    defaultMessage: 'Copied field {field} to the clipboard',
+  });

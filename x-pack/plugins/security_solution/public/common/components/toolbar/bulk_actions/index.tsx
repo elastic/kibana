@@ -13,7 +13,7 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import * as i18n from './translations';
 
-export interface BulkActionsProps {
+interface OwnProps {
   totalItems: number;
   selectedCount: number;
   showClearSelection: boolean;
@@ -32,7 +32,7 @@ BulkActionsContainer.displayName = 'BulkActionsContainer';
 /**
  * Stateless component integrating the bulk actions menu and the select all button
  */
-const BulkActionsComponent: React.FC<BulkActionsProps> = ({
+const BulkActionsComponent: React.FC<OwnProps> = ({
   selectedCount,
   totalItems,
   showClearSelection,

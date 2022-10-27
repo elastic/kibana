@@ -12,7 +12,6 @@ import type { TimelinesUIStart, TimelinesStartPlugins } from './types';
 import { useAddToTimeline, useAddToTimelineSensor } from './hooks/use_add_to_timeline';
 import { getHoverActions, HoverActionsConfig } from './components/hover_actions';
 import { timelineReducer } from './store/timeline/reducer';
-import { useDraggableKeyboardWrapper } from './components/drag_and_drop';
 import { LoadingPanelProps } from './components/loading';
 import { LastUpdatedAtProps } from './components/last_updated';
 
@@ -49,9 +48,6 @@ export class TimelinesPlugin implements Plugin<void, TimelinesUIStart> {
       },
       getUseAddToTimelineSensor: () => {
         return useAddToTimelineSensor;
-      },
-      getUseDraggableKeyboardWrapper: () => {
-        return useDraggableKeyboardWrapper;
       },
       setTimelineEmbeddedStore: (store: Store) => {
         this.setStore(store);

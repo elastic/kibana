@@ -23,7 +23,6 @@ import { useTimelineEvents } from '../../../containers';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
-import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '@kbn/timelines-plugin/public/components';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 
 jest.mock('../../../containers', () => ({
@@ -75,7 +74,6 @@ jest.mock('../../../../common/lib/kibana', () => {
         },
         timelines: {
           getLastUpdated: jest.fn(),
-          getUseDraggableKeyboardWrapper: () => mockUseDraggableKeyboardWrapper,
         },
         triggersActionsUi: {
           getFieldBrowser: jest.fn(),

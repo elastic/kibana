@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export const mockTimelines = {
-  getLastUpdated: jest.fn(),
-  getLoadingPanel: jest.fn(),
-};
+/*
+ *  Timeline IDs
+ */
+
+export enum TimelineId {
+  active = 'timeline-1',
+  casePage = 'timeline-case',
+  test = 'timeline-test', // Reserved for testing purposes
+}

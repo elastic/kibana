@@ -7,9 +7,9 @@
 
 import { omit } from 'lodash/fp';
 import type { DropResult } from 'react-beautiful-dnd';
-import { getTimelineIdFromColumnDroppableId } from '@kbn/timelines-plugin/public';
 
 import type { IdToDataProvider } from '../../store/drag_and_drop/model';
+import { getTimelineIdFromColumnDroppableId } from '../data_table/drag_and_drop';
 
 import {
   addProviderToTimeline,

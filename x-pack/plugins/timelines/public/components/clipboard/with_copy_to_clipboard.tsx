@@ -8,8 +8,8 @@
 import { EuiToolTip } from '@elastic/eui';
 
 import React from 'react';
-import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
-import { COPY_TO_CLIPBOARD } from '../actions/translations';
+import { COPY_TO_CLIPBOARD } from '../hover_actions/actions/translations';
+import { TooltipWithKeyboardShortcut } from '../tooltip_with_keyboard_shortcut';
 
 import { Clipboard } from './clipboard';
 

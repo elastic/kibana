@@ -6,7 +6,6 @@
  */
 
 import type { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
-import type { CustomBulkAction } from '@kbn/timelines-plugin/common/types';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
 import type { JSXElementConstructor } from 'react';
 import type { OnRowSelected } from '..';
@@ -18,7 +17,7 @@ import type {
 import type { ColumnHeaderOptions } from '../../data_table/columns';
 import type { Ecs } from '../../ecs';
 import type { BrowserFields, TimelineNonEcsData } from '../../search_strategy';
-import type { SetEventsDeleted, SetEventsLoading } from '../bulk_actions';
+import type { CustomBulkAction, SetEventsDeleted, SetEventsLoading } from '../bulk_actions';
 import type { SortColumnTable } from '../data_table';
 
 export interface HeaderActionProps {

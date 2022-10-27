@@ -9,19 +9,7 @@ import { EuiDataGridColumn, EuiDataGridColumnCellActionProps } from '@elastic/eu
 import { IFieldSubType } from '@kbn/es-query';
 import { ReactNode } from 'react';
 import { Ecs } from '../../../ecs';
-import { BrowserFields, TimelineItem, TimelineNonEcsData } from '../../../search_strategy';
-export interface CustomBulkAction {
-  key: string;
-  label: string;
-  disableOnQuery?: boolean;
-  disabledLabel?: string;
-  onClick: (items?: TimelineItem[]) => void;
-  ['data-test-subj']?: string;
-}
-
-export type CustomBulkActionProp = Omit<CustomBulkAction, 'onClick'> & {
-  onClick: (eventIds: string[]) => void;
-};
+import { BrowserFields, TimelineNonEcsData } from '../../../search_strategy';
 
 /** The default minimum width of a column (when a width for the column type is not specified) */
 export const DEFAULT_COLUMN_MIN_WIDTH = 180; // px
