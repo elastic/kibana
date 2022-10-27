@@ -27,6 +27,9 @@ jest.mock('../../hooks/use_request', () => {
         ],
       },
     }),
+    useGetSettings: jest.fn().mockReturnValue({
+      data: { item: { fleet_server_hosts: ['test'] } },
+    }),
     sendGetOneAgentPolicy: jest.fn().mockResolvedValue({
       data: { item: { package_policies: [] } },
     }),

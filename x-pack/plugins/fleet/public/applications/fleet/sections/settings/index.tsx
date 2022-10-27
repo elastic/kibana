@@ -12,7 +12,6 @@ import { Router, Route, Switch, useHistory, Redirect } from 'react-router-dom';
 import {
   useBreadcrumbs,
   useGetOutputs,
-  useGetSettings,
   useGetDownloadSources,
   useGetFleetServerHosts,
 } from '../../hooks';
@@ -33,7 +32,6 @@ export const SettingsApp = withConfirmModalProvider(() => {
   useBreadcrumbs('settings');
   const history = useHistory();
 
-  const settings = useGetSettings();
   const outputs = useGetOutputs();
   const fleetServerHosts = useGetFleetServerHosts();
   const downloadSources = useGetDownloadSources();
@@ -42,28 +40,18 @@ export const SettingsApp = withConfirmModalProvider(() => {
   const { deleteDownloadSource } = useDeleteDownloadSource(downloadSources.resendRequest);
   const { deleteFleetServerHost } = useDeleteFleetServerHost(fleetServerHosts.resendRequest);
 
-  const resendSettingsRequest = settings.resendRequest;
   const resendOutputRequest = outputs.resendRequest;
   const resendDownloadSourceRequest = downloadSources.resendRequest;
   const resendFleetServerHostsRequest = fleetServerHosts.resendRequest;
 
   const onCloseCallback = useCallback(() => {
-    resendSettingsRequest();
     resendOutputRequest();
     resendDownloadSourceRequest();
     resendFleetServerHostsRequest();
     history.replace(pagePathGetters.settings()[1]);
-  }, [
-    resendSettingsRequest,
-    resendOutputRequest,
-    resendDownloadSourceRequest,
-    resendFleetServerHostsRequest,
-    history,
-  ]);
+  }, [resendOutputRequest, resendDownloadSourceRequest, resendFleetServerHostsRequest, history]);
 
   if (
-    (settings.isLoading && settings.isInitialRequest) ||
-    !settings.data?.item ||
     (outputs.isLoading && outputs.isInitialRequest) ||
     !outputs.data?.items ||
     (fleetServerHosts.isLoading && fleetServerHosts.isInitialRequest) ||
@@ -152,7 +140,6 @@ export const SettingsApp = withConfirmModalProvider(() => {
         </Switch>
       </Router>
       <SettingsPage
-        settings={settings.data.item}
         outputs={outputs.data.items}
         fleetServerHosts={fleetServerHosts.data.items}
         deleteOutput={deleteOutput}

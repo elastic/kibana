@@ -7,6 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
+import { normalizeHostsForAgents } from '../../common/services';
 import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
@@ -38,6 +39,10 @@ export async function createFleetServerHost(
         { fromPreconfiguration: options?.fromPreconfiguration }
       );
     }
+  }
+
+  if (data.host_urls) {
+    data.host_urls = data.host_urls.map(normalizeHostsForAgents);
   }
 
   const res = await soClient.create<FleetServerHostSOAttributes>(
@@ -132,6 +137,10 @@ export async function updateFleetServerHost(
         { fromPreconfiguration: options?.fromPreconfiguration }
       );
     }
+  }
+
+  if (data.host_urls) {
+    data.host_urls = data.host_urls.map(normalizeHostsForAgents);
   }
 
   await soClient.update<FleetServerHostSOAttributes>(FLEET_SERVER_HOST_SAVED_OBJECT_TYPE, id, data);

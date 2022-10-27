@@ -10,18 +10,16 @@ import React from 'react';
 import { EuiTitle, EuiLink, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { Settings, FleetServerHost } from '../../../../types';
+import type { FleetServerHost } from '../../../../types';
 import { useLink, useStartServices } from '../../../../hooks';
 import { FleetServerHostsTable } from '../fleet_server_hosts_table';
 
 export interface FleetServerHostsSectionProps {
-  settings: Settings;
   fleetServerHosts: FleetServerHost[];
   deleteFleetServerHost: (fleetServerHost: FleetServerHost) => void;
 }
 
 export const FleetServerHostsSection: React.FunctionComponent<FleetServerHostsSectionProps> = ({
-  settings,
   fleetServerHosts,
   deleteFleetServerHost,
 }) => {

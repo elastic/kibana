@@ -193,7 +193,11 @@ export function useFleetServerHostsForm(
     onSuccess,
   ]);
 
-  const isDisabled = isLoading || !hostUrlsInput.hasChanged || hostUrlsInput.props.isInvalid;
+  const isDisabled =
+    isLoading ||
+    (!hostUrlsInput.hasChanged && !isDefaultInput.hasChanged && !nameInput.hasChanged) ||
+    hostUrlsInput.props.isInvalid ||
+    nameInput.props.isInvalid;
 
   return {
     isLoading,

@@ -8,7 +8,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 
-import { decodeCloudId } from '../../../common/services';
+import { decodeCloudId, normalizeHostsForAgents } from '../../../common/services';
 import type { FleetConfigType } from '../../config';
 import { DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
 
@@ -109,7 +109,10 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
         (!existingHost.is_preconfigured ||
           existingHost.is_default !== preconfiguredFleetServerHost.is_default ||
           existingHost.name !== preconfiguredFleetServerHost.name ||
-          !isEqual(existingHost?.host_urls, preconfiguredFleetServerHost.host_urls));
+          !isEqual(
+            existingHost.host_urls.map(normalizeHostsForAgents),
+            preconfiguredFleetServerHost.host_urls.map(normalizeHostsForAgents)
+          ));
 
       if (isCreate) {
         await createFleetServerHost(
