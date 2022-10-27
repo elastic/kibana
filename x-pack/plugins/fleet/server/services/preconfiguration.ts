@@ -36,7 +36,6 @@ import type { InputsOverride } from './package_policy';
 import { preconfigurePackageInputs } from './package_policy';
 import { appContextService } from './app_context';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
-import { getSettings } from './settings';
 
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
@@ -82,16 +81,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     pkg.version === PRECONFIGURATION_LATEST_KEYWORD ? pkg.name : pkg
   );
 
-  let prerelease: boolean = false;
-  try {
-    // auto upgrade to prerelease versions only if the setting is enabled
-    ({ prerelease_integrations_enabled: prerelease } = await getSettings(soClient));
-  } catch (err) {
-    appContextService
-      .getLogger()
-      .warn('Error while trying to load prerelease flag from settings, defaulting to false', err);
-  }
-
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await bulkInstallPackages({
     savedObjectsClient: soClient,
@@ -99,7 +88,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     packagesToInstall,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
     spaceId,
-    prerelease,
   });
 
   const fulfilledPackages = [];

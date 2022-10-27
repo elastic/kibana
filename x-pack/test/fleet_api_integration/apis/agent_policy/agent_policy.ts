@@ -20,6 +20,7 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('fleet_agent_policies', () => {
     skipIfNoDockerRegistry(providerContext);
+    setPrereleaseSetting(supertest);
     describe('POST /api/fleet/agent_policies', () => {
       let systemPkgVersion: string;
       before(async () => {
@@ -27,7 +28,6 @@ export default function (providerContext: FtrProviderContext) {
         await kibanaServer.savedObjects.cleanStandardList();
       });
       setupFleetAndAgents(providerContext);
-      setPrereleaseSetting(supertest);
       let packagePoliciesToDeleteIds: string[] = [];
       after(async () => {
         if (systemPkgVersion) {

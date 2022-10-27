@@ -12,6 +12,8 @@ import * as Registry from '../registry';
 
 import type { InstallResult } from '../../../types';
 
+import { getSettings } from '../../settings';
+
 import { installPackage, isPackageVersionOrLaterInstalled } from './install';
 import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 
@@ -31,9 +33,18 @@ export async function bulkInstallPackages({
   esClient,
   spaceId,
   force,
-  prerelease = false,
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
+
+  let prerelease: boolean = false;
+  try {
+    // auto upgrade to prerelease versions only if the setting is enabled
+    ({ prerelease_integrations_enabled: prerelease } = await getSettings(savedObjectsClient));
+  } catch (err) {
+    appContextService
+      .getLogger()
+      .warn('Error while trying to load prerelease flag from settings, defaulting to false', err);
+  }
 
   const packagesResults = await Promise.allSettled(
     packagesToInstall.map(async (pkg) => {
