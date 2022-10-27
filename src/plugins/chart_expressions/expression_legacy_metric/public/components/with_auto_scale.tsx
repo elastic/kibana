@@ -23,7 +23,6 @@ interface AutoScaleParams {
   alignment?: 'left' | 'center';
   minScale?: number;
   containerStyles: CSSProperties;
-  alignment?: 'left' | 'center';
 }
 
 interface AutoScaleProps {
