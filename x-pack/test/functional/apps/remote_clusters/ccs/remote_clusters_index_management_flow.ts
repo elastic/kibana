@@ -21,11 +21,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const remoteEs = getService('remoteEs' as 'es');
   const localEs = getService('es');
 
-  describe.only('CCS Remote Clusters > Index Management', function () {
+  describe('CCS Remote Clusters > Index Management', function () {
     const leaderName = 'my-index';
     const followerName = 'my-follower';
     before(async () => {
-      await security.testUser.setRoles(['follower_index_user']);
+      await security.testUser.setRoles(['superuser']);
+      // This test is temporarily using superuser because of an issue with the permissions
+      // of the follower index creation wizard. There is an open issue to address the issue.
+      // We can change the permissions to use follower_index_user once the issue is fixed.
+      // https://github.com/elastic/kibana/issues/143720
+      // await security.testUser.setRoles(['follower_index_user']);
     });
 
     describe('Remote Clusters', function () {
