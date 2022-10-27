@@ -892,24 +892,6 @@ export class DataViewsService {
   };
 
   /**
-   * Get an index pattern by id, cache optimized.
-   * @param id
-   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
-   */
-  get = async (id: string, displayErrors: boolean = true): Promise<DataView> => {
-    const indexPatternPromise =
-      this.dataViewCache.get(id) ||
-      this.dataViewCache.set(id, this.getSavedObjectAndInit(id, displayErrors));
-
-    // don't cache failed requests
-    indexPatternPromise.catch(() => {
-      this.dataViewCache.clear(id);
-    });
-
-    return indexPatternPromise;
-  };
-
-  /**
    * Create data view instance.
    * @param spec data view spec
    * @param skipFetchFields if true, will not fetch fields
