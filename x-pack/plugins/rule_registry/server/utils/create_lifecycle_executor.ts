@@ -68,7 +68,8 @@ export interface LifecycleAlertServices<
   ActionGroupIds extends string = never
 > {
   alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
-  getAlertStartedDate: (alertId: string) => string | null;
+  getAlertStartedDate: (alertInstanceId: string) => string | null;
+  getAlertUuid: (alertInstanceId: string) => string | null;
 }
 
 export type LifecycleRuleExecutor<
@@ -87,6 +88,12 @@ export type LifecycleRuleExecutor<
     LifecycleAlertServices<InstanceState, InstanceContext, ActionGroupIds>
   >
 ) => Promise<State | void>;
+
+/*
+  `alertId` will at some point be renamed to `ruleId` as that more
+  accurately describes the meaning of the variable.
+  See https://github.com/elastic/kibana/issues/100115
+*/
 
 const trackedAlertStateRt = rt.type({
   alertId: rt.string,
@@ -159,6 +166,8 @@ export const createLifecycleExecutor =
 
     const currentAlerts: Record<string, ExplicitAlertFields> = {};
 
+    const newAlertUuids: Record<string, string> = {};
+
     const lifecycleAlertServices: LifecycleAlertServices<
       InstanceState,
       InstanceContext,
@@ -169,6 +178,15 @@ export const createLifecycleExecutor =
         return alertFactory.create(id);
       },
       getAlertStartedDate: (alertId: string) => state.trackedAlerts[alertId]?.started ?? null,
+      getAlertUuid: (alertId: string) => {
+        if (!state.trackedAlerts[alertId]) {
+          const alertUuid = v4();
+          newAlertUuids[alertId] = alertUuid;
+          return alertUuid;
+        }
+
+        return state.trackedAlerts[alertId].alertUuid;
+      },
     };
 
     const nextWrappedState = await wrappedExecutor({
@@ -203,9 +221,9 @@ export const createLifecycleExecutor =
         commonRuleFields
       );
       result.forEach((hit) => {
-        const alertId = hit._source ? hit._source[ALERT_INSTANCE_ID] : void 0;
-        if (alertId && hit._source) {
-          trackedAlertsDataMap[alertId] = {
+        const alertInstanceId = hit._source ? hit._source[ALERT_INSTANCE_ID] : void 0;
+        if (alertInstanceId && hit._source) {
+          trackedAlertsDataMap[alertInstanceId] = {
             indexName: hit._index,
             fields: hit._source,
           };
@@ -226,10 +244,12 @@ export const createLifecycleExecutor =
         const isRecovered = !currentAlerts[alertId];
         const isActive = !isRecovered;
 
-        const { alertUuid, started } = state.trackedAlerts[alertId] ?? {
-          alertUuid: v4(),
-          started: commonRuleFields[TIMESTAMP],
-        };
+        const { alertUuid, started } = !isNew
+          ? state.trackedAlerts[alertId]
+          : {
+              alertUuid: newAlertUuids[alertId] || v4(),
+              started: commonRuleFields[TIMESTAMP],
+            };
 
         const event: ParsedTechnicalFields & ParsedExperimentalFields = {
           ...alertData?.fields,
@@ -249,8 +269,8 @@ export const createLifecycleExecutor =
           [ALERT_WORKFLOW_STATUS]: alertData?.fields[ALERT_WORKFLOW_STATUS] ?? 'open',
           [EVENT_KIND]: 'signal',
           [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
-          [VERSION]: ruleDataClient.kibanaVersion,
           [TAGS]: options.tags,
+          [VERSION]: ruleDataClient.kibanaVersion,
           ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
         };
 

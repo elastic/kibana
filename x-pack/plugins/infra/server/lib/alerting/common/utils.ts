@@ -9,8 +9,11 @@ import { isEmpty, isError } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger, LogMeta } from '@kbn/logging';
 import type { IBasePath } from '@kbn/core/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { ObservabilityConfig } from '@kbn/observability-plugin/server';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
 import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
 import {
   AlertExecutionDetails,
@@ -83,18 +86,30 @@ export const createScopedLogger = (
   };
 };
 
-export const getViewInAppUrl = (basePath: IBasePath, relativeViewInAppUrl: string) =>
-  basePath.publicBaseUrl
-    ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
-    : relativeViewInAppUrl;
+export const getAlertDetailsPageEnabledForApp = (
+  config: ObservabilityConfig['unsafe']['alertDetails'] | null,
+  appName: keyof ObservabilityConfig['unsafe']['alertDetails']
+): boolean => {
+  if (!config) return false;
 
-export const getViewInAppUrlInventory = (
-  criteria: InventoryMetricConditions[],
-  nodeType: string,
-  timestamp: string,
-  basePath: IBasePath
-) => {
+  return config[appName].enabled;
+};
+
+export const getViewInInventoryAppUrl = ({
+  basePath,
+  criteria,
+  nodeType,
+  spaceId,
+  timestamp,
+}: {
+  basePath: IBasePath;
+  criteria: InventoryMetricConditions[];
+  nodeType: string;
+  spaceId: string;
+  timestamp: string;
+}) => {
   const { metric, customMetric } = criteria[0];
+
   const fields = {
     [`${ALERT_RULE_PARAMETERS}.criteria.metric`]: [metric],
     [`${ALERT_RULE_PARAMETERS}.criteria.customMetric.id`]: [customMetric?.id],
@@ -104,6 +119,18 @@ export const getViewInAppUrlInventory = (
     [TIMESTAMP]: timestamp,
   };
 
-  const relativeViewInAppUrl = getInventoryViewInAppUrl(parseTechnicalFields(fields, true));
-  return getViewInAppUrl(basePath, relativeViewInAppUrl);
+  return addSpaceIdToPath(
+    basePath.publicBaseUrl,
+    spaceId,
+    getInventoryViewInAppUrl(parseTechnicalFields(fields, true))
+  );
 };
+
+export const getViewInMetricsAppUrl = (basePath: IBasePath, spaceId: string) =>
+  addSpaceIdToPath(basePath.publicBaseUrl, spaceId, LINK_TO_METRICS_EXPLORER);
+
+export const getAlertDetailsUrl = (
+  basePath: IBasePath,
+  spaceId: string,
+  alertUuid: string | null
+) => addSpaceIdToPath(basePath.publicBaseUrl, spaceId, `/app/observability/alerts/${alertUuid}`);
