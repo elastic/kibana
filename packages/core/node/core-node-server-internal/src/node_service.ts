@@ -48,7 +48,7 @@ interface PrebootDeps {
 export class NodeService {
   private readonly configService: IConfigService;
   private readonly log: Logger;
-  private roles: NodeRoles | undefined;
+  private roles?: NodeRoles;
 
   constructor(core: CoreContext) {
     this.configService = core.configService;

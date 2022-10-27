@@ -40,7 +40,7 @@ describe('createInitialState', () => {
     expect(
       createInitialState({
         kibanaVersion: '8.1.0',
-        waitForMigrationCompletion: false,
+        waitForMigrationCompletion: true,
         targetMappings: {
           dynamic: 'strict',
           properties: { my_type: { properties: { title: { type: 'text' } } } },
@@ -217,10 +217,32 @@ describe('createInitialState', () => {
         },
         "versionAlias": ".kibana_task_manager_8.1.0",
         "versionIndex": ".kibana_task_manager_8.1.0_001",
-        "waitForMigrationCompletion": false,
+        "waitForMigrationCompletion": true,
       }
     `);
   });
+
+  it('creates the initial state for the model with waitForMigrationCompletion false,', () => {
+    expect(
+      createInitialState({
+        kibanaVersion: '8.1.0',
+        waitForMigrationCompletion: false,
+        targetMappings: {
+          dynamic: 'strict',
+          properties: { my_type: { properties: { title: { type: 'text' } } } },
+        },
+        migrationVersionPerType: {},
+        indexPrefix: '.kibana_task_manager',
+        migrationsConfig,
+        typeRegistry,
+        docLinks,
+        logger: mockLogger.get(),
+      })
+    ).toMatchObject({
+        "waitForMigrationCompletion": false,
+      }
+    );
+  })
 
   it('returns state with the correct `knownTypes`', () => {
     typeRegistry.registerType({

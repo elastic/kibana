@@ -269,7 +269,7 @@ describe('SavedObjectsService', () => {
       expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();
     });
 
-    it('calls KibanaMigrator with correct version and waitForMigrationCompletion', async () => {
+    it('calls KibanaMigrator with correct version', async () => {
       const pkg = loadJsonFile.sync(join(REPO_ROOT, 'package.json')) as RawPackageInfo;
       const kibanaVersion = pkg.version;
 

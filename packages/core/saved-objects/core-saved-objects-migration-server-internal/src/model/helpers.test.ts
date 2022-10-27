@@ -263,4 +263,9 @@ describe('versionMigrationCompleted', () => {
       })
     ).toBe(false);
   });
+  it('returns false if neither the version or current alias exists', () => {
+    expect(
+      versionMigrationCompleted('.current-alias', '.version-alias', {})
+    ).toBe(false);
+  });
 });

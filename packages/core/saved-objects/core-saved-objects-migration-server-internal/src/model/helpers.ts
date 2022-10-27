@@ -76,11 +76,10 @@ export function mergeMigrationMappingPropertyHashes(
 export function versionMigrationCompleted(
   currentAlias: string,
   versionAlias: string,
-  aliases: Record<string, string>
+  aliases: Record<string, string | undefined>
 ): boolean {
   return (
     aliases[currentAlias] != null &&
-    aliases[versionAlias] != null &&
     aliases[currentAlias] === aliases[versionAlias]
   );
 }
@@ -174,16 +173,17 @@ export function getAliases(
   indices: FetchIndexResponse
 ): Either.Either<
   { type: 'multiple_indices_per_alias'; alias: string; indices: string[] },
-  Record<string, string>
+  Record<string, string | undefined>
 > {
-  const aliases = {} as Record<string, string>;
+  const aliases = {} as Record<string, string | undefined>;
   for (const index of Object.getOwnPropertyNames(indices)) {
     for (const alias of Object.getOwnPropertyNames(indices[index].aliases || {})) {
-      if (aliases[alias] != null) {
+      let secondIndexThisAliasPointsTo = aliases[alias];
+      if (secondIndexThisAliasPointsTo != null) {
         return Either.left({
           type: 'multiple_indices_per_alias',
           alias,
-          indices: [aliases[alias], index],
+          indices: [secondIndexThisAliasPointsTo, index],
         });
       }
       aliases[alias] = index;

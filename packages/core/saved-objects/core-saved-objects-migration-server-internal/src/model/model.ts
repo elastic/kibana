@@ -114,7 +114,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
           targetIndexMappings: mergeMigrationMappingPropertyHashes(
             stateP.targetIndexMappings,
-            indices[aliases[stateP.currentAlias]].mappings
+            indices[aliases[stateP.currentAlias]!].mappings
           ),
           versionIndexReadyActions: Option.none,
         };
@@ -122,7 +122,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // `.kibana` is pointing to an index that belongs to a later
         // version of Kibana .e.g. a 7.11.0 instance found the `.kibana` alias
         // pointing to `.kibana_7.12.0_001`
-        indexBelongsToLaterVersion(aliases[stateP.currentAlias], stateP.kibanaVersion)
+        indexBelongsToLaterVersion(aliases[stateP.currentAlias]!, stateP.kibanaVersion)
       ) {
         return {
           ...stateP,
@@ -155,7 +155,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         aliases[stateP.currentAlias] != null
       ) {
         // The source index is the index the `.kibana` alias points to
-        const source = aliases[stateP.currentAlias];
+        const source = aliases[stateP.currentAlias]!;
         return {
           ...stateP,
           controlState: 'WAIT_FOR_YELLOW_SOURCE',
@@ -254,7 +254,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
         targetIndexMappings: mergeMigrationMappingPropertyHashes(
           stateP.targetIndexMappings,
-          indices[aliasesRes.right[stateP.currentAlias]].mappings
+          indices[aliasesRes.right[stateP.currentAlias]!].mappings
         ),
         versionIndexReadyActions: Option.none,
       };
