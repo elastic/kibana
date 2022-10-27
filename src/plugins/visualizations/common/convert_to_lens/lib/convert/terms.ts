@@ -72,7 +72,7 @@ const getOrderByWithAgg = ({
 
 const filterOutEmptyValues = (values: string | Array<number | string>): number[] | string[] => {
   if (typeof values === 'string') {
-    return Boolean(values) ? [] : [values];
+    return Boolean(values) ? [values] : [];
   }
 
   return values.filter((v): v is string | number => {
@@ -99,12 +99,14 @@ export const convertToTermsParams = ({
     return null;
   }
 
+  const exclude = agg.aggParams.exclude ? filterOutEmptyValues(agg.aggParams.exclude) : [];
+  const include = agg.aggParams.include ? filterOutEmptyValues(agg.aggParams.include) : [];
   return {
     size: agg.aggParams.size ?? 10,
-    include: agg.aggParams.include ? filterOutEmptyValues(agg.aggParams.include) : [],
-    includeIsRegex: agg.aggParams.includeIsRegex,
-    exclude: agg.aggParams.exclude ? filterOutEmptyValues(agg.aggParams.exclude) : [],
-    excludeIsRegex: agg.aggParams.excludeIsRegex,
+    include,
+    exclude,
+    includeIsRegex: Boolean(include.length && agg.aggParams.includeIsRegex),
+    excludeIsRegex: Boolean(exclude.length && agg.aggParams.excludeIsRegex),
     otherBucket: agg.aggParams.otherBucket,
     orderDirection: agg.aggParams.order?.value ?? 'desc',
     parentFormat: { id: 'terms' },
