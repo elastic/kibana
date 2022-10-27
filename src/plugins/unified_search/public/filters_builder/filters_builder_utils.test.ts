@@ -7,6 +7,7 @@
  */
 
 import { buildEmptyFilter, type Filter, BooleanRelation } from '@kbn/es-query';
+import { DataView } from '@kbn/data-views-plugin/common';
 import {
   getFilterByPath,
   getPathInArray,
@@ -209,7 +210,9 @@ describe('filters_builder_utils', () => {
     const emptyFilter = buildEmptyFilter(false);
 
     test('should add filter into filters after zero element', () => {
-      const enlargedFilters = addFilter(filters, emptyFilter, '0', BooleanRelation.AND);
+      const enlargedFilters = addFilter(filters, emptyFilter, '0', BooleanRelation.AND, {
+        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+      } as DataView);
       expect(getFilterByPath(enlargedFilters, '1')).toMatchInlineSnapshot(`
         Object {
           "$state": Object {
@@ -243,7 +246,9 @@ describe('filters_builder_utils', () => {
   describe('moveFilter', () => {
     test('should move filter from "0" path to "2" path into filters', () => {
       const filterBeforeMoving = getFilterByPath(filters, '0');
-      const filtersAfterMovingFilter = moveFilter(filters, '0', '2', BooleanRelation.AND);
+      const filtersAfterMovingFilter = moveFilter(filters, '0', '2', BooleanRelation.AND, {
+        id: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',
+      } as DataView);
       const filterObtainedAfterFilterMovingFilters = getFilterByPath(filtersAfterMovingFilter, '2');
       expect(filterBeforeMoving).toEqual(filterObtainedAfterFilterMovingFilters);
     });

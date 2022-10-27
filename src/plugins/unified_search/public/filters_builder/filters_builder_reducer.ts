@@ -8,7 +8,7 @@
 
 import type { Reducer } from 'react';
 import type { Filter, BooleanRelation } from '@kbn/es-query';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Path } from './filters_builder_types';
 import { addFilter, moveFilter, removeFilter, updateFilter } from './filters_builder_utils';
 import type { Operator } from '../filter_bar/filter_editor';
@@ -23,6 +23,7 @@ export interface AddFilterPayload {
   path: Path;
   filter: Filter;
   booleanRelation: BooleanRelation;
+  dataView: DataView;
 }
 
 /** @internal **/
@@ -43,6 +44,7 @@ export interface MoveFilterPayload {
   pathFrom: Path;
   pathTo: Path;
   booleanRelation: BooleanRelation;
+  dataView: DataView;
 }
 
 /** @internal **/
@@ -63,7 +65,8 @@ export const FiltersBuilderReducer: Reducer<FiltersBuilderState, FiltersBuilderA
           state.filters,
           action.payload.filter,
           action.payload.path,
-          action.payload.booleanRelation
+          action.payload.booleanRelation,
+          action.payload.dataView
         ),
       };
     case 'removeFilter':
@@ -78,7 +81,8 @@ export const FiltersBuilderReducer: Reducer<FiltersBuilderState, FiltersBuilderA
           state.filters,
           action.payload.pathFrom,
           action.payload.pathTo,
-          action.payload.booleanRelation
+          action.payload.booleanRelation,
+          action.payload.dataView
         ),
       };
     case 'updateFilter':

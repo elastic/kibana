@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { BooleanRelation } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
@@ -126,7 +126,8 @@ export const addFilter = (
   filters: Filter[],
   filter: Filter,
   path: string,
-  booleanRelation: BooleanRelation
+  booleanRelation: BooleanRelation,
+  dataView: DataView
 ) => {
   const newFilters = cloneDeep(filters);
   const pathInArray = getPathInArray(path);
@@ -138,14 +139,14 @@ export const addFilter = (
       targetArray.splice(
         selector,
         1,
-        buildCombinedFilter(BooleanRelation.OR, [targetArray[selector], filter])
+        buildCombinedFilter(BooleanRelation.OR, [targetArray[selector], filter], dataView)
       );
     }
     if (booleanRelation === BooleanRelation.AND) {
       targetArray.splice(
         selector,
         1,
-        buildCombinedFilter(BooleanRelation.AND, [targetArray[selector], filter])
+        buildCombinedFilter(BooleanRelation.AND, [targetArray[selector], filter], dataView)
       );
     }
   } else {
@@ -182,7 +183,8 @@ export const moveFilter = (
   filters: Filter[],
   from: string,
   to: string,
-  booleanRelation: BooleanRelation
+  booleanRelation: BooleanRelation,
+  dataView: DataView
 ) => {
   const addFilterThenRemoveFilter = (
     source: Filter[],
@@ -191,7 +193,7 @@ export const moveFilter = (
     pathTo: string,
     conditional: BooleanRelation
   ) => {
-    const newFiltersWithFilter = addFilter(source, addedFilter, pathTo, conditional);
+    const newFiltersWithFilter = addFilter(source, addedFilter, pathTo, conditional, dataView);
     return removeFilter(newFiltersWithFilter, pathFrom);
   };
 
@@ -203,7 +205,7 @@ export const moveFilter = (
     conditional: BooleanRelation
   ) => {
     const newFiltersWithoutFilter = removeFilter(source, pathFrom);
-    return addFilter(newFiltersWithoutFilter, removableFilter, pathTo, conditional);
+    return addFilter(newFiltersWithoutFilter, removableFilter, pathTo, conditional, dataView);
   };
 
   const newFilters = cloneDeep(filters);

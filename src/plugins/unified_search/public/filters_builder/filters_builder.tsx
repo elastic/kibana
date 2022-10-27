@@ -74,10 +74,11 @@ function FiltersBuilder({
           pathFrom,
           pathTo,
           booleanRelation,
+          dataView,
         },
       });
     },
-    []
+    [dataView]
   );
 
   const onDragEnd: DragDropContextProps['onDragEnd'] = ({ combine, source, destination }) => {

@@ -154,10 +154,11 @@ export function FilterItem({
           path,
           filter: buildEmptyFilter(false, dataView?.id),
           booleanRelation,
+          dataView,
         },
       });
     },
-    [dispatch, dataView?.id, path]
+    [dispatch, dataView, path]
   );
 
   const onAddButtonClick = useCallback(() => onAddFilter(BooleanRelation.AND), [onAddFilter]);
