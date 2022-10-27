@@ -63,7 +63,7 @@ export const useUnifiedSearch = () => {
 
   const saveQuery = useCallback(
     (newSavedQuery: SavedQuery) => {
-      const savedQueryFilters = newSavedQuery.attributes.filters || [];
+      const savedQueryFilters = newSavedQuery.attributes.filters ?? [];
       const globalFilters = filterManager.getGlobalFilters();
       filterManager.setFilters([...savedQueryFilters, ...globalFilters]);
 

@@ -17,15 +17,19 @@ export const HostContainer = () => {
   const { metricsDataView, isDataViewLoading, hasFailedLoadingDataView } =
     useMetricsDataViewContext();
 
-  return isDataViewLoading ? (
-    <InfraLoadingPanel
-      height="100%"
-      width="auto"
-      text={i18n.translate('xpack.infra.waffle.loadingDataText', {
-        defaultMessage: 'Loading data',
-      })}
-    />
-  ) : hasFailedLoadingDataView || !metricsDataView ? null : (
+  if (isDataViewLoading) {
+    return (
+      <InfraLoadingPanel
+        height="100%"
+        width="auto"
+        text={i18n.translate('xpack.infra.waffle.loadingDataText', {
+          defaultMessage: 'Loading data',
+        })}
+      />
+    );
+  }
+
+  return hasFailedLoadingDataView || !metricsDataView ? null : (
     <>
       <UnifiedSearchBar dataView={metricsDataView} />
       <EuiSpacer />

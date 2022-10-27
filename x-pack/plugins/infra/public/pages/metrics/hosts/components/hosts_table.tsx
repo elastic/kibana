@@ -67,21 +67,23 @@ export const HostsTable = () => {
           })}
         />
       ) : noData ? (
-        <NoData
-          titleText={i18n.translate('xpack.infra.waffle.noDataTitle', {
-            defaultMessage: 'There is no data to display.',
-          })}
-          bodyText={i18n.translate('xpack.infra.waffle.noDataDescription', {
-            defaultMessage: 'Try adjusting your time or filter.',
-          })}
-          refetchText={i18n.translate('xpack.infra.waffle.checkNewDataButtonLabel', {
-            defaultMessage: 'Check for new data',
-          })}
-          onRefetch={() => {
-            reload();
-          }}
-          testString="noMetricsDataPrompt"
-        />
+        <div>
+          <NoData
+            titleText={i18n.translate('xpack.infra.waffle.noDataTitle', {
+              defaultMessage: 'There is no data to display.',
+            })}
+            bodyText={i18n.translate('xpack.infra.waffle.noDataDescription', {
+              defaultMessage: 'Try adjusting your time or filter.',
+            })}
+            refetchText={i18n.translate('xpack.infra.waffle.checkNewDataButtonLabel', {
+              defaultMessage: 'Check for new data',
+            })}
+            onRefetch={() => {
+              reload();
+            }}
+            testString="noMetricsDataPrompt"
+          />
+        </div>
       ) : (
         <EuiInMemoryTable pagination sorting items={items} columns={HostsTableColumns} />
       )}
