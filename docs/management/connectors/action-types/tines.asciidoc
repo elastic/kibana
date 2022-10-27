@@ -13,7 +13,7 @@ The Tines connector uses Tines's https://www.tines.com/docs/actions/types/webhoo
 
 Tines connectors have the following configuration properties.
 
-URL::        The Tines Tenant URL. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+URL::        The Tines tenant URL. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
 Email::      The email used to sign in to Tines.
 API Token::  A Tines API token created by the user. https://www.tines.com/api/authentication#generate-api-token[Docs]
 

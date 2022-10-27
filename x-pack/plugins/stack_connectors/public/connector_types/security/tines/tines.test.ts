@@ -54,7 +54,9 @@ describe('tines action params validation', () => {
     });
     expect(validation.errors).toEqual({
       subAction: [],
-      subActionParams: ['Story is required.'],
+      story: ['Story is required.'],
+      webhook: [],
+      body: [],
     });
   });
 
@@ -65,7 +67,9 @@ describe('tines action params validation', () => {
     });
     expect(validation.errors).toEqual({
       subAction: [],
-      subActionParams: ['Webhook is required.'],
+      story: [],
+      webhook: ['Webhook is required.'],
+      body: [],
     });
   });
 
@@ -76,7 +80,9 @@ describe('tines action params validation', () => {
     });
     expect(validation.errors).toEqual({
       subAction: [],
-      subActionParams: ['Webhook action path is missing.'],
+      story: [],
+      webhook: ['Webhook action path is missing.'],
+      body: [],
     });
   });
 
@@ -87,7 +93,9 @@ describe('tines action params validation', () => {
     });
     expect(validation.errors).toEqual({
       subAction: [],
-      subActionParams: ['Webhook action secret is missing.'],
+      story: [],
+      webhook: ['Webhook action secret is missing.'],
+      body: [],
     });
   });
 
@@ -95,7 +103,9 @@ describe('tines action params validation', () => {
     const validation = await actionTypeModel.validateParams(actionParams);
     expect(validation.errors).toEqual({
       subAction: [],
-      subActionParams: [],
+      story: [],
+      webhook: [],
+      body: [],
     });
   });
 
@@ -106,7 +116,9 @@ describe('tines action params validation', () => {
     });
     expect(validation.errors).toEqual({
       subAction: ['Action is required.'],
-      subActionParams: [],
+      story: [],
+      webhook: [],
+      body: [],
     });
   });
   it('should fail when subAction is wrong', async () => {
@@ -116,7 +128,9 @@ describe('tines action params validation', () => {
     });
     expect(validation.errors).toEqual({
       subAction: ['Invalid action name.'],
-      subActionParams: [],
+      story: [],
+      webhook: [],
+      body: [],
     });
   });
 
@@ -127,7 +141,9 @@ describe('tines action params validation', () => {
     });
     expect(validation.errors).toEqual({
       subAction: [],
-      subActionParams: ['Body is required.'],
+      story: [],
+      webhook: [],
+      body: ['Body is required.'],
     });
   });
 
@@ -138,7 +154,9 @@ describe('tines action params validation', () => {
     });
     expect(validation.errors).toEqual({
       subAction: [],
-      subActionParams: ['Body does not have a valid JSON format.'],
+      story: [],
+      webhook: [],
+      body: ['Body does not have a valid JSON format.'],
     });
   });
 
@@ -149,7 +167,9 @@ describe('tines action params validation', () => {
     });
     expect(validation.errors).toEqual({
       subAction: [],
-      subActionParams: [],
+      story: [],
+      webhook: [],
+      body: [],
     });
   });
 });

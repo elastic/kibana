@@ -22,6 +22,13 @@ import type {
 } from '../../../../common/connector_types/security/tines/types';
 import type { TinesExecuteActionParams } from './types';
 
+interface ValidationErrors {
+  subAction: string[];
+  story: string[];
+  webhook: string[];
+  body: string[];
+}
+
 export function getConnectorType(): ConnectorTypeModel<
   TinesConfig,
   TinesSecrets,
@@ -36,42 +43,47 @@ export function getConnectorType(): ConnectorTypeModel<
     }),
     validateParams: async (
       actionParams: TinesExecuteActionParams
-    ): Promise<GenericValidationResult<TinesExecuteActionParams>> => {
+    ): Promise<GenericValidationResult<ValidationErrors>> => {
       const translations = await import('./translations');
-      const errors = {
-        subAction: new Array<string>(),
-        subActionParams: new Array<string>(),
+      const errors: ValidationErrors = {
+        subAction: [],
+        story: [],
+        webhook: [],
+        body: [],
       };
       const { subAction, subActionParams } = actionParams;
 
       if (!subActionParams?.webhook?.storyId) {
-        errors.subActionParams.push(translations.STORY_REQUIRED);
-      }
-      if (!subActionParams?.webhook?.id) {
-        errors.subActionParams.push(translations.WEBHOOK_REQUIRED);
-      } else if (!subActionParams?.webhook?.path) {
-        errors.subActionParams.push(translations.WEBHOOK_PATH_REQUIRED);
-      } else if (!subActionParams?.webhook?.secret) {
-        errors.subActionParams.push(translations.WEBHOOK_SECRET_REQUIRED);
+        errors.story.push(translations.STORY_REQUIRED);
       }
 
-      if (errors.subActionParams.length) return { errors };
+      if (!subActionParams?.webhook?.id) {
+        errors.webhook.push(translations.WEBHOOK_REQUIRED);
+      } else if (!subActionParams?.webhook?.path) {
+        errors.webhook.push(translations.WEBHOOK_PATH_REQUIRED);
+      } else if (!subActionParams?.webhook?.secret) {
+        errors.webhook.push(translations.WEBHOOK_SECRET_REQUIRED);
+      }
+
+      if (subAction === SUB_ACTION.TEST) {
+        if (!subActionParams?.body?.length) {
+          errors.body.push(translations.BODY_REQUIRED);
+        } else {
+          try {
+            JSON.parse(subActionParams.body);
+          } catch {
+            errors.body.push(translations.BODY_INVALID);
+          }
+        }
+      }
+
+      if (errors.story.length || errors.webhook.length || errors.body.length) return { errors };
 
       // The internal "subAction" param should always be valid, ensure it is only if "subActionParams" are valid
       if (!subAction) {
         errors.subAction.push(translations.ACTION_REQUIRED);
       } else if (subAction !== SUB_ACTION.RUN && subAction !== SUB_ACTION.TEST) {
         errors.subAction.push(translations.INVALID_ACTION);
-      } else if (subAction === SUB_ACTION.TEST) {
-        if (!subActionParams?.body?.length) {
-          errors.subActionParams.push(translations.BODY_REQUIRED);
-        } else {
-          try {
-            JSON.parse(subActionParams.body);
-          } catch {
-            errors.subActionParams.push(translations.BODY_INVALID);
-          }
-        }
       }
       return { errors };
     },

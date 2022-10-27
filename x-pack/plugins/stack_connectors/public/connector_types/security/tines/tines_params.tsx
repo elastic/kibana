@@ -180,6 +180,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
         <EuiFormRow
           fullWidth
           error={errors.story}
+          isInvalid={!!errors.story?.length}
           label={i18n.STORY_LABEL}
           helpText={i18n.STORY_HELP}
         >
@@ -199,6 +200,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteA
         <EuiFormRow
           fullWidth
           error={errors.webhook}
+          isInvalid={!!errors.webhook?.length}
           label={i18n.WEBHOOK_LABEL}
           helpText={i18n.WEBHOOK_HELP}
         >

@@ -9,7 +9,7 @@ import {
   SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { AlertingConnectorFeatureId, SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import {
   TINES_CONNECTOR_ID,
@@ -32,7 +32,7 @@ export const getTinesConnectorType = (): SubActionConnectorType<TinesConfig, Tin
     secrets: TinesSecretsSchema,
   },
   validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }],
-  supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
+  supportedFeatureIds: [SecurityConnectorFeatureId],
   minimumLicenseRequired: 'gold' as const,
   renderParameterTemplates,
 });
