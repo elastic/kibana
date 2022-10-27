@@ -61,7 +61,7 @@ export const securityConfig: GuideConfig = {
         description: i18n.translate(
           'guidedOnboarding.securityGuide.rulesStep.manualCompletion.description',
           {
-            defaultMessage: 'When you’ve enabled the rules you want continue...',
+            defaultMessage: 'After you’ve enabled the rules you want, click here to continue.',
           }
         ),
       },
