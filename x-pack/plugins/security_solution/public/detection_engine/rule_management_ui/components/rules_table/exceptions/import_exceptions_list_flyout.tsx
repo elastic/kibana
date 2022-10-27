@@ -149,13 +149,11 @@ export const ImportExceptionListFlyout = React.memo(
           {alreadyExistingItem && (
             <>
               <EuiSpacer />
-              <EuiTextColor color={'danger'}>
-                {'We found a pre-existing list with that id'}
-              </EuiTextColor>
+              <EuiTextColor color={'danger'}>{i18n.IMPORT_EXCEPTION_LIST_WARNING}</EuiTextColor>
               <EuiSpacer />
               <EuiCheckbox
                 id={'basicCheckboxId'}
-                label="Overwrite the existing list"
+                label={i18n.IMPORT_EXCEPTION_LIST_OVERWRITE}
                 checked={overwrite}
                 onChange={(e) => {
                   setOverwrite(!overwrite);
@@ -164,7 +162,7 @@ export const ImportExceptionListFlyout = React.memo(
               />
               <EuiCheckbox
                 id={'createNewListCheckbox'}
-                label="Create new list"
+                label={i18n.IMPORT_EXCEPTION_LIST_AS_NEW_LIST}
                 checked={asNewList}
                 onChange={(e) => {
                   setAsNewList(!asNewList);

@@ -23,6 +23,7 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionListInfo } from '../../../../rule_exceptions_ui/pages/exceptions/use_all_exception_lists';
 import { TitleBadge } from './title_badge';
+import * as i18n from './translations';
 
 interface ExceptionsListCardProps {
   exceptionsList: ExceptionListInfo;
@@ -78,8 +79,8 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup gutterSize="s" alignItems="center">
-                      <TitleBadge title={'created by: '} badgeString={exceptionsList.created_by} />
-                      <TitleBadge title={'created at: '} badgeString={exceptionsList.created_at} />
+                      <TitleBadge title={i18n.CREATED_BY} badgeString={exceptionsList.created_by} />
+                      <TitleBadge title={i18n.CREATED_AT} badgeString={exceptionsList.created_at} />
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -117,7 +118,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                           })();
                         }}
                       >
-                        {'Delete exception list'}
+                        {i18n.DELETE_EXCEPTION_LIST}
                       </EuiContextMenuItem>,
                       <EuiContextMenuItem
                         key={'export'}
@@ -132,7 +133,7 @@ export const ExceptionsListCard = memo<ExceptionsListCardProps>(
                           })();
                         }}
                       >
-                        {'Export exception list'}
+                        {i18n.EXPORT_EXCEPTION_LIST}
                       </EuiContextMenuItem>,
                     ]}
                   />
