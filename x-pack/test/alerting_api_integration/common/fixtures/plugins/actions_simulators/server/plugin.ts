@@ -92,8 +92,6 @@ export interface FixtureStartDeps {
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
-  private router?: IRouter;
-
   public setup(core: CoreSetup<FixtureStartDeps>, { features, actions }: FixtureSetupDeps) {
     // this action is specifically NOT enabled in ../../config.ts
     const notEnabledActionType: ActionType = {
@@ -139,10 +137,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     initPagerduty(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
     initJira(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.JIRA));
     initResilient(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.RESILIENT));
-    initMSExchange(
-      router,
-      getExternalServiceSimulatorPath(ExternalServiceSimulator.MS_EXCHANGE)
-    );
+    initMSExchange(router, getExternalServiceSimulatorPath(ExternalServiceSimulator.MS_EXCHANGE));
     initServiceNowOAuth(
       router,
       getExternalServiceSimulatorPath(ExternalServiceSimulator.SERVICENOW)
