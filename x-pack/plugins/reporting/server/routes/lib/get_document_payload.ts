@@ -6,8 +6,6 @@
  */
 
 import { Stream } from 'stream';
-// @ts-ignore
-import contentDisposition from 'content-disposition';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '../../../common/constants';
 import { ReportApiJSON } from '../../../common/types';
 import { ReportingCore } from '../..';
@@ -72,7 +70,7 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
       contentType: output.content_type,
       headers: {
         ...headers,
-        'Content-Disposition': contentDisposition(filename, { type: 'inline' }),
+        'Content-Disposition': `attachment; filename="${filename}"`,
         'Content-Length': output.size,
       },
     };
