@@ -7,32 +7,19 @@
 
 import { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
 import memoizeOne from 'memoize-one';
-import React, {
-  ComponentType,
-  lazy,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  useContext,
-} from 'react';
+import React, { ComponentType, useCallback, useEffect, useMemo, useContext } from 'react';
 import type { ReactNode } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 
 import { ThemeContext } from 'styled-components';
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
-import { Filter } from '@kbn/es-query';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 import {
-  TGridCellAction,
-  BulkActionsProp,
-  CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
-  RowRenderer,
-  AlertStatus,
   SortColumnTimeline,
   TimelineId,
   TimelineTabs,
@@ -47,7 +34,6 @@ import { addBuildingBlockStyle, getEventIdToDataMapping } from './helpers';
 
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import type { OnRowSelected, OnSelectAll } from '../types';
-import type { Refetch } from '../../../store/t_grid/inputs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
@@ -57,8 +43,7 @@ import { checkBoxControlColumn } from './control_columns';
 import { TimelinesStartPlugins } from '../../../types';
 import { TGridComponentStateProvider } from '../../../methods/context';
 import { ALERT_TABLE_CONFIGURATION_KEY } from '../config';
-import { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
-import type { StatefulBodyProps } from './index';
+import type { StatefulBodyProps } from '.';
 
 type OwnProps = Omit<StatefulBodyProps, 'tableView'>;
 

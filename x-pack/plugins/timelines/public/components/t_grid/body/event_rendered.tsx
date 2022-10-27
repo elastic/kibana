@@ -20,7 +20,6 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
-  useState,
   useContext,
 } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
@@ -47,7 +46,6 @@ import { addBuildingBlockStyle, getEventIdToDataMapping } from './helpers';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import type { OnRowSelected, OnSelectAll } from '../types';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
-import { StatefulEventContext } from '../../stateful_event_context';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
@@ -55,7 +53,7 @@ import * as i18n from './translations';
 import { AlertCount } from '../styles';
 import { checkBoxControlColumn } from './control_columns';
 import { EventRenderedView } from '../event_rendered_view';
-import type { StatefulBodyProps } from './index';
+import type { StatefulBodyProps } from '.';
 
 const StatefulAlertBulkActions = lazy(() => import('../toolbar/bulk_actions/alert_bulk_actions'));
 
