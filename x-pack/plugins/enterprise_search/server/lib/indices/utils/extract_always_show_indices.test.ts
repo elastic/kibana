@@ -93,7 +93,7 @@ describe('expandAliases util function', () => {
       mockAliases,
       mockIndex,
       mockIndicesData,
-      { alias_pattern: 'search-' }
+      { alias_pattern: 'search-', index_pattern: '.ent-search-engine-documents' }
     );
 
     expect(expandedAliasList).toEqual([
