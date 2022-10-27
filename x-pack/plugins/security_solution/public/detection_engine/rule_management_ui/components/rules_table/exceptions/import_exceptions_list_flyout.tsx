@@ -110,11 +110,12 @@ export const ImportExceptionListFlyout = React.memo(
     const [alreadyExistingItem, setAlreadyExistingItem] = useState(false);
 
     useEffect(() => {
-      if (!importExceptionListState.loading && importExceptionListState?.result?.success) {
-        handleImportSuccess(importExceptionListState?.result);
-      } else if (!importExceptionListState.loading && importExceptionListState.result?.errors) {
-        handleImportError(importExceptionListState?.result?.errors);
-        setAlreadyExistingItem(true);
+      if (!importExceptionListState.loading) {
+        if (importExceptionListState?.result?.success) {
+          handleImportSuccess(importExceptionListState?.result);
+        } else if (importExceptionListState?.result?.errors) {
+          handleImportError(importExceptionListState?.result?.errors);
+        }
       }
     }, [
       handleImportError,
