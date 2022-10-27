@@ -101,6 +101,12 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
   }
 
   public render() {
+    const { filters } = this.state;
+
+    function shouldShowToggle() {
+      return !isCombinedFilter(filters[0]);
+    }
+
     return (
       <div>
         <EuiPopoverTitle paddingSize="s">
@@ -108,23 +114,25 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
             <EuiFlexItem>{this.props.mode === 'add' ? panelTitleAdd : panelTitleEdit}</EuiFlexItem>
             <EuiFlexItem grow={false} className="filterEditor__hiddenItem" />
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                data-test-subj="editQueryDSL"
-                onClick={this.toggleCustomEditor}
-              >
-                {this.state.isCustomEditorOpen ? (
-                  <FormattedMessage
-                    id="unifiedSearch.filter.filterEditor.editFilterValuesButtonLabel"
-                    defaultMessage="Edit filter values"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="unifiedSearch.filter.filterEditor.editQueryDslButtonLabel"
-                    defaultMessage="Edit as Query DSL"
-                  />
-                )}
-              </EuiButtonEmpty>
+              {shouldShowToggle() ? (
+                <EuiButtonEmpty
+                  size="xs"
+                  data-test-subj="editQueryDSL"
+                  onClick={this.toggleCustomEditor}
+                >
+                  {this.state.isCustomEditorOpen ? (
+                    <FormattedMessage
+                      id="unifiedSearch.filter.filterEditor.editFilterValuesButtonLabel"
+                      defaultMessage="Edit filter values"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="unifiedSearch.filter.filterEditor.editQueryDslButtonLabel"
+                      defaultMessage="Edit as Query DSL"
+                    />
+                  )}
+                </EuiButtonEmpty>
+              ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverTitle>
