@@ -8,6 +8,15 @@ import type { IconType } from '@elastic/eui';
 import type { ChartSeriesConfigs, ChartSeriesData, UpdateDateRange } from '../charts/common';
 import type { LensAttributes } from '../visualization_actions/types';
 
+export interface MetricStatItem {
+  color?: string;
+  description?: string;
+  icon?: IconType;
+  key: string;
+  name?: string;
+  lensAttributes?: LensAttributes;
+}
+
 export interface StatItem {
   color?: string;
   description?: string;

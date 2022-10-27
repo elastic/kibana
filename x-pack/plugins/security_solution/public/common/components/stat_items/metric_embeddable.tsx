@@ -7,16 +7,16 @@
 import { EuiFlexGroup, EuiIcon, EuiStat } from '@elastic/eui';
 import React from 'react';
 import { FlexItem, MetricItem } from './utils';
-import type { StatItem } from './types';
+import type { MetricStatItem } from './types';
 import { LensEmbeddable } from '../visualization_actions/lens_embeddable';
 
-const MetricComponent = ({
+const MetricEmbeddableComponent = ({
   fields,
   id,
   timerange,
   inspectTitle,
 }: {
-  fields: StatItem[];
+  fields: MetricStatItem[];
   id: string;
   timerange: { from: string; to: string };
   inspectTitle?: string;
@@ -64,4 +64,4 @@ const MetricComponent = ({
   );
 };
 
-export const Metric = React.memo(MetricComponent);
+export const MetricEmbeddable = React.memo(MetricEmbeddableComponent);

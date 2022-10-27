@@ -17,12 +17,11 @@ import { histogramDateTimeFormatter } from '../utils';
 import { StatItemHeader } from './stat_item_header';
 import { useToggleStatus } from './use_toggle_status';
 import type { StatItemsProps } from './types';
-import { areachartConfigs, barchartConfigs, FlexItem } from './utils';
+import { areachartConfigs, barchartConfigs, FlexItem, ChartHeight } from './utils';
 import { Metric } from './metrix';
-import { Metric as MetricEmbeddable } from '../stat_items_with_embeddables/metric';
+import { MetricEmbeddable } from './metric_embeddable';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { LensEmbeddable } from '../visualization_actions/lens_embeddable';
-import { ChartHeight } from '../stat_items_with_embeddables/utils';
 
 export const StatItemsComponent = React.memo<StatItemsProps>(
   ({

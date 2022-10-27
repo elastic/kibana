@@ -19,6 +19,9 @@ import type {
 import type { ChartSeriesData, ChartData } from '../charts/common';
 
 import type { StatItem } from './types';
+
+export const ChartHeight = '100px';
+
 export const FlexGroup = styled(EuiFlexGroup)`
   .no-margin {
     margin-top: 0 !important;
@@ -31,6 +34,14 @@ export const FlexItem = styled(EuiFlexItem)`
 `;
 
 FlexItem.displayName = 'FlexItem';
+
+export const MetricItem = styled(EuiFlexItem)`
+  &.euiFlexItem {
+    flex-basis: 0;
+    flex-grow: 0;
+  }
+`;
+MetricItem.displayName = 'MetricItem';
 
 export const StatValue = styled(EuiTitle)`
   overflow: hidden;
