@@ -406,6 +406,11 @@ const EventDetailsComponent: React.FC<Props> = ({
     [tabs, selectedTabId]
   );
 
+  const tourAnchor = useMemo(
+    () => (isTourAnchor ? { 'tour-step': getTourAnchor(3, SecurityStepId.alertsCases) } : {}),
+    [isTourAnchor]
+  );
+
   return (
     <GuidedOnboardingTourStep
       isTourAnchor={isTourAnchor}
@@ -413,7 +418,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       stepId={SecurityStepId.alertsCases}
     >
       <StyledEuiTabbedContent
-        {...(isTourAnchor ? { 'tour-step': getTourAnchor(3, SecurityStepId.alertsCases) } : {})}
+        {...tourAnchor}
         data-test-subj="eventDetails"
         tabs={tabs}
         selectedTab={selectedTab}

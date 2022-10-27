@@ -211,7 +211,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
     () =>
       isTourShown(SecurityStepId.alertsCases) &&
       eventType === 'signal' &&
-      // TODO: Steph make sure this is right
       isDetectionsAlertsTable(timelineId) &&
       ariaRowindex === 1,
     [isTourShown, ariaRowindex, eventType, timelineId]

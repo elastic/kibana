@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import type { EuiTourStepProps } from '@elastic/eui';
 import { EuiButton, EuiImage, EuiSpacer, EuiText, EuiTourStep } from '@elastic/eui';
@@ -25,6 +25,7 @@ export const SecurityTourStep = ({ children, step, stepId }: SecurityTourStep) =
     () => securityTourConfig[stepId].find((config) => config.step === step),
     [step, stepId]
   );
+  const onClick = useCallback(() => incrementStep(stepId), [incrementStep, stepId]);
   // step === 5 && stepId === SecurityStepId.alertsCases is in Cases app and out of context.
   // If we mount this step, we know we need to render it
   // we are also managing the context on the siem end in the background
@@ -38,7 +39,7 @@ export const SecurityTourStep = ({ children, step, stepId }: SecurityTourStep) =
   const footerAction: EuiTourStepProps['footerAction'] = !hideNextButton ? (
     <EuiButton
       size="s"
-      onClick={() => incrementStep(stepId)}
+      onClick={onClick}
       color="success"
       data-test-subj="onboarding--securityTourNextStepButton"
       tour-step="nextButton"
