@@ -7,7 +7,9 @@
 import { schema } from '@kbn/config-schema';
 import type { CreateHandler, FilesRouter } from './types';
 import { FileJSON } from '../../common';
+import { FILES_MANAGE_PRIVILEGE } from '../../common/constants';
 import { FILES_API_ROUTES, CreateRouteDefinition } from './api_routes';
+import { page, pageSize } from './common_schemas';
 
 const method = 'post' as const;
 
@@ -31,8 +33,8 @@ const rt = {
     meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   }),
   query: schema.object({
-    page: schema.maybe(schema.number()),
-    perPage: schema.maybe(schema.number({ defaultValue: 100 })),
+    page: schema.maybe(page),
+    perPage: schema.maybe(pageSize),
   }),
 };
 
@@ -63,16 +65,14 @@ const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
   });
 };
 
-// TODO: Find out whether we want to add stricter access controls to this route.
-// Currently this is giving read-access to all files which bypasses the
-// security we set up on a per route level for the "getById" and "list" endpoints.
-// Alternatively, we can remove the access controls on the "file kind" endpoints
-// or remove them entirely.
 export function register(router: FilesRouter) {
   router[method](
     {
       path: FILES_API_ROUTES.find,
       validate: { ...rt },
+      options: {
+        tags: [`access:${FILES_MANAGE_PRIVILEGE}`],
+      },
     },
     handler
   );

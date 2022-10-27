@@ -220,27 +220,47 @@ export function getFormBasedDatasource({
     removeLayer(state: FormBasedPrivateState, layerId: string) {
       const newLayers = { ...state.layers };
       delete newLayers[layerId];
+      const removedLayerIds: string[] = [layerId];
 
       // delete layers linked to this layer
       Object.keys(newLayers).forEach((id) => {
         const linkedLayers = newLayers[id]?.linkToLayers;
         if (linkedLayers && linkedLayers.includes(layerId)) {
           delete newLayers[id];
+          removedLayerIds.push(id);
         }
       });
 
       return {
-        ...state,
-        layers: newLayers,
+        removedLayerIds,
+        newState: {
+          ...state,
+          layers: newLayers,
+        },
       };
     },
 
     clearLayer(state: FormBasedPrivateState, layerId: string) {
+      const newLayers = { ...state.layers };
+
+      const removedLayerIds: string[] = [];
+      // delete layers linked to this layer
+      Object.keys(newLayers).forEach((id) => {
+        const linkedLayers = newLayers[id]?.linkToLayers;
+        if (linkedLayers && linkedLayers.includes(layerId)) {
+          delete newLayers[id];
+          removedLayerIds.push(id);
+        }
+      });
+
       return {
-        ...state,
-        layers: {
-          ...state.layers,
-          [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId].linkToLayers),
+        removedLayerIds,
+        newState: {
+          ...state,
+          layers: {
+            ...newLayers,
+            [layerId]: blankLayer(state.currentIndexPatternId, state.layers[layerId].linkToLayers),
+          },
         },
       };
     },
