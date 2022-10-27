@@ -69,7 +69,7 @@ describe('Fleet add agent flyout', () => {
       const AGENT_ID = 'agent' + Date.now();
       navigateTo(FLEET);
 
-      cy.getBySel(ADD_AGENT_BUTTON_TOP).click();
+      cy.getBySel(ADD_AGENT_BUTTON_TOP, { timeout: 150000 }).click();
       cy.intercept('POST', '/api/fleet/agent_policies?sys_monitoring=true').as('createAgentPolicy');
 
       cy.getBySel(AGENT_FLYOUT.CREATE_POLICY_BUTTON).click();

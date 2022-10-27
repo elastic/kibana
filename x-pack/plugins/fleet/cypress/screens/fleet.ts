@@ -48,7 +48,7 @@ export const SETTINGS_SAVE_BTN = 'saveApplySettingsBtn';
 export const AGENT_POLICY_SYSTEM_MONITORING_CHECKBOX = 'agentPolicyFormSystemMonitoringCheckbox';
 export const INSTALL_INTEGRATIONS_ADVANCE_OPTIONS_BTN = 'AgentPolicyAdvancedOptions.AccordionBtn';
 export const AGENT_POLICY_CREATE_STATUS_CALLOUT = 'agentPolicyCreateStatusCallOut';
-// export const FLEET_SERVER_HOST_INPUT = 'fleetServerHostInput';
+
 export const EXISTING_HOSTS_TAB = 'existingHostsTab';
 export const NEW_HOSTS_TAB = 'newHostsTab';
 
