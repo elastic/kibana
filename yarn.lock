@@ -3117,6 +3117,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-lifecycle-server-internal@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-lifecycle-server-mocks@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-lifecycle-server@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal":
   version "0.0.0"
   uid ""
@@ -3206,6 +3218,18 @@
   uid ""
 
 "@kbn/core-plugins-browser@link:bazel-bin/packages/core/plugins/core-plugins-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugins-server-internal@link:bazel-bin/packages/core/plugins/core-plugins-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugins-server-mocks@link:bazel-bin/packages/core/plugins/core-plugins-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-plugins-server@link:bazel-bin/packages/core/plugins/core-plugins-server":
   version "0.0.0"
   uid ""
 
@@ -7326,6 +7350,18 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-lifecycle-server-internal@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-lifecycle-server-mocks@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-lifecycle-server@link:bazel-bin/packages/core/lifecycle/core-lifecycle-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-logging-server-internal@link:bazel-bin/packages/core/logging/core-logging-server-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7415,6 +7451,18 @@
   uid ""
 
 "@types/kbn__core-plugins-browser@link:bazel-bin/packages/core/plugins/core-plugins-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-server-internal@link:bazel-bin/packages/core/plugins/core-plugins-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-server-mocks@link:bazel-bin/packages/core/plugins/core-plugins-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-plugins-server@link:bazel-bin/packages/core/plugins/core-plugins-server/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -12763,20 +12811,20 @@ cypress-react-selector@^3.0.0:
   dependencies:
     resq "1.10.2"
 
-cypress-real-events@^1.7.1:
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.7.1.tgz#8f430d67c29ea4f05b9c5b0311780120cbc9b935"
-  integrity sha512-/Bg15RgJ0SYsuXc6lPqH08x19z6j2vmhWN4wXfJqm3z8BTAFiK2MvipZPzxT8Z0jJP0q7kuniWrLIvz/i/8lCQ==
+cypress-real-events@^1.7.2:
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/cypress-real-events/-/cypress-real-events-1.7.2.tgz#d04e6d3f15117ef485eb49f9c9b361f3a3413002"
+  integrity sha512-tOANHbFRlqVL5Lu8OozvxTsrYgHwCnWmXAULGc1kdBF+k1gxrrvT/42uez3AhGoT+HcytyxieXAVt0jNP4yrvA==
 
 cypress-recurse@^1.23.0:
   version "1.23.0"
   resolved "https://registry.yarnpkg.com/cypress-recurse/-/cypress-recurse-1.23.0.tgz#f87334747516de6737bc4708754e8f429057bc6d"
   integrity sha512-CAsdvynhuR3SUEXVJRO2jBEnZRJ6nJp7nMXHwzV4UQq9Lap3Bj72AwcJK0cl51fJXcTaGDXYTQQ9zvGe3TyaQA==
 
-cypress@^10.9.0:
-  version "10.9.0"
-  resolved "https://registry.yarnpkg.com/cypress/-/cypress-10.9.0.tgz#273a61a6304766f9d6423e5ac8d4a9a11ed8b485"
-  integrity sha512-MjIWrRpc+bQM9U4kSSdATZWZ2hUqHGFEQTF7dfeZRa4MnalMtc88FIE49USWP2ZVtfy5WPBcgfBX+YorFqGElA==
+cypress@^10.10.0:
+  version "10.11.0"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-10.11.0.tgz#e9fbdd7638bae3d8fb7619fd75a6330d11ebb4e8"
+  integrity sha512-lsaE7dprw5DoXM00skni6W5ElVVLGAdRUUdZjX2dYsGjbY/QnpzWZ95Zom1mkGg0hAaO/QVTZoFVS7Jgr/GUPA==
   dependencies:
     "@cypress/request" "^2.88.10"
     "@cypress/xvfb" "^1.2.4"
