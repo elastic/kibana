@@ -8,6 +8,8 @@
 import { errors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core/server';
 
+import { ErrorCode } from '../../../../../../common/types/error_codes';
+
 import { deleteMlInferencePipeline } from './delete_ml_inference_pipeline';
 
 describe('deleteMlInferencePipeline lib function', () => {
@@ -144,7 +146,7 @@ describe('deleteMlInferencePipeline lib function', () => {
         'my-ml-pipeline',
         mockClient as unknown as ElasticsearchClient
       )
-    ).rejects.toThrow(Error);
+    ).rejects.toThrow(ErrorCode.PIPELINE_IS_IN_USE);
 
     expect(mockClient.ingest.putPipeline).toHaveBeenCalledTimes(0);
     expect(mockClient.ingest.deletePipeline).toHaveBeenCalledTimes(0);

@@ -451,9 +451,11 @@ describe('Enterprise Search Managed Indices', () => {
     });
 
     it('raises error if the pipeline is in use', async () => {
-      const mockError = new Error(ErrorCode.PIPELINE_IS_IN_USE);
       (deleteMlInferencePipeline as jest.Mock).mockImplementationOnce(() => {
-        return Promise.reject(mockError);
+        return Promise.reject({
+          message: ErrorCode.PIPELINE_IS_IN_USE,
+          pipelineName: 'my-other-index@ml-inference',
+        });
       });
 
       await mockRouter.callRoute({

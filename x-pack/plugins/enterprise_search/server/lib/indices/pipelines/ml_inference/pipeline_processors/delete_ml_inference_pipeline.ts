@@ -20,14 +20,15 @@ export const deleteMlInferencePipeline = async (
   client: ElasticsearchClient
 ) => {
   // Check if the pipeline is in use in a different index's managed pipeline
-  const pipelineIsInUse = await isPipelineInUse(pipelineName, indexName, client);
-  if (pipelineIsInUse) {
-    throw new Error(ErrorCode.PIPELINE_IS_IN_USE);
+  const otherPipelineName = await findUsageInOtherManagedPipelines(pipelineName, indexName, client);
+  if (otherPipelineName) {
+    throw Object.assign(new Error(ErrorCode.PIPELINE_IS_IN_USE), {
+      pipelineName: otherPipelineName,
+    });
   }
 
   // Detach the pipeline first
   const response = await detachPipeline(indexName, pipelineName, client);
-  console.log('after detachPipeline')
 
   // Finally, delete pipeline
   const deleteResponse = await client.ingest.deletePipeline({ id: pipelineName });
@@ -44,7 +45,7 @@ const detachPipeline = async (
   client: ElasticsearchClient
 ): Promise<DeleteMlInferencePipelineResponse> => {
   try {
-    return detachMlInferencePipeline(indexName, pipelineName, client);
+    return await detachMlInferencePipeline(indexName, pipelineName, client);
   } catch (error) {
     // only suppress Not Found error
     if (error.meta?.statusCode !== 404) {
@@ -53,13 +54,13 @@ const detachPipeline = async (
 
     return {};
   }
-}
+};
 
-const isPipelineInUse = async (
+const findUsageInOtherManagedPipelines = async (
   pipelineName: string,
   indexName: string,
   client: ElasticsearchClient
-): Promise<boolean> => {
+): Promise<string | undefined> => {
   try {
     // Fetch all managed parent ML pipelines
     const pipelines = await client.ingest.getPipeline({
@@ -69,17 +70,15 @@ const isPipelineInUse = async (
     // The given inference pipeline is being used in another index's managed pipeline if:
     // - The index name is different from the one we're deleting from, AND
     // - Its processors contain at least one entry in which the supplied pipeline name is referenced
-    return Object.entries(pipelines).some(
+    return Object.entries(pipelines).find(
       ([name, pipeline]) =>
         name !== getInferencePipelineNameFromIndexName(indexName) &&
-        pipeline.processors?.some((processor) => processor.pipeline?.name === pipelineName)
-    );
+        pipeline.processors?.find((processor) => processor.pipeline?.name === pipelineName)
+    )?.[0]; // Managed pipeline name
   } catch (error) {
     // only suppress Not Found error
     if (error.meta?.statusCode !== 404) {
       throw error;
     }
-
-    return false;
   }
 };

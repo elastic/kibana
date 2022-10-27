@@ -704,8 +704,11 @@ export function registerIndexRoutes({
             message: i18n.translate(
               'xpack.enterpriseSearch.server.routes.indices.mlInference.pipelineProcessors.pipelineIsInUseError',
               {
-                defaultMessage: 'Inference pipeline is used in a pipeline of a different index',
-              }
+                defaultMessage: `Inference pipeline is used in managed pipeline '{pipelineName}' of a different index`,
+                values: {
+                  pipelineName: error.pipelineName,
+                },
+              },
             ),
             response,
             statusCode: 400,
