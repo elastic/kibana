@@ -29,6 +29,7 @@ import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
 import { getArchivePackage } from '../archive';
 import { normalizeKuery } from '../../saved_object';
+import { getSettings } from '../../settings';
 
 import { createInstallableFrom } from '.';
 
@@ -132,7 +133,7 @@ export async function getPackageInfo({
   pkgVersion,
   skipArchive = false,
   ignoreUnverified = false,
-  prerelease = true,
+  prerelease,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -142,6 +143,17 @@ export async function getPackageInfo({
   ignoreUnverified?: boolean;
   prerelease?: boolean;
 }): Promise<PackageInfo> {
+  // if prerelease param not defined, query from settings
+  if (prerelease === undefined) {
+    try {
+      ({ prerelease_integrations_enabled: prerelease } = await getSettings(savedObjectsClient));
+    } catch (err) {
+      appContextService
+        .getLogger()
+        .warn('Error while trying to load prerelease flag from settings, defaulting to false', err);
+    }
+  }
+
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackageOrUndefined(pkgName, { prerelease }),
