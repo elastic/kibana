@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: octokit/graphql-action@v2.x
         id: add_to_project
-        if: ${{ github.event.label.name == env.DATA_PLANE_LABEL || github.event.label.name == env.CONTROL_PLANE_LABEL || github.event.label.name == env.ECOSYSTEM_LABEL || github.event.label.name == env.FLEET_LABEL }}
+        if: ${{ github.event.label.name == env.FLEET_LABEL }}
         with:
           query: |
             # Variables have to be snake cased because of https://github.com/octokit/graphql-action/issues/164
