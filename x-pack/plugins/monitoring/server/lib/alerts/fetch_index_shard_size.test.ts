@@ -191,7 +191,7 @@ describe('fetchIndexShardSize', () => {
       esRes
     );
 
-    const oneGBThreshold = 1
+    const oneGBThreshold = 1;
     const result = await fetchIndexShardSize(
       esClient,
       clusters,
