@@ -25,6 +25,7 @@ import {
 } from '../components/analytics_selector';
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 import { useUrlState } from '../../../util/url_state';
+import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 
 export const Page: FC<{
   jobId: string;
@@ -41,7 +42,9 @@ export const Page: FC<{
   } = useMlApiContext();
   const helpLink = docLinks.links.ml.dataFrameAnalytics;
   const jobIdToUse = jobId ?? analyticsId?.job_id;
-  const analysisTypeToUse = analysisType || analyticsId?.analysis_type;
+  const [analysisTypeToUse, setAnalysisTypeToUse] = useState<
+    DataFrameAnalysisConfigType | undefined
+  >(analysisType || analyticsId?.analysis_type);
 
   const [, setGlobalState] = useUrlState('_g');
 
@@ -54,6 +57,25 @@ export const Page: FC<{
       console.error('Error checking analytics jobs exist', e); // eslint-disable-line no-console
     }
   };
+
+  // The inner components of the results page don't have a concept of reloading the full page.
+  // Because we might want to refresh though if a user has to fix unsynced saved objects,
+  // we achieve this here by unmounting the inner pages first by setting `analysisTypeToUse`
+  // to `undefined`. The `useEffect()` below will then check if `analysisTypeToUse` doesn't
+  // match the passed in analyis type and will update it once again, the re-mounted
+  // page will then again fetch the most recent results.
+  const refresh = () => {
+    setAnalysisTypeToUse(undefined);
+  };
+
+  useEffect(
+    function checkRefresh() {
+      if (analysisTypeToUse !== analysisType || analyticsId?.analysis_type) {
+        setAnalysisTypeToUse(analysisType || analyticsId?.analysis_type);
+      }
+    },
+    [analyticsId, analysisType, analysisTypeToUse]
+  );
 
   useEffect(function checkJobs() {
     checkJobsExist();
@@ -126,6 +148,9 @@ export const Page: FC<{
           />
         </MlPageHeader>
       )}
+
+      <SavedObjectsWarning onCloseFlyout={refresh} />
+
       {jobIdToUse && analysisTypeToUse ? (
         <div data-test-subj="mlPageDataFrameAnalyticsExploration">
           {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
