@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useNavigationProps } from './use_navigation_props';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -14,9 +14,12 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MemoryRouter } from 'react-router-dom';
 
 const mockServices = {
-  singleDocLocator: { navigate: jest.fn() },
-  contextLocator: { navigate: jest.fn() },
-  locator: { getUrl: jest.fn(() => 'mock-referrer') },
+  singleDocLocator: { getRedirectUrl: jest.fn(() => ''), navigate: jest.fn() },
+  contextLocator: { getRedirectUrl: jest.fn(() => ''), navigate: jest.fn() },
+  locator: {
+    getUrl: jest.fn(() => Promise.resolve('mock-referrer')),
+    useUrl: jest.fn(() => 'mock-referrer'),
+  },
   filterManager: {
     getAppFilters: jest.fn(() => []),
     getGlobalFilters: jest.fn(() => []),
@@ -61,19 +64,23 @@ describe('useNavigationProps', () => {
     );
 
     const commonParams = {
-      dataViewId: '1',
+      index: {
+        id: '1',
+        title: 'test',
+        fields: [],
+      },
       rowId: 'mock-id',
       referrer: 'mock-referrer',
     };
 
-    await result.current.onOpenSurrDocs({ preventDefault: jest.fn() } as unknown as Event);
+    await result.current.onOpenContextView({ preventDefault: jest.fn() } as unknown as MouseEvent);
     expect(mockServices.contextLocator.navigate.mock.calls[0][0]).toEqual({
       ...commonParams,
       columns: ['mock-column'],
       filters: [],
     });
 
-    await result.current.onOpenSingleDoc({ preventDefault: jest.fn() } as unknown as Event);
+    await result.current.onOpenSingleDoc({ preventDefault: jest.fn() } as unknown as MouseEvent);
     expect(mockServices.singleDocLocator.navigate.mock.calls[0][0]).toEqual({
       ...commonParams,
       rowIndex: 'mock-index',

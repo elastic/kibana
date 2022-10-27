@@ -10,7 +10,6 @@ import { getStatesFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverContextAppLocatorDefinition } from './locator';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
-const savedSearchId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';
 
 interface SetupParams {
   useHash?: boolean;
@@ -43,7 +42,7 @@ describe('Discover context url generator', () => {
   test('can create basic link to context', async () => {
     const { locator } = await setup();
     const { app, path } = await locator.getLocation({
-      dataViewId,
+      index: dataViewId,
       rowId: 'mock-row-id',
       referrer: 'mock-referrer',
     });
@@ -56,17 +55,11 @@ describe('Discover context url generator', () => {
 
   test('should fill history state for context view', async () => {
     const { locator } = await setup();
-    const stateParams = {
-      dataViewId,
-      timeRange: { from: 'now-15m', to: 'now' },
-      query: { query: 'foo', language: 'kuery' },
-      savedSearchId,
-    };
 
     const { path, state } = await locator.getLocation({
+      index: dataViewId,
       rowId: 'mock-row-id',
       ...appStateParams,
-      ...stateParams,
       referrer: 'mock-referrer',
     });
 
@@ -82,7 +75,7 @@ describe('Discover context url generator', () => {
   test('when useHash set to false, sets data view ID in the generated URL', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({
-      dataViewId,
+      index: dataViewId,
       rowId: 'mock-row-id',
       ...appStateParams,
       referrer: 'mock-referrer',
@@ -97,7 +90,7 @@ describe('Discover context url generator', () => {
   test('when useHash set to true, does not set data view ID in the generated URL', async () => {
     const { locator } = await setup({ useHash: true });
     const { path } = await locator.getLocation({
-      dataViewId,
+      index: dataViewId,
       rowId: 'mock-row-id',
       ...appStateParams,
       referrer: 'mock-referrer',

@@ -15,35 +15,13 @@ const setup = () => {
   return { locator };
 };
 
-const stateParams = {
-  dataViewId,
-  columns: ['mock-column'],
-  filters: [
-    {
-      meta: {
-        disabled: false,
-        negate: false,
-        type: 'phrase',
-        key: 'mock-key',
-        value: 'mock-value',
-        params: { query: 'mock-value' },
-        index: dataViewId,
-      },
-      query: { match_phrase: { 'mock-key': 'mock-value' } },
-    },
-  ],
-  savedSearchId: 'mock-saved-search-id',
-  timeRange: { from: 'now-15m', to: 'now' },
-  query: { query: 'mock-query', language: 'kuery' },
-};
-
 describe('Discover single doc url generator', () => {
   test('should create init single doc page', async () => {
     const { locator } = setup();
     const { app, path, state } = await locator.getLocation({
+      index: dataViewId,
       rowId: 'mock-row-id',
       rowIndex: 'mock-row-index',
-      ...stateParams,
       referrer: 'mock-referrer',
     });
 

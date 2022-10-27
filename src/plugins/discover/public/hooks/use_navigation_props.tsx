@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useState, MouseEventHandler, MouseEvent } from 'react';
 import { AggregateQuery, Query, TimeRange, Filter, disableFilter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useHistory } from 'react-router-dom';
@@ -60,38 +60,8 @@ const getStateParams = ({
   };
 };
 
-/**
- * Use callback handler on click. Otherwise href is used.
- */
-const useButtonNavigationRef = ({ onClick }: { onClick: () => void }) => {
-  const handler = useCallback(
-    (event) => {
-      // if ctrl or meta key is pressed, use callback to navigate,
-      // otherwise use href to open in a new tab
-      if (!event.metaKey && !event.ctrlKey) {
-        event.preventDefault();
-        onClick();
-      }
-    },
-    [onClick]
-  );
-
-  const buttonRef = useRef<HTMLButtonElement | HTMLAnchorElement>();
-  const handlerRef = useRef(handler);
-
-  return useCallback(
-    (buttonElement: HTMLButtonElement | HTMLAnchorElement | null) => {
-      if (buttonElement) {
-        buttonRef.current = buttonElement;
-        handlerRef.current = handler;
-        buttonElement?.addEventListener('click', handlerRef.current);
-      } else if (buttonRef.current) {
-        buttonRef.current.removeEventListener('click', handlerRef.current);
-      }
-    },
-    [handler]
-  );
-};
+const isModifiedEvent = (event: MouseEvent) =>
+  !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
 export const useNavigationProps = ({
   dataView,
@@ -111,7 +81,7 @@ export const useNavigationProps = ({
     [dataView]
   );
 
-  const params = useMemo(
+  const buildParams = useCallback(
     () =>
       getStateParams({
         isEmbeddableView,
@@ -124,53 +94,90 @@ export const useNavigationProps = ({
     [columns, filters, isEmbeddableView, savedSearchId, services.data, services.filterManager]
   );
 
-  const referrer = services.locator.useUrl({ index, ...params });
-
   useEffect(() => {
-    const href = services.singleDocLocator.getRedirectUrl({ index, rowIndex, rowId, referrer });
-    setSingleDocHref(href);
-  }, [index, rowIndex, rowId, referrer, services.singleDocLocator, setSingleDocHref]);
-
-  useEffect(() => {
-    const href = services.contextLocator.getRedirectUrl({
-      index,
-      rowId,
-      columns: params.columns,
-      filters: params.filters?.map(disableFilter),
-      referrer,
-    });
-    setContextViewHref(href);
+    const dataViewId = typeof index === 'object' ? index.id : index;
+    services.locator
+      .getUrl({ dataViewId, ...buildParams() })
+      .then((referrer) => {
+        return services.singleDocLocator.getRedirectUrl({ index, rowIndex, rowId, referrer });
+      })
+      .then(setSingleDocHref);
   }, [
     index,
     rowIndex,
     rowId,
-    referrer,
-    services.contextLocator,
-    setContextViewHref,
-    params.columns,
-    params.filters,
+    services.singleDocLocator,
+    setSingleDocHref,
+    services.locator,
+    buildParams,
   ]);
 
-  const onOpenSingleDoc = useCallback(
-    () => services.singleDocLocator.navigate({ index, rowIndex, rowId, referrer }),
-    [index, referrer, rowId, rowIndex, services.singleDocLocator]
+  useEffect(() => {
+    const params = buildParams();
+    const dataViewId = typeof index === 'object' ? index.id : index;
+    services.locator
+      .getUrl({ dataViewId, ...params })
+      .then((referrer) =>
+        services.contextLocator.getRedirectUrl({
+          index,
+          rowId,
+          columns: params.columns,
+          filters: params.filters?.map(disableFilter),
+          referrer,
+        })
+      )
+      .then(setContextViewHref);
+  }, [
+    index,
+    rowIndex,
+    rowId,
+    setContextViewHref,
+    buildParams,
+    services.contextLocator,
+    services.locator,
+  ]);
+
+  const onOpenSingleDoc: MouseEventHandler = useCallback(
+    (event) => {
+      if (isModifiedEvent(event)) {
+        return;
+      }
+      event.preventDefault();
+      const dataViewId = typeof index === 'object' ? index.id : index;
+      services.locator
+        .getUrl({ dataViewId, ...buildParams() })
+        .then((referrer) =>
+          services.singleDocLocator.navigate({ index, rowIndex, rowId, referrer })
+        );
+    },
+    [buildParams, index, rowId, rowIndex, services.locator, services.singleDocLocator]
   );
 
-  const openContextView = useCallback(
-    () =>
-      services.contextLocator.navigate({
-        index,
-        rowId,
-        columns: params.columns,
-        filters: params.filters?.map(disableFilter),
-        referrer,
-      }),
-    [index, params.columns, params.filters, referrer, rowId, services.contextLocator]
+  const onOpenContextView: MouseEventHandler = useCallback(
+    (event) => {
+      const params = buildParams();
+      if (isModifiedEvent(event)) {
+        return;
+      }
+      event.preventDefault();
+      const dataViewId = typeof index === 'object' ? index.id : index;
+      services.locator.getUrl({ dataViewId, ...params }).then((referrer) =>
+        services.contextLocator.navigate({
+          index,
+          rowId,
+          columns: params.columns,
+          filters: params.filters?.map(disableFilter),
+          referrer,
+        })
+      );
+    },
+    [buildParams, index, rowId, services.contextLocator, services.locator]
   );
 
-  const singleDocButtonRef = useButtonNavigationRef({ onClick: onOpenSingleDoc });
-
-  const contextViewButtonRef = useButtonNavigationRef({ onClick: openContextView });
-
-  return { singleDocHref, contextViewHref, singleDocButtonRef, contextViewButtonRef };
+  return {
+    singleDocHref,
+    contextViewHref,
+    onOpenSingleDoc,
+    onOpenContextView,
+  };
 };

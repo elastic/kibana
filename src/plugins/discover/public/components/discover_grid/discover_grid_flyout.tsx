@@ -100,15 +100,9 @@ export function DiscoverGridFlyout({
     [activePage, setPage]
   );
 
-  const { singleDocHref, contextViewHref, singleDocButtonRef, contextViewButtonRef } =
-    useNavigationProps({
-      dataView,
-      rowIndex: hit.raw._index,
-      rowId: hit.raw._id,
-      columns,
-      filters,
-      savedSearchId,
-    });
+  const { singleDocHref, contextViewHref, onOpenSingleDoc, onOpenContextView } = useNavigationProps(
+    { dataView, rowIndex: hit.raw._index, rowId: hit.raw._id, columns, filters, savedSearchId }
+  );
 
   return (
     <EuiPortal>
@@ -146,14 +140,15 @@ export function DiscoverGridFlyout({
               </EuiFlexItem>
             </EuiHideFor>
             <EuiFlexItem grow={false}>
+              {/*  eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiButtonEmpty
                 size="s"
                 iconSize="s"
                 iconType="document"
                 flush="left"
                 data-test-subj="docTableRowAction"
-                buttonRef={singleDocButtonRef}
                 href={singleDocHref}
+                onClick={onOpenSingleDoc}
               >
                 {i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkTextSimple', {
                   defaultMessage: 'Single document',
@@ -163,12 +158,13 @@ export function DiscoverGridFlyout({
             {dataView.isTimeBased() && dataView.id && (
               <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
                 <EuiFlexItem grow={false}>
+                  {/*  eslint-disable-next-line @elastic/eui/href-or-on-click */}
                   <EuiButtonEmpty
                     size="s"
                     iconSize="s"
                     iconType="documents"
                     flush="left"
-                    buttonRef={contextViewButtonRef}
+                    onClick={onOpenContextView}
                     href={contextViewHref}
                     data-test-subj="docTableRowAction"
                   >

@@ -16,7 +16,6 @@ import { formatFieldValue } from '../../../utils/format_value';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../utils/row_formatter';
-import { useNavigationProps } from '../../../hooks/use_navigation_props';
 import { DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
 import { DataTableRecord, EsHitRecord } from '../../../types';
 import { TableRowDetails } from './table_row_details';
@@ -102,16 +101,6 @@ export const TableRow = ({
     },
     [filter, dataView.fields, row.flattened]
   );
-
-  const { singleDocHref, contextViewHref, singleDocButtonRef, contextViewButtonRef } =
-    useNavigationProps({
-      dataView,
-      rowIndex: row.raw._index,
-      rowId: row.raw._id,
-      columns,
-      filters,
-      savedSearchId,
-    });
 
   const rowCells = [
     <td className="kbnDocTableCell__toggleDetails" key="toggleDetailsCell">
@@ -209,24 +198,27 @@ export const TableRow = ({
         {rowCells}
       </tr>
       <tr data-test-subj="docTableDetailsRow" className="kbnDocTableDetails__row">
-        <TableRowDetails
-          open={open}
-          colLength={(columns.length || 1) + 2}
-          isTimeBased={dataView.isTimeBased()}
-          singleDocHref={singleDocHref}
-          contextViewHref={contextViewHref}
-          singleDocButtonRef={singleDocButtonRef}
-          contextViewButtonRef={contextViewButtonRef}
-        >
-          <DocViewer
-            columns={columns}
-            filter={filter}
-            hit={row}
+        {open && (
+          <TableRowDetails
+            colLength={(columns.length || 1) + 2}
+            isTimeBased={dataView.isTimeBased()}
             dataView={dataView}
-            onAddColumn={onAddColumn}
-            onRemoveColumn={onRemoveColumn}
-          />
-        </TableRowDetails>
+            rowIndex={row.raw._index}
+            rowId={row.raw._id}
+            columns={columns}
+            filters={filters}
+            savedSearchId={savedSearchId}
+          >
+            <DocViewer
+              columns={columns}
+              filter={filter}
+              hit={row}
+              dataView={dataView}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+            />
+          </TableRowDetails>
+        )}
       </tr>
     </Fragment>
   );
