@@ -37,7 +37,8 @@ import {
 import { createEnrichEventsFunction } from '../../signals/enrichments';
 
 export const createNewTermsAlertType = (
-  createOptions: CreateRuleOptions
+  createOptions: CreateRuleOptions,
+  isPreview?: boolean
 ): SecurityAlertType<NewTermsRuleParams, {}, {}, 'default'> => {
   const { logger } = createOptions;
   return {
@@ -106,7 +107,6 @@ export const createNewTermsAlertType = (
         spaceId,
         state,
         startedAt,
-        isPreview,
       } = execOptions;
 
       // Validate the history window size compared to `from` at runtime as well as in the `validate`

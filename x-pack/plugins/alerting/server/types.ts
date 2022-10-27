@@ -105,7 +105,6 @@ export interface RuleExecutorOptions<
   tags: string[];
   updatedBy: string | null;
   namespace?: string;
-  isPreview?: boolean;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
