@@ -106,11 +106,7 @@ describe('tagKibanaAssets', () => {
 
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
       tags: ['fleet-managed-default', 'fleet-pkg-system-default'],
-      assign: [
-        ...kibanaAssets.dashboard,
-        ...kibanaAssets.search,
-        ...kibanaAssets.visualization,
-      ],
+      assign: [...kibanaAssets.dashboard, ...kibanaAssets.search, ...kibanaAssets.visualization],
       unassign: [],
       refresh: false,
     });
