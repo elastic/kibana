@@ -160,7 +160,7 @@
             "label": "apm",
             "description": [],
             "signature": [
-              "{ readonly kibanaSettings: string; readonly supportedServiceMaps: string; readonly customLinks: string; readonly droppedTransactionSpans: string; readonly upgrading: string; readonly metaData: string; readonly overview: string; readonly tailSamplingPolicies: string; readonly elasticAgent: string; }"
+              "{ readonly kibanaSettings: string; readonly supportedServiceMaps: string; readonly customLinks: string; readonly droppedTransactionSpans: string; readonly upgrading: string; readonly metaData: string; readonly overview: string; readonly tailSamplingPolicies: string; readonly elasticAgent: string; readonly storageExplorer: string; readonly spanCompression: string; readonly transactionSampling: string; readonly indexLifecycleManagement: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,

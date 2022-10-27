@@ -1,0 +1,245 @@
+{
+  "id": "@kbn/core-lifecycle-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-lifecycle-server-mocks",
+        "id": "def-server.coreInternalLifecycleMock",
+        "type": "Object",
+        "tags": [],
+        "label": "coreInternalLifecycleMock",
+        "description": [],
+        "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server-mocks",
+            "id": "def-server.coreInternalLifecycleMock.createInternalPreboot",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalPreboot",
+            "description": [],
+            "signature": [
+              "() => { analytics: jest.Mocked<",
+              "AnalyticsServicePreboot",
+              ">; context: jest.Mocked<",
+              "InternalContextSetup",
+              ">; elasticsearch: ",
+              "MockedElasticSearchServicePreboot",
+              "; http: ",
+              "InternalHttpServicePrebootMock",
+              "; httpResources: { createRegistrar: jest.Mock<jest.Mocked<",
+              "HttpResources",
+              ">, []>; }; uiSettings: jest.Mocked<",
+              "InternalUiSettingsServicePreboot",
+              ">; logging: jest.Mocked<",
+              "InternalLoggingServicePreboot",
+              ">; preboot: ",
+              "InternalPrebootServicePrebootMock",
+              "; }"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server-mocks",
+            "id": "def-server.coreInternalLifecycleMock.createInternalSetup",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalSetup",
+            "description": [],
+            "signature": [
+              "() => { analytics: jest.Mocked<",
+              "AnalyticsServiceSetup",
+              ">; capabilities: jest.Mocked<",
+              "CapabilitiesSetup",
+              ">; context: jest.Mocked<",
+              "InternalContextSetup",
+              ">; docLinks: ",
+              "DocLinksServiceSetup",
+              "; elasticsearch: ",
+              "MockedInternalElasticSearchServiceSetup",
+              "; http: ",
+              "InternalHttpServiceSetupMock",
+              "; savedObjects: jest.Mocked<",
+              "InternalSavedObjectsServiceSetup",
+              ">; status: jest.Mocked<",
+              "InternalStatusServiceSetup",
+              ">; environment: jest.Mocked<",
+              "InternalEnvironmentServicePreboot",
+              ">; i18n: jest.Mocked<",
+              "I18nServiceSetup",
+              ">; httpResources: { createRegistrar: jest.Mock<jest.Mocked<",
+              "HttpResources",
+              ">, []>; }; rendering: jest.Mocked<",
+              "InternalRenderingServiceSetup",
+              ">; uiSettings: jest.Mocked<",
+              "UiSettingsServiceSetup",
+              ">; logging: jest.Mocked<",
+              "InternalLoggingServicePreboot",
+              ">; metrics: jest.Mocked<",
+              "MetricsServiceSetup",
+              ">; deprecations: jest.Mocked<",
+              "DeprecationRegistryProvider",
+              ">; executionContext: jest.Mocked<",
+              "IExecutionContext",
+              ">; coreUsageData: jest.Mocked<",
+              "InternalCoreUsageDataSetup",
+              ">; }"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server-mocks",
+            "id": "def-server.coreInternalLifecycleMock.createInternalStart",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalStart",
+            "description": [],
+            "signature": [
+              "() => { analytics: jest.Mocked<",
+              "AnalyticsServiceStart",
+              ">; capabilities: jest.Mocked<",
+              "CapabilitiesStart",
+              ">; docLinks: ",
+              "DocLinksServiceSetup",
+              "; elasticsearch: ",
+              "MockedElasticSearchServiceStart",
+              "; http: ",
+              "InternalHttpServiceStartMock",
+              "; metrics: jest.Mocked<",
+              "MetricsServiceSetup",
+              ">; savedObjects: jest.Mocked<",
+              "SavedObjectsServiceStart",
+              ">; uiSettings: jest.Mocked<",
+              "UiSettingsServiceStart",
+              ">; coreUsageData: jest.Mocked<",
+              "CoreUsageDataStart",
+              ">; executionContext: jest.Mocked<",
+              "IExecutionContext",
+              ">; deprecations: jest.Mocked<",
+              "InternalDeprecationsServiceStart",
+              ">; }"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-lifecycle-server-mocks",
+        "id": "def-server.coreLifecycleMock",
+        "type": "Object",
+        "tags": [],
+        "label": "coreLifecycleMock",
+        "description": [],
+        "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server-mocks",
+            "id": "def-server.coreLifecycleMock.createPreboot",
+            "type": "Function",
+            "tags": [],
+            "label": "createPreboot",
+            "description": [],
+            "signature": [
+              "() => CorePrebootMockType"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server-mocks",
+            "id": "def-server.coreLifecycleMock.createCoreSetup",
+            "type": "Function",
+            "tags": [],
+            "label": "createCoreSetup",
+            "description": [],
+            "signature": [
+              "({ pluginStartDeps, pluginStartContract, }?: { pluginStartDeps?: object | undefined; pluginStartContract?: any; }) => CoreSetupMockType"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-lifecycle-server-mocks",
+                "id": "def-server.coreLifecycleMock.createCoreSetup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ pluginStartDeps?: object | undefined; pluginStartContract?: any; }"
+                ],
+                "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/core_setup.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-lifecycle-server-mocks",
+            "id": "def-server.coreLifecycleMock.createCoreStart",
+            "type": "Function",
+            "tags": [],
+            "label": "createCoreStart",
+            "description": [],
+            "signature": [
+              "() => ",
+              "MockedKeys",
+              "<",
+              "CoreStart",
+              ">"
+            ],
+            "path": "packages/core/lifecycle/core-lifecycle-server-mocks/src/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
