@@ -82,6 +82,8 @@ export const createReduxEmbeddableTools = <
 
   // create the context which will wrap this embeddable's react components to allow access to update and read from the store.
   const context = {
+    embeddableInstance: embeddable,
+
     actions: slice.actions as ReduxEmbeddableContext<
       ReduxEmbeddableStateType,
       typeof reducers

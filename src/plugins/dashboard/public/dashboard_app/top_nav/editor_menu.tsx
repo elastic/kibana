@@ -25,14 +25,12 @@ import type {
   EmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
 
-import { DashboardContainer } from '../../dashboard_container';
 import { pluginServices } from '../../services/plugin_services';
 import { getPanelAddedSuccessString } from '../_dashboard_app_strings';
 import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
+import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_renderer';
 
 interface Props {
-  /** Dashboard container */
-  dashboardContainer: DashboardContainer;
   /** Handler for creating new visualization of a specified type */
   createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
 }
@@ -50,7 +48,7 @@ interface UnwrappedEmbeddableFactory {
   isEditable: boolean;
 }
 
-export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
+export const EditorMenu = ({ createNewVisType }: Props) => {
   const {
     embeddable,
     notifications: { toasts },
@@ -62,6 +60,8 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
       showNewVisModal,
     },
   } = pluginServices.getServices();
+
+  const { embeddableInstance: dashboardContainer } = useDashboardContainerContext();
 
   const embeddableFactories = useMemo(
     () => Array.from(embeddable.getEmbeddableFactories()),

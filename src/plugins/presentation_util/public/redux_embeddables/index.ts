@@ -8,10 +8,7 @@
 
 import { ReduxEmbeddablePackage } from './types';
 
-export {
-  useReduxContainerContext,
-  useReduxEmbeddableContext,
-} from './use_redux_embeddable_context';
+export { useReduxEmbeddableContext } from './use_redux_embeddable_context';
 
 export type { ReduxEmbeddableState, ReduxEmbeddableTools, ReduxEmbeddablePackage } from './types';
 

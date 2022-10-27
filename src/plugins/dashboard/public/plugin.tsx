@@ -49,11 +49,7 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
-import {
-  type DashboardContainerFactory,
-  DashboardContainerFactoryDefinition,
-} from './dashboard_container/embeddable/dashboard_container_factory';
-import { dashboardFeatureCatalog } from './dashboard_strings';
+import { DashboardContainerFactoryDefinition } from './dashboard_container/embeddable/dashboard_container_factory';
 import {
   type DashboardAppLocator,
   DashboardAppLocatorDefinition,
@@ -66,6 +62,7 @@ import {
 } from './dashboard_constants';
 import { PlaceholderEmbeddableFactory } from './placeholder_embeddable';
 import { DashboardMountContextProps } from './dashboard_app/types';
+import { dashboardFeatureCatalogStrings } from './dashboard_app/_dashboard_app_strings';
 
 export interface DashboardFeatureFlagConfig {
   allowByValueEmbeddables: boolean;
@@ -150,7 +147,7 @@ export class DashboardPlugin
               dashboardSavedObject: { loadDashboardStateFromSavedObject },
             } = pluginServices.getServices();
             return (
-              (await loadDashboardStateFromSavedObject({ id: dashboardId })).dashboardState
+              (await loadDashboardStateFromSavedObject({ id: dashboardId })).dashboardInput
                 ?.filters ?? []
             );
           },
@@ -269,10 +266,10 @@ export class DashboardPlugin
 
     if (home) {
       home.featureCatalogue.register({
-        id: DASHBOARD_APP_ID,
-        title: dashboardFeatureCatalog.getTitle(),
-        subtitle: dashboardFeatureCatalog.getSubtitle(),
-        description: dashboardFeatureCatalog.getDescription(),
+        id: LEGACY_DASHBOARD_APP_ID,
+        title: dashboardFeatureCatalogStrings.getTitle(),
+        subtitle: dashboardFeatureCatalogStrings.getSubtitle(),
+        description: dashboardFeatureCatalogStrings.getDescription(),
         icon: 'dashboardApp',
         path: `/app/dashboards#${LANDING_PAGE_PATH}`,
         showOnHomePage: false,

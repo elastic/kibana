@@ -46,7 +46,6 @@ export {
 } from './components';
 
 export {
-  useReduxContainerContext,
   useReduxEmbeddableContext,
   lazyLoadReduxEmbeddablePackage,
   type ReduxEmbeddableState,

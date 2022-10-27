@@ -9,8 +9,12 @@
 import React from 'react';
 import uuid from 'uuid';
 import ReactDOM from 'react-dom';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 
+import {
+  lazyLoadReduxEmbeddablePackage,
+  ReduxEmbeddableTools,
+} from '@kbn/presentation-util-plugin/public';
 import {
   ViewMode,
   Container,
@@ -25,36 +29,34 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
-import {
-  lazyLoadReduxEmbeddablePackage,
-  ReduxEmbeddableTools,
-} from '@kbn/presentation-util-plugin/public';
+import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 
-import { DASHBOARD_CONTAINER_TYPE } from '../..';
 import {
   DashboardContainerByValueInput,
   DashboardContainerInput,
   DashboardPanelState,
 } from '../../../common';
-import { pluginServices } from '../../services/plugin_services';
-import { DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
-import { DashboardAnalyticsService } from '../../services/analytics/types';
-import { createPanelState } from '../component/panel';
 import {
   IPanelPlacementArgs,
   PanelPlacementMethod,
 } from '../component/panel/dashboard_panel_placement';
+import { addFromLibrary, runClone, runQuickSave, runSaveAs, showOptions } from './dashboard_api';
+import { DASHBOARD_CONTAINER_TYPE } from '../..';
+import { createPanelState } from '../component/panel';
+import { pluginServices } from '../../services/plugin_services';
+import { DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
 import { PLACEHOLDER_EMBEDDABLE } from '../../placeholder_embeddable';
-import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardContainerOutput, DashboardReduxState } from '../types';
+import { DashboardAnalyticsService } from '../../services/analytics/types';
+import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { DashboardSavedObjectService } from '../../services/dashboard_saved_object/types';
 import { dashboardContainerInputIsByValue } from '../../../common/dashboard_container/type_guards';
 import { dashboardStateLoadWasSuccessful } from '../../services/dashboard_saved_object/lib/load_dashboard_state_from_saved_object';
+import { DashboardCreationOptions } from './dashboard_container_factory';
 
 export interface DashboardLoadedInfo {
   timeToData: number;
@@ -86,14 +88,17 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private onDestroyControlGroup?: () => void;
   private subscriptions: Subscription = new Subscription();
 
+  private initialized$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
   private reduxEmbeddableTools?: ReduxEmbeddableTools<
     DashboardReduxState,
     typeof dashboardContainerReducers
   >;
 
   public controlGroup?: ControlGroupContainer;
-  private domNode?: HTMLElement;
 
+  private domNode?: HTMLElement;
+  private overlayRef?: OverlayRef;
   private allDataViews: DataView[] = [];
 
   // Services that are used in the Dashboard container code
@@ -104,7 +109,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   constructor(
     initialInput: DashboardContainerInput,
     parent?: Container,
-    overrideInput?: Partial<DashboardContainerByValueInput>,
+    creationOptions?: DashboardCreationOptions,
     controlGroup?: ControlGroupContainer | ErrorEmbeddable
   ) {
     const {
@@ -128,7 +133,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       },
     } = pluginServices.getServices());
 
-    this.initializeDashboard(overrideInput);
+    this.initializeDashboard(creationOptions);
   }
 
   public getInputAsValueType = () => {
@@ -158,7 +163,11 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     }
   }
 
-  private async initializeDashboard(overrideInput?: Partial<DashboardContainerByValueInput>) {
+  private async initializeDashboard(creationOptions?: DashboardCreationOptions) {
+    const dashboardId = dashboardContainerInputIsByValue(this.input)
+      ? undefined
+      : this.input.savedObjectId;
+
     const reduxEmbeddablePackagePromise = lazyLoadReduxEmbeddablePackage();
     const dashboardStateUnwrapPromise = this.unwrapDashboardContainerInput();
 
@@ -167,8 +176,33 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       dashboardStateUnwrapPromise,
     ]);
 
+    const incomingEmbeddable = creationOptions?.incomingEmbeddable;
+
     // push by value input to embeddable input
-    const initialInput = { ...inputFromSavedObject, ...overrideInput };
+    const initialInput: DashboardContainerByValueInput = {
+      ...inputFromSavedObject,
+      ...creationOptions?.overrideInput,
+    };
+
+    // deal with the incoming embeddable if there is one
+    if (incomingEmbeddable) {
+      initialInput.viewMode = ViewMode.EDIT; // view mode must always be edit to recieve an embeddable.
+      if (
+        incomingEmbeddable.embeddableId &&
+        Boolean(initialInput.panels[incomingEmbeddable.embeddableId])
+      ) {
+        // this embeddable already exists, we will update the explicit input.
+        initialInput.panels[incomingEmbeddable.embeddableId].explicitInput = {
+          ...incomingEmbeddable.input,
+          id: incomingEmbeddable.embeddableId,
+        };
+      } else {
+        // otherwise this incoming embeddable is brand new and can be added via the default method after the dashboard container is created.
+        this.untilInitialized().then(() =>
+          this.addNewEmbeddable(incomingEmbeddable.type, incomingEmbeddable.input)
+        );
+      }
+    }
 
     // update input so the redux embeddable tools get the unwrapped, initial input
     this.updateInput(initialInput);
@@ -180,9 +214,25 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     >({
       embeddable: this as IEmbeddable<DashboardContainerByValueInput, DashboardContainerOutput>, // cast to unwrapped state type
       reducers: dashboardContainerReducers,
+      initialComponentState: {
+        lastSavedId: dashboardId,
+        lastSavedInput: inputFromSavedObject,
+      },
     });
 
-    // TODO communicate that dashboard is loaded.... dashboard renderer will NOT call render on the container until it is ready.
+    this.initialized$.next(true);
+  }
+
+  public async untilInitialized() {
+    if (this.initialized$.value) return Promise.resolve();
+    return new Promise<void>((resolve) => {
+      const subscription = this.initialized$.subscribe((isInitialized) => {
+        if (isInitialized) {
+          resolve();
+          subscription.unsubscribe();
+        }
+      });
+    });
   }
 
   private onDataLoaded(data: DashboardLoadedInfo) {
@@ -210,13 +260,23 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     return newPanel;
   }
 
+  public getReduxEmbeddableTools() {
+    if (!this.reduxEmbeddableTools) {
+      throw new Error('Dashboard must be initialized before it can be rendered');
+    }
+    return this.reduxEmbeddableTools;
+  }
+
   public render(dom: HTMLElement) {
+    if (!this.reduxEmbeddableTools) {
+      throw new Error('Dashboard must be initialized before it can be rendered');
+    }
     if (this.domNode) {
       ReactDOM.unmountComponentAtNode(this.domNode);
     }
     this.domNode = dom;
 
-    const { Wrapper: DashboardReduxWrapper } = this.reduxEmbeddableTools!;
+    const { Wrapper: DashboardReduxWrapper } = this.reduxEmbeddableTools;
     ReactDOM.render(
       <I18nProvider>
         <KibanaThemeProvider theme$={this.theme$}>
@@ -278,9 +338,38 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   // Dashboard API
   // ------------------------------------------------------------------------------------------------------
 
+  public showOptions = showOptions;
+  public addFromLibrary = addFromLibrary;
+
+  public runClone = runClone;
+  public runSaveAs = runSaveAs;
+  public runQuickSave = runQuickSave;
+
+  public forceRefresh() {
+    this.updateInput({
+      lastReloadRequestTime: new Date().getTime(),
+    });
+  }
+
+  public updateViewMode = (newViewMode: ViewMode) => {
+    const {
+      dispatch,
+      actions: { setViewMode },
+    } = this.getReduxEmbeddableTools();
+    dispatch(setViewMode(newViewMode));
+  };
+
   public getExpandedPanelId = () => {
     if (!this.reduxEmbeddableTools) throw new Error();
     return this.reduxEmbeddableTools.getState().componentState.expandedPanelId;
+  };
+
+  public openOverlay = (ref: OverlayRef) => {
+    this.overlayRef = ref;
+  };
+
+  public clearOverlays = () => {
+    this.overlayRef?.close();
   };
 
   public setExpandedPanelId = (newId?: string) => {

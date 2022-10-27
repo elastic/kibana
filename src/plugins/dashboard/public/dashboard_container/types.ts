@@ -16,11 +16,18 @@ export type DashboardReduxState = ReduxEmbeddableState<
   DashboardPublicState
 >;
 
+export type DashboardStateFromSaveModal = Pick<
+  DashboardContainerByValueInput,
+  'title' | 'description' | 'tags' | 'timeRestore' | 'timeRange' | 'refreshInterval'
+> &
+  Pick<DashboardPublicState, 'lastSavedId'>;
+
 export interface DashboardPublicState {
+  lastSavedInput: DashboardContainerByValueInput;
+  hasUnsavedChanges?: boolean;
   expandedPanelId?: string;
   fullScreenMode?: boolean;
-  hasUnsavedChanges?: boolean;
-  lastSavedInput: DashboardContainerByValueInput;
+  lastSavedId?: string;
 }
 
 export interface DashboardContainerOutput extends ContainerOutput {

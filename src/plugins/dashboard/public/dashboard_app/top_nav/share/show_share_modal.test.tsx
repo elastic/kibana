@@ -8,10 +8,9 @@
 
 import { Capabilities } from '@kbn/core/public';
 
-import { DashboardState } from '../../types';
-import { DashboardAppLocatorParams } from '../..';
-import { pluginServices } from '../../services/plugin_services';
-import { stateToRawDashboardState } from '../lib/convert_dashboard_state';
+import { DashboardAppLocatorParams } from '../../..';
+import { pluginServices } from '../../../services/plugin_services';
+import { stateToRawDashboardState } from '../../lib/convert_dashboard_state';
 import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
 
 describe('showPublicUrlSwitch', () => {

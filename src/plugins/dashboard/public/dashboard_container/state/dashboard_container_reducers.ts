@@ -7,7 +7,7 @@
  */
 
 import { PayloadAction } from '@reduxjs/toolkit';
-import { DashboardReduxState } from '../types';
+import { DashboardReduxState, DashboardStateFromSaveModal } from '../types';
 import { DashboardContainerByValueInput } from '../../../common';
 
 export const dashboardContainerReducers = {
@@ -33,21 +33,16 @@ export const dashboardContainerReducers = {
   // ------------------------------------------------------------------------------
   setStateFromSaveModal: (
     state: DashboardReduxState,
-    action: PayloadAction<
-      Pick<DashboardContainerByValueInput, 'title' | 'description' | 'tags' | 'timeRestore'>
-    >
+    action: PayloadAction<DashboardStateFromSaveModal>
   ) => {
+    state.componentState.lastSavedId = action.payload.lastSavedId;
+
     state.explicitInput.tags = action.payload.tags;
     state.explicitInput.title = action.payload.title;
+    state.explicitInput.timeRange = action.payload.timeRange;
     state.explicitInput.description = action.payload.description;
     state.explicitInput.timeRestore = action.payload.timeRestore;
-  },
-
-  setDashboardOptions: (
-    state: DashboardReduxState,
-    action: PayloadAction<DashboardContainerByValueInput['options']>
-  ) => {
-    state.explicitInput.options = action.payload;
+    state.explicitInput.refreshInterval = action.payload.refreshInterval;
   },
 
   setDescription: (
@@ -75,7 +70,30 @@ export const dashboardContainerReducers = {
     state: DashboardReduxState,
     action: PayloadAction<DashboardContainerByValueInput['title']>
   ) => {
-    state.explicitInput.description = action.payload;
+    state.explicitInput.title = action.payload;
+  },
+
+  // ------------------------------------------------------------------------------
+  // Options Reducers
+  // ------------------------------------------------------------------------------
+  setUseMargins: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
+    state.explicitInput.options.useMargins = action.payload;
+  },
+
+  setSyncCursor: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
+    state.explicitInput.options.syncCursor = action.payload;
+  },
+
+  setSyncColors: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
+    state.explicitInput.options.syncColors = action.payload;
+  },
+
+  setSyncTooltips: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
+    state.explicitInput.options.syncTooltips = action.payload;
+  },
+
+  setHidePanelTitles: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
+    state.explicitInput.options.hidePanelTitles = action.payload;
   },
 
   // ------------------------------------------------------------------------------

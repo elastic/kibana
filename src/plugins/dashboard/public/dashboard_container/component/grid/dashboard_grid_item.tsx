@@ -18,16 +18,14 @@ import {
 
 import { DashboardPanelState } from '../../../../common';
 import { pluginServices } from '../../../services/plugin_services';
-import { DashboardContainer } from '../..';
+import { useDashboardContainerContext } from '../../dashboard_container_renderer';
 
-type PanelProps = Pick<EmbeddableChildPanel, 'container'>;
 type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
-interface Props extends PanelProps, DivProps {
+interface Props extends DivProps {
   id: DashboardPanelState['explicitInput']['id'];
   index?: number;
   type: DashboardPanelState['type'];
-  container: DashboardContainer;
   focusedPanelId?: string;
   expandedPanelId?: string;
   key: string;
@@ -38,7 +36,6 @@ interface Props extends PanelProps, DivProps {
 const Item = React.forwardRef<HTMLDivElement, Props>(
   (
     {
-      container,
       expandedPanelId,
       focusedPanelId,
       id,
@@ -58,6 +55,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
     const {
       embeddable: { EmbeddablePanel: PanelComponent },
     } = pluginServices.getServices();
+    const { embeddableInstance: container } = useDashboardContainerContext();
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
     const hidePanel = expandedPanelId !== undefined && expandedPanelId !== id;
@@ -135,7 +133,9 @@ export const DashboardGridItem: FC<Props> = (props: Props) => {
     settings: { isProjectEnabledInLabs },
   } = pluginServices.getServices();
 
-  const isPrintMode = props.container.getInput().viewMode === ViewMode.PRINT;
+  const { useEmbeddableSelector: select } = useDashboardContainerContext();
+
+  const isPrintMode = select((state) => state.explicitInput.viewMode) === ViewMode.PRINT;
   const isEnabled = !isPrintMode && isProjectEnabledInLabs('labs:dashboard:deferBelowFold');
 
   return isEnabled ? <ObservedItem {...props} /> : <Item {...props} />;

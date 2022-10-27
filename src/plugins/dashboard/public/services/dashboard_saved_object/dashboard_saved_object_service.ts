@@ -41,10 +41,11 @@ export const dashboardSavedObjectServiceFactory: DashboardSavedObjectServiceFact
         savedObjectsClient,
         ...requiredServices,
       }),
-    saveDashboardStateToSavedObject: ({ currentState, redirectTo, saveOptions }) =>
+    saveDashboardStateToSavedObject: ({ currentState, redirectTo, saveOptions, lastSavedId }) =>
       saveDashboardStateToSavedObject({
         redirectTo,
         saveOptions,
+        lastSavedId,
         currentState,
         savedObjectsClient,
         ...requiredServices,

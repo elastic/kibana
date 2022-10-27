@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { createAction } from '@kbn/ui-actions-plugin/public';
+import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { firstValueFrom } from 'rxjs';
-import { DashboardConstants } from '@kbn/dashboard-plugin/public';
 import { MlCoreSetup } from '../plugin';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE, SwimLaneDrilldownContext } from '../embeddables';
 
 export const APPLY_TIME_RANGE_SELECTION_ACTION = 'applyTimeRangeSelectionAction';
 
-const supportedApps = [DashboardConstants.DASHBOARDS_ID];
+const supportedApps = [DASHBOARD_APP_ID];
 
 export function createApplyTimeRangeSelectionAction(
   getStartServices: MlCoreSetup['getStartServices']

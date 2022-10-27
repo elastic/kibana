@@ -41,7 +41,7 @@ export function getDashboardTitle(title: string, viewMode: ViewMode, isNew: bool
     : dashboardTitle;
 }
 
-export const unsavedChangesBadge = {
+export const unsavedChangesBadgeStrings = {
   getUnsavedChangedBadgeText: () =>
     i18n.translate('dashboard.unsavedChangesBadge', {
       defaultMessage: 'Unsaved changes',
@@ -181,8 +181,7 @@ export const dashboardUnsavedListingStrings = {
 /*
   Plugin
 */
-
-export const dashboardFeatureCatalog = {
+export const dashboardFeatureCatalogStrings = {
   getTitle: () =>
     i18n.translate('dashboard.featureCatalogue.dashboardTitle', {
       defaultMessage: 'Dashboard',
@@ -201,3 +200,82 @@ export const getDashboardBreadcrumb = () =>
   i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
     defaultMessage: 'Dashboard',
   });
+
+/*
+  Dashboard Top Nav
+*/
+export const topNavStrings = {
+  fullScreen: {
+    label: i18n.translate('dashboard.topNave.fullScreenButtonAriaLabel', {
+      defaultMessage: 'full screen',
+    }),
+
+    description: i18n.translate('dashboard.topNave.fullScreenConfigDescription', {
+      defaultMessage: 'Full Screen Mode',
+    }),
+  },
+  labs: {
+    label: i18n.translate('dashboard.topNav.labsButtonAriaLabel', {
+      defaultMessage: 'labs',
+    }),
+    description: i18n.translate('dashboard.topNav.labsConfigDescription', {
+      defaultMessage: 'Labs',
+    }),
+  },
+  edit: {
+    label: i18n.translate('dashboard.topNave.editButtonAriaLabel', {
+      defaultMessage: 'edit',
+    }),
+    description: i18n.translate('dashboard.topNave.editConfigDescription', {
+      defaultMessage: 'Switch to edit mode',
+    }),
+  },
+  quickSave: {
+    label: i18n.translate('dashboard.topNave.saveButtonAriaLabel', {
+      defaultMessage: 'save',
+    }),
+    description: i18n.translate('dashboard.topNave.saveConfigDescription', {
+      defaultMessage: 'Quick save your dashboard without any prompts',
+    }),
+  },
+  saveAs: {
+    label: i18n.translate('dashboard.topNave.saveAsButtonAriaLabel', {
+      defaultMessage: 'save as',
+    }),
+    description: i18n.translate('dashboard.topNave.saveAsConfigDescription', {
+      defaultMessage: 'Save as a new dashboard',
+    }),
+  },
+  switchToViewMode: {
+    label: i18n.translate('dashboard.topNave.cancelButtonAriaLabel', {
+      defaultMessage: 'Switch to view mode',
+    }),
+    description: i18n.translate('dashboard.topNave.viewConfigDescription', {
+      defaultMessage: 'Switch to view-only mode',
+    }),
+  },
+  share: {
+    label: i18n.translate('dashboard.topNave.shareButtonAriaLabel', {
+      defaultMessage: 'share',
+    }),
+    description: i18n.translate('dashboard.topNave.shareConfigDescription', {
+      defaultMessage: 'Share Dashboard',
+    }),
+  },
+  options: {
+    label: i18n.translate('dashboard.topNave.optionsButtonAriaLabel', {
+      defaultMessage: 'options',
+    }),
+    description: i18n.translate('dashboard.topNave.optionsConfigDescription', {
+      defaultMessage: 'Options',
+    }),
+  },
+  clone: {
+    label: i18n.translate('dashboard.topNave.cloneButtonAriaLabel', {
+      defaultMessage: 'clone',
+    }),
+    description: i18n.translate('dashboard.topNave.cloneConfigDescription', {
+      defaultMessage: 'Create a copy of your dashboard',
+    }),
+  },
+};

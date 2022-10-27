@@ -7,16 +7,17 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import ReactDOM from 'react-dom';
 
-import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import { DashboardCloneModal } from './clone_modal';
-import { pluginServices } from '../../services/plugin_services';
+import { pluginServices } from '../../../../services/plugin_services';
 
 export interface ShowCloneModalProps {
+  onClose: () => void;
   onClone: (
     newTitle: string,
     isTitleDuplicateConfirmed: boolean,
@@ -25,7 +26,7 @@ export interface ShowCloneModalProps {
   title: string;
 }
 
-export function showCloneModal({ onClone, title }: ShowCloneModalProps) {
+export function showCloneModal({ onClone, title, onClose }: ShowCloneModalProps) {
   const {
     settings: { theme },
   } = pluginServices.getServices();
@@ -34,6 +35,7 @@ export function showCloneModal({ onClone, title }: ShowCloneModalProps) {
   const closeModal = () => {
     ReactDOM.unmountComponentAtNode(container);
     document.body.removeChild(container);
+    onClose();
   };
 
   const onCloneConfirmed = async (

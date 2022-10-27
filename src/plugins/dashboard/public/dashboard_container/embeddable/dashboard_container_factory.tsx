@@ -14,6 +14,7 @@ import {
   ContainerOutput,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
+  EmbeddablePackageState,
 } from '@kbn/embeddable-plugin/public';
 
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
@@ -21,13 +22,24 @@ import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import type { DashboardContainer } from './dashboard_container';
 import { DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
-import { createExtract, createInject, DashboardContainerInput } from '../../../common';
+import {
+  createExtract,
+  createInject,
+  DashboardContainerByValueInput,
+  DashboardContainerInput,
+} from '../../../common';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
   ContainerOutput,
   DashboardContainer
 >;
+
+export interface DashboardCreationOptions {
+  overrideInput?: Partial<DashboardContainerByValueInput>;
+  incomingEmbeddable?: EmbeddablePackageState;
+}
+
 export class DashboardContainerFactoryDefinition
   implements
     EmbeddableFactoryDefinition<DashboardContainerInput, ContainerOutput, DashboardContainer>
@@ -60,11 +72,12 @@ export class DashboardContainerFactoryDefinition
 
   public create = async (
     initialInput: DashboardContainerInput,
-    parent?: Container
+    parent?: Container,
+    creationOptions?: DashboardCreationOptions
   ): Promise<DashboardContainer | ErrorEmbeddable> => {
     const { DashboardContainer: DashboardContainerEmbeddable } = await import(
       './dashboard_container'
     );
-    return Promise.resolve(new DashboardContainerEmbeddable(initialInput, parent));
+    return Promise.resolve(new DashboardContainerEmbeddable(initialInput, parent, creationOptions));
   };
 }

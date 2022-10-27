@@ -15,14 +15,13 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
 
 import { ViewMode, EmbeddablePhaseEvent } from '@kbn/embeddable-plugin/public';
-import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
 
 import { DashboardPanelState } from '../../../../common';
 import { DashboardGridItem } from './dashboard_grid_item';
-import { DashboardLoadedEventStatus, DashboardReduxState } from '../../types';
-import { dashboardContainerReducers } from '../../state/dashboard_container_reducers';
+import { DashboardLoadedEventStatus } from '../../types';
 import { DashboardContainer, DashboardLoadedInfo } from '../../embeddable/dashboard_container';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../../../dashboard_constants';
+import { useDashboardContainerContext } from '../../dashboard_container_renderer';
 
 let lastValidGridSize = 0;
 
@@ -125,17 +124,13 @@ const defaultPerformanceTracker: DashboardPerformanceTracker = {
   doneCount: 0,
 };
 
-export const DashboardGrid = ({ container, onDataLoaded }: DashboardGridProps) => {
-  const reduxContainerContext = useReduxContainerContext<
-    DashboardReduxState,
-    typeof dashboardContainerReducers
-  >();
-
+export const DashboardGrid = ({ onDataLoaded }: DashboardGridProps) => {
   const {
     actions: { setPanels },
-    useEmbeddableSelector: select,
     useEmbeddableDispatch,
-  } = reduxContainerContext;
+    useEmbeddableSelector: select,
+    embeddableInstance: dashboardContainer,
+  } = useDashboardContainerContext();
   const dispatch = useEmbeddableDispatch();
 
   const panels = select((state) => state.explicitInput.panels);
@@ -218,13 +213,12 @@ export const DashboardGrid = ({ container, onDataLoaded }: DashboardGridProps) =
         id={explicitInput.id}
         index={index + 1}
         type={type}
-        container={container}
         expandedPanelId={expandedPanelId}
         focusedPanelId={''} // TODO Panel focus / blur?
         onPanelStatusChange={onPanelStatusChange}
       />
     ));
-  }, [container, expandedPanelId, panelsInOrder, onPanelStatusChange]);
+  }, [dashboardContainer, expandedPanelId, panelsInOrder, onPanelStatusChange]);
 
   // in print mode, dashboard layout is not controlled by React Grid Layout
   if (viewMode === ViewMode.PRINT) {

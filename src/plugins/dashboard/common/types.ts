@@ -17,6 +17,7 @@ export interface DashboardOptions {
   useMargins: boolean;
   syncColors: boolean;
   syncTooltips: boolean;
+  syncCursor: boolean;
 }
 
 export interface DashboardCapabilities {

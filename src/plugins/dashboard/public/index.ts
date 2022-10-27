@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DashboardPlugin } from './plugin';
 import { PluginInitializerContext } from '@kbn/core/public';
+import { DashboardPlugin } from './plugin';
 
 export { DASHBOARD_CONTAINER_TYPE } from './dashboard_container';
 export { createDashboardEditUrl } from './dashboard_constants';
@@ -18,6 +18,8 @@ export {
   type DashboardAppLocatorParams,
   cleanEmptyKeys,
 } from './dashboard_app/locator/locator';
+
+export { DASHBOARD_APP_ID } from './dashboard_constants';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);

@@ -20,12 +20,12 @@ import { getStateFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 
-import { dashboardUrlParams } from '../dashboard_router';
-import { shareModalStrings } from '../../dashboard_strings';
-import { pluginServices } from '../../services/plugin_services';
-import type { DashboardContainerByValueInput } from '../../../common';
-import { convertPanelMapToSavedPanels, DashboardOptions } from '../../../common';
-import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../locator/locator';
+import { dashboardUrlParams } from '../../dashboard_router';
+import { shareModalStrings } from '../../../dashboard_strings';
+import { pluginServices } from '../../../services/plugin_services';
+import type { DashboardContainerByValueInput } from '../../../../common';
+import { convertPanelMapToSavedPanels, DashboardOptions } from '../../../../common';
+import { DashboardAppLocatorParams, DASHBOARD_APP_LOCATOR } from '../../locator/locator';
 
 const showFilterBarId = 'showFilterBar';
 

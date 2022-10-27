@@ -6,14 +6,6 @@
  * Side Public License, v 1.
  */
 
-export const TopNavIds = {
-  SHARE: 'share',
-  OPTIONS: 'options',
-  QUICK_SAVE: 'quickSave',
-  SAVE: 'save',
-  EXIT_EDIT_MODE: 'exitEditMode',
-  ENTER_EDIT_MODE: 'enterEditMode',
-  CLONE: 'clone',
-  FULL_SCREEN: 'fullScreenMode',
-  LABS: 'labs',
-};
+export { showOptions } from './show_options_popover';
+export { addFromLibrary } from './add_panel_from_library';
+export { runSaveAs, runQuickSave, runClone } from './run_save_functions';

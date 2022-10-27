@@ -8,16 +8,14 @@
 
 import React from 'react';
 
+import { CoreStart } from '@kbn/core/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/kibana-react-plugin/public';
-import { useReduxContainerContext } from '@kbn/presentation-util-plugin/public';
-import { CoreStart } from '@kbn/core/public';
 
 import { DashboardGrid } from '../grid';
-import { DashboardReduxState } from '../../types';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
-import { dashboardContainerReducers } from '../../state/dashboard_container_reducers';
+import { useDashboardContainerContext } from '../../dashboard_container_renderer';
 import { DashboardContainer, DashboardLoadedInfo } from '../../embeddable/dashboard_container';
 
 export interface DashboardViewportProps {
@@ -28,16 +26,11 @@ export interface DashboardViewportProps {
 export const DashboardViewport = ({ onDataLoaded, container }: DashboardViewportProps) => {
   const { chrome } = pluginServices.getServices();
 
-  const reduxContainerContext = useReduxContainerContext<
-    DashboardReduxState,
-    typeof dashboardContainerReducers
-  >();
-
   const {
     actions: { setFullScreenMode },
     useEmbeddableSelector: select,
     useEmbeddableDispatch,
-  } = reduxContainerContext;
+  } = useDashboardContainerContext();
   const dispatch = useEmbeddableDispatch();
 
   const panelCount = Object.keys(select((state) => state.explicitInput.panels)).length;

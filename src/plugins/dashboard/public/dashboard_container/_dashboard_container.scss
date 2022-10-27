@@ -1,8 +1,8 @@
 @import '../../../embeddable/public/variables';
 
-@import './grid/index';
-@import './panel/index';
-@import './viewport/index';
+@import './component/grid/index';
+@import './component/panel/index';
+@import './component/viewport/index';
 
 .dashboardViewport {
   flex: 1;

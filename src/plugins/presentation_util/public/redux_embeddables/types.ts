@@ -15,7 +15,7 @@ import {
   EnhancedStore,
 } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook } from 'react-redux';
-import { EmbeddableInput, EmbeddableOutput, IContainer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableInput, EmbeddableOutput, Embeddable } from '@kbn/embeddable-plugin/public';
 import { PropsWithChildren } from 'react';
 
 export interface ReduxEmbeddableSyncSettings<
@@ -89,7 +89,11 @@ export interface EmbeddableReducers<
  */
 export interface ReduxEmbeddableContext<
   ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
-  ReducerType extends EmbeddableReducers<ReduxEmbeddableStateType> = EmbeddableReducers<ReduxEmbeddableStateType>
+  ReducerType extends EmbeddableReducers<ReduxEmbeddableStateType> = EmbeddableReducers<ReduxEmbeddableStateType>,
+  EmbeddableType extends Embeddable<
+    ReduxEmbeddableStateType['explicitInput'],
+    ReduxEmbeddableStateType['output']
+  > = Embeddable<ReduxEmbeddableStateType['explicitInput'], ReduxEmbeddableStateType['output']>
 > {
   actions: {
     [Property in keyof ReducerType]: ActionCreatorWithPayload<
@@ -104,20 +108,7 @@ export interface ReduxEmbeddableContext<
       Partial<ReduxEmbeddableStateType['output']>
     >;
   };
+  embeddableInstance: EmbeddableType;
   useEmbeddableSelector: TypedUseSelectorHook<ReduxEmbeddableStateType>;
   useEmbeddableDispatch: () => Dispatch<AnyAction>;
 }
-
-export type ReduxContainerContext<
-  ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
-  ReducerType extends EmbeddableReducers<ReduxEmbeddableStateType> = EmbeddableReducers<ReduxEmbeddableStateType>
-> = ReduxEmbeddableContext<ReduxEmbeddableStateType, ReducerType> & {
-  containerActions: Pick<
-    IContainer,
-    | 'untilEmbeddableLoaded'
-    | 'removeEmbeddable'
-    | 'addNewEmbeddable'
-    | 'updateInputForChild'
-    | 'replaceEmbeddable'
-  >;
-};

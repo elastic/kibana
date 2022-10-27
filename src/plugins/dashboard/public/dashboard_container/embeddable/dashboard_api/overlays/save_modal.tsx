@@ -6,14 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 
-import { pluginServices } from '../../services/plugin_services';
-import type { DashboardSaveOptions } from '../../dashboard_container/types';
+import type { DashboardSaveOptions } from '../../../types';
+import { pluginServices } from '../../../../services/plugin_services';
+
+/**
+ * TODO: Portable Dashboard followup, convert this to a functional component & use redux for the state.
+ */
 
 interface Props {
   onSave: ({

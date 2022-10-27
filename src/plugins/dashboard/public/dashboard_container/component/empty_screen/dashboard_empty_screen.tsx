@@ -83,7 +83,7 @@ export function DashboardEmptyScreen({ isEditMode }: DashboardEmptyScreenProps) 
   );
   const viewMode = page(emptyScreenStrings.getFillDashboardTitle(), true);
   const editMode = (
-    <div data-test-subj="emptyDashboardWidget" className="dshEmptyWidget testClass">
+    <div data-test-subj="emptyDashboardWidget" className="dshEmptyWidget">
       <EuiIcon color="subdued" size="xl" type="visAreaStacked" />
       <EuiSpacer size="s" />
       <EuiTitle size="xs">
