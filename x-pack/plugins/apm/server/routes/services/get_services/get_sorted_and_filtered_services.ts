@@ -13,7 +13,7 @@ import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { Environment } from '../../../../common/environment_rt';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { ServiceGroup } from '../../../../common/service_groups';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { MlSetup } from '../../../lib/helpers/get_ml_setup';
 import { getHealthStatuses } from './get_health_statuses';
 import { lookupServices } from '../../service_groups/lookup_services';
 
@@ -51,7 +51,7 @@ export async function getServiceNamesFromTermsEnum({
 }
 
 export async function getSortedAndFilteredServices({
-  setup,
+  mlSetup,
   apmEventClient,
   start,
   end,
@@ -60,7 +60,7 @@ export async function getSortedAndFilteredServices({
   serviceGroup,
   maxNumberOfServices,
 }: {
-  setup: Setup;
+  mlSetup?: MlSetup;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
@@ -71,7 +71,7 @@ export async function getSortedAndFilteredServices({
 }) {
   const [servicesWithHealthStatuses, selectedServices] = await Promise.all([
     getHealthStatuses({
-      setup,
+      mlSetup,
       start,
       end,
       environment,

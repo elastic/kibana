@@ -11,19 +11,20 @@ import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../lib/helpers/setup_request';
+import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { ApmIndicesConfig } from '../apm_indices/get_apm_indices';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
 import { getConfigsAppliedToAgentsThroughFleet } from './get_config_applied_to_agent_through_fleet';
 
 export async function findExactConfiguration({
   service,
-  setup,
+  internalESClient,
+  indices,
 }: {
   service: AgentConfiguration['service'];
-  setup: Setup;
+  internalESClient: APMInternalESClient;
+  indices: ApmIndicesConfig;
 }) {
-  const { internalClient, indices } = setup;
-
   const serviceNameFilter = service.name
     ? { term: { [SERVICE_NAME]: service.name } }
     : { bool: { must_not: [{ exists: { field: SERVICE_NAME } }] } };
@@ -42,11 +43,11 @@ export async function findExactConfiguration({
   };
 
   const [agentConfig, configsAppliedToAgentsThroughFleet] = await Promise.all([
-    internalClient.search<AgentConfiguration, typeof params>(
+    internalESClient.search<AgentConfiguration, typeof params>(
       'find_exact_agent_configuration',
       params
     ),
-    getConfigsAppliedToAgentsThroughFleet({ setup }),
+    getConfigsAppliedToAgentsThroughFleet({ internalESClient, indices }),
   ]);
 
   const hit = agentConfig.hits.hits[0] as

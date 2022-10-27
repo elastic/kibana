@@ -6,15 +6,13 @@
  */
 import Boom from '@hapi/boom';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
-import { Setup } from '../helpers/setup_request';
+import { MlSetup } from '../helpers/get_ml_setup';
 import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
 
-export function getAnomalyDetectionJobs(setup: Setup) {
-  const { ml } = setup;
-
-  if (!ml) {
+export function getAnomalyDetectionJobs(mlSetup?: MlSetup) {
+  if (!mlSetup) {
     throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
   }
 
-  return getMlJobsWithAPMGroup(ml.anomalyDetectors);
+  return getMlJobsWithAPMGroup(mlSetup.anomalyDetectors);
 }

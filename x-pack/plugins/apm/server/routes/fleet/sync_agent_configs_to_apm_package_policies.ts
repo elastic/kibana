@@ -13,20 +13,23 @@ import {
 import { TelemetryUsageCounter } from '../typings';
 import { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
-import { Setup } from '../../lib/helpers/setup_request';
 import { listConfigurations } from '../settings/agent_configuration/list_configurations';
 import { getApmPackagePolicies } from './get_apm_package_policies';
 import { getPackagePolicyWithAgentConfigurations } from './register_fleet_policy_callbacks';
+import { APMInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
+import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
 export async function syncAgentConfigsToApmPackagePolicies({
   core,
   fleetPluginStart,
-  setup,
+  internalESClient,
+  indices,
   telemetryUsageCounter,
 }: {
   core: { setup: CoreSetup; start: () => Promise<CoreStart> };
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
-  setup: Setup;
+  internalESClient: APMInternalESClient;
+  indices: ApmIndicesConfig;
   telemetryUsageCounter?: TelemetryUsageCounter;
 }) {
   if (telemetryUsageCounter) {
@@ -40,7 +43,7 @@ export async function syncAgentConfigsToApmPackagePolicies({
   const [savedObjectsClient, agentConfigurations, packagePolicies] =
     await Promise.all([
       getInternalSavedObjectsClient(core.setup),
-      listConfigurations({ setup }),
+      listConfigurations({ internalESClient, indices }),
       getApmPackagePolicies({
         core,
         fleetPluginStart,

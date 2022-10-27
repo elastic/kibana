@@ -19,7 +19,7 @@ import type { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection
 import { apmMlJobsQuery } from './apm_ml_jobs_query';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { maybe } from '../../../common/utils/maybe';
-import type { Setup } from '../helpers/setup_request';
+import type { MlSetup } from '../helpers/get_ml_setup';
 import { anomalySearch } from './anomaly_search';
 import { getAnomalyResultBucketSize } from './get_anomaly_result_bucket_size';
 import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
@@ -60,7 +60,7 @@ export async function getAnomalyTimeseries({
   end: number;
   environment: Environment;
   logger: Logger;
-  mlSetup: Required<Setup>['ml'];
+  mlSetup: MlSetup;
 }): Promise<ServiceAnomalyTimeseries[]> {
   if (!mlSetup) {
     return [];

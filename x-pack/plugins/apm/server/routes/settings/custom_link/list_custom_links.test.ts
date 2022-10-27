@@ -10,7 +10,6 @@ import {
   inspectSearchParams,
   SearchParamsMock,
 } from '../../../utils/test_helpers';
-import { Setup } from '../../../lib/helpers/setup_request';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -20,9 +19,10 @@ describe('List Custom Links', () => {
   let mock: SearchParamsMock;
 
   it('fetches all custom links', async () => {
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams(({ mockIndices, mockInternalESClient }) =>
       listCustomLinks({
-        setup: setup as unknown as Setup,
+        indices: mockIndices,
+        internalESClient: mockInternalESClient,
       })
     );
 
@@ -34,10 +34,11 @@ describe('List Custom Links', () => {
       [SERVICE_NAME]: 'foo',
       [TRANSACTION_NAME]: 'bar',
     };
-    mock = await inspectSearchParams((setup) =>
+    mock = await inspectSearchParams(({ mockIndices, mockInternalESClient }) =>
       listCustomLinks({
         filters,
-        setup: setup as unknown as Setup,
+        internalESClient: mockInternalESClient,
+        indices: mockIndices,
       })
     );
 

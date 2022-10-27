@@ -18,7 +18,7 @@ import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
 
 export type APMIndexDocumentParams<T> = estypes.IndexRequest<T>;
 
-export type APMInternalClient = Awaited<
+export type APMInternalESClient = Awaited<
   ReturnType<typeof createInternalESClient>
 >;
 

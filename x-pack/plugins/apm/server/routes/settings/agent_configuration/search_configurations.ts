@@ -10,19 +10,20 @@ import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
 } from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../lib/helpers/setup_request';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
+import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { ApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
 export async function searchConfigurations({
   service,
-  setup,
+  internalESClient,
+  indices,
 }: {
   service: AgentConfiguration['service'];
-  setup: Setup;
+  internalESClient: APMInternalESClient;
+  indices: ApmIndicesConfig;
 }) {
-  const { internalClient, indices } = setup;
-
   // In the following `constant_score` is being used to disable IDF calculation (where frequency of a term influences scoring).
   // Additionally a boost has been added to service.name to ensure it scores higher.
   // If there is tie between a config with a matching service.name and a config with a matching environment, the config that matches service.name wins
@@ -69,7 +70,7 @@ export async function searchConfigurations({
     },
   };
 
-  const resp = await internalClient.search<AgentConfiguration, typeof params>(
+  const resp = await internalESClient.search<AgentConfiguration, typeof params>(
     'search_agent_configurations',
     params
   );

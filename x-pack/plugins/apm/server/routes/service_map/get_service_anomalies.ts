@@ -20,7 +20,7 @@ import {
 } from '../../../common/transaction_types';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
-import { Setup } from '../../lib/helpers/setup_request';
+import { MlSetup } from '../../lib/helpers/get_ml_setup';
 import { apmMlAnomalyQuery } from '../../lib/anomaly_detection/apm_ml_anomaly_query';
 import { ApmMlDetectorType } from '../../../common/anomaly_detection/apm_ml_detectors';
 
@@ -33,20 +33,18 @@ export type ServiceAnomaliesResponse = Awaited<
   ReturnType<typeof getServiceAnomalies>
 >;
 export async function getServiceAnomalies({
-  setup,
+  mlSetup,
   environment,
   start,
   end,
 }: {
-  setup: Setup;
+  mlSetup?: MlSetup;
   environment: string;
   start: number;
   end: number;
 }) {
   return withApmSpan('get_service_anomalies', async () => {
-    const { ml } = setup;
-
-    if (!ml) {
+    if (!mlSetup) {
       throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
     }
 
@@ -108,9 +106,9 @@ export async function getServiceAnomalies({
       // pass an empty array of job ids to anomaly search
       // so any validation is skipped
       withApmSpan('ml_anomaly_search', () =>
-        ml.mlSystem.mlAnomalySearch(params, [])
+        mlSetup.mlSystem.mlAnomalySearch(params, [])
       ),
-      getMLJobIds(ml.anomalyDetectors, environment),
+      getMLJobIds(mlSetup.anomalyDetectors, environment),
     ]);
 
     const typedAnomalyResponse: ESSearchResponse<unknown, typeof params> =

@@ -16,7 +16,6 @@ import {
   getEstimatedSizeForDocumentsInIndex,
   getApmDiskSpacedUsedPct,
 } from './indices_stats_helpers';
-import { Setup } from '../../lib/helpers/setup_request';
 import { ApmPluginRequestHandlerContext } from '../typings';
 import {
   IndexLifecyclePhaseSelectOption,
@@ -101,7 +100,6 @@ export async function getTracesPerMinute({
 }
 
 export async function getMainSummaryStats({
-  setup,
   apmEventClient,
   context,
   indexLifecyclePhase,
@@ -111,7 +109,6 @@ export async function getMainSummaryStats({
   environment,
   kuery,
 }: {
-  setup: Setup;
   apmEventClient: APMEventClient;
   context: ApmPluginRequestHandlerContext;
   indexLifecyclePhase: IndexLifecyclePhaseSelectOption;
@@ -121,9 +118,14 @@ export async function getMainSummaryStats({
   environment: string;
   kuery: string;
 }) {
+<<<<<<< HEAD
   const [totalIndicesStats, totalDiskSpace, res] = await Promise.all([
     getTotalIndicesStats({ context, setup }),
     getApmDiskSpacedUsedPct(context),
+=======
+  const [{ indices: allIndicesStats }, res] = await Promise.all([
+    getTotalIndicesStats({ context, apmEventClient }),
+>>>>>>> 65099d728a4 (Split and remove setupRequet)
     apmEventClient.search('get_storage_explorer_main_summary_stats', {
       apm: {
         events: [

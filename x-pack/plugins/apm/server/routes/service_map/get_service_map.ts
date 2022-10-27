@@ -16,7 +16,7 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { Setup } from '../../lib/helpers/setup_request';
+import { MlSetup } from '../../lib/helpers/get_ml_setup';
 import {
   DEFAULT_ANOMALIES,
   getServiceAnomalies,
@@ -29,9 +29,11 @@ import { getProcessorEventForTransactions } from '../../lib/helpers/transactions
 import { ServiceGroup } from '../../../common/service_groups';
 import { serviceGroupQuery } from '../../lib/service_group_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { APMConfig } from '../..';
 
 export interface IEnvOptions {
-  setup: Setup;
+  mlSetup?: MlSetup;
+  config: APMConfig;
   apmEventClient: APMEventClient;
   serviceNames?: string[];
   environment: string;
@@ -43,7 +45,7 @@ export interface IEnvOptions {
 }
 
 async function getConnectionData({
-  setup,
+  config,
   apmEventClient,
   serviceNames,
   environment,
@@ -53,7 +55,7 @@ async function getConnectionData({
 }: IEnvOptions) {
   return withApmSpan('get_service_map_connections', async () => {
     const { traceIds } = await getTraceSampleIds({
-      config: setup.config,
+      config,
       apmEventClient,
       serviceNames,
       environment,
@@ -62,7 +64,7 @@ async function getConnectionData({
       serviceGroup,
     });
 
-    const chunks = chunk(traceIds, setup.config.serviceMapMaxTracesPerRequest);
+    const chunks = chunk(traceIds, config.serviceMapMaxTracesPerRequest);
 
     const init = {
       connections: [],

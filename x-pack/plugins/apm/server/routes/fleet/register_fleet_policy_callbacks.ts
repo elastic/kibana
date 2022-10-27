@@ -14,11 +14,12 @@ import {
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import { APMPlugin, APMRouteHandlerResources } from '../..';
+import { createInternalESClient } from '../../lib/helpers/create_es_client/create_internal_es_client';
 import { AgentConfiguration } from '../../../common/agent_configuration/configuration_types';
 import { AGENT_NAME } from '../../../common/elasticsearch_fieldnames';
 import { APMPluginStartDependencies } from '../../types';
-import { setupRequest } from '../../lib/helpers/setup_request';
 import { mergePackagePolicyWithApm } from './merge_package_policy_with_apm';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 
 export async function registerFleetPolicyCallbacks({
   plugins,
@@ -97,19 +98,22 @@ function registerPackagePolicyExternalCallback({
     if (packagePolicy.package?.name !== 'apm') {
       return packagePolicy;
     }
-    const setup = await setupRequest({
+
+    // Todo PromiseAll
+
+    const internalESClient = await createInternalESClient({
       context: context as any,
-      params: { query: { _inspect: false } },
-      core: null as any,
-      plugins,
+      debug: false,
       request,
+    });
+    const { savedObjectsClient } = context as any;
+    const indices = await getApmIndices({
+      savedObjectsClient,
       config,
-      logger,
-      ruleDataClient,
-      kibanaVersion,
     });
     return await mergePackagePolicyWithApm({
-      setup,
+      internalESClient,
+      indices,
       fleetPluginStart,
       packagePolicy,
     });
