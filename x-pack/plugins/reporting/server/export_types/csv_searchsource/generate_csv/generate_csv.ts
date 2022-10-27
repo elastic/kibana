@@ -164,11 +164,16 @@ export class CsvGenerator {
           cell = '-';
         }
 
-        try {
-          // expected values are a string of JSON where the value(s) is in an array
-          cell = JSON.parse(cell);
-        } catch (e) {
-          // ignore
+        const isIdField = tableColumn === '_id'; // _id field can not be formatted or mutated
+        if (!isIdField) {
+          try {
+            // unwrap the value
+            // expected values are a string of JSON where the value(s) is in an array
+            // examples: "[""Jan 1, 2020 @ 04:00:00.000""]","[""username""]"
+            cell = JSON.parse(cell);
+          } catch (e) {
+            // ignore
+          }
         }
 
         // We have to strip singular array values out of their array wrapper,
@@ -381,6 +386,7 @@ export class CsvGenerator {
           break; // empty report with just the header
         }
 
+        // FIXME: make tabifyDocs handle the formatting, to get the same formatting logic as Discover?
         const formatters = this.getFormatters(table);
         await this.generateRows(columns, table, builder, formatters, settings);
 
