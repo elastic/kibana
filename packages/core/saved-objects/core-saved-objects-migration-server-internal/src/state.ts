@@ -177,7 +177,7 @@ export interface PostInitState extends BaseState {
   readonly outdatedDocumentsQuery: QueryDslQueryContainer;
 }
 
-export interface DoneState extends PostInitState {
+export interface DoneState extends BaseState {
   /** Migration completed successfully */
   readonly controlState: 'DONE';
 }

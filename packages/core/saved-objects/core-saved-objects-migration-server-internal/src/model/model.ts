@@ -244,19 +244,13 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     ) {
       return {
         ...stateP,
-        // Skip to 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT' so that if a new plugin was
-        // installed / enabled we can transform any old documents and update
-        // the mappings for this plugin's types.
-        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
-        // Source is a none because we didn't do any migration from a source
-        // index
-        sourceIndex: Option.none,
-        targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
-        targetIndexMappings: mergeMigrationMappingPropertyHashes(
-          stateP.targetIndexMappings,
-          indices[aliasesRes.right[stateP.currentAlias]!].mappings
-        ),
-        versionIndexReadyActions: Option.none,
+        // Proceed to 'DONE' and start serving traffic.
+        // Because WAIT_FOR_MIGRATION_COMPLETION can only be used by 
+        // background-task nodes on Cloud, we can be confident that this node
+        // has exactly the same plugins enabled as the node that finished the
+        // migration. So we won't need to transform any old documents or update
+        // the mappings.
+        controlState: 'DONE',
       };
     } else {
       // When getAliases returns a left 'multiple_indices_per_alias' error or
