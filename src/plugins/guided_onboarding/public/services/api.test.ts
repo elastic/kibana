@@ -12,19 +12,19 @@ import type { GuideState } from '@kbn/guided-onboarding';
 import { firstValueFrom, Subscription } from 'rxjs';
 
 import { API_BASE_PATH } from '../../common/constants';
-import { guidesConfig } from '../constants/guides_config';
 import { ApiService } from './api';
 import {
-  noGuideActiveState,
-  searchAddDataActiveState,
-  securityAddDataInProgressState,
-  securityRulesActiveState,
+  testGuide,
+  testGuideFirstStep,
+  testGuideManualCompletionStep,
+  testGuideStep1ActiveState,
+  testGuideStep1InProgressState,
+  testGuideStep2ActiveState,
+  testGuideNotActiveState,
+  testIntegration,
+  wrongIntegration,
+  testGuideStep2InProgressState,
 } from './api.mocks';
-
-const searchGuide = 'search';
-const firstStep = guidesConfig[searchGuide].steps[0].id;
-const endpointIntegration = 'endpoint';
-const kubernetesIntegration = 'kubernetes';
 
 describe('GuidedOnboarding ApiService', () => {
   let httpClient: jest.Mocked<HttpSetup>;
@@ -34,7 +34,7 @@ describe('GuidedOnboarding ApiService', () => {
   beforeEach(() => {
     httpClient = httpServiceMock.createStartContract({ basePath: '/base/path' });
     httpClient.get.mockResolvedValue({
-      state: [securityAddDataInProgressState],
+      state: [testGuideStep1ActiveState],
     });
     apiService = new ApiService();
     apiService.setup(httpClient);
@@ -57,10 +57,10 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it('broadcasts the updated state', async () => {
-      await apiService.activateGuide(searchGuide, searchAddDataActiveState);
+      await apiService.activateGuide(testGuide, testGuideStep1ActiveState);
 
       const state = await firstValueFrom(apiService.fetchActiveGuideState$());
-      expect(state).toEqual(searchAddDataActiveState);
+      expect(state).toEqual(testGuideStep1ActiveState);
     });
   });
 
@@ -74,12 +74,12 @@ describe('GuidedOnboarding ApiService', () => {
 
   describe('deactivateGuide', () => {
     it('deactivates an existing guide', async () => {
-      await apiService.deactivateGuide(searchAddDataActiveState);
+      await apiService.deactivateGuide(testGuideStep1ActiveState);
 
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
         body: JSON.stringify({
-          ...searchAddDataActiveState,
+          ...testGuideStep1ActiveState,
           isActive: false,
         }),
       });
@@ -88,17 +88,7 @@ describe('GuidedOnboarding ApiService', () => {
 
   describe('updateGuideState', () => {
     it('sends a request to the put API', async () => {
-      const updatedState: GuideState = {
-        ...searchAddDataActiveState,
-        steps: [
-          {
-            id: searchAddDataActiveState.steps[0].id,
-            status: 'in_progress', // update the first step status
-          },
-          searchAddDataActiveState.steps[1],
-          searchAddDataActiveState.steps[2],
-        ],
-      };
+      const updatedState: GuideState = testGuideStep1InProgressState;
       await apiService.updateGuideState(updatedState, false);
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
@@ -109,20 +99,11 @@ describe('GuidedOnboarding ApiService', () => {
 
   describe('isGuideStepActive$', () => {
     it('returns true if the step has been started', (done) => {
-      const updatedState: GuideState = {
-        ...searchAddDataActiveState,
-        steps: [
-          {
-            id: searchAddDataActiveState.steps[0].id,
-            status: 'in_progress',
-          },
-          searchAddDataActiveState.steps[1],
-          searchAddDataActiveState.steps[2],
-        ],
-      };
+      const updatedState: GuideState = testGuideStep1InProgressState;
       apiService.updateGuideState(updatedState, false);
+
       subscription = apiService
-        .isGuideStepActive$(searchGuide, firstStep)
+        .isGuideStepActive$(testGuide, testGuideFirstStep)
         .subscribe((isStepActive) => {
           if (isStepActive) {
             done();
@@ -131,9 +112,8 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it('returns false if the step is not been started', (done) => {
-      apiService.updateGuideState(searchAddDataActiveState, false);
       subscription = apiService
-        .isGuideStepActive$(searchGuide, firstStep)
+        .isGuideStepActive$(testGuide, testGuideFirstStep)
         .subscribe((isStepActive) => {
           if (!isStepActive) {
             done();
@@ -144,56 +124,44 @@ describe('GuidedOnboarding ApiService', () => {
 
   describe('activateGuide', () => {
     it('activates a new guide', async () => {
-      await apiService.activateGuide(searchGuide);
+      // update the mock to no active guides
+      httpClient.get.mockResolvedValue({
+        state: [],
+      });
+      apiService.setup(httpClient);
+
+      await apiService.activateGuide(testGuide);
 
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
-        body: JSON.stringify({
-          isActive: true,
-          status: 'not_started',
-          steps: [
-            {
-              id: 'add_data',
-              status: 'active',
-            },
-            {
-              id: 'browse_docs',
-              status: 'inactive',
-            },
-            {
-              id: 'search_experience',
-              status: 'inactive',
-            },
-          ],
-          guideId: searchGuide,
-        }),
+        body: JSON.stringify({ ...testGuideStep1ActiveState, status: 'not_started' }),
       });
     });
 
     it('reactivates a guide that has already been started', async () => {
-      await apiService.activateGuide(searchGuide, searchAddDataActiveState);
+      await apiService.activateGuide(testGuide, testGuideStep1ActiveState);
 
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
-        body: JSON.stringify(searchAddDataActiveState),
+        body: JSON.stringify(testGuideStep1ActiveState),
       });
     });
   });
 
   describe('completeGuide', () => {
     const readyToCompleteGuideState: GuideState = {
-      ...searchAddDataActiveState,
+      ...testGuideStep1ActiveState,
       steps: [
         {
-          id: 'add_data',
+          ...testGuideStep1ActiveState.steps[0],
           status: 'complete',
         },
         {
-          id: 'browse_docs',
+          ...testGuideStep1ActiveState.steps[1],
           status: 'complete',
         },
         {
-          id: 'search_experience',
+          ...testGuideStep1ActiveState.steps[2],
           status: 'complete',
         },
       ],
@@ -204,7 +172,7 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it('updates the selected guide and marks it as complete', async () => {
-      await apiService.completeGuide(searchGuide);
+      await apiService.completeGuide(testGuide);
 
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
         body: JSON.stringify({
@@ -222,51 +190,39 @@ describe('GuidedOnboarding ApiService', () => {
 
     it('returns undefined if the selected guide has uncompleted steps', async () => {
       const incompleteGuideState: GuideState = {
-        ...searchAddDataActiveState,
+        ...testGuideStep1ActiveState,
         steps: [
           {
-            id: 'add_data',
+            ...testGuideStep1ActiveState.steps[0],
             status: 'complete',
           },
           {
-            id: 'browse_docs',
+            ...testGuideStep1ActiveState.steps[1],
             status: 'complete',
           },
           {
-            id: 'search_experience',
+            ...testGuideStep1ActiveState.steps[2],
             status: 'in_progress',
           },
         ],
       };
       await apiService.updateGuideState(incompleteGuideState, false);
 
-      const completedState = await apiService.completeGuide(searchGuide);
+      const completedState = await apiService.completeGuide(testGuide);
       expect(completedState).not.toBeDefined();
     });
   });
 
   describe('startGuideStep', () => {
     beforeEach(async () => {
-      await apiService.updateGuideState(searchAddDataActiveState, false);
+      await apiService.updateGuideState(testGuideStep1ActiveState, false);
     });
 
     it('updates the selected step and marks it as in_progress', async () => {
-      await apiService.startGuideStep(searchGuide, firstStep);
+      await apiService.startGuideStep(testGuide, testGuideFirstStep);
 
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
-        body: JSON.stringify({
-          ...searchAddDataActiveState,
-          isActive: true,
-          status: 'in_progress',
-          steps: [
-            {
-              id: searchAddDataActiveState.steps[0].id,
-              status: 'in_progress',
-            },
-            searchAddDataActiveState.steps[1],
-            searchAddDataActiveState.steps[2],
-          ],
-        }),
+        body: JSON.stringify(testGuideStep1InProgressState),
       });
     });
 
@@ -278,76 +234,35 @@ describe('GuidedOnboarding ApiService', () => {
 
   describe('completeGuideStep', () => {
     it(`completes the step when it's in progress`, async () => {
-      const updatedState: GuideState = {
-        ...searchAddDataActiveState,
-        steps: [
-          {
-            id: searchAddDataActiveState.steps[0].id,
-            status: 'in_progress', // Mark a step as in_progress in order to test the "completeGuideStep" behavior
-          },
-          searchAddDataActiveState.steps[1],
-          searchAddDataActiveState.steps[2],
-        ],
-      };
-      await apiService.updateGuideState(updatedState, false);
+      await apiService.updateGuideState(testGuideStep1InProgressState, false);
 
-      await apiService.completeGuideStep(searchGuide, firstStep);
+      await apiService.completeGuideStep(testGuide, testGuideFirstStep);
 
       // Once on update, once on complete
       expect(httpClient.put).toHaveBeenCalledTimes(2);
       // Verify the completed step now has a "complete" status, and the subsequent step is "active"
       expect(httpClient.put).toHaveBeenLastCalledWith(`${API_BASE_PATH}/state`, {
-        body: JSON.stringify({
-          ...updatedState,
-          steps: [
-            {
-              id: searchAddDataActiveState.steps[0].id,
-              status: 'complete',
-            },
-            {
-              id: searchAddDataActiveState.steps[1].id,
-              status: 'active',
-            },
-            searchAddDataActiveState.steps[2],
-          ],
-        }),
+        body: JSON.stringify({ ...testGuideStep2ActiveState }),
       });
     });
 
     it(`marks the step as 'ready_to_complete' if it's configured for manual completion`, async () => {
-      const securityRulesInProgressState = {
-        ...securityRulesActiveState,
-        steps: [
-          securityRulesActiveState.steps[0],
-          {
-            id: securityRulesActiveState.steps[1].id,
-            status: 'in_progress',
-          },
-          securityRulesActiveState.steps[2],
-        ],
-      };
       httpClient.get.mockResolvedValue({
-        state: [securityRulesInProgressState],
+        state: [testGuideStep2InProgressState],
       });
       apiService.setup(httpClient);
 
-      await apiService.completeGuideStep('security', 'rules');
+      await apiService.completeGuideStep(testGuide, testGuideManualCompletionStep);
 
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       // Verify the completed step now has a "ready_to_complete" status, and the subsequent step is "inactive"
       expect(httpClient.put).toHaveBeenLastCalledWith(`${API_BASE_PATH}/state`, {
         body: JSON.stringify({
-          ...securityRulesInProgressState,
+          ...testGuideStep2InProgressState,
           steps: [
-            securityRulesInProgressState.steps[0],
-            {
-              id: securityRulesInProgressState.steps[1].id,
-              status: 'ready_to_complete',
-            },
-            {
-              id: securityRulesInProgressState.steps[2].id,
-              status: 'inactive',
-            },
+            testGuideStep2InProgressState.steps[0],
+            { ...testGuideStep2InProgressState.steps[1], status: 'ready_to_complete' },
+            testGuideStep2InProgressState.steps[2],
           ],
         }),
       });
@@ -359,12 +274,8 @@ describe('GuidedOnboarding ApiService', () => {
     });
 
     it('does nothing if the step is not in progress', async () => {
-      httpClient.get.mockResolvedValue({
-        state: [searchAddDataActiveState],
-      });
-      apiService.setup(httpClient);
-
-      await apiService.completeGuideStep(searchGuide, firstStep);
+      // by default the state set in beforeEach is test guide, step 1 active
+      await apiService.completeGuideStep(testGuide, testGuideFirstStep);
       expect(httpClient.put).toHaveBeenCalledTimes(0);
     });
   });
@@ -372,11 +283,11 @@ describe('GuidedOnboarding ApiService', () => {
   describe('isGuidedOnboardingActiveForIntegration$', () => {
     it('returns true if the integration is part of the active step', (done) => {
       httpClient.get.mockResolvedValue({
-        state: [securityAddDataInProgressState],
+        state: [testGuideStep1InProgressState],
       });
       apiService.setup(httpClient);
       subscription = apiService
-        .isGuidedOnboardingActiveForIntegration$(endpointIntegration)
+        .isGuidedOnboardingActiveForIntegration$(testIntegration)
         .subscribe((isIntegrationInGuideStep) => {
           if (isIntegrationInGuideStep) {
             done();
@@ -384,13 +295,13 @@ describe('GuidedOnboarding ApiService', () => {
         });
     });
 
-    it('returns false if another integration is part of the active step', (done) => {
+    it('returns false if the current step has a different integration', (done) => {
       httpClient.get.mockResolvedValue({
-        state: [securityAddDataInProgressState],
+        state: [testGuideStep1InProgressState],
       });
       apiService.setup(httpClient);
       subscription = apiService
-        .isGuidedOnboardingActiveForIntegration$(kubernetesIntegration)
+        .isGuidedOnboardingActiveForIntegration$(wrongIntegration)
         .subscribe((isIntegrationInGuideStep) => {
           if (!isIntegrationInGuideStep) {
             done();
@@ -400,11 +311,11 @@ describe('GuidedOnboarding ApiService', () => {
 
     it('returns false if no guide is active', (done) => {
       httpClient.get.mockResolvedValue({
-        state: [noGuideActiveState],
+        state: [testGuideNotActiveState],
       });
       apiService.setup(httpClient);
       subscription = apiService
-        .isGuidedOnboardingActiveForIntegration$(endpointIntegration)
+        .isGuidedOnboardingActiveForIntegration$(testIntegration)
         .subscribe((isIntegrationInGuideStep) => {
           if (!isIntegrationInGuideStep) {
             done();
@@ -416,35 +327,35 @@ describe('GuidedOnboarding ApiService', () => {
   describe('completeGuidedOnboardingForIntegration', () => {
     it(`completes the step if it's active for the integration`, async () => {
       httpClient.get.mockResolvedValue({
-        state: [securityAddDataInProgressState],
+        state: [testGuideStep1InProgressState],
       });
       apiService.setup(httpClient);
 
-      await apiService.completeGuidedOnboardingForIntegration(endpointIntegration);
+      await apiService.completeGuidedOnboardingForIntegration(testIntegration);
       expect(httpClient.put).toHaveBeenCalledTimes(1);
       // this assertion depends on the guides config
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
-        body: JSON.stringify(securityRulesActiveState),
+        body: JSON.stringify(testGuideStep2ActiveState),
       });
     });
 
     it(`does nothing if the step has a different integration`, async () => {
       httpClient.get.mockResolvedValue({
-        state: [securityAddDataInProgressState],
+        state: [testGuideStep1InProgressState],
       });
       apiService.setup(httpClient);
 
-      await apiService.completeGuidedOnboardingForIntegration(kubernetesIntegration);
+      await apiService.completeGuidedOnboardingForIntegration(wrongIntegration);
       expect(httpClient.put).not.toHaveBeenCalled();
     });
 
     it(`does nothing if no guide is active`, async () => {
       httpClient.get.mockResolvedValue({
-        state: [noGuideActiveState],
+        state: [testGuideNotActiveState],
       });
       apiService.setup(httpClient);
 
-      await apiService.completeGuidedOnboardingForIntegration(endpointIntegration);
+      await apiService.completeGuidedOnboardingForIntegration(testIntegration);
       expect(httpClient.put).not.toHaveBeenCalled();
     });
   });

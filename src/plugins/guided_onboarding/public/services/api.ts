@@ -147,10 +147,10 @@ export class ApiService implements GuidedOnboardingApi {
       });
 
       const updatedGuide: GuideState = {
+        guideId,
         isActive: true,
         status: 'not_started',
         steps: updatedSteps,
-        guideId,
       };
 
       return await this.updateGuideState(updatedGuide, true);
