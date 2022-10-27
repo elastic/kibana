@@ -7,7 +7,7 @@
 
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
-import { waitForChrome, waitForVisualizations } from '../utils';
+import { waitForVisualizations } from '../utils';
 
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/sample_data_logs'],
@@ -21,6 +21,5 @@ export const journey = new Journey({
 
   .step('Go to Web Logs Dashboard', async ({ page }) => {
     await page.click(subj('dashboardListingTitleLink-[Logs]-Web-Traffic'));
-    await waitForChrome(page);
     await waitForVisualizations(page, 11);
   });
