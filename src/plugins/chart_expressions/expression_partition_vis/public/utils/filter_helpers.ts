@@ -56,13 +56,15 @@ export const getFilterClickData = (
   data.push(
     ...(clickedLayers
       .map((clickedLayer, index) => {
-        const currentColumn = visData.columns.find((col) => col.id === bucketColumns[index].id);
+        const currentColumnIndex = visData.columns.findIndex(
+          (col) => col.id === bucketColumns[index].id
+        );
 
-        if (!currentColumn) {
+        if (currentColumnIndex === -1) {
           return undefined;
         }
 
-        const currentColumnIndex = visData.columns.findIndex((col) => col === currentColumn);
+        const currentColumn = visData.columns[currentColumnIndex];
 
         // this logic maps the indices of the elements in the
         // visualization's table to the indices in the table before
