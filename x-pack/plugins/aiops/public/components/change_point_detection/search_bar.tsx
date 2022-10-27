@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useCallback } from 'react';
+import React, { FC, useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Query, Filter } from '@kbn/es-query';
+import { type Filter, fromKueryExpression, type Query } from '@kbn/es-query';
 import { type SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar';
+import { type QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { EuiSpacer, EuiTextColor } from '@elastic/eui';
+import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
@@ -17,6 +20,11 @@ export interface SearchBarProps {
   filters: Filter[];
   onQueryChange: (update: Query) => void;
   onFiltersChange: (update: Filter[]) => void;
+  /**
+   * Provides a result ES query
+   * @param query
+   */
+  onESQueryChange: (query: QueryDslQueryContainer) => void;
 }
 
 /**
@@ -41,9 +49,20 @@ export const SearchBarWrapper: FC<SearchBarProps> = ({
     },
   } = useAiopsAppContext();
 
+  const [error, setError] = useState<string | undefined>();
+
   const onQuerySubmit: SearchBarOwnProps['onQuerySubmit'] = useCallback(
     (payload, isUpdate) => {
-      onQueryChange(payload.query);
+      if (payload.query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
+        try {
+          // Validates the query
+          fromKueryExpression(payload.query.query);
+          setError(undefined);
+          onQueryChange(payload.query);
+        } catch (e) {
+          setError(e.message);
+        }
+      }
     },
     [onQueryChange]
   );
@@ -58,22 +77,31 @@ export const SearchBarWrapper: FC<SearchBarProps> = ({
   const resultQuery = query ?? { query: '', language: 'kuery' };
 
   return (
-    <SearchBar
-      appName={'aiops'}
-      showFilterBar
-      showDatePicker={false}
-      showQueryInput
-      query={resultQuery}
-      filters={filters ?? []}
-      onQuerySubmit={onQuerySubmit}
-      indexPatterns={[dataView]}
-      placeholder={i18n.translate('xpack.aiops.searchPanel.queryBarPlaceholderText', {
-        defaultMessage: 'Search… (e.g. status:200 AND extension:"PHP")',
-      })}
-      displayStyle={'inPage'}
-      isClearable
-      // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
-      onFiltersUpdated={onFiltersUpdated}
-    />
+    <>
+      <SearchBar
+        showSubmitButton={false}
+        appName={'aiops'}
+        showFilterBar
+        showDatePicker={false}
+        showQueryInput
+        query={resultQuery}
+        filters={filters ?? []}
+        onQuerySubmit={onQuerySubmit}
+        indexPatterns={[dataView]}
+        placeholder={i18n.translate('xpack.aiops.searchPanel.queryBarPlaceholderText', {
+          defaultMessage: 'Search… (e.g. status:200 AND extension:"PHP")',
+        })}
+        displayStyle={'inPage'}
+        isClearable
+        // @ts-expect-error onFiltersUpdated is a valid prop on SearchBar
+        onFiltersUpdated={onFiltersUpdated}
+      />
+      {error ? (
+        <>
+          <EuiSpacer size={'s'} />
+          <EuiTextColor color="danger">{error}</EuiTextColor>
+        </>
+      ) : null}
+    </>
   );
 };
