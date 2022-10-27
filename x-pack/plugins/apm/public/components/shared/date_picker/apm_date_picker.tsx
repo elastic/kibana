@@ -27,7 +27,7 @@ export function ApmDatePicker() {
     rangeTo,
     refreshPaused: refreshPausedFromUrl = 'true',
     refreshInterval: refreshIntervalFromUrl = '0',
-  } = query;
+  } = { ...query };
 
   const refreshPaused = toBoolean(refreshPausedFromUrl);
 

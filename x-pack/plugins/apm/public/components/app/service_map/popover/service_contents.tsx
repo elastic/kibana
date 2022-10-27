@@ -53,7 +53,12 @@ export function ServiceContents({
     throw new Error('Expected rangeFrom and rangeTo to be set');
   }
 
-  const { rangeFrom, rangeTo, comparisonEnabled, offset } = query;
+  const {
+    rangeFrom,
+    rangeTo,
+    comparisonEnabled = false,
+    offset = '',
+  } = { ...query };
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
