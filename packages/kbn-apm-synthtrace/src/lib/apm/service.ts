@@ -20,19 +20,32 @@ export class Service extends Entity<ApmFields> {
   }
 }
 
-export function service({
-  name,
-  environment,
-  agentName,
-  agentVersion,
-}: {
+export function service(
+  name: string,
+  environment: string,
+  agentName: string,
+  agentVersion?: string
+): Service;
+
+export function service(options: {
   name: string;
   environment: string;
   agentName: string;
   agentVersion?: string;
-}) {
+}): Service;
+
+export function service(
+  ...args:
+    | [{ name: string; environment: string; agentName: string; agentVersion?: string }]
+    | [name: string, environment: string, agentName: string, agentVersion?: string]
+) {
+  const [serviceName, environment, agentName, agentVersion] =
+    args.length === 1
+      ? [args[0].name, args[0].environment, args[0].agentName, args[0].agentVersion]
+      : args;
+
   return new Service({
-    'service.name': name,
+    'service.name': serviceName,
     'service.environment': environment,
     'agent.name': agentName,
     'agent.version': agentVersion,

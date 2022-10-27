@@ -23,3 +23,4 @@ export const enableInfrastructureHostsView = 'observability:enableInfrastructure
 export const enableAwsLambdaMetrics = 'observability:enableAwsLambdaMetrics';
 export const enableServiceMetrics = 'observability:apmEnableServiceMetrics';
 export const enableAgentExplorerView = 'observability:apmAgentExplorerView';
+export const enableCriticalPath = 'observability:apmEnableCriticalPath';

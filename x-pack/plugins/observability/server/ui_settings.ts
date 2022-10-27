@@ -6,26 +6,27 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 import { UiSettingsParams } from '@kbn/core/types';
+import { i18n } from '@kbn/i18n';
 import { observabilityFeatureId, ProgressiveLoadingQuality } from '../common';
 import {
-  enableComparisonByDefault,
-  enableInspectEsQueries,
-  maxSuggestions,
-  defaultApmServiceEnvironment,
-  apmProgressiveLoading,
-  enableServiceGroups,
-  apmServiceInventoryOptimizedSorting,
-  enableNewSyntheticsView,
-  apmServiceGroupMaxNumberOfServices,
-  apmTraceExplorerTab,
-  apmOperationsTab,
   apmLabsButton,
-  enableInfrastructureHostsView,
-  enableServiceMetrics,
-  enableAwsLambdaMetrics,
+  apmOperationsTab,
+  apmProgressiveLoading,
+  apmServiceGroupMaxNumberOfServices,
+  apmServiceInventoryOptimizedSorting,
+  apmTraceExplorerTab,
+  defaultApmServiceEnvironment,
   enableAgentExplorerView,
+  enableAwsLambdaMetrics,
+  enableComparisonByDefault,
+  enableCriticalPath,
+  enableInfrastructureHostsView,
+  enableInspectEsQueries,
+  enableNewSyntheticsView,
+  enableServiceGroups,
+  enableServiceMetrics,
+  maxSuggestions,
 } from '../common/ui_settings_keys';
 
 const technicalPreviewLabel = i18n.translate(
@@ -317,6 +318,20 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.enableAgentExplorerDescription', {
       defaultMessage: '{technicalPreviewLabel} Enables Agent explorer view.',
+    }),
+    schema: schema.boolean(),
+    value: false,
+    requiresPageReload: true,
+    type: 'boolean',
+    showInLabs: true,
+  },
+  [enableCriticalPath]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableCriticalPath', {
+      defaultMessage: 'Critical path',
+    }),
+    description: i18n.translate('xpack.observability.enableCriticalPathDescription', {
+      defaultMessage: '{technicalPreviewLabel} Optionally display the critical path of a trace.',
       values: {
         technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
       },

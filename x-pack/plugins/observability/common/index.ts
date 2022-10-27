@@ -28,6 +28,7 @@ export {
   enableServiceMetrics,
   enableAwsLambdaMetrics,
   enableAgentExplorerView,
+  enableCriticalPath,
 } from './ui_settings_keys';
 
 export {

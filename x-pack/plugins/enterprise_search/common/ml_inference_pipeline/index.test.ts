@@ -17,6 +17,7 @@ import {
   getMlModelTypesForModelConfig,
   getSetProcessorForInferenceType,
   SUPPORTED_PYTORCH_TASKS as LOCAL_SUPPORTED_PYTORCH_TASKS,
+  parseMlInferenceParametersFromPipeline,
 } from '.';
 
 const mockModel: MlTrainedModelConfig = {
@@ -196,5 +197,47 @@ describe('generateMlInferencePipelineBody lib function', () => {
         ]),
       })
     );
+  });
+});
+
+describe('parseMlInferenceParametersFromPipeline', () => {
+  it('returns pipeline parameters from ingest pipeline', () => {
+    expect(
+      parseMlInferenceParametersFromPipeline('unit-test', {
+        processors: [
+          {
+            inference: {
+              field_map: {
+                body: 'text_field',
+              },
+              model_id: 'test-model',
+              target_field: 'ml.inference.test',
+            },
+          },
+        ],
+      })
+    ).toEqual({
+      destination_field: 'test',
+      model_id: 'test-model',
+      pipeline_name: 'unit-test',
+      source_field: 'body',
+    });
+  });
+  it('return null if pipeline missing inference processor', () => {
+    expect(parseMlInferenceParametersFromPipeline('unit-test', { processors: [] })).toBeNull();
+  });
+  it('return null if pipeline missing field_map', () => {
+    expect(
+      parseMlInferenceParametersFromPipeline('unit-test', {
+        processors: [
+          {
+            inference: {
+              model_id: 'test-model',
+              target_field: 'test',
+            },
+          },
+        ],
+      })
+    ).toBeNull();
   });
 });

@@ -87,6 +87,7 @@ describe('simple trace', () => {
       'service.name': 'opbeans-java',
       'service.node.name': 'instance-1',
       'service.language.name': 'java',
+      'timestamp.us': 1609459200000000,
       'trace.id': '00000000000000000000000000000241',
       'transaction.duration.us': 1000000,
       'transaction.id': '0000000000000240',
@@ -118,6 +119,7 @@ describe('simple trace', () => {
       'span.name': 'GET apm-*/_search',
       'span.subtype': 'elasticsearch',
       'span.type': 'db',
+      'timestamp.us': 1609459200050000,
       'trace.id': '00000000000000000000000000000301',
       'transaction.id': '0000000000000300',
     });
