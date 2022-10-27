@@ -97,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(apiResponse.body.attributes).eql({
           ...monitors[0],
-          [ConfigKey.ID]: apiResponse.body.id,
+          [ConfigKey.HEARTBEAT_ID]: apiResponse.body.id,
           [ConfigKey.CONFIG_ID]: apiResponse.body.id,
           revision: 1,
         });

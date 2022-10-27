@@ -104,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
         omit(
           {
             ...newMonitor,
-            [ConfigKey.ID]: apiResponse.body.id,
+            [ConfigKey.HEARTBEAT_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
           },
           secretKeys
@@ -278,7 +278,7 @@ export default function ({ getService }: FtrProviderContext) {
           omit(
             {
               ...monitor,
-              [ConfigKey.ID]: apiResponse.body.id,
+              [ConfigKey.HEARTBEAT_ID]: apiResponse.body.id,
               [ConfigKey.CONFIG_ID]: apiResponse.body.id,
               [ConfigKey.NAMESPACE]: formatKibanaNamespace(SPACE_ID),
             },
