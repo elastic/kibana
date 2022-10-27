@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
@@ -37,6 +37,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('updates all assets when updating a package to a different version', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+    setPrereleaseSetting(supertest);
 
     before(async () => {
       await installPackage(pkgName, pkgVersion);

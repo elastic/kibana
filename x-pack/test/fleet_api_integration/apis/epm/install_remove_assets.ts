@@ -11,7 +11,7 @@ import { sortBy } from 'lodash';
 import { AssetReference } from '@kbn/fleet-plugin/common/types';
 import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 function checkErrorWithResponseDataOrThrow(err: any) {
@@ -46,19 +46,7 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
-    before(async () => {
-      await supertest
-        .put('/api/fleet/settings')
-        .set('kbn-xsrf', 'xxxx')
-        .send({ prerelease_integrations_enabled: true });
-    });
-
-    after(async () => {
-      await supertest
-        .put('/api/fleet/settings')
-        .set('kbn-xsrf', 'xxxx')
-        .send({ prerelease_integrations_enabled: false });
-    });
+    setPrereleaseSetting(supertest);
 
     describe('installs all assets when installing a package for the first time', async () => {
       before(async () => {

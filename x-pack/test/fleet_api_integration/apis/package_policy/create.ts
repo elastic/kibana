@@ -10,7 +10,7 @@ import { Installation } from '@kbn/fleet-plugin/common';
 import uuid from 'uuid/v4';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -39,19 +39,7 @@ export default function (providerContext: FtrProviderContext) {
       );
     });
 
-    before(async () => {
-      await supertest
-        .put('/api/fleet/settings')
-        .set('kbn-xsrf', 'xxxx')
-        .send({ prerelease_integrations_enabled: true });
-    });
-
-    after(async () => {
-      await supertest
-        .put('/api/fleet/settings')
-        .set('kbn-xsrf', 'xxxx')
-        .send({ prerelease_integrations_enabled: false });
-    });
+    setPrereleaseSetting(supertest);
 
     before(async function () {
       const { body: agentPolicyResponse } = await supertest

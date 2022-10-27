@@ -7,7 +7,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 const testSpaceId = 'fleet_test_space';
@@ -50,6 +50,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('installs and uninstalls all assets (non default space)', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+    setPrereleaseSetting(supertest);
     before(async () => {
       await createSpace(testSpaceId);
     });

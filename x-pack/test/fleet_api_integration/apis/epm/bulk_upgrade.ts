@@ -12,7 +12,7 @@ import {
   IBulkInstallPackageHTTPError,
 } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { setPrereleaseSetting, skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
 
@@ -28,6 +28,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('bulk package upgrade api', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
+    setPrereleaseSetting(supertest);
 
     describe('bulk package upgrade with a package already installed', async () => {
       beforeEach(async () => {
