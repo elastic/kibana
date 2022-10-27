@@ -39,7 +39,6 @@ jest.mock(
   '../../lib/indices/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline',
   () => ({
     deleteMlInferencePipeline: jest.fn(),
-    isPipelineInUse: jest.fn(),
   })
 );
 jest.mock(

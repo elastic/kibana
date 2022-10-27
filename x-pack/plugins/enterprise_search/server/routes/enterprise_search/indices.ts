@@ -48,6 +48,7 @@ import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
   isIndexNotFoundException,
+  isPipelineIsInUseException,
   isResourceNotFoundException,
 } from '../../utils/identify_exceptions';
 import { getPrefixedInferencePipelineProcessorName } from '../../utils/ml_inference_pipeline_utils';
@@ -697,7 +698,7 @@ export function registerIndexRoutes({
             response,
             statusCode: 404,
           });
-        } else if (error.message === ErrorCode.PIPELINE_IS_IN_USE) {
+        } else if (isPipelineIsInUseException(error)) {
           return createError({
             errorCode: ErrorCode.PIPELINE_IS_IN_USE,
             message: i18n.translate(

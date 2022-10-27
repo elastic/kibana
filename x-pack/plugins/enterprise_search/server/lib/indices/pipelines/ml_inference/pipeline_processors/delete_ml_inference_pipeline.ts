@@ -19,24 +19,17 @@ export const deleteMlInferencePipeline = async (
   pipelineName: string,
   client: ElasticsearchClient
 ) => {
-  let response: DeleteMlInferencePipelineResponse = {};
-
   // Check if the pipeline is in use in a different index's managed pipeline
   const pipelineIsInUse = await isPipelineInUse(pipelineName, indexName, client);
   if (pipelineIsInUse) {
     throw new Error(ErrorCode.PIPELINE_IS_IN_USE);
   }
 
-  try {
-    response = await detachMlInferencePipeline(indexName, pipelineName, client);
-  } catch (error) {
-    // only suppress Not Found error
-    if (error.meta?.statusCode !== 404) {
-      throw error;
-    }
-  }
+  // Detach the pipeline first
+  const response = await detachPipeline(indexName, pipelineName, client);
+  console.log('after detachPipeline')
 
-  // finally, delete pipeline
+  // Finally, delete pipeline
   const deleteResponse = await client.ingest.deletePipeline({ id: pipelineName });
   if (deleteResponse.acknowledged === true) {
     response.deleted = pipelineName;
@@ -45,17 +38,42 @@ export const deleteMlInferencePipeline = async (
   return response;
 };
 
+const detachPipeline = async (
+  indexName: string,
+  pipelineName: string,
+  client: ElasticsearchClient
+): Promise<DeleteMlInferencePipelineResponse> => {
+  try {
+    return detachMlInferencePipeline(indexName, pipelineName, client);
+  } catch (error) {
+    // only suppress Not Found error
+    if (error.meta?.statusCode !== 404) {
+      throw error;
+    }
+
+    return {};
+  }
+}
+
 const isPipelineInUse = async (
   pipelineName: string,
   indexName: string,
   client: ElasticsearchClient
 ): Promise<boolean> => {
-  let pipelines;
   try {
     // Fetch all managed parent ML pipelines
-    pipelines = await client.ingest.getPipeline({
+    const pipelines = await client.ingest.getPipeline({
       id: '*@ml-inference',
     });
+
+    // The given inference pipeline is being used in another index's managed pipeline if:
+    // - The index name is different from the one we're deleting from, AND
+    // - Its processors contain at least one entry in which the supplied pipeline name is referenced
+    return Object.entries(pipelines).some(
+      ([name, pipeline]) =>
+        name !== getInferencePipelineNameFromIndexName(indexName) &&
+        pipeline.processors?.some((processor) => processor.pipeline?.name === pipelineName)
+    );
   } catch (error) {
     // only suppress Not Found error
     if (error.meta?.statusCode !== 404) {
@@ -64,13 +82,4 @@ const isPipelineInUse = async (
 
     return false;
   }
-
-  // The given inference pipeline is being used in another index's managed pipeline if:
-  // - The index name is different from the one we're deleting from, AND
-  // - Its processors contain at least one entry in which the supplied pipeline name is referenced
-  return Object.entries(pipelines).some(
-    ([name, pipeline]) =>
-      name !== getInferencePipelineNameFromIndexName(indexName) &&
-      pipeline.processors?.some((processor) => processor.pipeline?.name === pipelineName)
-  );
 };
