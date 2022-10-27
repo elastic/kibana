@@ -159,7 +159,7 @@ const store = createStore(
   storage
 );
 
-let testProps = {
+const testProps = {
   browserFields: mockBrowserFields,
   field,
   indexPattern: mockIndexPattern,
