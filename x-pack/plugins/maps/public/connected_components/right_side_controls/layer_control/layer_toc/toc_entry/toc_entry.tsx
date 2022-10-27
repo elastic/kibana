@@ -311,14 +311,24 @@ export class TOCEntry extends Component<Props, State> {
     );
   };
 
+  _hightlightAsSelectedLayer() {
+    if (this.props.isCombineLayer) {
+      return false;
+    }
+
+    if (this.props.layer.isPreviewLayer()) {
+      return true;
+    }
+
+    return this.props.selectedLayer && this.props.selectedLayer.getId() === this.props.layer.getId();
+  }
+
   render() {
     const classes = classNames('mapTocEntry', {
       'mapTocEntry-isDragging': this.props.isDragging,
       'mapTocEntry-isDraggingOver': this.props.isDraggingOver,
       'mapTocEntry-isCombineLayer': this.props.isCombineLayer,
-      'mapTocEntry-isSelected':
-        this.props.layer.isPreviewLayer() ||
-        (this.props.selectedLayer && this.props.selectedLayer.getId() === this.props.layer.getId()),
+      'mapTocEntry-isSelected': this._hightlightAsSelectedLayer(),
       'mapTocEntry-isInEditingMode': this.props.isFeatureEditorOpenForLayer,
     });
 
