@@ -248,7 +248,7 @@ export const generateEnqueueFunctionInput = (isArray: boolean = false) => {
     relatedSavedObjects: [
       {
         id: '1',
-        namespaces: undefined,
+        space_ids: ['default'],
         type: 'alert',
         typeId: RULE_TYPE_ID,
       },

@@ -6,6 +6,7 @@
  */
 
 import { IEvent } from '@kbn/event-log-plugin/server';
+import { namespaceToSpaceId } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 import { AlertInstanceState } from '../types';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 
@@ -87,10 +88,10 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
       ...(alerting ? alerting : {}),
       saved_objects: params.savedObjects.map((so) => ({
         ...(so.relation ? { rel: so.relation } : {}),
+        space_ids: [namespaceToSpaceId(namespace)],
         type: so.type,
         id: so.id,
         type_id: so.typeId,
-        namespace,
       })),
       ...(spaceId ? { space_ids: [spaceId] } : {}),
       ...(task ? { task: { scheduled: task.scheduled, schedule_delay: task.scheduleDelay } } : {}),

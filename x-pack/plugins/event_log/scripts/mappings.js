@@ -163,7 +163,7 @@ exports.EcsCustomPropertyMappings = {
             type: 'keyword',
             ignore_above: 1024,
           },
-          namespaces: {
+          space_ids: {
             type: 'keyword',
             ignore_above: 1024,
           },
@@ -219,5 +219,5 @@ exports.EcsEventLogMultiValuedProperties = [
   'event.type',
   'rule.author',
   'kibana.space_ids',
-  'kibana.saved_objects.namespaces',
+  'kibana.saved_objects.space_ids',
 ];

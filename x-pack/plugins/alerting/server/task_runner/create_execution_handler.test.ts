@@ -163,7 +163,7 @@ describe('Create Execution Handler', () => {
           "relatedSavedObjects": Array [
             Object {
               "id": "1",
-              "namespaces": Array [
+              "space_ids": Array [
                 "test1"
               ],
               "type": "alert",
@@ -262,7 +262,7 @@ describe('Create Execution Handler', () => {
         relatedSavedObjects: [
           {
             id: '1',
-            namespaces: ['test1'],
+            space_ids: ['test1'],
             type: 'alert',
             typeId: 'test',
           },
@@ -371,7 +371,7 @@ describe('Create Execution Handler', () => {
           "relatedSavedObjects": Array [
             Object {
               "id": "1",
-              "namespaces": Array [
+              "space_ids": Array [
                 "test1"
               ],
               "type": "alert",
@@ -419,7 +419,7 @@ describe('Create Execution Handler', () => {
           "relatedSavedObjects": Array [
             Object {
               "id": "1",
-              "namespace": Array [
+              "space_ids": Array [
                 "test1"
               ],
               "type": "alert",

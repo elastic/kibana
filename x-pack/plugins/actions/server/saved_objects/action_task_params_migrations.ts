@@ -15,6 +15,7 @@ import {
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IsMigrationNeededPredicate } from '@kbn/encrypted-saved-objects-plugin/server';
+import { namespaceToSpaceId } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 import { ActionTaskParams, PreConfiguredAction } from '../types';
 import { RelatedSavedObject, RelatedSavedObjects } from '../lib/related_saved_objects';
 
@@ -151,7 +152,7 @@ function useSavedObjectReferences(
   };
 }
 
-type LegacyRelatedSavedObject = Omit<RelatedSavedObject, 'namespaces'> & {
+type LegacyRelatedSavedObject = Omit<RelatedSavedObject, 'space_ids'> & {
   namespace?: string;
 };
 
@@ -167,14 +168,10 @@ function copyNamespaceToNamespaces(
       (relatedSavedObjects as LegacyRelatedSavedObject[]) ?? []
     ).map((relatedSavedObject: LegacyRelatedSavedObject) => {
       const { namespace, ...rest } = relatedSavedObject;
-      if (namespace) {
-        return {
-          ...rest,
-          namespaces: [namespace],
-        };
-      }
-
-      return relatedSavedObject;
+      return {
+        ...rest,
+        space_ids: [namespaceToSpaceId(namespace)],
+      };
     });
 
     return {

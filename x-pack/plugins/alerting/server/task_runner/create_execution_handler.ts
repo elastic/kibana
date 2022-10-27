@@ -7,6 +7,7 @@
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
 import { chunk } from 'lodash';
+import { namespaceToSpaceId } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 import { transformActionParams } from './transform_action_params';
 import { injectActionParams } from './inject_action_params';
 import {
@@ -178,7 +179,7 @@ export function createExecutionHandler<
           {
             id: ruleId,
             type: 'alert',
-            ...(namespace.namespace ? { namespaces: [namespace.namespace] } : {}),
+            space_ids: [namespaceToSpaceId(namespace.namespace)],
             typeId: ruleType.id,
           },
         ],

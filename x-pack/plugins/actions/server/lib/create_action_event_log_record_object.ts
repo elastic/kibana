@@ -80,7 +80,7 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
       type: relatedSavedObject.type,
       id: relatedSavedObject.id,
       type_id: relatedSavedObject.typeId,
-      namespaces: relatedSavedObject.namespaces,
+      space_ids: relatedSavedObject.space_ids,
     });
   }
   return event;
