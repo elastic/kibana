@@ -6,16 +6,18 @@
  */
 
 import { EuiFocusTrap, EuiScreenReaderOnly } from '@elastic/eui';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { DraggableId } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
 import { stopPropagationAndPreventDefault } from '@kbn/timelines-plugin/public';
+import { useLocation } from 'react-router-dom';
 import type { ColumnHeaderOptions, DataProvider } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from './keyboard_shortcut_constants';
 import { useHoverActionItems } from './use_hover_action_items';
+import { isAlertDetailsPage } from '../../../helpers';
 
 export const YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS = (fieldName: string) =>
   i18n.translate(
@@ -35,7 +37,7 @@ AdditionalContent.displayName = 'AdditionalContent';
 const StyledHoverActionsContainer = styled.div<{
   $showTopN: boolean;
   $showOwnFocus: boolean;
-  $hideTopN: boolean;
+  $hiddenActionsCount: number;
   $isActive: boolean;
 }>`
   display: flex;
@@ -82,7 +84,7 @@ const StyledHoverActionsContainer = styled.div<{
 `;
 
 const StyledHoverActionsContainerWithPaddingsAndMinWidth = styled(StyledHoverActionsContainer)`
-  min-width: ${({ $hideTopN }) => `${$hideTopN ? '112px' : '138px'}`};
+  min-width: ${({ $hiddenActionsCount }) => `${138 - $hiddenActionsCount * 26}px`};
   padding: ${(props) => `0 ${props.theme.eui.euiSizeS}`};
   position: relative;
 `;
@@ -162,6 +164,7 @@ export const HoverActions: React.FC<Props> = React.memo(
       setIsOverflowPopoverOpen(!isOverflowPopoverOpen);
     }, [isOverflowPopoverOpen, setIsOverflowPopoverOpen]);
 
+    const { pathname } = useLocation();
     const handleHoverActionClicked = useCallback(() => {
       if (closeTopN) {
         closeTopN();
@@ -216,6 +219,19 @@ export const HoverActions: React.FC<Props> = React.memo(
     );
 
     const isCaseView = scopeId === TimelineId.casePage;
+    const isTimelineView = scopeId === TimelineId.active;
+
+    const hideFilters = useMemo(
+      () => isAlertDetailsPage(pathname) && !isTimelineView,
+      [isTimelineView, pathname]
+    );
+
+    const hiddenActionsCount = useMemo(() => {
+      let count = 0;
+      if (hideTopN) count += 1;
+      if (hideFilters) count += 2;
+      return count;
+    }, [hideFilters, hideTopN]);
 
     const { overflowActionItems, allActionItems } = useHoverActionItems({
       dataProvider,
@@ -225,6 +241,7 @@ export const HoverActions: React.FC<Props> = React.memo(
       enableOverflowButton: enableOverflowButton && !isCaseView,
       field,
       fieldType,
+      hideFilters,
       isAggregatable,
       handleHoverActionClicked,
       hideAddToTimeline,
@@ -258,7 +275,7 @@ export const HoverActions: React.FC<Props> = React.memo(
           onKeyDown={onKeyDown}
           $showTopN={showTopN}
           $showOwnFocus={showOwnFocus}
-          $hideTopN={hideTopN}
+          $hiddenActionsCount={hiddenActionsCount}
           $isActive={isActive}
           className={isActive ? 'hoverActions-active' : ''}
         >
