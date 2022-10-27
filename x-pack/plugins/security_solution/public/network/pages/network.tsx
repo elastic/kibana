@@ -14,6 +14,7 @@ import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { TableId } from '../../../common/types';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { SecurityPageName } from '../../app/types';
 import type { UpdateDateRange } from '../../common/components/charts/common';
@@ -45,7 +46,6 @@ import {
   resetKeyboardFocus,
   showGlobalFilters,
 } from '../../timelines/components/timeline/helpers';
-import { TableId } from '../../../common/types/timeline';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';

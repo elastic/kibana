@@ -48,6 +48,7 @@ import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
 import type { SecurityDataView } from '../containers/sourcerer/api';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import { tGridReducer } from './data_table/reducer';
 
 type ComposeType = typeof compose;
 declare global {
@@ -125,7 +126,6 @@ export const createStoreFactory = async (
     },
   };
 
-  const tGridReducer = startPlugins.timelines?.getTGridReducer() ?? {};
   const timelineReducer = reduceReducers(
     timelineInitialState.timeline,
     startPlugins.timelines?.getTimelineReducer() ?? {},

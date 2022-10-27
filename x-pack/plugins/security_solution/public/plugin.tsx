@@ -406,7 +406,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       );
     }
     if (startPlugins.timelines) {
-      startPlugins.timelines.setTGridEmbeddedStore(this._store);
+      startPlugins.timelines.setTimelineEmbeddedStore(this._store);
     }
     return this._store;
   }

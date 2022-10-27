@@ -5,11 +5,13 @@
  * 2.0.
  */
 import type { ColumnHeaderOptions, ColumnHeaderType } from '../../../../common/types';
+import { Direction } from '../../../../common/types';
 import {
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
 } from '../../components/data_table/constants';
 import type { SubsetTGridModel } from './model';
+import * as i18n from './translations';
 
 export const defaultColumnHeaderType: ColumnHeaderType = 'not-filtered';
 
