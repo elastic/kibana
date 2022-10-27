@@ -22,6 +22,11 @@ import { FtrService } from '../../../functional/ftr_provider_context';
 import { EndpointRuleAlertGenerator } from './endpoint_rule_alert_generator';
 import { getAlertsIndexMappings } from './alerts_security_index_mappings';
 
+export interface IndexedEndpointRuleAlerts {
+  alerts: estypes.WriteResponseBase[];
+  cleanup: () => Promise<void>;
+}
+
 export class DetectionsTestService extends FtrService {
   private readonly supertest = this.ctx.getService('supertest');
   private readonly log = this.ctx.getService('log');
@@ -175,10 +180,7 @@ export class DetectionsTestService extends FtrService {
   async loadEndpointRuleAlerts(
     endpointAgentId: string,
     count: number = 2
-  ): Promise<{
-    alerts: estypes.WriteResponseBase[];
-    cleanup: () => Promise<void>;
-  }> {
+  ): Promise<IndexedEndpointRuleAlerts> {
     this.log.info(`Loading ${count} endpoint rule alerts`);
 
     await this.ensureEndpointRuleAlertsIndexExists();
