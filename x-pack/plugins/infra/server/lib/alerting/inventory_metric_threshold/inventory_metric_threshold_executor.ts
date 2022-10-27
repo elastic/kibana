@@ -151,14 +151,14 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
 
     let scheduledActionsCount = 0;
     const inventoryItems = Object.keys(first(results)!);
-    for (const instanceId of inventoryItems) {
+    for (const group of inventoryItems) {
       // AND logic; all criteria must be across the threshold
-      const shouldAlertFire = results.every((result) => result[instanceId]?.shouldFire);
-      const shouldAlertWarn = results.every((result) => result[instanceId]?.shouldWarn);
+      const shouldAlertFire = results.every((result) => result[group]?.shouldFire);
+      const shouldAlertWarn = results.every((result) => result[group]?.shouldWarn);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
       // whole alert is in a No Data/Error state
-      const isNoData = results.some((result) => result[instanceId]?.isNoData);
-      const isError = results.some((result) => result[instanceId]?.isError);
+      const isNoData = results.some((result) => result[group]?.isNoData);
+      const isError = results.some((result) => result[group]?.isError);
 
       const nextState = isError
         ? AlertStates.ERROR
@@ -174,8 +174,8 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         reason = results
           .map((result) =>
             buildReasonWithVerboseMetricName(
-              instanceId,
-              result[instanceId],
+              group,
+              result[group],
               buildFiredAlertReason,
               nextState === AlertStates.WARNING
             )
@@ -185,24 +185,16 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       if (alertOnNoData) {
         if (nextState === AlertStates.NO_DATA) {
           reason = results
-            .filter((result) => result[instanceId].isNoData)
+            .filter((result) => result[group].isNoData)
             .map((result) =>
-              buildReasonWithVerboseMetricName(
-                instanceId,
-                result[instanceId],
-                buildNoDataAlertReason
-              )
+              buildReasonWithVerboseMetricName(group, result[group], buildNoDataAlertReason)
             )
             .join('\n');
         } else if (nextState === AlertStates.ERROR) {
           reason = results
-            .filter((result) => result[instanceId].isError)
+            .filter((result) => result[group].isError)
             .map((result) =>
-              buildReasonWithVerboseMetricName(
-                instanceId,
-                result[instanceId],
-                buildErrorAlertReason
-              )
+              buildReasonWithVerboseMetricName(group, result[group], buildErrorAlertReason)
             )
             .join('\n');
         }
@@ -211,25 +203,24 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         const actionGroupId =
           nextState === AlertStates.WARNING ? WARNING_ACTIONS.id : FIRED_ACTIONS.id;
 
-        const additionalContext =
-          results && results.length > 0 ? results[0][instanceId].context : null;
+        const additionalContext = results && results.length > 0 ? results[0][group].context : null;
 
-        const alert = alertFactory(instanceId, reason, additionalContext);
-        const indexedStartedDate = getAlertStartedDate(instanceId) ?? startedAt.toISOString();
-        const alertUuid = getAlertUuid(instanceId);
+        const alert = alertFactory(group, reason, additionalContext);
+        const indexedStartedDate = getAlertStartedDate(group) ?? startedAt.toISOString();
+        const alertUuid = getAlertUuid(group);
 
         scheduledActionsCount++;
 
         const context = {
           alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
           alertState: stateToAlertMessage[nextState],
-          group: instanceId,
+          group,
           reason,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
           timestamp: startedAt.toISOString(),
           threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
           value: mapToConditionsLookup(results, (result) =>
-            formatMetric(result[instanceId].metric, result[instanceId].currentValue)
+            formatMetric(result[group].metric, result[group].currentValue)
           ),
           viewInAppUrl: getViewInInventoryAppUrl({
             basePath: libs.basePath,
@@ -248,15 +239,14 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
     const recoveredAlerts = getRecoveredAlerts();
 
     for (const alert of recoveredAlerts) {
-      const recoveredAlertInstanceId = alert.getId();
-      const indexedStartedDate =
-        getAlertStartedDate(recoveredAlertInstanceId) ?? startedAt.toISOString();
-      const alertUuid = getAlertUuid(recoveredAlertInstanceId);
+      const recoveredAlertId = alert.getId();
+      const indexedStartedDate = getAlertStartedDate(recoveredAlertId) ?? startedAt.toISOString();
+      const alertUuid = getAlertUuid(recoveredAlertId);
 
       alert.setContext({
         alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
         alertState: stateToAlertMessage[AlertStates.OK],
-        group: recoveredAlertInstanceId,
+        group: recoveredAlertId,
         metric: mapToConditionsLookup(criteria, (c) => c.metric),
         threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
         timestamp: startedAt.toISOString(),

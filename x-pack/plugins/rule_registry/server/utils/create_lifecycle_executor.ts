@@ -89,8 +89,14 @@ export type LifecycleRuleExecutor<
   >
 ) => Promise<State | void>;
 
+/*
+  `alertId` will at some point be renamed to `ruleId` as that more
+  accurately describes the meaning of the variable.
+  See https://github.com/elastic/kibana/issues/100115
+*/
+
 const trackedAlertStateRt = rt.type({
-  alertId: rt.string, // Todo: change to alertInstanceId.
+  alertId: rt.string,
   alertUuid: rt.string,
   started: rt.string,
 });
@@ -171,16 +177,15 @@ export const createLifecycleExecutor =
         currentAlerts[id] = fields;
         return alertFactory.create(id);
       },
-      getAlertStartedDate: (alertInstanceId: string) =>
-        state.trackedAlerts[alertInstanceId]?.started ?? null,
-      getAlertUuid: (alertInstanceId: string) => {
-        if (!state.trackedAlerts[alertInstanceId]) {
+      getAlertStartedDate: (alertId: string) => state.trackedAlerts[alertId]?.started ?? null,
+      getAlertUuid: (alertId: string) => {
+        if (!state.trackedAlerts[alertId]) {
           const alertUuid = v4();
-          newAlertUuids[alertInstanceId] = alertUuid;
+          newAlertUuids[alertId] = alertUuid;
           return alertUuid;
         }
 
-        return state.trackedAlerts[alertInstanceId].alertUuid;
+        return state.trackedAlerts[alertId].alertUuid;
       },
     };
 
@@ -193,15 +198,15 @@ export const createLifecycleExecutor =
       },
     });
 
-    const currentAlertInstanceIds = Object.keys(currentAlerts);
-    const trackedAlertInstanceIds = Object.keys(state.trackedAlerts);
-    const newAlertInstanceIds = difference(currentAlertInstanceIds, trackedAlertInstanceIds);
-    const allAlertIds = [...new Set(currentAlertInstanceIds.concat(trackedAlertInstanceIds))];
+    const currentAlertIds = Object.keys(currentAlerts);
+    const trackedAlertIds = Object.keys(state.trackedAlerts);
+    const newAlertIds = difference(currentAlertIds, trackedAlertIds);
+    const allAlertIds = [...new Set(currentAlertIds.concat(trackedAlertIds))];
 
     const trackedAlertStates = Object.values(state.trackedAlerts);
 
     logger.debug(
-      `[Rule Registry] Tracking ${allAlertIds.length} alerts (${newAlertInstanceIds.length} new, ${trackedAlertStates.length} previous)`
+      `[Rule Registry] Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStates.length} previous)`
     );
 
     const trackedAlertsDataMap: Record<
@@ -226,23 +231,23 @@ export const createLifecycleExecutor =
       });
     }
 
-    const makeEventsDataMapFor = (alertInstanceIds: string[]) =>
-      alertInstanceIds.map((alertInstanceId) => {
-        const alertData = trackedAlertsDataMap[alertInstanceId];
-        const currentAlertData = currentAlerts[alertInstanceId];
+    const makeEventsDataMapFor = (alertIds: string[]) =>
+      alertIds.map((alertId) => {
+        const alertData = trackedAlertsDataMap[alertId];
+        const currentAlertData = currentAlerts[alertId];
 
         if (!alertData) {
-          logger.debug(`[Rule Registry] Could not find alert data for ${alertInstanceId}`);
+          logger.debug(`[Rule Registry] Could not find alert data for ${alertId}`);
         }
 
-        const isNew = !state.trackedAlerts[alertInstanceId];
-        const isRecovered = !currentAlerts[alertInstanceId];
+        const isNew = !state.trackedAlerts[alertId];
+        const isRecovered = !currentAlerts[alertId];
         const isActive = !isRecovered;
 
         const { alertUuid, started } = !isNew
-          ? state.trackedAlerts[alertInstanceId]
+          ? state.trackedAlerts[alertId]
           : {
-              alertUuid: newAlertUuids[alertInstanceId] || v4(),
+              alertUuid: newAlertUuids[alertId] || v4(),
               started: commonRuleFields[TIMESTAMP],
             };
 
@@ -257,7 +262,7 @@ export const createLifecycleExecutor =
                 lte: commonRuleFields[TIMESTAMP],
               }
             : { gte: started },
-          [ALERT_INSTANCE_ID]: alertInstanceId,
+          [ALERT_INSTANCE_ID]: alertId,
           [ALERT_START]: started,
           [ALERT_UUID]: alertUuid,
           [ALERT_STATUS]: isRecovered ? ALERT_STATUS_RECOVERED : ALERT_STATUS_ACTIVE,
@@ -275,8 +280,8 @@ export const createLifecycleExecutor =
         };
       });
 
-    const trackedEventsToIndex = makeEventsDataMapFor(trackedAlertInstanceIds);
-    const newEventsToIndex = makeEventsDataMapFor(newAlertInstanceIds);
+    const trackedEventsToIndex = makeEventsDataMapFor(trackedAlertIds);
+    const newEventsToIndex = makeEventsDataMapFor(newAlertIds);
     const allEventsToIndex = [...trackedEventsToIndex, ...newEventsToIndex];
 
     // Only write alerts if:
@@ -308,10 +313,10 @@ export const createLifecycleExecutor =
       allEventsToIndex
         .filter(({ event }) => event[ALERT_STATUS] !== ALERT_STATUS_RECOVERED)
         .map(({ event }) => {
-          const alertInstanceId = event[ALERT_INSTANCE_ID]!;
+          const alertId = event[ALERT_INSTANCE_ID]!;
           const alertUuid = event[ALERT_UUID]!;
           const started = new Date(event[ALERT_START]!).toISOString();
-          return [alertInstanceId, { alertId: alertInstanceId, alertUuid, started }]; // Todo: change object key from alertId to instanceId.
+          return [alertId, { alertId, alertUuid, started }];
         })
     );
 

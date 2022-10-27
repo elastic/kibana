@@ -91,20 +91,20 @@ export interface RuleExecutorOptions<
   ActionGroupIds extends string = never
 > {
   alertId: string; // Is actually the Rule ID. Will be updated as part of https://github.com/elastic/kibana/issues/100115
-  executionId: string;
-  startedAt: Date;
-  previousStartedAt: Date | null;
-  services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds>;
-  params: Params;
-  state: State;
-  rule: SanitizedRuleConfig;
-  spaceId: string;
-  namespace?: string;
-  name: string;
-  tags: string[];
   createdBy: string | null;
-  updatedBy: string | null;
+  executionId: string;
   logger: Logger;
+  name: string;
+  params: Params;
+  previousStartedAt: Date | null;
+  rule: SanitizedRuleConfig;
+  services: RuleExecutorServices<InstanceState, InstanceContext, ActionGroupIds>;
+  spaceId: string;
+  startedAt: Date;
+  state: State;
+  tags: string[];
+  updatedBy: string | null;
+  namespace?: string;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
