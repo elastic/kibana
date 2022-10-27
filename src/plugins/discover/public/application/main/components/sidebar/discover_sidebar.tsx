@@ -139,24 +139,16 @@ export function DiscoverSidebarComponent({
     [fieldFilter, setFieldFilter]
   );
 
-  const popularLimit = useMemo(() => uiSettings.get(FIELDS_LIMIT_SETTING), [uiSettings]);
+  const popularFieldsLimit = useMemo(() => uiSettings.get(FIELDS_LIMIT_SETTING), [uiSettings]);
 
   const {
     selected: selectedFields,
     popular: popularFields,
     unpopular: unpopularFields,
   } = useMemo(
-    () => groupFields(fields, columns, popularLimit, fieldFilter, useNewFieldsApi),
-    [fields, columns, popularLimit, fieldFilter, useNewFieldsApi]
+    () => groupFields(fields, columns, popularFieldsLimit, fieldFilter, useNewFieldsApi),
+    [fields, columns, popularFieldsLimit, fieldFilter, useNewFieldsApi]
   );
-
-  // console.log({
-  //   fields,
-  //   restFields,
-  //   selectedFields,
-  //   popularFields,
-  //   unpopularFields,
-  // });
 
   const { fieldTypes, presentFieldTypes } = useMemo(() => {
     const result = ['any'];
@@ -272,11 +264,22 @@ export function DiscoverSidebarComponent({
     dataViewId: isPlainRecord || !selectedDataView?.id ? null : selectedDataView.id, // TODO: check whether we need Empty fields for text-based query
     fieldsExistenceReader,
     allFields,
+    popularFieldsLimit: isPlainRecord ? 0 : popularFieldsLimit,
     services: {
       dataViews,
     },
     onSelectedFieldFilter,
   });
+
+  // TODO: hide meta fields on Discover for text-based queries
+
+  // console.log({
+  //   fields,
+  //   selectedFields,
+  //   popularFields,
+  //   unpopularFields,
+  //   fieldGroups,
+  // });
 
   const renderFieldItem: FieldListGroupedProps<DataViewField>['renderFieldItem'] = useCallback(
     ({ field, groupName }) => (
@@ -295,7 +298,7 @@ export function DiscoverSidebarComponent({
           onDeleteField={deleteField}
           showFieldStats={showFieldStats}
           contextualFields={columns}
-          selected={groupName === FieldsGroupNames.SelectedFields}
+          selected={groupName === FieldsGroupNames.SelectedFields || onSelectedFieldFilter(field)}
         />
       </li>
     ),
@@ -312,6 +315,7 @@ export function DiscoverSidebarComponent({
       deleteField,
       showFieldStats,
       columns,
+      onSelectedFieldFilter,
     ]
   );
 

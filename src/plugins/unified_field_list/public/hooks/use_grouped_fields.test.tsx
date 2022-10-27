@@ -269,4 +269,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       )
     ).toStrictEqual(['SpecialFields-0', 'SelectedFields-0', 'AvailableFields-8', 'MetaFields-0']);
   });
+
+  // TODO: add a test for popular fields
 });

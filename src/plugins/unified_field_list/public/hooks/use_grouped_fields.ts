@@ -27,6 +27,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
     dataViews: DataViewsContract;
   };
   fieldsExistenceReader?: ExistingFieldsReader;
+  popularFieldsLimit?: number;
   onOverrideFieldGroupDetails?: (
     groupName: FieldsGroupNames
   ) => Partial<FieldsGroupDetails> | undefined | null;
@@ -44,6 +45,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   allFields,
   services,
   fieldsExistenceReader,
+  popularFieldsLimit,
   onOverrideFieldGroupDetails,
   onSupportedFieldFilter,
   onSelectedFieldFilter,
@@ -95,6 +97,12 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
       }),
     };
     const selectedFields = onSelectedFieldFilter ? sortedFields.filter(onSelectedFieldFilter) : [];
+    const popularFields = popularFieldsLimit
+      ? sortedFields
+          .filter((field) => field.count && field.type !== '_source')
+          .sort((a: T, b: T) => (b.count || 0) - (a.count || 0))
+          .slice(0, popularFieldsLimit)
+      : [];
 
     let fieldGroupDefinitions: FieldListGroups<T> = {
       SpecialFields: {
@@ -114,6 +122,19 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         showInAccordion: true,
         title: i18n.translate('unifiedFieldList.useGroupedFields.selectedFieldsLabel', {
           defaultMessage: 'Selected fields',
+        }),
+        isAffectedByGlobalFilter: false,
+        isAffectedByTimeFilter: false,
+        hideDetails: false,
+        hideIfEmpty: true,
+      },
+      PopularFields: {
+        fields: popularFields,
+        fieldCount: popularFields.length,
+        isInitiallyOpen: true,
+        showInAccordion: true,
+        title: i18n.translate('unifiedFieldList.useGroupedFields.popularFieldsLabel', {
+          defaultMessage: 'Popular fields',
         }),
         isAffectedByGlobalFilter: false,
         isAffectedByTimeFilter: true,
@@ -220,6 +241,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     dataViewId,
     hasFieldDataHandler,
     fieldsExistenceInfoUnavailable,
+    popularFieldsLimit,
   ]);
 
   const fieldGroups: FieldListGroups<T> = useMemo(() => {
