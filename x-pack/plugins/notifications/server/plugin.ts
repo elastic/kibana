@@ -5,59 +5,35 @@
  * 2.0.
  */
 
-import type {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '@kbn/core/server';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type {
   NotificationsPluginSetupDeps,
   NotificationsPluginStartDeps,
   NotificationsPluginStart,
 } from './types';
-import { type EmailService, checkEmailServiceConfiguration, getEmailService } from './services';
 import type { NotificationsConfigType } from './config';
+import { EmailServiceProvider } from './services/connectors_email_service_provider';
 
 export class NotificationsPlugin implements Plugin<void, NotificationsPluginStart> {
-  private readonly logger: Logger;
-  private readonly initialConfig: NotificationsConfigType;
-  private emailServiceSetupSuccessful: boolean;
+  private emailServiceProvider: EmailServiceProvider;
 
   constructor(initializerContext: PluginInitializerContext<NotificationsConfigType>) {
-    this.logger = initializerContext.logger.get();
-    this.initialConfig = initializerContext.config.get();
-    this.emailServiceSetupSuccessful = false;
+    this.emailServiceProvider = new EmailServiceProvider(
+      initializerContext.config.get(),
+      initializerContext.logger.get()
+    );
   }
 
   public setup(_core: CoreSetup, plugins: NotificationsPluginSetupDeps) {
-    try {
-      checkEmailServiceConfiguration({
-        config: this.initialConfig,
-        plugins,
-      });
-      this.emailServiceSetupSuccessful = true;
-    } catch (err) {
-      this.logger.warn(`Email Service Setup ${err}`);
-    }
+    this.emailServiceProvider.setup(plugins);
   }
 
   public start(_core: CoreStart, plugins: NotificationsPluginStartDeps) {
-    let email: EmailService | undefined;
-    try {
-      if (this.emailServiceSetupSuccessful) {
-        email = getEmailService({
-          config: this.initialConfig,
-          plugins,
-          logger: this.logger,
-        });
-      }
-    } catch (err) {
-      this.logger.warn(`Error starting email service: ${err}`);
-    }
+    const emailStartContract = this.emailServiceProvider.start(plugins);
 
-    return { email };
+    return {
+      ...emailStartContract,
+    };
   }
 
   public stop() {}

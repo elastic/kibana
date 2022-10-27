@@ -9,23 +9,15 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { NotificationsConfigType } from './config';
 import { NotificationsPlugin } from './plugin';
-import * as emailServiceFactory from './services/connectors_email_service_factory';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { EmailServiceProvider } from './services/connectors_email_service_provider';
+import { EmailServiceStart } from './services';
 
-const checkEmailServiceConfigurationSpy = jest.spyOn(
-  emailServiceFactory,
-  'checkEmailServiceConfiguration'
-);
+jest.mock('./services/connectors_email_service_provider');
 
-const getEmailServiceSpy = jest.spyOn(emailServiceFactory, 'getEmailService');
-
-const invalidConnectorConfig = {
-  connectors: {
-    default: {
-      email: 'someUnexistingConnectorId',
-    },
-  },
-};
+const emailServiceProviderMock = EmailServiceProvider as jest.MockedClass<
+  typeof EmailServiceProvider
+>;
 
 const validConnectorConfig = {
   connectors: {
@@ -58,7 +50,7 @@ const createNotificationsPlugin = (config: NotificationsConfigType) => {
 
   return {
     context,
-    logger: context.logger,
+    logger: context.logger.get(),
     plugin,
     coreSetup,
     coreStart,
@@ -70,76 +62,46 @@ const createNotificationsPlugin = (config: NotificationsConfigType) => {
 };
 
 describe('Notifications Plugin', () => {
+  beforeEach(() => emailServiceProviderMock.mockClear());
+
+  it('should create an EmailServiceProvider passing in the configuration and logger from the initializer context', () => {
+    const { logger } = createNotificationsPlugin(validConnectorConfig);
+    expect(emailServiceProviderMock).toHaveBeenCalledTimes(1);
+    expect(emailServiceProviderMock).toHaveBeenCalledWith(validConnectorConfig, logger);
+  });
+
   describe('setup()', () => {
-    beforeEach(() => checkEmailServiceConfigurationSpy.mockClear());
-
-    it('should call checkEmailServiceConfiguration(), catch Exceptions and log a warn', () => {
-      const { plugin, logger, coreSetup } = createNotificationsPlugin(validConnectorConfig);
-      const pluginSetup = {
-        actions: actionsMock.createSetup(),
-      };
+    it('should call setup() on the created EmailServiceProvider, passing in the setup plugin dependencies', () => {
+      const { plugin, coreSetup, pluginSetup } = createNotificationsPlugin(validConnectorConfig);
       plugin.setup(coreSetup, pluginSetup);
-      expect(checkEmailServiceConfigurationSpy).toHaveBeenCalledTimes(1);
-      expect(checkEmailServiceConfigurationSpy).toHaveBeenCalledWith({
-        config: validConnectorConfig,
-        plugins: pluginSetup,
-      });
-      expect(logger.get().warn).toHaveBeenCalledWith(
-        `Email Service Setup Error: 'actions' and 'licensing' plugins are required.`
-      );
-
-      // eslint-disable-next-line dot-notation
-      expect(plugin['emailServiceSetupSuccessful']).toEqual(false);
-    });
-
-    it('should pass the setup checks successfully and not log any warning if the configuration is correct', () => {
-      const { plugin, logger, coreSetup, pluginSetup } =
-        createNotificationsPlugin(validConnectorConfig);
-      plugin.setup(coreSetup, pluginSetup);
-      expect(checkEmailServiceConfigurationSpy).toHaveBeenCalledTimes(1);
-      expect(checkEmailServiceConfigurationSpy).toHaveBeenCalledWith({
-        config: validConnectorConfig,
-        plugins: pluginSetup,
-      });
-      expect(logger.get().warn).not.toHaveBeenCalled();
-
-      // eslint-disable-next-line dot-notation
-      expect(plugin['emailServiceSetupSuccessful']).toEqual(true);
+      expect(emailServiceProviderMock.mock.instances[0].setup).toHaveBeenCalledTimes(1);
+      expect(emailServiceProviderMock.mock.instances[0].setup).toBeCalledWith(pluginSetup);
     });
   });
 
   describe('start()', () => {
-    beforeEach(() => getEmailServiceSpy.mockClear());
-
-    it('should not call getEmailService() if the setup() has not been run', () => {
+    it('should call start() on the created EmailServiceProvider, passing in the setup plugin dependencies', () => {
       const { plugin, coreStart, pluginStart } = createNotificationsPlugin(validConnectorConfig);
-      const { email } = plugin.start(coreStart, pluginStart);
-      expect(getEmailServiceSpy).not.toHaveBeenCalled();
-      expect(email).toBeUndefined();
+      plugin.start(coreStart, pluginStart);
+      expect(emailServiceProviderMock.mock.instances[0].start).toHaveBeenCalledTimes(1);
+      expect(emailServiceProviderMock.mock.instances[0].start).toBeCalledWith(pluginStart);
     });
 
-    it('should not call getEmailService() if setup() has failed', () => {
-      const { plugin, coreSetup, pluginSetup, coreStart, pluginStart } =
-        createNotificationsPlugin(invalidConnectorConfig);
-      plugin.setup(coreSetup, pluginSetup);
-      const { email } = plugin.start(coreStart, pluginStart);
-      expect(getEmailServiceSpy).not.toHaveBeenCalled();
-      expect(email).toBeUndefined();
-    });
+    it('should return EmailServiceProvider.start() contract as part of its contract', () => {
+      const { plugin, coreStart, pluginStart } = createNotificationsPlugin(validConnectorConfig);
 
-    it('should call getEmailService() if setup() was successful', () => {
-      const { plugin, coreSetup, pluginSetup, coreStart, pluginStart } =
-        createNotificationsPlugin(validConnectorConfig);
-      plugin.setup(coreSetup, pluginSetup);
-      const { email } = plugin.start(coreStart, pluginStart);
-      expect(getEmailServiceSpy).toHaveBeenCalledTimes(1);
-      expect(getEmailServiceSpy).toHaveBeenCalledWith({
-        config: validConnectorConfig,
-        plugins: pluginStart,
-        logger: expect.any(Object),
-      });
-      expect(email).toEqual(getEmailServiceSpy.mock.results[0].value);
-      expect(email?.sendPlainTextEmail).toBeInstanceOf(Function);
+      const emailStart: EmailServiceStart = {
+        getEmailService: jest.fn(),
+        isEmailServiceAvailable: jest.fn(),
+      };
+
+      const providerMock = emailServiceProviderMock.mock
+        .instances[0] as jest.Mocked<EmailServiceProvider>;
+      providerMock.start.mockReturnValue(emailStart);
+      const start = plugin.start(coreStart, pluginStart);
+      expect(emailServiceProviderMock.mock.instances[0].start).toHaveBeenCalledTimes(1);
+      expect(emailServiceProviderMock.mock.instances[0].start).toBeCalledWith(pluginStart);
+      expect(start).toEqual(expect.objectContaining(emailStart));
     });
   });
 });

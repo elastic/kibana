@@ -9,6 +9,16 @@ export interface EmailService {
   sendPlainTextEmail(payload: PlainTextEmail): Promise<void>;
 }
 
+export interface EmailServiceStart {
+  isEmailServiceAvailable(): boolean;
+  getEmailService(): EmailService;
+}
+
+export interface IEmailServiceProvider<T, U> {
+  setup(setupDeps: T): void;
+  start(startDeps: U): EmailServiceStart;
+}
+
 interface RelatedSavedObject {
   id: string;
   type: string;

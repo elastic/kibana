@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { EmailService, EmailServiceSetupDeps, EmailServiceStartDeps } from './services';
+import type { EmailServiceStart, EmailServiceSetupDeps, EmailServiceStartDeps } from './services';
 
+// The 'notifications' plugin is currently only exposing an email service.
+// If we want to expose other services in the future, we should update these types accordingly
 export type NotificationsPluginSetupDeps = EmailServiceSetupDeps;
 export type NotificationsPluginStartDeps = EmailServiceStartDeps;
-
-export interface NotificationsPluginStart {
-  email?: EmailService;
-}
+export type NotificationsPluginStart = EmailServiceStart;
