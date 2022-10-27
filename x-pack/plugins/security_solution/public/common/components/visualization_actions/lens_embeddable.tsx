@@ -139,6 +139,9 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   const [response, ...additionalResponses] = visData.responses ?? [];
 
   const onLoad = useCallback((isLoading, adapters) => {
+    if (!adapters) {
+      return;
+    }
     const data = adapters?.requests?.getRequests().reduce(
       (acc: { requests: string[]; responses: string[] }, d: Request) => {
         return {
