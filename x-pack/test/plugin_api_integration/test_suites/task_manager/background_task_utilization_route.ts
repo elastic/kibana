@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       await delay(500);
-      throw new Error('sampleTask has not yet run');
+      throw new Error('Stats have not run yet');
     });
   }
 

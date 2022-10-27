@@ -81,7 +81,7 @@ export function backgroundTaskUtilizationRoute(
       tap((stats) => {
         lastMonitoredStats = stats;
       }),
-      // Only calculate the summerized stats (calculates all runnign averages and evaluates state)
+      // Only calculate the summarized stats (calculates all running averages and evaluates state)
       // when needed by throttling down to the requiredHotStatsFreshness
       map((stats) => getBackgroundTaskUtilization(stats))
     )
