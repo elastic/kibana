@@ -20,6 +20,7 @@ import { getRequestBase } from './get_request_base';
 // `x-pack/plugins/apm/server/routes/correlations/queries/fetch_duration_field_candidates.ts`
 
 const POPULATED_DOC_COUNT_SAMPLE_SIZE = 1000;
+const SAMPLE_PROBABILITY_MIN_DOC_COUNT = 50000;
 
 const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
@@ -96,11 +97,10 @@ export const fetchIndexInfo = async (
 
   const totalDocCount = (resp.hits.total as estypes.SearchTotalHits).value;
 
-  const minDocCount = 50000;
   let sampleProbability = 1;
 
-  if (totalDocCount > minDocCount) {
-    sampleProbability = Math.min(0.5, minDocCount / totalDocCount);
+  if (totalDocCount > SAMPLE_PROBABILITY_MIN_DOC_COUNT) {
+    sampleProbability = Math.min(0.5, SAMPLE_PROBABILITY_MIN_DOC_COUNT / totalDocCount);
   }
 
   return { fieldCandidates: [...finalFieldCandidates], sampleProbability, totalDocCount };
