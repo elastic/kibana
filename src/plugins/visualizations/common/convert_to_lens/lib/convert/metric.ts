@@ -78,7 +78,7 @@ export const isMetricWithField = (
 
 export const convertMetricAggregationColumnWithoutSpecialParams = (
   aggregation: SupportedMetric,
-  { agg, dataView }: CommonColumnConverterArgs<MetricsWithoutSpecialParams>,
+  { visType, agg, dataView }: CommonColumnConverterArgs<MetricsWithoutSpecialParams>,
   reducedTimeRange?: string
 ): MetricAggregationColumnWithoutSpecialParams | null => {
   if (!isSupportedAggregationWithoutParams(aggregation.name)) {
@@ -94,7 +94,7 @@ export const convertMetricAggregationColumnWithoutSpecialParams = (
   }
 
   const field = dataView.getFieldByName(sourceField);
-  if (!isFieldValid(field, aggregation)) {
+  if (!isFieldValid(visType, field, aggregation)) {
     return null;
   }
 

@@ -64,6 +64,7 @@ export interface CommonColumnConverterArgs<
 > {
   agg: SchemaConfig<Agg>;
   dataView: DataView;
+  visType: string;
 }
 
 export interface ExtendedColumnConverterArgs<
@@ -75,6 +76,7 @@ export interface ExtendedColumnConverterArgs<
 export interface CommonBucketConverterArgs<
   Agg extends SupportedAggregation = SupportedAggregation
 > {
+  visType: string;
   agg: SchemaConfig<Agg>;
   dataView: DataView;
   metricColumns: AggBasedColumn[];
