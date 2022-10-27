@@ -16,17 +16,17 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
 import { ValuesType } from 'utility-types';
-import { AgentExplorerFieldName } from '../../../../../../common/agent_explorer';
+import { AgentExplorerFieldName } from '../../../../../../../common/agent_explorer';
 import {
   getServiceNodeName,
   SERVICE_NODE_NAME_MISSING,
-} from '../../../../../../common/service_nodes';
-import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
-import { ServiceNodeMetricOverviewLink } from '../../../../shared/links/apm/service_node_metric_overview_link';
-import { unit } from '../../../../../utils/style';
-import { EnvironmentBadge } from '../../../../shared/environment_badge';
-import { ItemsBadge } from '../../../../shared/item_badge';
-import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
+} from '../../../../../../../common/service_nodes';
+import { APIReturnType } from '../../../../../../services/rest/create_call_apm_api';
+import { ServiceNodeMetricOverviewLink } from '../../../../../shared/links/apm/service_node_metric_overview_link';
+import { unit } from '../../../../../../utils/style';
+import { EnvironmentBadge } from '../../../../../shared/environment_badge';
+import { ItemsBadge } from '../../../../../shared/item_badge';
+import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 
 type AgentExplorerInstance = ValuesType<
   APIReturnType<'GET /internal/apm/services/{serviceName}/agent_instances'>['items']

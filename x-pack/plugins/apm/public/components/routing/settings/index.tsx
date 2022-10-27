@@ -4,25 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import * as t from 'io-ts';
-import { Outlet } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
+import { Outlet } from '@kbn/typed-react-router-config';
+import * as t from 'io-ts';
+import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { environmentRt } from '../../../../common/environment_rt';
 import { agentConfigurationPageStepRt } from '../../../../common/agent_configuration/constants';
+import { environmentRt } from '../../../../common/environment_rt';
 import { Breadcrumb } from '../../app/breadcrumb';
-import { SettingsTemplate } from '../templates/settings_template';
 import { AgentConfigurations } from '../../app/settings/agent_configurations';
-import { CreateAgentConfigurationRouteView } from './create_agent_configuration_route_view';
-import { EditAgentConfigurationRouteView } from './edit_agent_configuration_route_view';
+import { AgentExplorer } from '../../app/settings/agent_explorer';
+import { AgentKeys } from '../../app/settings/agent_keys';
+import { AnomalyDetection } from '../../app/settings/anomaly_detection';
 import { ApmIndices } from '../../app/settings/apm_indices';
 import { CustomLinkOverview } from '../../app/settings/custom_link';
-import { Schema } from '../../app/settings/schema';
-import { AnomalyDetection } from '../../app/settings/anomaly_detection';
-import { AgentKeys } from '../../app/settings/agent_keys';
 import { GeneralSettings } from '../../app/settings/general_settings';
-import { AgentExplorerDetails } from '../../app/agent_explorer_details';
+import { Schema } from '../../app/settings/schema';
+import { SettingsTemplate } from '../templates/settings_template';
+import { CreateAgentConfigurationRouteView } from './create_agent_configuration_route_view';
+import { EditAgentConfigurationRouteView } from './edit_agent_configuration_route_view';
 
 function page({
   title,
@@ -151,7 +151,7 @@ export const settings = {
               defaultMessage: 'Agent explorer',
             }
           ),
-          element: <AgentExplorerDetails />,
+          element: <AgentExplorer />,
           tab: 'agent-explorer',
         }),
         params: t.type({

@@ -8,8 +8,8 @@
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
+import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 
 interface AgentExplorerDocsLinkProps {
   agentName: AgentName;

@@ -20,14 +20,14 @@ import { useHistory } from 'react-router-dom';
 import {
   SERVICE_LANGUAGE_NAME,
   SERVICE_NAME,
-} from '../../../../common/elasticsearch_fieldnames';
-import { useApmParams } from '../../../hooks/use_apm_params';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { KueryBar } from '../../shared/kuery_bar';
-import * as urlHelpers from '../../shared/links/url_helpers';
-import { SuggestionsSelect } from '../../shared/suggestions_select';
+} from '../../../../../common/elasticsearch_fieldnames';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import { KueryBar } from '../../../shared/kuery_bar';
+import * as urlHelpers from '../../../shared/links/url_helpers';
+import { SuggestionsSelect } from '../../../shared/suggestions_select';
 import { AgentList } from './agent_list';
 
 function useAgentExplorerFetcher({
@@ -62,7 +62,7 @@ function useAgentExplorerFetcher({
   );
 }
 
-export function AgentExplorerDetails() {
+export function AgentExplorer() {
   const history = useHistory();
 
   const {
@@ -93,7 +93,7 @@ export function AgentExplorerDetails() {
         <EuiText color="subdued">
           {i18n.translate('xpack.apm.settings.agentExplorer.descriptionText', {
             defaultMessage:
-              'Check information around agents that are deployed.',
+              'Agent Explorer Technical Preview provides an inventory and details of deployed Agents.',
           })}
         </EuiText>
       </EuiFlexItem>

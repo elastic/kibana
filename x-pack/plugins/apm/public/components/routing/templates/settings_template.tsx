@@ -81,6 +81,21 @@ function getTabs({
       href: router.link('/settings/agent-configuration'),
     },
     {
+      key: 'agent-explorer',
+      label: i18n.translate('xpack.apm.settings.agentExplorer', {
+        defaultMessage: 'Agent Explorer',
+      }),
+      href: router.link('/settings/agent-explorer', {
+        query: {
+          environment: ENVIRONMENT_ALL.value,
+          rangeFrom: 'now-24h',
+          rangeTo: 'now',
+          kuery: '',
+        },
+      }),
+      append: <TechnicalPreviewBadge icon="beaker" />,
+    },
+    {
       key: 'agent-keys',
       label: i18n.translate('xpack.apm.settings.agentKeys', {
         defaultMessage: 'Agent Keys',
@@ -115,21 +130,6 @@ function getTabs({
         defaultMessage: 'Schema',
       }),
       href: router.link('/settings/schema'),
-    },
-    {
-      key: 'agent-explorer',
-      label: i18n.translate('xpack.apm.settings.agentExplorer', {
-        defaultMessage: 'Agent explorer',
-      }),
-      href: router.link('/settings/agent-explorer', {
-        query: {
-          environment: ENVIRONMENT_ALL.value,
-          rangeFrom: 'now-24h',
-          rangeTo: 'now',
-          kuery: '',
-        },
-      }),
-      append: <TechnicalPreviewBadge icon="beaker" />,
     },
   ];
 
