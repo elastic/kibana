@@ -80,6 +80,7 @@ import {
   config as pluginsConfig,
 } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
+import { elasticApmConfig } from './root/elastic_config';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -457,6 +458,7 @@ export class Server {
       cspConfig,
       deprecationConfig,
       elasticsearchConfig,
+      elasticApmConfig,
       executionContextConfig,
       externalUrlConfig,
       httpConfig,
