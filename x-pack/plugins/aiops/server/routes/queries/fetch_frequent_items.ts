@@ -74,7 +74,6 @@ export async function fetchFrequentItems(
     return p;
   }, []);
 
-  // TODO add query params
   const query = {
     bool: {
       minimum_should_match: 2,
