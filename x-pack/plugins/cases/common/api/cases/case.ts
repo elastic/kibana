@@ -14,25 +14,21 @@ import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt } from '../connectors';
 import { CaseAssigneesRt } from './assignee';
 
-const BucketsAggs = rt.array(
-  rt.type({
-    key: rt.string,
-  })
-);
-
-export const GetCaseIdsByAlertIdAggsRt = rt.type({
-  references: rt.type({
-    doc_count: rt.number,
-    caseIds: rt.type({
-      buckets: BucketsAggs,
-    }),
-  }),
-});
+const a = rt.union([rt.literal('a'), rt.literal('b')]);
 
 export const CasesByAlertIdRt = rt.array(
   rt.type({
     id: rt.string,
     title: rt.string,
+    description: rt.string,
+    status: CaseStatusRt,
+    totals: rt.type({
+      user: rt.number,
+      alert: rt.number,
+      actions: rt.number,
+      externalReference: rt.number,
+      persistableState: rt.number,
+    }),
   })
 );
 
@@ -350,5 +346,4 @@ export type CaseExternalServiceBasic = rt.TypeOf<typeof CaseExternalServiceBasic
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type AllReportersFindRequest = AllTagsFindRequest;
 
-export type GetCaseIdsByAlertIdAggs = rt.TypeOf<typeof GetCaseIdsByAlertIdAggsRt>;
 export type CasesByAlertId = rt.TypeOf<typeof CasesByAlertIdRt>;

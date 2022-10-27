@@ -65,7 +65,11 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       expect(cases.length).to.eql(3);
-      validateCasesFromAlertIDResponse(cases, [case1, case2, case3]);
+      validateCasesFromAlertIDResponse(cases, [
+        { caseInfo: case1, totalAlerts: 1, totalComments: 0 },
+        { caseInfo: case2, totalAlerts: 1, totalComments: 0 },
+        { caseInfo: case3, totalAlerts: 1, totalComments: 0 },
+      ]);
     });
 
     it('should return 1 case in space2 when 2 cases were created in space1 and 1 in space2', async () => {

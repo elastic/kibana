@@ -28,7 +28,6 @@ import {
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
 import type {
-  GetCaseIdsByAlertIdAggs,
   CaseResponse,
   CasesFindRequest,
   CommentAttributes,
@@ -36,7 +35,7 @@ import type {
   CaseAttributes,
   CaseStatuses,
 } from '../../../common/api';
-import { caseStatuses } from '../../../common/api';
+import { CommentType, caseStatuses } from '../../../common/api';
 import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
@@ -55,6 +54,34 @@ import type { AttachmentService } from '../attachments';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 import { createCaseError } from '../../common/error';
 import type { IndexRefresh } from '../types';
+
+type CommentTypeTotals = Record<CommentType, number>;
+
+type CaseCommentStats = {
+  id: string;
+} & Partial<CommentTypeTotals>;
+
+interface GetCaseIdsByAlertIdAggs {
+  references: {
+    doc_count: number;
+    caseIds: {
+      buckets: Array<{
+        key: string;
+        commentTypes: {
+          buckets: Array<{
+            key: string;
+            doc_count: number;
+          }>;
+        };
+        alerts: {
+          uniqueAlertCount: {
+            value: number;
+          };
+        };
+      }>;
+    };
+  };
+}
 
 interface GetCaseIdsByAlertIdArgs {
   alertId: string;
@@ -150,9 +177,33 @@ export class CasesService {
       },
       aggregations: {
         caseIds: {
+          filter: { term: { [`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`]: '123' } },
           terms: {
             field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
             size,
+          },
+          aggs: {
+            commentTypes: {
+              terms: {
+                field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
+                // always get more terms then we have attachment types
+                size: Object.keys(CommentType).length * 2,
+              },
+            },
+            alerts: {
+              filter: {
+                term: {
+                  [`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`]: CommentType.alert,
+                },
+              },
+              aggs: {
+                uniqueAlertCount: {
+                  cardinality: {
+                    field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
+                  },
+                },
+              },
+            },
           },
         },
       },
@@ -192,12 +243,20 @@ export class CasesService {
   }
 
   /**
-   * Extracts the case IDs from the alert aggregation
+   * Extracts the case IDs and the comment stats for each case from the aggregation
    */
   public static getCaseIDsFromAlertAggs(
     result: SavedObjectsFindResponse<CommentAttributes, GetCaseIdsByAlertIdAggs>
-  ): string[] {
-    return result.aggregations?.references.caseIds.buckets.map((b) => b.key) ?? [];
+  ): CaseCommentStats[] {
+    return (
+      result.aggregations?.references.caseIds.buckets.map((caseIdBucket) => ({
+        id: caseIdBucket.key,
+        ...caseIdBucket.commentTypes.buckets.map((commentTypeBucket) => ({
+          [commentTypeBucket.key]: commentTypeBucket.doc_count,
+        })),
+        [CommentType.alert]: caseIdBucket.alerts.uniqueAlertCount.value,
+      })) ?? []
+    );
   }
 
   /**
@@ -494,7 +553,6 @@ export class CasesService {
             username,
             full_name: user.full_name ?? null,
             email: user.email ?? null,
-            // TODO: verify that adding a new field is ok, shouldn't be a breaking change
             profile_uid: user.profile_uid,
           };
         }) ?? []

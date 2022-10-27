@@ -97,15 +97,15 @@ export const getCasesByAlertID = async (
       }))
     );
 
-    const caseIds = CasesService.getCaseIDsFromAlertAggs(commentsWithAlert);
+    const caseIdsWithCommentStats = CasesService.getCaseIDsFromAlertAggs(commentsWithAlert);
 
     // if we didn't find any case IDs then let's return early because there's nothing to request
-    if (caseIds.length <= 0) {
+    if (caseIdsWithCommentStats.length <= 0) {
       return [];
     }
 
     const casesInfo = await caseService.getCases({
-      caseIds,
+      caseIds: caseIdsWithCommentStats.map((stat) => stat.id),
     });
 
     // if there was an error retrieving one of the cases (maybe it was deleted, but the alert comment still existed)
@@ -125,6 +125,8 @@ export const getCasesByAlertID = async (
       validCasesInfo.map((caseInfo) => ({
         id: caseInfo.id,
         title: caseInfo.attributes.title,
+        description: caseInfo.attributes.description,
+        status: caseInfo.attributes.status,
       }))
     );
   } catch (error) {

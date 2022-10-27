@@ -9,20 +9,30 @@ import expect from '@kbn/expect';
 import { CaseResponse, CasesByAlertId } from '@kbn/cases-plugin/common/api';
 import { xorWith, isEqual } from 'lodash';
 
+interface TestCaseWithTotals {
+  caseInfo: CaseResponse;
+  totalAlerts: number;
+  totalComments: number;
+}
+
 /**
  * Ensure that the result of the alerts API request matches with the cases created for the test.
  */
 export function validateCasesFromAlertIDResponse(
   casesFromAPIResponse: CasesByAlertId,
-  createdCasesForTest: CaseResponse[]
+  createdCasesForTest: TestCaseWithTotals[]
 ) {
-  const idToTitle = new Map<string, string>(
-    createdCasesForTest.map((caseInfo) => [caseInfo.id, caseInfo.title])
+  const idToTitle = new Map<string, TestCaseWithTotals>(
+    createdCasesForTest.map((testCase) => [testCase.caseInfo.id, testCase])
   );
 
   for (const apiResCase of casesFromAPIResponse) {
     // check that the title in the api response matches the title in the map from the created cases
-    expect(apiResCase.title).to.be(idToTitle.get(apiResCase.id));
+    expect(apiResCase.title).to.be(idToTitle.get(apiResCase.id)?.caseInfo.title);
+    expect(apiResCase.description).to.be(idToTitle.get(apiResCase.id)?.caseInfo.description);
+    expect(apiResCase.status).to.be(idToTitle.get(apiResCase.id)?.caseInfo.status);
+    expect(apiResCase.totalAlerts).to.be(idToTitle.get(apiResCase.id)?.totalAlerts);
+    expect(apiResCase.totalComments).to.be(idToTitle.get(apiResCase.id)?.totalComments);
   }
 }
 
