@@ -147,7 +147,9 @@ const generateCommonArguments: GenerateExpressionAstArguments = (
       .filter(({ columnId }) => !isCollapsed(columnId, layer))
       .map(({ columnId }) => columnId)
       .map(prepareDimension),
-    metrics: layer.metrics.map(prepareDimension),
+    metrics: (layer.allowMultipleMetrics ? layer.metrics : [layer.metrics[0]]).map(
+      prepareDimension
+    ),
     legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
     legendPosition: [layer.legendPosition || Position.Right],
     maxLegendLines: [layer.legendMaxLines ?? 1],

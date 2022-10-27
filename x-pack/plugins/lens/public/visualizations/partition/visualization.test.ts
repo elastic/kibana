@@ -389,6 +389,34 @@ describe('pie_visualization', () => {
       expect(getConfig(stateWithMultipleMetrics).groups[0].supportsMoreColumns).toBeFalsy();
     });
 
+    it('reports too many metric dimensions if multiple not enabled', () => {
+      const colIds = ['1', '2', '3', '4'];
+
+      const frame = mockFrame();
+      frame.datasourceLayers[LAYER_ID]!.getTableSpec = () =>
+        colIds.map((id) => ({ columnId: id, fields: [] }));
+
+      const state = getExampleState();
+      state.layers[0].metrics = colIds;
+      state.layers[0].allowMultipleMetrics = false;
+      expect(
+        pieVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: state.layers[0].layerId,
+        }).groups[1].dimensionsTooMany
+      ).toBe(3);
+
+      state.layers[0].allowMultipleMetrics = true;
+      expect(
+        pieVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: state.layers[0].layerId,
+        }).groups[1].dimensionsTooMany
+      ).toBe(0);
+    });
+
     it.each(Object.values(PieChartTypes).filter((type) => type !== 'mosaic'))(
       '%s adds fake dimension',
       (type) => {

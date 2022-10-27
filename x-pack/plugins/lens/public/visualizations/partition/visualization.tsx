@@ -315,6 +315,7 @@ export const getPieVisualization = ({
         supportsMoreColumns: layer.metrics.length === 0 || Boolean(layer.allowMultipleMetrics),
         filterOperations: numberMetricOperations,
         requiredMinDimensionCount: 1,
+        dimensionsTooMany: layer.allowMultipleMetrics ? 0 : layer.metrics.length - 1,
         dataTestSubj: 'lnsPie_sizeByDimensionPanel',
         enableDimensionEditor: true,
       };

@@ -327,10 +327,6 @@ export function LayerPanel(
               updateVisualization(
                 activeVisualization.onLayerAction?.(layerId, action.id, visualizationState)
               );
-
-              if (action.clearLayer) {
-                onRemoveLayer(layerId);
-              }
             },
           })) || []),
         ...(layerDatasource?.getSupportedActionsForLayer?.(

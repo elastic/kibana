@@ -560,7 +560,7 @@ export interface LayerAction {
   'data-test-subj'?: string;
 }
 
-export type LayerActionFromVisualization = Omit<LayerAction, 'execute'> & { clearLayer?: boolean };
+export type LayerActionFromVisualization = Omit<LayerAction, 'execute'>;
 
 interface SharedDimensionProps {
   /** Visualizations can restrict operations based on their own rules.
