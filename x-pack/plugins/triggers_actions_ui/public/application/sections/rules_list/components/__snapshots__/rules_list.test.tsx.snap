@@ -12,19 +12,35 @@ exports[`Rules list bulk actions can bulk delete 1`] = `
                 Object {
                   "isQuoted": false,
                   "type": "literal",
-                  "value": "alert.id",
+                  "value": "alert.attributes.alertTypeId",
                 },
                 Object {
-                  "isQuoted": true,
+                  "isQuoted": false,
                   "type": "literal",
-                  "value": "alert:2",
+                  "value": "test_rule_type",
+                },
+              ],
+              "function": "is",
+              "type": "function",
+            },
+            Object {
+              "arguments": Array [
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "alert.attributes.alertTypeId",
+                },
+                Object {
+                  "isQuoted": false,
+                  "type": "literal",
+                  "value": "test_rule_type_disabled_by_license",
                 },
               ],
               "function": "is",
               "type": "function",
             },
           ],
-          "function": "not",
+          "function": "or",
           "type": "function",
         },
         "http": Object {
