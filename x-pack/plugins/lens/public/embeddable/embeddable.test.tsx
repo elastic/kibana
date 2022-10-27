@@ -1126,32 +1126,7 @@ describe('embeddable', () => {
     await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
     embeddable.render(mountpoint);
 
-    expect(onLoad.mock.calls[0][0]).toEqual(true);
-    expect(onLoad.mock.calls[0][1]).toMatchInlineSnapshot(`
-      Object {
-        "expression": ExpressionsInspectorAdapter {
-          "_ast": Object {},
-          "_events": Object {},
-          "_eventsCount": 0,
-          "_maxListeners": undefined,
-          Symbol(kCapture): false,
-        },
-        "requests": RequestAdapter {
-          "_events": Object {},
-          "_eventsCount": 0,
-          "_maxListeners": undefined,
-          "requests": Map {},
-          Symbol(kCapture): false,
-        },
-        "tables": TablesAdapter {
-          "_events": Object {},
-          "_eventsCount": 0,
-          "_maxListeners": undefined,
-          "_tables": Object {},
-          Symbol(kCapture): false,
-        },
-      }
-    `);
+    expect(onLoad).toHaveBeenCalledWith(true);
     expect(onLoad).toHaveBeenCalledTimes(1);
 
     await new Promise((resolve) => setTimeout(resolve, 20));
@@ -1169,33 +1144,7 @@ describe('embeddable', () => {
 
     // loading should become again true
     expect(onLoad).toHaveBeenCalledTimes(3);
-
-    expect(onLoad.mock.calls[2][0]).toEqual(true);
-    expect(onLoad.mock.calls[2][1]).toMatchInlineSnapshot(`
-      Object {
-        "expression": ExpressionsInspectorAdapter {
-          "_ast": Object {},
-          "_events": Object {},
-          "_eventsCount": 0,
-          "_maxListeners": undefined,
-          Symbol(kCapture): false,
-        },
-        "requests": RequestAdapter {
-          "_events": Object {},
-          "_eventsCount": 0,
-          "_maxListeners": undefined,
-          "requests": Map {},
-          Symbol(kCapture): false,
-        },
-        "tables": TablesAdapter {
-          "_events": Object {},
-          "_eventsCount": 0,
-          "_maxListeners": undefined,
-          "_tables": Object {},
-          Symbol(kCapture): false,
-        },
-      }
-    `);
+    expect(onLoad).toHaveBeenNthCalledWith(3, true);
 
     await new Promise((resolve) => setTimeout(resolve, 0));
 
