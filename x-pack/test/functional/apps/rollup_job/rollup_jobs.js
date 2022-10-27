@@ -8,28 +8,30 @@
 import datemath from '@kbn/datemath';
 import expect from '@kbn/expect';
 import { mockIndices } from './hybrid_index_helper';
-import { FtrProviderContext } from '../../ftr_provider_context';
+// import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const config = getService('config')
+export default function ({ getService, getPageObjects }) {
+  const config = getService('config');
   const PageObjects = getPageObjects(['rollup', 'common', 'security']);
   const security = getService('security');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
-  const isRunningCcs =  config.get('esTestCluster.ccs') ? true : false;
+  const isRunningCcs = config.get('esTestCluster.ccs') ? true : false;
   let remoteEs;
   if (isRunningCcs) {
-    remoteEs = getService('remoteEs' as 'es');
-  };
+    remoteEs = getService('remoteEs');
+  }
 
-  describe.only('rollup job', function () {
+  describe('rollup job', function () {
     // Since rollups can only be created once with the same name (even if you delete it),
     // we add the Date.now() to avoid name collision.
     const rollupJobName = 'rollup-to-be-' + Date.now();
     const targetIndexName = 'rollup-to-be';
-    const indexPatternToUse = 'to-be*'
-    const rollupSourceIndexPattern = isRunningCcs ? 'ftr-remote:'+ indexPatternToUse: indexPatternToUse;
+    const indexPatternToUse = 'to-be*';
+    const rollupSourceIndexPattern = isRunningCcs
+      ? 'ftr-remote:' + indexPatternToUse
+      : indexPatternToUse;
     const rollupSourceDataPrepend = 'to-be';
 
     // make sure all dates have the same concept of "now"
@@ -78,9 +80,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // Delete all data indices that were created.
-      await esDeleteAllIndices([targetIndexName], false)
+      await esDeleteAllIndices([targetIndexName], false);
       if (isRunningCcs) {
-        await esDeleteAllIndices([indexPatternToUse], true)
+        await esDeleteAllIndices([indexPatternToUse], true);
       } else {
         await esDeleteAllIndices([indexPatternToUse], false);
       }
