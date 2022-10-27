@@ -64,12 +64,15 @@ describe('useTourContext', () => {
       });
       expect(result.current.isTourShown(stepId)).toBe(true);
     });
-    it('endTourStep calls completeGuideStep with correct stepId', () => {
-      const { result } = renderHook(() => useTourContext(), {
-        wrapper: TourContextProvider,
+    it('endTourStep calls completeGuideStep with correct stepId', async () => {
+      await act(async () => {
+        const { result, waitForNextUpdate } = renderHook(() => useTourContext(), {
+          wrapper: TourContextProvider,
+        });
+        await waitForNextUpdate();
+        result.current.endTourStep(stepId);
+        expect(mockCompleteGuideStep).toHaveBeenCalledWith('security', stepId);
       });
-      result.current.endTourStep(stepId);
-      expect(mockCompleteGuideStep).toHaveBeenCalledWith('security', stepId);
     });
     it('activeStep is initially 1', () => {
       const { result } = renderHook(() => useTourContext(), {
