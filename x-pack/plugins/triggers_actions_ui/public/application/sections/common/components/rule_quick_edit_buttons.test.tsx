@@ -65,7 +65,7 @@ describe('rule_quick_edit_buttons', () => {
     expect(wrapper.find('[data-test-subj="enableAll"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="disableAll"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="updateAPIKeys"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="deleteAll"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="bulkDelete"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="bulkSnooze"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="bulkUnsnooze"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="bulkSnoozeSchedule"]').exists()).toBeTruthy();
@@ -133,7 +133,7 @@ describe('rule_quick_edit_buttons', () => {
     );
 
     expect(wrapper.find('[data-test-subj="disableAll"]').first().prop('isDisabled')).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="deleteAll"]').first().prop('isDisabled')).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="bulkDelete"]').first().prop('isDisabled')).toBeFalsy();
     expect(wrapper.find('[data-test-subj="updateAPIKeys"]').first().prop('isDisabled')).toBeFalsy();
     expect(wrapper.find('[data-test-subj="bulkSnooze"]').first().prop('isDisabled')).toBeFalsy();
     expect(wrapper.find('[data-test-subj="bulkUnsnooze"]').first().prop('isDisabled')).toBeFalsy();
