@@ -176,6 +176,10 @@ for use in their own application.
 |Index pattern fields formatters
 
 
+|{kib-repo}blob/{branch}/src/plugins/files/README.md[files]
+|File upload, download, sharing, and serving over HTTP implementation in Kibana.
+
+
 |{kib-repo}blob/{branch}/src/plugins/guided_onboarding/README.md[guidedOnboarding]
 |This plugin contains the code for the Guided Onboarding project. Guided onboarding consists of guides for Solutions (Enterprise Search, Observability, Security) that can be completed as a checklist of steps. The guides help users to ingest their data and to navigate to the correct Solutions pages.
 
@@ -489,10 +493,6 @@ activities.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
 |The features plugin enhance Kibana with a per-feature privilege system.
-
-
-|{kib-repo}blob/{branch}/src/plugins/files/README.md[files]
-|File upload, download, sharing, and serving over HTTP implementation in Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/file_upload[fileUpload]
