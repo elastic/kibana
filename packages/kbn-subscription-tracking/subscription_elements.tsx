@@ -21,7 +21,7 @@ interface CommonProps {
 export type SubscriptionLinkProps = EuiLinkProps & CommonProps;
 
 /**
- * Wrapper around `EuiLink` that provides scubscription events
+ * Wrapper around `EuiLink` that provides subscription events
  */
 export function SubscriptionLink({
   subscriptionContext,
@@ -41,7 +41,7 @@ export function SubscriptionLink({
 export type SubscriptionButtonProps = EuiButtonProps & CommonProps;
 
 /**
- * Wrapper around `EuiButton` that provides scubscription events
+ * Wrapper around `EuiButton` that provides subscription events
  */
 export function SubscriptionButton({
   subscriptionContext,
@@ -61,7 +61,7 @@ export function SubscriptionButton({
 export type SubscriptionButtonEmptyProps = EuiButtonEmptyProps & CommonProps;
 
 /**
- * Wrapper around `EuiButtonEmpty` that provides scubscription events
+ * Wrapper around `EuiButtonEmpty` that provides subscription events
  */
 export function SubscriptionButtonEmpty({
   subscriptionContext,
