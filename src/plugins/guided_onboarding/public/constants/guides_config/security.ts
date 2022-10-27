@@ -73,7 +73,7 @@ export const securityConfig: GuideConfig = {
     {
       id: 'alertsCases',
       title: i18n.translate('guidedOnboarding.securityGuide.alertsStep.title', {
-        defaultMessage: 'Alerts and cases',
+        defaultMessage: 'Manage alerts and cases',
       }),
       descriptionList: [
         i18n.translate('guidedOnboarding.securityGuide.alertsStep.description1', {
