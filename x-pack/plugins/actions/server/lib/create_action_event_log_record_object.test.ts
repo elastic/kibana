@@ -51,6 +51,7 @@ describe('createActionEventLogRecordObject', () => {
             rel: 'primary',
             type: 'action',
             type_id: 'test',
+            space_ids: ['default'],
           },
         ],
         space_ids: ['default'],
@@ -98,7 +99,7 @@ describe('createActionEventLogRecordObject', () => {
         saved_objects: [
           {
             id: '2',
-            namespace: 'default',
+            space_ids: ['default'],
             rel: 'primary',
             type: 'action',
             type_id: '.email',
@@ -135,7 +136,7 @@ describe('createActionEventLogRecordObject', () => {
         saved_objects: [
           {
             id: '2',
-            namespace: 'default',
+            space_ids: ['default'],
             rel: 'primary',
             type: 'action',
             type_id: '.email',
@@ -183,6 +184,7 @@ describe('createActionEventLogRecordObject', () => {
             rel: 'primary',
             type: 'action',
             type_id: 'test',
+            space_ids: ['default'],
           },
         ],
         task: {
@@ -216,6 +218,7 @@ describe('createActionEventLogRecordObject', () => {
             type: 'alert',
             typeId: '.rule-type',
             id: '123',
+            space_ids: ['default'],
           },
         ],
       })
@@ -237,7 +240,7 @@ describe('createActionEventLogRecordObject', () => {
         saved_objects: [
           {
             id: '2',
-            namespace: 'default',
+            space_ids: ['default'],
             rel: 'primary',
             type: 'action',
             type_id: '.email',
@@ -246,7 +249,7 @@ describe('createActionEventLogRecordObject', () => {
             id: '123',
             rel: 'primary',
             type: 'alert',
-            namespace: undefined,
+            space_ids: ['default'],
             type_id: '.rule-type',
           },
         ],

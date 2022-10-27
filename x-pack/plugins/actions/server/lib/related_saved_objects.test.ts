@@ -23,6 +23,7 @@ describe('related_saved_objects', () => {
       {
         id: 'some-id',
         type: 'some-type',
+        space_ids: ['some-space-id'],
       },
     ]);
     ensureValid(loggerMock, [
@@ -30,31 +31,19 @@ describe('related_saved_objects', () => {
         id: 'some-id',
         type: 'some-type',
         typeId: 'some-type-id',
+        space_ids: ['some-space-id'],
       },
     ]);
     ensureValid(loggerMock, [
       {
         id: 'some-id',
         type: 'some-type',
-        namespace: 'some-namespace',
-      },
-    ]);
-    ensureValid(loggerMock, [
-      {
-        id: 'some-id',
-        type: 'some-type',
-        typeId: 'some-type-id',
-        namespace: 'some-namespace',
-      },
-    ]);
-    ensureValid(loggerMock, [
-      {
-        id: 'some-id',
-        type: 'some-type',
+        space_ids: ['some-space-id'],
       },
       {
         id: 'some-id-2',
         type: 'some-type-2',
+        space_ids: ['default'],
       },
     ]);
   });

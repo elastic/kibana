@@ -65,7 +65,7 @@ describe('createAlertEventLogRecordObject', () => {
         saved_objects: [
           {
             id: '1',
-            namespace: undefined,
+            space_ids: ['default'],
             rel: 'primary',
             type: 'alert',
             type_id: 'test',
@@ -140,7 +140,7 @@ describe('createAlertEventLogRecordObject', () => {
         saved_objects: [
           {
             id: '1',
-            namespace: 'default',
+            space_ids: ['default'],
             rel: 'primary',
             type: 'alert',
             type_id: 'test',
@@ -218,14 +218,14 @@ describe('createAlertEventLogRecordObject', () => {
         saved_objects: [
           {
             id: '1',
-            namespace: 'default',
+            space_ids: ['default'],
             rel: 'primary',
             type: 'alert',
             type_id: 'test',
           },
           {
             id: '2',
-            namespace: 'default',
+            space_ids: ['default'],
             type: 'action',
             type_id: '.email',
           },

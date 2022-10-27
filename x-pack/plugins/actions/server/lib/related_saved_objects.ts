@@ -12,7 +12,7 @@ export type RelatedSavedObjects = TypeOf<typeof RelatedSavedObjectsSchema>;
 export type RelatedSavedObject = TypeOf<typeof RelatedSavedObjectSchema>;
 
 const RelatedSavedObjectSchema = schema.object({
-  space_ids: schema.maybe(schema.arrayOf(schema.string({ minLength: 1 }))),
+  space_ids: schema.arrayOf(schema.string({ minLength: 1 })),
   id: schema.string({ minLength: 1 }),
   type: schema.string({ minLength: 1 }),
   // optional; for SO types like action/alert that have type id's

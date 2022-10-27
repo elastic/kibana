@@ -925,6 +925,7 @@ describe('initializeExecuteRecord', () => {
         type: 'alert',
         type_id: contextWithScheduleDelay.ruleType.id,
         rel: SAVED_OBJECT_REL_PRIMARY,
+        space_ids: ['default'],
       },
     ]);
     expect(record.kibana?.space_ids).toEqual([contextWithScheduleDelay.spaceId]);
@@ -985,6 +986,7 @@ describe('createExecuteTimeoutRecord', () => {
         type: 'alert',
         type_id: contextWithName.ruleType.id,
         rel: SAVED_OBJECT_REL_PRIMARY,
+        space_ids: ['default'],
       },
     ]);
     expect(record.kibana?.space_ids).toEqual([contextWithName.spaceId]);
@@ -1035,6 +1037,7 @@ describe('createAlertRecord', () => {
         type: 'alert',
         type_id: contextWithName.ruleType.id,
         rel: SAVED_OBJECT_REL_PRIMARY,
+        space_ids: ['default'],
       },
     ]);
     expect(record.kibana?.space_ids).toEqual([contextWithName.spaceId]);
@@ -1087,11 +1090,13 @@ describe('createActionExecuteRecord', () => {
         type: 'alert',
         type_id: contextWithName.ruleType.id,
         rel: SAVED_OBJECT_REL_PRIMARY,
+        space_ids: ['default'],
       },
       {
         id: action.id,
         type: 'action',
         type_id: action.typeId,
+        space_ids: ['default'],
       },
     ]);
     expect(record.kibana?.space_ids).toEqual([contextWithName.spaceId]);

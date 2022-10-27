@@ -29,17 +29,19 @@ describe('extractSavedObjectReferences()', () => {
         id: 'abc',
         type: 'alert',
         typeId: 'ruleTypeA',
+        space_ids: ['default'],
       },
       {
         id: 'def',
         type: 'action',
         typeId: 'connectorTypeB',
+        space_ids: ['default'],
       },
       {
         id: 'xyz',
         type: 'alert',
         typeId: 'ruleTypeB',
-        namespaces: ['custom'],
+        space_ids: ['custom'],
       },
     ];
 
@@ -71,17 +73,19 @@ describe('extractSavedObjectReferences()', () => {
           id: 'related_alert_0',
           type: 'alert',
           typeId: 'ruleTypeA',
+          space_ids: ['default'],
         },
         {
           id: 'related_action_1',
           type: 'action',
           typeId: 'connectorTypeB',
+          space_ids: ['default'],
         },
         {
           id: 'related_alert_2',
           type: 'alert',
           typeId: 'ruleTypeB',
-          namespace: 'custom',
+          space_ids: ['custom'],
         },
       ],
     });
@@ -99,17 +103,19 @@ describe('extractSavedObjectReferences()', () => {
         id: 'abc',
         type: 'alert',
         typeId: 'ruleTypeA',
+        space_ids: ['default'],
       },
       {
         id: 'def',
         type: 'action',
         typeId: 'connectorTypeB',
+        space_ids: ['default'],
       },
       {
         id: 'xyz',
         type: 'alert',
         typeId: 'ruleTypeB',
-        namespace: 'custom',
+        space_ids: ['custom'],
       },
     ];
 
@@ -136,17 +142,19 @@ describe('extractSavedObjectReferences()', () => {
           id: 'related_alert_0',
           type: 'alert',
           typeId: 'ruleTypeA',
+          space_ids: ['default'],
         },
         {
           id: 'related_action_1',
           type: 'action',
           typeId: 'connectorTypeB',
+          space_ids: ['default'],
         },
         {
           id: 'related_alert_2',
           type: 'alert',
           typeId: 'ruleTypeB',
-          namespace: 'custom',
+          space_ids: ['custom'],
         },
       ],
     });
@@ -200,11 +208,13 @@ describe('injectSavedObjectReferences()', () => {
             id: 'related_alert_0',
             type: 'alert',
             typeId: 'ruleTypeA',
+            space_ids: ['default'],
           },
           {
             id: 'related_action_1',
             type: 'action',
             typeId: 'connectorTypeB',
+            space_ids: ['default'],
           },
           {
             id: 'related_alert_2',
@@ -221,17 +231,19 @@ describe('injectSavedObjectReferences()', () => {
           id: 'abc',
           type: 'alert',
           typeId: 'ruleTypeA',
+          space_ids: ['default'],
         },
         {
           id: 'def',
           type: 'action',
           typeId: 'connectorTypeB',
+          space_ids: ['default'],
         },
         {
           id: 'xyz',
           type: 'alert',
           typeId: 'ruleTypeB',
-          namespace: 'custom',
+          space_ids: ['custom'],
         },
       ],
     });
@@ -262,11 +274,13 @@ describe('injectSavedObjectReferences()', () => {
             id: 'related_alert_0',
             type: 'alert',
             typeId: 'ruleTypeA',
+            space_ids: ['default'],
           },
           {
             id: 'related_action_1',
             type: 'action',
             typeId: 'connectorTypeB',
+            space_ids: ['default'],
           },
           {
             id: 'related_alert_2',
@@ -282,17 +296,19 @@ describe('injectSavedObjectReferences()', () => {
           id: 'abc',
           type: 'alert',
           typeId: 'ruleTypeA',
+          space_ids: ['default'],
         },
         {
           id: 'def',
           type: 'action',
           typeId: 'connectorTypeB',
+          space_ids: ['default'],
         },
         {
           id: 'xyz',
           type: 'alert',
           typeId: 'ruleTypeB',
-          namespace: 'custom',
+          space_ids: ['custom'],
         },
       ],
     });
@@ -307,11 +323,13 @@ describe('injectSavedObjectReferences()', () => {
             id: 'abc',
             type: 'alert',
             typeId: 'ruleTypeA',
+            space_ids: ['default'],
           },
           {
             id: 'def',
             type: 'action',
             typeId: 'connectorTypeB',
+            space_ids: ['default'],
           },
           {
             id: 'xyz',
@@ -327,17 +345,19 @@ describe('injectSavedObjectReferences()', () => {
           id: 'abc',
           type: 'alert',
           typeId: 'ruleTypeA',
+          space_ids: ['default'],
         },
         {
           id: 'def',
           type: 'action',
           typeId: 'connectorTypeB',
+          space_ids: ['default'],
         },
         {
           id: 'xyz',
           type: 'alert',
           typeId: 'ruleTypeB',
-          namespace: 'custom',
+          space_ids: ['custom'],
         },
       ],
     });
@@ -363,11 +383,13 @@ describe('injectSavedObjectReferences()', () => {
             id: 'related_alert_0',
             type: 'alert',
             typeId: 'ruleTypeA',
+            space_ids: ['default'],
           },
           {
             id: 'def',
             type: 'action',
             typeId: 'connectorTypeB',
+            space_ids: ['default'],
           },
           {
             id: 'xyz',
@@ -384,17 +406,19 @@ describe('injectSavedObjectReferences()', () => {
           id: 'abc',
           type: 'alert',
           typeId: 'ruleTypeA',
+          space_ids: ['default'],
         },
         {
           id: 'def',
           type: 'action',
           typeId: 'connectorTypeB',
+          space_ids: ['default'],
         },
         {
           id: 'xyz',
           type: 'alert',
           typeId: 'ruleTypeB',
-          namespace: 'custom',
+          space_ids: ['custom'],
         },
       ],
     });

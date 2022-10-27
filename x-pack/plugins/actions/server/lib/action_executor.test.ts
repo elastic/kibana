@@ -149,8 +149,10 @@ test('successfully executes', async () => {
             "saved_objects": Array [
               Object {
                 "id": "1",
-                "namespace": "some-namespace",
                 "rel": "primary",
+                "space_ids": Array [
+                  "some-namespace",
+                ],
                 "type": "action",
                 "type_id": "test",
               },
@@ -180,8 +182,10 @@ test('successfully executes', async () => {
             "saved_objects": Array [
               Object {
                 "id": "1",
-                "namespace": "some-namespace",
                 "rel": "primary",
+                "space_ids": Array [
+                  "some-namespace",
+                ],
                 "type": "action",
                 "type_id": "test",
               },
@@ -250,8 +254,10 @@ test('successfully executes with preconfigured connector', async () => {
             "saved_objects": Array [
               Object {
                 "id": "preconfigured",
-                "namespace": "some-namespace",
                 "rel": "primary",
+                "space_ids": Array [
+                  "some-namespace",
+                ],
                 "type": "action",
                 "type_id": "test",
               },
@@ -281,8 +287,10 @@ test('successfully executes with preconfigured connector', async () => {
             "saved_objects": Array [
               Object {
                 "id": "preconfigured",
-                "namespace": "some-namespace",
                 "rel": "primary",
+                "space_ids": Array [
+                  "some-namespace",
+                ],
                 "type": "action",
                 "type_id": "test",
               },
@@ -702,8 +710,10 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
             "saved_objects": Array [
               Object {
                 "id": "preconfigured",
-                "namespace": "some-namespace",
                 "rel": "primary",
+                "space_ids": Array [
+                  "some-namespace",
+                ],
                 "type": "action",
                 "type_id": "test",
               },
@@ -733,8 +743,10 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
             "saved_objects": Array [
               Object {
                 "id": "preconfigured",
-                "namespace": "some-namespace",
                 "rel": "primary",
+                "space_ids": Array [
+                  "some-namespace",
+                ],
                 "type": "action",
                 "type_id": "test",
               },
@@ -837,7 +849,7 @@ test('writes to event log for execute timeout', async () => {
           type: 'action',
           id: 'action1',
           type_id: 'test',
-          namespace: 'some-namespace',
+          space_ids: ['some-namespace'],
         },
       ],
       space_ids: ['some-namespace'],
@@ -873,7 +885,7 @@ test('writes to event log for execute and execute start', async () => {
           type: 'action',
           id: '1',
           type_id: 'test',
-          namespace: 'some-namespace',
+          space_ids: ['some-namespace'],
         },
       ],
       space_ids: ['some-namespace'],
@@ -900,7 +912,7 @@ test('writes to event log for execute and execute start', async () => {
           type: 'action',
           id: '1',
           type_id: 'test',
-          namespace: 'some-namespace',
+          space_ids: ['some-namespace'],
         },
       ],
       space_ids: ['some-namespace'],
@@ -923,6 +935,7 @@ test('writes to event log for execute and execute start when consumer and relate
         typeId: '.rule-type',
         type: 'alert',
         id: '12',
+        space_ids: ['default'],
       },
     ],
   });
@@ -948,13 +961,14 @@ test('writes to event log for execute and execute start when consumer and relate
           type: 'action',
           id: '1',
           type_id: 'test',
-          namespace: 'some-namespace',
+          space_ids: ['some-namespace'],
         },
         {
           rel: 'primary',
           type: 'alert',
           id: '12',
           type_id: '.rule-type',
+          space_ids: ['default'],
         },
       ],
       space_ids: ['some-namespace'],
@@ -983,13 +997,14 @@ test('writes to event log for execute and execute start when consumer and relate
           type: 'action',
           id: '1',
           type_id: 'test',
-          namespace: 'some-namespace',
+          space_ids: ['some-namespace'],
         },
         {
           rel: 'primary',
           type: 'alert',
           id: '12',
           type_id: '.rule-type',
+          space_ids: ['default'],
         },
       ],
       space_ids: ['some-namespace'],

@@ -7,6 +7,7 @@
 
 import { isEmpty, set } from 'lodash';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
+import { namespaceToSpaceId } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 import { RelatedSavedObjects } from './related_saved_objects';
 
 export type Event = Exclude<IEvent, undefined>;
@@ -62,7 +63,7 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
         type: so.type,
         id: so.id,
         type_id: so.typeId,
-        ...(namespace ? { namespace } : {}),
+        space_ids: [namespaceToSpaceId(namespace)],
       })),
       ...(spaceId ? { space_ids: [spaceId] } : {}),
       ...(task ? { task: { scheduled: task.scheduled, schedule_delay: task.scheduleDelay } } : {}),

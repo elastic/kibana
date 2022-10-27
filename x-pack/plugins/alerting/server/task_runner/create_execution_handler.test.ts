@@ -164,7 +164,7 @@ describe('Create Execution Handler', () => {
             Object {
               "id": "1",
               "space_ids": Array [
-                "test1"
+                "test1",
               ],
               "type": "alert",
               "typeId": "test",
@@ -372,7 +372,7 @@ describe('Create Execution Handler', () => {
             Object {
               "id": "1",
               "space_ids": Array [
-                "test1"
+                "test1",
               ],
               "type": "alert",
               "typeId": "test",
@@ -420,7 +420,7 @@ describe('Create Execution Handler', () => {
             Object {
               "id": "1",
               "space_ids": Array [
-                "test1"
+                "test1",
               ],
               "type": "alert",
               "typeId": "test",

@@ -327,6 +327,7 @@ describe('disable()', () => {
             rel: 'primary',
             type: 'alert',
             type_id: 'myType',
+            space_ids: ['default'],
           },
         ],
         space_ids: ['default'],
