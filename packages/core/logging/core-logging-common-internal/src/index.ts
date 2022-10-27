@@ -15,3 +15,4 @@ export {
   MetaConversion,
   type Conversion,
 } from './layouts';
+export { AbstractLogger, type CreateLogRecordFn } from './logger';

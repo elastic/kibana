@@ -14,4 +14,6 @@ export {
   LevelConversion,
   MetaConversion,
   type Conversion,
+  AbstractLogger,
+  type CreateLogRecordFn,
 } from './src';
