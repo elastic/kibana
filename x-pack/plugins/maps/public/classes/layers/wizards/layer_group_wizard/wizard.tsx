@@ -45,8 +45,8 @@ export class LayerGroupWizard extends Component<RenderWizardArguments, State> {
     return (
       <EuiPanel>
         <EuiFormRow
-          label={i18n.translate('xpack.maps.layerGroupWizard.label', {
-            defaultMessage: 'Label',
+          label={i18n.translate('xpack.maps.layerPanel.settingsPanel.layerNameLabel', {
+            defaultMessage: 'Name',
           })}
         >
           <EuiFieldText value={this.state.label} onChange={this._onLabelChange} />
