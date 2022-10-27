@@ -92,7 +92,7 @@ const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = ({ onClo
       </EuiModalBody>
     );
   }
-  if (supportedMLModels === undefined || supportedMLModels?.length === 0) {
+  if (supportedMLModels.length === 0) {
     return <NoModelsPanel />;
   }
   return (
@@ -188,8 +188,10 @@ const ModalFooter: React.FC<AddMLInferencePipelineModalProps & { ingestionMethod
   onClose,
 }) => {
   const { addInferencePipelineModal: modal, isPipelineDataValid } = useValues(MLInferenceLogic);
-  const { createPipeline, setAddInferencePipelineStep } = useActions(MLInferenceLogic);
+  const { attachPipeline, createPipeline, setAddInferencePipelineStep } =
+    useActions(MLInferenceLogic);
 
+  const attachExistingPipeline = Boolean(modal.configuration.existingPipeline);
   let nextStep: AddInferencePipelineSteps | undefined;
   let previousStep: AddInferencePipelineSteps | undefined;
   switch (modal.step) {
@@ -238,6 +240,21 @@ const ModalFooter: React.FC<AddMLInferencePipelineModalProps & { ingestionMethod
               fill
             >
               {CONTINUE_BUTTON_LABEL}
+            </EuiButton>
+          ) : attachExistingPipeline ? (
+            <EuiButton
+              color="primary"
+              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-attach`}
+              disabled={!isPipelineDataValid}
+              fill
+              onClick={attachPipeline}
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.footer.attach',
+                {
+                  defaultMessage: 'Attach',
+                }
+              )}
             </EuiButton>
           ) : (
             <EuiButton

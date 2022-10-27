@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { IngestSetProcessor, MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/types';
+import {
+  IngestPipeline,
+  IngestSetProcessor,
+  MlTrainedModelConfig,
+} from '@elastic/elasticsearch/lib/api/types';
 
-import { MlInferencePipeline } from '../types/pipelines';
+import { MlInferencePipeline, CreateMlInferencePipelineParameters } from '../types/pipelines';
 
 // Getting an error importing this from @kbn/ml-plugin/common/constants/data_frame_analytics'
 // So defining it locally for now with a test to make sure it matches.
@@ -151,3 +155,25 @@ export const formatPipelineName = (rawName: string) =>
     .trim()
     .replace(/\s+/g, '_') // Convert whitespaces to underscores
     .toLowerCase();
+
+export const parseMlInferenceParametersFromPipeline = (
+  name: string,
+  pipeline: IngestPipeline
+): CreateMlInferencePipelineParameters | null => {
+  const processor = pipeline?.processors?.find((proc) => proc.inference !== undefined);
+  if (!processor || processor?.inference === undefined) {
+    return null;
+  }
+  const { inference: inferenceProcessor } = processor;
+  const sourceFields = Object.keys(inferenceProcessor.field_map ?? {});
+  const sourceField = sourceFields.length === 1 ? sourceFields[0] : null;
+  if (!sourceField) {
+    return null;
+  }
+  return {
+    destination_field: inferenceProcessor.target_field.replace('ml.inference.', ''),
+    model_id: inferenceProcessor.model_id,
+    pipeline_name: name,
+    source_field: sourceField,
+  };
+};

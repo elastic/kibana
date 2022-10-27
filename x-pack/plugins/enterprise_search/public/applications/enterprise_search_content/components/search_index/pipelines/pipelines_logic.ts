@@ -47,12 +47,21 @@ import {
   FetchIndexApiParams,
   FetchIndexApiResponse,
 } from '../../../api/index/fetch_index_api_logic';
-import { CreateMlInferencePipelineApiLogic } from '../../../api/ml_models/create_ml_inference_pipeline';
 import {
   DeleteMlInferencePipelineApiLogic,
   DeleteMlInferencePipelineApiLogicArgs,
   DeleteMlInferencePipelineResponse,
 } from '../../../api/ml_models/delete_ml_inference_pipeline';
+import {
+  AttachMlInferencePipelineApiLogic,
+  AttachMlInferencePipelineApiLogicArgs,
+  AttachMlInferencePipelineResponse,
+} from '../../../api/pipelines/attach_ml_inference_pipeline';
+import {
+  CreateMlInferencePipelineApiLogic,
+  CreateMlInferencePipelineApiLogicArgs,
+  CreateMlInferencePipelineResponse,
+} from '../../../api/pipelines/create_ml_inference_pipeline';
 import { FetchMlInferencePipelineProcessorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_processors';
 import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
 
@@ -60,6 +69,10 @@ type PipelinesActions = Pick<
   Actions<PostPipelineArgs, PostPipelineResponse>,
   'apiError' | 'apiSuccess' | 'makeRequest'
 > & {
+  attachMlInferencePipelineSuccess: Actions<
+    AttachMlInferencePipelineApiLogicArgs,
+    AttachMlInferencePipelineResponse
+  >['apiSuccess'];
   closeAddMlInferencePipelineModal: () => void;
   closeModal: () => void;
   createCustomPipeline: Actions<
@@ -73,6 +86,10 @@ type PipelinesActions = Pick<
   createCustomPipelineSuccess: Actions<
     CreateCustomPipelineApiLogicArgs,
     CreateCustomPipelineApiLogicResponse
+  >['apiSuccess'];
+  createMlInferencePipelineSuccess: Actions<
+    CreateMlInferencePipelineApiLogicArgs,
+    CreateMlInferencePipelineResponse
   >['apiSuccess'];
   deleteMlPipeline: Actions<
     DeleteMlInferencePipelineApiLogicArgs,
@@ -153,6 +170,8 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
         'makeRequest as fetchMlInferenceProcessors',
         'apiError as fetchMlInferenceProcessorsApiError',
       ],
+      AttachMlInferencePipelineApiLogic,
+      ['apiSuccess as attachMlInferencePipelineSuccess'],
       CreateMlInferencePipelineApiLogic,
       ['apiSuccess as createMlInferencePipelineSuccess'],
       DeleteMlInferencePipelineApiLogic,
@@ -200,6 +219,12 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
           defaultMessage: 'Pipelines successfully updated',
         })
       );
+    },
+    attachMlInferencePipelineSuccess: () => {
+      // Re-fetch processors to ensure we display newly added ml processor
+      actions.fetchMlInferenceProcessors({ indexName: values.index.name });
+      // Needed to ensure correct JSON is available in the JSON configurations tab
+      actions.fetchCustomPipeline({ indexName: values.index.name });
     },
     closeModal: () =>
       actions.setPipelineState(
@@ -287,6 +312,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
     showAddMlInferencePipelineModal: [
       false,
       {
+        attachMlInferencePipelineSuccess: () => false,
         closeAddMlInferencePipelineModal: () => false,
         createMlInferencePipelineSuccess: () => false,
         openAddMlInferencePipelineModal: () => true,
