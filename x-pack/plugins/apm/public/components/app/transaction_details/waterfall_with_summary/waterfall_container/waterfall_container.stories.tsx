@@ -8,6 +8,7 @@
 import { Meta, Story } from '@storybook/react';
 import React, { ComponentProps } from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { noop } from 'lodash';
 import { MockApmPluginContextWrapper } from '../../../../../context/apm_plugin/mock_apm_plugin_context';
 import { WaterfallContainer } from '.';
 import { getWaterfall } from './waterfall/waterfall_helpers/waterfall_helpers';
@@ -59,6 +60,8 @@ export const Example: Story<Args> = ({
       serviceName={serviceName}
       waterfallItemId={waterfallItemId}
       waterfall={waterfall}
+      showCriticalPath={false}
+      onShowCriticalPathChange={noop}
     />
   );
 };
@@ -76,6 +79,8 @@ export const WithErrors: Story<Args> = ({
       serviceName={serviceName}
       waterfallItemId={waterfallItemId}
       waterfall={waterfall}
+      showCriticalPath={false}
+      onShowCriticalPathChange={noop}
     />
   );
 };
@@ -93,6 +98,8 @@ export const ChildStartsBeforeParent: Story<Args> = ({
       serviceName={serviceName}
       waterfallItemId={waterfallItemId}
       waterfall={waterfall}
+      showCriticalPath={false}
+      onShowCriticalPathChange={noop}
     />
   );
 };
@@ -110,6 +117,8 @@ export const InferredSpans: Story<Args> = ({
       serviceName={serviceName}
       waterfallItemId={waterfallItemId}
       waterfall={waterfall}
+      showCriticalPath={false}
+      onShowCriticalPathChange={noop}
     />
   );
 };
@@ -127,6 +136,8 @@ export const ManyChildrenWithSameLength: Story<Args> = ({
       serviceName={serviceName}
       waterfallItemId={waterfallItemId}
       waterfall={waterfall}
+      showCriticalPath={false}
+      onShowCriticalPathChange={noop}
     />
   );
 };
