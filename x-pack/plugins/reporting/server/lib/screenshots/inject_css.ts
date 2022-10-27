@@ -33,9 +33,9 @@ export const injectCustomCss = async (
   }
   const buffer = await fsp.readFile(filePath);
   try {
-    await browser.evaluate(
+    await browser.evaluate<string[]>(
       {
-        fn: (css) => {
+        fn: (css: string) => {
           const node = document.createElement('style');
           node.type = 'text/css';
           node.innerHTML = css; // eslint-disable-line no-unsanitized/property
