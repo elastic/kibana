@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { ResponseHeaders } from '@kbn/core-http-server';
 import { Stream } from 'stream';
+import { ReportingCore } from '../..';
 import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '../../../common/constants';
 import { ReportApiJSON } from '../../../common/types';
-import { ReportingCore } from '../..';
 import { getContentStream, statuses } from '../../lib';
 import { ExportTypeDefinition } from '../../types';
 import { jobsQueryFactory } from './jobs_query';
@@ -22,7 +23,7 @@ interface Payload {
   statusCode: number;
   content: string | Stream | ErrorFromPayload;
   contentType: string | null;
-  headers: Record<string, string | number>;
+  headers: ResponseHeaders;
 }
 
 type TaskRunResult = Required<ReportApiJSON>['output'];
@@ -71,7 +72,8 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
       headers: {
         ...headers,
         'Content-Disposition': `attachment; filename="${filename}"`,
-        'Content-Length': output.size,
+        'Content-Type': output.content_type ?? 'text/plain',
+        'Content-Length': output.size.toString(),
       },
     };
   }
@@ -97,7 +99,7 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
       statusCode: 503,
       content: status,
       contentType: 'text/plain',
-      headers: { 'retry-after': 30 },
+      headers: { 'retry-after': '30' },
     };
   }
 

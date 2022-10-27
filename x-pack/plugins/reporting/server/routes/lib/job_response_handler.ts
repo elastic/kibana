@@ -52,10 +52,7 @@ export async function downloadJobResponseHandler(
     return res.custom({
       body: typeof payload.content === 'string' ? Buffer.from(payload.content) : payload.content,
       statusCode: payload.statusCode,
-      headers: {
-        ...payload.headers,
-        'content-type': payload.contentType || '',
-      },
+      headers: payload.headers,
     });
   } catch (err) {
     const { logger } = reporting.getPluginSetupDeps();
