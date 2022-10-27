@@ -13,6 +13,7 @@ import type { StartServices } from '../../../../types';
 import { getTrailingBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../hosts/pages/details/utils';
 import { getTrailingBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/pages/details';
 import { getTrailingBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
+import { getTrailingBreadcrumbs as getCSPBreadcrumbs } from '../../../../cloud_security_posture/breadcrumbs';
 import { getTrailingBreadcrumbs as getUsersBreadcrumbs } from '../../../../users/pages/details/utils';
 import { getTrailingBreadcrumbs as getKubernetesBreadcrumbs } from '../../../../kubernetes/pages/utils/breadcrumbs';
 import { SecurityPageName } from '../../../../app/types';
@@ -79,13 +80,7 @@ export const getBreadcrumbsForRoute = (
 ): ChromeBreadcrumb[] | null => {
   const spyState: RouteSpyState = omit('navTabs', object);
 
-  if (
-    !spyState ||
-    !object.navTabs ||
-    !spyState.pageName ||
-    isCaseRoutes(spyState) ||
-    isCloudSecurityPostureManagedRoutes(spyState)
-  ) {
+  if (!spyState || !object.navTabs || !spyState.pageName || isCaseRoutes(spyState)) {
     return null;
   }
 
@@ -133,6 +128,10 @@ const getTrailingBreadcrumbsForRoutes = (
     return getKubernetesBreadcrumbs(spyState, getSecuritySolutionUrl);
   }
 
+  if (isCloudSecurityPostureBenchmarksRoutes(spyState)) {
+    return getCSPBreadcrumbs(spyState, getSecuritySolutionUrl);
+  }
+
   return [];
 };
 
@@ -154,8 +153,8 @@ const isRulesRoutes = (spyState: RouteSpyState): spyState is AdministrationRoute
   spyState.pageName === SecurityPageName.rules ||
   spyState.pageName === SecurityPageName.rulesCreate;
 
-const isCloudSecurityPostureManagedRoutes = (spyState: RouteSpyState) =>
-  spyState.pageName === SecurityPageName.cloudSecurityPostureRules;
+const isCloudSecurityPostureBenchmarksRoutes = (spyState: RouteSpyState) =>
+  spyState.pageName === SecurityPageName.cloudSecurityPostureBenchmarks;
 
 const emptyLastBreadcrumbUrl = (breadcrumbs: ChromeBreadcrumb[]) => {
   const leadingBreadCrumbs = breadcrumbs.slice(0, -1);

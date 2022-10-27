@@ -37,16 +37,17 @@ export const cloudPosturePages: Record<CspPage, CspPageNavigationItem> = {
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings`,
     id: 'cloud_security_posture-findings',
   },
-  rules: {
-    name: NAV_ITEMS_NAMES.RULES,
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks/:packagePolicyId/:policyId/rules`,
-    id: 'cloud_security_posture-rules',
-  },
   benchmarks: {
     name: NAV_ITEMS_NAMES.BENCHMARKS,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks`,
-    exact: true,
     id: 'cloud_security_posture-benchmarks',
+  },
+};
+
+export const benchmarksNavigation = {
+  rules: {
+    name: NAV_ITEMS_NAMES.RULES,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/benchmarks/:packagePolicyId/:policyId/rules`,
   },
 };
 
