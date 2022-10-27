@@ -33,7 +33,7 @@ import type { ToastInput, Toast, ErrorToastOptions } from '@kbn/core-notificatio
 
 import { useImportExceptionList } from './use_import_exception_list';
 
-import * as i18n from '../../../../rule_exceptions_ui/pages/exceptions/translations';
+import * as i18n from './translations';
 
 export const ImportExceptionListFlyout = React.memo(
   ({

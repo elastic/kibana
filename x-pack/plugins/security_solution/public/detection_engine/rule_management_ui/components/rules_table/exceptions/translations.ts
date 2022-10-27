@@ -7,6 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const uploadSuccessMessage = (fileName: string) =>
+  i18n.translate('xpack.securitySolution.lists.exceptionListImportSuccess', {
+    defaultMessage: "Exception list '{fileName}' was imported",
+    values: { fileName },
+  });
+
 export const CREATED_BY = i18n.translate('xpack.securitySolution.exceptionsTable.createdBy', {
   defaultMessage: 'Created By',
 });
@@ -54,5 +60,26 @@ export const IMPORT_EXCEPTION_LIST_AS_NEW_LIST = i18n.translate(
   'xpack.securitySolution.exceptionsTable.importExceptionListAsNewList',
   {
     defaultMessage: 'Create new list',
+  }
+);
+
+export const UPLOAD_SUCCESS_TITLE = i18n.translate(
+  'xpack.securitySolution.lists.exceptionListImportSuccessTitle',
+  {
+    defaultMessage: 'Exception list imported',
+  }
+);
+
+export const UPLOAD_ERROR = i18n.translate(
+  'xpack.securitySolution.lists.exceptionListUploadError',
+  {
+    defaultMessage: 'There was an error uploading the exception list.',
+  }
+);
+
+export const UPLOAD_BUTTON = i18n.translate(
+  'xpack.securitySolution.exceptions.exceptionListsImportButton',
+  {
+    defaultMessage: 'Import list',
   }
 );

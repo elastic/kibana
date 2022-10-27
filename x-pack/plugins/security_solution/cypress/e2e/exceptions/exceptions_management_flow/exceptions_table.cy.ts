@@ -20,6 +20,7 @@ import {
   searchForExceptionList,
   waitForExceptionsTableToBeLoaded,
   clearSearchSelection,
+  expandExceptionActions,
 } from '../../../tasks/exceptions_table';
 import {
   EXCEPTIONS_TABLE_DELETE_BTN,
@@ -182,6 +183,7 @@ describe('Exceptions Table - read only', () => {
   });
 
   it('Delete icon is not shown', () => {
+    expandExceptionActions();
     cy.get(EXCEPTIONS_TABLE_DELETE_BTN).should('be.disabled');
   });
 });
