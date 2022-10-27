@@ -320,7 +320,9 @@ export class TOCEntry extends Component<Props, State> {
       return true;
     }
 
-    return this.props.selectedLayer && this.props.selectedLayer.getId() === this.props.layer.getId();
+    return (
+      this.props.selectedLayer && this.props.selectedLayer.getId() === this.props.layer.getId()
+    );
   }
 
   render() {

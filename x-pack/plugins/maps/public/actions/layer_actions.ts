@@ -886,7 +886,7 @@ function ungroupLayer(layerId: string) {
       return;
     }
 
-    (layer as LayerGroup).getChildren().forEach(childLayer => {
+    (layer as LayerGroup).getChildren().forEach((childLayer) => {
       dispatch(setLayerParent(childLayer.getId(), layer.getParent()));
     });
   };
