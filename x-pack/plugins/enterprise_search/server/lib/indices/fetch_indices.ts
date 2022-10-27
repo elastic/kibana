@@ -80,7 +80,16 @@ export const fetchIndices = async (
         privileges: { manage: false, read: false, ...indexPrivileges[name] },
       };
       return includeAliases
-        ? [indexEntry, ...expandAliases(name, aliases, indexData, totalIndexData)]
+        ? [
+            indexEntry,
+            ...expandAliases(
+              name,
+              aliases,
+              indexData,
+              totalIndexData,
+              ...(name.startsWith('.ent-search-engine-documents') ? [alwaysShowPattern] : [])
+            ),
+          ]
         : [indexEntry];
     });
 
