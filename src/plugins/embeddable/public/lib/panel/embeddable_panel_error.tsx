@@ -33,20 +33,20 @@ export function EmbeddablePanelError({
     [editPanelAction, embeddable, isEditable]
   );
 
-  const title = embeddable.getTitle();
-  const actionDisplayName = useMemo(
+  const label = useMemo(
     () => editPanelAction?.getDisplayName({ embeddable }),
     [editPanelAction, embeddable]
   );
-  const label = useMemo(
+  const title = useMemo(() => embeddable.getTitle(), [embeddable]);
+  const ariaLabel = useMemo(
     () =>
       !title
-        ? actionDisplayName
+        ? label
         : i18n.translate('embeddableApi.panel.editPanel.displayName', {
             defaultMessage: 'Edit {value}',
             values: { value: title },
           }),
-    [title, actionDisplayName]
+    [label, title]
   );
 
   useEffect(() => {
@@ -77,7 +77,7 @@ export function EmbeddablePanelError({
       layout="vertical"
       actions={
         isEditable && (
-          <EuiButtonEmpty onClick={handleErrorClick} size="s">
+          <EuiButtonEmpty aria-label={ariaLabel} onClick={handleErrorClick} size="s">
             {label}
           </EuiButtonEmpty>
         )
