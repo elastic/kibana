@@ -40,11 +40,12 @@ const getI18nTexts = ({ entityName }: { entityName: string }) => ({
 
 export interface Props {
   item: Item;
-  onSave(args: { title: string; description?: string }): Promise<void>;
+  isReadonly: boolean;
+  onSave?: (args: { title: string; description?: string }) => Promise<void>;
   onCancel: () => void;
 }
 
-export const InspectorFlyoutContent: FC<Props> = ({ item, onSave, onCancel }) => {
+export const InspectorFlyoutContent: FC<Props> = ({ item, isReadonly, onSave, onCancel }) => {
   const i18nTexts = getI18nTexts({ entityName: 'Dashboard' });
   const [isSaving] = useState(false);
   const [isSubmitting] = useState(false);
@@ -52,7 +53,7 @@ export const InspectorFlyoutContent: FC<Props> = ({ item, onSave, onCancel }) =>
   const form = useMetadataForm({ item });
 
   const onClickSave = useCallback(() => {
-    return onSave({ title: form.title, description: form.description });
+    return onSave?.({ title: form.title, description: form.description });
   }, [form, onSave]);
 
   const onClickCancel = useCallback(() => {
@@ -70,7 +71,7 @@ export const InspectorFlyoutContent: FC<Props> = ({ item, onSave, onCancel }) =>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <MetadataForm form={form} />
+        <MetadataForm form={form} isReadonly={isReadonly} />
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
@@ -87,18 +88,20 @@ export const InspectorFlyoutContent: FC<Props> = ({ item, onSave, onCancel }) =>
               </EuiButtonEmpty>
             </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                color="primary"
-                onClick={onClickSave}
-                data-test-subj="fieldSaveButton"
-                fill
-                disabled={hasErrors}
-                isLoading={isSaving || isSubmitting}
-              >
-                {i18nTexts.saveButtonLabel}
-              </EuiButton>
-            </EuiFlexItem>
+            {isReadonly === false && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  onClick={onClickSave}
+                  data-test-subj="fieldSaveButton"
+                  fill
+                  disabled={hasErrors}
+                  isLoading={isSaving || isSubmitting}
+                >
+                  {i18nTexts.saveButtonLabel}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </>
       </EuiFlyoutFooter>

@@ -14,9 +14,10 @@ import type { MetadataFormState } from './use_metadata_form';
 
 interface Props {
   form: MetadataFormState;
+  isReadonly: boolean;
 }
 
-export const MetadataForm: FC<Props> = ({ form }) => {
+export const MetadataForm: FC<Props> = ({ form, isReadonly }) => {
   const { errors, title, setTitle, description, setDescription } = form;
 
   return (
@@ -35,6 +36,7 @@ export const MetadataForm: FC<Props> = ({ form }) => {
           }}
           fullWidth
           data-test-subj="input"
+          readOnly={isReadonly}
         />
       </EuiFormRow>
 
@@ -54,6 +56,7 @@ export const MetadataForm: FC<Props> = ({ form }) => {
           }}
           fullWidth
           data-test-subj="input"
+          readOnly={isReadonly}
         />
       </EuiFormRow>
     </>

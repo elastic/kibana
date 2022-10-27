@@ -13,7 +13,10 @@ import { useServices } from './services';
 import { InspectorLoader } from './components';
 import type { InspectorFlyoutContentContainerProps } from './components';
 
-export type OpenInspectorParams = Pick<InspectorFlyoutContentContainerProps, 'item' | 'onSave'>;
+export type OpenInspectorParams = Pick<
+  InspectorFlyoutContentContainerProps,
+  'item' | 'onSave' | 'isReadonly'
+>;
 
 export function useOpenInspector() {
   const { openFlyout } = useServices();
