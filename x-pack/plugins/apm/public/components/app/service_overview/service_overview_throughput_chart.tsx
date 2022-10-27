@@ -24,7 +24,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferred_service_anomaly_timeseries';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
+import { TimeseriesChartWithContext } from '../../shared/charts/timeseries_chart_with_context';
 import { getComparisonChartTheme } from '../../shared/time_comparison/get_comparison_chart_theme';
 import {
   ChartType,
@@ -152,7 +152,7 @@ export function ServiceOverviewThroughputChart({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <TimeseriesChart
+      <TimeseriesChartWithContext
         id="throughput"
         height={height}
         showAnnotations={false}

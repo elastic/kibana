@@ -28,16 +28,15 @@ import {
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '@kbn/observability-plugin/public';
 import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+
 import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
@@ -48,7 +47,6 @@ import {
   getChartAnomalyTimeseries,
 } from './helper/get_chart_anomaly_timeseries';
 import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
-import { getTimeZone } from './helper/timezone';
 
 interface AnomalyTimeseries extends ServiceAnomalyTimeseries {
   color?: string;
@@ -72,37 +70,15 @@ interface Props {
   anomalyTimeseries?: AnomalyTimeseries;
   customTheme?: Record<string, unknown>;
   anomalyTimeseriesColor?: string;
-  comparisonEnabled?: boolean;
+  comparisonEnabled: boolean;
   offset?: string;
-  externalContext?: boolean;
-  timeZone?: string;
+  timeZone: string;
 }
 
 const END_ZONE_LABEL = i18n.translate('xpack.apm.timeseries.endzone', {
   defaultMessage:
     'The selected time range does not include this entire bucket. It might contain partial data.',
 });
-
-function UseAnyOfApmParamsWrapper({
-  setAnyOfApmParams,
-}: {
-  setAnyOfApmParams: Function;
-}) {
-  const {
-    query: { comparisonEnabled, offset },
-  } = useAnyOfApmParams(
-    '/services',
-    '/dependencies/*',
-    '/services/{serviceName}'
-  );
-  useEffect(() => {
-    setAnyOfApmParams({
-      comparisonEnabled,
-      offset,
-    });
-  }, [setAnyOfApmParams, comparisonEnabled, offset]);
-  return null;
-}
 
 export function TimeseriesChart({
   id,
@@ -118,33 +94,22 @@ export function TimeseriesChart({
   customTheme = {},
   comparisonEnabled,
   offset,
-  externalContext,
   timeZone,
 }: Props) {
   const history = useHistory();
-  const { core } = useApmPluginContext();
   const { annotations } = useAnnotationsContext();
   const { chartRef, updatePointerEvent } = useChartPointerEventContext();
   const theme = useTheme();
   const chartTheme = useChartTheme();
-
-  const [anyOfApmParams, setAnyOfApmParams] = useState({
-    comparisonEnabled,
-    offset,
-  });
-
   const anomalyChartTimeseries = getChartAnomalyTimeseries({
     anomalyTimeseries,
     theme,
     anomalyTimeseriesColor: anomalyTimeseries?.color,
   });
-
   const isEmpty = isTimeseriesEmpty(timeseries);
   const annotationColor = theme.eui.euiColorSuccess;
-
   const isComparingExpectedBounds =
-    anyOfApmParams.comparisonEnabled &&
-    isExpectedBoundsComparison(anyOfApmParams.offset);
+    comparisonEnabled && isExpectedBoundsComparison(offset);
   const allSeries = [
     ...timeseries,
     ...(isComparingExpectedBounds
@@ -162,18 +127,14 @@ export function TimeseriesChart({
     );
 
   const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
-
   const xValuesExpectedBounds =
     anomalyChartTimeseries?.boundaries?.flatMap(({ data }) =>
       data.map(({ x }) => x)
     ) ?? [];
-
   const min = Math.min(...xValues);
   const max = Math.max(...xValues, ...xValuesExpectedBounds);
   const xFormatter = niceTimeFormatter([min, max]);
-
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
-
   // Using custom legendSort here when comparing expected bounds
   // because by default elastic-charts will show legends for expected bounds first
   // but for consistency, we are making `Expected bounds` last
@@ -216,9 +177,6 @@ export function TimeseriesChart({
       status={fetchStatus}
       id={id}
     >
-      {!externalContext && (
-        <UseAnyOfApmParamsWrapper setAnyOfApmParams={setAnyOfApmParams} />
-      )}
       <Chart ref={chartRef} id={id}>
         <Settings
           tooltip={{
@@ -326,9 +284,7 @@ export function TimeseriesChart({
 
           return (
             <Series
-              timeZone={
-                externalContext ? timeZone : getTimeZone(core.uiSettings)
-              }
+              timeZone={timeZone}
               key={serie.title}
               id={serie.id || serie.title}
               groupId={serie.groupId}

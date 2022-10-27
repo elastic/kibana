@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { TopAlert } from '@kbn/observability-plugin/public/pages/alerts';
 import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { EuiFlexItem } from '@elastic/eui';
 import { getDurationFormatter } from '../../../common/utils/formatters/duration';
@@ -28,10 +27,13 @@ import {
 import { ChartPointerEventContextProvider } from '../../context/chart_pointer_event/chart_pointer_event_context';
 
 export interface AlertDetailsAppSectionProps {
-  alert: TopAlert;
   rule: Rule<RuleTypeParams>;
+  timeZone: string;
 }
-export function AlertDetailsAppSection({ rule }: AlertDetailsAppSectionProps) {
+export function AlertDetailsAppSection({
+  rule,
+  timeZone,
+}: AlertDetailsAppSectionProps) {
   const params = rule.params;
   const environment = String(params.environment);
   const latencyAggregationType =
@@ -122,7 +124,6 @@ export function AlertDetailsAppSection({ rule }: AlertDetailsAppSectionProps) {
         <ChartPointerEventContextProvider>
           <TimeseriesChart
             height={200}
-            externalContext={true}
             comparisonEnabled={comparisonEnabled}
             offset={offset}
             fetchStatus={status}
@@ -138,6 +139,7 @@ export function AlertDetailsAppSection({ rule }: AlertDetailsAppSectionProps) {
                   }
                 : undefined
             }
+            timeZone={timeZone}
           />
         </ChartPointerEventContextProvider>
       </EuiFlexItem>
