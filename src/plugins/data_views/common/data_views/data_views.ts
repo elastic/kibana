@@ -935,6 +935,7 @@ export class DataViewsService {
       await this.refreshFields(indexPattern, displayErrors);
     }
 
+    // Important: Only here we set in cache resolved DataView!
     this.dataViewCache.set(indexPattern.id!, Promise.resolve(indexPattern));
 
     return indexPattern;
