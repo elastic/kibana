@@ -1,0 +1,29 @@
+name: Docs Preview Links
+
+on:
+  pull_request_target:
+    types: [opened]
+
+jobs:
+  doc-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v6
+        name: Ping response ops for review
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+
+            const { data: pullRequest } = github.rest.pulls.get({
+              pull_number: pr.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const { data: pullRequest } = github.rest.pulls.createComment({
+              pull_number: pr.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment: pullRequest
+            });
+
