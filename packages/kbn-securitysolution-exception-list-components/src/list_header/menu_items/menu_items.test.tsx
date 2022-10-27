@@ -47,6 +47,38 @@ describe('MenuItems', () => {
     expect(wrapper.queryByTestId('LinkedRulesMenuItems')).not.toBeInTheDocument();
     expect(wrapper.getByTestId('noLinkedRules')).toBeInTheDocument();
   });
+  it('should render all menu actions enabled', () => {
+    const wrapper = render(
+      <MenuItems
+        isReadonly={false}
+        linkedRules={[]}
+        securityLinkAnchorComponent={securityLinkAnchorComponentMock}
+        onExportList={onExportList}
+        onDeleteList={onDeleteList}
+        onManageRules={onManageRules}
+      />
+    );
+    fireEvent.click(wrapper.getByTestId('MenuActionsButtonIcon'));
+    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.getByTestId('MenuActionsActionItem1')).toBeEnabled();
+    expect(wrapper.getByTestId('MenuActionsActionItem2')).toBeEnabled();
+  });
+  it('should render delete action disabled', () => {
+    const wrapper = render(
+      <MenuItems
+        isReadonly={false}
+        canUserEditList={false}
+        linkedRules={rules}
+        securityLinkAnchorComponent={securityLinkAnchorComponentMock}
+        onExportList={onExportList}
+        onDeleteList={onDeleteList}
+        onManageRules={onManageRules}
+      />
+    );
+    fireEvent.click(wrapper.getByTestId('MenuActionsButtonIcon'));
+    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.getByTestId('MenuActionsActionItem2')).toBeDisabled();
+  });
   it('should call onManageRules', () => {
     const wrapper = render(
       <MenuItems

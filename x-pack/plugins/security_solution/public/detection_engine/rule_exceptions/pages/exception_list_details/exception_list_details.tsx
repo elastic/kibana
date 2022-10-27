@@ -23,7 +23,7 @@ export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProp
   list,
 }) => {
   const {
-    canUserEditDetails,
+    canUserEditList,
     allRules,
     listId,
     linkedRules,
@@ -47,7 +47,8 @@ export const ExceptionListDetailsComponent: FC<ExceptionListDetailsComponentProp
         description={listDescription}
         listId={listId}
         linkedRules={linkedRules}
-        isReadonly={!canUserEditDetails}
+        isReadonly={isReadOnly}
+        canUserEditList={canUserEditList}
         securityLinkAnchorComponent={ListDetailsLinkAnchor}
         onEditListDetails={onEditListDetails}
         onExportList={onExportList}

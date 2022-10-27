@@ -26,6 +26,7 @@ interface ExceptionListHeaderComponentProps {
   linkedRules: Rule[];
   dataTestSubj?: string;
   breadcrumbLink?: string;
+  canUserEditList?: boolean;
   securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   onEditListDetails: (listDetails: ListDetails) => void;
   onExportList: () => void;
@@ -42,6 +43,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
   dataTestSubj,
   securityLinkAnchorComponent,
   breadcrumbLink,
+  canUserEditList = true,
   onEditListDetails,
   onExportList,
   onDeleteList,
@@ -61,7 +63,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
           <TextWithEdit
             dataTestSubj={`${dataTestSubj || ''}Title`}
             text={listDetails.name || i18n.EXCEPTION_LIST_HEADER_NAME}
-            isReadonly={isReadonly}
+            isReadonly={isReadonly || !canUserEditList}
             onEdit={onEdit}
           />
         }
@@ -72,7 +74,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
             <TextWithEdit
               dataTestSubj={`${dataTestSubj || ''}Description`}
               textCss={textCss}
-              isReadonly={isReadonly}
+              isReadonly={isReadonly || !canUserEditList}
               text={listDetails.description || i18n.EXCEPTION_LIST_HEADER_DESCRIPTION}
               onEdit={onEdit}
             />
@@ -87,6 +89,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
             dataTestSubj={`${dataTestSubj || ''}RightSideMenuItems`}
             linkedRules={linkedRules}
             isReadonly={isReadonly}
+            canUserEditList={canUserEditList}
             securityLinkAnchorComponent={securityLinkAnchorComponent}
             onExportList={onExportList}
             onDeleteList={onDeleteList}

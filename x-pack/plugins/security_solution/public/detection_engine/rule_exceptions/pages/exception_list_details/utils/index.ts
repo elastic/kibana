@@ -7,6 +7,8 @@
 
 import type { Rule as UIRule } from '@kbn/securitysolution-exception-list-components';
 import type { Rule } from '../../../../rule_management/logic/types';
+import { listIDsCannotBeEdited } from '../config';
+import type { ExceptionListWithRules } from '../types';
 
 export const mapListRulesToUIRules = (listRules: Rule[]): UIRule[] | [] => {
   if (!listRules.length) return [];
@@ -16,4 +18,8 @@ export const mapListRulesToUIRules = (listRules: Rule[]): UIRule[] | [] => {
     rule_id: listRule.rule_id,
     exception_list: listRule.exceptions_list,
   }));
+};
+
+export const checkIfListCannotBeEdited = (list: ExceptionListWithRules) => {
+  return listIDsCannotBeEdited.find((id) => id === list.list_id);
 };

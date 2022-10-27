@@ -16,6 +16,7 @@ interface MenuItemsProps {
   isReadonly: boolean;
   dataTestSubj?: string;
   linkedRules: Rule[];
+  canUserEditList?: boolean;
   securityLinkAnchorComponent: React.ElementType; // This property needs to be removed to avoid the Prop Drilling, once we move all the common components from x-pack/security-solution/common
   onExportList: () => void;
   onDeleteList: () => void;
@@ -27,6 +28,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
   linkedRules,
   securityLinkAnchorComponent,
   isReadonly,
+  canUserEditList = true,
   onExportList,
   onDeleteList,
   onManageRules,
@@ -101,6 +103,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
               onClick: () => {
                 if (typeof onDeleteList === 'function') onDeleteList();
               },
+              disabled: !canUserEditList,
             },
           ]}
           disableActions={isReadonly}

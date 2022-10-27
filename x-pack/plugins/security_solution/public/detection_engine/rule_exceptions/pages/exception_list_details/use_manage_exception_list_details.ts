@@ -9,7 +9,7 @@ import type { ListDetails } from '@kbn/securitysolution-exception-list-component
 import { useExceptionListDetailsContext } from './context';
 import type { ExceptionListDetailsComponentProps } from './types';
 import { deleteList, exportList, updateList } from './api';
-import { mapListRulesToUIRules } from './utils';
+import { checkIfListCannotBeEdited, mapListRulesToUIRules } from './utils';
 import * as i18n from './translations';
 
 export const useManageExceptionListDetails = ({
@@ -18,7 +18,7 @@ export const useManageExceptionListDetails = ({
 }: ExceptionListDetailsComponentProps) => {
   const [showManageRulesFlyout, setShowManageRulesFlyout] = useState(false);
   const [exportedList, setExportedList] = useState<Blob>();
-  const [canUserEditDetails, setCanUserEditDetails] = useState(true);
+  const [canUserEditList, setCanUserEditList] = useState(true);
   const { name: listName, description: listDescription, list_id: listId, rules: allRules } = list;
   const linkedRules = useMemo(() => mapListRulesToUIRules(list.rules), [list.rules]);
 
@@ -26,10 +26,10 @@ export const useManageExceptionListDetails = ({
     useExceptionListDetailsContext();
 
   useEffect(() => {
-    if (list.list_id === 'endpoint_list') return setCanUserEditDetails(false);
+    if (checkIfListCannotBeEdited(list)) return setCanUserEditList(false);
 
     setIsReadOnly(isReadOnly);
-  }, [isReadOnly, list.list_id, setIsReadOnly]);
+  }, [isReadOnly, list, list.list_id, setIsReadOnly]);
 
   const onEditListDetails = useCallback(
     async (listDetails: ListDetails) => {
@@ -91,7 +91,7 @@ export const useManageExceptionListDetails = ({
   }, []);
   const onRuleSelectionChange = useCallback(() => {}, []);
   return {
-    canUserEditDetails,
+    canUserEditList,
     allRules,
     linkedRules,
     exportedList,
