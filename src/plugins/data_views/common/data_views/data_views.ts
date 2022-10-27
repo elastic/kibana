@@ -892,17 +892,46 @@ export class DataViewsService {
   };
 
   /**
-   * Create a new data view instance.
+   * Get an index pattern by id, cache optimized.
+   * @param id
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
+   */
+  get = async (id: string, displayErrors: boolean = true): Promise<DataView> => {
+    const indexPatternPromise =
+      this.dataViewCache.get(id) ||
+      this.dataViewCache.set(id, this.getSavedObjectAndInit(id, displayErrors));
+
+    // don't cache failed requests
+    indexPatternPromise.catch(() => {
+      this.dataViewCache.clear(id);
+    });
+
+    return indexPatternPromise;
+  };
+
+  /**
+   * Create data view instance.
    * @param spec data view spec
    * @param skipFetchFields if true, will not fetch fields
    * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
+   * @param recreateDataView - If set true, new instance of DataView will be created with updating in cache.
    * @returns DataView
    */
   async create(
     { id, name, title, ...restOfSpec }: DataViewSpec,
     skipFetchFields = false,
-    displayErrors = true
+    displayErrors = true,
+    recreateDataView = false
   ): Promise<DataView> {
+    if (!recreateDataView && id) {
+      console.log('create - before  this.dataViewCache.get');
+      const cachedDataView = await this.dataViewCache.get(id);
+      console.log('create - after  this.dataViewCache.get');
+      if (cachedDataView) {
+        return cachedDataView;
+      }
+    }
+
     const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
 

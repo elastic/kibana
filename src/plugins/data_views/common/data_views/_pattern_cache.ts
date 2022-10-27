@@ -19,9 +19,11 @@ export function createDataViewCache(): DataViewCache {
   const vals: Record<string, Promise<DataView>> = {};
   const cache: DataViewCache = {
     get: (id: string) => {
+      console.log('createDataViewCache.get', id);
       return vals[id];
     },
     set: (id: string, prom: Promise<DataView>) => {
+      console.log('createDataViewCache.set', id);
       vals[id] = prom;
       return prom;
     },
