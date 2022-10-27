@@ -37,6 +37,7 @@ type WebhookOption = EuiComboBoxOptionOption<TinesWebhookObject>;
 const createOption = <T extends TinesStoryObject | TinesWebhookObject>(
   data: T
 ): EuiComboBoxOptionOption<T> => ({
+  key: data.id.toString(),
   value: data,
   label: data.name,
 });

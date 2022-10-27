@@ -21,6 +21,31 @@ API Token::  A Tines API token created by the user. https://www.tines.com/api/au
 image::../images/tines-connector.png[Tines connector]
 
 [float]
+[[Preconfigured-tines-configuration]]
+==== Preconfigured connector type
+
+[source,text]
+--
+ my-tines:
+   name: preconfigured-tines-connector-type
+   actionTypeId: .tines
+   config:
+     url: https://some-tenant-2345.tines.com
+   secrets:
+     email: some.address@test.com
+     token: ausergeneratedapitoken
+--
+
+Config defines information for the connector type.
+
+`url`:: A Tines tenant URL string that corresponds to *URL*.
+
+Secrets defines sensitive information for the connector type.
+
+`email`:: A string that corresponds to *Email*.
+`token`:: A string that corresponds to *API Token*.
+
+[float]
 [[tines-action-parameters]]
 === Action parameters
 
@@ -29,7 +54,7 @@ Tines action have the following parameters.
 Story::   The Story to send the events to.
 Webhook:: The Webhook action from the previous story that will receive the events, it is the data entry point. 
 
-Test Slack action parameters.
+Test Tines action parameters.
 
 [role="screenshot"]
 image::../images/tines-params-test.png[Tines params test]

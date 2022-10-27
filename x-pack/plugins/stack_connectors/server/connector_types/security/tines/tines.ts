@@ -39,22 +39,19 @@ export const API_PATH = '/api/v1';
 export const WEBHOOK_PATH = '/webhook';
 export const WEBHOOK_AGENT_TYPE = 'Agents::WebhookAgent';
 
-function storiesAccumulator(
-  result: TinesStoriesActionResponse,
-  { stories }: TinesStoriesApiResponse
-) {
+function accumulateStories(acc: TinesStoriesActionResponse, { stories }: TinesStoriesApiResponse) {
   stories.forEach(({ id, name }) => {
-    result.push({ id, name });
+    acc.push({ id, name });
   });
 }
 
-function webhooksAccumulator(
-  result: TinesWebhooksActionResponse,
+function accumulateWebhooks(
+  acc: TinesWebhooksActionResponse,
   { agents }: TinesWebhooksApiResponse
 ) {
   agents.forEach(({ id, type, name, story_id: storyId, options: { path = '', secret = '' } }) => {
     if (type === WEBHOOK_AGENT_TYPE) {
-      result.push({ id, name, path, secret, storyId });
+      acc.push({ id, name, path, secret, storyId });
     }
   });
 }
@@ -110,7 +107,7 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
   }
 
   /**
-   * Recursively request pages for given a Tines request, it stops when there's no more pages
+   * Iteratively request pages for a given Tines request, it stops when there's no more pages
    * or when the `pageLimit` is hit. Returns an array of the responses data.
    * @param req The parameters that will be used on every pagination request.
    * @param accumulatePage Function to add each page data into the accumulated result.
@@ -141,12 +138,12 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
 
   protected getResponseErrorMessage(error: AxiosError): string {
     if (!error.response?.status) {
-      throw new Error('Unknown API Error');
+      return 'Message: Unknown API Error';
     }
     if (error.response.status === 401) {
-      throw new Error('Unauthorized API Error');
+      return 'Message: Unauthorized API Error';
     }
-    throw new Error(`API Error: (${error.response?.status}) ${error.response?.statusText}`);
+    return `Message: API Error: (${error.response?.status}) ${error.response?.statusText}`;
   }
 
   public async getStories(): Promise<TinesStoriesActionResponse> {
@@ -156,7 +153,7 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
         headers: this.getAuthHeaders(),
         responseSchema: TinesStoriesApiResponseSchema,
       },
-      storiesAccumulator
+      accumulateStories
     );
   }
 
@@ -170,7 +167,7 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
         headers: this.getAuthHeaders(),
         responseSchema: TinesWebhooksApiResponseSchema,
       },
-      webhooksAccumulator
+      accumulateWebhooks
     );
   }
 
