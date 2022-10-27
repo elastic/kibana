@@ -70,6 +70,19 @@ const getOrderByWithAgg = ({
   };
 };
 
+const filterOutEmptyValues = (values: string | Array<number | string>): number[] | string[] => {
+  if (typeof values === 'string') {
+    return Boolean(values) ? [] : [values];
+  }
+
+  return values.filter((v): v is string | number => {
+    if (typeof v === 'string') {
+      return Boolean(v);
+    }
+    return true;
+  }) as string[] | number[];
+};
+
 export const convertToTermsParams = ({
   agg,
   dataView,
@@ -88,17 +101,9 @@ export const convertToTermsParams = ({
 
   return {
     size: agg.aggParams.size ?? 10,
-    include: agg.aggParams.include
-      ? Array.isArray(agg.aggParams.include)
-        ? agg.aggParams.include
-        : [agg.aggParams.include]
-      : [],
+    include: agg.aggParams.include ? filterOutEmptyValues(agg.aggParams.include) : [],
     includeIsRegex: agg.aggParams.includeIsRegex,
-    exclude: agg.aggParams.exclude
-      ? Array.isArray(agg.aggParams.exclude)
-        ? agg.aggParams.exclude
-        : [agg.aggParams.exclude]
-      : [],
+    exclude: agg.aggParams.exclude ? filterOutEmptyValues(agg.aggParams.exclude) : [],
     excludeIsRegex: agg.aggParams.excludeIsRegex,
     otherBucket: agg.aggParams.otherBucket,
     orderDirection: agg.aggParams.order?.value ?? 'desc',
