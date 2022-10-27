@@ -7164,7 +7164,6 @@
     "xpack.apm.dependencyOperationDetailTraceListOutcomeColumn": "Résultat",
     "xpack.apm.dependencyOperationDetailTraceListServiceNameColumn": "Service d'origine",
     "xpack.apm.dependencyOperationDetailTraceListTimestampColumn": "Horodatage",
-    "xpack.apm.dependencyOperationDetailTraceListTraceIdColumn": "Trace",
     "xpack.apm.dependencyOperationDetailTraceListTransactionNameColumn": "Nom de la transaction",
     "xpack.apm.dependencyOperationDistributionChart.allSpansLegendLabel": "Tous les intervalles",
     "xpack.apm.dependencyOperationDistributionChart.failedSpansLegendLabel": "Intervalles ayant échoué",
