@@ -61,7 +61,7 @@ export class EmailServiceProvider
 
     let email: EmailService;
     if (this.setupSuccessful && actions && licensing) {
-      const emailConnector = this.config.connectors!.default!.email;
+      const emailConnector = this.config.connectors!.default!.email!;
 
       try {
         const unsecuredActionsClient = actions.getUnsecuredActionsClient();
