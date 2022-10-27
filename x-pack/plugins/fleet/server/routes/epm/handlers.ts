@@ -204,7 +204,7 @@ export const getInfoHandler: FleetRequestHandler<
   try {
     const savedObjectsClient = (await context.fleet).epm.internalSoClient;
     const { pkgName, pkgVersion } = request.params;
-    const { ignoreUnverified = false, prerelease = false } = request.query;
+    const { ignoreUnverified = false, prerelease } = request.query;
     if (pkgVersion && !semverValid(pkgVersion)) {
       throw new FleetError('Package version is not a valid semver');
     }
