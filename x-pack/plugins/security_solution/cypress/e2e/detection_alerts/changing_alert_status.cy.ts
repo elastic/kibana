@@ -157,7 +157,8 @@ describe('Changing alert status', () => {
       selectCountTable();
       clearGroupByTopInput();
     });
-    it('Closes and opens alerts', () => {
+    // FLAKY
+    it.skip('Closes and opens alerts', () => {
       const numberOfAlertsToBeClosed = 3;
       cy.get(ALERTS_COUNT)
         .invoke('text')
@@ -253,7 +254,8 @@ describe('Changing alert status', () => {
         });
     });
 
-    it('Updates trend histogram whenever alert status is updated in table', () => {
+    // FLAKY
+    it.skip('Updates trend histogram whenever alert status is updated in table', () => {
       const numberOfAlertsToBeClosed = 1;
       cy.get(ALERTS_COUNT)
         .invoke('text')

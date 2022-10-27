@@ -68,7 +68,8 @@ describe('Cases', () => {
     );
   });
 
-  it('Creates a new case with timeline and opens the timeline', function () {
+  // FLAKY
+  it.skip('Creates a new case with timeline and opens the timeline', function () {
     loginWithUser({ username: 'elastic', password: 'changeme' });
     visitWithoutDateRange(CASES_URL);
     goToCreateNewCase();
