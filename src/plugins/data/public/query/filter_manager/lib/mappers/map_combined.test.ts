@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { DataView } from '@kbn/data-views-plugin/common';
 import {
   BooleanRelation,
   buildEmptyFilter,
@@ -31,7 +32,9 @@ describe('filter manager utilities', () => {
         meta: { index: 'logstash-*' } as FilterMeta,
         query: { range: { bytes: { lt: 2048, gt: 1024 } } },
       } as RangeFilter;
-      const filter = buildCombinedFilter(BooleanRelation.AND, [rangeFilter]);
+      const filter = buildCombinedFilter(BooleanRelation.AND, [rangeFilter], {
+        id: 'logstash-*',
+      } as DataView);
       const result = mapCombined(filter);
 
       expect(result).toMatchInlineSnapshot(`
