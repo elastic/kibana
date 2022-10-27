@@ -49,14 +49,14 @@ describe('Info session routes', () => {
 
     it('returns 500 if unhandled exception is thrown when session is retrieved.', async () => {
       const unhandledException = new Error('Something went wrong.');
-      session.get.mockRejectedValue(unhandledException);
+      session.tryGet.mockRejectedValue(unhandledException);
 
       const request = httpServerMock.createKibanaRequest();
       await expect(
         routeHandler({} as unknown as SecurityRequestHandlerContext, request, kibanaResponseFactory)
       ).rejects.toThrowError(unhandledException);
 
-      expect(session.get).toHaveBeenCalledWith(request);
+      expect(session.tryGet).toHaveBeenCalledWith(request);
     });
 
     it('returns session info.', async () => {
@@ -128,7 +128,7 @@ describe('Info session routes', () => {
       ];
 
       for (const [sessionInfo, expected] of assertions) {
-        session.get.mockResolvedValue({ error: null, value: sessionMock.createValue(sessionInfo) });
+        session.tryGet.mockResolvedValue(sessionMock.createValue(sessionInfo));
 
         const expectedBody = {
           canBeExtended: expected.canBeExtended,
