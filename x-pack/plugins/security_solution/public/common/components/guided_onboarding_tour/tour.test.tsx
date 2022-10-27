@@ -12,6 +12,10 @@ import { SecurityStepId, securityTourConfig } from './tour_config';
 import { useKibana } from '../../lib/kibana';
 
 jest.mock('../../lib/kibana');
+jest.mock('../../hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: () => true,
+}));
+
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
 
