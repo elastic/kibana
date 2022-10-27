@@ -87,7 +87,12 @@ import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage, TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 import { SharingSavedObjectProps, VisualizationDisplayOptions } from '../types';
-import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
+import {
+  getActiveDatasourceIdFromDoc,
+  getIndexPatternsObjects,
+  getSearchWarningMessages,
+  inferTimeField,
+} from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 import { convertDataViewIntoLensIndexPattern } from '../data_views_service/loader';
 
@@ -531,34 +536,27 @@ export class Embeddable
 
   private handleWarnings(adapters?: Partial<DefaultInspectorAdapters>) {
     const activeDatasourceId = getActiveDatasourceIdFromDoc(this.savedVis);
-    if (!activeDatasourceId || !adapters?.requests) return;
+
+    if (!activeDatasourceId || !adapters?.requests) {
+      return;
+    }
+
     const activeDatasource = this.deps.datasourceMap[activeDatasourceId];
     const docDatasourceState = this.savedVis?.state.datasourceStates[activeDatasourceId];
-    const warningsMap: Map<string, Array<string | React.ReactNode>> = new Map();
-    this.deps.data.search.showWarnings(adapters.requests, (warning, meta) => {
-      const { request, response, requestId } = meta;
 
-      const warningMessages = activeDatasource.getSearchWarningMessages?.(
-        docDatasourceState,
-        warning,
-        request,
-        response
-      );
-
-      if (warningMessages?.length) {
-        const key = (requestId ?? '') + warning.type + warning.reason?.type ?? '';
-        if (!warningsMap.has(key)) {
-          warningsMap.set(key, warningMessages);
-        }
-        return true;
+    const requestWarnings = getSearchWarningMessages(
+      adapters.requests,
+      activeDatasource,
+      docDatasourceState,
+      {
+        searchService: this.deps.data.search,
       }
-      return false;
-    });
+    );
 
-    if (warningsMap.size && this.warningDomNode) {
+    if (requestWarnings.length && this.warningDomNode) {
       render(
         <KibanaThemeProvider theme$={this.deps.theme.theme$}>
-          <Warnings warnings={[...warningsMap.values()].flat()} />
+          <Warnings warnings={requestWarnings} />
         </KibanaThemeProvider>,
         this.warningDomNode
       );

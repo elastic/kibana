@@ -36,6 +36,7 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { DropIllustration } from '@kbn/chart-icons';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
+import { getSearchWarningMessages } from '../../../utils';
 import {
   FramePublicAPI,
   isLensBrushEvent,
@@ -231,31 +232,20 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     (data: unknown, adapters?: Partial<DefaultInspectorAdapters>) => {
       if (renderDeps.current) {
         const [defaultLayerId] = Object.keys(renderDeps.current.datasourceLayers);
-
-        const warningsMap: Map<string, Array<string | React.ReactNode>> = new Map();
         const datasource = Object.values(renderDeps.current.datasourceMap)[0];
         const datasourceState = Object.values(renderDeps.current.datasourceStates)[0].state;
 
+        let requestWarnings: Array<React.ReactNode | string> = [];
+
         if (adapters?.requests) {
-          plugins.data.search.showWarnings(adapters.requests, (warning, meta) => {
-            const { request, response, requestId } = meta;
-
-            const warningMessages = datasource.getSearchWarningMessages?.(
-              datasourceState,
-              warning,
-              request,
-              response
-            );
-
-            if (warningMessages?.length) {
-              const key = (requestId ?? '') + warning.type + warning.reason?.type ?? '';
-              if (!warningsMap.has(key)) {
-                warningsMap.set(key, warningMessages);
-              }
-              return true;
+          requestWarnings = getSearchWarningMessages(
+            adapters.requests,
+            datasource,
+            datasourceState,
+            {
+              searchService: plugins.data.search,
             }
-            return false;
-          });
+          );
         }
 
         dispatchLens(
@@ -270,7 +260,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
                     {}
                   )
                 : undefined,
-            requestWarnings: [...warningsMap.values()].flat(),
+            requestWarnings,
           })
         );
       }
