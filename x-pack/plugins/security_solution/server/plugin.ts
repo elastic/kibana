@@ -43,6 +43,7 @@ import { initRoutes } from './routes';
 import { registerLimitedConcurrencyRoutes } from './routes/limited_concurrency';
 import { ManifestTask } from './endpoint/lib/artifacts';
 import { CheckMetadataTransformsTask } from './endpoint/lib/metadata';
+import { CheckDeletedFilesTask } from './endpoint/lib/files';
 import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
@@ -122,6 +123,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   private manifestTask: ManifestTask | undefined;
   private checkMetadataTransformsTask: CheckMetadataTransformsTask | undefined;
+  private checkDeletedFilesTask: CheckDeletedFilesTask | undefined;
   private artifactsCache: LRU<string, Buffer>;
   private telemetryUsageCounter?: UsageCounter;
   private kibanaIndex?: string;
@@ -362,12 +364,19 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryUsageCounter
     );
 
-    this.checkMetadataTransformsTask = new CheckMetadataTransformsTask({
-      endpointAppContext: endpointContext,
-      core,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      taskManager: plugins.taskManager!,
-    });
+    if (plugins.taskManager) {
+      this.checkMetadataTransformsTask = new CheckMetadataTransformsTask({
+        endpointAppContext: endpointContext,
+        core,
+        taskManager: plugins.taskManager,
+      });
+
+      this.checkDeletedFilesTask = new CheckDeletedFilesTask({
+        endpointAppContext: endpointContext,
+        core,
+        taskManager: plugins.taskManager,
+      });
+    }
 
     featureUsageService.setup(plugins.licensing);
 
@@ -497,6 +506,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     if (plugins.taskManager) {
       this.checkMetadataTransformsTask?.start({
+        taskManager: plugins.taskManager,
+      });
+
+      this.checkDeletedFilesTask?.start({
         taskManager: plugins.taskManager,
       });
     }

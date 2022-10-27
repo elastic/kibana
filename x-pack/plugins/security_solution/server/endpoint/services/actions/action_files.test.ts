@@ -10,11 +10,20 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { Logger } from '@kbn/core/server';
 import { createEsFileClient as _createEsFileClient } from '@kbn/files-plugin/server';
 import { createFileClientMock } from '@kbn/files-plugin/server/mocks';
-import { getFileDownloadStream, getFileInfo } from './action_files';
+import {
+  getFileDownloadStream,
+  getFileInfo,
+  fileIdsWithoutChunks,
+  getFilesByStatus,
+  updateFilesStatus,
+} from './action_files';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import { NotFoundError } from '../../errors';
-import { FILE_STORAGE_DATA_INDEX } from '../../../../common/endpoint/constants';
+import {
+  FILE_STORAGE_DATA_INDEX,
+  FILE_STORAGE_METADATA_INDEX,
+} from '../../../../common/endpoint/constants';
 import { BaseDataGenerator } from '../../../../common/endpoint/data_generators/base_data_generator';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -31,6 +40,10 @@ describe('Action Files service', () => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
     fileClientMock = createFileClientMock();
     createEsFileClient.mockReturnValue(fileClientMock);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   describe('#getFileDownloadStream()', () => {
@@ -110,6 +123,97 @@ describe('Action Files service', () => {
       await expect(getFileInfo(esClientMock, loggerMock, '123')).rejects.toBeInstanceOf(
         NotFoundError
       );
+    });
+  });
+
+  describe('#fileIdsWithoutChunks()', () => {
+    it('should return expected values', async () => {
+      esClientMock.search.mockResolvedValueOnce({
+        took: 5,
+        timed_out: false,
+        _shards: {
+          total: 1,
+          successful: 1,
+          skipped: 0,
+          failed: 0,
+        },
+        hits: {
+          hits: [
+            {
+              _index: FILE_STORAGE_DATA_INDEX,
+              _id: 'keep1',
+              _source: {
+                bid: 'keep1',
+              },
+            },
+            {
+              _index: FILE_STORAGE_DATA_INDEX,
+              _id: 'keep2',
+              _source: {
+                bid: 'keep2',
+              },
+            },
+          ],
+        },
+      });
+
+      const fileIds = ['keep1', 'keep2', 'delete1', 'delete2'];
+      const deletedFileIds = await fileIdsWithoutChunks(esClientMock, fileIds);
+
+      expect(esClientMock.search).toBeCalledWith({
+        index: FILE_STORAGE_DATA_INDEX,
+        body: {
+          query: {
+            terms: {
+              'bid.keyword': fileIds,
+            },
+          },
+          _source: ['bid'],
+        },
+      });
+      expect(deletedFileIds).toEqual(['delete1', 'delete2']);
+    });
+  });
+
+  describe('#getFilesByStatus()', () => {
+    it('calls esClient.search with expected values', () => {
+      const status = 'READY';
+      getFilesByStatus(esClientMock, status);
+
+      expect(esClientMock.search).toBeCalledWith({
+        index: FILE_STORAGE_METADATA_INDEX,
+        body: {
+          query: {
+            term: {
+              'file.Status.keyword': status,
+            },
+          },
+          _source: false,
+        },
+        ignore_unavailable: true,
+      });
+    });
+  });
+
+  describe('#updateFilesStatus()', () => {
+    it('calls esClient.updateByQuery with expected values', () => {
+      const fileIds = ['someid1', 'someid2'];
+      const status = 'DELETED';
+      updateFilesStatus(esClientMock, fileIds, status);
+
+      expect(esClientMock.updateByQuery).toBeCalledWith({
+        index: FILE_STORAGE_METADATA_INDEX,
+        refresh: true,
+        query: {
+          ids: {
+            values: fileIds,
+          },
+        },
+        script: {
+          source: `ctx._source.file.Status = '${status}'`,
+          lang: 'painless',
+        },
+      });
     });
   });
 });

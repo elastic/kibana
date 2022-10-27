@@ -110,6 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cleanup_failed_action_executions',
         'cloud_security_posture-stats_task',
         'dashboard_telemetry',
+        'endpoint:check-deleted-files-task',
         'endpoint:metadata-check-transforms-task',
         'endpoint:user-artifact-packager',
         'fleet:reassign_action:retry',

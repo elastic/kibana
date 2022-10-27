@@ -8,8 +8,10 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Readable } from 'stream';
 import type { FileClient } from '@kbn/files-plugin/server';
+import type { FileStatus } from '@kbn/files-plugin/common';
 import { createEsFileClient } from '@kbn/files-plugin/server';
 import { errors } from '@elastic/elasticsearch';
+import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { UploadedFileInfo } from '../../../../common/endpoint/types';
 import { NotFoundError } from '../../errors';
@@ -133,3 +135,84 @@ const doesFileHaveChunks = async (
 
   return Boolean((chunks.hits?.total as SearchTotalHits)?.value);
 };
+
+/**
+ * Returns subset of fileIds that don't have any file chunks
+ *
+ * @param esClient
+ * @param fileIds
+ * @returns fileIds
+ */
+export async function fileIdsWithoutChunks(
+  esClient: ElasticsearchClient,
+  fileIds: string[]
+): Promise<string[]> {
+  const noChunkFileIds = new Set(fileIds);
+
+  const chunks = await esClient.search<{ bid: string }>({
+    index: FILE_STORAGE_DATA_INDEX,
+    body: {
+      query: {
+        terms: {
+          'bid.keyword': fileIds,
+        },
+      },
+      _source: ['bid'],
+    },
+  });
+
+  chunks.hits.hits.forEach((hit) => {
+    const fileId = hit._source?.bid;
+    if (!fileId) return;
+    noChunkFileIds.delete(fileId);
+  });
+
+  return Array.from(noChunkFileIds);
+}
+
+/**
+ * Gets files with given status
+ *
+ * @param esClient
+ * @param status
+ */
+export function getFilesByStatus(esClient: ElasticsearchClient, status: FileStatus = 'READY') {
+  return esClient.search({
+    index: FILE_STORAGE_METADATA_INDEX,
+    body: {
+      query: {
+        term: {
+          'file.Status.keyword': status,
+        },
+      },
+      _source: false,
+    },
+    ignore_unavailable: true,
+  });
+}
+
+/**
+ * Updates given fileIds to provided status
+ *
+ * @param esClient
+ * @param fileIds
+ */
+export function updateFilesStatus(
+  esClient: ElasticsearchClient,
+  fileIds: string[],
+  status: FileStatus
+): Promise<UpdateByQueryResponse> {
+  return esClient.updateByQuery({
+    index: FILE_STORAGE_METADATA_INDEX,
+    refresh: true,
+    query: {
+      ids: {
+        values: fileIds,
+      },
+    },
+    script: {
+      source: `ctx._source.file.Status = '${status}'`,
+      lang: 'painless',
+    },
+  });
+}
