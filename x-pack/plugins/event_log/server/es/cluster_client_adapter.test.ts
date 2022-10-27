@@ -862,11 +862,24 @@ describe('getQueryBody', () => {
                     },
                     {
                       bool: {
-                        must_not: {
-                          exists: {
-                            field: 'kibana.saved_objects.namespace',
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
                           },
-                        },
+                          {
+                            term: {
+                              'kibana.saved_objects.space_ids': {
+                                value: 'default',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -945,10 +958,23 @@ describe('getQueryBody', () => {
                       },
                     },
                     {
-                      term: {
-                        'kibana.saved_objects.namespace': {
-                          value: 'namespace',
-                        },
+                      bool: {
+                        should: [
+                          {
+                            term: {
+                              'kibana.saved_objects.namespace': {
+                                value: 'namespace',
+                              },
+                            },
+                          },
+                          {
+                            term: {
+                              'kibana.saved_objects.space_ids': {
+                                value: 'namespace',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -1056,11 +1082,24 @@ describe('getQueryBody', () => {
                     },
                     {
                       bool: {
-                        must_not: {
-                          exists: {
-                            field: 'kibana.saved_objects.namespace',
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
                           },
-                        },
+                          {
+                            term: {
+                              'kibana.saved_objects.space_ids': {
+                                value: 'default',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -1140,11 +1179,24 @@ describe('getQueryBody', () => {
                     },
                     {
                       bool: {
-                        must_not: {
-                          exists: {
-                            field: 'kibana.saved_objects.namespace',
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
                           },
-                        },
+                          {
+                            term: {
+                              'kibana.saved_objects.space_ids': {
+                                value: 'default',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -1266,11 +1318,24 @@ describe('getQueryBody', () => {
                     },
                     {
                       bool: {
-                        must_not: {
-                          exists: {
-                            field: 'kibana.saved_objects.namespace',
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
                           },
-                        },
+                          {
+                            term: {
+                              'kibana.saved_objects.space_ids': {
+                                value: 'default',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -1355,11 +1420,24 @@ describe('getQueryBody', () => {
                     },
                     {
                       bool: {
-                        must_not: {
-                          exists: {
-                            field: 'kibana.saved_objects.namespace',
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
                           },
-                        },
+                          {
+                            term: {
+                              'kibana.saved_objects.space_ids': {
+                                value: 'default',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -1445,11 +1523,24 @@ describe('getQueryBody', () => {
                     },
                     {
                       bool: {
-                        must_not: {
-                          exists: {
-                            field: 'kibana.saved_objects.namespace',
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
                           },
-                        },
+                          {
+                            term: {
+                              'kibana.saved_objects.space_ids': {
+                                value: 'default',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -1559,11 +1650,24 @@ describe('getQueryBodyWithAuthFilter', () => {
                     },
                     {
                       bool: {
-                        must_not: {
-                          exists: {
-                            field: 'kibana.saved_objects.namespace',
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
                           },
-                        },
+                          {
+                            term: {
+                              'kibana.saved_objects.space_ids': {
+                                value: 'default',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -1619,10 +1723,23 @@ describe('getQueryBodyWithAuthFilter', () => {
                       },
                     },
                     {
-                      term: {
-                        'kibana.saved_objects.namespace': {
-                          value: 'namespace',
-                        },
+                      bool: {
+                        should: [
+                          {
+                            term: {
+                              'kibana.saved_objects.namespace': {
+                                value: 'namespace',
+                              },
+                            },
+                          },
+                          {
+                            term: {
+                              'kibana.saved_objects.space_ids': {
+                                value: 'namespace',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -1713,11 +1830,24 @@ describe('getQueryBodyWithAuthFilter', () => {
                     },
                     {
                       bool: {
-                        must_not: {
-                          exists: {
-                            field: 'kibana.saved_objects.namespace',
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
                           },
-                        },
+                          {
+                            term: {
+                              'kibana.saved_objects.space_ids': {
+                                value: 'default',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -1772,11 +1902,24 @@ describe('getQueryBodyWithAuthFilter', () => {
                     },
                     {
                       bool: {
-                        must_not: {
-                          exists: {
-                            field: 'kibana.saved_objects.namespace',
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
                           },
-                        },
+                          {
+                            term: {
+                              'kibana.saved_objects.space_ids': {
+                                value: 'default',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -1838,11 +1981,24 @@ describe('getQueryBodyWithAuthFilter', () => {
                     },
                     {
                       bool: {
-                        must_not: {
-                          exists: {
-                            field: 'kibana.saved_objects.namespace',
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
                           },
-                        },
+                          {
+                            term: {
+                              'kibana.saved_objects.space_ids': {
+                                value: 'default',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],
@@ -1905,11 +2061,24 @@ describe('getQueryBodyWithAuthFilter', () => {
                     },
                     {
                       bool: {
-                        must_not: {
-                          exists: {
-                            field: 'kibana.saved_objects.namespace',
+                        should: [
+                          {
+                            bool: {
+                              must_not: {
+                                exists: {
+                                  field: 'kibana.saved_objects.namespace',
+                                },
+                              },
+                            },
                           },
-                        },
+                          {
+                            term: {
+                              'kibana.saved_objects.space_ids': {
+                                value: 'default',
+                              },
+                            },
+                          },
+                        ],
                       },
                     },
                   ],

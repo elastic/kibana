@@ -323,7 +323,6 @@ describe('disable()', () => {
         saved_objects: [
           {
             id: '1',
-            namespace: 'default',
             rel: 'primary',
             type: 'alert',
             type_id: 'myType',

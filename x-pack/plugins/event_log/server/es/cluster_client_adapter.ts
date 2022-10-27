@@ -13,6 +13,7 @@ import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import util from 'util';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery, KueryNode, nodeBuilder } from '@kbn/es-query';
+import { namespaceToSpaceId } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { AggregateOptionsType, FindOptionsType, QueryOptionsType } from '../event_log_client';
 import { ParsedIndexAlias } from './init';
@@ -546,6 +547,7 @@ export function getQueryBodyWithAuthFilter(
 }
 
 function getNamespaceQuery(namespace?: string) {
+  const spaceId = namespaceToSpaceId(namespace);
   const defaultNamespaceQuery = {
     bool: {
       must_not: {
@@ -562,7 +564,22 @@ function getNamespaceQuery(namespace?: string) {
       },
     },
   };
-  return namespace === undefined ? defaultNamespaceQuery : namedNamespaceQuery;
+  const namespaceQuery = namespace === undefined ? defaultNamespaceQuery : namedNamespaceQuery;
+
+  return {
+    bool: {
+      should: [
+        namespaceQuery,
+        {
+          term: {
+            'kibana.saved_objects.space_ids': {
+              value: spaceId,
+            },
+          },
+        },
+      ],
+    },
+  };
 }
 
 export function getQueryBody(
