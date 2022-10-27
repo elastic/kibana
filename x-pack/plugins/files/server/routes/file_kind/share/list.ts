@@ -9,13 +9,14 @@ import { schema } from '@kbn/config-schema';
 import { CreateRouteDefinition, FILES_API_ROUTES } from '../../api_routes';
 import type { FileKind, FileShareJSON } from '../../../../common/types';
 import { CreateHandler, FileKindRouter } from '../types';
+import * as cs from '../../common_schemas';
 
 export const method = 'get' as const;
 
 const rt = {
   query: schema.object({
-    page: schema.maybe(schema.number()),
-    perPage: schema.maybe(schema.number()),
+    page: schema.maybe(cs.page),
+    perPage: schema.maybe(cs.pageSize),
     forFileId: schema.maybe(schema.string()),
   }),
 };

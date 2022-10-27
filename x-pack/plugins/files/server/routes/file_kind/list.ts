@@ -7,6 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import type { FileJSON, FileKind } from '../../../common/types';
 import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
+import * as cs from '../common_schemas';
 import type { CreateHandler, FileKindRouter } from './types';
 import {
   stringOrArrayOfStrings,
@@ -24,8 +25,8 @@ const rt = {
     meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   }),
   query: schema.object({
-    page: schema.maybe(schema.number()),
-    perPage: schema.maybe(schema.number({ defaultValue: 100 })),
+    page: schema.maybe(cs.page),
+    perPage: schema.maybe(cs.pageSize),
   }),
 };
 

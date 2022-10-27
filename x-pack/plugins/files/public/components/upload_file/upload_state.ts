@@ -43,7 +43,7 @@ interface FileState {
 
 type Upload = SimpleStateSubject<FileState>;
 
-interface DoneNotification {
+export interface DoneNotification {
   id: string;
   kind: string;
 }

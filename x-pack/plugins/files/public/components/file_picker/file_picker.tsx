@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 
+import type { DoneNotification } from '../upload_file';
 import { useBehaviorSubject } from '../use_behavior_subject';
 import { useFilePickerContext, FilePickerContext } from './context';
 
@@ -44,12 +45,16 @@ export interface Props<Kind extends string = string> {
    */
   onDone: (fileIds: string[]) => void;
   /**
+   * When a user has succesfully uploaded some files this callback will be called
+   */
+  onUpload?: (done: DoneNotification[]) => void;
+  /**
    * The number of results to show per page.
    */
   pageSize?: number;
 }
 
-const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
+const Component: FunctionComponent<Props> = ({ onClose, onDone, onUpload }) => {
   const { state, kind } = useFilePickerContext();
 
   const hasFiles = useBehaviorSubject(state.hasFiles$);
@@ -59,7 +64,7 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
 
   useObservable(state.files$);
 
-  const renderFooter = () => <ModalFooter onDone={onDone} />;
+  const renderFooter = () => <ModalFooter kind={kind} onDone={onDone} onUpload={onUpload} />;
 
   return (
     <EuiModal
