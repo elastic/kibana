@@ -16,7 +16,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'timePicker',
     'visEditor',
   ]);
-  const log = getService('log');
 
   describe('Heatmap', function describeIndexTests() {
     const isNewChartsLibraryEnabled = true;
