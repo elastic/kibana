@@ -15,6 +15,7 @@ import { useMetricsDataViewContext } from './use_data_view';
 import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
 import { useTimeRangeUrlState } from './use_time_range_url_state';
 import { useHostsQueryContext } from './use_host_query';
+import { useHostFiltersContext } from './use_host_filters';
 
 const DEFAULT_FROM_MINUTES_VALUE = 15;
 
@@ -31,6 +32,7 @@ export const useUnifiedSearch = () => {
     useTimeRangeUrlState();
 
   const { applyFilterQuery } = useHostsQueryContext();
+  const { applyFilters } = useHostFiltersContext();
 
   const [getTime, setTime] = useKibanaTimefilterTime({
     from: selectedTimeRange.startTime,
@@ -62,7 +64,8 @@ export const useUnifiedSearch = () => {
   const submitFilterChange = useCallback(
     (query?: Query, dateRange?: TimeRange, filters?: Filter[]) => {
       if (filters) {
-        filterManager.setFilters(filters);
+        applyFilters(filters);
+        filterManager.setFilters([...filterManager.getFilters(), ...filters]);
       }
 
       if (dateRange) {
@@ -89,7 +92,15 @@ export const useUnifiedSearch = () => {
       // This can be removed once we get the state from the URL
       forceUpdate();
     },
-    [setTime, getTime, queryString, filterManager, handleSelectedTimeRangeChange, applyFilterQuery]
+    [
+      setTime,
+      getTime,
+      queryString,
+      applyFilters,
+      filterManager,
+      handleSelectedTimeRangeChange,
+      applyFilterQuery,
+    ]
   );
 
   const saveQuery = useCallback(
@@ -97,21 +108,15 @@ export const useUnifiedSearch = () => {
       const savedQueryFilters = newSavedQuery.attributes.filters ?? [];
       const globalFilters = filterManager.getGlobalFilters();
       filterManager.setFilters([...savedQueryFilters, ...globalFilters]);
-
-      // Unified search holds the all state, we need to force the hook to rerender so that it can return the most recent values
-      // This can be removed once we get the state from the URL
-      forceUpdate();
+      applyFilters(filterManager.getFilters());
     },
-    [filterManager]
+    [applyFilters, filterManager]
   );
 
   const clearSavedQUery = useCallback(() => {
     filterManager.setFilters(filterManager.getGlobalFilters());
-
-    // Unified search holds the all state, we need to force the hook to rerender so that it can return the most recent values
-    // This can be removed once we get the state from the URL
-    forceUpdate();
-  }, [filterManager]);
+    applyFilters(filterManager.getFilters());
+  }, [applyFilters, filterManager]);
 
   const buildQuery = useCallback(() => {
     if (!metricsDataView) {
