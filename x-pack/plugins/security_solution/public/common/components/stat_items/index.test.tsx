@@ -11,13 +11,7 @@ import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
 import type { StatItemsProps, StatItems } from '.';
-import {
-  StatItemsComponent,
-  addValueToFields,
-  addValueToAreaChart,
-  addValueToBarChart,
-  useKpiMatrixStatus,
-} from '.';
+import { StatItemsComponent, useKpiMatrixStatus } from '.';
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
 import { EuiHorizontalRule } from '@elastic/eui';
@@ -245,30 +239,6 @@ describe('Stat Items Component', () => {
       );
       expect(wrapper.find('[data-test-subj="stat-title"]').first().exists()).toEqual(false);
     });
-  });
-});
-
-describe('addValueToFields', () => {
-  const mockNetworkMappings = fieldTitleChartMapping[0];
-  test('should update value from data', () => {
-    const result = addValueToFields(mockNetworkMappings.fields, mockData);
-    expect(result).toEqual(mockEnableChartsData.fields);
-  });
-});
-
-describe('addValueToAreaChart', () => {
-  const mockNetworkMappings = fieldTitleChartMapping[0];
-  test('should add areaChart from data', () => {
-    const result = addValueToAreaChart(mockNetworkMappings.fields, mockData);
-    expect(result).toEqual(mockEnableChartsData.areaChart);
-  });
-});
-
-describe('addValueToBarChart', () => {
-  const mockNetworkMappings = fieldTitleChartMapping[0];
-  test('should add areaChart from data', () => {
-    const result = addValueToBarChart(mockNetworkMappings.fields, mockData);
-    expect(result).toEqual(mockEnableChartsData.barChart);
   });
 });
 
