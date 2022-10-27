@@ -718,8 +718,6 @@ export function asRan(task: InstanceOf<TaskRunningStage.RAN, RanTask>): RanTask 
 
 export function calculateDelay(attempts: number) {
   if (attempts === 1) {
-    return 0;
-  } else if (attempts === 2) {
     return 30 * 1000; // 30s
   } else {
     // get multiples of 5 min
