@@ -14,7 +14,7 @@ export interface DeleteMlInferencePipelineApiLogicArgs {
   pipelineName: string;
 }
 
-export { DeleteMlInferencePipelineResponse };
+export type { DeleteMlInferencePipelineResponse };
 
 export const deleteMlInferencePipeline = async (
   args: DeleteMlInferencePipelineApiLogicArgs
