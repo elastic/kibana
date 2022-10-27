@@ -205,7 +205,7 @@ export const RulesList = ({
   });
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
-  const [rulesToDeleteFilter, setRulesToDeleteFilter] = useState<KueryNode | null | undefined>(); // do we need null and undefined?
+  const [rulesToDeleteFilter, setRulesToDeleteFilter] = useState<KueryNode | null | undefined>();
   const [isDeletingRules, setIsDeletingRules] = useState<boolean>(false);
 
   // TODO - tech debt: Right now we're using null and undefined to determine if we should
