@@ -25,6 +25,7 @@ import {
   enableInfrastructureHostsView,
   enableServiceMetrics,
   enableAwsLambdaMetrics,
+  enableCriticalPath,
 } from '../common/ui_settings_keys';
 
 const technicalPreviewLabel = i18n.translate(
@@ -305,6 +306,23 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.boolean(),
     value: true,
+    requiresPageReload: true,
+    type: 'boolean',
+    showInLabs: true,
+  },
+  [enableCriticalPath]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableCriticalPath', {
+      defaultMessage: 'Critical path',
+    }),
+    description: i18n.translate('xpack.observability.enableCriticalPathDescription', {
+      defaultMessage: '{technicalPreviewLabel} Optionally display the critical path of a trace.',
+      values: {
+        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: false,
     requiresPageReload: true,
     type: 'boolean',
     showInLabs: true,
