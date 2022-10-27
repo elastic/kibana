@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { number } from 'joi';
 import { parse } from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ReportingUsageStats } from '../../services/reporting_upgrade_services';
@@ -122,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               usage = (await usageAPI.getUsageStats()) as UsageStats;
               reportingAPI.expectCompletedReportCount(usage, completedReportCount + 1);
             });
-            log.debug(`Elapsed Time: ${(new Date()).getTime() - startTime.getTime()}`);
+            log.debug(`Elapsed Time: ${new Date().getTime() - startTime.getTime()}`);
           });
         });
       });
