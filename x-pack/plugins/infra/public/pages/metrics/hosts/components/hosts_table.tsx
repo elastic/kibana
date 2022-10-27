@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiInMemoryTable } from '@elastic/eui';
 import type { SnapshotNode } from '../../../../../common/http_api';
 import { HostsTableColumns } from './hosts_table_columns';
 import { useHostTable } from '../hooks/use_host_table';
@@ -18,11 +18,5 @@ interface Props {
 export const HostsTable: React.FunctionComponent<Props> = ({ nodes }) => {
   const items = useHostTable(nodes);
 
-  return (
-    <EuiBasicTable
-      tableCaption="Infrastructure metrics for hosts"
-      items={items}
-      columns={HostsTableColumns}
-    />
-  );
+  return <EuiInMemoryTable pagination sorting items={items} columns={HostsTableColumns} />;
 };
