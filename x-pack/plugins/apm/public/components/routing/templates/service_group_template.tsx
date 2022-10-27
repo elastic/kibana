@@ -152,6 +152,7 @@ export function ServiceGroupTemplate({
       }}
       environmentFilter={environmentFilter}
       showServiceGroupSaveButton={true}
+      selectedNavButton={!serviceGroupId ? 'allServices' : undefined}
       {...pageTemplateProps}
     >
       {children}

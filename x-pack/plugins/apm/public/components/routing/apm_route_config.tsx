@@ -79,6 +79,7 @@ const apmRoutes = {
               pageTitle={ServiceGroupsTitle}
               environmentFilter={false}
               showServiceGroupSaveButton
+              selectedNavButton="serviceGroups"
             >
               <ServiceGroupsRedirect>
                 <ServiceGroupsList />

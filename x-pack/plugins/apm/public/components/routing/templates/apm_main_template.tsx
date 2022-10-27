@@ -17,6 +17,7 @@ import { ApmPluginStartDeps } from '../../../plugin';
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { getNoDataConfig } from './no_data_config';
 import { ServiceGroupSaveButton } from '../../app/service_groups';
+import { ServiceGroupsButtonGroup } from '../../app/service_groups/service_groups_button_group';
 
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings'];
@@ -37,6 +38,7 @@ export function ApmMainTemplate({
   children,
   environmentFilter = true,
   showServiceGroupSaveButton = false,
+  selectedNavButton,
   ...pageTemplateProps
 }: {
   pageTitle?: React.ReactNode;
@@ -44,6 +46,7 @@ export function ApmMainTemplate({
   children: React.ReactNode;
   environmentFilter?: boolean;
   showServiceGroupSaveButton?: boolean;
+  selectedNavButton?: 'serviceGroups' | 'allServices';
 } & KibanaPageTemplateProps) {
   const location = useLocation();
 
@@ -116,6 +119,9 @@ export function ApmMainTemplate({
         pageTitle,
         rightSideItems,
         ...pageHeader,
+        children: renderServiceGroupSaveButton ? (
+          <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
+        ) : null,
       }}
       {...pageTemplateProps}
     >
