@@ -186,6 +186,7 @@ export interface ColumnState {
   summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
   alignment?: 'left' | 'right' | 'center';
   collapseFn?: CollapseFunction;
+  palette?: PaletteOutput<CustomPaletteParams>;
 }
 
 export interface TableVisConfiguration {
