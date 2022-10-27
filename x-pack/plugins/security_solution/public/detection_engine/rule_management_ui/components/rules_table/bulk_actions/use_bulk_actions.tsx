@@ -106,7 +106,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkAction.enable,
-          ...(isAllSelected ? { query: filterQuery } : { ids: ruleIds }),
+          queryOrIds: isAllSelected ? filterQuery : ruleIds,
         });
       };
 
@@ -118,7 +118,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkAction.disable,
-          ...(isAllSelected ? { query: filterQuery } : { ids: enabledIds }),
+          queryOrIds: isAllSelected ? filterQuery : enabledIds,
         });
       };
 
@@ -128,7 +128,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkAction.duplicate,
-          ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
+          queryOrIds: isAllSelected ? filterQuery : selectedRuleIds,
         });
         clearRulesSelection();
       };
@@ -147,7 +147,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkAction.delete,
-          ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
+          queryOrIds: isAllSelected ? filterQuery : selectedRuleIds,
         });
       };
 
@@ -189,9 +189,7 @@ export const useBulkActions = ({
 
         const dryRunResult = await executeBulkActionsDryRun({
           type: BulkAction.edit,
-          ...(isAllSelected
-            ? { query: convertRulesFilterToKQL(filterOptions) }
-            : { ids: selectedRuleIds }),
+          queryOrIds: isAllSelected ? convertRulesFilterToKQL(filterOptions) : selectedRuleIds,
           editPayload: computeDryRunPayload(bulkEditActionType),
         });
 
@@ -250,7 +248,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkAction.edit,
-          ...prepareSearchParams({
+          queryOrIds: prepareSearchParams({
             ...(isAllSelected ? { filterOptions } : { selectedRuleIds }),
             dryRunResult,
           }),

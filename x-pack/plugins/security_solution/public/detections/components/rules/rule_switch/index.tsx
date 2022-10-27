@@ -7,7 +7,6 @@
 
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSwitch } from '@elastic/eui';
-import { noop } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { BulkAction } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
@@ -56,7 +55,7 @@ export const RuleSwitchComponent = ({
       });
       const bulkActionResponse = await executeBulkAction({
         type: event.target.checked ? BulkAction.enable : BulkAction.disable,
-        ids: [id],
+        queryOrIds: [id],
       });
       if (bulkActionResponse?.attributes.results.updated.length) {
         // The rule was successfully updated
@@ -64,7 +63,7 @@ export const RuleSwitchComponent = ({
       }
       setMyIsLoading(false);
     },
-    [enabled, executeBulkAction, id, onChange, rulesTableContext, startTransaction]
+    [enabled, executeBulkAction, id, onChange, startTransaction]
   );
 
   const showLoader = useMemo((): boolean => {

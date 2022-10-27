@@ -62,7 +62,7 @@ describe('useExecuteBulkAction', () => {
   it('executes bulk action', async () => {
     const bulkActionDescriptor = {
       type: BulkAction.enable,
-      query: 'some query',
+      queryOrIds: 'some query',
     } as const;
 
     await executeBulkAction(bulkActionDescriptor);
@@ -74,7 +74,7 @@ describe('useExecuteBulkAction', () => {
     it('shows success toast upon completion', async () => {
       await executeBulkAction({
         type: BulkAction.enable,
-        ids: ['ruleId1'],
+        queryOrIds: ['ruleId1'],
       });
 
       expect(toasts.addSuccess).toHaveBeenCalled();
@@ -85,7 +85,7 @@ describe('useExecuteBulkAction', () => {
       await executeBulkAction(
         {
           type: BulkAction.enable,
-          ids: ['ruleId1'],
+          queryOrIds: ['ruleId1'],
         },
         { suppressSuccessToast: true }
       );
@@ -101,7 +101,7 @@ describe('useExecuteBulkAction', () => {
 
       await executeBulkAction({
         type: BulkAction.enable,
-        ids: ['ruleId1'],
+        queryOrIds: ['ruleId1'],
       });
 
       expect(toasts.addError).toHaveBeenCalled();
@@ -124,7 +124,7 @@ describe('useExecuteBulkAction', () => {
     it('sets the loading state before execution', async () => {
       await executeBulkAction({
         type: BulkAction.enable,
-        ids: ['ruleId1', 'ruleId2'],
+        queryOrIds: ['ruleId1', 'ruleId2'],
       });
 
       expect(setLoadingRules).toHaveBeenCalledWith({
@@ -136,7 +136,7 @@ describe('useExecuteBulkAction', () => {
     it('sets the empty loading state before execution when query is set', async () => {
       await executeBulkAction({
         type: BulkAction.enable,
-        query: 'some query',
+        queryOrIds: 'some query',
       });
 
       expect(setLoadingRules).toHaveBeenCalledWith({
@@ -148,7 +148,7 @@ describe('useExecuteBulkAction', () => {
     it('clears loading state for the processing rules after execution', async () => {
       await executeBulkAction({
         type: BulkAction.enable,
-        ids: ['ruleId1', 'ruleId2'],
+        queryOrIds: ['ruleId1', 'ruleId2'],
       });
 
       expect(setLoadingRules).toHaveBeenCalledWith({ ids: [], action: null });
@@ -161,7 +161,7 @@ describe('useExecuteBulkAction', () => {
 
       await executeBulkAction({
         type: BulkAction.enable,
-        ids: ['ruleId1', 'ruleId2'],
+        queryOrIds: ['ruleId1', 'ruleId2'],
       });
 
       expect(setLoadingRules).toHaveBeenCalledWith({ ids: [], action: null });
@@ -172,7 +172,7 @@ describe('useExecuteBulkAction', () => {
     it('sends for enable action', async () => {
       await executeBulkAction({
         type: BulkAction.enable,
-        query: 'some query',
+        queryOrIds: 'some query',
       });
 
       expect(track).toHaveBeenCalledWith(METRIC_TYPE.COUNT, TELEMETRY_EVENT.SIEM_RULE_ENABLED);
@@ -182,7 +182,7 @@ describe('useExecuteBulkAction', () => {
     it('sends for disable action', async () => {
       await executeBulkAction({
         type: BulkAction.disable,
-        query: 'some query',
+        queryOrIds: 'some query',
       });
 
       expect(track).toHaveBeenCalledWith(METRIC_TYPE.COUNT, TELEMETRY_EVENT.SIEM_RULE_DISABLED);

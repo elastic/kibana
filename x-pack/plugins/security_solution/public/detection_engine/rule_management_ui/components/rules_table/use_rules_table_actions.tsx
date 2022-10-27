@@ -24,14 +24,12 @@ import {
   goToRuleEditPage,
   useExecuteBulkAction,
 } from '../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
-import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
 
 export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
   const { navigateToApp } = useKibana().services.application;
   const hasActionsPrivileges = useHasActionsPrivileges();
   const toasts = useAppToasts();
-  const { setLoadingRules } = useRulesTableContext().actions;
   const { startTransaction } = useStartTransaction();
   const { executeBulkAction } = useExecuteBulkAction();
   const { bulkExport } = useBulkExport();
@@ -70,7 +68,7 @@ export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
         const result = await executeBulkAction({
           type: BulkAction.duplicate,
-          ids: [rule.id],
+          queryOrIds: [rule.id],
         });
         const createdRules = result?.attributes.results.created;
         if (createdRules?.length) {
@@ -86,11 +84,7 @@ export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
       name: i18n.EXPORT_RULE,
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
-        const response = await bulkExport({
-          setLoadingRules,
-          visibleRuleIds: [rule.id],
-          search: { ids: [rule.id] },
-        });
+        const response = await bulkExport([rule.id]);
         if (response) {
           await downloadExportedRules({
             response,
@@ -110,7 +104,7 @@ export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
         await executeBulkAction({
           type: BulkAction.delete,
-          ids: [rule.id],
+          queryOrIds: [rule.id],
         });
       },
     },

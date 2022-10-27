@@ -26,10 +26,11 @@ export function useBulkExport() {
 
   const bulkExport = useCallback(
     async (queryOrIds: QueryOrIds) => {
-      const ids = 'ids' in queryOrIds ? queryOrIds.ids : [];
-
       try {
-        setLoadingRules?.({ ids, action: BulkAction.export });
+        setLoadingRules?.({
+          ids: Array.isArray(queryOrIds) ? queryOrIds : [],
+          action: BulkAction.export,
+        });
         return await mutateAsync(queryOrIds);
       } catch (error) {
         showBulkErrorToast(toasts, BulkAction.export, error);

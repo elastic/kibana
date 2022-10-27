@@ -23,12 +23,15 @@ type PrepareSearchFilterProps =
  * @param filterOptions {@link FilterOptions} find filter
  * @returns either list of ids or KQL search query
  */
-export const prepareSearchParams = ({ dryRunResult, ...props }: PrepareSearchFilterProps) => {
+export const prepareSearchParams = ({
+  dryRunResult,
+  ...props
+}: PrepareSearchFilterProps): string | string[] => {
   // if selectedRuleIds present, filter out rules that failed during dry run
   if ('selectedRuleIds' in props) {
     const failedRuleIdsSet = new Set(dryRunResult?.ruleErrors.flatMap(({ ruleIds }) => ruleIds));
 
-    return { ids: props.selectedRuleIds.filter((id) => !failedRuleIdsSet.has(id)) };
+    return props.selectedRuleIds.filter((id) => !failedRuleIdsSet.has(id));
   }
 
   // otherwise create filter that excludes failed results based on dry run errors
@@ -48,5 +51,5 @@ export const prepareSearchParams = ({ dryRunResult, ...props }: PrepareSearchFil
     }
   });
 
-  return { query: convertRulesFilterToKQL(modifiedFilterOptions) };
+  return convertRulesFilterToKQL(modifiedFilterOptions);
 };

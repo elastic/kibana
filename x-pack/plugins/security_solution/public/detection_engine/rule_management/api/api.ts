@@ -213,14 +213,16 @@ export interface BulkActionResponse {
   };
 }
 
-export type QueryOrIds = { query: string } | { ids: string[] };
-type PlainBulkActionDescriptor = {
+export type QueryOrIds = string | string[];
+interface PlainBulkActionDescriptor {
   type: Exclude<BulkAction, BulkAction.edit | BulkAction.export>;
-} & QueryOrIds;
-type EditBulkActionDescriptor = {
+  queryOrIds: QueryOrIds;
+}
+interface EditBulkActionDescriptor {
   type: BulkAction.edit;
+  queryOrIds: QueryOrIds;
   editPayload: BulkActionEditPayload[];
-} & QueryOrIds;
+}
 export type BulkActionDescriptor = PlainBulkActionDescriptor | EditBulkActionDescriptor;
 
 /**
@@ -237,8 +239,12 @@ export async function performBulkAction(
 ): Promise<BulkActionResponse> {
   const params = {
     action: bulkActionDescriptor.type,
-    ...('query' in bulkActionDescriptor ? { query: bulkActionDescriptor.query } : {}),
-    ...('ids' in bulkActionDescriptor ? { ids: bulkActionDescriptor.ids } : {}),
+    ...(typeof bulkActionDescriptor.queryOrIds === 'string'
+      ? { query: bulkActionDescriptor.queryOrIds }
+      : {}),
+    ...(Array.isArray(bulkActionDescriptor.queryOrIds)
+      ? { ids: bulkActionDescriptor.queryOrIds }
+      : {}),
     ...(bulkActionDescriptor.type === BulkAction.edit
       ? { edit: bulkActionDescriptor.editPayload }
       : {}),
@@ -256,16 +262,15 @@ export type BulkExportResponse = Blob;
 /**
  * Bulk export rules selected by a filter query
  *
- * @param query filter query to select rules to perform bulk action with
- * @param ids string[] rule ids to select rules to perform bulk action with
+ * @param queryOrIds filter query to select rules to perform bulk action with or rule ids to select rules to perform bulk action with
  *
  * @throws An error if response is not OK
  */
 export async function bulkExportRules(queryOrIds: QueryOrIds): Promise<BulkExportResponse> {
   const params = {
     action: BulkAction.export,
-    ...('query' in queryOrIds ? { query: queryOrIds.query } : {}),
-    ...('ids' in queryOrIds ? { ids: queryOrIds.ids } : {}),
+    ...(typeof queryOrIds === 'string' ? { query: queryOrIds } : {}),
+    ...(Array.isArray(queryOrIds) ? { ids: queryOrIds } : {}),
   };
 
   return KibanaServices.get().http.fetch<BulkExportResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {

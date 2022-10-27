@@ -12,7 +12,6 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { noop } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
@@ -89,7 +88,7 @@ const RuleActionsOverflowComponent = ({
                 closePopover();
                 const result = await executeBulkAction({
                   type: BulkAction.duplicate,
-                  ids: [rule.id],
+                  queryOrIds: [rule.id],
                 });
                 const createdRules = result?.attributes.results.created;
                 if (createdRules?.length) {
@@ -116,7 +115,7 @@ const RuleActionsOverflowComponent = ({
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
                 closePopover();
-                const response = await bulkExport({ search: { ids: [rule.id] } });
+                const response = await bulkExport([rule.id]);
                 if (response) {
                   await downloadExportedRules({
                     response,
@@ -137,7 +136,7 @@ const RuleActionsOverflowComponent = ({
                 closePopover();
                 await executeBulkAction({
                   type: BulkAction.delete,
-                  ids: [rule.id],
+                  queryOrIds: [rule.id],
                 });
 
                 onRuleDeletedCallback();
