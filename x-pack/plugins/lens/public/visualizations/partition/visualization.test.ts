@@ -102,49 +102,6 @@ describe('pie_visualization', () => {
     });
   });
 
-  describe('#getSupportedActionsForLayer', () => {
-    it('should return actions to toggle multiple metrics mode', () => {
-      const state = getExampleState();
-
-      expect(pieVisualization.getSupportedActionsForLayer!(LAYER_ID, state)).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "displayName": "Enable multiple metrics",
-            "icon": "visPie",
-            "id": "enableMultipleMetricsAction",
-            "isCompatible": true,
-          },
-        ]
-      `);
-
-      expect(
-        pieVisualization.getSupportedActionsForLayer!(LAYER_ID, {
-          ...state,
-          layers: [{ ...state.layers[0], allowMultipleMetrics: true }],
-        })
-      ).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "clearLayer": true,
-            "displayName": "Disable multiple metrics",
-            "icon": "visPie",
-            "id": "disableMultipleMetricsAction",
-            "isCompatible": true,
-          },
-        ]
-      `);
-    });
-
-    it('should return no actions for mosaic chart', () => {
-      expect(
-        pieVisualization.getSupportedActionsForLayer!(LAYER_ID, {
-          ...getExampleState(),
-          shape: 'mosaic',
-        })
-      ).toEqual([]);
-    });
-  });
-
   describe('#getLayerType', () => {
     it('should return the type only if the layer is in the state', () => {
       expect(pieVisualization.getLayerType(LAYER_ID, getExampleState())).toEqual(LayerTypes.DATA);

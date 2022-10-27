@@ -36,7 +36,7 @@ import {
 } from '../../../common';
 import { suggestions } from './suggestions';
 import { PartitionChartsMeta } from './partition_charts_meta';
-import { DimensionEditor, PieToolbar } from './toolbar';
+import { DimensionEditor, LayerSettings, PieToolbar } from './toolbar';
 import { checkTableForContainsSmallValues } from './render_helpers';
 
 function newLayerState(layerId: string): PieLayerState {
@@ -420,6 +420,17 @@ export const getPieVisualization = ({
     );
   },
 
+  renderLayerSettings(domElement, props) {
+    render(
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <LayerSettings {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
+      domElement
+    );
+  },
+
   getWarningMessages(state, frame) {
     if (state?.layers.length === 0 || !frame.activeData) {
       return;
@@ -538,49 +549,5 @@ export const getPieVisualization = ({
           },
         ]
       : [];
-  },
-
-  getSupportedActionsForLayer(layerId, state) {
-    const layerInQuestion = state.layers.find((layer) => layer.layerId === layerId);
-
-    if (!layerInQuestion || state.shape === PieChartTypes.MOSAIC) {
-      return [];
-    }
-
-    return layerInQuestion.allowMultipleMetrics
-      ? [
-          {
-            id: DISABLE_MULTIPLE_METRICS_ACTION_ID,
-            displayName: 'Disable multiple metrics',
-            icon: 'visPie',
-            isCompatible: true,
-            clearLayer: true,
-          },
-        ]
-      : [
-          {
-            id: ENABLE_MULTIPLE_METRICS_ACTION_ID,
-            displayName: 'Enable multiple metrics',
-            icon: 'visPie',
-            isCompatible: true,
-          },
-        ];
-  },
-
-  onLayerAction(layerId, actionId, state) {
-    return {
-      ...state,
-      layers: state.layers.map((layer) => {
-        const ret: PieLayerState =
-          layer.layerId !== layerId
-            ? layer
-            : {
-                ...layer,
-                allowMultipleMetrics: actionId === ENABLE_MULTIPLE_METRICS_ACTION_ID,
-              };
-
-        return ret;
-      }),
-    };
   },
 });

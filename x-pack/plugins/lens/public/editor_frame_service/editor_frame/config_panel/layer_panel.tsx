@@ -699,14 +699,17 @@ export function LayerPanel(
                 />
               )}
               {activeVisualization?.renderLayerSettings && (
-                <NativeRenderer
-                  render={activeVisualization?.renderLayerSettings}
-                  nativeProps={{
-                    ...layerVisualizationConfigProps,
-                    setState: props.updateVisualization,
-                    panelRef: settingsPanelRef,
-                  }}
-                />
+                <>
+                  <EuiSpacer size="m" />
+                  <NativeRenderer
+                    render={activeVisualization?.renderLayerSettings}
+                    nativeProps={{
+                      ...layerVisualizationConfigProps,
+                      setState: props.updateVisualization,
+                      panelRef: settingsPanelRef,
+                    }}
+                  />
+                </>
               )}
             </div>
           </div>
