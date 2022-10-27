@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  AgentName,
-  isElasticAgentName,
-} from '../../../typings/es_schemas/ui/fields/agent';
+import { isOpenTelemetryAgentName } from '../../../common/agent_name';
+import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
 const agentsRepoName: Partial<Record<AgentName, string>> = {
   go: 'apm-agent-go',
@@ -39,7 +37,9 @@ export const getAllAgentsName = () =>
   Object.keys(agentsRepoName).map((agent) => agent as AgentName);
 
 export const getAgentRepositoryDetails = (agentName: AgentName) => {
-  const user = isElasticAgentName(agentName) ? 'elastic' : 'open-telemetry';
+  const user = isOpenTelemetryAgentName(agentName)
+    ? 'open-telemetry'
+    : 'elastic';
   const repository = agentsRepoName[agentName];
 
   if (!repository) {

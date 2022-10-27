@@ -5,26 +5,18 @@
  * 2.0.
  */
 
-import { ValuesType } from 'utility-types';
-
-const elasticAgentNames = [
-  'go',
-  'java',
-  'js-base',
-  'iOS/swift',
-  'rum-js',
-  'nodejs',
-  'python',
-  'dotnet',
-  'ruby',
-  'php',
-  'android/java',
-] as const;
-
-export type ElasticAgentName = ValuesType<typeof elasticAgentNames>;
-
-export const isElasticAgentName = (agentName: AgentName) =>
-  elasticAgentNames.includes(agentName as ElasticAgentName);
+export type ElasticAgentName =
+  | 'go'
+  | 'java'
+  | 'js-base'
+  | 'iOS/swift'
+  | 'rum-js'
+  | 'nodejs'
+  | 'python'
+  | 'dotnet'
+  | 'ruby'
+  | 'php'
+  | 'android/java';
 
 export type OpenTelemetryAgentName =
   | 'otlp'
