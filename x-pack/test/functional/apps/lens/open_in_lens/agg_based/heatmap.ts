@@ -16,6 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'timePicker',
     'visEditor',
   ]);
+  const timeout = 250;
 
   describe('Heatmap', function describeIndexTests() {
     const isNewChartsLibraryEnabled = true;
@@ -53,7 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('heatmapChart');
+      await lens.waitForVisualization('heatmapChart', timeout);
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
       if (!debugState) {
@@ -91,7 +92,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('heatmapChart');
+      await lens.waitForVisualization('heatmapChart', timeout);
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
       if (!debugState) {
@@ -115,7 +116,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visChart.waitForVisualizationRenderingStabilized();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('heatmapChart');
+      await lens.waitForVisualization('heatmapChart', timeout);
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
       if (!debugState) {
@@ -175,7 +176,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visChart.waitForVisualizationRenderingStabilized();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('heatmapChart');
+      await lens.waitForVisualization('heatmapChart', timeout);
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
       if (!debugState) {
