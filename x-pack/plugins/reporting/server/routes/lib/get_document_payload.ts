@@ -64,16 +64,16 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
     const content = await getContentStream(reporting, { id, index }, { encoding });
     const filename = getTitle(exportType, title);
     const headers = getReportingHeaders(output, exportType);
+    const contentType = output.content_type ?? 'text/plain';
 
     return {
       content,
       statusCode: 200,
-      contentType: output.content_type,
+      contentType,
       headers: {
         ...headers,
         'Content-Disposition': `attachment; filename="${filename}"`,
-        'Content-Type': output.content_type ?? 'text/plain',
-        'Content-Length': output.size.toString(),
+        'Content-Length': `${output.size ?? ''}`,
       },
     };
   }
