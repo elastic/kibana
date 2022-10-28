@@ -881,7 +881,7 @@ function ungroupLayer(layerId: string) {
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    const layer = getLayerList(getState()).find((layer) => layer.getId() === layerId);
+    const layer = getLayerList(getState()).find((findLayer) => findLayer.getId() === layerId);
     if (!layer || !isLayerGroup(layer)) {
       return;
     }
