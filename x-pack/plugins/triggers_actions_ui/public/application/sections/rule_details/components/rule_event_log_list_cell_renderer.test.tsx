@@ -114,7 +114,7 @@ describe('rule_event_log_list_cell_renderer', () => {
         spaceIds={['space1']}
       />
     );
-    //@ts-ignore data-href is not a native EuiLink prop
+    // @ts-ignore data-href is not a native EuiLink prop
     expect(wrapper1.find(EuiLink).props()['data-href']).toEqual('/rule/1');
     const wrapper2 = shallow(
       <RuleEventLogListCellRenderer
@@ -124,7 +124,7 @@ describe('rule_event_log_list_cell_renderer', () => {
         spaceIds={['space2']}
       />
     );
-    //@ts-ignore data-href is not a native EuiLink prop
+    // @ts-ignore data-href is not a native EuiLink prop
     expect(wrapper2.find(EuiLink).props()['data-href']).toEqual(
       '/s/space2/app/management/insightsAndAlerting/triggersActions/rule/1'
     );
