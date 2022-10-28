@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { setImmediate } from 'timers/promises';
 import { join } from 'path';
 import loadJsonFile from 'load-json-file';
-import { setImmediate } from 'timers/promises';
 
 import {
   clientProviderInstanceMock,

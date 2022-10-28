@@ -83,18 +83,19 @@ export function registerErrorCountRuleType({
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      executor: async ({ services, params }) => {
+      executor: async ({ services, params: ruleParams }) => {
         const config = await firstValueFrom(config$);
-        const ruleParams = params;
 
         const indices = await getApmIndices({
           config,
           savedObjectsClient: services.savedObjectsClient,
         });
+
         const searchParams = {
           index: indices.error,
-          size: 0,
           body: {
+            track_total_hits: false,
+            size: 0,
             query: {
               bool: {
                 filter: [

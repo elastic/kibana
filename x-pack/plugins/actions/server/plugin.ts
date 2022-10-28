@@ -43,7 +43,7 @@ import {
 import { ActionsConfig, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { ActionsClient } from './actions_client';
-import { ActionTypeRegistry } from './action_type_registry';
+import { ActionTypeRegistry, MAX_ATTEMPTS } from './action_type_registry';
 import {
   createExecutionEnqueuerFunction,
   createEphemeralExecutionEnqueuerFunction,
@@ -101,6 +101,11 @@ import { createSubActionConnectorFramework } from './sub_action_framework';
 import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';
+import {
+  IUnsecuredActionsClient,
+  UnsecuredActionsClient,
+} from './unsecured_actions_client/unsecured_actions_client';
+import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 
 export interface PluginSetupContract {
   registerType<
@@ -137,6 +142,8 @@ export interface PluginStartContract {
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
 
   preconfiguredActions: PreConfiguredAction[];
+
+  getUnsecuredActionsClient(): IUnsecuredActionsClient;
 
   renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
@@ -351,6 +358,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
       ) => {
         ensureSufficientLicense(actionType);
+        actionType.maxAttempts = actionType.maxAttempts ?? MAX_ATTEMPTS;
         actionTypeRegistry.register(actionType);
       },
       registerSubActionConnectorType: <
@@ -452,6 +460,21 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       });
     };
 
+    const getUnsecuredActionsClient = () => {
+      const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
+        ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      ]);
+
+      return new UnsecuredActionsClient({
+        internalSavedObjectsRepository,
+        executionEnqueuer: createBulkUnsecuredExecutionEnqueuerFunction({
+          taskManager: plugins.taskManager,
+          connectorTypeRegistry: actionTypeRegistry!,
+          preconfiguredConnectors: preconfiguredActions,
+        }),
+      });
+    };
+
     // Ensure the public API cannot be used to circumvent authorization
     // using our legacy exemption mechanism by passing in a legacy SO
     // as authorizationContext which would then set a Legacy AuthorizationMode
@@ -532,6 +555,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         return instantiateAuthorization(request);
       },
       getActionsClientWithRequest: secureGetActionsClientWithRequest,
+      getUnsecuredActionsClient,
       preconfiguredActions,
       renderActionParameterTemplates: (...args) =>
         renderActionParameterTemplates(actionTypeRegistry, ...args),

@@ -53,7 +53,7 @@ beforeEach(async () => {
   }
 });
 
-test('Updates the embeddable title when given', async (done) => {
+test('Updates the embeddable title when given', async () => {
   const getUserData = () => Promise.resolve({ title: 'What is up?' });
   const customizePanelAction = new CustomizePanelTitleAction(getUserData);
   expect(embeddable.getInput().title).toBeUndefined();
@@ -66,11 +66,10 @@ test('Updates the embeddable title when given', async (done) => {
   // Recreating the container should preserve the custom title.
   const containerClone = createHelloWorldContainer(container.getInput());
   // Need to wait for the container to tell us the embeddable has been loaded.
-  const subscription = containerClone.getOutput$().subscribe(() => {
+  const subscription = await containerClone.getOutput$().subscribe(() => {
     if (containerClone.getOutput().embeddableLoaded[embeddable.id]) {
       expect(embeddable.getInput().title).toBe('What is up?');
       subscription.unsubscribe();
-      done();
     }
   });
 });
