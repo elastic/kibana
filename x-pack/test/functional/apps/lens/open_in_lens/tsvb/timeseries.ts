@@ -58,7 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await goBackBtn.click();
       await visualBuilder.checkVisualBuilderIsPresent();
       await retry.try(async () => {
-        const actualCount = await visualBuilder.getRhythmChartLegendValue(0);
+        const actualCount = await visualBuilder.getRhythmChartLegendValue();
         expect(actualCount).to.be('56');
       });
     });
