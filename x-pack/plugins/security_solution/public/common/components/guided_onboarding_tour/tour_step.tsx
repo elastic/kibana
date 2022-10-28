@@ -48,6 +48,7 @@ export const SecurityTourStep = ({ children, step, stepId }: SecurityTourStep) =
   );
 
   const onClick = useCallback(() => incrementStep(stepId), [incrementStep, stepId]);
+
   // step === 5 && stepId === SecurityStepId.alertsCases is in Cases app and out of context.
   // If we mount this step, we know we need to render it
   // we are also managing the context on the siem end in the background
