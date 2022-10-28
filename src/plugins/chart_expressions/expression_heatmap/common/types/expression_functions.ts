@@ -94,6 +94,7 @@ export interface HeatmapExpressionProps {
   args: HeatmapArguments;
   syncTooltips: boolean;
   syncCursor: boolean;
+  canNavigateToLens?: boolean;
 }
 
 export interface HeatmapRender {
