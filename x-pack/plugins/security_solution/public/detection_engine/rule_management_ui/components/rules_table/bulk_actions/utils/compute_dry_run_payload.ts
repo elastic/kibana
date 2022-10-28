@@ -15,7 +15,7 @@ import { assertUnreachable } from '../../../../../../../common/utility_types';
  * @param {BulkActionEditType | undefined} editAction
  * @returns {BulkActionEditPayload[] | undefined}
  */
-export const computeDryRunPayload = (editAction: BulkActionEditType): BulkActionEditPayload[] => {
+export function computeDryRunPayload(editAction: BulkActionEditType): BulkActionEditPayload[] {
   switch (editAction) {
     case BulkActionEditType.add_index_patterns:
     case BulkActionEditType.delete_index_patterns:
@@ -64,4 +64,11 @@ export const computeDryRunPayload = (editAction: BulkActionEditType): BulkAction
     default:
       assertUnreachable(editAction);
   }
-};
+
+  return [
+    {
+      type: editAction,
+      value: [],
+    },
+  ];
+}
