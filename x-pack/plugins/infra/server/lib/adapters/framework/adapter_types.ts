@@ -22,16 +22,18 @@ import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { PluginSetupContract as AlertingPluginContract } from '@kbn/alerting-plugin/server';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 
 export interface InfraServerPluginSetupDeps {
+  alerting: AlertingPluginContract;
   data: DataPluginSetup;
   home: HomeServerPluginSetup;
+  features: FeaturesPluginSetup;
+  ruleRegistry: RuleRegistryPluginSetupContract;
+  observability: ObservabilityPluginSetup;
   spaces: SpacesPluginSetup;
   usageCollection: UsageCollectionSetup;
   visTypeTimeseries: VisTypeTimeseriesSetup;
-  features: FeaturesPluginSetup;
-  alerting: AlertingPluginContract;
-  ruleRegistry: RuleRegistryPluginSetupContract;
   ml?: MlPluginSetup;
 }
 
