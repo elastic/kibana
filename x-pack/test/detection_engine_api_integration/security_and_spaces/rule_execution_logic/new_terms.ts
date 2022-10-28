@@ -50,10 +50,12 @@ export default ({ getService }: FtrProviderContext) => {
   describe('New terms type rules', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/new_terms');
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/new_terms');
       await deleteSignalsIndex(supertest, log);
       await deleteAllAlerts(supertest, log);
     });
@@ -225,6 +227,96 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
       expect(previewAlertsOrderedByHostIp[2]._source?.['kibana.alert.new_terms']).eql([
         'host.ip: fe80::24ce:f7ff:fede:a571',
+      ]);
+    });
+
+    it('should generate 3 alerts when 1 document has 3 new values for multiple fields', async () => {
+      const rule: NewTermsRuleCreateProps = {
+        ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+        new_terms_fields: ['host.name', 'host.ip'],
+        from: '2019-02-19T20:42:00.000Z',
+        history_window_start: '2019-01-19T20:42:00.000Z',
+      };
+
+      const { previewId } = await previewRule({ supertest, rule });
+      const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+      expect(previewAlerts.length).eql(3);
+
+      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql([
+        'host.name: zeek-newyork-sha-aa8df15',
+        'host.ip: 10.10.0.6',
+      ]);
+      expect(previewAlerts[1]._source?.['kibana.alert.new_terms']).eql([
+        'host.name: zeek-newyork-sha-aa8df15',
+        'host.ip: 157.230.208.30',
+      ]);
+      expect(previewAlerts[2]._source?.['kibana.alert.new_terms']).eql([
+        'host.name: zeek-newyork-sha-aa8df15',
+        'host.ip: fe80::24ce:f7ff:fede:a571',
+      ]);
+    });
+
+    it.only('should generate 1 alert for unique combination of existing terms', async () => {
+      // ensure there are no alerts for single new terms fields, it means values are not new
+      const rule: NewTermsRuleCreateProps = {
+        ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+        index: ['new_terms'],
+        new_terms_fields: ['host.name', 'host.ip'],
+        from: '2020-10-19T05:00:04.000Z',
+        history_window_start: '2020-10-13T05:00:04.000Z',
+      };
+      // shouldn't be terms for 'host.ip'
+      const hostIpPreview = await previewRule({
+        supertest,
+        rule: { ...rule, new_terms_fields: ['host.ip'] },
+      });
+      const hostIpPreviewAlerts = await getPreviewAlerts({
+        es,
+        previewId: hostIpPreview.previewId,
+      });
+      expect(hostIpPreviewAlerts.length).eql(0);
+
+      // shouldn't be terms for 'host.name'
+      const hostNamePreview = await previewRule({
+        supertest,
+        rule: { ...rule, new_terms_fields: ['host.name'] },
+      });
+      const hostNamePreviewAlerts = await getPreviewAlerts({
+        es,
+        previewId: hostNamePreview.previewId,
+      });
+      expect(hostNamePreviewAlerts.length).eql(0);
+
+      const { previewId } = await previewRule({ supertest, rule });
+      const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+      expect(previewAlerts.length).eql(1);
+
+      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql([
+        'host.name: host-0',
+        'host.ip: 127.0.0.2',
+      ]);
+    });
+
+    it('should generate alert for each new unique combination', async () => {
+      // ensure there are no alerts for single new terms fields, it means values are not new
+      const rule: NewTermsRuleCreateProps = {
+        ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+        index: ['new_terms'],
+        new_terms_fields: ['source.ip', 'tags'],
+        from: '2020-10-19T05:00:04.000Z',
+        history_window_start: '2020-10-13T05:00:04.000Z',
+      };
+
+      const { previewId } = await previewRule({ supertest, rule });
+      const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+      expect(previewAlerts.length).eql(4);
+
+      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql([
+        'host.name: host-0',
+        'host.ip: 127.0.0.2',
       ]);
     });
 

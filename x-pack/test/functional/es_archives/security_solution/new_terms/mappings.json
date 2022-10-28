@@ -1,0 +1,46 @@
+{
+    "type": "index",
+    "value": {
+      "index": "new_terms",
+      "mappings": {
+        "properties": {
+          "@timestamp": {
+            "type": "date"
+          },
+          "host": {
+            "properties": {
+              "name": {
+                "type": "keyword"
+              },
+              "ip": {
+                "type": "ip"
+              }
+            }
+          },
+          "user": {
+            "properties": {
+              "name": {
+                "type": "keyword"
+              }
+            }
+          },
+          "source": {
+            "properties": {
+              "ip": {
+                "type": "ip"
+              }
+            }
+          },
+          "tags": {
+            "type": "keyword"
+          }
+        }
+      },
+      "settings": {
+        "index": {
+          "number_of_replicas": "1",
+          "number_of_shards": "1"
+        }
+      }
+    }
+  }
