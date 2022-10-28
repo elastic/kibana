@@ -33,7 +33,7 @@ describe('fetchIndexShardSize', () => {
   const size = 10;
   const shardIndexPatterns = '*';
   const threshold = 0.00000001;
-  
+
   const esRes: estypes.SearchResponse = {
     took: 1,
     timed_out: false,
@@ -164,7 +164,7 @@ describe('fetchIndexShardSize', () => {
       },
     },
   };
-  
+
   it('fetch as expected', async () => {
     esClient.search.mockResponse(esRes);
     const result = await fetchIndexShardSize(
@@ -195,7 +195,7 @@ describe('fetchIndexShardSize', () => {
       },
     ]);
   });
-  
+
   it('higher alert threshold', async () => {
     esClient.search.mockResponse(esRes);
     const oneGBThreshold = 1;
@@ -215,7 +215,7 @@ describe('fetchIndexShardSize', () => {
       },
     ]);
   });
-  
+
   it('should call ES with correct query', async () => {
     await fetchIndexShardSize(esClient, clusters, threshold, shardIndexPatterns, size);
     expect(esClient.search).toHaveBeenCalledWith({
@@ -271,7 +271,7 @@ describe('fetchIndexShardSize', () => {
       },
     });
   });
-  
+
   it('should call ES with correct query when ccs disabled', async () => {
     // @ts-ignore
     Globals.app.config.ui.ccs.enabled = false;
@@ -284,5 +284,4 @@ describe('fetchIndexShardSize', () => {
     // @ts-ignore
     expect(params.index).toBe('.monitoring-es-*,metrics-elasticsearch.stack_monitoring.index-*');
   });
-  
 });
