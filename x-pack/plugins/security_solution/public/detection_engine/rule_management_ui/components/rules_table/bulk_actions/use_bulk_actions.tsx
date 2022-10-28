@@ -72,7 +72,7 @@ export const useBulkActions = ({
 
   const {
     state: { isAllSelected, rules, loadingRuleIds, selectedRuleIds },
-    actions: { setLoadingRules, clearRulesSelection },
+    actions: { clearRulesSelection },
   } = rulesTableContext;
 
   const getBulkItemsPopoverContent = useCallback(
@@ -448,7 +448,6 @@ export const useBulkActions = ({
       startTransaction,
       hasMlPermissions,
       executeBulkAction,
-      setLoadingRules,
       filterQuery,
       toasts,
       clearRulesSelection,
