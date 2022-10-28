@@ -20,7 +20,6 @@ export interface TourContextValue {
   activeStep: number;
   endTourStep: (stepId: SecurityStepId) => void;
   incrementStep: (stepId: SecurityStepId) => void;
-  setActiveStep: (stepId: SecurityStepId, step: number) => void;
   isTourShown: (stepId: SecurityStepId) => boolean;
 }
 
@@ -28,7 +27,6 @@ const initialState: TourContextValue = {
   activeStep: 0,
   endTourStep: () => {},
   incrementStep: () => {},
-  setActiveStep: () => {},
   isTourShown: () => false,
 };
 
@@ -64,12 +62,6 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
 
   const isTourShown = useCallback((stepId: SecurityStepId) => tourStatus[stepId], [tourStatus]);
   const [activeStep, _setActiveStep] = useState<number>(1);
-
-  const setActiveStep = useCallback((stepId: SecurityStepId, step: number) => {
-    if (step <= securityTourConfig[stepId].length) {
-      _setActiveStep(step);
-    }
-  }, []);
 
   const incrementStep = useCallback((stepId: SecurityStepId) => {
     _setActiveStep(
@@ -113,7 +105,6 @@ export const RealTourContextProvider = ({ children }: { children: ReactChild }) 
     endTourStep,
     incrementStep,
     isTourShown,
-    setActiveStep,
   };
 
   return <TourContext.Provider value={context}>{children}</TourContext.Provider>;
