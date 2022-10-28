@@ -309,7 +309,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         {this.state.error && (
           <EuiFlexGroup
             alignItems="center"
-            className="eui-fullHeight"
+            className="eui-fullHeight embPanel__error"
             data-test-subj="embeddableError"
             justifyContent="center"
           >
