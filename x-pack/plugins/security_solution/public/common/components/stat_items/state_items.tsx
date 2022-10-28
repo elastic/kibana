@@ -63,7 +63,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(
       [from, to]
     );
 
-    const { toggleStatus, toggle } = useToggleStatus({ id });
+    const { toggleStatus, toggle } = useToggleStatus({ id, setQuerySkip });
 
     const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
 

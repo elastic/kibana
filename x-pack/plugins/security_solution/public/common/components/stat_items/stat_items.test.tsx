@@ -10,18 +10,12 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
-import type { StatItemsProps, StatItems } from '.';
-import { StatItemsComponent, useKpiMatrixStatus } from '.';
+import type { StatItemsProps } from '.';
+import { StatItemsComponent } from './state_items';
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { fieldsMapping as fieldTitleChartMapping } from '../../../network/components/kpi_network/unique_private_ips';
-import {
-  mockData,
-  mockEnableChartsData,
-  mockNoChartMappings,
-  mockUpdateDateRange,
-} from '../../../network/components/kpi_network/mock';
+import { mockUpdateDateRange } from '../../../network/components/kpi_network/mock';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
@@ -31,13 +25,10 @@ import {
 import type { State } from '../../store';
 import { createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import type {
-  HostsKpiStrategyResponse,
-  NetworkKpiStrategyResponse,
-} from '../../../../common/search_strategy';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
 import * as module from '../../containers/query_toggle';
 import { tGridReducer } from '@kbn/timelines-plugin/public';
+import type { LensAttributes } from '../visualization_actions/types';
 
 const from = '2019-06-15T06:00:00.000Z';
 const to = '2019-06-18T06:00:00.000Z';
@@ -48,6 +39,13 @@ jest.mock('../charts/areachart', () => {
 
 jest.mock('../charts/barchart', () => {
   return { BarChart: () => <div className="barchart" /> };
+});
+
+jest.mock('../visualization_actions', () => {
+  return {
+    VisualizationActions: () => <div className="visualizationActions" />,
+    HISTOGRAM_ACTIONS_BUTTON_CLASS: 'histogram-actions-trigger',
+  };
 });
 
 const mockSetToggle = jest.fn();
@@ -71,7 +69,7 @@ describe('Stat Items Component', () => {
     description: 'HOSTS',
     fields: [{ key: 'hosts', value: null, color: '#6092C0', icon: 'cross' }],
     from,
-    id: 'statItems',
+    id: 'hostsKpiHostsQuery',
     key: 'mock-keys',
     loading: false,
     setQuerySkip: mockSetQuerySkip,
@@ -162,6 +160,7 @@ describe('Stat Items Component', () => {
         value: 1714,
         color: '#D36086',
         icon: 'cross',
+        lensAttributes: {} as LensAttributes,
       },
       {
         key: 'uniqueDestinationIps',
@@ -169,6 +168,7 @@ describe('Stat Items Component', () => {
         value: 2359,
         color: '#9170B8',
         icon: 'cross',
+        lensAttributes: {} as LensAttributes,
       },
     ],
   };
@@ -221,7 +221,7 @@ describe('Stat Items Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toEqual(true);
+      expect(wrapper.find(`.viz-actions`).exists()).toEqual(true);
       expect(wrapper.find('[data-test-subj="stat-title"]').first().exists()).toEqual(true);
     });
     test('toggleStatus=false, render none', () => {
@@ -234,73 +234,8 @@ describe('Stat Items Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toEqual(
-        false
-      );
+      expect(wrapper.find('.viz-actions').first().exists()).toEqual(false);
       expect(wrapper.find('[data-test-subj="stat-title"]').first().exists()).toEqual(false);
     });
-  });
-});
-
-describe('useKpiMatrixStatus', () => {
-  const mockNetworkMappings = fieldTitleChartMapping;
-  const MockChildComponent = (mappedStatItemProps: StatItemsProps) => <span />;
-  const MockHookWrapperComponent = ({
-    fieldsMapping,
-    data,
-  }: {
-    fieldsMapping: Readonly<StatItems[]>;
-    data: NetworkKpiStrategyResponse | HostsKpiStrategyResponse;
-  }) => {
-    const statItemsProps: StatItemsProps[] = useKpiMatrixStatus(
-      fieldsMapping,
-      data,
-      'statItem',
-      from,
-      to,
-      mockUpdateDateRange,
-      mockSetQuerySkip,
-      false
-    );
-
-    return (
-      <div>
-        {statItemsProps.map((mappedStatItemProps) => {
-          return <MockChildComponent {...mappedStatItemProps} />;
-        })}
-      </div>
-    );
-  };
-
-  test('it updates status correctly', () => {
-    const wrapper = mount(
-      <>
-        <MockHookWrapperComponent fieldsMapping={mockNetworkMappings} data={mockData} />
-      </>
-    );
-    const result = { ...wrapper.find('MockChildComponent').get(0).props };
-    const { setQuerySkip, ...restResult } = result;
-    const { setQuerySkip: a, ...restExpect } = mockEnableChartsData;
-    expect(restResult).toEqual(restExpect);
-  });
-
-  test('it should not append areaChart if enableAreaChart is off', () => {
-    const wrapper = mount(
-      <>
-        <MockHookWrapperComponent fieldsMapping={mockNoChartMappings} data={mockData} />
-      </>
-    );
-
-    expect(wrapper.find('MockChildComponent').get(0).props.areaChart).toBeUndefined();
-  });
-
-  test('it should not append barChart if enableBarChart is off', () => {
-    const wrapper = mount(
-      <>
-        <MockHookWrapperComponent fieldsMapping={mockNoChartMappings} data={mockData} />
-      </>
-    );
-
-    expect(wrapper.find('MockChildComponent').get(0).props.barChart).toBeUndefined();
   });
 });
