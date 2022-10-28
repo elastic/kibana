@@ -50,7 +50,7 @@ import {
   convertECSMappingToObject,
 } from '../../../common/schemas/common/utils';
 import ECSSchema from '../../common/schemas/ecs/v8.5.0.json';
-import osquerySchema from '../../common/schemas/osquery/v5.4.0.json';
+import osquerySchema from '../../common/schemas/osquery/v5.5.1.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';
