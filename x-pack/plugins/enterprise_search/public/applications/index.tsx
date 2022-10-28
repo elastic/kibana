@@ -62,6 +62,7 @@ export const renderApp = (
     charts: plugins.charts,
     cloud: plugins.cloud,
     uiSettings: core.uiSettings,
+    guidedOnboarding: plugins.guidedOnboarding,
     history: params.history,
     navigateToUrl: core.application.navigateToUrl,
     security: plugins.security,

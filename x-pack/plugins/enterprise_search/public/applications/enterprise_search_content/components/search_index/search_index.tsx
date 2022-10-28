@@ -11,6 +11,8 @@ import { useParams } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
+import useObservable from 'react-use/lib/useObservable';
+
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -61,6 +63,20 @@ export const SearchIndex: React.FC = () => {
   }>();
 
   const { indexName } = useValues(IndexNameLogic);
+
+  /**
+   * Guided Onboarding needs us to mark the add data step as complete as soon as the user has data in an index
+   * Putting it here guarantees that if a user is viewing an index with data, it'll be marked as complete
+   */
+  const { guidedOnboarding } = useValues(KibanaLogic);
+  const isDataStepActive = useObservable(
+    guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('search', 'add_data')
+  );
+  useEffect(() => {
+    if (isDataStepActive && indexData?.count) {
+      guidedOnboarding.guidedOnboardingApi?.completeGuideStep('search', 'add_data');
+    }
+  }, [isDataStepActive, indexData?.count]);
 
   useEffect(() => {
     if (
