@@ -45,7 +45,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
   const { ingestionMethod } = useValues(IndexViewLogic);
   const [isPopOverOpen, setIsPopOverOpen] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const { deleteMlPipeline } = useActions(PipelinesLogic);
+  const { deleteMlPipeline, detachMlPipeline } = useActions(PipelinesLogic);
   const showConfirmDeleteModal = () => {
     setShowConfirmDelete(true);
     setIsPopOverOpen(false);
@@ -103,6 +103,26 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                         {i18n.translate(
                           'xpack.enterpriseSearch.inferencePipelineCard.action.view',
                           { defaultMessage: 'View in Stack Management' }
+                        )}
+                      </EuiButtonEmpty>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <div>
+                      <EuiButtonEmpty
+                        data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-detachPipeline`}
+                        size="s"
+                        flush="both"
+                        iconType="unlink"
+                        color="text"
+                        onClick={() => {
+                          detachMlPipeline({ indexName, pipelineName });
+                          setIsPopOverOpen(false);
+                        }}
+                      >
+                        {i18n.translate(
+                          'xpack.enterpriseSearch.inferencePipelineCard.action.detach',
+                          { defaultMessage: 'Detach pipeline' }
                         )}
                       </EuiButtonEmpty>
                     </div>
