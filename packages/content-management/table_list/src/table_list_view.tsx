@@ -149,6 +149,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   const {
     canEditAdvancedSettings,
     getListingLimitSettingsUrl,
+    getTagIdsFromReferences,
     searchQueryParser,
     notifyError,
     DateFormatterComp,
@@ -207,11 +208,12 @@ function TableListViewComp<T extends UserContentCommonSchema>({
         item: {
           title: item.attributes.title,
           description: item.attributes.description,
+          tags: getTagIdsFromReferences(item.references),
         },
         ...inspector,
       });
     },
-    [openInspector, inspector]
+    [openInspector, inspector, getTagIdsFromReferences]
   );
 
   const tableColumns = useMemo(() => {

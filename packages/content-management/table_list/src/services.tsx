@@ -48,6 +48,7 @@ export interface Services {
   TagList: FC<{ references: SavedObjectsReference[]; onClick?: (tag: { name: string }) => void }>;
   /** Predicate function to indicate if the saved object references include tags */
   itemHasTags: (references: SavedObjectsReference[]) => boolean;
+  getTagIdsFromReferences: (references: SavedObjectsReference[]) => string[];
 }
 
 const TableListViewContext = React.createContext<Services | null>(null);
@@ -112,6 +113,10 @@ export interface TableListViewKibanaDependencies {
           };
           onClick?: (tag: { name: string; description: string; color: string }) => void;
         }>;
+        SavedObjectSaveModalTagSelector: React.FC<{
+          initialSelection: string[];
+          onTagsSelected: (ids: string[]) => void;
+        }>;
       };
       parseSearchQuery: (
         query: string,
@@ -174,20 +179,31 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
     return Comp;
   }, [savedObjectsTagging?.ui.components.TagList]);
 
-  const itemHasTags = useCallback(
+  const getTagIdsFromReferences = useCallback(
     (references: SavedObjectsReference[]) => {
       if (!savedObjectsTagging?.ui.getTagIdsFromReferences) {
-        return false;
+        return [];
       }
 
-      return savedObjectsTagging.ui.getTagIdsFromReferences(references).length > 0;
+      return savedObjectsTagging.ui.getTagIdsFromReferences(references);
     },
     [savedObjectsTagging?.ui]
   );
 
+  const itemHasTags = useCallback(
+    (references: SavedObjectsReference[]) => {
+      return getTagIdsFromReferences(references).length > 0;
+    },
+    [getTagIdsFromReferences]
+  );
+
   return (
     <RedirectAppLinksKibanaProvider coreStart={core}>
-      <InspectorKibanaProvider core={core} toMountPoint={toMountPoint}>
+      <InspectorKibanaProvider
+        core={core}
+        toMountPoint={toMountPoint}
+        savedObjectsTagging={savedObjectsTagging}
+      >
         <TableListViewProvider
           canEditAdvancedSettings={Boolean(core.application.capabilities.advancedSettings?.save)}
           getListingLimitSettingsUrl={() =>
@@ -205,6 +221,7 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
           navigateToUrl={core.application.navigateToUrl}
           TagList={TagList}
           itemHasTags={itemHasTags}
+          getTagIdsFromReferences={getTagIdsFromReferences}
         >
           {children}
         </TableListViewProvider>
