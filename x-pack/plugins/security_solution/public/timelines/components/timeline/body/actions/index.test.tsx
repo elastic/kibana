@@ -110,6 +110,11 @@ const defaultProps = {
 
 describe('Actions', () => {
   beforeAll(() => {
+    (useTourContext as jest.Mock).mockReturnValue({
+      activeStep: 1,
+      incrementStep: () => null,
+      isTourShown: () => false,
+    });
     (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
   });
 
@@ -248,7 +253,6 @@ describe('Actions', () => {
     describe.each(Object.keys(isTourAnchorConditions))('tour condition true: %s', (key: string) => {
       it('Single condition does not make tour step exist', () => {
         const wrapper = mount(
-          // @ts-ignore
           <TestProviders>
             <Actions {...defaultProps} {...{ [key]: isTourAnchorConditions[key] }} />
           </TestProviders>
