@@ -82,6 +82,12 @@ export interface AggregateEventsBySavedObjectResult {
   aggregations: Record<string, estypes.AggregationsAggregate> | undefined;
 }
 
+type GetQueryBodyWithAuthFilterOpts =
+  | (FindEventsOptionsWithAuthFilter & {
+      namespaces: AggregateEventsWithAuthFilter['namespaces'];
+    })
+  | AggregateEventsWithAuthFilter;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AliasAny = any;
 
@@ -518,11 +524,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
 
 export function getQueryBodyWithAuthFilter(
   logger: Logger,
-  opts:
-    | (FindEventsOptionsWithAuthFilter & {
-        namespaces: AggregateEventsWithAuthFilter['namespaces'];
-      })
-    | AggregateEventsWithAuthFilter,
+  opts: GetQueryBodyWithAuthFilterOpts,
   queryOptions: QueryOptionsType
 ) {
   const { namespaces, type, authFilter } = opts;

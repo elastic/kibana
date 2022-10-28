@@ -461,6 +461,9 @@ const MAX_RULES_NUMBER_FOR_BULK_OPERATION = 10000;
 const API_KEY_GENERATE_CONCURRENCY = 50;
 const RULE_TYPE_CHECKS_CONCURRENCY = 50;
 
+const actionErrorLogDefaultFilter =
+  'event.provider:actions AND ((event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout))';
+
 const alertingAuthorizationFilterOpts: AlertingAuthorizationFilterOpts = {
   type: AlertingAuthorizationFilterType.KQL,
   fieldNames: { ruleTypeId: 'alert.attributes.alertTypeId', consumer: 'alert.attributes.consumer' },
@@ -1055,9 +1058,6 @@ export class RulesClient {
       })
     );
 
-    const defaultFilter =
-      'event.provider:actions AND ((event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout))';
-
     // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();
     const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
@@ -1074,7 +1074,9 @@ export class RulesClient {
           end: parsedDateEnd.toISOString(),
           page,
           per_page: perPage,
-          filter: filter ? `(${defaultFilter}) AND (${filter})` : defaultFilter,
+          filter: filter
+            ? `(${actionErrorLogDefaultFilter}) AND (${filter})`
+            : actionErrorLogDefaultFilter,
           sort: convertEsSortToEventLogSort(sort),
         },
         rule.legacyId !== null ? [rule.legacyId] : undefined
@@ -1129,9 +1131,6 @@ export class RulesClient {
       })
     );
 
-    const defaultFilter =
-      'event.provider:actions AND ((event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout))';
-
     // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();
     const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
@@ -1150,7 +1149,9 @@ export class RulesClient {
           end: parsedDateEnd.toISOString(),
           page,
           per_page: perPage,
-          filter: filter ? `(${defaultFilter}) AND (${filter})` : defaultFilter,
+          filter: filter
+            ? `(${actionErrorLogDefaultFilter}) AND (${filter})`
+            : actionErrorLogDefaultFilter,
           sort: convertEsSortToEventLogSort(sort),
         }
       );
