@@ -1717,6 +1717,20 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorOptions.createdBy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "createdBy",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.RuleExecutorOptions.executionId",
             "type": "string",
             "tags": [],
@@ -1728,13 +1742,13 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-server.RuleExecutorOptions.startedAt",
+            "id": "def-server.RuleExecutorOptions.logger",
             "type": "Object",
             "tags": [],
-            "label": "startedAt",
+            "label": "logger",
             "description": [],
             "signature": [
-              "Date"
+              "Logger"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -1742,35 +1756,11 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-server.RuleExecutorOptions.previousStartedAt",
-            "type": "CompoundType",
+            "id": "def-server.RuleExecutorOptions.name",
+            "type": "string",
             "tags": [],
-            "label": "previousStartedAt",
+            "label": "name",
             "description": [],
-            "signature": [
-              "Date | null"
-            ],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.RuleExecutorOptions.services",
-            "type": "Object",
-            "tags": [],
-            "label": "services",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "alerting",
-                "scope": "server",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-server.RuleExecutorServices",
-                "text": "RuleExecutorServices"
-              },
-              "<InstanceState, InstanceContext, ActionGroupIds>"
-            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1791,13 +1781,13 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-server.RuleExecutorOptions.state",
-            "type": "Uncategorized",
+            "id": "def-server.RuleExecutorOptions.previousStartedAt",
+            "type": "CompoundType",
             "tags": [],
-            "label": "state",
+            "label": "previousStartedAt",
             "description": [],
             "signature": [
-              "State"
+              "Date | null"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -1827,6 +1817,27 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorOptions.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.RuleExecutorServices",
+                "text": "RuleExecutorServices"
+              },
+              "<InstanceState, InstanceContext, ActionGroupIds>"
+            ],
+            "path": "x-pack/plugins/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.RuleExecutorOptions.spaceId",
             "type": "string",
             "tags": [],
@@ -1838,13 +1849,13 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-server.RuleExecutorOptions.namespace",
-            "type": "string",
+            "id": "def-server.RuleExecutorOptions.startedAt",
+            "type": "Object",
             "tags": [],
-            "label": "namespace",
+            "label": "startedAt",
             "description": [],
             "signature": [
-              "string | undefined"
+              "Date"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -1852,11 +1863,14 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-server.RuleExecutorOptions.name",
-            "type": "string",
+            "id": "def-server.RuleExecutorOptions.state",
+            "type": "Uncategorized",
             "tags": [],
-            "label": "name",
+            "label": "state",
             "description": [],
+            "signature": [
+              "State"
+            ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1870,20 +1884,6 @@
             "description": [],
             "signature": [
               "string[]"
-            ],
-            "path": "x-pack/plugins/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.RuleExecutorOptions.createdBy",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "createdBy",
-            "description": [],
-            "signature": [
-              "string | null"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -1905,13 +1905,13 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-server.RuleExecutorOptions.logger",
-            "type": "Object",
+            "id": "def-server.RuleExecutorOptions.namespace",
+            "type": "string",
             "tags": [],
-            "label": "logger",
+            "label": "namespace",
             "description": [],
             "signature": [
-              "Logger"
+              "string | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,

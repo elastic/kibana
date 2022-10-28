@@ -2183,6 +2183,8 @@
             "signature": [
               "(id: string, column: { formula: string; label?: string | undefined; filter?: ",
               "Query",
+              " | undefined; reducedTimeRange?: string | undefined; timeScale?: ",
+              "TimeScaleUnit",
               " | undefined; format?: { id: string; params?: { decimals: number; } | undefined; } | undefined; }, layer: ",
               {
                 "pluginId": "lens",
@@ -2275,6 +2277,35 @@
                     "description": [],
                     "signature": [
                       "Query",
+                      " | undefined"
+                    ],
+                    "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "lens",
+                    "id": "def-public.FormulaPublicApi.insertOrReplaceFormulaColumn.$2.reducedTimeRange",
+                    "type": "string",
+                    "tags": [],
+                    "label": "reducedTimeRange",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "lens",
+                    "id": "def-public.FormulaPublicApi.insertOrReplaceFormulaColumn.$2.timeScale",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "timeScale",
+                    "description": [],
+                    "signature": [
+                      "TimeScaleUnit",
                       " | undefined"
                     ],
                     "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/formula/formula_public_api.ts",
@@ -8771,6 +8802,7 @@
         "label": "HeatmapVisualizationState",
         "description": [],
         "signature": [
+          "Omit<",
           {
             "pluginId": "expressionHeatmap",
             "scope": "common",
@@ -8778,7 +8810,7 @@
             "section": "def-common.HeatmapArguments",
             "text": "HeatmapArguments"
           },
-          " & { layerId: string; layerType: ",
+          ", \"palette\"> & { layerId: string; layerType: ",
           {
             "pluginId": "lens",
             "scope": "common",

@@ -7544,7 +7544,7 @@
         "label": "isFieldValid",
         "description": [],
         "signature": [
-          "(field: ",
+          "(visType: string, field: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -7570,6 +7570,21 @@
           {
             "parentPluginId": "visualizations",
             "id": "def-common.isFieldValid.$1",
+            "type": "string",
+            "tags": [],
+            "label": "visType",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.isFieldValid.$2",
             "type": "Object",
             "tags": [],
             "label": "field",
@@ -7591,7 +7606,7 @@
           },
           {
             "parentPluginId": "visualizations",
-            "id": "def-common.isFieldValid.$2",
+            "id": "def-common.isFieldValid.$3",
             "type": "CompoundType",
             "tags": [],
             "label": "aggregation",
@@ -9141,6 +9156,498 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.HeatmapArguments",
+        "type": "Interface",
+        "tags": [],
+        "label": "HeatmapArguments",
+        "description": [],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapArguments.percentageMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "percentageMode",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapArguments.lastRangeIsRightOpen",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "lastRangeIsRightOpen",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapArguments.showTooltip",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showTooltip",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapArguments.highlightInHover",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "highlightInHover",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapArguments.palette",
+            "type": "Object",
+            "tags": [],
+            "label": "palette",
+            "description": [],
+            "signature": [
+              "PaletteOutput",
+              "<",
+              "CustomPaletteParams",
+              "> | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapArguments.xAccessor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "xAccessor",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapArguments.yAccessor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "yAccessor",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapArguments.valueAccessor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "valueAccessor",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapArguments.splitRowAccessor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "splitRowAccessor",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapArguments.splitColumnAccessor",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "splitColumnAccessor",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapArguments.legend",
+            "type": "Object",
+            "tags": [],
+            "label": "legend",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.HeatmapLegendConfig",
+                "text": "HeatmapLegendConfig"
+              }
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapArguments.gridConfig",
+            "type": "Object",
+            "tags": [],
+            "label": "gridConfig",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.HeatmapGridConfig",
+                "text": "HeatmapGridConfig"
+              }
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapArguments.ariaLabel",
+            "type": "string",
+            "tags": [],
+            "label": "ariaLabel",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.HeatmapGridConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "HeatmapGridConfig",
+        "description": [],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapGridConfig.strokeWidth",
+            "type": "number",
+            "tags": [],
+            "label": "strokeWidth",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapGridConfig.strokeColor",
+            "type": "string",
+            "tags": [],
+            "label": "strokeColor",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapGridConfig.isCellLabelVisible",
+            "type": "boolean",
+            "tags": [],
+            "label": "isCellLabelVisible",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapGridConfig.isYAxisLabelVisible",
+            "type": "boolean",
+            "tags": [],
+            "label": "isYAxisLabelVisible",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapGridConfig.isYAxisTitleVisible",
+            "type": "boolean",
+            "tags": [],
+            "label": "isYAxisTitleVisible",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapGridConfig.yTitle",
+            "type": "string",
+            "tags": [],
+            "label": "yTitle",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapGridConfig.isXAxisLabelVisible",
+            "type": "boolean",
+            "tags": [],
+            "label": "isXAxisLabelVisible",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapGridConfig.isXAxisTitleVisible",
+            "type": "boolean",
+            "tags": [],
+            "label": "isXAxisTitleVisible",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapGridConfig.xTitle",
+            "type": "string",
+            "tags": [],
+            "label": "xTitle",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapGridConfig.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"heatmap_grid\""
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.HeatmapLegendConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "HeatmapLegendConfig",
+        "description": [],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapLegendConfig.isVisible",
+            "type": "boolean",
+            "tags": [],
+            "label": "isVisible",
+            "description": [],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapLegendConfig.position",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "position",
+            "description": [],
+            "signature": [
+              "\"top\" | \"bottom\" | \"left\" | \"right\""
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapLegendConfig.maxLines",
+            "type": "number",
+            "tags": [],
+            "label": "maxLines",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapLegendConfig.shouldTruncate",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "shouldTruncate",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapLegendConfig.legendSize",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "legendSize",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.LegendSize",
+                "text": "LegendSize"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.HeatmapLegendConfig.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"heatmap_legend\""
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.LabelsOrientationConfig",
         "type": "Interface",
         "tags": [],
@@ -10466,7 +10973,7 @@
             "label": "ranges",
             "description": [],
             "signature": [
-              "Range[]"
+              "Range[] | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/params.ts",
             "deprecated": false,
@@ -12638,6 +13145,21 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.ChartShapes",
+        "type": "Type",
+        "tags": [],
+        "label": "ChartShapes",
+        "description": [],
+        "signature": [
+          "\"heatmap\""
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.CollapseFunction",
         "type": "Type",
         "tags": [],
@@ -12756,6 +13278,14 @@
             "docId": "kibVisualizationsPluginApi",
             "section": "def-common.GaugeVisConfiguration",
             "text": "GaugeVisConfiguration"
+          },
+          " | ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.HeatmapConfiguration",
+            "text": "HeatmapConfiguration"
           }
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
@@ -13254,6 +13784,74 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-common.HeatmapConfiguration",
+        "type": "Type",
+        "tags": [],
+        "label": "HeatmapConfiguration",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.HeatmapArguments",
+            "text": "HeatmapArguments"
+          },
+          " & { layerId: string; layerType: ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.LayerType",
+            "text": "LayerType"
+          },
+          "; valueAccessor?: string | undefined; xAccessor?: string | undefined; yAccessor?: string | undefined; shape: \"heatmap\"; } & { palette?: ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.Palette",
+            "text": "Palette"
+          },
+          " | undefined; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.HeatmapLayerState",
+        "type": "Type",
+        "tags": [],
+        "label": "HeatmapLayerState",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.HeatmapArguments",
+            "text": "HeatmapArguments"
+          },
+          " & { layerId: string; layerType: ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.LayerType",
+            "text": "LayerType"
+          },
+          "; valueAccessor?: string | undefined; xAccessor?: string | undefined; yAccessor?: string | undefined; shape: \"heatmap\"; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-common.LastValueColumn",
         "type": "Type",
         "tags": [],
@@ -13566,6 +14164,24 @@
           "\"range\" | \"min\" | \"max\" | \"filters\" | \"count\" | \"date_histogram\" | \"percentile\" | \"sum\" | \"average\" | \"terms\" | \"median\" | \"standard_deviation\" | \"unique_count\" | \"percentile_rank\" | \"last_value\""
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/operations.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
+        "id": "def-common.Palette",
+        "type": "Type",
+        "tags": [],
+        "label": "Palette",
+        "description": [],
+        "signature": [
+          "PaletteOutput",
+          "<",
+          "CustomPaletteParams",
+          "> & { accessor: string; }"
+        ],
+        "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

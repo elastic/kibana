@@ -1245,7 +1245,7 @@
             "label": "overrideMissingContent",
             "description": [],
             "signature": [
-              "((params: { element: JSX.Element; noDataFound?: boolean | undefined; }) => JSX.Element | null) | undefined"
+              "((params: { element: JSX.Element; reason: \"no-data\" | \"unsupported\"; }) => JSX.Element | null) | undefined"
             ],
             "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
             "deprecated": false,
@@ -1278,13 +1278,13 @@
                   },
                   {
                     "parentPluginId": "unifiedFieldList",
-                    "id": "def-public.FieldStatsProps.overrideMissingContent.$1.noDataFound",
+                    "id": "def-public.FieldStatsProps.overrideMissingContent.$1.reason",
                     "type": "CompoundType",
                     "tags": [],
-                    "label": "noDataFound",
+                    "label": "reason",
                     "description": [],
                     "signature": [
-                      "boolean | undefined"
+                      "\"no-data\" | \"unsupported\""
                     ],
                     "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
                     "deprecated": false,

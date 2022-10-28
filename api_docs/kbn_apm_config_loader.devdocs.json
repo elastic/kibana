@@ -274,7 +274,32 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/apm-config-loader",
+        "id": "def-server.apmConfigSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "apmConfigSchema",
+        "description": [],
+        "signature": [
+          "ObjectType",
+          "<{ active: ",
+          "Type",
+          "<boolean | undefined>; serverUrl: ",
+          "Type",
+          "<string | undefined>; secretToken: ",
+          "Type",
+          "<string | undefined>; globalLabels: ",
+          "ObjectType",
+          "<{}>; }>"
+        ],
+        "path": "packages/kbn-apm-config-loader/src/apm_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   },
   "common": {
     "classes": [],

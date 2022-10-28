@@ -633,7 +633,7 @@
             "section": "def-public.CaseAttachmentsWithoutOwner",
             "text": "CaseAttachmentsWithoutOwner"
           },
-          " | undefined; }"
+          " | undefined; headerContent?: React.ReactNode; }"
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_create_case_flyout.tsx",
         "deprecated": false,
@@ -878,7 +878,7 @@
           "label": "hooks",
           "description": [],
           "signature": [
-            "{ getUseCasesAddToNewCaseFlyout: (props?: AddToNewCaseFlyoutProps) => { open: ({ attachments }?: { attachments?: ",
+            "{ getUseCasesAddToNewCaseFlyout: (props?: AddToNewCaseFlyoutProps) => { open: ({ attachments, headerContent, }?: { attachments?: ",
             {
               "pluginId": "cases",
               "scope": "public",
@@ -886,7 +886,7 @@
               "section": "def-public.CaseAttachmentsWithoutOwner",
               "text": "CaseAttachmentsWithoutOwner"
             },
-            " | undefined; }) => void; close: () => void; }; getUseCasesAddToExistingCaseModal: (props?: AddToExistingFlyoutProps) => { open: ({ attachments }?: { attachments?: ",
+            " | undefined; headerContent?: React.ReactNode; }) => void; close: () => void; }; getUseCasesAddToExistingCaseModal: (props?: AddToExistingFlyoutProps) => { open: ({ attachments }?: { attachments?: ",
             {
               "pluginId": "cases",
               "scope": "public",
