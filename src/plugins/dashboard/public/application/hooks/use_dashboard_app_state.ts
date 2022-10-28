@@ -13,6 +13,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { DataView } from '@kbn/data-plugin/common';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import {
@@ -225,7 +226,14 @@ export const useDashboardAppState = ({
             dashboardContainer.controlGroup?.setRelevantDataViewId(newDataViewIds[0]);
           }
           // fetch all data views. These should be cached locally at this time so we will not need to query ES.
-          const allDataViews = await Promise.all(newDataViewIds.map((id) => dataViews.get(id)));
+          const responses = await Promise.allSettled(newDataViewIds.map((id) => dataViews.get(id)));
+          // Keep only fullfilled ones as each panel will handle the rejected ones already on their own
+          const allDataViews = responses
+            .filter(
+              (response): response is PromiseFulfilledResult<DataView> =>
+                response.status === 'fulfilled'
+            )
+            .map(({ value }) => value);
           dashboardContainer.setAllDataViews(allDataViews);
           setDashboardAppState((s) => ({ ...s, dataViews: allDataViews }));
         },
