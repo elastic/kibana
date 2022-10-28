@@ -12,10 +12,10 @@ import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
-import { DatatableRow } from '@kbn/expressions-plugin/common';
+import { buildExpressionFunction, DatatableRow } from '@kbn/expressions-plugin/common';
 import { PaletteRegistry, CustomPaletteParams, CUSTOM_PALETTE } from '@kbn/coloring';
-import type { GaugeArguments } from '@kbn/expression-gauge-plugin/common';
-import { GaugeShapes, EXPRESSION_GAUGE_NAME } from '@kbn/expression-gauge-plugin/common';
+import type { GaugeExpressionFunctionDefinition } from '@kbn/expression-gauge-plugin/common';
+import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import {
   getGoalValue,
   getMaxValue,
@@ -27,12 +27,7 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type { DatasourceLayers, OperationMetadata, Suggestion, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
-import {
-  GROUP_ID,
-  LENS_GAUGE_ID,
-  GaugeVisualizationState,
-  GaugeExpressionState,
-} from './constants';
+import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState } from './constants';
 import { GaugeToolbar } from './toolbar_component';
 import { applyPaletteParams } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
@@ -116,7 +111,7 @@ const toExpression = (
   paletteService: PaletteRegistry,
   state: GaugeVisualizationState,
   datasourceLayers: DatasourceLayers,
-  attributes?: Partial<Omit<GaugeArguments, keyof GaugeExpressionState | 'ariaLabel'>>,
+  attributes?: unknown,
   datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}
 ): Ast | null => {
   const datasource = datasourceLayers[state.layerId];
@@ -127,36 +122,25 @@ const toExpression = (
     return null;
   }
 
+  const gaugeFn = buildExpressionFunction<GaugeExpressionFunctionDefinition>('gauge', {
+    metric: state.metricAccessor,
+    min: state.minAccessor,
+    max: state.maxAccessor,
+    goal: state.goalAccessor,
+    shape: state.shape ?? GaugeShapes.HORIZONTAL_BULLET,
+    colorMode: state?.colorMode ?? 'none',
+    palette: state.palette?.params
+      ? paletteService.get(CUSTOM_PALETTE).toExpression(computePaletteParams(state.palette.params))
+      : undefined,
+    ticksPosition: state.ticksPosition ?? 'auto',
+    labelMinor: state.labelMinor,
+    labelMajor: state.labelMajor,
+    labelMajorMode: state.labelMajorMode ?? 'auto',
+  });
+
   return {
     type: 'expression',
-    chain: [
-      ...(datasourceExpression?.chain ?? []),
-      {
-        type: 'function',
-        function: EXPRESSION_GAUGE_NAME,
-        arguments: {
-          metric: state.metricAccessor ? [state.metricAccessor] : [],
-          min: state.minAccessor ? [state.minAccessor] : [],
-          max: state.maxAccessor ? [state.maxAccessor] : [],
-          goal: state.goalAccessor ? [state.goalAccessor] : [],
-          shape: [state.shape ?? GaugeShapes.HORIZONTAL_BULLET],
-          colorMode: [state?.colorMode ?? 'none'],
-          palette: state.palette?.params
-            ? [
-                paletteService
-                  .get(CUSTOM_PALETTE)
-                  .toExpression(
-                    computePaletteParams((state.palette?.params || {}) as CustomPaletteParams)
-                  ),
-              ]
-            : [],
-          ticksPosition: state.ticksPosition ? [state.ticksPosition] : ['auto'],
-          labelMinor: state.labelMinor ? [state.labelMinor] : [],
-          labelMajor: state.labelMajor ? [state.labelMajor] : [],
-          labelMajorMode: state.labelMajorMode ? [state.labelMajorMode] : ['auto'],
-        },
-      },
-    ],
+    chain: [...(datasourceExpression?.chain ?? []), gaugeFn.toAst()],
   };
 };
 
