@@ -9,7 +9,7 @@
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { BooleanRelation } from '@kbn/es-query';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, pickBy, identity } from 'lodash';
 import { buildCombinedFilter, isCombinedFilter } from '@kbn/es-query';
 import { getBooleanRelationType } from '../utils';
 import type { Operator } from '../filter_bar/filter_editor';
@@ -259,7 +259,9 @@ export const updateFilter = (
   let filter = Object.assign({}, changedFilter);
 
   if (field && operator && params) {
-    if (Array.isArray(params)) {
+    if (operator.type === 'range') {
+      filter = updateWithRangeOperator(filter, operator, params, field);
+    } else if (Array.isArray(params)) {
       filter = updateWithIsOneOfOperator(filter, operator, params);
     } else {
       filter = updateWithIsOperator(filter, operator, params);
@@ -339,6 +341,37 @@ function updateWithIsOperator(
     },
     query: { match_phrase: { ...filter!.query?.match_phrase, [filter.meta.key!]: params } },
   };
+}
+
+// @todo: not for merge, just testing the CI
+function updateWithRangeOperator(
+  filter: Filter,
+  operator: Operator,
+  rawParams: Array<Filter['meta']['params']>,
+  field: DataViewField
+) {
+  const params = {
+    ...filter.meta.params,
+    ...pickBy(rawParams, identity),
+  };
+
+  params.gte = params.from;
+  params.lt = params.to;
+
+  const updatedFilter = {
+    ...filter,
+    meta: {
+      ...filter.meta,
+      negate: operator?.negate,
+      type: operator?.type,
+      params,
+    },
+    query: {
+      [field.name]: params,
+    },
+  };
+
+  return updatedFilter;
 }
 
 function updateWithIsOneOfOperator(
