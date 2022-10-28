@@ -14,9 +14,9 @@ type ReqRuleAction = Omit<RuleAction, 'actionTypeId' | 'frequency'> & {
     >[K];
   };
 };
-export const rewriteActions: (actions: ReqRuleAction[]) => Omit<RuleAction, 'actionTypeId'>[] = (
-  actions
-) => {
+export const rewriteActions: (
+  actions: ReqRuleAction[]
+) => Array<Omit<RuleAction, 'actionTypeId'>> = (actions) => {
   const rewriteFrequency: RewriteRequestCase<NonNullable<RuleAction['frequency']>> = ({
     notify_when: notifyWhen,
     ...rest
