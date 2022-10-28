@@ -31,6 +31,12 @@ import {
   SanitizedRule,
 } from '../../common';
 
+enum Reasons {
+  MUTED = 'muted',
+  THROTTLED = 'throttled',
+  ACTION_GROUP_NOT_CHANGED = 'actionGroupHasNotChanged',
+}
+
 export class ExecutionHandler<
   Params extends RuleTypeParams,
   ExtractedParams extends RuleTypeParams,
@@ -122,7 +128,7 @@ export class ExecutionHandler<
       },
     } = this;
 
-    const executables = this.generateExecutables({ alerts, actions: this.rule.actions, recovered });
+    const executables = this.generateExecutables({ alerts, recovered });
 
     if (!!executables.length) {
       const logActions = [];
@@ -131,9 +137,8 @@ export class ExecutionHandler<
         this.request
       );
 
-      this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
-
       for (const { action, alert, alertId, actionGroup, state } of executables) {
+        this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(1);
         const { actionTypeId } = action;
 
         if (!recovered) {
@@ -242,17 +247,15 @@ export class ExecutionHandler<
   }
 
   private generateExecutables({
-    actions,
     alerts,
     recovered,
   }: {
-    actions: RuleAction[];
     alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>;
     recovered: boolean;
   }) {
     const executables = [];
 
-    for (const action of actions) {
+    for (const action of this.rule.actions) {
       for (const [alertId, alert] of Object.entries(alerts)) {
         if (this.isAlertExecutable({ alertId, alert, recovered })) {
           const actionGroup = recovered
@@ -362,12 +365,6 @@ export class ExecutionHandler<
 
     const muted = mutedAlertIdsSet.has(alertId);
     const throttled = alert.isThrottled(throttle);
-
-    enum Reasons {
-      MUTED = 'muted',
-      THROTTLED = 'throttled',
-      ACTION_GROUP_NOT_CHANGED = 'actionGroupHasNotChanged',
-    }
 
     if (muted) {
       if (
