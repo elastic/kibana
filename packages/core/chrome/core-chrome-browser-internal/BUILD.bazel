@@ -44,7 +44,7 @@ RUNTIME_DEPS = [
   "@npm//classnames",
   "@npm//react-use",
   "@npm//@elastic/eui",
-  "//packages/kbn-i18n:npm_module_types",
+  "//packages/kbn-i18n",
   "//packages/kbn-i18n-react",
   "//packages/core/mount-utils/core-mount-utils-browser-internal",
 ]

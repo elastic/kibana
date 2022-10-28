@@ -276,7 +276,7 @@ export default ({ getService }: FtrProviderContext) => {
       const errorActions = data.filter((d) => d.type === expected.errorFilter);
       expect(errorActions.length).to.be(1);
 
-      expect(errorActions[0].payload).to.be('Failed to fetch field candidates.');
+      expect(errorActions[0].payload).to.be('Failed to fetch index information.');
     });
   });
 };
