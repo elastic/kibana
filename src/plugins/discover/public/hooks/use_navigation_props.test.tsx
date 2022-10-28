@@ -14,8 +14,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MemoryRouter } from 'react-router-dom';
 
 const mockServices = {
-  singleDocLocator: { getRedirectUrl: jest.fn(() => ''), navigate: jest.fn() },
-  contextLocator: { getRedirectUrl: jest.fn(() => ''), navigate: jest.fn() },
+  singleDocLocator: { getRedirectUrl: jest.fn(() => 'mock-doc-redirect-url'), navigate: jest.fn() },
+  contextLocator: {
+    getRedirectUrl: jest.fn(() => 'mock-context-redirect-url'),
+    navigate: jest.fn(),
+  },
   locator: {
     getUrl: jest.fn(() => Promise.resolve('mock-referrer')),
     useUrl: jest.fn(() => 'mock-referrer'),
@@ -44,25 +47,30 @@ const dataViewMock = {
   }),
 } as unknown as DataView;
 
+const render = async () => {
+  const renderResult = renderHook(
+    () =>
+      useNavigationProps({
+        dataView: dataViewMock,
+        rowIndex: 'mock-index',
+        rowId: 'mock-id',
+        columns: ['mock-column'],
+      }),
+    {
+      wrapper: ({ children }) => (
+        <MemoryRouter initialEntries={['/']}>
+          <KibanaContextProvider services={mockServices}>{children}</KibanaContextProvider>
+        </MemoryRouter>
+      ),
+    }
+  );
+  await renderResult.waitForNextUpdate();
+  return renderResult;
+};
+
 describe('useNavigationProps', () => {
   it('should call context and single doc callbacks with correct params', async () => {
-    const { result } = renderHook(
-      () =>
-        useNavigationProps({
-          dataView: dataViewMock,
-          rowIndex: 'mock-index',
-          rowId: 'mock-id',
-          columns: ['mock-column'],
-        }),
-      {
-        wrapper: ({ children }) => (
-          <MemoryRouter initialEntries={['/']}>
-            <KibanaContextProvider services={mockServices}>{children}</KibanaContextProvider>
-          </MemoryRouter>
-        ),
-      }
-    );
-
+    const { result } = await render();
     const commonParams = {
       index: {
         id: '1',
@@ -85,5 +93,12 @@ describe('useNavigationProps', () => {
       ...commonParams,
       rowIndex: 'mock-index',
     });
+  });
+
+  test('should create valid links to the context and single doc pages', async () => {
+    const { result } = await render();
+
+    expect(result.current.singleDocHref).toMatchInlineSnapshot(`"mock-doc-redirect-url"`);
+    expect(result.current.contextViewHref).toMatchInlineSnapshot(`"mock-context-redirect-url"`);
   });
 });
