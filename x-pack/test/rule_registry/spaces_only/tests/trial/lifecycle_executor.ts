@@ -49,6 +49,7 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
     fatal: fakeLogger,
     log: sinon.stub(),
     get: sinon.stub(),
+    isLevelEnabled: sinon.stub(),
   } as Logger;
 
   const getClusterClient = () => {

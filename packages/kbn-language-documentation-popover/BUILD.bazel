@@ -2,7 +2,7 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_BASE_NAME = "kbn-language-documentation-popover"
+PKG_DIRNAME = "kbn-language-documentation-popover"
 PKG_REQUIRE_NAME = "@kbn/language-documentation-popover"
 
 SOURCE_FILES = glob(
@@ -101,7 +101,7 @@ ts_project(
 )
 
 js_library(
-  name = PKG_BASE_NAME,
+  name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
   deps = RUNTIME_DEPS + [":target_node", ":target_webpack"],
   package_name = PKG_REQUIRE_NAME,
@@ -110,9 +110,7 @@ js_library(
 
 pkg_npm(
   name = "npm_module",
-  deps = [
-    ":%s" % PKG_BASE_NAME,
-  ]
+  deps = [":" + PKG_DIRNAME],
 )
 
 filegroup(
