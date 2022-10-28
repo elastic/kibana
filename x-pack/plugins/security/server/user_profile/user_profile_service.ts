@@ -506,11 +506,15 @@ export class UserProfileService {
         this.logger.error(`Privileges check API returned unknown profile UIDs: ${unknownUids}.`);
       }
 
-      // Log profile UIDs for which an error was encountered.
-      if (response.errorUids.length > 0) {
-        this.logger.error(
-          `Privileges check API failed for the following user profiles: ${response.errorUids}.`
-        );
+      // Log profile UIDs and reason for which an error was encountered.
+      if (response.errors?.count) {
+        const uids = Object.keys(response.errors.details);
+
+        for (const uid of uids) {
+          this.logger.error(
+            `Privileges check API failed for UID ${uid} because ${response.errors.details[uid].reason}.`
+          );
+        }
       }
     }
 
