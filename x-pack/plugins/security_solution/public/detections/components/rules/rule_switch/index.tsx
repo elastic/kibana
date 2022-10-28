@@ -55,7 +55,7 @@ export const RuleSwitchComponent = ({
       });
       const bulkActionResponse = await executeBulkAction({
         type: event.target.checked ? BulkAction.enable : BulkAction.disable,
-        queryOrIds: [id],
+        ids: [id],
       });
       if (bulkActionResponse?.attributes.results.updated.length) {
         // The rule was successfully updated

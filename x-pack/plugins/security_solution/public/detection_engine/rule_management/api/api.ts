@@ -213,16 +213,14 @@ export interface BulkActionResponse {
   };
 }
 
-export type QueryOrIds = string | string[];
-interface PlainBulkActionDescriptor {
+export type QueryOrIds = { query: string; ids?: undefined } | { query?: undefined; ids: string[] };
+type PlainBulkActionDescriptor = {
   type: Exclude<BulkAction, BulkAction.edit | BulkAction.export>;
-  queryOrIds: QueryOrIds;
-}
-interface EditBulkActionDescriptor {
+} & QueryOrIds;
+type EditBulkActionDescriptor = {
   type: BulkAction.edit;
-  queryOrIds: QueryOrIds;
   editPayload: BulkActionEditPayload[];
-}
+} & QueryOrIds;
 export type BulkActionDescriptor = PlainBulkActionDescriptor | EditBulkActionDescriptor;
 
 /**
@@ -239,12 +237,8 @@ export async function performBulkAction(
 ): Promise<BulkActionResponse> {
   const params = {
     action: bulkActionDescriptor.type,
-    ...(typeof bulkActionDescriptor.queryOrIds === 'string'
-      ? { query: bulkActionDescriptor.queryOrIds }
-      : {}),
-    ...(Array.isArray(bulkActionDescriptor.queryOrIds)
-      ? { ids: bulkActionDescriptor.queryOrIds }
-      : {}),
+    ...(bulkActionDescriptor.query ? { query: bulkActionDescriptor.query } : {}),
+    ...(bulkActionDescriptor.ids ? { ids: bulkActionDescriptor.ids } : {}),
     ...(bulkActionDescriptor.type === BulkAction.edit
       ? { edit: bulkActionDescriptor.editPayload }
       : {}),
@@ -269,8 +263,8 @@ export type BulkExportResponse = Blob;
 export async function bulkExportRules(queryOrIds: QueryOrIds): Promise<BulkExportResponse> {
   const params = {
     action: BulkAction.export,
-    ...(typeof queryOrIds === 'string' ? { query: queryOrIds } : {}),
-    ...(Array.isArray(queryOrIds) ? { ids: queryOrIds } : {}),
+    ...(queryOrIds.query ? { query: queryOrIds.query } : {}),
+    ...(queryOrIds.ids ? { ids: queryOrIds.ids } : {}),
   };
 
   return KibanaServices.get().http.fetch<BulkExportResponse>(DETECTION_ENGINE_RULES_BULK_ACTION, {

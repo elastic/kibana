@@ -88,7 +88,7 @@ const RuleActionsOverflowComponent = ({
                 closePopover();
                 const result = await executeBulkAction({
                   type: BulkAction.duplicate,
-                  queryOrIds: [rule.id],
+                  ids: [rule.id],
                 });
                 const createdRules = result?.attributes.results.created;
                 if (createdRules?.length) {
@@ -115,7 +115,7 @@ const RuleActionsOverflowComponent = ({
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
                 closePopover();
-                const response = await bulkExport([rule.id]);
+                const response = await bulkExport({ ids: [rule.id] });
                 if (response) {
                   await downloadExportedRules({
                     response,
@@ -136,7 +136,7 @@ const RuleActionsOverflowComponent = ({
                 closePopover();
                 await executeBulkAction({
                   type: BulkAction.delete,
-                  queryOrIds: [rule.id],
+                  ids: [rule.id],
                 });
 
                 onRuleDeletedCallback();

@@ -44,9 +44,7 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
     async (bulkActionDescriptor: BulkActionDescriptor) => {
       try {
         setLoadingRules?.({
-          ids: Array.isArray(bulkActionDescriptor.queryOrIds)
-            ? bulkActionDescriptor.queryOrIds
-            : [],
+          ids: bulkActionDescriptor.ids ?? [],
           action: bulkActionDescriptor.type,
         });
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryOrIds } from '../../../../../rule_management/logic';
 import type { DryRunResult } from '../types';
 import type { FilterOptions } from '../../../../../rule_management/logic/types';
 
@@ -26,12 +27,12 @@ type PrepareSearchFilterProps =
 export const prepareSearchParams = ({
   dryRunResult,
   ...props
-}: PrepareSearchFilterProps): string | string[] => {
+}: PrepareSearchFilterProps): QueryOrIds => {
   // if selectedRuleIds present, filter out rules that failed during dry run
   if ('selectedRuleIds' in props) {
     const failedRuleIdsSet = new Set(dryRunResult?.ruleErrors.flatMap(({ ruleIds }) => ruleIds));
 
-    return props.selectedRuleIds.filter((id) => !failedRuleIdsSet.has(id));
+    return { ids: props.selectedRuleIds.filter((id) => !failedRuleIdsSet.has(id)) };
   }
 
   // otherwise create filter that excludes failed results based on dry run errors
@@ -51,5 +52,5 @@ export const prepareSearchParams = ({
     }
   });
 
-  return convertRulesFilterToKQL(modifiedFilterOptions);
+  return { query: convertRulesFilterToKQL(modifiedFilterOptions) };
 };

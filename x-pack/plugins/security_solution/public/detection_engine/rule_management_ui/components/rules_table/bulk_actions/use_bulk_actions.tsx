@@ -106,7 +106,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkAction.enable,
-          queryOrIds: isAllSelected ? filterQuery : ruleIds,
+          ...(isAllSelected ? { query: filterQuery } : { ids: ruleIds }),
         });
       };
 
@@ -118,7 +118,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkAction.disable,
-          queryOrIds: isAllSelected ? filterQuery : enabledIds,
+          ...(isAllSelected ? { query: filterQuery } : { ids: enabledIds }),
         });
       };
 
@@ -128,7 +128,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkAction.duplicate,
-          queryOrIds: isAllSelected ? filterQuery : selectedRuleIds,
+          ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
         });
         clearRulesSelection();
       };
@@ -147,7 +147,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkAction.delete,
-          queryOrIds: isAllSelected ? filterQuery : selectedRuleIds,
+          ...(isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }),
         });
       };
 
@@ -155,7 +155,9 @@ export const useBulkActions = ({
         closePopover();
         startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
 
-        const response = await bulkExport(isAllSelected ? filterQuery : selectedRuleIds);
+        const response = await bulkExport(
+          isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds }
+        );
 
         // if response null, likely network error happened and export rules haven't been received
         if (!response) {
@@ -185,7 +187,9 @@ export const useBulkActions = ({
 
         const dryRunResult = await executeBulkActionsDryRun({
           type: BulkAction.edit,
-          queryOrIds: isAllSelected ? convertRulesFilterToKQL(filterOptions) : selectedRuleIds,
+          ...(isAllSelected
+            ? { query: convertRulesFilterToKQL(filterOptions) }
+            : { ids: selectedRuleIds }),
           editPayload: computeDryRunEditPayload(bulkEditActionType),
         });
 
@@ -244,7 +248,7 @@ export const useBulkActions = ({
 
         await executeBulkAction({
           type: BulkAction.edit,
-          queryOrIds: prepareSearchParams({
+          ...prepareSearchParams({
             ...(isAllSelected ? { filterOptions } : { selectedRuleIds }),
             dryRunResult,
           }),

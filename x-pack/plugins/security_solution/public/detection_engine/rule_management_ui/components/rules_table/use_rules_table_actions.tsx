@@ -68,7 +68,7 @@ export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
         const result = await executeBulkAction({
           type: BulkAction.duplicate,
-          queryOrIds: [rule.id],
+          ids: [rule.id],
         });
         const createdRules = result?.attributes.results.created;
         if (createdRules?.length) {
@@ -84,7 +84,7 @@ export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
       name: i18n.EXPORT_RULE,
       onClick: async (rule: Rule) => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
-        const response = await bulkExport([rule.id]);
+        const response = await bulkExport({ ids: [rule.id] });
         if (response) {
           await downloadExportedRules({
             response,
@@ -104,7 +104,7 @@ export const useRulesTableActions = (): Array<DefaultItemAction<Rule>> => {
         startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
         await executeBulkAction({
           type: BulkAction.delete,
-          queryOrIds: [rule.id],
+          ids: [rule.id],
         });
       },
     },
