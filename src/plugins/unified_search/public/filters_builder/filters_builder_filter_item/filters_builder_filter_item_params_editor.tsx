@@ -56,11 +56,13 @@ export function ParamsEditor<TParams = unknown>({
     typeof params === 'string' ? params : undefined
   );
 
+  let Component: JSX.Element | null = null;
+
   switch (operator?.type) {
     case 'exists':
       return null;
     case 'phrases':
-      return (
+      Component = (
         <PhrasesValuesInput
           compressed
           indexPattern={dataView}
@@ -72,8 +74,9 @@ export function ParamsEditor<TParams = unknown>({
           fullWidth
         />
       );
+      break;
     case 'range':
-      return (
+      Component = (
         <RangeValueInput
           compressed
           field={field!}
@@ -82,20 +85,25 @@ export function ParamsEditor<TParams = unknown>({
           fullWidth
         />
       );
+      break;
     default:
-      return (
-        <EuiFormRow fullWidth isInvalid={isInvalid} error={errorMessage}>
-          <PhraseValueInput
-            disabled={!dataView || !operator}
-            indexPattern={dataView}
-            field={field!}
-            value={typeof params === 'string' ? params : undefined}
-            onChange={onParamsChange}
-            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-            fullWidth
-            compressed
-          />
-        </EuiFormRow>
+      Component = (
+        <PhraseValueInput
+          disabled={!dataView || !operator}
+          indexPattern={dataView}
+          field={field!}
+          value={typeof params === 'string' ? params : undefined}
+          onChange={onParamsChange}
+          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+          fullWidth
+          compressed
+        />
       );
   }
+
+  return (
+    <EuiFormRow fullWidth isInvalid={isInvalid} error={errorMessage}>
+      {Component}
+    </EuiFormRow>
+  );
 }

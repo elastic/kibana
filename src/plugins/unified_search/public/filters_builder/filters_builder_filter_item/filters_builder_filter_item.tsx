@@ -193,7 +193,6 @@ export function FilterItem({
         >
           <EuiDraggable
             spacing="s"
-            key={JSON.stringify(filter)}
             index={index}
             draggableId={`${path}`}
             customDragHandle={true}
