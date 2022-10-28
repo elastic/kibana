@@ -53,7 +53,15 @@ describe('GuidedOnboarding ApiService', () => {
       expect(httpClient.get).toHaveBeenCalledTimes(1);
       expect(httpClient.get).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
         query: { active: true },
+        signal: new AbortController().signal,
       });
+    });
+
+    it(`doesn't send multiple requests when there are several subscriptions`, () => {
+      subscription = apiService.fetchActiveGuideState$().subscribe();
+      // another subscription
+      apiService.fetchActiveGuideState$().subscribe();
+      expect(httpClient.get).toHaveBeenCalledTimes(1);
     });
 
     it('broadcasts the updated state', async () => {
