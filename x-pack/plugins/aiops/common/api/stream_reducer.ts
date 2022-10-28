@@ -16,7 +16,7 @@ interface StreamState {
   errors: string[];
   loaded: number;
   loadingState: string;
-  remainingFieldCandidatesChunks?: string[][];
+  remainingFieldCandidates?: string[];
   groupsMissing?: boolean;
 }
 

@@ -109,14 +109,13 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
 
   useEffect(() => {
     if (!isRunning) {
-      const { loaded, remainingFieldCandidatesChunks, groupsMissing } = data;
+      const { loaded, remainingFieldCandidates, groupsMissing } = data;
 
       if (
-        (Array.isArray(remainingFieldCandidatesChunks) &&
-          remainingFieldCandidatesChunks?.length > 0) ||
+        (Array.isArray(remainingFieldCandidates) && remainingFieldCandidates.length > 0) ||
         groupsMissing
       ) {
-        setOverrides({ loaded, remainingFieldCandidatesChunks, changePoints: data.changePoints });
+        setOverrides({ loaded, remainingFieldCandidates, changePoints: data.changePoints });
       } else {
         setOverrides(undefined);
       }
