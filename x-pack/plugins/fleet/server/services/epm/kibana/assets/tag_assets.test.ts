@@ -11,18 +11,18 @@ describe('tagKibanaAssets', () => {
     updateTagAssignments: jest.fn(),
   } as any;
   const savedObjectTagClient = {
-    getAll: jest.fn(),
+    get: jest.fn(),
     create: jest.fn(),
   } as any;
 
   beforeEach(() => {
     savedObjectTagAssignmentService.updateTagAssignments.mockReset();
-    savedObjectTagClient.getAll.mockReset();
+    savedObjectTagClient.get.mockReset();
     savedObjectTagClient.create.mockReset();
   });
 
-  it('should create Managed and System tags when tagKibanaAssets with System package', async () => {
-    savedObjectTagClient.getAll.mockResolvedValue([]);
+  it('should create Managed and System tags when tagKibanaAssets with System package when no tags exist', async () => {
+    savedObjectTagClient.get.mockRejectedValue(new Error('not found'));
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
     );
@@ -34,6 +34,7 @@ describe('tagKibanaAssets', () => {
       kibanaAssets,
       pkgTitle: 'System',
       pkgName: 'system',
+      spaceId: 'default',
     });
 
     expect(savedObjectTagClient.create).toHaveBeenCalledWith(
@@ -42,7 +43,7 @@ describe('tagKibanaAssets', () => {
         description: '',
         color: '#FFFFFF',
       },
-      { id: 'managed', overwrite: true, refresh: false }
+      { id: 'fleet-managed-default', overwrite: true, refresh: false }
     );
     expect(savedObjectTagClient.create).toHaveBeenCalledWith(
       {
@@ -50,10 +51,10 @@ describe('tagKibanaAssets', () => {
         description: '',
         color: '#FFFFFF',
       },
-      { id: 'system', overwrite: true, refresh: false }
+      { id: 'fleet-pkg-system-default', overwrite: true, refresh: false }
     );
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
-      tags: ['managed', 'system'],
+      tags: ['fleet-managed-default', 'fleet-pkg-system-default'],
       assign: kibanaAssets.dashboard,
       unassign: [],
       refresh: false,
@@ -61,10 +62,7 @@ describe('tagKibanaAssets', () => {
   });
 
   it('should only assign Managed and System tags when tags already exist', async () => {
-    savedObjectTagClient.getAll.mockResolvedValue([
-      { id: 'managed', name: 'Managed' },
-      { id: 'system', name: 'System' },
-    ]);
+    savedObjectTagClient.get.mockResolvedValue({ name: '', color: '', description: '' });
     const kibanaAssets = { dashboard: [{ id: 'dashboard1', type: 'dashboard' }] } as any;
 
     await tagKibanaAssets({
@@ -73,11 +71,12 @@ describe('tagKibanaAssets', () => {
       kibanaAssets,
       pkgTitle: 'System',
       pkgName: 'system',
+      spaceId: 'default',
     });
 
     expect(savedObjectTagClient.create).not.toHaveBeenCalled();
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
-      tags: ['managed', 'system'],
+      tags: ['fleet-managed-default', 'fleet-pkg-system-default'],
       assign: kibanaAssets.dashboard,
       unassign: [],
       refresh: false,
@@ -85,7 +84,7 @@ describe('tagKibanaAssets', () => {
   });
 
   it('should skip non taggable asset types', async () => {
-    savedObjectTagClient.getAll.mockResolvedValue([]);
+    savedObjectTagClient.get.mockRejectedValue(new Error('tag not found'));
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
     );
@@ -104,10 +103,11 @@ describe('tagKibanaAssets', () => {
       kibanaAssets,
       pkgTitle: 'System',
       pkgName: 'system',
+      spaceId: 'default',
     });
 
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
-      tags: ['managed', 'system'],
+      tags: ['fleet-managed-default', 'fleet-pkg-system-default'],
       assign: [
         ...kibanaAssets.dashboard,
         ...kibanaAssets.search,
@@ -129,8 +129,132 @@ describe('tagKibanaAssets', () => {
       kibanaAssets,
       pkgTitle: 'System',
       pkgName: 'system',
+      spaceId: 'default',
     });
 
     expect(savedObjectTagAssignmentService.updateTagAssignments).not.toHaveBeenCalled();
+  });
+
+  it('should use legacy managed tag if it exists', async () => {
+    savedObjectTagClient.get.mockImplementation(async (id: string) => {
+      if (id === 'managed') return { name: 'managed', description: '', color: '' };
+
+      throw new Error('not found');
+    });
+
+    savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
+      Promise.resolve({ id: name.toLowerCase(), name })
+    );
+    const kibanaAssets = { dashboard: [{ id: 'dashboard1', type: 'dashboard' }] } as any;
+
+    await tagKibanaAssets({
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
+      kibanaAssets,
+      pkgTitle: 'System',
+      pkgName: 'system',
+      spaceId: 'default',
+    });
+
+    expect(savedObjectTagClient.create).not.toHaveBeenCalledWith(
+      {
+        name: 'Managed',
+        description: '',
+        color: '#FFFFFF',
+      },
+      { id: 'fleet-managed-default', overwrite: true, refresh: false }
+    );
+
+    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+      {
+        name: 'System',
+        description: '',
+        color: '#FFFFFF',
+      },
+      { id: 'fleet-pkg-system-default', overwrite: true, refresh: false }
+    );
+    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
+      tags: ['managed', 'fleet-pkg-system-default'],
+      assign: kibanaAssets.dashboard,
+      unassign: [],
+      refresh: false,
+    });
+  });
+
+  it('should use legacy package tag if it exists', async () => {
+    savedObjectTagClient.get.mockImplementation(async (id: string) => {
+      if (id === 'system') return { name: 'system', description: '', color: '' };
+
+      throw new Error('not found');
+    });
+
+    savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
+      Promise.resolve({ id: name.toLowerCase(), name })
+    );
+    const kibanaAssets = { dashboard: [{ id: 'dashboard1', type: 'dashboard' }] } as any;
+
+    await tagKibanaAssets({
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
+      kibanaAssets,
+      pkgTitle: 'System',
+      pkgName: 'system',
+      spaceId: 'default',
+    });
+
+    expect(savedObjectTagClient.create).toHaveBeenCalledWith(
+      {
+        name: 'Managed',
+        description: '',
+        color: '#FFFFFF',
+      },
+      { id: 'fleet-managed-default', overwrite: true, refresh: false }
+    );
+
+    expect(savedObjectTagClient.create).not.toHaveBeenCalledWith(
+      {
+        name: 'System',
+        description: '',
+        color: '#FFFFFF',
+      },
+      { id: 'system', overwrite: true, refresh: false }
+    );
+    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
+      tags: ['fleet-managed-default', 'system'],
+      assign: kibanaAssets.dashboard,
+      unassign: [],
+      refresh: false,
+    });
+  });
+
+  it('should use both legacy tags if they exist', async () => {
+    savedObjectTagClient.get.mockImplementation(async (id: string) => {
+      if (id === 'managed') return { name: 'managed', description: '', color: '' };
+      if (id === 'system') return { name: 'system', description: '', color: '' };
+
+      throw new Error('not found');
+    });
+
+    savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
+      Promise.resolve({ id: name.toLowerCase(), name })
+    );
+    const kibanaAssets = { dashboard: [{ id: 'dashboard1', type: 'dashboard' }] } as any;
+
+    await tagKibanaAssets({
+      savedObjectTagAssignmentService,
+      savedObjectTagClient,
+      kibanaAssets,
+      pkgTitle: 'System',
+      pkgName: 'system',
+      spaceId: 'default',
+    });
+
+    expect(savedObjectTagClient.create).not.toHaveBeenCalled();
+    expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
+      tags: ['managed', 'system'],
+      assign: kibanaAssets.dashboard,
+      unassign: [],
+      refresh: false,
+    });
   });
 });

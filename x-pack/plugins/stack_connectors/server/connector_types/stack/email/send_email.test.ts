@@ -178,6 +178,7 @@ describe('send_email module', () => {
           "fatal": [MockFunction],
           "get": [MockFunction],
           "info": [MockFunction],
+          "isLevelEnabled": [MockFunction],
           "log": [MockFunction],
           "trace": [MockFunction],
           "warn": [MockFunction],
