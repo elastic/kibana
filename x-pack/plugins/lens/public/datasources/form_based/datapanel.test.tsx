@@ -456,9 +456,9 @@ describe('FormBased Data Panel', () => {
         })
       );
       expect(UseExistingFieldsApi.useExistingFieldsReader).toHaveBeenCalled();
-      expect(
-        inst.find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]').first().text()
-      ).toBe('2 available fields. 3 empty fields. 0 meta fields.');
+      expect(inst.find('[data-test-subj="lnsIndexPattern__ariaDescription"]').first().text()).toBe(
+        '2 available fields. 3 empty fields. 0 meta fields.'
+      );
     });
 
     it('loads existence data for current index pattern id', async () => {
@@ -484,9 +484,9 @@ describe('FormBased Data Panel', () => {
         })
       );
       expect(UseExistingFieldsApi.useExistingFieldsReader).toHaveBeenCalled();
-      expect(
-        inst.find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]').first().text()
-      ).toBe('1 available field. 2 empty fields. 0 meta fields.');
+      expect(inst.find('[data-test-subj="lnsIndexPattern__ariaDescription"]').first().text()).toBe(
+        '1 available field. 2 empty fields. 0 meta fields.'
+      );
     });
 
     it('does not load existence data if date and index pattern ids are unchanged', async () => {
@@ -612,9 +612,9 @@ describe('FormBased Data Panel', () => {
         })
       );
 
-      expect(
-        inst.find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]').first().text()
-      ).toBe('2 available fields. 3 empty fields. 0 meta fields.');
+      expect(inst.find('[data-test-subj="lnsIndexPattern__ariaDescription"]').first().text()).toBe(
+        '2 available fields. 3 empty fields. 0 meta fields.'
+      );
 
       await act(async () => {
         await inst.setProps({
@@ -644,9 +644,9 @@ describe('FormBased Data Panel', () => {
         })
       );
 
-      expect(
-        inst.find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]').first().text()
-      ).toBe('1 available field. 2 empty fields. 0 meta fields.');
+      expect(inst.find('[data-test-subj="lnsIndexPattern__ariaDescription"]').first().text()).toBe(
+        '1 available field. 2 empty fields. 0 meta fields.'
+      );
     });
 
     it('shows a loading indicator when loading', async () => {
@@ -664,9 +664,9 @@ describe('FormBased Data Panel', () => {
       const inst = await mountAndWaitForLazyModules(<FormBasedDataPanel {...props} />);
 
       expect(inst.find(EuiProgress).length).toEqual(1);
-      expect(
-        inst.find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]').first().text()
-      ).toBe('');
+      expect(inst.find('[data-test-subj="lnsIndexPattern__ariaDescription"]').first().text()).toBe(
+        ''
+      );
 
       await act(async () => {
         resolveFunction!({
@@ -680,9 +680,9 @@ describe('FormBased Data Panel', () => {
       });
 
       expect(inst.find(EuiProgress).length).toEqual(0);
-      expect(
-        inst.find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]').first().text()
-      ).toBe('1 available field. 2 empty fields. 0 meta fields.');
+      expect(inst.find('[data-test-subj="lnsIndexPattern__ariaDescription"]').first().text()).toBe(
+        '1 available field. 2 empty fields. 0 meta fields.'
+      );
     });
 
     it("should trigger showNoDataPopover if fields don't have data", async () => {
@@ -700,9 +700,9 @@ describe('FormBased Data Panel', () => {
 
       expect(defaultProps.showNoDataPopover).toHaveBeenCalled();
 
-      expect(
-        inst.find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]').first().text()
-      ).toBe('0 available fields. 5 empty fields. 0 meta fields.');
+      expect(inst.find('[data-test-subj="lnsIndexPattern__ariaDescription"]').first().text()).toBe(
+        '0 available fields. 5 empty fields. 0 meta fields.'
+      );
     });
 
     it("should default to empty dsl if query can't be parsed", async () => {
@@ -736,9 +736,9 @@ describe('FormBased Data Panel', () => {
         })
       );
 
-      expect(
-        inst.find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]').first().text()
-      ).toBe('2 available fields. 3 empty fields. 0 meta fields.');
+      expect(inst.find('[data-test-subj="lnsIndexPattern__ariaDescription"]').first().text()).toBe(
+        '2 available fields. 3 empty fields. 0 meta fields.'
+      );
     });
   });
 
@@ -766,7 +766,7 @@ describe('FormBased Data Panel', () => {
 
       expect(
         wrapper
-          .find('[data-test-subj="fieldListGroupedSelectedFields"]')
+          .find('[data-test-subj="lnsIndexPatternSelectedFields"]')
           .find(FieldItem)
           .map((fieldItem) => fieldItem.prop('field').name)
       ).toEqual(['bytes']);
@@ -777,7 +777,7 @@ describe('FormBased Data Panel', () => {
 
       expect(
         wrapper!
-          .find('[data-test-subj="fieldListGroupedSelectedFields"]')
+          .find('[data-test-subj="lnsIndexPatternSelectedFields"]')
           .find(FieldItem)
           .map((fieldItem) => fieldItem.prop('field').name)
       ).toEqual([]);
@@ -787,17 +787,17 @@ describe('FormBased Data Panel', () => {
       const wrapper = await mountAndWaitForLazyModules(<InnerFormBasedDataPanel {...props} />);
 
       expect(wrapper.find(FieldItem).first().prop('field').displayName).toEqual('Records');
-      const availableAccordion = wrapper.find('[data-test-subj="fieldListGroupedAvailableFields"]');
+      const availableAccordion = wrapper.find('[data-test-subj="lnsIndexPatternAvailableFields"]');
       expect(
         availableAccordion.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)
       ).toEqual(['memory', 'bytes']);
       expect(availableAccordion.find(FieldItem).at(0).prop('exists')).toEqual(true);
       wrapper
-        .find('[data-test-subj="fieldListGroupedEmptyFields"]')
+        .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
         .find('button')
         .first()
         .simulate('click');
-      const emptyAccordion = wrapper.find('[data-test-subj="fieldListGroupedEmptyFields"]');
+      const emptyAccordion = wrapper.find('[data-test-subj="lnsIndexPatternEmptyFields"]');
       expect(
         emptyAccordion.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)
       ).toEqual(['client', 'source', 'timestamp']);
@@ -833,13 +833,13 @@ describe('FormBased Data Panel', () => {
       );
 
       wrapper
-        .find('[data-test-subj="fieldListGroupedMetaFields"]')
+        .find('[data-test-subj="lnsIndexPatternMetaFields"]')
         .find('button')
         .first()
         .simulate('click');
       expect(
         wrapper
-          .find('[data-test-subj="fieldListGroupedMetaFields"]')
+          .find('[data-test-subj="lnsIndexPatternMetaFields"]')
           .find(FieldItem)
           .first()
           .prop('field').name
@@ -858,18 +858,18 @@ describe('FormBased Data Panel', () => {
       expect(wrapper.find(EuiCallOut).length).toEqual(2);
       expect(
         wrapper
-          .find('[data-test-subj="fieldListGroupedAvailableFields"]')
+          .find('[data-test-subj="lnsIndexPatternAvailableFields"]')
           .find(FieldItem)
           .map((fieldItem) => fieldItem.prop('field').name)
       ).toEqual([]);
       wrapper
-        .find('[data-test-subj="fieldListGroupedEmptyFields"]')
+        .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
         .find('button')
         .first()
         .simulate('click');
       expect(
         wrapper
-          .find('[data-test-subj="fieldListGroupedEmptyFields"]')
+          .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
           .find(FieldItem)
           .map((fieldItem) => fieldItem.prop('field').displayName)
       ).toEqual(['amemory', 'bytes', 'client', 'source', 'timestampLabel']);
@@ -886,7 +886,7 @@ describe('FormBased Data Panel', () => {
       const wrapper = await mountAndWaitForLazyModules(<InnerFormBasedDataPanel {...props} />);
 
       expect(
-        wrapper.find('[data-test-subj="fieldListGroupedAvailableFields"]').find(EuiLoadingSpinner)
+        wrapper.find('[data-test-subj="lnsIndexPatternAvailableFields"]').find(EuiLoadingSpinner)
           .length
       ).toEqual(1);
       expect(wrapper.find(EuiCallOut).length).toEqual(0);
@@ -902,7 +902,7 @@ describe('FormBased Data Panel', () => {
       });
 
       expect(
-        wrapper.find('[data-test-subj="fieldListGroupedAvailableFields"]').find(EuiLoadingSpinner)
+        wrapper.find('[data-test-subj="lnsIndexPatternAvailableFields"]').find(EuiLoadingSpinner)
           .length
       ).toEqual(0);
       expect(wrapper.find(EuiCallOut).length).toEqual(2);
@@ -932,7 +932,7 @@ describe('FormBased Data Panel', () => {
       });
 
       wrapper
-        .find('[data-test-subj="fieldListGroupedEmptyFields"] button')
+        .find('[data-test-subj="lnsIndexPatternEmptyFields"] button')
         .first()
         .simulate('click');
 
@@ -952,7 +952,7 @@ describe('FormBased Data Panel', () => {
       });
 
       wrapper
-        .find('[data-test-subj="fieldListGroupedEmptyFields"]')
+        .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
         .find('button')
         .first()
         .simulate('click');
@@ -995,7 +995,7 @@ describe('FormBased Data Panel', () => {
       wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
       wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
       wrapper
-        .find('[data-test-subj="fieldListGroupedEmptyFields"]')
+        .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
         .find('button')
         .first()
         .simulate('click');

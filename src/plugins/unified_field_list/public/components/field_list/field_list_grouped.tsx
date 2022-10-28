@@ -34,6 +34,7 @@ export interface FieldListGroupedProps<T extends FieldListItem> {
   fieldsExistInIndex: boolean;
   renderFieldItem: FieldsAccordionProps<T>['renderFieldItem'];
   screenReaderDescriptionForSearchInputId?: string;
+  'data-test-subj'?: string;
 }
 
 function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
@@ -42,6 +43,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   fieldsExistInIndex,
   renderFieldItem,
   screenReaderDescriptionForSearchInputId,
+  'data-test-subj': dataTestSubject = 'fieldListGrouped',
 }: FieldListGroupedProps<T>) {
   const hasSyncedExistingFields =
     fieldsExistenceStatus && fieldsExistenceStatus !== ExistenceFetchStatus.unknown;
@@ -108,7 +110,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
             <div
               aria-live="polite"
               id={screenReaderDescriptionForSearchInputId}
-              data-test-subj="unifiedFieldList__fieldListGroupedDescription"
+              data-test-subj={`${dataTestSubject}__ariaDescription`}
             >
               {hasSyncedExistingFields
                 ? [
@@ -187,7 +189,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
           return (
             <Fragment key={key}>
               <FieldsAccordion<T>
-                id={`fieldListGrouped${key}`}
+                id={`${dataTestSubject}${key}`}
                 initialIsOpen={Boolean(accordionState[key])}
                 label={fieldGroup.title}
                 helpTooltip={fieldGroup.helpText}

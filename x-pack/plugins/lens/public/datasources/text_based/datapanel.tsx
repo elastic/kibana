@@ -202,6 +202,7 @@ export function TextBasedDataPanel({
               fieldsExistInIndex={Boolean(fieldList.length)}
               renderFieldItem={renderFieldItem}
               screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
+              data-test-subj="lnsTextBasedLanguages"
             />
           </EuiFlexItem>
         </EuiFlexGroup>

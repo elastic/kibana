@@ -216,19 +216,23 @@ describe('TextBased Query Languages Data Panel', () => {
 
     expect(
       wrapper
-        .find('[data-test-subj="fieldListGroupedAvailableFields"]')
+        .find('[data-test-subj="lnsTextBasedLanguagesAvailableFields"]')
         .find(FieldButton)
         .map((fieldItem) => fieldItem.prop('fieldName'))
     ).toEqual(['bytes', 'memory', 'timestamp']);
 
-    expect(wrapper.find('[data-test-subj="fieldListGroupedEmptyFields"]').exists()).toBe(false);
-    expect(wrapper.find('[data-test-subj="fieldListGroupedMetaFields"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="lnsTextBasedLanguagesEmptyFields"]').exists()).toBe(
+      false
+    );
+    expect(wrapper.find('[data-test-subj="lnsTextBasedLanguagesMetaFields"]').exists()).toBe(false);
   });
 
   it('should not display the selected fields accordion if there are no fields displayed', async () => {
     const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...defaultProps} />);
 
-    expect(wrapper.find('[data-test-subj="fieldListGroupedSelectedFields"]').length).toEqual(0);
+    expect(wrapper.find('[data-test-subj="lnsTextBasedLanguagesSelectedFields"]').length).toEqual(
+      0
+    );
   });
 
   it('should display the selected fields accordion if there are fields displayed', async () => {
@@ -238,7 +242,9 @@ describe('TextBased Query Languages Data Panel', () => {
     };
     const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...props} />);
 
-    expect(wrapper.find('[data-test-subj="fieldListGroupedSelectedFields"]').length).not.toEqual(0);
+    expect(
+      wrapper.find('[data-test-subj="lnsTextBasedLanguagesSelectedFields"]').length
+    ).not.toEqual(0);
   });
 
   it('should list all supported fields in the pattern that match the search input', async () => {
@@ -255,7 +261,7 @@ describe('TextBased Query Languages Data Panel', () => {
     await wrapper.update();
     expect(
       wrapper
-        .find('[data-test-subj="fieldListGroupedAvailableFields"]')
+        .find('[data-test-subj="lnsTextBasedLanguagesAvailableFields"]')
         .find(FieldButton)
         .map((fieldItem) => fieldItem.prop('fieldName'))
     ).toEqual(['memory']);

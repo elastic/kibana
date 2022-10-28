@@ -621,6 +621,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
             fieldsExistInIndex={!!allFields.length}
             renderFieldItem={renderFieldItem}
             screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
+            data-test-subj="lnsIndexPattern"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
