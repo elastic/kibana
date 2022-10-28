@@ -19,10 +19,10 @@ export interface IEmailServiceProvider<T, U> {
   start(startDeps: U): EmailServiceStart;
 }
 
-interface RelatedSavedObject {
+export interface RelatedSavedObject {
   id: string;
   type: string;
-  namespace: string;
+  spaceIds: string[];
 }
 
 export interface PlainTextEmail {

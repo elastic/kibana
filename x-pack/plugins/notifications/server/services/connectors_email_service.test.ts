@@ -50,7 +50,7 @@ describe('sendPlainTextEmail()', () => {
             {
               id: '9c9456a4-c160-46f5-96f7-e9ac734d0d9b',
               type: 'cases',
-              namespace: 'some-space',
+              spaceIds: ['space1', 'space2'],
             },
           ],
         },
@@ -71,7 +71,12 @@ describe('sendPlainTextEmail()', () => {
             {
               id: '9c9456a4-c160-46f5-96f7-e9ac734d0d9b',
               type: 'cases',
-              namespace: 'some-space',
+              namespace: 'space1',
+            },
+            {
+              id: '9c9456a4-c160-46f5-96f7-e9ac734d0d9b',
+              type: 'cases',
+              namespace: 'space2',
             },
           ],
         },
@@ -86,7 +91,12 @@ describe('sendPlainTextEmail()', () => {
             {
               id: '9c9456a4-c160-46f5-96f7-e9ac734d0d9b',
               type: 'cases',
-              namespace: 'some-space',
+              namespace: 'space1',
+            },
+            {
+              id: '9c9456a4-c160-46f5-96f7-e9ac734d0d9b',
+              type: 'cases',
+              namespace: 'space2',
             },
           ],
         },
@@ -101,7 +111,12 @@ describe('sendPlainTextEmail()', () => {
             {
               id: '9c9456a4-c160-46f5-96f7-e9ac734d0d9b',
               type: 'cases',
-              namespace: 'some-space',
+              namespace: 'space1',
+            },
+            {
+              id: '9c9456a4-c160-46f5-96f7-e9ac734d0d9b',
+              type: 'cases',
+              namespace: 'space2',
             },
           ],
         },
