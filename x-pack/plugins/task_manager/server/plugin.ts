@@ -56,11 +56,10 @@ export type TaskManagerStartContract = Pick<
   | 'bulkEnable'
   | 'bulkDisable'
   | 'bulkSchedule'
-  | 'getRegisteredTypes'
 > &
   Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'remove'> & {
     removeIfExists: TaskStore['remove'];
-  } & { supportsEphemeralTasks: () => boolean };
+  } & { supportsEphemeralTasks: () => boolean; getRegisteredTypes: () => string[] };
 
 export class TaskManagerPlugin
   implements Plugin<TaskManagerSetupContract, TaskManagerStartContract>

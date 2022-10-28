@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
   // This test is meant to fail when any change is made in task manager registered types.
   // The intent is to trigger a code review from the Response Ops team to review the new task type changes.
   describe('check_registered_task_types', () => {
-    it('should check changes on all registered task types ', async () => {
+    it('should check changes on all registered task types', async () => {
       expect((await getRegisteredTypes()).sort()).to.eql([
         'Fleet-Usage-Sender',
         'ML:saved-objects-sync',

@@ -283,8 +283,9 @@ export class SampleTaskManagerFixturePlugin
         res: KibanaResponseFactory
       ): Promise<IKibanaResponse<any>> => {
         try {
+          const tm = await this.taskManagerStart;
           return res.ok({
-            body: taskManager.getRegisteredTypes(),
+            body: tm.getRegisteredTypes(),
           });
         } catch (err) {
           return res.badRequest({ body: err });
