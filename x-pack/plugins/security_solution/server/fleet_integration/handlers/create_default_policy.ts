@@ -40,12 +40,20 @@ export const createDefaultPolicy = (
 };
 
 /**
- * Set all keys of the given object to false
+ * Create a copy of an object with all keys set to false
  */
 const falsyObjectKeys = <T extends Record<string, boolean>>(obj: T): T => {
   return Object.keys(obj).reduce((accumulator, key) => {
     return { ...accumulator, [key]: false };
   }, {} as T);
+};
+
+const getEndpointPolicyConfigPreset = (config: PolicyCreateEndpointConfig | undefined) => {
+  const isNGAV = config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_NGAV;
+  const isEDREssential = config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL;
+  const isEDRComplete = config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_EDR_COMPLETE;
+
+  return { isNGAV, isEDREssential, isEDRComplete };
 };
 
 /**
@@ -55,14 +63,10 @@ const getEndpointPolicyWithIntegrationConfig = (
   policy: PolicyConfig,
   config: PolicyCreateEndpointConfig | undefined
 ): PolicyConfig => {
-  const isNGAV = config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_NGAV;
-  const isEDREssential = config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_EDR_ESSENTIAL;
-  const isEDRComplete = config?.endpointConfig?.preset === ENDPOINT_CONFIG_PRESET_EDR_COMPLETE;
+  const { isNGAV, isEDREssential, isEDRComplete } = getEndpointPolicyConfigPreset(config);
 
-  const isOnlyEvents = !isNGAV && !isEDREssential && !isEDRComplete;
-
-  if (isOnlyEvents) {
-    return disableProtections(policy);
+  if (isEDRComplete) {
+    return policy;
   } else if (isNGAV || isEDREssential) {
     const events = {
       process: true,
@@ -94,9 +98,10 @@ const getEndpointPolicyWithIntegrationConfig = (
         },
       },
     };
-  } else {
-    return policy;
   }
+
+  // data collection by default
+  return disableProtections(policy);
 };
 
 /**
