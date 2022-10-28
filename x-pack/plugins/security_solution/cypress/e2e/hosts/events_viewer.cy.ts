@@ -61,6 +61,7 @@ describe('Events Viewer', () => {
 
   after(() => {
     esArchiverUnload('auditbeat_big');
+    esArchiverUnload('bulk_process');
   });
 
   context('Fields rendering', () => {

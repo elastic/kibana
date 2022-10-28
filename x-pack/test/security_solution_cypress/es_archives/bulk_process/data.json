@@ -224,7 +224,7 @@
       "event.duration": 956768735370253,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:12.391Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:21.127Z",
       "event.type": [
         "connection"
@@ -566,7 +566,7 @@
       "event.duration": 956787543352351,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.674Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.218Z",
       "event.category": [
         "network"
@@ -908,7 +908,7 @@
       "event.duration": 956787748441401,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.674Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.422Z",
       "event.type": [
         "connection"
@@ -1250,7 +1250,7 @@
       "event.duration": 956787951177013,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.539Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.490Z",
       "event.category": [
         "network"
@@ -1592,7 +1592,7 @@
       "event.duration": 956787679978167,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.470Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.150Z",
       "event.category": [
         "network"
@@ -1934,7 +1934,7 @@
       "event.duration": 956787951967553,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.470Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.422Z",
       "event.category": [
         "network"
@@ -2276,7 +2276,7 @@
       "event.duration": 956787882883131,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.403Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.286Z",
       "event.type": [
         "connection"
@@ -2618,7 +2618,7 @@
       "event.duration": 956786865599529,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.402Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:28.268Z",
       "event.type": [
         "connection"
@@ -2960,7 +2960,7 @@
       "event.duration": 956788495778695,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.402Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.898Z",
       "event.category": [
         "network"
@@ -3232,7 +3232,7 @@
       "event.duration": 67892423,
       "event.kind": "signal",
       "event.start": "2022-10-14T14:00:14.578Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:14.646Z",
       "event.category": [
         "network"
@@ -3547,7 +3547,7 @@
       "event.duration": 17021,
       "event.kind": "signal",
       "event.start": "2022-10-14T14:00:10.218Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:10.218Z",
       "event.category": [
         "network"
@@ -3819,7 +3819,7 @@
       "event.duration": 18211,
       "event.kind": "signal",
       "event.start": "2022-10-14T14:00:02.802Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:02.802Z",
       "event.category": [
         "network"
@@ -4134,7 +4134,7 @@
       "event.duration": 24764,
       "event.kind": "signal",
       "event.start": "2022-10-14T13:59:55.106Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:55.106Z",
       "event.type": [
         "connection",
@@ -4408,7 +4408,7 @@
       "event.duration": 16787,
       "event.kind": "signal",
       "event.start": "2022-10-14T13:59:46.394Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:46.394Z",
       "event.type": [
         "connection",
@@ -4725,7 +4725,7 @@
       "event.duration": 167614,
       "event.kind": "signal",
       "event.start": "2022-10-14T13:59:39.994Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:39.994Z",
       "event.category": [
         "network"
@@ -4999,7 +4999,7 @@
       "event.duration": 965526,
       "event.kind": "signal",
       "event.start": "2022-10-14T13:59:31.071Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:31.071Z",
       "event.category": [
         "network"
@@ -5343,7 +5343,7 @@
       "event.duration": 205760039931,
       "event.kind": "signal",
       "event.start": "2022-10-14T13:56:49.502Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:15.262Z",
       "event.category": [
         "network"
@@ -5685,7 +5685,7 @@
       "event.duration": 375323750148,
       "event.kind": "signal",
       "event.start": "2022-10-14T13:54:14.506Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.830Z",
       "event.category": [
         "network"
@@ -6027,7 +6027,7 @@
       "event.duration": 501988222496,
       "event.kind": "signal",
       "event.start": "2022-10-14T13:52:03.418Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:25.406Z",
       "event.category": [
         "network"
@@ -6369,7 +6369,7 @@
       "event.duration": 651368145217,
       "event.kind": "signal",
       "event.start": "2022-10-14T13:49:38.598Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.966Z",
       "event.type": [
         "connection"
@@ -6711,7 +6711,7 @@
       "event.duration": 956782504131348,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.262Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:23.766Z",
       "event.category": [
         "network"
@@ -7007,7 +7007,7 @@
       "event.duration": 956779852576912,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.262Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:21.114Z",
       "event.type": [
         "connection"
@@ -7349,7 +7349,7 @@
       "event.duration": 4472111864472,
       "event.kind": "signal",
       "event.start": "2022-10-14T12:45:56.902Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.014Z",
       "event.category": [
         "network"
@@ -7691,7 +7691,7 @@
       "event.duration": 4472321691223,
       "event.kind": "signal",
       "event.start": "2022-10-14T12:45:56.828Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.150Z",
       "event.category": [
         "network"
@@ -8033,7 +8033,7 @@
       "event.duration": 4472321780912,
       "event.kind": "signal",
       "event.start": "2022-10-14T12:45:56.828Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.150Z",
       "event.category": [
         "network"
@@ -8375,7 +8375,7 @@
       "event.duration": 9982195253239,
       "event.kind": "signal",
       "event.start": "2022-10-14T11:14:06.955Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.150Z",
       "event.category": [
         "network"
@@ -8717,7 +8717,7 @@
       "event.duration": 390443040149848,
       "event.kind": "signal",
       "event.start": "2022-10-10T01:33:04.134Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:27.174Z",
       "event.category": [
         "network"
@@ -9059,7 +9059,7 @@
       "event.duration": 10058859355438,
       "event.kind": "signal",
       "event.start": "2022-10-14T11:12:50.494Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.354Z",
       "event.category": [
         "network"
@@ -9401,7 +9401,7 @@
       "event.duration": 951382636140504,
       "event.kind": "signal",
       "event.start": "2022-10-03T13:44:03.110Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:25.746Z",
       "event.type": [
         "connection"
@@ -9716,7 +9716,7 @@
       "event.duration": 38180,
       "event.kind": "signal",
       "event.start": "2022-10-14T14:00:25.338Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:25.338Z",
       "event.category": [
         "network"
@@ -9979,7 +9979,7 @@
       "event.duration": 40636,
       "event.kind": "signal",
       "event.start": "2022-10-14T13:59:44.966Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:44.966Z",
       "event.category": [
         "network"
@@ -10282,7 +10282,7 @@
       "event.duration": 956779645801589,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.402Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:21.048Z",
       "event.category": [
         "network"
@@ -10624,7 +10624,7 @@
       "event.duration": 956787956053009,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.330Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.286Z",
       "event.category": [
         "network"
@@ -10966,7 +10966,7 @@
       "event.duration": 956788499630857,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.330Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.830Z",
       "event.category": [
         "network"
@@ -11308,7 +11308,7 @@
       "event.duration": 956788636225316,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.330Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.966Z",
       "event.category": [
         "network"
@@ -11650,7 +11650,7 @@
       "event.duration": 956788092284999,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.330Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.422Z",
       "event.category": [
         "network"
@@ -11992,7 +11992,7 @@
       "event.duration": 956787341535122,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.265Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:28.606Z",
       "event.category": [
         "network"
@@ -12334,7 +12334,7 @@
       "event.duration": 956788228179335,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.330Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.558Z",
       "event.category": [
         "network"
@@ -12676,7 +12676,7 @@
       "event.duration": 956788633423849,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.265Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.898Z",
       "event.category": [
         "network"
@@ -13018,7 +13018,7 @@
       "event.duration": 956787003327173,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.265Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:28.268Z",
       "event.category": [
         "network"
@@ -13360,7 +13360,7 @@
       "event.duration": 956788089434566,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.264Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.354Z",
       "event.type": [
         "connection"
@@ -13702,7 +13702,7 @@
       "event.duration": 956788633578775,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.264Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.898Z",
       "event.category": [
         "network"
@@ -14044,7 +14044,7 @@
       "event.duration": 956779852198618,
       "event.kind": "signal",
       "event.start": "2022-10-03T12:14:01.263Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:21.115Z",
       "event.category": [
         "network"
@@ -14386,7 +14386,7 @@
       "event.duration": 1861164081732,
       "event.kind": "signal",
       "event.start": "2022-10-14T13:29:25.942Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:27.106Z",
       "event.category": [
         "network"
@@ -14728,7 +14728,7 @@
       "event.duration": 10059335464429,
       "event.kind": "signal",
       "event.start": "2022-10-14T11:12:50.494Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.830Z",
       "event.category": [
         "network"
@@ -15070,7 +15070,7 @@
       "event.duration": 10061042841630,
       "event.kind": "signal",
       "event.start": "2022-10-14T11:12:48.447Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.490Z",
       "event.category": [
         "network"
@@ -15412,7 +15412,7 @@
       "event.duration": 10060565961827,
       "event.kind": "signal",
       "event.start": "2022-10-14T11:12:48.516Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.082Z",
       "event.type": [
         "connection"
@@ -15754,7 +15754,7 @@
       "event.duration": 10113867587405,
       "event.kind": "signal",
       "event.start": "2022-10-14T11:11:55.758Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.626Z",
       "event.type": [
         "connection"
@@ -16096,7 +16096,7 @@
       "event.duration": 20841043827579,
       "event.kind": "signal",
       "event.start": "2022-10-14T08:12:57.618Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:18.662Z",
       "event.category": [
         "network"
@@ -16438,7 +16438,7 @@
       "event.duration": 28611065616082,
       "event.kind": "signal",
       "event.start": "2022-10-14T06:03:38.696Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.762Z",
       "event.category": [
         "network"
@@ -16780,7 +16780,7 @@
       "event.duration": 28656283608091,
       "event.kind": "signal",
       "event.start": "2022-10-14T06:02:53.546Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.830Z",
       "event.category": [
         "network"
@@ -17122,7 +17122,7 @@
       "event.duration": 28773883091446,
       "event.kind": "signal",
       "event.start": "2022-10-14T06:00:55.403Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.286Z",
       "event.category": [
         "network"
@@ -17464,7 +17464,7 @@
       "event.duration": 28773814841350,
       "event.kind": "signal",
       "event.start": "2022-10-14T06:00:55.403Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.218Z",
       "event.category": [
         "network"
@@ -17806,7 +17806,7 @@
       "event.duration": 28774019443387,
       "event.kind": "signal",
       "event.start": "2022-10-14T06:00:55.403Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.422Z",
       "event.category": [
         "network"
@@ -18148,7 +18148,7 @@
       "event.duration": 28774155229774,
       "event.kind": "signal",
       "event.start": "2022-10-14T06:00:55.403Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.558Z",
       "event.type": [
         "connection"
@@ -18490,7 +18490,7 @@
       "event.duration": 28774155164834,
       "event.kind": "signal",
       "event.start": "2022-10-14T06:00:55.403Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.558Z",
       "event.category": [
         "network"
@@ -18832,7 +18832,7 @@
       "event.duration": 28774087362204,
       "event.kind": "signal",
       "event.start": "2022-10-14T06:00:55.403Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.490Z",
       "event.category": [
         "network"
@@ -19174,7 +19174,7 @@
       "event.duration": 28774019340906,
       "event.kind": "signal",
       "event.start": "2022-10-14T06:00:55.403Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.422Z",
       "event.category": [
         "network"
@@ -19516,7 +19516,7 @@
       "event.duration": 28773815235805,
       "event.kind": "signal",
       "event.start": "2022-10-14T06:00:55.402Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.218Z",
       "event.category": [
         "network"
@@ -19858,7 +19858,7 @@
       "event.duration": 28773679330408,
       "event.kind": "signal",
       "event.start": "2022-10-14T06:00:55.402Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.082Z",
       "event.category": [
         "network"
@@ -20200,7 +20200,7 @@
       "event.duration": 28774155403251,
       "event.kind": "signal",
       "event.start": "2022-10-14T06:00:55.402Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.558Z",
       "event.category": [
         "network"
@@ -20542,7 +20542,7 @@
       "event.duration": 28774087626986,
       "event.kind": "signal",
       "event.start": "2022-10-14T06:00:55.402Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.490Z",
       "event.category": [
         "network"
@@ -20884,7 +20884,7 @@
       "event.duration": 91595979914049,
       "event.kind": "signal",
       "event.start": "2022-10-13T12:33:43.022Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:19.002Z",
       "event.category": [
         "network"
@@ -21226,7 +21226,7 @@
       "event.duration": 102986536175763,
       "event.kind": "signal",
       "event.start": "2022-10-13T09:23:50.018Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:16.554Z",
       "event.type": [
         "connection"
@@ -21568,7 +21568,7 @@
       "event.duration": 260763252698364,
       "event.kind": "signal",
       "event.start": "2022-10-11T13:34:22.902Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:26.154Z",
       "event.category": [
         "network"
@@ -21910,7 +21910,7 @@
       "event.duration": 260903308012015,
       "event.kind": "signal",
       "event.start": "2022-10-11T13:32:05.230Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:28.538Z",
       "event.category": [
         "network"
@@ -22252,7 +22252,7 @@
       "event.duration": 951636410084964,
       "event.kind": "signal",
       "event.start": "2022-10-03T13:39:51.858Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:28.268Z",
       "event.category": [
         "network"
@@ -22594,7 +22594,7 @@
       "event.duration": 10061043110093,
       "event.kind": "signal",
       "event.start": "2022-10-14T11:12:48.447Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.490Z",
       "event.category": [
         "network"
@@ -22936,7 +22936,7 @@
       "event.duration": 10061110923494,
       "event.kind": "signal",
       "event.start": "2022-10-14T11:12:48.447Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.558Z",
       "event.type": [
         "connection"
@@ -23278,7 +23278,7 @@
       "event.duration": 28713811901569,
       "event.kind": "signal",
       "event.start": "2022-10-14T06:01:55.406Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.218Z",
       "event.type": [
         "connection"
@@ -23620,7 +23620,7 @@
       "event.duration": 28773882873995,
       "event.kind": "signal",
       "event.start": "2022-10-14T06:00:55.403Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.286Z",
       "event.type": [
         "connection"
@@ -23962,7 +23962,7 @@
       "event.duration": 28780638966331,
       "event.kind": "signal",
       "event.start": "2022-10-14T06:00:48.987Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.626Z",
       "event.type": [
         "connection"
@@ -24304,7 +24304,7 @@
       "event.duration": 951202072265478,
       "event.kind": "signal",
       "event.start": "2022-10-03T13:46:59.314Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:21.386Z",
       "event.category": [
         "network"
@@ -24646,7 +24646,7 @@
       "event.duration": 28780299958469,
       "event.kind": "signal",
       "event.start": "2022-10-14T06:00:48.782Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.082Z",
       "event.type": [
         "connection"
@@ -24954,7 +24954,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:59.265Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:59.265Z",
       "event.category": [
         "network"
@@ -25304,7 +25304,7 @@
       "event.duration": 951747519846319,
       "event.kind": "signal",
       "event.start": "2022-10-03T13:38:02.038Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:29.558Z",
       "event.type": [
         "connection"
@@ -25656,7 +25656,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:59.232Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:59.232Z",
       "event.category": [
         "network"
@@ -25967,7 +25967,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:59.171Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:59.171Z",
       "event.type": [
         "info",
@@ -26283,7 +26283,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:43.780Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:58.883Z",
       "event.type": [
         "info",
@@ -26563,7 +26563,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:58.327Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:58.327Z",
       "event.category": [
         "network"
@@ -26873,7 +26873,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:58.731Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:58.731Z",
       "event.category": [
         "network"
@@ -27222,7 +27222,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:58.316Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:58.464Z",
       "event.category": [
         "network"
@@ -27577,7 +27577,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:58.098Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:58.098Z",
       "event.category": [
         "network"
@@ -27882,7 +27882,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:58.084Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:58.084Z",
       "event.type": [
         "info",
@@ -28231,7 +28231,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:57.504Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:57.610Z",
       "event.category": [
         "network"
@@ -28542,7 +28542,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:57.541Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:57.541Z",
       "event.type": [
         "info",
@@ -28858,7 +28858,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:57.488Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:57.488Z",
       "event.type": [
         "info",
@@ -29133,7 +29133,7 @@
       "event.created": "2022-10-14T14:00:28.2455469Z",
       "event.kind": "signal",
       "event.module": "endpoint",
-      "event.action": "disconnect_received",
+      "event.action": "exec",
       "event.id": "MnfasOX3AsaNqJMD+++SvWXm",
       "event.category": [
         "network"
@@ -29403,7 +29403,7 @@
       "event.created": "2022-10-14T14:00:28.2449462Z",
       "event.kind": "signal",
       "event.module": "endpoint",
-      "event.action": "connection_attempted",
+      "event.action": "exec",
       "event.id": "MnfasOX3AsaNqJMD+++SvWXl",
       "event.category": [
         "network"
@@ -29955,7 +29955,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:42.218Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:57.321Z",
       "event.type": [
         "info",
@@ -30271,7 +30271,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:57.016Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:57.016Z",
       "event.category": [
         "network"
@@ -30587,7 +30587,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:56.768Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:56.768Z",
       "event.type": [
         "info",
@@ -30903,7 +30903,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:41.777Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:56.940Z",
       "event.category": [
         "network"
@@ -31252,7 +31252,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:53.384Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:56.679Z",
       "event.type": [
         "info",
@@ -31527,7 +31527,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:56.279Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:57.303Z",
       "event.type": [
         "info",
@@ -31813,7 +31813,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T13:59:43.553Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T13:59:57.198Z",
       "event.type": [
         "info",
@@ -32090,7 +32090,7 @@
       "event.created": "2022-10-14T14:00:27.2646226Z",
       "event.kind": "signal",
       "event.module": "endpoint",
-      "event.action": "rename",
+      "event.action": "exec",
       "event.id": "MnfiZLkz1DywMGBf++++9ApE",
       "event.category": [
         "file"
@@ -32366,7 +32366,7 @@
       "event.created": "2022-10-14T14:00:27.2587857Z",
       "event.kind": "signal",
       "event.module": "endpoint",
-      "event.action": "creation",
+      "event.action": "exec",
       "event.id": "MnfiZLkz1DywMGBf++++9ApC",
       "event.category": [
         "file"
@@ -32710,7 +32710,7 @@
       "event.kind": "signal",
       "event.module": "system",
       "event.start": "2022-10-14T14:00:23.649Z",
-      "event.action": "network_flow",
+      "event.action": "exec",
       "event.end": "2022-10-14T14:00:24.296Z",
       "event.category": [
         "network"

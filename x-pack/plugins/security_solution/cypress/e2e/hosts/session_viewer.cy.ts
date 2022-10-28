@@ -9,7 +9,7 @@ import {
   investigateAllEventsInTimeline,
   investigateFirstPageEventsInTimeline,
 } from '../../tasks/common/event_table';
-import { esArchiverLoad } from '../../tasks/es_archiver';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { waitsForEventsToBeLoaded } from '../../tasks/hosts/events';
 import { openSessions } from '../../tasks/hosts/main';
 import { login, visit } from '../../tasks/login';
@@ -19,6 +19,9 @@ describe('Bulk investigate in timeline', () => {
   before(() => {
     esArchiverLoad('bulk_process');
     login();
+  });
+  after(() => {
+    esArchiverUnload('bulk_process');
   });
 
   beforeEach(() => {

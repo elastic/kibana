@@ -12,7 +12,7 @@ import {
   ALERT_TABLE_SEVERITY_VALUES,
   PROVIDER_BADGE,
 } from '../../screens/timeline';
-import { esArchiverLoad } from '../../tasks/es_archiver';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
 import {
   addAlertPropertyToTimeline,
@@ -84,6 +84,10 @@ describe('Bulk Investigate in Timeline', () => {
     login();
     createCustomRuleEnabled(getNewRule());
     esArchiverLoad('bulk_process');
+  });
+
+  after(() => {
+    esArchiverUnload('bulk_process');
   });
 
   beforeEach(() => {
