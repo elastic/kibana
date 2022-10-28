@@ -34,6 +34,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const DASHBOARD_NAME = 'Test Options List Control';
 
   describe('Dashboard options list integration', () => {
+    const newDocuments: Array<{ index: string; id: string }> = [];
+
+    const addDocument = async (index: string, document: string) => {
+      await console.enterRequest('\nPOST ' + index + '/_doc/ \n{\n ' + document);
+      await console.clickPlay();
+      await header.waitUntilLoadingHasFinished();
+      const response = JSON.parse(await console.getResponse());
+      newDocuments.push({ index, id: response._id });
+    };
+
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
 
@@ -41,11 +51,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToApp('console');
       await console.collapseHelp();
       await console.clearTextArea();
-      await console.enterRequest(
-        '\nPOST animals-cats-2018-01-01/_doc/ \n{\n "@timestamp": "2018-01-01T16:00:00.000Z", \n"name": "Rosie", \n"sound": "hiss'
+      await addDocument(
+        'animals-cats-2018-01-01',
+        '"@timestamp": "2018-01-01T16:00:00.000Z", \n"name": "Rosie", \n"sound": "hiss"'
       );
-      await console.clickPlay();
-      await header.waitUntilLoadingHasFinished();
 
       /* then, create our testing dashboard */
       await common.navigateToApp('dashboard');
@@ -229,7 +238,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('Applies query settings to controls', async () => {
         it('Applies dashboard query to options list control', async () => {
-          await queryBar.setQuery('isDog : true ');
+          await queryBar.setQuery('animal.keyword : "dog" ');
           await queryBar.submitQuery();
           await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
@@ -438,7 +447,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('Can mark selections invalid with Query', async () => {
-          await queryBar.setQuery('isDog : false ');
+          await queryBar.setQuery('NOT animal.keyword : "dog" ');
           await queryBar.submitQuery();
           await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
@@ -487,7 +496,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('Does not mark selections invalid with Query', async () => {
-          await queryBar.setQuery('isDog : false ');
+          await queryBar.setQuery('NOT animal.keyword : "dog" ');
           await queryBar.submitQuery();
           await dashboard.waitForRenderComplete();
           await header.waitUntilLoadingHasFinished();
@@ -506,8 +515,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await filterBar.removeAllFilters();
         await queryBar.clickQuerySubmitButton();
         await dashboardControls.clearAllControls();
-        await security.testUser.restoreDefaults();
       });
+    });
+
+    after(async () => {
+      await common.navigateToApp('console');
+      await console.collapseHelp();
+      await console.clearTextArea();
+      for (const { index, id } of newDocuments) {
+        await console.enterRequest(`\nDELETE /${index}/_doc/${id}`);
+        await console.clickPlay();
+        await header.waitUntilLoadingHasFinished();
+      }
+      await security.testUser.restoreDefaults();
     });
   });
 }
