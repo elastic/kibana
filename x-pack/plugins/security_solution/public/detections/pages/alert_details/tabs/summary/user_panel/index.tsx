@@ -109,7 +109,7 @@ export const UserPanel = React.memo(
                 <EuiIcon type="userAvatar" size="xl" />
               </UserPanelSection>
               <UserPanelSection title={USER_NAME_TITLE}>
-                <UserDetailsLink userName={userName} />
+                {userName ? <UserDetailsLink userName={userName} /> : getEmptyTagValue()}
               </UserPanelSection>
             </EuiFlexGroup>
             <EuiSpacer size="l" />
