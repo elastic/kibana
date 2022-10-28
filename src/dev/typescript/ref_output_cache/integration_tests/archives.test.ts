@@ -41,7 +41,7 @@ const FIXTURE = Path.resolve(__dirname, '__fixtures__');
 const TMP = Path.resolve(__dirname, '__tmp__');
 
 beforeAll(() => del(TMP, { force: true }));
-beforeEach(() => cpy('.', TMP, { cwd: FIXTURE, parents: true }));
+beforeEach(() => cpy('.', TMP, { cwd: FIXTURE }));
 afterEach(async () => {
   await del(TMP, { force: true });
   jest.resetAllMocks();

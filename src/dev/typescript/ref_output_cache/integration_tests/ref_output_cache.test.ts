@@ -39,7 +39,7 @@ const logWriter = new ToolingLogCollectingWriter();
 log.setWriters([logWriter]);
 
 beforeAll(() => del(TMP, { force: true }));
-beforeEach(() => cpy('.', TMP, { cwd: FIXTURE, parents: true }));
+beforeEach(() => cpy('.', TMP, { cwd: FIXTURE }));
 afterEach(async () => {
   await del(TMP, { force: true });
   jest.resetAllMocks();

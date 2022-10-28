@@ -41,8 +41,6 @@ beforeEach(async () => {
   await del(TMP_DIR);
   await cpy('**/*', MOCK_REPO_DIR, {
     cwd: MOCK_REPO_SRC,
-    parents: true,
-    deep: true,
   });
 });
 

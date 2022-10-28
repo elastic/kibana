@@ -156,7 +156,6 @@ export async function copyAll(
 
   const copiedFiles = await cpy(select, destination, {
     cwd: sourceDir,
-    parents: true,
     ignoreJunk: false,
     dot,
   });
