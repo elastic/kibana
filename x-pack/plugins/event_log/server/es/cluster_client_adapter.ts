@@ -550,11 +550,18 @@ function getNamespaceQuery(namespace?: string) {
   const spaceId = namespaceToSpaceId(namespace);
   const defaultNamespaceQuery = {
     bool: {
-      must_not: {
-        exists: {
-          field: 'kibana.saved_objects.namespace',
+      must_not: [
+        {
+          exists: {
+            field: 'kibana.saved_objects.namespace',
+          },
         },
-      },
+        {
+          exists: {
+            field: 'kibana.saved_objects.space_ids',
+          },
+        },
+      ],
     },
   };
   const namedNamespaceQuery = {
