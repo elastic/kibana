@@ -55,7 +55,7 @@ describe('useBulkExport', () => {
   });
 
   it('executes bulk export action', async () => {
-    await bulkExport('some query');
+    await bulkExport({ query: 'some query' });
 
     expect(mutateAsync).toHaveBeenCalledWith('some query');
   });
@@ -66,7 +66,7 @@ describe('useBulkExport', () => {
         mutateAsync: jest.fn().mockRejectedValue(new Error()),
       });
 
-      await bulkExport(['ruleId1']);
+      await bulkExport({ ids: ['ruleId1'] });
 
       expect(toasts.addError).toHaveBeenCalled();
     });
@@ -85,7 +85,7 @@ describe('useBulkExport', () => {
     });
 
     it('sets the loading state before execution', async () => {
-      await bulkExport(['ruleId1', 'ruleId2']);
+      await bulkExport({ ids: ['ruleId1', 'ruleId2'] });
 
       expect(setLoadingRules).toHaveBeenCalledWith({
         ids: ['ruleId1', 'ruleId2'],
@@ -94,7 +94,7 @@ describe('useBulkExport', () => {
     });
 
     it('sets the empty loading state before execution when query is set', async () => {
-      await bulkExport('some query');
+      await bulkExport({ query: 'some query' });
 
       expect(setLoadingRules).toHaveBeenCalledWith({
         ids: [],
@@ -103,7 +103,7 @@ describe('useBulkExport', () => {
     });
 
     it('clears loading state for the processing rules after execution', async () => {
-      await bulkExport(['ruleId1', 'ruleId2']);
+      await bulkExport({ ids: ['ruleId1', 'ruleId2'] });
 
       expect(setLoadingRules).toHaveBeenCalledWith({ ids: [], action: null });
     });
@@ -113,7 +113,7 @@ describe('useBulkExport', () => {
         mutateAsync: jest.fn().mockRejectedValue(new Error()),
       });
 
-      await bulkExport(['ruleId1', 'ruleId2']);
+      await bulkExport({ ids: ['ruleId1', 'ruleId2'] });
 
       expect(setLoadingRules).toHaveBeenCalledWith({ ids: [], action: null });
     });
