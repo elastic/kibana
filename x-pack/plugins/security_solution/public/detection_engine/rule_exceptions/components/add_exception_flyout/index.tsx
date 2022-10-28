@@ -162,8 +162,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     listType: getListType,
     selectedRulesToAddTo: rules != null ? rules : [],
   });
-
-  console.log(listType);
   const hasAlertData = useMemo((): boolean => {
     return alertData != null;
   }, [alertData]);
@@ -370,6 +368,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       setErrorSubmitting(e);
     }
   }, [
+    sharedListToAddTo,
     submitNewExceptionItems,
     addExceptionToRadioSelection,
     exceptionItemName,
