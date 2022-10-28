@@ -70,6 +70,18 @@ image::../images/tines-alerting.png[Tines rule alert]
 
 It will send a POST request to the Tines webhook action on every action execution that had at least one result.
 
+[float]
+[[tines-story-library]]
+=== Tines Story Libary
+
+In order to simplify the integration with Elastic, Tines offers a set of pre-defined Elastic stories in the Story library.
+They can be found by search for "Elastic" in the Tines Story library:
+
+[role="screenshot"]
+image::../images/tines_elastic_stories.png[Tines Elastic stories]
+
+They can be imported directly into your Tines tenant.
+
 === Format
 
 Tines connector will send the data in JSON format.
