@@ -98,7 +98,7 @@ export async function getLimitedPackages(options: {
   const { savedObjectsClient } = options;
   const allPackages = await getPackages({
     savedObjectsClient,
-    prerelease: true,
+    experimental: true,
   });
   const installedPackages = allPackages.filter(
     (pkg) => pkg.status === installationStatuses.Installed

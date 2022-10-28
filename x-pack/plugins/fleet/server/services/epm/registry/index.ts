@@ -57,6 +57,8 @@ import { getRegistryUrl } from './registry_url';
 export interface SearchParams {
   category?: CategoryId;
   prerelease?: boolean;
+  // deprecated
+  experimental?: boolean;
 }
 
 export const splitPkgKey = split;
@@ -73,6 +75,9 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
     }
     if (params.prerelease) {
       url.searchParams.set('prerelease', params.prerelease.toString());
+    }
+    if (params.experimental) {
+      url.searchParams.set('experimental', params.experimental.toString());
     }
   }
 
@@ -234,6 +239,9 @@ export async function fetchCategories(
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/categories`);
   if (params) {
+    if (params.experimental) {
+      url.searchParams.set('experimental', params.experimental.toString());
+    }
     if (params.prerelease) {
       url.searchParams.set('prerelease', params.prerelease.toString());
     }

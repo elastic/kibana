@@ -69,7 +69,6 @@ export const getCategoriesHandler: FleetRequestHandler<
   try {
     const res = await getCategories({
       ...request.query,
-      prerelease: request.query.prerelease ?? request.query.experimental,
     });
     const body: GetCategoriesResponse = {
       items: res,
@@ -90,7 +89,6 @@ export const getListHandler: FleetRequestHandler<
     const res = await getPackages({
       savedObjectsClient,
       ...request.query,
-      prerelease: request.query.prerelease ?? request.query.experimental,
     });
     const body: GetPackagesResponse = {
       items: res,
