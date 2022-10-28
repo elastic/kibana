@@ -136,5 +136,6 @@ export const prepareNewTerms = (newTermsFields: string[], bucketKey: string | nu
   // if newTermsFields has length greater than 1, bucketKey can't be number, so casting is safe here
   const values = newTermsFields.length === 1 ? [bucketKey] : decodeBucketKey(bucketKey as string);
 
-  return newTermsFields.map((field, i) => [field, values[i]].join(': '));
+  return values;
+  //  return newTermsFields.map((field, i) => [field, values[i]].join(': '));
 };

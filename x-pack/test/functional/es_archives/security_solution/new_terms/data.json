@@ -9,6 +9,9 @@
           "ip": "127.0.0.1"
         },
         "user.name": "user-0",
+        "user.id": 0,
+        "user.enabled": true,
+        "blob": "U29tZSBiaW5hcnkgYmxvYg==",
         "source.ip": "192.168.1.1",
         "tags": ["tag-1", "tag-2"]
       },
@@ -27,6 +30,28 @@
           "ip": "127.0.0.1"
         },
         "user.name": "user-0",
+        "user.id": 0,
+        "user.enabled": true,
+        "blob": "U29tZSBiaW5hcnkgYmxvYg==",
+        "source.ip": "192.168.1.1"
+      },
+      "type": "_doc"
+    }
+  }
+
+  {
+    "type": "doc",
+    "value": {
+      "index": "new_terms",
+      "source": {
+        "@timestamp": "2020-10-14T05:00:02.000Z",
+        "host": {
+          "name": "host-1"
+        },
+        "user.name": "user-0",
+        "user.id": 0,
+        "user.enabled": true,
+        "blob": "U29tZSBiaW5hcnkgYmxvYg==",
         "source.ip": "192.168.1.1",
         "tags": ["tag-1", "tag-2"]
       },
@@ -45,6 +70,9 @@
           "ip": "127.0.0.2"
         },
         "user.name": "user-0",
+        "user.id": 0,
+        "user.enabled": true,
+        "blob": "U29tZSBiaW5hcnkgYmxvYg==",
         "source.ip": "192.168.1.1",
         "tags": ["tag-1", "tag-2"]
       },
@@ -63,6 +91,9 @@
           "ip": "127.0.0.1"
         },
         "user.name": "user-0",
+        "user.id": 0,
+        "user.enabled": true,
+        "blob": "U29tZSBiaW5hcnkgYmxvYg==",
         "source.ip": "192.168.1.1",
         "tags": ["tag-1", "tag-2"]
       },
@@ -82,6 +113,9 @@
           "ip": "127.0.0.2"
         },
         "user.name": "user-0",
+        "user.id": 0,
+        "user.enabled": true,
+        "blob": "U29tZSBiaW5hcnkgYmxvYg==",
         "source.ip": "192.168.1.1",
         "tags": ["tag-1", "tag-2"]
       },
@@ -100,8 +134,53 @@
           "ip": "127.0.0.2"
         },
         "user.name": "user-0",
+        "user.id": 0,
+        "user.enabled": true,
+        "blob": "U29tZSBiaW5hcnkgYmxvYg==",
         "source.ip": ["192.168.1.1", "192.168.1.2"],
         "tags": ["tag-new-1", "tag-2", "tag-new-3"]
+      },
+      "type": "_doc"
+    }
+  }
+
+  {
+    "type": "doc",
+    "value": {
+      "index": "new_terms",
+      "source": {
+        "@timestamp": "2020-10-20T05:00:04.000Z",
+        "host": {
+          "name": "host-0",
+          "ip": "127.0.0.2"
+        },
+        "user.name": "user-0",
+        "user.id": 1,
+        "user.enabled": false,
+        "blob": "bmV3IHRlcm1zIHRlc3QgZm9yIHRoZSB3aW4=",
+        "source.ip": "192.168.1.1",
+        "tags": ["tag-1", "tag-2"]
+      },
+      "type": "_doc"
+    }
+  }
+
+  {
+    "type": "doc",
+    "value": {
+      "index": "new_terms",
+      "source": {
+        "@timestamp": "2020-10-20T05:00:04.000Z",
+        "host": {
+          "name": "host-0",
+          "ip": "127.0.0.2"
+        },
+        "user.name": "user-0",
+        "user.id": 0,
+        "user.enabled": true,
+        "blob": "bmV3IHRlcm1zIHRlc3Q=",
+        "source.ip": "192.168.1.1",
+        "tags": ["tag-1", "tag-2"]
       },
       "type": "_doc"
     }

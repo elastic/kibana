@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(alerts.hits.hits.length).eql(1);
       expect(removeRandomValuedProperties(alerts.hits.hits[0]._source)).eql({
-        'kibana.alert.new_terms': ['host.name: zeek-newyork-sha-aa8df15'],
+        'kibana.alert.new_terms': ['zeek-newyork-sha-aa8df15'],
         'kibana.alert.rule.category': 'New Terms Rule',
         'kibana.alert.rule.consumer': 'siem',
         'kibana.alert.rule.name': 'Query with a rule id',
@@ -220,13 +220,13 @@ export default ({ getService }: FtrProviderContext) => {
         'asc'
       );
       expect(previewAlertsOrderedByHostIp[0]._source?.['kibana.alert.new_terms']).eql([
-        'host.ip: 10.10.0.6',
+        '10.10.0.6',
       ]);
       expect(previewAlertsOrderedByHostIp[1]._source?.['kibana.alert.new_terms']).eql([
-        'host.ip: 157.230.208.30',
+        '157.230.208.30',
       ]);
       expect(previewAlertsOrderedByHostIp[2]._source?.['kibana.alert.new_terms']).eql([
-        'host.ip: fe80::24ce:f7ff:fede:a571',
+        'fe80::24ce:f7ff:fede:a571',
       ]);
     });
 
@@ -243,21 +243,19 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(previewAlerts.length).eql(3);
 
-      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql([
-        'host.name: zeek-newyork-sha-aa8df15',
-        'host.ip: 10.10.0.6',
-      ]);
-      expect(previewAlerts[1]._source?.['kibana.alert.new_terms']).eql([
-        'host.name: zeek-newyork-sha-aa8df15',
-        'host.ip: 157.230.208.30',
-      ]);
-      expect(previewAlerts[2]._source?.['kibana.alert.new_terms']).eql([
-        'host.name: zeek-newyork-sha-aa8df15',
-        'host.ip: fe80::24ce:f7ff:fede:a571',
+      const newTerms = orderBy(
+        previewAlerts.map((item) => item._source?.['kibana.alert.new_terms']),
+        ['0', '1']
+      );
+
+      expect(newTerms).eql([
+        ['zeek-newyork-sha-aa8df15', '10.10.0.6'],
+        ['zeek-newyork-sha-aa8df15', '157.230.208.30'],
+        ['zeek-newyork-sha-aa8df15', 'fe80::24ce:f7ff:fede:a571'],
       ]);
     });
 
-    it.only('should generate 1 alert for unique combination of existing terms', async () => {
+    it('should generate 1 alert for unique combination of existing terms', async () => {
       // ensure there are no alerts for single new terms fields, it means values are not new
       const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
@@ -293,13 +291,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(previewAlerts.length).eql(1);
 
-      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql([
-        'host.name: host-0',
-        'host.ip: 127.0.0.2',
-      ]);
+      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql(['host-0', '127.0.0.2']);
     });
 
-    it('should generate alert for each new unique combination', async () => {
+    it('should generate 5 alerts, 1 for each new unique combination in 2 fields', async () => {
       // ensure there are no alerts for single new terms fields, it means values are not new
       const rule: NewTermsRuleCreateProps = {
         ...getCreateNewTermsRulesSchemaMock('rule-1', true),
@@ -312,11 +307,70 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-      expect(previewAlerts.length).eql(4);
+      expect(previewAlerts.length).eql(5);
 
+      const newTerms = orderBy(
+        previewAlerts.map((item) => item._source?.['kibana.alert.new_terms']),
+        ['0', '1']
+      );
+
+      expect(newTerms).eql([
+        ['192.168.1.1', 'tag-new-1'],
+        ['192.168.1.1', 'tag-new-3'],
+        ['192.168.1.2', 'tag-2'],
+        ['192.168.1.2', 'tag-new-1'],
+        ['192.168.1.2', 'tag-new-3'],
+      ]);
+    });
+
+    it('should generate 1 alert for unique combination of terms, one if which is a number', async () => {
+      const rule: NewTermsRuleCreateProps = {
+        ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+        index: ['new_terms'],
+        new_terms_fields: ['user.name', 'user.id'],
+        from: '2020-10-19T05:00:04.000Z',
+        history_window_start: '2020-10-13T05:00:04.000Z',
+      };
+
+      const { previewId } = await previewRule({ supertest, rule });
+      const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+      expect(previewAlerts.length).eql(1);
+      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql(['user-0', '1']);
+    });
+
+    it('should generate 1 alert for unique combination of terms, one if which is a boolean', async () => {
+      const rule: NewTermsRuleCreateProps = {
+        ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+        index: ['new_terms'],
+        new_terms_fields: ['user.name', 'user.enabled'],
+        from: '2020-10-19T05:00:04.000Z',
+        history_window_start: '2020-10-13T05:00:04.000Z',
+      };
+
+      const { previewId } = await previewRule({ supertest, rule });
+      const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+      expect(previewAlerts.length).eql(1);
+      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql(['user-0', 'false']);
+    });
+
+    it('should generate 1 alert for unique combination of terms, one if which is of a binary type', async () => {
+      const rule: NewTermsRuleCreateProps = {
+        ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+        index: ['new_terms'],
+        new_terms_fields: ['user.name', 'blob'],
+        from: '2020-10-19T05:00:04.000Z',
+        history_window_start: '2020-10-13T05:00:04.000Z',
+      };
+
+      const { previewId } = await previewRule({ supertest, rule });
+      const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+      expect(previewAlerts.length).eql(1);
       expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql([
-        'host.name: host-0',
-        'host.ip: 127.0.0.2',
+        'user-0',
+        'bmV3IHRlcm1zIHRlc3Q=',
       ]);
     });
 
@@ -336,11 +390,11 @@ export default ({ getService }: FtrProviderContext) => {
       const hostNames = previewAlerts
         .map((signal) => signal._source?.['kibana.alert.new_terms'])
         .sort();
-      expect(hostNames[0]).eql(['host.name: suricata-sensor-amsterdam']);
-      expect(hostNames[1]).eql(['host.name: suricata-sensor-san-francisco']);
-      expect(hostNames[2]).eql(['host.name: zeek-newyork-sha-aa8df15']);
-      expect(hostNames[3]).eql(['host.name: zeek-sensor-amsterdam']);
-      expect(hostNames[4]).eql(['host.name: zeek-sensor-san-francisco']);
+      expect(hostNames[0]).eql(['suricata-sensor-amsterdam']);
+      expect(hostNames[1]).eql(['suricata-sensor-san-francisco']);
+      expect(hostNames[2]).eql(['zeek-newyork-sha-aa8df15']);
+      expect(hostNames[3]).eql(['zeek-sensor-amsterdam']);
+      expect(hostNames[4]).eql(['zeek-sensor-san-francisco']);
     });
 
     describe('timestamp override and fallback', () => {
@@ -381,8 +435,8 @@ export default ({ getService }: FtrProviderContext) => {
         const hostNames = previewAlerts
           .map((signal) => signal._source?.['kibana.alert.new_terms'])
           .sort();
-        expect(hostNames[0]).eql(['host.name: host-3']);
-        expect(hostNames[1]).eql(['host.name: host-4']);
+        expect(hostNames[0]).eql(['host-3']);
+        expect(hostNames[1]).eql(['host-4']);
       });
     });
 
@@ -421,10 +475,10 @@ export default ({ getService }: FtrProviderContext) => {
         const hostNames = previewAlerts
           .map((signal) => signal._source?.['kibana.alert.new_terms'])
           .sort();
-        expect(hostNames[0]).eql(['host.name: suricata-sensor-amsterdam']);
-        expect(hostNames[1]).eql(['host.name: suricata-sensor-san-francisco']);
-        expect(hostNames[2]).eql(['host.name: zeek-newyork-sha-aa8df15']);
-        expect(hostNames[3]).eql(['host.name: zeek-sensor-amsterdam']);
+        expect(hostNames[0]).eql(['suricata-sensor-amsterdam']);
+        expect(hostNames[1]).eql(['suricata-sensor-san-francisco']);
+        expect(hostNames[2]).eql(['zeek-newyork-sha-aa8df15']);
+        expect(hostNames[3]).eql(['zeek-sensor-amsterdam']);
       });
     });
 
@@ -446,7 +500,7 @@ export default ({ getService }: FtrProviderContext) => {
       const processPids = previewAlerts
         .map((signal) => signal._source?.['kibana.alert.new_terms'])
         .sort();
-      expect(processPids[0]).eql(['process.pid: 1']);
+      expect(processPids[0]).eql([1]);
     });
 
     describe('alerts should be be enriched', () => {

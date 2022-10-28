@@ -21,8 +21,14 @@
             "properties": {
               "name": {
                 "type": "keyword"
+                }, 
+                "id": {
+                  "type": "integer"
+                },
+                "enabled": {
+                  "type": "boolean"
+                }
               }
-            }
           },
           "source": {
             "properties": {
@@ -33,6 +39,9 @@
           },
           "tags": {
             "type": "keyword"
+          },
+          "blob": {
+            "type": "binary"
           }
         }
       },
