@@ -207,11 +207,6 @@ export class RemoteClusterTable extends Component {
         }),
         sortable: true,
         render: (mode) => {
-          console.log(
-            i18n.translate('xpack.remoteClusters.remoteClusterList.table.sniffModeDescription', {
-              defaultMessage: 'default',
-            })
-          );
           let modeMessage;
           mode === PROXY_MODE
             ? (modeMessage = mode)
