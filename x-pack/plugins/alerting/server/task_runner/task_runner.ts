@@ -443,6 +443,8 @@ export class TaskRunner<
       alertingEventLogger: this.alertingEventLogger,
     });
 
+    await executionHandler.init();
+
     await this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
       await rulesClient.clearExpiredSnoozes({ id: rule.id });
 

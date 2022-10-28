@@ -59,7 +59,6 @@ export class ExecutionHandler<
     ActionGroupIds,
     RecoveryActionGroupId
   >;
-  private ruleTypeActionGroups;
   private taskRunnerContext: TaskRunnerContext;
   private taskInstance: RuleTaskInstance;
   private ruleRunMetricsStore: RuleRunMetricsStore;
@@ -68,9 +67,11 @@ export class ExecutionHandler<
   private executionId: string;
   private ruleLabel: string;
   private ephemeralActionsToSchedule: number;
-  private mutedAlertIdsSet: Set<string>;
   private CHUNK_SIZE = 1000;
   private skippedAlerts: { [key: string]: { reason: string } } = {};
+  private actionsClient?: PublicMethodsOf<ActionsClient>;
+  private ruleTypeActionGroups?: Map<ActionGroupIds | RecoveryActionGroupId, string>;
+  private mutedAlertIdsSet?: Set<string>;
 
   constructor({
     rule,
@@ -98,9 +99,6 @@ export class ExecutionHandler<
     this.alertingEventLogger = alertingEventLogger;
     this.rule = rule;
     this.ruleType = ruleType;
-    this.ruleTypeActionGroups = new Map(
-      ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
-    );
     this.taskRunnerContext = taskRunnerContext;
     this.taskInstance = taskInstance;
     this.ruleRunMetricsStore = ruleRunMetricsStore;
@@ -110,7 +108,16 @@ export class ExecutionHandler<
     this.ruleLabel = ruleLabel;
     this.request = request;
     this.ephemeralActionsToSchedule = taskRunnerContext.maxEphemeralActionsPerRule;
-    this.mutedAlertIdsSet = new Set(rule.mutedInstanceIds);
+  }
+
+  public async init() {
+    this.ruleTypeActionGroups = new Map(
+      this.ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
+    );
+    this.mutedAlertIdsSet = new Set(this.rule.mutedInstanceIds);
+    this.actionsClient = await this.taskRunnerContext.actionsPlugin.getActionsClientWithRequest(
+      this.request
+    );
   }
 
   public async run(
@@ -133,9 +140,6 @@ export class ExecutionHandler<
     if (!!executables.length) {
       const logActions = [];
       const bulkActions: EnqueueExecutionOptions[] = [];
-      const actionsClient = await this.taskRunnerContext.actionsPlugin.getActionsClientWithRequest(
-        this.request
-      );
 
       for (const { action, alert, alertId, actionGroup, state } of executables) {
         this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(1);
@@ -203,7 +207,7 @@ export class ExecutionHandler<
               tags: this.rule.tags,
               alertInstanceId: alertId,
               alertActionGroup: actionGroup,
-              alertActionGroupName: this.ruleTypeActionGroups.get(actionGroup)!,
+              alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
               context: alert.getContext(),
               actionId: action.id,
               state,
@@ -216,7 +220,6 @@ export class ExecutionHandler<
 
         await this.actionRunOrAddToBulk({
           enqueueOptions: this.getEnqueueOptions(actionToRun),
-          actionsClient,
           bulkActions,
         });
 
@@ -234,7 +237,7 @@ export class ExecutionHandler<
 
       if (!!bulkActions.length) {
         for (const c of chunk(bulkActions, CHUNK_SIZE)) {
-          await actionsClient.bulkEnqueueExecution(c);
+          await this.actionsClient!.bulkEnqueueExecution(c);
         }
       }
 
@@ -263,7 +266,7 @@ export class ExecutionHandler<
             : alert.getScheduledActionOptions()?.actionGroup!;
           const state = recovered ? {} : alert.getScheduledActionOptions()?.state!;
 
-          if (!this.ruleTypeActionGroups.has(actionGroup)) {
+          if (!this.ruleTypeActionGroups!.has(actionGroup)) {
             this.logger.error(
               `Invalid action group "${actionGroup}" for rule "${this.ruleType.id}".`
             );
@@ -287,17 +290,15 @@ export class ExecutionHandler<
 
   private async actionRunOrAddToBulk({
     enqueueOptions,
-    actionsClient,
     bulkActions,
   }: {
     enqueueOptions: EnqueueExecutionOptions;
-    actionsClient: PublicMethodsOf<ActionsClient>;
     bulkActions: EnqueueExecutionOptions[];
   }) {
     if (this.taskRunnerContext.supportsEphemeralTasks && this.ephemeralActionsToSchedule > 0) {
       this.ephemeralActionsToSchedule--;
       try {
-        await actionsClient.ephemeralEnqueuedExecution(enqueueOptions);
+        await this.actionsClient!.ephemeralEnqueuedExecution(enqueueOptions);
       } catch (err) {
         if (isEphemeralTaskRejectedDueToCapacityError(err)) {
           bulkActions.push(enqueueOptions);
@@ -363,7 +364,7 @@ export class ExecutionHandler<
       mutedAlertIdsSet,
     } = this;
 
-    const muted = mutedAlertIdsSet.has(alertId);
+    const muted = mutedAlertIdsSet!.has(alertId);
     const throttled = alert.isThrottled(throttle);
 
     if (muted) {
