@@ -499,6 +499,7 @@ describe('heatmap', () => {
         ...exampleState(),
         layerId: 'first',
         xAccessor: 'x-accessor',
+        valueAccessor: 'value-accessor',
       };
 
       expect(
@@ -515,7 +516,7 @@ describe('heatmap', () => {
             arguments: {
               xAccessor: ['x-accessor'],
               yAccessor: [''],
-              valueAccessor: [''],
+              valueAccessor: ['value-accessor'],
               palette: [
                 {
                   type: 'expression',
