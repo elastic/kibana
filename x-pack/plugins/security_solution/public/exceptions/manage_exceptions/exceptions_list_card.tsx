@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
-import type { ExceptionListInfo } from '../../../../rule_exceptions_ui/pages/exceptions/use_all_exception_lists';
+import type { ExceptionListInfo } from './use_all_exception_lists';
 import { TitleBadge } from './title_badge';
 import * as i18n from './translations';
 

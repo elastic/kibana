@@ -8,18 +8,18 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../common/mock';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
-import { useUserData } from '../../../../detections/components/user_info';
+import { useUserData } from '../../detections/components/user_info';
 
 import { ExceptionListsTable } from './exceptions_table';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { useAllExceptionLists } from './use_all_exception_lists';
 import { useHistory } from 'react-router-dom';
-import { generateHistoryMock } from '../../../../common/utils/route/mocks';
+import { generateHistoryMock } from '../../common/utils/route/mocks';
 
-jest.mock('../../../../detections/components/user_info');
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../detections/components/user_info');
+jest.mock('../../common/lib/kibana');
 jest.mock('./use_all_exception_lists');
 jest.mock('@kbn/securitysolution-list-hooks');
 jest.mock('react-router-dom', () => {
@@ -39,7 +39,7 @@ jest.mock('@kbn/i18n-react', () => {
   };
 });
 
-jest.mock('../../../../detections/containers/detection_engine/lists/use_lists_config', () => ({
+jest.mock('../../detections/containers/detection_engine/lists/use_lists_config', () => ({
   useListsConfig: jest.fn().mockReturnValue({ loading: false }),
 }));
 

@@ -27,25 +27,25 @@ import {
 import type { NamespaceType, ExceptionListFilter } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 
-import { AutoDownload } from '../../../../common/components/auto_download/auto_download';
-import { Loader } from '../../../../common/components/loader';
-import { useKibana } from '../../../../common/lib/kibana';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { AutoDownload } from '../../common/components/auto_download/auto_download';
+import { Loader } from '../../common/components/loader';
+import { useKibana } from '../../common/lib/kibana';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
 
-import * as i18n from './translations';
+import * as i18n from './translations_exceptions_table';
 import { ExceptionsTableUtilityBar } from './exceptions_table_utility_bar';
 import { useAllExceptionLists } from './use_all_exception_lists';
-import { ReferenceErrorModal } from '../../../../detections/components/value_lists_management_flyout/reference_error_modal';
-import { patchRule } from '../../../rule_management/api/api';
+import { ReferenceErrorModal } from '../../detections/components/value_lists_management_flyout/reference_error_modal';
+import { patchRule } from '../../detection_engine/rule_management/api/api';
 import { ExceptionsSearchBar } from './exceptions_search_bar';
-import { getSearchFilters } from '../../../rule_management_ui/components/rules_table/helpers';
-import { useUserData } from '../../../../detections/components/user_info';
-import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
-import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
-import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../../common/endpoint/service/artifacts/constants';
-import { ExceptionsListCard } from '../../../rule_management_ui/components/rules_table/exceptions/exceptions_list_card';
+import { getSearchFilters } from '../../detection_engine/rule_management_ui/components/rules_table/helpers';
+import { useUserData } from '../../detections/components/user_info';
+import { useListsConfig } from '../../detections/containers/detection_engine/lists/use_lists_config';
+import { MissingPrivilegesCallOut } from '../../detections/components/callouts/missing_privileges_callout';
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../common/endpoint/service/artifacts/constants';
+import { ExceptionsListCard } from './exceptions_list_card';
 
-import { ImportExceptionListFlyout } from '../../../rule_management_ui/components/rules_table/exceptions/import_exceptions_list_flyout';
+import { ImportExceptionListFlyout } from './import_exceptions_list_flyout';
 
 export type Func = () => Promise<void>;
 
