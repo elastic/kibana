@@ -93,7 +93,8 @@ jsts_transpiler(
   srcs = SRCS,
   build_pkg_name = package_name(),
   additional_args = [
-    "--copy-files"
+    "--copy-files",
+    "--quiet"
   ],
 )
 
@@ -103,7 +104,8 @@ jsts_transpiler(
   build_pkg_name = package_name(),
   web = True,
   additional_args = [
-    "--copy-files"
+    "--copy-files",
+    "--quiet"
   ],
 )
 
