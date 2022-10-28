@@ -82,9 +82,12 @@ export const getElasticsearchMetricQuery = (
 
   const currentPeriod = wrapInCurrentPeriod(currentTimeframe, metricAggregations);
 
+  const shouldTermsAggOnContainer = groupBy && Array.isArray(groupBy)
+    ? groupBy.includes(KUBERNETES_POD_UID)
+    : groupBy === KUBERNETES_POD_UID;
+
   const containerContextAgg =
-    groupBy?.includes(KUBERNETES_POD_UID) &&
-      fieldsExisted &&
+    shouldTermsAggOnContainer && fieldsExisted &&
       fieldsExisted[termsAggField[KUBERNETES_POD_UID]]
       ? {
         containerContext: {
@@ -104,12 +107,11 @@ export const getElasticsearchMetricQuery = (
           }
         }
       }
-      : null;
+      : void 0;
 
   const includesList = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
-  if(containerContextAgg === null) includesList.push('container.*');
-
   const excludesList = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
+  if(!containerContextAgg) includesList.push('container.*');
 
   const additionalContextAgg = {
     additionalContext: {

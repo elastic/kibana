@@ -394,7 +394,7 @@ const formatAlertResult = <AlertResult>(
 const hasAdditionalContext = (groupBy: string | string[] | null) => {
   return groupBy
     ? Array.isArray(groupBy)
-      ? groupBy?.every(group => groupByListForContext.includes(group))
+      ? groupBy.every(group => groupByListForContext.includes(group))
       : groupByListForContext.includes(groupBy)
     : false;
 };
