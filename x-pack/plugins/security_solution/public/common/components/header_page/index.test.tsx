@@ -144,7 +144,7 @@ describe('HeaderPage', () => {
       <TestProviders>
         <HeaderPage
           title="Test title"
-          rightSideItems={[<div data-test-subj="right-side-item" >{'Right side item'}</div>]}
+          rightSideItems={[<div data-test-subj="right-side-item">{'Right side item'}</div>]}
         />
       </TestProviders>
     );
