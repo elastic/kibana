@@ -17,6 +17,7 @@ import {
   NETWORK_HOST_CONNECTION_TYPE,
   SERVICE_NAME,
   SERVICE_VERSION,
+  TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -41,6 +42,7 @@ export async function getMobileFilters({
   start,
   end,
   searchAggregatedTransactions,
+  transactionType,
 }: {
   kuery: string;
   apmEventClient: APMEventClient;
@@ -49,6 +51,7 @@ export async function getMobileFilters({
   start: number;
   end: number;
   searchAggregatedTransactions: boolean;
+  transactionType: string;
 }): Promise<MobileFilters> {
   const response = await apmEventClient.search('get_mobile_filters', {
     apm: {
@@ -61,6 +64,7 @@ export async function getMobileFilters({
         bool: {
           filter: [
             ...termQuery(SERVICE_NAME, serviceName),
+            ...termQuery(TRANSACTION_TYPE, transactionType),
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
