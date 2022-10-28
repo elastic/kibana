@@ -59,20 +59,6 @@ export function ParamsEditor<TParams = unknown>({
   switch (operator?.type) {
     case 'exists':
       return null;
-    case 'phrase':
-      return (
-        <EuiFormRow fullWidth isInvalid={isInvalid} error={errorMessage}>
-          <PhraseValueInput
-            compressed
-            indexPattern={dataView}
-            field={field!}
-            value={typeof params === 'string' ? params : undefined}
-            onChange={onParamsChange}
-            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-            fullWidth
-          />
-        </EuiFormRow>
-      );
     case 'phrases':
       return (
         <PhrasesValuesInput
@@ -98,16 +84,18 @@ export function ParamsEditor<TParams = unknown>({
       );
     default:
       return (
-        <PhraseValueInput
-          disabled={!dataView || !operator}
-          indexPattern={dataView}
-          field={field!}
-          value={typeof params === 'string' ? params : undefined}
-          onChange={onParamsChange}
-          timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-          fullWidth
-          compressed
-        />
+        <EuiFormRow fullWidth isInvalid={isInvalid} error={errorMessage}>
+          <PhraseValueInput
+            disabled={!dataView || !operator}
+            indexPattern={dataView}
+            field={field!}
+            value={typeof params === 'string' ? params : undefined}
+            onChange={onParamsChange}
+            timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
+            fullWidth
+            compressed
+          />
+        </EuiFormRow>
       );
   }
 }
