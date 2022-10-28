@@ -282,7 +282,9 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         singleTitle={i18n.translate('xpack.triggersActionsUI.sections.rulesList.singleTitle', {
           defaultMessage: 'rule',
         })}
-        multipleTitle=""
+        multipleTitle={i18n.translate('xpack.triggersActionsUI.sections.rulesList.multipleTitle', {
+          defaultMessage: 'rules',
+        })}
         setIsLoadingState={() => {}}
       />
       <UpdateApiKeyModalConfirmation

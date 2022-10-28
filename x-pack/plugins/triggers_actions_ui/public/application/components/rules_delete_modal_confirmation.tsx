@@ -8,6 +8,7 @@
 import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { KueryNode } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../common/lib/kibana';
 import { bulkDeleteRules } from '../lib/rule_api';
 import {
@@ -43,6 +44,13 @@ export const RulesDeleteModalConfirmation = ({
 
   const [deleteModalFlyoutVisible, setDeleteModalVisibility] = useState<boolean>(false);
 
+  const singleTitle = i18n.translate('xpack.triggersActionsUI.sections.rulesList.singleTitle', {
+    defaultMessage: 'rule',
+  });
+  const multipleTitle = i18n.translate('xpack.triggersActionsUI.sections.rulesList.multipleTitle', {
+    defaultMessage: 'rules',
+  });
+
   useEffect(() => {
     setDeleteModalVisibility(idsToDelete.length > 0 || Boolean(rulesToDeleteFilter));
   }, [idsToDelete, rulesToDeleteFilter]);
@@ -60,7 +68,7 @@ export const RulesDeleteModalConfirmation = ({
     <EuiConfirmModal
       buttonColor="danger"
       data-test-subj="rulesDeleteConfirmation"
-      title={getConfirmButtonText(numberIdsToDelete)}
+      title={getConfirmButtonText(numberIdsToDelete, singleTitle, multipleTitle)}
       onCancel={() => {
         setDeleteModalVisibility(false);
         onCancel();
@@ -78,19 +86,21 @@ export const RulesDeleteModalConfirmation = ({
         const numErrors = errors.length;
         const numSuccesses = total - numErrors;
         if (numSuccesses > 0) {
-          toasts.addSuccess(getSuccessfulNotificationText(numSuccesses));
+          toasts.addSuccess(
+            getSuccessfulNotificationText(numSuccesses, singleTitle, multipleTitle)
+          );
         }
 
         if (numErrors > 0) {
-          toasts.addDanger(getFailedNotificationText(numErrors));
+          toasts.addDanger(getFailedNotificationText(numErrors, singleTitle, multipleTitle));
           await onErrors();
         }
         await onDeleted();
       }}
       cancelButtonText={cancelButtonText}
-      confirmButtonText={getConfirmButtonText(numberIdsToDelete)}
+      confirmButtonText={getConfirmButtonText(numberIdsToDelete, singleTitle, multipleTitle)}
     >
-      <p>{getConfirmModalText(numberIdsToDelete)}</p>
+      <p>{getConfirmModalText(numberIdsToDelete, singleTitle, multipleTitle)}</p>
       {showWarningText && (
         <EuiCallOut title={<>{warningText}</>} color="warning" iconType="alert" />
       )}
