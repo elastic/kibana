@@ -142,6 +142,7 @@ enabled:
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group8/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group9/config.ts
   - x-pack/test/detection_engine_api_integration/security_and_spaces/group10/config.ts
+  - x-pack/test/detection_engine_api_integration/security_and_spaces/rule_execution_logic/config.ts
   - x-pack/test/encrypted_saved_objects_api_integration/config.ts
   - x-pack/test/endpoint_api_integration_no_ingest/config.ts
   - x-pack/test/examples/config.ts
@@ -270,6 +271,7 @@ enabled:
   - x-pack/test/upgrade_assistant_integration/config.js
   - x-pack/test/usage_collection/config.ts
   - x-pack/performance/journeys/ecommerce_dashboard.ts
+  - x-pack/performance/journeys/ecommerce_dashboard_map_only.ts
   - x-pack/performance/journeys/flight_dashboard.ts
   - x-pack/performance/journeys/login.ts
   - x-pack/performance/journeys/many_fields_discover.ts
