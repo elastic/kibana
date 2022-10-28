@@ -224,7 +224,7 @@ export const TakeActionDropdown = React.memo(
       scopeId as TableId
     );
 
-    const { addToCaseActionItems } = useAddToCaseActions({
+    const { addToCaseActionItems, handleAddToNewCaseClick } = useAddToCaseActions({
       ecsData,
       nonEcsData: detailsData?.map((d) => ({ field: d.field, value: d.values })) ?? [],
       onMenuItemClick,
@@ -256,7 +256,11 @@ export const TakeActionDropdown = React.memo(
 
     const takeActionButton = useMemo(
       () => (
-        <GuidedOnboardingTourStep step={4} stepId={SecurityStepId.alertsCases}>
+        <GuidedOnboardingTourStep
+          onClick={handleAddToNewCaseClick}
+          step={4}
+          stepId={SecurityStepId.alertsCases}
+        >
           <EuiButton
             data-test-subj="take-action-dropdown-btn"
             fill
@@ -269,7 +273,7 @@ export const TakeActionDropdown = React.memo(
         </GuidedOnboardingTourStep>
       ),
 
-      [togglePopoverHandler]
+      [handleAddToNewCaseClick, togglePopoverHandler]
     );
 
     return items.length && !loadingEventDetails && ecsData ? (

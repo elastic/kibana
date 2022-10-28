@@ -143,5 +143,6 @@ export const useAddToCaseActions = ({
 
   return {
     addToCaseActionItems,
+    handleAddToNewCaseClick,
   };
 };

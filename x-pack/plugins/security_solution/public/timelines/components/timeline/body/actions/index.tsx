@@ -244,6 +244,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
       )}
       <GuidedOnboardingTourStep
         isTourAnchor={isTourAnchor}
+        onClick={onExpandEvent}
         step={2}
         stepId={SecurityStepId.alertsCases}
       >

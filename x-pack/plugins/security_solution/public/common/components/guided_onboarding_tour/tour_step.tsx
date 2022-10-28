@@ -15,17 +15,23 @@ import { useTourContext } from './tour';
 import { securityTourConfig, SecurityStepId } from './tour_config';
 interface SecurityTourStep {
   children?: React.ReactElement;
+  onClick?: () => void;
   step: number;
   stepId: SecurityStepId;
 }
 
-export const SecurityTourStep = ({ children, step, stepId }: SecurityTourStep) => {
+export const SecurityTourStep = ({ children, onClick, step, stepId }: SecurityTourStep) => {
   const { activeStep, incrementStep, isTourShown } = useTourContext();
   const tourStep = useMemo(
     () => securityTourConfig[stepId].find((config) => config.step === step),
     [step, stepId]
   );
-  const onClick = useCallback(() => incrementStep(stepId), [incrementStep, stepId]);
+  const onClickNext = useCallback(
+    () =>
+      // onClick should call incrementStep itself
+      onClick ? onClick() : incrementStep(stepId),
+    [incrementStep, onClick, stepId]
+  );
   // step === 5 && stepId === SecurityStepId.alertsCases is in Cases app and out of context.
   // If we mount this step, we know we need to render it
   // we are also managing the context on the siem end in the background
@@ -39,7 +45,7 @@ export const SecurityTourStep = ({ children, step, stepId }: SecurityTourStep) =
   const footerAction: EuiTourStepProps['footerAction'] = !hideNextButton ? (
     <EuiButton
       size="s"
-      onClick={onClick}
+      onClick={onClickNext}
       color="success"
       data-test-subj="onboarding--securityTourNextStepButton"
       tour-step="nextButton"

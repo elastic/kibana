@@ -16,7 +16,7 @@ export const enum SecurityStepId {
 
 export type StepConfig = Pick<
   EuiTourStepProps,
-  'step' | 'content' | 'anchorPosition' | 'title' | 'initialFocus' | 'anchor'
+  'step' | 'content' | 'anchorPosition' | 'title' | 'initialFocus' | 'anchor' | 'offset'
 > & {
   anchor?: ElementTarget;
   dataTestSubj: string;
@@ -70,7 +70,6 @@ const alertsCasesConfig: StepConfig[] = [
     ),
     anchorPosition: 'rightUp',
     dataTestSubj: getTourAnchor(2, SecurityStepId.alertsCases),
-    hideNextButton: true,
   },
   {
     ...defaultConfig,
@@ -104,7 +103,6 @@ const alertsCasesConfig: StepConfig[] = [
     }),
     anchorPosition: 'upRight',
     dataTestSubj: getTourAnchor(4, SecurityStepId.alertsCases),
-    hideNextButton: true,
   },
   {
     ...defaultConfig,
@@ -118,8 +116,9 @@ const alertsCasesConfig: StepConfig[] = [
         defaultMessage: `In addition to the alert, you can add any relevant information you need to the case.`,
       }
     ),
-    anchor: `[data-test-subj="create-case-flyout"]`,
+    anchor: `[data-test-subj="create-case-flyout"] [data-test-subj="caseTitle"] label`,
     anchorPosition: 'leftUp',
+    offset: 20,
     dataTestSubj: getTourAnchor(5, SecurityStepId.alertsCases),
     hideNextButton: true,
   },
