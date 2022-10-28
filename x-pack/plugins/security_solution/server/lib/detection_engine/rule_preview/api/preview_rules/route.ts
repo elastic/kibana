@@ -161,6 +161,7 @@ export const previewRulesRoute = async (
           ...securityRuleTypeOptions,
           ruleDataClient: previewRuleDataClient,
           ruleExecutionLoggerFactory: previewRuleExecutionLogger.factory,
+          isPreview: true,
         });
 
         const runExecutors = async <
@@ -406,7 +407,9 @@ export const previewRulesRoute = async (
             );
             break;
           case 'new_terms':
-            const newTermsAlertType = previewRuleTypeWrapper(createNewTermsAlertType(ruleOptions));
+            const newTermsAlertType = previewRuleTypeWrapper(
+              createNewTermsAlertType(ruleOptions, true)
+            );
             await runExecutors(
               newTermsAlertType.executor,
               newTermsAlertType.id,

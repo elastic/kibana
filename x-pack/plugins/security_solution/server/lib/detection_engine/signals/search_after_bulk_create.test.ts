@@ -104,6 +104,7 @@ describe('searchAfterAndBulkCreate', () => {
       ignoreFields: [],
       spaceId: 'default',
       indicesToQuery: inputIndexPattern,
+      alertTimestampOverride: undefined,
     });
   });
 
