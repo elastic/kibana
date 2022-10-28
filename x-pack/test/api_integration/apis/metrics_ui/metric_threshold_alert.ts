@@ -184,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
                 isNoData: false,
                 context: {
                   cloud: undefined,
-                  container: null,
+                  container: undefined,
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
@@ -240,7 +240,7 @@ export default function ({ getService }: FtrProviderContext) {
                 isNoData: false,
                 context: {
                   cloud: undefined,
-                  container: null,
+                  container: undefined,
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
@@ -269,6 +269,147 @@ export default function ({ getService }: FtrProviderContext) {
                 }
               },
             },
+          ]);
+        });
+        it('should trigger with contaier list in context on document count', async () => {
+          const params = {
+            ...baseParams,
+            groupBy: ['kubernetes.pod.uid'],
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: Comparator.GT_OR_EQ,
+                aggType: Aggregators.COUNT,
+              } as CountMetricExpressionParams,
+            ],
+          };
+          const config = {
+            ...configuration,
+            metricAlias: 'filebeat-*',
+          };
+          const timeFrame = { end: DATES.ten_thousand_plus.max };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            config,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
+
+          expect(results).to.eql([
+            {
+              'pod-01': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: '>=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: 2,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                context: {
+                  cloud: undefined,
+                  container: [
+                    { id: 'container-01' },
+                    { id: 'container-02' }
+                  ],
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
+              },
+              'pod-02': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: '>=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: 2,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                context: {
+                  cloud: undefined,
+                  container: [
+                    { id: 'container-03' },
+                    { id: 'container-04' }
+                  ],
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
+              },
+            },
+          ]);
+        });
+        it('should trigger with single container in context on document count', async () => {
+          const params = {
+            ...baseParams,
+            groupBy: ['container.id'],
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [2],
+                comparator: Comparator.GT_OR_EQ,
+                aggType: Aggregators.COUNT,
+              } as CountMetricExpressionParams,
+            ],
+          };
+          const config = {
+            ...configuration,
+            metricAlias: 'filebeat-*',
+          };
+          const timeFrame = { end: DATES.ten_thousand_plus.max };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            config,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
+
+          expect(results).to.eql([
+            {
+              'container-05': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [2],
+                comparator: '>=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: 2,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+                context: {
+                  cloud: undefined,
+                  container: { 
+                    id: 'container-05'
+                  },
+                  host: undefined,
+                  labels: undefined,
+                  orchestrator: undefined,
+                  tags: undefined
+                }
+              }
+            }
           ]);
         });
       });
@@ -704,7 +845,7 @@ export default function ({ getService }: FtrProviderContext) {
                 isNoData: false,
                 context: {
                   cloud: undefined,
-                  container: null,
+                  container: undefined,
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
@@ -725,7 +866,7 @@ export default function ({ getService }: FtrProviderContext) {
                 isNoData: false,
                 context: {
                   cloud: undefined,
-                  container: null,
+                  container: undefined,
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
@@ -767,7 +908,7 @@ export default function ({ getService }: FtrProviderContext) {
                 isNoData: false,
                 context: {
                   cloud: undefined,
-                  container: null,
+                  container: undefined,
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
@@ -1071,7 +1212,7 @@ export default function ({ getService }: FtrProviderContext) {
                 isNoData: false,
                 context: {
                   cloud: undefined,
-                  container: null,
+                  container: undefined,
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,

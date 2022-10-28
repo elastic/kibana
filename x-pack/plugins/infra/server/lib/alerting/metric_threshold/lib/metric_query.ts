@@ -85,11 +85,11 @@ export const getElasticsearchMetricQuery = (
   const containerContextAgg =
     groupBy?.includes(KUBERNETES_POD_UID) &&
       fieldsExisted &&
-      fieldsExisted[termsAggField.KUBERNETES_POD_UID]
+      fieldsExisted[termsAggField[KUBERNETES_POD_UID]]
       ? {
         containerContext: {
           terms: {
-            field: termsAggField.KUBERNETES_POD_UID,
+            field: termsAggField[KUBERNETES_POD_UID],
             size: NUMBER_OF_DOCUMENTS
           },
           aggs: {

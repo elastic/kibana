@@ -42,7 +42,7 @@ interface Aggs {
   missingGroup?: {
     value: number;
   };
-  containerContext: ContainerContext;
+  containerContext?: ContainerContext;
   additionalContext: SearchResponse<EcsFieldsResponse, Record<string, AggregationsAggregate>>;
 }
 
@@ -138,7 +138,7 @@ export const getData = async (
           containerContext
         } = bucket;
 
-        const containerList = containerContext ? createContainerList(containerContext) : null;
+        const containerList = containerContext ? createContainerList(containerContext) : void 0;
 
         const bucketHits = additionalContext.hits?.hits;
         const additionalContextSource =
@@ -164,8 +164,8 @@ export const getData = async (
             trigger: (shouldTrigger && shouldTrigger.value > 0) || false,
             warn: (shouldWarn && shouldWarn.value > 0) || false,
             value,
+            container: containerList,
             ...additionalContextSource,
-            container: containerList
           };
         }
       }
@@ -237,7 +237,7 @@ export const getData = async (
     groupBy?.includes(KUBERNETES_POD_UID)
       ? await doFieldsExist(
         esClient,
-        [termsAggField.KUBERNETES_POD_UID],
+        [termsAggField[KUBERNETES_POD_UID]],
         index)
       : null;
 

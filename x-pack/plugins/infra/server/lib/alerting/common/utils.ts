@@ -118,7 +118,7 @@ export const getViewInAppUrlInventory = (
 export const NUMBER_OF_DOCUMENTS = 10;
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 export const termsAggField: Record<string, string> =
-  { KUBERNETES_POD_UID: 'container.id' };
+  { [KUBERNETES_POD_UID]: 'container.id' };
 
 export type AdditionalContext = {
   [x: string]: any;
