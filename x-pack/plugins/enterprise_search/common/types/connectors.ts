@@ -38,11 +38,47 @@ export interface IngestPipelineParams {
   run_ml_inference: boolean;
 }
 
+export interface FilteringRule {
+  created_at: string;
+  field: string;
+  id: string;
+  order: number;
+  policy: string;
+  rule: string;
+  updated_at: string;
+  value: string;
+}
+
+export interface FilteringValidation {
+  ids: string[];
+  messages: string[];
+}
+
+export interface FilteringRules {
+  advanced_snippet: {
+    created_at: string;
+    updated_at: string;
+    value: object;
+  };
+  rules: FilteringRule[];
+  validation: {
+    errors: FilteringValidation[];
+    state: string;
+  };
+}
+
+export interface FilteringConfig {
+  active: FilteringRules;
+  domain: string;
+  draft: FilteringRules;
+}
+
 export interface Connector {
   api_key_id: string | null;
   configuration: ConnectorConfiguration;
   description: string | null;
   error: string | null;
+  filtering: FilteringConfig[] | null;
   id: string;
   index_name: string;
   is_native: boolean;
