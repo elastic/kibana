@@ -187,6 +187,9 @@ export interface DiscoverStateContainer {
    * functions executed by UI
    */
   actions: {
+    /**
+     * Set the currently selected data view
+     */
     setDataView: (dataView: DataView) => void;
   };
 }

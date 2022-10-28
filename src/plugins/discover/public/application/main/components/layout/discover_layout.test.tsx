@@ -16,7 +16,7 @@ import { esHits } from '../../../../__mocks__/es_hits';
 import { dataViewMock } from '../../../../__mocks__/data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { DiscoverLayoutProps } from './types';
 import {
@@ -117,7 +117,6 @@ async function mountComponent(
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
 
-  const dataViewList = [dataView] as DataViewListItem[];
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 
   const main$ = new BehaviorSubject({
@@ -156,7 +155,6 @@ async function mountComponent(
 
   stateContainer.setAppState({ interval: 'auto', query });
   stateContainer.internalState.transitions.setDataView(dataView);
-  stateContainer.internalState.transitions.setDataViews(dataViewList as DataViewListItem[]);
 
   const props: DiscoverLayoutProps = {
     dataView,

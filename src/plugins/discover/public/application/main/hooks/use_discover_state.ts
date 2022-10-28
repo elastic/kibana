@@ -63,10 +63,9 @@ export function useDiscoverState({
       savedSearch,
       services,
     });
-    container.internalState.transitions.setDataViews(dataViewList);
-    container.internalState.transitions.setDataView(dataView);
+    container.actions.setDataView(dataView);
     return container;
-  }, [dataView, dataViewList, history, savedSearch, services]);
+  }, [dataView, history, savedSearch, services]);
 
   const { appState, replaceUrlAppState } = stateContainer;
 
@@ -104,7 +103,7 @@ export function useDiscoverState({
           state.query
         );
         setUrlTracking(nextDataView);
-        stateContainer.internalState.transitions.setDataView(nextDataView);
+        stateContainer.actions.setDataView(nextDataView);
         stateContainer.setAppState(nextAppState);
       }
       setExpandedDoc(undefined);
@@ -190,7 +189,7 @@ export function useDiscoverState({
           savedSearch.searchSource,
           services.toastNotifications
         );
-        stateContainer.internalState.transitions.setDataView(nextDataView);
+        stateContainer.actions.setDataView(nextDataView);
 
         // If the requested data view is not found, don't try to load it,
         // and instead reset the app state to the fallback data view
