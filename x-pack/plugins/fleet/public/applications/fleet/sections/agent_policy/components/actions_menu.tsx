@@ -94,7 +94,7 @@ export const AgentPolicyActionMenu = memo<{
                 >
                   {isFleetServerPolicy ? (
                     <FormattedMessage
-                      id="xpack.fleet.agentPolicyActionMenu.enrollAgentActionText"
+                      id="xpack.fleet.agentPolicyActionMenu.addFleetServerActionText"
                       defaultMessage="Add Fleet Server"
                     />
                   ) : (
