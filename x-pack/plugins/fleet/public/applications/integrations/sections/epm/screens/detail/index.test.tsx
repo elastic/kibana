@@ -17,6 +17,7 @@ import type {
   GetInfoResponse,
   GetPackagePoliciesResponse,
   GetStatsResponse,
+  GetSettingsResponse,
 } from '../../../../../../../common/types/rest_spec';
 import type {
   DetailViewPanelName,
@@ -79,19 +80,23 @@ describe('when on integration detail', () => {
     });
   });
 
-  describe('and the package is not installed', () => {
+  function mockGAAndPrereleaseVersions(pkgVersion: string) {
+    const unInstalledPackage = mockedApi.responseProvider.epmGetInfo('nginx');
+    unInstalledPackage.item.status = 'not_installed';
+    unInstalledPackage.item.version = pkgVersion;
+    mockedApi.responseProvider.epmGetInfo.mockImplementation((name, version, query) => {
+      if (query?.prerelease === false) {
+        const gaPackage = { item: { ...unInstalledPackage.item } };
+        gaPackage.item.version = '1.0.0';
+        return gaPackage;
+      }
+      return unInstalledPackage;
+    });
+  }
+
+  describe('and the package is not installed and prerelease enabled', () => {
     beforeEach(async () => {
-      const unInstalledPackage = mockedApi.responseProvider.epmGetInfo('nginx');
-      unInstalledPackage.item.status = 'not_installed';
-      unInstalledPackage.item.version = '1.0.0-beta';
-      mockedApi.responseProvider.epmGetInfo.mockImplementation((pkgName, pkgVersion, query) => {
-        if (query?.prerelease === false) {
-          const gaPackage = { item: { ...unInstalledPackage.item } };
-          gaPackage.item.version = '1.0.0';
-          return gaPackage;
-        }
-        return unInstalledPackage;
-      });
+      mockGAAndPrereleaseVersions('1.0.0-beta');
       await render();
     });
 
@@ -105,14 +110,14 @@ describe('when on integration detail', () => {
       expect(renderResult.queryByTestId('tab-policies')).toBeNull();
     });
 
-    it('should display version select', async () => {
+    it('should display version select if prerelease setting enabled and prererelase version available', async () => {
       await mockedApi.waitForApi();
       const versionSelect = renderResult.queryByTestId('versionSelect');
       expect(versionSelect?.textContent).toEqual('1.0.0-beta1.0.0');
       expect((versionSelect as any)?.value).toEqual('1.0.0-beta');
     });
 
-    it('should display prerelease callout', async () => {
+    it('should display prerelease callout if prerelease setting enabled and prerelease version available', async () => {
       await mockedApi.waitForApi();
       const calloutTitle = renderResult.getByTestId('prereleaseCallout');
       expect(calloutTitle).toBeInTheDocument();
@@ -120,6 +125,22 @@ describe('when on integration detail', () => {
       expect((calloutGABtn as any)?.href).toEqual(
         'http://localhost/mock/app/integrations/detail/nginx-1.0.0/overview'
       );
+    });
+  });
+
+  describe('and the package is not installed and prerelease disabled', () => {
+    beforeEach(async () => {
+      mockGAAndPrereleaseVersions('1.0.0');
+      mockedApi.responseProvider.getSettings.mockReturnValue({
+        item: { prerelease_integrations_enabled: false, id: '', fleet_server_hosts: [] },
+      });
+      await render();
+    });
+
+    it('should display version text and no callout if prerelease setting disabled', async () => {
+      await mockedApi.waitForApi();
+      expect((renderResult.queryByTestId('versionText') as any)?.textContent).toEqual('1.0.0');
+      expect(renderResult.queryByTestId('prereleaseCallout')).toBeNull();
     });
   });
 
@@ -301,6 +322,7 @@ interface EpmPackageDetailsResponseProvidersMock {
   packagePolicyList: jest.MockedFunction<() => GetPackagePoliciesResponse>;
   agentPolicyList: jest.MockedFunction<() => GetAgentPoliciesResponse>;
   appCheckPermissions: jest.MockedFunction<() => CheckPermissionsResponse>;
+  getSettings: jest.MockedFunction<() => GetSettingsResponse>;
 }
 
 const mockApiCalls = (
@@ -780,6 +802,8 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
     success: true,
   };
 
+  const getSettingsResponse = { item: { prerelease_integrations_enabled: true } };
+
   const mockedApiInterface: MockedApi<EpmPackageDetailsResponseProvidersMock> = {
     waitForApi() {
       return new Promise((resolve) => {
@@ -798,6 +822,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
       packagePolicyList: jest.fn().mockReturnValue(packagePoliciesResponse),
       agentPolicyList: jest.fn().mockReturnValue(agentPoliciesResponse),
       appCheckPermissions: jest.fn().mockReturnValue(appCheckPermissionsResponse),
+      getSettings: jest.fn().mockReturnValue(getSettingsResponse),
     },
   };
 
@@ -852,7 +877,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
         return Promise.resolve();
       }
       if (path === '/api/fleet/settings') {
-        return { item: { prerelease_integrations_enabled: true } };
+        return mockedApiInterface.responseProvider.getSettings();
       }
 
       const err = new Error(`API [GET ${path}] is not MOCKED!`);

@@ -430,7 +430,7 @@ export function Detail() {
                           }
                         />
                       ) : (
-                        packageInfo.version
+                        <div data-test-subj="versionText">{packageInfo.version}</div>
                       )}
                     </EuiFlexItem>
                     {updateAvailable ? (
