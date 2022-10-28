@@ -21,6 +21,7 @@ import { ServiceGroupsListItems } from './service_groups_list';
 import { Sort } from './sort';
 import { RefreshServiceGroupsSubscriber } from '../refresh_service_groups_subscriber';
 import { getDateRange } from '../../../../context/url_params_context/helpers';
+import { ServiceGroupSaveButton } from '../service_group_save';
 
 export type ServiceGroupsSortType = 'recently_added' | 'alphabetical';
 
@@ -46,7 +47,7 @@ export function ServiceGroupsList() {
 
   const { data: servicesCountData = { servicesCounts: {} } } = useFetcher(
     (callApmApi) => {
-      if (start && end) {
+      if (start && end && serviceGroups.length) {
         return callApmApi('GET /internal/apm/service_groups/services_count', {
           params: { query: { start, end } },
         });
@@ -133,51 +134,94 @@ export function ServiceGroupsList() {
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="m">
             <EuiFlexItem>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiText style={{ fontWeight: 'bold' }} size="s">
-                    {i18n.translate('xpack.apm.serviceGroups.groupsCount', {
-                      defaultMessage:
-                        '{servicesCount} {servicesCount, plural, =0 {group} one {group} other {groups}}',
-                      values: { servicesCount: filteredItems.length },
-                    })}
-                  </EuiText>
-                </EuiFlexItem>
+              <EuiFlexGroup direction="row" gutterSize="m">
+                {serviceGroups.length ? (
+                  <>
+                    <EuiFlexItem grow={1}>
+                      <EuiFlexGroup gutterSize="s">
+                        <EuiFlexItem grow={false}>
+                          <EuiText style={{ fontWeight: 'bold' }} size="s">
+                            {i18n.translate(
+                              'xpack.apm.serviceGroups.groupsCount',
+                              {
+                                defaultMessage:
+                                  '{servicesCount} {servicesCount, plural, =0 {groups} one {group} other {groups}}',
+                                values: { servicesCount: filteredItems.length },
+                              }
+                            )}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiText color="subdued" size="s">
+                        {i18n.translate(
+                          'xpack.apm.serviceGroups.listDescription',
+                          {
+                            defaultMessage:
+                              'Displayed service counts reflect the last 24 hours.',
+                          }
+                        )}
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <ServiceGroupSaveButton />
+                    </EuiFlexItem>
+                  </>
+                ) : null}
               </EuiFlexGroup>
-              <EuiText color="subdued" size="s">
-                {i18n.translate('xpack.apm.serviceGroups.listDescription', {
-                  defaultMessage:
-                    'Displayed service counts reflect the last 24 hours.',
-                })}
-              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
-              {items.length ? (
-                <ServiceGroupsListItems
-                  items={items}
-                  servicesCounts={servicesCountData.servicesCounts}
-                  isLoading={isLoading}
-                />
+              {serviceGroups.length ? (
+                items.length ? (
+                  <ServiceGroupsListItems
+                    items={items}
+                    servicesCounts={servicesCountData.servicesCounts}
+                    isLoading={isLoading}
+                  />
+                ) : (
+                  <EuiEmptyPrompt
+                    iconType="layers"
+                    iconColor="black"
+                    title={
+                      <h2>
+                        {i18n.translate(
+                          'xpack.apm.serviceGroups.filtered.emptyPrompt.serviceGroups',
+                          { defaultMessage: 'Service groups' }
+                        )}
+                      </h2>
+                    }
+                    body={
+                      <p>
+                        {i18n.translate(
+                          'xpack.apm.serviceGroups.filtered.emptyPrompt.message',
+                          { defaultMessage: 'No groups found for this filter' }
+                        )}
+                      </p>
+                    }
+                  />
+                )
               ) : (
                 <EuiEmptyPrompt
-                  iconType="layers"
-                  iconColor="black"
+                  iconType="addDataApp"
                   title={
                     <h2>
                       {i18n.translate(
-                        'xpack.apm.serviceGroups.emptyPrompt.serviceGroups',
-                        { defaultMessage: 'Service groups' }
+                        'xpack.apm.serviceGroups.data.emptyPrompt.noServiceGroups',
+                        { defaultMessage: 'No service groups' }
                       )}
                     </h2>
                   }
                   body={
                     <p>
                       {i18n.translate(
-                        'xpack.apm.serviceGroups.emptyPrompt.message',
-                        { defaultMessage: 'No groups found for this filter' }
+                        'xpack.apm.serviceGroups.data.emptyPrompt.message',
+                        {
+                          defaultMessage:
+                            'Start grouping and organising your services and your application. Learn more about Service groups or create a group.',
+                        }
                       )}
                     </p>
                   }
+                  actions={<ServiceGroupSaveButton />}
                 />
               )}
             </EuiFlexItem>

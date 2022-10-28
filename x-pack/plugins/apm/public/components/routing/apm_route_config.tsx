@@ -78,7 +78,8 @@ const apmRoutes = {
             <ApmMainTemplate
               pageTitle={ServiceGroupsTitle}
               environmentFilter={false}
-              showServiceGroupSaveButton
+              showServiceGroupSaveButton={false}
+              showServiceGroupsNav
               selectedNavButton="serviceGroups"
             >
               <ServiceGroupsRedirect>

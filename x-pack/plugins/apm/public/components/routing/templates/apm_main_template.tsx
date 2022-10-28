@@ -38,6 +38,7 @@ export function ApmMainTemplate({
   children,
   environmentFilter = true,
   showServiceGroupSaveButton = false,
+  showServiceGroupsNav = false,
   selectedNavButton,
   ...pageTemplateProps
 }: {
@@ -46,6 +47,7 @@ export function ApmMainTemplate({
   children: React.ReactNode;
   environmentFilter?: boolean;
   showServiceGroupSaveButton?: boolean;
+  showServiceGroupsNav?: boolean;
   selectedNavButton?: 'serviceGroups' | 'allServices';
 } & KibanaPageTemplateProps) {
   const location = useLocation();
@@ -119,9 +121,10 @@ export function ApmMainTemplate({
         pageTitle,
         rightSideItems,
         ...pageHeader,
-        children: renderServiceGroupSaveButton ? (
-          <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
-        ) : null,
+        children:
+          showServiceGroupsNav && isServiceGroupsEnabled ? (
+            <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
+          ) : null,
       }}
       {...pageTemplateProps}
     >

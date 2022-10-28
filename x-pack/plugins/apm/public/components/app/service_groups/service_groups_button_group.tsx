@@ -24,9 +24,7 @@ const buttonGroupOptions = {
       id: 'serviceGroups',
       label: i18n.translate(
         'xpack.apm.serviceGroups.buttonGroup.serviceGroups',
-        {
-          defaultMessage: 'Service groups',
-        }
+        { defaultMessage: 'Service groups' }
       ),
     },
     pathname: '/service-groups',
@@ -44,8 +42,8 @@ export function ServiceGroupsButtonGroup({
         color="primary"
         type="multi"
         options={[
-          buttonGroupOptions.allServices.option,
           buttonGroupOptions.serviceGroups.option,
+          buttonGroupOptions.allServices.option,
         ]}
         idToSelectedMap={{
           allServices: selectedNavButton === 'allServices',
