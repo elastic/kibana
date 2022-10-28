@@ -46,15 +46,15 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
               policy: { type: 'keyword' },
               rule: { type: 'keyword' },
               updated_at: { type: 'date' },
-              value: { type: 'keyword' }
-            }
+              value: { type: 'keyword' },
+            },
           },
           advanced_snippet: {
             properties: {
               created_at: { type: 'date' },
               updated_at: { type: 'date' },
-              value: { type: 'object' }
-            }
+              value: { type: 'object' },
+            },
           },
           validation: {
             properties: {
@@ -62,12 +62,12 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
               errors: {
                 properties: {
                   ids: { type: 'keyword' },
-                  messages: { type: 'text' }
-                }
-              }
-            }
-          }
-        }
+                  messages: { type: 'text' },
+                },
+              },
+            },
+          },
+        },
       },
       draft: {
         properties: {
@@ -80,30 +80,30 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
               policy: { type: 'keyword' },
               rule: { type: 'keyword' },
               updated_at: { type: 'date' },
-              value: { type: 'keyword' }
-            }
+              value: { type: 'keyword' },
+            },
           },
           advanced_snippet: {
             properties: {
               created_at: { type: 'date' },
               updated_at: { type: 'date' },
-              value: { type: 'object' }
-            }
+              value: { type: 'object' },
+            },
           },
           validation: {
             properties: {
               errors: {
                 properties: {
                   ids: { type: 'keyword' },
-                  messages: { type: 'text' }
-                }
+                  messages: { type: 'text' },
+                },
               },
-              state: { type: 'keyword' }
-            }
-          }
-        }
-      }
-    }
+              state: { type: 'keyword' },
+            },
+          },
+        },
+      },
+    },
   },
   index_name: { type: 'keyword' },
   is_native: { type: 'boolean' },
@@ -120,8 +120,8 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
       extract_binary_content: { type: 'boolean' },
       name: { type: 'keyword' },
       reduce_whitespace: { type: 'boolean' },
-      run_ml_inference: { type: 'boolean' }
-    }
+      run_ml_inference: { type: 'boolean' },
+    },
   },
   scheduling: {
     properties: {
@@ -171,7 +171,7 @@ const indices: IndexDefinition[] = [
     aliases: ['.elastic-connectors-sync-jobs'],
     mappings: {
       _meta: {
-        version: 1
+        version: 1,
       },
       properties: {
         completed_at: { type: 'date' },
@@ -191,28 +191,28 @@ const indices: IndexDefinition[] = [
                 policy: { type: 'keyword' },
                 rule: { type: 'keyword' },
                 updated_at: { type: 'date' },
-                value: { type: 'keyword' }
-              }
+                value: { type: 'keyword' },
+              },
             },
             advanced_snippet: {
               properties: {
                 created_at: { type: 'date' },
                 updated_at: { type: 'date' },
-                value: { type: 'object' }
-              }
+                value: { type: 'object' },
+              },
             },
             warnings: {
               properties: {
                 ids: { type: 'keyword' },
-                messages: { type: 'text' }
-              }
-            }
-          }
+                messages: { type: 'text' },
+              },
+            },
+          },
         },
         indexed_document_count: { type: 'integer' },
         status: { type: 'keyword' },
-        worker_hostname: { type: 'keyword' }
-      }
+        worker_hostname: { type: 'keyword' },
+      },
     },
     name: '.elastic-connectors-sync-jobs-v1',
     settings: defaultSettings,
