@@ -7,12 +7,15 @@
 
 import expect from '@kbn/expect';
 import {
-  searchAddDataActiveState,
-  securityAddDataInProgressState,
+  testGuideStep1ActiveState,
+  testGuideNotActiveState,
 } from '@kbn/guided-onboarding-plugin/public/services/api.mocks';
 import { guidedSetupSavedObjectsType } from '@kbn/guided-onboarding-plugin/server/saved_objects/guided_setup';
-import type { GuideState } from '@kbn/guided-onboarding';
+import type { GuideState, GuideId } from '@kbn/guided-onboarding';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+
+const testGuideA = testGuideStep1ActiveState;
+const testGuideB = { ...testGuideNotActiveState, guideId: 'testGuideB' as GuideId }; // different guideId
 
 export default function testGetState({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -36,39 +39,37 @@ export default function testGetState({ getService }: FtrProviderContext) {
     };
 
     it('should return the state for all guides', async () => {
-      await createGuides([searchAddDataActiveState, securityAddDataInProgressState]);
+      // Create two guides to return
+      await createGuides([testGuideA, testGuideB]);
 
       const response = await supertest.get('/api/guided_onboarding/state').expect(200);
       expect(response.body.state.length).to.eql(2);
       expect(response.body).to.eql({
-        state: [searchAddDataActiveState, securityAddDataInProgressState],
+        state: [testGuideA, testGuideB],
       });
     });
 
     it('should return the state for the active guide with query param `active=true`', async () => {
-      await createGuides([
-        searchAddDataActiveState,
-        { ...securityAddDataInProgressState, isActive: false },
-      ]);
+      await createGuides([testGuideA, { ...testGuideB, isActive: false }]);
 
       const response = await supertest
         .get('/api/guided_onboarding/state')
         .query({ active: true })
         .expect(200);
-      expect(response.body).to.eql({ state: [searchAddDataActiveState] });
+      expect(response.body).to.eql({ state: [testGuideA] });
     });
 
     it('should return state from saved object if it exists', async () => {
       // Add a new state to the saved object
       await kibanaServer.savedObjects.create({
         type: guidedSetupSavedObjectsType,
-        id: securityAddDataInProgressState.guideId,
+        id: testGuideA.guideId,
         overwrite: true,
-        attributes: securityAddDataInProgressState,
+        attributes: testGuideA,
       });
       const response = await supertest.get('/api/guided_onboarding/state').expect(200);
       expect(response.body).to.eql({
-        state: [securityAddDataInProgressState],
+        state: [testGuideA],
       });
     });
 
