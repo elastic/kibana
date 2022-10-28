@@ -1122,7 +1122,7 @@ describe('UserProfileService', () => {
       ).toHaveBeenCalledWith({
         name: 'some',
         size: 10,
-        data: 'kibana.one,kibana.two',
+        data: 'kibana.one,two',
       });
 
       expect(mockAuthz.checkUserProfilesPrivileges).toHaveBeenCalledTimes(1);
