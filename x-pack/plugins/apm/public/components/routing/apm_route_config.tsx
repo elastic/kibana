@@ -18,7 +18,6 @@ import { serviceDetail } from './service_detail';
 import { settings } from './settings';
 import { ApmMainTemplate } from './templates/apm_main_template';
 import { ServiceGroupsList } from '../app/service_groups';
-import { ServiceGroupsRedirect } from './service_groups_redirect';
 import { offsetRt } from '../../../common/comparison_rt';
 
 const ServiceGroupsTitle = i18n.translate(
@@ -82,9 +81,7 @@ const apmRoutes = {
               showServiceGroupsNav
               selectedNavButton="serviceGroups"
             >
-              <ServiceGroupsRedirect>
-                <ServiceGroupsList />
-              </ServiceGroupsRedirect>
+              <ServiceGroupsList />
             </ApmMainTemplate>
           </Breadcrumb>
         ),

@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiFormControlLayout,
   EuiText,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, sortBy } from 'lodash';
@@ -22,6 +23,7 @@ import { Sort } from './sort';
 import { RefreshServiceGroupsSubscriber } from '../refresh_service_groups_subscriber';
 import { getDateRange } from '../../../../context/url_params_context/helpers';
 import { ServiceGroupSaveButton } from '../service_group_save';
+import { BetaBadge } from '../../../shared/beta_badge';
 
 export type ServiceGroupsSortType = 'recently_added' | 'alphabetical';
 
@@ -40,6 +42,8 @@ export function ServiceGroupsList() {
     []
   );
 
+  const { serviceGroups } = data;
+
   const { start, end } = useMemo(
     () => getDateRange({ rangeFrom: 'now-24h', rangeTo: 'now' }),
     []
@@ -53,10 +57,8 @@ export function ServiceGroupsList() {
         });
       }
     },
-    [start, end]
+    [start, end, serviceGroups.length]
   );
-
-  const { serviceGroups } = data;
 
   const isLoading =
     status === FETCH_STATUS.NOT_INITIATED || status === FETCH_STATUS.LOADING;
@@ -167,6 +169,30 @@ export function ServiceGroupsList() {
                     </EuiFlexItem>
                   </>
                 ) : null}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup
+                alignItems="center"
+                justifyContent="flexStart"
+                gutterSize="s"
+              >
+                <EuiFlexItem grow={false}>
+                  <div>
+                    <BetaBadge />
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiLink
+                    href="https://ela.st/feedback-service-groups"
+                    target="_blank"
+                  >
+                    {i18n.translate(
+                      'xpack.apm.serviceGroups.beta.feedback.link',
+                      { defaultMessage: 'Send feedback' }
+                    )}
+                  </EuiLink>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>

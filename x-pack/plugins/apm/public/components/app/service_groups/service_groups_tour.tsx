@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiSpacer, EuiText, EuiTourStep } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiText,
+  EuiTourStep,
+  PopoverAnchorPosition,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -18,6 +24,7 @@ interface Props {
   content: string;
   tourEnabled: boolean;
   dismissTour: () => void;
+  anchorPosition?: PopoverAnchorPosition;
   children: React.ReactElement;
 }
 
@@ -26,6 +33,7 @@ export function ServiceGroupsTour({
   dismissTour,
   title,
   content,
+  anchorPosition,
   children,
 }: Props) {
   return (
@@ -46,9 +54,7 @@ export function ServiceGroupsTour({
                 >
                   {i18n.translate(
                     'xpack.apm.serviceGroups.tour.content.link.docs',
-                    {
-                      defaultMessage: 'docs',
-                    }
+                    { defaultMessage: 'docs' }
                   )}
                 </ElasticDocsLink>
               ),
@@ -63,7 +69,7 @@ export function ServiceGroupsTour({
       step={1}
       stepsTotal={1}
       title={title}
-      anchorPosition="upLeft"
+      anchorPosition={anchorPosition}
       footerAction={
         <EuiButtonEmpty color="text" size="xs" onClick={dismissTour}>
           {i18n.translate('xpack.apm.serviceGroups.tour.dismiss', {

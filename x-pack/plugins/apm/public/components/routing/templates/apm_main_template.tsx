@@ -10,7 +10,6 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import { enableServiceGroups } from '@kbn/observability-plugin/public';
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
 import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
@@ -102,14 +101,8 @@ export function ApmMainTemplate({
     loading: isLoading,
   });
 
-  const {
-    services: { uiSettings },
-  } = useKibana<ApmPluginStartDeps>();
-  const isServiceGroupsEnabled = uiSettings?.get<boolean>(enableServiceGroups);
-  const renderServiceGroupSaveButton =
-    showServiceGroupSaveButton && isServiceGroupsEnabled;
   const rightSideItems = [
-    ...(renderServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
+    ...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
     ...(environmentFilter ? [<ApmEnvironmentFilter />] : []),
   ];
 
@@ -121,10 +114,9 @@ export function ApmMainTemplate({
         pageTitle,
         rightSideItems,
         ...pageHeader,
-        children:
-          showServiceGroupsNav && isServiceGroupsEnabled ? (
-            <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
-          ) : null,
+        children: showServiceGroupsNav ? (
+          <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
+        ) : null,
       }}
       {...pageTemplateProps}
     >

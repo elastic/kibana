@@ -23398,7 +23398,6 @@
     "xpack.observability.enableInspectEsQueriesExperimentName": "检查 ES 查询",
     "xpack.observability.enableNewSyntheticsViewExperimentDescription": "在 Observability 中启用新的组合监测应用程序。刷新页面可应用该设置。",
     "xpack.observability.enableNewSyntheticsViewExperimentName": "启用新的组合监测应用程序",
-    "xpack.observability.enableServiceGroups": "服务组功能",
     "xpack.observability.exp.breakDownFilter.noBreakdown": "无细目",
     "xpack.observability.exp.breakDownFilter.unavailable": "步骤名称细目不可用于监测持续时间指标。使用步骤持续时间指标以按步骤名称细分。",
     "xpack.observability.exp.breakDownFilter.warning": "一次只能将细目应用于一个序列。",

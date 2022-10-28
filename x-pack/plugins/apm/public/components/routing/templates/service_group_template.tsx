@@ -14,11 +14,8 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
-import { enableServiceGroups } from '@kbn/observability-plugin/public';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { ApmPluginStartDeps } from '../../../plugin';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmMainTemplate } from './apm_main_template';
@@ -38,11 +35,6 @@ export function ServiceGroupTemplate({
   environmentFilter?: boolean;
   serviceGroupContextTab: ServiceGroupContextTab['key'];
 } & KibanaPageTemplateProps) {
-  const {
-    services: { uiSettings },
-  } = useKibana<ApmPluginStartDeps>();
-  const isServiceGroupsEnabled = uiSettings?.get<boolean>(enableServiceGroups);
-
   const router = useApmRouter();
   const {
     query,
@@ -119,9 +111,9 @@ export function ServiceGroupTemplate({
   );
   return (
     <ApmMainTemplate
-      pageTitle={isServiceGroupsEnabled ? serviceGroupsPageTitle : pageTitle}
+      pageTitle={serviceGroupsPageTitle}
       pageHeader={{
-        tabs: isServiceGroupsEnabled ? tabs : undefined,
+        tabs,
         breadcrumbs: !isAllServices
           ? [
               {
