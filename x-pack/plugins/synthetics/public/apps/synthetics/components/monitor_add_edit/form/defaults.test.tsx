@@ -72,6 +72,8 @@ describe('defaults', () => {
     type: 'browser',
     'url.port': null,
     urls: '',
+    id: '',
+    config_id: '',
   } as SyntheticsMonitor;
 
   it('correctly formats monitor type to form type', () => {

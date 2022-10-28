@@ -58,6 +58,7 @@ describe('validateMonitor', () => {
       [ConfigKey.MONITOR_TYPE]: DataStream.ICMP,
       [ConfigKey.NAME]: 'test-monitor-name',
       [ConfigKey.CONFIG_ID]: 'test-monitor-id',
+      [ConfigKey.HEARTBEAT_ID]: '',
       [ConfigKey.ENABLED]: true,
       [ConfigKey.TAGS]: testTags,
       [ConfigKey.SCHEDULE]: testSchedule,
@@ -445,6 +446,7 @@ function getJsonPayload() {
     '  ],' +
     '  "name": "test-monitor-name",' +
     '  "config_id": "test-monitor-id",' +
+    '  "id": "test-id",' +
     '  "namespace": "testnamespace",' +
     '  "locations": [{' +
     '    "id": "eu-west-01",' +
