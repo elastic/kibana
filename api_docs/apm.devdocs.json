@@ -465,7 +465,7 @@
                 "section": "def-server.LicensingPluginStart",
                 "text": "LicensingPluginStart"
               },
-              ">; }; observability: { setup: { getScopedAnnotationsClient: (requestContext: ",
+              ">; }; observability: { setup: { getAlertDetailsConfig(): Readonly<{} & { apm: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; uptime: Readonly<{} & { enabled: boolean; }>; }>; getScopedAnnotationsClient: (requestContext: ",
               "RequestHandlerContext",
               " & { licensing: Promise<",
               {

@@ -734,6 +734,54 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace",
+        "id": "def-server.dedot",
+        "type": "Function",
+        "tags": [],
+        "label": "dedot",
+        "description": [],
+        "signature": [
+          "(source: Record<string, any>, target: Record<string, any>) => Record<string, any>"
+        ],
+        "path": "packages/kbn-apm-synthtrace/src/lib/utils/dedot.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.dedot.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/utils/dedot.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.dedot.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "target",
+            "description": [],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/utils/dedot.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace",
         "id": "def-server.observer",
         "type": "Function",
         "tags": [],
@@ -1052,29 +1100,15 @@
             "label": "service",
             "description": [],
             "signature": [
-              "({ name, environment, agentName, }: { name: string; environment: string; agentName: string; }) => ",
-              "Service"
+              "{ (name: string, environment: string, agentName: string): ",
+              "Service",
+              "; (options: { name: string; environment: string; agentName: string; }): ",
+              "Service",
+              "; }"
             ],
             "path": "packages/kbn-apm-synthtrace/src/lib/apm/index.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/apm-synthtrace",
-                "id": "def-server.apm.service.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "__0",
-                "description": [],
-                "signature": [
-                  "{ name: string; environment: string; agentName: string; }"
-                ],
-                "path": "packages/kbn-apm-synthtrace/src/lib/apm/service.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace",
