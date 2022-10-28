@@ -141,7 +141,13 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       validateEvent(event, {
         spaceId: Spaces.space1.id,
         savedObjects: [
-          { type: 'alert', id: ruleId, rel: 'primary', type_id: 'test.cumulative-firing' },
+          {
+            type: 'alert',
+            id: ruleId,
+            rel: 'primary',
+            type_id: 'test.cumulative-firing',
+            space_ids: ['default'],
+          },
         ],
         message: "instance 'instance-0' has recovered due to the rule was disabled",
         shouldHaveEventEnd: false,

@@ -1244,7 +1244,7 @@ instanceStateValue: true
         rel: 'primary',
         type: 'alert',
         id: alertId,
-        namespace: spaceId,
+        space_ids: [spaceId],
         type_id: ruleObject.alertInfo.ruleTypeId,
       },
     ]);

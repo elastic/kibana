@@ -75,7 +75,15 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
       validateEvent(event, {
         spaceId,
-        savedObjects: [{ type: 'alert', id: alertId, rel: 'primary', type_id: 'test.noop' }],
+        savedObjects: [
+          {
+            type: 'alert',
+            id: alertId,
+            rel: 'primary',
+            type_id: 'test.noop',
+            space_ids: ['default'],
+          },
+        ],
         outcome: 'failure',
         message: `test.noop:${alertId}: execution failed`,
         errorMessage: 'Unable to decrypt attribute "apiKey"',

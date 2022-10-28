@@ -150,7 +150,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 validateEvent(event, {
                   spaceId: space.id,
                   savedObjects: [
-                    { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+                    {
+                      type: 'alert',
+                      id: alertId,
+                      rel: 'primary',
+                      type_id: 'test.patternFiring',
+                      space_ids: ['default'],
+                    },
                   ],
                   message: `rule execution start: "${alertId}"`,
                   shouldHaveTask: true,
@@ -169,8 +175,19 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 validateEvent(event, {
                   spaceId: space.id,
                   savedObjects: [
-                    { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
-                    { type: 'action', id: createdAction.id, type_id: 'test.noop' },
+                    {
+                      type: 'alert',
+                      id: alertId,
+                      rel: 'primary',
+                      type_id: 'test.patternFiring',
+                      space_ids: ['default'],
+                    },
+                    {
+                      type: 'action',
+                      id: createdAction.id,
+                      type_id: 'test.noop',
+                      space_ids: ['default'],
+                    },
                   ],
                   message: `alert: test.patternFiring:${alertId}: 'abc' instanceId: 'instance' scheduled actionGroup: 'default' action: test.noop:${createdAction.id}`,
                   instanceId: 'instance',
@@ -218,7 +235,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 validateEvent(event, {
                   spaceId: space.id,
                   savedObjects: [
-                    { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+                    {
+                      type: 'alert',
+                      id: alertId,
+                      rel: 'primary',
+                      type_id: 'test.patternFiring',
+                      space_ids: ['default'],
+                    },
                   ],
                   outcome: 'success',
                   message: `rule executed: test.patternFiring:${alertId}: 'abc'`,
@@ -269,7 +292,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 validateEvent(event, {
                   spaceId: space.id,
                   savedObjects: [
-                    { type: 'action', id: createdAction.id, rel: 'primary', type_id: 'test.noop' },
+                    {
+                      type: 'action',
+                      id: createdAction.id,
+                      rel: 'primary',
+                      type_id: 'test.noop',
+                      space_ids: ['default'],
+                    },
                   ],
                   message: `action executed: test.noop:${createdAction.id}: MY action`,
                   outcome: 'success',
@@ -291,7 +320,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             validateEvent(event, {
               spaceId: space.id,
               savedObjects: [
-                { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+                {
+                  type: 'alert',
+                  id: alertId,
+                  rel: 'primary',
+                  type_id: 'test.patternFiring',
+                  space_ids: ['default'],
+                },
               ],
               message: `test.patternFiring:${alertId}: 'abc' ${subMessage}`,
               instanceId: 'instance',
@@ -373,7 +408,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 validateEvent(event, {
                   spaceId: space.id,
                   savedObjects: [
-                    { type: 'alert', id: ruleId, rel: 'primary', type_id: 'test.multipleSearches' },
+                    {
+                      type: 'alert',
+                      id: ruleId,
+                      rel: 'primary',
+                      type_id: 'test.multipleSearches',
+                      space_ids: ['default'],
+                    },
                   ],
                   outcome: 'success',
                   message: `rule executed: test.multipleSearches:${ruleId}: 'abc'`,
@@ -488,7 +529,13 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
           validateEvent(startEvent, {
             spaceId: space.id,
             savedObjects: [
-              { type: 'alert', id: alertId, rel: 'primary', type_id: 'test.patternFiring' },
+              {
+                type: 'alert',
+                id: alertId,
+                rel: 'primary',
+                type_id: 'test.patternFiring',
+                space_ids: ['default'],
+              },
             ],
             message: `rule execution start: "${alertId}"`,
             shouldHaveTask: true,
@@ -504,7 +551,15 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
           validateEvent(executeEvent, {
             spaceId: space.id,
-            savedObjects: [{ type: 'alert', id: alertId, rel: 'primary', type_id: 'test.throw' }],
+            savedObjects: [
+              {
+                type: 'alert',
+                id: alertId,
+                rel: 'primary',
+                type_id: 'test.throw',
+                space_ids: ['default'],
+              },
+            ],
             outcome: 'failure',
             message: `rule execution failure: test.throw:${alertId}: 'abc'`,
             errorMessage: 'this alert is intended to fail',
@@ -535,6 +590,7 @@ interface SavedObject {
   id: string;
   rel?: string;
   type_id: string;
+  space_ids?: string[];
 }
 
 interface ValidateEventLogParams {
@@ -712,11 +768,10 @@ function isSavedObjectInEvent(
   rel?: string
 ): boolean {
   const savedObjects = event?.kibana?.saved_objects ?? [];
-  const namespace = spaceId === 'default' ? undefined : spaceId;
 
   for (const savedObject of savedObjects) {
     if (
-      savedObject.namespace === namespace &&
+      savedObject.space_ids?.includes(spaceId) &&
       savedObject.type === type &&
       savedObject.id === id &&
       savedObject.rel === rel

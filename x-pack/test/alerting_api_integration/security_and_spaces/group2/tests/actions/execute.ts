@@ -555,7 +555,7 @@ export default function ({ getService }: FtrProviderContext) {
         rel: 'primary',
         type: 'action',
         id: connectorId,
-        namespace: 'space1',
+        space_ids: ['space1'],
         type_id: actionTypeId,
       },
     ]);
