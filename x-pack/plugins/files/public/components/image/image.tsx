@@ -90,6 +90,7 @@ export const Image = React.forwardRef<HTMLImageElement, Props>(
           size={size}
           src={isVisible ? src : undefined}
           alt={alt}
+          hidden={!isLoaded}
           onLoad={(ev) => {
             setIsLoaded(true);
             onLoad?.(ev);

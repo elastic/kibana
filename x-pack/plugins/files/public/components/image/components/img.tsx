@@ -13,19 +13,24 @@ import { sizes } from '../styles';
 
 export interface Props extends ImgHTMLAttributes<HTMLImageElement> {
   size?: EuiImageSize;
+  hidden: boolean;
   observerRef: (el: null | HTMLImageElement) => void;
 }
 
 export const Img = React.forwardRef<HTMLImageElement, Props>(
-  ({ observerRef, src, size, ...rest }, ref) => {
+  ({ observerRef, src, size, hidden, ...rest }, ref) => {
     const { euiTheme } = useEuiTheme();
     const styles = [
       css`
         transition: opacity ${euiTheme.animation.extraFast};
       `,
-      !src
+      hidden
         ? css`
             visibility: hidden;
+          `
+        : undefined,
+      !src
+        ? css`
             position: absolute; // ensure that empty img tag occupies full container
             top: 0;
             right: 0;
