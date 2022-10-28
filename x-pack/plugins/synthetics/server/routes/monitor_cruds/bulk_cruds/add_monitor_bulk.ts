@@ -35,8 +35,6 @@ export const createNewSavedObjectMonitorBulk = async ({
     type: syntheticsMonitorType,
     attributes: formatSecrets({
       ...monitor,
-      [ConfigKey.HEARTBEAT_ID]: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
-      [ConfigKey.CONFIG_ID]: id,
       revision: 1,
     }),
   }));
@@ -62,11 +60,17 @@ export const syncNewMonitorBulk = async ({
   spaceId: string;
 }) => {
   let newMonitors: SavedObjectsBulkResponse<EncryptedSyntheticsMonitor> | null = null;
-
-  const monitorsToCreate = normalizedMonitors.map((monitor) => ({
-    id: uuidV4(),
-    monitor: monitor as MonitorFields,
-  }));
+  const monitorsToCreate = normalizedMonitors.map((monitor) => {
+    const monitorSavedObjectId = uuidV4();
+    return {
+      id: monitorSavedObjectId,
+      monitor: {
+        ...monitor,
+        [ConfigKey.CONFIG_ID]: monitorSavedObjectId,
+        [ConfigKey.HEARTBEAT_ID]: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitorSavedObjectId,
+      } as MonitorFields,
+    };
+  });
 
   try {
     const [createdMonitors, { syncErrors }] = await Promise.all([
