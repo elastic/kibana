@@ -27,13 +27,20 @@ const getColor = (
 export const getStopsWithColorsFromColorsNumber = (
   colorsNumber: number | '',
   colorSchema: ColorSchemas,
-  invertColors: boolean = false
+  invertColors: boolean = false,
+  includeZeroElement: boolean = false
 ) => {
   const colors = [];
   const stops = [];
   if (!colorsNumber) {
     return { color: [] };
   }
+
+  if (includeZeroElement) {
+    colors.push(TRANSPARENT);
+    stops.push(0);
+  }
+
   const step = 100 / colorsNumber;
   for (let i = 0; i < colorsNumber; i++) {
     colors.push(getColor(i, colorsNumber, colorSchema, invertColors));
