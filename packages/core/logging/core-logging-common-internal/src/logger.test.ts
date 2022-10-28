@@ -216,4 +216,26 @@ describe('AbstractLogger', () => {
       }
     });
   });
+
+  describe('isLevelEnabled', () => {
+    const orderedLogLevels = [
+      LogLevel.Fatal,
+      LogLevel.Error,
+      LogLevel.Warn,
+      LogLevel.Info,
+      LogLevel.Debug,
+      LogLevel.Trace,
+      LogLevel.All,
+    ];
+
+    for (const logLevel of orderedLogLevels) {
+      it(`returns the correct value for a '${logLevel.id}' level logger`, () => {
+        const levelLogger = new TestLogger(context, logLevel, appenderMocks, factory);
+        for (const level of orderedLogLevels) {
+          const levelEnabled = logLevel.supports(level);
+          expect(levelLogger.isLevelEnabled(level.id)).toEqual(levelEnabled);
+        }
+      });
+    }
+  });
 });

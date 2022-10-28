@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { Appender, LogLevel, LogRecord, LoggerFactory, LogMeta, Logger } from '@kbn/logging';
+import {
+  Appender,
+  LogLevel,
+  LogRecord,
+  LoggerFactory,
+  LogMeta,
+  Logger,
+  LogLevelId,
+} from '@kbn/logging';
 
 /**
  * @internal
@@ -57,6 +65,10 @@ export abstract class AbstractLogger implements Logger {
 
   public fatal<Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta): void {
     this.log(this.createLogRecord<Meta>(LogLevel.Fatal, errorOrMessage, meta));
+  }
+
+  public isLevelEnabled(levelId: LogLevelId): boolean {
+    return this.level.supports(LogLevel.fromId(levelId));
   }
 
   public log(record: LogRecord) {
