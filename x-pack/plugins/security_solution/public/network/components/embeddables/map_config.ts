@@ -117,11 +117,29 @@ export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
       type: LAYER_TYPE.EMS_VECTOR_TILE,
     },
     ...indexPatternIds.reduce((acc: object[], { title, id }) => {
+      const layerGroupDescriptor = {
+        id: uuid.v4(),
+        label: title,
+        sourceDescriptor: null,
+        type: LAYER_TYPE.LAYER_GROUP,
+        visible: true,
+      };
       return [
         ...acc,
-        getLineLayer(title, id, lmc[title] ?? lmc.default),
-        getDestinationLayer(title, id, lmc[title]?.destination ?? lmc.default.destination),
-        getSourceLayer(title, id, lmc[title]?.source ?? lmc.default.source),
+        getLineLayer(title, id, layerGroupDescriptor.id, lmc[title] ?? lmc.default),
+        getDestinationLayer(
+          title,
+          id,
+          layerGroupDescriptor.id,
+          lmc[title]?.destination ?? lmc.default.destination
+        ),
+        getSourceLayer(
+          title,
+          id,
+          layerGroupDescriptor.id,
+          lmc[title]?.source ?? lmc.default.source
+        ),
+        layerGroupDescriptor,
       ];
     }, []),
   ];
@@ -133,11 +151,13 @@ export const getLayerList = (indexPatternIds: IndexPatternMapping[]) => {
  *
  * @param indexPatternTitle used as layer name in LayerToC UI: "${indexPatternTitle} | Source point"
  * @param indexPatternId used as layer's indexPattern to query for data
+ * @param parentId
  * @param layerDetails layer-specific field details
  */
 export const getSourceLayer = (
   indexPatternTitle: string,
   indexPatternId: string,
+  parentId: string,
   layerDetails: LayerMappingDetails
 ) => ({
   sourceDescriptor: {
@@ -179,6 +199,7 @@ export const getSourceLayer = (
     },
   },
   id: uuid.v4(),
+  parent: parentId,
   label: `${indexPatternTitle} | ${layerDetails.label}`,
   minZoom: 0,
   maxZoom: 24,
@@ -195,12 +216,14 @@ export const getSourceLayer = (
  *
  * @param indexPatternTitle used as layer name in LayerToC UI: "${indexPatternTitle} | Destination point"
  * @param indexPatternId used as layer's indexPattern to query for data
+ * @param parentId used as layer's indexPattern to query for data
  * @param layerDetails layer-specific field details
  *
  */
 export const getDestinationLayer = (
   indexPatternTitle: string,
   indexPatternId: string,
+  parentId: string,
   layerDetails: LayerMappingDetails
 ) => ({
   sourceDescriptor: {
@@ -243,6 +266,7 @@ export const getDestinationLayer = (
     },
   },
   id: uuid.v4(),
+  parent: parentId,
   label: `${indexPatternTitle} | ${layerDetails.label}`,
   minZoom: 0,
   maxZoom: 24,
@@ -258,11 +282,13 @@ export const getDestinationLayer = (
  *
  * @param indexPatternTitle used as layer name in LayerToC UI: "${indexPatternTitle} | Line"
  * @param indexPatternId used as layer's indexPattern to query for data
+ * @param parentId
  * @param layerDetails layer-specific field details
  */
 export const getLineLayer = (
   indexPatternTitle: string,
   indexPatternId: string,
+  parentId: string,
   layerDetails: LayerMapping
 ) => ({
   sourceDescriptor: {
@@ -327,6 +353,7 @@ export const getLineLayer = (
     },
   },
   id: uuid.v4(),
+  parent: parentId,
   label: `${indexPatternTitle} | ${i18n.LINE_LAYER}`,
   minZoom: 0,
   maxZoom: 24,
