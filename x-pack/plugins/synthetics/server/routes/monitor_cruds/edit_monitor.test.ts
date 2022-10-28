@@ -79,7 +79,7 @@ describe('syncEditedMonitor', () => {
   } as unknown as SyntheticsMonitor;
 
   const previousMonitor = {
-    id: 'saved-obj-id',
+    id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
     attributes: { name: editedMonitor.name, locations: [] } as any,
     type: 'synthetics-monitor',
     references: [],
@@ -109,14 +109,14 @@ describe('syncEditedMonitor', () => {
     expect(syntheticsService.editConfig).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
-          id: 'saved-obj-id',
+          id: '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
         }),
       ])
     );
 
     expect(serverMock.authSavedObjectsClient?.update).toHaveBeenCalledWith(
       'synthetics-monitor',
-      'saved-obj-id',
+      '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
       expect.objectContaining({
         enabled: true,
       })
