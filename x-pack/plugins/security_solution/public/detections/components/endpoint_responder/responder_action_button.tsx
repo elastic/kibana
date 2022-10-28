@@ -8,8 +8,10 @@
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ResponderContextMenuItemProps } from './use_repsonder_action_data';
-import { useResponderActionData } from './use_repsonder_action_data';
+import {
+  type ResponderContextMenuItemProps,
+  useResponderActionData,
+} from './use_responder_action_data';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 export const ResponderActionButton = memo<ResponderContextMenuItemProps>(
@@ -20,12 +22,18 @@ export const ResponderActionButton = memo<ResponderContextMenuItemProps>(
     });
     const endpointPrivileges = useUserPrivileges().endpointPrivileges;
 
-    return endpointPrivileges.canAccessResponseConsole ? (
+    if (!endpointPrivileges.canAccessResponseConsole) {
+      return null;
+    }
+
+    const actionButtonKey = 'endpointResponseActions-action-button';
+
+    return (
       <EuiToolTip position="top" content={tooltip}>
         <EuiButton
           fill
-          key="endpointResponseActions-action-button"
-          data-test-subj="endpointResponseActions-action-button"
+          key={actionButtonKey}
+          data-test-subj={actionButtonKey}
           disabled={isDisabled}
           onClick={handleResponseActionsClick}
         >
@@ -35,8 +43,6 @@ export const ResponderActionButton = memo<ResponderContextMenuItemProps>(
           />
         </EuiButton>
       </EuiToolTip>
-    ) : (
-      <></>
     );
   }
 );

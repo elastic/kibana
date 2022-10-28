@@ -8,8 +8,10 @@
 import { EuiContextMenuItem } from '@elastic/eui';
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ResponderContextMenuItemProps } from './use_repsonder_action_data';
-import { useResponderActionData } from './use_repsonder_action_data';
+import {
+  type ResponderContextMenuItemProps,
+  useResponderActionData,
+} from './use_responder_action_data';
 
 export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
   ({ endpointId, onClick }) => {
