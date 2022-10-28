@@ -13,7 +13,7 @@ import { Subject } from 'rxjs';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { StatusMessage } from './status_message';
 import { IndicesList } from './indices_list';
-import { matchedIndiciesDefault } from '../data_view_editor_flyout_content';
+import { matchedIndiciesDefault } from '../../data_view_editor_service';
 
 import { MatchedIndicesSet } from '../../types';
 

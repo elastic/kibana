@@ -21,19 +21,16 @@ import {
 import { canAppendWildcard } from '../../lib';
 import { schema } from '../form_schema';
 import { RollupIndicesCapsResponse, IndexPatternConfig, MatchedIndicesSet } from '../../types';
-import { matchedIndiciesDefault } from '../data_view_editor_flyout_content';
-
-interface RefreshMatchedIndicesResult {
-  matchedIndicesResult: MatchedIndicesSet;
-  newRollupIndexName?: string;
-}
+import { matchedIndiciesDefault } from '../../data_view_editor_service';
 
 interface TitleFieldProps {
   isRollup: boolean;
   matchedIndices$: Subject<MatchedIndicesSet>;
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
-  refreshMatchedIndices: (title: string) => Promise<RefreshMatchedIndicesResult>;
-  indicesProvider: () => Promise<MatchedIndicesSet>;
+  indexPatternValidationProvider: () => Promise<{
+    matchedIndices: MatchedIndicesSet;
+    rollupIndex: string | null | undefined;
+  }>;
 }
 
 const rollupIndexPatternNoMatchError = {
@@ -56,30 +53,26 @@ const mustMatchError = {
 
 interface MatchesValidatorArgs {
   rollupIndicesCapabilities: Record<string, { error: string }>;
-  // refreshMatchedIndices: (title: string) => Promise<RefreshMatchedIndicesResult>;
   isRollup: boolean;
 }
 
 const createMatchesIndicesValidator = ({
   rollupIndicesCapabilities,
-  // refreshMatchedIndices,
   isRollup,
 }: MatchesValidatorArgs): ValidationConfig<{}, string, string> => ({
   validator: async ({ value, customData: { provider } }) => {
-    // const indices = await provider();
-    console.log('*** validator awaiting results');
-    const { matchedIndicesResult, rollupIndex } = (await provider()) as {
-      matchedIndicesResult: MatchedIndicesSet;
+    // todo can I pass in value here?
+    const { matchedIndices, rollupIndex } = (await provider()) as {
+      matchedIndices: MatchedIndicesSet;
       rollupIndex?: string;
     };
 
-    console.log('*** validator has results', matchedIndicesResult);
+    console.log('*** validator has results', matchedIndices);
     // verifies that the title matches at least one index, alias, or data stream
     // const { newRollupIndexName } = await refreshMatchedIndices(removeSpaces(value));
     const rollupIndices = Object.keys(rollupIndicesCapabilities);
 
-    if (matchedIndicesResult.exactMatchedIndices.length === 0) {
-      console.log('ERR');
+    if (matchedIndices.exactMatchedIndices.length === 0) {
       return mustMatchError;
     }
 
@@ -88,7 +81,7 @@ const createMatchesIndicesValidator = ({
     }
 
     // A rollup index pattern needs to match one and only one rollup index.
-    const rollupIndexMatches = matchedIndicesResult.exactMatchedIndices.filter((matchedIndex) =>
+    const rollupIndexMatches = matchedIndices.exactMatchedIndices.filter((matchedIndex) =>
       rollupIndices.includes(matchedIndex.name)
     );
 
@@ -118,14 +111,12 @@ interface GetTitleConfigArgs {
   isRollup: boolean;
   matchedIndices: MatchedItem[];
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
-  // refreshMatchedIndices: (title: string) => Promise<RefreshMatchedIndicesResult>;
 }
 
 const getTitleConfig = ({
   isRollup,
   rollupIndicesCapabilities,
-}: // refreshMatchedIndices,
-GetTitleConfigArgs): FieldConfig<string> => {
+}: GetTitleConfigArgs): FieldConfig<string> => {
   const titleFieldConfig = schema.title;
 
   const validations = [
@@ -133,7 +124,6 @@ GetTitleConfigArgs): FieldConfig<string> => {
     // note this is responsible for triggering the state update for the selected source list.
     createMatchesIndicesValidator({
       rollupIndicesCapabilities,
-      // refreshMatchedIndices,
       isRollup,
     }),
   ];
@@ -148,8 +138,7 @@ export const TitleField = ({
   isRollup,
   matchedIndices$,
   rollupIndicesCapabilities,
-  // refreshMatchedIndices,
-  indicesProvider,
+  indexPatternValidationProvider,
 }: TitleFieldProps) => {
   const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
   const matchedIndices = useObservable(matchedIndices$, matchedIndiciesDefault).exactMatchedIndices;
@@ -160,16 +149,15 @@ export const TitleField = ({
         isRollup,
         matchedIndices,
         rollupIndicesCapabilities,
-        // refreshMatchedIndices,
       }),
-    [isRollup, matchedIndices, rollupIndicesCapabilities] // , refreshMatchedIndices]
+    [isRollup, matchedIndices, rollupIndicesCapabilities]
   );
 
   return (
     <UseField<string, IndexPatternConfig>
       path="title"
       config={fieldConfig}
-      validationDataProvider={indicesProvider}
+      validationDataProvider={indexPatternValidationProvider}
       componentProps={{
         euiFieldProps: {
           'aria-label': i18n.translate('indexPatternEditor.form.titleAriaLabel', {

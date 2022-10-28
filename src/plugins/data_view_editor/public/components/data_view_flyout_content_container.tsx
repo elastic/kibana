@@ -14,7 +14,7 @@ import { IndexPatternEditorFlyoutContent } from './data_view_editor_flyout_conte
 import { DataViewEditorContext, DataViewEditorProps } from '../types';
 import { DataViewEditorService } from '../data_view_editor_service';
 
-// @ts-ignore
+// @ts-expect-error
 export const DataViewEditorServiceContext = React.createContext<{
   dataViewEditorService: DataViewEditorService;
 }>();
@@ -68,10 +68,14 @@ const DataViewFlyoutContentContainer = ({
     }
   };
 
+  const dataViewEditorService = new DataViewEditorService({
+    http,
+    dataViews,
+    initialName: editData?.name,
+  });
+
   return (
-    <DataViewEditorServiceContext.Provider
-      value={{ dataViewEditorService: new DataViewEditorService(http, dataViews) }}
-    >
+    <DataViewEditorServiceContext.Provider value={{ dataViewEditorService }}>
       <IndexPatternEditorFlyoutContent
         onSave={onSaveClick}
         onCancel={onCancel}

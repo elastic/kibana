@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { EuiFormRow, EuiComboBox, EuiFormHelpText, EuiComboBoxOptionOption } from '@elastic/eui';
-import { matchedIndiciesDefault } from '../data_view_editor_flyout_content';
+import { matchedIndiciesDefault } from '../../data_view_editor_service';
 
 import {
   UseField,

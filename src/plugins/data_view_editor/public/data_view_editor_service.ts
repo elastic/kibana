@@ -20,23 +20,58 @@ import { RollupIndicesCapsResponse, MatchedIndicesSet, TimestampOption } from '.
 import { getMatchedIndices, ensureMinimumTime, extractTimeFields } from './lib';
 import { GetFieldsOptions } from './shared_imports';
 
+export const matchedIndiciesDefault = {
+  allIndices: [],
+  exactMatchedIndices: [],
+  partialMatchedIndices: [],
+  visibleIndices: [],
+};
+
+export interface DataViewEditorServiceConstructorArgs {
+  http: HttpSetup;
+  dataViews: DataViewsServicePublic;
+  initialName?: string;
+}
+
 export class DataViewEditorService {
-  constructor(private http: HttpSetup, private dataViews: DataViewsServicePublic) {
+  constructor({ http, dataViews, initialName }: DataViewEditorServiceConstructorArgs) {
+    this.http = http;
+    this.dataViews = dataViews;
+
+    // fire off a couple of requests that we know we'll need
     this.rollupCapsResponse = this.getRollupIndexCaps();
+    this.dataViewNames = this.loadDataViewNames(initialName);
+
+    // alternate value with undefined so validation knows when its getting a fresh value
     this.matchedIndices$.subscribe((matchedIndices) => {
-      console.log('*** matchedIndices copy', matchedIndices);
       this.matchedIndicesForProvider$.next(matchedIndices);
       this.matchedIndicesForProvider$.next(undefined);
     });
+
+    // alternate value with undefined so validation knows when its getting a fresh value
+    this.rollupIndex$.subscribe((rollupIndex) => {
+      this.rollupIndexForProvider$.next(rollupIndex);
+      this.rollupIndexForProvider$.next(undefined);
+    });
   }
 
+  private http: HttpSetup;
+  private dataViews: DataViewsServicePublic;
+
+  // used for data view name validation - no dupes!
+  dataViewNames: Promise<string[]>;
+
+  // used for validating rollup data views - must match one and only one data view
   rollupIndicesCapabilities$ = new BehaviorSubject<RollupIndicesCapsResponse>({});
   isLoadingSources$ = new BehaviorSubject<boolean>(false);
 
   loadingTimestampFields$ = new BehaviorSubject<boolean>(false);
   timestampFieldOptions$ = new Subject<TimestampOption[]>();
 
-  rollupIndex$ = new BehaviorSubject<string | undefined>(undefined);
+  // current matched rollup index
+  rollupIndex$ = new BehaviorSubject<string | undefined | null>(undefined);
+  // alernates between value and undefined so validation can treat new value as thought its a promise
+  rollupIndexForProvider$ = new Subject<string | undefined | null>();
 
   matchedIndices$ = new BehaviorSubject<MatchedIndicesSet>({
     allIndices: [],
@@ -45,6 +80,7 @@ export class DataViewEditorService {
     visibleIndices: [],
   });
 
+  // alernates between value and undefined so validation can treat new value as thought its a promise
   matchedIndicesForProvider$ = new Subject<MatchedIndicesSet | undefined>();
 
   private rollupCapsResponse: Promise<RollupIndicesCapsResponse>;
@@ -52,7 +88,6 @@ export class DataViewEditorService {
   private currentLoadingTimestampFields = 0;
   private currentLoadingMatchedIndices = 0;
 
-  // todo call only once per display of modal
   private getRollupIndexCaps = async () => {
     let response: RollupIndicesCapsResponse = {};
     try {
@@ -71,26 +106,19 @@ export class DataViewEditorService {
     return (indexName: string) => this.getRollupIndices(response).includes(indexName);
   };
 
-  // todo hopefully don't use return value
   loadMatchedIndices = async (
     query: string,
     allowHidden: boolean,
     allSources: MatchedItem[],
     type: INDEX_PATTERN_TYPE
-  ): Promise<{
-    matchedIndicesResult: MatchedIndicesSet;
-    exactMatched: MatchedItem[];
-    partialMatched: MatchedItem[];
-  }> => {
+  ): Promise<void> => {
     const currentLoadingMatchedIndicesIdx = ++this.currentLoadingMatchedIndices;
     const isRollupIndex = await this.getIsRollupIndex();
     const indexRequests = [];
-    let newRollupIndexName: string | undefined;
-    console.log('loadMatchedIndices', query, allowHidden, allSources, type);
+    let newRollupIndexName: string | undefined | null;
 
     if (query?.endsWith('*')) {
       const exactMatchedQuery = this.getIndicesCached({
-        // might need to add isRollupIndex
         pattern: query,
         showAllIndices: allowHidden,
       });
@@ -100,12 +128,10 @@ export class DataViewEditorService {
       indexRequests.push(Promise.resolve([]));
     } else {
       const exactMatchQuery = this.getIndicesCached({
-        // might need to add isRollupIndex
         pattern: query,
         showAllIndices: allowHidden,
       });
       const partialMatchQuery = this.getIndicesCached({
-        // might need to add isRollupIndex
         pattern: `${query}*`,
         showAllIndices: allowHidden,
       });
@@ -125,23 +151,18 @@ export class DataViewEditorService {
       allowHidden
     );
 
+    // verify we're looking at the current result
     if (currentLoadingMatchedIndicesIdx === this.currentLoadingMatchedIndices) {
-      // we are still interested in this result
       if (type === INDEX_PATTERN_TYPE.ROLLUP) {
         const rollupIndices = exactMatched.filter((index) => isRollupIndex(index.name));
-        newRollupIndexName = rollupIndices.length === 1 ? rollupIndices[0].name : undefined;
+        newRollupIndexName = rollupIndices.length === 1 ? rollupIndices[0].name : null;
         this.rollupIndex$.next(newRollupIndexName);
       } else {
-        this.rollupIndex$.next(undefined);
+        this.rollupIndex$.next(null);
       }
 
-      // todo
-      // loadingMatchedIndices$.current.next(false);
-      console.log('*** matchedIndicesResult', matchedIndicesResult);
       this.matchedIndices$.next(matchedIndicesResult);
-      return { matchedIndicesResult, exactMatched, partialMatched };
     }
-    // return undefined;
   };
 
   loadIndices = async (title: string, allowHidden: boolean, type: INDEX_PATTERN_TYPE) => {
@@ -151,40 +172,33 @@ export class DataViewEditorService {
       pattern: '*',
       showAllIndices: allowHidden,
     });
-    // todo look at this
-    const { matchedIndicesResult } = await this.loadMatchedIndices(
-      title,
-      allowHidden,
-      allSrcs,
-      type
-    );
+    await this.loadMatchedIndices(title, allowHidden, allSrcs, type);
 
     this.isLoadingSources$.next(false);
-
-    this.matchedIndices$.next(matchedIndicesResult);
-    return matchedIndicesResult;
   };
 
-  loadDataViewNames = async (dataViewName?: string) => {
-    const dataViewListItems = await this.dataViews.getIdsWithTitle(dataViewName ? true : false);
+  private loadDataViewNames = async (initialName?: string) => {
+    const dataViewListItems = await this.dataViews.getIdsWithTitle(true);
     const dataViewNames = dataViewListItems.map((item) => item.name || item.title);
-    return dataViewName ? dataViewNames.filter((v) => v !== dataViewName) : dataViewNames;
+    return initialName ? dataViewNames.filter((v) => v !== initialName) : dataViewNames;
   };
 
   private getIndicesMemory: Record<string, Promise<MatchedItem[]>> = {};
+
   getIndicesCached = async (props: { pattern: string; showAllIndices?: boolean | undefined }) => {
     const key = JSON.stringify(props);
 
-    const getIndicesPromise = this.getIsRollupIndex().then((isRollupIndex) =>
-      this.dataViews.getIndices({ ...props, isRollupIndex })
-    );
-    this.getIndicesMemory[key] = this.getIndicesMemory[key] || getIndicesPromise;
+    this.getIndicesMemory[key] =
+      this.getIndicesMemory[key] ||
+      this.getIsRollupIndex().then((isRollupIndex) =>
+        this.dataViews.getIndices({ ...props, isRollupIndex })
+      );
 
-    getIndicesPromise.catch(() => {
+    this.getIndicesMemory[key].catch(() => {
       delete this.getIndicesMemory[key];
     });
 
-    return await getIndicesPromise;
+    return await this.getIndicesMemory[key];
   };
 
   private timeStampOptionsMemory: Record<string, Promise<TimestampOption[]>> = {};
@@ -250,20 +264,23 @@ export class DataViewEditorService {
     }
   };
 
-  indicesProvider = async () => {
-    console.log('*** creating indices provider promise!');
-    const rollupIndex = undefined;
-    /* await firstValueFrom(
-      dataViewEditorService.rollupIndex$.pipe(first((data) => data !== null))
+  indexPatternValidationProvider = async () => {
+    const rollupIndexPromise = firstValueFrom(
+      // todo track this guy
+      this.rollupIndex$.pipe(first((data) => data !== undefined))
     );
-    */
 
-    const matchedIndicesResult = await firstValueFrom(
+    const matchedIndicesPromise = firstValueFrom(
       this.matchedIndicesForProvider$.pipe(first((data) => data !== undefined))
     );
 
     // Wait until we have fetched the indices.
     // The result will then be sent to the field validator(s) (when calling await provider(););
-    return { matchedIndicesResult, rollupIndex };
+    const [rollupIndex, matchedIndices] = await Promise.all([
+      rollupIndexPromise,
+      matchedIndicesPromise,
+    ]);
+
+    return { rollupIndex, matchedIndices: matchedIndices || matchedIndiciesDefault };
   };
 }

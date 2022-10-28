@@ -36,7 +36,7 @@ export const schema = {
       {
         validator: fieldValidators.emptyField(
           i18n.translate('indexPatternEditor.validations.titleIsRequiredErrorMessage', {
-            defaultMessage: 'An Index pattern is required.',
+            defaultMessage: 'An index pattern is required.',
           })
         ),
       },

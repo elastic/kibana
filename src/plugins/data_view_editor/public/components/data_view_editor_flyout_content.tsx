@@ -73,13 +73,6 @@ export interface Props {
   allowAdHoc: boolean;
 }
 
-export const matchedIndiciesDefault = {
-  allIndices: [],
-  exactMatchedIndices: [],
-  partialMatchedIndices: [],
-  visibleIndices: [],
-};
-
 const editorTitle = i18n.translate('indexPatternEditor.title', {
   defaultMessage: 'Create data view',
 });
@@ -129,6 +122,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
         return;
       }
 
+      // todo see if I can reduce getValue usage
+      // todo export asObservable references instead of full subjects
       const rollupIndicesCapabilities = dataViewEditorService.rollupIndicesCapabilities$.getValue();
 
       const indexPatternStub: DataViewSpec = {
@@ -202,24 +197,32 @@ const IndexPatternEditorFlyoutContentComponent = ({
   // initial loading of indicies and data view names
   useEffect(() => {
     let isCancelled = false;
+
+    // subscribe to matches indices updates and update timestamp field options
     const matchedIndicesSub = dataViewEditorService.matchedIndices$.subscribe((matchedIndices) => {
-      const timeFieldQuery = editData ? editData.title : title;
+      const timeFieldQuery = editData ? editData.getIndexPattern() : title;
+      // might be a good idea to pass in matchedIndices, would make it a pure function
       dataViewEditorService.loadTimestampFields(
         removeSpaces(timeFieldQuery),
         type,
         requireTimestampField,
-        dataViewEditorService.rollupIndex$.getValue()
+        // this can return null but we can treat it as undefined
+        dataViewEditorService.rollupIndex$.getValue() || undefined
       );
     });
 
-    dataViewEditorService.loadIndices(title, allowHidden, type).then((matchedIndices) => {
-      dataViewEditorService.matchedIndices$.next(matchedIndices);
-    });
+    // run loadMAtchedIndices on initial load
+    // TODO THIS IS A BIT UNCLEAR
+    // this is firing too much
+    // ... should it load current matches?
+    // todo - set title, alowHidden, type on service and have it do the right thing
+    dataViewEditorService.loadIndices(title, allowHidden, type);
 
-    dataViewEditorService.loadDataViewNames(title).then((names) => {
+    // this should happen only on initial page load and should not change.
+    // todo - see if this code can be removed
+    dataViewEditorService.dataViewNames.then((names) => {
       if (isCancelled) return;
-      const filteredNames = editData ? names.filter((name) => name !== editData?.name) : names;
-      existingDataViewNames$.current.next(filteredNames);
+      existingDataViewNames$.current.next(names);
       isLoadingDataViewNames$.current.next(false);
     });
 
@@ -306,10 +309,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
             <EuiFlexItem>
               <TitleField
                 isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
-                // refreshMatchedIndices={reloadMatchedIndices}
                 matchedIndices$={dataViewEditorService.matchedIndices$}
                 rollupIndicesCapabilities={rollupIndicesCapabilities}
-                indicesProvider={dataViewEditorService.indicesProvider}
+                indexPatternValidationProvider={
+                  dataViewEditorService.indexPatternValidationProvider
+                }
               />
             </EuiFlexItem>
           </EuiFlexGroup>
