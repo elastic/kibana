@@ -137,4 +137,4 @@ export type DateHistogramSeries = Pick<
   'split_mode' | 'override_index_pattern' | 'series_interval' | 'series_drop_last_bucket'
 >;
 
-export { FiltersColumn, TermsColumn, DateHistogramColumn };
+export type { FiltersColumn, TermsColumn, DateHistogramColumn };
