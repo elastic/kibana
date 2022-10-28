@@ -45,7 +45,7 @@ const dataViewMock = {
 } as unknown as DataView;
 
 describe('useNavigationProps', () => {
-  it('should call single doc callback with correct params', async () => {
+  it('should call context and single doc callbacks with correct params', async () => {
     const { result } = renderHook(
       () =>
         useNavigationProps({
