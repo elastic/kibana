@@ -30,6 +30,7 @@ describe('GuidedOnboarding ApiService', () => {
   let httpClient: jest.Mocked<HttpSetup>;
   let apiService: ApiService;
   let subscription: Subscription;
+  let anotherSubscription: Subscription;
 
   beforeEach(() => {
     httpClient = httpServiceMock.createStartContract({ basePath: '/base/path' });
@@ -41,9 +42,8 @@ describe('GuidedOnboarding ApiService', () => {
   });
 
   afterEach(() => {
-    if (subscription) {
-      subscription.unsubscribe();
-    }
+    subscription?.unsubscribe();
+    anotherSubscription?.unsubscribe();
     jest.restoreAllMocks();
   });
 
@@ -59,9 +59,38 @@ describe('GuidedOnboarding ApiService', () => {
 
     it(`doesn't send multiple requests when there are several subscriptions`, () => {
       subscription = apiService.fetchActiveGuideState$().subscribe();
-      // another subscription
-      apiService.fetchActiveGuideState$().subscribe();
+      anotherSubscription = apiService.fetchActiveGuideState$().subscribe();
       expect(httpClient.get).toHaveBeenCalledTimes(1);
+    });
+
+    it(`re-sends the request if the previous one failed`, async () => {
+      httpClient.get.mockRejectedValueOnce(new Error('request failed'));
+      subscription = apiService.fetchActiveGuideState$().subscribe();
+      // wait until the request fails
+      await new Promise((resolve) => process.nextTick(resolve));
+      anotherSubscription = apiService.fetchActiveGuideState$().subscribe();
+      expect(httpClient.get).toHaveBeenCalledTimes(2);
+    });
+
+    it(`re-sends the request if there is no guide state and there is another subscription`, async () => {
+      httpClient.get.mockResolvedValueOnce({
+        state: [],
+      });
+      subscription = apiService.fetchActiveGuideState$().subscribe();
+      // wait until the request completes
+      await new Promise((resolve) => process.nextTick(resolve));
+      anotherSubscription = apiService.fetchActiveGuideState$().subscribe();
+      expect(httpClient.get).toHaveBeenCalledTimes(2);
+    });
+
+    it(`re-sends the request if the subscription was unsubscribed before the request completed`, async () => {
+      httpClient.get.mockImplementationOnce(() => {
+        return new Promise((resolve) => setTimeout(resolve));
+      });
+      // subscribe and immediately unsubscribe
+      apiService.fetchActiveGuideState$().subscribe().unsubscribe();
+      anotherSubscription = apiService.fetchActiveGuideState$().subscribe();
+      expect(httpClient.get).toHaveBeenCalledTimes(2);
     });
 
     it('broadcasts the updated state', async () => {

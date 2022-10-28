@@ -53,9 +53,11 @@ export class ApiService implements GuidedOnboardingApi {
           observer.complete();
         })
         .catch((error) => {
+          this.isGuideStateLoading = false;
           observer.error(error);
         });
       return () => {
+        this.isGuideStateLoading = false;
         controller.abort();
       };
     });
