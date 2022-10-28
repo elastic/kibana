@@ -42,7 +42,7 @@ export const mockSearchStrategyResponse: IEsSearchResponse<HostRiskScore> = {
           _source: {
             '@timestamp': '1234567899',
             host: {
-              name: 'testUsermame',
+              name: 'testUsername',
               risk: {
                 rule_risks: [],
                 calculated_level: RiskSeverity.high,
@@ -121,7 +121,7 @@ describe('buildRiskScoreQuery search strategy', () => {
         alertsByEntity: {
           buckets: [
             {
-              key: 'testUsermame',
+              key: 'testUsername',
               doc_count: alertsCunt,
               oldestAlertTimestamp: {
                 value_as_string: '12345566',
@@ -138,7 +138,7 @@ describe('buildRiskScoreQuery search strategy', () => {
   });
 
   test('should enhance data with alerts oldest timestamp', async () => {
-    const oldestAlertTimestamp = 'oldesTimestamp_test';
+    const oldestAlertTimestamp = 'oldestTimestamp_test';
     searchMock.mockReturnValue({
       aggregations: {
         oldestAlertTimestamp: {
@@ -152,7 +152,7 @@ describe('buildRiskScoreQuery search strategy', () => {
         alertsByEntity: {
           buckets: [
             {
-              key: 'testUsermame',
+              key: 'testUsername',
               doc_count: 1,
               oldestAlertTimestamp: {
                 value_as_string: oldestAlertTimestamp,
