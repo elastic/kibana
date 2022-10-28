@@ -77,7 +77,7 @@ export const ConnectorNameAndDescriptionFlyout: React.FC = () => {
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               onClick={() => setIsEditing(false)}
-              isDisabled={status === Status.LOADING}
+              isLoading={status === Status.LOADING}
             >
               {CANCEL_BUTTON_LABEL}
             </EuiButtonEmpty>
