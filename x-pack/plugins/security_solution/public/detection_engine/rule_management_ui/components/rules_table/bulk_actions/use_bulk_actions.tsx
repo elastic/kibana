@@ -37,7 +37,7 @@ import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
 import type { BulkActionForConfirmation, DryRunResult } from './types';
 import type { ExecuteBulkActionsDryRun } from './use_bulk_actions_dry_run';
-import { computeDryRunPayload } from './utils/compute_dry_run_payload';
+import { computeDryRunEditPayload } from './utils/compute_dry_run_edit_payload';
 import { transformExportDetailsToDryRunResult } from './utils/dry_run_result';
 import { prepareSearchParams } from './utils/prepare_search_params';
 
@@ -155,11 +155,7 @@ export const useBulkActions = ({
         closePopover();
         startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
 
-        const response = await bulkExport({
-          visibleRuleIds: selectedRuleIds,
-          setLoadingRules,
-          search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
-        });
+        const response = await bulkExport(isAllSelected ? filterQuery : selectedRuleIds);
 
         // if response null, likely network error happened and export rules haven't been received
         if (!response) {
@@ -190,7 +186,7 @@ export const useBulkActions = ({
         const dryRunResult = await executeBulkActionsDryRun({
           type: BulkAction.edit,
           queryOrIds: isAllSelected ? convertRulesFilterToKQL(filterOptions) : selectedRuleIds,
-          editPayload: computeDryRunPayload(bulkEditActionType),
+          editPayload: computeDryRunEditPayload(bulkEditActionType),
         });
 
         // User has cancelled edit action or there are no custom rules to proceed

@@ -715,7 +715,7 @@ describe('Detections Rules API', () => {
     });
 
     test('passes a query', async () => {
-      await performBulkAction({ type: BulkAction.enable, query: 'some query' });
+      await performBulkAction({ type: BulkAction.enable, queryOrIds: 'some query' });
 
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
         method: 'POST',
@@ -728,7 +728,7 @@ describe('Detections Rules API', () => {
     });
 
     test('passes ids', async () => {
-      await performBulkAction({ type: BulkAction.disable, ids: ['ruleId1', 'ruleId2'] });
+      await performBulkAction({ type: BulkAction.disable, queryOrIds: ['ruleId1', 'ruleId2'] });
 
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
         method: 'POST',
@@ -743,7 +743,7 @@ describe('Detections Rules API', () => {
     test('passes edit payload', async () => {
       await performBulkAction({
         type: BulkAction.edit,
-        ids: ['ruleId1'],
+        queryOrIds: ['ruleId1'],
         editPayload: [
           { type: BulkActionEditType.add_index_patterns, value: ['some-index-pattern'] },
         ],
@@ -761,7 +761,7 @@ describe('Detections Rules API', () => {
     });
 
     test('executes dry run', async () => {
-      await performBulkAction({ type: BulkAction.disable, query: 'some query' }, true);
+      await performBulkAction({ type: BulkAction.disable, queryOrIds: 'some query' }, true);
 
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules/_bulk_action', {
         method: 'POST',
@@ -774,7 +774,10 @@ describe('Detections Rules API', () => {
     });
 
     test('returns result', async () => {
-      const result = await performBulkAction({ type: BulkAction.disable, query: 'some query' });
+      const result = await performBulkAction({
+        type: BulkAction.disable,
+        queryOrIds: 'some query',
+      });
 
       expect(result).toBe(fetchMockResult);
     });
