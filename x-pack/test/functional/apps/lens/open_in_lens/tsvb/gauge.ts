@@ -90,7 +90,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setColorRuleValue(10);
       await visualBuilder.setColorPickerValue('#54B399', 2);
 
-      await visualBuilder.createColorRule(0);
+      await visualBuilder.createColorRule();
 
       await visualBuilder.setColorRuleOperator('>= greater than or equal');
       await visualBuilder.setColorRuleValue(100, 1);
