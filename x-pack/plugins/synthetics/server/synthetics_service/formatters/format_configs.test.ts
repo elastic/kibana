@@ -205,17 +205,17 @@ describe('formatMonitorConfig', () => {
 });
 
 describe('formatHeartbeatRequest', () => {
-  it('uses custom heartbeat id when defined', () => {
+  it('uses heartbeat id', () => {
     const monitorId = 'test-monitor-id';
-    const customHeartbeatId = 'test-custom-heartbeat-id';
+    const heartbeatId = 'test-custom-heartbeat-id';
     const actual = formatHeartbeatRequest({
       monitor: testBrowserConfig as SyntheticsMonitor,
       monitorId,
-      customHeartbeatId,
+      heartbeatId,
     });
     expect(actual).toEqual({
       ...testBrowserConfig,
-      id: customHeartbeatId,
+      id: heartbeatId,
       fields: {
         config_id: monitorId,
         'monitor.project.name': testBrowserConfig.project_id,
@@ -232,6 +232,7 @@ describe('formatHeartbeatRequest', () => {
     const actual = formatHeartbeatRequest({
       monitor: testBrowserConfig as SyntheticsMonitor,
       monitorId,
+      heartbeatId: monitorId,
     });
     expect(actual).toEqual({
       ...testBrowserConfig,
@@ -253,6 +254,7 @@ describe('formatHeartbeatRequest', () => {
     const actual = formatHeartbeatRequest({
       monitor,
       monitorId,
+      heartbeatId: monitorId,
     });
 
     expect(actual).toEqual({
@@ -275,6 +277,7 @@ describe('formatHeartbeatRequest', () => {
     const actual = formatHeartbeatRequest({
       monitor,
       monitorId,
+      heartbeatId: monitorId,
     });
 
     expect(actual).toEqual({
@@ -297,6 +300,7 @@ describe('formatHeartbeatRequest', () => {
       monitor: testBrowserConfig as SyntheticsMonitor,
       monitorId,
       runOnce: true,
+      heartbeatId: monitorId,
     });
 
     expect(actual).toEqual({
@@ -320,6 +324,7 @@ describe('formatHeartbeatRequest', () => {
       monitor: testBrowserConfig as SyntheticsMonitor,
       monitorId,
       testRunId,
+      heartbeatId: monitorId,
     });
 
     expect(actual).toEqual({

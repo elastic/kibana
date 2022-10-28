@@ -38,6 +38,7 @@ export const runOnceSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
         // making it enabled, even if it's disabled in the UI
         monitor: { ...validationResult.decodedMonitor, enabled: true },
         monitorId,
+        heartbeatId: monitorId,
         runOnce: true,
       }),
     ]);
