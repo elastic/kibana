@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -70,15 +70,22 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
   ) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
   attachments?: CaseAttachmentsWithoutOwner;
+  initialValue?: Partial<Case>;
 }
 
 const empty: ActionConnector[] = [];
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
   ({ connectors, isLoadingConnectors, withSteps }) => {
-    const { isSubmitting } = useFormContext();
+    const { isSubmitting, submit } = useFormContext();
     const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
 
-    const { owner } = useCasesContext();
+    const { owner, isSubmit } = useCasesContext();
+
+    useEffect(() => {
+      console.log('useEffect', isSubmit);
+      if (isSubmit) submit();
+    }, [isSubmit, submit]);
+
     const availableOwners = useAvailableCasesOwners();
     const canShowCaseSolutionSelection = !owner.length && availableOwners.length;
 
@@ -181,12 +188,14 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     onSuccess,
     timelineIntegration,
     attachments,
+    initialValue,
   }) => (
     <CasesTimelineIntegrationProvider timelineIntegration={timelineIntegration}>
       <FormContext
         afterCaseCreated={afterCaseCreated}
         onSuccess={onSuccess}
         attachments={attachments}
+        initialValue={initialValue}
       >
         <CreateCaseFormFields
           connectors={empty}

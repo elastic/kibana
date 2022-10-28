@@ -23,6 +23,12 @@ export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps = {}) 
   const { dispatch } = useCasesContext();
   const casesToasts = useCasesToast();
 
+  const submitFromFlyout = useCallback(() => {
+    dispatch({
+      type: CasesContextStoreActionsList.SUBMIT_CASE_FROM_FLYOUT,
+    });
+  }, [dispatch]);
+
   const closeFlyout = useCallback(() => {
     dispatch({
       type: CasesContextStoreActionsList.CLOSE_CREATE_CASE_FLYOUT,
@@ -73,6 +79,7 @@ export const useCasesAddToNewCaseFlyout = (props: AddToNewCaseFlyoutProps = {}) 
   return {
     open: openFlyout,
     close: closeFlyout,
+    submit: submitFromFlyout,
   };
 };
 

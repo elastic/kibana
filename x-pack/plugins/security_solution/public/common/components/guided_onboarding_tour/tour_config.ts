@@ -120,9 +120,20 @@ const alertsCasesConfig: StepConfig[] = [
     anchorPosition: 'leftUp',
     offset: 20,
     dataTestSubj: getTourAnchor(5, SecurityStepId.alertsCases),
-    hideNextButton: true,
   },
 ];
+
+export const sampleCase = {
+  title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.createCase.title', {
+    defaultMessage: `Malicious signal detected`,
+  }),
+  description: i18n.translate(
+    'xpack.securitySolution.guided_onboarding.tour.createCase.description',
+    {
+      defaultMessage: `This is a very unfortunate case of a malicious signal. I've seen it do horrible things. My oh my what a terror, run for your lives!`,
+    }
+  ),
+};
 
 interface SecurityTourConfig {
   [SecurityStepId.rules]: StepConfig[];

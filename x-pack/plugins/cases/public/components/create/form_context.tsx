@@ -44,6 +44,7 @@ interface Props {
   children?: JSX.Element | JSX.Element[];
   onSuccess?: (theCase: Case) => Promise<void>;
   attachments?: CaseAttachmentsWithoutOwner;
+  initialValue?: Partial<Case>;
 }
 
 export const FormContext: React.FC<Props> = ({
@@ -51,6 +52,7 @@ export const FormContext: React.FC<Props> = ({
   children,
   onSuccess,
   attachments,
+  initialValue,
 }) => {
   const { data: connectors = [], isLoading: isLoadingConnectors } = useGetConnectors();
   const { owner, appId } = useCasesContext();
@@ -128,7 +130,7 @@ export const FormContext: React.FC<Props> = ({
   );
 
   const { form } = useForm<FormProps>({
-    defaultValue: initialCaseValue,
+    defaultValue: { ...initialCaseValue, ...initialValue },
     options: { stripEmptyFields: false },
     schema,
     onSubmit: submitCase,

@@ -26,6 +26,7 @@ export interface CreateCaseFlyoutProps {
   onSuccess?: (theCase: Case) => Promise<void>;
   attachments?: CaseAttachmentsWithoutOwner;
   headerContent?: React.ReactNode;
+  initialValue?: Partial<Case>;
 }
 
 const StyledFlyout = styled(EuiFlyout)`
@@ -72,7 +73,7 @@ const FormWrapper = styled.div`
 `;
 
 export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
-  ({ afterCaseCreated, onClose, onSuccess, attachments, headerContent }) => {
+  ({ afterCaseCreated, onClose, onSuccess, attachments, headerContent, initialValue }) => {
     const handleCancel = onClose || function () {};
     const handleOnSuccess = onSuccess || async function () {};
 
@@ -99,6 +100,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
                 onCancel={handleCancel}
                 onSuccess={handleOnSuccess}
                 withSteps={false}
+                initialValue={initialValue}
               />
             </FormWrapper>
           </StyledEuiFlyoutBody>

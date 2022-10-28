@@ -10,7 +10,10 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import { CommentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { GuidedOnboardingTourStep } from '../../../../common/components/guided_onboarding_tour/tour_step';
-import { SecurityStepId } from '../../../../common/components/guided_onboarding_tour/tour_config';
+import {
+  sampleCase,
+  SecurityStepId,
+} from '../../../../common/components/guided_onboarding_tour/tour_config';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
@@ -64,10 +67,19 @@ export const useAddToCaseActions = ({
     }
   }, [endTourStep, isTourShown]);
 
+  const prefillCasesValue = useMemo(
+    () =>
+      isTourShown(SecurityStepId.alertsCases) && (activeStep === 4 || activeStep === 5)
+        ? sampleCase
+        : {},
+    [activeStep, isTourShown]
+  );
+
   const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
     onClose: onMenuItemClick,
     onSuccess,
     afterCaseCreated,
+    initialValue: prefillCasesValue,
   });
 
   const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
@@ -85,7 +97,12 @@ export const useAddToCaseActions = ({
             headerContent: (
               // isTourAnchor=true no matter what in order to
               // force active guide step outside of security solution (cases)
-              <GuidedOnboardingTourStep isTourAnchor step={5} stepId={SecurityStepId.alertsCases} />
+              <GuidedOnboardingTourStep
+                onClick={createCaseFlyout.submit}
+                isTourAnchor
+                step={5}
+                stepId={SecurityStepId.alertsCases}
+              />
             ),
           }
         : {}),

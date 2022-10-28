@@ -13,6 +13,7 @@ export const getInitialCasesContextState = (): CasesContextState => {
   return {
     createCaseFlyout: {
       isFlyoutOpen: false,
+      isSubmit: false,
     },
     selectCaseModal: {
       isModalOpen: false,
@@ -23,6 +24,7 @@ export const getInitialCasesContextState = (): CasesContextState => {
 export interface CasesContextState {
   createCaseFlyout: {
     isFlyoutOpen: boolean;
+    isSubmit: boolean;
     props?: CreateCaseFlyoutProps;
   };
   selectCaseModal: {
@@ -36,6 +38,7 @@ export enum CasesContextStoreActionsList {
   CLOSE_CREATE_CASE_FLYOUT,
   OPEN_ADD_TO_CASE_MODAL,
   CLOSE_ADD_TO_CASE_MODAL,
+  SUBMIT_CASE_FROM_FLYOUT,
 }
 export type CasesContextStoreAction =
   | {
@@ -47,7 +50,8 @@ export type CasesContextStoreAction =
       type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL;
       payload: AllCasesSelectorModalProps;
     }
-  | { type: CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL };
+  | { type: CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL }
+  | { type: CasesContextStoreActionsList.SUBMIT_CASE_FROM_FLYOUT };
 
 export const casesContextReducer: React.Reducer<CasesContextState, CasesContextStoreAction> = (
   state: CasesContextState,
@@ -55,16 +59,22 @@ export const casesContextReducer: React.Reducer<CasesContextState, CasesContextS
 ): CasesContextState => {
   switch (action.type) {
     case CasesContextStoreActionsList.OPEN_CREATE_CASE_FLYOUT: {
-      return { ...state, createCaseFlyout: { isFlyoutOpen: true, props: action.payload } };
+      return {
+        ...state,
+        createCaseFlyout: { ...state.createCaseFlyout, isFlyoutOpen: true, props: action.payload },
+      };
     }
     case CasesContextStoreActionsList.CLOSE_CREATE_CASE_FLYOUT: {
-      return { ...state, createCaseFlyout: { isFlyoutOpen: false } };
+      return { ...state, createCaseFlyout: { ...state.createCaseFlyout, isFlyoutOpen: false } };
     }
     case CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL: {
       return { ...state, selectCaseModal: { isModalOpen: true, props: action.payload } };
     }
     case CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL: {
       return { ...state, selectCaseModal: { isModalOpen: false } };
+    }
+    case CasesContextStoreActionsList.SUBMIT_CASE_FROM_FLYOUT: {
+      return { ...state, createCaseFlyout: { ...state.createCaseFlyout, isSubmit: true } };
     }
     default:
       assertNever(action);

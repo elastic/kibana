@@ -37,6 +37,7 @@ export interface CasesContextValue {
   features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;
   dispatch: CasesContextValueDispatch;
+  isSubmit: boolean;
 }
 
 export interface CasesContextProps
@@ -90,6 +91,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
     ),
     releasePhase,
     dispatch,
+    isSubmit: false,
   }));
 
   /**
@@ -113,6 +115,15 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
       }));
     }
   }, [appTitle, appId]);
+
+  useEffect(() => {
+    if (state.createCaseFlyout.isSubmit) {
+      setValue((prev) => ({
+        ...prev,
+        isSubmit: true,
+      }));
+    }
+  }, [state.createCaseFlyout.isSubmit]);
 
   return isCasesContextValue(value) ? (
     <CasesContext.Provider value={value}>
