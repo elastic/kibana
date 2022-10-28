@@ -100,7 +100,7 @@ describe('fetchIndexShardSize', () => {
                               },
                               primaries: {
                                 store: {
-                                  size_in_bytes: 1073741824,
+                                  size_in_bytes: 1073741823,
                                 },
                               },
                             },
