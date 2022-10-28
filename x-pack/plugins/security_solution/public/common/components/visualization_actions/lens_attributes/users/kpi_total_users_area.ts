@@ -58,12 +58,6 @@ export const kpiTotalUsersAreaLensAttributes: LensAttributes = {
           layerType: 'data',
           seriesType: 'area',
           xAccessor: '5eea817b-67b7-4268-8ecb-7688d1094721',
-          yConfig: [
-            {
-              forAccessor: 'b00c65ea-32be-4163-bfc8-f795b1ef9d06',
-              color: '#6092c0',
-            },
-          ],
         },
       ],
       legend: { isVisible: true, position: 'right' },
