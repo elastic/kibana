@@ -117,8 +117,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
   const showPreviewByDefault = useMemo(
-    () =>
-      stateContainer ? !stateContainer.appState.getState().hideAggregatedPreview : true,
+    () => (stateContainer ? !stateContainer.appState.getState().hideAggregatedPreview : true),
     [stateContainer]
   );
 

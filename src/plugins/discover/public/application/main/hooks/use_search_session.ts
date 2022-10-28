@@ -57,12 +57,7 @@ export function useSearchSession({
               },
       }
     );
-  }, [
-    capabilities.discover.storeSearchSession,
-    data,
-    savedSearch,
-    stateContainer.appState,
-  ]);
+  }, [capabilities.discover.storeSearchSession, data, savedSearch, stateContainer.appState]);
 
   return searchSessionManager;
 }
