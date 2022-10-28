@@ -123,7 +123,7 @@ describe('buildRiskScoreQuery search strategy', () => {
             {
               key: 'testUsermame',
               doc_count: alertsCunt,
-              oldesAlertTimestamp: {
+              oldestAlertTimestamp: {
                 value_as_string: '12345566',
               },
             },
@@ -141,7 +141,7 @@ describe('buildRiskScoreQuery search strategy', () => {
     const oldestAlertTimestamp = 'oldesTimestamp_test';
     searchMock.mockReturnValue({
       aggregations: {
-        oldesAlertTimestamp: {
+        oldestAlertTimestamp: {
           value_as_string: oldestAlertTimestamp,
         },
       },
@@ -154,7 +154,7 @@ describe('buildRiskScoreQuery search strategy', () => {
             {
               key: 'testUsermame',
               doc_count: 1,
-              oldesAlertTimestamp: {
+              oldestAlertTimestamp: {
                 value_as_string: oldestAlertTimestamp,
               },
             },

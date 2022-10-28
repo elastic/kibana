@@ -67,7 +67,7 @@ export const riskScore: SecuritySolutionFactory<
 };
 
 export type EnhancedDataBucket = {
-  oldesAlertTimestamp: AggregationsMinAggregate;
+  oldestAlertTimestamp: AggregationsMinAggregate;
 } & BucketItem;
 
 async function enhanceData(
@@ -84,11 +84,11 @@ async function enhanceData(
 
   const enhancedAlertsDataByEntityName: Record<
     string,
-    { count: number; oldesAlertTimestamp: string }
+    { count: number; oldestAlertTimestamp: string }
   > = buckets.reduce(
-    (acc, { key, doc_count: count, oldesAlertTimestamp }) => ({
+    (acc, { key, doc_count: count, oldestAlertTimestamp }) => ({
       ...acc,
-      [key]: { count, oldesAlertTimestamp: oldesAlertTimestamp.value_as_string },
+      [key]: { count, oldestAlertTimestamp: oldestAlertTimestamp.value_as_string },
     }),
     {}
   );
@@ -97,7 +97,7 @@ async function enhanceData(
     ...risk,
     alertsCount: enhancedAlertsDataByEntityName[get(nameField, risk)]?.count ?? 0,
     oldestAlertTimestamp:
-      enhancedAlertsDataByEntityName[get(nameField, risk)]?.oldesAlertTimestamp ?? 0,
+      enhancedAlertsDataByEntityName[get(nameField, risk)]?.oldestAlertTimestamp ?? 0,
   }));
 }
 
@@ -117,7 +117,7 @@ const getAlertsQueryForEntity = (names: string[], nameField: string): SearchRequ
         field: nameField,
       },
       aggs: {
-        oldesAlertTimestamp: {
+        oldestAlertTimestamp: {
           min: { field: '@timestamp' },
         },
       },
