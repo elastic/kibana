@@ -208,7 +208,9 @@
               "Observable",
               "<",
               "SessionMeta",
-              ">; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => () => void; getSessionId: () => string | undefined; getSession$: () => ",
+              ">; readonly disableSaveAfterSearchesExpire$: ",
+              "Observable",
+              "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
               "Observable",
               "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; clear: () => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
               {
@@ -251,8 +253,14 @@
               ">; find: (options: Omit<",
               "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
-              "SavedObjectsFindResponse",
-              "<unknown, unknown>>; update: (sessionId: string, attributes: unknown) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionsFindResponse",
+                "text": "SearchSessionsFindResponse"
+              },
+              ">; update: (sessionId: string, attributes: unknown) => Promise<",
               "SavedObjectsUpdateResponse",
               "<",
               {
@@ -638,7 +646,9 @@
               "Observable",
               "<",
               "SessionMeta",
-              ">; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => () => void; getSessionId: () => string | undefined; getSession$: () => ",
+              ">; readonly disableSaveAfterSearchesExpire$: ",
+              "Observable",
+              "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
               "Observable",
               "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; clear: () => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
               {
@@ -681,8 +691,14 @@
               ">; find: (options: Omit<",
               "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
-              "SavedObjectsFindResponse",
-              "<unknown, unknown>>; update: (sessionId: string, attributes: unknown) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionsFindResponse",
+                "text": "SearchSessionsFindResponse"
+              },
+              ">; update: (sessionId: string, attributes: unknown) => Promise<",
               "SavedObjectsUpdateResponse",
               "<",
               {
@@ -1228,8 +1244,14 @@
           ">; find: (options: Omit<",
           "SavedObjectsFindOptions",
           ", \"type\">) => Promise<",
-          "SavedObjectsFindResponse",
-          "<unknown, unknown>>; update: (sessionId: string, attributes: unknown) => Promise<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSessionsFindResponse",
+            "text": "SearchSessionsFindResponse"
+          },
+          ">; update: (sessionId: string, attributes: unknown) => Promise<",
           "SavedObjectsUpdateResponse",
           "<",
           {
@@ -1288,7 +1310,9 @@
           "Observable",
           "<",
           "SessionMeta",
-          ">; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => () => void; getSessionId: () => string | undefined; getSession$: () => ",
+          ">; readonly disableSaveAfterSearchesExpire$: ",
+          "Observable",
+          "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
           "Observable",
           "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; clear: () => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
           {
@@ -1461,7 +1485,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; sessions: Readonly<{} & { enabled: boolean; pageSize: number; trackingInterval: moment.Duration; cleanupInterval: moment.Duration; expireInterval: moment.Duration; monitoringTaskTimeout: moment.Duration; notTouchedTimeout: moment.Duration; notTouchedInProgressTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>"
+                  "Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
                 "deprecated": false,
@@ -1495,13 +1519,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>, deps: SetupDependencies) => void"
             ],
             "path": "src/plugins/data/server/search/session/session_service.ts",
@@ -1516,13 +1534,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<object, unknown>"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
@@ -1557,14 +1569,8 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreStart",
-                "text": "CoreStart"
-              },
-              ", deps: StartDependencies) => Promise<void>"
+              "CoreStart",
+              ", deps: StartDependencies) => void"
             ],
             "path": "src/plugins/data/server/search/session/session_service.ts",
             "deprecated": false,
@@ -1578,13 +1584,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
                 "deprecated": false,
@@ -1661,7 +1661,7 @@
                 "section": "def-common.SearchSessionSavedObjectAttributes",
                 "text": "SearchSessionSavedObjectAttributes"
               },
-              "> | undefined>"
+              ">>"
             ],
             "path": "src/plugins/data/server/search/session/session_service.ts",
             "deprecated": false,
@@ -1842,8 +1842,8 @@
             "label": "find",
             "description": [],
             "signature": [
-              "({ savedObjectsClient }: ",
-              "SearchSessionDependencies",
+              "({ savedObjectsClient, internalElasticsearchClient }: ",
+              "SearchSessionStatusDependencies",
               ", user: ",
               {
                 "pluginId": "security",
@@ -1855,16 +1855,14 @@
               " | null, options: Omit<",
               "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
-              "SavedObjectsFindResponse",
-              "<",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSessionSavedObjectAttributes",
-                "text": "SearchSessionSavedObjectAttributes"
+                "section": "def-common.SearchSessionsFindResponse",
+                "text": "SearchSessionsFindResponse"
               },
-              ", unknown>>"
+              ">"
             ],
             "path": "src/plugins/data/server/search/session/session_service.ts",
             "deprecated": false,
@@ -1875,10 +1873,10 @@
                 "id": "def-server.SearchSessionService.find.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ savedObjectsClient }",
+                "label": "{ savedObjectsClient, internalElasticsearchClient }",
                 "description": [],
                 "signature": [
-                  "SearchSessionDependencies"
+                  "SearchSessionStatusDependencies"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
                 "deprecated": false,
@@ -2400,20 +2398,101 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.SearchSessionService.status",
+            "type": "Function",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "(deps: ",
+              "SearchSessionStatusDependencies",
+              ", user: ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              },
+              " | null, sessionId: string) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionStatusResponse",
+                "text": "SearchSessionStatusResponse"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data/server/search/session/session_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.status.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "signature": [
+                  "SearchSessionStatusDependencies"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.status.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "user",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "security",
+                    "scope": "common",
+                    "docId": "kibSecurityPluginApi",
+                    "section": "def-common.AuthenticatedUser",
+                    "text": "AuthenticatedUser"
+                  },
+                  " | null"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.SearchSessionService.status.$3",
+                "type": "string",
+                "tags": [],
+                "label": "sessionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data/server/search/session/session_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.SearchSessionService.asScopedProvider",
             "type": "Function",
             "tags": [],
             "label": "asScopedProvider",
             "description": [],
             "signature": [
-              "({ savedObjects }: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreStart",
-                "text": "CoreStart"
-              },
+              "({ savedObjects, elasticsearch }: ",
+              "CoreStart",
               ") => (request: ",
               "KibanaRequest",
               "<unknown, unknown, unknown, any>) => { getId: (args_0: ",
@@ -2432,7 +2511,7 @@
                 "section": "def-common.ISearchOptions",
                 "text": "ISearchOptions"
               },
-              ") => Promise<string>; trackId: (args_0: ",
+              ") => Promise<string>; trackId: (searchRequest: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -2440,7 +2519,7 @@
                 "section": "def-common.IKibanaSearchRequest",
                 "text": "IKibanaSearchRequest"
               },
-              "<any>, args_1: string, args_2: ",
+              "<any>, searchId: string, options: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -2466,7 +2545,7 @@
                 "section": "def-common.SearchSessionSavedObjectAttributes",
                 "text": "SearchSessionSavedObjectAttributes"
               },
-              "> | undefined>; get: (sessionId: string) => Promise<",
+              ">>; get: (sessionId: string) => Promise<",
               "SavedObject",
               "<",
               {
@@ -2479,16 +2558,14 @@
               ">>; find: (options: Omit<",
               "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
-              "SavedObjectsFindResponse",
-              "<",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSessionSavedObjectAttributes",
-                "text": "SearchSessionSavedObjectAttributes"
+                "section": "def-common.SearchSessionsFindResponse",
+                "text": "SearchSessionsFindResponse"
               },
-              ", unknown>>; update: (sessionId: string, attributes: Partial<",
+              ">; update: (sessionId: string, attributes: Partial<",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -2526,7 +2603,15 @@
                 "section": "def-common.SearchSessionSavedObjectAttributes",
                 "text": "SearchSessionSavedObjectAttributes"
               },
-              ">>; delete: (sessionId: string) => Promise<{}>; getConfig: () => Readonly<{} & { enabled: boolean; pageSize: number; trackingInterval: moment.Duration; cleanupInterval: moment.Duration; expireInterval: moment.Duration; monitoringTaskTimeout: moment.Duration; notTouchedTimeout: moment.Duration; notTouchedInProgressTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }"
+              ">>; delete: (sessionId: string) => Promise<{}>; status: (sessionId: string) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionStatusResponse",
+                "text": "SearchSessionStatusResponse"
+              },
+              ">; getConfig: () => Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }"
             ],
             "path": "src/plugins/data/server/search/session/session_service.ts",
             "deprecated": false,
@@ -2537,16 +2622,10 @@
                 "id": "def-server.SearchSessionService.asScopedProvider.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ savedObjects }",
+                "label": "{ savedObjects, elasticsearch }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
                 "deprecated": false,
@@ -2693,15 +2772,7 @@
                 "label": "attributes",
                 "description": [],
                 "signature": [
-                  "{ sessionId?: string | undefined; name?: string | undefined; appId?: string | undefined; created?: string | undefined; touched?: string | undefined; expires?: string | undefined; completed?: string | null | undefined; status?: ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.SearchSessionStatus",
-                    "text": "SearchSessionStatus"
-                  },
-                  " | undefined; locatorId?: string | undefined; initialState?: ",
+                  "{ sessionId?: string | undefined; name?: string | undefined; appId?: string | undefined; created?: string | undefined; expires?: string | undefined; locatorId?: string | undefined; initialState?: ",
                   "SerializableRecord",
                   " | undefined; restoreState?: ",
                   "SerializableRecord",
@@ -2713,7 +2784,7 @@
                     "section": "def-common.SearchSessionRequestInfo",
                     "text": "SearchSessionRequestInfo"
                   },
-                  "> | undefined; persisted?: boolean | undefined; realmType?: string | undefined; realmName?: string | undefined; username?: string | undefined; version?: string | undefined; }"
+                  "> | undefined; realmType?: string | undefined; realmName?: string | undefined; username?: string | undefined; version?: string | undefined; isCanceled?: boolean | undefined; }"
                 ],
                 "path": "src/plugins/data/server/search/session/types.ts",
                 "deprecated": false,
@@ -2770,16 +2841,14 @@
               "(options: Omit<",
               "SavedObjectsFindOptions",
               ", \"type\">) => Promise<",
-              "SavedObjectsFindResponse",
-              "<",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSessionSavedObjectAttributes",
-                "text": "SearchSessionSavedObjectAttributes"
+                "section": "def-common.SearchSessionsFindResponse",
+                "text": "SearchSessionsFindResponse"
               },
-              ", unknown>>"
+              ">"
             ],
             "path": "src/plugins/data/server/search/types.ts",
             "deprecated": false,
@@ -2802,7 +2871,11 @@
                   "SavedObjectsFindOptionsReference",
                   " | ",
                   "SavedObjectsFindOptionsReference",
-                  "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; pit?: ",
+                  "[] | undefined; hasReferenceOperator?: \"AND\" | \"OR\" | undefined; hasNoReference?: ",
+                  "SavedObjectsFindOptionsReference",
+                  " | ",
+                  "SavedObjectsFindOptionsReference",
+                  "[] | undefined; hasNoReferenceOperator?: \"AND\" | \"OR\" | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; namespaces?: string[] | undefined; typeToNamespacesMap?: Map<string, string[] | undefined> | undefined; preference?: string | undefined; pit?: ",
                   "SavedObjectsPitParams",
                   " | undefined; }"
                 ],
@@ -2864,15 +2937,7 @@
                 "label": "attributes",
                 "description": [],
                 "signature": [
-                  "{ sessionId?: string | undefined; name?: string | undefined; appId?: string | undefined; created?: string | undefined; touched?: string | undefined; expires?: string | undefined; completed?: string | null | undefined; status?: ",
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.SearchSessionStatus",
-                    "text": "SearchSessionStatus"
-                  },
-                  " | undefined; locatorId?: string | undefined; initialState?: ",
+                  "{ sessionId?: string | undefined; name?: string | undefined; appId?: string | undefined; created?: string | undefined; expires?: string | undefined; locatorId?: string | undefined; initialState?: ",
                   "SerializableRecord",
                   " | undefined; restoreState?: ",
                   "SerializableRecord",
@@ -2884,7 +2949,7 @@
                     "section": "def-common.SearchSessionRequestInfo",
                     "text": "SearchSessionRequestInfo"
                   },
-                  "> | undefined; persisted?: boolean | undefined; realmType?: string | undefined; realmName?: string | undefined; username?: string | undefined; version?: string | undefined; }"
+                  "> | undefined; realmType?: string | undefined; realmName?: string | undefined; username?: string | undefined; version?: string | undefined; isCanceled?: boolean | undefined; }"
                 ],
                 "path": "src/plugins/data/server/search/session/types.ts",
                 "deprecated": false,
@@ -2999,6 +3064,42 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.IScopedSearchClient.getSessionStatus",
+            "type": "Function",
+            "tags": [],
+            "label": "getSessionStatus",
+            "description": [],
+            "signature": [
+              "(sessionId: string) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionStatusResponse",
+                "text": "SearchSessionStatusResponse"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data/server/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.IScopedSearchClient.getSessionStatus.$1",
+                "type": "string",
+                "tags": [],
+                "label": "sessionId",
+                "description": [],
+                "path": "src/plugins/data/server/search/session/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -3023,13 +3124,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ") => (request: ",
               "KibanaRequest",
               "<unknown, unknown, unknown, any>) => ",
@@ -3047,13 +3142,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/plugins/data/server/search/session/types.ts",
                 "deprecated": false,
@@ -4917,6 +5006,36 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.AggConfigs.samplerConfig",
+            "type": "Object",
+            "tags": [],
+            "label": "samplerConfig",
+            "description": [],
+            "signature": [
+              "{ probability: number; seed: number | undefined; }"
+            ],
+            "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggConfigs.isSamplingEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isSamplingEnabled",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.AggConfigs.setTimeFields",
             "type": "Function",
             "tags": [],
@@ -6593,7 +6712,7 @@
                 "section": "def-common.RequestAdapter",
                 "text": "RequestAdapter"
               },
-              " | undefined, abortSignal?: AbortSignal | undefined, searchSessionId?: string | undefined) => Promise<",
+              " | undefined, abortSignal?: AbortSignal | undefined, searchSessionId?: string | undefined, disableShardFailureWarning?: boolean | undefined) => Promise<",
               "SearchResponse",
               "<any, Record<string, ",
               "AggregationsAggregate",
@@ -6945,6 +7064,20 @@
                 ],
                 "signature": [
                   "string | undefined"
+                ],
+                "path": "src/plugins/data/common/search/aggs/agg_type.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.AggType.postFlightRequest.$8",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "disableShardFailureWarning",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
                 ],
                 "path": "src/plugins/data/common/search/aggs/agg_type.ts",
                 "deprecated": false,
@@ -9730,7 +9863,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.ts"
               }
             ],
             "children": [],
@@ -10044,19 +10177,19 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.test.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.test.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.test.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/utils/wrap_search_source_client.test.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "inputControlVis",
@@ -15994,7 +16127,7 @@
             "id": "def-common.pollSearch.$3",
             "type": "Object",
             "tags": [],
-            "label": "{ pollInterval = 1000, abortSignal }",
+            "label": "{ pollInterval, abortSignal }",
             "description": [],
             "signature": [
               {
@@ -16620,6 +16753,34 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggConfigsOptions.probability",
+            "type": "number",
+            "tags": [],
+            "label": "probability",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggConfigsOptions.samplerSeed",
+            "type": "number",
+            "tags": [],
+            "label": "samplerSeed",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "src/plugins/data/common/search/aggs/agg_configs.ts",
             "deprecated": false,
@@ -26063,7 +26224,7 @@
             "tags": [],
             "label": "pollInterval",
             "description": [
-              "\nThe number of milliseconds to wait between receiving a response and sending another request"
+              "\nThe number of milliseconds to wait between receiving a response and sending another request\nIf not provided, then a default 1 second interval with back-off up to 5 seconds interval is used"
             ],
             "signature": [
               "number | undefined"
@@ -26587,6 +26748,22 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.IKibanaSearchResponse.isStored",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isStored",
+            "description": [
+              "\nIndicates whether the search has been saved to a search-session object and long keepAlive was set"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.IKibanaSearchResponse.warning",
             "type": "string",
             "tags": [],
@@ -27036,6 +27213,22 @@
             "label": "isStored",
             "description": [
               "\nWhether the session is already saved (i.e. sent to background)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.ISearchOptions.isSearchStored",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSearchStored",
+            "description": [
+              "\nWhether the search was successfully polled after session was saved. Search was added to a session saved object and keepAlive extended."
             ],
             "signature": [
               "boolean | undefined"
@@ -28211,90 +28404,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-common.SearchSessionFindOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "SearchSessionFindOptions",
-        "description": [],
-        "path": "src/plugins/data/common/search/session/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SearchSessionFindOptions.page",
-            "type": "number",
-            "tags": [],
-            "label": "page",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data/common/search/session/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SearchSessionFindOptions.perPage",
-            "type": "number",
-            "tags": [],
-            "label": "perPage",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data/common/search/session/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SearchSessionFindOptions.sortField",
-            "type": "string",
-            "tags": [],
-            "label": "sortField",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/session/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SearchSessionFindOptions.sortOrder",
-            "type": "string",
-            "tags": [],
-            "label": "sortOrder",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/session/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SearchSessionFindOptions.filter",
-            "type": "string",
-            "tags": [],
-            "label": "filter",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/session/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-common.SearchSessionRequestInfo",
         "type": "Interface",
         "tags": [],
@@ -28329,15 +28438,36 @@
             "path": "src/plugins/data/common/search/session/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SearchSessionRequestStatus",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchSessionRequestStatus",
+        "description": [],
+        "path": "src/plugins/data/common/search/session/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
           {
             "parentPluginId": "data",
-            "id": "def-common.SearchSessionRequestInfo.status",
-            "type": "string",
+            "id": "def-common.SearchSessionRequestStatus.status",
+            "type": "Enum",
             "tags": [],
             "label": "status",
-            "description": [
-              "\nstatus"
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchStatus",
+                "text": "SearchStatus"
+              }
             ],
             "path": "src/plugins/data/common/search/session/types.ts",
             "deprecated": false,
@@ -28345,7 +28475,7 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.SearchSessionRequestInfo.error",
+            "id": "def-common.SearchSessionRequestStatus.error",
             "type": "string",
             "tags": [],
             "label": "error",
@@ -28431,63 +28561,12 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.SearchSessionSavedObjectAttributes.touched",
-            "type": "string",
-            "tags": [],
-            "label": "touched",
-            "description": [
-              "\nLast touch time of the session"
-            ],
-            "path": "src/plugins/data/common/search/session/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-common.SearchSessionSavedObjectAttributes.expires",
             "type": "string",
             "tags": [],
             "label": "expires",
             "description": [
               "\nExpiration time of the session. Expiration itself is managed by Elasticsearch."
-            ],
-            "path": "src/plugins/data/common/search/session/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SearchSessionSavedObjectAttributes.completed",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "completed",
-            "description": [
-              "\nTime of transition into completed state,\n\nCan be \"null\" in case already completed session\ntransitioned into in-progress session"
-            ],
-            "signature": [
-              "string | null | undefined"
-            ],
-            "path": "src/plugins/data/common/search/session/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-common.SearchSessionSavedObjectAttributes.status",
-            "type": "Enum",
-            "tags": [],
-            "label": "status",
-            "description": [
-              "\nstatus"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSessionStatus",
-                "text": "SearchSessionStatus"
-              }
             ],
             "path": "src/plugins/data/common/search/session/types.ts",
             "deprecated": false,
@@ -28569,19 +28648,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.SearchSessionSavedObjectAttributes.persisted",
-            "type": "boolean",
-            "tags": [],
-            "label": "persisted",
-            "description": [
-              "\nThis value is true if the session was actively stored by the user. If it is false, the session may be purged by the system."
-            ],
-            "path": "src/plugins/data/common/search/session/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-common.SearchSessionSavedObjectAttributes.realmType",
             "type": "string",
             "tags": [],
@@ -28632,6 +28698,132 @@
             "label": "version",
             "description": [
               "\nVersion information to display warnings when trying to restore a session from a different version"
+            ],
+            "path": "src/plugins/data/common/search/session/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSessionSavedObjectAttributes.isCanceled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isCanceled",
+            "description": [
+              "\n`true` if session was cancelled"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/session/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SearchSessionsFindResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchSessionsFindResponse",
+        "description": [
+          "\nList of search session objects with on-the-fly calculated search session statuses"
+        ],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSessionsFindResponse",
+            "text": "SearchSessionsFindResponse"
+          },
+          " extends ",
+          "SavedObjectsFindResponse",
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSessionSavedObjectAttributes",
+            "text": "SearchSessionSavedObjectAttributes"
+          },
+          ", unknown>"
+        ],
+        "path": "src/plugins/data/common/search/session/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSessionsFindResponse.statuses",
+            "type": "Object",
+            "tags": [],
+            "label": "statuses",
+            "description": [
+              "\nMap containing calculated statuses of search sessions from the find response"
+            ],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionStatusResponse",
+                "text": "SearchSessionStatusResponse"
+              },
+              "; }"
+            ],
+            "path": "src/plugins/data/common/search/session/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SearchSessionStatusResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SearchSessionStatusResponse",
+        "description": [
+          "\nOn-the-fly calculated search session status"
+        ],
+        "path": "src/plugins/data/common/search/session/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSessionStatusResponse.status",
+            "type": "Enum",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSessionStatus",
+                "text": "SearchSessionStatus"
+              }
+            ],
+            "path": "src/plugins/data/common/search/session/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SearchSessionStatusResponse.errors",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "src/plugins/data/common/search/session/types.ts",
             "deprecated": false,
@@ -29626,6 +29818,18 @@
         "type": "Enum",
         "tags": [],
         "label": "SearchSessionStatus",
+        "description": [],
+        "path": "src/plugins/data/common/search/session/status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.SearchStatus",
+        "type": "Enum",
+        "tags": [],
+        "label": "SearchStatus",
         "description": [],
         "path": "src/plugins/data/common/search/session/status.ts",
         "deprecated": false,
@@ -32811,7 +33015,7 @@
         "signature": [
           "{ executionContext?: ",
           "KibanaExecutionContext",
-          " | undefined; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; }"
+          " | undefined; isStored?: boolean | undefined; isRestore?: boolean | undefined; sessionId?: string | undefined; strategy?: string | undefined; legacyHitsTotal?: boolean | undefined; isSearchStored?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/types.ts",
         "deprecated": false,

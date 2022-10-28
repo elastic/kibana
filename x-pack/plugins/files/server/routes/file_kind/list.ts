@@ -7,28 +7,49 @@
 import { schema } from '@kbn/config-schema';
 import type { FileJSON, FileKind } from '../../../common/types';
 import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
+import * as cs from '../common_schemas';
 import type { CreateHandler, FileKindRouter } from './types';
+import {
+  stringOrArrayOfStrings,
+  nameStringOrArrayOfNameStrings,
+  toArrayOrUndefined,
+} from '../find';
 
-export const method = 'get' as const;
+export const method = 'post' as const;
 
 const rt = {
+  body: schema.object({
+    status: schema.maybe(stringOrArrayOfStrings),
+    extension: schema.maybe(stringOrArrayOfStrings),
+    name: schema.maybe(nameStringOrArrayOfNameStrings),
+    meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  }),
   query: schema.object({
-    page: schema.maybe(schema.number({ defaultValue: 1 })),
-    perPage: schema.maybe(schema.number({ defaultValue: 100 })),
+    page: schema.maybe(cs.page),
+    perPage: schema.maybe(cs.pageSize),
   }),
 };
 
-export type Endpoint = CreateRouteDefinition<typeof rt, { files: FileJSON[] }>;
+export type Endpoint<M = unknown> = CreateRouteDefinition<
+  typeof rt,
+  { files: Array<FileJSON<M>>; total: number }
+>;
 
 export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req, res) => {
   const {
+    body: { name, status, extension, meta },
     query: { page, perPage },
   } = req;
   const { fileService } = await files;
-  const response = await fileService.asCurrentUser().list({ fileKind, page, perPage });
-  const body: Endpoint['output'] = {
-    files: response.map((result) => result.toJSON()),
-  };
+  const body: Endpoint['output'] = await fileService.asCurrentUser().find({
+    kind: [fileKind],
+    name: toArrayOrUndefined(name),
+    status: toArrayOrUndefined(status),
+    extension: toArrayOrUndefined(extension),
+    page,
+    perPage,
+    meta,
+  });
   return res.ok({ body });
 };
 

@@ -266,7 +266,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           />
         )}
       </Suspense>
-      {alertsCount >= 0 && (
+      {alertsCount > 0 && (
         <EuiDataGrid
           aria-label="Alerts table"
           data-test-subj="alertsTable"

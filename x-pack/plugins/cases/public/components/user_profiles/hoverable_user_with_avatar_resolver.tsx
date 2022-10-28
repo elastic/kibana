@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import React from 'react';
-import { ElasticUser } from '../../containers/types';
-import {
-  HoverableUserWithAvatar,
-  HoverableUserWithAvatarProps,
-} from './hoverable_user_with_avatar';
+import type { ElasticUser } from '../../containers/types';
+import type { HoverableUserWithAvatarProps } from './hoverable_user_with_avatar';
+import { HoverableUserWithAvatar } from './hoverable_user_with_avatar';
 import { convertToUserInfo } from './user_converter';
 
 const HoverableUserWithAvatarResolverComponent: React.FC<

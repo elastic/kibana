@@ -17,6 +17,7 @@ import {
   Direction,
   EuiSpacer,
   EuiTableActionsColumnType,
+  CriteriaWithPagination,
 } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -35,6 +36,7 @@ import { useServices } from './services';
 import type { SavedObjectsReference, SavedObjectsFindOptionsReference } from './services';
 import type { Action } from './actions';
 import { getReducer } from './reducer';
+import type { SortColumnField } from './components';
 
 export interface Props<T extends UserContentCommonSchema = UserContentCommonSchema> {
   entityName: string;
@@ -79,8 +81,8 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   totalItems: number;
   hasUpdatedAtMetadata: boolean;
   pagination: Pagination;
-  tableSort?: {
-    field: keyof T;
+  tableSort: {
+    field: SortColumnField;
     direction: Direction;
   };
 }
@@ -157,6 +159,10 @@ function TableListViewComp<T extends UserContentCommonSchema>({
       totalItemCount: 0,
       pageSize: initialPageSize,
       pageSizeOptions: uniq([10, 20, 50, initialPageSize]).sort(),
+    },
+    tableSort: {
+      field: 'attributes.title' as const,
+      direction: 'asc',
     },
   });
 
@@ -307,6 +313,17 @@ function TableListViewComp<T extends UserContentCommonSchema>({
       });
     }
   }, [searchQueryParser, searchQuery, findItems]);
+
+  const onSortChange = useCallback((field: SortColumnField, direction: Direction) => {
+    dispatch({
+      type: 'onTableSortChange',
+      data: { field, direction },
+    });
+  }, []);
+
+  const onTableChange = useCallback((criteria: CriteriaWithPagination<T>) => {
+    dispatch({ type: 'onTableChange', data: criteria });
+  }, []);
 
   const deleteSelectedItems = useCallback(async () => {
     if (isDeletingItems) {
@@ -468,6 +485,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           isFetchingItems={isFetchingItems}
           searchQuery={searchQuery}
           tableColumns={tableColumns}
+          hasUpdatedAtMetadata={hasUpdatedAtMetadata}
           tableSort={tableSort}
           pagination={pagination}
           selectedIds={selectedIds}
@@ -475,6 +493,8 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           entityNamePlural={entityNamePlural}
           deleteItems={deleteItems}
           tableCaption={tableListTitle}
+          onTableChange={onTableChange}
+          onSortChange={onSortChange}
         />
 
         {/* Delete modal */}

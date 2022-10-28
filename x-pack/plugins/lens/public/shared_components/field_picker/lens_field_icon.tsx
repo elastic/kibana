@@ -8,7 +8,7 @@
 import React from 'react';
 import { FieldIcon, FieldIconProps } from '@kbn/react-field';
 import { DataType } from '../../types';
-import { normalizeOperationDataType } from '../../indexpattern_datasource/pure_utils';
+import { normalizeOperationDataType } from '../../datasources/form_based/pure_utils';
 
 export function LensFieldIcon({ type, ...rest }: FieldIconProps & { type: DataType }) {
   return (

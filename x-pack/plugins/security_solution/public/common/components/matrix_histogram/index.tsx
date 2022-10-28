@@ -57,7 +57,7 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     showLegend?: boolean;
     stackByOptions: MatrixHistogramOption[];
     subtitle?: string | GetSubTitle;
-    timelineId?: string;
+    scopeId?: string;
     title: string | GetTitle;
   };
 
@@ -97,7 +97,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   stackByOptions,
   startDate,
   subtitle,
-  timelineId,
+  scopeId,
   title,
   titleSize,
   yTickFormatter,
@@ -300,7 +300,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
                 barChart={barChartData}
                 configs={barchartConfigs}
                 stackByField={selectedStackByOption.value}
-                timelineId={timelineId}
+                scopeId={scopeId}
               />
             )
           ) : null}

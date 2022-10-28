@@ -2366,6 +2366,25 @@
             "description": [
               "\nQuery string used to match name-related fields in user profiles. The following fields are treated as\nname-related: username, full_name and email."
             ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.UserProfileSuggestParams.hint",
+            "type": "Object",
+            "tags": [],
+            "label": "hint",
+            "description": [
+              "\nExtra search criteria to improve relevance of the suggestion result. A profile matching the\nspecified hint is ranked higher in the response. But not-matching the hint does not exclude a\nprofile from the response as long as it matches the `name` field query."
+            ],
+            "signature": [
+              "{ uids: string[]; } | undefined"
+            ],
             "path": "x-pack/plugins/security/server/user_profile/user_profile_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2550,10 +2569,6 @@
               "path": "src/plugins/data/server/search/session/session_service.ts"
             },
             {
-              "plugin": "cloud",
-              "path": "x-pack/plugins/cloud/server/routes/chat.ts"
-            },
-            {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/server/routes/annotations.ts"
             },
@@ -2568,6 +2583,10 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/request_context_factory.ts"
+            },
+            {
+              "plugin": "securitySolution",
+              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview/api/preview_rules/route.ts"
             },
             {
               "plugin": "securitySolution",
@@ -2586,8 +2605,8 @@
               "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals/open_close_signals_route.ts"
             },
             {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/detection_engine/routes/rules/preview_rules_route.ts"
+              "plugin": "cloudChat",
+              "path": "x-pack/plugins/cloud_integrations/cloud_chat/server/routes/chat.ts"
             },
             {
               "plugin": "securitySolution",
@@ -2720,24 +2739,6 @@
           "path": "x-pack/plugins/security/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
-        },
-        {
-          "parentPluginId": "security",
-          "id": "def-server.SecurityPluginSetup.setIsElasticCloudDeployment",
-          "type": "Function",
-          "tags": [],
-          "label": "setIsElasticCloudDeployment",
-          "description": [
-            "\nSets the flag to indicate that Kibana is running inside an Elastic Cloud deployment. This flag is supposed to be\nset by the Cloud plugin and can be only once."
-          ],
-          "signature": [
-            "() => void"
-          ],
-          "path": "x-pack/plugins/security/server/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [],
-          "returnComment": []
         }
       ],
       "lifecycle": "setup",

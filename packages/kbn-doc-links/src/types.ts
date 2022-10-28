@@ -35,6 +35,10 @@ export interface DocLinks {
     readonly overview: string;
     readonly tailSamplingPolicies: string;
     readonly elasticAgent: string;
+    readonly storageExplorer: string;
+    readonly spanCompression: string;
+    readonly transactionSampling: string;
+    readonly indexLifecycleManagement: string;
   };
   readonly canvas: {
     readonly guide: string;
@@ -111,10 +115,9 @@ export interface DocLinks {
     readonly connectorsMongoDB: string;
     readonly connectorsMySQL: string;
     readonly connectorsWorkplaceSearch: string;
-    readonly contentExtraction: string;
-    readonly crawlerGettingStarted: string;
     readonly crawlerManaging: string;
     readonly crawlerOverview: string;
+    readonly deployTrainedModels: string;
     readonly documentLevelSecurity: string;
     readonly ingestPipelines: string;
     readonly languageAnalyzers: string;
@@ -276,6 +279,10 @@ export interface DocLinks {
     };
     readonly threatIntelInt: string;
     readonly responseActions: string;
+    readonly configureEndpointIntegrationPolicy: string;
+    readonly exceptions: {
+      value_lists: string;
+    };
   };
   readonly query: {
     readonly eql: string;
@@ -339,6 +346,7 @@ export interface DocLinks {
     userExperience: string;
     createAlerts: string;
     syntheticsCommandReference: string;
+    syntheticsProjectMonitors: string;
   }>;
   readonly alerting: Record<string, string>;
   readonly maps: Readonly<{

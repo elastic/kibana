@@ -9,11 +9,12 @@
 import { ConnectionOptions as TlsConnectionOptions } from 'tls';
 import { URL } from 'url';
 import { Duration } from 'moment';
-import type { ClientOptions, HttpAgentOptions } from '@elastic/elasticsearch';
+import type { ClientOptions } from '@elastic/elasticsearch';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
+import { AgentOptions } from 'https';
 import { getDefaultHeaders } from './headers';
 
-export type ParsedClientOptions = Omit<ClientOptions, 'agent'> & { agent: HttpAgentOptions };
+export type ParsedClientOptions = Omit<ClientOptions, 'agent'> & { agent: AgentOptions };
 
 /**
  * Parse the client options from given client config and `scoped` flag.
@@ -38,8 +39,10 @@ export function parseClientOptions(
     // fixes https://github.com/elastic/kibana/issues/101944
     disablePrototypePoisoningProtection: true,
     agent: {
-      maxSockets: config.maxSockets,
+      maxTotalSockets: config.maxSockets,
       keepAlive: config.keepAlive ?? true,
+      timeout: getDurationAsMs(config.idleSocketTimeout),
+      maxFreeSockets: config.maxIdleSockets,
     },
     compression: config.compression,
   };

@@ -5,38 +5,79 @@
  * 2.0.
  */
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { css } from '@emotion/react';
 
+import { FilesContext } from '../context';
+import { getImageMetadata } from '../util';
 import { Image, Props } from './image';
-import { base64dLogo } from './image.constants.stories';
+import { getImageData as getBlob, base64dLogo } from './image.constants.stories';
+import { FilesClient } from '../../types';
 
-const defaultArgs = { alt: 'my alt text', src: `data:image/png;base64,${base64dLogo}` };
+const defaultArgs: Props = { alt: 'test', src: `data:image/png;base64,${base64dLogo}` };
 
 export default {
   title: 'components/Image',
   component: Image,
   args: defaultArgs,
-};
+  decorators: [
+    (Story) => (
+      <FilesContext client={{} as unknown as FilesClient}>
+        <Story />
+      </FilesContext>
+    ),
+  ],
+} as ComponentMeta<typeof Image>;
 
-const baseStyle = css`
-  width: 400px;
-`;
-
-const Template: ComponentStory<typeof Image> = (props: Props) => (
-  <Image css={baseStyle} {...props} ref={action('ref')} />
+const Template: ComponentStory<typeof Image> = (props: Props, { loaded: { meta } }) => (
+  <Image size="original" {...props} meta={meta} ref={action('ref')} />
 );
 
 export const Basic = Template.bind({});
 
+export const WithBlurhash = Template.bind({});
+WithBlurhash.storyName = 'With blurhash';
+WithBlurhash.args = {
+  style: { visibility: 'hidden' },
+};
+WithBlurhash.loaders = [
+  async () => ({
+    meta: await getImageMetadata(getBlob()),
+  }),
+];
+WithBlurhash.decorators = [
+  (Story) => {
+    const alwaysShowBlurhash = `img:nth-of-type(1) { opacity: 1 !important; }`;
+    return (
+      <>
+        <style>{alwaysShowBlurhash}</style>
+        <Story />
+      </>
+    );
+  },
+];
+
 export const BrokenSrc = Template.bind({});
+BrokenSrc.storyName = 'Broken src';
 BrokenSrc.args = {
-  src: 'broken',
+  src: 'foo',
 };
 
+export const WithBlurhashAndBrokenSrc = Template.bind({});
+WithBlurhashAndBrokenSrc.storyName = 'With blurhash and broken src';
+WithBlurhashAndBrokenSrc.args = {
+  src: 'foo',
+};
+WithBlurhashAndBrokenSrc.loaders = [
+  async () => ({
+    blurhash: await getImageMetadata(getBlob()),
+  }),
+];
+
 export const OffScreen = Template.bind({});
-OffScreen.args = { ...defaultArgs, onFirstVisible: action('visible') };
+OffScreen.storyName = 'Offscreen';
+OffScreen.args = { onFirstVisible: action('visible') };
 OffScreen.decorators = [
   (Story) => (
     <>

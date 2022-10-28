@@ -10,7 +10,7 @@ import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import classNames from 'classnames';
 import type { FormatFactory } from '../../../../common';
-import { getOriginalId } from '../../../../common/expressions';
+import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 import type { ColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
 import { getContrastColor, getNumericValue } from '../../../shared_components/coloring/utils';

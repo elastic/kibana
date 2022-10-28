@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const queryBar = getService('queryBar');
 
-  describe('Loaded Dashboard', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/142548
+  describe.skip('Loaded Dashboard', () => {
     let fromTimestamp: string | undefined;
 
     const getEvents = async (count: number, options?: GetEventsOptions) =>

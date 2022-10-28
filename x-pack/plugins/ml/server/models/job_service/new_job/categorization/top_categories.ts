@@ -14,8 +14,8 @@ export function topCategoriesProvider(mlClient: MlClient) {
   async function getTotalCategories(jobId: string): Promise<number> {
     const body = await mlClient.anomalySearch<estypes.SearchResponse<any>>(
       {
-        size: 0,
         body: {
+          size: 0,
           query: {
             bool: {
               filter: [
@@ -42,8 +42,8 @@ export function topCategoriesProvider(mlClient: MlClient) {
   async function getTopCategoryCounts(jobId: string, numberOfCategories: number) {
     const body = await mlClient.anomalySearch<estypes.SearchResponse<any>>(
       {
-        size: 0,
         body: {
+          size: 0,
           query: {
             bool: {
               filter: [
@@ -107,8 +107,8 @@ export function topCategoriesProvider(mlClient: MlClient) {
         };
     const body = await mlClient.anomalySearch<any>(
       {
-        size,
         body: {
+          size,
           query: {
             bool: {
               filter: [
