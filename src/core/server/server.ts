@@ -69,10 +69,18 @@ import type {
 import { RenderingService } from '@kbn/core-rendering-server-internal';
 
 import { HttpResourcesService } from '@kbn/core-http-resources-server-internal';
+import {
+  InternalCorePreboot,
+  InternalCoreSetup,
+  InternalCoreStart,
+} from '@kbn/core-lifecycle-server-internal';
+import {
+  DiscoveredPlugins,
+  PluginsService,
+  config as pluginsConfig,
+} from '@kbn/core-plugins-server-internal';
 import { CoreApp } from './core_app';
-import { PluginsService, config as pluginsConfig } from './plugins';
-import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './internal_types';
-import { DiscoveredPlugins } from './plugins';
+import { elasticApmConfig } from './root/elastic_config';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -450,6 +458,7 @@ export class Server {
       cspConfig,
       deprecationConfig,
       elasticsearchConfig,
+      elasticApmConfig,
       executionContextConfig,
       externalUrlConfig,
       httpConfig,

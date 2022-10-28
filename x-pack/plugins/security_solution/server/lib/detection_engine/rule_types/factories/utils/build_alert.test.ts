@@ -65,7 +65,8 @@ describe('buildAlert', () => {
         completeRule,
         SPACE_ID,
         reason,
-        completeRule.ruleParams.index as string[]
+        completeRule.ruleParams.index as string[],
+        undefined
       ),
       ...additionalAlertFields(doc),
     };
@@ -245,7 +246,8 @@ describe('buildAlert', () => {
         completeRule,
         SPACE_ID,
         reason,
-        completeRule.ruleParams.index as string[]
+        completeRule.ruleParams.index as string[],
+        undefined
       ),
       ...additionalAlertFields(doc),
     };

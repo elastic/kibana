@@ -4,7 +4,6 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-export BUILD_TS_REFS_DISABLE=false
 .buildkite/scripts/bootstrap.sh
 node scripts/build_kibana_platform_plugins.js
 

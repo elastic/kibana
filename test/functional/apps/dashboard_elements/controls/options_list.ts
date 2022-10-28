@@ -385,6 +385,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await pieChart.getPieSliceCount()).to.be(2);
         });
 
+        it('excluding selections has expected results', async () => {
+          await dashboard.clickQuickSave();
+          await dashboard.waitForRenderComplete();
+
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await dashboardControls.optionsListPopoverSetIncludeSelections(false);
+          await dashboard.waitForRenderComplete();
+
+          expect(await pieChart.getPieSliceCount()).to.be(5);
+          await dashboard.clearUnsavedChanges();
+        });
+
+        it('including selections has expected results', async () => {
+          await dashboardControls.optionsListOpenPopover(controlId);
+          await dashboardControls.optionsListPopoverSetIncludeSelections(true);
+          await dashboard.waitForRenderComplete();
+
+          expect(await pieChart.getPieSliceCount()).to.be(2);
+          await dashboard.clearUnsavedChanges();
+        });
+
         it('Can mark multiple selections invalid with Filter', async () => {
           await filterBar.addFilter('sound.keyword', 'is', ['hiss']);
           await dashboard.waitForRenderComplete();
