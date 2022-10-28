@@ -33,12 +33,10 @@ import {
   RawRule,
   RawRuleExecutionStatus,
   RuleMonitoring,
-  RuleMonitoringHistory,
   RuleTaskState,
   RuleTypeRegistry,
 } from '../types';
 import { asErr, asOk, map, resolveErr, Result } from '../lib/result_type';
-import { getExecutionDurationPercentiles, getExecutionSuccessRatio } from '../lib/monitoring';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import { isAlertSavedObjectNotFoundError, isEsUnavailableError } from '../lib/is_alerting_error';
 import { partiallyUpdateAlert } from '../saved_objects';
@@ -69,18 +67,10 @@ import { logAlerts } from './log_alerts';
 import { scheduleActionsForAlerts } from './schedule_actions_for_alerts';
 import { getPublicAlertFactory } from '../alert/create_alert_factory';
 import { TaskRunnerTimer, TaskRunnerTimerSpan } from './task_runner_timer';
+import { RuleMonitoringService } from '../monitoring/rule_monitoring_client';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
-
-export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
-  execution: {
-    history: [],
-    calculated_metrics: {
-      success_ratio: 0,
-    },
-  },
-});
 
 interface StackTraceLog {
   message: ElasticsearchError;
@@ -120,6 +110,7 @@ export class TaskRunner<
   private searchAbortController: AbortController;
   private cancelled: boolean;
   private stackTraceLog: StackTraceLog | null;
+  private ruleMonitoring: RuleMonitoringService;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -152,6 +143,7 @@ export class TaskRunner<
     this.timer = new TaskRunnerTimer({ logger: this.logger });
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
     this.stackTraceLog = null;
+    this.ruleMonitoring = new RuleMonitoringService();
   }
 
   private getExecutionHandler(
@@ -365,6 +357,7 @@ export class TaskRunner<
                 alertFactory: getPublicAlertFactory(alertFactory),
                 shouldWriteAlerts: () => this.shouldLogAndScheduleActionsForAlerts(),
                 shouldStopExecution: () => this.cancelled,
+                ruleMonitoringService: this.ruleMonitoring.getLastRunMetricsSetters(),
               },
               params,
               state: ruleTypeState as RuleState,
@@ -585,11 +578,9 @@ export class TaskRunner<
   private async processRunResults({
     runDate,
     stateWithMetrics,
-    monitoring,
   }: {
     runDate: Date;
     stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
-    monitoring: RuleMonitoring;
   }) {
     const {
       params: { alertId: ruleId, spaceId },
@@ -624,11 +615,6 @@ export class TaskRunner<
       );
     }
 
-    const monitoringHistory: RuleMonitoringHistory = {
-      success: true,
-      timestamp: +new Date(),
-    };
-
     // set start and duration based on event log
     const { start, duration } = this.alertingEventLogger.getStartAndDuration();
     if (null != start) {
@@ -636,20 +622,10 @@ export class TaskRunner<
     }
     if (null != duration) {
       executionStatus.lastDuration = nanosToMillis(duration);
-      monitoringHistory.duration = executionStatus.lastDuration;
     }
 
     // if executionStatus indicates an error, fill in fields in
-    // event from it
-    if (executionStatus.error) {
-      monitoringHistory.success = false;
-    }
-
-    monitoring.execution.history.push(monitoringHistory);
-    monitoring.execution.calculated_metrics = {
-      success_ratio: getExecutionSuccessRatio(monitoring),
-      ...getExecutionDurationPercentiles(monitoring),
-    };
+    this.ruleMonitoring.addHistory(executionStatus.lastDuration, executionStatus.error != null)
 
     if (!this.cancelled) {
       this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
@@ -663,7 +639,7 @@ export class TaskRunner<
       );
       await this.updateRuleSavedObject(ruleId, namespace, {
         executionStatus: ruleExecutionStatusToRaw(executionStatus),
-        monitoring,
+        monitoring: this.ruleMonitoring.getMonitoring(),
       });
     }
 
@@ -687,15 +663,13 @@ export class TaskRunner<
     }
 
     let stateWithMetrics: Result<RuleTaskStateAndMetrics, Error>;
-    let monitoring: RuleMonitoring = getDefaultRuleMonitoring();
     let schedule: Result<IntervalSchedule, Error>;
     try {
       const preparedResult = await this.timer.runWithTimer(
         TaskRunnerTimerSpan.PrepareRule,
         async () => this.prepareToRun()
       );
-
-      monitoring = preparedResult.rule.monitoring ?? getDefaultRuleMonitoring();
+      this.ruleMonitoring.setMonitoring(preparedResult.rule.monitoring)
 
       stateWithMetrics = asOk(await this.runRule(preparedResult));
 
@@ -713,7 +687,6 @@ export class TaskRunner<
         this.processRunResults({
           runDate,
           stateWithMetrics,
-          monitoring,
         })
     );
 
@@ -783,7 +756,7 @@ export class TaskRunner<
 
         return { interval: retryInterval };
       }),
-      monitoring,
+      monitoring: this.ruleMonitoring.getMonitoring(),
     };
   }
 

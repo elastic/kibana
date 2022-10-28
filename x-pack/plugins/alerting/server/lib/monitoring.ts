@@ -9,12 +9,12 @@ import stats from 'stats-lite';
 import { RuleMonitoring } from '../types';
 
 export const getExecutionSuccessRatio = (ruleMonitoring: RuleMonitoring) => {
-  const { history } = ruleMonitoring.execution;
+  const { history } = ruleMonitoring.run;
   return history.filter(({ success }) => success).length / history.length;
 };
 
 export const getExecutionDurationPercentiles = (ruleMonitoring: RuleMonitoring) => {
-  const durationSamples = ruleMonitoring.execution.history.reduce<number[]>((duration, history) => {
+  const durationSamples = ruleMonitoring.run.history.reduce<number[]>((duration, history) => {
     if (typeof history.duration === 'number') {
       return [...duration, history.duration];
     }

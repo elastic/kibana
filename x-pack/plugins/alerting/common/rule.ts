@@ -174,16 +174,32 @@ export interface RuleMonitoringHistory extends SavedObjectAttributes {
   success: boolean;
   timestamp: number;
   duration?: number;
+  outcome?: string; // TODO create enum
+}
+
+interface RuleMonitoringLastRun extends SavedObjectAttributes {
+  timestamp: string;
+  metrics: {
+    duration: number;
+    total_search_duration_ms: number | null;
+    total_indexing_duration_ms: number | null;
+    total_alerts_detected: number | null;
+    total_alerts_created: number | null;
+    gap_duration_s: number | null;
+  };
+}
+
+interface RuleMonitoringCalculatedMetrics extends SavedObjectAttributes {
+  p50?: number;
+  p95?: number;
+  p99?: number;
+  success_ratio: number;
 }
 
 export interface RuleMonitoring extends SavedObjectAttributes {
-  execution: {
+  run: {
     history: RuleMonitoringHistory[];
-    calculated_metrics: {
-      p50?: number;
-      p95?: number;
-      p99?: number;
-      success_ratio: number;
-    };
+    calculated_metrics: RuleMonitoringCalculatedMetrics;
+    last_run: RuleMonitoringLastRun;
   };
 }

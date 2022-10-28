@@ -81,6 +81,7 @@ export interface RuleExecutorServices<
   alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
   shouldWriteAlerts: () => boolean;
   shouldStopExecution: () => boolean;
+  ruleMonitoringService: RuleMonitoringService;
 }
 
 export interface RuleExecutorOptions<
@@ -280,3 +281,11 @@ export interface InvalidatePendingApiKey {
 export type RuleTypeRegistry = PublicMethodsOf<OrigruleTypeRegistry>;
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
+
+export interface RuleMonitoringService {
+  setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;
+  setLastRunMetricsTotalIndexingDurationMs: (totalIndexingDurationMs: number) => void;
+  setLastRunMetricsTotalAlertDetected: (totalAlertDetected: number) => void;
+  setLastRunMetricsTotalAlertCreated: (totalAlertCreated: number) => void;
+  setLastRunMetricsGapDurationS: (gapDurationS: number) => void;
+}
