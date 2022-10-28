@@ -427,7 +427,6 @@ describe('heatmap', () => {
                       arguments: {
                         isVisible: [true],
                         position: [Position.Right],
-                        legendSize: [],
                       },
                     },
                   ],
@@ -441,11 +440,6 @@ describe('heatmap', () => {
                       type: 'function',
                       function: HEATMAP_GRID_FUNCTION,
                       arguments: {
-                        // grid
-                        strokeWidth: [],
-                        strokeColor: [],
-                        xTitle: [],
-                        yTitle: [],
                         // cells
                         isCellLabelVisible: [false],
                         // Y-axis
@@ -545,7 +539,7 @@ describe('heatmap', () => {
                       function: LEGEND_FUNCTION,
                       arguments: {
                         isVisible: [false],
-                        position: [],
+                        position: ['right'],
                       },
                     },
                   ],
