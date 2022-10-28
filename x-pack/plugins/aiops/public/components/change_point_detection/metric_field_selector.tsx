@@ -27,7 +27,7 @@ export const MetricFieldSelector: FC<MetricFieldSelectorProps> = React.memo(
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.aiops.changePointDetection.selectSpitFieldLabel"
+            id="xpack.aiops.changePointDetection.selectMetricFieldLabel"
             defaultMessage="Metric field"
           />
         }
