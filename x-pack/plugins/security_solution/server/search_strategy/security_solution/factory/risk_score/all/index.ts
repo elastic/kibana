@@ -9,6 +9,7 @@ import type { IEsSearchResponse, SearchRequest } from '@kbn/data-plugin/common';
 import { get, getOr } from 'lodash/fp';
 
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { AggregationsMinAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type { SecuritySolutionFactory } from '../../types';
 import type {
   RiskScoreRequestOptions,
@@ -65,6 +66,10 @@ export const riskScore: SecuritySolutionFactory<
   },
 };
 
+export type EnhancedDataBucket = {
+  oldesAlertTimestamp: AggregationsMinAggregate;
+} & BucketItem;
+
 async function enhanceData(
   data: Array<HostRiskScore | UserRiskScore>,
   names: string[],
@@ -74,27 +79,25 @@ async function enhanceData(
 ): Promise<Array<HostRiskScore | UserRiskScore>> {
   const ruleDataReader = ruleDataClient?.getReader({ namespace: spaceId });
   const query = getAlertsQueryForEntity(names, nameField);
-
   const response = await ruleDataReader?.search(query);
-  const buckets: BucketItem[] = getOr([], 'aggregations.alertsByEntity.buckets', response);
-  const oldestAlertTimestamp: string | undefined = getOr(
-    undefined,
-    'aggregations.oldesAlertTimestamp.value_as_string',
-    response
-  );
+  const buckets: EnhancedDataBucket[] = getOr([], 'aggregations.alertsByEntity.buckets', response);
 
-  const alertsCountByEntityName: Record<string, number> = buckets.reduce(
-    (acc, { key, doc_count: count }) => ({
+  const enhancedAlertsDataByEntityName: Record<
+    string,
+    { count: number; oldesAlertTimestamp: string }
+  > = buckets.reduce(
+    (acc, { key, doc_count: count, oldesAlertTimestamp }) => ({
       ...acc,
-      [key]: count,
+      [key]: { count, oldesAlertTimestamp: oldesAlertTimestamp.value_as_string },
     }),
     {}
   );
 
   return data.map((risk) => ({
     ...risk,
-    alertsCount: alertsCountByEntityName[get(nameField, risk)] ?? 0,
-    oldestAlertTimestamp,
+    alertsCount: enhancedAlertsDataByEntityName[get(nameField, risk)]?.count ?? 0,
+    oldestAlertTimestamp:
+      enhancedAlertsDataByEntityName[get(nameField, risk)]?.oldesAlertTimestamp ?? 0,
   }));
 }
 
@@ -113,9 +116,11 @@ const getAlertsQueryForEntity = (names: string[], nameField: string): SearchRequ
       terms: {
         field: nameField,
       },
-    },
-    oldesAlertTimestamp: {
-      min: { field: '@timestamp' },
+      aggs: {
+        oldesAlertTimestamp: {
+          min: { field: '@timestamp' },
+        },
+      },
     },
   },
 });
