@@ -4,8 +4,8 @@
     "outDir": "./target/types"
   },
   "include": [
-    "public/**/*.ts",
-    "public/**/*.tsx",
+    "**/*.ts",
+    "**/*.tsx",
   ],
   "exclude": [
     "./target"

@@ -15,7 +15,10 @@
     "../../typings/**/*",
     "../../packages/kbn-test/types/ftr_globals/**/*",
   ],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*",
+    "*/plugins/**/*",
+  ],
   "references": [
     { "path": "../../test/tsconfig.json" },
     { "path": "../../src/core/tsconfig.json" },
@@ -101,6 +104,7 @@
     { "path": "../plugins/remote_clusters/tsconfig.json" },
     { "path": "../plugins/cross_cluster_replication/tsconfig.json" },
     { "path": "../plugins/index_lifecycle_management/tsconfig.json"},
-    { "path": "../plugins/synthetics/tsconfig.json"}
+    { "path": "../plugins/synthetics/tsconfig.json" },
+    { "path": "./plugin_functional/plugins/global_search_test/tsconfig.json" }
   ]
 }
