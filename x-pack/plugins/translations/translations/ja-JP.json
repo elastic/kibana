@@ -6726,7 +6726,6 @@
     "xpack.aiops.dataGrid.field.documentCountChartSplit.seriesLabel": "他のドキュメントカウント",
     "xpack.aiops.documentCountContent.clearSelectionAriaLabel": "選択した項目をクリア",
     "xpack.aiops.explainLogRateSpikes.loadingState.doneMessage": "完了しました。",
-    "xpack.aiops.explainLogRateSpikes.loadingState.loadingFieldCandidates": "フィールド候補を読み込んでいます。",
     "xpack.aiops.explainLogRateSpikes.loadingState.loadingHistogramData": "ヒストグラムデータを読み込んでいます。",
     "xpack.aiops.explainLogRateSpikesPage.emptyPromptBody": "explainログレートスパイク機能は、ログレートのスパイクに寄与する統計的に有意なフィールド/値の組み合わせを特定します。",
     "xpack.aiops.explainLogRateSpikesPage.emptyPromptTitle": "ヒストグラム図のスパイクをクリックすると、分析が開始します。",

@@ -20,6 +20,7 @@ import { getRequestBase } from './get_request_base';
 // `x-pack/plugins/apm/server/routes/correlations/queries/fetch_duration_field_candidates.ts`
 
 const POPULATED_DOC_COUNT_SAMPLE_SIZE = 1000;
+const SAMPLE_PROBABILITY_MIN_DOC_COUNT = 50000;
 
 const SUPPORTED_ES_FIELD_TYPES = [
   ES_FIELD_TYPES.KEYWORD,
@@ -42,14 +43,16 @@ export const getRandomDocsRequest = (
       },
     },
     size: POPULATED_DOC_COUNT_SAMPLE_SIZE,
+    // Used to determine sample probability for follow up queries
+    track_total_hits: true,
   },
 });
 
-export const fetchFieldCandidates = async (
+export const fetchIndexInfo = async (
   esClient: ElasticsearchClient,
   params: AiopsExplainLogRateSpikesSchema,
   abortSignal?: AbortSignal
-): Promise<string[]> => {
+): Promise<{ fieldCandidates: string[]; sampleProbability: number; totalDocCount: number }> => {
   const { index } = params;
   // Get all supported fields
   const respMapping = await esClient.fieldCaps(
@@ -73,20 +76,32 @@ export const fetchFieldCandidates = async (
     }
   });
 
-  const resp = await esClient.search(getRandomDocsRequest(params), {
-    signal: abortSignal,
-    maxRetries: 0,
-  });
+  // Only the deviation window will be used to identify field candidates and sample probability based on total doc count.
+  const resp = await esClient.search(
+    getRandomDocsRequest({ ...params, start: params.deviationMin, end: params.deviationMax }),
+    {
+      signal: abortSignal,
+      maxRetries: 0,
+    }
+  );
   const sampledDocs = resp.hits.hits.map((d) => d.fields ?? {});
 
   // Get all field names for each returned doc and flatten it
-  // to a list of unique field names used across all docs.
-  // and filter by list of acceptable fields and some APM specific unique fields.
+  // to a list of unique field names used across all docs
+  // and filter by list of acceptable fields.
   [...new Set(sampledDocs.map(Object.keys).flat(1))].forEach((field) => {
     if (acceptableFields.has(field)) {
       finalFieldCandidates.add(field);
     }
   });
 
-  return [...finalFieldCandidates];
+  const totalDocCount = (resp.hits.total as estypes.SearchTotalHits).value;
+
+  let sampleProbability = 1;
+
+  if (totalDocCount > SAMPLE_PROBABILITY_MIN_DOC_COUNT) {
+    sampleProbability = Math.min(0.5, SAMPLE_PROBABILITY_MIN_DOC_COUNT / totalDocCount);
+  }
+
+  return { fieldCandidates: [...finalFieldCandidates], sampleProbability, totalDocCount };
 };
