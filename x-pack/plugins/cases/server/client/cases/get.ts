@@ -19,6 +19,7 @@ import type {
   CasesByAlertIDRequest,
   CasesByAlertId,
   CaseAttributes,
+  AttachmentTotals,
 } from '../../../common/api';
 import {
   CaseResponseRt,
@@ -62,9 +63,10 @@ export const getCasesByAlertID = async (
   clientArgs: CasesClientArgs
 ): Promise<CasesByAlertId> => {
   const {
-    services: { caseService },
+    services: { caseService, attachmentService },
     logger,
     authorization,
+    unsecuredSavedObjectsClient,
   } = clientArgs;
 
   try {
@@ -104,6 +106,11 @@ export const getCasesByAlertID = async (
       return [];
     }
 
+    const commentStats = await attachmentService.getCaseCommentStats({
+      unsecuredSavedObjectsClient,
+      caseIds,
+    });
+
     const casesInfo = await caseService.getCases({
       caseIds,
     });
@@ -125,6 +132,10 @@ export const getCasesByAlertID = async (
       validCasesInfo.map((caseInfo) => ({
         id: caseInfo.id,
         title: caseInfo.attributes.title,
+        description: caseInfo.attributes.description,
+        status: caseInfo.attributes.status,
+        createdAt: caseInfo.attributes.created_at,
+        totals: getCommentTotatlsForCaseId(caseInfo.id, commentStats),
       }))
     );
   } catch (error) {
@@ -137,6 +148,9 @@ export const getCasesByAlertID = async (
     });
   }
 };
+
+const getCommentTotatlsForCaseId = (id: string, stats: Map<string, AttachmentTotals>) =>
+  stats.get(id) ?? { alerts: 0, userComments: 0 };
 
 /**
  * The parameters for retrieving a case

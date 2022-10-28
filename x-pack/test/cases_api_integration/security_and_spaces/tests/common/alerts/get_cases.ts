@@ -56,7 +56,11 @@ export default ({ getService }: FtrProviderContext): void => {
       const caseIDsWithAlert = await getCasesByAlert({ supertest, alertID: 'test-id' });
 
       expect(caseIDsWithAlert.length).to.eql(3);
-      validateCasesFromAlertIDResponse(caseIDsWithAlert, [case1, case2, case3]);
+      validateCasesFromAlertIDResponse(caseIDsWithAlert, [
+        { caseInfo: case1, totals: { alerts: 1, userComments: 0 } },
+        { caseInfo: case2, totals: { alerts: 1, userComments: 0 } },
+        { caseInfo: case3, totals: { alerts: 1, userComments: 0 } },
+      ]);
     });
 
     it('should return all cases with the same alert ID when more than 100 cases', async () => {
@@ -83,7 +87,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(caseIDsWithAlert.length).to.eql(numCases);
 
-      validateCasesFromAlertIDResponse(caseIDsWithAlert, cases);
+      const testResults = cases.map((caseInfo) => ({
+        caseInfo,
+        totals: {
+          alerts: 1,
+          userComments: 0,
+        },
+      }));
+
+      validateCasesFromAlertIDResponse(caseIDsWithAlert, testResults);
     });
 
     it('should return no cases when the alert ID is not found', async () => {
@@ -197,7 +209,15 @@ export default ({ getService }: FtrProviderContext): void => {
           });
           expect(res.length).to.eql(scenario.cases.length);
 
-          validateCasesFromAlertIDResponse(res, scenario.cases);
+          const testResults = scenario.cases.map((caseInfo) => ({
+            caseInfo,
+            totals: {
+              alerts: 1,
+              userComments: 0,
+            },
+          }));
+
+          validateCasesFromAlertIDResponse(res, testResults);
         }
       });
 

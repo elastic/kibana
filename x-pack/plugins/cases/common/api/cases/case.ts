@@ -14,27 +14,21 @@ import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt } from '../connectors';
 import { CaseAssigneesRt } from './assignee';
 
-const BucketsAggs = rt.array(
-  rt.type({
-    key: rt.string,
-  })
-);
-
-export const GetCaseIdsByAlertIdAggsRt = rt.type({
-  references: rt.type({
-    doc_count: rt.number,
-    caseIds: rt.type({
-      buckets: BucketsAggs,
-    }),
-  }),
+export const AttachmentTotalsRt = rt.type({
+  alerts: rt.number,
+  userComments: rt.number,
 });
 
-export const CasesByAlertIdRt = rt.array(
-  rt.type({
-    id: rt.string,
-    title: rt.string,
-  })
-);
+export const RelatedCaseInfoRt = rt.type({
+  id: rt.string,
+  title: rt.string,
+  description: rt.string,
+  status: CaseStatusRt,
+  totals: AttachmentTotalsRt,
+  createdAt: rt.string,
+});
+
+export const CasesByAlertIdRt = rt.array(RelatedCaseInfoRt);
 
 export const SettingsRt = rt.type({
   syncAlerts: rt.boolean,
@@ -350,5 +344,6 @@ export type CaseExternalServiceBasic = rt.TypeOf<typeof CaseExternalServiceBasic
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type AllReportersFindRequest = AllTagsFindRequest;
 
-export type GetCaseIdsByAlertIdAggs = rt.TypeOf<typeof GetCaseIdsByAlertIdAggsRt>;
+export type AttachmentTotals = rt.TypeOf<typeof AttachmentTotalsRt>;
+export type RelatedCaseInfo = rt.TypeOf<typeof RelatedCaseInfoRt>;
 export type CasesByAlertId = rt.TypeOf<typeof CasesByAlertIdRt>;
