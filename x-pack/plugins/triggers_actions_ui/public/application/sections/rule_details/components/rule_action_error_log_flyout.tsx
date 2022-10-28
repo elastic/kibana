@@ -41,7 +41,7 @@ export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) =
     rule_id: ruleId,
     message,
     num_errored_actions: totalErrors,
-    space_ids: spaceIds,
+    space_ids: spaceIds = [],
   } = runLog;
 
   const isFlyoutPush = useIsWithinBreakpoints(['xl']);
