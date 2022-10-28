@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  ConnectorExecutorResult,
-  rewriteResponseToCamelCase,
-} from './rewrite_response_to_camel_case';
+import type { ConnectorExecutorResult } from './rewrite_response_to_camel_case';
+import { rewriteResponseToCamelCase } from './rewrite_response_to_camel_case';
 
 const responseWithSnakeCasedFields: ConnectorExecutorResult<{}> = {
   service_message: 'oh noooooo',

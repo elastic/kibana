@@ -19,7 +19,7 @@ describe('getConfiguration', () => {
     expect(
       getConfiguration('test1', samplePieVis as any, {
         metrics: ['metric-1'],
-        buckets: ['bucket-1'],
+        buckets: { all: ['bucket-1'], customBuckets: {} },
       })
     ).toEqual({
       layers: [
@@ -55,7 +55,7 @@ describe('getConfiguration', () => {
         { ...samplePieVis, params: { ...samplePieVis.params, legendDisplay: 'hide' } } as any,
         {
           metrics: ['metric-1'],
-          buckets: ['bucket-1'],
+          buckets: { all: ['bucket-1'], customBuckets: {} },
         }
       )
     ).toEqual({
@@ -73,7 +73,7 @@ describe('getConfiguration', () => {
         { ...samplePieVis, params: { ...samplePieVis.params, legendDisplay: 'show' } } as any,
         {
           metrics: ['metric-1'],
-          buckets: ['bucket-1'],
+          buckets: { all: ['bucket-1'], customBuckets: {} },
         }
       )
     ).toEqual({
@@ -92,7 +92,7 @@ describe('getConfiguration', () => {
         { ...samplePieVis, params: { ...samplePieVis.params, legendDisplay } } as any,
         {
           metrics: ['metric-1'],
-          buckets: ['bucket-1'],
+          buckets: { all: ['bucket-1'], customBuckets: {} },
         }
       )
     ).toEqual({

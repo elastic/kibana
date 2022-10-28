@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { AppNavLinkStatus } from '@kbn/core/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
@@ -40,6 +41,7 @@ import {
 export interface HomePluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   urlForwarding: UrlForwardingStart;
+  guidedOnboarding: GuidedOnboardingPluginStart;
 }
 
 export interface HomePluginSetupDependencies {
@@ -78,7 +80,7 @@ export class HomePublicPlugin
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiCounter.bind(usageCollection, 'Kibana_home')
           : () => {};
-        const [coreStart, { dataViews, urlForwarding: urlForwardingStart }] =
+        const [coreStart, { dataViews, urlForwarding: urlForwardingStart, guidedOnboarding }] =
           await core.getStartServices();
         setServices({
           share,
@@ -102,6 +104,8 @@ export class HomePublicPlugin
           addDataService: this.addDataService,
           featureCatalogue: this.featuresCatalogueRegistry,
           welcomeService: this.welcomeService,
+          guidedOnboardingService: guidedOnboarding.guidedOnboardingApi,
+          cloud,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })

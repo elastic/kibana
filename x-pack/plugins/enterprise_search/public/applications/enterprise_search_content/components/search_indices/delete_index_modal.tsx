@@ -22,6 +22,7 @@ export const DeleteIndexModal: React.FC = () => {
     deleteModalIndexName: indexName,
     deleteModalIngestionMethod: ingestionMethod,
     isDeleteModalVisible,
+    isDeleteLoading,
   } = useValues(IndicesLogic);
   return isDeleteModalVisible ? (
     <EuiConfirmModal
@@ -35,12 +36,21 @@ export const DeleteIndexModal: React.FC = () => {
       onConfirm={() => {
         deleteIndex({ indexName });
       }}
-      cancelButtonText={i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndices.deleteModal.cancelButton.title',
-        {
-          defaultMessage: 'Cancel',
-        }
-      )}
+      cancelButtonText={
+        isDeleteLoading
+          ? i18n.translate(
+              'xpack.enterpriseSearch.content.searchIndices.deleteModal.closeButton.title',
+              {
+                defaultMessage: 'Close',
+              }
+            )
+          : i18n.translate(
+              'xpack.enterpriseSearch.content.searchIndices.deleteModal.cancelButton.title',
+              {
+                defaultMessage: 'Cancel',
+              }
+            )
+      }
       confirmButtonText={i18n.translate(
         'xpack.enterpriseSearch.content.searchIndices.deleteModal.confirmButton.title',
         {
@@ -49,6 +59,7 @@ export const DeleteIndexModal: React.FC = () => {
       )}
       defaultFocusedButton="confirm"
       buttonColor="danger"
+      isLoading={isDeleteLoading}
     >
       <p>
         {i18n.translate(

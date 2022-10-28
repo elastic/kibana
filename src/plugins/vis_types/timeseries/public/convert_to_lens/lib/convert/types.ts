@@ -85,7 +85,13 @@ export type MovingAverageColumn = GenericColumnWithMeta<BaseMovingAverageColumn,
 export type FormulaColumn = GenericColumnWithMeta<BaseFormulaColumn, Meta>;
 export type StaticValueColumn = GenericColumnWithMeta<BaseStaticValueColumn, Meta>;
 
-export type ColumnsWithoutMeta = FiltersColumn | TermsColumn | DateHistogramColumn;
+export type ColumnsWithoutMeta =
+  | FiltersColumn
+  | TermsColumn
+  | DateHistogramColumn
+  | BaseStaticValueColumn
+  | BaseFormulaColumn;
+
 export type AnyColumnWithReferences = GenericColumnWithMeta<BaseAnyColumnWithReferences, Meta>;
 
 type CommonColumns = Exclude<BaseColumn, ColumnsWithoutMeta>;
@@ -110,5 +116,25 @@ export interface CommonColumnConverterArgs {
   metric: Metric;
   dataView: DataView;
 }
+
+export type TermsSeries = Pick<
+  Series,
+  | 'split_mode'
+  | 'terms_direction'
+  | 'terms_order_by'
+  | 'terms_size'
+  | 'terms_include'
+  | 'terms_exclude'
+  | 'terms_field'
+  | 'formatter'
+  | 'value_template'
+>;
+
+export type FiltersSeries = Pick<Series, 'split_mode' | 'filter' | 'split_filters'>;
+
+export type DateHistogramSeries = Pick<
+  Series,
+  'split_mode' | 'override_index_pattern' | 'series_interval' | 'series_drop_last_bucket'
+>;
 
 export { FiltersColumn, TermsColumn, DateHistogramColumn };

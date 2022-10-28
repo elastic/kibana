@@ -68,13 +68,13 @@ describe('Error details', () => {
       it('shows errors distribution chart', () => {
         cy.visitKibana(errorDetailsPageHref);
         cy.contains('Error group 00000');
-        cy.get('[data-test-subj="errorDistribution"]').contains('Occurrences');
+        cy.getByTestSubj('errorDistribution').contains('Occurrences');
       });
 
       it('shows top erroneous transactions table', () => {
         cy.visitKibana(errorDetailsPageHref);
         cy.contains('Top 5 affected transactions');
-        cy.get('[data-test-subj="topErroneousTransactionsTable"]')
+        cy.getByTestSubj('topErroneousTransactionsTable')
           .contains('a', 'GET /apple 🍎')
           .click();
         cy.url().should('include', 'opbeans-java/transactions/view');

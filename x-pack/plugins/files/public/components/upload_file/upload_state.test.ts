@@ -11,6 +11,7 @@ import { TestScheduler } from 'rxjs/testing';
 import type { FileKind, FileJSON } from '../../../common';
 import { createMockFilesClient } from '../../mocks';
 import type { FilesClient } from '../../types';
+import { ImageMetadataFactory } from '../util/image_metadata';
 
 import { UploadState } from './upload_state';
 
@@ -21,6 +22,7 @@ describe('UploadState', () => {
   let filesClient: DeeplyMockedKeys<FilesClient>;
   let uploadState: UploadState;
   let testScheduler: TestScheduler;
+  const imageMetadataFactory = (() => of(undefined)) as unknown as ImageMetadataFactory;
 
   beforeEach(() => {
     filesClient = createMockFilesClient();
@@ -28,7 +30,9 @@ describe('UploadState', () => {
     filesClient.upload.mockReturnValue(of(undefined) as any);
     uploadState = new UploadState(
       { id: 'test', http: {}, maxSizeBytes: 1000 } as FileKind,
-      filesClient
+      filesClient,
+      {},
+      imageMetadataFactory
     );
     testScheduler = getTestScheduler();
   });
@@ -189,7 +193,8 @@ describe('UploadState', () => {
       uploadState = new UploadState(
         { id: 'test', http: {}, maxSizeBytes: 1000 } as FileKind,
         filesClient,
-        { allowRepeatedUploads: true }
+        { allowRepeatedUploads: true },
+        imageMetadataFactory
       );
       const file1 = { name: 'test' } as File;
       const file2 = { name: 'test 2.png' } as File;
@@ -200,5 +205,15 @@ describe('UploadState', () => {
       expectObservable(upload$, '           --^').toBe('---0|', [undefined]);
       expectObservable(uploadState.clear$, '^').toBe('  ---0-', [undefined]);
     });
+  });
+
+  it('correctly detects when files are ready for upload', () => {
+    const file1 = { name: 'test' } as File;
+    const file2 = { name: 'test 2.png' } as File;
+    expect(uploadState.hasFiles()).toBe(false);
+    uploadState.setFiles([file1, file2]);
+    expect(uploadState.hasFiles()).toBe(true);
+    uploadState.setFiles([]);
+    expect(uploadState.hasFiles()).toBe(false);
   });
 });

@@ -10,7 +10,10 @@ import { uniq, uniqWith, pick, isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
 import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
+
+const FREQUENT_ITEMS_FIELDS_LIMIT = 15;
 
 interface FrequentItemsAggregation extends estypes.AggregationsSamplerAggregation {
   fi: {
@@ -53,12 +56,24 @@ export async function fetchFrequentItems(
   changePoints: ChangePoint[],
   timeFieldName: string,
   deviationMin: number,
-  deviationMax: number
+  deviationMax: number,
+  logger: Logger,
+  emitError: (m: string) => void,
+  abortSignal?: AbortSignal
 ) {
-  // get unique fields that are left
-  const fields = [...new Set(changePoints.map((t) => t.fieldName))];
+  // Sort change points by ascending p-value, necessary to apply the field limit correctly.
+  const sortedChangePoints = changePoints.slice().sort((a, b) => {
+    return (a.pValue ?? 0) - (b.pValue ?? 0);
+  });
 
-  // TODO add query params
+  // Get up to 15 unique fields from change points with retained order
+  const fields = sortedChangePoints.reduce<string[]>((p, c) => {
+    if (p.length < FREQUENT_ITEMS_FIELDS_LIMIT && !p.some((d) => d === c.fieldName)) {
+      p.push(c.fieldName);
+    }
+    return p;
+  }, []);
+
   const query = {
     bool: {
       minimum_should_match: 2,
@@ -73,7 +88,7 @@ export async function fetchFrequentItems(
           },
         },
       ],
-      should: changePoints.map((t) => {
+      should: sortedChangePoints.map((t) => {
         return { term: { [t.fieldName]: t.fieldValue } };
       }),
     },
@@ -91,6 +106,8 @@ export async function fetchFrequentItems(
     sampleProbability = Math.min(0.5, minDocCount / totalDocCount);
   }
 
+  logger.debug(`frequent_items sample probability: ${sampleProbability}`);
+
   // frequent items can be slow, so sample and use 10% min_support
   const aggs: Record<string, estypes.AggregationsAggregationContainer> = {
     sample: {
@@ -103,7 +120,7 @@ export async function fetchFrequentItems(
           frequent_items: {
             minimum_set_size: 2,
             size: 200,
-            minimum_support: 0.01,
+            minimum_support: 0.1,
             fields: aggFields,
           },
         },
@@ -111,25 +128,33 @@ export async function fetchFrequentItems(
     },
   };
 
+  const esBody = {
+    query,
+    aggs,
+    size: 0,
+    track_total_hits: true,
+  };
+
   const body = await client.search<unknown, { sample: FrequentItemsAggregation }>(
     {
       index,
       size: 0,
-      body: {
-        query,
-        aggs,
-        size: 0,
-        track_total_hits: true,
-      },
+      body: esBody,
     },
-    { maxRetries: 0 }
+    { signal: abortSignal, maxRetries: 0 }
   );
 
-  const totalDocCountFi = (body.hits.total as estypes.SearchTotalHits).value;
-
   if (body.aggregations === undefined) {
-    throw new Error('fetchFrequentItems failed, did not return aggregations.');
+    logger.error(`Failed to fetch frequent_items, got: \n${JSON.stringify(body, null, 2)}`);
+    emitError(`Failed to fetch frequent_items.`);
+    return {
+      fields: [],
+      df: [],
+      totalDocCount: 0,
+    };
   }
+
+  const totalDocCountFi = (body.hits.total as estypes.SearchTotalHits).value;
 
   const shape = body.aggregations.sample.fi.buckets.length;
   let maximum = shape;
@@ -155,7 +180,7 @@ export async function fetchFrequentItems(
     Object.entries(fis.key).forEach(([key, value]) => {
       result.set[key] = value[0];
 
-      const pValue = changePoints.find(
+      const pValue = sortedChangePoints.find(
         (t) => t.fieldName === key && t.fieldValue === value[0]
       )?.pValue;
 

@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('with data loaded', function () {
         const adJobId = 'fq_single_a11y';
-        const dfaOutlierJobId = 'iph_outlier_a11y';
+        const dfaOutlierResultsJobId = 'iph_outlier_a11y';
         const calendarId = 'calendar_a11y';
         const eventDescription = 'calendar_event_a11y';
         const filterId = 'filter_a11y';
@@ -68,14 +68,28 @@ export default function ({ getService }: FtrProviderContext) {
         const fqIndexPattern = 'ft_farequote';
         const ecIndexPattern = 'ft_module_sample_ecommerce';
         const ihpIndexPattern = 'ft_ihp_outlier';
+        const egsIndexPattern = 'ft_egs_regression';
+        const bmIndexPattern = 'ft_bank_marketing';
         const ecExpectedTotalCount = '287';
 
         const adJobAggAndFieldIdentifier = 'Mean(responsetime)';
         const adJobBucketSpan = '30m';
         const adSingleMetricJobId = `fq_single_a11y_${Date.now()}`;
+        const adMultiSplitField = 'airline';
+        const adMultiMetricJobId = `fq_multi_a11y_${Date.now()}`;
+        const adMultiMetricJobDescription =
+          'Multi metric job based on the farequote dataset with 30m bucketspan and mean(responsetime) split by airline';
 
-        const dfaJobType = 'outlier_detection';
-        const dfaJobId = `ihp_ally_${Date.now()}`;
+        const dfaOutlierJobType = 'outlier_detection';
+        const dfaOutlierJobId = `ihp_outlier_ally_${Date.now()}`;
+        const dfaRegressionJobType = 'regression';
+        const dfaRegressionJobId = `egs_regression_ally_${Date.now()}`;
+        const dfaRegressionJobDepVar = 'stab';
+        const dfaRegressionJobTrainingPercent = 30;
+        const dfaClassificationJobType = 'classification';
+        const dfaClassificationJobId = `bm_classification_ally_${Date.now()}`;
+        const dfaClassificationJobDepVar = 'y';
+        const dfaClassificationJobTrainingPercent = 30;
 
         const uploadFilePath = require.resolve(
           '../../functional/apps/ml/data_visualizer/files_to_import/artificial_server_log'
@@ -84,11 +98,15 @@ export default function ({ getService }: FtrProviderContext) {
         before(async () => {
           await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
           await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
+          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
+          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
           await esArchiver.loadIfNeeded(
             'x-pack/test/functional/es_archives/ml/module_sample_ecommerce'
           );
           await ml.testResources.createIndexPatternIfNeeded(fqIndexPattern, '@timestamp');
-          await ml.testResources.createIndexPatternIfNeeded(ihpIndexPattern, '@timestamp');
+          await ml.testResources.createIndexPatternIfNeeded(ihpIndexPattern);
+          await ml.testResources.createIndexPatternIfNeeded(egsIndexPattern);
+          await ml.testResources.createIndexPatternIfNeeded(bmIndexPattern);
           await ml.testResources.createIndexPatternIfNeeded(ecIndexPattern, 'order_date');
           await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -98,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           await ml.api.createAndRunDFAJob(
-            ml.commonConfig.getDFAIhpOutlierDetectionJobConfig(dfaOutlierJobId)
+            ml.commonConfig.getDFAIhpOutlierDetectionJobConfig(dfaOutlierResultsJobId)
           );
 
           await ml.api.createCalendar(calendarId, {
@@ -122,15 +140,19 @@ export default function ({ getService }: FtrProviderContext) {
 
         after(async () => {
           await ml.api.cleanMlIndices();
-          await ml.api.deleteIndices(`user-${dfaOutlierJobId}`);
+          await ml.api.deleteIndices(`user-${dfaOutlierResultsJobId}`);
           await ml.api.deleteCalendar(calendarId);
           await ml.api.deleteFilter(filterId);
 
           await ml.testResources.deleteIndexPatternByTitle(fqIndexPattern);
           await ml.testResources.deleteIndexPatternByTitle(ihpIndexPattern);
+          await ml.testResources.deleteIndexPatternByTitle(egsIndexPattern);
+          await ml.testResources.deleteIndexPatternByTitle(bmIndexPattern);
           await ml.testResources.deleteIndexPatternByTitle(ecIndexPattern);
           await esArchiver.unload('x-pack/test/functional/es_archives/ml/farequote');
           await esArchiver.unload('x-pack/test/functional/es_archives/ml/ihp_outlier');
+          await esArchiver.unload('x-pack/test/functional/es_archives/ml/egs_regression');
+          await esArchiver.unload('x-pack/test/functional/es_archives/ml/bm_classification');
           await esArchiver.unload('x-pack/test/functional/es_archives/ml/module_sample_ecommerce');
           await ml.testResources.resetKibanaTimeZone();
         });
@@ -196,6 +218,55 @@ export default function ({ getService }: FtrProviderContext) {
           await a11y.testAppSnapshot();
         });
 
+        it('anomaly detection create multi metric job and move to time range step', async () => {
+          // Proceed all the way to the step for selecting the time range
+          // as the other steps have already been tested for the single metric job
+          await ml.navigation.navigateToAnomalyDetection();
+          await ml.jobManagement.navigateToNewJobSourceSelection();
+          await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(fqIndexPattern);
+          await ml.jobTypeSelection.selectMultiMetricJob();
+          await ml.testExecution.logTestStep('job creation set the time range');
+          await ml.jobWizardCommon.clickUseFullDataButton(
+            'Feb 7, 2016 @ 00:00:00.000',
+            'Feb 11, 2016 @ 23:59:54.000'
+          );
+          await a11y.testAppSnapshot();
+        });
+
+        it('anomaly detection create multi metric job pick fields step', async () => {
+          await ml.jobWizardCommon.advanceToPickFieldsSection();
+          await ml.testExecution.logTestStep('job creation selects field and aggregation');
+          await ml.jobWizardCommon.selectAggAndField(adJobAggAndFieldIdentifier, false);
+          await ml.testExecution.logTestStep('job creation selects split field');
+          await ml.jobWizardMultiMetric.selectSplitField(adMultiSplitField);
+          await ml.testExecution.logTestStep('job creation inputs the bucket span');
+          await ml.jobWizardCommon.setBucketSpan(adJobBucketSpan);
+          await a11y.testAppSnapshot();
+        });
+
+        it('anomaly detection create multi metric job details step', async () => {
+          await ml.jobWizardCommon.advanceToJobDetailsSection();
+          await ml.testExecution.logTestStep('job creation inputs the job id');
+          await ml.jobWizardCommon.setJobId(adMultiMetricJobId);
+          await ml.testExecution.logTestStep('job creation inputs the job description');
+          await ml.jobWizardCommon.setJobDescription(adMultiMetricJobDescription);
+          await ml.testExecution.logTestStep('job creation opens the additional settings section');
+          await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
+          await ml.testExecution.logTestStep('job creation opens the advanced section');
+          await ml.jobWizardCommon.ensureAdvancedSectionOpen();
+          await a11y.testAppSnapshot();
+        });
+
+        it('anomaly detection create multi metric job validation step', async () => {
+          await ml.jobWizardCommon.advanceToValidationSection();
+          await a11y.testAppSnapshot();
+        });
+
+        it('anomaly detection create multi metric job summary step', async () => {
+          await ml.jobWizardCommon.advanceToSummarySection();
+          await a11y.testAppSnapshot();
+        });
+
         it('anomaly detection Single Metric Viewer page', async () => {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToAnomalyDetection();
@@ -210,6 +281,22 @@ export default function ({ getService }: FtrProviderContext) {
           await a11y.testAppSnapshot();
         });
 
+        it('anomaly detection forecasting from Single Metric Viewer page', async () => {
+          await ml.testExecution.logTestStep('opens the forecasting modal showing no forecasts');
+          await ml.forecast.openForecastModal();
+          await a11y.testAppSnapshot();
+
+          await ml.testExecution.logTestStep('run the forecast and close the modal');
+          await ml.forecast.clickForecastModalRunButton();
+
+          await ml.testExecution.logTestStep('opens the forecasting modal showing a forecast');
+          await ml.forecast.openForecastModal();
+          await a11y.testAppSnapshot();
+
+          await ml.testExecution.logTestStep('closes the forecasting modal');
+          await ml.forecast.closeForecastModal();
+        });
+
         it('anomaly detection Anomaly Explorer page', async () => {
           await ml.singleMetricViewer.openAnomalyExplorer();
           await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
@@ -222,7 +309,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('data frame analytics outlier job exploration page', async () => {
-          await ml.dataFrameAnalyticsTable.openResultsView(dfaOutlierJobId);
+          await ml.dataFrameAnalyticsTable.openResultsView(dfaOutlierResultsJobId);
           await ml.dataFrameAnalyticsResults.assertOutlierTablePanelExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
@@ -248,7 +335,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('data frame analytics create job configuration step for outlier job', async () => {
           await ml.testExecution.logTestStep('selects the outlier job type');
           await ml.dataFrameAnalyticsCreation.assertJobTypeSelectExists();
-          await ml.dataFrameAnalyticsCreation.selectJobType(dfaJobType);
+          await ml.dataFrameAnalyticsCreation.selectJobType(dfaOutlierJobType);
           await ml.testExecution.logTestStep('displays the source data preview');
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
           await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewHistogramChartEnabled(true);
@@ -264,7 +351,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('data frame analytics create job additional options step for outlier job', async () => {
           await ml.dataFrameAnalyticsCreation.continueToDetailsStep();
-          await ml.dataFrameAnalyticsCreation.setJobId(dfaJobId);
+          await ml.dataFrameAnalyticsCreation.setJobId(dfaOutlierJobId);
           await a11y.testAppSnapshot();
         });
 
@@ -275,6 +362,102 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('data frame analytics create job create step for outlier job', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToCreateStep();
+          await a11y.testAppSnapshot();
+        });
+
+        it('data frame analytics create job configuration step for regression job', async () => {
+          await ml.testExecution.logTestStep(
+            'job creation selects the source data and loads the DFA job wizard page'
+          );
+          await ml.navigation.navigateToMl();
+          await ml.navigation.navigateToDataFrameAnalytics();
+          await ml.dataFrameAnalytics.startAnalyticsCreation();
+          await ml.jobSourceSelection.selectSourceForAnalyticsJob(egsIndexPattern);
+          await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
+          await ml.testExecution.logTestStep('selects the regression job type');
+          await ml.dataFrameAnalyticsCreation.assertJobTypeSelectExists();
+          await ml.dataFrameAnalyticsCreation.selectJobType(dfaRegressionJobType);
+          await ml.testExecution.logTestStep('inputs the dependent variable');
+          await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
+          await ml.dataFrameAnalyticsCreation.selectDependentVariable(dfaRegressionJobDepVar);
+          await ml.testExecution.logTestStep('inputs the training percent');
+          await ml.dataFrameAnalyticsCreation.assertTrainingPercentInputExists();
+          await ml.dataFrameAnalyticsCreation.setTrainingPercent(dfaRegressionJobTrainingPercent);
+          await ml.testExecution.logTestStep('displays the source data preview');
+          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
+          await ml.testExecution.logTestStep('displays the include fields selection');
+          await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+          await a11y.testAppSnapshot();
+        });
+
+        it('data frame analytics create job additional options step for regression job', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
+          await a11y.testAppSnapshot();
+        });
+
+        it('data frame analytics create job additional options step for regression job', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToDetailsStep();
+          await ml.dataFrameAnalyticsCreation.setJobId(dfaRegressionJobId);
+          await a11y.testAppSnapshot();
+        });
+
+        it('data frame analytics create job validation step for regression job', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToValidationStep();
+          await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
+          await a11y.testAppSnapshot();
+        });
+
+        it('data frame analytics create job create step for regression job', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToCreateStep();
+          await a11y.testAppSnapshot();
+        });
+
+        it('data frame analytics create job configuration step for classification job', async () => {
+          await ml.testExecution.logTestStep(
+            'job creation selects the source data and loads the DFA job wizard page'
+          );
+          await ml.navigation.navigateToMl();
+          await ml.navigation.navigateToDataFrameAnalytics();
+          await ml.dataFrameAnalytics.startAnalyticsCreation();
+          await ml.jobSourceSelection.selectSourceForAnalyticsJob(bmIndexPattern);
+          await ml.dataFrameAnalyticsCreation.assertConfigurationStepActive();
+          await ml.testExecution.logTestStep('selects the classification job type');
+          await ml.dataFrameAnalyticsCreation.assertJobTypeSelectExists();
+          await ml.dataFrameAnalyticsCreation.selectJobType(dfaClassificationJobType);
+          await ml.testExecution.logTestStep('inputs the dependent variable');
+          await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
+          await ml.dataFrameAnalyticsCreation.selectDependentVariable(dfaClassificationJobDepVar);
+          await ml.testExecution.logTestStep('inputs the training percent');
+          await ml.dataFrameAnalyticsCreation.assertTrainingPercentInputExists();
+          await ml.dataFrameAnalyticsCreation.setTrainingPercent(
+            dfaClassificationJobTrainingPercent
+          );
+          await ml.testExecution.logTestStep('displays the source data preview');
+          await ml.dataFrameAnalyticsCreation.assertSourceDataPreviewExists();
+          await ml.testExecution.logTestStep('displays the include fields selection');
+          await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+          await a11y.testAppSnapshot();
+        });
+
+        it('data frame analytics create job additional options step for classification job', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();
+          await a11y.testAppSnapshot();
+        });
+
+        it('data frame analytics create job additional options step for classification job', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToDetailsStep();
+          await ml.dataFrameAnalyticsCreation.setJobId(dfaClassificationJobId);
+          await a11y.testAppSnapshot();
+        });
+
+        it('data frame analytics create job validation step for classification job', async () => {
+          await ml.dataFrameAnalyticsCreation.continueToValidationStep();
+          await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
+          await a11y.testAppSnapshot();
+        });
+
+        it('data frame analytics create job create step for classification job', async () => {
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
           await a11y.testAppSnapshot();
         });

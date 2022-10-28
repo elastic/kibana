@@ -14,6 +14,8 @@ import { i18n } from '@kbn/i18n';
 import noMlModelsGraphicDark from '../../../../../../assets/images/no_ml_models_dark.svg';
 import noMlModelsGraphicLight from '../../../../../../assets/images/no_ml_models_light.svg';
 
+import { docLinks } from '../../../../../shared/doc_links';
+
 export const NoModelsPanel: React.FC = () => {
   const { colorMode } = useEuiTheme();
 
@@ -43,8 +45,7 @@ export const NoModelsPanel: React.FC = () => {
         </>
       }
       footer={
-        // TODO: insert correct docsLink here
-        <EuiLink href="#" target="_blank">
+        <EuiLink href={docLinks.deployTrainedModels} target="_blank">
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.emptyPrompt.docsLink',
             {
