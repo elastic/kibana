@@ -15,13 +15,17 @@ import type { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embedda
 
 type IReactEmbeddable = IEmbeddable<EmbeddableInput, EmbeddableOutput, MaybePromise<ReactNode>>;
 
-interface EmbeddableErrorProps {
+interface EmbeddableErrorHandlerProps {
   children: IReactEmbeddable['catchError'];
   embeddable?: IReactEmbeddable;
   error: ErrorLike | string;
 }
 
-export function EmbeddableError({ children, embeddable, error }: EmbeddableErrorProps) {
+export function EmbeddableErrorHandler({
+  children,
+  embeddable,
+  error,
+}: EmbeddableErrorHandlerProps) {
   const [node, setNode] = useState<ReactNode>();
   const ref = useRef<HTMLDivElement>(null);
 

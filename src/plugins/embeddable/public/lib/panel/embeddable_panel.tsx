@@ -32,7 +32,12 @@ import {
   EmbeddableContext,
   contextMenuTrigger,
 } from '../triggers';
-import { EmbeddableError, EmbeddableInput, EmbeddableOutput, IEmbeddable } from '../embeddables';
+import {
+  EmbeddableErrorHandler,
+  EmbeddableInput,
+  EmbeddableOutput,
+  IEmbeddable,
+} from '../embeddables';
 import { ViewMode } from '../types';
 
 import { EmbeddablePanelError } from './embeddable_panel_error';
@@ -309,7 +314,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
             justifyContent="center"
           >
             <EuiFlexItem>
-              <EmbeddableError embeddable={this.props.embeddable} error={this.state.error}>
+              <EmbeddableErrorHandler embeddable={this.props.embeddable} error={this.state.error}>
                 {(error) => (
                   <EmbeddablePanelError
                     editPanelAction={this.state.universalActions.editPanel}
@@ -317,7 +322,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
                     error={error}
                   />
                 )}
-              </EmbeddableError>
+              </EmbeddableErrorHandler>
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
