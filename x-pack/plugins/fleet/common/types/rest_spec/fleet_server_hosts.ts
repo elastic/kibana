@@ -10,3 +10,23 @@ import type { FleetServerHost } from '../models';
 import type { ListResult } from './common';
 
 export type GetFleetServerHostsResponse = ListResult<FleetServerHost>;
+
+export interface PutFleetServerHostsRequest {
+  params: {
+    itemId: string;
+  };
+  body: {
+    name?: string;
+    host_urls?: string[];
+    is_default?: boolean;
+  };
+}
+
+export interface PostFleetServerHostsRequest {
+  body: {
+    id?: string;
+    name?: string;
+    host_urls?: string[];
+    is_default?: boolean;
+  };
+}

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { splitPkgKey } from '../../../../../../../common/services';
 
-import { useGetPackageInfoByKey, useGetSettings, useLink } from '../../../../hooks';
+import { useGetPackageInfoByKey, useGetFleetServerHosts, useLink } from '../../../../hooks';
 
 import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
 
@@ -66,8 +66,6 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     setCurrentStep(0);
   };
 
-  const { isLoading: isSettingsLoading, data: settingsData } = useGetSettings();
-
   const {
     data: packageInfoData,
     error: packageInfoError,
@@ -82,7 +80,6 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   } = useGetAgentPolicyOrDefault(queryParamsPolicyId);
 
   const packageInfo = useMemo(() => packageInfoData?.item, [packageInfoData]);
-  const settings = useMemo(() => settingsData?.item, [settingsData]);
 
   const integrationInfo = useMemo(() => {
     if (!integration) return;
@@ -95,6 +92,10 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     setOnSplash(false);
   };
 
+  const fleetServerHostsRequest = useGetFleetServerHosts();
+  const fleetServerHosts =
+    fleetServerHostsRequest.data?.items?.filter((f) => true)?.[0]?.host_urls ?? [];
+
   const cancelUrl = getHref('add_integration_to_policy', {
     pkgkey,
     useMultiPageLayout: false,
@@ -105,7 +106,9 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   if (onSplash || !packageInfo) {
     return (
       <AddFirstIntegrationSplashScreen
-        isLoading={isPackageInfoLoading || isSettingsLoading || isAgentPolicyLoading}
+        isLoading={
+          isPackageInfoLoading || fleetServerHostsRequest.isLoading || isAgentPolicyLoading
+        }
         error={packageInfoError || agentPolicyError}
         integrationInfo={integrationInfo}
         packageInfo={packageInfo}
@@ -134,7 +137,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
 
   return (
     <MultiPageStepsLayout
-      settings={settings}
+      fleetServerHosts={fleetServerHosts}
       agentPolicy={agentPolicy}
       enrollmentAPIKey={enrollmentAPIKey}
       currentStep={currentStep}

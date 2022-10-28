@@ -9,7 +9,12 @@ import React, { useCallback } from 'react';
 import { EuiPortal } from '@elastic/eui';
 import { Router, Route, Switch, useHistory, Redirect } from 'react-router-dom';
 
-import { useBreadcrumbs, useGetOutputs, useGetSettings, useGetDownloadSources } from '../../hooks';
+import {
+  useBreadcrumbs,
+  useGetOutputs,
+  useGetDownloadSources,
+  useGetFleetServerHosts,
+} from '../../hooks';
 import { FLEET_ROUTING_PATHS, pagePathGetters } from '../../constants';
 import { DefaultLayout } from '../../layouts';
 import { Loading } from '../../components';
@@ -19,6 +24,7 @@ import { withConfirmModalProvider } from './hooks/use_confirm_modal';
 import { FleetServerHostsFlyout } from './components/fleet_server_hosts_flyout';
 import { EditOutputFlyout } from './components/edit_output_flyout';
 import { useDeleteOutput } from './hooks/use_delete_output';
+import { useDeleteFleetServerHost } from './hooks/use_delete_fleet_server_host';
 import { EditDownloadSourceFlyout } from './components/download_source_flyout';
 import { useDeleteDownloadSource } from './components/download_source_flyout/use_delete_download_source';
 
@@ -26,29 +32,30 @@ export const SettingsApp = withConfirmModalProvider(() => {
   useBreadcrumbs('settings');
   const history = useHistory();
 
-  const settings = useGetSettings();
   const outputs = useGetOutputs();
+  const fleetServerHosts = useGetFleetServerHosts();
   const downloadSources = useGetDownloadSources();
 
   const { deleteOutput } = useDeleteOutput(outputs.resendRequest);
   const { deleteDownloadSource } = useDeleteDownloadSource(downloadSources.resendRequest);
+  const { deleteFleetServerHost } = useDeleteFleetServerHost(fleetServerHosts.resendRequest);
 
-  const resendSettingsRequest = settings.resendRequest;
   const resendOutputRequest = outputs.resendRequest;
   const resendDownloadSourceRequest = downloadSources.resendRequest;
+  const resendFleetServerHostsRequest = fleetServerHosts.resendRequest;
 
   const onCloseCallback = useCallback(() => {
-    resendSettingsRequest();
     resendOutputRequest();
     resendDownloadSourceRequest();
+    resendFleetServerHostsRequest();
     history.replace(pagePathGetters.settings()[1]);
-  }, [resendSettingsRequest, resendOutputRequest, resendDownloadSourceRequest, history]);
+  }, [resendOutputRequest, resendDownloadSourceRequest, resendFleetServerHostsRequest, history]);
 
   if (
-    (settings.isLoading && settings.isInitialRequest) ||
-    !settings.data?.item ||
     (outputs.isLoading && outputs.isInitialRequest) ||
     !outputs.data?.items ||
+    (fleetServerHosts.isLoading && fleetServerHosts.isInitialRequest) ||
+    !fleetServerHosts.data?.items ||
     (downloadSources.isLoading && downloadSources.isInitialRequest) ||
     !downloadSources.data?.items
   ) {
@@ -64,11 +71,27 @@ export const SettingsApp = withConfirmModalProvider(() => {
       <Router history={history}>
         <Switch>
           <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts}>
+            {(route: { match: { params: { itemId: string } } }) => {
+              const fleetServerHost = fleetServerHosts.data?.items.find(
+                (o) => route.match.params.itemId === o.id
+              );
+              if (!fleetServerHost) {
+                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+              }
+
+              return (
+                <EuiPortal>
+                  <FleetServerHostsFlyout
+                    onClose={onCloseCallback}
+                    fleetServerHost={fleetServerHost}
+                  />
+                </EuiPortal>
+              );
+            }}
+          </Route>
+          <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_server_hosts}>
             <EuiPortal>
-              <FleetServerHostsFlyout
-                onClose={onCloseCallback}
-                fleetServerHosts={settings.data?.item.fleet_server_hosts ?? []}
-              />
+              <FleetServerHostsFlyout onClose={onCloseCallback} />
             </EuiPortal>
           </Route>
           <Route path={FLEET_ROUTING_PATHS.settings_create_outputs}>
@@ -117,9 +140,10 @@ export const SettingsApp = withConfirmModalProvider(() => {
         </Switch>
       </Router>
       <SettingsPage
-        settings={settings.data.item}
         outputs={outputs.data.items}
+        fleetServerHosts={fleetServerHosts.data.items}
         deleteOutput={deleteOutput}
+        deleteFleetServerHost={deleteFleetServerHost}
         downloadSources={downloadSources.data.items}
         deleteDownloadSource={deleteDownloadSource}
       />

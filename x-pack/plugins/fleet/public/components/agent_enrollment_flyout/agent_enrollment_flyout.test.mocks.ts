@@ -17,6 +17,16 @@ jest.mock('../../hooks/use_request', () => {
   const module = jest.requireActual('../../hooks/use_request');
   return {
     ...module,
+    useGetFleetServerHosts: jest.fn().mockReturnValue({
+      data: {
+        items: [
+          {
+            is_default: true,
+            host_urls: ['http://test.fr'],
+          },
+        ],
+      },
+    }),
     useGetSettings: jest.fn().mockReturnValue({
       data: { item: { fleet_server_hosts: ['test'] } },
     }),

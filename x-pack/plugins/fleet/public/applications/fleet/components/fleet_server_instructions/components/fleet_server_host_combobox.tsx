@@ -6,12 +6,15 @@
  */
 import React, { useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+
 import { EuiComboBox, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import type { FleetServerHost } from '../../../types';
+
 interface Props {
-  fleetServerHost: string | undefined;
+  fleetServerHost: FleetServerHost | undefined;
   fleetServerHostSettings: string[];
   isDisabled: boolean;
   isInvalid: boolean;
@@ -42,7 +45,6 @@ export const FleetServerHostComboBox: React.FunctionComponent<Props> = ({
     setCreatedOptions([...createdOptions, option]);
     onFleetServerHostChange(option);
   };
-
   return (
     <EuiComboBox<string>
       fullWidth
@@ -57,7 +59,11 @@ export const FleetServerHostComboBox: React.FunctionComponent<Props> = ({
           values: { searchValuePlaceholder: '{searchValue}' },
         }
       )}
-      selectedOptions={fleetServerHost ? [{ label: fleetServerHost, value: fleetServerHost }] : []}
+      selectedOptions={
+        fleetServerHost
+          ? [{ label: fleetServerHost.host_urls[0], value: fleetServerHost.host_urls[0] }]
+          : []
+      }
       prepend={
         <EuiText>
           <FormattedMessage

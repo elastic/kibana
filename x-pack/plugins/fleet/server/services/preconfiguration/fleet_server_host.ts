@@ -8,10 +8,12 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 
+import { decodeCloudId, normalizeHostsForAgents } from '../../../common/services';
 import type { FleetConfigType } from '../../config';
 import { DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
 
 import type { FleetServerHost } from '../../types';
+import { appContextService } from '../app_context';
 import {
   bulkGetFleetServerHosts,
   createFleetServerHost,
@@ -20,12 +22,42 @@ import {
   updateFleetServerHost,
 } from '../fleet_server_host';
 
+export function getCloudFleetServersHosts() {
+  const cloudSetup = appContextService.getCloud();
+  if (cloudSetup && cloudSetup.isCloudEnabled && cloudSetup.cloudId && cloudSetup.deploymentId) {
+    const res = decodeCloudId(cloudSetup.cloudId);
+    if (!res) {
+      return;
+    }
+
+    // Fleet Server url are formed like this `https://<deploymentId>.fleet.<host>
+    return [
+      `https://${cloudSetup.deploymentId}.fleet.${res.host}${
+        res.defaultPort !== '443' ? `:${res.defaultPort}` : ''
+      }`,
+    ];
+  }
+}
+
 export function getPreconfiguredFleetServerHostFromConfig(config?: FleetConfigType) {
   const { fleetServerHosts: fleetServerHostsFromConfig } = config;
 
   const legacyFleetServerHostsConfig = getConfigFleetServerHosts(config);
 
+  // is cloud
+  const cloudServerHosts = getCloudFleetServersHosts();
+
   const fleetServerHosts: FleetServerHost[] = (fleetServerHostsFromConfig || []).concat([
+    ...(cloudServerHosts
+      ? [
+          {
+            name: 'Default',
+            is_default: true,
+            id: DEFAULT_FLEET_SERVER_HOST_ID,
+            host_urls: cloudServerHosts,
+          },
+        ]
+      : []),
     ...(legacyFleetServerHostsConfig
       ? [
           {
@@ -77,7 +109,10 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
         (!existingHost.is_preconfigured ||
           existingHost.is_default !== preconfiguredFleetServerHost.is_default ||
           existingHost.name !== preconfiguredFleetServerHost.name ||
-          !isEqual(existingHost?.host_urls, preconfiguredFleetServerHost.host_urls));
+          !isEqual(
+            existingHost.host_urls.map(normalizeHostsForAgents),
+            preconfiguredFleetServerHost.host_urls.map(normalizeHostsForAgents)
+          ));
 
       if (isCreate) {
         await createFleetServerHost(

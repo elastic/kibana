@@ -21,71 +21,132 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiSpacer,
+  EuiForm,
+  EuiFormRow,
+  EuiFieldText,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { MultiRowInput } from '../multi_row_input';
 import { useStartServices } from '../../../../hooks';
 import { FLYOUT_MAX_WIDTH } from '../../constants';
+import type { FleetServerHost } from '../../../../types';
 
 import { useFleetServerHostsForm } from './use_fleet_server_host_form';
 
 export interface FleetServerHostsFlyoutProps {
   onClose: () => void;
-  fleetServerHosts: string[];
+  fleetServerHost?: FleetServerHost;
 }
 
 export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFlyoutProps> = ({
   onClose,
-  fleetServerHosts,
+  fleetServerHost,
 }) => {
   const { docLinks } = useStartServices();
 
-  const form = useFleetServerHostsForm(fleetServerHosts, onClose);
+  const form = useFleetServerHostsForm(fleetServerHost, onClose);
+  const { inputs } = form;
 
   return (
     <EuiFlyout maxWidth={FLYOUT_MAX_WIDTH} onClose={onClose}>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="m">
-          <h2 id="FleetPackagePolicyPreviousVersionFlyoutTitle">
-            <FormattedMessage
-              id="xpack.fleet.settings.fleetServerHostsFlyout.title"
-              defaultMessage="Fleet Server hosts"
-            />
+          <h2>
+            {fleetServerHost ? (
+              <FormattedMessage
+                id="xpack.fleet.settings.fleetServerHostsFlyout.editTitle"
+                defaultMessage="Edit Fleet Server"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.settings.fleetServerHostsFlyout.addTitle"
+                defaultMessage="Add Fleet Server"
+              />
+            )}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiText color="subdued">
-          <FormattedMessage
-            id="xpack.fleet.settings.fleetServerHostsFlyout.description"
-            defaultMessage="Specify the URLs that your agents will use to connect to a Fleet Server. If multiple URLs exist, Fleet shows the first provided URL for enrollment purposes. Fleet Server uses port 8220 by default. Refer to the {link}."
-            values={{
-              link: (
-                <EuiLink
-                  href={docLinks.links.fleet.settingsFleetServerHostSettings}
-                  target="_blank"
-                  external
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.settings.fleetServerHostsFlyout.userGuideLink"
-                    defaultMessage="Fleet and Elastic Agent Guide"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiText>
-        <EuiSpacer size="m" />
-        <MultiRowInput
-          {...form.fleetServerHostsInput.props}
-          id="fleet-server-inputs"
-          placeholder={i18n.translate(
-            'xpack.fleet.settings.fleetServerHostsFlyout.fleetServerHostsInputPlaceholder',
-            {
-              defaultMessage: 'Specify host URL',
+        <EuiForm onSubmit={form.submit}>
+          <EuiFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.fleetServerHostsFlyout.nameInputLabel"
+                defaultMessage="Name"
+              />
             }
-          )}
-        />
+            {...inputs.nameInput.formRowProps}
+          >
+            <EuiFieldText
+              data-test-subj="fleetServerHostsFlyout.nameInput"
+              fullWidth
+              {...inputs.nameInput.props}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.fleetServerHostsFlyout.nameInputPlaceholder',
+                {
+                  defaultMessage: 'Specify name',
+                }
+              )}
+            />
+          </EuiFormRow>
+          <EuiFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.fleetServerHostsFlyout.hostUrlLabel"
+                defaultMessage="URL"
+              />
+            }
+          >
+            <>
+              <EuiText color="subdued" size="relative">
+                <FormattedMessage
+                  id="xpack.fleet.settings.fleetServerHostsFlyout.description"
+                  defaultMessage="Specify multiple URLs to scale out your deployment and provide automatic failover. If multiple URLs exist, Fleet shows the first provided URL for enrollment purposes. Enrolled Elastic Agents will connect to the URLs in round robin order until they connect successfully. For more information, see the {link} ."
+                  values={{
+                    link: (
+                      <EuiLink
+                        href={docLinks.links.fleet.settingsFleetServerHostSettings}
+                        target="_blank"
+                        external
+                      >
+                        <FormattedMessage
+                          id="xpack.fleet.settings.fleetServerHostsFlyout.userGuideLink"
+                          defaultMessage="Fleet and Elastic Agent Guide"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </EuiText>
+              <EuiSpacer size="m" />
+              <MultiRowInput
+                {...form.inputs.hostUrlsInput.props}
+                id="fleet-server-inputs"
+                placeholder={i18n.translate(
+                  'xpack.fleet.settings.fleetServerHostsFlyout.fleetServerHostsInputPlaceholder',
+                  {
+                    defaultMessage: 'Specify host URL',
+                  }
+                )}
+              />
+            </>
+          </EuiFormRow>
+          <EuiFormRow fullWidth {...inputs.isDefaultInput.formRowProps}>
+            <EuiSwitch
+              data-test-subj="fleetServerHostsFlyout.isDefaultSwitch"
+              {...inputs.isDefaultInput.props}
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.settings.fleetServerHostsFlyout.defaultOutputSwitchLabel"
+                  defaultMessage="Make this Fleet server the default one."
+                />
+              }
+            />
+          </EuiFormRow>
+        </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

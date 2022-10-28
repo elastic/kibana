@@ -18,3 +18,4 @@ export * from './setup';
 export * from './app';
 export * from './ingest_pipelines';
 export * from './download_source';
+export * from './fleet_server_hosts';

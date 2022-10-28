@@ -8,31 +8,36 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import type { Output, Settings, DownloadSource } from '../../../../types';
+import type { Output, DownloadSource, FleetServerHost } from '../../../../types';
 
-import { SettingsSection } from './settings_section';
+import { FleetServerHostsSection } from './fleet_server_hosts_section';
 import { OutputSection } from './output_section';
 import { AgentBinarySection } from './agent_binary_section';
 
 export interface SettingsPageProps {
-  settings: Settings;
   outputs: Output[];
+  fleetServerHosts: FleetServerHost[];
   deleteOutput: (output: Output) => void;
+  deleteFleetServerHost: (fleetServerHost: FleetServerHost) => void;
   downloadSources: DownloadSource[];
   deleteDownloadSource: (ds: DownloadSource) => void;
 }
 
 export const SettingsPage: React.FunctionComponent<SettingsPageProps> = ({
-  settings,
   outputs,
+  fleetServerHosts,
   deleteOutput,
+  deleteFleetServerHost,
   downloadSources,
   deleteDownloadSource,
 }) => {
   return (
     <>
       <EuiSpacer size="m" />
-      <SettingsSection settings={settings} />
+      <FleetServerHostsSection
+        fleetServerHosts={fleetServerHosts}
+        deleteFleetServerHost={deleteFleetServerHost}
+      />
       <EuiSpacer size="m" />
       <OutputSection outputs={outputs} deleteOutput={deleteOutput} />
       <EuiSpacer size="m" />

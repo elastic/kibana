@@ -11,9 +11,9 @@ import {
   AGENT_FLYOUT,
   CREATE_FLEET_SERVER_POLICY_BTN,
   AGENT_POLICY_CREATE_STATUS_CALLOUT,
-  FLEET_SERVER_HOST_INPUT,
   ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON,
   ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON,
+  FLEET_SERVER_SETUP,
 } from '../screens/fleet';
 import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
 import { verifyPolicy, verifyAgentPackage, navigateToTab } from '../tasks/fleet';
@@ -98,9 +98,8 @@ describe('Fleet startup', () => {
       cy.getBySel(AGENT_FLYOUT.POLICY_DROPDOWN);
 
       // verify fleet server enroll command contains created policy id
-      cy.getBySel(FLEET_SERVER_HOST_INPUT)
-        .getBySel('comboBoxSearchInput')
-        .type('https://localhost:8220');
+      cy.getBySel(FLEET_SERVER_SETUP.NAME_INPUT).type('New host');
+      cy.get('[placeholder="Specify host URL"').type('https://localhost:8220');
 
       cy.getBySel(ADVANCED_FLEET_SERVER_ADD_HOST_BUTTON).click();
       cy.getBySel(ADVANCED_FLEET_SERVER_GENERATE_SERVICE_TOKEN_BUTTON).click();

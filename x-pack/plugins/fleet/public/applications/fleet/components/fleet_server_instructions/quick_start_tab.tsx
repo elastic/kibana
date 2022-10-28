@@ -17,24 +17,32 @@ import {
 } from './steps';
 
 export const QuickStartTab: React.FunctionComponent = () => {
-  const quickStartCreateForm = useQuickStartCreateForm();
+  const { fleetServerHost, fleetServerPolicyId, serviceToken, status, error, submit, inputs } =
+    useQuickStartCreateForm();
   const { isFleetServerReady } = useWaitForFleetServer();
 
   const steps = [
     getGettingStartedStep({
-      quickStartCreateForm,
+      fleetServerHost,
+      fleetServerPolicyId,
+      serviceToken,
+      status,
+      error,
+      submit,
+      isFleetServerHostSubmitted: false,
+      inputs,
     }),
     getInstallFleetServerStep({
       isFleetServerReady,
-      fleetServerHost: quickStartCreateForm.fleetServerHost,
-      fleetServerPolicyId: quickStartCreateForm.fleetServerPolicyId,
-      serviceToken: quickStartCreateForm.serviceToken,
+      fleetServerHost: fleetServerHost?.host_urls[0],
+      fleetServerPolicyId,
+      serviceToken,
       deploymentMode: 'quickstart',
-      disabled: quickStartCreateForm.status !== 'success',
+      disabled: status !== 'success',
     }),
     getConfirmFleetServerConnectionStep({
       isFleetServerReady,
-      disabled: quickStartCreateForm.status !== 'success',
+      disabled: status !== 'success',
     }),
   ];
 

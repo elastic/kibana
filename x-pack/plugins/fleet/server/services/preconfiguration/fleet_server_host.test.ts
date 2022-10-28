@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { getPreconfiguredFleetServerHostFromConfig } from './fleet_server_host';
+import { appContextService } from '../app_context';
 
-jest.mock('../fleet_server_host');
+import {
+  getCloudFleetServersHosts,
+  getPreconfiguredFleetServerHostFromConfig,
+} from './fleet_server_host';
+
+jest.mock('../app_context');
+
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 
 describe('getPreconfiguredFleetServerHostFromConfig', () => {
   it('should work with preconfigured fleetServerHosts', () => {
@@ -79,5 +86,46 @@ describe('getPreconfiguredFleetServerHostFromConfig', () => {
     expect(() => getPreconfiguredFleetServerHostFromConfig(config)).toThrowError(
       /Only one default Fleet Server host is allowed/
     );
+  });
+});
+
+describe('getCloudFleetServersHosts', () => {
+  afterEach(() => {
+    mockedAppContextService.getCloud.mockReset();
+  });
+  it('should return undefined if cloud is not setup', () => {
+    expect(getCloudFleetServersHosts()).toBeUndefined();
+  });
+
+  it('should return fleet server hosts if cloud is correctly setup with default port == 443', () => {
+    mockedAppContextService.getCloud.mockReturnValue({
+      cloudId:
+        'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
+      isCloudEnabled: true,
+      deploymentId: 'deployment-id-1',
+      apm: {},
+    });
+
+    expect(getCloudFleetServersHosts()).toMatchInlineSnapshot(`
+      Array [
+        "https://deployment-id-1.fleet.us-east-1.aws.found.io",
+      ]
+    `);
+  });
+
+  it('should return fleet server hosts if cloud is correctly setup with a default port', () => {
+    mockedAppContextService.getCloud.mockReturnValue({
+      cloudId:
+        'test:dGVzdC5mcjo5MjQzJGRhM2I2YjNkYWY5ZDRjODE4ZjI4ZmEzNDdjMzgzODViJDgxMmY4NWMxZjNjZTQ2YTliYjgxZjFjMWIxMzRjNmRl',
+      isCloudEnabled: true,
+      deploymentId: 'deployment-id-1',
+      apm: {},
+    });
+
+    expect(getCloudFleetServersHosts()).toMatchInlineSnapshot(`
+      Array [
+        "https://deployment-id-1.fleet.test.fr:9243",
+      ]
+    `);
   });
 });

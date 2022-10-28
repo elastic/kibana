@@ -83,12 +83,13 @@ async function createSetupSideEffects(
   logger.debug('Setting up Fleet download source');
   const defaultDownloadSource = await downloadSourceService.ensureDefault(soClient);
 
-  logger.debug('Setting up Fleet outputs');
-
+  logger.debug('Setting up Fleet Sever Hosts');
   await ensurePreconfiguredFleetServerHosts(
     soClient,
     getPreconfiguredFleetServerHostFromConfig(appContextService.getConfig())
   );
+
+  logger.debug('Setting up Fleet outputs');
   await Promise.all([
     ensurePreconfiguredOutputs(
       soClient,

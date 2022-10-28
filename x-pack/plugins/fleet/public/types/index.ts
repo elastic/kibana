@@ -24,6 +24,7 @@ export type {
   PackagePolicyPackage,
   Output,
   DownloadSource,
+  FleetServerHost,
   DataStream,
   Settings,
   ActionStatus,
