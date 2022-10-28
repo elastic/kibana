@@ -19,6 +19,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
+import type { Services } from '../services';
 import type { Item } from '../types';
 import { MetadataForm } from './metadata_form';
 import { useMetadataForm } from './use_metadata_form';
@@ -41,13 +42,15 @@ const getI18nTexts = ({ entityName }: { entityName: string }) => ({
 export interface Props {
   item: Item;
   isReadonly?: boolean;
-  onSave?: (args: { title: string; description?: string }) => Promise<void>;
+  services: Pick<Services, 'TagSelector'>;
+  onSave?: (args: { title: string; description?: string; tags: string[] }) => Promise<void>;
   onCancel: () => void;
 }
 
 export const InspectorFlyoutContent: FC<Props> = ({
   item,
   isReadonly = true,
+  services: { TagSelector },
   onSave,
   onCancel,
 }) => {
@@ -59,7 +62,11 @@ export const InspectorFlyoutContent: FC<Props> = ({
   const onClickSave = useCallback(async () => {
     if (form.isValid) {
       setIsSubmitting(true);
-      await onSave?.({ title: form.title.value, description: form.description.value });
+      await onSave?.({
+        title: form.title.value,
+        description: form.description.value,
+        tags: form.tags.value,
+      });
       setIsSubmitting(false);
     }
     setIsSubmitted(true);
@@ -80,7 +87,7 @@ export const InspectorFlyoutContent: FC<Props> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <MetadataForm form={form} isReadonly={isReadonly} />
+        <MetadataForm form={form} isReadonly={isReadonly} TagSelector={TagSelector} />
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>

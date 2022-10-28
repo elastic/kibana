@@ -12,11 +12,23 @@ import type { Observable } from 'rxjs';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 
+interface TagSelectorProps {
+  initialSelection: string[];
+  onTagsSelected: (ids: string[]) => void;
+}
+
+export interface SavedObjectsReference {
+  id: string;
+  name: string;
+  type: string;
+}
+
 /**
  * Abstract external services for this component.
  */
 export interface Services {
   openFlyout(node: ReactNode, options?: OverlayFlyoutOpenOptions): OverlayRef;
+  TagSelector?: React.FC<TagSelectorProps>;
 }
 
 const InspectorContext = React.createContext<Services | null>(null);
@@ -49,6 +61,21 @@ export interface TableListViewKibanaDependencies {
     node: React.ReactNode,
     options?: { theme$: Observable<{ readonly darkMode: boolean }> }
   ) => MountPoint;
+  /**
+   * The public API from the savedObjectsTaggingOss plugin.
+   * It is returned by calling `getTaggingApi()` from the SavedObjectTaggingOssPluginStart
+   *
+   * ```js
+   * const savedObjectsTagging = savedObjectsTaggingOss?.getTaggingApi()
+   * ```
+   */
+  savedObjectsTagging?: {
+    ui: {
+      components: {
+        SavedObjectSaveModalTagSelector: React.FC<TagSelectorProps>;
+      };
+    };
+  };
 }
 
 /**
@@ -58,7 +85,7 @@ export const InspectorKibanaProvider: FC<TableListViewKibanaDependencies> = ({
   children,
   ...services
 }) => {
-  const { core, toMountPoint } = services;
+  const { core, toMountPoint, savedObjectsTagging } = services;
   const { openFlyout: coreOpenFlyout } = core.overlays;
 
   const openFlyout = useCallback(
@@ -68,7 +95,14 @@ export const InspectorKibanaProvider: FC<TableListViewKibanaDependencies> = ({
     [toMountPoint, coreOpenFlyout]
   );
 
-  return <InspectorProvider openFlyout={openFlyout}>{children}</InspectorProvider>;
+  return (
+    <InspectorProvider
+      openFlyout={openFlyout}
+      TagSelector={savedObjectsTagging?.ui.components.SavedObjectSaveModalTagSelector}
+    >
+      {children}
+    </InspectorProvider>
+  );
 };
 
 /**
@@ -79,7 +113,7 @@ export function useServices() {
 
   if (!context) {
     throw new Error(
-      'InspectorContext is missing. Ensure your component or React root is wrapped with <InspectorProvider /> or <TableListViewKibanaProvider />.'
+      'InspectorContext is missing. Ensure your component or React root is wrapped with <InspectorProvider /> or <InspectorKibanaProvider />.'
     );
   }
 

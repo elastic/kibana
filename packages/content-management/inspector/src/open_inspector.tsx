@@ -19,7 +19,8 @@ export type OpenInspectorParams = Pick<
 >;
 
 export function useOpenInspector() {
-  const { openFlyout } = useServices();
+  const services = useServices();
+  const { openFlyout } = services;
   const flyout = useRef<OverlayRef | null>(null);
 
   return useCallback(
@@ -30,7 +31,7 @@ export function useOpenInspector() {
       }
 
       flyout.current = openFlyout(
-        <InspectorLoader {...args} onCancel={() => flyout.current?.close()} />,
+        <InspectorLoader {...args} onCancel={() => flyout.current?.close()} services={services} />,
         {
           maxWidth: 600,
           size: 'm',
@@ -39,6 +40,6 @@ export function useOpenInspector() {
         }
       );
     },
-    [openFlyout]
+    [openFlyout, services]
   );
 }

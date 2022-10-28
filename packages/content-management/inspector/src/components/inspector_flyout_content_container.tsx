@@ -11,7 +11,10 @@ import type { FC } from 'react';
 import { InspectorFlyoutContent } from './inspector_flyout_content';
 import type { Props as InspectorFlyoutContentProps } from './inspector_flyout_content';
 
-type CommonProps = Pick<InspectorFlyoutContentProps, 'item' | 'isReadonly' | 'onSave' | 'onCancel'>;
+type CommonProps = Pick<
+  InspectorFlyoutContentProps,
+  'item' | 'isReadonly' | 'services' | 'onSave' | 'onCancel'
+>;
 
 export type Props = CommonProps;
 

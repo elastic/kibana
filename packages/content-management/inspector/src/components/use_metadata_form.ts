@@ -20,6 +20,7 @@ interface Field<T = string> {
 interface Fields {
   title: Field<string>;
   description: Field<string>;
+  tags: Field<string[]>;
 }
 
 const validators: { [key in keyof Fields]: ((value: unknown) => string | null) | null } = {
@@ -30,17 +31,22 @@ const validators: { [key in keyof Fields]: ((value: unknown) => string | null) |
     return null;
   },
   description: null,
+  tags: null,
 };
+
+type SetFieldValueFn<T = unknown> = (value: T) => void;
+type SetFieldValueGetter<T = unknown> = (fieldName: keyof Fields) => SetFieldValueFn<T>;
 
 export const useMetadataForm = ({ item }: { item: Item }) => {
   const changingValueTimeout = useRef<{ [key in keyof Fields]?: NodeJS.Timeout | null }>({});
   const [fields, setFields] = useState<Fields>({
     title: { value: item.title, isValid: true, isChangingValue: false },
     description: { value: item.description ?? '', isValid: true, isChangingValue: false },
+    tags: { value: item.tags ?? [], isValid: true, isChangingValue: false },
   });
 
-  const setFieldValue = useCallback(
-    (fieldName: keyof Fields) => (value: string) => {
+  const setFieldValue = useCallback<SetFieldValueGetter>(
+    (fieldName) => (value) => {
       const validator = validators[fieldName];
       let isValid = true;
       let errorMessage: string | null = null;
@@ -87,8 +93,12 @@ export const useMetadataForm = ({ item }: { item: Item }) => {
     []
   );
 
-  const setTitle = useMemo(() => setFieldValue('title'), [setFieldValue]);
-  const setDescription = useMemo(() => setFieldValue('description'), [setFieldValue]);
+  const setTitle: SetFieldValueFn<string> = useMemo(() => setFieldValue('title'), [setFieldValue]);
+  const setDescription: SetFieldValueFn<string> = useMemo(
+    () => setFieldValue('description'),
+    [setFieldValue]
+  );
+  const setTags: SetFieldValueFn<string[]> = useMemo(() => setFieldValue('tags'), [setFieldValue]);
 
   const validate = useCallback(() => {
     return Object.values(fields).every((field: Field) => field.isValid);
@@ -101,6 +111,8 @@ export const useMetadataForm = ({ item }: { item: Item }) => {
     setTitle,
     description: fields.description,
     setDescription,
+    tags: fields.tags,
+    setTags,
     isValid,
   };
 };

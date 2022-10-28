@@ -11,14 +11,16 @@ import type { FC } from 'react';
 import { EuiFormRow, EuiFieldText, EuiTextArea, EuiSpacer } from '@elastic/eui';
 
 import type { MetadataFormState } from './use_metadata_form';
+import type { Services } from '../services';
 
 interface Props {
   form: MetadataFormState;
   isReadonly: boolean;
+  TagSelector?: Services['TagSelector'];
 }
 
-export const MetadataForm: FC<Props> = ({ form, isReadonly }) => {
-  const { title, setTitle, description, setDescription } = form;
+export const MetadataForm: FC<Props> = ({ form, TagSelector, isReadonly }) => {
+  const { title, setTitle, description, setDescription, tags, setTags } = form;
 
   return (
     <>
@@ -59,6 +61,13 @@ export const MetadataForm: FC<Props> = ({ form, isReadonly }) => {
           readOnly={isReadonly}
         />
       </EuiFormRow>
+
+      {TagSelector !== undefined && (
+        <>
+          <EuiSpacer />
+          <TagSelector initialSelection={tags.value} onTagsSelected={setTags} />
+        </>
+      )}
     </>
   );
 };
