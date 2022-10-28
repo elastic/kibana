@@ -200,7 +200,7 @@
             "section": "def-public.MapEmbeddableOutput",
             "text": "MapEmbeddableOutput"
           },
-          "> implements ",
+          ", any> implements ",
           {
             "pluginId": "embeddable",
             "scope": "public",
