@@ -141,8 +141,9 @@ export class ExecutionHandler<
       const logActions = [];
       const bulkActions: EnqueueExecutionOptions[] = [];
 
+      this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(executables.length);
+
       for (const { action, alert, alertId, actionGroup, state } of executables) {
-        this.ruleRunMetricsStore.incrementNumberOfGeneratedActions(1);
         const { actionTypeId } = action;
 
         if (!recovered) {
