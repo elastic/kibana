@@ -118,14 +118,9 @@ export async function getMainSummaryStats({
   environment: string;
   kuery: string;
 }) {
-<<<<<<< HEAD
   const [totalIndicesStats, totalDiskSpace, res] = await Promise.all([
-    getTotalIndicesStats({ context, setup }),
-    getApmDiskSpacedUsedPct(context),
-=======
-  const [{ indices: allIndicesStats }, res] = await Promise.all([
     getTotalIndicesStats({ context, apmEventClient }),
->>>>>>> 65099d728a4 (Split and remove setupRequet)
+    getApmDiskSpacedUsedPct(context),
     apmEventClient.search('get_storage_explorer_main_summary_stats', {
       apm: {
         events: [

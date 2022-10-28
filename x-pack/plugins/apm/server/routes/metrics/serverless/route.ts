@@ -6,7 +6,6 @@
  */
 
 import * as t from 'io-ts';
-import { setupRequest } from '../../../lib/helpers/setup_request';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../../default_api_types';
 import { getServerlessAgentMetricsCharts } from './get_serverless_agent_metrics_chart';
@@ -36,11 +35,8 @@ const serverlessMetricsChartsRoute = createApmServerRoute({
   ): Promise<{
     charts: Awaited<ReturnType<typeof getServerlessAgentMetricsCharts>>;
   }> => {
-    const { params } = resources;
-    const [setup, apmEventClient] = await Promise.all([
-      setupRequest(resources),
-      getApmEventClient(resources),
-    ]);
+    const { params, config } = resources;
+    const apmEventClient = await getApmEventClient(resources);
 
     const { serviceName } = params.path;
     const { environment, kuery, start, end, serverlessId } = params.query;
@@ -50,7 +46,7 @@ const serverlessMetricsChartsRoute = createApmServerRoute({
       start,
       end,
       kuery,
-      config: setup.config,
+      config,
       apmEventClient,
       serviceName,
       serverlessId,
@@ -82,11 +78,8 @@ const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
     >;
     timeseries: Awaited<ReturnType<typeof getActiveInstancesTimeseries>>;
   }> => {
-    const { params } = resources;
-    const [setup, apmEventClient] = await Promise.all([
-      setupRequest(resources),
-      getApmEventClient(resources),
-    ]);
+    const { params, config } = resources;
+    const apmEventClient = await getApmEventClient(resources);
 
     const { serviceName } = params.path;
     const { environment, kuery, start, end, serverlessId } = params.query;
@@ -96,7 +89,6 @@ const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
       start,
       end,
       kuery,
-      setup,
       serviceName,
       serverlessId,
       apmEventClient,
@@ -104,7 +96,7 @@ const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
 
     const [activeInstances, timeseries] = await Promise.all([
       getServerlessActiveInstancesOverview(options),
-      getActiveInstancesTimeseries({ ...options, config: setup.config }),
+      getActiveInstancesTimeseries({ ...options, config }),
     ]);
     return { activeInstances, timeseries };
   },
