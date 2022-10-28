@@ -67,10 +67,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    describe('classic table in window 900x900', async function () {
+    describe('classic table in window 900x700', async function () {
       before(async () => {
         await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
-        await browser.setWindowSize(900, 900);
+        await browser.setWindowSize(900, 700);
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
       });
@@ -87,10 +87,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('classic table in window 600x900', async function () {
+    describe('classic table in window 600x700', async function () {
       before(async () => {
         await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
-        await browser.setWindowSize(600, 900);
+        await browser.setWindowSize(600, 700);
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
       });
@@ -113,7 +113,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.waitUntilSearchingHasFinished();
       });
-
+      after(async () => {
+        await kibanaServer.uiSettings.replace({});
+      });
       it(`should load up to ${rowsHardLimit} rows when scrolling at the end of the table`, async function () {
         const initialRows = await testSubjects.findAll('docTableRow');
         // click the Skip to the end of the table
@@ -198,7 +200,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should show allow toggling columns from the expanded document', async function () {
           await PageObjects.discover.clickNewSearchButton();
           await retry.try(async function () {
-            log.debug('row index: ' + String(rowToInspect - 1));
             await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
 
             // add columns
