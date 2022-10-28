@@ -21,6 +21,13 @@ export interface ChartComponentProps {
   };
 }
 
+const fnOperationTypeMapping: Record<string, string> = {
+  min: 'min',
+  max: 'max',
+  sum: 'sum',
+  avg: 'average',
+} as const;
+
 export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation }) => {
   const {
     lens: { EmbeddableComponent },
@@ -170,7 +177,7 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
                   'e9f26d17-fb36-4982-8539-03f1849cbed0': {
                     label: `${requestParams.fn}(${requestParams.metricField})`,
                     dataType: 'number',
-                    operationType: requestParams.fn,
+                    operationType: fnOperationTypeMapping[requestParams.fn],
                     sourceField: requestParams.metricField,
                     isBucketed: false,
                     scale: 'ratio',
@@ -200,12 +207,10 @@ export const ChartComponent: FC<ChartComponentProps> = React.memo(({ annotation 
   return (
     <EmbeddableComponent
       id="changePointChart"
-      style={{ height: 500 }}
+      style={{ height: 350 }}
       timeRange={timeRange}
       attributes={attributes}
       renderMode={'view'}
-      // @ts-ignore
-      filters={filters}
     />
   );
 });
