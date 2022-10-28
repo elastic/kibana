@@ -106,6 +106,7 @@ import {
   validateOperationOnAttributes,
   retryIfBulkEditConflicts,
   retryIfBulkDeleteConflicts,
+  retryIfBulkEnableConflicts,
   applyBulkEditOperation,
   buildKueryNodeFilter,
 } from './lib';
@@ -134,6 +135,7 @@ import { RuleMutedError } from '../lib/errors/rule_muted';
 import { formatExecutionErrorsResult } from '../lib/format_execution_log_errors';
 import { getActiveScheduledSnoozes } from '../lib/is_rule_snoozed';
 import { isSnoozeExpired } from '../lib';
+import { AttributesProcessor } from '@opentelemetry/sdk-metrics-base/build/src/view/AttributesProcessor';
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
   authorizedConsumers: string[];
@@ -299,15 +301,15 @@ export type BulkEditOptions<Params extends RuleTypeParams> =
   | BulkEditOptionsFilter<Params>
   | BulkEditOptionsIds<Params>;
 
-export interface BulkDeleteOptionsFilter {
+export interface BulkCommonOptionsFilter {
   filter?: string | KueryNode;
 }
 
-export interface BulkDeleteOptionsIds {
+export interface BulkCommonOptionsIds {
   ids?: string[];
 }
 
-export type BulkDeleteOptions = BulkDeleteOptionsFilter | BulkDeleteOptionsIds;
+export type BulkCommonOptions = BulkCommonOptionsFilter | BulkCommonOptionsIds;
 
 export interface BulkEditError {
   message: string;
@@ -447,6 +449,8 @@ interface ScheduleTaskOptions {
   schedule: IntervalSchedule;
   throwOnConflict: boolean; // whether to throw conflict errors or swallow them
 }
+
+type BulkAction = 'DELETE' | 'ENABLE';
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
 const extractedSavedObjectParamReferenceNamePrefix = 'param:';
@@ -1734,9 +1738,9 @@ export class RulesClient {
     }
   };
 
-  public bulkDeleteRules = async (options: BulkDeleteOptions) => {
-    const filter = (options as BulkDeleteOptionsFilter).filter;
-    const ids = (options as BulkDeleteOptionsIds).ids;
+  private getAndValidateCommonBulkOptions = (options: BulkCommonOptions) => {
+    const filter = (options as BulkCommonOptionsFilter).filter;
+    const ids = (options as BulkCommonOptionsIds).ids;
 
     if (!ids && !filter) {
       throw Boom.badRequest(
@@ -1753,20 +1757,34 @@ export class RulesClient {
         "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method's arguments"
       );
     }
+    return { ids, filter };
+  };
 
-    const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
-    const authorizationFilter = await this.getAuthorizationFilter();
-
-    const kueryNodeFilterWithAuth =
-      authorizationFilter && kueryNodeFilter
-        ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
-        : kueryNodeFilter;
-
+  private checkAuthorizationAndGetTotal = async ({
+    filter,
+    action,
+  }: {
+    filter: KueryNode | null;
+    action: BulkAction;
+  }) => {
+    const actionToConstantsMapping: Record<
+      BulkAction,
+      { WriteOperation: WriteOperations | ReadOperations; RuleAuditAction: RuleAuditAction }
+    > = {
+      DELETE: {
+        WriteOperation: WriteOperations.BulkDelete,
+        RuleAuditAction: RuleAuditAction.DELETE,
+      },
+      ENABLE: {
+        WriteOperation: WriteOperations.BulkDelete,
+        RuleAuditAction: RuleAuditAction.DELETE,
+      },
+    };
     const { aggregations, total } = await this.unsecuredSavedObjectsClient.find<
       RawRule,
       RuleBulkOperationAggregation
     >({
-      filter: kueryNodeFilterWithAuth,
+      filter,
       page: 1,
       perPage: 0,
       type: 'alert',
@@ -1796,19 +1814,24 @@ export class RulesClient {
 
     await pMap(
       buckets,
-      async ({ key: [ruleType, consumer] }) => {
+      async ({ key: [ruleType, consumer, actions] }) => {
         this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
         try {
           await this.authorization.ensureAuthorized({
             ruleTypeId: ruleType,
             consumer,
-            operation: WriteOperations.BulkDelete,
+            operation: actionToConstantsMapping[action].WriteOperation,
             entity: AlertingAuthorizationEntity.Rule,
           });
+          if (action === 'ENABLE') {
+            if (actions.length) {
+              await this.actionsAuthorization.ensureAuthorized('execute');
+            }
+          }
         } catch (error) {
           this.auditLogger?.log(
             ruleAuditEvent({
-              action: RuleAuditAction.DELETE,
+              action: actionToConstantsMapping[action].RuleAuditAction,
               error,
             })
           );
@@ -1817,6 +1840,24 @@ export class RulesClient {
       },
       { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
     );
+    return { total };
+  };
+
+  public bulkDeleteRules = async (options: BulkCommonOptions) => {
+    const { ids, filter } = this.getAndValidateCommonBulkOptions(options);
+
+    const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
+    const authorizationFilter = await this.getAuthorizationFilter();
+
+    const kueryNodeFilterWithAuth =
+      authorizationFilter && kueryNodeFilter
+        ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
+        : kueryNodeFilter;
+
+    const { total } = await this.checkAuthorizationAndGetTotal({
+      filter: kueryNodeFilterWithAuth,
+      action: 'DELETE',
+    });
 
     const { apiKeysToInvalidate, errors, taskIdsToDelete } = await retryIfBulkDeleteConflicts(
       this.logger,
@@ -2342,6 +2383,138 @@ export class RulesClient {
 
     return { apiKeysToInvalidate, resultSavedObjects: result.saved_objects, errors, rules };
   }
+
+  public bulkEnableRules = async (options: BulkCommonOptions) => {
+    const { ids, filter } = this.getAndValidateCommonBulkOptions(options);
+
+    const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
+    const authorizationFilter = await this.getAuthorizationFilter();
+
+    const kueryNodeFilterWithAuth =
+      authorizationFilter && kueryNodeFilter
+        ? nodeBuilder.and([kueryNodeFilter, authorizationFilter as KueryNode])
+        : kueryNodeFilter;
+
+    const { total } = await this.checkAuthorizationAndGetTotal({
+      filter: kueryNodeFilterWithAuth,
+      action: 'ENABLE',
+    });
+
+    const { errors, taskIdsToEnable } = await retryIfBulkEnableConflicts(
+      this.logger,
+      (filterKueryNode: KueryNode | null) =>
+        this.bulkEnableRulesWithOCC({ filter: filterKueryNode }),
+      kueryNodeFilterWithAuth
+    );
+
+    await this.taskManager.bulkEnable(taskIdsToEnable);
+
+    return { errors, total };
+  };
+
+  private bulkEnableRulesWithOCC = async ({ filter }: { filter: KueryNode | null }) => {
+    const rulesFinder =
+      await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
+        {
+          filter,
+          type: 'alert',
+          perPage: 100,
+          ...(this.namespace ? { namespaces: [this.namespace] } : undefined),
+        }
+      );
+
+    const rulesToEnable: SavedObjectsBulkUpdateObject[] = [];
+    const taskIdsToEnable: string[] = [];
+    const errors: BulkDeleteError[] = [];
+    const taskIdToRuleIdMapping: Record<string, string> = {};
+    const ruleNameToRuleIdMapping: Record<string, string> = {};
+
+    for await (const response of rulesFinder.find()) {
+      for (const rule of response.saved_objects) {
+        if (rule.attributes.enabled === false) continue;
+        if (rule.attributes.name) {
+          ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+        }
+        if (rule.attributes.scheduledTaskId) {
+          taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
+        }
+
+        const username = await this.getUserName();
+
+        const updatedAttributes = this.updateMeta({
+          ...rule.attributes,
+          ...(!rule.attributes.apiKey &&
+            (await this.createNewAPIKeySet({ attributes: rule.attributes, username }))),
+          enabled: true,
+          updatedBy: username,
+          updatedAt: new Date().toISOString(),
+          executionStatus: {
+            status: 'pending',
+            lastDuration: 0,
+            lastExecutionDate: new Date().toISOString(),
+            error: null,
+            warning: null,
+          },
+        });
+
+        let scheduledTaskIdToCreate: string | null = null;
+        if (rule.attributes.scheduledTaskId) {
+          try {
+            // make sure scheduledTaskId exist
+            await this.taskManager.get(rule.attributes.scheduledTaskId);
+          } catch (err) {
+            scheduledTaskIdToCreate = rule.id;
+          }
+        } else {
+          scheduledTaskIdToCreate = rule.id;
+        }
+
+        if (scheduledTaskIdToCreate) {
+          const scheduledTask = await this.scheduleTask({
+            id: rule.id,
+            consumer: rule.attributes.consumer,
+            ruleTypeId: rule.attributes.alertTypeId,
+            schedule: rule.attributes.schedule as IntervalSchedule,
+            throwOnConflict: false,
+          });
+          rulesToEnable.push({
+            ...rule,
+            attributes: { ...updatedAttributes, scheduledTaskId: scheduledTask },
+          });
+        } else {
+          taskIdsToEnable.push(rule.attributes.scheduledTaskId!);
+        }
+
+        this.auditLogger?.log(
+          ruleAuditEvent({
+            action: RuleAuditAction.ENABLE,
+            outcome: 'unknown',
+            savedObject: { type: 'alert', id: rule.id },
+          })
+        );
+      }
+    }
+
+    const result = await this.unsecuredSavedObjectsClient.bulkUpdate(rulesToEnable);
+
+    result.saved_objects.forEach((rule) => {
+      if (rule.error === undefined) {
+        if (taskIdToRuleIdMapping[rule.id]) {
+          taskIdsToEnable.push(taskIdToRuleIdMapping[rule.id]);
+        }
+      } else {
+        errors.push({
+          message: rule.error.message ?? 'n/a',
+          status: rule.error.statusCode,
+          rule: {
+            id: rule.id,
+            name: ruleNameToRuleIdMapping[rule.id] ?? 'n/a',
+          },
+        });
+      }
+    });
+    return { errors, taskIdsToEnable };
+  };
 
   private apiKeyAsAlertAttributes(
     apiKey: CreateAPIKeyResult | null,
