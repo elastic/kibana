@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { chunk } from 'lodash';
 import { queue } from 'async';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { i18n } from '@kbn/i18n';
-import { asyncForEach } from '@kbn/std';
 import type { IRouter } from '@kbn/core/server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Logger } from '@kbn/logging';
@@ -669,94 +667,94 @@ export const defineExplainLogRateSpikesRoute = (
 
           // time series filtered by fields
           if (changePoints.length > 0 && overallTimeSeries !== undefined) {
-            const changePointsChunks = chunk(changePoints, CHUNK_SIZE);
-
-            for (const changePointsChunk of changePointsChunks) {
+            const fieldValueHistogramQueue = queue(async function (cp: ChangePoint) {
               if (shouldStop) {
                 logDebugMessage('shouldStop abort fetching field/value histograms.');
+                fieldValueHistogramQueue.kill();
                 end();
                 return;
               }
 
-              await asyncForEach(changePointsChunk, async (cp) => {
-                if (overallTimeSeries !== undefined) {
-                  const histogramQuery = {
-                    bool: {
-                      filter: [
+              if (overallTimeSeries !== undefined) {
+                const histogramQuery = {
+                  bool: {
+                    filter: [
+                      {
+                        term: { [cp.fieldName]: cp.fieldValue },
+                      },
+                    ],
+                  },
+                };
+
+                let cpTimeSeries: NumericChartData;
+
+                try {
+                  cpTimeSeries = (
+                    (await fetchHistogramsForFields(
+                      client,
+                      request.body.index,
+                      histogramQuery,
+                      // fields
+                      [
                         {
-                          term: { [cp.fieldName]: cp.fieldValue },
+                          fieldName: request.body.timeFieldName,
+                          type: KBN_FIELD_TYPES.DATE,
+                          interval: overallTimeSeries.interval,
+                          min: overallTimeSeries.stats[0],
+                          max: overallTimeSeries.stats[1],
                         },
                       ],
-                    },
-                  };
-
-                  let cpTimeSeries: NumericChartData;
-
-                  try {
-                    cpTimeSeries = (
-                      (await fetchHistogramsForFields(
-                        client,
-                        request.body.index,
-                        histogramQuery,
-                        // fields
-                        [
-                          {
-                            fieldName: request.body.timeFieldName,
-                            type: KBN_FIELD_TYPES.DATE,
-                            interval: overallTimeSeries.interval,
-                            min: overallTimeSeries.stats[0],
-                            max: overallTimeSeries.stats[1],
-                          },
-                        ],
-                        // samplerShardSize
-                        -1,
-                        undefined,
-                        abortSignal
-                      )) as [NumericChartData]
-                    )[0];
-                  } catch (e) {
-                    logger.error(
-                      `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${
-                        cp.fieldValue
-                      }", got: \n${e.toString()}`
-                    );
-                    pushError(
-                      `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${cp.fieldValue}".`
-                    );
-                    return;
-                  }
-
-                  const histogram =
-                    overallTimeSeries.data.map((o, i) => {
-                      const current = cpTimeSeries.data.find(
-                        (d1) => d1.key_as_string === o.key_as_string
-                      ) ?? {
-                        doc_count: 0,
-                      };
-                      return {
-                        key: o.key,
-                        key_as_string: o.key_as_string ?? '',
-                        doc_count_change_point: current.doc_count,
-                        doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                      };
-                    }) ?? [];
-
-                  const { fieldName, fieldValue } = cp;
-
-                  loaded += (1 / changePoints.length) * PROGRESS_STEP_HISTOGRAMS;
-                  pushHistogramDataLoadingState();
-                  push(
-                    addChangePointsHistogramAction([
-                      {
-                        fieldName,
-                        fieldValue,
-                        histogram,
-                      },
-                    ])
+                      // samplerShardSize
+                      -1,
+                      undefined,
+                      abortSignal
+                    )) as [NumericChartData]
+                  )[0];
+                } catch (e) {
+                  logger.error(
+                    `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${
+                      cp.fieldValue
+                    }", got: \n${e.toString()}`
                   );
+                  pushError(
+                    `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${cp.fieldValue}".`
+                  );
+                  return;
                 }
-              });
-            }
+
+                const histogram =
+                  overallTimeSeries.data.map((o, i) => {
+                    const current = cpTimeSeries.data.find(
+                      (d1) => d1.key_as_string === o.key_as_string
+                    ) ?? {
+                      doc_count: 0,
+                    };
+                    return {
+                      key: o.key,
+                      key_as_string: o.key_as_string ?? '',
+                      doc_count_change_point: current.doc_count,
+                      doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                    };
+                  }) ?? [];
+
+                const { fieldName, fieldValue } = cp;
+
+                loaded += (1 / changePoints.length) * PROGRESS_STEP_HISTOGRAMS;
+                pushHistogramDataLoadingState();
+                push(
+                  addChangePointsHistogramAction([
+                    {
+                      fieldName,
+                      fieldValue,
+                      histogram,
+                    },
+                  ])
+                );
+              }
+            }, CHUNK_SIZE);
+
+            fieldValueHistogramQueue.push(changePoints);
+            await fieldValueHistogramQueue.drain();
           }
 
           endWithUpdatedLoadingState();
