@@ -19,7 +19,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const pieChart = getService('pieChart');
   const testSubjects = getService('testSubjects');
-  const timeout = 250;
 
   describe('Pie', function describeIndexTests() {
     const isNewChartsLibraryEnabled = true;
@@ -77,14 +76,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('partitionVisChart', timeout);
+      await lens.waitForVisualization('partitionVisChart');
 
-      expect(await lens.getLayerCount(timeout)).to.be(1);
+      expect(await lens.getLayerCount()).to.be(1);
 
       const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel', 0);
       const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel', 0);
 
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(2);
       expect(sliceByText).to.be('machine.os.raw: Descending');
       expect(sizeByText).to.be('Sum of machine.ram');
@@ -99,12 +98,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('partitionVisChart', timeout);
+      await lens.waitForVisualization('partitionVisChart');
 
       const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel', 0);
       const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel', 0);
 
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(2);
       expect(sliceByText).to.be('machine.os.raw: Descending');
       expect(sizeByText).to.be('Count');
@@ -121,25 +120,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('partitionVisChart', timeout);
+      await lens.waitForVisualization('partitionVisChart');
 
-      let chartSwitcher = await testSubjects.find('lnsChartSwitchPopover', timeout);
+      let chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
       let type = await chartSwitcher.getVisibleText();
       expect(type).to.be('Donut');
 
-      const goBackBtn = await testSubjects.find('lnsApp_goBackToAppButton', timeout);
+      const goBackBtn = await testSubjects.find('lnsApp_goBackToAppButton');
       await goBackBtn.click();
 
       await visEditor.clickOptionsTab();
-      const isDonutButton = await testSubjects.find('visTypePieIsDonut', timeout);
+      const isDonutButton = await testSubjects.find('visTypePieIsDonut');
       await isDonutButton.click();
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('partitionVisChart', timeout);
+      await lens.waitForVisualization('partitionVisChart');
 
-      chartSwitcher = await testSubjects.find('lnsChartSwitchPopover', timeout);
+      chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
       type = await chartSwitcher.getVisibleText();
       expect(type).to.be('Pie');
     });

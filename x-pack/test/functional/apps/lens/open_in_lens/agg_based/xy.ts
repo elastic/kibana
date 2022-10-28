@@ -20,7 +20,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const timeout = 250;
 
   describe('XY', function describeIndexTests() {
     const isNewChartsLibraryEnabled = true;
@@ -120,11 +119,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
-        expect(await lens.getLayerCount(timeout)).to.be(2);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings', timeout);
+        expect(await lens.getLayerCount()).to.be(2);
+        const layersSettings = await testSubjects.findAll('lns_layer_settings');
         expect(layersSettings.length).to.be(2);
         expect(await layersSettings[0].getVisibleText()).to.be('Area');
         expect(await layersSettings[1].getVisibleText()).to.be('Bar vertical');
@@ -147,11 +146,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
-        expect(await lens.getLayerCount(timeout)).to.be(1);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings', timeout);
+        expect(await lens.getLayerCount()).to.be(1);
+        const layersSettings = await testSubjects.findAll('lns_layer_settings');
         expect(layersSettings.length).to.be(1);
         expect(await layersSettings[0].getVisibleText()).to.be('Bar vertical');
         const yDimensionText1 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
@@ -169,10 +168,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
 
       await retry.try(async () => {
-        expect(await lens.getLayerCount(timeout)).to.be(1);
+        expect(await lens.getLayerCount()).to.be(1);
         const yDimensionText = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         const splitText = await lens.getDimensionTriggerText('lnsXY_splitDimensionPanel', 0);
         expect(yDimensionText).to.be('Cumulative Sum of Count');
@@ -187,9 +186,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
 
-      expect(await lens.getLayerCount(timeout)).to.be(1);
+      expect(await lens.getLayerCount()).to.be(1);
 
       const yDimensionText = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
       const splitText = await lens.getDimensionTriggerText('lnsXY_splitDimensionPanel', 0);
@@ -198,7 +197,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(splitText).to.be('@timestamp');
 
       await lens.openDimensionEditor('lnsXY_splitDimensionPanel > lns-dimensionTrigger');
-      const collapseBy = await testSubjects.find('indexPattern-collapse-by', timeout);
+      const collapseBy = await testSubjects.find('indexPattern-collapse-by');
       expect(await collapseBy.getAttribute('value')).to.be('max');
     });
 
@@ -209,9 +208,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        expect(await lens.getLayerCount(timeout)).to.be(2);
+        expect(await lens.getLayerCount()).to.be(2);
         const yDimensionText = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         expect(yDimensionText).to.be('Count');
         const referenceLineDimensionText = await lens.getDimensionTriggerText(
@@ -232,10 +231,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        expect(await lens.getLayerCount(timeout)).to.be(1);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings', timeout);
+        expect(await lens.getLayerCount()).to.be(1);
+        const layersSettings = await testSubjects.findAll('lns_layer_settings');
         expect(layersSettings.length).to.be(1);
         expect(await layersSettings[0].getVisibleText()).to.be('Area stacked');
       });
@@ -252,10 +251,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        expect(await lens.getLayerCount(timeout)).to.be(1);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings', timeout);
+        expect(await lens.getLayerCount()).to.be(1);
+        const layersSettings = await testSubjects.findAll('lns_layer_settings');
         expect(layersSettings.length).to.be(1);
         expect(await layersSettings[0].getVisibleText()).to.be('Area percentage');
       });
@@ -271,10 +270,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        expect(await lens.getLayerCount(timeout)).to.be(1);
-        const layersSettings = await testSubjects.findAll('lns_layer_settings', timeout);
+        expect(await lens.getLayerCount()).to.be(1);
+        const layersSettings = await testSubjects.findAll('lns_layer_settings');
         expect(layersSettings.length).to.be(1);
         expect(await layersSettings[0].getVisibleText()).to.be('Bar horizontal');
       });
@@ -296,9 +295,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
 
-      expect(await lens.getLayerCount(timeout)).to.be(1);
+      expect(await lens.getLayerCount()).to.be(1);
 
       const yDimensionText1 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
       const yDimensionText2 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 1);
@@ -324,7 +323,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const expectedData = await visChart.getLegendEntriesXYCharts('xyVisChart');
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
       const data = await lens.getCurrentChartDebugState('xyVisChart');
       await retry.try(async () => {
         const yDimensionText = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
@@ -346,7 +345,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       const expectedData = await visChart.getLegendEntriesXYCharts('xyVisChart');
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
       const data = await lens.getCurrentChartDebugState('xyVisChart');
       await retry.try(async () => {
         const yDimensionText = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);

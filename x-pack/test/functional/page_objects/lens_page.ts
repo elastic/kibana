@@ -883,8 +883,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Returns the number of layers visible in the chart configuration
      */
-    async getLayerCount(timeout?: number) {
-      return (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`, timeout)).length;
+    async getLayerCount() {
+      return (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length;
     },
 
     /**
@@ -1194,8 +1194,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       // TODO: target dimensionTrigger color element after merging https://github.com/elastic/kibana/pull/76871
       await testSubjects.getAttribute('~indexPattern-dimension-colorPicker', color);
     },
-    async getMetricTiles(timeout?: number) {
-      return findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li', timeout);
+    async getMetricTiles() {
+      return findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li');
     },
 
     async getMetricElementIfExists(selector: string, container: WebElementWrapper) {
@@ -1225,11 +1225,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       };
     },
 
-    async getMetricVisualizationData(timeout?: number) {
-      const tiles = await this.getMetricTiles(timeout);
-      const showingBar = Boolean(
-        await findService.existsByCssSelector('.echSingleMetricProgress', timeout)
-      );
+    async getMetricVisualizationData() {
+      const tiles = await this.getMetricTiles();
+      const showingBar = Boolean(await findService.existsByCssSelector('.echSingleMetricProgress'));
 
       const metricDataPromises = [];
       for (const tile of tiles) {
@@ -1309,11 +1307,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       expect(focusedElementText).to.eql(name);
     },
 
-    async waitForVisualization(visDataTestSubj?: string, timeout?: number) {
+    async waitForVisualization(visDataTestSubj?: string) {
       async function getRenderingCount() {
         const visualizationContainer = await testSubjects.find(
-          visDataTestSubj || 'lnsVisualizationContainer',
-          timeout
+          visDataTestSubj || 'lnsVisualizationContainer'
         );
         const renderingCount = await visualizationContainer.getAttribute('data-rendering-count');
         return Number(renderingCount);
@@ -1322,7 +1319,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.waitFor('rendering count to stabilize', async () => {
         const firstCount = await getRenderingCount();
 
-        await PageObjects.common.sleep(timeout ?? 1000);
+        await PageObjects.common.sleep(1000);
 
         const secondCount = await getRenderingCount();
 
@@ -1624,12 +1621,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
     },
 
-    async getPaletteColorStops(timeout: number = 10000) {
+    async getPaletteColorStops() {
       const stops = await find.allByCssSelector(
-        `[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]`,
-        timeout
+        `[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]`
       );
-      const colorsElements = await testSubjects.findAll('euiColorPickerAnchor', timeout);
+      const colorsElements = await testSubjects.findAll('euiColorPickerAnchor');
       const colors = await Promise.all(
         colorsElements.map((c) => c.getComputedStyle('background-color'))
       );

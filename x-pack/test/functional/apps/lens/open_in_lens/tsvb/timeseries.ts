@@ -21,7 +21,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');
   const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
-  const timeout = 250;
 
   describe('Time Series', function describeIndexTests() {
     before(async () => {
@@ -40,9 +39,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(2);
         expect(await dimensions[0].getVisibleText()).to.be('@timestamp');
         expect(await dimensions[1].getVisibleText()).to.be('Count of records');
@@ -53,13 +52,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
 
-      const goBackBtn = await testSubjects.find('lnsApp_goBackToAppButton', timeout);
+      const goBackBtn = await testSubjects.find('lnsApp_goBackToAppButton');
       await goBackBtn.click();
       await visualBuilder.checkVisualBuilderIsPresent();
       await retry.try(async () => {
-        const actualCount = await visualBuilder.getRhythmChartLegendValue(0, timeout);
+        const actualCount = await visualBuilder.getRhythmChartLegendValue(0);
         expect(actualCount).to.be('56');
       });
     });
@@ -68,7 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await filterBar.addFilter('extension', 'is', 'css');
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
 
       expect(await filterBar.hasFilter('extension', 'css')).to.be(true);
     });
@@ -78,7 +77,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await queryBar.submitQuery();
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
 
       expect(await queryBar.getQueryString()).to.equal('machine.os : ios');
     });
@@ -91,9 +90,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`, timeout);
+        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
 
         const referenceLineDimensions = await testSubjects.findAllDescendant(
           'lns-dimensionTrigger',
@@ -116,11 +115,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
 
-        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(2);
         expect(await dimensions[0].getVisibleText()).to.be('@timestamp');
         expect(await dimensions[1].getVisibleText()).to.eql(
@@ -154,11 +153,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisulization();
 
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        expect(await lens.getLayerCount(timeout)).to.be(1);
+        expect(await lens.getLayerCount()).to.be(1);
 
-        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(3);
         expect(await dimensions[0].getVisibleText()).to.be('@timestamp');
         expect(await dimensions[1].getVisibleText()).to.eql('Cumulative sum of Records');
@@ -177,11 +176,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await visualize.navigateToLensFromAnotherVisulization();
 
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        expect(await lens.getLayerCount(timeout)).to.be(1);
+        expect(await lens.getLayerCount()).to.be(1);
 
-        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(3);
         expect(await dimensions[0].getVisibleText()).to.be('@timestamp');
         expect(await dimensions[1].getVisibleText()).to.eql('overall_average(count())');

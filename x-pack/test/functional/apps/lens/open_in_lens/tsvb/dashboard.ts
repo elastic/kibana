@@ -22,7 +22,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const panelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const timeout = 250;
 
   describe('Dashboard to TSVB to Lens', function describeIndexTests() {
     before(async () => {
@@ -47,9 +46,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.clickEdit();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('xyVisChart', timeout);
+      await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(await dimensions[1].getVisibleText()).to.be('Count of records');
       });
 
@@ -75,9 +74,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.clickEdit();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('legacyMtrVis', timeout);
+      await lens.waitForVisualization('legacyMtrVis');
       await retry.try(async () => {
-        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(await dimensions[1].getVisibleText()).to.be('Count of records');
       });
 
@@ -87,7 +86,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(embeddableCount).to.eql(originalEmbeddableCount);
       });
 
-      const panel = await testSubjects.find(`embeddablePanelHeading-`, timeout);
+      const panel = await testSubjects.find(`embeddablePanelHeading-`);
       const descendants = await testSubjects.findAllDescendant(
         'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
         panel

@@ -18,7 +18,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
 
   const testSubjects = getService('testSubjects');
-  const timeout = 250;
 
   describe('Goal', function describeIndexTests() {
     const isNewChartsLibraryEnabled = true;
@@ -40,8 +39,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert to Lens', async () => {
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('mtrVis', timeout);
-      const data = await lens.getMetricVisualizationData(timeout);
+      await lens.waitForVisualization('mtrVis');
+      const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(1);
       expect(data).to.eql([
         {
@@ -63,16 +62,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('mtrVis', timeout);
+      await lens.waitForVisualization('mtrVis');
 
-      expect(await lens.getLayerCount(timeout)).to.be(1);
+      expect(await lens.getLayerCount()).to.be(1);
 
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(2);
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
       expect(await dimensions[1].getVisibleText()).to.be('Static value: 1');
 
-      const data = await lens.getMetricVisualizationData(timeout);
+      const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(1);
       expect(data).to.eql([
         {
@@ -93,17 +92,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('mtrVis', timeout);
+      await lens.waitForVisualization('mtrVis');
 
-      expect(await lens.getLayerCount(timeout)).to.be(1);
+      expect(await lens.getLayerCount()).to.be(1);
 
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(3);
       expect(await dimensions[0].getVisibleText()).to.be('Overall Max of Count');
       expect(await dimensions[1].getVisibleText()).to.be('Static value: 1');
       expect(await dimensions[2].getVisibleText()).to.be('@timestamp');
 
-      const data = await lens.getMetricVisualizationData(timeout);
+      const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(1);
       expect(data).to.eql([
         {
@@ -136,17 +135,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('mtrVis', timeout);
+      await lens.waitForVisualization('mtrVis');
 
-      expect(await lens.getLayerCount(timeout)).to.be(1);
+      expect(await lens.getLayerCount()).to.be(1);
 
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(3);
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
       expect(await dimensions[1].getVisibleText()).to.be('Static value: 1');
       expect(await dimensions[2].getVisibleText()).to.be('machine.os.raw: Descending');
 
-      const data = await lens.getMetricVisualizationData(timeout);
+      const data = await lens.getMetricVisualizationData();
       expect(data.length).to.be.equal(6);
       expect(data).to.eql([
         {
@@ -208,7 +207,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dimensions[0].click();
 
       await lens.openPalettePanel('lnsMetric');
-      const colorStops = await lens.getPaletteColorStops(timeout);
+      const colorStops = await lens.getPaletteColorStops();
 
       expect(colorStops).to.eql([
         { stop: '0', color: 'rgba(0, 104, 55, 1)' },

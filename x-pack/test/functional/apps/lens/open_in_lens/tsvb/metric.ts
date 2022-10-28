@@ -18,7 +18,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const timeout = 250;
 
   describe('Metric', function describeIndexTests() {
     before(async () => {
@@ -37,9 +36,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should convert to Lens', async () => {
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('mtrVis', timeout);
+      await lens.waitForVisualization('mtrVis');
 
-      const metricData = await lens.getMetricVisualizationData(timeout);
+      const metricData = await lens.getMetricVisualizationData();
       expect(metricData[0].title).to.eql('Count of records');
     });
 
@@ -50,11 +49,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('mtrVis', timeout);
+      await lens.waitForVisualization('mtrVis');
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
 
-        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(1);
         expect(await dimensions[0].getVisibleText()).to.be('10');
       });
@@ -67,11 +66,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('mtrVis', timeout);
+      await lens.waitForVisualization('mtrVis');
       await retry.try(async () => {
         expect(await lens.getLayerCount()).to.be(1);
 
-        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(1);
         expect(await dimensions[0].getVisibleText()).to.be('Count of bytes');
       });
@@ -104,24 +103,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await visualize.navigateToLensFromAnotherVisulization();
 
-      await lens.waitForVisualization('mtrVis', timeout);
+      await lens.waitForVisualization('mtrVis');
       await retry.try(async () => {
         const closePalettePanels = await testSubjects.findAll(
-          'lns-indexPattern-PalettePanelContainerBack',
-          timeout
+          'lns-indexPattern-PalettePanelContainerBack'
         );
         if (closePalettePanels.length) {
           await lens.closePalettePanel();
           await lens.closeDimensionEditor();
         }
 
-        const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(1);
 
         await dimensions[0].click();
 
         await lens.openPalettePanel('lnsMetric');
-        const colorStops = await lens.getPaletteColorStops(timeout);
+        const colorStops = await lens.getPaletteColorStops();
 
         expect(colorStops).to.eql([
           { stop: '10', color: 'rgba(84, 179, 153, 1)' },

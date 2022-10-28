@@ -18,7 +18,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
 
   const testSubjects = getService('testSubjects');
-  const timeout = 250;
 
   describe('Table', function describeIndexTests() {
     const isNewChartsLibraryEnabled = true;
@@ -57,11 +56,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('lnsDataTable', timeout);
+      await lens.waitForVisualization('lnsDataTable');
 
-      expect(await lens.getLayerCount(timeout)).to.be(1);
+      expect(await lens.getLayerCount()).to.be(1);
 
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(1);
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
     });
@@ -71,25 +70,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectAggregation('Average', 'metrics');
       await visEditor.selectField('machine.ram', 'metrics');
       await visEditor.clickOptionsTab();
-      const showTotalSwitch = await testSubjects.find('showTotal', timeout);
+      const showTotalSwitch = await testSubjects.find('showTotal');
       await showTotalSwitch.click();
       await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('lnsDataTable', timeout);
+      await lens.waitForVisualization('lnsDataTable');
 
-      expect(await lens.getLayerCount(timeout)).to.be(1);
+      expect(await lens.getLayerCount()).to.be(1);
 
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(1);
       expect(await dimensions[0].getVisibleText()).to.be('Average machine.ram');
 
       await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
-      const summaryRowFunction = await testSubjects.find(
-        'lnsDatatable_summaryrow_function',
-        timeout
-      );
+      const summaryRowFunction = await testSubjects.find('lnsDatatable_summaryrow_function');
       expect(await summaryRowFunction.getVisibleText()).to.be('Sum');
     });
 
@@ -100,14 +96,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('lnsDataTable', timeout);
+      await lens.waitForVisualization('lnsDataTable');
 
-      expect(await lens.getLayerCount(timeout)).to.be(1);
+      expect(await lens.getLayerCount()).to.be(1);
 
       const metricText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 0);
       const splitRowText = await lens.getDimensionTriggerText('lnsDatatable_rows', 0);
 
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(2);
       expect(metricText).to.be('Overall Max of Count');
       expect(splitRowText).to.be('@timestamp');
@@ -122,14 +118,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('lnsDataTable', timeout);
+      await lens.waitForVisualization('lnsDataTable');
 
-      expect(await lens.getLayerCount(timeout)).to.be(1);
+      expect(await lens.getLayerCount()).to.be(1);
 
       const metricText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 0);
       const splitRowText = await lens.getDimensionTriggerText('lnsDatatable_rows', 0);
 
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(2);
       expect(metricText).to.be('Cumulative Sum of Count');
       expect(splitRowText).to.be('@timestamp');
@@ -145,15 +141,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('lnsDataTable', timeout);
+      await lens.waitForVisualization('lnsDataTable');
 
-      expect(await lens.getLayerCount(timeout)).to.be(1);
+      expect(await lens.getLayerCount()).to.be(1);
 
       const metricText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 0);
       const splitRowText1 = await lens.getDimensionTriggerText('lnsDatatable_rows', 0);
       const splitRowText2 = await lens.getDimensionTriggerText('lnsDatatable_rows', 1);
 
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(3);
       expect(metricText).to.be('Count');
       expect(splitRowText1).to.be('@timestamp');
@@ -167,18 +163,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       await visualize.navigateToLensFromAnotherVisulization();
-      await lens.waitForVisualization('lnsDataTable', timeout);
+      await lens.waitForVisualization('lnsDataTable');
 
-      expect(await lens.getLayerCount(timeout)).to.be(1);
+      expect(await lens.getLayerCount()).to.be(1);
 
       const metricText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 0);
       const percentageColumnText = await lens.getDimensionTriggerText('lnsDatatable_metrics', 1);
 
       await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger', 0, 1);
-      const format = await testSubjects.find('indexPattern-dimension-format', timeout);
+      const format = await testSubjects.find('indexPattern-dimension-format');
       expect(await format.getVisibleText()).to.be('Percent');
 
-      const dimensions = await testSubjects.findAll('lns-dimensionTrigger', timeout);
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
       expect(dimensions).to.have.length(2);
       expect(metricText).to.be('Count');
       expect(percentageColumnText).to.be('Count percentages');

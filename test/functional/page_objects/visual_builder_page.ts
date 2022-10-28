@@ -340,10 +340,10 @@ export class VisualBuilderPageObject extends FtrService {
     await el.type(value);
   }
 
-  public async getRhythmChartLegendValue(nth = 0, timeout?: number) {
+  public async getRhythmChartLegendValue(nth = 0) {
     await this.visChart.waitForVisualizationRenderingStabilized();
     const metricValue = (
-      await this.find.allByCssSelector(`.echLegendItem .echLegendItem__extra`, timeout ?? 20000)
+      await this.find.allByCssSelector(`.echLegendItem .echLegendItem__extra`, 20000)
     )[nth];
     await metricValue.moveMouseTo();
     return await metricValue.getVisibleText();
@@ -417,12 +417,12 @@ export class VisualBuilderPageObject extends FtrService {
     });
   }
 
-  public async createColorRule(nth = 0, timeout?: number) {
-    const elements = await this.testSubjects.findAll('AddAddBtn', timeout);
+  public async createColorRule(nth = 0) {
+    const elements = await this.testSubjects.findAll('AddAddBtn');
     await elements[nth].click();
     await this.visChart.waitForVisualizationRenderingStabilized();
     await this.retry.waitFor('new color rule is added', async () => {
-      const currentAddButtons = await this.testSubjects.findAll('AddAddBtn', timeout);
+      const currentAddButtons = await this.testSubjects.findAll('AddAddBtn');
       return currentAddButtons.length > elements.length;
     });
   }
