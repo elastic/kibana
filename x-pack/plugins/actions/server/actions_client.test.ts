@@ -2223,7 +2223,7 @@ describe('execute()', () => {
             id: 'some-id',
             typeId: 'some-type-id',
             type: 'some-type',
-            space_ids: ['default'],
+            spaceIds: ['default'],
           },
         ],
       })
@@ -2240,7 +2240,7 @@ describe('execute()', () => {
           id: 'some-id',
           typeId: 'some-type-id',
           type: 'some-type',
-          space_ids: ['default'],
+          spaceIds: ['default'],
         },
       ],
     });
@@ -2256,7 +2256,7 @@ describe('execute()', () => {
             id: 'some-id',
             typeId: 'some-type-id',
             type: 'some-type',
-            space_ids: ['some-namespace'],
+            spaceIds: ['some-namespace'],
           },
         ],
       })
@@ -2273,7 +2273,7 @@ describe('execute()', () => {
           id: 'some-id',
           typeId: 'some-type-id',
           type: 'some-type',
-          space_ids: ['some-namespace'],
+          spaceIds: ['some-namespace'],
         },
       ],
     });

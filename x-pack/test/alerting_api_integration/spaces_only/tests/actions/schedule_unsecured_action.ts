@@ -45,7 +45,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
             {
               id: 'abc',
               type: 'alert',
-              space_ids: ['space-1', 'space-2'],
+              spaceIds: ['space-1', 'space-2'],
             },
           ],
         })

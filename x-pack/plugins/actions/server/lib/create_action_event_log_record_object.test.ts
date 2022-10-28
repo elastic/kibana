@@ -218,7 +218,7 @@ describe('createActionEventLogRecordObject', () => {
             type: 'alert',
             typeId: '.rule-type',
             id: '123',
-            space_ids: ['default'],
+            spaceIds: ['default'],
           },
         ],
       })

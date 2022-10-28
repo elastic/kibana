@@ -91,7 +91,7 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
       type: relatedSavedObject.type,
       id: relatedSavedObject.id,
       type_id: relatedSavedObject.typeId,
-      space_ids: relatedSavedObject.space_ids,
+      space_ids: relatedSavedObject.spaceIds,
     });
   }
   return event;

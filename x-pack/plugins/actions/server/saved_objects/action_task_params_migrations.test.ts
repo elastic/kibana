@@ -367,7 +367,7 @@ describe('successful migrations', () => {
   });
 
   describe('8.6.0', () => {
-    test(`sets space_ids in relatedSavedObjects to 'default' if namespace is undefined`, () => {
+    test(`sets spaceIds in relatedSavedObjects to 'default' if namespace is undefined`, () => {
       const migration860 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup, [])['8.6.0'];
       const actionTaskParam = getMockData({
         relatedSavedObjects: [
@@ -388,14 +388,14 @@ describe('successful migrations', () => {
               id: 'some-id',
               type: 'some-type',
               typeId: 'some-typeId',
-              space_ids: ['default'],
+              spaceIds: ['default'],
             },
           ],
         },
       });
     });
 
-    test(`sets space_ids in relatedSavedObjects to value of namespace if namespace is defined`, () => {
+    test(`sets spaceIds in relatedSavedObjects to value of namespace if namespace is defined`, () => {
       const migration860 = getActionTaskParamsMigrations(encryptedSavedObjectsSetup, [])['8.6.0'];
       const actionTaskParam = getMockData({
         relatedSavedObjects: [
@@ -417,7 +417,7 @@ describe('successful migrations', () => {
               id: 'some-id',
               type: 'some-type',
               typeId: 'some-typeId',
-              space_ids: ['some-custom-space'],
+              spaceIds: ['some-custom-space'],
             },
           ],
         },

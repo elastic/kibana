@@ -923,7 +923,7 @@ test('writes to event log for execute and execute start when consumer and relate
         typeId: '.rule-type',
         type: 'alert',
         id: '12',
-        space_ids: ['default'],
+        spaceIds: ['default'],
       },
     ],
   });

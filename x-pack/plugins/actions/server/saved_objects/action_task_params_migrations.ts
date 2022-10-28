@@ -152,7 +152,7 @@ function useSavedObjectReferences(
   };
 }
 
-type LegacyRelatedSavedObject = Omit<RelatedSavedObject, 'space_ids'> & {
+type LegacyRelatedSavedObject = Omit<RelatedSavedObject, 'spaceIds'> & {
   namespace?: string;
 };
 
@@ -170,7 +170,7 @@ function copyNamespaceToSpaceIds(
       const { namespace, ...rest } = relatedSavedObject;
       return {
         ...rest,
-        space_ids: [namespaceToSpaceId(namespace)],
+        spaceIds: [namespaceToSpaceId(namespace)],
       };
     });
 

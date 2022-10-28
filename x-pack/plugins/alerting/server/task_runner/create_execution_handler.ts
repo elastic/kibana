@@ -179,7 +179,7 @@ export function createExecutionHandler<
           {
             id: ruleId,
             type: 'alert',
-            space_ids: [namespaceToSpaceId(namespace.namespace)],
+            spaceIds: [namespaceToSpaceId(namespace.namespace)],
             typeId: ruleType.id,
           },
         ],

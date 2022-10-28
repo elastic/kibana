@@ -481,7 +481,7 @@ test('uses relatedSavedObjects merged with references when provided', async () =
       executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
       relatedSavedObjects: [
-        { id: 'related_some-type_0', type: 'some-type', space_ids: ['default'] },
+        { id: 'related_some-type_0', type: 'some-type', spaceIds: ['default'] },
       ],
     },
     references: [
@@ -509,7 +509,7 @@ test('uses relatedSavedObjects merged with references when provided', async () =
       {
         id: 'some-id',
         type: 'some-type',
-        space_ids: ['default'],
+        spaceIds: ['default'],
       },
     ],
     request: expect.objectContaining({
@@ -540,7 +540,7 @@ test('uses relatedSavedObjects as is when references are empty', async () => {
       params: { baz: true },
       executionId: '123abc',
       apiKey: Buffer.from('123:abc').toString('base64'),
-      relatedSavedObjects: [{ id: 'abc', type: 'some-type', space_ids: ['yo'] }],
+      relatedSavedObjects: [{ id: 'abc', type: 'some-type', spaceIds: ['yo'] }],
     },
     references: [
       {
@@ -562,7 +562,7 @@ test('uses relatedSavedObjects as is when references are empty', async () => {
       {
         id: 'abc',
         type: 'some-type',
-        space_ids: ['yo'],
+        spaceIds: ['yo'],
       },
     ],
     request: expect.objectContaining({

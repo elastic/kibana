@@ -28,7 +28,7 @@ export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDep
           relatedSavedObjects: schema.maybe(
             schema.arrayOf(
               schema.object({
-                space_ids: schema.arrayOf(schema.string({ minLength: 1 })),
+                spaceIds: schema.arrayOf(schema.string({ minLength: 1 })),
                 id: schema.string({ minLength: 1 }),
                 type: schema.string({ minLength: 1 }),
                 // optional; for SO types like action/alert that have type id's

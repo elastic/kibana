@@ -96,13 +96,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           type: 'alert',
           typeId: 'example.always-firing',
           id: 'related_alert_0',
-          space_ids: ['default'],
+          spaceIds: ['default'],
         },
         {
           type: 'alert',
           typeId: 'example.always-firing',
           id: 'related_alert_1',
-          space_ids: ['custom-space'],
+          spaceIds: ['custom-space'],
         },
       ]);
     });

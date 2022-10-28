@@ -200,7 +200,7 @@ describe('execute()', () => {
       relatedSavedObjects: [
         {
           id: 'some-id',
-          space_ids: ['some-space-ids'],
+          spaceIds: ['some-space-ids'],
           type: 'some-type',
           typeId: 'some-typeId',
         },
@@ -216,7 +216,7 @@ describe('execute()', () => {
         relatedSavedObjects: [
           {
             id: 'related_some-type_0',
-            space_ids: ['some-space-ids'],
+            spaceIds: ['some-space-ids'],
             type: 'some-type',
             typeId: 'some-typeId',
           },
@@ -360,7 +360,7 @@ describe('execute()', () => {
       relatedSavedObjects: [
         {
           id: 'some-id',
-          space_ids: ['some-space-id'],
+          spaceIds: ['some-space-id'],
           type: 'some-type',
           typeId: 'some-typeId',
         },
@@ -393,7 +393,7 @@ describe('execute()', () => {
         relatedSavedObjects: [
           {
             id: 'related_some-type_0',
-            space_ids: ['some-space-id'],
+            spaceIds: ['some-space-id'],
             type: 'some-type',
             typeId: 'some-typeId',
           },
@@ -756,7 +756,7 @@ describe('bulkExecute()', () => {
         relatedSavedObjects: [
           {
             id: 'some-id',
-            space_ids: ['some-space-id'],
+            spaceIds: ['some-space-id'],
             type: 'some-type',
             typeId: 'some-typeId',
           },
@@ -774,7 +774,7 @@ describe('bulkExecute()', () => {
           relatedSavedObjects: [
             {
               id: 'related_some-type_0',
-              space_ids: ['some-space-id'],
+              spaceIds: ['some-space-id'],
               type: 'some-type',
               typeId: 'some-typeId',
             },
@@ -942,7 +942,7 @@ describe('bulkExecute()', () => {
         relatedSavedObjects: [
           {
             id: 'some-id',
-            space_ids: ['some-space-id'],
+            spaceIds: ['some-space-id'],
             type: 'some-type',
             typeId: 'some-typeId',
           },
@@ -979,7 +979,7 @@ describe('bulkExecute()', () => {
           relatedSavedObjects: [
             {
               id: 'related_some-type_0',
-              space_ids: ['some-space-id'],
+              spaceIds: ['some-space-id'],
               type: 'some-type',
               typeId: 'some-typeId',
             },
