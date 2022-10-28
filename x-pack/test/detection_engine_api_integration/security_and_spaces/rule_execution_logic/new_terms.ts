@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(alerts.hits.hits.length).eql(1);
       expect(removeRandomValuedProperties(alerts.hits.hits[0]._source)).eql({
-        'kibana.alert.new_terms': ['zeek-newyork-sha-aa8df15'],
+        'kibana.alert.new_terms': ['host.name: zeek-newyork-sha-aa8df15'],
         'kibana.alert.rule.category': 'New Terms Rule',
         'kibana.alert.rule.consumer': 'siem',
         'kibana.alert.rule.name': 'Query with a rule id',
@@ -218,13 +218,13 @@ export default ({ getService }: FtrProviderContext) => {
         'asc'
       );
       expect(previewAlertsOrderedByHostIp[0]._source?.['kibana.alert.new_terms']).eql([
-        '10.10.0.6',
+        'host.ip: 10.10.0.6',
       ]);
       expect(previewAlertsOrderedByHostIp[1]._source?.['kibana.alert.new_terms']).eql([
-        '157.230.208.30',
+        'host.ip: 157.230.208.30',
       ]);
       expect(previewAlertsOrderedByHostIp[2]._source?.['kibana.alert.new_terms']).eql([
-        'fe80::24ce:f7ff:fede:a571',
+        'host.ip: fe80::24ce:f7ff:fede:a571',
       ]);
     });
 
@@ -244,11 +244,11 @@ export default ({ getService }: FtrProviderContext) => {
       const hostNames = previewAlerts
         .map((signal) => signal._source?.['kibana.alert.new_terms'])
         .sort();
-      expect(hostNames[0]).eql(['suricata-sensor-amsterdam']);
-      expect(hostNames[1]).eql(['suricata-sensor-san-francisco']);
-      expect(hostNames[2]).eql(['zeek-newyork-sha-aa8df15']);
-      expect(hostNames[3]).eql(['zeek-sensor-amsterdam']);
-      expect(hostNames[4]).eql(['zeek-sensor-san-francisco']);
+      expect(hostNames[0]).eql(['host.name: suricata-sensor-amsterdam']);
+      expect(hostNames[1]).eql(['host.name: suricata-sensor-san-francisco']);
+      expect(hostNames[2]).eql(['host.name: zeek-newyork-sha-aa8df15']);
+      expect(hostNames[3]).eql(['host.name: zeek-sensor-amsterdam']);
+      expect(hostNames[4]).eql(['host.name: zeek-sensor-san-francisco']);
     });
 
     describe('timestamp override and fallback', () => {
@@ -289,8 +289,8 @@ export default ({ getService }: FtrProviderContext) => {
         const hostNames = previewAlerts
           .map((signal) => signal._source?.['kibana.alert.new_terms'])
           .sort();
-        expect(hostNames[0]).eql(['host-3']);
-        expect(hostNames[1]).eql(['host-4']);
+        expect(hostNames[0]).eql(['host.name: host-3']);
+        expect(hostNames[1]).eql(['host.name: host-4']);
       });
     });
 
@@ -329,10 +329,10 @@ export default ({ getService }: FtrProviderContext) => {
         const hostNames = previewAlerts
           .map((signal) => signal._source?.['kibana.alert.new_terms'])
           .sort();
-        expect(hostNames[0]).eql(['suricata-sensor-amsterdam']);
-        expect(hostNames[1]).eql(['suricata-sensor-san-francisco']);
-        expect(hostNames[2]).eql(['zeek-newyork-sha-aa8df15']);
-        expect(hostNames[3]).eql(['zeek-sensor-amsterdam']);
+        expect(hostNames[0]).eql(['host.name: suricata-sensor-amsterdam']);
+        expect(hostNames[1]).eql(['host.name: suricata-sensor-san-francisco']);
+        expect(hostNames[2]).eql(['host.name: zeek-newyork-sha-aa8df15']);
+        expect(hostNames[3]).eql(['host.name: zeek-sensor-amsterdam']);
       });
     });
 
@@ -354,7 +354,7 @@ export default ({ getService }: FtrProviderContext) => {
       const processPids = previewAlerts
         .map((signal) => signal._source?.['kibana.alert.new_terms'])
         .sort();
-      expect(processPids[0]).eql([1]);
+      expect(processPids[0]).eql(['process.pid: 1']);
     });
 
     describe('alerts should be be enriched', () => {
