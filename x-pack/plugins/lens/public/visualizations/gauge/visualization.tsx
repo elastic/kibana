@@ -14,10 +14,7 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
 import { buildExpressionFunction, DatatableRow } from '@kbn/expressions-plugin/common';
 import { PaletteRegistry, CustomPaletteParams, CUSTOM_PALETTE } from '@kbn/coloring';
-import type {
-  GaugeArguments,
-  GaugeExpressionFunctionDefinition,
-} from '@kbn/expression-gauge-plugin/common';
+import type { GaugeExpressionFunctionDefinition } from '@kbn/expression-gauge-plugin/common';
 import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import {
   getGoalValue,
@@ -30,12 +27,7 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type { DatasourceLayers, OperationMetadata, Suggestion, Visualization } from '../../types';
 import { getSuggestions } from './suggestions';
-import {
-  GROUP_ID,
-  LENS_GAUGE_ID,
-  GaugeVisualizationState,
-  GaugeExpressionState,
-} from './constants';
+import { GROUP_ID, LENS_GAUGE_ID, GaugeVisualizationState } from './constants';
 import { GaugeToolbar } from './toolbar_component';
 import { applyPaletteParams } from '../../shared_components';
 import { GaugeDimensionEditor } from './dimension_editor';
@@ -119,7 +111,7 @@ const toExpression = (
   paletteService: PaletteRegistry,
   state: GaugeVisualizationState,
   datasourceLayers: DatasourceLayers,
-  attributes?: Partial<Omit<GaugeArguments, keyof GaugeExpressionState | 'ariaLabel'>>,
+  attributes?: unknown,
   datasourceExpressionsByLayers: Record<string, Ast> | undefined = {}
 ): Ast | null => {
   const datasource = datasourceLayers[state.layerId];
@@ -138,9 +130,7 @@ const toExpression = (
     shape: state.shape ?? GaugeShapes.HORIZONTAL_BULLET,
     colorMode: state?.colorMode ?? 'none',
     palette: state.palette?.params
-      ? paletteService
-          .get(CUSTOM_PALETTE)
-          .toExpression(computePaletteParams((state.palette?.params || {}) as CustomPaletteParams))
+      ? paletteService.get(CUSTOM_PALETTE).toExpression(computePaletteParams(state.palette.params))
       : undefined,
     ticksPosition: state.ticksPosition ?? 'auto',
     labelMinor: state.labelMinor,
