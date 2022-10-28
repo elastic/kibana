@@ -10,6 +10,8 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { asPercent } from '../../../../common/utils/formatters';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { getDurationFormatter } from '../../../../common/utils/formatters/duration';
 import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
@@ -56,6 +58,7 @@ export function AlertDetailsAppSectionTransactionDuration({
     previousPeriod: [],
   };
 
+  /* Latency Chart */
   const { data, error, status } = useFetcher(
     (callApmApi) => {
       if (
@@ -110,7 +113,20 @@ export function AlertDetailsAppSectionTransactionDuration({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data]
   );
+  const { currentPeriod, previousPeriod } = memoizedData;
 
+  const timeseriesLatency = [
+    currentPeriod,
+    comparisonEnabled && isTimeComparison(offset) ? previousPeriod : undefined,
+  ].filter(filterNil);
+  const latencyMaxY = getMaxY(timeseriesLatency);
+  const latencyFormatter = getDurationFormatter(latencyMaxY);
+  const preferredAnomalyTimeseriesLatency =
+    usePreferredServiceAnomalyTimeseries(ApmMlDetectorType.txLatency);
+
+  /* Latency Chart */
+
+  /* Throughput Chart */
   const { data: dataThroughput = INITIAL_STATE, status: statusThroughput } =
     useFetcher(
       (callApmApi) => {
@@ -172,20 +188,99 @@ export function AlertDetailsAppSectionTransactionDuration({
         ]
       : []),
   ];
-  const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
-    ApmMlDetectorType.txThroughput
+  const preferredAnomalyTimeseriesThroughput =
+    usePreferredServiceAnomalyTimeseries(ApmMlDetectorType.txThroughput);
+  /* Throughput Chart */
+
+  /* Error Rate */
+  type ErrorRate =
+    APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>;
+
+  const INITIAL_STATE_ERROR_RATE: ErrorRate = {
+    currentPeriod: {
+      timeseries: [],
+      average: null,
+    },
+    previousPeriod: {
+      timeseries: [],
+      average: null,
+    },
+  };
+  function yLabelFormat(y?: number | null) {
+    return asPercent(y || 0, 1);
+  }
+  const {
+    data: dataErrorRate = INITIAL_STATE_ERROR_RATE,
+    status: statusErrorRate,
+  } = useFetcher(
+    (callApmApi) => {
+      if (transactionType && serviceName && start && end) {
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate',
+          {
+            params: {
+              path: {
+                serviceName,
+              },
+              query: {
+                environment,
+                kuery: '',
+                start,
+                end,
+                transactionType,
+                transactionName: undefined,
+                offset:
+                  comparisonEnabled && isTimeComparison(offset)
+                    ? offset
+                    : undefined,
+              },
+            },
+          }
+        );
+      }
+    },
+    [
+      environment,
+      serviceName,
+      start,
+      end,
+      transactionType,
+      offset,
+      comparisonEnabled,
+    ]
   );
 
-  const { currentPeriod, previousPeriod } = memoizedData;
+  const {
+    currentPeriodColor: currentPeriodColorErrorRate,
+    previousPeriodColor: previousPeriodColorErrorRate,
+  } = getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
+
+  const timeseriesErrorRate = [
+    {
+      data: dataErrorRate.currentPeriod.timeseries,
+      type: 'linemark',
+      color: currentPeriodColorErrorRate,
+      title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
+        defaultMessage: 'Failed transaction rate (avg.)',
+      }),
+    },
+    ...(comparisonEnabled
+      ? [
+          {
+            data: dataErrorRate.previousPeriod.timeseries,
+            type: 'area',
+            color: previousPeriodColorErrorRate,
+            title: '',
+          },
+        ]
+      : []),
+  ];
+
+  const preferredAnomalyTimeseriesErrorRate =
+    usePreferredServiceAnomalyTimeseries(ApmMlDetectorType.txFailureRate);
+  /* Error Rate */
 
   const anomalyTimeseriesColor = previousPeriod?.color as string;
-
-  const timeseries = [
-    currentPeriod,
-    comparisonEnabled && isTimeComparison(offset) ? previousPeriod : undefined,
-  ].filter(filterNil);
-  const latencyMaxY = getMaxY(timeseries);
-  const latencyFormatter = getDurationFormatter(latencyMaxY);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -199,12 +294,12 @@ export function AlertDetailsAppSectionTransactionDuration({
             offset={offset}
             fetchStatus={status}
             customTheme={comparisonChartTheme}
-            timeseries={timeseries}
+            timeseries={timeseriesLatency}
             yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
             anomalyTimeseries={
-              preferredAnomalyTimeseries
+              preferredAnomalyTimeseriesThroughput
                 ? {
-                    ...preferredAnomalyTimeseries,
+                    ...preferredAnomalyTimeseriesThroughput,
                     color: anomalyTimeseriesColor,
                   }
                 : undefined
@@ -212,25 +307,51 @@ export function AlertDetailsAppSectionTransactionDuration({
             timeZone={timeZone}
           />
           <EuiFlexItem>
-            <TimeseriesChart
-              id="throughput"
-              height={200}
-              comparisonEnabled={comparisonEnabled}
-              offset={offset}
-              fetchStatus={statusThroughput}
-              customTheme={comparisonChartTheme}
-              timeseries={timeseriesThroughput}
-              yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-              anomalyTimeseries={
-                preferredAnomalyTimeseries
-                  ? {
-                      ...preferredAnomalyTimeseries,
-                      color: anomalyTimeseriesColor,
-                    }
-                  : undefined
-              }
-              timeZone={timeZone}
-            />
+            <EuiFlexGroup direction="row" gutterSize="s">
+              <EuiFlexItem>
+                <TimeseriesChart
+                  id="throughput"
+                  height={200}
+                  comparisonEnabled={comparisonEnabled}
+                  offset={offset}
+                  fetchStatus={statusThroughput}
+                  customTheme={comparisonChartTheme}
+                  timeseries={timeseriesThroughput}
+                  yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
+                  anomalyTimeseries={
+                    preferredAnomalyTimeseriesLatency
+                      ? {
+                          ...preferredAnomalyTimeseriesLatency,
+                          color: anomalyTimeseriesColor,
+                        }
+                      : undefined
+                  }
+                  timeZone={timeZone}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <TimeseriesChart
+                  id="errorRate"
+                  height={200}
+                  showAnnotations={false}
+                  fetchStatus={statusErrorRate}
+                  timeseries={timeseriesErrorRate}
+                  yLabelFormat={yLabelFormat}
+                  yDomain={{ min: 0, max: 1 }}
+                  comparisonEnabled={false}
+                  customTheme={comparisonChartTheme}
+                  anomalyTimeseries={
+                    preferredAnomalyTimeseriesErrorRate
+                      ? {
+                          ...preferredAnomalyTimeseriesErrorRate,
+                          color: previousPeriodColorErrorRate,
+                        }
+                      : undefined
+                  }
+                  timeZone={timeZone}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </ChartPointerEventContextProvider>
       </EuiFlexItem>
