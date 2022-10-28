@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { useOpenInspector } from '@kbn/content-management-inspector';
 import type { OpenInspectorParams } from '@kbn/content-management-inspector';
 
 import {
@@ -153,6 +154,8 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     DateFormatterComp,
   } = useServices();
 
+  const openInspector = useOpenInspector();
+
   const reducer = useMemo(() => {
     return getReducer<T>();
   }, []);
@@ -198,6 +201,19 @@ function TableListViewComp<T extends UserContentCommonSchema>({
   const showFetchError = Boolean(fetchError);
   const showLimitError = !showFetchError && totalItems > listingLimit;
 
+  const inspectItem = useCallback(
+    (item: T) => {
+      openInspector({
+        item: {
+          title: item.attributes.title,
+          description: item.attributes.description,
+        },
+        ...inspector,
+      });
+    },
+    [openInspector, inspector]
+  );
+
   const tableColumns = useMemo(() => {
     const columns: Array<EuiBasicTableColumn<T>> = [
       {
@@ -239,9 +255,11 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     }
 
     // Add "Actions" column
-    if (editItem) {
-      const actions: EuiTableActionsColumnType<T>['actions'] = [
-        {
+    if (editItem || inspector.enabled !== false) {
+      const actions: EuiTableActionsColumnType<T>['actions'] = [];
+
+      if (editItem) {
+        actions.push({
           name: (item) => {
             return i18n.translate('contentManagement.tableList.listing.table.editActionName', {
               defaultMessage: 'Edit {itemDescription}',
@@ -260,8 +278,30 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           type: 'icon',
           enabled: (v) => !(v as unknown as { error: string })?.error,
           onClick: editItem,
-        },
-      ];
+        });
+      }
+
+      if (inspector.enabled !== false) {
+        actions.push({
+          name: (item) => {
+            return i18n.translate('contentManagement.tableList.listing.table.inspectActionName', {
+              defaultMessage: 'Inspect {itemDescription}',
+              values: {
+                itemDescription: get(item, 'attributes.title'),
+              },
+            });
+          },
+          description: i18n.translate(
+            'contentManagement.tableList.listing.table.inspectActionDescription',
+            {
+              defaultMessage: 'Inspect',
+            }
+          ),
+          icon: 'inspect',
+          type: 'icon',
+          onClick: inspectItem,
+        });
+      }
 
       columns.push({
         name: i18n.translate('contentManagement.tableList.listing.table.actionTitle', {
@@ -282,6 +322,8 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     onClickTitle,
     searchQuery,
     DateFormatterComp,
+    inspector,
+    inspectItem,
   ]);
 
   const itemsById = useMemo(() => {
@@ -508,7 +550,6 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           tableCaption={tableListTitle}
           onTableChange={onTableChange}
           onSortChange={onSortChange}
-          inspector={inspector}
         />
 
         {/* Delete modal */}
