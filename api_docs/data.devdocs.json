@@ -12852,6 +12852,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/pages/metrics/hosts/hooks/use_data_view.test.ts"
               }
             ]
           },
@@ -20320,6 +20324,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/infra/public/pages/metrics/hosts/hooks/use_data_view.test.ts"
               }
             ]
           },

@@ -106,11 +106,6 @@ export GCS_UPLOAD_PREFIX=FAKE_UPLOAD_PREFIX # TODO remove the need for this
 
 export KIBANA_BUILD_LOCATION="$WORKSPACE/kibana-build-xpack"
 
-if [[ "${BUILD_TS_REFS_CACHE_ENABLE:-}" != "true" ]]; then
-  export BUILD_TS_REFS_CACHE_ENABLE=false
-fi
-
-export BUILD_TS_REFS_DISABLE=true
 export DISABLE_BOOTSTRAP_VALIDATION=true
 
 # Prevent Browserlist from logging on CI about outdated database versions
