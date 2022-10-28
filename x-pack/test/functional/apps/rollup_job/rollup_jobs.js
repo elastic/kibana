@@ -42,7 +42,10 @@ export default function ({ getService, getPageObjects }) {
       datemath.parse('now-3d', { forceNow: now }),
     ];
     before(async () => {
-      await security.testUser.setRoles(['manage_rollups_role', 'global_ccr_role', 'superuser']);
+      // <issue for security roles not working as expected>
+      // https://github.com/elastic/kibana/issues/143720
+      // await security.testUser.setRoles(['manage_rollups_role', 'global_ccr_role']);
+      await security.testUser.setRoles(['superuser']);
       await PageObjects.common.navigateToApp('rollupJob');
     });
 
