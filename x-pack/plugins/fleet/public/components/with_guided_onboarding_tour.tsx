@@ -101,6 +101,10 @@ export const WithGuidedOnboardingTour: FunctionComponent<{
           })}
         </EuiButton>
       }
+      isOpen={isGuidedOnboardingTourOpen}
+      // Close the tour when the user clicks outside of the tour. This is a workaround for
+      // popover remaining open when the user changes the category of the integration list
+      closePopover={() => setIsGuidedOnboardingTourOpen(false)}
     >
       {children}
     </EuiTourStep>
