@@ -148,7 +148,15 @@ export default function ({ getService }: FtrProviderContext) {
         .send(httpMonitorJson);
 
       expect(apiResponse.body.attributes).eql(
-        omit({ ...httpMonitorJson, revision: 2 }, secretKeys)
+        omit(
+          {
+            ...httpMonitorJson,
+            [ConfigKey.HEARTBEAT_ID]: apiResponse.body.id,
+            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            revision: 2,
+          },
+          secretKeys
+        )
       );
     });
 

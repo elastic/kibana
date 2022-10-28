@@ -16,7 +16,6 @@ import {
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { formatSecrets } from '../../synthetics_service/utils';
 
 jest.mock('../telemetry/monitor_upgrade_sender', () => ({
   sendTelemetryEvents: jest.fn(),
@@ -94,7 +93,6 @@ describe('syncEditedMonitor', () => {
   it('includes the isEdit flag', async () => {
     await syncEditedMonitor({
       normalizedMonitor: editedMonitor,
-      monitorWithRevision: formatSecrets(editedMonitor),
       previousMonitor,
       decryptedPreviousMonitor:
         previousMonitor as unknown as SavedObject<SyntheticsMonitorWithSecrets>,
