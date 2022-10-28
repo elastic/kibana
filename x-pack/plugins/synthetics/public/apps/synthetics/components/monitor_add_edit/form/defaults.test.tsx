@@ -78,6 +78,7 @@ describe('defaults', () => {
 
   it('correctly formats monitor type to form type', () => {
     expect(formatDefaultFormValues(monitorValues)).toEqual({
+      ...monitorValues,
       __ui: {
         script_source: {
           file_name: '',
