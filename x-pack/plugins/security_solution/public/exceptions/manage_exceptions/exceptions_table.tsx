@@ -47,6 +47,8 @@ import { ExceptionsListCard } from './exceptions_list_card';
 
 import { ImportExceptionListFlyout } from './import_exceptions_list_flyout';
 
+import { AddExceptionFlyout } from '../../detection_engine/rule_exceptions/components/add_exception_flyout';
+
 export type Func = () => Promise<void>;
 
 interface ReferenceModalState {
@@ -355,6 +357,15 @@ export const ExceptionListsTable = React.memo(() => {
 
   const goToPage = (pageNumber: number) => setActivePage(pageNumber);
 
+  const [isCreatePopoverOpen, setIsCreatePopoverOpen] = useState(false);
+  const [displayAddExceptionItemFlyout, setDisplayAddExceptionItemFlyout] = useState(false);
+
+  const onCreateButtonClick = () => setIsCreatePopoverOpen((isOpen) => !isOpen);
+  const onCloseCreatePopover = () => {
+    setDisplayAddExceptionItemFlyout(false);
+    setIsCreatePopoverOpen(false);
+  };
+
   return (
     <>
       <MissingPrivilegesCallOut />
@@ -370,10 +381,49 @@ export const ExceptionListsTable = React.memo(() => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton iconType={'importAction'} onClick={() => setDisplayImportListFlyout(true)}>
-            {'Import exception list'}
+            {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
           </EuiButton>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            data-test-subj="manageExceptionListCreateButton"
+            button={<EuiButton onClick={onCreateButtonClick}>{i18n.CREATE_BUTTON}</EuiButton>}
+            isOpen={isCreatePopoverOpen}
+            closePopover={onCloseCreatePopover}
+          >
+            <EuiContextMenuPanel
+              items={[
+                // <EuiContextMenuItem key={'createList'}
+                // onClick={() => {
+                //   onCloseCreateButtonPopover();
+                //   handleOpenCreateExceptionList()();
+                // }}
+                // />,
+                <EuiContextMenuItem
+                  key={'createItem'}
+                  onClick={() => {
+                    onCloseCreatePopover();
+                    setDisplayAddExceptionItemFlyout(true);
+                  }}
+                >
+                  {'create exception item'}
+                </EuiContextMenuItem>,
+              ]}
+            />
+          </EuiPopover>
+        </EuiFlexItem>
       </EuiFlexGroup>
+
+      {displayAddExceptionItemFlyout && (
+        <AddExceptionFlyout
+          rules={null}
+          isEndpointItem={false}
+          isBulkAction={false}
+          showAlertCloseOptions
+          onCancel={(didRuleChange: boolean) => setDisplayAddExceptionItemFlyout(false)}
+          onConfirm={(didRuleChange: boolean) => setDisplayAddExceptionItemFlyout(false)}
+        />
+      )}
 
       {displayImportListFlyout && (
         <ImportExceptionListFlyout
