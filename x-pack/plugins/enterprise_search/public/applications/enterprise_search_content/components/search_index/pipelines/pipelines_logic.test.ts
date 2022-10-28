@@ -15,7 +15,7 @@ import { nextTick } from '@kbn/test-jest-helpers';
 import { UpdatePipelineApiLogic } from '../../../api/connector/update_pipeline_api_logic';
 import { FetchCustomPipelineApiLogic } from '../../../api/index/fetch_custom_pipeline_api_logic';
 import { FetchIndexApiLogic } from '../../../api/index/fetch_index_api_logic';
-import { DetachMlInferencePipelineApiLogic } from '../../../api/ml_models/detach_ml_inference_pipeline';
+import { DetachMlInferencePipelineApiLogic } from '../../../api/pipelines/detach_ml_inference_pipeline';
 
 import { PipelinesLogic } from './pipelines_logic';
 

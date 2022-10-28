@@ -121,7 +121,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                         }}
                       >
                         {i18n.translate(
-                          'xpack.enterpriseSearch.inferencePipelineCard.action.delete',
+                          'xpack.enterpriseSearch.inferencePipelineCard.action.detach',
                           { defaultMessage: 'Detach pipeline' }
                         )}
                       </EuiButtonEmpty>

@@ -52,12 +52,12 @@ import {
   DeleteMlInferencePipelineApiLogic,
   DeleteMlInferencePipelineApiLogicArgs,
   DeleteMlInferencePipelineResponse,
-} from '../../../api/ml_models/delete_ml_inference_pipeline';
+} from '../../../api/pipelines/delete_ml_inference_pipeline';
 import {
   DetachMlInferencePipelineApiLogic,
   DetachMlInferencePipelineApiLogicArgs,
   DetachMlInferencePipelineResponse,
-} from '../../../api/ml_models/detach_ml_inference_pipeline';
+} from '../../../api/pipelines/detach_ml_inference_pipeline';
 
 import { FetchMlInferencePipelineProcessorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_processors';
 import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
