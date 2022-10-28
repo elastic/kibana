@@ -12,6 +12,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import createContainer from 'constate';
+import { enumeration } from '@kbn/securitysolution-io-ts-types';
+import { FilterStateStore } from '@kbn/es-query';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useUrlState } from '../../../../utils/use_url_state';
 
@@ -48,31 +50,37 @@ export const useHostFilters = () => {
   };
 };
 
-export const HostsFilterRT = rt.type({
-  $state: rt.type({
-    store: rt.any,
+export const HostsFilterRT = rt.intersection([
+  rt.partial({
+    $state: rt.type({
+      store: enumeration('FilterStateStore', FilterStateStore),
+    }),
   }),
-  meta: rt.partial({
-    alias: rt.union([rt.undefined, rt.null, rt.string]),
-    disabled: rt.boolean,
-    negate: rt.boolean,
-    controlledBy: rt.union([rt.undefined, rt.string]),
-    group: rt.union([rt.undefined, rt.string]),
-    index: rt.union([rt.undefined, rt.string]),
-    isMultiIndex: rt.boolean,
-    type: rt.union([rt.undefined, rt.string]),
-    key: rt.union([rt.undefined, rt.string]),
-    params: rt.any,
-    value: rt.any,
+  rt.type({
+    meta: rt.partial({
+      alias: rt.union([rt.null, rt.string]),
+      disabled: rt.boolean,
+      negate: rt.boolean,
+      controlledBy: rt.union([rt.undefined, rt.string]),
+      group: rt.union([rt.undefined, rt.string]),
+      index: rt.union([rt.undefined, rt.string]),
+      isMultiIndex: rt.boolean,
+      type: rt.union([rt.undefined, rt.string]),
+      key: rt.union([rt.undefined, rt.string]),
+      params: rt.any,
+      value: rt.any,
+    }),
   }),
-  query: rt.any,
-});
+  rt.partial({
+    query: rt.record(rt.string, rt.any),
+  }),
+]);
 
 const HostsFiltersRT = rt.array(HostsFilterRT);
 
 export type HostsFilters = rt.TypeOf<typeof HostsFiltersRT>;
 const encodeUrlState = HostsFiltersRT.encode;
-const decodeUrlState = (value: unknown[]) =>
+const decodeUrlState = (value: unknown) =>
   pipe(HostsFiltersRT.decode(value), fold(constant([]), identity));
 
 export const [HostFilterProvider, useHostFiltersContext] = createContainer(useHostFilters);
