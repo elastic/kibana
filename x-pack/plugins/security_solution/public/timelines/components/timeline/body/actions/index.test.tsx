@@ -144,7 +144,7 @@ describe('Actions', () => {
     expect(wrapper.find('[data-test-subj="select-event"]').exists()).toBe(false);
   });
 
-  describe.only('Guided Onboarding Step', () => {
+  describe('Guided Onboarding Step', () => {
     const incrementStepMock = jest.fn();
     beforeEach(() => {
       (useTourContext as jest.Mock).mockReturnValue({
