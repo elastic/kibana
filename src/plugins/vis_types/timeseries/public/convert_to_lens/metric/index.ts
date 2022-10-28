@@ -22,12 +22,16 @@ import { excludeMetaFromLayers, getUniqueBuckets } from '../utils';
 const MAX_SERIES = 2;
 const MAX_BUCKETS = 2;
 
-export const convertToLens: ConvertTsvbToLensVisualization = async (model, timeRange) => {
+export const convertToLens: ConvertTsvbToLensVisualization = async (
+  { params: model },
+  timeRange
+) => {
   const dataViews = getDataViewsStart();
   const seriesNum = model.series.filter((series) => !series.hidden).length;
 
   const indexPatternIds = new Set();
-  const visibleSeries = model.series.filter(({ hidden }) => !hidden);
+  // we should get max only 2 series
+  const visibleSeries = model.series.filter(({ hidden }) => !hidden).slice(0, 2);
   let currentIndexPattern: DataView | null = null;
   for (const series of visibleSeries) {
     const datasourceInfo = await getDataSourceInfo(
