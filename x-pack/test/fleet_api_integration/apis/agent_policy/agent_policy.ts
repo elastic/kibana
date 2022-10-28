@@ -20,7 +20,6 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('fleet_agent_policies', () => {
     skipIfNoDockerRegistry(providerContext);
-    setPrereleaseSetting(supertest);
     describe('POST /api/fleet/agent_policies', () => {
       let systemPkgVersion: string;
       before(async () => {
@@ -287,6 +286,7 @@ export default function (providerContext: FtrProviderContext) {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       });
       setupFleetAndAgents(providerContext);
+      setPrereleaseSetting(supertest);
       after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
         if (systemPkgVersion) {

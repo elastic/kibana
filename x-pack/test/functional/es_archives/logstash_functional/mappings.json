@@ -366,12 +366,7 @@
           }
         },
         "number_of_replicas": "0",
-        "number_of_shards": "1",
-        "mapping": {
-          "total_fields": {
-            "limit": 10000
-          }
-        }
+        "number_of_shards": "1"
       }
     }
   }
@@ -742,12 +737,7 @@
           }
         },
         "number_of_replicas": "0",
-        "number_of_shards": "1",
-        "mapping": {
-          "total_fields": {
-            "limit": 10000
-          }
-        }
+        "number_of_shards": "1"
       }
     }
   }
@@ -1118,12 +1108,7 @@
           }
         },
         "number_of_replicas": "0",
-        "number_of_shards": "1",
-        "mapping": {
-          "total_fields": {
-            "limit": 10000
-          }
-        }
+        "number_of_shards": "1"
       }
     }
   }
