@@ -49,6 +49,7 @@ import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
   isIndexNotFoundException,
+  isPipelineIsInUseException,
   isResourceNotFoundException,
 } from '../../utils/identify_exceptions';
 import { getPrefixedInferencePipelineProcessorName } from '../../utils/ml_inference_pipeline_utils';
@@ -702,7 +703,24 @@ export function registerIndexRoutes({
             response,
             statusCode: 404,
           });
+        } else if (isPipelineIsInUseException(error)) {
+          return createError({
+            errorCode: ErrorCode.PIPELINE_IS_IN_USE,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.indices.mlInference.pipelineProcessors.pipelineIsInUseError',
+              {
+                defaultMessage:
+                  "Inference pipeline is used in managed pipeline '{pipelineName}' of a different index",
+                values: {
+                  pipelineName: error.pipelineName,
+                },
+              }
+            ),
+            response,
+            statusCode: 400,
+          });
         }
+
         // otherwise, let the default handler wrap it
         throw error;
       }
