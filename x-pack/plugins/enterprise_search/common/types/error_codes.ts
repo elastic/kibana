@@ -14,6 +14,7 @@ export enum ErrorCode {
   INDEX_ALREADY_EXISTS = 'index_already_exists',
   INDEX_NOT_FOUND = 'index_not_found',
   PIPELINE_ALREADY_EXISTS = 'pipeline_already_exists',
+  PIPELINE_IS_IN_USE = 'pipeline_is_in_use',
   RESOURCE_NOT_FOUND = 'resource_not_found',
   UNAUTHORIZED = 'unauthorized',
   UNCAUGHT_EXCEPTION = 'uncaught_exception',
