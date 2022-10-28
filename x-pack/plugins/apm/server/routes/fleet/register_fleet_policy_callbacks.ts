@@ -98,19 +98,19 @@ function registerPackagePolicyExternalCallback({
     if (packagePolicy.package?.name !== 'apm') {
       return packagePolicy;
     }
-
-    // Todo PromiseAll
-
-    const internalESClient = await createInternalESClient({
-      context: context as any,
-      debug: false,
-      request,
-    });
     const { savedObjectsClient } = context as any;
-    const indices = await getApmIndices({
-      savedObjectsClient,
-      config,
-    });
+
+    const [internalESClient, indices] = await Promise.all([
+      createInternalESClient({
+        context: context as any,
+        debug: false,
+        request,
+      }),
+      getApmIndices({
+        savedObjectsClient,
+        config,
+      }),
+    ]);
     return await mergePackagePolicyWithApm({
       internalESClient,
       indices,

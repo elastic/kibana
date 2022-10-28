@@ -41,15 +41,17 @@ const agentConfigurationRoute = createApmServerRoute({
   }> => {
     const { context, request, params, config } = resources;
     const savedObjectsClient = (await context.core).savedObjects.client;
-    const internalESClient = await createInternalESClient({
-      context,
-      request,
-      debug: params.query._inspect,
-    });
-    const indices = await getApmIndices({
-      savedObjectsClient,
-      config,
-    });
+    const [internalESClient, indices] = await Promise.all([
+      createInternalESClient({
+        context,
+        request,
+        debug: params.query._inspect,
+      }),
+      getApmIndices({
+        savedObjectsClient,
+        config,
+      }),
+    ]);
 
     const configurations = await listConfigurations({
       internalESClient,
@@ -77,15 +79,17 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
     const service = { name, environment };
 
     const savedObjectsClient = (await context.core).savedObjects.client;
-    const internalESClient = await createInternalESClient({
-      context,
-      request,
-      debug: _inspect,
-    });
-    const indices = await getApmIndices({
-      savedObjectsClient,
-      config,
-    });
+    const [internalESClient, indices] = await Promise.all([
+      createInternalESClient({
+        context,
+        request,
+        debug: _inspect,
+      }),
+      getApmIndices({
+        savedObjectsClient,
+        config,
+      }),
+    ]);
     const exactConfig = await findExactConfiguration({
       service,
       internalESClient,
@@ -129,15 +133,17 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
 
     const savedObjectsClient = (await context.core).savedObjects.client;
 
-    const internalESClient = await createInternalESClient({
-      context,
-      request,
-      debug: params.query._inspect,
-    });
-    const indices = await getApmIndices({
-      savedObjectsClient,
-      config,
-    });
+    const [internalESClient, indices] = await Promise.all([
+      createInternalESClient({
+        context,
+        request,
+        debug: params.query._inspect,
+      }),
+      getApmIndices({
+        savedObjectsClient,
+        config,
+      }),
+    ]);
     const exactConfig = await findExactConfiguration({
       service,
       internalESClient,
@@ -202,15 +208,17 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
 
     const savedObjectsClient = (await context.core).savedObjects.client;
 
-    const internalESClient = await createInternalESClient({
-      context,
-      request,
-      debug: params.query._inspect,
-    });
-    const indices = await getApmIndices({
-      savedObjectsClient,
-      config,
-    });
+    const [internalESClient, indices] = await Promise.all([
+      createInternalESClient({
+        context,
+        request,
+        debug: params.query._inspect,
+      }),
+      getApmIndices({
+        savedObjectsClient,
+        config,
+      }),
+    ]);
 
     // if the config already exists, it is fetched and updated
     // this is to avoid creating two configs with identical service params
@@ -289,15 +297,17 @@ const agentConfigurationSearchRoute = createApmServerRoute({
 
     const savedObjectsClient = (await context.core).savedObjects.client;
 
-    const internalESClient = await createInternalESClient({
-      context,
-      request,
-      debug: params.query._inspect,
-    });
-    const indices = await getApmIndices({
-      savedObjectsClient,
-      config,
-    });
+    const [internalESClient, indices] = await Promise.all([
+      createInternalESClient({
+        context,
+        request,
+        debug: params.query._inspect,
+      }),
+      getApmIndices({
+        savedObjectsClient,
+        config,
+      }),
+    ]);
     const configuration = await searchConfigurations({
       service,
       internalESClient,
