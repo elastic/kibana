@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
 
     // the plugin contains some heavy json files
     "resolveJsonModule": false
@@ -22,7 +21,7 @@
     "tasks/mocks/*",
     "types/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/bfetch/tsconfig.json" },
     { "path": "../../../src/plugins/charts/tsconfig.json" },

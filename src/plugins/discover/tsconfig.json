@@ -4,10 +4,9 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*", ".storybook/**/*"],
-  "references": [
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../charts/tsconfig.json" },
     { "path": "../saved_search/tsconfig.json" },

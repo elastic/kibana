@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
     "isolatedModules": true
   },
   "include": [
@@ -15,7 +14,7 @@
     "schema/oss_plugins.json",
     "schema/oss_root.json",
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../../plugins/home/tsconfig.json" },
     { "path": "../../plugins/kibana_react/tsconfig.json" },

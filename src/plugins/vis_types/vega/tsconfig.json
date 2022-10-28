@@ -4,7 +4,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
     "strictNullChecks": false
   },
   "include": [
@@ -14,7 +13,7 @@
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "public/test_utils/vega_map_test.json"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../core/tsconfig.json" },
     { "path": "../../data/tsconfig.json" },
     { "path": "../../data_views/tsconfig.json" },

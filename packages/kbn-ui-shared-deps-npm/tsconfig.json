@@ -3,7 +3,6 @@
   "compilerOptions": {
     "allowJs": true,
     "declaration": true,
-    "declarationMap": true,
     "emitDeclarationOnly": true,
     "outDir": "./target_types",
     "types": [

@@ -4,10 +4,9 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true
   },
   "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*"],
-  "references": [
+  "kbn_references": [
     { "path": "../spaces/tsconfig.json" },
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../task_manager/tsconfig.json" },

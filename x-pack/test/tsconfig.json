@@ -19,7 +19,7 @@
     "target/**/*",
     "*/plugins/**/*",
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../test/tsconfig.json" },
     { "path": "../../src/core/tsconfig.json" },
     { "path": "../../src/plugins/bfetch/tsconfig.json" },
