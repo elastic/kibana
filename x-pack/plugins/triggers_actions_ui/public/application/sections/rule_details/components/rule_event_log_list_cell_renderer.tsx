@@ -12,7 +12,7 @@ import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 import { useHistory } from 'react-router-dom';
 import { routeToRuleDetails } from '../../../constants';
 import { formatRuleAlertCount } from '../../../../common/lib/format_rule_alert_count';
-import { useSpacesData } from '../../../../common/lib/kibana';
+import { useKibana, useSpacesData } from '../../../../common/lib/kibana';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
 import { RuleDurationFormat } from '../../rules_list/components/rule_duration_format';
 import {
@@ -37,6 +37,7 @@ interface RuleEventLogListCellRendererProps {
 export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRendererProps) => {
   const { columnId, value, version, dateFormat = DEFAULT_DATE_FORMAT, ruleId, spaceIds } = props;
   const spacesData = useSpacesData();
+  const { http } = useKibana().services;
 
   const history = useHistory();
 
@@ -55,10 +56,14 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
     const ruleRoute = routeToRuleDetails.replace(':ruleId', ruleId);
     if (ruleOnDifferentSpace) {
       const [linkedSpaceId] = spaceIds ?? [];
+      const basePath = http.basePath.get();
       const spacePath = linkedSpaceId !== 'default' ? `/s/${linkedSpaceId}` : '';
       const historyPathname = history.location.pathname;
-      const newPathname = `${spacePath}${window.location.pathname
-        .replace(/^\/s\/([^/])+/, '')
+      const newPathname = `${basePath.replace(
+        `/s/${activeSpace!.id}`,
+        ''
+      )}${spacePath}${window.location.pathname
+        .replace(basePath, '')
         .replace(historyPathname, ruleRoute)}`;
       return newPathname;
     }

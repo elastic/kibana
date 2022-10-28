@@ -32,6 +32,15 @@ jest.mock('../../../../common/lib/kibana', () => ({
     ]),
     activeSpaceId: 'space1',
   }),
+  useKibana: () => ({
+    services: {
+      http: {
+        basePath: {
+          get: () => '/basePath',
+        },
+      },
+    },
+  }),
 }));
 
 describe('rule_event_log_list_cell_renderer', () => {
@@ -126,7 +135,7 @@ describe('rule_event_log_list_cell_renderer', () => {
     );
     // @ts-ignore data-href is not a native EuiLink prop
     expect(wrapper2.find(EuiLink).props()['data-href']).toEqual(
-      '/s/space2/app/management/insightsAndAlerting/triggersActions/rule/1'
+      '/basePath/s/space2/app/management/insightsAndAlerting/triggersActions/rule/1'
     );
 
     window.location = savedLocation;
