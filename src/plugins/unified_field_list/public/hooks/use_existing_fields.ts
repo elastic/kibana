@@ -7,6 +7,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { htmlIdGenerator } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
 import type { AggregateQuery, EsQueryConfig, Filter, Query } from '@kbn/es-query';
@@ -21,6 +22,7 @@ import { loadFieldExisting } from '../services/field_existing';
 import { ExistenceFetchStatus } from '../types';
 
 const getBuildEsQueryAsync = async () => (await import('@kbn/es-query')).buildEsQuery;
+const generateId = htmlIdGenerator();
 
 export interface ExistingFieldsInfo {
   fetchStatus: ExistenceFetchStatus;
@@ -64,7 +66,7 @@ const unknownInfo: ExistingFieldsInfo = {
 };
 
 const globalMap$ = new BehaviorSubject<ExistingFieldsByDataViewMap>(initialData); // for syncing between hooks
-let lastFetchRequestedAtTimestamp: number = 0; // persist last fetching time to skip older handlers if any
+let lastFetchId: string = ''; // persist last fetch id to skip older requests/responses if any
 
 export const useExistingFieldsFetcher = (
   params: ExistingFieldsFetcherParams
@@ -82,7 +84,11 @@ export const useExistingFieldsFetcher = (
       toDate,
       services: { dataViews, data, core },
       onNoData,
-    }: ExistingFieldsFetcherParams & { dataViewId: string | undefined }): Promise<void> => {
+      fetchId,
+    }: ExistingFieldsFetcherParams & {
+      dataViewId: string | undefined;
+      fetchId: string;
+    }): Promise<void> => {
       if (!dataViewId) {
         return;
       }
@@ -149,8 +155,8 @@ export const useExistingFieldsFetcher = (
         }
       }
 
-      // skip redundant results
-      if (mountedRef.current && Date.now() >= lastFetchRequestedAtTimestamp) {
+      // skip redundant and older results
+      if (mountedRef.current && fetchId === lastFetchId) {
         globalMap$.next({
           ...globalMap$.getValue(),
           [dataViewId]: info,
@@ -165,10 +171,12 @@ export const useExistingFieldsFetcher = (
   const dataViewsHash = getDataViewsHash(params.dataViews);
   const refetchFieldsExistenceInfo = useCallback(
     async (dataViewId?: string) => {
-      lastFetchRequestedAtTimestamp = Date.now();
+      const fetchId = generateId();
+      lastFetchId = fetchId;
       // refetch only for the specified data view
       if (dataViewId) {
         await fetchFieldsExistenceInfo({
+          fetchId,
           dataViewId,
           ...params,
         });
@@ -178,6 +186,7 @@ export const useExistingFieldsFetcher = (
       await Promise.all(
         params.dataViews.map((dataView) =>
           fetchFieldsExistenceInfo({
+            fetchId,
             dataViewId: dataView.id,
             ...params,
           })
