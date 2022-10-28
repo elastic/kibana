@@ -65,7 +65,7 @@ export const MetadataForm: FC<Props> = ({ form, TagSelector, isReadonly }) => {
       {TagSelector !== undefined && (
         <>
           <EuiSpacer />
-          <TagSelector initialSelection={tags.value} onTagsSelected={setTags} />
+          <TagSelector initialSelection={tags.value} onTagsSelected={setTags} fullWidth />
         </>
       )}
     </>

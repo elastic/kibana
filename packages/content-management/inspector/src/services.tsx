@@ -9,13 +9,14 @@
 import React, { useContext, useCallback } from 'react';
 import type { FC, ReactNode } from 'react';
 import type { Observable } from 'rxjs';
+import type { EuiComboBoxProps } from '@elastic/eui';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 
-interface TagSelectorProps {
+type TagSelectorProps = EuiComboBoxProps<unknown> & {
   initialSelection: string[];
   onTagsSelected: (ids: string[]) => void;
-}
+};
 
 export interface SavedObjectsReference {
   id: string;
