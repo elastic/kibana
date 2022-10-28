@@ -146,8 +146,6 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   const unit = (c: number) =>
     c > 1 ? i18n.TOTAL_COUNT_OF_SESSIONS : i18n.SINGLE_COUNT_OF_SESSIONS;
 
-  const dispatch = useDispatch();
-
   useEffect(() => {
     dispatch(
       dataTableActions.initializeTGridSettings({
