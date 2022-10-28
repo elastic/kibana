@@ -20,8 +20,8 @@ import { constructQueryOptions } from '../utils';
 import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
 import { Operations } from '../../authorization';
 import type { CasesClientArgs } from '..';
-import type { ConstructQueryParams } from '../types';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import type { CasesFindQueryParams } from '../types';
 
 /**
  * Retrieves a case and optionally its comments.
@@ -65,7 +65,7 @@ export const find = async (
       licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
     }
 
-    const queryArgs: ConstructQueryParams = {
+    const queryArgs: CasesFindQueryParams = {
       tags: queryParams.tags,
       reporters: queryParams.reporters,
       sortByField: queryParams.sortField,
@@ -82,6 +82,7 @@ export const find = async (
       status: undefined,
       authorizationFilter,
     });
+
     const caseQueryOptions = constructQueryOptions({ ...queryArgs, authorizationFilter });
 
     const [cases, statusStats] = await Promise.all([

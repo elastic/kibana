@@ -6,23 +6,16 @@
  */
 
 import { Direction } from '../../common/search_strategy';
-import { TimelineState } from '../types';
+import { TableId, TableState } from '../types';
 import { defaultHeaders } from './header';
 
-export const mockGlobalState: TimelineState = {
-  timelineById: {
-    test: {
+export const mockGlobalState: TableState = {
+  tableById: {
+    [TableId.test]: {
       columns: defaultHeaders,
-      dateRange: {
-        start: '2020-07-07T08:20:18.966Z',
-        end: '2020-07-08T08:20:18.966Z',
-      },
-      dataProviders: [],
       dataViewId: null,
       deletedEventIds: [],
-      excludedRowRendererIds: [],
       expandedDetail: {},
-      kqlQuery: { filterQuery: null },
       id: 'test',
       indexNames: [
         'apm-*-transaction*',
@@ -49,16 +42,12 @@ export const mockGlobalState: TimelineState = {
         },
       ],
       selectedEventIds: {},
-      savedObjectId: null,
-      version: null,
-      documentType: '',
       defaultColumns: defaultHeaders,
-      footerText: 'total of events',
       loadingText: 'loading events',
       queryFields: [],
-      selectAll: false,
       title: 'Events',
-      timelineType: 'default',
+      sessionViewConfig: null,
+      selectAll: false,
     },
   },
 };

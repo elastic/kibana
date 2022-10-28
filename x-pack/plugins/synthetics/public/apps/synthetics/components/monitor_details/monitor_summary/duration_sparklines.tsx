@@ -11,7 +11,12 @@ import { ReportTypes, useTheme } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
 import { ClientPluginsStart } from '../../../../../plugin';
 
-export const DurationSparklines = () => {
+interface DurationSparklinesProps {
+  from: string;
+  to: string;
+}
+
+export const DurationSparklines = (props: DurationSparklinesProps) => {
   const {
     services: {
       observability: { ExploratoryViewEmbeddable },
@@ -31,7 +36,7 @@ export const DurationSparklines = () => {
         attributes={[
           {
             seriesType: 'area',
-            time: { from: 'now-30d/d', to: 'now' },
+            time: props,
             name: 'Monitor duration',
             dataType: 'synthetics',
             selectedMetricField: 'monitor.duration.us',

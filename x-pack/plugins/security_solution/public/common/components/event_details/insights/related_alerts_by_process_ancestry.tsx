@@ -9,8 +9,8 @@ import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import { EuiBetaBadge, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
 import type { Filter } from '@kbn/es-query';
+import { isActiveTimeline } from '../../../../helpers';
 import type { DataProvider } from '../../../../../common/types';
-import { TimelineId } from '../../../../../common/types/timeline';
 import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { getDataProvider } from '../table/use_action_cell_data_provider';
 import { useAlertPrevalenceFromProcessTree } from '../../../containers/alerts/use_alert_prevalence_from_process_tree';
@@ -32,7 +32,7 @@ interface Props {
   eventId: string;
   index: TimelineEventsDetailsItem;
   originalDocumentId: TimelineEventsDetailsItem;
-  timelineId?: string;
+  scopeId?: string;
 }
 
 interface Cache {
@@ -70,7 +70,7 @@ const dataProviderLimit = 5;
  * state inside the component rather than to add it to Redux.
  */
 export const RelatedAlertsByProcessAncestry = React.memo<Props>(
-  ({ data, originalDocumentId, index, eventId, timelineId }) => {
+  ({ data, originalDocumentId, index, eventId, scopeId }) => {
     const [showContent, setShowContent] = useState(false);
     const [cache, setCache] = useState<Partial<Cache>>({});
 
@@ -85,7 +85,7 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
         return (
           <ActualRelatedAlertsByProcessAncestry
             eventId={eventId}
-            timelineId={timelineId}
+            scopeId={scopeId}
             alertIds={cache.alertIds}
           />
         );
@@ -96,11 +96,11 @@ export const RelatedAlertsByProcessAncestry = React.memo<Props>(
           index={index}
           originalDocumentId={originalDocumentId}
           eventId={eventId}
-          timelineId={timelineId}
+          isActiveTimelines={isActiveTimeline(scopeId ?? '')}
           onCacheLoad={setCache}
         />
       );
-    }, [showContent, cache, data, eventId, timelineId, index, originalDocumentId]);
+    }, [showContent, cache.alertIds, data, index, originalDocumentId, eventId, scopeId]);
 
     const betaBadge = useMemo(() => <EuiBetaBadge size="s" label={BETA} color="subdued" />, []);
 
@@ -132,9 +132,9 @@ const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<{
   eventId: string;
   index: TimelineEventsDetailsItem;
   originalDocumentId: TimelineEventsDetailsItem;
-  timelineId?: string;
+  isActiveTimelines: boolean;
   onCacheLoad: (cache: Cache) => void;
-}> = ({ data, originalDocumentId, index, timelineId, onCacheLoad, eventId }) => {
+}> = ({ data, originalDocumentId, index, isActiveTimelines, onCacheLoad, eventId }) => {
   const { values: wrappedProcessEntityId } = data;
   const { values: indices } = index;
   const { values: wrappedDocumentId } = originalDocumentId;
@@ -142,7 +142,7 @@ const FetchAndNotifyCachedAlertsByProcessAncestry: React.FC<{
   const processEntityId = Array.isArray(wrappedProcessEntityId) ? wrappedProcessEntityId[0] : '';
   const { loading, error, alertIds } = useAlertPrevalenceFromProcessTree({
     processEntityId,
-    timelineId: timelineId ?? TimelineId.active,
+    isActiveTimeline: isActiveTimelines,
     documentId,
     indices: indices ?? [],
   });
@@ -173,8 +173,8 @@ FetchAndNotifyCachedAlertsByProcessAncestry.displayName =
 const ActualRelatedAlertsByProcessAncestry: React.FC<{
   alertIds: string[];
   eventId: string;
-  timelineId?: string;
-}> = ({ alertIds, eventId, timelineId }) => {
+  scopeId?: string;
+}> = ({ alertIds, eventId, scopeId }) => {
   const shouldUseFilters = alertIds && alertIds.length && alertIds.length >= dataProviderLimit;
   const dataProviders = useMemo(() => {
     if (alertIds && alertIds.length) {
@@ -182,14 +182,14 @@ const ActualRelatedAlertsByProcessAncestry: React.FC<{
         return null;
       } else {
         return alertIds.reduce<DataProvider[]>((result, alertId, index) => {
-          const id = `${timelineId}-${eventId}-event.id-${index}-${alertId}`;
+          const id = `${scopeId}-${eventId}-event.id-${index}-${alertId}`;
           result.push(getDataProvider('_id', id, alertId));
           return result;
         }, []);
       }
     }
     return null;
-  }, [alertIds, eventId, timelineId, shouldUseFilters]);
+  }, [alertIds, shouldUseFilters, scopeId, eventId]);
 
   const filters: Filter[] | null = useMemo(() => {
     if (shouldUseFilters) {
