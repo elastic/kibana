@@ -6,17 +6,13 @@
  * Side Public License, v 1.
  */
 
-import chalk from 'chalk';
 import { LogRecord } from '@kbn/logging';
 import { Conversion } from './types';
 
 export const LoggerConversion: Conversion = {
   pattern: /%logger/g,
-  convert(record: LogRecord, highlight: boolean) {
-    let message = record.context;
-    if (highlight) {
-      message = chalk.magenta(message);
-    }
+  convert(record: LogRecord) {
+    const message = record.context;
     return message;
   },
 };

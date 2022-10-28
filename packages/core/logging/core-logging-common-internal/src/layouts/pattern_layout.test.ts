@@ -132,14 +132,6 @@ test('`format()` correctly formats record with meta data.', () => {
   ).toBe('[2012-02-01T09:30:22.011-05:00][DEBUG][context-meta] message-meta');
 });
 
-test('`format()` correctly formats record with highlighting.', () => {
-  const layout = new PatternLayout({ highlight: true });
-
-  for (const record of records) {
-    expect(layout.format(record)).toMatchSnapshot();
-  }
-});
-
 test('allows specifying the PID in custom pattern', () => {
   const layout = new PatternLayout({ pattern: '%pid-%logger-%message' });
 

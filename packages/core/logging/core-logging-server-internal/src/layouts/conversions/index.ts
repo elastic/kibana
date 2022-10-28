@@ -7,10 +7,10 @@
  */
 
 export { PidConversion } from './pid';
+export { LevelConversion } from './level';
+export { LoggerConversion } from './logger';
 export {
   DateConversion,
-  LoggerConversion,
   MessageConversion,
-  LevelConversion,
   MetaConversion,
 } from '@kbn/core-logging-common-internal';

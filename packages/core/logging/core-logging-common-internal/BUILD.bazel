@@ -39,7 +39,6 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "@npm//lodash",
   "@npm//moment-timezone",
-  "@npm//chalk",
 ]
 
 TYPES_DEPS = [
@@ -47,7 +46,6 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/moment-timezone",
   "@npm//lodash",
-  "@npm//chalk",
   "//packages/kbn-logging:npm_module_types",
 ]
 
