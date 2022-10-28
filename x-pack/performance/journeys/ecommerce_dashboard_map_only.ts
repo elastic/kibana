@@ -7,7 +7,6 @@
 
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
-import { waitForVisualizations } from '../utils';
 
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce'],
@@ -21,5 +20,7 @@ export const journey = new Journey({
 
   .step('Go to Ecommerce No Map Dashboard', async ({ page, kbnUrl }) => {
     await page.click(subj('dashboardListingTitleLink-[eCommerce]-Map-Only'));
-    await waitForVisualizations(page, 1);
+    await page.waitForSelector(
+      'div[data-title="[eCommerce] Orders by Country"][data-render-complete="true"]'
+    );
   });
