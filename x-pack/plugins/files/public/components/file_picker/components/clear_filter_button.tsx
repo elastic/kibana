@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import { useFilePickerContext } from '../context';
 
 import { i18nTexts } from '../i18n_texts';
+import { useBehaviorSubject } from '../../use_behavior_subject';
 
 interface Props {
   onClick: () => void;
@@ -19,6 +20,7 @@ interface Props {
 
 export const ClearFilterButton: FunctionComponent<Props> = ({ onClick }) => {
   const { state } = useFilePickerContext();
+  const isUploading = useBehaviorSubject(state.isUploading$);
   const query = useObservable(state.queryDebounced$);
   if (!query) {
     return null;
@@ -30,7 +32,9 @@ export const ClearFilterButton: FunctionComponent<Props> = ({ onClick }) => {
         place-items: center;
       `}
     >
-      <EuiLink onClick={onClick}>{i18nTexts.clearFilterButton}</EuiLink>
+      <EuiLink disabled={isUploading} onClick={onClick}>
+        {i18nTexts.clearFilterButton}
+      </EuiLink>
     </div>
   );
 };
