@@ -9,10 +9,5 @@ import type { PackageInfo } from '../types';
 
 export function isPackagePrerelease(pkg: PackageInfo): boolean {
   // derive from semver
-  return (
-    pkg.version.startsWith('0') ||
-    pkg.version.includes('preview') ||
-    pkg.version.includes('beta') ||
-    pkg.version.includes('rc')
-  );
+  return pkg.version.startsWith('0') || pkg.version.includes('-');
 }

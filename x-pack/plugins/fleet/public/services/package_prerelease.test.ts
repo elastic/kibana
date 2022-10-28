@@ -27,4 +27,8 @@ describe('isPackagePrerelease', () => {
   it('should return prerelease true for 1.0.0-rc', () => {
     expect(isPackagePrerelease({ version: '1.0.0-rc' } as any)).toBe(true);
   });
+
+  it('should return prerelease true for 1.0.0-dev.0', () => {
+    expect(isPackagePrerelease({ version: '1.0.0-dev.0' } as any)).toBe(true);
+  });
 });
