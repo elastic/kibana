@@ -38,7 +38,7 @@ test('getTopNavLinks result', () => {
     onOpenSavedSearch: () => {},
     isPlainRecord: false,
     persistDataView: jest.fn(),
-    addAdHocDataView: jest.fn(),
+    updateDataViewList: jest.fn(),
     adHocDataViews: [],
     updateAdHocDataViewId: jest.fn(),
   });
@@ -104,7 +104,7 @@ test('getTopNavLinks result for sql mode', () => {
     onOpenSavedSearch: () => {},
     isPlainRecord: true,
     persistDataView: jest.fn(),
-    addAdHocDataView: jest.fn(),
+    updateDataViewList: jest.fn(),
     adHocDataViews: [],
     updateAdHocDataViewId: jest.fn(),
   });

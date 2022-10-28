@@ -159,6 +159,7 @@ describe('EsQueryAlertTypeExpression', () => {
         defaultActionGroupId=""
         actionGroups={[]}
         charts={chartsStartMock}
+        onChangeMetaData={() => {}}
       />
     );
 

@@ -8,13 +8,18 @@
 import React, { Fragment, useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { lastValueFrom } from 'rxjs';
-import { Filter } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { type DataView, type Query, type ISearchSource, getTime } from '@kbn/data-plugin/common';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
-import { SearchBarProps } from '@kbn/unified-search-plugin/public';
-import { mapAndFlattenFilters, type SavedQuery } from '@kbn/data-plugin/public';
+import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import {
+  mapAndFlattenFilters,
+  getTime,
+  type SavedQuery,
+  type ISearchSource,
+} from '@kbn/data-plugin/public';
 import { STACK_ALERTS_FEATURE_ID } from '../../../../common';
 import { CommonAlertParams, EsQueryAlertMetaData, EsQueryAlertParams, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';

@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiPopover,
@@ -25,12 +25,13 @@ import {
   EuiButtonEmpty,
   EuiToolTip,
 } from '@elastic/eui';
-import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
 import type { DataViewPickerPropsExtended } from '.';
+import type { DataViewListItemEnhanced } from './dataview_list';
 import type { TextBasedLanguagesListProps } from './text_languages_list';
 import type { TextBasedLanguagesTransitionModalProps } from './text_languages_transition_modal';
+import adhoc from './assets/adhoc.svg';
 import { changeDataViewStyles } from './change_dataview.styles';
 import { DataViewSelector } from './data_view_selector';
 
@@ -61,6 +62,7 @@ export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
   adHocDataViews,
+  savedDataViews,
   onChangeDataView,
   onAddField,
   onDataViewCreated,
@@ -76,7 +78,7 @@ export function ChangeDataView({
 }: DataViewPickerPropsExtended) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
-  const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
+  const [dataViewsList, setDataViewsList] = useState<DataViewListItemEnhanced[]>([]);
   const [triggerLabel, setTriggerLabel] = useState('');
   const [isTextBasedLangSelected, setIsTextBasedLangSelected] = useState(
     Boolean(textBasedLanguage)
@@ -96,7 +98,9 @@ export function ChangeDataView({
 
   useEffect(() => {
     const fetchDataViews = async () => {
-      const dataViewsRefs = await data.dataViews.getIdsWithTitle();
+      const dataViewsRefs: DataViewListItemEnhanced[] = savedDataViews
+        ? savedDataViews
+        : await data.dataViews.getIdsWithTitle();
       if (adHocDataViews?.length) {
         adHocDataViews.forEach((adHocDataView) => {
           if (adHocDataView.id) {
@@ -104,6 +108,7 @@ export function ChangeDataView({
               title: adHocDataView.title,
               name: adHocDataView.name,
               id: adHocDataView.id,
+              isAdhoc: true,
             });
           }
         });
@@ -111,7 +116,7 @@ export function ChangeDataView({
       setDataViewsList(dataViewsRefs);
     };
     fetchDataViews();
-  }, [data, currentDataViewId, adHocDataViews]);
+  }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
 
   useEffect(() => {
     if (trigger.label) {
@@ -128,6 +133,10 @@ export function ChangeDataView({
       setIsTextBasedLangSelected(Boolean(textBasedLanguage));
     }
   }, [isTextBasedLangSelected, textBasedLanguage]);
+
+  const isAdHocSelected = useMemo(() => {
+    return adHocDataViews?.some((dataView) => dataView.id === currentDataViewId);
+  }, [adHocDataViews, currentDataViewId]);
 
   const createTrigger = function () {
     const { label, title, 'data-test-subj': dataTestSubj, fullWidth, ...rest } = trigger;
@@ -146,7 +155,18 @@ export function ChangeDataView({
         disabled={isDisabled}
         {...rest}
       >
-        {triggerLabel}
+        <>
+          {isAdHocSelected && (
+            <EuiIcon
+              type={adhoc}
+              color="primary"
+              css={css`
+                margin-right: ${euiTheme.size.s};
+              `}
+            />
+          )}
+          {triggerLabel}
+        </>
       </EuiButton>
     );
   };

@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
-import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
+import { DataViewListItem, DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_SQL } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -38,7 +38,8 @@ export type DiscoverTopNavProps = Pick<
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
   updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
   adHocDataViewList: DataView[];
-  onAddAdHocDataViews: (DataViewEditorStart: DataView[]) => void;
+  savedDataViewList: DataViewListItem[];
+  updateDataViewList: (DataViewEditorStart: DataView[]) => Promise<void>;
 };
 
 export const DiscoverTopNav = ({
@@ -59,7 +60,8 @@ export const DiscoverTopNav = ({
   persistDataView,
   updateAdHocDataViewId,
   adHocDataViewList,
-  onAddAdHocDataViews,
+  savedDataViewList,
+  updateDataViewList,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
 
@@ -164,7 +166,7 @@ export const DiscoverTopNav = ({
         onOpenSavedSearch,
         isPlainRecord,
         adHocDataViews: adHocDataViewList,
-        onAddAdHocDataViews,
+        updateDataViewList,
         persistDataView,
         updateAdHocDataViewId,
       }),
@@ -181,7 +183,7 @@ export const DiscoverTopNav = ({
       adHocDataViewList,
       persistDataView,
       updateAdHocDataViewId,
-      onAddAdHocDataViews,
+      updateDataViewList,
     ]
   );
 
@@ -210,7 +212,7 @@ export const DiscoverTopNav = ({
     trigger: {
       label: dataView?.getName() || '',
       'data-test-subj': 'discover-dataView-switch-link',
-      title: dataView?.title || '',
+      title: dataView?.getIndexPattern() || '',
     },
     currentDataViewId: dataView?.id,
     onAddField: addField,
@@ -219,6 +221,7 @@ export const DiscoverTopNav = ({
     onChangeDataView,
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],
     adHocDataViews: adHocDataViewList,
+    savedDataViewList,
   };
 
   const onTextBasedSavedAndExit = useCallback(

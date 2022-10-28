@@ -215,7 +215,10 @@ describe('rule_add', () => {
     expect(wrapper.find('.euiSelect').first().props().value).toBe('m');
 
     wrapper.find('[data-test-subj="cancelSaveRuleButton"]').first().simulate('click');
-    expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.CANCELED);
+    expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.CANCELED, {
+      test: 'some value',
+      fields: ['test'],
+    });
   });
 
   it('renders rule add flyout with initial values', async () => {
@@ -287,7 +290,10 @@ describe('rule_add', () => {
       wrapper.update();
     });
 
-    expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.SAVED);
+    expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.SAVED, {
+      test: 'some value',
+      fields: ['test'],
+    });
   });
 
   it('should enforce any default interval', async () => {
