@@ -20,11 +20,11 @@ export const getGuidePanelStyles = (euiTheme: EuiThemeComputed) => ({
   flyoutOverrides: {
     flyoutContainer: css`
       top: 55px !important;
-      bottom: 25px !important;
+      bottom: unset !important;
       right: 128px;
       border-radius: 6px;
       width: 480px;
-      height: auto;
+      height: auto !important;
       animation: euiModal 350ms cubic-bezier(0.34, 1.61, 0.7, 1);
       box-shadow: none;
       "@media only screen and (max-width: 574px)": {
