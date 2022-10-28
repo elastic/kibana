@@ -60,7 +60,6 @@ describe('useLensAttributes', () => {
       ...getHostDetailsPageFilter('mockHost'),
       ...hostNameExistsFilter,
       ...getIndexFilters(['auditbeat-*']),
-      ...filterFromSearchBar,
     ]);
   });
 
