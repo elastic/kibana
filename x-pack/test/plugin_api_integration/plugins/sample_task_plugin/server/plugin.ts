@@ -270,6 +270,27 @@ export class SampleTaskManagerFixturePlugin
       },
     });
     initRoutes(core.http.createRouter(), this.taskManagerStart, taskTestingEvents);
+
+    const router = core.http.createRouter();
+    router.get(
+      {
+        path: '/api/registered_tasks',
+        validate: {},
+      },
+      async (
+        context: RequestHandlerContext,
+        req: KibanaRequest<any, any, any, any>,
+        res: KibanaResponseFactory
+      ): Promise<IKibanaResponse<any>> => {
+        try {
+          return res.ok({
+            body: taskManager.getRegisteredTypes(),
+          });
+        } catch (err) {
+          return res.badRequest({ body: err });
+        }
+      }
+    );
   }
 
   public start(core: CoreStart, { taskManager }: SampleTaskManagerFixtureStartDeps) {

@@ -56,6 +56,7 @@ export type TaskManagerStartContract = Pick<
   | 'bulkEnable'
   | 'bulkDisable'
   | 'bulkSchedule'
+  | 'getRegisteredTypes'
 > &
   Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'remove'> & {
     removeIfExists: TaskStore['remove'];
@@ -259,6 +260,7 @@ export class TaskManagerPlugin
       ephemeralRunNow: (task: EphemeralTask) => taskScheduling.ephemeralRunNow(task),
       supportsEphemeralTasks: () =>
         this.config.ephemeral_tasks.enabled && this.shouldRunBackgroundTasks,
+      getRegisteredTypes: () => this.definitions.getAllTypes(),
     };
   }
 
