@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 import apmAgent from 'elastic-apm-node';
-import { Appender, LogLevel, LogRecord, LoggerFactory, LogMeta, Logger } from '@kbn/logging';
+import {
+  Appender,
+  LogLevel,
+  LogLevelId,
+  LogRecord,
+  LoggerFactory,
+  LogMeta,
+  Logger,
+} from '@kbn/logging';
 
 function isError(x: any): x is Error {
   return x instanceof Error;
@@ -43,6 +51,10 @@ export class BaseLogger implements Logger {
 
   public fatal<Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta): void {
     this.log(this.createLogRecord<Meta>(LogLevel.Fatal, errorOrMessage, meta));
+  }
+
+  public isLevelEnabled(levelId: LogLevelId): boolean {
+    return this.level.supports(LogLevel.fromId(levelId));
   }
 
   public log(record: LogRecord) {

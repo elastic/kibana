@@ -22,6 +22,7 @@ export const convertToLogger = (cliLog: Log): Logger => {
     error: (msgOrError) => cliLog.bad('error', getErrorMessage(msgOrError)),
     fatal: (msgOrError) => cliLog.bad('fatal', getErrorMessage(msgOrError)),
     log: (record) => cliLog.write(record.message),
+    isLevelEnabled: () => true,
     get: () => adapter,
   };
   return adapter;
