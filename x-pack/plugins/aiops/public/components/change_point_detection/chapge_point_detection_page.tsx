@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Query, Filter } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import { SearchBarWrapper } from './search_bar';
 import { useChangePontDetectionContext } from './change_point_detection_context';
 import { MetricFieldSelector } from './metric_field_selector';
@@ -31,8 +31,15 @@ import { FunctionPicker } from './function_picker';
 import { ChartComponent } from './chart_component';
 
 export const ChangePointDetectionPage: FC = () => {
-  const { isLoading, requestParams, updateRequestParams, annotations } =
-    useChangePontDetectionContext();
+  const {
+    isLoading,
+    requestParams,
+    updateRequestParams,
+    annotations,
+    resultFilters,
+    updateFilters,
+    resultQuery,
+  } = useChangePontDetectionContext();
 
   const setFn = useCallback(
     (fn: string) => {
@@ -62,20 +69,13 @@ export const ChangePointDetectionPage: FC = () => {
     [updateRequestParams]
   );
 
-  const setFilters = useCallback(
-    (filters: Filter[]) => {
-      updateRequestParams({ filters });
-    },
-    [updateRequestParams]
-  );
-
   return (
     <div data-test-subj="aiopsChanePointDetectionPage">
       <SearchBarWrapper
-        query={requestParams.query}
+        query={resultQuery}
         onQueryChange={setQuery}
-        filters={requestParams.filters ?? []}
-        onFiltersChange={setFilters}
+        filters={resultFilters}
+        onFiltersChange={updateFilters}
       />
 
       <EuiSpacer size="m" />

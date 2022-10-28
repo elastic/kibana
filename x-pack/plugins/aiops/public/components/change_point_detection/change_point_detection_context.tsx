@@ -18,7 +18,10 @@ import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { startWith } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
 import type { Query, Filter } from '@kbn/es-query';
-import { createMergedEsQuery } from '../../application/utils/search_utils';
+import {
+  createMergedEsQuery,
+  getEsQueryFromSavedSearch,
+} from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useTimefilter, useTimeRangeUpdates } from '../../hooks/use_time_filter';
 import { useChangePointRequest } from './use_change_point_agg_request';
@@ -45,6 +48,9 @@ export const ChangePointDetectionContext = createContext<{
   updateRequestParams: (update: Partial<ChangePointDetectionRequestParams>) => void;
   isLoading: boolean;
   annotations: ChangePointAnnotation[];
+  resultFilters: Filter[];
+  updateFilters: (update: Filter[]) => void;
+  resultQuery: Query;
 }>({
   isLoading: false,
   splitFieldsOptions: [],
@@ -54,6 +60,9 @@ export const ChangePointDetectionContext = createContext<{
   bucketInterval: {} as TimeBucketsInterval,
   updateRequestParams: () => {},
   annotations: [],
+  resultFilters: [],
+  updateFilters: () => {},
+  resultQuery: { query: '', language: 'kuery' },
 });
 
 export type ChangePointType =
@@ -75,8 +84,10 @@ interface ChangePointAnnotation {
   p_value?: number;
 }
 
+const DEFAULT_AGG_FUNCTION = 'min';
+
 export const ChangePointDetectionContextProvider: FC = ({ children }) => {
-  const { dataView } = useDataSource();
+  const { dataView, savedSearch } = useDataSource();
   const {
     uiSettings,
     notifications: { toasts },
@@ -84,6 +95,16 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
       query: { filterManager },
     },
   } = useAiopsAppContext();
+
+  const savedSearchQuery = useMemo(() => {
+    return getEsQueryFromSavedSearch({
+      dataView,
+      uiSettings,
+      savedSearch,
+      filterManager,
+    });
+  }, [dataView, savedSearch, uiSettings, filterManager]);
+
   const timefilter = useTimefilter();
   const timeBuckets = useTimeBuckets();
   const [annotations, setAnnotations] = useState<ChangePointAnnotation[]>([]);
@@ -128,10 +149,19 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   const [requestParamsFromUrl, updateRequestParams] =
     usePageUrlState<ChangePointDetectionRequestParams>('changePoint');
 
+  const resultQuery = useMemo<Query>(() => {
+    return (
+      requestParamsFromUrl.query ?? {
+        query: savedSearchQuery?.searchString,
+        language: savedSearchQuery?.queryLanguage,
+      }
+    );
+  }, [savedSearchQuery, requestParamsFromUrl.query]);
+
   const requestParams = useMemo(() => {
     const params = { ...requestParamsFromUrl };
     if (!params.fn) {
-      params.fn = 'min';
+      params.fn = DEFAULT_AGG_FUNCTION;
     }
     if (!params.metricField && metricFieldOptions.length > 0) {
       params.metricField = metricFieldOptions[0].name;
@@ -143,7 +173,15 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     return params;
   }, [requestParamsFromUrl, metricFieldOptions, splitFieldsOptions, bucketInterval]);
 
+  const updateFilters = useCallback(
+    (update: Filter[]) => {
+      filterManager.setFilters(update);
+    },
+    [filterManager]
+  );
+
   useMount(() => {
+    setResultFilter(filterManager.getFilters());
     const sub = filterManager.getUpdates$().subscribe(() => {
       setResultFilter(filterManager.getFilters());
     });
@@ -166,8 +204,8 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   );
 
   const combinedQuery = useMemo(() => {
-    return createMergedEsQuery(requestParams.query, resultFilters, dataView, uiSettings);
-  }, [resultFilters, requestParams.query, uiSettings, dataView]);
+    return createMergedEsQuery(resultQuery, resultFilters, dataView, uiSettings);
+  }, [resultFilters, resultQuery, uiSettings, dataView]);
 
   const { runRequest, cancelRequest, isLoading } = useChangePointRequest(
     requestParams,
@@ -229,6 +267,9 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     splitFieldsOptions,
     annotations,
     bucketInterval,
+    resultFilters,
+    updateFilters,
+    resultQuery,
   };
 
   return (
