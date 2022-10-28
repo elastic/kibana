@@ -24,10 +24,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  useGetSettings,
+  useStartServices,
   useFleetStatus,
   useAgentEnrollmentFlyoutData,
-  useStartServices,
+  useGetFleetServerHosts,
 } from '../../hooks';
 import { FLEET_SERVER_PACKAGE } from '../../constants';
 import type { PackagePolicy, AgentPolicy } from '../../types';
@@ -57,10 +57,12 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
     return policies.find((p) => p.id === id);
   };
 
-  const settings = useGetSettings();
+  const fleetServerHostsRequest = useGetFleetServerHosts();
+
   const fleetStatus = useFleetStatus();
-  const fleetServerHosts = settings.data?.item?.fleet_server_hosts || [];
   const { docLinks } = useStartServices();
+  const fleetServerHosts =
+    fleetServerHostsRequest.data?.items?.filter((f) => true)?.[0]?.host_urls ?? [];
 
   const [selectedPolicyId, setSelectedPolicyId] = useState(agentPolicy?.id);
   const [isFleetServerPolicySelected, setIsFleetServerPolicySelected] = useState<boolean>(false);
@@ -99,7 +101,8 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
 
   const { isK8s } = useIsK8sPolicy(selectedPolicy ? selectedPolicy : undefined);
 
-  const isLoadingInitialRequest = settings.isLoading && settings.isInitialRequest;
+  const isLoadingInitialRequest =
+    fleetServerHostsRequest.isLoading && fleetServerHostsRequest.isInitialRequest;
 
   return (
     <EuiFlyout data-test-subj="agentEnrollmentFlyout" onClose={onClose} size="m">
@@ -189,7 +192,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
           <Loading size="l" />
         ) : (
           <Instructions
-            settings={settings.data?.item}
+            fleetServerHosts={fleetServerHostsRequest.data?.items ?? []}
             setSelectedPolicyId={setSelectedPolicyId}
             agentPolicy={agentPolicy}
             selectedPolicy={selectedPolicy}
