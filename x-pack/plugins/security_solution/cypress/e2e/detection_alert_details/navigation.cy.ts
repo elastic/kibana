@@ -36,7 +36,6 @@ describe('Alert Details Page Navigation', () => {
     describe('context menu', () => {
       it('should navigate to the details page from the alert context menu', () => {
         cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
-        // It opens in a new tab by default, for testing purposes, we want it to open in the same tab
         cy.get(OPEN_ALERT_DETAILS_PAGE_CONTEXT_MENU_BTN).click({ force: true });
         cy.get(PAGE_TITLE).should('contain.text', rule.name);
         cy.url().should('include', '/summary');
@@ -50,7 +49,6 @@ describe('Alert Details Page Navigation', () => {
       });
 
       it('should navigate to the details page from the alert flyout', () => {
-        // It opens in a new tab by default, for testing purposes, we want it to open in the same tab
         expandFirstAlert();
         cy.get(OPEN_ALERT_DETAILS_PAGE).click({ force: true });
         cy.get(PAGE_TITLE).should('contain.text', rule.name);

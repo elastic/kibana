@@ -36,9 +36,9 @@ export const useGetRelatedCasesByEvent = (eventId: string) => {
       setError(err);
       toasts.addWarning(CASES_ERROR_TOAST(err));
     } finally {
+      setRelatedCases(relatedCasesResponse);
       setLoading(false);
     }
-    setRelatedCases(relatedCasesResponse);
   }, [eventId, cases.api, toasts]);
 
   useEffect(() => {

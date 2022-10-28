@@ -227,10 +227,10 @@ export const HoverActions: React.FC<Props> = React.memo(
     );
 
     const hiddenActionsCount = useMemo(() => {
-      let count = 0;
-      if (hideTopN) count += 1;
-      if (hideFilters) count += 2;
-      return count;
+      const hiddenTopNActions = hideTopN ? 1 : 0; // hides the `Top N` button
+      const hiddenFilterActions = hideFilters ? 2 : 0; // hides both the `Filter In` and `Filter out` buttons
+
+      return hiddenTopNActions + hiddenFilterActions;
     }, [hideFilters, hideTopN]);
 
     const { overflowActionItems, allActionItems } = useHoverActionItems({

@@ -178,7 +178,7 @@ describe('useDetailPanel', () => {
   });
 
   describe('open network details', () => {
-    const ip = '1.2.3.4.5';
+    const ip = '1.2.3.4';
     const flowTarget = FlowTargetSourceDest.source;
     test('should fire redux action to open host details panel', async () => {
       await act(async () => {

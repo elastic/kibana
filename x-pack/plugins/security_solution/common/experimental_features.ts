@@ -77,7 +77,7 @@ export const allowedExperimentalValues = Object.freeze({
   guidedOnboarding: false,
 
   /**
-   * Enables the alert details page currently only accessible via the alert details flyout
+   * Enables the alert details page currently only accessible via the alert details flyout and alert table context menu
    */
   alertDetailsPageEnabled: false,
 });

@@ -22,14 +22,14 @@ import { UserPanel } from './user_panel';
 import { SummaryColumn, SummaryRow } from './wrappers';
 
 export interface DetailsSummaryTabProps {
+  eventId: string;
   dataAsNestedObject: Ecs | null;
   detailsData: TimelineEventsDetailsItem[];
   sourcererDataView: SelectedDataView;
 }
 
 export const DetailsSummaryTab = React.memo(
-  ({ dataAsNestedObject, detailsData, sourcererDataView }: DetailsSummaryTabProps) => {
-    const eventId = dataAsNestedObject?._id as string;
+  ({ dataAsNestedObject, detailsData, eventId, sourcererDataView }: DetailsSummaryTabProps) => {
     const userCasesPermissions = useGetUserCasesPermissions();
 
     const { DetailsPanel, openHostDetailsPanel, openUserDetailsPanel } = useDetailPanel({

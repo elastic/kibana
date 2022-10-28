@@ -154,7 +154,6 @@ export const CasesPanel = React.memo<CasesPanelProps>(
                     </EuiButton>
                   </EuiFlexItem>
                 )}
-                {/* TODO: confirm update is the only item necessary and not also create and push */}
                 {userCasesPermissions.create && (
                   <EuiFlexItem>
                     <EuiButton

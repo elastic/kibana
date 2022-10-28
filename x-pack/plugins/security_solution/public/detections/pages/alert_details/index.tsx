@@ -49,8 +49,8 @@ export const AlertDetailsPage = memo(() => {
 
   // Example of using useGetFieldsData. Only place it is used currently
   const getFieldsData = useGetFieldsData(searchHit?.fields);
-  const timestamp = getFieldsData(TIMESTAMP) as string;
-  const ruleName = getFieldsData(ALERT_RULE_NAME) as string;
+  const timestamp = getFieldsData(TIMESTAMP) as string | undefined;
+  const ruleName = getFieldsData(ALERT_RULE_NAME) as string | undefined;
 
   useEffect(() => {
     // TODO: move detail panel to it's own redux state
@@ -78,6 +78,7 @@ export const AlertDetailsPage = memo(() => {
           <Switch>
             <Route exact path={getAlertDetailsTabUrl(eventId, AlertDetailRouteType.summary)}>
               <DetailsSummaryTab
+                eventId={eventId}
                 dataAsNestedObject={dataAsNestedObject}
                 detailsData={detailsData}
                 sourcererDataView={sourcererDataView}

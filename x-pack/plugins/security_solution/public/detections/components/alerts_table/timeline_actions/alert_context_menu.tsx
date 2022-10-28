@@ -55,7 +55,7 @@ interface AlertContextMenuProps {
   scopeId: string;
 }
 
-// eslint-disable-next-line complexity
+
 const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux> = ({
   ariaLabel = i18n.MORE_ACTIONS,
   ariaRowindex,
@@ -75,7 +75,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     setPopover(false);
   }, []);
 
-  const alertId = ecsRowData?.kibana?.alert ? ecsRowData?._id : null;
+  const getAlertId = () => (ecsRowData?.kibana?.alert ? ecsRowData?._id : null);
+  const alertId = getAlertId();
   const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
   const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
   const isInDetections = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage].includes(

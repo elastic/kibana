@@ -22,7 +22,7 @@ import {
   FirstLastSeenType,
 } from '../../../../../../common/components/first_last_seen';
 import { DefaultFieldRenderer } from '../../../../../../timelines/components/field_renderers/field_renderers';
-import { NetworkDetailsLink } from '../../../../../../common/components/links';
+import { HostDetailsLink, NetworkDetailsLink } from '../../../../../../common/components/links';
 import type { SelectedDataView } from '../../../../../../common/store/sourcerer/model';
 import { getEnrichedFieldInfo } from '../../../../../../common/components/event_details/helpers';
 import { getTimelineEventData } from '../../../utils/get_timeline_event_data';
@@ -134,7 +134,9 @@ export const HostPanel = React.memo(
               <HostPanelSection grow={false}>
                 <EuiIcon type="storage" size="xl" />
               </HostPanelSection>
-              <HostPanelSection title={HOST_NAME_TITLE}>{hostName}</HostPanelSection>
+              <HostPanelSection title={HOST_NAME_TITLE}>
+                <HostDetailsLink hostName={hostName} />
+              </HostPanelSection>
             </EuiFlexGroup>
             <EuiSpacer size="l" />
             <EuiFlexGroup data-test-subj="host-panel-agent-status">

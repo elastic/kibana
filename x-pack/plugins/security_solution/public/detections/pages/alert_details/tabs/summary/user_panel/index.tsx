@@ -19,7 +19,7 @@ import {
   FirstLastSeenType,
 } from '../../../../../../common/components/first_last_seen';
 import { DefaultFieldRenderer } from '../../../../../../timelines/components/field_renderers/field_renderers';
-import { NetworkDetailsLink } from '../../../../../../common/components/links';
+import { NetworkDetailsLink, UserDetailsLink } from '../../../../../../common/components/links';
 import type { SelectedDataView } from '../../../../../../common/store/sourcerer/model';
 import { getTimelineEventData } from '../../../utils/get_timeline_event_data';
 import {
@@ -108,7 +108,9 @@ export const UserPanel = React.memo(
               <UserPanelSection grow={false}>
                 <EuiIcon type="userAvatar" size="xl" />
               </UserPanelSection>
-              <UserPanelSection title={USER_NAME_TITLE}>{userName}</UserPanelSection>
+              <UserPanelSection title={USER_NAME_TITLE}>
+                <UserDetailsLink userName={userName} />
+              </UserPanelSection>
             </EuiFlexGroup>
             <EuiSpacer size="l" />
             {isRiskLicenseValid && (
