@@ -7,19 +7,22 @@
 
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
-  EuiHorizontalRule,
-  EuiTabbedContent,
-  EuiSpacer,
-  EuiLoadingContent,
-  EuiNotificationBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLoadingContent,
   EuiLoadingSpinner,
+  EuiNotificationBadge,
+  EuiSpacer,
+  EuiTabbedContent,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
+import { isDetectionsAlertsTable } from '../top_n/helpers';
+import { getTourAnchor, SecurityStepId } from '../guided_onboarding_tour/tour_config';
 import type { AlertRawEventData } from './osquery_tab';
 import { useOsqueryTab } from './osquery_tab';
 import { EventFieldsBrowser } from './event_fields_browser';
@@ -178,6 +181,8 @@ const EventDetailsComponent: React.FC<Props> = ({
         : null,
     [detailsEcsData]
   );
+
+  const isTourAnchor = useMemo(() => isDetectionsAlertsTable(scopeId), [scopeId]);
 
   const showThreatSummary = useMemo(() => {
     const hasEnrichments = enrichmentCount > 0;
@@ -401,14 +406,26 @@ const EventDetailsComponent: React.FC<Props> = ({
     [tabs, selectedTabId]
   );
 
+  const tourAnchor = useMemo(
+    () => (isTourAnchor ? { 'tour-step': getTourAnchor(3, SecurityStepId.alertsCases) } : {}),
+    [isTourAnchor]
+  );
+
   return (
-    <StyledEuiTabbedContent
-      data-test-subj="eventDetails"
-      tabs={tabs}
-      selectedTab={selectedTab}
-      onTabClick={handleTabClick}
-      key="event-summary-tabs"
-    />
+    <GuidedOnboardingTourStep
+      isTourAnchor={isTourAnchor}
+      step={3}
+      stepId={SecurityStepId.alertsCases}
+    >
+      <StyledEuiTabbedContent
+        {...tourAnchor}
+        data-test-subj="eventDetails"
+        tabs={tabs}
+        selectedTab={selectedTab}
+        onTabClick={handleTabClick}
+        key="event-summary-tabs"
+      />
+    </GuidedOnboardingTourStep>
   );
 };
 EventDetailsComponent.displayName = 'EventDetailsComponent';
