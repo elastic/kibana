@@ -51,6 +51,11 @@ export default function (providerContext: FtrProviderContext) {
       {
         data_stream: {
           dataset: monitorType,
+          elasticsearch: {
+            privileges: {
+              indices: ['auto_configure', 'create_doc', 'read'],
+            },
+          },
           type: 'synthetics',
         },
         id: `${getSyntheticsPolicy(agentFullPolicy)?.streams?.[0]?.id}`,
@@ -81,6 +86,11 @@ export default function (providerContext: FtrProviderContext) {
             {
               data_stream: {
                 dataset: 'browser.network',
+                elasticsearch: {
+                  privileges: {
+                    indices: ['auto_configure', 'create_doc', 'read'],
+                  },
+                },
                 type: 'synthetics',
               },
               id: `${getSyntheticsPolicy(agentFullPolicy)?.streams?.[1]?.id}`,
@@ -105,6 +115,11 @@ export default function (providerContext: FtrProviderContext) {
             {
               data_stream: {
                 dataset: 'browser.screenshot',
+                elasticsearch: {
+                  privileges: {
+                    indices: ['auto_configure', 'create_doc', 'read'],
+                  },
+                },
                 type: 'synthetics',
               },
               id: `${getSyntheticsPolicy(agentFullPolicy)?.streams?.[2]?.id}`,
@@ -133,11 +148,7 @@ export default function (providerContext: FtrProviderContext) {
     use_output: 'default',
   });
 
-  // FAILING: https://github.com/elastic/kibana/issues/144139
-  // FAILING: https://github.com/elastic/kibana/issues/144140
-  // FAILING: https://github.com/elastic/kibana/issues/144141
-  // FAILING: https://github.com/elastic/kibana/issues/144142
-  describe.skip('When on the Synthetics Integration Policy Create Page', function () {
+  describe('When on the Synthetics Integration Policy Create Page', function () {
     skipIfNoDockerRegistry(providerContext);
     const basicConfig = {
       name: monitorName,
