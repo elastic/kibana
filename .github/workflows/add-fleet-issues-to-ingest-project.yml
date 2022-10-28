@@ -31,7 +31,7 @@ jobs:
           project_id: ${{ env.INGEST_PROJECT_ID }}
           content_id: ${{ github.event.issue.node_id }}
         env:
-          GITHUB_TOKEN: ${{ secrets.FLEET_TECH_KIBANA_USER_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.FLEET_PROJECT_TOKEN }}
       - uses: octokit/graphql-action@v2.x
         id: set_fleet_ui_area
         if: github.event.label.name == env.FLEET_LABEL
@@ -48,4 +48,4 @@ jobs:
           area_field_id: ${{ env.AREA_FIELD_ID }}
           area_id: ${{ env.FLEET_UI_OPTION_ID }}
         env:
-          GITHUB_TOKEN: ${{ secrets.FLEET_TECH_KIBANA_USER_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.FLEET_PROJECT_TOKEN }}
