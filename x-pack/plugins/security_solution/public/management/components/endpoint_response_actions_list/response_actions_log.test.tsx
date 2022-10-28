@@ -606,17 +606,22 @@ describe('Response actions history', () => {
 
     it('should show a list of actions when opened', () => {
       render();
-      const { getByTestId } = renderResult;
+      const { getByTestId, getAllByTestId } = renderResult;
 
       userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
-      expect(filterList.querySelectorAll('ul>li').length).toEqual(
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(
         RESPONSE_ACTION_API_COMMANDS_NAMES.length
       );
-      expect(
-        Array.from(filterList.querySelectorAll('ul>li')).map((option) => option.textContent)
-      ).toEqual(['isolate', 'release', 'kill-process', 'suspend-process', 'processes', 'get-file']);
+      expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
+        'isolate',
+        'release',
+        'kill-process',
+        'suspend-process',
+        'processes',
+        'get-file',
+      ]);
     });
 
     it('should have `clear all` button `disabled` when no selected values', () => {
@@ -634,15 +639,17 @@ describe('Response actions history', () => {
 
     it('should show a list of statuses when opened', () => {
       render();
-      const { getByTestId } = renderResult;
+      const { getByTestId, getAllByTestId } = renderResult;
 
       userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
-      expect(filterList.querySelectorAll('ul>li').length).toEqual(3);
-      expect(
-        Array.from(filterList.querySelectorAll('ul>li')).map((option) => option.textContent)
-      ).toEqual(['Failed', 'Pending', 'Successful']);
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(3);
+      expect(getAllByTestId(`${filterPrefix}-option`).map((option) => option.textContent)).toEqual([
+        'Failed',
+        'Pending',
+        'Successful',
+      ]);
     });
 
     it('should have `clear all` button `disabled` when no selected values', () => {
@@ -677,13 +684,13 @@ describe('Response actions history', () => {
 
     it('should show a list of host names when opened', () => {
       render({ showHostNames: true });
-      const { getByTestId } = renderResult;
+      const { getByTestId, getAllByTestId } = renderResult;
 
       const popoverButton = getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`);
       userEvent.click(popoverButton);
       const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
-      expect(filterList.querySelectorAll('ul>li').length).toEqual(9);
+      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(9);
       expect(
         getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`).querySelector(
           '.euiNotificationBadge'
@@ -706,16 +713,15 @@ describe('Response actions history', () => {
         }
       });
 
-      const filterList = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
-
-      const selectedFilterOptions = Array.from(filterList.querySelectorAll('ul>li')).reduce<
-        number[]
-      >((acc, curr, i) => {
-        if (curr.getAttribute('aria-checked') === 'true') {
-          acc.push(i);
-        }
-        return acc;
-      }, []);
+      const selectedFilterOptions = getAllByTestId(`${filterPrefix}-option`).reduce<number[]>(
+        (acc, curr, i) => {
+          if (curr.getAttribute('aria-checked') === 'true') {
+            acc.push(i);
+          }
+          return acc;
+        },
+        []
+      );
 
       expect(selectedFilterOptions).toEqual([1, 3, 5]);
     });
@@ -740,16 +746,16 @@ describe('Response actions history', () => {
 
       // re-open
       userEvent.click(popoverButton);
-      const filterList = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
 
-      const selectedFilterOptions = Array.from(filterList.querySelectorAll('ul>li')).reduce<
-        number[]
-      >((acc, curr, i) => {
-        if (curr.getAttribute('aria-checked') === 'true') {
-          acc.push(i);
-        }
-        return acc;
-      }, []);
+      const selectedFilterOptions = getAllByTestId(`${filterPrefix}-option`).reduce<number[]>(
+        (acc, curr, i) => {
+          if (curr.getAttribute('aria-checked') === 'true') {
+            acc.push(i);
+          }
+          return acc;
+        },
+        []
+      );
 
       expect(selectedFilterOptions).toEqual([0, 1, 2]);
     });
@@ -784,15 +790,15 @@ describe('Response actions history', () => {
         }
       });
 
-      const filterList = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
-      const selectedFilterOptions = Array.from(filterList.querySelectorAll('ul>li')).reduce<
-        number[]
-      >((acc, curr, i) => {
-        if (curr.getAttribute('aria-checked') === 'true') {
-          acc.push(i);
-        }
-        return acc;
-      }, []);
+      const selectedFilterOptions = getAllByTestId(`${filterPrefix}-option`).reduce<number[]>(
+        (acc, curr, i) => {
+          if (curr.getAttribute('aria-checked') === 'true') {
+            acc.push(i);
+          }
+          return acc;
+        },
+        []
+      );
 
       expect(selectedFilterOptions).toEqual([0, 1, 2, 4, 6, 8]);
     });
