@@ -6,6 +6,7 @@
  */
 
 import { chunk } from 'lodash';
+import { queue } from 'async';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -239,23 +240,23 @@ export const defineExplainLogRateSpikesRoute = (
           // Don't use more than 10 here otherwise Kibana will emit an error
           // regarding a limit of abort signal listeners of more than 10.
           const CHUNK_SIZE = 10;
-          let chunkCount = 0;
 
-          const fieldCandidatesChunks = chunk(fieldCandidates, CHUNK_SIZE);
+          const loadingStepSizePValues = PROGRESS_STEP_P_VALUES;
+
+          const totalFieldCandidates = fieldCandidates.length;
 
           logDebugMessage('Fetch p-values.');
 
-          for (const fieldCandidatesChunk of fieldCandidatesChunks) {
-            chunkCount++;
-            logDebugMessage(
-              `Fetch p-values. Chunk ${chunkCount} of ${fieldCandidatesChunks.length}`
-            );
+          const q = queue(async function (fieldCandidate: string) {
+            loaded += (1 / totalFieldCandidates) * loadingStepSizePValues;
+
             let pValues: Awaited<ReturnType<typeof fetchChangePointPValues>>;
+
             try {
               pValues = await fetchChangePointPValues(
                 client,
                 request.body,
-                fieldCandidatesChunk,
+                [fieldCandidate],
                 logger,
                 sampleProbability,
                 pushError,
@@ -264,13 +265,11 @@ export const defineExplainLogRateSpikesRoute = (
             } catch (e) {
               if (!isRequestAbortedError(e)) {
                 logger.error(
-                  `Failed to fetch p-values for ${JSON.stringify(
-                    fieldCandidatesChunk
-                  )}, got: \n${e.toString()}`
+                  `Failed to fetch p-values for '${fieldCandidate}', got: \n${e.toString()}`
                 );
-                pushError(`Failed to fetch p-values for ${JSON.stringify(fieldCandidatesChunk)}.`);
-              } // Still continue the analysis even if chunks of p-value queries fail.
-              continue;
+                pushError(`Failed to fetch p-values for '${fieldCandidate}'.`);
+              }
+              return;
             }
 
             if (pValues.length > 0) {
@@ -278,12 +277,10 @@ export const defineExplainLogRateSpikesRoute = (
                 fieldsToSample.add(d.fieldName);
               });
               changePoints.push(...pValues);
-            }
 
-            loaded += (1 / fieldCandidatesChunks.length) * PROGRESS_STEP_P_VALUES;
-            if (pValues.length > 0) {
               push(addChangePointsAction(pValues));
             }
+
             push(
               updateLoadingStateAction({
                 ccsWarning: false,
@@ -303,10 +300,14 @@ export const defineExplainLogRateSpikesRoute = (
 
             if (shouldStop) {
               logDebugMessage('shouldStop fetching p-values.');
+              q.kill();
               end();
-              return;
             }
-          }
+          }, CHUNK_SIZE);
+
+          q.push(fieldCandidates);
+
+          await q.drain();
 
           if (changePoints.length === 0) {
             logDebugMessage('Stopping analysis, did not find change points.');
