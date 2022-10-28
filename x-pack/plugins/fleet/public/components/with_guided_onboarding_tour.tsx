@@ -11,7 +11,7 @@ import type { EuiTourStepProps } from '@elastic/eui';
 import { EuiButton, EuiText, EuiTourStep } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-type TourType = 'addIntegrationButton' | 'integrationsList' | 'agentModalButton';
+type TourType = 'addIntegrationButton' | 'integrationCard' | 'agentModalButton';
 const getTourConfig = (packageKey: string, tourType: TourType) => {
   if (packageKey.startsWith('endpoint') && tourType === 'addIntegrationButton') {
     return {
@@ -21,6 +21,17 @@ const getTourConfig = (packageKey: string, tourType: TourType) => {
       description: i18n.translate('xpack.fleet.guidedOnboardingTour.endpointButton.description', {
         defaultMessage:
           'In just a few steps, configure your data with our recommended defaults. You can change this later.',
+      }),
+    };
+  }
+
+  if (packageKey.startsWith('endpoint') && tourType === 'integrationCard') {
+    return {
+      title: i18n.translate('xpack.fleet.guidedOnboardingTour.endpointCard.title', {
+        defaultMessage: 'Select Elastic Defend',
+      }),
+      description: i18n.translate('xpack.fleet.guidedOnboardingTour.endpointCard.description', {
+        defaultMessage: 'The best way to get data quickly in to your SIEM.',
       }),
     };
   }
