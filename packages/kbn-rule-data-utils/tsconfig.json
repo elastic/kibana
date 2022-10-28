@@ -4,7 +4,6 @@
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": true,
-    "incremental": false,
     "outDir": "./target_types",
     "stripInternal": false,
     "types": [

@@ -4,7 +4,6 @@
     "outDir": "target",
     "allowJs": true,
     "checkJs": true,
-    "composite": false,
     "target": "ES2022",
     "module": "ESNext"
   },

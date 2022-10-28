@@ -12,7 +12,6 @@ import { IMinimatch, Minimatch } from 'minimatch';
 import { REPO_ROOT } from '@kbn/utils';
 
 import { parseTsConfig } from './ts_configfile';
-import { ProjectSet } from './project_set';
 
 function makeMatchers(directory: string, patterns: string[]) {
   return patterns.map(
@@ -109,6 +108,8 @@ export class Project {
     return project;
   }
 
+  public readonly typeCheckConfigPath: string;
+
   constructor(
     public readonly tsConfigPath: string,
     public readonly directory: string,
@@ -121,7 +122,9 @@ export class Project {
     private readonly includePatterns?: string[],
     private readonly exclude?: IMinimatch[],
     private readonly excludePatterns?: string[]
-  ) {}
+  ) {
+    this.typeCheckConfigPath = Path.resolve(this.directory, 'tsconfig.type_check.json');
+  }
 
   public getIncludePatterns(): string[] {
     return this.includePatterns
@@ -146,11 +149,6 @@ export class Project {
     return testMatchers(this.getExclude(), path) ? false : testMatchers(this.getInclude(), path);
   }
 
-  public isCompositeProject(): boolean {
-    const own = this.config.compilerOptions?.composite;
-    return !!(own === undefined ? this.baseProject?.isCompositeProject() : own);
-  }
-
   public getOutDir(): string | undefined {
     if (this.config.compilerOptions?.outDir) {
       return Path.resolve(this.directory, this.config.compilerOptions.outDir);
@@ -169,21 +167,6 @@ export class Project {
     }
 
     return this.baseProject ? this.baseProject.getRefdPaths() : [];
-  }
-
-  public getProjectsDeep(cache?: Map<string, Project>) {
-    const projects = new Set<Project>();
-    const queue = new Set<string>([this.tsConfigPath]);
-
-    for (const path of queue) {
-      const project = Project.load(path, {}, { skipConfigValidation: true, cache });
-      projects.add(project);
-      for (const refPath of project.getRefdPaths()) {
-        queue.add(refPath);
-      }
-    }
-
-    return new ProjectSet(projects);
   }
 
   public getConfigPaths(): string[] {

@@ -4,13 +4,14 @@
     "outDir": "./target/types"
   },
   "include": [
-    "public/**/*.ts",
-    "public/**/*.tsx",
+    "**/*.ts",
+    "**/*.tsx",
   ],
   "exclude": [
     "./target"
   ],
   "references": [
-    { "path": "../../../../../src/core/tsconfig.json" }
+    { "path": "../../../../../src/core/tsconfig.json" },
+    { "path": "../../../../plugins/global_search/tsconfig.json" },
   ]
 }

@@ -23,9 +23,9 @@
   "exclude": [
     "target/**/*",
     "analytics/fixtures/plugins/**/*",
-    "interpreter_functional/plugins/**/*",
-    "plugin_functional/plugins/**/*",
+    "interactive_setup_api_integration/fixtures/test_endpoints/**/*",
     "server_integration/__fixtures__/plugins/**/*",
+    "*/plugins/**/*",
   ],
   "references": [
     { "path": "../src/core/tsconfig.json" },
