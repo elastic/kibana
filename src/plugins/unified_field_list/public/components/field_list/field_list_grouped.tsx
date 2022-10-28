@@ -138,6 +138,19 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                           },
                         }
                       ),
+                    fieldGroups.PopularFields &&
+                      (!fieldGroups.PopularFields?.hideIfEmpty ||
+                        fieldGroups.PopularFields?.fields?.length > 0) &&
+                      i18n.translate(
+                        'unifiedFieldList.fieldListGrouped.fieldSearchForPopularFieldsLiveRegion',
+                        {
+                          defaultMessage:
+                            '{popularFields} empty {popularFields, plural, one {field} other {fields}}.',
+                          values: {
+                            popularFields: fieldGroups.PopularFields?.fields?.length || 0,
+                          },
+                        }
+                      ),
                     fieldGroups.EmptyFields &&
                       (!fieldGroups.EmptyFields?.hideIfEmpty ||
                         fieldGroups.EmptyFields?.fields?.length > 0) &&

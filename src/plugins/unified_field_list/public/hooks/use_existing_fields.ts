@@ -15,7 +15,6 @@ import {
   DataPublicPluginStart,
   DataViewsContract,
   getEsQueryConfig,
-  UI_SETTINGS,
 } from '@kbn/data-plugin/public';
 import { type DataView } from '@kbn/data-plugin/common';
 import { loadFieldExisting } from '../services/field_existing';
@@ -137,11 +136,11 @@ export const useExistingFieldsFetcher = (
 
           const existingFieldNames = result?.existingFieldNames || [];
 
-          const metaFields = core.uiSettings.get(UI_SETTINGS.META_FIELDS) || [];
           if (
-            !existingFieldNames.filter((fieldName) => !metaFields.includes?.(fieldName)).length &&
+            onNoData &&
             numberOfFetches === 1 &&
-            onNoData
+            !existingFieldNames.filter((fieldName) => !dataView?.metaFields?.includes(fieldName))
+              .length
           ) {
             onNoData(dataViewId);
           }

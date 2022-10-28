@@ -373,7 +373,7 @@ export function DiscoverSidebarComponent({
                 selectedDataView.id!
               )}
               renderFieldItem={renderFieldItem}
-              existFieldsInIndex={Boolean(fields?.length)}
+              fieldsExistInIndex={Boolean(fields?.length)}
             />
           )}
           {/* <div */}

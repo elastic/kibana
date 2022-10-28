@@ -103,7 +103,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
       (onSelectedFieldFilter ? sortedFields.filter(onSelectedFieldFilter) : []);
     const popularFields = popularFieldsLimit
       ? sortedFields
-          .filter((field) => field.count && field.type !== '_source')
+          .filter((field) => field.count && field.type !== '_source' && containsData(field))
           .sort((a: T, b: T) => (b.count || 0) - (a.count || 0))
           .slice(0, popularFieldsLimit)
       : [];

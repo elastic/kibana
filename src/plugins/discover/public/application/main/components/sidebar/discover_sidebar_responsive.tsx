@@ -149,7 +149,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const query = useAppStateSelector((state) => state.query);
   const filters = useAppStateSelector((state) => state.filters);
-  const dateRange = data.query.timefilter.timefilter.getTime();
+  const dateRange = data.query.timefilter.timefilter.getTime(); // TODO: is it correct to use the relative time range instead of absolute time range here? Currently, it helps to avoid unnecessary refetches.
 
   const { isProcessing, refetchFieldsExistenceInfo } = useExistingFieldsFetcher({
     dataViews: selectedDataView ? [selectedDataView] : [],

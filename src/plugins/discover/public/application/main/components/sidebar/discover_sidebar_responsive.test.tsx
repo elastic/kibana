@@ -30,6 +30,8 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
+import * as ExistingFieldsServiceApi from '@kbn/unified-field-list-plugin/public/services/field_existing/load_field_existing';
+import { coreMock } from '@kbn/core/public/mocks';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -68,8 +70,11 @@ jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
 }));
 
 const dataServiceMock = dataPluginMock.createStartContract();
+const dataViews = dataViewPluginMocks.createStartContract();
+const core = coreMock.createStart();
 
 const mockServices = {
+  core,
   history: () => ({
     location: {
       search: '',
@@ -83,13 +88,7 @@ const mockServices = {
       save: false,
     },
   },
-  uiSettings: {
-    get: (key: string) => {
-      if (key === 'fields:popularLimit') {
-        return 5;
-      }
-    },
-  },
+  uiSettings: core.uiSettings,
   docLinks: { links: { discover: { fieldTypeHelp: '' } } },
   dataViewEditor: {
     userPermissions: {
@@ -108,11 +107,15 @@ const mockServices = {
             from: '2021-08-31T22:00:00.000Z',
             to: '2022-09-01T09:16:29.553Z',
           }),
+          getTime: () => ({
+            from: 'now-15m',
+            to: 'now',
+          }),
         },
       },
     },
   },
-  dataViews: dataViewPluginMocks.createStartContract(),
+  dataViews,
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   charts: chartPluginMock.createSetupContract(),
 } as unknown as DiscoverServices;
@@ -133,6 +136,19 @@ jest.mock('../../../../kibana_services', () => ({
 jest.mock('../../utils/calc_field_counts', () => ({
   calcFieldCounts: () => mockCalcFieldCounts(),
 }));
+
+jest.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockImplementation(async () => ({
+  indexPatternTitle: 'test',
+  existingFieldNames: Object.keys(mockCalcFieldCounts()),
+}));
+jest.spyOn(dataViews, 'get').mockImplementation(async (dataViewId) => {
+  return [stubLogstashDataView].find((dw) => dw.id === dataViewId)!;
+});
+jest.spyOn(core.uiSettings, 'get').mockImplementation((key: string) => {
+  if (key === 'fields:popularLimit') {
+    return 5;
+  }
+});
 
 function getCompProps(): DiscoverSidebarResponsiveProps {
   const dataView = stubLogstashDataView;
@@ -202,26 +218,34 @@ describe('discover responsive sidebar', function () {
     });
   });
 
-  it('should have Selected Fields and Available Fields with Popular Fields sections', function () {
-    const popular = findTestSubject(comp, 'fieldList-popular');
-    const selected = findTestSubject(comp, 'fieldList-selected');
-    const unpopular = findTestSubject(comp, 'fieldList-unpopular');
-    expect(popular.children().length).toBe(1);
-    expect(unpopular.children().length).toBe(6);
-    expect(selected.children().length).toBe(1);
+  it('should have Selected Fields, Available Fields, and Popular Fields sections', async function () {
+    const popularFieldsCount = findTestSubject(comp, 'fieldListGroupedPopularFields-count');
+    const selectedFieldsCount = findTestSubject(comp, 'fieldListGroupedSelectedFields-count');
+    const availableFieldsCount = findTestSubject(comp, 'fieldListGroupedAvailableFields-count');
+    const emptyFieldsCount = findTestSubject(comp, 'fieldListGroupedEmptyFields-count');
+    const metaFieldsCount = findTestSubject(comp, 'fieldListGroupedMetaFields-count');
+
+    expect(selectedFieldsCount.text()).toBe('1');
+    expect(popularFieldsCount.text()).toBe('1');
+    expect(availableFieldsCount.text()).toBe('3'); // TODO: double check
+    expect(emptyFieldsCount.text()).toBe('20');
+    expect(metaFieldsCount.text()).toBe('2');
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
   it('should allow selecting fields', function () {
-    findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
+    const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
+    findTestSubject(availableFields, 'fieldToggle-bytes').simulate('click');
     expect(props.onAddField).toHaveBeenCalledWith('bytes');
   });
   it('should allow deselecting fields', function () {
-    findTestSubject(comp, 'fieldToggle-extension').simulate('click');
+    const selectedFields = findTestSubject(comp, 'fieldListGroupedSelectedFields');
+    findTestSubject(selectedFields, 'fieldToggle-extension').simulate('click');
     expect(props.onRemoveField).toHaveBeenCalledWith('extension');
   });
   it('should allow adding filters', async function () {
+    const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
     await act(async () => {
-      const button = findTestSubject(comp, 'field-extension-showDetails');
+      const button = findTestSubject(availableFields, 'field-extension-showDetails');
       await button.simulate('click');
       await comp.update();
     });
@@ -231,8 +255,9 @@ describe('discover responsive sidebar', function () {
     expect(props.onAddFilter).toHaveBeenCalled();
   });
   it('should allow adding "exist" filter', async function () {
+    const availableFields = findTestSubject(comp, 'fieldListGroupedAvailableFields');
     await act(async () => {
-      const button = findTestSubject(comp, 'field-extension-showDetails');
+      const button = findTestSubject(availableFields, 'field-extension-showDetails');
       await button.simulate('click');
       await comp.update();
     });
@@ -242,14 +267,14 @@ describe('discover responsive sidebar', function () {
     expect(props.onAddFilter).toHaveBeenCalledWith('_exists_', 'extension', '+');
   });
   it('should allow filtering by string, and calcFieldCount should just be executed once', function () {
-    expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(6);
+    expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('6');
     act(() => {
       findTestSubject(comp, 'fieldFilterSearchInput').simulate('change', {
         target: { value: 'abc' },
       });
     });
     comp.update();
-    expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(4);
+    expect(findTestSubject(comp, 'fieldListGroupedAvailableFields-count').text()).toBe('4');
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
 
