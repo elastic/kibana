@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiFormRow,
   EuiFieldText,
+  EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -132,6 +133,19 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
             />
             {status === 'error' && <EuiFormErrorText>{error}</EuiFormErrorText>}
           </>
+        </EuiFormRow>
+        <EuiFormRow fullWidth {...inputs.isDefaultInput.formRowProps}>
+          <EuiSwitch
+            data-test-subj="fleetServerHostsFlyout.isDefaultSwitch"
+            {...inputs.isDefaultInput.props}
+            disabled={false}
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.fleetServerHostsFlyout.defaultOutputSwitchLabel"
+                defaultMessage="Make this Fleet server the default one."
+              />
+            }
+          />
         </EuiFormRow>
 
         <EuiSpacer size="m" />

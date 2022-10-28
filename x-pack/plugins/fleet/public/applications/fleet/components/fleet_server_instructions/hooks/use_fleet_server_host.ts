@@ -13,6 +13,7 @@ import {
   useGetFleetServerHosts,
   useComboInput,
   useInput,
+  useSwitchInput,
 } from '../../../hooks';
 import type { FleetServerHost } from '../../../types';
 
@@ -31,6 +32,7 @@ export interface FleetServerHostForm {
   inputs: {
     hostUrlsInput: ReturnType<typeof useComboInput>;
     nameInput: ReturnType<typeof useInput>;
+    isDefaultInput: ReturnType<typeof useSwitchInput>;
   };
 }
 
@@ -40,6 +42,11 @@ export const useFleetServerHost = (): FleetServerHostForm => {
 
   const isPreconfigured = fleetServerHost?.is_preconfigured ?? false;
   const nameInput = useInput(fleetServerHost?.name ?? '', validateName, isPreconfigured);
+
+  const isDefaultInput = useSwitchInput(
+    fleetServerHost?.is_default ?? false,
+    isPreconfigured || fleetServerHost?.is_default
+  );
 
   const hostUrlsInput = useComboInput(
     'hostUrls',
@@ -105,6 +112,7 @@ export const useFleetServerHost = (): FleetServerHostForm => {
     inputs: {
       hostUrlsInput,
       nameInput,
+      isDefaultInput,
     },
   };
 };
