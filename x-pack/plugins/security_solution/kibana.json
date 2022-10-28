@@ -19,6 +19,7 @@
     "embeddable",
     "eventLog",
     "features",
+    "guidedOnboarding",
     "inspector",
     "kubernetesSecurity",
     "lens",
