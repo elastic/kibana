@@ -18,8 +18,7 @@ export type GetUrlParams = () => SyntheticsUrlParams;
 export type UpdateUrlParams = (
   updatedParams: {
     [key: string]: string | number | boolean | undefined;
-  },
-  clearAllParams?: boolean
+  } | null
 ) => void;
 
 export type SyntheticsUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
@@ -42,24 +41,26 @@ export const useUrlParams: SyntheticsUrlParamsHook = () => {
         ...updatedParams,
       };
 
-      const updatedSearch = stringify(
-        // drop any parameters that have no value
-        Object.keys(mergedParams).reduce((params, key) => {
-          const value = mergedParams[key];
-          if (value === undefined || value === '') {
-            return params;
-          }
+      const updatedSearch = updatedParams
+        ? stringify(
+            // drop any parameters that have no value
+            Object.keys(mergedParams).reduce((params, key) => {
+              const value = mergedParams[key];
+              if (value === undefined || value === '') {
+                return params;
+              }
 
-          return {
-            ...params,
-            [key]: value,
-          };
-        }, {})
-      );
+              return {
+                ...params,
+                [key]: value,
+              };
+            }, {})
+          )
+        : null;
 
       // only update the URL if the search has actually changed
       if (search !== updatedSearch) {
-        history.push({ pathname, search: !clearAllParams ? updatedSearch : undefined });
+        history.push({ pathname, search: updatedSearch || undefined });
       }
     },
     [history, pathname, search]

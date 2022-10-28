@@ -30,9 +30,7 @@ export function NoMonitorsFound() {
 export function ClearFilters() {
   const [_, updateUrlParams] = useUrlParams();
   return (
-    <EuiButtonEmpty onClick={() => updateUrlParams(null, true)}>
-      {CLEAR_FILTERS_LABEL}
-    </EuiButtonEmpty>
+    <EuiButtonEmpty onClick={() => updateUrlParams(null)}>{CLEAR_FILTERS_LABEL}</EuiButtonEmpty>
   );
 }
 
