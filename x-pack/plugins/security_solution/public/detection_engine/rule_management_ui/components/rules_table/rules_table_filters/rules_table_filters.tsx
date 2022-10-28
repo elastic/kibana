@@ -15,8 +15,6 @@ import {
 import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
-import { GuidedOnboardingTourStep } from '../../../../../common/components/guided_onboarding_tour/tour_step';
-import { SecurityStepId } from '../../../../../common/components/guided_onboarding_tour/tour_config';
 import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import { usePrePackagedRulesStatus } from '../../../../rule_management/logic/use_pre_packaged_rules_status';
@@ -24,6 +22,7 @@ import * as i18n from '../../../../../detections/pages/detection_engine/rules/tr
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import { TagsFilterPopover } from './tags_filter_popover';
 import { useTags } from '../../../../rule_management/logic/use_tags';
+import { SEARCH_FIRST_RULE_ANCHOR } from '../../guided_onboarding/rules_management_tour';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
@@ -86,15 +85,14 @@ const RulesTableFiltersComponent = () => {
   return (
     <FilterWrapper gutterSize="m" justifyContent="flexEnd">
       <SearchBarWrapper grow>
-        <GuidedOnboardingTourStep step={2} stepId={SecurityStepId.rules}>
-          <EuiFieldSearch
-            aria-label={i18n.SEARCH_RULES}
-            fullWidth
-            incremental={false}
-            placeholder={i18n.SEARCH_PLACEHOLDER}
-            onSearch={handleOnSearch}
-          />
-        </GuidedOnboardingTourStep>
+        <EuiFieldSearch
+          id={SEARCH_FIRST_RULE_ANCHOR}
+          aria-label={i18n.SEARCH_RULES}
+          fullWidth
+          incremental={false}
+          placeholder={i18n.SEARCH_PLACEHOLDER}
+          onSearch={handleOnSearch}
+        />
       </SearchBarWrapper>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
