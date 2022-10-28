@@ -11,7 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
 
-import { fetchFieldCandidates, getRandomDocsRequest } from './fetch_field_candidates';
+import { fetchIndexInfo, getRandomDocsRequest } from './fetch_index_info';
 
 const params: AiopsExplainLogRateSpikesSchema = {
   index: 'the-index',
@@ -26,7 +26,7 @@ const params: AiopsExplainLogRateSpikesSchema = {
   searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
 };
 
-describe('query_field_candidates', () => {
+describe('fetch_index_info', () => {
   describe('getRandomDocsRequest', () => {
     it('returns the most basic request body for a sample of random documents', () => {
       const req = getRandomDocsRequest(params);
@@ -57,6 +57,7 @@ describe('query_field_candidates', () => {
             },
           },
           size: 1000,
+          track_total_hits: true,
         },
         index: params.index,
         ignore_throttled: undefined,
@@ -87,6 +88,7 @@ describe('query_field_candidates', () => {
                 },
               },
             ],
+            total: { value: 5000000 },
           },
         } as unknown as estypes.SearchResponse;
       });
@@ -96,9 +98,14 @@ describe('query_field_candidates', () => {
         search: esClientSearchMock,
       } as unknown as ElasticsearchClient;
 
-      const resp = await fetchFieldCandidates(esClientMock, params);
+      const { totalDocCount, sampleProbability, fieldCandidates } = await fetchIndexInfo(
+        esClientMock,
+        params
+      );
 
-      expect(resp).toEqual(['myIpFieldName', 'myKeywordFieldName']);
+      expect(fieldCandidates).toEqual(['myIpFieldName', 'myKeywordFieldName']);
+      expect(sampleProbability).toEqual(0.01);
+      expect(totalDocCount).toEqual(5000000);
       expect(esClientFieldCapsMock).toHaveBeenCalledTimes(1);
       expect(esClientSearchMock).toHaveBeenCalledTimes(1);
     });
