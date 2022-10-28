@@ -1985,7 +1985,7 @@ describe('SavedObjectsRepository Security Extension', () => {
 
       const expectedTypesAndSpaces = new Map([
         [obj1.type, new Set([namespace])],
-        [obj2.type, new Set(internalOptions.mockMGetResponseObjects[1].initialNamespaces)],
+        [obj2.type, new Set([namespace])], // only need authz in current space
       ]);
 
       const { typesAndSpaces: actualTypesAndSpaces, typeMap: actualTypeMap } =
