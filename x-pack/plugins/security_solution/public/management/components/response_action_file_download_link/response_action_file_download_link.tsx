@@ -109,7 +109,7 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     }
 
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="none">
+      <EuiFlexGroup alignItems="center" gutterSize="none" data-test-subj={dataTestSubj}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             href={downloadUrl}

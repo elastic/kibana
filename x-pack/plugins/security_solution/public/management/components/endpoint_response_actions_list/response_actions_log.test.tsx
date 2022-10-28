@@ -417,37 +417,21 @@ describe('Response actions history', () => {
     });
 
     it('should contain download link in expanded row for `get-file` action WITH file operation permission', async () => {
-      const privileges = useUserPrivilegesMock();
-
-      useUserPrivilegesMock.mockImplementationOnce(() => {
-        return {
-          ...privileges,
-          endpointPrivileges: {
-            ...privileges.endpointPrivileges,
-            canWriteFileOperations: true,
-          },
-        };
-      });
-
       mockUseGetEndpointActionList = {
         ...baseMockedActionList,
         data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
       };
 
       render();
-      const { getAllByTestId } = renderResult;
+      const { getByTestId } = renderResult;
 
-      const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
-      expandButtons.map((button) => userEvent.click(button));
-      const trays = getAllByTestId(`${testPrefix}-details-tray`);
-      expect(trays).toBeTruthy();
-      expect(
-        Array.from(trays[0].querySelectorAll('dd pre code'))
-          .map((title) => title.textContent)
-          .slice(-1)
-      ).toEqual([
-        'get-file completed successfullyClick here to download(ZIP file passcode: elastic)',
-      ]);
+      const expandButton = getByTestId(`${testPrefix}-expand-button`);
+      userEvent.click(expandButton);
+      const downloadLink = getByTestId(`${testPrefix}-getFileDownloadLink`);
+      expect(downloadLink).toBeTruthy();
+      expect(downloadLink.textContent).toEqual(
+        'Click here to download(ZIP file passcode: elastic)'
+      );
     });
 
     it('should not contain download link in expanded row for `get-file` action when NO file operation permission', async () => {
@@ -469,17 +453,14 @@ describe('Response actions history', () => {
       };
 
       render();
-      const { getAllByTestId } = renderResult;
+      const { getByTestId, queryByTestId } = renderResult;
 
-      const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
-      expandButtons.map((button) => userEvent.click(button));
-      const trays = getAllByTestId(`${testPrefix}-details-tray`);
-      expect(trays).toBeTruthy();
-      expect(
-        Array.from(trays[0].querySelectorAll('dd pre code'))
-          .map((title) => title.textContent)
-          .slice(-1)
-      ).toEqual(['get-file completed successfully']);
+      const expandButton = getByTestId(`${testPrefix}-expand-button`);
+      userEvent.click(expandButton);
+      const output = getByTestId(`${testPrefix}-details-tray-output`);
+      expect(output).toBeTruthy();
+      expect(output.textContent).toEqual('get-file completed successfully');
+      expect(queryByTestId(`${testPrefix}-getFileDownloadLink`)).toBeNull();
     });
 
     it('should refresh data when autoRefresh is toggled on', async () => {

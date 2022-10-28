@@ -186,7 +186,11 @@ export const useResponseActionsLogTable = ({
                     isGetFileCommand ? (
                       <>
                         {OUTPUT_MESSAGES.wasSuccessful(command)}
-                        <ResponseActionFileDownloadLink action={item} textSize="xs" />
+                        <ResponseActionFileDownloadLink
+                          action={item}
+                          textSize="xs"
+                          data-test-subj={getTestId('getFileDownloadLink')}
+                        />
                       </>
                     ) : (
                       OUTPUT_MESSAGES.wasSuccessful(command)
