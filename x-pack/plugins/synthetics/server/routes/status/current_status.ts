@@ -162,7 +162,7 @@ export async function getStatus(
       if (monitor.attributes[ConfigKey.ENABLED] === false) {
         disabledCount += monitor.attributes[ConfigKey.LOCATIONS].length;
       } else {
-        enabledIds.push(monitor.attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] || monitor.id);
+        enabledIds.push(monitor.attributes[ConfigKey.HEARTBEAT_ID]);
         maxLocations = Math.max(maxLocations, monitor.attributes.locations.length);
         maxPeriod = Math.max(maxPeriod, periodToMs(monitor.attributes.schedule));
       }
