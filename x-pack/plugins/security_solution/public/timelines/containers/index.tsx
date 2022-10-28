@@ -20,7 +20,7 @@ import type { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { timelineActions } from '../store/timeline';
-import { detectionsTimelineIds, skipQueryForDetectionsPage } from './helpers';
+import { detectionsTimelineIds } from './helpers';
 import { getInspectResponse } from '../../helpers';
 import type {
   PaginationInputPaginated,
@@ -344,7 +344,7 @@ export const useTimelineEventsHandler = ({
   );
 
   useEffect(() => {
-    if (skipQueryForDetectionsPage(id, indexNames) || indexNames.length === 0) {
+    if (indexNames.length === 0) {
       return;
     }
 
@@ -405,7 +405,7 @@ export const useTimelineEventsHandler = ({
           activeTimeline.setActivePage(newActivePage);
         }
       }
-      if (!skipQueryForDetectionsPage(id, indexNames) && !deepEqual(prevRequest, currentRequest)) {
+      if (!deepEqual(prevRequest, currentRequest)) {
         return currentRequest;
       }
       return prevRequest;

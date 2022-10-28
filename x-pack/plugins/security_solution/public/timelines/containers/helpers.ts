@@ -14,7 +14,7 @@ export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alerts
 export const skipQueryForDetectionsPage = (
   id: string,
   defaultIndex: string[],
-  useRuleRegistry = false
+  useRuleRegistry = true
 ) =>
   id != null &&
   detectionsTimelineIds.some((timelineId) => timelineId === id) &&

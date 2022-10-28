@@ -75,7 +75,8 @@ export const useAddBulkToTimelineAction = ({
   const { filters, dataTable: { selectAll, totalCount, sort, selectedEventIds } = tableDefaults } =
     useSelector((state: State) => eventsViewerSelector(state, tableId));
 
-  const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings as any), [uiSettings]);
 
   const timelineQuerySortField = sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
     field: columnId,
@@ -113,7 +114,7 @@ export const useAddBulkToTimelineAction = ({
     indexNames: selectedPatterns,
     filterQuery,
     runtimeMappings,
-    limit: Math.min(10000, totalCount),
+    limit: Math.min(MAX_LIMIT_TIMELINE, totalCount),
     timerangeKind: 'absolute',
   });
 
@@ -163,13 +164,6 @@ export const useAddBulkToTimelineAction = ({
 
   const onResponseHandler = useCallback(
     (localResponse: TimelineArgs) => {
-      dispatch(
-        setEventsLoading({
-          id: tableId,
-          isLoading: true,
-          eventIds: Object.keys(selectedEventIds),
-        })
-      );
       sendBulkEventsToTimelineAction(
         createTimeline,
         localResponse.events.map((item) => item.ecs),
@@ -192,6 +186,13 @@ export const useAddBulkToTimelineAction = ({
       if (!items) return;
 
       if (selectAll) {
+        dispatch(
+          setEventsLoading({
+            id: tableId,
+            isLoading: true,
+            eventIds: Object.keys(selectedEventIds),
+          })
+        );
         searchhandler(onResponseHandler);
         return;
       }
@@ -202,7 +203,15 @@ export const useAddBulkToTimelineAction = ({
         'KqlFilter'
       );
     },
-    [createTimeline, searchhandler, selectAll, onResponseHandler]
+    [
+      dispatch,
+      selectedEventIds,
+      tableId,
+      createTimeline,
+      searchhandler,
+      selectAll,
+      onResponseHandler,
+    ]
   );
 
   const investigateInTimelineTitle = useMemo(() => {

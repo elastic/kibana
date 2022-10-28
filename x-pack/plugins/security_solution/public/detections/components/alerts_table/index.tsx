@@ -204,6 +204,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     tableId,
     from,
     to,
+    scopeId: SourcererScopeName.detections,
   });
 
   const bulkActions = useMemo(

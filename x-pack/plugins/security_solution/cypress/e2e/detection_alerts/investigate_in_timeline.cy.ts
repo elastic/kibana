@@ -6,19 +6,13 @@
  */
 
 import { getNewRule } from '../../objects/rule';
-import { SELECTED_ALERTS } from '../../screens/alerts';
-import {
-  SELECT_ALL_EVENTS,
-  SELECT_EVENTS_ACTION_ADD_BULK_TO_TIMELINE,
-} from '../../screens/common/controls';
-import { EVENT_VIEWER_CHECKBOX } from '../../screens/hosts/events';
 import {
   ALERT_TABLE_FILE_NAME_HEADER,
   ALERT_TABLE_FILE_NAME_VALUES,
   ALERT_TABLE_SEVERITY_VALUES,
   PROVIDER_BADGE,
-  SERVER_SIDE_EVENT_COUNT,
 } from '../../screens/timeline';
+import { esArchiverLoad } from '../../tasks/es_archiver';
 
 import {
   addAlertPropertyToTimeline,
@@ -32,6 +26,11 @@ import { login, visit } from '../../tasks/login';
 import { openActiveTimeline } from '../../tasks/timeline';
 
 import { ALERTS_URL } from '../../urls/navigation';
+import {
+  investigateAllEventsInTimeline,
+  investigateFirstPageEventsInTimeline,
+} from '../../tasks/common/event_table';
+import { fillAddFilterForm, openAddFilterPopover } from '../../tasks/search_bar';
 
 describe('Alerts timeline', () => {
   before(() => {
@@ -69,29 +68,35 @@ describe('Alerts timeline', () => {
   });
 
   it('Add an empty property to default timeline', () => {
+    // add condition to make sure the fild is empty
+    openAddFilterPopover();
+    fillAddFilterForm({ key: 'file.name', operator: 'does not exist' });
     scrollAlertTableColumnIntoView(ALERT_TABLE_FILE_NAME_HEADER);
     addAlertPropertyToTimeline(ALERT_TABLE_FILE_NAME_VALUES, 0);
     openActiveTimeline();
     cy.get(PROVIDER_BADGE).first().should('have.text', 'NOT file.name exists');
   });
+});
+
+describe('Bulk Investigate in Timeline', () => {
+  before(() => {
+    cleanKibana();
+    login();
+    createCustomRuleEnabled(getNewRule());
+    esArchiverLoad('bulk_process');
+  });
+
+  beforeEach(() => {
+    visit(ALERTS_URL);
+    waitForAlertsToPopulate();
+  });
 
   it('Adding multiple alerts to the timeline should be successful', () => {
     // select all visible events
-    cy.get(EVENT_VIEWER_CHECKBOX).first().scrollIntoView().click();
-    cy.get(SELECTED_ALERTS).then((sub) => {
-      const alertCountText = sub.text();
-      const alertCount = alertCountText.split(' ')[1];
-      sub.trigger('click');
-      cy.get(SELECT_EVENTS_ACTION_ADD_BULK_TO_TIMELINE).click();
-      cy.get('body').should('contain.text', `${alertCount} event IDs`);
-      cy.get(SERVER_SIDE_EVENT_COUNT).should('contain.text', alertCount);
-    });
+    investigateFirstPageEventsInTimeline();
   });
 
-  it('When selected all alerts are selected, bulk action should be disabled', () => {
-    cy.get(EVENT_VIEWER_CHECKBOX).first().scrollIntoView().click();
-    cy.get(SELECT_ALL_EVENTS).click();
-    cy.get(SELECTED_ALERTS).click();
-    cy.get(SELECT_EVENTS_ACTION_ADD_BULK_TO_TIMELINE).should('be.disabled');
+  it('When selected all alerts are selected should be successfull', () => {
+    investigateAllEventsInTimeline();
   });
 });

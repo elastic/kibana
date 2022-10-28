@@ -34,4 +34,5 @@ export const tableDefaults: SubsetTGridModel = {
   sessionViewConfig: null,
   columns: defaultHeaders,
   queryFields: [],
+  totalCount: 0,
 };
