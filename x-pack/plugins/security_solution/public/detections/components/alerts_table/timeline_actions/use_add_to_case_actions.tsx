@@ -80,7 +80,9 @@ export const useAddToCaseActions = ({
     onMenuItemClick();
     createCaseFlyout.open({
       attachments: caseAttachments,
-      ...(isTourShown(SecurityStepId.alertsCases) && activeStep === 4
+      // activeStep will be 4 on first render because not yet incremented
+      // if the user closes the flyout without completing the form and comes back, we will be at step 5
+      ...(isTourShown(SecurityStepId.alertsCases) && (activeStep === 4 || activeStep === 5)
         ? {
             headerContent: (
               // isTourAnchor=true no matter what in order to
