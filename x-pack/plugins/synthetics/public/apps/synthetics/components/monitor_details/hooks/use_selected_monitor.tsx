@@ -8,6 +8,7 @@
 import { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
+import { ConfigKey } from '../../../../../../common/runtime_types';
 import {
   getMonitorAction,
   selectEncryptedSyntheticsSavedMonitors,
@@ -20,10 +21,9 @@ export const useSelectedMonitor = () => {
   const monitorsList = useSelector(selectEncryptedSyntheticsSavedMonitors);
   const { loading: monitorListLoading } = useSelector(selectMonitorListState);
   const monitorFromList = useMemo(
-    () => monitorsList.find((monitor) => monitor.id === monitorId) ?? null,
+    () => monitorsList.find((monitor) => monitor[ConfigKey.CONFIG_ID] === monitorId) ?? null,
     [monitorId, monitorsList]
   );
-
   const { syntheticsMonitor, syntheticsMonitorLoading } = useSelector(selectorMonitorDetailsState);
   const dispatch = useDispatch();
 

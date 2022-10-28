@@ -14,9 +14,5 @@ export const useMonitorQueryId = () => {
 
   const { monitor } = useSelectedMonitor();
 
-  if (monitor && monitor.origin === 'project') {
-    return monitor[ConfigKey.CUSTOM_HEARTBEAT_ID]!;
-  }
-
-  return monitorId;
+  return monitor[ConfigKey.HEARTBEAT_ID] || monitorId;
 };

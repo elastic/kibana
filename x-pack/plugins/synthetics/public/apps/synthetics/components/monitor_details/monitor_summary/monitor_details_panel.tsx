@@ -40,7 +40,7 @@ export const MonitorDetailsPanel = () => {
 
   if (
     (latestPing && latestPing?.config_id !== monitorId) ||
-    (monitor && monitor.id !== monitorId)
+    (monitor && monitor[ConfigKey.CONFIG_ID] !== monitorId)
   ) {
     return <EuiLoadingContent lines={6} />;
   }
