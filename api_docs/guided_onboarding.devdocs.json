@@ -529,6 +529,20 @@
             "path": "src/plugins/guided_onboarding/public/constants/guides_config/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "guidedOnboarding",
+            "id": "def-public.guidesConfig.testGuide",
+            "type": "Object",
+            "tags": [],
+            "label": "testGuide",
+            "description": [],
+            "signature": [
+              "GuideConfig"
+            ],
+            "path": "src/plugins/guided_onboarding/public/constants/guides_config/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

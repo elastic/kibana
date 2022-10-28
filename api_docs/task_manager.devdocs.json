@@ -26,13 +26,7 @@
             "text": "TaskManagerPlugin"
           },
           " implements ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "taskManager",
@@ -77,13 +71,7 @@
                 "label": "initContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<unknown>"
                 ],
                 "path": "x-pack/plugins/task_manager/server/plugin.ts",
@@ -103,13 +91,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>, plugins: { usageCollection?: ",
               {
                 "pluginId": "usageCollection",
@@ -139,13 +121,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<object, unknown>"
                 ],
                 "path": "x-pack/plugins/task_manager/server/plugin.ts",
@@ -199,13 +175,7 @@
             "description": [],
             "signature": [
               "({ savedObjects, elasticsearch, executionContext, }: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ") => ",
               {
                 "pluginId": "taskManager",
@@ -227,13 +197,7 @@
                 "label": "{\n    savedObjects,\n    elasticsearch,\n    executionContext,\n  }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "x-pack/plugins/task_manager/server/plugin.ts",
                 "deprecated": false,
