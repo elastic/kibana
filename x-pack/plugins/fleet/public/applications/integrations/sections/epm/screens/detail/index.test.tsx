@@ -81,9 +81,17 @@ describe('when on integration detail', () => {
 
   describe('and the package is not installed', () => {
     beforeEach(async () => {
-      const unInstalledPackage = mockedApi.responseProvider.epmGetInfo();
+      const unInstalledPackage = mockedApi.responseProvider.epmGetInfo('nginx');
       unInstalledPackage.item.status = 'not_installed';
-      mockedApi.responseProvider.epmGetInfo.mockReturnValue(unInstalledPackage);
+      unInstalledPackage.item.version = '1.0.0-beta';
+      mockedApi.responseProvider.epmGetInfo.mockImplementation((pkgName, pkgVersion, query) => {
+        if (query?.prerelease === false) {
+          const gaPackage = { item: { ...unInstalledPackage.item } };
+          gaPackage.item.version = '1.0.0';
+          return gaPackage;
+        }
+        return unInstalledPackage;
+      });
       await render();
     });
 
@@ -95,6 +103,23 @@ describe('when on integration detail', () => {
     it('should NOT display the Policies tab', async () => {
       await mockedApi.waitForApi();
       expect(renderResult.queryByTestId('tab-policies')).toBeNull();
+    });
+
+    it('should display version select', async () => {
+      await mockedApi.waitForApi();
+      const versionSelect = renderResult.queryByTestId('versionSelect');
+      expect(versionSelect?.textContent).toEqual('1.0.0-beta1.0.0');
+      expect((versionSelect as any)?.value).toEqual('1.0.0-beta');
+    });
+
+    it('should display prerelease callout', async () => {
+      await mockedApi.waitForApi();
+      const calloutTitle = renderResult.getByTestId('prereleaseCallout');
+      expect(calloutTitle).toBeInTheDocument();
+      const calloutGABtn = renderResult.getByTestId('switchToGABtn');
+      expect((calloutGABtn as any)?.href).toEqual(
+        'http://localhost/mock/app/integrations/detail/nginx-1.0.0/overview'
+      );
     });
   });
 
@@ -267,7 +292,9 @@ interface MockedApi<
 }
 
 interface EpmPackageDetailsResponseProvidersMock {
-  epmGetInfo: jest.MockedFunction<() => GetInfoResponse>;
+  epmGetInfo: jest.MockedFunction<
+    (pkgName: string, pkgVersion?: string, options?: { prerelease?: boolean }) => GetInfoResponse
+  >;
   epmGetFile: jest.MockedFunction<() => string>;
   epmGetStats: jest.MockedFunction<() => GetStatsResponse>;
   fleetSetup: jest.MockedFunction<() => GetFleetStatusResponse>;
@@ -774,11 +801,15 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
     },
   };
 
-  http.get.mockImplementation(async (path: any) => {
+  http.get.mockImplementation((async (path: any, options: any) => {
     if (typeof path === 'string') {
       if (path === epmRouteService.getInfoPath(`nginx`, `0.3.7`)) {
         markApiCallAsHandled();
-        return mockedApiInterface.responseProvider.epmGetInfo();
+        return mockedApiInterface.responseProvider.epmGetInfo('nginx');
+      }
+      if (path === epmRouteService.getInfoPath(`nginx`)) {
+        markApiCallAsHandled();
+        return mockedApiInterface.responseProvider.epmGetInfo('nginx', undefined, options.query);
       }
 
       if (path === epmRouteService.getFilePath('/package/nginx/0.3.7/docs/README.md')) {
@@ -820,13 +851,16 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
       if (path === '/api/fleet/agents') {
         return Promise.resolve();
       }
+      if (path === '/api/fleet/settings') {
+        return { item: { prerelease_integrations_enabled: true } };
+      }
 
       const err = new Error(`API [GET ${path}] is not MOCKED!`);
       // eslint-disable-next-line no-console
       console.error(err);
       throw err;
     }
-  });
+  }) as any);
 
   return mockedApiInterface;
 };

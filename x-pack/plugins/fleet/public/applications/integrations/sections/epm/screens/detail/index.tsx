@@ -421,6 +421,7 @@ export function Detail() {
                     <EuiFlexItem>
                       {showVersionSelect ? (
                         <EuiSelect
+                          data-test-subj="versionSelect"
                           prepend={versionLabel}
                           options={versionOptions}
                           value={packageInfo.version}

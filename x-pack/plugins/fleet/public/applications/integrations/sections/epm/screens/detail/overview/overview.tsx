@@ -80,6 +80,7 @@ const PrereleaseCallout: React.FC<{
   return (
     <>
       <EuiCallOut
+        data-test-subj="prereleaseCallout"
         title={i18n.translate('xpack.fleet.epm.prereleaseWarningCalloutTitle', {
           defaultMessage: 'This is a pre-release version of {packageTitle} integration.',
           values: {
@@ -91,7 +92,7 @@ const PrereleaseCallout: React.FC<{
       >
         {latestGAVersion && (
           <p>
-            <EuiButton href={overviewPathLatestGA} color="warning">
+            <EuiButton href={overviewPathLatestGA} color="warning" data-test-subj="switchToGABtn">
               <FormattedMessage
                 id="xpack.fleet.epm.prereleaseWarningCalloutSwitchToGAButton"
                 defaultMessage="Switch to latest GA version"
