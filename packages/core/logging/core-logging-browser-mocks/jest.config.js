@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { BaseLogger } from './logger';
-export { BrowserLoggingSystem, type IBrowserLoggingSystem } from './logging_system';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/logging/core-logging-browser-mocks'],
+};

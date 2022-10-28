@@ -7,6 +7,7 @@
  */
 
 import { filter, firstValueFrom } from 'rxjs';
+import type { LogLevelId } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
   InjectedMetadataService,
@@ -108,9 +109,8 @@ export class CoreSystem {
 
     this.rootDomElement = rootDomElement;
 
-    // TODO: change log level depending on environment.
-    this.loggingSystem = new BrowserLoggingSystem({ logLevel: 'info' });
-    this.i18n = new I18nService();
+    const logLevel: LogLevelId = injectedMetadata.env.mode.dev ? 'all' : 'warn';
+    this.loggingSystem = new BrowserLoggingSystem({ logLevel });
 
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,
@@ -121,13 +121,12 @@ export class CoreSystem {
       logger: this.loggingSystem.asLoggerFactory(),
     };
 
+    this.i18n = new I18nService();
     this.analytics = new AnalyticsService(this.coreContext);
-
     this.fatalErrors = new FatalErrorsService(rootDomElement, () => {
       // Stop Core before rendering any fatal errors into the DOM
       this.stop();
     });
-
     this.theme = new ThemeService();
     this.notifications = new NotificationsService();
     this.http = new HttpService();
@@ -144,7 +143,6 @@ export class CoreSystem {
     this.integrations = new IntegrationsService();
     this.deprecations = new DeprecationsService();
     this.executionContext = new ExecutionContextService();
-
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreAppsService(this.coreContext);
 

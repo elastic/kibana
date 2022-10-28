@@ -3133,6 +3133,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-logging-browser-mocks@link:bazel-bin/packages/core/logging/core-logging-browser-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-logging-common-internal@link:bazel-bin/packages/core/logging/core-logging-common-internal":
   version "0.0.0"
   uid ""
@@ -7371,6 +7375,10 @@
   uid ""
 
 "@types/kbn__core-logging-browser-internal@link:bazel-bin/packages/core/logging/core-logging-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-logging-browser-mocks@link:bazel-bin/packages/core/logging/core-logging-browser-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 

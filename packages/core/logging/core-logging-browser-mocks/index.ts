@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { BaseLogger } from './logger';
-export { BrowserLoggingSystem, type IBrowserLoggingSystem } from './logging_system';
+export { loggingSystemMock } from './src';

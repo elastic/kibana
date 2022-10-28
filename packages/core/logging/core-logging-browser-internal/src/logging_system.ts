@@ -22,7 +22,14 @@ const CONSOLE_APPENDER_ID = 'console';
 /**
  * @internal
  */
-export class BrowserLoggingSystem implements LoggerFactory {
+export interface IBrowserLoggingSystem extends LoggerFactory {
+  asLoggerFactory(): LoggerFactory;
+}
+
+/**
+ * @internal
+ */
+export class BrowserLoggingSystem implements IBrowserLoggingSystem {
   private readonly loggers: Map<string, Logger> = new Map();
   private readonly appenders: Map<string, DisposableAppender> = new Map();
 
