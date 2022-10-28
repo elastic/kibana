@@ -383,7 +383,7 @@ export const getHeatmapVisualization = ({
     const originalOrder = datasource?.getTableSpec().map(({ columnId }) => columnId);
     // When we add a column it could be empty, and therefore have no order
 
-    if (!originalOrder) {
+    if (!originalOrder || !state.valueAccessor) {
       return null;
     }
 
