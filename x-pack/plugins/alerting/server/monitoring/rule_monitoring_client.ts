@@ -8,9 +8,6 @@
 import stats from 'stats-lite';
 import { RuleMonitoring, RuleMonitoringHistory } from '../types';
 
-
-
-
 export class RuleMonitoringService {
   private monitoring: RuleMonitoring = {
     run: {
@@ -47,7 +44,7 @@ export class RuleMonitoringService {
   }
 
   public addHistory(duration: number | undefined, hasError: boolean = true) {
-    const date = new Date()
+    const date = new Date();
     const monitoringHistory: RuleMonitoringHistory = {
       success: true,
       timestamp: date.getTime(),
@@ -73,11 +70,8 @@ export class RuleMonitoringService {
       setLastRunMetricsTotalAlertDetected: this.setLastRunMetricsTotalAlertDetected,
       setLastRunMetricsTotalAlertCreated: this.setLastRunMetricsTotalAlertCreated,
       setLastRunMetricsGapDurationS: this.setLastRunMetricsGapDurationS,
-    }
-
+    };
   }
-
-
 
   private setLastRunMetricsTotalSearchDurationMs(totalSearchDurationMs: number) {
     this.monitoring.run.last_run.metrics.total_search_duration_ms = totalSearchDurationMs;
@@ -98,8 +92,6 @@ export class RuleMonitoringService {
   private setLastRunMetricsGapDurationS(gapDurationS: number) {
     this.monitoring.run.last_run.metrics.gap_duration_s = gapDurationS;
   }
-
-
 
   private buildExecutionSuccessRatio() {
     const { history } = this.monitoring.run;

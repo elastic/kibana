@@ -625,7 +625,7 @@ export class TaskRunner<
     }
 
     // if executionStatus indicates an error, fill in fields in
-    this.ruleMonitoring.addHistory(executionStatus.lastDuration, executionStatus.error != null)
+    this.ruleMonitoring.addHistory(executionStatus.lastDuration, executionStatus.error != null);
 
     if (!this.cancelled) {
       this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
@@ -669,7 +669,7 @@ export class TaskRunner<
         TaskRunnerTimerSpan.PrepareRule,
         async () => this.prepareToRun()
       );
-      this.ruleMonitoring.setMonitoring(preparedResult.rule.monitoring)
+      this.ruleMonitoring.setMonitoring(preparedResult.rule.monitoring);
 
       stateWithMetrics = asOk(await this.runRule(preparedResult));
 
