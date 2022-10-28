@@ -112,6 +112,31 @@ export class EventLogClient implements IEventLogClient {
     });
   }
 
+  public async findEventsWithAuthFilter(
+    type: string,
+    ids: string[],
+    authFilter: KueryNode,
+    namespace: string | undefined,
+    options?: Partial<FindOptionsType>
+  ): Promise<QueryEventsBySavedObjectResult> {
+    if (!authFilter) {
+      throw new Error('No authorization filter defined!');
+    }
+
+    const findOptions = queryOptionsSchema.validate(options ?? {});
+
+    return await this.esContext.esAdapter.queryEventsWithAuthFilter({
+      index: this.esContext.esNames.indexPattern,
+      namespace: namespace
+        ? this.spacesService?.spaceIdToNamespace(namespace)
+        : await this.getNamespace(),
+      type,
+      ids,
+      findOptions,
+      authFilter,
+    });
+  }
+
   public async aggregateEventsBySavedObjectIds(
     type: string,
     ids: string[],

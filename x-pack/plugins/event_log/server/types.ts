@@ -57,6 +57,13 @@ export interface IEventLogClient {
     options?: Partial<FindOptionsType>,
     legacyIds?: string[]
   ): Promise<QueryEventsBySavedObjectResult>;
+  findEventsWithAuthFilter(
+    type: string,
+    ids: string[],
+    authFilter: KueryNode,
+    namespace: string | undefined,
+    options?: Partial<FindOptionsType>
+  ): Promise<QueryEventsBySavedObjectResult>;
   aggregateEventsBySavedObjectIds(
     type: string,
     ids: string[],

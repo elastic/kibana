@@ -73,7 +73,7 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
       return;
     }
     history.push(ruleNamePathname);
-  }, [ruleNamePathname, history, ruleOnDifferentSpace]);
+  }, [ruleNamePathname, history, ruleOnDifferentSpace, ruleId]);
 
   if (typeof value === 'undefined') {
     return null;

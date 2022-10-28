@@ -440,6 +440,7 @@ export interface GetActionErrorLogByIdParams {
   page: number;
   perPage: number;
   sort: estypes.Sort;
+  namespace?: string;
 }
 
 interface ScheduleTaskOptions {
@@ -1077,6 +1078,81 @@ export class RulesClient {
           sort: convertEsSortToEventLogSort(sort),
         },
         rule.legacyId !== null ? [rule.legacyId] : undefined
+      );
+      return formatExecutionErrorsResult(errorResult);
+    } catch (err) {
+      this.logger.debug(
+        `rulesClient.getActionErrorLog(): error searching event log for rule ${id}: ${err.message}`
+      );
+      throw err;
+    }
+  }
+
+  public async getActionErrorLogWithAuth({
+    id,
+    dateStart,
+    dateEnd,
+    filter,
+    page,
+    perPage,
+    sort,
+    namespace,
+  }: GetActionErrorLogByIdParams): Promise<IExecutionErrorsResult> {
+    this.logger.debug(`getActionErrorLogWithAuth(): getting action error logs for rule ${id}`);
+
+    let authorizationTuple;
+    try {
+      authorizationTuple = await this.authorization.getFindAuthorizationFilter(
+        AlertingAuthorizationEntity.Alert,
+        {
+          type: AlertingAuthorizationFilterType.KQL,
+          fieldNames: {
+            ruleTypeId: 'kibana.alert.rule.rule_type_id',
+            consumer: 'kibana.alert.rule.consumer',
+          },
+        }
+      );
+    } catch (error) {
+      this.auditLogger?.log(
+        ruleAuditEvent({
+          action: RuleAuditAction.GET_ACTION_ERROR_LOG,
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger?.log(
+      ruleAuditEvent({
+        action: RuleAuditAction.GET_ACTION_ERROR_LOG,
+        savedObject: { type: 'alert', id },
+      })
+    );
+
+    const defaultFilter =
+      'event.provider:actions AND ((event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout))';
+
+    // default duration of instance summary is 60 * rule interval
+    const dateNow = new Date();
+    const parsedDateStart = parseDate(dateStart, 'dateStart', dateNow);
+    const parsedDateEnd = parseDate(dateEnd, 'dateEnd', dateNow);
+
+    const eventLogClient = await this.getEventLogClient();
+
+    try {
+      const errorResult = await eventLogClient.findEventsWithAuthFilter(
+        'alert',
+        [id],
+        authorizationTuple.filter as KueryNode,
+        namespace,
+        {
+          start: parsedDateStart.toISOString(),
+          end: parsedDateEnd.toISOString(),
+          page,
+          per_page: perPage,
+          filter: filter ? `(${defaultFilter}) AND (${filter})` : defaultFilter,
+          sort: convertEsSortToEventLogSort(sort),
+        }
       );
       return formatExecutionErrorsResult(errorResult);
     } catch (err) {

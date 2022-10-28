@@ -180,6 +180,10 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     () => (showFromAllSpaces && spacesData ? accessibleSpaceIds : undefined),
     [showFromAllSpaces, spacesData, accessibleSpaceIds]
   );
+  const activeSpace = useMemo(
+    () => spacesData?.spacesMap.get(spacesData?.activeSpaceId),
+    [spacesData]
+  );
 
   const isInitialized = useRef(false);
 
@@ -462,6 +466,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           runLog={selectedRunLog}
           refreshToken={refreshToken}
           onClose={onFlyoutClose}
+          activeSpaceId={activeSpace?.id}
         />
       )}
     </EuiFlexGroup>
