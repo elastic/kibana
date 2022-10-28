@@ -34,9 +34,15 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
   error: { type: 'keyword' },
   filtering: {
     properties: {
-      domain: { type: 'keyword' },
       active: {
         properties: {
+          advanced_snippet: {
+            properties: {
+              created_at: { type: 'date' },
+              updated_at: { type: 'date' },
+              value: { type: 'object' },
+            },
+          },
           rules: {
             properties: {
               created_at: { type: 'date' },
@@ -49,28 +55,29 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
               value: { type: 'keyword' },
             },
           },
-          advanced_snippet: {
-            properties: {
-              created_at: { type: 'date' },
-              updated_at: { type: 'date' },
-              value: { type: 'object' },
-            },
-          },
           validation: {
             properties: {
-              state: { type: 'keyword' },
               errors: {
                 properties: {
                   ids: { type: 'keyword' },
                   messages: { type: 'text' },
                 },
               },
+              state: { type: 'keyword' },
             },
           },
         },
       },
+      domain: { type: 'keyword' },
       draft: {
         properties: {
+          advanced_snippet: {
+            properties: {
+              created_at: { type: 'date' },
+              updated_at: { type: 'date' },
+              value: { type: 'object' },
+            },
+          },
           rules: {
             properties: {
               created_at: { type: 'date' },
@@ -81,13 +88,6 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
               rule: { type: 'keyword' },
               updated_at: { type: 'date' },
               value: { type: 'keyword' },
-            },
-          },
-          advanced_snippet: {
-            properties: {
-              created_at: { type: 'date' },
-              updated_at: { type: 'date' },
-              value: { type: 'object' },
             },
           },
           validation: {
@@ -108,12 +108,12 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
   index_name: { type: 'keyword' },
   is_native: { type: 'boolean' },
   language: { type: 'keyword' },
+  last_deleted_document_count: { type: 'long' },
+  last_indexed_document_count: { type: 'long' },
   last_seen: { type: 'date' },
   last_sync_error: { type: 'keyword' },
   last_sync_status: { type: 'keyword' },
   last_synced: { type: 'date' },
-  last_indexed_document_count: { type: 'long' },
-  last_deleted_document_count: { type: 'long' },
   name: { type: 'keyword' },
   pipeline: {
     properties: {
@@ -181,6 +181,13 @@ const indices: IndexDefinition[] = [
         error: { type: 'keyword' },
         filtering: {
           properties: {
+            advanced_snippet: {
+              properties: {
+                created_at: { type: 'date' },
+                updated_at: { type: 'date' },
+                value: { type: 'object' },
+              },
+            },
             domain: { type: 'keyword' },
             rules: {
               properties: {
@@ -192,13 +199,6 @@ const indices: IndexDefinition[] = [
                 rule: { type: 'keyword' },
                 updated_at: { type: 'date' },
                 value: { type: 'keyword' },
-              },
-            },
-            advanced_snippet: {
-              properties: {
-                created_at: { type: 'date' },
-                updated_at: { type: 'date' },
-                value: { type: 'object' },
               },
             },
             warnings: {
