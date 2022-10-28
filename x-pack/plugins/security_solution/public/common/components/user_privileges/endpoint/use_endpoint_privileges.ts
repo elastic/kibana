@@ -44,6 +44,7 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
 
   const fleetServices = fleetServicesFromUseKibana ?? fleetServicesFromPluginStart;
   const isEndpointRbacEnabled = useIsExperimentalFeatureEnabled('endpointRbacEnabled');
+  const isEndpointRbacV1Enabled = useIsExperimentalFeatureEnabled('endpointRbacV1Enabled');
 
   const endpointPermissions = calculatePermissionsFromCapabilities(
     useKibana().services.application.capabilities
@@ -57,7 +58,7 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
             licenseService,
             fleetAuthz,
             userRoles,
-            isEndpointRbacEnabled,
+            isEndpointRbacEnabled || isEndpointRbacV1Enabled,
             endpointPermissions
           )
         : getEndpointAuthzInitialState()),
@@ -72,6 +73,7 @@ export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
     licenseService,
     userRoles,
     isEndpointRbacEnabled,
+    isEndpointRbacV1Enabled,
     endpointPermissions,
   ]);
 

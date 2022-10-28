@@ -25,9 +25,18 @@ function hasPermission(
   hasEndpointManagementAccess: boolean,
   privilege: typeof ENDPOINT_PRIVILEGES[number]
 ): boolean {
-  return isEndpointRbacEnabled
-    ? fleetAuthz.packagePrivileges?.endpoint?.actions[privilege].executePackageAction ?? false
-    : hasEndpointManagementAccess;
+  // user is superuser, always return true
+  if (hasEndpointManagementAccess) {
+    return true;
+  }
+
+  // not superuser and FF not enabled, no access
+  if (!isEndpointRbacEnabled) {
+    return false;
+  }
+
+  // FF enabled, access based on privileges
+  return fleetAuthz.packagePrivileges?.endpoint?.actions[privilege].executePackageAction ?? false;
 }
 
 /**

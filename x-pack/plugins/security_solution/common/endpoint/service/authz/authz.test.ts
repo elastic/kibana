@@ -115,6 +115,10 @@ describe('Endpoint Authz service', () => {
     });
 
     describe('and endpoint rbac is enabled', () => {
+      beforeEach(() => {
+        userRoles = [];
+      });
+
       it.each<[EndpointAuthzKeyList[number], string]>([
         ['canWriteEndpointList', 'writeEndpointList'],
         ['canReadEndpointList', 'readEndpointList'],
