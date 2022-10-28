@@ -120,7 +120,7 @@ describe('RuleActionsOverflow', () => {
       fireEvent.click(getByTestId('rules-details-duplicate-rule'));
 
       expect(executeBulkAction).toHaveBeenCalledWith(
-        expect.objectContaining({ action: 'duplicate' })
+        expect.objectContaining({ type: 'duplicate' })
       );
     });
 
@@ -140,7 +140,7 @@ describe('RuleActionsOverflow', () => {
       fireEvent.click(getByTestId('rules-details-duplicate-rule'));
 
       expect(executeBulkAction).toHaveBeenCalledWith(
-        expect.objectContaining({ action: 'duplicate', search: { ids: ['id'] } })
+        expect.objectContaining({ type: 'duplicate', queryOrIds: ['id'] })
       );
     });
   });
@@ -213,7 +213,7 @@ describe('RuleActionsOverflow', () => {
       fireEvent.click(getByTestId('rules-details-popover-button-icon'));
       fireEvent.click(getByTestId('rules-details-delete-rule'));
 
-      expect(executeBulkAction).toHaveBeenCalledWith(expect.objectContaining({ action: 'delete' }));
+      expect(executeBulkAction).toHaveBeenCalledWith(expect.objectContaining({ type: 'delete' }));
     });
 
     test('it calls deleteRulesAction with the rule.id when rules-details-delete-rule is clicked', () => {
@@ -229,7 +229,7 @@ describe('RuleActionsOverflow', () => {
       fireEvent.click(getByTestId('rules-details-delete-rule'));
 
       expect(executeBulkAction).toHaveBeenCalledWith(
-        expect.objectContaining({ action: 'delete', search: { ids: ['id'] } })
+        expect.objectContaining({ type: 'delete', queryOrIds: ['id'] })
       );
     });
   });
