@@ -1086,7 +1086,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           namespaces = actualResult!._source.namespaces ?? [
             SavedObjectsUtils.namespaceIdToString(namespace),
           ];
-          const useForce = force && force === true ? true : false;
+          const useForce = force && force === true;
           // the document is shared to more than one space and can only be deleted by force.
           if (!useForce && (namespaces.length > 1 || namespaces.includes(ALL_NAMESPACES_STRING))) {
             return {
@@ -1143,43 +1143,23 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         force,
       });
 
-    const validObjects = expectedBulkDeleteMultiNamespaceDocsResults.filter(isRight);
-    if (validObjects.length === 0) {
-      // We only have error results; return early to avoid potentially trying authZ checks for 0 types which would result in an exception.
-      const savedObjects = expectedBulkDeleteMultiNamespaceDocsResults
-        .filter(isLeft)
-        .map((expectedResult) => {
-          return { ...expectedResult.value, success: false };
-        });
-      return { statuses: [...savedObjects] };
-    }
-
-    // check auth
+    // Perform Auth Check (on both L/R, we'll deal with that later)
     const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
-    // const getNamespaceString = (objectNamespace?: string) => objectNamespace ?? namespaceString;
     const typesAndSpaces = new Map<string, Set<string>>();
     const spacesToAuthorize = new Set<string>([namespaceString]); // Always check authZ for the active space
     if (this._securityExtension) {
-      for (const { value } of validObjects) {
-        const { type, esRequestIndex: index } = value;
+      for (const { value } of expectedBulkDeleteMultiNamespaceDocsResults) {
+        const index = (value as { esRequestIndex: number }).esRequestIndex;
+        const { type } = value;
         const preflightResult =
           index !== undefined ? multiNamespaceDocsResponse?.body.docs[index] : undefined;
 
         const spacesToEnforce = typesAndSpaces.get(type) ?? new Set([namespaceString]); // Always enforce authZ for the active space
-        // objectNamespaces?.forEach((objectSpace) => {
-        //   const objectNamespaceString = getNamespaceString(objectSpace);
-        //   spacesToEnforce.add(objectNamespaceString);
-        //   // spacesToAuthorize.add(objectNamespaceString);
-        // });
-        // typesAndSpaces.set(type, spacesToEnforce);
-        // spacesToAuthorize.add(namespaceString);
-
+        typesAndSpaces.set(type, spacesToEnforce);
         // @ts-expect-error MultiGetHit._source is optional
         for (const space of preflightResult?._source?.namespaces ?? []) {
-          spacesToEnforce.add(space);
           spacesToAuthorize.add(space); // existing namespaces are included
         }
-        typesAndSpaces.set(type, spacesToEnforce);
       }
     }
 
@@ -1194,7 +1174,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
         action: 'bulk_delete',
         typeMap: authorizationResult.typeMap,
         auditCallback: (error) => {
-          for (const { value } of validObjects) {
+          for (const { value } of expectedBulkDeleteMultiNamespaceDocsResults) {
             this._securityExtension!.addAuditEvent({
               action: AuditAction.DELETE,
               savedObject: { type: value.type, id: value.id },
@@ -1204,6 +1184,18 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
           }
         },
       });
+    }
+
+    // Filter valid objects
+    const validObjects = expectedBulkDeleteMultiNamespaceDocsResults.filter(isRight);
+    if (validObjects.length === 0) {
+      // We only have error results; return early to avoid potentially trying authZ checks for 0 types which would result in an exception.
+      const savedObjects = expectedBulkDeleteMultiNamespaceDocsResults
+        .filter(isLeft)
+        .map((expectedResult) => {
+          return { ...expectedResult.value, success: false };
+        });
+      return { statuses: [...savedObjects] };
     }
 
     // bulk up the bulkDeleteParams
