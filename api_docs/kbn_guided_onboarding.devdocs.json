@@ -201,7 +201,7 @@
             "label": "guideId",
             "description": [],
             "signature": [
-              "\"search\" | \"security\" | \"observability\""
+              "\"search\" | \"security\" | \"observability\" | \"testGuide\""
             ],
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
@@ -264,7 +264,7 @@
         "label": "GuideId",
         "description": [],
         "signature": [
-          "\"search\" | \"security\" | \"observability\""
+          "\"search\" | \"security\" | \"observability\" | \"testGuide\""
         ],
         "path": "packages/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
