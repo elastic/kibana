@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { getDurationFormatter } from '../../../../common/utils/formatters/duration';
 import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
@@ -25,6 +26,10 @@ import {
   getResponseTimeTickFormatter,
 } from '../../shared/charts/transaction_charts/helper';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
+import {
+  ChartType,
+  getTimeSeriesColor,
+} from '../../shared/charts/helper/get_timeseries_color';
 
 export interface AlertDetailsAppSectionProps {
   rule: Rule<RuleTypeParams>;
@@ -42,10 +47,14 @@ export function AlertDetailsAppSectionTransactionDuration({
   const transactionType = String(params.transactionType);
   const comparisonEnabled = false;
   const offset = '1d';
-  const rangeFrom = 'now-2h';
+  const rangeFrom = 'now-60m';
   const rangeTo = 'now';
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const comparisonChartTheme = getComparisonChartTheme();
+  const INITIAL_STATE = {
+    currentPeriod: [],
+    previousPeriod: [],
+  };
 
   const { data, error, status } = useFetcher(
     (callApmApi) => {
@@ -102,6 +111,67 @@ export function AlertDetailsAppSectionTransactionDuration({
     [data]
   );
 
+  const { data: dataThroughput = INITIAL_STATE, status: statusThroughput } =
+    useFetcher(
+      (callApmApi) => {
+        if (serviceName && transactionType && start && end) {
+          return callApmApi(
+            'GET /internal/apm/services/{serviceName}/throughput',
+            {
+              params: {
+                path: {
+                  serviceName,
+                },
+                query: {
+                  environment,
+                  kuery: '',
+                  start,
+                  end,
+                  transactionType,
+                  offset:
+                    comparisonEnabled && isTimeComparison(offset)
+                      ? offset
+                      : undefined,
+                  transactionName: undefined,
+                },
+              },
+            }
+          );
+        }
+      },
+      [
+        environment,
+        serviceName,
+        start,
+        end,
+        transactionType,
+        offset,
+        comparisonEnabled,
+      ]
+    );
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+    ChartType.THROUGHPUT
+  );
+  const timeseriesThroughput = [
+    {
+      data: dataThroughput.currentPeriod,
+      type: 'linemark',
+      color: currentPeriodColor,
+      title: i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
+        defaultMessage: 'Throughput',
+      }),
+    },
+    ...(comparisonEnabled
+      ? [
+          {
+            data: dataThroughput.previousPeriod,
+            type: 'area',
+            color: previousPeriodColor,
+            title: '',
+          },
+        ]
+      : []),
+  ];
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
     ApmMlDetectorType.txThroughput
   );
@@ -123,11 +193,11 @@ export function AlertDetailsAppSectionTransactionDuration({
       <EuiFlexItem>
         <ChartPointerEventContextProvider>
           <TimeseriesChart
+            id="latencyChart"
             height={200}
             comparisonEnabled={comparisonEnabled}
             offset={offset}
             fetchStatus={status}
-            id="latencyChart"
             customTheme={comparisonChartTheme}
             timeseries={timeseries}
             yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
@@ -141,6 +211,27 @@ export function AlertDetailsAppSectionTransactionDuration({
             }
             timeZone={timeZone}
           />
+          <EuiFlexItem>
+            <TimeseriesChart
+              id="throughput"
+              height={200}
+              comparisonEnabled={comparisonEnabled}
+              offset={offset}
+              fetchStatus={statusThroughput}
+              customTheme={comparisonChartTheme}
+              timeseries={timeseriesThroughput}
+              yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
+              anomalyTimeseries={
+                preferredAnomalyTimeseries
+                  ? {
+                      ...preferredAnomalyTimeseries,
+                      color: anomalyTimeseriesColor,
+                    }
+                  : undefined
+              }
+              timeZone={timeZone}
+            />
+          </EuiFlexItem>
         </ChartPointerEventContextProvider>
       </EuiFlexItem>
     </EuiFlexGroup>
