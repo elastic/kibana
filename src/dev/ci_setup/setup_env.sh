@@ -148,20 +148,6 @@ if [[ "$ghprbPullId" && "$ghprbGhRepository" == 'elastic/kibana' ]] ; then
   export CHECKS_REPORTER_ACTIVE=true
 fi
 
-###
-### Implements github-checks-reporter kill switch when scripts are called from the command line
-### $@ - all arguments
-###
-function checks-reporter-with-killswitch() {
-  if [ "$CHECKS_REPORTER_ACTIVE" == "true" ] ; then
-    yarn run github-checks-reporter "$@"
-  else
-    arguments=("$@");
-    "${arguments[@]:1}";
-  fi
-}
-
-export -f checks-reporter-with-killswitch
 
 source "$KIBANA_DIR/src/dev/ci_setup/load_env_keys.sh"
 

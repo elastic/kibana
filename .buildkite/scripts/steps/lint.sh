@@ -7,8 +7,7 @@ source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 
 echo '--- Lint: stylelint'
-checks-reporter-with-killswitch "Lint: stylelint" \
-  node scripts/stylelint
+node scripts/stylelint
 echo "stylelint ✅"
 
 echo '--- Lint: eslint'

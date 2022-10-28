@@ -4,6 +4,6 @@ source src/dev/ci_setup/setup_env.sh
 
 cd test/plugin_functional/plugins/kbn_sample_panel_action;
 if [[ ! -d "target" ]]; then
-  checks-reporter-with-killswitch "Build kbn_sample_panel_action" yarn build;
+  yarn build;
 fi
 cd -;

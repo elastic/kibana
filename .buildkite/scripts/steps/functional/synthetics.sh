@@ -13,5 +13,4 @@ echo "--- synthetics @elastic/synthetics Tests"
 
 cd "$XPACK_DIR"
 
-checks-reporter-with-killswitch "synthetics @elastic/synthetics Tests" \
-  node plugins/synthetics/scripts/e2e.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" --grep "MonitorManagement-monitor*"
+node plugins/synthetics/scripts/e2e.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" --grep "MonitorManagement-monitor*"
