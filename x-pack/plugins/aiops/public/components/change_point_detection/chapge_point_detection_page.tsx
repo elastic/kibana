@@ -117,7 +117,7 @@ export const ChangePointDetectionPage: FC = () => {
         </EuiCallOut>
       ) : null}
 
-      <EuiFlexGrid columns={2} responsive gutterSize={'s'}>
+      <EuiFlexGrid columns={annotations.length >= 2 ? 2 : 1} responsive gutterSize={'s'}>
         {annotations.map((v) => {
           return (
             <EuiFlexItem key={v.group_field}>
