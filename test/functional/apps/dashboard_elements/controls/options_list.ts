@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await console.collapseHelp();
       await console.clearTextArea();
       await console.enterRequest(
-        '\nPOST animals-dogs-2018-01-01/_doc/ \n{\n "@timestamp": "2018-01-01T16:00:00.000Z", \n"name": "Max", \n"sound": "bark'
+        '\nPOST animals-cats-2018-01-01/_doc/ \n{\n "@timestamp": "2018-01-01T16:00:00.000Z", \n"name": "Rosie", \n"sound": "hiss'
       );
       await console.clickPlay();
       await header.waitUntilLoadingHasFinished();
@@ -208,8 +208,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const ensureAvailableOptionsEql = async (expectation: string[], skipOpen?: boolean) => {
         if (!skipOpen) await dashboardControls.optionsListOpenPopover(controlId);
         await retry.try(async () => {
-          expect((await dashboardControls.optionsListPopoverGetAvailableOptions()).sort()).to.eql(
-            expectation.sort()
+          expect(await dashboardControls.optionsListPopoverGetAvailableOptions()).to.eql(
+            expectation
           );
         });
         if (!skipOpen) await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
@@ -388,14 +388,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           it('creating exists query has expected results', async () => {
-            expect((await pieChart.getPieChartValues())[2]).to.be(4);
+            expect((await pieChart.getPieChartValues())[0]).to.be(6);
             await dashboardControls.optionsListOpenPopover(controlId);
             await dashboardControls.optionsListPopoverSelectOption('exists');
             await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
             await dashboard.waitForRenderComplete();
 
             expect(await pieChart.getPieSliceCount()).to.be(5);
-            expect((await pieChart.getPieChartValues())[2]).to.be(3);
+            expect((await pieChart.getPieChartValues())[0]).to.be(5);
           });
 
           it('negating exists query has expected results', async () => {

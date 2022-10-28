@@ -179,6 +179,7 @@ export class PieChartService extends FtrService {
   }
 
   async getPieChartValues(isNewLibrary: boolean = true) {
+    this.log.debug('PieChart.getPieChartValues');
     if (isNewLibrary) {
       const slices =
         (await this.visChart.getEsChartDebugState(partitionVisChartSelector))?.partition?.[0]

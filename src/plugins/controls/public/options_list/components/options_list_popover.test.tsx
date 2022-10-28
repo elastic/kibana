@@ -92,9 +92,12 @@ describe('Options list popover', () => {
     });
     clickShowOnlySelections(popover);
     const availableOptionsDiv = findTestSubject(popover, 'optionsList-control-available-options');
-    availableOptionsDiv.children().forEach((child, i) => {
-      expect(child.text()).toBe(selections[i]);
-    });
+    availableOptionsDiv
+      .childAt(0)
+      .children()
+      .forEach((child, i) => {
+        expect(child.text()).toBe(selections[i]);
+      });
   });
 
   test('should default to exclude = false', async () => {
