@@ -12,10 +12,13 @@ import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { Ast } from '@kbn/interpreter';
-import { DatatableRow } from '@kbn/expressions-plugin/common';
+import { buildExpressionFunction, DatatableRow } from '@kbn/expressions-plugin/common';
 import { PaletteRegistry, CustomPaletteParams, CUSTOM_PALETTE } from '@kbn/coloring';
-import type { GaugeArguments } from '@kbn/expression-gauge-plugin/common';
-import { GaugeShapes, EXPRESSION_GAUGE_NAME } from '@kbn/expression-gauge-plugin/common';
+import type {
+  GaugeArguments,
+  GaugeExpressionFunctionDefinition,
+} from '@kbn/expression-gauge-plugin/common';
+import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import {
   getGoalValue,
   getMaxValue,
@@ -127,36 +130,27 @@ const toExpression = (
     return null;
   }
 
+  const gaugeFn = buildExpressionFunction<GaugeExpressionFunctionDefinition>('gauge', {
+    metric: state.metricAccessor,
+    min: state.minAccessor,
+    max: state.maxAccessor,
+    goal: state.goalAccessor,
+    shape: state.shape ?? GaugeShapes.HORIZONTAL_BULLET,
+    colorMode: state?.colorMode ?? 'none',
+    palette: state.palette?.params
+      ? paletteService
+          .get(CUSTOM_PALETTE)
+          .toExpression(computePaletteParams((state.palette?.params || {}) as CustomPaletteParams))
+      : undefined,
+    ticksPosition: state.ticksPosition ?? 'auto',
+    labelMinor: state.labelMinor,
+    labelMajor: state.labelMajor,
+    labelMajorMode: state.labelMajorMode ?? 'auto',
+  });
+
   return {
     type: 'expression',
-    chain: [
-      ...(datasourceExpression?.chain ?? []),
-      {
-        type: 'function',
-        function: EXPRESSION_GAUGE_NAME,
-        arguments: {
-          metric: state.metricAccessor ? [state.metricAccessor] : [],
-          min: state.minAccessor ? [state.minAccessor] : [],
-          max: state.maxAccessor ? [state.maxAccessor] : [],
-          goal: state.goalAccessor ? [state.goalAccessor] : [],
-          shape: [state.shape ?? GaugeShapes.HORIZONTAL_BULLET],
-          colorMode: [state?.colorMode ?? 'none'],
-          palette: state.palette?.params
-            ? [
-                paletteService
-                  .get(CUSTOM_PALETTE)
-                  .toExpression(
-                    computePaletteParams((state.palette?.params || {}) as CustomPaletteParams)
-                  ),
-              ]
-            : [],
-          ticksPosition: state.ticksPosition ? [state.ticksPosition] : ['auto'],
-          labelMinor: state.labelMinor ? [state.labelMinor] : [],
-          labelMajor: state.labelMajor ? [state.labelMajor] : [],
-          labelMajorMode: state.labelMajorMode ? [state.labelMajorMode] : ['auto'],
-        },
-      },
-    ],
+    chain: [...(datasourceExpression?.chain ?? []), gaugeFn.toAst()],
   };
 };
 
