@@ -47,7 +47,7 @@ export function ServiceField({
         )}
         defaultValue={currentValue}
         fieldName={SERVICE_NAME}
-        onChange={onChange}
+        onChange={(value) => onChange(value || undefined)}
         placeholder={i18n.translate('xpack.apm.serviceNamesSelectPlaceholder', {
           defaultMessage: 'Select service name',
         })}
@@ -82,7 +82,7 @@ export function EnvironmentField({
         )}
         defaultValue={getEnvironmentLabel(currentValue)}
         fieldName={SERVICE_ENVIRONMENT}
-        onChange={onChange}
+        onChange={(value) => onChange(value || undefined)}
         placeholder={i18n.translate('xpack.apm.environmentsSelectPlaceholder', {
           defaultMessage: 'Select environment',
         })}
@@ -115,7 +115,7 @@ export function TransactionTypeField({
         )}
         defaultValue={currentValue}
         fieldName={TRANSACTION_TYPE}
-        onChange={onChange}
+        onChange={(value) => onChange(value || undefined)}
         placeholder={i18n.translate(
           'xpack.apm.transactionTypesSelectPlaceholder',
           {

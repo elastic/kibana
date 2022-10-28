@@ -19,7 +19,6 @@ import { KibanaRequest } from '@kbn/core/server';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { firstValueFrom } from 'rxjs';
 import {
   ApmRuleType,
   RULE_TYPES_CONFIG,
@@ -47,15 +46,14 @@ import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import { getMLJobs } from '../../../service_map/get_service_anomalies';
 import { apmActionVariables } from '../../action_variables';
 import { RegisterRuleDependencies } from '../../register_apm_rule_types';
-import { getAnomalousEventSourceFields } from './get_anomalous_event_source_fields';
-import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
+import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
 
 const paramsSchema = schema.object({
   serviceName: schema.maybe(schema.string()),
   transactionType: schema.maybe(schema.string()),
   windowSize: schema.number(),
   windowUnit: schema.string(),
-  environment: schema.string(),
+  environment: schema.maybe(schema.string()),
   anomalySeverityType: schema.oneOf([
     schema.literal(ANOMALY_SEVERITY.CRITICAL),
     schema.literal(ANOMALY_SEVERITY.MAJOR),
@@ -106,13 +104,6 @@ export function registerAnomalyRuleType({
         if (!ml) {
           return {};
         }
-
-        const config = await firstValueFrom(config$);
-        const indices = await getApmIndices({
-          config,
-          savedObjectsClient: services.savedObjectsClient,
-        });
-        const { transaction: transactionsIndex } = indices;
 
         const ruleParams = params;
         const request = {} as KibanaRequest;
@@ -173,14 +164,8 @@ export function registerAnomalyRuleType({
                       },
                     },
                   },
-                  ...termQuery(
-                    'partition_field_value',
-                    ruleParams.serviceName || null
-                  ),
-                  ...termQuery(
-                    'by_field_value',
-                    ruleParams.transactionType || null
-                  ),
+                  ...termQuery('partition_field_value', ruleParams.serviceName),
+                  ...termQuery('by_field_value', ruleParams.transactionType),
                   ...termQuery(
                     'detector_index',
                     getApmMlDetectorIndex(ApmMlDetectorType.txLatency)
@@ -261,9 +246,10 @@ export function registerAnomalyRuleType({
             bucketSpan,
           } = anomaly;
 
-          const eventSourceFields = await getAnomalousEventSourceFields({
+          const eventSourceFields = await getServiceGroupFieldsForAnomaly({
+            config$,
             scopedClusterClient: services.scopedClusterClient,
-            index: transactionsIndex,
+            savedObjectsClient: services.savedObjectsClient,
             serviceName,
             environment,
             transactionType,

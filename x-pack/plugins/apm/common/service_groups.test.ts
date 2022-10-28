@@ -16,18 +16,22 @@ import {
   SERVICE_FRAMEWORK_VERSION,
 } from './elasticsearch_fieldnames';
 
-const unsupportedFields = [
-  TRANSACTION_TYPE,
-  TRANSACTION_DURATION,
-  SERVICE_FRAMEWORK_VERSION,
-];
-const mockFields = [...SERVICE_GROUP_SUPPORTED_FIELDS, ...unsupportedFields];
-
 describe('service_groups common utils', () => {
   describe('isSupportedField', () => {
-    it('should only filter supported supported fields for service groups', () => {
-      const supportedFields = mockFields.filter(isSupportedField);
-      expect(supportedFields).toEqual(SERVICE_GROUP_SUPPORTED_FIELDS);
+    it('should allow supported fields', () => {
+      SERVICE_GROUP_SUPPORTED_FIELDS.map((field) => {
+        expect(isSupportedField(field)).toBe(true);
+      });
+    });
+    it('should reject unsupported fields', () => {
+      const unsupportedFields = [
+        TRANSACTION_TYPE,
+        TRANSACTION_DURATION,
+        SERVICE_FRAMEWORK_VERSION,
+      ];
+      unsupportedFields.map((field) => {
+        expect(isSupportedField(field)).toBe(false);
+      });
     });
   });
   describe('validateServiceGroupKuery', () => {

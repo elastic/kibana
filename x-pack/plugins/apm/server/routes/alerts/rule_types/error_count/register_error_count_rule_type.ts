@@ -37,14 +37,17 @@ import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import { RegisterRuleDependencies } from '../../register_apm_rule_types';
-import { getSourceFieldsAgg, getSourceFields } from '../get_source_fields';
+import {
+  getServiceGroupFieldsAgg,
+  getServiceGroupFields,
+} from '../get_service_group_fields';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
   windowUnit: schema.string(),
   threshold: schema.number(),
   serviceName: schema.maybe(schema.string()),
-  environment: schema.string(),
+  environment: schema.maybe(schema.string()),
 });
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
@@ -126,7 +129,7 @@ export function registerErrorCountRuleType({
                   size: 1000,
                   order: { _count: 'desc' as const },
                 },
-                aggs: getSourceFieldsAgg(),
+                aggs: getServiceGroupFieldsAgg(),
               },
             },
           },
@@ -144,7 +147,7 @@ export function registerErrorCountRuleType({
               serviceName,
               environment,
               errorCount: bucket.doc_count,
-              sourceFields: getSourceFields(bucket),
+              sourceFields: getServiceGroupFields(bucket),
             };
           }) ?? [];
 

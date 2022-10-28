@@ -44,7 +44,10 @@ import { alertingEsClient } from '../../alerting_es_client';
 import { RegisterRuleDependencies } from '../../register_apm_rule_types';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import { getDocumentTypeFilterForTransactions } from '../../../../lib/helpers/transactions';
-import { getSourceFields, getSourceFieldsAgg } from '../get_source_fields';
+import {
+  getServiceGroupFields,
+  getServiceGroupFieldsAgg,
+} from '../get_service_group_fields';
 
 const paramsSchema = schema.object({
   windowSize: schema.number(),
@@ -52,7 +55,7 @@ const paramsSchema = schema.object({
   threshold: schema.number(),
   transactionType: schema.maybe(schema.string()),
   serviceName: schema.maybe(schema.string()),
-  environment: schema.string(),
+  environment: schema.maybe(schema.string()),
 });
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionErrorRate];
@@ -162,7 +165,7 @@ export function registerTransactionErrorRateRuleType({
                     terms: {
                       field: EVENT_OUTCOME,
                     },
-                    aggs: getSourceFieldsAgg(),
+                    aggs: getServiceGroupFieldsAgg(),
                   },
                 },
               },
@@ -199,7 +202,7 @@ export function registerTransactionErrorRateRuleType({
               environment,
               transactionType,
               errorRate,
-              sourceFields: getSourceFields(failedOutcomeBucket),
+              sourceFields: getServiceGroupFields(failedOutcomeBucket),
             });
           }
         }

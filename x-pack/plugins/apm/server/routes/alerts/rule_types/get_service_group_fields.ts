@@ -12,7 +12,7 @@ export interface SourceDoc {
   [key: string]: string | SourceDoc;
 }
 
-export function getSourceFieldsAgg(
+export function getServiceGroupFieldsAgg(
   topHitsOpts: AggregationsTopHitsAggregation = {}
 ) {
   return {
@@ -36,7 +36,7 @@ interface AggResultBucket {
   };
 }
 
-export function getSourceFields(bucket?: AggResultBucket) {
+export function getServiceGroupFields(bucket?: AggResultBucket) {
   if (!bucket) {
     return {};
   }

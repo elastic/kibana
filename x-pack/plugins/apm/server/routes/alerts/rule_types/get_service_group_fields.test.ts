@@ -6,10 +6,10 @@
  */
 
 import {
-  getSourceFields,
-  getSourceFieldsAgg,
+  getServiceGroupFields,
+  getServiceGroupFieldsAgg,
   flattenSourceDoc,
-} from './get_source_fields';
+} from './get_service_group_fields';
 
 const mockSourceObj = {
   service: {
@@ -37,7 +37,7 @@ const mockBucket = {
 
 describe('getSourceFields', () => {
   it('should return a flattened record of fields and values for a given bucket', () => {
-    const result = getSourceFields(mockBucket);
+    const result = getServiceGroupFields(mockBucket);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "agent.name": "nodejs",
@@ -52,7 +52,7 @@ describe('getSourceFields', () => {
 
 describe('getSourceFieldsAgg', () => {
   it('should create a agg for specific source fields', () => {
-    const agg = getSourceFieldsAgg();
+    const agg = getServiceGroupFieldsAgg();
     expect(agg).toMatchInlineSnapshot(`
       Object {
         "source_fields": Object {
@@ -74,7 +74,7 @@ describe('getSourceFieldsAgg', () => {
   });
 
   it('should accept options for top_hits options', () => {
-    const agg = getSourceFieldsAgg({
+    const agg = getServiceGroupFieldsAgg({
       sort: [{ 'transaction.duration.us': { order: 'desc' } }],
     });
     expect(agg).toMatchInlineSnapshot(`

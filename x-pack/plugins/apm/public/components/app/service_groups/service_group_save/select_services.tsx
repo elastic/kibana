@@ -67,7 +67,9 @@ export function SelectServices({
 }: Props) {
   const [kuery, setKuery] = useState(serviceGroup?.kuery || '');
   const [stagedKuery, setStagedKuery] = useState(serviceGroup?.kuery || '');
-  const [kueryValidationMessage, setKueryValidationMessage] = useState('');
+  const [kueryValidationMessage, setKueryValidationMessage] = useState<
+    string | undefined
+  >();
 
   useEffect(() => {
     if (isEdit) {
@@ -83,7 +85,7 @@ export function SelectServices({
     const { isValid, isParsingError, message } =
       validateServiceGroupKuery(stagedKuery);
     if (isValid || isParsingError) {
-      setKueryValidationMessage('');
+      setKueryValidationMessage(undefined);
     } else {
       setKueryValidationMessage(message);
     }

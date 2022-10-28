@@ -4,7 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IScopedClusterClient } from '@kbn/core/server';
+import { firstValueFrom } from 'rxjs';
+import {
+  IScopedClusterClient,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -12,25 +16,39 @@ import {
   TRANSACTION_DURATION,
 } from '../../../../../common/elasticsearch_fieldnames';
 import { alertingEsClient } from '../../alerting_es_client';
-import { getSourceFields, getSourceFieldsAgg } from '../get_source_fields';
+import {
+  getServiceGroupFields,
+  getServiceGroupFieldsAgg,
+} from '../get_service_group_fields';
+import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
+import { RegisterRuleDependencies } from '../../register_apm_rule_types';
 
-export async function getAnomalousEventSourceFields({
+export async function getServiceGroupFieldsForAnomaly({
+  config$,
   scopedClusterClient,
-  index,
+  savedObjectsClient,
   serviceName,
   environment,
   transactionType,
   timestamp,
   bucketSpan,
 }: {
+  config$: RegisterRuleDependencies['config$'];
   scopedClusterClient: IScopedClusterClient;
-  index: string;
+  savedObjectsClient: SavedObjectsClientContract;
   serviceName: string;
   environment: string;
   transactionType: string;
   timestamp: number;
   bucketSpan: number;
 }) {
+  const config = await firstValueFrom(config$);
+  const indices = await getApmIndices({
+    config,
+    savedObjectsClient,
+  });
+  const { transaction: index } = indices;
+
   const params = {
     index,
     body: {
@@ -55,7 +73,7 @@ export async function getAnomalousEventSourceFields({
         },
       },
       aggs: {
-        ...getSourceFieldsAgg({
+        ...getServiceGroupFieldsAgg({
           sort: [{ [TRANSACTION_DURATION]: { order: 'desc' as const } }],
         }),
       },
@@ -69,5 +87,5 @@ export async function getAnomalousEventSourceFields({
   if (!response.aggregations) {
     return {};
   }
-  return getSourceFields(response.aggregations);
+  return getServiceGroupFields(response.aggregations);
 }

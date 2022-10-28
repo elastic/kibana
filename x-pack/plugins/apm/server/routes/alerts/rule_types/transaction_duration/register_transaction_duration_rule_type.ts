@@ -51,11 +51,14 @@ import {
   averageOrPercentileAgg,
   getMultiTermsSortOrder,
 } from './average_or_percentile_agg';
-import { getSourceFields, getSourceFieldsAgg } from '../get_source_fields';
+import {
+  getServiceGroupFields,
+  getServiceGroupFieldsAgg,
+} from '../get_service_group_fields';
 
 const paramsSchema = schema.object({
-  serviceName: schema.string(),
-  transactionType: schema.string(),
+  serviceName: schema.maybe(schema.string()),
+  transactionType: schema.maybe(schema.string()),
   windowSize: schema.number(),
   windowUnit: schema.string(),
   threshold: schema.number(),
@@ -64,7 +67,7 @@ const paramsSchema = schema.object({
     schema.literal(AggregationType.P95),
     schema.literal(AggregationType.P99),
   ]),
-  environment: schema.string(),
+  environment: schema.maybe(schema.string()),
 });
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
@@ -170,7 +173,7 @@ export function registerTransactionDurationRuleType({
                   aggregationType: ruleParams.aggregationType,
                   transactionDurationField: field,
                 }),
-                ...getSourceFieldsAgg(),
+                ...getServiceGroupFieldsAgg(),
               },
             },
           },
@@ -205,7 +208,7 @@ export function registerTransactionDurationRuleType({
             environment,
             transactionType,
             transactionDuration,
-            sourceFields: getSourceFields(bucket),
+            sourceFields: getServiceGroupFields(bucket),
           });
         }
       }
