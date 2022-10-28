@@ -7,7 +7,9 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
-import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
+import { SecurityStepId } from '../../../common/components/guided_onboarding_tour/tour_config';
 import { isActiveTimeline } from '../../../helpers';
 import { TableId } from '../../../../common/types';
 import { useResponderActionItem } from '../endpoint_responder';
@@ -45,7 +47,7 @@ export interface TakeActionDropdownProps {
   isHostIsolationPanelOpen: boolean;
   loadingEventDetails: boolean;
   onAddEventFilterClick: () => void;
-  onAddExceptionTypeClick: (type: ExceptionListType) => void;
+  onAddExceptionTypeClick: (type?: ExceptionListTypeEnum) => void;
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
   refetch: (() => void) | undefined;
   refetchFlyoutData: () => Promise<void>;
@@ -144,7 +146,7 @@ export const TakeActionDropdown = React.memo(
     );
 
     const handleOnAddExceptionTypeClick = useCallback(
-      (type: ExceptionListType) => {
+      (type?: ExceptionListTypeEnum) => {
         onAddExceptionTypeClick(type);
         setIsPopoverOpen(false);
       },
@@ -252,19 +254,24 @@ export const TakeActionDropdown = React.memo(
       ]
     );
 
-    const takeActionButton = useMemo(() => {
-      return (
-        <EuiButton
-          data-test-subj="take-action-dropdown-btn"
-          fill
-          iconSide="right"
-          iconType="arrowDown"
-          onClick={togglePopoverHandler}
-        >
-          {TAKE_ACTION}
-        </EuiButton>
-      );
-    }, [togglePopoverHandler]);
+    const takeActionButton = useMemo(
+      () => (
+        <GuidedOnboardingTourStep step={4} stepId={SecurityStepId.alertsCases}>
+          <EuiButton
+            data-test-subj="take-action-dropdown-btn"
+            fill
+            iconSide="right"
+            iconType="arrowDown"
+            onClick={togglePopoverHandler}
+          >
+            {TAKE_ACTION}
+          </EuiButton>
+        </GuidedOnboardingTourStep>
+      ),
+
+      [togglePopoverHandler]
+    );
+
     return items.length && !loadingEventDetails && ecsData ? (
       <EuiPopover
         id="AlertTakeActionPanel"
