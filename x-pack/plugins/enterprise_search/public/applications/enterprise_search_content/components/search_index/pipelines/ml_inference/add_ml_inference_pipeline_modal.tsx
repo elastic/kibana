@@ -85,6 +85,15 @@ const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = ({ onClo
     isLoading,
     addInferencePipelineModal: { step },
   } = useValues(MLInferenceLogic);
+  // Using the value of create errors to reduce unnecessary hook calls
+  const createErrorsHookDep = createErrors.join('|');
+  useEffect(() => {
+    if (createErrors.length === 0) return;
+    const modalOverflow = document.getElementsByClassName('euiModalBody__overflow');
+    if (modalOverflow.length === 0) return;
+    modalOverflow[0].scrollTop = 0;
+  }, [createErrorsHookDep]);
+
   if (isLoading) {
     return (
       <EuiModalBody>
