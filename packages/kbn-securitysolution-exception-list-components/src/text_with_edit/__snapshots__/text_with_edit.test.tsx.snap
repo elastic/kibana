@@ -6,7 +6,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-1xjcsb0"
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
       >
         <div
           class="euiFlexItem euiFlexItem--flexGrow10"
@@ -25,7 +25,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-1xjcsb0"
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
     >
       <div
         class="euiFlexItem euiFlexItem--flexGrow10"
@@ -101,7 +101,7 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-1xjcsb0"
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
       >
         <div
           class="euiFlexItem euiFlexItem--flexGrow10"
@@ -134,7 +134,7 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-1xjcsb0"
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive css-nhr7ke"
     >
       <div
         class="euiFlexItem euiFlexItem--flexGrow10"

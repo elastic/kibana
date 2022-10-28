@@ -50,7 +50,7 @@ import type { Rule } from '../../../rule_management/logic/types';
 import { ExceptionItemsFlyoutAlertsActions } from '../flyout_components/alerts_actions';
 import { ExceptionsAddToRulesOrLists } from '../flyout_components/add_exception_to_rule_or_list';
 import { useAddNewExceptionItems } from './use_add_new_exceptions';
-import { entrichNewExceptionItems } from '../flyout_components/utils';
+import { enrichNewExceptionItems } from '../flyout_components/utils';
 import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
 
@@ -74,6 +74,7 @@ export interface AddExceptionFlyoutProps {
    */
   isAlertDataLoading?: boolean;
   alertStatus?: Status;
+  sharedListToAddTo?: ExceptionListSchema[];
   onCancel: (didRuleChange: boolean) => void;
   onConfirm: (didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
 }
@@ -106,6 +107,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   showAlertCloseOptions,
   isAlertDataLoading,
   alertStatus,
+  sharedListToAddTo,
   onCancel,
   onConfirm,
 }: AddExceptionFlyoutProps) {
@@ -125,6 +127,12 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     }
   }, [rules]);
 
+  const getListType = useMemo(() => {
+    if (isEndpointItem) return ExceptionListTypeEnum.ENDPOINT;
+    if (sharedListToAddTo) return ExceptionListTypeEnum.DETECTION;
+
+    return ExceptionListTypeEnum.RULE_DEFAULT;
+  }, [isEndpointItem, sharedListToAddTo]);
   const [
     {
       exceptionItemMeta: { name: exceptionItemName },
@@ -151,10 +159,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       : rules != null && rules.length === 1
       ? 'add_to_rule'
       : 'select_rules_to_add_to',
-    listType: isEndpointItem ? ExceptionListTypeEnum.ENDPOINT : ExceptionListTypeEnum.RULE_DEFAULT,
+    listType: getListType,
     selectedRulesToAddTo: rules != null ? rules : [],
   });
 
+  console.log(listType);
   const hasAlertData = useMemo((): boolean => {
     return alertData != null;
   }, [alertData]);
@@ -320,14 +329,16 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     try {
       const ruleDefaultOptions = ['add_to_rule', 'add_to_rules', 'select_rules_to_add_to'];
       const addToRules = ruleDefaultOptions.includes(addExceptionToRadioSelection);
-      const addToSharedLists = addExceptionToRadioSelection === 'add_to_lists';
+      const addToSharedLists =
+        !!sharedListToAddTo?.length || addExceptionToRadioSelection === 'add_to_lists';
+      const sharedLists = sharedListToAddTo?.length ? sharedListToAddTo : exceptionListsToAddTo;
 
-      const items = entrichNewExceptionItems({
+      const items = enrichNewExceptionItems({
         itemName: exceptionItemName,
         commentToAdd: newComment,
         addToRules,
         addToSharedLists,
-        sharedLists: exceptionListsToAddTo,
+        sharedLists,
         listType,
         selectedOs: osTypesSelection,
         items: exceptionItems,
@@ -338,8 +349,9 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         selectedRulesToAddTo,
         listType,
         addToRules: addToRules && !isEmpty(selectedRulesToAddTo),
-        addToSharedLists: addToSharedLists && !isEmpty(exceptionListsToAddTo),
-        sharedLists: exceptionListsToAddTo,
+        addToSharedLists:
+          !!sharedListToAddTo?.length || (addToSharedLists && !isEmpty(exceptionListsToAddTo)),
+        sharedLists,
       });
 
       const alertIdToClose = closeSingleAlert && alertData ? alertData._id : undefined;
@@ -463,7 +475,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             onFilterIndexPatterns={filterIndexPatterns}
           />
 
-          {listType !== ExceptionListTypeEnum.ENDPOINT && (
+          {listType !== ExceptionListTypeEnum.ENDPOINT && !sharedListToAddTo?.length && (
             <>
               <EuiHorizontalRule />
               <ExceptionsAddToRulesOrLists

@@ -62,6 +62,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list }) => 
           rules={null} // which rule list.rules?
           isBulkAction={false}
           isEndpointItem={false}
+          sharedListToAddTo={[list]}
           onCancel={handleCancelExceptionItemFlyout}
           onConfirm={handleConfirmExceptionFlyout}
           data-test-subj="addExceptionItemFlyoutInList"
@@ -85,6 +86,7 @@ const ListWithSearchComponent: FC<ListWithSearchComponentProps> = ({ list }) => 
                 list={list}
                 itemToEdit={exceptionToEdit}
                 showAlertCloseOptions
+                openedFromListDetailPage
                 onCancel={handleCancelExceptionItemFlyout}
                 onConfirm={handleConfirmExceptionFlyout}
                 data-test-subj="editExceptionItemFlyoutInList"

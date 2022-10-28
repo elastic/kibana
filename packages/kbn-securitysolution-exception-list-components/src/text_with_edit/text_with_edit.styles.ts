@@ -13,7 +13,7 @@ export const textWithEditContainerCss = css`
   display: flex;
   width: fit-content;
   align-items: baseline;
-  padding-top: ${euiThemeVars.euiSizeS};
+  padding-bottom: ${euiThemeVars.euiSizeS};
   h1 {
     margin-bottom: 0;
   }
