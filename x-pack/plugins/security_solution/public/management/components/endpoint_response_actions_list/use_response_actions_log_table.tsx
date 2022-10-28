@@ -171,6 +171,35 @@ export const useResponseActionsLogTable = ({
           };
         });
 
+        const getOutputContent = () => {
+          if (isExpired) {
+            return OUTPUT_MESSAGES.hasExpired(command);
+          }
+
+          if (!isCompleted) {
+            return OUTPUT_MESSAGES.isPending(command);
+          }
+
+          if (!wasSuccessful) {
+            return OUTPUT_MESSAGES.hasFailed(command);
+          }
+
+          if (!isGetFileCommand) {
+            return OUTPUT_MESSAGES.wasSuccessful(command);
+          } else {
+            return (
+              <>
+                {OUTPUT_MESSAGES.wasSuccessful(command)}
+                <ResponseActionFileDownloadLink
+                  action={item}
+                  textSize="xs"
+                  data-test-subj={getTestId('getFileDownloadLink')}
+                />
+              </>
+            );
+          }
+        };
+
         const outputList = [
           {
             title: (
@@ -179,28 +208,7 @@ export const useResponseActionsLogTable = ({
             description: (
               // codeblock for output
               <StyledEuiCodeBlock data-test-subj={getTestId('details-tray-output')}>
-                {isExpired ? (
-                  OUTPUT_MESSAGES.hasExpired(command)
-                ) : isCompleted ? (
-                  wasSuccessful ? (
-                    isGetFileCommand ? (
-                      <>
-                        {OUTPUT_MESSAGES.wasSuccessful(command)}
-                        <ResponseActionFileDownloadLink
-                          action={item}
-                          textSize="xs"
-                          data-test-subj={getTestId('getFileDownloadLink')}
-                        />
-                      </>
-                    ) : (
-                      OUTPUT_MESSAGES.wasSuccessful(command)
-                    )
-                  ) : (
-                    OUTPUT_MESSAGES.hasFailed(command)
-                  )
-                ) : (
-                  OUTPUT_MESSAGES.isPending(command)
-                )}
+                {getOutputContent()}
               </StyledEuiCodeBlock>
             ),
           },
