@@ -46,7 +46,7 @@ export const createInternalReadonlySoClient = (
   } as unknown as KibanaRequest;
 
   const internalSoClient = savedObjectsServiceStart.getScopedClient(fakeRequest, {
-    excludedWrappers: ['security'],
+    excludedExtensions: ['security'],
   });
 
   return new Proxy(internalSoClient, {

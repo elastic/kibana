@@ -190,34 +190,6 @@ describe('SavedObjectsService', () => {
       });
     });
 
-    describe('#addClientWrapper', () => {
-      it('registers the wrapper to the clientProvider', async () => {
-        const coreContext = createCoreContext();
-        const soService = new SavedObjectsService(coreContext);
-        const setup = await soService.setup(createSetupDeps());
-
-        const wrapperA = jest.fn();
-        const wrapperB = jest.fn();
-
-        setup.addClientWrapper(1, 'A', wrapperA);
-        setup.addClientWrapper(2, 'B', wrapperB);
-
-        await soService.start(createStartDeps());
-
-        expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledTimes(2);
-        expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledWith(
-          1,
-          'A',
-          wrapperA
-        );
-        expect(clientProviderInstanceMock.addClientWrapperFactory).toHaveBeenCalledWith(
-          2,
-          'B',
-          wrapperB
-        );
-      });
-    });
-
     describe('#registerType', () => {
       it('registers the type to the internal typeRegistry', async () => {
         // we mocked registerCoreObjectTypes above, so this test case only reflects direct calls to the registerType method
@@ -335,12 +307,6 @@ describe('SavedObjectsService', () => {
         setup.setClientFactoryProvider(jest.fn());
       }).toThrowErrorMatchingInlineSnapshot(
         `"cannot call \`setClientFactoryProvider\` after service startup."`
-      );
-
-      expect(() => {
-        setup.addClientWrapper(0, 'dummy', jest.fn());
-      }).toThrowErrorMatchingInlineSnapshot(
-        `"cannot call \`addClientWrapper\` after service startup."`
       );
 
       expect(() => {

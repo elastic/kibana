@@ -25,8 +25,11 @@ import type {
   SavedObjectsRepositoryFactory,
   SavedObjectStatusMeta,
   SavedObjectsClientFactoryProvider,
-  SavedObjectsClientWrapperFactory,
   ISavedObjectTypeRegistry,
+  SavedObjectsEncryptionExtensionFactory,
+  SavedObjectsSecurityExtensionFactory,
+  SavedObjectsSpacesExtensionFactory,
+  SavedObjectsExtensions,
 } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectConfig,
@@ -74,12 +77,6 @@ export interface SavedObjectsSetupDeps {
   deprecations: DeprecationRegistryProvider;
 }
 
-interface WrappedClientFactoryWrapper {
-  priority: number;
-  id: string;
-  factory: SavedObjectsClientWrapperFactory;
-}
-
 /** @internal */
 export interface SavedObjectsStartDeps {
   elasticsearch: InternalElasticsearchServiceStart;
@@ -96,7 +93,9 @@ export class SavedObjectsService
   private setupDeps?: SavedObjectsSetupDeps;
   private config?: SavedObjectConfig;
   private clientFactoryProvider?: SavedObjectsClientFactoryProvider;
-  private clientFactoryWrappers: WrappedClientFactoryWrapper[] = [];
+  private encryptionExtensionFactory?: SavedObjectsEncryptionExtensionFactory;
+  private securityExtensionFactory?: SavedObjectsSecurityExtensionFactory;
+  private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
 
   private migrator$ = new Subject<IKibanaMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
@@ -160,15 +159,32 @@ export class SavedObjectsService
         }
         this.clientFactoryProvider = provider;
       },
-      addClientWrapper: (priority, id, factory) => {
+      addEncryptionExtension: (factory) => {
         if (this.started) {
-          throw new Error('cannot call `addClientWrapper` after service startup.');
+          throw new Error('cannot call `addEncryptionExtension` after service startup.');
         }
-        this.clientFactoryWrappers.push({
-          priority,
-          id,
-          factory,
-        });
+        if (this.encryptionExtensionFactory) {
+          throw new Error('encryption extension is already set, and can only be set once');
+        }
+        this.encryptionExtensionFactory = factory;
+      },
+      addSecurityExtension: (factory) => {
+        if (this.started) {
+          throw new Error('cannot call `addSecurityExtension` after service startup.');
+        }
+        if (this.securityExtensionFactory) {
+          throw new Error('security extension is already set, and can only be set once');
+        }
+        this.securityExtensionFactory = factory;
+      },
+      addSpacesExtension: (factory) => {
+        if (this.started) {
+          throw new Error('cannot call `addSpacesExtension` after service startup.');
+        }
+        if (this.spacesExtensionFactory) {
+          throw new Error('spaces extension is already set, and can only be set once');
+        }
+        this.spacesExtensionFactory = factory;
       },
       registerType: (type) => {
         if (this.started) {
@@ -250,7 +266,8 @@ export class SavedObjectsService
 
     const createRepository = (
       esClient: ElasticsearchClient,
-      includedHiddenTypes: string[] = []
+      includedHiddenTypes: string[] = [],
+      extensions?: SavedObjectsExtensions
     ) => {
       return SavedObjectsRepository.createRepository(
         migrator,
@@ -258,31 +275,42 @@ export class SavedObjectsService
         kibanaIndex,
         esClient,
         this.logger.get('repository'),
-        includedHiddenTypes
+        includedHiddenTypes,
+        extensions
       );
     };
 
     const repositoryFactory: SavedObjectsRepositoryFactory = {
-      createInternalRepository: (includedHiddenTypes?: string[]) =>
-        createRepository(client.asInternalUser, includedHiddenTypes),
-      createScopedRepository: (req: KibanaRequest, includedHiddenTypes?: string[]) =>
-        createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes),
+      createInternalRepository: (
+        includedHiddenTypes?: string[],
+        extensions?: SavedObjectsExtensions | undefined
+      ) => createRepository(client.asInternalUser, includedHiddenTypes, extensions),
+      createScopedRepository: (
+        req: KibanaRequest,
+        includedHiddenTypes?: string[],
+        extensions?: SavedObjectsExtensions
+      ) => createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes, extensions),
     };
 
     const clientProvider = new SavedObjectsClientProvider({
-      defaultClientFactory({ request, includedHiddenTypes }) {
-        const repository = repositoryFactory.createScopedRepository(request, includedHiddenTypes);
+      defaultClientFactory({ request, includedHiddenTypes, extensions }): SavedObjectsClient {
+        const repository = repositoryFactory.createScopedRepository(
+          request,
+          includedHiddenTypes,
+          extensions
+        );
         return new SavedObjectsClient(repository);
       },
       typeRegistry: this.typeRegistry,
+      encryptionExtensionFactory: this.encryptionExtensionFactory,
+      securityExtensionFactory: this.securityExtensionFactory,
+      spacesExtensionFactory: this.spacesExtensionFactory,
     });
+
     if (this.clientFactoryProvider) {
       const clientFactory = this.clientFactoryProvider(repositoryFactory);
       clientProvider.setClientFactory(clientFactory);
     }
-    this.clientFactoryWrappers.forEach(({ id, factory, priority }) => {
-      clientProvider.addClientWrapperFactory(priority, id, factory);
-    });
 
     this.started = true;
 

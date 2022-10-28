@@ -218,7 +218,8 @@ describe('TagsClient', () => {
         expect.objectContaining({
           type: 'tag',
           perPage: 1000,
-        })
+        }),
+        undefined // internalOptions
       );
     });
 

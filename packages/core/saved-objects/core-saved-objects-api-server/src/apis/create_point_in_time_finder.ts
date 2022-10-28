@@ -7,7 +7,7 @@
  */
 
 import type { SavedObjectsFindOptions, SavedObjectsFindResponse } from './find';
-import type { SavedObjectsClientContract } from '../saved_objects_client';
+import { ISavedObjectsRepository } from '../saved_objects_repository';
 
 /**
  * @public
@@ -21,7 +21,7 @@ export type SavedObjectsCreatePointInTimeFinderOptions = Omit<
  * @public
  */
 export type SavedObjectsPointInTimeFinderClient = Pick<
-  SavedObjectsClientContract,
+  ISavedObjectsRepository,
   'find' | 'openPointInTimeForType' | 'closePointInTime'
 >;
 

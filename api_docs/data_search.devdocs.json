@@ -16145,7 +16145,7 @@
             "id": "def-common.pollSearch.$3",
             "type": "Object",
             "tags": [],
-            "label": "{ pollInterval = 1000, abortSignal }",
+            "label": "{ pollInterval, abortSignal }",
             "description": [],
             "signature": [
               {
@@ -26214,7 +26214,7 @@
             "tags": [],
             "label": "pollInterval",
             "description": [
-              "\nThe number of milliseconds to wait between receiving a response and sending another request"
+              "\nThe number of milliseconds to wait between receiving a response and sending another request\nIf not provided, then a default 1 second interval with back-off up to 5 seconds interval is used"
             ],
             "signature": [
               "number | undefined"

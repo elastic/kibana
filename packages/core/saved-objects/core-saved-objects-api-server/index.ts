@@ -7,7 +7,10 @@
  */
 
 export type { SavedObjectsClientContract } from './src/saved_objects_client';
-export type { ISavedObjectsRepository } from './src/saved_objects_repository';
+export type {
+  ISavedObjectsRepository,
+  SavedObjectsFindInternalOptions,
+} from './src/saved_objects_repository';
 export type {
   MutatingOperationRefreshSetting,
   SavedObjectsBaseOptions,

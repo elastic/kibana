@@ -26,10 +26,29 @@ import {
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { internalBulkResolve, InternalBulkResolveParams } from './internal_bulk_resolve';
 import { normalizeNamespace } from './internal_utils';
+import {
+  AuditAction,
+  ISavedObjectsEncryptionExtension,
+  ISavedObjectsSecurityExtension,
+  ISavedObjectTypeRegistry,
+} from '@kbn/core-saved-objects-server';
+import {
+  authMap,
+  enforceError,
+  typeMapsAreEqual,
+  setsAreEqual,
+  setupCheckAuthorized,
+  setupCheckUnauthorized,
+  setupEnforceFailure,
+  setupEnforceSuccess,
+  setupRedactPassthrough,
+} from '../test_helpers/repository.test.common';
+import { savedObjectsExtensionsMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
 const OBJ_TYPE = 'obj-type';
 const UNSUPPORTED_TYPE = 'unsupported-type';
+const ENCRYPTED_TYPE = 'encrypted-type';
 
 beforeEach(() => {
   mockGetSavedObjectFromSource.mockReset();
@@ -46,23 +65,30 @@ describe('internalBulkResolve', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
   let serializer: SavedObjectsSerializer;
   let incrementCounterInternal: jest.Mock<any, any>;
+  let registry: jest.Mocked<ISavedObjectTypeRegistry>;
 
   /** Sets up the type registry, saved objects client, etc. and return the full parameters object to be passed to `internalBulkResolve` */
   function setup(
     objects: SavedObjectsBulkResolveObject[],
-    options: SavedObjectsBaseOptions = {}
+    options: SavedObjectsBaseOptions = {},
+    extensions?: {
+      encryptionExt?: ISavedObjectsEncryptionExtension;
+      securityExt?: ISavedObjectsSecurityExtension;
+    }
   ): InternalBulkResolveParams {
-    const registry = typeRegistryMock.create();
+    registry = typeRegistryMock.create();
     client = elasticsearchClientMock.createElasticsearchClient();
     serializer = new SavedObjectsSerializer(registry);
     incrementCounterInternal = jest.fn().mockRejectedValue(new Error('increment error')); // mock error to implicitly test that it is caught and swallowed
     return {
-      registry: typeRegistryMock.create(), // doesn't need additional mocks for this test suite
-      allowedTypes: [OBJ_TYPE],
+      registry,
+      allowedTypes: [OBJ_TYPE, ENCRYPTED_TYPE],
       client,
       serializer,
       getIndexForType: (type: string) => `index-for-${type}`,
       incrementCounterInternal,
+      encryptionExtension: extensions?.encryptionExt,
+      securityExtension: extensions?.securityExt,
       objects,
       options,
     };
@@ -343,4 +369,231 @@ describe('internalBulkResolve', () => {
       ]);
     });
   }
+
+  describe('with encryption extension', () => {
+    const namespace = 'foo';
+
+    const attributes = {
+      attrNotSoSecret: '*not-so-secret*',
+      attrOne: 'one',
+      attrSecret: '*secret*',
+      attrThree: 'three',
+      title: 'Testing',
+    };
+
+    beforeEach(() => {
+      mockGetSavedObjectFromSource.mockImplementation((_registry, type, id) => {
+        return {
+          id,
+          type,
+          namespaces: [namespace],
+          attributes,
+          references: [],
+        } as SavedObject;
+      });
+    });
+
+    it('only attempts to decrypt and strip attributes for types that are encryptable', async () => {
+      const objects = [
+        { type: OBJ_TYPE, id: '11' }, // non encryptable type
+        { type: ENCRYPTED_TYPE, id: '12' }, // encryptable type
+      ];
+      const mockEncryptionExt = savedObjectsExtensionsMock.createEncryptionExtension();
+      const params = setup(objects, { namespace }, { encryptionExt: mockEncryptionExt });
+      mockBulkResults(
+        // No alias matches
+        { found: false },
+        { found: false }
+      );
+      mockMgetResults(
+        // exact matches
+        { found: true },
+        { found: true }
+      );
+
+      mockEncryptionExt.isEncryptableType.mockReturnValueOnce(false);
+      mockEncryptionExt.isEncryptableType.mockReturnValueOnce(true);
+
+      await internalBulkResolve(params);
+
+      expect(mockEncryptionExt.isEncryptableType).toBeCalledTimes(2);
+      expect(mockEncryptionExt.isEncryptableType).toBeCalledWith(OBJ_TYPE);
+      expect(mockEncryptionExt.isEncryptableType).toBeCalledWith(ENCRYPTED_TYPE);
+
+      expect(mockEncryptionExt.decryptOrStripResponseAttributes).toBeCalledTimes(1);
+      expect(mockEncryptionExt.decryptOrStripResponseAttributes).toBeCalledWith(
+        expect.objectContaining({ type: ENCRYPTED_TYPE, id: '12', attributes })
+      );
+    });
+  });
+
+  describe('with security extension', () => {
+    const namespace = 'foo';
+    const objects = [
+      { type: OBJ_TYPE, id: '13' },
+      { type: OBJ_TYPE, id: '14' },
+    ];
+    let mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>;
+    let params: InternalBulkResolveParams;
+
+    beforeEach(() => {
+      mockGetSavedObjectFromSource.mockReset();
+      mockGetSavedObjectFromSource.mockImplementation((_registry, type, id) => {
+        return {
+          id,
+          type,
+          namespaces: [namespace],
+          attributes: {},
+          references: [],
+        } as SavedObject;
+      });
+
+      mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
+      params = setup(objects, { namespace }, { securityExt: mockSecurityExt });
+
+      mockBulkResults(
+        // No alias matches
+        { found: false },
+        { found: false }
+      );
+      mockMgetResults(
+        // exact matches
+        { found: true },
+        { found: true }
+      );
+    });
+
+    test(`propagates decorated error when unauthorized`, async () => {
+      setupCheckUnauthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
+
+      await expect(internalBulkResolve(params)).rejects.toThrow(enforceError);
+      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+    });
+
+    test(`returns result when authorized`, async () => {
+      setupCheckAuthorized(mockSecurityExt);
+      setupEnforceSuccess(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
+
+      const result = await internalBulkResolve(params);
+      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+
+      const bulkIds = objects.map((obj) => obj.id);
+      const expectedNamespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
+      expectBulkArgs(expectedNamespaceString, bulkIds);
+      const mgetIds = bulkIds;
+      expectMgetArgs(namespace, mgetIds);
+      expect(result.resolved_objects).toEqual([
+        expect.objectContaining({
+          outcome: 'exactMatch',
+          saved_object: expect.objectContaining({ id: objects[0].id }),
+        }),
+        expect.objectContaining({
+          outcome: 'exactMatch',
+          saved_object: expect.objectContaining({ id: objects[1].id }),
+        }),
+      ]);
+    });
+
+    test(`calls checkAuthorization with type, actions, namespace, and object namespaces`, async () => {
+      setupCheckAuthorized(mockSecurityExt);
+      setupEnforceSuccess(mockSecurityExt);
+
+      await internalBulkResolve(params);
+      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+      const expectedActions = ['bulk_get'];
+      const expectedSpaces = new Set([namespace]);
+      const expectedTypes = new Set([objects[0].type]);
+
+      const {
+        actions: actualActions,
+        spaces: actualSpaces,
+        types: actualTypes,
+      } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
+
+      expect(actualActions).toEqual(expectedActions);
+      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
+      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
+    });
+
+    test(`calls enforceAuthorization with action, type map, and auth map`, async () => {
+      setupCheckAuthorized(mockSecurityExt);
+      setupEnforceSuccess(mockSecurityExt);
+
+      await internalBulkResolve(params);
+      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'bulk_get',
+        })
+      );
+
+      const expectedTypesAndSpaces = new Map([[objects[0].type, new Set([namespace])]]);
+
+      const { typesAndSpaces: actualTypesAndSpaces, typeMap: actualTypeMap } =
+        mockSecurityExt.enforceAuthorization.mock.calls[0][0];
+
+      expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
+      expect(actualTypeMap).toBe(authMap);
+    });
+
+    test(`calls redactNamespaces with authorization map`, async () => {
+      setupCheckAuthorized(mockSecurityExt);
+      setupEnforceSuccess(mockSecurityExt);
+      setupRedactPassthrough(mockSecurityExt);
+
+      await internalBulkResolve(params);
+      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+
+      expect(mockSecurityExt.redactNamespaces).toHaveBeenCalledTimes(objects.length);
+      objects.forEach((obj, i) => {
+        const { savedObject, typeMap } = mockSecurityExt.redactNamespaces.mock.calls[i][0];
+        expect(savedObject).toEqual(
+          expect.objectContaining({
+            type: obj.type,
+            id: obj.id,
+            namespaces: [namespace],
+          })
+        );
+        expect(typeMap).toBe(authMap);
+      });
+    });
+
+    test(`adds audit event per object when successful`, async () => {
+      setupCheckAuthorized(mockSecurityExt);
+      setupEnforceSuccess(mockSecurityExt);
+
+      await internalBulkResolve(params);
+
+      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
+      objects.forEach((obj) => {
+        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
+          action: AuditAction.RESOLVE,
+          savedObject: { type: obj.type, id: obj.id },
+          error: undefined,
+        });
+      });
+    });
+
+    test(`adds audit event per object when not successful`, async () => {
+      setupCheckAuthorized(mockSecurityExt);
+      setupEnforceFailure(mockSecurityExt);
+
+      await expect(internalBulkResolve(params)).rejects.toThrow(enforceError);
+
+      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
+      objects.forEach((obj) => {
+        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
+          action: AuditAction.RESOLVE,
+          savedObject: { type: obj.type, id: obj.id },
+          error: enforceError,
+        });
+      });
+    });
+  });
 });

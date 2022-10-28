@@ -108,7 +108,7 @@ export class CasesClientFactory {
       includedHiddenTypes: SAVED_OBJECT_TYPES,
       // this tells the security plugin to not perform SO authorization and audit logging since we are handling
       // that manually using our Authorization class and audit logger.
-      excludedWrappers: ['security'],
+      excludedExtensions: ['security'],
     });
 
     const services = this.createServices({

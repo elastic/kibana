@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/adhoc-profiler",
+  "owner": "@elastic/apm-ui",
+  "runtimeDeps": [],
+  "typeDeps": [],
+}

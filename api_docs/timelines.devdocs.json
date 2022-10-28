@@ -2490,7 +2490,7 @@
         "label": "useBulkActionItems",
         "description": [],
         "signature": [
-          "({ eventIds, currentStatus, query, indexName, setEventsLoading, showAlertStatusActions, setEventsDeleted, onUpdateSuccess, onUpdateFailure, customBulkActions, scopeId, }: ",
+          "({ eventIds, currentStatus, query, indexName, setEventsLoading, showAlertStatusActions, setEventsDeleted, onUpdateSuccess, onUpdateFailure, customBulkActions, }: ",
           "BulkActionsProps",
           ") => JSX.Element[]"
         ],
@@ -2503,7 +2503,7 @@
             "id": "def-public.useBulkActionItems.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  eventIds,\n  currentStatus,\n  query,\n  indexName,\n  setEventsLoading,\n  showAlertStatusActions = true,\n  setEventsDeleted,\n  onUpdateSuccess,\n  onUpdateFailure,\n  customBulkActions,\n  scopeId,\n}",
+            "label": "{\n  eventIds,\n  currentStatus,\n  query,\n  indexName,\n  setEventsLoading,\n  showAlertStatusActions = true,\n  setEventsDeleted,\n  onUpdateSuccess,\n  onUpdateFailure,\n  customBulkActions,\n}",
             "description": [],
             "signature": [
               "BulkActionsProps"
@@ -3269,7 +3269,7 @@
         "label": "TGridType",
         "description": [],
         "signature": [
-          "\"standalone\" | \"embedded\""
+          "\"embedded\""
         ],
         "path": "x-pack/plugins/timelines/public/types.ts",
         "deprecated": false,
@@ -3347,15 +3347,7 @@
           "label": "getTGrid",
           "description": [],
           "signature": [
-            "<T extends ",
-            {
-              "pluginId": "timelines",
-              "scope": "public",
-              "docId": "kibTimelinesPluginApi",
-              "section": "def-public.TGridType",
-              "text": "TGridType"
-            },
-            " = \"embedded\">(props: ",
+            "<T extends \"embedded\" = \"embedded\">(props: ",
             "GetTGridProps",
             "<T>) => React.ReactElement<",
             "GetTGridProps",
