@@ -7,10 +7,11 @@
 
 import { EuiButton } from '@elastic/eui';
 import React from 'react';
+import { SecurityStepId } from '../../../../common/components/guided_onboarding_tour/tour_config';
+import { GuidedOnboardingTourStep } from '../../../../common/components/guided_onboarding_tour/tour_step';
 import { usePrePackagedRulesInstallationStatus } from '../../../../detection_engine/rule_management/logic/use_pre_packaged_rules_installation_status';
 import { usePrePackagedRulesStatus } from '../../../../detection_engine/rule_management/logic/use_pre_packaged_rules_status';
 import { usePrePackagedTimelinesInstallationStatus } from '../../../../detection_engine/rule_management/logic/use_pre_packaged_timelines_installation_status';
-import { INSTALL_PREBUILT_RULES_ANCHOR } from '../../../../detection_engine/rule_management_ui/components/guided_onboarding/rules_management_tour';
 import type {
   PrePackagedRuleInstallationStatus,
   PrePackagedTimelineInstallationStatus,
@@ -63,13 +64,9 @@ export const LoadPrePackagedRulesButton = ({
     prePackagedAssetsStatus !== 'someRuleUninstall';
 
   if (showInstallButton) {
-    // Without the outer div EuiStepTour crashes with Uncaught DOMException:
-    // Failed to execute 'removeChild' on 'Node': The node to be removed is not
-    // a child of this node.
     return (
-      <div>
+      <GuidedOnboardingTourStep step={1} stepId={SecurityStepId.rules}>
         <EuiButton
-          id={INSTALL_PREBUILT_RULES_ANCHOR}
           fill={fill}
           iconType="indexOpen"
           isLoading={isLoading}
@@ -79,7 +76,7 @@ export const LoadPrePackagedRulesButton = ({
         >
           {getLoadRulesOrTimelinesButtonTitle(prePackagedAssetsStatus, prePackagedTimelineStatus)}
         </EuiButton>
-      </div>
+      </GuidedOnboardingTourStep>
     );
   }
 
@@ -88,13 +85,9 @@ export const LoadPrePackagedRulesButton = ({
     prePackagedTimelineStatus === 'someTimelineUninstall';
 
   if (showUpdateButton) {
-    // Without the outer div EuiStepTour crashes with Uncaught DOMException:
-    // Failed to execute 'removeChild' on 'Node': The node to be removed is not
-    // a child of this node.
     return (
-      <div>
+      <GuidedOnboardingTourStep step={1} stepId={SecurityStepId.rules}>
         <EuiButton
-          id={INSTALL_PREBUILT_RULES_ANCHOR}
           fill={fill}
           iconType="plusInCircle"
           isLoading={isLoading}
@@ -107,7 +100,7 @@ export const LoadPrePackagedRulesButton = ({
             prePackagedRulesStatus?.timelines_not_installed ?? 0
           )}
         </EuiButton>
-      </div>
+      </GuidedOnboardingTourStep>
     );
   }
 

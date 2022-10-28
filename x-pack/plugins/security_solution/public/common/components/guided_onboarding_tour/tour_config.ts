@@ -125,6 +125,39 @@ const alertsCasesConfig: StepConfig[] = [
   },
 ];
 
+const rulesConfig: StepConfig[] = [
+  {
+    ...defaultConfig,
+    title: i18n.translate(
+      'xpack.securitySolution.detectionEngine.rules.guidedOnboarding.installPrebuiltRules.title',
+      { defaultMessage: 'Load the Elastic prebuilt rules' }
+    ),
+    content: i18n.translate(
+      'xpack.securitySolution.detectionEngine.rules.guidedOnboarding.installPrebuiltRules.content',
+      { defaultMessage: 'To get started you need to load the Elastic prebuilt rules.' }
+    ),
+    step: 1,
+    anchorPosition: 'downCenter',
+    hideNextButton: true,
+    dataTestSubj: getTourAnchor(1, SecurityStepId.rules),
+  },
+  {
+    ...defaultConfig,
+    title: i18n.translate(
+      'xpack.securitySolution.detectionEngine.rules.guidedOnboarding.searchFirstRule.title',
+      { defaultMessage: 'Search for Elastic Defend rules' }
+    ),
+    content: i18n.translate(
+      'xpack.securitySolution.detectionEngine.rules.guidedOnboarding.searchFirstRule.content',
+      { defaultMessage: 'Find the rules you want and enable them.' }
+    ),
+    step: 2,
+    anchorPosition: 'upCenter',
+    hideNextButton: true,
+    dataTestSubj: getTourAnchor(2, SecurityStepId.rules),
+  },
+];
+
 interface SecurityTourConfig {
   [SecurityStepId.rules]: StepConfig[];
   [SecurityStepId.alertsCases]: StepConfig[];
@@ -134,6 +167,6 @@ export const securityTourConfig: SecurityTourConfig = {
   /**
    * D&R team implement your tour config here
    */
-  [SecurityStepId.rules]: [],
+  [SecurityStepId.rules]: rulesConfig,
   [SecurityStepId.alertsCases]: alertsCasesConfig,
 };
