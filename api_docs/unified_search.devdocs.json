@@ -452,7 +452,7 @@
                 "section": "def-public.EmbeddableOutput",
                 "text": "EmbeddableOutput"
               },
-              "> | undefined"
+              ", any> | undefined"
             ],
             "path": "src/plugins/unified_search/public/actions/apply_filter_action.ts",
             "deprecated": false,
@@ -1229,6 +1229,8 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
+              " | ",
+              "DataViewByIdOrTitle",
               ")[]"
             ],
             "path": "src/plugins/unified_search/public/query_string_input/query_string_input.tsx",
@@ -1902,13 +1904,7 @@
             "text": "UnifiedSearchServerPlugin"
           },
           " implements ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCorePluginApi",
-            "section": "def-server.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "unifiedSearch",
@@ -1945,13 +1941,7 @@
                 "label": "initializerContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<Readonly<{} & { autocomplete: Readonly<{} & { querySuggestions: Readonly<{} & { enabled: boolean; }>; valueSuggestions: Readonly<{} & { timeout: moment.Duration; enabled: boolean; tiers: string[]; terminateAfter: moment.Duration; }>; }>; }>>"
                 ],
                 "path": "src/plugins/unified_search/server/plugin.ts",
@@ -1971,13 +1961,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<",
               "UnifiedSearchServerPluginStartDependencies",
               ", ",
@@ -2004,13 +1988,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<",
                   "UnifiedSearchServerPluginStartDependencies",
                   ", ",
@@ -2055,13 +2033,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", {}: ",
               "UnifiedSearchServerPluginStartDependencies",
               ") => {}"
@@ -2078,13 +2050,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-server.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/plugins/unified_search/server/plugin.ts",
                 "deprecated": false,

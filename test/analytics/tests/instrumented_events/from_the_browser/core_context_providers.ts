@@ -91,5 +91,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(event.context).not.to.have.property('cloudId');
       }
     });
+
+    it('should have the properties provided by the "viewport_size" context provider', async () => {
+      expect(event.context).to.have.property('viewport_width');
+      expect(event.context.viewport_width).to.be.a('number');
+      expect(event.context).to.have.property('viewport_height');
+      expect(event.context.viewport_height).to.be.a('number');
+    });
   });
 }

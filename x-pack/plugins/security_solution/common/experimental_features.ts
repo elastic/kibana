@@ -64,6 +64,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables endpoint package level rbac
    */
   endpointRbacEnabled: false,
+
+  /**
+   * Enables the Guided Onboarding tour in security
+   */
+  guidedOnboarding: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

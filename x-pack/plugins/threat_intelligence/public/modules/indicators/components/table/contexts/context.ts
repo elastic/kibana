@@ -6,7 +6,7 @@
  */
 
 import { createContext, Dispatch, SetStateAction } from 'react';
-import { Indicator } from '../../../../../../common/types/indicator';
+import { Indicator } from '../../../types';
 
 export interface IndicatorsTableContextValue {
   expanded: Indicator | undefined;

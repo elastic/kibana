@@ -13,6 +13,8 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
 
+const FREQUENT_ITEMS_FIELDS_LIMIT = 15;
+
 interface FrequentItemsAggregation extends estypes.AggregationsSamplerAggregation {
   fi: {
     buckets: Array<{ key: Record<string, string[]>; doc_count: number; support: number }>;
@@ -56,12 +58,22 @@ export async function fetchFrequentItems(
   deviationMin: number,
   deviationMax: number,
   logger: Logger,
-  emitError: (m: string) => void
+  emitError: (m: string) => void,
+  abortSignal?: AbortSignal
 ) {
-  // get unique fields from change points
-  const fields = [...new Set(changePoints.map((t) => t.fieldName))];
+  // Sort change points by ascending p-value, necessary to apply the field limit correctly.
+  const sortedChangePoints = changePoints.slice().sort((a, b) => {
+    return (a.pValue ?? 0) - (b.pValue ?? 0);
+  });
 
-  // TODO add query params
+  // Get up to 15 unique fields from change points with retained order
+  const fields = sortedChangePoints.reduce<string[]>((p, c) => {
+    if (p.length < FREQUENT_ITEMS_FIELDS_LIMIT && !p.some((d) => d === c.fieldName)) {
+      p.push(c.fieldName);
+    }
+    return p;
+  }, []);
+
   const query = {
     bool: {
       minimum_should_match: 2,
@@ -76,7 +88,7 @@ export async function fetchFrequentItems(
           },
         },
       ],
-      should: changePoints.map((t) => {
+      should: sortedChangePoints.map((t) => {
         return { term: { [t.fieldName]: t.fieldValue } };
       }),
     },
@@ -116,18 +128,20 @@ export async function fetchFrequentItems(
     },
   };
 
+  const esBody = {
+    query,
+    aggs,
+    size: 0,
+    track_total_hits: true,
+  };
+
   const body = await client.search<unknown, { sample: FrequentItemsAggregation }>(
     {
       index,
       size: 0,
-      body: {
-        query,
-        aggs,
-        size: 0,
-        track_total_hits: true,
-      },
+      body: esBody,
     },
-    { maxRetries: 0 }
+    { signal: abortSignal, maxRetries: 0 }
   );
 
   if (body.aggregations === undefined) {
@@ -166,7 +180,7 @@ export async function fetchFrequentItems(
     Object.entries(fis.key).forEach(([key, value]) => {
       result.set[key] = value[0];
 
-      const pValue = changePoints.find(
+      const pValue = sortedChangePoints.find(
         (t) => t.fieldName === key && t.fieldValue === value[0]
       )?.pValue;
 
