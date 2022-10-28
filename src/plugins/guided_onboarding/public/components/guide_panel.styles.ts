@@ -27,7 +27,6 @@ export const getGuidePanelStyles = (euiTheme: EuiThemeComputed) => ({
       height: auto !important;
       animation: euiModal 350ms cubic-bezier(0.34, 1.61, 0.7, 1);
       box-shadow: none;
-
       @media (max-width: 574px) {
         right: 25px !important;
       }
@@ -36,7 +35,6 @@ export const getGuidePanelStyles = (euiTheme: EuiThemeComputed) => ({
       .euiFlyoutBody__overflowContent {
         width: 480px;
         padding-top: 10px;
-
         @media (max-width: 574px) {
           width: 100%;
         }
