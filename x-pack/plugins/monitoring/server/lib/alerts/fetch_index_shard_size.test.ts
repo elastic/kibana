@@ -34,7 +34,20 @@ describe('fetchIndexShardSize', () => {
   const size = 10;
   const shardIndexPatterns = '*';
   const threshold = 0.00000001;
-  const esRes = {
+  const esRes: estypes.SearchResponse = {
+    took: 1,
+    timed_out: false,
+    _shards: {
+      total: 0,
+      successful: 0,
+      failed: 0,
+      skipped: 0,
+    },
+    hits: {
+      total: 0,
+      max_score: 0,
+      hits: [],
+    },
     aggregations: {
       clusters: {
         buckets: [
@@ -152,11 +165,7 @@ describe('fetchIndexShardSize', () => {
     },
   };
   it('fetch as expected', async () => {
-    esClient.search.mockResponse(
-      // @ts-expect-error not full response interface
-      esRes
-    );
-
+    esClient.search.mockResponse(esRes);
     const result = await fetchIndexShardSize(
       esClient,
       clusters,
@@ -186,11 +195,7 @@ describe('fetchIndexShardSize', () => {
     ]);
   });
   it('higher alert threshold', async () => {
-    esClient.search.mockResponse(
-      // @ts-expect-error not full response interface
-      esRes
-    );
-
+    esClient.search.mockResponse(esRes);
     const oneGBThreshold = 1;
     const result = await fetchIndexShardSize(
       esClient,
