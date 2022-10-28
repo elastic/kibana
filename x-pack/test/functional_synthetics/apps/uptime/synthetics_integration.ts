@@ -148,7 +148,6 @@ export default function (providerContext: FtrProviderContext) {
     use_output: 'default',
   });
 
-  // FAILING: https://github.com/elastic/kibana/issues/144139
   describe('When on the Synthetics Integration Policy Create Page', function () {
     skipIfNoDockerRegistry(providerContext);
     const basicConfig = {
