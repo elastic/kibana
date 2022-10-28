@@ -8,6 +8,10 @@
 import { getApmAgentCommands } from './get_apm_agent_commands';
 
 describe('getCommands', () => {
+  const defaultValues = {
+    apmServiceName: 'my-service-name',
+    apmEnvironment: 'my-environment',
+  };
   describe('unknown agent', () => {
     it('renders empty command', () => {
       const commands = getApmAgentCommands({
@@ -16,6 +20,7 @@ describe('getCommands', () => {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
+        defaultValues,
       });
       expect(commands).toBe('');
     });
@@ -25,15 +30,16 @@ describe('getCommands', () => {
       const commands = getApmAgentCommands({
         variantId: 'java',
         policyDetails: {},
+        defaultValues,
       });
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\\\
-        -Delastic.apm.service_name=my-application \\\\
-        -Delastic.apm.server_urls= \\\\
+        -Delastic.apm.service_name=my-service-name \\\\
         -Delastic.apm.secret_token= \\\\
-        -Delastic.apm.environment=production \\\\
+        -Delastic.apm.server_url= \\\\
+        -Delastic.apm.environment=my-environment \\\\
         -Delastic.apm.application_packages=org.example \\\\
-        -jar my-application.jar"
+        -jar my-service-name.jar"
       `);
     });
     it('renders with secret token and url', () => {
@@ -43,16 +49,17 @@ describe('getCommands', () => {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\\\
-        -Delastic.apm.service_name=my-application \\\\
-        -Delastic.apm.server_urls=localhost:8220 \\\\
+        -Delastic.apm.service_name=my-service-name \\\\
         -Delastic.apm.secret_token=foobar \\\\
-        -Delastic.apm.environment=production \\\\
+        -Delastic.apm.server_url=localhost:8220 \\\\
+        -Delastic.apm.environment=my-environment \\\\
         -Delastic.apm.application_packages=org.example \\\\
-        -jar my-application.jar"
+        -jar my-service-name.jar"
       `);
     });
   });
@@ -61,6 +68,7 @@ describe('getCommands', () => {
       const commands = getApmAgentCommands({
         variantId: 'js',
         policyDetails: {},
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -68,7 +76,7 @@ describe('getCommands', () => {
         var apm = initApm({
 
           // Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)
-          serviceName: 'your-app-name',
+          serviceName: 'my-service-name',
 
           // Set custom APM Server URL (default: http://localhost:8200)
           serverUrl: '',
@@ -77,7 +85,7 @@ describe('getCommands', () => {
           serviceVersion: '',
 
           // Set the service environment
-          environment: 'production'
+          environment: 'my-environment'
         })"
       `);
     });
@@ -88,6 +96,7 @@ describe('getCommands', () => {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -95,7 +104,7 @@ describe('getCommands', () => {
         var apm = initApm({
 
           // Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)
-          serviceName: 'your-app-name',
+          serviceName: 'my-service-name',
 
           // Set custom APM Server URL (default: http://localhost:8200)
           serverUrl: 'localhost:8220',
@@ -104,7 +113,7 @@ describe('getCommands', () => {
           serviceVersion: '',
 
           // Set the service environment
-          environment: 'production'
+          environment: 'my-environment'
         })"
       `);
     });
@@ -114,24 +123,25 @@ describe('getCommands', () => {
       const commands = getApmAgentCommands({
         variantId: 'node',
         policyDetails: {},
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "// Add this to the VERY top of the first file loaded in your app
         var apm = require('elastic-apm-node').start({
 
-        // Override the service name from package.json
-        // Allowed characters: a-z, A-Z, 0-9, -, _, and space
-        serviceName: '',
+          // Override the service name from package.json
+          // Allowed characters: a-z, A-Z, 0-9, -, _, and space
+          serviceName: 'my-service-name',
 
-        // Use if APM Server requires a secret token
-        secretToken: '',
+          // Use if APM Server requires a secret token
+          secretToken: '',
 
-        // Set the custom APM Server URL (default: http://localhost:8200)
-        serverUrl: '',
+          // Set the custom APM Server URL (default: http://localhost:8200)
+          serverUrl: '',
 
-        // Set the service environment
-        environment: 'production'
+          // Set the service environment
+          environment: 'my-environment'
         })"
       `);
     });
@@ -142,24 +152,25 @@ describe('getCommands', () => {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "// Add this to the VERY top of the first file loaded in your app
         var apm = require('elastic-apm-node').start({
 
-        // Override the service name from package.json
-        // Allowed characters: a-z, A-Z, 0-9, -, _, and space
-        serviceName: '',
+          // Override the service name from package.json
+          // Allowed characters: a-z, A-Z, 0-9, -, _, and space
+          serviceName: 'my-service-name',
 
-        // Use if APM Server requires a secret token
-        secretToken: 'foobar',
+          // Use if APM Server requires a secret token
+          secretToken: 'foobar',
 
-        // Set the custom APM Server URL (default: http://localhost:8200)
-        serverUrl: 'localhost:8220',
+          // Set the custom APM Server URL (default: http://localhost:8200)
+          serverUrl: 'localhost:8220',
 
-        // Set the service environment
-        environment: 'production'
+          // Set the service environment
+          environment: 'my-environment'
         })"
       `);
     });
@@ -169,34 +180,35 @@ describe('getCommands', () => {
       const commands = getApmAgentCommands({
         variantId: 'django',
         policyDetails: {},
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "# Add the agent to the installed apps
         INSTALLED_APPS = (
-        'elasticapm.contrib.django',
-        # ...
+          'elasticapm.contrib.django',
+          # ...
         )
 
         ELASTIC_APM = {
-        # Set the required service name. Allowed characters:
-        # a-z, A-Z, 0-9, -, _, and space
-        #'SERVICE_NAME': 'unknown-python-service',
+          # Set the required service name. Allowed characters:
+          # a-z, A-Z, 0-9, -, _, and space
+          #'SERVICE_NAME': 'my-service-name',
 
-        # Use if APM Server requires a secret token
-        'SECRET_TOKEN': '',
+          # Use if APM Server requires a secret token
+          'SECRET_TOKEN': '',
 
-        # Set the custom APM Server URL (default: http://localhost:8200)
-        'SERVER_URL': '',
+          # Set the custom APM Server URL (default: http://localhost:8200)
+          'SERVER_URL': '',
 
-        # Set the service environment
-        'ENVIRONMENT': 'production',
+          # Set the service environment
+          'ENVIRONMENT': 'my-environment',
         }
 
         # To send performance metrics, add our tracing middleware:
         MIDDLEWARE = (
-        'elasticapm.contrib.django.middleware.TracingMiddleware',
-        #...
+          'elasticapm.contrib.django.middleware.TracingMiddleware',
+          #...
         )"
       `);
     });
@@ -207,34 +219,35 @@ describe('getCommands', () => {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "# Add the agent to the installed apps
         INSTALLED_APPS = (
-        'elasticapm.contrib.django',
-        # ...
+          'elasticapm.contrib.django',
+          # ...
         )
 
         ELASTIC_APM = {
-        # Set the required service name. Allowed characters:
-        # a-z, A-Z, 0-9, -, _, and space
-        #'SERVICE_NAME': 'unknown-python-service',
+          # Set the required service name. Allowed characters:
+          # a-z, A-Z, 0-9, -, _, and space
+          #'SERVICE_NAME': 'my-service-name',
 
-        # Use if APM Server requires a secret token
-        'SECRET_TOKEN': 'foobar',
+          # Use if APM Server requires a secret token
+          'SECRET_TOKEN': 'foobar',
 
-        # Set the custom APM Server URL (default: http://localhost:8200)
-        'SERVER_URL': 'localhost:8220',
+          # Set the custom APM Server URL (default: http://localhost:8200)
+          'SERVER_URL': 'localhost:8220',
 
-        # Set the service environment
-        'ENVIRONMENT': 'production',
+          # Set the service environment
+          'ENVIRONMENT': 'my-environment',
         }
 
         # To send performance metrics, add our tracing middleware:
         MIDDLEWARE = (
-        'elasticapm.contrib.django.middleware.TracingMiddleware',
-        #...
+          'elasticapm.contrib.django.middleware.TracingMiddleware',
+          #...
         )"
       `);
     });
@@ -244,6 +257,7 @@ describe('getCommands', () => {
       const commands = getApmAgentCommands({
         variantId: 'flask',
         policyDetails: {},
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -255,18 +269,18 @@ describe('getCommands', () => {
         # or configure to use ELASTIC_APM in your application's settings
         from elasticapm.contrib.flask import ElasticAPM
         app.config['ELASTIC_APM'] = {
-        # Set the required service name. Allowed characters:
-        # a-z, A-Z, 0-9, -, _, and space
-        #'SERVICE_NAME': 'unknown-python-service',
+          # Set the required service name. Allowed characters:
+          # a-z, A-Z, 0-9, -, _, and space
+          #'SERVICE_NAME': 'my-service-name',
 
-        # Use if APM Server requires a secret token
-        'SECRET_TOKEN': '',
+          # Use if APM Server requires a secret token
+          'SECRET_TOKEN': '',
 
-        # Set the custom APM Server URL (default: http://localhost:8200)
-        'SERVER_URL': '',
+          # Set the custom APM Server URL (default: http://localhost:8200)
+          'SERVER_URL': '',
 
-        # Set the service environment
-        'ENVIRONMENT': 'production',
+          # Set the service environment
+          'ENVIRONMENT': 'my-environment',
         }
 
         apm = ElasticAPM(app)"
@@ -279,6 +293,7 @@ describe('getCommands', () => {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -290,18 +305,18 @@ describe('getCommands', () => {
         # or configure to use ELASTIC_APM in your application's settings
         from elasticapm.contrib.flask import ElasticAPM
         app.config['ELASTIC_APM'] = {
-        # Set the required service name. Allowed characters:
-        # a-z, A-Z, 0-9, -, _, and space
-        #'SERVICE_NAME': 'unknown-python-service',
+          # Set the required service name. Allowed characters:
+          # a-z, A-Z, 0-9, -, _, and space
+          #'SERVICE_NAME': 'my-service-name',
 
-        # Use if APM Server requires a secret token
-        'SECRET_TOKEN': 'foobar',
+          # Use if APM Server requires a secret token
+          'SECRET_TOKEN': 'foobar',
 
-        # Set the custom APM Server URL (default: http://localhost:8200)
-        'SERVER_URL': 'localhost:8220',
+          # Set the custom APM Server URL (default: http://localhost:8200)
+          'SERVER_URL': 'localhost:8220',
 
-        # Set the service environment
-        'ENVIRONMENT': 'production',
+          # Set the service environment
+          'ENVIRONMENT': 'my-environment',
         }
 
         apm = ElasticAPM(app)"
@@ -313,6 +328,7 @@ describe('getCommands', () => {
       const commands = getApmAgentCommands({
         variantId: 'rails',
         policyDetails: {},
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -320,7 +336,7 @@ describe('getCommands', () => {
 
         # Set the service name - allowed characters: a-z, A-Z, 0-9, -, _ and space
         # Defaults to the name of your Rails app
-        service_name: 'my-service'
+        service_name: 'my-service-name'
 
         # Use if APM Server requires a secret token
         secret_token: ''
@@ -329,7 +345,7 @@ describe('getCommands', () => {
         server_url: ''
 
         # Set the service environment
-        environment: 'production'"
+        environment: 'my-environment'"
       `);
     });
     it('renders with secret token and url', () => {
@@ -339,6 +355,7 @@ describe('getCommands', () => {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -346,7 +363,7 @@ describe('getCommands', () => {
 
         # Set the service name - allowed characters: a-z, A-Z, 0-9, -, _ and space
         # Defaults to the name of your Rails app
-        service_name: 'my-service'
+        service_name: 'my-service-name'
 
         # Use if APM Server requires a secret token
         secret_token: 'foobar'
@@ -355,7 +372,7 @@ describe('getCommands', () => {
         server_url: 'localhost:8220'
 
         # Set the service environment
-        environment: 'production'"
+        environment: 'my-environment'"
       `);
     });
   });
@@ -364,6 +381,7 @@ describe('getCommands', () => {
       const commands = getApmAgentCommands({
         variantId: 'rack',
         policyDetails: {},
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -371,7 +389,7 @@ describe('getCommands', () => {
 
         # Set the service name - allowed characters: a-z, A-Z, 0-9, -, _ and space
         # Defaults to the name of your Rack app's class.
-        service_name: 'my-service'
+        service_name: 'my-service-name'
 
         # Use if APM Server requires a token
         secret_token: ''
@@ -380,7 +398,7 @@ describe('getCommands', () => {
         server_url: '',
 
         # Set the service environment
-        environment: 'production'"
+        environment: 'my-environment'"
       `);
     });
     it('renders with secret token and url', () => {
@@ -390,6 +408,7 @@ describe('getCommands', () => {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -397,7 +416,7 @@ describe('getCommands', () => {
 
         # Set the service name - allowed characters: a-z, A-Z, 0-9, -, _ and space
         # Defaults to the name of your Rack app's class.
-        service_name: 'my-service'
+        service_name: 'my-service-name'
 
         # Use if APM Server requires a token
         secret_token: 'foobar'
@@ -406,7 +425,7 @@ describe('getCommands', () => {
         server_url: 'localhost:8220',
 
         # Set the service environment
-        environment: 'production'"
+        environment: 'my-environment'"
       `);
     });
   });
@@ -415,6 +434,7 @@ describe('getCommands', () => {
       const commands = getApmAgentCommands({
         variantId: 'go',
         policyDetails: {},
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -422,16 +442,16 @@ describe('getCommands', () => {
 
         # Set the service name. Allowed characters: # a-z, A-Z, 0-9, -, _, and space.
         # If ELASTIC_APM_SERVICE_NAME is not specified, the executable name will be used.
-        export ELASTIC_APM_SERVICE_NAME=
-
-        # Set custom APM Server URL (default: http://localhost:8200)
-        export ELASTIC_APM_SERVER_URL=
+        export ELASTIC_APM_SERVICE_NAME=my-service-name
 
         # Use if APM Server requires a secret token
         export ELASTIC_APM_SECRET_TOKEN=
 
+        # Set custom APM Server URL (default: http://localhost:8200)
+        export ELASTIC_APM_SERVER_URL=
+
         # Set the service environment
-        export ELASTIC_APM_ENVIRONMENT=
+        export ELASTIC_APM_ENVIRONMENT=my-environment
         "
       `);
     });
@@ -442,6 +462,7 @@ describe('getCommands', () => {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
@@ -449,16 +470,16 @@ describe('getCommands', () => {
 
         # Set the service name. Allowed characters: # a-z, A-Z, 0-9, -, _, and space.
         # If ELASTIC_APM_SERVICE_NAME is not specified, the executable name will be used.
-        export ELASTIC_APM_SERVICE_NAME=
-
-        # Set custom APM Server URL (default: http://localhost:8200)
-        export ELASTIC_APM_SERVER_URL=localhost:8220
+        export ELASTIC_APM_SERVICE_NAME=my-service-name
 
         # Use if APM Server requires a secret token
         export ELASTIC_APM_SECRET_TOKEN=foobar
 
+        # Set custom APM Server URL (default: http://localhost:8200)
+        export ELASTIC_APM_SERVER_URL=localhost:8220
+
         # Set the service environment
-        export ELASTIC_APM_ENVIRONMENT=
+        export ELASTIC_APM_ENVIRONMENT=my-environment
         "
       `);
     });
@@ -468,16 +489,17 @@ describe('getCommands', () => {
       const commands = getApmAgentCommands({
         variantId: 'dotnet',
         policyDetails: {},
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "{
-        \\"ElasticApm\\": {
-        \\"SecretToken\\": \\"\\",
-        \\"ServerUrls\\": \\"\\", //Set custom APM Server URL (default: http://localhost:8200)
-        \\"ServiceName\\": \\"MyApp\\", //allowed characters: a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application
-        \\"Environment\\": \\"production\\", // Set the service environment
-        }
+          \\"ElasticApm\\": {
+            \\"ServiceName\\": \\"my-service-name\\", //allowed characters: a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application
+            \\"SecretToken\\": \\"\\",
+            \\"ServerUrl\\": \\"\\", //Set custom APM Server URL (default: http://localhost:8200)
+            \\"Environment\\": \\"my-environment\\", // Set the service environment
+          }
         }"
       `);
     });
@@ -488,16 +510,17 @@ describe('getCommands', () => {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
         "{
-        \\"ElasticApm\\": {
-        \\"SecretToken\\": \\"foobar\\",
-        \\"ServerUrls\\": \\"localhost:8220\\", //Set custom APM Server URL (default: http://localhost:8200)
-        \\"ServiceName\\": \\"MyApp\\", //allowed characters: a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application
-        \\"Environment\\": \\"production\\", // Set the service environment
-        }
+          \\"ElasticApm\\": {
+            \\"ServiceName\\": \\"my-service-name\\", //allowed characters: a-z, A-Z, 0-9, -, _, and space. Default is the entry assembly of the application
+            \\"SecretToken\\": \\"foobar\\",
+            \\"ServerUrl\\": \\"localhost:8220\\", //Set custom APM Server URL (default: http://localhost:8200)
+            \\"Environment\\": \\"my-environment\\", // Set the service environment
+          }
         }"
       `);
     });
@@ -507,12 +530,14 @@ describe('getCommands', () => {
       const commands = getApmAgentCommands({
         variantId: 'php',
         policyDetails: {},
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
-        "elastic_apm.server_url=\\"\\"
+        "elastic_apm.service_name=\\"my-service-name\\"
         elastic_apm.secret_token=\\"\\"
-        elastic_apm.service_name=\\"My service\\"
+        elastic_apm.server_url=\\"\\"
+        elastic_apm.environment=\\"my-environment\\"
         "
       `);
     });
@@ -523,12 +548,14 @@ describe('getCommands', () => {
           apmServerUrl: 'localhost:8220',
           secretToken: 'foobar',
         },
+        defaultValues,
       });
       expect(commands).not.toBe('');
       expect(commands).toMatchInlineSnapshot(`
-        "elastic_apm.server_url=\\"localhost:8220\\"
+        "elastic_apm.service_name=\\"my-service-name\\"
         elastic_apm.secret_token=\\"foobar\\"
-        elastic_apm.service_name=\\"My service\\"
+        elastic_apm.server_url=\\"localhost:8220\\"
+        elastic_apm.environment=\\"my-environment\\"
         "
       `);
     });

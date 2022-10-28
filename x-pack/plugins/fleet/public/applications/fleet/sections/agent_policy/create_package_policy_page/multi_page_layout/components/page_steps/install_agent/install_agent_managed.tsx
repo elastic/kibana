@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiLink, EuiSteps, EuiSpacer } from '@elastic/eui';
 
@@ -28,7 +28,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
     setIsManaged,
     agentPolicy,
     enrollmentAPIKey,
-    settings,
+    fleetServerHosts,
     enrolledAgentIds,
   } = props;
 
@@ -39,10 +39,6 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
   const kibanaVersion = useKibanaVersion();
 
   const [commandCopied, setCommandCopied] = useState(false);
-
-  const fleetServerHosts = useMemo(() => {
-    return settings?.fleet_server_hosts || [];
-  }, [settings]);
 
   if (!enrollmentAPIKey) {
     return (

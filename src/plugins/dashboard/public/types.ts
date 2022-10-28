@@ -71,6 +71,7 @@ export interface DashboardContainerInput extends ContainerInput {
   useMargins: boolean;
   syncColors?: boolean;
   syncTooltips?: boolean;
+  syncCursor?: boolean;
   viewMode: ViewMode;
   filters: Filter[];
   title: string;
@@ -118,6 +119,7 @@ export type DashboardOptions = {
   hidePanelTitles: boolean;
   useMargins: boolean;
   syncColors: boolean;
+  syncCursor: boolean;
   syncTooltips: boolean;
 };
 

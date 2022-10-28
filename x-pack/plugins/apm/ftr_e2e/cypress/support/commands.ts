@@ -21,7 +21,7 @@ Cypress.Commands.add('loginAsEditorUser', () => {
 
 Cypress.Commands.add('loginAsMonitorUser', () => {
   return cy.loginAs({
-    username: ApmUsername.apmMonitorIndices,
+    username: ApmUsername.apmMonitorClusterAndIndices,
     password: 'changeme',
   });
 });

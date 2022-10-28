@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { CASE_VIEW_PAGE_TABS } from './types';
-import { CasesFeaturesAllRequired } from './ui/types';
+import type { CasesFeaturesAllRequired } from './ui/types';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
@@ -141,7 +141,7 @@ export const MAX_CONCURRENT_SEARCHES = 10 as const;
  * Validation
  */
 
-export const MAX_TITLE_LENGTH = 64 as const;
+export const MAX_TITLE_LENGTH = 160 as const;
 
 /**
  * Cases features
@@ -179,6 +179,7 @@ export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
 
 export const DEFAULT_USER_SIZE = 10;
 export const MAX_ASSIGNEES_PER_CASE = 10;
+export const NO_ASSIGNEES_FILTERING_KEYWORD = 'none';
 
 /**
  * Delays

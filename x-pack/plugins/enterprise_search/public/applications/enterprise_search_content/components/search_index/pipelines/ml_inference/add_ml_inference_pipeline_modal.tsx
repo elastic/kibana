@@ -43,6 +43,8 @@ import { NoModelsPanel } from './no_models';
 import { ReviewPipeline } from './review_pipeline';
 import { TestPipeline } from './test_pipeline';
 
+import './add_ml_inference_pipeline_modal.scss';
+
 interface AddMLInferencePipelineModalProps {
   onClose: () => void;
 }
@@ -57,7 +59,7 @@ export const AddMLInferencePipelineModal: React.FC<AddMLInferencePipelineModalPr
   }, [indexName]);
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} className="enterpriseSearchInferencePipelineModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h1>
@@ -90,7 +92,7 @@ const AddProcessorContent: React.FC<AddMLInferencePipelineModalProps> = ({ onClo
       </EuiModalBody>
     );
   }
-  if (supportedMLModels === undefined || supportedMLModels?.length === 0) {
+  if (supportedMLModels.length === 0) {
     return <NoModelsPanel />;
   }
   return (
@@ -141,7 +143,10 @@ const ModalSteps: React.FC = () => {
       ),
     },
     {
-      onClick: () => setAddInferencePipelineStep(AddInferencePipelineSteps.Test),
+      onClick: () => {
+        if (!isPipelineDataValid) return;
+        setAddInferencePipelineStep(AddInferencePipelineSteps.Test);
+      },
       status: isPipelineDataValid ? 'incomplete' : 'disabled',
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.test.title',
@@ -151,7 +156,10 @@ const ModalSteps: React.FC = () => {
       ),
     },
     {
-      onClick: () => setAddInferencePipelineStep(AddInferencePipelineSteps.Review),
+      onClick: () => {
+        if (!isPipelineDataValid) return;
+        setAddInferencePipelineStep(AddInferencePipelineSteps.Review);
+      },
       status: isPipelineDataValid ? 'incomplete' : 'disabled',
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.review.title',
@@ -180,8 +188,10 @@ const ModalFooter: React.FC<AddMLInferencePipelineModalProps & { ingestionMethod
   onClose,
 }) => {
   const { addInferencePipelineModal: modal, isPipelineDataValid } = useValues(MLInferenceLogic);
-  const { createPipeline, setAddInferencePipelineStep } = useActions(MLInferenceLogic);
+  const { attachPipeline, createPipeline, setAddInferencePipelineStep } =
+    useActions(MLInferenceLogic);
 
+  const attachExistingPipeline = Boolean(modal.configuration.existingPipeline);
   let nextStep: AddInferencePipelineSteps | undefined;
   let previousStep: AddInferencePipelineSteps | undefined;
   switch (modal.step) {
@@ -227,14 +237,31 @@ const ModalFooter: React.FC<AddMLInferencePipelineModalProps & { ingestionMethod
               iconSide="right"
               onClick={() => setAddInferencePipelineStep(nextStep as AddInferencePipelineSteps)}
               disabled={!isPipelineDataValid}
+              fill
             >
               {CONTINUE_BUTTON_LABEL}
             </EuiButton>
+          ) : attachExistingPipeline ? (
+            <EuiButton
+              color="primary"
+              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-attach`}
+              disabled={!isPipelineDataValid}
+              fill
+              onClick={attachPipeline}
+            >
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.footer.attach',
+                {
+                  defaultMessage: 'Attach',
+                }
+              )}
+            </EuiButton>
           ) : (
             <EuiButton
-              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-create`}
               color="success"
+              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-create`}
               disabled={!isPipelineDataValid}
+              fill
               onClick={createPipeline}
             >
               {i18n.translate(

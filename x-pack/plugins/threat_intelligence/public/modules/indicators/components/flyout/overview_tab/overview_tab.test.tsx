@@ -8,7 +8,7 @@
 import { TestProvidersComponent } from '../../../../../common/mocks/test_providers';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { generateMockIndicator, Indicator } from '../../../../../../common/types/indicator';
+import { generateMockIndicator, Indicator } from '../../../types';
 import {
   IndicatorsFlyoutOverview,
   TI_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS,

@@ -86,7 +86,10 @@ export const eqlSearchStrategyProvider = (
         }
       };
 
-      return pollSearch(search, cancel, options).pipe(tap((response) => (id = response.id)));
+      return pollSearch(search, cancel, {
+        pollInterval: searchConfig.asyncSearch.pollInterval,
+        ...options,
+      }).pipe(tap((response) => (id = response.id)));
     },
 
     extend: async (id, keepAlive, options, { esClient }) => {
