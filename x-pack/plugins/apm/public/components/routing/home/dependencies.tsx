@@ -79,6 +79,7 @@ export const dependencies = {
                 t.literal(TransactionTab.metadata),
                 t.literal(TransactionTab.logs),
               ]),
+              showCriticalPath: toBooleanRt,
             }),
             t.partial({
               spanId: t.string,
@@ -91,6 +92,7 @@ export const dependencies = {
         defaults: {
           query: {
             detailTab: TransactionTab.timeline,
+            showCriticalPath: '',
           },
         },
         element: <DependencyOperationDetailView />,
