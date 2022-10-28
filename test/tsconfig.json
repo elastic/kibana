@@ -27,7 +27,7 @@
     "server_integration/__fixtures__/plugins/**/*",
     "*/plugins/**/*",
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../src/core/tsconfig.json" },
     { "path": "../src/plugins/telemetry_management_section/tsconfig.json" },
     { "path": "../src/plugins/advanced_settings/tsconfig.json" },

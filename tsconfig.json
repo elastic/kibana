@@ -20,7 +20,7 @@
     "x-pack/tasks/**/*",
   ],
   "exclude": [],
-  "references": [
+  "kbn_references": [
     { "path": "./src/core/tsconfig.json" },
     { "path": "./src/plugins/usage_collection/tsconfig.json" },
     { "path": "./src/plugins/interactive_setup/tsconfig.json" },

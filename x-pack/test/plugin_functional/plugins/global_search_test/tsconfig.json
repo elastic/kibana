@@ -10,7 +10,7 @@
   "exclude": [
     "./target"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../../../src/core/tsconfig.json" },
     { "path": "../../../../plugins/global_search/tsconfig.json" },
   ]

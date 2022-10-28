@@ -5,7 +5,6 @@
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
-    "declarationMap": true,
   },
   "exclude": ["cypress.config.ts"],
   "include": [
@@ -20,7 +19,7 @@
     "cypress.config.ts",
     "../../../typings/**/*"
   ],
-  "references": [
+  "kbn_references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../tsconfig.json" },
     // add references to other TypeScript projects the plugin depends on
