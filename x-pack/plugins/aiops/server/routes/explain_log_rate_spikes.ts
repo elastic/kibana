@@ -17,7 +17,12 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Logger } from '@kbn/logging';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { streamFactory } from '@kbn/aiops-utils';
-import type { ChangePoint, NumericChartData, NumericHistogramField } from '@kbn/ml-agg-utils';
+import type {
+  ChangePoint,
+  ChangePointGroup,
+  NumericChartData,
+  NumericHistogramField,
+} from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import { stringHash } from '@kbn/ml-string-hash';
 
@@ -247,7 +252,7 @@ export const defineExplainLogRateSpikesRoute = (
 
           logDebugMessage('Fetch p-values.');
 
-          const q = queue(async function (fieldCandidate: string) {
+          const pValuesQueue = queue(async function (fieldCandidate: string) {
             loaded += (1 / totalFieldCandidates) * loadingStepSizePValues;
 
             let pValues: Awaited<ReturnType<typeof fetchChangePointPValues>>;
@@ -300,14 +305,13 @@ export const defineExplainLogRateSpikesRoute = (
 
             if (shouldStop) {
               logDebugMessage('shouldStop fetching p-values.');
-              q.kill();
+              pValuesQueue.kill();
               end();
             }
           }, CHUNK_SIZE);
 
-          q.push(fieldCandidates);
-
-          await q.drain();
+          pValuesQueue.push(fieldCandidates);
+          await pValuesQueue.drain();
 
           if (changePoints.length === 0) {
             logDebugMessage('Stopping analysis, did not find change points.');
@@ -569,85 +573,85 @@ export const defineExplainLogRateSpikesRoute = (
 
                 logDebugMessage(`Fetch ${changePointGroups.length} group histograms.`);
 
-                const changePointGroupsChunks = chunk(changePointGroups, CHUNK_SIZE);
-
-                for (const changePointGroupsChunk of changePointGroupsChunks) {
+                const groupHistogramQueue = queue(async function (cpg: ChangePointGroup) {
                   if (shouldStop) {
                     logDebugMessage('shouldStop abort fetching group histograms.');
+                    groupHistogramQueue.kill();
                     end();
                     return;
                   }
 
-                  await asyncForEach(changePointGroupsChunk, async (cpg) => {
-                    if (overallTimeSeries !== undefined) {
-                      const histogramQuery = {
-                        bool: {
-                          filter: cpg.group.map((d) => ({
-                            term: { [d.fieldName]: d.fieldValue },
-                          })),
-                        },
-                      };
+                  if (overallTimeSeries !== undefined) {
+                    const histogramQuery = {
+                      bool: {
+                        filter: cpg.group.map((d) => ({
+                          term: { [d.fieldName]: d.fieldValue },
+                        })),
+                      },
+                    };
 
-                      let cpgTimeSeries: NumericChartData;
-                      try {
-                        cpgTimeSeries = (
-                          (await fetchHistogramsForFields(
-                            client,
-                            request.body.index,
-                            histogramQuery,
-                            // fields
-                            [
-                              {
-                                fieldName: request.body.timeFieldName,
-                                type: KBN_FIELD_TYPES.DATE,
-                                interval: overallTimeSeries.interval,
-                                min: overallTimeSeries.stats[0],
-                                max: overallTimeSeries.stats[1],
-                              },
-                            ],
-                            // samplerShardSize
-                            -1,
-                            undefined,
-                            abortSignal
-                          )) as [NumericChartData]
-                        )[0];
-                      } catch (e) {
-                        if (!isRequestAbortedError(e)) {
-                          logger.error(
-                            `Failed to fetch the histogram data for group #${
-                              cpg.id
-                            }, got: \n${e.toString()}`
-                          );
-                          pushError(`Failed to fetch the histogram data for group #${cpg.id}.`);
-                        }
-                        return;
+                    let cpgTimeSeries: NumericChartData;
+                    try {
+                      cpgTimeSeries = (
+                        (await fetchHistogramsForFields(
+                          client,
+                          request.body.index,
+                          histogramQuery,
+                          // fields
+                          [
+                            {
+                              fieldName: request.body.timeFieldName,
+                              type: KBN_FIELD_TYPES.DATE,
+                              interval: overallTimeSeries.interval,
+                              min: overallTimeSeries.stats[0],
+                              max: overallTimeSeries.stats[1],
+                            },
+                          ],
+                          // samplerShardSize
+                          -1,
+                          undefined,
+                          abortSignal
+                        )) as [NumericChartData]
+                      )[0];
+                    } catch (e) {
+                      if (!isRequestAbortedError(e)) {
+                        logger.error(
+                          `Failed to fetch the histogram data for group #${
+                            cpg.id
+                          }, got: \n${e.toString()}`
+                        );
+                        pushError(`Failed to fetch the histogram data for group #${cpg.id}.`);
                       }
-                      const histogram =
-                        overallTimeSeries.data.map((o, i) => {
-                          const current = cpgTimeSeries.data.find(
-                            (d1) => d1.key_as_string === o.key_as_string
-                          ) ?? {
-                            doc_count: 0,
-                          };
-                          return {
-                            key: o.key,
-                            key_as_string: o.key_as_string ?? '',
-                            doc_count_change_point: current.doc_count,
-                            doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                          };
-                        }) ?? [];
-
-                      push(
-                        addChangePointsGroupHistogramAction([
-                          {
-                            id: cpg.id,
-                            histogram,
-                          },
-                        ])
-                      );
+                      return;
                     }
-                  });
-                }
+                    const histogram =
+                      overallTimeSeries.data.map((o, i) => {
+                        const current = cpgTimeSeries.data.find(
+                          (d1) => d1.key_as_string === o.key_as_string
+                        ) ?? {
+                          doc_count: 0,
+                        };
+                        return {
+                          key: o.key,
+                          key_as_string: o.key_as_string ?? '',
+                          doc_count_change_point: current.doc_count,
+                          doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                        };
+                      }) ?? [];
+
+                    push(
+                      addChangePointsGroupHistogramAction([
+                        {
+                          id: cpg.id,
+                          histogram,
+                        },
+                      ])
+                    );
+                  }
+                }, CHUNK_SIZE);
+
+                groupHistogramQueue.push(changePointGroups);
+                await groupHistogramQueue.drain();
               }
             } catch (e) {
               if (!isRequestAbortedError(e)) {
