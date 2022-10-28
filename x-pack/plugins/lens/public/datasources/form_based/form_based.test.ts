@@ -1789,9 +1789,7 @@ describe('IndexPattern Data Source', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/143908
-  // FLAKY: https://github.com/elastic/kibana/issues/143907
-  describe.skip('#clearLayer', () => {
+  describe('#clearLayer', () => {
     it('should clear a layer', () => {
       const state = {
         layers: {
@@ -1817,6 +1815,7 @@ describe('IndexPattern Data Source', () => {
               columnOrder: [],
               columns: {},
               linkToLayers: ['some-layer'],
+              sampling: 1,
             },
           },
         },
@@ -1845,7 +1844,7 @@ describe('IndexPattern Data Source', () => {
         newState: {
           ...state,
           layers: {
-            first: state.layers.first,
+            first: { ...state.layers.first, linkToLayers: undefined, sampling: 1 },
           },
         },
       });
