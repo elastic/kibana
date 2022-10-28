@@ -26,9 +26,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await visualize.navigateToNewVisualization();
-      await visualize.clickVisualBuilder();
-      await visualBuilder.checkVisualBuilderIsPresent();
       await visualBuilder.resetPage();
       await visualBuilder.clickGauge();
       await visualBuilder.clickDataTab('gauge');
@@ -39,6 +36,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should convert to Lens', async () => {
+      await header.waitUntilLoadingHasFinished();
+
       await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('mtrVis');
 
@@ -76,7 +75,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should not allow converting of not valid panel', async () => {
       await visualBuilder.selectAggType('Value Count');
+
       await header.waitUntilLoadingHasFinished();
+
       expect(await visualize.hasNavigateToLensButton()).to.be(false);
     });
 
@@ -96,6 +97,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setColorPickerValue('#54A000', 4);
 
       await header.waitUntilLoadingHasFinished();
+
       await visualize.navigateToLensFromAnotherVisulization();
 
       await lens.waitForVisualization('mtrVis');
@@ -111,7 +113,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(3);
 
-        dimensions[0].click();
+        await dimensions[0].click();
 
         await lens.openPalettePanel('lnsMetric');
         const colorStops = await lens.getPaletteColorStops();
