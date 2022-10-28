@@ -19,12 +19,7 @@ const mobileFilters = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([
-      kueryRt,
-      rangeRt,
-      environmentRt,
-      t.type({ transactionType: t.string }),
-    ]),
+    query: t.intersection([kueryRt, rangeRt, environmentRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -38,7 +33,7 @@ const mobileFilters = createApmServerRoute({
     ]);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { kuery, environment, start, end, transactionType } = params.query;
+    const { kuery, environment, start, end } = params.query;
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient,
       config: setup.config,
@@ -54,7 +49,6 @@ const mobileFilters = createApmServerRoute({
       serviceName,
       apmEventClient,
       searchAggregatedTransactions,
-      transactionType,
     });
     return { mobileFilters: filters };
   },

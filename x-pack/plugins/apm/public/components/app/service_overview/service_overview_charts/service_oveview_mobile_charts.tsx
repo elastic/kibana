@@ -33,8 +33,7 @@ export function ServiceOverviewMobileCharts({
   nonLatencyChartHeight,
   isSingleColumn,
 }: Props) {
-  const { fallbackToTransactions, serviceName, transactionType } =
-    useApmServiceContext();
+  const { fallbackToTransactions, serviceName } = useApmServiceContext();
   const router = useApmRouter();
 
   const {
@@ -69,7 +68,6 @@ export function ServiceOverviewMobileCharts({
           end={end}
           environment={environment}
           kuery={kuery}
-          transactionType={transactionType}
           filters={{
             device,
             osVersion,

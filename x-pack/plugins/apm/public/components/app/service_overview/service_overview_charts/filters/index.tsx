@@ -21,7 +21,6 @@ interface Props {
   kuery: string;
   serviceName: string;
   start: string;
-  transactionType?: string;
   filters: Record<MobileFilter['key'], string | undefined>;
 }
 
@@ -36,25 +35,22 @@ export function MobileFilters({
   kuery,
   serviceName,
   start,
-  transactionType,
   filters,
 }: Props) {
   const history = useHistory();
   const { data = { mobileFilters: [] } } = useFetcher(
     (callApmApi) => {
-      if (transactionType) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/mobile/filters',
-          {
-            params: {
-              path: { serviceName },
-              query: { end, environment, kuery, start, transactionType },
-            },
-          }
-        );
-      }
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/mobile/filters',
+        {
+          params: {
+            path: { serviceName },
+            query: { end, environment, kuery, start },
+          },
+        }
+      );
     },
-    [end, environment, kuery, serviceName, start, transactionType]
+    [end, environment, kuery, serviceName, start]
   );
 
   function toSelectOptions(items?: string[]) {
