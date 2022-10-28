@@ -7,11 +7,10 @@
 
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
-import { waitForVisualizations } from '../utils';
 
 export const journey = new Journey({
   esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce'],
-  kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_no_map_dashboard'],
+  kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_map_only_dashboard'],
 })
 
   .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
@@ -19,7 +18,9 @@ export const journey = new Journey({
     await page.waitForSelector('#dashboardListingHeading');
   })
 
-  .step('Go to Ecommerce Dashboard', async ({ page }) => {
-    await page.click(subj('dashboardListingTitleLink-[eCommerce]-Revenue-Dashboard'));
-    await waitForVisualizations(page, 12);
+  .step('Go to Ecommerce No Map Dashboard', async ({ page, kbnUrl }) => {
+    await page.click(subj('dashboardListingTitleLink-[eCommerce]-Map-Only'));
+    await page.waitForSelector(
+      'div[data-title="[eCommerce] Orders by Country"][data-render-complete="true"]'
+    );
   });

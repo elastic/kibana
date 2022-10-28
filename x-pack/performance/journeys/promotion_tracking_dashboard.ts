@@ -11,7 +11,7 @@ import { waitForVisualizations } from '../utils';
 
 export const journey = new Journey({
   kbnArchives: ['x-pack/performance/kbn_archives/promotion_tracking_dashboard'],
-  esArchives: ['x-pack/performance/es_archives/ecommerce_sample_data'],
+  esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce'],
   scalabilitySetup: {
     warmup: [
       {
