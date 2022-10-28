@@ -17,7 +17,10 @@ import {
   getCasesByAlert,
   deleteAllCaseItems,
 } from '../../../../common/lib/utils';
-import { validateCasesFromAlertIDResponse } from '../../../../common/lib/validation';
+import {
+  TestCaseWithTotals,
+  validateCasesFromAlertIDResponse,
+} from '../../../../common/lib/validation';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -57,9 +60,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(caseIDsWithAlert.length).to.eql(3);
       validateCasesFromAlertIDResponse(caseIDsWithAlert, [
-        { caseInfo: case1, totalAlerts: 1, totalComments: 0 },
-        { caseInfo: case2, totalAlerts: 1, totalComments: 0 },
-        { caseInfo: case3, totalAlerts: 1, totalComments: 0 },
+        { caseInfo: case1, totals: { alert: 1, user: 0 } },
+        { caseInfo: case2, totals: { alert: 1, user: 0 } },
+        { caseInfo: case3, totals: { alert: 1, user: 0 } },
       ]);
     });
 
@@ -87,10 +90,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(caseIDsWithAlert.length).to.eql(numCases);
 
-      const testCasesWithTotals = cases.map((caseInfo) => ({
+      const testCasesWithTotals: TestCaseWithTotals[] = cases.map((caseInfo) => ({
         caseInfo,
-        totalAlerts: 1,
-        totalComments: 0,
+        totals: {
+          alert: 1,
+          user: 0,
+        },
       }));
       validateCasesFromAlertIDResponse(caseIDsWithAlert, testCasesWithTotals);
     });
@@ -206,10 +211,12 @@ export default ({ getService }: FtrProviderContext): void => {
           });
           expect(res.length).to.eql(scenario.cases.length);
 
-          const testCasesWithTotals = scenario.cases.map((caseInfo) => ({
+          const testCasesWithTotals: TestCaseWithTotals[] = scenario.cases.map((caseInfo) => ({
             caseInfo,
-            totalAlerts: 1,
-            totalComments: 0,
+            totals: {
+              alert: 1,
+              user: 0,
+            },
           }));
           validateCasesFromAlertIDResponse(res, testCasesWithTotals);
         }

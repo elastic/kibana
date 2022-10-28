@@ -66,9 +66,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(cases.length).to.eql(3);
       validateCasesFromAlertIDResponse(cases, [
-        { caseInfo: case1, totalAlerts: 1, totalComments: 0 },
-        { caseInfo: case2, totalAlerts: 1, totalComments: 0 },
-        { caseInfo: case3, totalAlerts: 1, totalComments: 0 },
+        { caseInfo: case1, totals: { alert: 1, user: 0 } },
+        { caseInfo: case2, totals: { alert: 1, user: 0 } },
+        { caseInfo: case3, totals: { alert: 1, user: 0 } },
       ]);
     });
 

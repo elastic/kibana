@@ -55,11 +55,30 @@ import type { AggregationBuilder, AggregationResponse } from '../../client/metri
 import { createCaseError } from '../../common/error';
 import type { IndexRefresh } from '../types';
 
-type CommentTypeTotals = Record<CommentType, number>;
-
-type CaseCommentStats = {
-  id: string;
-} & Partial<CommentTypeTotals>;
+interface GetCaseIdsByAlertIdAggs2 {
+  references: {
+    doc_count: number;
+    casesWithAlertId: {
+      doc_count: number;
+      caseIds: {
+        buckets: Array<{
+          key: string;
+          commentTypes: {
+            buckets: Array<{
+              key: string;
+              doc_count: number;
+            }>;
+          };
+          alerts: {
+            uniqueAlertCount: {
+              value: number;
+            };
+          };
+        }>;
+      };
+    };
+  };
+}
 
 interface GetCaseIdsByAlertIdAggs {
   references: {
@@ -177,29 +196,52 @@ export class CasesService {
       },
       aggregations: {
         caseIds: {
-          filter: { term: { [`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`]: '123' } },
           terms: {
             field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
             size,
           },
+        },
+      },
+    },
+  });
+
+  private buildCaseIdsAggs2 = (
+    alertId: string,
+    size: number = 100
+  ): Record<string, estypes.AggregationsAggregationContainer> => ({
+    references: {
+      nested: {
+        path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
+      },
+      aggregations: {
+        casesWithAlertId: {
+          filter: { term: { [`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`]: alertId } },
           aggs: {
-            commentTypes: {
+            caseIds: {
               terms: {
-                field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
-                // always get more terms then we have attachment types
-                size: Object.keys(CommentType).length * 2,
-              },
-            },
-            alerts: {
-              filter: {
-                term: {
-                  [`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`]: CommentType.alert,
-                },
+                field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
+                size,
               },
               aggs: {
-                uniqueAlertCount: {
-                  cardinality: {
-                    field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
+                commentTypes: {
+                  terms: {
+                    field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
+                    // always get more terms then we have attachment types
+                    size: Object.keys(CommentType).length * 2,
+                  },
+                },
+                alerts: {
+                  filter: {
+                    term: {
+                      [`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`]: CommentType.alert,
+                    },
+                  },
+                  aggs: {
+                    uniqueAlertCount: {
+                      cardinality: {
+                        field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
+                      },
+                    },
                   },
                 },
               },
@@ -243,21 +285,46 @@ export class CasesService {
   }
 
   /**
-   * Extracts the case IDs and the comment stats for each case from the aggregation
+   * Extracts the case IDs from the alert aggregation
    */
   public static getCaseIDsFromAlertAggs(
     result: SavedObjectsFindResponse<CommentAttributes, GetCaseIdsByAlertIdAggs>
-  ): CaseCommentStats[] {
-    return (
-      result.aggregations?.references.caseIds.buckets.map((caseIdBucket) => ({
-        id: caseIdBucket.key,
-        ...caseIdBucket.commentTypes.buckets.map((commentTypeBucket) => ({
-          [commentTypeBucket.key]: commentTypeBucket.doc_count,
-        })),
-        [CommentType.alert]: caseIdBucket.alerts.uniqueAlertCount.value,
-      })) ?? []
-    );
+  ): string[] {
+    return result.aggregations?.references.caseIds.buckets.map((b) => b.key) ?? [];
   }
+
+  /**
+   * Extracts the case IDs and the comment stats for each case from the aggregation
+   */
+  // public static getCaseIDsFromAlertAggs(
+  //   result: SavedObjectsFindResponse<CommentAttributes, GetCaseIdsByAlertIdAggs>
+  // ): CaseCommentStats[] {
+  //   return (
+  //     result.aggregations?.references.caseIds.buckets.map((caseIdBucket) => ({
+  //       id: caseIdBucket.key,
+  //       totals: CasesService.buildCommentTotals(caseIdBucket),
+  //     })) ?? []
+  //   );
+  // }
+
+  // private static buildCommentTotals(
+  //   caseIdBucket: GetCaseIdsByAlertIdAggs['references']['caseIds']['buckets'][number]
+  // ): CommentTypeStats {
+  //   const initialTotals: CommentTypeStats = createRecordOfCommentType<number>(
+  //     (acc, commentType) => ({
+  //       ...acc,
+  //       [commentType]: 0,
+  //     })
+  //   );
+
+  //   return caseIdBucket.commentTypes.buckets.reduce((totals, bucket) => {
+  //     const accumulatedTotals = { ...totals, [bucket.key]: bucket.doc_count };
+  //     // overwrite the alert field value with the unique alert count
+  //     accumulatedTotals[CommentType.alert] = caseIdBucket.alerts.uniqueAlertCount.value;
+
+  //     return accumulatedTotals;
+  //   }, initialTotals);
+  // }
 
   /**
    * Returns a map of all cases.

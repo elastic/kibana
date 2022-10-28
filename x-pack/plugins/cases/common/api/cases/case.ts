@@ -9,28 +9,40 @@ import * as rt from 'io-ts';
 
 import { NumberFromString } from '../saved_object';
 import { UserRT } from '../user';
-import { CommentResponseRt } from './comment';
+import { CommentResponseRt, CommentType } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt } from '../connectors';
 import { CaseAssigneesRt } from './assignee';
 
-const a = rt.union([rt.literal('a'), rt.literal('b')]);
+export const createRecordOfCommentType = <T>(
+  reduceCallback: (acc: Record<CommentType, T>, commentType: CommentType) => Record<CommentType, T>
+) =>
+  Object.values(CommentType).reduce<Record<CommentType, T>>(
+    reduceCallback,
+    // TODO: how can I get around this cast?
+    {} as Record<CommentType, T>
+  );
 
-export const CasesByAlertIdRt = rt.array(
-  rt.type({
-    id: rt.string,
-    title: rt.string,
-    description: rt.string,
-    status: CaseStatusRt,
-    totals: rt.type({
-      user: rt.number,
-      alert: rt.number,
-      actions: rt.number,
-      externalReference: rt.number,
-      persistableState: rt.number,
-    }),
-  })
-);
+// TODO: do we want to expose all the comment types or just add the totals together ourselves?
+const objWithCommentTypeKeys = createRecordOfCommentType<rt.NumberC>((acc, commentType) => {
+  acc[commentType] = rt.number;
+  return acc;
+});
+
+const CommentTypeStatsRt = rt.strict(objWithCommentTypeKeys);
+
+export const RelatedCaseInfoRt = rt.strict({
+  id: rt.string,
+  title: rt.string,
+  description: rt.string,
+  status: CaseStatusRt,
+  /**
+   * The keys in this field are equivalent to the values in the CommentType enum within x-pack/plugins/cases/common/api/cases/comment.ts
+   */
+  totals: CommentTypeStatsRt,
+});
+
+export const CasesByAlertIdRt = rt.array(RelatedCaseInfoRt);
 
 export const SettingsRt = rt.type({
   syncAlerts: rt.boolean,
@@ -346,4 +358,6 @@ export type CaseExternalServiceBasic = rt.TypeOf<typeof CaseExternalServiceBasic
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type AllReportersFindRequest = AllTagsFindRequest;
 
+export type CommentTypeStats = rt.TypeOf<typeof CommentTypeStatsRt>;
+export type RelatedCaseInfo = rt.TypeOf<typeof RelatedCaseInfoRt>;
 export type CasesByAlertId = rt.TypeOf<typeof CasesByAlertIdRt>;

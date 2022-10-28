@@ -31,11 +31,16 @@ import {
   CasesByAlertIdRt,
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
-import { countAlertsForID, flattenCaseSavedObject } from '../../common/utils';
+import {
+  countAlertsForID,
+  createZeroedCommentStats,
+  flattenCaseSavedObject,
+} from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
+import type { CaseCommentStats } from '../../services/attachments/types';
 
 /**
  * Parameters for finding cases IDs using an alert ID
@@ -62,9 +67,10 @@ export const getCasesByAlertID = async (
   clientArgs: CasesClientArgs
 ): Promise<CasesByAlertId> => {
   const {
-    services: { caseService },
+    services: { caseService, attachmentService },
     logger,
     authorization,
+    unsecuredSavedObjectsClient,
   } = clientArgs;
 
   try {
@@ -97,15 +103,29 @@ export const getCasesByAlertID = async (
       }))
     );
 
-    const caseIdsWithCommentStats = CasesService.getCaseIDsFromAlertAggs(commentsWithAlert);
+    console.log('aggs', JSON.stringify(commentsWithAlert.aggregations, null, 2));
+    const caseIds = CasesService.getCaseIDsFromAlertAggs(commentsWithAlert);
 
+    console.log('case ids', JSON.stringify(caseIds, null, 2));
     // if we didn't find any case IDs then let's return early because there's nothing to request
-    if (caseIdsWithCommentStats.length <= 0) {
+    if (caseIds.length <= 0) {
       return [];
     }
 
+    const commentStats = await attachmentService.getAttachmentTypeStats({
+      unsecuredSavedObjectsClient,
+      caseIds,
+      filter,
+    });
+
+    console.log('comment stats', JSON.stringify(commentStats, null, 2));
+
+    const idToStats = new Map<string, CaseCommentStats>(
+      commentStats.map((stat) => [stat.id, stat])
+    );
+
     const casesInfo = await caseService.getCases({
-      caseIds: caseIdsWithCommentStats.map((stat) => stat.id),
+      caseIds,
     });
 
     // if there was an error retrieving one of the cases (maybe it was deleted, but the alert comment still existed)
@@ -127,6 +147,7 @@ export const getCasesByAlertID = async (
         title: caseInfo.attributes.title,
         description: caseInfo.attributes.description,
         status: caseInfo.attributes.status,
+        totals: getCommentTotals(caseInfo.id, idToStats),
       }))
     );
   } catch (error) {
@@ -138,6 +159,12 @@ export const getCasesByAlertID = async (
       logger,
     });
   }
+};
+
+const getCommentTotals = (id: string, stats: Map<string, CaseCommentStats>) => {
+  const zeroStats = createZeroedCommentStats();
+
+  return stats.get(id)?.totals ?? zeroStats;
 };
 
 /**

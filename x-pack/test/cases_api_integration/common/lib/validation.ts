@@ -6,13 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import { CaseResponse, CasesByAlertId } from '@kbn/cases-plugin/common/api';
+import {
+  CaseResponse,
+  CasesByAlertId,
+  CommentType,
+  RelatedCaseInfo,
+} from '@kbn/cases-plugin/common/api';
 import { xorWith, isEqual } from 'lodash';
 
-interface TestCaseWithTotals {
+export interface TestCaseWithTotals {
   caseInfo: CaseResponse;
-  totalAlerts: number;
-  totalComments: number;
+  totals?: Partial<Record<CommentType, number>>;
 }
 
 /**
@@ -22,17 +26,30 @@ export function validateCasesFromAlertIDResponse(
   casesFromAPIResponse: CasesByAlertId,
   createdCasesForTest: TestCaseWithTotals[]
 ) {
-  const idToTitle = new Map<string, TestCaseWithTotals>(
-    createdCasesForTest.map((testCase) => [testCase.caseInfo.id, testCase])
+  const idToResponse = new Map<string, RelatedCaseInfo>(
+    casesFromAPIResponse.map((response) => [response.id, response])
   );
 
-  for (const apiResCase of casesFromAPIResponse) {
-    // check that the title in the api response matches the title in the map from the created cases
-    expect(apiResCase.title).to.be(idToTitle.get(apiResCase.id)?.caseInfo.title);
-    expect(apiResCase.description).to.be(idToTitle.get(apiResCase.id)?.caseInfo.description);
-    expect(apiResCase.status).to.be(idToTitle.get(apiResCase.id)?.caseInfo.status);
-    expect(apiResCase.totalAlerts).to.be(idToTitle.get(apiResCase.id)?.totalAlerts);
-    expect(apiResCase.totalComments).to.be(idToTitle.get(apiResCase.id)?.totalComments);
+  expect(idToResponse.size).to.be(createdCasesForTest.length);
+
+  // only iterate over the test cases not the api response values
+  for (const expectedTestInfo of createdCasesForTest) {
+    expect(idToResponse.get(expectedTestInfo.caseInfo.id)?.title).to.be(
+      expectedTestInfo.caseInfo.title
+    );
+    expect(idToResponse.get(expectedTestInfo.caseInfo.id)?.description).to.be(
+      expectedTestInfo.caseInfo.description
+    );
+    expect(idToResponse.get(expectedTestInfo.caseInfo.id)?.status).to.be(
+      expectedTestInfo.caseInfo.status
+    );
+
+    // only check the totals that are defined in the test case
+    for (const totalKey of Object.keys(expectedTestInfo.totals ?? {}) as CommentType[]) {
+      expect(idToResponse.get(expectedTestInfo.caseInfo.id)?.totals[totalKey]).to.be(
+        expectedTestInfo.totals?.[totalKey]
+      );
+    }
   }
 }
 

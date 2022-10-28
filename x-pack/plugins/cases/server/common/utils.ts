@@ -38,6 +38,7 @@ import type {
   CommentRequestUserType,
   CommentResponse,
   CommentsResponse,
+  CommentTypeStats,
   User,
 } from '../../common/api';
 import {
@@ -46,6 +47,7 @@ import {
   CommentType,
   ConnectorTypes,
   ExternalReferenceStorageType,
+  createRecordOfCommentType,
 } from '../../common/api';
 import type { UpdateAlertRequest } from '../client/alerts/types';
 import {
@@ -453,3 +455,9 @@ export const getCaseViewPath = (params: {
 
   return `${basePath}${normalizePath(CASE_VIEW_PATH.replace(':detailName', caseId))}`;
 };
+
+export const createZeroedCommentStats = (): CommentTypeStats =>
+  createRecordOfCommentType<number>((acc, commentType) => ({
+    ...acc,
+    [commentType]: 0,
+  }));

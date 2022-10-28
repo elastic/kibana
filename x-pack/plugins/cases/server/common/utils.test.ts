@@ -33,6 +33,7 @@ import {
   transformNewCase,
   getApplicationRoute,
   getCaseViewPath,
+  createZeroedCommentStats,
 } from './utils';
 import { newCase } from '../routes/api/__mocks__/request_responses';
 import { CASE_VIEW_PAGE_TABS } from '../../common/types';
@@ -1277,6 +1278,20 @@ describe('common utils', () => {
           tabId: CASE_VIEW_PAGE_TABS.ALERTS,
         })
       ).toBe('https://example.com/app/security/cases/my-case-id/?tabId=alerts');
+    });
+  });
+
+  describe('createZeroedCommentStats', () => {
+    it('creates an object with the comment types set to 0', () => {
+      expect(createZeroedCommentStats()).toMatchInlineSnapshot(`
+        Object {
+          "actions": 0,
+          "alert": 0,
+          "externalReference": 0,
+          "persistableState": 0,
+          "user": 0,
+        }
+      `);
     });
   });
 });

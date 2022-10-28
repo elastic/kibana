@@ -24,8 +24,9 @@ import type {
   CommentAttributes as AttachmentAttributes,
   CommentAttributesWithoutRefs as AttachmentAttributesWithoutRefs,
   CommentPatchAttributes as AttachmentPatchAttributes,
+  CommentTypeStats,
 } from '../../../common/api';
-import { CommentType } from '../../../common/api';
+import { createRecordOfCommentType, CommentType } from '../../../common/api';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
@@ -43,6 +44,7 @@ import {
 import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type { IndexRefresh } from '../types';
+import type { CaseCommentStats } from './types';
 
 interface AttachedToCaseArgs extends ClientArgs {
   caseId: string;
@@ -100,6 +102,28 @@ interface CommentStats {
   alerts: number;
 }
 
+interface GetCaseIdsByAlertIdAggs {
+  references: {
+    doc_count: number;
+    caseIds: {
+      buckets: Array<{
+        key: string;
+        commentTypes: {
+          buckets: Array<{
+            key: string;
+            doc_count: number;
+          }>;
+        };
+        alerts: {
+          uniqueAlertCount: {
+            value: number;
+          };
+        };
+      }>;
+    };
+  };
+}
+
 export class AttachmentService {
   constructor(
     private readonly log: Logger,
@@ -137,73 +161,108 @@ export class AttachmentService {
     };
   }
 
-  // public async getAttachmentTypeStats({
-  //   unsecuredSavedObjectsClient,
-  //   caseIds,
-  //   filter,
-  // }: {
-  //   unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  //   filter: KueryNode;
-  //   caseIds: string[];
-  // }): Promise<number | undefined> {
-  //   try {
-  //     this.log.debug(`Attempting to get attachment type stats for case ids ${caseIds}`);
-  //     const res = await this.executeCaseAggregations<{}>({
-  //       unsecuredSavedObjectsClient,
-  //       caseIds,
-  //       filter,
-  //       aggregations: AttachmentService.buildAttachmentTypesCountAggs(),
-  //     });
+  public async getAttachmentTypeStats({
+    unsecuredSavedObjectsClient,
+    caseIds,
+    filter,
+  }: {
+    unsecuredSavedObjectsClient: SavedObjectsClientContract;
+    filter: KueryNode | undefined;
+    caseIds: string[];
+  }): Promise<CaseCommentStats[]> {
+    try {
+      this.log.debug(`Attempting to get attachment type stats for case ids ${caseIds}`);
+      const res = await this.executeCaseAggregations<GetCaseIdsByAlertIdAggs>({
+        unsecuredSavedObjectsClient,
+        caseIds,
+        filter,
+        aggregations: AttachmentService.buildAttachmentTypesCountAggs(MAX_DOCS_PER_PAGE),
+      });
 
-  //     return res?.alerts?.value;
-  //   } catch (error) {
-  //     this.log.error(`Error while getting attachment type stats for case ids ${caseIds}: ${error}`);
-  //     throw error;
-  //   }
-  // }
+      console.log('comment stats aggs result', JSON.stringify(res, null, 2));
+      return AttachmentService.getCommentStats(res);
+    } catch (error) {
+      this.log.error(`Error while getting attachment type stats for case ids ${caseIds}: ${error}`);
+      throw error;
+    }
+  }
 
-  // private static buildAttachmentTypesCountAggs(): Record<
-  //   string,
-  //   estypes.AggregationsAggregationContainer
-  // > {
-  //   return {
-  //     references: {
-  //       nested: {
-  //         path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
-  //       },
-  //       aggs: {
-  //         caseIds: {
-  //           terms: {
+  private static buildAttachmentTypesCountAggs(
+    size: number = 100
+  ): Record<string, estypes.AggregationsAggregationContainer> {
+    return {
+      references: {
+        nested: {
+          path: `${CASE_COMMENT_SAVED_OBJECT}.references`,
+        },
+        aggregations: {
+          caseIds: {
+            terms: {
+              field: `${CASE_COMMENT_SAVED_OBJECT}.references.id`,
+              size,
+            },
+            aggs: {
+              reverse_nested: {},
+              aggs: {
+                commentTypes: {
+                  terms: {
+                    field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
+                    // always get more terms then we have attachment types
+                    size: Object.keys(CommentType).length * 2,
+                  },
+                },
+                alerts: {
+                  filter: {
+                    term: {
+                      [`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`]: CommentType.alert,
+                    },
+                  },
+                  aggs: {
+                    uniqueAlertCount: {
+                      cardinality: {
+                        field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+  }
 
-  //           }
-  //         }
-  //       }
-  //     }
-  //     commentTypes: {
-  //       terms: {
-  //         field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
-  //         // always get more terms then we have attachment types
-  //         size: Object.keys(CommentType).length * 2,
-  //       },
-  //       aggs: {
-  //         totalAlerts: {
-  //           filter: {
-  //             term: {
-  //               [`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`]: CommentType.alert,
-  //             },
-  //           },
-  //           aggs: {
-  //             totalAlerts: {
-  //               cardinality: {
-  //                 field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
-  //               },
-  //             },
-  //           },
-  //         },
-  //       },
-  //     },
-  //   };
-  // }
+  /**
+   * Extracts the case IDs and the comment stats for each case from the aggregation
+   */
+  public static getCommentStats(result: GetCaseIdsByAlertIdAggs | undefined): CaseCommentStats[] {
+    return (
+      result?.references.caseIds.buckets.map((caseIdBucket) => ({
+        id: caseIdBucket.key,
+        totals: AttachmentService.buildCommentTotals(caseIdBucket),
+      })) ?? []
+    );
+  }
+
+  private static buildCommentTotals(
+    caseIdBucket: GetCaseIdsByAlertIdAggs['references']['caseIds']['buckets'][number]
+  ): CommentTypeStats {
+    const initialTotals: CommentTypeStats = createRecordOfCommentType<number>(
+      (acc, commentType) => ({
+        ...acc,
+        [commentType]: 0,
+      })
+    );
+
+    return caseIdBucket.commentTypes.buckets.reduce((totals, bucket) => {
+      const accumulatedTotals = { ...totals, [bucket.key]: bucket.doc_count };
+      // overwrite the alert field value with the unique alert count
+      accumulatedTotals[CommentType.alert] = caseIdBucket.alerts.uniqueAlertCount.value;
+
+      return accumulatedTotals;
+    }, initialTotals);
+  }
 
   public async valueCountAlertsAttachedToCase(params: AlertsAttachedToCaseArgs): Promise<number> {
     try {
@@ -267,7 +326,7 @@ export class AttachmentService {
   /**
    * Executes the aggregations against a type of attachment attached to a case.
    */
-  public async executeCaseAggregations<Agg extends AggregationResponse = AggregationResponse>({
+  public async executeCaseAggregations<Agg = AggregationResponse>({
     unsecuredSavedObjectsClient,
     caseIds,
     filter,
