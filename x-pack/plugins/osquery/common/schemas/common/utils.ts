@@ -52,3 +52,39 @@ export const convertECSMappingToArray = (
     },
     [] as ECSMappingArray
   );
+
+export type ShardsArray = Array<{
+  policy: string;
+  percentage: number;
+}>;
+
+export type Shard = Record<string, number>;
+
+export const convertShardsToObject = (shards: ShardsArray): Shard =>
+  reduce(
+    shards,
+    (acc, value) => {
+      if (!isEmpty(value?.policy)) {
+        acc[value.policy] = value.percentage;
+      }
+
+      return acc;
+    },
+    {} as Shard
+  );
+
+export const convertShardsToArray = (shards: DefaultValues<Shard> | undefined): ShardsArray =>
+  reduce(
+    shards,
+    (acc, value, key) => {
+      if (value) {
+        acc.push({
+          policy: key,
+          percentage: value,
+        });
+      }
+
+      return acc;
+    },
+    [] as ShardsArray
+  );

@@ -134,8 +134,8 @@ export const PackTypeSelectable = memo(
                   <EuiRadio
                     style={getRadioStyle(globalCardSelectable.isSelected)}
                     id={'osquery_pack_type_advanced'}
-                    label={i18n.translate('xpack.osquery.pack.form.advancedLabel', {
-                      defaultMessage: 'Advanced',
+                    label={i18n.translate('xpack.osquery.pack.form.shardsDeploymentLabel', {
+                      defaultMessage: 'Shards deployment',
                     })}
                     onChange={noop}
                     checked={packType === 'shards'}
@@ -143,8 +143,8 @@ export const PackTypeSelectable = memo(
                 }
                 titleSize="xs"
                 hasBorder
-                description={i18n.translate('xpack.osquery.pack.form.advancedDescription', {
-                  defaultMessage: 'Specify shards and agents to run pack on',
+                description={i18n.translate('xpack.osquery.pack.form.shardsDeploymentDescription', {
+                  defaultMessage: 'Specify shards for specific policies',
                 })}
                 selectable={advancedCardSelectable}
               />

@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { FormProvider, useForm as useHookForm } from 'react-hook-form';
 
-import { PackShardsField } from './pack_shards_field';
+import { PackShardsField } from './shards/pack_shards_field';
 import { useKibana, useRouterNavigate } from '../../common/lib/kibana';
 import { PolicyIdComboBoxField } from './policy_id_combobox_field';
 import { QueriesField } from './queries_field';
@@ -33,7 +33,7 @@ import type { PackItem } from '../types';
 import { NameField } from './name_field';
 import { DescriptionField } from './description_field';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
-import { PackTypeSelectable } from './pack_type_selectable';
+import { PackTypeSelectable } from './shards/pack_type_selectable';
 
 type PackFormData = Omit<PackItem, 'id' | 'queries'> & { queries: PackQueryFormData[] };
 
@@ -106,6 +106,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     watch,
     formState: { isSubmitting },
   } = hooksForm;
+  const { policy_ids: policyIds, shards } = watch();
 
   const getShards = useCallback(() => {
     if (packType === 'global') {
@@ -114,25 +115,22 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
     if (packType === 'shards') {
       // for testing
-      return {
-        Pack: 100,
-      };
+      return shards;
     }
-  }, [packType]);
+  }, [packType, shards]);
 
   const onSubmit = useCallback(
     async (values: PackFormData) => {
-      const shards = getShards();
       const serializer = ({
         shards: _,
-        policy_ids: policyIds,
+        policy_ids: payloadPolicyIds,
         queries,
         ...restPayload
       }: PackFormData) => ({
         ...restPayload,
-        policy_ids: packType === 'policy' ? policyIds : [],
+        policy_ids: packType === 'policy' ? payloadPolicyIds : [],
         queries: convertSOQueriesToPack(queries),
-        shards: packType !== 'policy' ? shards : {},
+        shards: packType !== 'policy' ? getShards() : {},
       });
 
       try {
@@ -148,8 +146,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   );
 
   const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
-
-  const { policy_ids: policyIds } = watch();
 
   const isDefaultNamespace = useMemo(() => currentSpace === 'default', [currentSpace]);
   const agentCount = useMemo(
