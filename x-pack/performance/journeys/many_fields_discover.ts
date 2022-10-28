@@ -7,6 +7,7 @@
 
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
+import { waitForChrome } from '../utils';
 
 export const journey = new Journey({
   // FAILING: https://github.com/elastic/kibana/issues/130287
@@ -16,6 +17,8 @@ export const journey = new Journey({
 })
   .step('Go to Discover Page', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(`/app/discover`));
+
+    await waitForChrome(page);
     await page.waitForSelector(subj('discoverDocTable'));
   })
   .step('Expand the first document', async ({ page }) => {

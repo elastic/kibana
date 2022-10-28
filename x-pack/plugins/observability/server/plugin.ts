@@ -157,6 +157,9 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     });
 
     return {
+      getAlertDetailsConfig() {
+        return config.unsafe.alertDetails;
+      },
       getScopedAnnotationsClient: async (...args: Parameters<ScopedAnnotationsClientFactory>) => {
         const api = await annotationsApiPromise;
         return api?.getScopedAnnotationsClient(...args);
