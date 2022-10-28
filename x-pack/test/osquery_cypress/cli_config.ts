@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// force cypress test run
+
 import { FtrConfigProviderContext } from '@kbn/test';
 
 import { OsqueryCypressCliTestRunner } from './runner';
