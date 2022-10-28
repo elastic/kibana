@@ -28,27 +28,100 @@ interface IndexDefinition {
 }
 
 const connectorMappingsProperties: Record<string, MappingProperty> = {
-  api_key_id: {
-    type: 'keyword',
-  },
-  configuration: {
-    type: 'object',
-  },
+  api_key_id: { type: 'keyword' },
+  configuration: { type: 'object' },
+  description: { type: 'text' },
   error: { type: 'keyword' },
+  filtering: {
+    properties: {
+      domain: { type: 'keyword' },
+      active: {
+        properties: {
+          rules: {
+            properties: {
+              created_at: { type: 'date' },
+              field: { type: 'keyword' },
+              id: { type: 'keyword' },
+              order: { type: 'short' },
+              policy: { type: 'keyword' },
+              rule: { type: 'keyword' },
+              updated_at: { type: 'date' },
+              value: { type: 'keyword' }
+            }
+          },
+          advanced_snippet: {
+            properties: {
+              created_at: { type: 'date' },
+              updated_at: { type: 'date' },
+              value: { type: 'object' }
+            }
+          },
+          validation: {
+            properties: {
+              state: { type: 'keyword' },
+              errors: {
+                properties: {
+                  ids: { type: 'keyword' },
+                  messages: { type: 'text' }
+                }
+              }
+            }
+          }
+        }
+      },
+      draft: {
+        properties: {
+          rules: {
+            properties: {
+              created_at: { type: 'date' },
+              field: { type: 'keyword' },
+              id: { type: 'keyword' },
+              order: { type: 'short' },
+              policy: { type: 'keyword' },
+              rule: { type: 'keyword' },
+              updated_at: { type: 'date' },
+              value: { type: 'keyword' }
+            }
+          },
+          advanced_snippet: {
+            properties: {
+              created_at: { type: 'date' },
+              updated_at: { type: 'date' },
+              value: { type: 'object' }
+            }
+          },
+          validation: {
+            properties: {
+              errors: {
+                properties: {
+                  ids: { type: 'keyword' },
+                  messages: { type: 'text' }
+                }
+              },
+              state: { type: 'keyword' }
+            }
+          }
+        }
+      }
+    }
+  },
   index_name: { type: 'keyword' },
+  is_native: { type: 'boolean' },
   language: { type: 'keyword' },
   last_seen: { type: 'date' },
   last_sync_error: { type: 'keyword' },
   last_sync_status: { type: 'keyword' },
   last_synced: { type: 'date' },
+  last_indexed_document_count: { type: 'long' },
+  last_deleted_document_count: { type: 'long' },
   name: { type: 'keyword' },
   pipeline: {
     properties: {
       extract_binary_content: { type: 'boolean' },
       name: { type: 'keyword' },
       reduce_whitespace: { type: 'boolean' },
-      run_ml_inference: { type: 'boolean' },
-    },
+      run_ml_inference: { type: 'boolean' }
+    }
   },
   scheduling: {
     properties: {
@@ -98,25 +171,48 @@ const indices: IndexDefinition[] = [
     aliases: ['.elastic-connectors-sync-jobs'],
     mappings: {
       _meta: {
-        version: '1',
+        version: 1
       },
       properties: {
         completed_at: { type: 'date' },
-        connector: { properties: connectorMappingsProperties },
-        connector_id: {
-          type: 'keyword',
-        },
+        connector_id: { type: 'keyword' },
         created_at: { type: 'date' },
         deleted_document_count: { type: 'integer' },
-        error: {
-          type: 'keyword',
+        error: { type: 'keyword' },
+        filtering: {
+          properties: {
+            domain: { type: 'keyword' },
+            rules: {
+              properties: {
+                created_at: { type: 'date' },
+                field: { type: 'keyword' },
+                id: { type: 'keyword' },
+                order: { type: 'short' },
+                policy: { type: 'keyword' },
+                rule: { type: 'keyword' },
+                updated_at: { type: 'date' },
+                value: { type: 'keyword' }
+              }
+            },
+            advanced_snippet: {
+              properties: {
+                created_at: { type: 'date' },
+                updated_at: { type: 'date' },
+                value: { type: 'object' }
+              }
+            },
+            warnings: {
+              properties: {
+                ids: { type: 'keyword' },
+                messages: { type: 'text' }
+              }
+            }
+          }
         },
         indexed_document_count: { type: 'integer' },
-        status: {
-          type: 'keyword',
-        },
-        worker_hostname: { type: 'keyword' },
-      },
+        status: { type: 'keyword' },
+        worker_hostname: { type: 'keyword' }
+      }
     },
     name: '.elastic-connectors-sync-jobs-v1',
     settings: defaultSettings,
