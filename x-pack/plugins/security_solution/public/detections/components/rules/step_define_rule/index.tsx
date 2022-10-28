@@ -59,6 +59,7 @@ import {
   useFormData,
 } from '../../../../shared_imports';
 import { schema } from './schema';
+import { getTermsAggregationFields } from './utils';
 import * as i18n from './translations';
 import {
   isEqlRule,
@@ -296,6 +297,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
      */
     setAggregatableFields(aggregatableFields(fields as BrowserField[]));
   }, [indexPattern]);
+
+  const termsAggregationFields: BrowserField[] = useMemo(
+    () => getTermsAggregationFields(aggFields),
+    [aggFields]
+  );
 
   const [
     threatIndexPatternsLoading,
@@ -836,7 +842,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 path="newTermsFields"
                 component={NewTermsFields}
                 componentProps={{
-                  browserFields: aggFields,
+                  browserFields: termsAggregationFields,
                 }}
               />
               <UseField
