@@ -11,7 +11,7 @@ We currently support the following SLI:
 
 For the APM SLIs, customer can provide the service, environment, transaction name and type to configure them. For the **Duration** SLI, a threshold in microsecond needs to be provided to discriminate the good and bad responses (events). For the **Error Rate** SLI, a list of good status codes needs to be provided to discriminate the good and bad responses (events).
 
-The **custom KQL** SLI requires an index pattern, an optional filter query and a numerator and denominator query.
+The **custom KQL** SLI requires an index pattern, an optional filter query, a numerator query, and denominator query.
 
 ## SLO configuration
 
@@ -21,7 +21,7 @@ We support **calendar aligned** and **rolling** time windows. Any duration great
 
 **Rolling time window:** Requires a duration, e.g. `1w` for one week, and `is_rolling: true`. SLOs defined with such time window, will only considere the SLI data from the last duration period as a moving window.
 
-**Calendar aligned time window:** Requires a duration, e.g. `1M` for one month, and a `calendar.start_time` date in ISO 8601 in UTC, which marks the beginning of the first period. From it and the duration, the system will compute the different time windows. For example, starting the calendar on the **01/01/2022** with a monthly duration, if today is the **24/10/2022**, the window associated is: `[2022-10-01T00:00:00Z, 2022-11-01T00:00:00Z]`
+**Calendar aligned time window:** Requires a duration, e.g. `1M` for one month, and a `calendar.start_time` date in ISO 8601 in UTC, which marks the beginning of the first period. From start time and the duration, the system will compute the different time windows. For example, starting the calendar on the **01/01/2022** with a monthly duration, if today is the **24/10/2022**, the window associated is: `[2022-10-01T00:00:00Z, 2022-11-01T00:00:00Z]`
 
 ### Budgeting method
 
@@ -31,7 +31,7 @@ An **occurrences** budgeting method uses the number of **good** and **total** ev
 
 A **timeslices** budgeting method uses the number of **good slices** and **total slices** during the time window. A slice is an arbitrary time window (smaller than the overall SLO time window) that is either considered good or bad, calculated from the timeslice threshold and the ratio of good over total events that happened during the slice window.
 
-For example, defining a **timeslices** budgeting method with a `0.95` threshold over a `5m` timeslice window means that a 1 week SLO is split in 2,016 buckets (`7*24*60 / 5`). Each bucket is either good or bad depending on the ratio of good over total events during that bucket, compared to the threshold.
+For example, defining a **timeslices** budgeting method with a `95%` slice threshold and `5m` slice window means that a 1 week SLO is split in 2,016 slices (`7*24*60 / 5`); for a 99% SLO target there will be approximately 20 minutes of available error budget. Each bucket is either good or bad depending on the ratio of good over total events during that bucket, compared to the slice threshold of 95%.
 
 ###  Objective
 
