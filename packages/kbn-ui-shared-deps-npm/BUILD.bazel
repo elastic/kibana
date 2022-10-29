@@ -61,6 +61,7 @@ RUNTIME_DEPS = [
   "@npm//react-is",
   "@npm//react-router-dom",
   "@npm//react-router",
+  "@npm//react-use",
   "@npm//react",
   "@npm//rison-node",
   "@npm//rxjs",

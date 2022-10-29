@@ -38,9 +38,6 @@ export const useLogsDataView = (payload?: UseLogsDataView) => {
         if (data.length) {
           dataView = data[0];
         }
-        // else {
-        //   throw new Error('No data view found');
-        // }
       } catch (e) {
         if (dataViews.getCanSaveSync()) {
           dataView = await dataViews.createAndSave({
