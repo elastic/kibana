@@ -27,7 +27,8 @@ import {
   stateToAlertMessage,
 } from '../common/messages';
 import {
-  createScopedLogger, AdditionalContext,
+  createScopedLogger,
+  AdditionalContext,
   getAlertDetailsUrl,
   getViewInMetricsAppUrl,
   UNGROUPED_FACTORY_KEY,
@@ -88,7 +89,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         id,
         fields: {
           [ALERT_REASON]: reason,
-          ...additionalContext
+          ...additionalContext,
         },
       });
 
@@ -282,7 +283,6 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
       const recoveredAlertId = alert.getId();
       const alertUuid = getAlertUuid(recoveredAlertId);
 
-      
       alert.setContext({
         alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, alertUuid),
         alertState: stateToAlertMessage[AlertStates.OK],
@@ -382,4 +382,3 @@ const formatAlertResult = <AlertResult>(
     comparator: comparatorToUse,
   };
 };
-

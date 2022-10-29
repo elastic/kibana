@@ -7,7 +7,13 @@
 
 import moment from 'moment';
 import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
-import { hasAdditionalContext, KUBERNETES_POD_UID, NUMBER_OF_DOCUMENTS, shouldTermsAggOnContainer, termsAggField } from '../../common/utils';
+import {
+  hasAdditionalContext,
+  KUBERNETES_POD_UID,
+  NUMBER_OF_DOCUMENTS,
+  shouldTermsAggOnContainer,
+  termsAggField,
+} from '../../common/utils';
 import { createBucketSelector } from './create_bucket_selector';
 import { createPercentileAggregation } from './create_percentile_aggregation';
 import { createRateAggsBuckets, createRateAggsBucketScript } from './create_rate_aggregation';
@@ -83,43 +89,46 @@ export const getElasticsearchMetricQuery = (
   const currentPeriod = wrapInCurrentPeriod(currentTimeframe, metricAggregations);
 
   const containerContextAgg =
-    shouldTermsAggOnContainer(groupBy) && fieldsExisted &&
-      fieldsExisted[termsAggField[KUBERNETES_POD_UID]]
+    shouldTermsAggOnContainer(groupBy) &&
+    fieldsExisted &&
+    fieldsExisted[termsAggField[KUBERNETES_POD_UID]]
       ? {
-        containerContext: {
-          terms: {
-            field: termsAggField[KUBERNETES_POD_UID],
-            size: NUMBER_OF_DOCUMENTS
-          },
-          aggs: {
-            container: {
-              top_hits: {
-                size: 1,
-                _source: {
-                  includes: ['container.*']
+          containerContext: {
+            terms: {
+              field: termsAggField[KUBERNETES_POD_UID],
+              size: NUMBER_OF_DOCUMENTS,
+            },
+            aggs: {
+              container: {
+                top_hits: {
+                  size: 1,
+                  _source: {
+                    includes: ['container.*'],
+                  },
                 },
               },
-            }
-          }
+            },
+          },
         }
-      }
       : void 0;
 
   const includesList = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
   const excludesList = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
-  if(!containerContextAgg) includesList.push('container.*');
+  if (!containerContextAgg) includesList.push('container.*');
 
-  const additionalContextAgg = hasAdditionalContext(groupBy) ? {
-    additionalContext: {
-      top_hits: {
-        size: 1,
-        _source: {
-          includes: includesList,
-          excludes: excludesList,
+  const additionalContextAgg = hasAdditionalContext(groupBy)
+    ? {
+        additionalContext: {
+          top_hits: {
+            size: 1,
+            _source: {
+              includes: includesList,
+              excludes: excludesList,
+            },
+          },
         },
-      },
-    },
-  } : void 0;
+      }
+    : void 0;
 
   const aggs: any = groupBy
     ? {

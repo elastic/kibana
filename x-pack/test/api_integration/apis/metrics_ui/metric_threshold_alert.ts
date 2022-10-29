@@ -131,8 +131,8 @@ export default function ({ getService }: FtrProviderContext) {
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -188,8 +188,8 @@ export default function ({ getService }: FtrProviderContext) {
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -244,8 +244,8 @@ export default function ({ getService }: FtrProviderContext) {
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
               middleware: {
                 timeSize: 5,
@@ -265,8 +265,8 @@ export default function ({ getService }: FtrProviderContext) {
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -317,15 +317,12 @@ export default function ({ getService }: FtrProviderContext) {
                 isNoData: false,
                 context: {
                   cloud: undefined,
-                  container: [
-                    { id: 'container-01' },
-                    { id: 'container-02' }
-                  ],
+                  container: [{ id: 'container-01' }, { id: 'container-02' }],
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
               'pod-02': {
                 timeSize: 5,
@@ -341,15 +338,12 @@ export default function ({ getService }: FtrProviderContext) {
                 isNoData: false,
                 context: {
                   cloud: undefined,
-                  container: [
-                    { id: 'container-03' },
-                    { id: 'container-04' }
-                  ],
+                  container: [{ id: 'container-03' }, { id: 'container-04' }],
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -400,16 +394,16 @@ export default function ({ getService }: FtrProviderContext) {
                 isNoData: false,
                 context: {
                   cloud: undefined,
-                  container: { 
-                    id: 'container-05'
+                  container: {
+                    id: 'container-05',
                   },
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
-              }
-            }
+                  tags: undefined,
+                },
+              },
+            },
           ]);
         });
       });
@@ -460,8 +454,8 @@ export default function ({ getService }: FtrProviderContext) {
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -499,8 +493,8 @@ export default function ({ getService }: FtrProviderContext) {
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -553,8 +547,8 @@ export default function ({ getService }: FtrProviderContext) {
                     host: undefined,
                     labels: undefined,
                     orchestrator: undefined,
-                    tags: undefined
-                  }
+                    tags: undefined,
+                  },
                 },
               },
             ]);
@@ -607,8 +601,8 @@ export default function ({ getService }: FtrProviderContext) {
                     host: undefined,
                     labels: undefined,
                     orchestrator: undefined,
-                    tags: undefined
-                  }
+                    tags: undefined,
+                  },
                 },
                 web: {
                   timeSize: 5,
@@ -628,8 +622,8 @@ export default function ({ getService }: FtrProviderContext) {
                     host: undefined,
                     labels: undefined,
                     orchestrator: undefined,
-                    tags: undefined
-                  }
+                    tags: undefined,
+                  },
                 },
                 prod: {
                   timeSize: 5,
@@ -649,8 +643,8 @@ export default function ({ getService }: FtrProviderContext) {
                     host: undefined,
                     labels: undefined,
                     orchestrator: undefined,
-                    tags: undefined
-                  }
+                    tags: undefined,
+                  },
                 },
               },
             ]);
@@ -707,8 +701,8 @@ export default function ({ getService }: FtrProviderContext) {
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -757,8 +751,8 @@ export default function ({ getService }: FtrProviderContext) {
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -796,8 +790,8 @@ export default function ({ getService }: FtrProviderContext) {
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -849,8 +843,8 @@ export default function ({ getService }: FtrProviderContext) {
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
               prod: {
                 timeSize: 5,
@@ -870,8 +864,8 @@ export default function ({ getService }: FtrProviderContext) {
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -912,8 +906,8 @@ export default function ({ getService }: FtrProviderContext) {
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -956,8 +950,8 @@ export default function ({ getService }: FtrProviderContext) {
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -1029,8 +1023,8 @@ export default function ({ getService }: FtrProviderContext) {
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
               dev: {
                 timeSize: 5,
@@ -1050,8 +1044,8 @@ export default function ({ getService }: FtrProviderContext) {
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -1106,8 +1100,8 @@ export default function ({ getService }: FtrProviderContext) {
                 host: undefined,
                 labels: undefined,
                 orchestrator: undefined,
-                tags: undefined
-              }
+                tags: undefined,
+              },
             },
           },
         ]);
@@ -1158,8 +1152,8 @@ export default function ({ getService }: FtrProviderContext) {
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
             },
           ]);
@@ -1216,8 +1210,8 @@ export default function ({ getService }: FtrProviderContext) {
                   host: undefined,
                   labels: undefined,
                   orchestrator: undefined,
-                  tags: undefined
-                }
+                  tags: undefined,
+                },
               },
             },
           ]);
