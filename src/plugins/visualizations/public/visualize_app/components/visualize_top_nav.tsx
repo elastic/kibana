@@ -332,6 +332,7 @@ const TopNav = ({
           ? {
               currentDataViewId: selectedDataView.id,
               trigger: {
+                'data-test-subj': 'visualize-data-view-switch-link',
                 label: isMissingCurrentDataView
                   ? i18n.translate('visualizations.fallbackDataView.label', {
                       defaultMessage: '{type} not found',
