@@ -59,3 +59,5 @@ export const SaferLodashSet = require('@kbn/safer-lodash-set');
 export const RisonNode = require('rison-node');
 export const History = require('history');
 export const Classnames = require('classnames');
+export const ReactQuery = require('@tanstack/react-query');
+export const ReactQueryDevtools = require('@tanstack/react-query-devtools');
