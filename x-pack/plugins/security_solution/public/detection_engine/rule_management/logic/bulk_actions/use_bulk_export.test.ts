@@ -57,7 +57,7 @@ describe('useBulkExport', () => {
   it('executes bulk export action', async () => {
     await bulkExport({ query: 'some query' });
 
-    expect(mutateAsync).toHaveBeenCalledWith('some query');
+    expect(mutateAsync).toHaveBeenCalledWith({ query: 'some query' });
   });
 
   describe('state handlers', () => {

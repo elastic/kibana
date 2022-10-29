@@ -139,9 +139,7 @@ describe('RuleActionsOverflow', () => {
       fireEvent.click(getByTestId('rules-details-popover-button-icon'));
       fireEvent.click(getByTestId('rules-details-duplicate-rule'));
 
-      expect(executeBulkAction).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'duplicate', queryOrIds: ['id'] })
-      );
+      expect(executeBulkAction).toHaveBeenCalledWith({ type: 'duplicate', ids: ['id'] });
     });
   });
 
@@ -228,9 +226,7 @@ describe('RuleActionsOverflow', () => {
       fireEvent.click(getByTestId('rules-details-popover-button-icon'));
       fireEvent.click(getByTestId('rules-details-delete-rule'));
 
-      expect(executeBulkAction).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'delete', queryOrIds: ['id'] })
-      );
+      expect(executeBulkAction).toHaveBeenCalledWith({ type: 'delete', ids: ['id'] });
     });
   });
 });

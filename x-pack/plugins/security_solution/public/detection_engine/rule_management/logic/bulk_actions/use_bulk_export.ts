@@ -28,7 +28,7 @@ export function useBulkExport() {
     async (queryOrIds: QueryOrIds) => {
       try {
         setLoadingRules?.({
-          ids: Array.isArray(queryOrIds) ? queryOrIds : [],
+          ids: queryOrIds.ids ?? [],
           action: BulkAction.export,
         });
         return await mutateAsync(queryOrIds);
