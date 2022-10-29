@@ -43,7 +43,7 @@ interface Aggs {
     value: number;
   };
   containerContext?: ContainerContext;
-  additionalContext: SearchResponse<EcsFieldsResponse, Record<string, AggregationsAggregate>>;
+  additionalContext?: SearchResponse<EcsFieldsResponse, Record<string, AggregationsAggregate>>;
 }
 
 interface ContainerContext {
@@ -140,7 +140,7 @@ export const getData = async (
 
         const containerList = containerContext ? createContainerList(containerContext) : void 0;
 
-        const bucketHits = additionalContext.hits?.hits;
+        const bucketHits = additionalContext?.hits?.hits;
         const additionalContextSource =
           bucketHits && bucketHits.length > 0 ? bucketHits[0]._source : null;
 
