@@ -201,7 +201,6 @@ export function useDiscoverState({
           savedSearch.searchSource,
           services.toastNotifications
         );
-        stateContainer.actions.setDataView(nextDataView);
 
         // If the requested data view is not found, don't try to load it,
         // and instead reset the app state to the fallback data view
@@ -211,6 +210,7 @@ export function useDiscoverState({
         }
         savedSearch.searchSource.setField('index', nextDataView);
         reset();
+        stateContainer.actions.setDataView(nextDataView);
       }
 
       if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
@@ -226,7 +226,7 @@ export function useDiscoverState({
     refetch$,
     data$,
     reset,
-    savedSearch.searchSource,
+    savedSearch,
     replaceUrlAppState,
     stateContainer,
   ]);

@@ -319,7 +319,7 @@ export function getDiscoverStateContainer({
         setState(appStateContainerModified, { index: dataView.id });
       }
       // sync initial app filters from state to filterManager
-      const filters = appStateContainer.getState().filters;
+      const filters = appStateContainer.getState().filters || [];
       if (filters) {
         filterManager.setAppFilters(cloneDeep(filters));
       }
