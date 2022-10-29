@@ -38,7 +38,9 @@ export function ServiceField({
       })}
     >
       <SuggestionsSelect
-        customOptions={allowAll ? [ENVIRONMENT_ALL] : undefined}
+        customOptions={
+          allowAll ? [{ label: allOptionText, value: '' }] : undefined
+        }
         customOptionText={i18n.translate(
           'xpack.apm.serviceNamesSelectCustomOptionText',
           {
@@ -47,7 +49,7 @@ export function ServiceField({
         )}
         defaultValue={currentValue}
         fieldName={SERVICE_NAME}
-        onChange={(value) => onChange(value || undefined)}
+        onChange={onChange}
         placeholder={i18n.translate('xpack.apm.serviceNamesSelectPlaceholder', {
           defaultMessage: 'Select service name',
         })}
@@ -82,7 +84,7 @@ export function EnvironmentField({
         )}
         defaultValue={getEnvironmentLabel(currentValue)}
         fieldName={SERVICE_ENVIRONMENT}
-        onChange={(value) => onChange(value || undefined)}
+        onChange={onChange}
         placeholder={i18n.translate('xpack.apm.environmentsSelectPlaceholder', {
           defaultMessage: 'Select environment',
         })}
@@ -106,7 +108,7 @@ export function TransactionTypeField({
   return (
     <PopoverExpression value={currentValue || allOptionText} title={label}>
       <SuggestionsSelect
-        customOptions={[ENVIRONMENT_ALL]}
+        customOptions={[{ label: allOptionText, value: '' }]}
         customOptionText={i18n.translate(
           'xpack.apm.transactionTypesSelectCustomOptionText',
           {
@@ -115,7 +117,7 @@ export function TransactionTypeField({
         )}
         defaultValue={currentValue}
         fieldName={TRANSACTION_TYPE}
-        onChange={(value) => onChange(value || undefined)}
+        onChange={onChange}
         placeholder={i18n.translate(
           'xpack.apm.transactionTypesSelectPlaceholder',
           {

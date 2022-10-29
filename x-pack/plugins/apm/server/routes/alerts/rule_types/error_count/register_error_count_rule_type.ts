@@ -47,7 +47,7 @@ const paramsSchema = schema.object({
   windowUnit: schema.string(),
   threshold: schema.number(),
   serviceName: schema.maybe(schema.string()),
-  environment: schema.maybe(schema.string()),
+  environment: schema.string(),
 });
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.ErrorCount];
@@ -111,7 +111,9 @@ export function registerErrorCountRuleType({
                     },
                   },
                   { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
-                  ...termQuery(SERVICE_NAME, ruleParams.serviceName),
+                  ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+                    queryEmptyString: false,
+                  }),
                   ...environmentQuery(ruleParams.environment),
                 ],
               },

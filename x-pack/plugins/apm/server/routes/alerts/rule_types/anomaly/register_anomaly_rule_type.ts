@@ -53,7 +53,7 @@ const paramsSchema = schema.object({
   transactionType: schema.maybe(schema.string()),
   windowSize: schema.number(),
   windowUnit: schema.string(),
-  environment: schema.maybe(schema.string()),
+  environment: schema.string(),
   anomalySeverityType: schema.oneOf([
     schema.literal(ANOMALY_SEVERITY.CRITICAL),
     schema.literal(ANOMALY_SEVERITY.MAJOR),
@@ -164,8 +164,14 @@ export function registerAnomalyRuleType({
                       },
                     },
                   },
-                  ...termQuery('partition_field_value', ruleParams.serviceName),
-                  ...termQuery('by_field_value', ruleParams.transactionType),
+                  ...termQuery(
+                    'partition_field_value',
+                    ruleParams.serviceName,
+                    { queryEmptyString: false }
+                  ),
+                  ...termQuery('by_field_value', ruleParams.transactionType, {
+                    queryEmptyString: false,
+                  }),
                   ...termQuery(
                     'detector_index',
                     getApmMlDetectorIndex(ApmMlDetectorType.txLatency)

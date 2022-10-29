@@ -57,8 +57,8 @@ import {
 } from '../get_service_group_fields';
 
 const paramsSchema = schema.object({
-  serviceName: schema.maybe(schema.string()),
-  transactionType: schema.maybe(schema.string()),
+  serviceName: schema.string(),
+  transactionType: schema.string(),
   windowSize: schema.number(),
   windowUnit: schema.string(),
   threshold: schema.number(),
@@ -67,7 +67,7 @@ const paramsSchema = schema.object({
     schema.literal(AggregationType.P95),
     schema.literal(AggregationType.P99),
   ]),
-  environment: schema.maybe(schema.string()),
+  environment: schema.string(),
 });
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
@@ -148,8 +148,12 @@ export function registerTransactionDurationRuleType({
                 ...getDocumentTypeFilterForTransactions(
                   searchAggregatedTransactions
                 ),
-                ...termQuery(SERVICE_NAME, ruleParams.serviceName),
-                ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType),
+                ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+                  queryEmptyString: false,
+                }),
+                ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
+                  queryEmptyString: false,
+                }),
                 ...environmentQuery(ruleParams.environment),
               ] as QueryDslQueryContainer[],
             },

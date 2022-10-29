@@ -55,7 +55,7 @@ const paramsSchema = schema.object({
   threshold: schema.number(),
   transactionType: schema.maybe(schema.string()),
   serviceName: schema.maybe(schema.string()),
-  environment: schema.maybe(schema.string()),
+  environment: schema.string(),
 });
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionErrorRate];
@@ -140,8 +140,12 @@ export function registerTransactionErrorRateRuleType({
                       ],
                     },
                   },
-                  ...termQuery(SERVICE_NAME, ruleParams.serviceName),
-                  ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType),
+                  ...termQuery(SERVICE_NAME, ruleParams.serviceName, {
+                    queryEmptyString: false,
+                  }),
+                  ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType, {
+                    queryEmptyString: false,
+                  }),
                   ...environmentQuery(ruleParams.environment),
                 ],
               },
