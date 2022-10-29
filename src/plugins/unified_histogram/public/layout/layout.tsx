@@ -19,12 +19,18 @@ import type {
   UnifiedHistogramServices,
   UnifiedHistogramHitsContext,
   UnifiedHistogramBreakdownContext,
+  UnifiedHistogramFetchStatus,
+  UnifiedHistogramRequestContext,
 } from '../types';
 
 export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> {
   className?: string;
   services: UnifiedHistogramServices;
   dataView: DataView;
+  /**
+   * Context object for requests made by unified histogram components -- optional
+   */
+  request?: UnifiedHistogramRequestContext;
   /**
    * Context object for the hits count -- leave undefined to hide the hits count
    */
@@ -69,12 +75,18 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Callback to update the breakdown field -- should set {@link UnifiedHistogramBreakdownContext.field} to breakdownField
    */
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
+  /**
+   * Callback to update the total hits -- should set {@link UnifiedHistogramHitsContext.status} to status
+   * and {@link UnifiedHistogramHitsContext.total} to totalHits
+   */
+  onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, totalHits?: number) => void;
 }
 
 export const UnifiedHistogramLayout = ({
   className,
   services,
   dataView,
+  request,
   hits,
   chart,
   breakdown,
@@ -86,6 +98,7 @@ export const UnifiedHistogramLayout = ({
   onChartHiddenChange,
   onTimeIntervalChange,
   onBreakdownFieldChange,
+  onTotalHitsChange,
   children,
 }: UnifiedHistogramLayoutProps) => {
   const topPanelNode = useMemo(
@@ -134,6 +147,7 @@ export const UnifiedHistogramLayout = ({
           className={chartClassName}
           services={services}
           dataView={dataView}
+          request={request}
           hits={hits}
           chart={chart}
           breakdown={breakdown}
@@ -144,6 +158,7 @@ export const UnifiedHistogramLayout = ({
           onChartHiddenChange={onChartHiddenChange}
           onTimeIntervalChange={onTimeIntervalChange}
           onBreakdownFieldChange={onBreakdownFieldChange}
+          onTotalHitsChange={onTotalHitsChange}
         />
       </InPortal>
       <InPortal node={mainPanelNode}>{children}</InPortal>

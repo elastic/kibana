@@ -32,6 +32,7 @@ export class DiscoverSearchSessionManager {
    */
   readonly newSearchSessionIdFromURL$: Rx.Observable<string | null>;
   private readonly deps: DiscoverSearchSessionManagerDeps;
+  private lastSearchSessionId?: string;
 
   constructor(deps: DiscoverSearchSessionManagerDeps) {
     this.deps = deps;
@@ -65,7 +66,16 @@ export class DiscoverSearchSessionManager {
       }
     }
 
-    return searchSessionIdFromURL ?? this.deps.session.start();
+    this.lastSearchSessionId = searchSessionIdFromURL ?? this.deps.session.start();
+
+    return this.lastSearchSessionId;
+  }
+
+  /**
+   * Get the last returned session id by {@link getNextSearchSessionId}
+   */
+  getLastSearchSessionId() {
+    return this.lastSearchSessionId;
   }
 
   /**

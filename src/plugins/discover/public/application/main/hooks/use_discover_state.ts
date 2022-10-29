@@ -308,5 +308,6 @@ export function useDiscoverState({
     adHocDataViewList,
     persistDataView,
     updateAdHocDataViewId,
+    searchSessionManager,
   };
 }

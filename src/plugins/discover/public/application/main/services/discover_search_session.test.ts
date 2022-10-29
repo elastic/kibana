@@ -28,6 +28,7 @@ describe('DiscoverSearchSessionManager', () => {
       const id = searchSessionManager.getNextSearchSessionId();
       expect(id).toEqual(nextId);
       expect(session.start).toBeCalled();
+      expect(searchSessionManager.getLastSearchSessionId()).toEqual(id);
     });
 
     test('restores a session using query param from the URL', () => {

@@ -13,12 +13,17 @@ import {
   triggerVisualizeActions,
 } from '@kbn/unified-field-list-plugin/public';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram-plugin/public';
+import type { RequestAdapter } from '@kbn/inspector-plugin/public';
+import useDebounce from 'react-use/lib/useDebounce';
 import { getUiActions } from '../../../../kibana_services';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDataState } from '../../hooks/use_data_state';
 import type { SavedSearchData } from '../../hooks/use_saved_search';
 import type { AppState, GetStateReturn } from '../../services/discover_state';
+import { FetchStatus } from '../../../types';
+import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
 export const HISTOGRAM_HEIGHT_KEY = 'discover:histogramHeight';
@@ -32,6 +37,8 @@ export const useDiscoverHistogram = ({
   savedSearch,
   isTimeBased,
   isPlainRecord,
+  inspectorAdapters,
+  searchSessionManager,
 }: {
   stateContainer: GetStateReturn;
   state: AppState;
@@ -40,6 +47,8 @@ export const useDiscoverHistogram = ({
   savedSearch: SavedSearch;
   isTimeBased: boolean;
   isPlainRecord: boolean;
+  inspectorAdapters: { requests: RequestAdapter };
+  searchSessionManager: DiscoverSearchSessionManager;
 }) => {
   const { storage } = useDiscoverServices();
 
@@ -115,8 +124,59 @@ export const useDiscoverHistogram = ({
   );
 
   /**
-   * Data
+   * Request
    */
+
+  const [lastReloadRequestTime, setLastReloadRequestTime] = useState(0);
+  const { fetchStatus: mainFetchStatus } = useDataState(savedSearchData$.main$);
+
+  // Reload unified histogram when a refetch is triggered,
+  // with a debounce to avoid multiple requests
+  const [, cancelDebounce] = useDebounce(
+    () => {
+      if (mainFetchStatus === FetchStatus.LOADING) {
+        setLastReloadRequestTime(Date.now());
+      }
+    },
+    100,
+    [mainFetchStatus]
+  );
+
+  // A refetch is triggered when the data view is changed,
+  // but we don't want to reload unified histogram in this case,
+  // so cancel the debounced effect on unmount
+  useEffect(() => cancelDebounce, [cancelDebounce]);
+
+  const searchSessionId = searchSessionManager.getLastSearchSessionId();
+  const request = useMemo(
+    () => ({
+      searchSessionId,
+      adapter: inspectorAdapters.requests,
+      lastReloadRequestTime,
+    }),
+    [inspectorAdapters.requests, lastReloadRequestTime, searchSessionId]
+  );
+
+  /**
+   * Total hits
+   */
+
+  const onTotalHitsChange = useCallback(
+    (status: UnifiedHistogramFetchStatus, totalHits?: number) => {
+      const { fetchStatus, recordRawType } = savedSearchData$.totalHits$.getValue();
+
+      if (fetchStatus === 'partial' && status === 'loading') {
+        return;
+      }
+
+      savedSearchData$.totalHits$.next({
+        fetchStatus: status as FetchStatus,
+        result: totalHits,
+        recordRawType,
+      });
+    },
+    [savedSearchData$.totalHits$]
+  );
 
   const { fetchStatus: hitsFetchStatus, result: hitsTotal } = useDataState(
     savedSearchData$.totalHits$
@@ -132,6 +192,10 @@ export const useDiscoverHistogram = ({
           },
     [hitsFetchStatus, hitsTotal, isPlainRecord]
   );
+
+  /**
+   * Chart
+   */
 
   const chart = useMemo(
     () =>
@@ -168,6 +232,7 @@ export const useDiscoverHistogram = ({
 
   return {
     topPanelHeight,
+    request,
     hits,
     chart,
     breakdown,
@@ -176,5 +241,6 @@ export const useDiscoverHistogram = ({
     onChartHiddenChange,
     onTimeIntervalChange,
     onBreakdownFieldChange,
+    onTotalHitsChange,
   };
 };

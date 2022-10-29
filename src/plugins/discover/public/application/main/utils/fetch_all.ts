@@ -8,7 +8,6 @@
 import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
-import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { getRawRecordType } from './get_raw_record_type';
 import {
@@ -21,14 +20,11 @@ import {
 } from '../hooks/use_saved_search_messages';
 import { updateSearchSource } from './update_search_source';
 import { fetchDocuments } from './fetch_documents';
-import { fetchTotalHits } from './fetch_total_hits';
 import { AppState } from '../services/discover_state';
 import { FetchStatus } from '../../types';
 import {
-  DataCharts$,
   DataDocuments$,
   DataMain$,
-  DataTotalHits$,
   RecordRawType,
   SavedSearchData,
 } from '../hooks/use_saved_search';
@@ -49,8 +45,7 @@ export interface FetchDeps {
 
 /**
  * This function starts fetching all required queries in Discover. This will be the query to load the individual
- * documents, and depending on whether a chart is shown either the aggregation query to load the chart data
- * or a query to retrieve just the total hits.
+ * documents as well as any other requests that might be required to load the main view.
  *
  * This method returns a promise, which will resolve (without a value), as soon as all queries that have been started
  * have been completed (failed or successfully).
@@ -68,9 +63,7 @@ export function fetchAll(
    * to the specified subjects. It will ignore AbortErrors and will use the data
    * plugin to show a toast for the error (e.g. allowing better insights into shard failures).
    */
-  const sendErrorTo = (
-    ...errorSubjects: Array<DataMain$ | DataDocuments$ | DataTotalHits$ | DataCharts$>
-  ) => {
+  const sendErrorTo = (...errorSubjects: Array<DataMain$ | DataDocuments$>) => {
     return (error: Error) => {
       if (error instanceof Error && error.name === 'AbortError') {
         return;
@@ -86,7 +79,7 @@ export function fetchAll(
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);
     }
-    const { hideChart, sort, query } = appStateContainer.getState();
+    const { sort, query } = appStateContainer.getState();
     const recordRawType = getRawRecordType(query);
     const useSql = recordRawType === RecordRawType.PLAIN;
 
@@ -101,20 +94,16 @@ export function fetchAll(
     }
 
     // Mark all subjects as loading
-    sendLoadingMsg(dataSubjects.main$, recordRawType);
-    sendLoadingMsg(dataSubjects.documents$, recordRawType, query);
-    sendLoadingMsg(dataSubjects.totalHits$, recordRawType);
-
-    const isChartVisible =
-      !hideChart && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP;
+    sendLoadingMsg(dataSubjects.main$, { recordRawType });
+    sendLoadingMsg(dataSubjects.documents$, { recordRawType, query });
+    sendLoadingMsg(dataSubjects.totalHits$, { recordRawType });
 
     // Start fetching all required requests
     const documents =
       useSql && query
         ? fetchSql(query, services.dataViews, data, services.expressions)
         : fetchDocuments(searchSource.createCopy(), fetchDeps);
-    const totalHits =
-      !isChartVisible && !useSql ? fetchTotalHits(searchSource.createCopy(), fetchDeps) : undefined;
+
     /**
      * This method checks the passed in hit count and will send a PARTIAL message to main$
      * if there are results, indicating that we have finished some of the requests that have been
@@ -158,19 +147,8 @@ export function fetchAll(
       // but their errors will be shown in-place (e.g. of the chart).
       .catch(sendErrorTo(dataSubjects.documents$, dataSubjects.main$));
 
-    totalHits
-      ?.then((hitCount) => {
-        dataSubjects.totalHits$.next({
-          fetchStatus: FetchStatus.COMPLETE,
-          result: hitCount,
-          recordRawType,
-        });
-        checkHitCount(hitCount);
-      })
-      .catch(sendErrorTo(dataSubjects.totalHits$));
-
     // Return a promise that will resolve once all the requests have finished or failed
-    return Promise.allSettled([documents, totalHits]).then(() => {
+    return Promise.allSettled([documents]).then(() => {
       // Send a complete message to main$ once all queries are done and if main$
       // is not already in an ERROR state, e.g. because the document query has failed.
       // This will only complete main$, if it hasn't already been completed previously

@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { AggregateQuery, Query } from '@kbn/es-query';
+import type { BehaviorSubject } from 'rxjs';
 import { FetchStatus } from '../../types';
-import {
-  DataCharts$,
+import type {
   DataDocuments$,
   DataMain$,
+  DataMsg,
   DataTotalHits$,
-  RecordRawType,
   SavedSearchData,
 } from './use_saved_search';
 
@@ -60,27 +59,22 @@ export function sendPartialMsg(main$: DataMain$) {
 /**
  * Send LOADING message via main observable
  */
-export function sendLoadingMsg(
-  data$: DataMain$ | DataDocuments$ | DataTotalHits$ | DataCharts$,
-  recordRawType: RecordRawType,
-  query?: AggregateQuery | Query
+export function sendLoadingMsg<T extends DataMsg>(
+  data$: BehaviorSubject<T>,
+  props: Omit<T, 'fetchStatus'>
 ) {
   if (data$.getValue().fetchStatus !== FetchStatus.LOADING) {
     data$.next({
+      ...props,
       fetchStatus: FetchStatus.LOADING,
-      recordRawType,
-      query,
-    });
+    } as T);
   }
 }
 
 /**
  * Send ERROR message
  */
-export function sendErrorMsg(
-  data$: DataMain$ | DataDocuments$ | DataTotalHits$ | DataCharts$,
-  error: Error
-) {
+export function sendErrorMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$, error: Error) {
   const recordRawType = data$.getValue().recordRawType;
   data$.next({
     fetchStatus: FetchStatus.ERROR,

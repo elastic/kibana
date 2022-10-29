@@ -36,7 +36,6 @@ export interface SavedSearchData {
 export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
-export type DataCharts$ = BehaviorSubject<DataChartsMessage>;
 export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
 
 export type DataRefetch$ = Subject<DataRefetchMsg>;
@@ -125,7 +124,6 @@ export const useSavedSearch = ({
   const main$: DataMain$ = useBehaviorSubject(initialState) as DataMain$;
   const documents$: DataDocuments$ = useBehaviorSubject(initialState) as DataDocuments$;
   const totalHits$: DataTotalHits$ = useBehaviorSubject(initialState) as DataTotalHits$;
-  const charts$: DataCharts$ = useBehaviorSubject(initialState) as DataCharts$;
   const availableFields$: AvailableFields$ = useBehaviorSubject(initialState) as AvailableFields$;
 
   const dataSubjects = useMemo(() => {
@@ -133,10 +131,9 @@ export const useSavedSearch = ({
       main$,
       documents$,
       totalHits$,
-      charts$,
       availableFields$,
     };
-  }, [main$, charts$, documents$, totalHits$, availableFields$]);
+  }, [main$, documents$, totalHits$, availableFields$]);
 
   /**
    * The observable to trigger data fetching in UI

@@ -72,6 +72,7 @@ export function DiscoverLayout({
   persistDataView,
   updateAdHocDataViewId,
   adHocDataViewList,
+  searchSessionManager,
 }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
@@ -324,6 +325,8 @@ export function DiscoverLayout({
                   onFieldEdited={onFieldEdited}
                   columns={columns}
                   resizeRef={resizeRef}
+                  inspectorAdapters={inspectorAdapters}
+                  searchSessionManager={searchSessionManager}
                 />
               )}
             </EuiPageContent>

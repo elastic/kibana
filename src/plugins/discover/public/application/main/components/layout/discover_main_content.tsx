@@ -15,6 +15,7 @@ import { UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DataTableRecord } from '../../../../types';
 import { DocumentViewModeToggle, VIEW_MODE } from '../../../../components/view_mode_toggle';
@@ -25,6 +26,7 @@ import { FieldStatisticsTable } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { useDiscoverHistogram } from './use_discover_histogram';
+import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 
 const FieldStatisticsTableMemoized = React.memo(FieldStatisticsTable);
 
@@ -46,6 +48,8 @@ export interface DiscoverMainContentProps {
   onFieldEdited: () => Promise<void>;
   columns: string[];
   resizeRef: RefObject<HTMLDivElement>;
+  inspectorAdapters: { requests: RequestAdapter };
+  searchSessionManager: DiscoverSearchSessionManager;
 }
 
 export const DiscoverMainContent = ({
@@ -66,6 +70,8 @@ export const DiscoverMainContent = ({
   onFieldEdited,
   columns,
   resizeRef,
+  inspectorAdapters,
+  searchSessionManager,
 }: DiscoverMainContentProps) => {
   const services = useDiscoverServices();
   const { trackUiMetric } = services;
@@ -87,6 +93,7 @@ export const DiscoverMainContent = ({
 
   const {
     topPanelHeight,
+    request,
     hits,
     chart,
     breakdown,
@@ -95,6 +102,7 @@ export const DiscoverMainContent = ({
     onChartHiddenChange,
     onTimeIntervalChange,
     onBreakdownFieldChange,
+    onTotalHitsChange,
   } = useDiscoverHistogram({
     stateContainer,
     state,
@@ -103,6 +111,8 @@ export const DiscoverMainContent = ({
     savedSearch,
     isTimeBased,
     isPlainRecord,
+    inspectorAdapters,
+    searchSessionManager,
   });
 
   const resetSearchButtonWrapper = css`
@@ -114,6 +124,7 @@ export const DiscoverMainContent = ({
       className="dscPageContent__inner"
       services={services}
       dataView={dataView}
+      request={request}
       hits={hits}
       chart={chart}
       breakdown={breakdown}
@@ -144,6 +155,7 @@ export const DiscoverMainContent = ({
       onChartHiddenChange={onChartHiddenChange}
       onTimeIntervalChange={onTimeIntervalChange}
       onBreakdownFieldChange={onBreakdownFieldChange}
+      onTotalHitsChange={onTotalHitsChange}
     >
       <EuiFlexGroup
         className="eui-fullHeight"

@@ -7,7 +7,7 @@
  */
 
 import type { ReactElement } from 'react';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -15,11 +15,8 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiToolTip,
-  useEuiBreakpoint,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
@@ -27,15 +24,22 @@ import { useChartPanels } from './use_chart_panels';
 import type {
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
+  UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
+  UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
 } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
+import { useTotalHits } from './use_total_hits';
+import { useRequestParams } from './use_request_params';
+import { useChartStyles } from './use_chart_styles';
+import { useChartActions } from './use_chart_actions';
 
 export interface ChartProps {
   className?: string;
   services: UnifiedHistogramServices;
   dataView: DataView;
+  request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
   breakdown?: UnifiedHistogramBreakdownContext;
@@ -46,6 +50,7 @@ export interface ChartProps {
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
+  onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, totalHits?: number) => void;
 }
 
 const HistogramMemoized = memo(Histogram);
@@ -54,6 +59,7 @@ export function Chart({
   className,
   services,
   dataView,
+  request,
   hits,
   chart,
   breakdown,
@@ -64,95 +70,58 @@ export function Chart({
   onChartHiddenChange,
   onTimeIntervalChange,
   onBreakdownFieldChange,
+  onTotalHitsChange,
 }: ChartProps) {
-  const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
-
-  const chartRef = useRef<{ element: HTMLElement | null; moveFocus: boolean }>({
-    element: null,
-    moveFocus: false,
+  const {
+    showChartOptionsPopover,
+    chartRef,
+    toggleChartOptions,
+    closeChartOptions,
+    toggleHideChart,
+  } = useChartActions({
+    chart,
+    onChartHiddenChange,
   });
-
-  const onShowChartOptions = useCallback(() => {
-    setShowChartOptionsPopover(!showChartOptionsPopover);
-  }, [showChartOptionsPopover]);
-
-  const closeChartOptions = useCallback(() => {
-    setShowChartOptionsPopover(false);
-  }, [setShowChartOptionsPopover]);
-
-  useEffect(() => {
-    if (chartRef.current.moveFocus && chartRef.current.element) {
-      chartRef.current.element.focus();
-    }
-  }, [chart?.hidden]);
-
-  const toggleHideChart = useCallback(() => {
-    const chartHidden = !chart?.hidden;
-    chartRef.current.moveFocus = !chartHidden;
-    onChartHiddenChange?.(chartHidden);
-  }, [chart?.hidden, onChartHiddenChange]);
 
   const panels = useChartPanels({
     chart,
     toggleHideChart,
-    onTimeIntervalChange: (timeInterval) => onTimeIntervalChange?.(timeInterval),
-    closePopover: () => setShowChartOptionsPopover(false),
+    onTimeIntervalChange,
+    closePopover: closeChartOptions,
     onResetChartHeight,
   });
 
-  const [totalHits, setTotalHits] = useState<number>();
-
-  const onTotalHitsChange = useCallback((newTotalHits: number) => {
-    setTotalHits(newTotalHits);
-  }, []);
-
-  const chartVisible =
+  const chartVisible = !!(
     chart &&
     !chart.hidden &&
     dataView.id &&
     dataView.type !== DataViewType.ROLLUP &&
-    dataView.isTimeBased();
+    dataView.isTimeBased()
+  );
 
-  const { euiTheme } = useEuiTheme();
-  const resultCountCss = css`
-    padding: ${euiTheme.size.s} ${euiTheme.size.s} ${chartVisible ? 0 : euiTheme.size.s}
-      ${euiTheme.size.s};
-    min-height: ${euiTheme.base * 2.5}px;
-  `;
-  const resultCountTitleCss = css`
-    ${useEuiBreakpoint(['xs', 's'])} {
-      margin-bottom: 0 !important;
-    }
-  `;
-  const resultCountToggleCss = css`
-    ${useEuiBreakpoint(['xs', 's'])} {
-      align-items: flex-end;
-    }
-  `;
-  const timechartCss = css`
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    position: relative;
+  const { filters, query, timeRange } = useRequestParams(services);
 
-    // SASSTODO: the visualizing component should have an option or a modifier
-    .series > rect {
-      fill-opacity: 0.5;
-      stroke-width: 1;
-    }
-  `;
-  const breakdownFieldSelectorGroupCss = css`
-    width: 100%;
-  `;
-  const breakdownFieldSelectorItemCss = css`
-    align-items: flex-end;
-    padding-left: ${euiTheme.size.s};
-  `;
-  const chartToolButtonCss = css`
-    display: flex;
-    justify-content: center;
-    padding-left: ${euiTheme.size.s};
-  `;
+  useTotalHits({
+    services,
+    request,
+    chartVisible,
+    hits,
+    dataView,
+    filters,
+    query,
+    timeRange,
+    onTotalHitsChange,
+  });
+
+  const {
+    resultCountCss,
+    resultCountTitleCss,
+    resultCountToggleCss,
+    histogramCss,
+    breakdownFieldSelectorGroupCss,
+    breakdownFieldSelectorItemCss,
+    chartToolButtonCss,
+  } = useChartStyles(chartVisible);
 
   return (
     <EuiFlexGroup
@@ -169,7 +138,7 @@ export function Chart({
             className="eui-textTruncate eui-textNoWrap"
             css={resultCountTitleCss}
           >
-            {hits && <HitsCounter hits={hits} totalHits={totalHits} append={appendHitsCounter} />}
+            {hits && <HitsCounter hits={hits} append={appendHitsCounter} />}
           </EuiFlexItem>
           {chart && (
             <EuiFlexItem css={resultCountToggleCss}>
@@ -220,7 +189,7 @@ export function Chart({
                         <EuiButtonIcon
                           size="xs"
                           iconType="gear"
-                          onClick={onShowChartOptions}
+                          onClick={toggleChartOptions}
                           data-test-subj="unifiedHistogramChartOptionsToggle"
                           aria-label={i18n.translate('unifiedHistogram.chartOptionsButton', {
                             defaultMessage: 'Chart options',
@@ -249,13 +218,18 @@ export function Chart({
             aria-label={i18n.translate('unifiedHistogram.histogramOfFoundDocumentsAriaLabel', {
               defaultMessage: 'Histogram of found documents',
             })}
-            css={timechartCss}
+            css={histogramCss}
           >
             <HistogramMemoized
               services={services}
               dataView={dataView}
+              request={request}
+              hits={hits}
               chart={chart}
               breakdown={breakdown}
+              filters={filters}
+              query={query}
+              timeRange={timeRange}
               onTotalHitsChange={onTotalHitsChange}
             />
           </section>

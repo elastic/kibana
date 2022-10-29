@@ -12,6 +12,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
+import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 
 /**
  * The fetch status of a unified histogram request
@@ -42,6 +43,24 @@ export interface UnifiedHistogramBucketInterval {
   scaled?: boolean;
   description?: string;
   scale?: number;
+}
+
+/**
+ * Context object for requests made by unified histogram components
+ */
+export interface UnifiedHistogramRequestContext {
+  /**
+   * Current search session ID
+   */
+  searchSessionId?: string;
+  /**
+   * The adapter to use for requests
+   */
+  adapter?: RequestAdapter;
+  /**
+   * Can be updated to `Date.now()` to force a refresh
+   */
+  lastReloadRequestTime?: number;
 }
 
 /**
