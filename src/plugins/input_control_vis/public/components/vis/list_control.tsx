@@ -10,7 +10,7 @@ import React, { PureComponent } from 'react';
 import _ from 'lodash';
 
 import { injectI18n, InjectedIntlProps } from '@kbn/i18n-react';
-import { EuiFieldText, EuiComboBox } from '@elastic/eui';
+import { EuiFieldText, EuiComboBox, EuiThemeProvider } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormRow } from './form_row';
 
@@ -31,6 +31,7 @@ export type ListControlUiProps = InjectedIntlProps & {
   controlIndex: number;
   stageFilter: (controlIndex: number, value: any) => void;
   fetchOptions?: (searchValue: string) => void;
+  isDarkMode?: boolean;
 };
 
 class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState> {
@@ -135,21 +136,23 @@ class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState
     });
 
     return (
-      <EuiComboBox
-        placeholder={intl.formatMessage({
-          id: 'inputControl.vis.listControl.selectPlaceholder',
-          defaultMessage: 'Select...',
-        })}
-        options={options}
-        isLoading={this.state.isLoading}
-        async={this.props.dynamicOptions}
-        onSearchChange={this.props.dynamicOptions ? this.onSearchChange : undefined}
-        selectedOptions={selectedOptions}
-        onChange={this.handleOnChange}
-        singleSelection={!this.props.multiselect}
-        data-test-subj={`listControlSelect${this.props.controlIndex}`}
-        inputRef={this.setTextInputRef}
-      />
+      <EuiThemeProvider colorMode={this.props.isDarkMode ? 'dark' : 'light'}>
+        <EuiComboBox
+          placeholder={intl.formatMessage({
+            id: 'inputControl.vis.listControl.selectPlaceholder',
+            defaultMessage: 'Select...',
+          })}
+          options={options}
+          isLoading={this.state.isLoading}
+          async={this.props.dynamicOptions}
+          onSearchChange={this.props.dynamicOptions ? this.onSearchChange : undefined}
+          selectedOptions={selectedOptions}
+          onChange={this.handleOnChange}
+          singleSelection={!this.props.multiselect}
+          data-test-subj={`listControlSelect${this.props.controlIndex}`}
+          inputRef={this.setTextInputRef}
+        />
+      </EuiThemeProvider>
     );
   }
 
