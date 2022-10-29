@@ -1,8 +1,8 @@
 {
   "type": "shared-common",
   "id": "@kbn/eslint-plugin-telemetry",
+  "owner": "@elastic/actionable-observability",
   "devOnly": true,
-  "owner": "@elastic/kibana-operations",
   "runtimeDeps": [],
   "typeDeps": []
 }

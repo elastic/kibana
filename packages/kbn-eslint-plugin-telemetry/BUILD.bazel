@@ -46,9 +46,9 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "@npm//resolve",
-  "@npm//@typescript-eslint/typescript-estree",
-  "@npm//eslint",
+  # "@npm//@typescript-eslint/typescript-estree",
+  # "@npm//@types/estree",
+  # "@npm//eslint",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -61,12 +61,11 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
-  "@npm//dedent", # only required for the tests, which are excluded except on windows
-  "@npm//@types/eslint",
-  "@npm//@types/jest",
   "@npm//@types/node",
-  "@npm//@types/estree",
-  "@npm//@typescript-eslint/typescript-estree",
+  "@npm//@types/jest",
+  # "@npm//@types/estree",
+  "@npm//@types/eslint",
+  # "@npm//@typescript-eslint/typescript-estree",
 ]
 
 jsts_transpiler(

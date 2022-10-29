@@ -251,6 +251,6 @@ module.exports = {
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',
     '@kbn/imports/no_boundary_crossing': 'error',
-    '@kbn/telemetry/instrumentable_elements_should_be_instrumented': 'warn',
+    '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
   },
 };

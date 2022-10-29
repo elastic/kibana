@@ -71,7 +71,6 @@ TYPES_DEPS = [
   "@npm//dedent", # only required for the tests, which are excluded except on windows
   "@npm//@types/eslint",
   "@npm//@types/jest",
-  "@npm//@types/estree",
   "@npm//@types/node",
   "@npm//@types/normalize-path",
   "@npm//@types/resolve",
