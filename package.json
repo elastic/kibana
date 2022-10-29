@@ -72,6 +72,7 @@
     "yarn": "^1.22.19"
   },
   "resolutions": {
+    "**/@tanstack/match-sorter-utils": "8.1.1",
     "**/@types/node": "16.11.41",
     "**/chokidar": "^3.5.3",
     "**/deepmerge": "^4.2.2",
@@ -92,7 +93,6 @@
     "**/typescript": "4.6.3",
     "**/use-composed-ref": "^1.3.0",
     "**/use-latest": "^1.2.1",
-    "@tanstack/query-core": "^4.2.1",
     "globby/fast-glob": "^3.2.11",
     "puppeteer/node-fetch": "^2.6.7"
   },
@@ -436,8 +436,8 @@
     "@opentelemetry/semantic-conventions": "^1.4.0",
     "@reduxjs/toolkit": "1.7.2",
     "@slack/webhook": "^5.0.4",
-    "@tanstack/react-query": "^4.2.1",
-    "@tanstack/react-query-devtools": "^4.2.1",
+    "@tanstack/react-query": "^4.13.4",
+    "@tanstack/react-query-devtools": "^4.13.4",
     "@turf/along": "6.0.1",
     "@turf/area": "6.0.1",
     "@turf/bbox": "6.0.1",
