@@ -216,7 +216,16 @@ export function FilterItem({
                         [cursorOrStyles]: dropTarget === path && !hideOr,
                       })}
                     >
-                      <EuiFlexItem grow={false} {...provided.dragHandleProps}>
+                      <EuiFlexItem
+                        grow={false}
+                        aria-label={i18n.translate(
+                          'unifiedSearch.filter.filtersBuilder.dragFilterAriaLabel',
+                          {
+                            defaultMessage: 'Drag filter',
+                          }
+                        )}
+                        {...provided.dragHandleProps}
+                      >
                         <EuiIcon type="grab" size="s" className={grabIconStyles} />
                       </EuiFlexItem>
                       <EuiFlexItem grow={true}>

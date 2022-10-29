@@ -113,16 +113,22 @@ export class FilterBarService extends FtrService {
     return Promise.all(filters.map((filter) => filter.getVisibleText()));
   }
 
+  public async openFilterBuilder() {
+    await this.retry.try(async () => {
+      await this.testSubjects.click('addFilter');
+      await this.testSubjects.existOrFail('addFilterPopover');
+    });
+  }
+
   public async addFilterAndSelectDataView(
     dataViewTitle: string | null,
     field: string,
     operator: string,
     ...values: any
   ): Promise<void> {
-    await this.retry.tryForTime(this.defaultTryTimeout * 2, async () => {
-      await this.testSubjects.click('addFilter');
-      await this.testSubjects.existOrFail('addFilterPopover');
+    await this.openFilterBuilder();
 
+    await this.retry.tryForTime(this.defaultTryTimeout * 2, async () => {
       if (dataViewTitle) {
         await this.comboBox.set('filterIndexPatternsSelect', dataViewTitle);
       }
