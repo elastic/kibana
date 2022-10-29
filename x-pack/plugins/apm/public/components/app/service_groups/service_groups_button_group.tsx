@@ -38,7 +38,7 @@ type SelectedNavButton = keyof typeof buttonGroupOptions;
 export function ServiceGroupsButtonGroup({
   selectedNavButton,
 }: {
-  selectedNavButton: SelectedNavButton | undefined;
+  selectedNavButton: SelectedNavButton;
 }) {
   const history = useHistory();
   const { tourEnabled, dismissTour } = useServiceGroupsTour('createGroup');
@@ -60,17 +60,11 @@ export function ServiceGroupsButtonGroup({
     >
       <EuiButtonGroup
         color="primary"
-        type="multi"
         options={[
           buttonGroupOptions.allServices.option,
           buttonGroupOptions.serviceGroups.option,
         ]}
-        idToSelectedMap={{
-          allServices:
-            selectedNavButton === buttonGroupOptions.allServices.option.id,
-          serviceGroups:
-            selectedNavButton === buttonGroupOptions.serviceGroups.option.id,
-        }}
+        idSelected={selectedNavButton as string}
         onChange={(id) => {
           const { pathname } = buttonGroupOptions[id as SelectedNavButton];
           history.push({ pathname });
