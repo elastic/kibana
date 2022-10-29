@@ -2874,7 +2874,7 @@
             "label": "getAlertStartedDate",
             "description": [],
             "signature": [
-              "(alertId: string) => string | null"
+              "(alertInstanceId: string) => string | null"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
             "deprecated": false,
@@ -2885,7 +2885,39 @@
                 "id": "def-server.LifecycleAlertServices.getAlertStartedDate.$1",
                 "type": "string",
                 "tags": [],
-                "label": "alertId",
+                "label": "alertInstanceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.LifecycleAlertServices.getAlertUuid",
+            "type": "Function",
+            "tags": [],
+            "label": "getAlertUuid",
+            "description": [],
+            "signature": [
+              "(alertInstanceId: string) => string | null"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.LifecycleAlertServices.getAlertUuid.$1",
+                "type": "string",
+                "tags": [],
+                "label": "alertInstanceId",
                 "description": [],
                 "signature": [
                   "string"
