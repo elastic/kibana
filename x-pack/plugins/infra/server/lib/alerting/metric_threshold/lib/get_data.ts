@@ -14,7 +14,13 @@ import {
   Comparator,
   MetricExpressionParams,
 } from '../../../../../common/alerting/metrics';
-import { AdditionalContext, doFieldsExist, KUBERNETES_POD_UID, termsAggField, UNGROUPED_FACTORY_KEY } from '../../common/utils';
+import {
+  AdditionalContext,
+  doFieldsExist,
+  KUBERNETES_POD_UID,
+  termsAggField,
+  UNGROUPED_FACTORY_KEY,
+} from '../../common/utils';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 export type GetDataResponse = Record<
@@ -98,7 +104,7 @@ const createContainerList = (containerContext: ContainerContext) => {
     }
   }
   return containerList;
-}
+};
 
 export const getData = async (
   esClient: ElasticsearchClient,
@@ -135,7 +141,7 @@ export const getData = async (
           currentPeriod: { aggregatedValue, doc_count: docCount },
           aggregatedValue: aggregatedValueForRate,
           additionalContext,
-          containerContext
+          containerContext,
         } = bucket;
 
         const containerList = containerContext ? createContainerList(containerContext) : void 0;
@@ -233,13 +239,9 @@ export const getData = async (
     }
   };
 
-  const fieldsExisted =
-    groupBy?.includes(KUBERNETES_POD_UID)
-      ? await doFieldsExist(
-        esClient,
-        [termsAggField[KUBERNETES_POD_UID]],
-        index)
-      : null;
+  const fieldsExisted = groupBy?.includes(KUBERNETES_POD_UID)
+    ? await doFieldsExist(esClient, [termsAggField[KUBERNETES_POD_UID]], index)
+    : null;
 
   const request = {
     index,
