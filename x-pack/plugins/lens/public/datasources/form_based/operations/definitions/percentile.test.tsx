@@ -25,6 +25,7 @@ import {
   buildExpressionFunction,
   buildExpression,
   ExpressionAstExpressionBuilder,
+  parseExpression,
 } from '@kbn/expressions-plugin/public';
 import type { OriginalColumn } from '../../to_expression';
 import { IndexPattern } from '../../../../types';
@@ -232,84 +233,23 @@ describe('percentile', () => {
       const timeShift1 = '1d';
       const timeShift2 = '2d';
 
-      const aggs = [
+      const aggExpressions = [
         // group 1
-        makeEsAggBuilder('aggSinglePercentile', {
-          id: '1',
-          enabled: true,
-          schema: 'metric',
-          field: field1,
-          percentile: 10,
-          timeShift: undefined,
-        }),
-        makeEsAggBuilder('aggSinglePercentile', {
-          id: '2',
-          enabled: true,
-          schema: 'metric',
-          field: field1,
-          percentile: 20,
-          timeShift: undefined,
-        }),
-        makeEsAggBuilder('aggSinglePercentile', {
-          id: '3',
-          enabled: true,
-          schema: 'metric',
-          field: field1,
-          percentile: 30,
-          timeShift: undefined,
-        }),
+        'aggSinglePercentile id="1" enabled=true schema="metric" field="foo" percentile=10',
+        'aggSinglePercentile id="2" enabled=true schema="metric" field="foo" percentile=20',
+        'aggSinglePercentile id="3" enabled=true schema="metric" field="foo" percentile=30',
         // group 2
-        makeEsAggBuilder('aggSinglePercentile', {
-          id: '4',
-          enabled: true,
-          schema: 'metric',
-          field: field2,
-          percentile: 10,
-          timeShift: undefined,
-        }),
-        makeEsAggBuilder('aggSinglePercentile', {
-          id: '5',
-          enabled: true,
-          schema: 'metric',
-          field: field2,
-          percentile: 40,
-          timeShift: undefined,
-        }),
+        'aggSinglePercentile id="4" enabled=true schema="metric" field="bar" percentile=10',
+        'aggSinglePercentile id="5" enabled=true schema="metric" field="bar" percentile=40',
         // group 3
-        makeEsAggBuilder('aggSinglePercentile', {
-          id: '6',
-          enabled: true,
-          schema: 'metric',
-          field: field2,
-          percentile: 50,
-          timeShift: timeShift1,
-        }),
-        makeEsAggBuilder('aggSinglePercentile', {
-          id: '7',
-          enabled: true,
-          schema: 'metric',
-          field: field2,
-          percentile: 60,
-          timeShift: timeShift1,
-        }),
+        'aggSinglePercentile id="6" enabled=true schema="metric" field="bar" percentile=50 timeShift="1d"',
+        'aggSinglePercentile id="7" enabled=true schema="metric" field="bar" percentile=60 timeShift="1d"',
         // group 4
-        makeEsAggBuilder('aggSinglePercentile', {
-          id: '8',
-          enabled: true,
-          schema: 'metric',
-          field: field2,
-          percentile: 70,
-          timeShift: timeShift2,
-        }),
-        makeEsAggBuilder('aggSinglePercentile', {
-          id: '9',
-          enabled: true,
-          schema: 'metric',
-          field: field2,
-          percentile: 80,
-          timeShift: timeShift2,
-        }),
+        'aggSinglePercentile id="8" enabled=true schema="metric" field="bar" percentile=70 timeShift="2d"',
+        'aggSinglePercentile id="9" enabled=true schema="metric" field="bar" percentile=80 timeShift="2d"',
       ];
+
+      const aggs = aggExpressions.map((expression) => buildExpression(parseExpression(expression)));
 
       const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
 
@@ -542,41 +482,16 @@ describe('percentile', () => {
       const field2 = 'bar';
       const samePercentile = 90;
 
-      const aggs = [
+      const aggExpressions = [
         // group 1
-        makeEsAggBuilder('aggSinglePercentile', {
-          id: '1',
-          enabled: true,
-          schema: 'metric',
-          field: field1,
-          percentile: samePercentile,
-          timeShift: undefined,
-        }),
-        makeEsAggBuilder('aggSinglePercentile', {
-          id: '2',
-          enabled: true,
-          schema: 'metric',
-          field: field1,
-          percentile: samePercentile,
-          timeShift: undefined,
-        }),
-        makeEsAggBuilder('aggSinglePercentile', {
-          id: '4',
-          enabled: true,
-          schema: 'metric',
-          field: field2,
-          percentile: 10,
-          timeShift: undefined,
-        }),
-        makeEsAggBuilder('aggSinglePercentile', {
-          id: '3',
-          enabled: true,
-          schema: 'metric',
-          field: field1,
-          percentile: samePercentile,
-          timeShift: undefined,
-        }),
+        'aggSinglePercentile id="1" enabled=true schema="metric" field="foo" percentile=90',
+        'aggSinglePercentile id="2" enabled=true schema="metric" field="foo" percentile=90',
+        // group 2
+        'aggSinglePercentile id="4" enabled=true schema="metric" field="bar" percentile=10',
+        'aggSinglePercentile id="3" enabled=true schema="metric" field="foo" percentile=90',
       ];
+
+      const aggs = aggExpressions.map((expression) => buildExpression(parseExpression(expression)));
 
       const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
 
