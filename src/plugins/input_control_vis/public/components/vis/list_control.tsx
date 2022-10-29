@@ -136,23 +136,21 @@ class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState
     });
 
     return (
-      <EuiThemeProvider colorMode={this.props.isDarkMode ? 'dark' : 'light'}>
-        <EuiComboBox
-          placeholder={intl.formatMessage({
-            id: 'inputControl.vis.listControl.selectPlaceholder',
-            defaultMessage: 'Select...',
-          })}
-          options={options}
-          isLoading={this.state.isLoading}
-          async={this.props.dynamicOptions}
-          onSearchChange={this.props.dynamicOptions ? this.onSearchChange : undefined}
-          selectedOptions={selectedOptions}
-          onChange={this.handleOnChange}
-          singleSelection={!this.props.multiselect}
-          data-test-subj={`listControlSelect${this.props.controlIndex}`}
-          inputRef={this.setTextInputRef}
-        />
-      </EuiThemeProvider>
+      <EuiComboBox
+        placeholder={intl.formatMessage({
+          id: 'inputControl.vis.listControl.selectPlaceholder',
+          defaultMessage: 'Select...',
+        })}
+        options={options}
+        isLoading={this.state.isLoading}
+        async={this.props.dynamicOptions}
+        onSearchChange={this.props.dynamicOptions ? this.onSearchChange : undefined}
+        selectedOptions={selectedOptions}
+        onChange={this.handleOnChange}
+        singleSelection={!this.props.multiselect}
+        data-test-subj={`listControlSelect${this.props.controlIndex}`}
+        inputRef={this.setTextInputRef}
+      />
     );
   }
 
@@ -167,15 +165,17 @@ class ListControlUi extends PureComponent<ListControlUiProps, ListControlUiState
     );
 
     return (
-      <FormRow
-        id={this.props.id}
-        label={this.props.label}
-        warningMsg={this.props.partialResults ? partialResultsWarningMessage : undefined}
-        controlIndex={this.props.controlIndex}
-        disableMsg={this.props.disableMsg}
-      >
-        {this.renderControl()}
-      </FormRow>
+      <EuiThemeProvider colorMode={this.props.isDarkMode ? 'dark' : 'light'}>
+        <FormRow
+          id={this.props.id}
+          label={this.props.label}
+          warningMsg={this.props.partialResults ? partialResultsWarningMessage : undefined}
+          controlIndex={this.props.controlIndex}
+          disableMsg={this.props.disableMsg}
+        >
+          {this.renderControl()}
+        </FormRow>
+      </EuiThemeProvider>
     );
   }
 }
