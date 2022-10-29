@@ -17,7 +17,7 @@ import {
 import { SERVICE_NODE_NAME_MISSING } from '../service_nodes';
 
 export function environmentQuery(
-  environment: string
+  environment: string | undefined
 ): QueryDslQueryContainer[] {
   if (!environment || environment === ENVIRONMENT_ALL.value) {
     return [];

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AggregationType } from '../../../common/rules/apm_rule_types';
-import { getDurationFieldForTransactions } from '../../lib/helpers/transactions';
+import { AggregationType } from '../../../../../common/rules/apm_rule_types';
+import { getDurationFieldForTransactions } from '../../../../lib/helpers/transactions';
 
 type TransactionDurationField = ReturnType<
   typeof getDurationFieldForTransactions
@@ -44,4 +44,14 @@ export function averageOrPercentileAgg({
       },
     },
   };
+}
+
+export function getMultiTermsSortOrder(aggregationType: AggregationType): {
+  order: { [path: string]: 'desc' };
+} {
+  if (aggregationType === AggregationType.Avg) {
+    return { order: { avgLatency: 'desc' } };
+  }
+  const percentsKey = aggregationType === AggregationType.P95 ? 95 : 99;
+  return { order: { [`pctLatency.${percentsKey}`]: 'desc' } };
 }
